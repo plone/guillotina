@@ -1,0 +1,12 @@
+*.pyc
+*.pyo
+/.idea/
+/.installed.cfg
+/.mr.developer.cfg
+/bin/
+/Data.fs*
+/develop-eggs/
+/extras/
+/parts/
+/result
+/sandbox.egg-info/
