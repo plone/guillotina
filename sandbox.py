@@ -13,7 +13,6 @@ from zope.interface import implementer
 import asyncio
 import inspect
 import logging
-import threading
 import transaction
 import ZODB
 import ZODB.Connection
@@ -67,9 +66,6 @@ def get_current_request():
 
 class RequestAwareTransactionManager(transaction.TransactionManager):
 
-    # Synchronous lock to sync accidental calls to synchronous API
-    lock = threading.Lock()
-
     # ITransactionManager
     def begin(self, request=None):
         """Return new request specific transaction
@@ -91,16 +87,10 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
 
     # with
     def __enter__(self):
-        return self.begin(get_current_request())
+        raise NotImplementedError()
 
     def __exit__(self, type_, value, traceback):
-        request = get_current_request()
-        if value is None:
-            with self.lock:
-                self.get(request).commit()
-        else:
-            with self.lock:
-                self.get(request).abort()
+        raise NotImplementedError()
 
     # async with
     async def __aenter__(self):
@@ -273,7 +263,7 @@ def make_app():
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
-    web.run_app(make_app(), port=8082)
+    web.run_app(make_app(), port=8080)
 
 
 if __name__ == "__main__":
