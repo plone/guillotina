@@ -16,6 +16,7 @@ setup(
         'BTrees',
         'cchardet',
         'setuptools',
+        'transaction',
         'ZODB',
     ],
     tests_require=[
