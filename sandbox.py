@@ -52,7 +52,6 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
         pass
 
 
-# noinspection PyProtectedMember
 @implementer(ISavepointDataManager)
 class RequestDataManager(object):
 
@@ -119,7 +118,6 @@ def get_current_request():
     raise RuntimeError('Unable to find the current request')
 
 
-# noinspection PyProtectedMember
 class RequestAwareConnection(ZODB.Connection.Connection):
     def _register(self, obj=None):
         request = get_current_request()
@@ -135,7 +133,6 @@ class RequestAwareDB(ZODB.DB):
     klass = RequestAwareConnection
 
 
-# noinspection PyProtectedMember
 class Container(OOBTree):
     @property
     def __parent__(self):
@@ -150,39 +147,21 @@ class Container(OOBTree):
         return self[name]
 
 
-# Initialize DB
-DB = ZODB.DB('Data.fs')
-CONNECTION = DB.open()
-if getattr(CONNECTION.root, 'data', None) is None:
-    with transaction.manager:
-        CONNECTION.root.data = Container()
-        CONNECTION.root._p_changed = 1
-CONNECTION.close()
-DB.close()
-
-
-# Set request aware classes for app
-DB = RequestAwareDB('Data.fs')
-TM = RequestAwareTransactionManager()
-CONNECTION = DB.open(transaction_manager=TM)
-
-
 class RootFactory(AbstractResource):
 
     __parent__ = None
 
     def __init__(self, app):
         self.app = app
+        self.root = app._p_jar.root.data
 
     def __getitem__(self, name):
         return Traverser(self, (name,))
 
     async def __getchild__(self, name):
-        global TM, CONNECTION
-        return await CONNECTION.root.data.__getchild__(name)
+        return await self.root.__getchild__(name)
 
 
-# noinspection PyProtectedMember
 def locked(obj):
     if not hasattr(obj, '_v_lock'):
         obj._v_lock = asyncio.Lock()
@@ -200,7 +179,8 @@ class ContainerView(View):
 
         async with locked(counter):
             counter.change(1)
-            await sync(self.request)(TM.get(self.request).commit)
+            tm = self.request.app._p_jar.transaction_manager
+            await sync(self.request)(tm.get(self.request).commit)
 
         parts = [str(counter()),
                  self.resource['__name__']]
@@ -213,13 +193,33 @@ class ContainerView(View):
         return web.Response(text='/'.join(reversed(parts)))
 
 
-def main():
-    logging.basicConfig(level=logging.DEBUG)
+def make_app():
     app = web.Application(router=TraversalRouter())
     app.executor = ThreadPoolExecutor(max_workers=1)
     app.router.set_root_factory(RootFactory)
     app.router.bind_view(Container, ContainerView)
-    web.run_app(app)
+
+    # Initialize DB
+    db = ZODB.DB('Data.fs')
+    conn = db.open()
+    if getattr(conn.root, 'data', None) is None:
+        with transaction.manager:
+            conn.root.data = Container()
+            conn.root._p_changed = 1
+    conn.close()
+    db.close()
+
+    # Set request aware database for app
+    db = RequestAwareDB('Data.fs')
+    tm = RequestAwareTransactionManager()
+    # While _p_jar is a funny name, it's consistent with Persistent API
+    app._p_jar = db.open(transaction_manager=tm)
+    return app
+
+
+def main():
+    logging.basicConfig(level=logging.DEBUG)
+    web.run_app(make_app(), port=8082)
     logger.info('HTTP server running at http://localhost:8080/')
 
 
