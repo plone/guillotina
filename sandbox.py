@@ -248,7 +248,6 @@ def make_app():
 def main():
     logging.basicConfig(level=logging.DEBUG)
     web.run_app(make_app(), port=8082)
-    logger.info('HTTP server running at http://localhost:8080/')
 
 
 if __name__ == "__main__":
