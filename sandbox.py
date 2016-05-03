@@ -70,8 +70,8 @@ class RequestDataManager(object):
         self.connection._registered_objects = self._registered_objects
         self.connection._savepoint_storage = self._savepoint_storage
         self.connection.abort(txn)
-        self._registered_objects = self.connection._registered_objects
-        self._savepoint_storage = self.connection._savepoint_storage
+        self._registered_objects = []
+        self._savepoint_storage = None
         delattr(self.request, '_txn_dm')
 
     def tpc_begin(self, txn):
@@ -87,13 +87,13 @@ class RequestDataManager(object):
 
     def tpc_finish(self, txn):
         self.connection.tpc_finish(txn)
-        self._registered_objects = self.connection._registered_objects
-        self._savepoint_storage = self.connection._savepoint_storage
+        self._registered_objects = []
+        self._savepoint_storage = None
 
     def tpc_abort(self, txn):
         self.connection.tpc_abort(txn)
-        self._registered_objects = self.connection._registered_objects
-        self._savepoint_storage = self.connection._savepoint_storage
+        self._registered_objects = []
+        self._savepoint_storage = None
 
     def sortKey(self):
         return self.connection.sortKey()
@@ -102,8 +102,8 @@ class RequestDataManager(object):
         self.connection._registered_objects = self._registered_objects
         self.connection._savepoint_storage = self._savepoint_storage
         savepoint = self.connection.savepoint()
-        self._registered_objects = self.connection._registered_objects
-        self._savepoint_storage = self.connection._savepoint_storage
+        self._registered_objects = []
+        self._savepoint_storage = None
         return savepoint
 
 
