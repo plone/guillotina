@@ -214,18 +214,19 @@ class ContainerView(View):
     async def __call__(self):
         counter = self.resource['__visited__']
 
-        async with locked(counter), tm(self.request):
+        # Lock, update, commit
+        async with tm(self.request), locked(counter):
             counter.change(1)
 
-        parts = [str(counter()),
-                 self.resource['__name__']]
+        # getPhysicalPath
+        parts = [str(counter()), self.resource['__name__']]
         parent = self.resource.__parent__
-
         while parent is not None and parent.get('__name__') is not None:
             parts.append(parent['__name__'])
             parent = parent.__parent__
+        parts.reverse()
 
-        return web.Response(text='/'.join(reversed(parts)))
+        return web.Response(text='/'.join(parts))
 
 
 def make_app():
