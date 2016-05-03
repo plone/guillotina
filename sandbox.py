@@ -27,11 +27,19 @@ def locked(obj):
     return obj._v_lock
 
 
+def tm(request):
+    assert getattr(request, 'app', None) is not None, \
+        'Request has no app'
+    assert getattr(request.app, '_p_jar', None) is not None, \
+        'App has no ZODB connection'
+    return request.app._p_jar.transaction_manager
+
+
 def sync(request):
     assert getattr(request, 'app', None) is not None, \
-           'Request has no app'
+        'Request has no app'
     assert getattr(request.app, 'executor', None) is not None, \
-        'Request has no executor'
+        'App has no executor'
     return lambda *args, **kwargs: request.app.loop.run_in_executor(
             request.app.executor, *args, **kwargs)
 
@@ -206,8 +214,7 @@ class ContainerView(View):
     async def __call__(self):
         counter = self.resource['__visited__']
 
-        tm = self.request.app._p_jar.transaction_manager
-        async with locked(counter), tm:
+        async with locked(counter), tm(self.request):
             counter.change(1)
 
         parts = [str(counter()),
@@ -239,9 +246,9 @@ def make_app():
 
     # Set request aware database for app
     db = RequestAwareDB('Data.fs')
-    tm = RequestAwareTransactionManager()
+    tm_ = RequestAwareTransactionManager()
     # While _p_jar is a funny name, it's consistent with Persistent API
-    app._p_jar = db.open(transaction_manager=tm)
+    app._p_jar = db.open(transaction_manager=tm_)
     return app
 
 
