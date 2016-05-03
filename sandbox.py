@@ -10,6 +10,7 @@ from BTrees._OOBTree import OOBTree
 from concurrent.futures import ThreadPoolExecutor
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
+import threading
 import asyncio
 import inspect
 import logging
@@ -20,12 +21,41 @@ import ZODB.Connection
 logger = logging.getLogger('sandbox')
 
 
+def locked(obj):
+    if not hasattr(obj, '_v_lock'):
+        obj._v_lock = asyncio.Lock()
+    return obj._v_lock
+
+
+def sync(request):
+    assert getattr(request, 'app', None) is not None, \
+           'Request has no app'
+    assert getattr(request.app, 'executor', None) is not None, \
+        'Request has no executor'
+    return lambda *args, **kwargs: request.app.loop.run_in_executor(
+            request.app.executor, *args, **kwargs)
+
+
+def get_current_request():
+    """Get the nearest request from the current frame stack"""
+    frame = inspect.currentframe()
+    while frame is not None:
+        if isinstance(frame.f_locals.get('self'), View):
+            return frame.f_locals.get('self').request
+        elif isinstance(frame.f_locals.get('self'), RequestHandler):
+            return frame.f_locals['request']
+        frame = frame.f_back
+    raise RuntimeError('Unable to find the current request')
+
+
 class RequestAwareTransactionManager(transaction.TransactionManager):
+
+    lock = threading.Lock()
 
     # ITransactionManager
     def begin(self, request=None):
-        assert request is not None, \
-            'Request aware TM called without request'
+        if request is None:
+            request = get_current_request()
 
         txn = getattr(request, '_txn', None)
         if txn is not None:
@@ -38,10 +68,32 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
 
         return txn
 
+    def __enter__(self):
+        return self.begin(get_current_request())
+
+    async def __aenter__(self):
+        return self.begin(get_current_request())
+
+    def __exit__(self, type_, value, traceback):
+        request = get_current_request()
+        if value is None:
+            with self.lock:
+                self.get(request).commit()
+        else:
+            with self.lock:
+                self.get(request).abort()
+
+    async def __aexit__(self, type_, value, traceback):
+        request = get_current_request()
+        if value is None:
+            await sync(request)(self.get(request).commit)
+        else:
+            await sync(request)(self.get(request).abort)
+
     # ITransactionManager
     def get(self, request=None):
-        assert request is not None, \
-            'Request aware TM called without request'
+        if request is None:
+            request = get_current_request()
 
         if getattr(request, '_txn', None) is None:
             request._txn = transaction.Transaction(self._synchs, self)
@@ -106,18 +158,6 @@ class RequestDataManager(object):
         return savepoint
 
 
-def get_current_request():
-    """Get the nearest request from the current frame stack"""
-    frame = inspect.currentframe()
-    while frame is not None:
-        if isinstance(frame.f_locals.get('self'), View):
-            return frame.f_locals.get('self').request
-        elif isinstance(frame.f_locals.get('self'), RequestHandler):
-            return frame.f_locals['request']
-        frame = frame.f_back
-    raise RuntimeError('Unable to find the current request')
-
-
 class RequestAwareConnection(ZODB.Connection.Connection):
     def _register(self, obj=None):
         request = get_current_request()
@@ -162,25 +202,13 @@ class RootFactory(AbstractResource):
         return await self.root.__getchild__(name)
 
 
-def locked(obj):
-    if not hasattr(obj, '_v_lock'):
-        obj._v_lock = asyncio.Lock()
-    return obj._v_lock
-
-
-def sync(request):
-    return lambda *args, **kwargs: request.app.loop.run_in_executor(
-            request.app.executor, *args, **kwargs)
-
-
 class ContainerView(View):
     async def __call__(self):
         counter = self.resource['__visited__']
 
-        async with locked(counter):
+        tm = self.request.app._p_jar.transaction_manager
+        async with locked(counter), tm:
             counter.change(1)
-            tm = self.request.app._p_jar.transaction_manager
-            await sync(self.request)(tm.get(self.request).commit)
 
         parts = [str(counter()),
                  self.resource['__name__']]
