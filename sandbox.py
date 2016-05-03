@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
-from aiohttp.web import RequestHandler
 from aiohttp_traversal.abc import AbstractResource
 from aiohttp_traversal.ext.views import View
 from aiohttp_traversal import TraversalRouter
 from aiohttp_traversal.traversal import Traverser
+from aiohttp.web import RequestHandler
 from BTrees.Length import Length
 from BTrees._OOBTree import OOBTree
 from concurrent.futures import ThreadPoolExecutor
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
-import threading
 import asyncio
 import inspect
 import logging
+import threading
 import transaction
 import ZODB
 import ZODB.Connection
@@ -22,12 +22,18 @@ logger = logging.getLogger('sandbox')
 
 
 def locked(obj):
+    """Return object specfic volatile asyncio lock
+    :param obj:
+    """
     if not hasattr(obj, '_v_lock'):
         obj._v_lock = asyncio.Lock()
     return obj._v_lock
 
 
 def tm(request):
+    """Return shared transaction manager (from request)
+    :param request:
+    """
     assert getattr(request, 'app', None) is not None, \
         'Request has no app'
     assert getattr(request.app, '_p_jar', None) is not None, \
@@ -36,6 +42,9 @@ def tm(request):
 
 
 def sync(request):
+    """Return shared asyncio executor instance (from request)
+    :param request:
+    """
     assert getattr(request, 'app', None) is not None, \
         'Request has no app'
     assert getattr(request.app, 'executor', None) is not None, \
@@ -45,7 +54,7 @@ def sync(request):
 
 
 def get_current_request():
-    """Get the nearest request from the current frame stack"""
+    """Return the nearest request from the current frame"""
     frame = inspect.currentframe()
     while frame is not None:
         if isinstance(frame.f_locals.get('self'), View):
@@ -58,10 +67,14 @@ def get_current_request():
 
 class RequestAwareTransactionManager(transaction.TransactionManager):
 
+    # Synchronous lock to sync accidental calls to synchronous API
     lock = threading.Lock()
 
     # ITransactionManager
     def begin(self, request=None):
+        """Return new request specific transaction
+        :param request: current request
+        """
         if request is None:
             request = get_current_request()
 
@@ -76,10 +89,8 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
 
         return txn
 
+    # with
     def __enter__(self):
-        return self.begin(get_current_request())
-
-    async def __aenter__(self):
         return self.begin(get_current_request())
 
     def __exit__(self, type_, value, traceback):
@@ -91,6 +102,10 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
             with self.lock:
                 self.get(request).abort()
 
+    # async with
+    async def __aenter__(self):
+        return self.begin(get_current_request())
+
     async def __aexit__(self, type_, value, traceback):
         request = get_current_request()
         if value is None:
@@ -100,6 +115,9 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
 
     # ITransactionManager
     def get(self, request=None):
+        """Return the current request specific transaction
+        :param request: current request
+        """
         if request is None:
             request = get_current_request()
 
