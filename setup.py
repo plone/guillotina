@@ -11,7 +11,6 @@ setup(
     setup_requires=[
     ],
     install_requires=[
-        'Acquisition',
         'aiohttp',
         'aiohttp_traversal',
         'BTrees',

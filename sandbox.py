@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-from BTrees.Length import Length
 from aiohttp import web
+from aiohttp.web import RequestHandler
 from aiohttp_traversal.abc import AbstractResource
 from aiohttp_traversal.ext.views import View
 from aiohttp_traversal import TraversalRouter
-from aiohttp_traversal.traversal import traverse, Traverser
+from aiohttp_traversal.traversal import Traverser
+from BTrees.Length import Length
 from BTrees._OOBTree import OOBTree
 from concurrent.futures import ThreadPoolExecutor
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
-import Acquisition
-import ExtensionClass
+import asyncio
+import inspect
 import logging
-import sys
 import transaction
 import ZODB
 import ZODB.Connection
@@ -52,75 +52,82 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
         pass
 
 
+# noinspection PyProtectedMember
 @implementer(ISavepointDataManager)
 class RequestDataManager(object):
 
-    # noinspection PyProtectedMember
     def __init__(self, request, connection):
         self.request = request
         self.connection = connection
         self._registered_objects = []
+        self._savepoint_storage = None
 
     @property
     def txn_manager(self):
         return self.connection.transaction_manager
 
     def abort(self, txn):
+        self.connection._registered_objects = self._registered_objects
+        self.connection._savepoint_storage = self._savepoint_storage
+        self.connection.abort(txn)
+        self._registered_objects = self.connection._registered_objects
+        self._savepoint_storage = self.connection._savepoint_storage
         delattr(self.request, '_txn_dm')
-        return self.connection.abort(txn)
 
     def tpc_begin(self, txn):
-        # XXX: ZODB.Connection.Connection instance can only handle a single
-        # connection at time and that limit is now only enforced by relying on
-        # single thread ThreadPoolExecutor...
-
-        # noinspection PyProtectedMember
-        self.connection._registered_objects.extend(self._registered_objects)
+        self.connection._registered_objects = self._registered_objects
+        self.connection._savepoint_storage = self._savepoint_storage
         return self.connection.tpc_begin(txn)
 
     def commit(self, txn):
-        return self.connection.commit(txn)
+        self.connection.commit(txn)
 
     def tpc_vote(self, txn):
-        return self.connection.tpc_vote(txn)
+        self.connection.tpc_vote(txn)
 
     def tpc_finish(self, txn):
-        return self.connection.tpc_finish(txn)
+        self.connection.tpc_finish(txn)
+        self._registered_objects = self.connection._registered_objects
+        self._savepoint_storage = self.connection._savepoint_storage
 
     def tpc_abort(self, txn):
-        return self.connection.tpc_abort(txn)
+        self.connection.tpc_abort(txn)
+        self._registered_objects = self.connection._registered_objects
+        self._savepoint_storage = self.connection._savepoint_storage
 
     def sortKey(self):
         return self.connection.sortKey()
 
     def savepoint(self):
-        return self.connection.savepoint()
+        self.connection._registered_objects = self._registered_objects
+        self.connection._savepoint_storage = self._savepoint_storage
+        savepoint = self.connection.savepoint()
+        self._registered_objects = self.connection._registered_objects
+        self._savepoint_storage = self.connection._savepoint_storage
+        return savepoint
 
 
 def get_current_request():
-    for i in range(2, 10):  # _request should be found at depth 2
-        # noinspection PyProtectedMember
-        frame = sys._getframe(i)
-        context = frame.f_locals.get('self')
-        request = getattr(context, '_request', None)
-        if request is not None:
-            return request
+    """Get the nearest request from the current frame stack"""
+    frame = inspect.currentframe()
+    while frame is not None:
+        if isinstance(frame.f_locals.get('self'), View):
+            return frame.f_locals.get('self').request
+        elif isinstance(frame.f_locals.get('self'), RequestHandler):
+            return frame.f_locals['request']
+        frame = frame.f_back
     raise RuntimeError('Unable to find the current request')
 
 
+# noinspection PyProtectedMember
 class RequestAwareConnection(ZODB.Connection.Connection):
-
     def _register(self, obj=None):
-        if not hasattr(obj, '_request'):
-            return super(RequestAwareConnection, self)._register(obj)
-
         request = get_current_request()
         if not hasattr(request, '_txn_dm'):
             request._txn_dm = RequestDataManager(request, self)
             self.transaction_manager.get(request).join(request._txn_dm)
 
         if obj is not None:
-            # noinspection PyProtectedMember
             request._txn_dm._registered_objects.append(obj)
 
 
@@ -128,95 +135,87 @@ class RequestAwareDB(ZODB.DB):
     klass = RequestAwareConnection
 
 
-class RequestContainer(ExtensionClass.Base):
+# noinspection PyProtectedMember
+class Container(OOBTree):
+    @property
+    def __parent__(self):
+        return getattr(self, '_v_parent', None)
 
-    def __init__(self, request):
-        self._request = request
-
-
-class RequestAware(Acquisition.Explicit):
-    _request = Acquisition.Acquired
-
-
-class Counter(Length, RequestAware):
-    pass
-
-
-class Container(OOBTree, RequestAware):
     async def __getchild__(self, name):
-        container = Acquisition.aq_base(self)
-        if name not in container:
-            container[name] = Container()
-            container[name]['__name__'] = name
-            container[name]['__visited__'] = Counter()
-        return container[name].__of__(self)
+        if name not in self:
+            self[name] = Container()
+            self[name]['__name__'] = name
+            self[name]['__visited__'] = Length()
+        self[name]._v_parent = self
+        return self[name]
 
 
-# DB = RequestAwareDB(None)  # volatile
-DB = RequestAwareDB('Data.fs')
-
-# Initialize
-conn = DB.open(transaction_manager=transaction.manager)
-if getattr(conn.root, 'data', None) is None:
+# Initialize DB
+DB = ZODB.DB('Data.fs')
+CONNECTION = DB.open()
+if getattr(CONNECTION.root, 'data', None) is None:
     with transaction.manager:
-        conn.root.data = Container()
-        conn.root._p_changed = 1
-conn.close()
+        CONNECTION.root.data = Container()
+        CONNECTION.root._p_changed = 1
+CONNECTION.close()
+DB.close()
 
+
+# Set request aware classes for app
+DB = RequestAwareDB('Data.fs')
 TM = RequestAwareTransactionManager()
 CONNECTION = DB.open(transaction_manager=TM)
-
-
-class RequestTraversalRouter(TraversalRouter):
-    async def traverse(self, request, *args, **kwargs):
-        path = list(p for p in request.path.split('/') if p)
-        root = self.get_root(request, *args, **kwargs)  # added request
-        if path:
-            return await traverse(root, path)
-        else:
-            return root, path
 
 
 class RootFactory(AbstractResource):
 
     __parent__ = None
 
-    def __init__(self, request):
-        self.app = RequestContainer(request)
+    def __init__(self, app):
+        self.app = app
 
     def __getitem__(self, name):
         return Traverser(self, (name,))
 
     async def __getchild__(self, name):
         global TM, CONNECTION
-        return await CONNECTION.root.data.__of__(self.app).__getchild__(name)
+        return await CONNECTION.root.data.__getchild__(name)
+
+
+# noinspection PyProtectedMember
+def locked(obj):
+    if not hasattr(obj, '_v_lock'):
+        obj._v_lock = asyncio.Lock()
+    return obj._v_lock
+
+
+def sync(request):
+    return lambda *args, **kwargs: request.app.loop.run_in_executor(
+            request.app.executor, *args, **kwargs)
 
 
 class ContainerView(View):
     async def __call__(self):
-        counter = Acquisition.aq_base(self.resource)['__visited__']
-        counter.__of__(self.resource).change(1)
+        counter = self.resource['__visited__']
 
-        parts = [
-            str(counter()),
-            Acquisition.aq_base(self.resource)['__name__']
-        ]
-        parent = Acquisition.aq_parent(self.resource)
+        async with locked(counter):
+            counter.change(1)
+            await sync(self.request)(TM.get(self.request).commit)
+
+        parts = [str(counter()),
+                 self.resource['__name__']]
+        parent = self.resource.__parent__
 
         while parent is not None and parent.get('__name__') is not None:
-            parts.append(Acquisition.aq_base(parent)['__name__'])
-            parent = Acquisition.aq_parent(parent)
-
-        await self.request.app.loop.run_in_executor(
-                self.request.app.executor,
-                TM.get(self.request).commit)
+            parts.append(parent['__name__'])
+            parent = parent.__parent__
 
         return web.Response(text='/'.join(reversed(parts)))
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
-    app = web.Application(router=RequestTraversalRouter())
+    logging.basicConfig(level=logging.DEBUG)
+    app = web.Application(router=TraversalRouter())
     app.executor = ThreadPoolExecutor(max_workers=1)
     app.router.set_root_factory(RootFactory)
     app.router.bind_view(Container, ContainerView)
