@@ -6,6 +6,9 @@
 let self = {
   buildout = pythonPackages.zc_buildout_nix.overrideDerivation(args: {
     postInstall = "";
+    propagatedNativeBuildInputs = [
+        pythonPackages.lxml
+    ];
   });
 };
 

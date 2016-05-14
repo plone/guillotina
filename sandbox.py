@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
+
+import sys
+import venusianconfiguration
 from aiohttp_traversal.abc import AbstractResource
 from aiohttp_traversal.ext.views import View
 from aiohttp_traversal import TraversalRouter
@@ -9,6 +12,9 @@ from BTrees.Length import Length
 from BTrees._OOBTree import OOBTree
 from concurrent.futures import ThreadPoolExecutor
 from transaction.interfaces import ISavepointDataManager
+from zope import schema
+from zope.configuration.config import ConfigurationMachine
+from zope.configuration.xmlconfig import registerCommonDirectives
 from zope.interface import implementer
 import asyncio
 import inspect
@@ -16,6 +22,7 @@ import logging
 import transaction
 import ZODB
 import ZODB.Connection
+from zope.publisher.browser import BrowserView
 
 logger = logging.getLogger('sandbox')
 
@@ -236,12 +243,45 @@ class ContainerView(View):
 
         return web.Response(text='/'.join(parts))
 
+# from zope.interface import Interface
+# from venusianconfiguration import configure
+# import zope.component
+# from zope.traversing.interfaces import ITraversable
+#
+# configure.include(package=zope.component, file='meta.zcml')
+#
+# @configure.adapter.factory(
+#     name='default',
+#     provides=ITraversable,
+#     for_=(Interface, Interface))
+# class HelloWorld(BrowserView):
+#     def __call__(self):
+#         import pdb; pdb.set_trace()
+
+from plone.supermodel import model
+
+class IPage(model.Schema):
+
+    title = schema.TextLine()
+
+from plone.dexterity.content import Item
+
+
+obj = Item()
+
 
 def make_app():
     app = web.Application(router=TraversalRouter())
     app.executor = ThreadPoolExecutor(max_workers=1)
     app.router.set_root_factory(RootFactory)
     app.router.bind_view(Container, ContainerView)
+
+    venusianconfiguration.enable()
+    config = ConfigurationMachine()
+    registerCommonDirectives(config)
+    venusianconfiguration.venusianscan(sys.modules[__name__], config)
+    config.execute_actions()
+    app.config = config
 
     # Initialize DB
     db = ZODB.DB('Data.fs')
