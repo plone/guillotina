@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-import asyncio
-import inspect
-
 from aiohttp.web import RequestHandler
-
 from plone.server.view import View
+import asyncio
 
 
 def locked(obj):

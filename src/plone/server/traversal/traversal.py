@@ -1,19 +1,21 @@
+# -*- coding: utf-8 -*-
 import asyncio
 import logging
-import sys
 from zope.component.interfaces import ISite
 from zope.component.hooks import setSite
 
 log = logging.getLogger(__name__)
 
 
-@asyncio.coroutine
-def traverse(root, path, request):
+async def traverse(request, root, path):
     """ Find resource for path
+    :param request: instance of Request
     :param root: instance of Resource
     :param list path: `('events', 'event_id', 'sets', 'set_id')`
     :return: `(resource, tail)`
     """
+    assert request  # could be used for permissions, etc
+
     if not path:
         return root, tuple(path)
 
@@ -23,18 +25,19 @@ def traverse(root, path, request):
     while path:
         traverser = traverser[path.pop(0)]
 
-    return (yield from traverser.traverse())
+    return await traverser.traverse()
 
 
 class Traverser:
     _is_coroutine = True
 
-    def __init__(self, resource, path):
+    def __init__(self, request, resource, path):
+        self.request = request
         self.resource = resource
         self.path = path
 
     def __getitem__(self, item):
-        return Traverser(self.resource, self.path + (item,))
+        return Traverser(self.request, self.resource, self.path + (item,))
 
     def __iter__(self):
         """ This object is coroutine
@@ -48,8 +51,7 @@ class Traverser:
         else:
             return resource
 
-    if sys.version_info >= (3, 5):
-        __await__ = __iter__
+    __await__ = __iter__
 
     @asyncio.coroutine
     def traverse(self):
@@ -61,7 +63,7 @@ class Traverser:
 
         while path:
             item = path[0]
-            last, current = current, (yield from current.get(item))
+            last, current = current, (yield from current.__getchild__(self.request, item))
 
             if current is None:
                 return last, tuple(path)
@@ -87,3 +89,11 @@ def find_root(resource):
     """ Find root resource
     """
     return list(lineage(resource))[-1]
+
+# from plone.server.exceptions import NoElement
+# 
+# def get(self, name):
+#     if name not in self:
+#         raise NoElement()
+#     self[name]._v_parent = self
+#     return self[name]

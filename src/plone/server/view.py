@@ -1,14 +1,10 @@
-import asyncio
-
-from plone.server.traversal.abc import AbstractView
+# -*- coding: utf-8 -*-
 
 
-class View(AbstractView):
-    def __init__(self, request, resource, tail):
+class View(object):
+    def __init__(self, request, context):
         self.request = request
-        self.resource = resource
-        self.tail = tail
+        self.context= context
 
-    @asyncio.coroutine
-    def __call__(self):
+    async def __call__(self):
         raise NotImplementedError
