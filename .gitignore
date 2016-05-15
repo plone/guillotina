@@ -9,4 +9,5 @@
 /extras/
 /parts/
 /result
-/sandbox.egg-info/
+*.egg-info/
+eggs/

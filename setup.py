@@ -1,29 +1,34 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
-    name='sandbox',
+    name='plone.server',
     version=open('VERSION').read().strip(),
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
     py_modules=[
-        'sandbox',
+        'plone.server',
     ],
     setup_requires=[
     ],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    namespace_packages=['plone'],
+    include_package_data=True,
     install_requires=[
         'aiohttp',
-        'aiohttp_traversal',
+        'resolver_deco',
         'BTrees',
         'cchardet',
         'setuptools',
         'transaction',
+        'plone.registry',
         'ZODB',
     ],
     tests_require=[
     ],
-    entry_points = {
+    entry_points={
         'console_scripts': [
-            'sandbox = sandbox:main',
+            'sandbox = plone.server.server:main',
         ]
     }
 )
