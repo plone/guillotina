@@ -16,7 +16,7 @@ class AbstractResource(metaclass=ABCMeta):
 
     @asyncio.coroutine
     @abstractmethod
-    def __getchild__(self, name):
+    def get(self, name):
         """ Return child resource or None, if not exists """
 
 

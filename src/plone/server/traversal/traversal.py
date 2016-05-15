@@ -1,12 +1,14 @@
 import asyncio
 import logging
 import sys
+from zope.component.interfaces import ISite
+from zope.component.hooks import setSite
 
 log = logging.getLogger(__name__)
 
 
 @asyncio.coroutine
-def traverse(root, path):
+def traverse(root, path, request):
     """ Find resource for path
     :param root: instance of Resource
     :param list path: `('events', 'event_id', 'sets', 'set_id')`
@@ -59,10 +61,13 @@ class Traverser:
 
         while path:
             item = path[0]
-            last, current = current, (yield from current.__getchild__(item))
+            last, current = current, (yield from current.get(item))
 
             if current is None:
                 return last, tuple(path)
+
+            elif ISite.providedBy(current):
+                setSite(current)
 
             del path[0]
 

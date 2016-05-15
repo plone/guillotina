@@ -1,4 +1,6 @@
 from BTrees._OOBTree import OOBTree
+from BTrees.Length import Length
+from plone.server.exceptions import NoElement
 
 
 class Container(OOBTree):
@@ -6,10 +8,9 @@ class Container(OOBTree):
     def __parent__(self):
         return getattr(self, '_v_parent', None)
 
-    async def __getchild__(self, name):
+    async def get(self, name):
+        import pdb; pdb.set_trace()
         if name not in self:
-            self[name] = Container()
-            self[name]['__name__'] = name
-            self[name]['__visited__'] = Length()
+            raise NoElement()
         self[name]._v_parent = self
         return self[name]

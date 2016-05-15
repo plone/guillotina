@@ -1,0 +1,4 @@
+
+
+class NoElement(Exception):
+    pass

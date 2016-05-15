@@ -22,6 +22,9 @@ setup(
         'setuptools',
         'transaction',
         'plone.registry',
+        'zope.component',
+        'venusianconfiguration',
+        'zope.configuration',
         'ZODB',
     ],
     tests_require=[

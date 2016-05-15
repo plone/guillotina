@@ -87,6 +87,7 @@ class TraversalRouter(AbstractRouter):
 
     @asyncio.coroutine
     def resolve(self, request):
+        import pdb; pdb.set_trace()
         try:
             resource, tail = yield from self.traverse(request)
             exc = None
@@ -101,6 +102,7 @@ class TraversalRouter(AbstractRouter):
 
         if resource is not None:
             try:
+                # Adapter!!!
                 view = self.resolve_view(request, resource, tail)
             except ViewNotResolved:
                 return TraversalExceptionMatchInfo(request, HTTPNotFound())
@@ -114,7 +116,7 @@ class TraversalRouter(AbstractRouter):
         path = tuple(p for p in request.path.split('/') if p)
         root = self.get_root(request.app, *args, **kwargs)
         if path:
-            return (yield from traverse(root, path))
+            return (yield from traverse(root, path, request))
         else:
             return root, path
 
