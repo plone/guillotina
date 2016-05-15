@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import RequestHandler
-from plone.server.view import View
+from plone.server.interfaces import IView
 import asyncio
+import inspect
 
 
 def locked(obj):
@@ -40,7 +41,7 @@ def get_current_request():
     """Return the nearest request from the current frame"""
     frame = inspect.currentframe()
     while frame is not None:
-        if isinstance(frame.f_locals.get('self'), View):
+        if IView.providedBy(isinstance(frame.f_locals.get('self'))):
             return frame.f_locals.get('self').request
         elif isinstance(frame.f_locals.get('self'), RequestHandler):
             return frame.f_locals['request']
