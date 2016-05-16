@@ -50,8 +50,9 @@ def make_app():
             fti = DexterityFTI('Todo')
             register(fti)
             obj = utils.createContent('Todo')
-            obj.id = 'Todo'
+            obj.id = 'obj1'
             plonesite['obj1'] = obj
+            obj.__parent__ = plonesite
             sm.registerUtility(plonesite['registry'], provided=IRegistry)
 
     conn.close()
