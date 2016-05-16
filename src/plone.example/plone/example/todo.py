@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.web import Response
-from plone.registry.interfaces import IRegistry
 from zope.interface import Attribute
 from zope.interface import Interface
 
@@ -16,5 +15,4 @@ class View(object):
         self.request = request
 
     async def __call__(self):
-        registry = self.request.registry.getUtility(IRegistry)
-        return Response(text=str(registry))
+        return Response(text='Hello World!')

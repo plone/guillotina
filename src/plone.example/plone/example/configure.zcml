@@ -1,9 +1,10 @@
 <configure xmlns="http://namespaces.zope.org/zope">
 
-	<adapter 
-		factory="plone.example.todo.View"
-		for="plone.example.todo.ITodo
-			 plone.server.interfaces.IRequest"
-		provides="plone.server.interfaces.IView"/>
+  <adapter
+      provides="plone.server.interfaces.IView"
+      for="plone.example.todo.ITodo
+           plone.server.interfaces.IRequest"
+      factory="plone.example.todo.View"
+      />
 
 </configure>

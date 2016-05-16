@@ -48,6 +48,7 @@ def make_app():
             from plone.dexterity.fti import register, DexterityFTI
             from plone.dexterity import utils
             fti = DexterityFTI('Todo')
+            fti.schema = 'plone.example.todo.ITodo'
             register(fti)
             obj = utils.createContent('Todo')
             obj.id = 'obj1'
