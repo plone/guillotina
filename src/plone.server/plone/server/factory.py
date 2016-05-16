@@ -26,7 +26,7 @@ def make_app():
     # Initialize global (threadlocal) ZCA configuration
     app.config = ConfigurationMachine()
     registerCommonDirectives(app.config)
-    include(app.config, 'configure.zcml', sys.modules[__name__])
+    include(app.config, 'configure.zcml', sys.modules['plone.server'])
     for ep in iter_entry_points('plone.server'):  # auto-include applications
         include(app.config, 'configure.zcml', ep.load())
     app.config.execute_actions()
