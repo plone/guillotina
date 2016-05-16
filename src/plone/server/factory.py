@@ -12,6 +12,7 @@ from venusianconfiguration import configure
 from venusianconfiguration import scan
 from zope.configuration.config import ConfigurationMachine
 from zope.configuration.xmlconfig import registerCommonDirectives
+import plone.dexterity
 import plone.registry
 import sys
 import transaction
@@ -21,6 +22,8 @@ import zope.component
 
 configure.include(package=zope.component, file='meta.zcml')
 configure.include(package=plone.registry)
+configure.include(package=plone.dexterity, file='meta.zcml')
+configure.include(package=plone.dexterity)
 scan(site)
 
 
