@@ -9,8 +9,8 @@ from zope.interface import implementer
 @implementer(IPloneSite)
 class Site(Container):
 
-    def __init__(self):
-        super(Site, self).__init__()
+    def __init__(self, id_):
+        super(Site, self).__init__(id_)
         self['_components'] = PersistentComponents()
 
     def getSiteManager(self):

@@ -39,7 +39,7 @@ def make_app():
             dbroot = conn.root()
 
             # Creating a testing site
-            dbroot['plone'] = Site()
+            dbroot['plone'] = Site('plone')
             plonesite = dbroot['plone']
 
             # Creating and registering a local registry
@@ -61,5 +61,8 @@ def make_app():
     tm_ = RequestAwareTransactionManager()
     # While _p_jar is a funny name, it's consistent with Persistent API
     app._p_jar = db.open(transaction_manager=tm_)
+
+    # Set router root from the ZODB connection
     app.router.set_root_factory(app._p_jar.root)
+
     return app
