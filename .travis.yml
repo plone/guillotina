@@ -1,0 +1,11 @@
+language: python
+python:
+- 3.5
+sudo: false
+cache:
+  directories:
+  - eggs
+install:
+- python bootstrap-buildout.py
+- bin/buildout -N -t 3
+script: bin/code-analysis
