@@ -3,6 +3,7 @@
 	<include package="zope.component" />
 
 	<include package="plone.registry" />
+	<include package="plone.dexterity" file="meta.zcml" />
 	<include package="plone.dexterity" />
 
 	<adapter factory=".browser.View" />
