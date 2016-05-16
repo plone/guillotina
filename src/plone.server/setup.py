@@ -1,4 +1,6 @@
-from setuptools import find_packages, setup
+# -*- coding: utf-8 -*-
+from setuptools import find_packages
+from setuptools import setup
 
 setup(
     name='plone.server',
@@ -10,8 +12,7 @@ setup(
     ],
     setup_requires=[
     ],
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
+    packages=find_packages(exclude=['ez_setup']),
     namespace_packages=['plone'],
     include_package_data=True,
     install_requires=[

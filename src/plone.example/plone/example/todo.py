@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.web import Response
-from zope.interface import Interface
-from zope.interface import Attribute
 from plone.registry.interfaces import IRegistry
+from zope.interface import Attribute
+from zope.interface import Interface
 
 
 class ITodo(Interface):

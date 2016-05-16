@@ -5,6 +5,6 @@
 	<include package="plone.registry" />
 	<include package="plone.dexterity" />
 
-	<include package="plone.server.content" />
+	<adapter factory=".content.View" />
 
 </configure>

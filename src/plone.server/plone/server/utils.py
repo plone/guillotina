@@ -9,7 +9,9 @@ def locked(obj):
     """Return object specfic volatile asyncio lock
     :param obj:
     """
-    if not hasattr(obj, '_v_lock'):
+    try:
+        assert obj._v_lock is not None
+    except (AssertionError, AttributeError):
         obj._v_lock = asyncio.Lock()
     return obj._v_lock
 

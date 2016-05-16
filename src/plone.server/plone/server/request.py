@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
+from plone.server.utils import get_current_request
+from plone.server.utils import sync
+from transaction.interfaces import ISavepointDataManager
+from zope.interface import implementer
+import transaction
 import ZODB
 import ZODB.Connection
-
-from .utils import get_current_request, sync
-
-import transaction
-
-from transaction.interfaces import ISavepointDataManager
-
-from zope.interface import implementer
 
 
 class RequestAwareTransactionManager(transaction.TransactionManager):
@@ -109,7 +106,7 @@ class RequestDataManager(object):
         self._registered_objects = []
         self._savepoint_storage = None
 
-    def sortKey(self): # noqa
+    def sortKey(self):
         return self.connection.sortKey()
 
     def savepoint(self):
@@ -124,7 +121,9 @@ class RequestDataManager(object):
 class RequestAwareConnection(ZODB.Connection.Connection):
     def _register(self, obj=None):
         request = get_current_request()
-        if not hasattr(request, '_txn_dm'):
+        try:
+            assert request._txn_dm is not None
+        except (AssertionError, AttributeError):
             request._txn_dm = RequestDataManager(request, self)
             self.transaction_manager.get(request).join(request._txn_dm)
 

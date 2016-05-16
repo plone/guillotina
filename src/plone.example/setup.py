@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup
 from setuptools import find_packages
-
+from setuptools import setup
 
 version = '0.1'
 
 short_description = """\
 Example for content types
 """
-long_description = open("README.rst").read() + "\n"
-long_description += open("CHANGES.rst").read()
+long_description = open('README.rst').read() + '\n'
+long_description += open('CHANGES.rst').read()
 
 setup(
     name='plone.example',
@@ -17,11 +16,11 @@ setup(
     description=short_description,
     long_description=long_description,
     classifiers=[
-        "Framework :: Plone",
-        "Framework :: Plone :: 7.0",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3.5",
-        "Topic :: Software Development :: Libraries :: Python Modules",
+        'Framework :: Plone',
+        'Framework :: Plone :: 7.0',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     keywords='plone example contenttypes',
     url='https://pypi.python.org/pypi/plone.example',

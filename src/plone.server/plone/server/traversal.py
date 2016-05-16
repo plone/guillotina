@@ -39,7 +39,7 @@ class MatchInfo(AbstractMatchInfo):
             'resource': self.resource,
             'view': self.view,
         }
- 
+
     async def expect_handler(self, request):
         return None
 
@@ -69,23 +69,23 @@ class TraversalRouter(AbstractRouter):
         request.resource = resource
         request.tail = tail
         request.exc = exc
-        
-        view = None
-        
+
         # Site registry lookup
-        if hasattr(request, 'registry'):
+        try:
             view = request.registry.queryMultiAdapter(
                 (resource, request), IView)
-            
+        except AttributeError:
+            view = None
+
         # Global registry lookup
         if view is None:
             view = queryMultiAdapter(
                 (resource, request), IView)
-            
+
         if view is not None:
             return MatchInfo(resource, request, view)
         else:
-            print(resource)
+            print(resource)  # noqa
             raise HTTPNotFound()
 
     async def traverse(self, request):
