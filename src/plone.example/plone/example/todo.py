@@ -1,12 +1,14 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.web import Response
-from zope.interface import Attribute
-from zope.interface import Interface
+from plone.supermodel import model
+from zope import schema
 
 
-class ITodo(Interface):
-    title = Attribute("""Title""")
-    done = Attribute("""Done""")
+class ITodo(model.Schema):
+    title = schema.TextLine(title=u"Title",
+                            required=False)
+    done = schema.Bool(title=u"Done",
+                       required=False)
 
 
 class View(object):
