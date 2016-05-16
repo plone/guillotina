@@ -45,11 +45,8 @@ def make_app():
             # Creating and registering a local registry
             plonesite['registry'] = Registry()
             sm = plonesite.getSiteManager()
-            from plone.dexterity.fti import register, DexterityFTI
+
             from plone.dexterity import utils
-            fti = DexterityFTI('Todo')
-            fti.schema = 'plone.example.todo.ITodo'
-            register(fti)
             obj = utils.createContent('Todo')
             obj.id = 'obj1'
             plonesite['obj1'] = obj

@@ -1,6 +1,15 @@
 <configure xmlns="http://namespaces.zope.org/zope"
            xmlns:plone="http://namespaces.plone.org/plone">
 
+
+  <include package="plone.server" file="meta.zcml" />
+
+  <plone:contenttype
+      portal_type="Todo"
+      schema=".todo.ITodo"
+      behaviors="plone.behavior.tests.IAnnotationStored"
+    />
+
   <adapter
       provides="plone.server.interfaces.IView"
       for="plone.example.todo.ITodo
