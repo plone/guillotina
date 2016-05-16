@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import Response
-from venusianconfiguration import configure
-from plone.server.content import Container
-from zope.component.interfaces import ISite
 from plone.registry.interfaces import IRegistry
+from plone.server.content import Container
+from plone.server.interfaces import IRequest
+from plone.server.interfaces import IView
+from zope.component import adapter
+from zope.component.interfaces import ISite
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
-from plone.server.interfaces import IView
-from plone.server.interfaces import IRequest
 
 
 # noinspection PyPep8Naming
@@ -25,7 +25,8 @@ class Site(Container):
         self['_components'] = sitemanager
 
 
-@configure.adapter.factory(for_=(ISite, IRequest), provides=IView)
+@adapter(ISite, IRequest)
+@implementer(IView)
 class View(object):
     def __init__(self, context, request):
         self.context = context

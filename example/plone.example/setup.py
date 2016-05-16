@@ -18,7 +18,7 @@ setup(
     long_description=long_description,
     classifiers=[
         "Framework :: Plone",
-        "Framework :: Plone :: 6.0",
+        "Framework :: Plone :: 7.0",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
         "Topic :: Software Development :: Libraries :: Python Modules",
@@ -33,11 +33,12 @@ setup(
     install_requires=[
         'setuptools',
         'plone.server'
-
     ],
     extras_require={
     },
     entry_points="""
     # -*- Entry points: -*-
+    [plone.server]
+    include = plone.example
     """,
 )

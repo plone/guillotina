@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from aiohttp.abc import AbstractRouter
 from aiohttp.abc import AbstractMatchInfo
+from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
-from aiohttp.web import Response
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
 from zope.component import queryMultiAdapter
