@@ -12,18 +12,25 @@ from venusianconfiguration import configure
 from venusianconfiguration import scan
 from zope.configuration.config import ConfigurationMachine
 from zope.configuration.xmlconfig import registerCommonDirectives
+from zope.component import getUtility
 import plone.dexterity
+import plone.example
 import plone.registry
 import sys
 import transaction
 import venusianconfiguration
 import ZODB
 import zope.component
+from plone.example.todo import ITodo
+from plone.dexterity.interfaces import IDexterityFTI
 
 configure.include(package=zope.component, file='meta.zcml')
 configure.include(package=plone.registry)
 configure.include(package=plone.dexterity, file='meta.zcml')
 configure.include(package=plone.dexterity)
+configure.include(package=plone.example)
+
+
 scan(site)
 
 
@@ -51,7 +58,14 @@ def make_app():
             # Creating and registering a local registry
             plonesite['registry'] = Registry()
             sm = plonesite.getSiteManager()
+            from plone.dexterity.fti import register, DexterityFTI
+            from plone.dexterity import utils
+            fti = DexterityFTI('Todo')
+            register(fti)
+            obj = utils.createContent('Todo')
+            plonesite['obj1'] = obj
             sm.registerUtility(plonesite['registry'], provided=IRegistry)
+
     conn.close()
     db.close()
 
