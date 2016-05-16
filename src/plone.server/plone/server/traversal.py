@@ -85,7 +85,6 @@ class TraversalRouter(AbstractRouter):
         if view is not None:
             return MatchInfo(resource, request, view)
         else:
-            print(resource)  # noqa
             raise HTTPNotFound()
 
     async def traverse(self, request):
