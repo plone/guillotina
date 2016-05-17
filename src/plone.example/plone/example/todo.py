@@ -2,6 +2,7 @@
 from aiohttp.web import Response
 from plone.supermodel import model
 from zope import schema
+from plone.server.api.service import Service
 
 
 class ITodo(model.Schema):
@@ -11,7 +12,7 @@ class ITodo(model.Schema):
                        required=False)
 
 
-class View(object):
+class View(Service):
     def __init__(self, context, request):
         self.context = context
         self.request = request

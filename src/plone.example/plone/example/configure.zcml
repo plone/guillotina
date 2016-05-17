@@ -23,4 +23,6 @@
       factory="plone.behavior.AnnotationStorage"
       />
 
+  <plone:api file="api.json"/>
+
 </configure>

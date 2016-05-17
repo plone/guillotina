@@ -1,4 +1,6 @@
-<configure xmlns="http://namespaces.zope.org/zope">
+<configure 
+	xmlns="http://namespaces.zope.org/zope"
+	xmlns:plone="http://namespaces.plone.org/plone">
 
 	<include package="zope.component" />
 
@@ -7,5 +9,21 @@
 	<include package="plone.dexterity" />
 
 	<adapter factory=".browser.View" />
+
+	<adapter factory=".languages.EN" />
+	<adapter factory=".languages.CA" />
+	<adapter factory=".languages.FI" />
+	<adapter factory=".languages.ENUS" />
+
+	<adapter factory=".translation.GenericTranslation" />
+
+	<adapter factory=".renderers.RendererFormatJson" />
+	<adapter factory=".renderers.RendererFormatHtml" />
+	<adapter factory=".renderers.Renderer" />
+	<adapter factory=".renderers.RendererJson" />
+	<adapter factory=".renderers.RendererHtml" />
+
+	<include file="meta.zcml" />
+	<plone:api file="api/api.json" />
 
 </configure>

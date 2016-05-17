@@ -8,6 +8,7 @@ from plone.server.content import Site
 from plone.server.request import RequestAwareDB
 from plone.server.request import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter
+from plone.server.registry import ILayers
 from zope.configuration.config import ConfigurationMachine
 from zope.configuration.xmlconfig import include
 from zope.configuration.xmlconfig import registerCommonDirectives
@@ -44,6 +45,8 @@ def make_app():
 
             # Creating and registering a local registry
             plonesite['registry'] = Registry()
+            plonesite['registry'].registerInterface(ILayers)
+            plonesite['registry'].records['plone.server.registry.layers.ILayers.active_layers'].value = ["plone.server.api.layer.IDefaultLayer"]
             sm = plonesite.getSiteManager()
 
             from plone.dexterity import utils

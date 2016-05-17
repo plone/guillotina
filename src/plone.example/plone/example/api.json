@@ -1,0 +1,10 @@
+{
+	"contenttypes": {
+		"plone.example.todo.ITodo": {
+			"GET": {
+				"factory": "plone.example.todo.View",
+				"permission": "AccessContent"
+			}
+		}
+	}
+}

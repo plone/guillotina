@@ -1,0 +1,82 @@
+{
+    "methods": {
+        "PUT": "plone.server.interfaces.IPUT",
+        "POST": "plone.server.interfaces.IPOST",
+        "PATCH": "plone.server.interfaces.IPATCH",
+        "DELETE": "plone.server.interfaces.IDELETE",
+        "GET": "plone.server.interfaces.IGET"
+    },
+    "cors_auth": true,
+    "layer": "plone.server.api.layer.IDefaultLayer",
+    "default_permission": "zope.Public",
+    "cors": "*",
+    "renderers": {
+        "application/json": "plone.server.renderers.IRendererFormatJson",
+        "text/html": "plone.server.renderers.IRendererFormatHtml"
+    },
+    "cors_headers": [
+        "*"
+    ],
+    "languages": {
+        "en": "plone.server.languages.IEN",
+        "en-us": "plone.server.languages.IENUS",
+        "ca": "plone.server.languages.ICA"
+    },
+    "cors_expose_headers": true,
+    "cors_max_age": 3660,
+    "contenttypes": {
+        "plone.server.interfaces.IPloneSite": {
+            "endpoints": {
+                "login": {
+                    "POST": {
+                        "factory": "plone.server.api.login.Login",
+                        "permission": "View"
+                    }
+                },
+                "logout": {
+                    "POST": {
+                        "factory": "plone.server.api.login.Logout",
+                        "permission": "View"
+                    }
+                },
+                "refresh": {
+                    "POST": {
+                        "factory": "plone.server.api.login.Refresh",
+                        "permission": "View"
+                    }
+                }
+            }
+        },
+        "plone.dexterity.interfaces.IDexterityContent": {
+            "GET": {
+                "factory": "plone.server.api.dexterity.DefaultGET",
+                "permission": "AccessContent"
+            },
+            "PATCH": {
+                "factory": "plone.server.api.dexterity.DefaultPATCH",
+                "permission": "ModifyContent"
+            },
+            "PUT": {
+                "factory": "plone.server.api.dexterity.DefaultPUT",
+                "permission": "ModifyContent"
+            },
+            "POST": {
+                "factory": "plone.server.api.dexterity.DefaultPOST",
+                "permission": "ModifyContent"
+            },
+            "endpoints": {
+                "sharing": {
+                    "POST": {
+                        "factory": "plone.server.api.dexterity.SharingPOST",
+                        "permission": "View"
+                    }
+                }
+            },
+            "DELETE": {
+                "factory": "plone.server.api.dexterity.DefaultDELETE",
+                "permission": "ModifyContent"
+            }
+        }
+    },
+    "version": 1
+}

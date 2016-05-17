@@ -1,0 +1,7 @@
+# -*- encoding: utf-8 -*-
+
+DICT_METHODS = {}
+DICT_RENDERS = {}
+DICT_LANGUAGES = {}
+DEFAULT_LAYER = []
+DEFAULT_PERMISSION = []

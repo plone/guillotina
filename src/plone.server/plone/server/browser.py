@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from aiohttp.web import json_response
 from plone.dexterity.interfaces import IDexterityContent
 from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
+from plone.server.interfaces import IGET
 from zope.component import adapter
 from zope.interface import implementer
 
@@ -27,7 +27,7 @@ class View(object):
         self.registry = self.request.registry.getUtility(IRegistry)
 
     async def __call__(self):
-        return json_response({
+        return {
             'context': str(self.context),
             'path': '/'.join(get_physical_path(self.context))
-        })
+        }

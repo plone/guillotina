@@ -2,6 +2,7 @@
 from aiohttp.web import RequestHandler
 from plone.server.interfaces import IView
 import asyncio
+import importlib
 import inspect
 
 
@@ -49,3 +50,8 @@ def get_current_request():
             return frame.f_locals['request']
         frame = frame.f_back
     raise RuntimeError('Unable to find the current request')
+
+
+def import_class(import_string):
+    t = import_string.rsplit('.', 1)
+    return getattr(importlib.import_module(t[0]), t[1], None)

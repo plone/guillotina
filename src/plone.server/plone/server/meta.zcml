@@ -10,6 +10,11 @@
             handler=".metaconfigure.contenttypeDirective"
             />
 
+	    <directive
+	        name="api"
+	        schema=".metaconfigure.IApi"
+	        handler=".metaconfigure.apiDirective"
+	        />
     </directives>
 
 </configure>
