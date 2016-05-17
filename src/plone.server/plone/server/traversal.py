@@ -25,6 +25,8 @@ async def traverse(request, parent, path):
         context = parent[path[0]]
     except TypeError:
         return parent, path
+    except KeyError:
+        return parent, path
 
     context._v_parent = parent
 
@@ -86,9 +88,10 @@ class TraversalRouter(AbstractRouter):
         request.resource = resource
         request.tail = tail
         request.exc = exc
-        if len(tail) == 1:
+
+        if tail and len(tail) == 1:
             view_name = tail[0]
-        elif len(tail) == 0:
+        elif tail is None or len(tail) == 0:
             view_name = ''
         else:
             raise HTTPNotFound()

@@ -6,28 +6,32 @@
         "DELETE": "plone.server.interfaces.IDELETE",
         "GET": "plone.server.interfaces.IGET"
     },
-    "cors_auth": true,
     "layer": "plone.server.api.layer.IDefaultLayer",
     "default_permission": "zope.Public",
-    "cors": "*",
+    "default_cors": {
+        "accept": "*",
+        "headers": "*",
+        "expose_headers": true,
+        "max_age": 3660,
+        "auth": true
+    },
     "renderers": {
         "application/json": "plone.server.renderers.IRendererFormatJson",
         "text/html": "plone.server.renderers.IRendererFormatHtml"
     },
-    "cors_headers": [
-        "*"
-    ],
     "languages": {
         "en": "plone.server.languages.IEN",
         "en-us": "plone.server.languages.IENUS",
         "ca": "plone.server.languages.ICA"
     },
-    "cors_expose_headers": true,
-    "cors_max_age": 3660,
     "contenttypes": {
         "plone.server.interfaces.IPloneSite": {
             "endpoints": {
                 "login": {
+                    "GET": {
+                        "factory": "plone.server.api.login.Login",
+                        "permission": "View"
+                    },
                     "POST": {
                         "factory": "plone.server.api.login.Login",
                         "permission": "View"

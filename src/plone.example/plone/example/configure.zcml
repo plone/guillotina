@@ -10,13 +10,6 @@
       behaviors="plone.behavior.tests.IAnnotationStored"
     />
 
-  <adapter
-      provides="plone.server.interfaces.IView"
-      for="plone.example.todo.ITodo
-           plone.server.interfaces.IRequest"
-      factory="plone.example.todo.View"
-      />
-
   <plone:behavior
       title="Annotation behavior"
       provides="plone.behavior.tests.IAnnotationStored"
