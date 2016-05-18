@@ -1,0 +1,27 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="zope"
+    >
+
+  <!-- This file contains sample security policy definition -->
+
+  <include package="zope.securitypolicy" file="meta.zcml" />
+  <include package="zope.securitypolicy" />
+
+  <securityPolicy
+      component="plone.server.securitypolicy.PloneSecurityPolicy"
+      />
+
+  <role
+      id="plone.Anonymous"
+      title="Everybody"
+      description="All users have this role implicitly"
+      />
+  <role id="plone.Manager" title="Site Manager" />
+  <role id="plone.Member" title="Site Member" />
+
+
+  <grantAll role="zope.Manager" />
+
+</configure>

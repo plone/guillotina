@@ -23,7 +23,11 @@
 	<adapter factory=".renderers.RendererJson" />
 	<adapter factory=".renderers.RendererHtml" />
 
+
+	<!-- <include file="permissions.zcml" /> -->
+	<include file="securitypolicy.zcml" />
 	<include file="meta.zcml" />
+	<include file="./auth/configure.zcml" />
 	<plone:api file="api/api.json" />
 
 </configure>

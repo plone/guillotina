@@ -20,6 +20,7 @@ setup(
         'BTrees',
         'cchardet',
         'plone.dexterity',
+        'plone.supermodel',
         'plone.registry',
         'setuptools',
         'transaction',
@@ -36,6 +37,7 @@ setup(
         'zope.location',
         'zope.schema',
         'zope.security',
+        'pyjwt'
     ],
     tests_require=[
     ],

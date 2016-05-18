@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
-from aiohttp.web_exceptions import HTTPNotFound
+from aiohttp.web_exceptions import HTTPNotFound, HTTPUnauthorized
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
 from plone.server.interfaces import ITranslated
@@ -13,6 +13,8 @@ from zope.interface import alsoProvides
 from plone.server import DICT_RENDERS, DICT_METHODS
 from plone.registry.interfaces import IRegistry
 from plone.server.utils import import_class
+from zope.security import checkPermission
+from plone.server.securitypolicy import PloneSecurityPolicy
 
 
 async def traverse(request, parent, path):
@@ -77,6 +79,8 @@ class TraversalRouter(AbstractRouter):
 
     async def resolve(self, request):
         alsoProvides(request, IRequest)
+        request.interaction = PloneSecurityPolicy(request)
+
         try:
             resource, tail = await self.traverse(request)
             exc = None
@@ -104,6 +108,11 @@ class TraversalRouter(AbstractRouter):
         resource = queryMultiAdapter(
             (language_object, resource, request), ITranslated).translate()
 
+        # permission_tool = IPermissionTool(request)
+        # if not checkPermission(resource, 'Access content'):
+        #     raise HTTPUnauthorized('No access to content')
+
+        checkPermission(resource, 'Access content', interaction=request.interaction)
         # Site registry lookup
         try:
             view = request.registry.queryMultiAdapter(

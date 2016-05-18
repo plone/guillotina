@@ -1,0 +1,96 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml"
+           i18n_domain="cmf_default">
+
+  <include file="meta.zcml" package="zope.security" />
+
+  <permission
+    id="plone.ListFolderContents"
+    title="List folder contents"
+    />
+
+  <permission
+    id="plone.ListUndoableChanges"
+    title="List undoable changes"
+    />
+
+  <permission
+    id="plone.AccessInactivePortalContent"
+    title="Access inactive portal content"
+    />
+
+  <permission
+    id="plone.ModifyPortalContent"
+    title="Modify portal content"
+    />
+
+  <permission
+    id="plone.ManageProperties"
+    title="Manage properties"
+    />
+
+  <permission
+    id="plone.ListPortalMembers"
+    title="List portal members"
+    />
+
+  <permission
+    id="plone.AddPortalFolders"
+    title="Add portal folders"
+    />
+
+  <permission
+    id="plone.AddPortalContent"
+    title="Add portal content"
+    />
+
+  <permission
+    id="plone.AddPortalMember"
+    title="Add portal member"
+    />
+
+  <permission
+    id="plone.SetOwnPassword"
+    title="Set own password"
+    />
+
+  <permission
+    id="plone.SetOwnProperties"
+    title="Set own properties"
+    />
+
+  <permission
+    id="plone.ChangeLocalRoles"
+    title="Change local roles"
+    />
+
+  <permission
+    id="plone.MailForgottenPassword"
+    title="Mail forgotten password"
+    />
+
+  <permission
+    id="plone.RequestReview"
+    title="Request review"
+    />
+
+  <permission
+    id="plone.ReviewPortalContent"
+    title="Review portal content"
+    />
+
+  <permission
+    id="plone.AccessContent"
+    title="Access content"
+    />
+
+  <!-- Zope has 
+
+    zope.Public,
+    zope.View,
+    zope.Security,
+    zope.ManageContent,
+    zope.ManageServices,
+    zope.ManageSite -->
+
+</configure>
