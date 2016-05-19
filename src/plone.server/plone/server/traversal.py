@@ -15,6 +15,7 @@ from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.securitypolicy import PloneSecurityPolicy
 from plone.server.utils import import_class
 from zope.component import queryMultiAdapter
+from zope.component import getGlobalSiteManager
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
 from zope.security import checkPermission
@@ -83,6 +84,7 @@ class TraversalRouter(AbstractRouter):
 
     async def resolve(self, request):
         alsoProvides(request, IRequest)
+        request.registry = getGlobalSiteManager()
 
         try:
             resource, tail = await self.traverse(request)
