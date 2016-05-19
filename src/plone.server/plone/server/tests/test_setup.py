@@ -1,10 +1,11 @@
-import unittest
-import plone.server
+from plone.server.auth.oauth import IOAuth
+from zope.component import getUtility
 from zope.component.testlayer import LayerBase
 from zope.component.testlayer import ZCMLFileLayer
+
+import plone.server
+import unittest
 import zope.component
-from zope.component import getUtility
-from plone.server.auth.oauth import IOAuth
 
 
 ZCMLLayer = ZCMLFileLayer(plone.server, 'configure.zcml')
