@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
+from plone.server.utils import get_current_request
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IParticipation
 from zope.security.management import system_user
 from zope.security.proxy import removeSecurityProxy
 from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
-
-from plone.server.utils import get_current_request
 
 
 class PloneSecurityPolicy(ZopeSecurityPolicy):

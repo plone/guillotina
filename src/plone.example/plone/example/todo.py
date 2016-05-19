@@ -2,12 +2,12 @@
 from plone.dexterity.interfaces import IDexterityContent
 from plone.dexterity.interfaces import IFormFieldProvider
 from plone.server.api.service import Service
-from plone.supermodel.directives import read_permission
 from plone.supermodel import model
+from plone.supermodel.directives import read_permission
+from zope import schema
 from zope.component import adapter
 from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
 from zope.dublincore.interfaces import IWriteZopeDublinCore
-from zope import schema
 from zope.interface import provider
 
 
