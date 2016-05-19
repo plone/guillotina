@@ -51,6 +51,10 @@ def make_app():
             # Creating a testing site
             dbroot['plone'] = Site('plone')
             plonesite = dbroot['plone']
+            plonesite.title = 'Site'
+            plonesite.description = 'Awww yeah...'
+            # TODO: This should really get set on the class itself
+            plonesite.portal_type = 'Plone Site'
 
             # Creating and registering a local registry
             plonesite['registry'] = Registry()
