@@ -12,7 +12,7 @@ class IAuthExtractionPlugins(Interface):
 
     active_plugins = field.List(
         title=_('Active Plugins'),
-        defaultFactory=lambda: [],
+        defaultFactory=list,
         value_type=field.TextLine(
             title=_('Value')
         )
@@ -26,7 +26,7 @@ class IAuthPloneUserPlugins(Interface):
 
     active_plugins = field.List(
         title='Active Plugins',
-        defaultFactory=lambda: [],
+        defaultFactory=list,
         value_type=field.TextLine(
             title='Value'
         )
@@ -39,7 +39,7 @@ class ILayers(Interface):
 
     active_layers = field.List(
         title=_('Active Layers'),
-        defaultFactory=lambda: [],
+        defaultFactory=list,
         value_type=field.TextLine(
             title='Value'
         )
