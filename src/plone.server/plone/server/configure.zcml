@@ -31,9 +31,5 @@
 	<include file="./auth/configure.zcml" />
 	<plone:api file="api/api.json" />
 
-	<utility 
-		component=".async.oauth" 
-		provides=".async.IOAuth"
-		/>
 
 </configure>

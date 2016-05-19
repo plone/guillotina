@@ -3,5 +3,9 @@
 	xmlns:plone="http://namespaces.plone.org/plone">
 
 	<adapter factory="plone.server.auth.participation.PloneParticipation" />
+	<utility 
+		component="plone.server.auth.oauth.oauth" 
+		provides="plone.server.auth.oauth.IOAuth"
+		/>
 
 </configure>
