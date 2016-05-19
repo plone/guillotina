@@ -1,15 +1,14 @@
 
 from plone.server.api.service import Service
 from plone.server.browser import get_physical_path
+from zope.component import getMultiAdapter
+from plone.jsonserializer.interfaces import ISerializeToJson
 
 
 class DefaultGET(Service):
     async def __call__(self):
-        return {
-            'context': str(self.context),
-            'path': '/'.join(get_physical_path(self.context)),
-            'portal_type': self.context.portal_type
-        }
+        serializer = getMultiAdapter((self.context, self.request), ISerializeToJson)
+        return serializer()
 
 
 class DefaultPOST(Service):
