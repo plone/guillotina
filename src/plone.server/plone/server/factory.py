@@ -85,9 +85,8 @@ def make_app():
     conn.close()
     db.close()
 
-    loop = asyncio.get_event_loop()
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
-        loop.call_soon(asyncio.ensure_future(utility.initialize(app=app)))
+        asyncio.ensure_future(utility.initialize(app=app))
 
     # Set request aware database for app
     db = RequestAwareDB('Data.fs')
