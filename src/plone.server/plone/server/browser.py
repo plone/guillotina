@@ -24,7 +24,7 @@ class View(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
-        self.registry = self.request.registry.getUtility(IRegistry)
+        self.registry = self.request.components.getUtility(IRegistry)
 
     async def __call__(self):
         return {
