@@ -7,6 +7,7 @@
 	<include package="plone.registry" />
 	<include package="plone.dexterity" file="meta.zcml" />
 	<include package="plone.dexterity" />
+	<include package="zope.annotation" />
 
 	<adapter factory=".browser.View" />
 
@@ -29,5 +30,10 @@
 	<include file="meta.zcml" />
 	<include file="./auth/configure.zcml" />
 	<plone:api file="api/api.json" />
+
+	<utility 
+		component=".async.oauth" 
+		provides=".async.IOAuth"
+		/>
 
 </configure>

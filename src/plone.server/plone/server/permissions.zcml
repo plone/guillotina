@@ -84,6 +84,12 @@
     title="Access content"
     />
 
+
+  <grant
+      permission="plone.AccessContent"
+      role="Reader"
+      />
+
   <!-- Zope has 
 
     zope.Public,

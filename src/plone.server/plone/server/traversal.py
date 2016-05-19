@@ -15,6 +15,8 @@ from plone.registry.interfaces import IRegistry
 from plone.server.utils import import_class
 from zope.security import checkPermission
 from plone.server.securitypolicy import PloneSecurityPolicy
+from plone.server.registry  import ACTIVE_LAYERS_KEY
+
 
 
 async def traverse(request, parent, path):
@@ -33,9 +35,10 @@ async def traverse(request, parent, path):
     context._v_parent = parent
 
     if ISite.providedBy(context):
+        request.site = context
         request.registry = context.getSiteManager()
         plone_registry = request.registry.getUtility(IRegistry)
-        layers = plone_registry.get('plone.server.registry.layers.ILayers.active_layers', [])
+        layers = plone_registry.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
 
@@ -79,7 +82,6 @@ class TraversalRouter(AbstractRouter):
 
     async def resolve(self, request):
         alsoProvides(request, IRequest)
-        request.interaction = PloneSecurityPolicy(request)
 
         try:
             resource, tail = await self.traverse(request)
@@ -88,6 +90,8 @@ class TraversalRouter(AbstractRouter):
             resource = None
             tail = None
             exc = _exc
+
+        request.interaction = PloneSecurityPolicy(request)
 
         request.resource = resource
         request.tail = tail
@@ -112,7 +116,7 @@ class TraversalRouter(AbstractRouter):
         # if not checkPermission(resource, 'Access content'):
         #     raise HTTPUnauthorized('No access to content')
 
-        checkPermission(resource, 'Access content', interaction=request.interaction)
+        checkPermission('Access content', resource, interaction=request.interaction)
         # Site registry lookup
         try:
             view = request.registry.queryMultiAdapter(

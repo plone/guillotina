@@ -20,7 +20,10 @@ class View(Service):
         self.request = request
 
     async def __call__(self):
-        return Response(text='Hello World!')
+        return {
+            'context': str(self.context),
+            'portal_type': self.context.portal_type
+        }
 
 
 from zope.dublincore.interfaces import IWriteZopeDublinCore

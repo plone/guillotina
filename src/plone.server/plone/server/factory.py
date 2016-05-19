@@ -1,20 +1,35 @@
 # -*- coding: utf-8 -*-
+import asyncio
+
+import sys
+
+import ZODB
+
 from aiohttp import web
+
 from concurrent.futures import ThreadPoolExecutor
+
 from pkg_resources import iter_entry_points
+
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.content import Site
-from plone.server.request import RequestAwareDB
-from plone.server.request import RequestAwareTransactionManager
-from plone.server.traversal import TraversalRouter
 from plone.server.registry import ILayers
-from zope.configuration.config import ConfigurationMachine
-from zope.configuration.xmlconfig import include
-from zope.configuration.xmlconfig import registerCommonDirectives
-import sys
+from plone.server.registry import (IAuthExtractionPlugins,
+                                        IAuthPloneUserPlugins)
+from plone.server.auth.oauth import (IPloneJWTExtractionConfig,
+                                              IPloneOAuthConfig)
+from plone.server.request import RequestAwareDB, RequestAwareTransactionManager
+from plone.server.traversal import TraversalRouter
+
 import transaction
-import ZODB
+
+from zope.configuration.config import ConfigurationMachine
+from zope.configuration.xmlconfig import include, registerCommonDirectives
+from zope.component import getAllUtilitiesRegisteredFor
+from plone.server.async import IAsyncUtility
+import functools
+
 
 
 def make_app():
@@ -46,7 +61,22 @@ def make_app():
             # Creating and registering a local registry
             plonesite['registry'] = Registry()
             plonesite['registry'].registerInterface(ILayers)
-            plonesite['registry'].records['plone.server.registry.layers.ILayers.active_layers'].value = ["plone.server.api.layer.IDefaultLayer"]
+            plonesite['registry'].registerInterface(IAuthPloneUserPlugins)
+            plonesite['registry'].registerInterface(IAuthExtractionPlugins)
+
+            plonesite['registry'].forInterface(ILayers).active_layers = \
+                ["plone.server.api.layer.IDefaultLayer"]
+
+            plonesite['registry'].forInterface(IAuthExtractionPlugins).active_plugins = \
+                ["plone.server.auth.oauth.PloneJWTExtraction"]
+
+            plonesite['registry'].forInterface(IAuthPloneUserPlugins).active_plugins = \
+                ["plone.server.auth.oauth.OAuthPloneUserFactory"]
+
+            # Set default plugins
+            plonesite['registry'].registerInterface(IPloneJWTExtractionConfig)
+            plonesite['registry'].registerInterface(IPloneOAuthConfig)
+
             sm = plonesite.getSiteManager()
 
             from plone.dexterity import utils
@@ -58,6 +88,10 @@ def make_app():
 
     conn.close()
     db.close()
+
+    loop = asyncio.get_event_loop()
+    for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
+        loop.call_soon(asyncio.ensure_future(utility.initialize(app=app)))
 
     # Set request aware database for app
     db = RequestAwareDB('Data.fs')
