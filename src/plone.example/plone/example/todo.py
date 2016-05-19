@@ -15,21 +15,21 @@ class ITodo(model.Schema):
     title = schema.TextLine(
         title='Title',
         required=False,
-        description="It's a title",
-        default=''
+        description=u"Describe the task.",
+        default=u''
     )
     done = schema.Bool(
         title='Done',
         required=False,
-        description='Has the task been completed?',
+        description=u'Has the task been completed?',
         default=False
     )
     read_permission(notes='plone.example.classified')
     notes = schema.Text(
         title='Notes',
         required=False,
-        description='Classified notes on about task',
-        default=''
+        description=u'Classified notes on about task',
+        default=u''
     )
 
 

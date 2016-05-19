@@ -90,7 +90,10 @@ def make_app():
                                     description='Awww yeah...')
 
             # And some example content
-            obj = createContent('Todo', id='obj1', title='It\'s a todo!')
+            obj = createContent('Todo',
+                                id='obj1',
+                                title='It\'s a todo!',
+                                notes='$240 of pudding.')
             plonesite['obj1'] = obj
             obj.__parent__ = plonesite
 
