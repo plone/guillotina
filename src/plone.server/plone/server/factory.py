@@ -2,6 +2,7 @@
 from aiohttp import web
 from concurrent.futures import ThreadPoolExecutor
 from pkg_resources import iter_entry_points
+from plone.dexterity.utils import createContent
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.async import IAsyncUtility
@@ -24,6 +25,40 @@ import functools
 import sys
 import transaction
 import ZODB
+
+
+def create_site(app, id, title='', description=''):
+    plonesite = Site(id)
+    app[id] = plonesite
+    plonesite.title = title
+    plonesite.description = description
+    # TODO: This should really get set on the class itself
+    plonesite.portal_type = 'Plone Site'
+
+    # Creating and registering a local registry
+    plonesite['registry'] = Registry()
+    plonesite['registry'].registerInterface(ILayers)
+    plonesite['registry'].registerInterface(IAuthPloneUserPlugins)
+    plonesite['registry'].registerInterface(IAuthExtractionPlugins)
+
+    plonesite['registry'].forInterface(ILayers).active_layers = \
+        ['plone.server.api.layer.IDefaultLayer']
+
+    plonesite['registry'].forInterface(
+        IAuthExtractionPlugins).active_plugins = \
+        ['plone.server.auth.oauth.PloneJWTExtraction']
+
+    plonesite['registry'].forInterface(
+        IAuthPloneUserPlugins).active_plugins = \
+        ['plone.server.auth.oauth.OAuthPloneUserFactory']
+
+    # Set default plugins
+    plonesite['registry'].registerInterface(IPloneJWTExtractionConfig)
+    plonesite['registry'].registerInterface(IPloneOAuthConfig)
+    sm = plonesite.getSiteManager()
+    sm.registerUtility(plonesite['registry'], provided=IRegistry)
+
+    return plonesite
 
 
 def make_app():
@@ -49,45 +84,15 @@ def make_app():
             dbroot = conn.root()
 
             # Creating a testing site
-            dbroot['plone'] = Site('plone')
-            plonesite = dbroot['plone']
-            plonesite.title = 'Site'
-            plonesite.description = 'Awww yeah...'
+            plonesite = create_site(dbroot,
+                                    id='plone',
+                                    title='Demo Site',
+                                    description='Awww yeah...')
 
-            # TODO: This should really get set on the class itself
-            plonesite.portal_type = 'Plone Site'
-
-            # Creating and registering a local registry
-            plonesite['registry'] = Registry()
-            plonesite['registry'].registerInterface(ILayers)
-            plonesite['registry'].registerInterface(IAuthPloneUserPlugins)
-            plonesite['registry'].registerInterface(IAuthExtractionPlugins)
-
-            plonesite['registry'].forInterface(ILayers).active_layers = \
-                ['plone.server.api.layer.IDefaultLayer']
-
-            plonesite['registry'].forInterface(
-                IAuthExtractionPlugins).active_plugins = \
-                ['plone.server.auth.oauth.PloneJWTExtraction']
-
-            plonesite['registry'].forInterface(
-                IAuthPloneUserPlugins).active_plugins = \
-                ['plone.server.auth.oauth.OAuthPloneUserFactory']
-
-            # Set default plugins
-            plonesite['registry'].registerInterface(IPloneJWTExtractionConfig)
-            plonesite['registry'].registerInterface(IPloneOAuthConfig)
-
-            sm = plonesite.getSiteManager()
-
-            from plone.dexterity import utils
-            obj = utils.createContent('Todo')
-            obj.id = 'obj1'
-            obj.title = 'It\'s a todo!'
-
+            # And some example content
+            obj = createContent('Todo', id='obj1', title='It\'s a todo!')
             plonesite['obj1'] = obj
             obj.__parent__ = plonesite
-            sm.registerUtility(plonesite['registry'], provided=IRegistry)
 
     conn.close()
     db.close()
