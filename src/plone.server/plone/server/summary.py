@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # from plone.app.contentlisting.interfaces import IContentListingObject
-from plone.server.browser import get_physical_path
 from plone.jsonserializer.interfaces import ISerializeToJsonSummary
 from plone.jsonserializer.serializer.converters import json_compatible
+from plone.server.browser import get_physical_path
 from zope.component import adapter
 from zope.interface import implementer
 from zope.interface import Interface

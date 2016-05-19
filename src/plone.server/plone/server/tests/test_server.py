@@ -1,8 +1,10 @@
-import pytest
-from plone.server.testing import PLONE_LAYER
-import unittest
+# -*- coding: utf-8 -*-
 from plone.server import factory
+from plone.server.testing import PLONE_LAYER
 from plone.server.traversal import TraversalRouter
+
+import pytest
+import unittest
 
 
 class TestServer(unittest.TestCase):
