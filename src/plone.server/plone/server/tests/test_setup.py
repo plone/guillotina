@@ -1,5 +1,4 @@
 import unittest
-from plone.server import traversal
 import plone.server
 from zope.component.testlayer import LayerBase
 from zope.component.testlayer import ZCMLFileLayer
@@ -21,6 +20,7 @@ class LayersLayer(object):
         ZopeComponentLayer(zope.component),
         ZCMLLayer
     )
+
 
 class TestTraversal(unittest.TestCase):
     layer = LayersLayer()
