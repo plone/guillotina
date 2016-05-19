@@ -1,10 +1,4 @@
-<configure
-    xmlns="http://namespaces.zope.org/zope"
-    xmlns:zcml="http://namespaces.zope.org/zcml"
-    i18n_domain="zope"
-    >
-
-  <!-- This file contains sample security policy definition -->
+<configure xmlns="http://namespaces.zope.org/zope">
 
   <include package="zope.securitypolicy" file="meta.zcml" />
   <include package="zope.securitypolicy" />

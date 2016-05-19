@@ -5,21 +5,25 @@ from zope.security.management import system_user
 from zope.security.proxy import removeSecurityProxy
 from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
 
+from plone.server.utils import get_current_request
+
 
 class PloneSecurityPolicy(ZopeSecurityPolicy):
 
-    def __init__(self, request, *args, **kwargs):
+    def __init__(self, request=None, *args, **kwargs):
+        if request is None:
+            request = get_current_request()
         ZopeSecurityPolicy.__init__(self, *args, **kwargs)
         self.request = request
         participation = IParticipation(request)
         participation.interaction = self
         self.participations.append(participation)
 
-    def checkPermission(self, permission, object):
+    def checkPermission(self, permission, obj):
         if permission is CheckerPublic:
             return True
 
-        object = removeSecurityProxy(object)
+        obj = removeSecurityProxy(obj)
         seen = {}
         for participation in self.participations:
             principal = participation.principal
@@ -33,7 +37,7 @@ class PloneSecurityPolicy(ZopeSecurityPolicy):
                 continue
 
             if self.cached_decision(
-                    object,
+                    obj,
                     principal.id,
                     self._groupsFor(principal),
                     permission):

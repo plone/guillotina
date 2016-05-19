@@ -2,26 +2,34 @@
 from plone.dexterity.interfaces import IDexterityContent
 from plone.dexterity.interfaces import IFormFieldProvider
 from plone.server.api.service import Service
+from plone.supermodel.directives import read_permission
 from plone.supermodel import model
-from zope import schema
 from zope.component import adapter
 from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
 from zope.dublincore.interfaces import IWriteZopeDublinCore
+from zope import schema
 from zope.interface import provider
 
 
 class ITodo(model.Schema):
     title = schema.TextLine(
-        title=u"Title",
+        title='Title',
         required=False,
-        description=u"It's a title",
-        default=u''
+        description="It's a title",
+        default=''
     )
     done = schema.Bool(
-        title=u"Done",
+        title='Done',
         required=False,
-        description=u"Has the task been completed?",
+        description='Has the task been completed?',
         default=False
+    )
+    read_permission(notes='plone.example.classified')
+    notes = schema.Text(
+        title='Notes',
+        required=False,
+        description='Classified notes on about task',
+        default=''
     )
 
 
@@ -39,7 +47,7 @@ class View(Service):
 
 @provider(IFormFieldProvider)
 class IDublinCore(IWriteZopeDublinCore):
-    """ We basically just want the IFormFieldProvider interface applied
+    """We basically just want the IFormFieldProvider interface applied
         There's probably a zcml way of doing this. """
 
 

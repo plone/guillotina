@@ -1,8 +1,13 @@
 <configure xmlns="http://namespaces.zope.org/zope"
            xmlns:plone="http://namespaces.plone.org/plone">
 
-
   <include package="plone.server" file="meta.zcml" />
+  <include package="zope.security" file="meta.zcml" />
+
+  <permission
+      id="plone.example.classified"
+      title="Can read classified attribute"
+      />
 
   <plone:contenttype
       portal_type="Todo"

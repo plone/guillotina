@@ -45,7 +45,7 @@ def get_current_request():
     """Return the nearest request from the current frame"""
     frame = inspect.currentframe()
     while frame is not None:
-        if IView.providedBy(isinstance(frame.f_locals.get('self'))):
+        if IView.providedBy(frame.f_locals.get('self')):
             return frame.f_locals.get('self').request
         elif isinstance(frame.f_locals.get('self'), RequestHandler):
             return frame.f_locals['request']
