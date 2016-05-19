@@ -23,6 +23,9 @@ class PloneSecurityPolicy(ZopeSecurityPolicy):
         seen = {}
         for participation in self.participations:
             principal = participation.principal
+            if principal is None:
+                continue
+
             if principal is system_user:
                 return True
 
@@ -30,8 +33,10 @@ class PloneSecurityPolicy(ZopeSecurityPolicy):
                 continue
 
             if self.cached_decision(
-                object, principal.id, self._groupsFor(principal), permission,
-            ):
+                    object,
+                    principal.id,
+                    self._groupsFor(principal),
+                    permission):
                 return True
 
             seen[principal.id] = 1

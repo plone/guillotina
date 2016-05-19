@@ -6,6 +6,7 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
+from plone.server.api.layer import IDefaultLayer
 from plone.server.contentnegotiation import content_negotiation
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
@@ -84,6 +85,7 @@ class TraversalRouter(AbstractRouter):
 
     async def resolve(self, request):
         alsoProvides(request, IRequest)
+        alsoProvides(request, IDefaultLayer)
         request.registry = getGlobalSiteManager()
 
         try:
@@ -112,8 +114,11 @@ class TraversalRouter(AbstractRouter):
         renderer, language = content_negotiation(request)
         language_object = language(request)
 
-        resource = queryMultiAdapter(
-            (language_object, resource, request), ITranslated).translate()
+        translator = queryMultiAdapter(
+            (language_object, resource, request),
+            ITranslated)
+        if translator is not None:
+            resource = translator.translate()
 
         # permission_tool = IPermissionTool(request)
         # if not checkPermission(resource, 'Access content'):

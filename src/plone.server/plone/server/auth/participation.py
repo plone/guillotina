@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IRequest
 from plone.server.registry import ACTIVE_AUTH_EXTRACTION_KEY
@@ -35,7 +36,9 @@ class PloneParticipation(object):
         self.request = request
         # Cached user
         if not hasattr(self.request, '__cache_user'):
-            plone_registry = request.registry.getUtility(IRegistry)
+            # Get plone_registry or
+            plone_registry = request.registry.queryUtility(IRegistry) or {}
+
             # Plugin to extract the credentials to request._cache_credentials
             plugins = plone_registry.get(ACTIVE_AUTH_EXTRACTION_KEY, [])
             for plugin in plugins:
@@ -48,5 +51,5 @@ class PloneParticipation(object):
                 plugin_object = import_class(plugin)
                 plugin_object(self.request)
 
-        self.principal = self.request._cache_user
+        self.principal = getattr(self.request, '_cache_user', None)
         self.interaction = None
