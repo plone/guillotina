@@ -24,16 +24,10 @@
   <adapter factory=".renderers.RendererJson" />
   <adapter factory=".renderers.RendererHtml" />
 
-
   <!-- <include file="permissions.zcml" /> -->
   <include file="securitypolicy.zcml" />
   <include file="meta.zcml" />
-  <include file="./auth/configure.zcml" />
+  <include package=".auth" />
   <plone:api file="api/api.json" />
-
-  <utility
-      component=".async.oauth"
-      provides=".async.IOAuth"
-      />
 
 </configure>
