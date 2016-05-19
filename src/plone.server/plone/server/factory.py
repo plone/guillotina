@@ -78,6 +78,8 @@ def make_app():
             from plone.dexterity import utils
             obj = utils.createContent('Todo')
             obj.id = 'obj1'
+            obj.title = 'It\'s a todo!'
+
             plonesite['obj1'] = obj
             obj.__parent__ = plonesite
             sm.registerUtility(plonesite['registry'], provided=IRegistry)
