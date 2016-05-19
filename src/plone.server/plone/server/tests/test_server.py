@@ -14,4 +14,4 @@ class TestServer(unittest.TestCase):
     def test_make_app(self):
         app = factory.make_app()
         self.assertTrue(app is not None)
-        self.assertEquals(type(app.router), TraversalRouter)
+        self.assertEqual(type(app.router), TraversalRouter)

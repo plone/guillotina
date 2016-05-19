@@ -53,6 +53,7 @@ def make_app():
             plonesite = dbroot['plone']
             plonesite.title = 'Site'
             plonesite.description = 'Awww yeah...'
+
             # TODO: This should really get set on the class itself
             plonesite.portal_type = 'Plone Site'
 
