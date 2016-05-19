@@ -31,4 +31,5 @@
 
   <plone:api file="api/api.json" />
 
+  <adapter factory=".summary.DefaultJSONSummarySerializer" />
 </configure>
