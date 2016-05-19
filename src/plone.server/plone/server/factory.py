@@ -1,35 +1,29 @@
 # -*- coding: utf-8 -*-
-import asyncio
-
-import sys
-
-import ZODB
-
 from aiohttp import web
-
 from concurrent.futures import ThreadPoolExecutor
-
 from pkg_resources import iter_entry_points
-
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
-from plone.server.content import Site
-from plone.server.registry import ILayers
-from plone.server.registry import (IAuthExtractionPlugins,
-                                        IAuthPloneUserPlugins)
-from plone.server.auth.oauth import (IPloneJWTExtractionConfig,
-                                              IPloneOAuthConfig)
-from plone.server.request import RequestAwareDB, RequestAwareTransactionManager
-from plone.server.traversal import TraversalRouter
-
-import transaction
-
-from zope.configuration.config import ConfigurationMachine
-from zope.configuration.xmlconfig import include, registerCommonDirectives
-from zope.component import getAllUtilitiesRegisteredFor
 from plone.server.async import IAsyncUtility
-import functools
+from plone.server.auth.oauth import IPloneJWTExtractionConfig
+from plone.server.auth.oauth import IPloneOAuthConfig
+from plone.server.content import Site
+from plone.server.registry import IAuthExtractionPlugins
+from plone.server.registry import IAuthPloneUserPlugins
+from plone.server.registry import ILayers
+from plone.server.request import RequestAwareDB
+from plone.server.request import RequestAwareTransactionManager
+from plone.server.traversal import TraversalRouter
+from zope.component import getAllUtilitiesRegisteredFor
+from zope.configuration.config import ConfigurationMachine
+from zope.configuration.xmlconfig import include
+from zope.configuration.xmlconfig import registerCommonDirectives
 
+import asyncio
+import functools
+import sys
+import transaction
+import ZODB
 
 
 def make_app():
@@ -65,13 +59,15 @@ def make_app():
             plonesite['registry'].registerInterface(IAuthExtractionPlugins)
 
             plonesite['registry'].forInterface(ILayers).active_layers = \
-                ["plone.server.api.layer.IDefaultLayer"]
+                ['plone.server.api.layer.IDefaultLayer']
 
-            plonesite['registry'].forInterface(IAuthExtractionPlugins).active_plugins = \
-                ["plone.server.auth.oauth.PloneJWTExtraction"]
+            plonesite['registry'].forInterface(
+                IAuthExtractionPlugins).active_plugins = \
+                ['plone.server.auth.oauth.PloneJWTExtraction']
 
-            plonesite['registry'].forInterface(IAuthPloneUserPlugins).active_plugins = \
-                ["plone.server.auth.oauth.OAuthPloneUserFactory"]
+            plonesite['registry'].forInterface(
+                IAuthPloneUserPlugins).active_plugins = \
+                ['plone.server.auth.oauth.OAuthPloneUserFactory']
 
             # Set default plugins
             plonesite['registry'].registerInterface(IPloneJWTExtractionConfig)

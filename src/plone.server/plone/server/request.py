@@ -3,6 +3,7 @@ from plone.server.utils import get_current_request
 from plone.server.utils import sync
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
+
 import transaction
 import ZODB
 import ZODB.Connection

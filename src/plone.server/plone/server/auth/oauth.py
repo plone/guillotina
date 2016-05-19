@@ -1,18 +1,17 @@
-import asyncio
-import logging
-
+# -*- coding: utf-8 -*-
 from collections import OrderedDict
-
-import aiohttp
-
-import jwt
-
 from plone.registry import field
 from plone.registry.interfaces import IRegistry
 from plone.server.async import IAsyncUtility
-from plone.server.auth.participation import AnonymousUser, PloneUser
-
+from plone.server.auth.participation import AnonymousUser
+from plone.server.auth.participation import PloneUser
 from zope.interface import Interface
+
+import aiohttp
+import asyncio
+import jwt
+import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class OAuth(object):
         self.request = request
         while(True):
             await asyncio.sleep(1)
-            print("test")
+            print('test')  # noqa
 
 
 oauth = OAuth()
@@ -38,41 +37,41 @@ oauth = OAuth()
 class IPloneJWTExtractionConfig(Interface):
 
     secret = field.TextLine(
-        title=u"JWTSecret",
-        default="secret"
+        title=u'JWTSecret',
+        default='secret',
     )
 
     algorithm = field.TextLine(
-        title=u"Algorithm",
-        default="HS256"
+        title=u'Algorithm',
+        default='HS256',
     )
 
 
 class IPloneOAuthConfig(Interface):
 
     server = field.TextLine(
-        title=u"Server",
-        default="http://localhost:6542"
+        title=u'Server',
+        default='http://localhost:6542',
     )
 
     secret = field.TextLine(
-        title=u"JWTSecret",
-        default="secret"
+        title=u'JWTSecret',
+        default='secret',
     )
 
     algorithm = field.TextLine(
-        title=u"Algorithm",
-        default="HS256"
+        title=u'Algorithm',
+        default='HS256',
     )
 
     client_id = field.TextLine(
-        title=u"ClientID",
-        default="11"
+        title=u'ClientID',
+        default='11',
     )
 
     client_password = field.TextLine(
-        title=u"ClientPassword",
-        default="2020Plone"
+        title=u'ClientPassword',
+        default='2020Plone',
     )
 
 
@@ -104,7 +103,7 @@ async def call_auth(base_uri, call, params, **kw):
 
 
 class PloneJWTExtraction(object):
-    """ User jwt token extraction.    """
+    """User jwt token extraction."""
 
     def __init__(self, request):
         self.request = request
@@ -120,7 +119,7 @@ class PloneJWTExtraction(object):
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'bearer':
                 token = encoded_token.encode('ascii')
-                creds["jwt"] = jwt.decode(
+                creds['jwt'] = jwt.decode(
                     token,
                     self.config.secret,
                     algorithms=[self.config.algorithm])
@@ -176,5 +175,5 @@ class OAuthPloneUser(PloneUser):
         self.name = user_data['result']['name']
 
         if len(self._roles) == 0:
-            logger.error("User without roles in this scope")
+            logger.error('User without roles in this scope')
             raise KeyError('Plone OAuth User has no roles in this Scope')

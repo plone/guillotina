@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
-from aiohttp.web_exceptions import HTTPNotFound, HTTPUnauthorized
-from plone.server.interfaces import IRequest
-from plone.server.interfaces import IView
-from plone.server.interfaces import ITranslated
-from plone.server.interfaces import IRendered
+from aiohttp.web_exceptions import HTTPNotFound
+from aiohttp.web_exceptions import HTTPUnauthorized
+from plone.registry.interfaces import IRegistry
+from plone.server import DICT_METHODS
+from plone.server import DICT_RENDERS
 from plone.server.contentnegotiation import content_negotiation
+from plone.server.interfaces import IRendered
+from plone.server.interfaces import IRequest
+from plone.server.interfaces import ITranslated
+from plone.server.interfaces import IView
+from plone.server.registry import ACTIVE_LAYERS_KEY
+from plone.server.securitypolicy import PloneSecurityPolicy
+from plone.server.utils import import_class
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
-from plone.server import DICT_RENDERS, DICT_METHODS
-from plone.registry.interfaces import IRegistry
-from plone.server.utils import import_class
 from zope.security import checkPermission
-from plone.server.securitypolicy import PloneSecurityPolicy
-from plone.server.registry  import ACTIVE_LAYERS_KEY
-
 
 
 async def traverse(request, parent, path):
@@ -116,7 +117,9 @@ class TraversalRouter(AbstractRouter):
         # if not checkPermission(resource, 'Access content'):
         #     raise HTTPUnauthorized('No access to content')
 
-        checkPermission('Access content', resource, interaction=request.interaction)
+        checkPermission(
+            'Access content', resource,
+            interaction=request.interaction)
         # Site registry lookup
         try:
             view = request.registry.queryMultiAdapter(

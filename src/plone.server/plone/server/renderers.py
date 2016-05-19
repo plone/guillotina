@@ -1,7 +1,9 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.web import json_response
-from plone.server.interfaces import (IRendered,
-                                     IRenderFormats, IRequest, IView)
+from plone.server.interfaces import IRendered
+from plone.server.interfaces import IRenderFormats
+from plone.server.interfaces import IRequest
+from plone.server.interfaces import IView
 from zope.component import adapter
 from zope.interface import implementer
 
@@ -60,4 +62,5 @@ class RendererJson(Renderer):
 @implementer(IRendered)
 class RendererHtml(Renderer):
     async def __call__(self):
+        value = ''
         return value

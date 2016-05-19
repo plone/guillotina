@@ -1,17 +1,26 @@
 # -*- encoding: utf-8 -*-
-from aiohttp.web import Response
+from plone.dexterity.interfaces import IDexterityContent
+from plone.dexterity.interfaces import IFormFieldProvider
+from plone.server.api.service import Service
 from plone.supermodel import model
 from zope import schema
-from plone.server.api.service import Service
+from zope.component import adapter
+from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
+from zope.dublincore.interfaces import IWriteZopeDublinCore
+from zope.interface import provider
 
 
 class ITodo(model.Schema):
-    title = schema.TextLine(title=u"Title",
-                            required=False,
-                            description=u"It's a title")
-    done = schema.Bool(title=u"Done",
-                       required=False,
-                       description=u"Has the task been completed?")
+    title = schema.TextLine(
+        title=u"Title",
+        required=False,
+        description=u"It's a title",
+    )
+    done = schema.Bool(
+        title=u"Done",
+        required=False,
+        description=u"Has the task been completed?",
+    )
 
 
 class View(Service):
@@ -22,17 +31,8 @@ class View(Service):
     async def __call__(self):
         return {
             'context': str(self.context),
-            'portal_type': self.context.portal_type
+            'portal_type': self.context.portal_type,
         }
-
-
-from zope.dublincore.interfaces import IWriteZopeDublinCore
-from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
-from zope.interface import provider
-from zope import schema
-from plone.dexterity.interfaces import IFormFieldProvider
-from plone.dexterity.interfaces import IDexterityContent
-from zope.component import adapter
 
 
 @provider(IFormFieldProvider)

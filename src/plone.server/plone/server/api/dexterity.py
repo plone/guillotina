@@ -1,13 +1,15 @@
-
+# -*- coding: utf-8 -*-
+from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.api.service import Service
 from plone.server.browser import get_physical_path
 from zope.component import getMultiAdapter
-from plone.jsonserializer.interfaces import ISerializeToJson
 
 
 class DefaultGET(Service):
     async def __call__(self):
-        serializer = getMultiAdapter((self.context, self.request), ISerializeToJson)
+        serializer = getMultiAdapter(
+            (self.context, self.request),
+            ISerializeToJson)
         return serializer()
 
 
@@ -29,4 +31,3 @@ class SharingPOST(Service):
 
 class DefaultDELETE(Service):
     pass
-

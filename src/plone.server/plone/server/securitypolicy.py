@@ -1,9 +1,9 @@
-
-from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
+# -*- coding: utf-8 -*-
 from zope.security.checker import CheckerPublic
-from zope.security.proxy import removeSecurityProxy
-from zope.security.management import system_user
 from zope.security.interfaces import IParticipation
+from zope.security.management import system_user
+from zope.security.proxy import removeSecurityProxy
+from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
 
 
 class PloneSecurityPolicy(ZopeSecurityPolicy):
@@ -14,7 +14,6 @@ class PloneSecurityPolicy(ZopeSecurityPolicy):
         participation = IParticipation(request)
         participation.interaction = self
         self.participations.append(participation)
-
 
     def checkPermission(self, permission, object):
         if permission is CheckerPublic:

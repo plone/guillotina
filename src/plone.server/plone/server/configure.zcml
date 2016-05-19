@@ -28,6 +28,7 @@
   <include file="securitypolicy.zcml" />
   <include file="meta.zcml" />
   <include package=".auth" />
+
   <plone:api file="api/api.json" />
 
 </configure>

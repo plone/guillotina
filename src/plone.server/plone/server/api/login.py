@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
 from plone.server.api.service import Service
 
+
 class Login(Service):
-	pass
+    pass
 
 
 class Logout(Service):
-	pass
+    pass
 
 
 class Refresh(Service):
-	pass
+    pass

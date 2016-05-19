@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from plone.dexterity.interfaces import IDexterityContent
 from plone.registry.interfaces import IRegistry
+from plone.server.interfaces import IGET
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
-from plone.server.interfaces import IGET
 from zope.component import adapter
 from zope.interface import implementer
 

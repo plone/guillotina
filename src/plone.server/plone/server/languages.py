@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from plone.server.api.layer import IDefaultLayer
 from plone.server.interfaces import ILanguage
-
 from zope.component import adapter
 from zope.interface import implementer
 

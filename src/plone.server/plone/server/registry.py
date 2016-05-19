@@ -1,36 +1,46 @@
+# -*- coding: utf-8 -*-
 from plone.registry import field
-
+from plone.server import _
 from zope.interface import Interface
 
 
 ACTIVE_AUTH_EXTRACTION_KEY = \
-    "plone.server.registry.IAuthExtractionPlugins.active_plugins"
+    'plone.server.registry.IAuthExtractionPlugins.active_plugins'
 
 
 class IAuthExtractionPlugins(Interface):
 
     active_plugins = field.List(
-        title=u"Active Plugins",
-        default=[],
-        value_type=field.TextLine(title=u"Value"))
+        title=_('Active Plugins'),
+        defaultFactory=lambda: [],
+        value_type=field.TextLine(
+            title=_('Value')
+        )
+    )
 
 ACTIVE_AUTH_USER_KEY = \
-    "plone.server.registry.IAuthPloneUserPlugins.active_plugins"
+    'plone.server.registry.IAuthPloneUserPlugins.active_plugins'
 
 
 class IAuthPloneUserPlugins(Interface):
 
     active_plugins = field.List(
-        title=u"Active Plugins",
-        default=[],
-        value_type=field.TextLine(title=u"Value"))
+        title='Active Plugins',
+        defaultFactory=lambda: [],
+        value_type=field.TextLine(
+            title='Value'
+        )
+    )
 
-ACTIVE_LAYERS_KEY = "plone.server.registry.ILayers.active_layers"
+ACTIVE_LAYERS_KEY = 'plone.server.registry.ILayers.active_layers'
 
 
 class ILayers(Interface):
 
     active_layers = field.List(
-        title=u"Active Layers",
-        default=[],
-        value_type=field.TextLine(title=u"Value"))
+        title=_('Active Layers'),
+        defaultFactory=lambda: [],
+        value_type=field.TextLine(
+            title='Value'
+        )
+    )

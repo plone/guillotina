@@ -7,14 +7,20 @@ setup(
     version=open('VERSION').read().strip(),
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
-    py_modules=[
-        'plone.server',
+    classifiers=[
+        'Framework :: Plone :: 7.0',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    url='https://pypi.python.org/pypi/plone.server',
+    license='GPL version 3',
     setup_requires=[
+        'pytest-runner',
     ],
+    zip_safe=True,
+    include_package_data=True,
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages=['plone'],
-    include_package_data=True,
     install_requires=[
         'aiohttp',
         'BTrees',
@@ -38,9 +44,10 @@ setup(
         'zope.location',
         'zope.schema',
         'zope.security',
-        'pyjwt'
+        'pyjwt',
     ],
     tests_require=[
+        'pytest',
     ],
     entry_points={
         'console_scripts': [

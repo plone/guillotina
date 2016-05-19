@@ -1,26 +1,47 @@
-from zope.interface import Interface
-from zope.configuration import fields as configuration_fields
-from plone.dexterity.fti import register
+# -*- coding: utf-8 -*-
 from plone.dexterity.fti import DexterityFTI
+from plone.dexterity.fti import register
+from plone.server import _
+from plone.server import DEFAULT_LAYER
+from plone.server import DEFAULT_PERMISSION
+from plone.server import DICT_LANGUAGES
+from plone.server import DICT_METHODS
+from plone.server import DICT_RENDERS
+from plone.server.utils import import_class
+from zope.component.zcml import adapter
+from zope.configuration import fields as configuration_fields
+from zope.configuration.exceptions import ConfigurationError
+from zope.configuration.fields import Path
+from zope.interface import Interface
+from zope.security.checker import Checker
+from zope.security.checker import defineChecker
+from zope.security.checker import getCheckerForInstancesOf
+from zope.security.checker import undefineChecker
+
+import json
+import os
 
 
 class IContentTypeDirective(Interface):
 
     portal_type = configuration_fields.MessageID(
-        title=u"Portal type",
-        description=u"",
-        required=True)
+        title=_('Portal type'),
+        description='',
+        required=True
+    )
 
     schema = configuration_fields.GlobalInterface(
-        title=u"",
-        description=u"",
-        required=True)
+        title='',
+        description='',
+        required=True
+    )
 
     behaviors = configuration_fields.Tokens(
-        title=u"",
-        description=u"",
+        title='',
+        description='',
         value_type=configuration_fields.GlobalInterface(),
-        required=True)
+        required=True
+    )
 
 
 def contenttypeDirective(_context,
@@ -28,7 +49,7 @@ def contenttypeDirective(_context,
                          schema,
                          behaviors=[],
                          add_permission=None):
-    """ Generate a Dexterity FTI and factory for the passed schema """
+    ''' Generate a Dexterity FTI and factory for the passed schema '''
     interface_name = schema.__identifier__
     behavior_names = [a.__identifier__ for a in behaviors]
 
@@ -43,43 +64,13 @@ def contenttypeDirective(_context,
     register(fti)
 
 
-# -*- coding: utf-8 -*-
-# from zope.configuration.exceptions import ConfigurationError
-# from zope.configuration.fields import GlobalObject
-from zope.interface import Interface
-from zope.configuration.fields import Path
-from zope.configuration.exceptions import ConfigurationError
-import os
-import json
-import plone.server
-import importlib
-from zope.component.zcml import adapter
-from plone.server.utils import import_class
-from plone.server.interfaces import IView, IResponse, IRendered
-from plone.dexterity.interfaces import IDexterityContent
-from plone.server import DICT_RENDERS, DICT_METHODS, DICT_LANGUAGES, DEFAULT_LAYER, DEFAULT_PERMISSION
-# from zope.schema import TextLine, Bool, Text
-# from zope.publisher.interfaces.browser import IBrowserPublisher
-# from plone.rest import interfaces
-# from plone.rest.traverse import NAME_PREFIX
-# from plone.rest.negotiation import register_service
-# from plone.rest.cors import options_view, options_view_wrap, wrap_cors
-from zope.security.checker import CheckerPublic, Checker, defineChecker
-from zope.security.checker import getCheckerForInstancesOf, undefineChecker
-
-# 
-# from zope.security.zcml import Permission
-
-
-
 class IApi(Interface):
-    """
-    """
+    '''
+    '''
 
     file = Path(
-        title=u"The name of a file defining the api.",
-        description=u"""
-        Refers to a file containing a json definition.""",
+        title='The name of a file defining the api.',
+        description='Refers to a file containing a json definition.',
         required=False
     )
 
@@ -92,10 +83,11 @@ def register_service(
         layer,
         default_permission,
         name=''):
-    print(configuration)
+    print(configuration)  # noqa
     factory = import_class(configuration['factory'])
     if factory is None:
-        raise TypeError("Factory not defined %s " % configuration['factory'])
+        raise TypeError(
+            'Factory not defined {0:s} '.format(configuration['factory']))
     if getCheckerForInstancesOf(factory):
         # in case already exist remove old checker
         undefineChecker(factory)
@@ -108,14 +100,13 @@ def register_service(
         required[n] = permission
 
     defineChecker(factory, Checker(required))
-    print("Defining adapter for %s %s %s to %s name %s" % (
+    print('Defining adapter for '  # noqa
+          '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
         content,
         DICT_METHODS[method],
         layer,
         factory,
-        name
-        )
-    )
+        name))
     adapter(
         _context,
         factory=(factory,),
@@ -125,12 +116,12 @@ def register_service(
     )
 
 
-def apiDirective(_context, file):
+def apiDirective(_context, file):  # noqa 'too complex' :)
 
     if file:
         file = os.path.abspath(_context.path(file))
         if not os.path.isfile(file):
-            raise ConfigurationError("No such file", file)
+            raise ConfigurationError('No such file', file)
 
     with open(file, 'r') as f:
         json_info = json.loads(f.read())
@@ -163,7 +154,7 @@ def apiDirective(_context, file):
     if 'languages' in json_info:
         for language, language_interface in json_info['languages'].items():
             # We define which Interface is for the languages
-            print(language_interface)
+            print(language_interface)  # noqa
             DICT_LANGUAGES[language] = import_class(language_interface)
 
     if 'contenttypes' in json_info:
@@ -180,8 +171,8 @@ def apiDirective(_context, file):
                         default_permission)
 
             if 'endpoints' in configuration:
-                for endpoint, endpoint_configuration in configuration['endpoints'].items():
-                    for method, method_configuration in endpoint_configuration.items():
+                for endpoint, endpoint_configuration in configuration['endpoints'].items():  # noqa
+                    for method, method_configuration in endpoint_configuration.items():  # noqa
                         register_service(
                             _context,
                             method_configuration,
@@ -190,6 +181,3 @@ def apiDirective(_context, file):
                             layer,
                             default_permission,
                             endpoint)
-
-
-

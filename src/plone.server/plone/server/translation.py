@@ -1,8 +1,9 @@
 # -*- encoding: utf-8 -*-
 
 from plone.dexterity.interfaces import IDexterityContent
-from plone.server.interfaces import ILanguage, ITranslated, IRequest
-
+from plone.server.interfaces import ILanguage
+from plone.server.interfaces import IRequest
+from plone.server.interfaces import ITranslated
 from zope.component import adapter
 from zope.interface import implementer
 

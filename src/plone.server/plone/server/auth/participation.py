@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
-from zope.security.interfaces import IParticipation
-from zope.interface import implementer
-from zope.component import adapter
-from plone.server.interfaces import IRequest
-from collections import OrderedDict
-from plone.server.registry import ACTIVE_AUTH_EXTRACTION_KEY, ACTIVE_AUTH_USER_KEY
-from plone.server.utils import import_class
 from plone.registry.interfaces import IRegistry
+from plone.server.interfaces import IRequest
+from plone.server.registry import ACTIVE_AUTH_EXTRACTION_KEY
+from plone.server.registry import ACTIVE_AUTH_USER_KEY
+from plone.server.utils import import_class
+from zope.component import adapter
+from zope.interface import implementer
+from zope.security.interfaces import IParticipation
 
 
 class PloneUser(object):
 
     def __init__(self, request):
-        self.id = "plone"
+        self.id = 'plone'
         self.request = request
         self._groups = {}
         self._roles = []
@@ -50,5 +50,3 @@ class PloneParticipation(object):
 
         self.principal = self.request._cache_user
         self.interaction = None
-
-

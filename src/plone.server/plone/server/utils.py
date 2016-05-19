@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import RequestHandler
 from plone.server.interfaces import IView
+
 import asyncio
 import importlib
 import inspect

@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
-from plone.server import DICT_LANGUAGES, DICT_RENDERS
+from plone.server import DICT_LANGUAGES
+from plone.server import DICT_RENDERS
 
 
 def content_negotiation(request):
