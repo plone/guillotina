@@ -22,3 +22,7 @@ Run tests
 We're using py.test::
 
     ./bin/py.test src
+
+and for test coverage::
+
+    ./bin/py.test --cov=plone.server src/
