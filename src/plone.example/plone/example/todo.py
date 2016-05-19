@@ -15,11 +15,13 @@ class ITodo(model.Schema):
         title=u"Title",
         required=False,
         description=u"It's a title",
+        default=u''
     )
     done = schema.Bool(
         title=u"Done",
         required=False,
         description=u"Has the task been completed?",
+        default=False
     )
 
 
