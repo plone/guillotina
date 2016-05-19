@@ -22,6 +22,7 @@ setup(
         'plone.dexterity',
         'plone.supermodel',
         'plone.registry',
+        'plone.jsonserializer',
         'setuptools',
         'transaction',
         'ZODB',
