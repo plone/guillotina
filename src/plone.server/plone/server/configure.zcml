@@ -1,39 +1,39 @@
-<configure 
-	xmlns="http://namespaces.zope.org/zope"
-	xmlns:plone="http://namespaces.plone.org/plone">
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:plone="http://namespaces.plone.org/plone">
 
-	<include package="zope.component" />
+  <include package="zope.component" />
 
-	<include package="plone.registry" />
-	<include package="plone.dexterity" file="meta.zcml" />
-	<include package="plone.dexterity" />
-	<include package="zope.annotation" />
+  <include package="plone.registry" />
+  <include package="plone.dexterity" file="meta.zcml" />
+  <include package="plone.dexterity" />
+  <include package="zope.annotation" />
 
-	<adapter factory=".browser.View" />
+  <adapter factory=".browser.View" />
 
-	<adapter factory=".languages.EN" />
-	<adapter factory=".languages.CA" />
-	<adapter factory=".languages.FI" />
-	<adapter factory=".languages.ENUS" />
+  <adapter factory=".languages.EN" />
+  <adapter factory=".languages.CA" />
+  <adapter factory=".languages.FI" />
+  <adapter factory=".languages.ENUS" />
 
-	<adapter factory=".translation.GenericTranslation" />
+  <adapter factory=".translation.GenericTranslation" />
 
-	<adapter factory=".renderers.RendererFormatJson" />
-	<adapter factory=".renderers.RendererFormatHtml" />
-	<adapter factory=".renderers.Renderer" />
-	<adapter factory=".renderers.RendererJson" />
-	<adapter factory=".renderers.RendererHtml" />
+  <adapter factory=".renderers.RendererFormatJson" />
+  <adapter factory=".renderers.RendererFormatHtml" />
+  <adapter factory=".renderers.Renderer" />
+  <adapter factory=".renderers.RendererJson" />
+  <adapter factory=".renderers.RendererHtml" />
 
 
-	<!-- <include file="permissions.zcml" /> -->
-	<include file="securitypolicy.zcml" />
-	<include file="meta.zcml" />
-	<include file="./auth/configure.zcml" />
-	<plone:api file="api/api.json" />
+  <!-- <include file="permissions.zcml" /> -->
+  <include file="securitypolicy.zcml" />
+  <include file="meta.zcml" />
+  <include file="./auth/configure.zcml" />
+  <plone:api file="api/api.json" />
 
-	<utility 
-		component=".async.oauth" 
-		provides=".async.IOAuth"
-		/>
+  <utility
+      component=".async.oauth"
+      provides=".async.IOAuth"
+      />
 
 </configure>
