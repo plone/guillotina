@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import zope.component
 from zope.component import testlayer
+
 import plone.server
+import zope.component
 
 
 ZCMLLayer = testlayer.ZCMLFileLayer(plone.server, 'configure.zcml')
