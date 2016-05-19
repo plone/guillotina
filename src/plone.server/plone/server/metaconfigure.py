@@ -102,10 +102,10 @@ def register_service(
     defineChecker(factory, Checker(required))
     print('Defining adapter for '  # noqa
           '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
-        content,
-        DICT_METHODS[method],
-        layer,
-        factory,
+        content.__identifier__,
+        DICT_METHODS[method].__identifier__,
+        layer.__identifier__,
+        str(factory),
         name))
     adapter(
         _context,
