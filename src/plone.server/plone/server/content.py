@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from zope.securitypolicy.interfaces import IRolePermissionManager
 from plone.dexterity.content import Container
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
@@ -10,6 +11,7 @@ from zope.interface import implementer
 from plone.server.registry import ILayers
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import IAuthExtractionPlugins
+from plone.server.interfaces import DEFAULT_READ_PERMISSION
 
 
 @implementer(IPloneSite)
@@ -36,6 +38,12 @@ class PloneSite(Container):
             ['plone.server.auth.oauth.OAuthPloneUserFactory']
         registry.registerInterface(IPloneJWTExtractionConfig)
         registry.registerInterface(IPloneOAuthConfig)
+
+        roles = IRolePermissionManager(self)
+        roles.grantPermissionForRole(
+            DEFAULT_READ_PERMISSION,
+            'Anonymous User'
+        )
 
     def getSiteManager(self):
         return self['_components']
