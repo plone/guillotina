@@ -23,6 +23,7 @@ from zope.component import getUtility
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
 from zope.security.interfaces import IPermission
+from zope.security.proxy import ProxyFactory
 
 
 async def traverse(request, parent, path):
@@ -153,8 +154,9 @@ class TraversalRouter(AbstractRouter):
             if view is None or not ITraversableView.providedBy(view):
                 return HTTPNotFound('No view defined')
             else:
-                view = view.traverse_to(traverse_to)
+                view = view.publishTraverse(traverse_to)
 
+        view = ProxyFactory(view, checker=PloneChecker(request))
         # We want to check for the content negotiation
         renderer_object = renderer(request)
 

@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from plone.dexterity.content import Item
 from plone.dexterity.interfaces import IDexterityContent
 from plone.dexterity.interfaces import IFormFieldProvider
 from plone.server.api.service import Service
@@ -31,6 +32,10 @@ class ITodo(model.Schema):
         description=u'Classified notes on about task',
         default=u''
     )
+
+
+class Todo(Item):
+    pass
 
 
 class View(Service):
