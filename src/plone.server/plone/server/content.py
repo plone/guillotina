@@ -39,6 +39,7 @@ class PloneSite(Container):
         registry.registerInterface(IPloneJWTExtractionConfig)
         registry.registerInterface(IPloneOAuthConfig)
 
+        # Default policy
         roles = IRolePermissionManager(self)
         roles.grantPermissionForRole(
             DEFAULT_READ_PERMISSION,
