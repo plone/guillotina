@@ -16,17 +16,17 @@ class ElasticSearchUtility(DefaultSearchUtility):
     index_name = 'plone'
     doc_type = 'plone'
 
-    async def __init__(self, settings):
+    def __init__(self, settings):
         self.settings = settings
         self.index_index = settings['index_name']
         self.doc_type = settings['doc_type']
         self.bulk_size = settings.get('bulk_size', 50)
-        await self._init_el()
+        self._init_el()
 
-    def async _init_el(self):
+    def _init_el(self):
         conn = self.get_connection()
         try:
-            await conn.indices.create(self.index_name)
+            conn.indices.create(self.index_name)
         except TransportError:
             pass
         except ConnectionError:
@@ -37,7 +37,7 @@ class ElasticSearchUtility(DefaultSearchUtility):
 
         mapping = {'properties': self.settings['mapping']}
         try:
-            await conn.indices.put_mapping(self.index_name, self.doc_type, body=mapping)
+            conn.indices.put_mapping(self.index_name, self.doc_type, body=mapping)
         except:
             logger.warn('elasticsearch not installed', exc_info=True)
 
