@@ -11,5 +11,5 @@ class Service(View):
 class TraversableService(View):
 
     def __init__(self, context, request):
-        super(TraversableService).__init__(context, request)
+        super(TraversableService, self).__init__(context, request)
         alsoProvides(self, ITraversableView)

@@ -3,8 +3,6 @@ from zope.securitypolicy.interfaces import IRolePermissionManager
 from plone.dexterity.content import Container
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
-from plone.server.auth.oauth import IPloneJWTExtractionConfig
-from plone.server.auth.oauth import IPloneOAuthConfig
 from plone.server.interfaces import IPloneSite
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
@@ -18,7 +16,7 @@ from plone.server.interfaces import DEFAULT_READ_PERMISSION
 class PloneSite(Container):
 
     def __init__(self, *args, **kwargs):
-        super(Site, self).__init__(*args, **kwargs)
+        super(PloneSite, self).__init__(*args, **kwargs)
         self['_components'] = components = PersistentComponents()
 
         # Creating and registering a local registry
@@ -36,8 +34,6 @@ class PloneSite(Container):
             ['plone.server.auth.oauth.PloneJWTExtraction']
         registry.forInterface(IAuthPloneUserPlugins).active_plugins = \
             ['plone.server.auth.oauth.OAuthPloneUserFactory']
-        registry.registerInterface(IPloneJWTExtractionConfig)
-        registry.registerInterface(IPloneOAuthConfig)
 
         # Default policy
         roles = IRolePermissionManager(self)
@@ -52,5 +48,3 @@ class PloneSite(Container):
     def setSiteManager(self, sitemanager):
         self['_components'] = sitemanager
 
-
-Site = PloneSite  # BBB

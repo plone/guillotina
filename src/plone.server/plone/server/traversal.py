@@ -23,7 +23,9 @@ from zope.component import getUtility
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
 from zope.security.interfaces import IPermission
+from zope.security.interfaces import IParticipation
 from zope.security.proxy import ProxyFactory
+from plone.server.security import DexterityChecker
 
 
 async def traverse(request, parent, path):
@@ -45,7 +47,8 @@ async def traverse(request, parent, path):
         request.site = context
         request.site_components = context.getSiteManager()
         request.site_settings = request.site_components.getUtility(IRegistry)
-
+        participation = IParticipation(request)
+        request.security.add(participation)
         layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
@@ -155,7 +158,7 @@ class TraversalRouter(AbstractRouter):
             else:
                 view = view.publishTraverse(traverse_to)
 
-        view = ProxyFactory(view, checker=PloneChecker(request))
+        view = ProxyFactory(view, checker=DexterityChecker(request))
         # We want to check for the content negotiation
         renderer_object = renderer(request)
 
