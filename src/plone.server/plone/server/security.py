@@ -33,11 +33,14 @@ class DexterityChecker(object):
         # Lookup or cached permission lookup
         portal_type = getattr(obj, 'portal_type', None)
         permission = self.getters.get((portal_type, name), _marker)
+        adapted = IDexterityContent(obj, None)
 
         # Lookup for the permission
         if permission is _marker:
             permission = DEFAULT_READ_PERMISSION
-            for schema in iterSchemata(IDexterityContent(obj)):
+
+        if adapted is not None:
+            for schema in iterSchemata(adapted):
                 mapping = mergedTaggedValueDict(schema, READ_PERMISSIONS_KEY)
                 if name in mapping:
                     permission = mapping.get(name)
@@ -55,11 +58,14 @@ class DexterityChecker(object):
         # Lookup or cached permission lookup
         portal_type = getattr(obj, 'portal_type', None)
         permission = self.setters.get((portal_type, name), _marker)
+        adapted = IDexterityContent(obj, None)
 
         # Lookup for the permission
         if permission is _marker:
-            permission = DEFAULT_WRITE_PERMISSION
-            for schema in iterSchemata(IDexterityContent(obj)):
+            permission = DEFAULT_READ_PERMISSION
+
+        if adapted is not None:
+            for schema in iterSchemata(adapted):
                 mapping = mergedTaggedValueDict(schema, WRITE_PERMISSIONS_KEY)
                 if name in mapping:
                     permission = mapping.get(name)
