@@ -49,7 +49,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'sandbox = plone.server.server:main',
+            'server = plone.server.server:main',
         ]
     }
 )
