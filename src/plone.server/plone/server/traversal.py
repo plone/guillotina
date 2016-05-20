@@ -159,7 +159,6 @@ class TraversalRouter(AbstractRouter):
             else:
                 view = view.publishTraverse(traverse_to)
 
-        selectChecker(view)
         view = ProxyFactory(view, selectChecker(view))
         # We want to check for the content negotiation
         renderer_object = renderer(request)
