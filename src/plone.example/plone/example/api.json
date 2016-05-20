@@ -1,10 +1,14 @@
 {
 	"contenttypes": {
-		"plone.example.todo.ITodo": {
-			"GET": {
-				"factory": "plone.example.todo.View",
-				"permission": "AccessContent"
-			}
-		}
+		"plone.server.interfaces.IPloneSite": {
+            "endpoints": {
+                "ws": {
+                	"GET": {
+                        "factory": "plone.example.messaging.WebsocketsView",
+                        "permission": "View"
+                    }
+                }
+            }
+        }
 	}
 }
