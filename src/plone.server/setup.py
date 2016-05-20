@@ -43,7 +43,15 @@ setup(
         'zope.location',
         'zope.schema',
         'zope.security',
+        # required here?
+        # zc.recipe.egg not respecting plone.server[elasticsearch] for console scripts?
+        'aioes'
     ],
+    extras_require={
+        'elasticsearch': [
+            'aioes'
+        ]
+    },
     tests_require=[
         'pytest',
     ],

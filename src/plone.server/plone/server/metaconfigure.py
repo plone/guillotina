@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
+import json
+import os
+
 from plone.dexterity.fti import DexterityFTI
 from plone.dexterity.fti import register
-from plone.server import _
 from plone.server import DEFAULT_LAYER
 from plone.server import DEFAULT_PERMISSION
 from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
+from plone.server import _
+from plone.server.search.interfaces import ISearchUtility
 from plone.server.utils import import_class
 from zope.component.zcml import adapter
+from zope.component.zcml import utility
 from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
@@ -17,9 +22,6 @@ from zope.security.checker import Checker
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
-
-import json
-import os
 
 
 class IContentTypeDirective(Interface):
@@ -193,3 +195,30 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
                             layer,
                             default_permission,
                             endpoint)
+
+class ISearch(Interface):
+    '''
+    '''
+
+    file = Path(
+        title='The name of a file defining the search registration information.',
+        description='Refers to a file containing a json definition.',
+        required=True
+    )
+
+
+def searchDirective(_context, file):
+    if file:
+        file = os.path.abspath(_context.path(file))
+        if not os.path.isfile(file):
+            raise ConfigurationError('No such file', file)
+
+    with open(file, 'r') as f:
+        json_info = json.loads(f.read())
+        f.close()
+
+    SearchUtility = import_class(json_info['utility'])
+    settings = json_info['settings']
+    search_utility = SearchUtility(settings)
+
+    utility(_context, provides=ISearchUtility, component=search_utility)

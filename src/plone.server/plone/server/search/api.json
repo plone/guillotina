@@ -1,0 +1,19 @@
+{
+    "methods": {
+        "GET": "plone.server.interfaces.IGET"
+    },
+    "layer": "plone.server.api.layer.IDefaultLayer",
+    "default_permission": "zope.Public",
+    "contenttypes": {
+        "plone.dexterity.interfaces.IDexterityContent": {
+            "endpoints": {
+                "@search": {
+                    "GET": {
+                        "factory": "plone.server.search.search.SearchGET"
+                    }
+                }
+            }
+        }
+    },
+    "version": 1
+}
