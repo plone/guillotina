@@ -1,0 +1,10 @@
+{
+  "utility": "plone.server.auth.oauth.OAuth",
+  "settings": {
+    "server": "http://localhost:6542/",
+    "jwt_secret": "secret",
+    "jwt_algorithm": "HS256",
+    "client_id": "plone",
+    "client_password": "plone"
+  }
+}
