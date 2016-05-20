@@ -24,7 +24,7 @@ _marker = object()
 
 
 @implementer(IChecker)
-class ImplicitPermissionChecker(CheckerPy):
+class ViewPermissionChecker(CheckerPy):
     def check_setattr(self, obj, name):
         if self.set_permissions:
             permission = self.set_permissions.get(name)
@@ -63,11 +63,13 @@ class ImplicitPermissionChecker(CheckerPy):
             __traceback_supplement__ = (TracebackSupplement, obj)
             raise ForbiddenAttribute(name, obj)
 
-    check_getattr = check # 'See IChecker'
+    check_getattr = check
 
-    def __call__(self, *args, **kwargs):
-        print("WIP...")
-        pass
+    # IChecker.proxy
+    def proxy(self, obj):
+        return obj
+        # TODO: Figure out, how to not wrap __providedBy__, __call__ etc
+        # Once they have been checked
 
 
 @adapter(IRequest)

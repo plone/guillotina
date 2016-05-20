@@ -3,9 +3,10 @@ from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from zope.security.checker import selectChecker
 from zope.security.interfaces import IInteraction
 
+from parts.packages.zope.security.checker import selectChecker, \
+    getCheckerForInstancesOf
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
@@ -159,7 +160,9 @@ class TraversalRouter(AbstractRouter):
             else:
                 view = view.publishTraverse(traverse_to)
 
-        view = ProxyFactory(view, selectChecker(view))
+        checker = getCheckerForInstancesOf(view.__class__)
+        if checker is not None:
+            view = ProxyFactory(view, checker)
         # We want to check for the content negotiation
         renderer_object = renderer(request)
 

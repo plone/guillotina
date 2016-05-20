@@ -42,31 +42,31 @@
         "plone.dexterity.interfaces.IDexterityContent": {
             "GET": {
                 "factory": "plone.server.api.dexterity.DefaultGET",
-                "permission": "AccessContent"
+                "permission": "plone.AccessContent"
             },
             "PATCH": {
                 "factory": "plone.server.api.dexterity.DefaultPATCH",
-                "permission": "ModifyContent"
+                "permission": "plone.ModifyContent"
             },
             "PUT": {
                 "factory": "plone.server.api.dexterity.DefaultPUT",
-                "permission": "ModifyContent"
+                "permission": "plone.ModifyContent"
             },
             "POST": {
                 "factory": "plone.server.api.dexterity.DefaultPOST",
-                "permission": "ModifyContent"
+                "permission": "plone.ModifyContent"
             },
             "endpoints": {
                 "sharing": {
                     "POST": {
                         "factory": "plone.server.api.dexterity.SharingPOST",
-                        "permission": "View"
+                        "permission": "plone.ViewContent"
                     }
                 }
             },
             "DELETE": {
                 "factory": "plone.server.api.dexterity.DefaultDELETE",
-                "permission": "ModifyContent"
+                "permission": "plone.ModifyContent"
             }
         }
     },
