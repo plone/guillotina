@@ -61,9 +61,10 @@ def contenttypeDirective(_context,
     behavior_names = [a.__identifier__ for a in behaviors]
     dotted_name = None
     if class_:
+        if not hasattr(class_, 'meta_type'):
+            class_.meta_type = portal_type
         dotted_name = '{0}.{1}'.format(class_.__module__, class_.__name__)
     fti_args = {'id': portal_type,
-                'content_meta_type': portal_type,
                 'klass': dotted_name,
                 'schema': interface_name,
                 'behaviors': behavior_names}
