@@ -25,7 +25,7 @@ from zope.interface import alsoProvides
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import IParticipation
 from zope.security.proxy import ProxyFactory
-from plone.server.security import PloneChecker
+from plone.server.security import PlonePermissionChecker
 
 
 async def traverse(request, parent, path):
@@ -158,7 +158,7 @@ class TraversalRouter(AbstractRouter):
             else:
                 view = view.publishTraverse(traverse_to)
 
-        view = ProxyFactory(view, checker=PloneChecker(request))
+        view = ProxyFactory(view, checker=PlonePermissionChecker(request))
         # We want to check for the content negotiation
         renderer_object = renderer(request)
 
