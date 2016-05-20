@@ -21,6 +21,13 @@
             schema=".metaconfigure.ISearch"
             handler=".metaconfigure.searchDirective"
             />
+
+        <directive
+            name="oauth"
+            schema=".metaconfigure.IOAuthDirective"
+            handler=".metaconfigure.oauthDirective"
+            />
+
     </directives>
 
 </configure>
