@@ -41,7 +41,7 @@ class PloneParticipation(object):
         # Cached user
         if not hasattr(self.request, '__cache_user'):
             # Get settings or
-            settings = request.components.queryUtility(IRegistry) or {}
+            settings = request.site_components.queryUtility(IRegistry) or {}
 
             # Plugin to extract the credentials to request._cache_credentials
             plugins = settings.get(ACTIVE_AUTH_EXTRACTION_KEY, [])

@@ -43,10 +43,10 @@ async def traverse(request, parent, path):
 
     if ISite.providedBy(context):
         request.site = context
-        request.components = context.getSiteManager()
-        settings = request.components.getUtility(IRegistry)
+        request.site_components = context.getSiteManager()
+        request.site_settings = request.site_components.getUtility(IRegistry)
 
-        layers = settings.get(ACTIVE_LAYERS_KEY, [])
+        layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
 
@@ -91,7 +91,7 @@ class TraversalRouter(AbstractRouter):
     async def resolve(self, request):
         alsoProvides(request, IRequest)
         alsoProvides(request, IDefaultLayer)
-        request.components = getGlobalSiteManager()
+        request.site_components = getGlobalSiteManager()
         request.security = IInteraction(request)
 
         try:
@@ -101,7 +101,6 @@ class TraversalRouter(AbstractRouter):
             resource = None
             tail = None
             exc = _exc
-
 
         request.resource = resource
         request.tail = tail
@@ -139,7 +138,7 @@ class TraversalRouter(AbstractRouter):
 
         # Site registry lookup
         try:
-            view = request.components.queryMultiAdapter(
+            view = request.site_components.queryMultiAdapter(
                 (resource, request), method, name=view_name)
         except AttributeError:
             view = None

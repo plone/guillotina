@@ -21,44 +21,9 @@ from zope.configuration.xmlconfig import include
 from zope.configuration.xmlconfig import registerCommonDirectives
 
 import asyncio
-import functools
 import sys
 import transaction
 import ZODB
-
-
-def create_site(app, id, title='', description=''):
-    plonesite = Site(id)
-    app[id] = plonesite
-    plonesite.title = title
-    plonesite.description = description
-    # TODO: This should really get set on the class itself
-    plonesite.portal_type = 'Plone Site'
-
-    # Creating and registering a local registry
-    plonesite['registry'] = Registry()
-    plonesite['registry'].registerInterface(ILayers)
-    plonesite['registry'].registerInterface(IAuthPloneUserPlugins)
-    plonesite['registry'].registerInterface(IAuthExtractionPlugins)
-
-    plonesite['registry'].forInterface(ILayers).active_layers = \
-        ['plone.server.api.layer.IDefaultLayer']
-
-    plonesite['registry'].forInterface(
-        IAuthExtractionPlugins).active_plugins = \
-        ['plone.server.auth.oauth.PloneJWTExtraction']
-
-    plonesite['registry'].forInterface(
-        IAuthPloneUserPlugins).active_plugins = \
-        ['plone.server.auth.oauth.OAuthPloneUserFactory']
-
-    # Set default plugins
-    plonesite['registry'].registerInterface(IPloneJWTExtractionConfig)
-    plonesite['registry'].registerInterface(IPloneOAuthConfig)
-    sm = plonesite.getSiteManager()
-    sm.registerUtility(plonesite['registry'], provided=IRegistry)
-
-    return plonesite
 
 
 def make_app():
@@ -84,18 +49,20 @@ def make_app():
             dbroot = conn.root()
 
             # Creating a testing site
-            plonesite = create_site(dbroot,
-                                    id='plone',
-                                    title='Demo Site',
-                                    description='Awww yeah...')
+            site = createContent('Plone Site',
+                                 id='plone',
+                                 title='Demo Site',
+                                 description='Awww yeah...')
+            dbroot['plone'] = site
+            site.__parent__ = None  # don't expose dbroot
 
             # And some example content
             obj = createContent('Todo',
                                 id='obj1',
-                                title='It\'s a todo!',
+                                title="It's a todo!",
                                 notes='$240 of pudding.')
-            plonesite['obj1'] = obj
-            obj.__parent__ = plonesite
+            site['obj1'] = obj
+            obj.__parent__ = site
 
     conn.close()
     db.close()

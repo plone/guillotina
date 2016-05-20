@@ -107,7 +107,7 @@ class PloneJWTExtraction(object):
 
     def __init__(self, request):
         self.request = request
-        settings = request.components.getUtility(IRegistry)
+        settings = request.site_components.getUtility(IRegistry)
         self.config = settings.forInterface(
             IPloneJWTExtractionConfig)
         self.request._cache_credentials = self.extract_user()
@@ -147,7 +147,7 @@ class OAuthPloneUser(PloneUser):
 
     def __init__(self, request):
         super(OAuthPloneUser, self).__init__(request)
-        settings = request.components.getUtility(IRegistry)
+        settings = request.site_components.getUtility(IRegistry)
         self.token = self.request._cache_credentials['jwt']
         self.config = settings.forInterface(
             IPloneOAuthConfig)

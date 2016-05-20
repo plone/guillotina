@@ -9,7 +9,7 @@ class Read(TraversableService):
         if len(traverse) == 1:
             # we want have the key of the registry
             serializer = getMultiAdapter(
-                (self.plone_registry[traverse], self.request),
+                (self.request.site_settings[traverse], self.request),
                 ISerializeToJson)
             return serializer()
         else:

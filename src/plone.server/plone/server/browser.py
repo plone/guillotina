@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from plone.dexterity.interfaces import IDexterityContent
-from plone.registry.interfaces import IRegistry
-from plone.server.interfaces import IGET
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
 from zope.component import adapter
@@ -24,7 +22,6 @@ class View(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
-        self.plone_registry = self.request.components.getUtility(IRegistry)
 
     async def __call__(self):
         return {
