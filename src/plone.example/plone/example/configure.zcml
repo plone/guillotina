@@ -12,6 +12,7 @@
   <plone:contenttype
       portal_type="Todo"
       schema=".todo.ITodo"
+      class=".todo.Todo"
       behaviors="plone.behavior.tests.IAnnotationStored"
     />
 

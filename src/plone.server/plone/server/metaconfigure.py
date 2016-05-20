@@ -30,6 +30,12 @@ class IContentTypeDirective(Interface):
         required=True
     )
 
+    class_ = configuration_fields.GlobalObject(
+        title=_('Class'),
+        description='',
+        required=False
+    )
+
     schema = configuration_fields.GlobalInterface(
         title='',
         description='',
@@ -46,14 +52,19 @@ class IContentTypeDirective(Interface):
 
 def contenttypeDirective(_context,
                          portal_type,
+                         class_,
                          schema,
                          behaviors=[],
                          add_permission=None):
     ''' Generate a Dexterity FTI and factory for the passed schema '''
     interface_name = schema.__identifier__
     behavior_names = [a.__identifier__ for a in behaviors]
-
+    dotted_name = None
+    if class_:
+        dotted_name = '{0}.{1}'.format(class_.__module__, class_.__name__)
     fti_args = {'id': portal_type,
+                'content_meta_type': portal_type,
+                'klass': dotted_name,
                 'schema': interface_name,
                 'behaviors': behavior_names}
     if add_permission is not None:
