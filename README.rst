@@ -26,3 +26,12 @@ We're using py.test::
 and for test coverage::
 
     ./bin/py.test --cov=plone.server src/
+
+
+Running dependency graph
+------------------------
+
+Using buildout::
+
+    ./bin/buildout -c dependency-graph.cfg
+    ./bin/dependencies-eggdeps > docs/dependency-graph.txt
