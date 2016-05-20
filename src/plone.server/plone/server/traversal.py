@@ -134,7 +134,7 @@ class TraversalRouter(AbstractRouter):
         #     raise HTTPUnauthorized('No access to content')
 
         permission = getUtility(IPermission, name='plone.AccessContent')
-        allowed = request.security.checkPermission(permission, resource)
+        allowed = request.security.checkPermission(permission.id, resource)
 
         if not allowed:
             raise HTTPUnauthorized()

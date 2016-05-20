@@ -38,7 +38,11 @@ class PloneSite(Container):
         # Default policy
         roles = IRolePermissionManager(self)
         roles.grantPermissionToRole(
-            DEFAULT_READ_PERMISSION,
+            'plone.AccessContent',
+            'Anonymous User'
+        )
+        roles.grantPermissionToRole(
+            'plone.ViewContent',
             'Anonymous User'
         )
 
