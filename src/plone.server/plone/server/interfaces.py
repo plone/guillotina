@@ -26,6 +26,12 @@ class IView(Interface):
         pass
 
 
+class ITraversableView(IView):
+
+    def traverse_to(traverse_to):
+        pass
+
+
 class IGET(IView):
     pass
 
@@ -68,3 +74,4 @@ class IRendered(Interface):
 
 class ITranslated(Interface):
     pass
+

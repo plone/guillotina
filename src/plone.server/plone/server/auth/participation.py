@@ -20,12 +20,16 @@ class PloneUser(object):
         self._roles = []
         self._properties = {}
 
+    def groups(self):
+        return self._groups
+
 
 class AnonymousUser(PloneUser):
 
     def __init__(self, request):
         self.id = 'Anonymous User'
         self.request = request
+        self.groups = ()
 
 
 @adapter(IRequest)

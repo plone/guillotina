@@ -12,14 +12,17 @@ from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
 from plone.server.interfaces import IView
+from plone.server.interfaces import ITraversableView
 from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.securitypolicy import PloneSecurityPolicy
 from plone.server.utils import import_class
 from zope.component import getGlobalSiteManager
 from zope.component import queryMultiAdapter
+from zope.component import getUtility
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
 from zope.security import checkPermission
+from zope.security.interfaces import IPermission
 
 
 async def traverse(request, parent, path):
@@ -102,12 +105,14 @@ class TraversalRouter(AbstractRouter):
         request.tail = tail
         request.exc = exc
 
+        traverse_to = None
         if tail and len(tail) == 1:
             view_name = tail[0]
         elif tail is None or len(tail) == 0:
             view_name = ''
         else:
-            raise HTTPNotFound()
+            view_name = tail[0]
+            traverse_to = tail[1:]
 
         method = DICT_METHODS[request.method]
 
@@ -124,9 +129,14 @@ class TraversalRouter(AbstractRouter):
         # if not checkPermission(resource, 'Access content'):
         #     raise HTTPUnauthorized('No access to content')
 
-        checkPermission(
-            'Access content', resource,
+        permission = getUtility(IPermission, name='plone.AccessContent')
+
+        allowed = checkPermission(
+            permission, resource,
             interaction=request.interaction)
+
+        if not allowed:
+            raise HTTPUnauthorized()
         # Site registry lookup
         try:
             view = request.components.queryMultiAdapter(
@@ -138,6 +148,13 @@ class TraversalRouter(AbstractRouter):
         if view is None:
             view = queryMultiAdapter(
                 (resource, request), method, name=view_name)
+
+        # Traverse view if its needed
+        if traverse_to is not None:
+            if view is None or not ITraversableView.providedBy(view):
+                return HTTPNotFound('No view defined')
+            else:
+                view = view.traverse_to(traverse_to)
 
         # We want to check for the content negotiation
         renderer_object = renderer(request)

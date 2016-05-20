@@ -3,7 +3,9 @@
            i18n_domain="cmf_default">
 
   <include file="meta.zcml" package="zope.security" />
+  <include file="meta.zcml" package="zope.securitypolicy" />
 
+<!--
   <permission
     id="plone.ListFolderContents"
     title="List folder contents"
@@ -78,16 +80,58 @@
     id="plone.ReviewPortalContent"
     title="Review portal content"
     />
-
+-->
   <permission
     id="plone.AccessContent"
     title="Access content"
     />
 
+  <role
+      id="plone.reader"
+      title="Reader"
+      description="It can read content"
+      />
+
+  <role
+      id="plone.editor"
+      title="Editor"
+      description="It can edit content"
+      />
+
+
+  <role
+      id="plone.reviewer"
+      title="Reviewer"
+      description="It can review content"
+      />
+
+  <role
+      id="plone.siteadmin"
+      title="Site Administrator"
+      description="It can set settings on site"
+      />
+
+  <role
+      id="plone.manager"
+      title="Manager"
+      description="It can create sites"
+      />
+
+  <role
+      id="plone.collaborator"
+      title="Collaborator"
+      description="It can add content"
+      />
+
+  <role
+      id="plone.member"
+      title="Member"
+      description="Its a member of the site"
+      />
 
   <grant
       permission="plone.AccessContent"
-      role="Reader"
+      role="plone.reader"
       />
 
   <!-- Zope has 
