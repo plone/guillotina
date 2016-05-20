@@ -3,6 +3,8 @@ from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
+from zope.security.interfaces import IInteraction
+
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
@@ -14,7 +16,7 @@ from plone.server.interfaces import ITranslated
 from plone.server.interfaces import IView
 from plone.server.interfaces import ITraversableView
 from plone.server.registry import ACTIVE_LAYERS_KEY
-from plone.server.securitypolicy import PloneSecurityPolicy
+from plone.server.securitypolicy import SecurityInteraction
 from plone.server.utils import import_class
 from zope.component import getGlobalSiteManager
 from zope.component import queryMultiAdapter
@@ -44,6 +46,7 @@ async def traverse(request, parent, path):
         request.site = context
         request.components = context.getSiteManager()
         settings = request.components.getUtility(IRegistry)
+
         layers = settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
@@ -90,6 +93,7 @@ class TraversalRouter(AbstractRouter):
         alsoProvides(request, IRequest)
         alsoProvides(request, IDefaultLayer)
         request.components = getGlobalSiteManager()
+        request.security = IInteraction(request)
 
         try:
             resource, tail = await self.traverse(request)
@@ -99,7 +103,6 @@ class TraversalRouter(AbstractRouter):
             tail = None
             exc = _exc
 
-        request.interaction = PloneSecurityPolicy(request)
 
         request.resource = resource
         request.tail = tail
@@ -130,13 +133,11 @@ class TraversalRouter(AbstractRouter):
         #     raise HTTPUnauthorized('No access to content')
 
         permission = getUtility(IPermission, name='plone.AccessContent')
-
-        allowed = checkPermission(
-            permission, resource,
-            interaction=request.interaction)
+        allowed = request.security.checkPermission(permission, resource)
 
         if not allowed:
             raise HTTPUnauthorized()
+
         # Site registry lookup
         try:
             view = request.components.queryMultiAdapter(

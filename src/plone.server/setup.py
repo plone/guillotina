@@ -34,8 +34,6 @@ setup(
         'transaction',
         'ZODB',
         'zope.component',
-        'zope.component',
-        'zope.configuration',
         'zope.configuration',
         'zope.dottedname',
         'zope.event',

@@ -3,10 +3,6 @@
   <include package="zope.securitypolicy" file="meta.zcml" />
   <include package="zope.securitypolicy" />
 
-  <securityPolicy
-      component="plone.server.securitypolicy.PloneSecurityPolicy"
-      />
-
   <role
       id="plone.Anonymous"
       title="Everybody"
@@ -15,7 +11,8 @@
   <role id="plone.Manager" title="Site Manager" />
   <role id="plone.Member" title="Site Member" />
 
-
   <grantAll role="zope.Manager" />
+
+  <adapter factory=".securitypolicy.getIn" />
 
 </configure>

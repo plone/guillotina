@@ -12,8 +12,8 @@ from plone.server.content import Site
 from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ILayers
-from plone.server.request import RequestAwareDB
-from plone.server.request import RequestAwareTransactionManager
+from plone.server.transactions import RequestAwareDB
+from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter
 from zope.component import getAllUtilitiesRegisteredFor
 from zope.configuration.config import ConfigurationMachine
