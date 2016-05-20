@@ -56,3 +56,11 @@ def get_current_request():
 def import_class(import_string):
     t = import_string.rsplit('.', 1)
     return getattr(importlib.import_module(t[0]), t[1], None)
+
+
+def get_content_path(content):
+    parts = []
+    while content:
+        parts.append(content.__name__)
+        content = getattr(content, '__parent__', None)
+    return '/' + '/'.join(reversed(parts))

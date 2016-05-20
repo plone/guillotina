@@ -15,6 +15,12 @@
 	        schema=".metaconfigure.IApi"
 	        handler=".metaconfigure.apiDirective"
 	        />
+
+        <directive
+            name="search"
+            schema=".metaconfigure.ISearch"
+            handler=".metaconfigure.searchDirective"
+            />
     </directives>
 
 </configure>

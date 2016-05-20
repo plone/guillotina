@@ -31,6 +31,7 @@
   <include file="content.zcml" />
 
   <include package=".auth" />
+  <include package=".search" />
 
   <plone:api file="api/api.json" />
 

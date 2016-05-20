@@ -1,0 +1,32 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    xmlns:plone="http://namespaces.plone.org/plone">
+
+  <plone:api file="api.json" />
+
+  <plone:search file="elasticsearch.json" zcml:condition="installed aioes" />
+
+  <!-- index events -->
+  <subscriber
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      handler=".index.add_object" />
+  <subscriber
+    for="plone.dexterity.interfaces.IDexterityContent
+         zope.lifecycleevent.interfaces.IObjectCopiedEvent"
+    handler=".index.add_object" />
+  <subscriber
+    for="plone.dexterity.interfaces.IDexterityContent
+         zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+    handler=".index.add_object" />
+  <!-- will need workflow events as well -->
+
+
+  <!-- unindex events -->
+  <subscriber
+    for="plone.dexterity.interfaces.IDexterityContent
+         zope.lifecycleevent.interfaces.IObjectRemovedEvent"
+    handler=".index.remove_object" />
+
+</configure>

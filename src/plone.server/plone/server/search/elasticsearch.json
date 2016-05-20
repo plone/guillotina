@@ -1,0 +1,29 @@
+{
+  "utility": "plone.server.search.elasticsearch.ElasticSearchUtility",
+  "settings": {
+    "connection_settings": {
+      "endpoints": "127.0.0.1:9200"
+    },
+    "bulk_size": 50,
+    "index_name": "plone",
+    "doc_type": "plone",
+    "mapping": {
+      "title": {
+        "type": "string",
+        "index": "analyzed"
+      },
+      "description": {
+        "type": "string",
+        "index": "analyzed"
+      },
+      "portal_type": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "path": {
+        "type": "string",
+        "index": "not_analyzed"
+      }
+    }
+  }
+}
