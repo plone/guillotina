@@ -5,7 +5,9 @@ from plone.uuid.interfaces import IUUID
 from zope.component import getUtility
 from zope.component import queryUtility
 import transaction
-
+from plone.server import utils
+import asyncio
+from plone.server.exceptions import RequestNotFound
 
 logger = logging.getLogger('plone.server')
 
@@ -20,9 +22,10 @@ class CommitHook(object):
         if not trns:
             return
 
+        loop = asyncio.get_event_loop()
         search = getUtility(ISearchUtility)
-        search.remove(self.remove)
-        search.index(self.index)
+        asyncio.run_coroutine_threadsafe(search.remove(self.remove), loop)
+        asyncio.run_coroutine_threadsafe(search.index(self.index), loop)
 
         self.index = {}
         self.remove = []
@@ -34,7 +37,10 @@ def get_hook():
     if not search:
         return  # no search configured
 
-    trns = transaction.get()
+    try:
+        trns = utils.tm(utils.get_current_request())
+    except RequestNotFound:
+        trns = transaction.get()
     hook = None
     for _hook in trns._after_commit:
         if isinstance(_hook[0], CommitHook):

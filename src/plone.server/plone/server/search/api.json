@@ -3,7 +3,7 @@
         "GET": "plone.server.interfaces.IGET"
     },
     "layer": "plone.server.api.layer.IDefaultLayer",
-    "default_permission": "zope.Public",
+    "default_permission": "plone.ViewContent",
     "contenttypes": {
         "plone.dexterity.interfaces.IDexterityContent": {
             "endpoints": {

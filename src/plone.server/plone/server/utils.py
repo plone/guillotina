@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import RequestHandler
 from plone.server.interfaces import IView
+from plone.server.exceptions import RequestNotFound
 
 import asyncio
 import importlib
@@ -50,7 +51,7 @@ def get_current_request():
         elif isinstance(frame.f_locals.get('self'), RequestHandler):
             return frame.f_locals['request']
         frame = frame.f_back
-    raise RuntimeError('Unable to find the current request')
+    raise RequestNotFound('Unable to find the current request')
 
 
 def import_class(import_string):

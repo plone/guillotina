@@ -15,18 +15,19 @@ class ElasticSearchUtility(DefaultSearchUtility):
     bulk_size = 50
     index_name = 'plone'
     doc_type = 'plone'
+    initialized = False
 
     def __init__(self, settings):
         self.settings = settings
         self.index_index = settings['index_name']
         self.doc_type = settings['doc_type']
         self.bulk_size = settings.get('bulk_size', 50)
-        self._init_el()
 
-    def _init_el(self):
+    async def _init_el(self):
+        # need delayed setup here since __init__ can not return a future
         conn = self.get_connection()
         try:
-            conn.indices.create(self.index_name)
+            await conn.indices.create(self.index_name)
         except TransportError:
             pass
         except ConnectionError:
@@ -37,30 +38,18 @@ class ElasticSearchUtility(DefaultSearchUtility):
 
         mapping = {'properties': self.settings['mapping']}
         try:
-            conn.indices.put_mapping(self.index_name, self.doc_type, body=mapping)
+            await conn.indices.put_mapping(self.index_name, self.doc_type, body=mapping)
         except:
             logger.warn('elasticsearch not installed', exc_info=True)
+        self.initialized = True
 
     def get_connection(self):
         return Elasticsearch(**self.settings['connection_settings'])
 
     async def search(self, q):
-        import pdb; pdb.set_trace()
         query = {
-            'filtered': {
-                'filter': {},
-                "query": {
-                    "dis_max": {
-                        "queries": [{
-                            "match_phrase": {
-                                'text': {
-                                    'query': q,
-                                    'slop': 50
-                                }
-                            }
-                        }]
-                    }
-                }
+            "match": {
+                "title": q
             }
         }
         result = await self.get_connection().search(
@@ -69,21 +58,24 @@ class ElasticSearchUtility(DefaultSearchUtility):
             body={'query': query})
         items = []
         for item in result['hits']['hits']:
-            items.append({
-                "@id": "http://localhost:55001/plone/robot-test-folder",
-                "@type": "Folder",
-                "description": item['description'],
-                "title": item['title']
+            data = item['_source']
+            data.update({
+                "@id": "http://<get-url>:55001" + data.get('path', ''),
+                "@type": data.get('portal_type'),
             })
+            items.append(data)
         return {
             "items_count": result['hits']['total'],
             "member": items
         }
 
-    def index(self, datas):
+    async def index(self, datas):
         """
         {uid: <dict>}
         """
+        if not self.initialized:
+            await self._init_el()
+
         if len(datas) > 0:
             bulk_data = []
 
@@ -98,13 +90,14 @@ class ElasticSearchUtility(DefaultSearchUtility):
                     }
                 }, data])
                 if len(bulk_data) % self.bulk_size == 0:
-                    connection.bulk(index=self.index_name, doc_type=self.doc_type, body=bulk_data)
+                    await connection.bulk(index=self.index_name, doc_type=self.doc_type,
+                                          body=bulk_data)
                     bulk_data = []
 
             if len(bulk_data) > 0:
-                connection.bulk(index=self.index_name, doc_type=self.doc_type, body=bulk_data)
+                await connection.bulk(index=self.index_name, doc_type=self.doc_type, body=bulk_data)
 
-    def remove(self, uids):
+    async def remove(self, uids):
         """
         list of UIDs to remove from index
         """
@@ -118,5 +111,5 @@ class ElasticSearchUtility(DefaultSearchUtility):
                         '_id': uid
                     }
                 })
-            self.get_connection().bulk(index=self.index_name, doc_type=self.doc_type,
-                                       body=bulk_data)
+            await self.get_connection().bulk(index=self.index_name, doc_type=self.doc_type,
+                                             body=bulk_data)
