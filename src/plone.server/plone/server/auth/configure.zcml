@@ -8,4 +8,5 @@
 		provides="plone.server.auth.oauth.IOAuth"
 		/>
 
+
 </configure>

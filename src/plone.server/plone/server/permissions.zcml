@@ -140,6 +140,11 @@
       />
 
   <grant
+      permission="plone.ViewContent"
+      role="plone.reader"
+      />
+
+  <grant
       permission="plone.AccessContent"
       role="plone.reader"
       />

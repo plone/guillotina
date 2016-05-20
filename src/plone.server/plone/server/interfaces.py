@@ -31,7 +31,7 @@ class IView(Interface):
 
 class ITraversableView(IView):
 
-    def traverse_to(traverse_to):
+    def publishTraverse(traverse_to):
         pass
 
 

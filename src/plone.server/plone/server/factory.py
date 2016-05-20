@@ -6,9 +6,7 @@ from plone.dexterity.utils import createContent
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.async import IAsyncUtility
-from plone.server.auth.oauth import IPloneJWTExtractionConfig
-from plone.server.auth.oauth import IPloneOAuthConfig
-from plone.server.content import Site
+from plone.server.content import PloneSite
 from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ILayers
