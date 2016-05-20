@@ -26,22 +26,26 @@ class DefaultSearchUtility(object):
     def __init__(self, settings):
         self.settings = settings
 
-    def search(self, query):
+    async def search(self, query):
         pass
 
-    def index(self, datas):
+    async def index(self, datas):
         """
         {uid: <dict>}
         """
         pass
 
-    def remove(self, uids):
+    async def remove(self, uids):
         """
         list of UIDs to remove from index
         """
         pass
 
     def get_data(self, content):
+        text = '\n'.join([
+            content.title,
+            content.description
+        ])
         return {
             'title': content.title,
             'description': content.description,

@@ -2,7 +2,8 @@
   "utility": "plone.server.search.elasticsearch.ElasticSearchUtility",
   "settings": {
     "connection_settings": {
-      "endpoints": "127.0.0.1:9200"
+      "endpoints": ["localhost:9200"],
+      "sniffer_timeout": 0.5
     },
     "bulk_size": 50,
     "index_name": "plone",

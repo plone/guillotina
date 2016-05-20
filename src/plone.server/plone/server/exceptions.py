@@ -1,0 +1,4 @@
+
+
+class RequestNotFound(Exception):
+    pass
