@@ -30,6 +30,7 @@ setup(
         'plone.registry',
         'plone.supermodel',
         'pyjwt',
+        'repoze.workflow',
         'setuptools',
         'transaction',
         'ZODB',
