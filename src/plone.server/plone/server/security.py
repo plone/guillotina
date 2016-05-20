@@ -1,13 +1,86 @@
 # -*- coding: utf-8 -*-
+from plone.dexterity.interfaces import IDexterityContent
+from plone.dexterity.utils import iterSchemata
 from plone.server.interfaces import IRequest
+from plone.server.interfaces import DEFAULT_READ_PERMISSION
+from plone.server.interfaces import DEFAULT_WRITE_PERMISSION
 from plone.server.utils import get_current_request
 from zope.component import adapter
 from zope.interface import implementer
-from zope.security.checker import CheckerPublic
+from zope.security.proxy import Proxy
+from zope.security.checker import CheckerPublic, TracebackSupplement
+from zope.security.interfaces import IChecker, Unauthorized
 from zope.security.interfaces import IInteraction
 from zope.security.management import system_user
 from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
 from zope.security.proxy import removeSecurityProxy
+from plone.supermodel.interfaces import READ_PERMISSIONS_KEY
+from plone.supermodel.interfaces import WRITE_PERMISSIONS_KEY
+from plone.supermodel.utils import mergedTaggedValueDict
+
+_marker = object()
+
+
+@adapter(IRequest)
+@implementer(IChecker)
+class DexterityChecker(object):
+    def __init__(self, request):
+        self.request = request
+        self.getters = {}
+        self.setters = {}
+
+    def check_getattr(self, obj, name):
+        # Lookup or cached permission lookup
+        portal_type = getattr(obj, 'portal_type', None)
+        permission = self.getters.get((portal_type, name), _marker)
+
+        # Lookup for the permission
+        if permission is _marker:
+            permission = DEFAULT_READ_PERMISSION
+            for schema in iterSchemata(IDexterityContent(obj)):
+                mapping = mergedTaggedValueDict(schema, READ_PERMISSIONS_KEY)
+                if name in mapping:
+                    permission = mapping.get(name)
+                    break
+            self.getters[(portal_type, name)] = permission
+
+        if IInteraction(self.request).checkPermission(permission, obj):
+            return  # has permission
+
+        __traceback_supplement__ = (TracebackSupplement, obj)
+        raise Unauthorized(obj, name, permission)
+
+    # IChecker.setattr
+    def check_setattr(self, obj, name):
+        # Lookup or cached permission lookup
+        portal_type = getattr(obj, 'portal_type', None)
+        permission = self.setters.get((portal_type, name), _marker)
+
+        # Lookup for the permission
+        if permission is _marker:
+            permission = DEFAULT_WRITE_PERMISSION
+            for schema in iterSchemata(IDexterityContent(obj)):
+                mapping = mergedTaggedValueDict(schema, WRITE_PERMISSIONS_KEY)
+                if name in mapping:
+                    permission = mapping.get(name)
+                    break
+            self.setters[(portal_type, name)] = permission
+
+        if IInteraction(self.request).checkPermission(permission, obj):
+            return  # has permission
+
+        __traceback_supplement__ = (TracebackSupplement, obj)
+        raise Unauthorized(obj, name, permission)
+
+    # IChecker.check
+    check = check_getattr
+
+    # IChecker.proxy
+    def proxy(self, obj):
+        if isinstance(obj, Proxy):
+            return obj
+        else:
+            return Proxy(obj, self)
 
 
 @adapter(IRequest)

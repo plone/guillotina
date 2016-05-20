@@ -82,9 +82,19 @@
     />
 -->
   <permission
-    id="plone.AccessContent"
-    title="Access content"
-    />
+      id="plone.AccessContent"
+      title="Access content"
+      />
+
+  <permission
+      id="plone.ManageContent"
+      title="Manage content"
+      />
+
+  <permission
+      id="plone.ViewContent"
+      title="View content"
+      />
 
   <role
       id="plone.reader"

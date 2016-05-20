@@ -2,6 +2,9 @@
 from zope.component.interfaces import ISite
 from zope.interface import Interface
 
+DEFAULT_READ_PERMISSION = 'plone.ViewContent'
+DEFAULT_WRITE_PERMISSION = 'plone.ManageContent'
+
 
 class IPloneSite(ISite):
     pass
