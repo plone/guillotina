@@ -19,7 +19,8 @@ from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
 from zope.interface import Interface
-from zope.security.checker import Checker
+from plone.server.security import DexterityPermissionChecker, \
+    ImplicitPermissionChecker
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
@@ -114,7 +115,7 @@ def register_service(
     for n in ('__call__', 'publishTraverse'):
         required[n] = permission
 
-    defineChecker(factory, Checker(required))
+    defineChecker(factory, ImplicitPermissionChecker(required))
     print('Defining adapter for '  # noqa
           '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
         content.__identifier__,

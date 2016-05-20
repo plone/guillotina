@@ -3,6 +3,7 @@ from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
+from zope.security.checker import selectChecker
 from zope.security.interfaces import IInteraction
 
 from plone.registry.interfaces import IRegistry
@@ -25,7 +26,7 @@ from zope.interface import alsoProvides
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import IParticipation
 from zope.security.proxy import ProxyFactory
-from plone.server.security import PlonePermissionChecker
+from plone.server.security import DexterityPermissionChecker
 
 
 async def traverse(request, parent, path):
@@ -158,7 +159,8 @@ class TraversalRouter(AbstractRouter):
             else:
                 view = view.publishTraverse(traverse_to)
 
-        view = ProxyFactory(view, checker=PlonePermissionChecker(request))
+        selectChecker(view)
+        view = ProxyFactory(view, selectChecker(view))
         # We want to check for the content negotiation
         renderer_object = renderer(request)
 
