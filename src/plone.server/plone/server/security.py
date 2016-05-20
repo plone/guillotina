@@ -23,7 +23,7 @@ _marker = object()
 
 @adapter(IRequest)
 @implementer(IChecker)
-class DexterityChecker(object):
+class PloneChecker(object):
     def __init__(self, request):
         self.request = request
         self.getters = {}
