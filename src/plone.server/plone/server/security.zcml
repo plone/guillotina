@@ -13,6 +13,6 @@
 
   <grantAll role="zope.Manager" />
 
-  <adapter factory=".securitypolicy.getIn" />
+  <adapter factory=".security.getCurrentInteraction" />
 
 </configure>

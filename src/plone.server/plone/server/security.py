@@ -12,7 +12,7 @@ from zope.security.proxy import removeSecurityProxy
 
 @adapter(IRequest)
 @implementer(IInteraction)
-def getSecurityInteraction(request):
+def getCurrentInteraction(request):
     interaction = getattr(request, 'security', None)
     if IInteraction.providedBy(interaction):
         return interaction

@@ -16,14 +16,12 @@ from plone.server.interfaces import ITranslated
 from plone.server.interfaces import IView
 from plone.server.interfaces import ITraversableView
 from plone.server.registry import ACTIVE_LAYERS_KEY
-from plone.server.securitypolicy import SecurityInteraction
 from plone.server.utils import import_class
 from zope.component import getGlobalSiteManager
 from zope.component import queryMultiAdapter
 from zope.component import getUtility
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
-from zope.security import checkPermission
 from zope.security.interfaces import IPermission
 
 

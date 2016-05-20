@@ -25,9 +25,10 @@
   <adapter factory=".renderers.RendererJson" />
   <adapter factory=".renderers.RendererHtml" />
 
-  <include file="permissions.zcml" />
-  <include file="securitypolicy.zcml" />
   <include file="meta.zcml" />
+  <include file="permissions.zcml" />
+  <include file="security.zcml" />
+
   <include package=".auth" />
 
   <plone:api file="api/api.json" />
