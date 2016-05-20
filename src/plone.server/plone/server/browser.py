@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from zope.location import ILocation
+
 from plone.dexterity.interfaces import IDexterityContent
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
@@ -17,11 +19,18 @@ def get_physical_path(context):
 
 
 @adapter(IDexterityContent, IRequest)
-@implementer(IView)
+@implementer(IView, ILocation)
 class View(object):
+
+    __name__ = 'view'
+
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+    @property
+    def __parent__(self):
+        return self.context
 
     async def __call__(self):
         return {

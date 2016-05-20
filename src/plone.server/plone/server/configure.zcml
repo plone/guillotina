@@ -10,8 +10,6 @@
   <include package="zope.annotation" />
   <include package="zope.security" file="meta.zcml"/>
 
-  <adapter factory=".browser.View" />
-
   <adapter factory=".languages.EN" />
   <adapter factory=".languages.CA" />
   <adapter factory=".languages.FI" />
