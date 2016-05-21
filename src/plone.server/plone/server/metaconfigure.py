@@ -49,7 +49,7 @@ class IContentTypeDirective(Interface):
         title='',
         description='',
         value_type=configuration_fields.GlobalInterface(),
-        required=True
+        required=False
     )
 
 
