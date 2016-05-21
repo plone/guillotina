@@ -3,13 +3,7 @@ from aiohttp import web
 from concurrent.futures import ThreadPoolExecutor
 from pkg_resources import iter_entry_points
 from plone.dexterity.utils import createContent
-from plone.registry import Registry
-from plone.registry.interfaces import IRegistry
 from plone.server.async import IAsyncUtility
-from plone.server.content import PloneSite
-from plone.server.registry import IAuthExtractionPlugins
-from plone.server.registry import IAuthPloneUserPlugins
-from plone.server.registry import ILayers
 from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter

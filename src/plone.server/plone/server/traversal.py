@@ -3,8 +3,6 @@ from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from parts.packages.zope.security.checker import getCheckerForInstancesOf
-from parts.packages.zope.security.checker import selectChecker
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
@@ -23,6 +21,8 @@ from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
+from zope.security.checker import getCheckerForInstancesOf
+from zope.security.checker import selectChecker
 from zope.security.interfaces import IInteraction
 from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
