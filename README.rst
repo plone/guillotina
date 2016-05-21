@@ -11,10 +11,17 @@ Getting started
 
 We use buildout of course::
 
-    python3.5 bootstrap.py
-    # then run the server
-    ./bin/sandbox
+    python3.5 bootstrap-buildout.py
+    ./bin/buildout
 
+The buildout installs the app itself, code analysis tools, and a test runner.
+
+Run the server
+--------------
+
+To run the server::
+
+    ./bin/server
 
 Run tests
 ---------
