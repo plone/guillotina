@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
-import json
-import os
-
 from plone.dexterity.fti import DexterityFTI
 from plone.dexterity.fti import register
+from plone.server import _
 from plone.server import DEFAULT_LAYER
 from plone.server import DEFAULT_PERMISSION
 from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
-from plone.server import _
-from plone.server.search.interfaces import ISearchUtility
 from plone.server.auth.oauth import IOAuth
+from plone.server.search.interfaces import ISearchUtility
+from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
 from zope.component.zcml import adapter
 from zope.component.zcml import utility
@@ -19,10 +17,12 @@ from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
 from zope.interface import Interface
-from plone.server.security import ViewPermissionChecker
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
+
+import json
+import os
 
 
 class IContentTypeDirective(Interface):
@@ -197,12 +197,13 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
                             default_permission,
                             endpoint)
 
+
 class IOAuthDirective(Interface):
     '''
     '''
 
     file = Path(
-        title='The name of a file defining the oauth registration information.',
+        title='The name of a file defining oauth registration information.',
         description='Refers to a file containing a json definition.',
         required=True
     )
@@ -218,12 +219,11 @@ def oauthDirective(_context, file):
         json_info = json.loads(f.read())
         f.close()
 
-    OAuth = import_class(json_info['utility']) # noqa
+    OAuth = import_class(json_info['utility'])  # noqa
     settings = json_info['settings']
     oauth_utility = OAuth(settings)
 
     utility(_context, provides=IOAuth, component=oauth_utility)
-
 
 
 class ISearch(Interface):
@@ -231,7 +231,7 @@ class ISearch(Interface):
     '''
 
     file = Path(
-        title='The name of a file defining the search registration information.',
+        title='The name of a file defining search registration information.',
         description='Refers to a file containing a json definition.',
         required=True
     )

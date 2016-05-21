@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-from zope.securitypolicy.interfaces import IRolePermissionManager
-from zope.securitypolicy.interfaces import IPrincipalPermissionManager
 from plone.dexterity.content import Container
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IPloneSite
+from plone.server.registry import IAuthExtractionPlugins
+from plone.server.registry import IAuthPloneUserPlugins
+from plone.server.registry import ILayers
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
-from plone.server.registry import ILayers
-from plone.server.registry import IAuthPloneUserPlugins
-from plone.server.registry import IAuthExtractionPlugins
+from zope.securitypolicy.interfaces import IPrincipalPermissionManager
+from zope.securitypolicy.interfaces import IRolePermissionManager
 
 
 @implementer(IPloneSite)
@@ -21,8 +21,8 @@ class PloneSite(Container):
 
         # Creating and registering a local registry
         self['_registry'] = registry = Registry()
-        components.registerUtility(self['_registry'],
-                                            provided=IRegistry)
+        components.registerUtility(
+            self['_registry'], provided=IRegistry)
 
         # Set default plugins
         registry.registerInterface(ILayers)
@@ -61,4 +61,3 @@ class PloneSite(Container):
 
     def setSiteManager(self, sitemanager):
         self['_components'] = sitemanager
-

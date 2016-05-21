@@ -1,10 +1,11 @@
-import json
-
+# -*- coding: utf-8 -*-
 from plone.server.api.service import Service
 from plone.server.search.interfaces import ISearchUtility
+from plone.server.utils import get_content_path
 from zope.component import queryUtility
 from zope.interface import implementer
-from plone.server.utils import get_content_path
+
+import json
 
 
 class SearchGET(Service):
@@ -13,8 +14,8 @@ class SearchGET(Service):
         utility = queryUtility(ISearchUtility)
         if not q or utility is None:
             return {
-                "items_count": 0,
-                "member": []
+                'items_count': 0,
+                'member': []
             }
 
         return json.dumps(await utility.search(q))
@@ -42,10 +43,6 @@ class DefaultSearchUtility(object):
         pass
 
     def get_data(self, content):
-        text = '\n'.join([
-            content.title,
-            content.description
-        ])
         return {
             'title': content.title,
             'description': content.description,

@@ -1,13 +1,15 @@
-import logging
-
+# -*- coding: utf-8 -*-
+from plone.server import utils
+from plone.server.exceptions import RequestNotFound
 from plone.server.search.interfaces import ISearchUtility
 from plone.uuid.interfaces import IUUID
 from zope.component import getUtility
 from zope.component import queryUtility
-import transaction
-from plone.server import utils
+
 import asyncio
-from plone.server.exceptions import RequestNotFound
+import logging
+import transaction
+
 
 logger = logging.getLogger('plone.server')
 
