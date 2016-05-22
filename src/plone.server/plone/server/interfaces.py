@@ -77,4 +77,3 @@ class IRendered(Interface):
 
 class ITranslated(Interface):
     pass
-

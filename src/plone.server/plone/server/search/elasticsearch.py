@@ -1,10 +1,11 @@
-import logging
-
+# -*- coding: utf-8 -*-
 from aioes import Elasticsearch
 from aioes.exception import ConnectionError
 from aioes.exception import RequestError
 from aioes.exception import TransportError
 from plone.server.search.search import DefaultSearchUtility
+
+import logging
 
 
 logger = logging.getLogger('plone.server')
@@ -38,7 +39,8 @@ class ElasticSearchUtility(DefaultSearchUtility):
 
         mapping = {'properties': self.settings['mapping']}
         try:
-            await conn.indices.put_mapping(self.index_name, self.doc_type, body=mapping)
+            await conn.indices.put_mapping(
+                self.index_name, self.doc_type, body=mapping)
         except:
             logger.warn('elasticsearch not installed', exc_info=True)
         self.initialized = True
@@ -48,8 +50,8 @@ class ElasticSearchUtility(DefaultSearchUtility):
 
     async def search(self, q):
         query = {
-            "match": {
-                "title": q
+            'match': {
+                'title': q
             }
         }
         result = await self.get_connection().search(
@@ -60,13 +62,13 @@ class ElasticSearchUtility(DefaultSearchUtility):
         for item in result['hits']['hits']:
             data = item['_source']
             data.update({
-                "@id": "http://<get-url>:55001" + data.get('path', ''),
-                "@type": data.get('portal_type'),
+                '@id': 'http://<get-url>:55001' + data.get('path', ''),
+                '@type': data.get('portal_type'),
             })
             items.append(data)
         return {
-            "items_count": result['hits']['total'],
-            "member": items
+            'items_count': result['hits']['total'],
+            'member': items
         }
 
     async def index(self, datas):
@@ -90,12 +92,15 @@ class ElasticSearchUtility(DefaultSearchUtility):
                     }
                 }, data])
                 if len(bulk_data) % self.bulk_size == 0:
-                    await connection.bulk(index=self.index_name, doc_type=self.doc_type,
-                                          body=bulk_data)
+                    await connection.bulk(
+                        index=self.index_name, doc_type=self.doc_type,
+                        body=bulk_data)
                     bulk_data = []
 
             if len(bulk_data) > 0:
-                await connection.bulk(index=self.index_name, doc_type=self.doc_type, body=bulk_data)
+                await connection.bulk(
+                    index=self.index_name, doc_type=self.doc_type,
+                    body=bulk_data)
 
     async def remove(self, uids):
         """
@@ -111,5 +116,5 @@ class ElasticSearchUtility(DefaultSearchUtility):
                         '_id': uid
                     }
                 })
-            await self.get_connection().bulk(index=self.index_name, doc_type=self.doc_type,
-                                             body=bulk_data)
+            await self.get_connection().bulk(
+                index=self.index_name, doc_type=self.doc_type, body=bulk_data)

@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.api.service import TraversableService
 from zope.component import getMultiAdapter
-from plone.jsonserializer.interfaces import ISerializeToJson
 from zope.interface.interfaces import ComponentLookupError
 
 

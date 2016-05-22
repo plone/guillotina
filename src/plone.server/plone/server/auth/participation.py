@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IRequest
 from plone.server.registry import ACTIVE_AUTH_EXTRACTION_KEY

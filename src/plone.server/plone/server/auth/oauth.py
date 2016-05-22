@@ -7,8 +7,8 @@ from plone.registry.interfaces import IRegistry
 from plone.server.async import IAsyncUtility
 from plone.server.auth.participation import AnonymousUser
 from plone.server.auth.participation import PloneUser
-from zope.interface import Interface
 from zope.component import getUtility
+from zope.interface import Interface
 
 import aiohttp
 import asyncio
@@ -67,7 +67,8 @@ class OAuth(object):
     @property
     async def auth_code(self):
         if self._auth_code:
-            if self._auth_code['exp'] > timegm(datetime.utcnow().utctimetuple()):
+            now = timegm(datetime.utcnow().utctimetuple())
+            if self._auth_code['exp'] > now:
                 return self._auth_code['auth_code']
         result = await self.call_auth('getAuthCode', {
             'client_id': self._client_id,
@@ -85,9 +86,10 @@ class OAuth(object):
 
     async def get_service_token(self):
         if self._service_token:
-            if self._service_token['exp'] > timegm(datetime.utcnow().utctimetuple()):
+            now = timegm(datetime.utcnow().utctimetuple())
+            if self._service_token['exp'] > now:
                 return self._service_token['access_token']
-        logger.info("SERVICE")
+        logger.info('SERVICE')
         result = await self.call_auth('getAuthToken', {
             'code': await self.auth_code,
             'client_id': self._client_id,
@@ -135,14 +137,16 @@ class OAuth(object):
         result = None
         with aiohttp.ClientSession() as session:
             if method == 'GET':
-                async with session.get(self._server + url, params=params) as resp:
+                async with session.get(
+                        self._server + url, params=params) as resp:
                     if resp.status == 200:
                         result = jwt.decode(
                             resp.text(),
                             self._jwt_secret,
                             algorithms=[self._jwt_algorithm])
             elif method == 'POST':
-                async with session.post(self._server + url, data=params) as resp:
+                async with session.post(
+                        self._server + url, data=params) as resp:
                     if resp.status == 200:
                         result = jwt.decode(
                             resp.text(),

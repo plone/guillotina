@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from zope.security._zope_security_checker import selectChecker
 from plone.dexterity.interfaces import IDexterityContent
 from plone.dexterity.utils import iterSchemata
 from plone.server.interfaces import DEFAULT_READ_PERMISSION
@@ -11,14 +10,20 @@ from plone.supermodel.interfaces import WRITE_PERMISSIONS_KEY
 from plone.supermodel.utils import mergedTaggedValueDict
 from zope.component import adapter
 from zope.interface import implementer
-from zope.security.checker import _available_by_default, CheckerPy
-from zope.security.checker import CheckerPublic, TracebackSupplement
-from zope.security.interfaces import IChecker, Unauthorized, ForbiddenAttribute
+from zope.security._zope_security_checker import selectChecker
+from zope.security.checker import _available_by_default
+from zope.security.checker import CheckerPublic
+from zope.security.checker import CheckerPy
+from zope.security.checker import TracebackSupplement
+from zope.security.interfaces import ForbiddenAttribute
+from zope.security.interfaces import IChecker
 from zope.security.interfaces import IInteraction
+from zope.security.interfaces import Unauthorized
 from zope.security.management import system_user
-from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
 from zope.security.proxy import Proxy
 from zope.security.proxy import removeSecurityProxy
+from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
+
 
 _marker = object()
 
@@ -33,11 +38,11 @@ class ViewPermissionChecker(CheckerPy):
 
         if permission is not None:
             if permission is CheckerPublic:
-                return # Public
+                return  # Public
 
             request = get_current_request()
             if IInteraction(request).checkPermission(permission, obj):
-                return # allowed
+                return  # allowed
             else:
                 __traceback_supplement__ = (TracebackSupplement, obj)
                 raise Unauthorized(obj, name, permission)
@@ -49,7 +54,7 @@ class ViewPermissionChecker(CheckerPy):
         permission = self.get_permissions.get(name)
         if permission is not None:
             if permission is CheckerPublic:
-                return # Public
+                return  # Public
             request = get_current_request()
             if IInteraction(request).checkPermission(permission, obj):
                 return

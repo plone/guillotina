@@ -45,7 +45,8 @@ setup(
         'zope.schema',
         'zope.security',
         # required here?
-        # zc.recipe.egg not respecting plone.server[elasticsearch] for console scripts?
+        # zc.recipe.egg not respecting plone.server[elasticsearch]
+        # for console scripts?
         'aioes'
     ],
     extras_require={

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from zope.location import ILocation
-
 from plone.dexterity.interfaces import IDexterityContent
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
 from zope.component import adapter
 from zope.interface import implementer
+from zope.location import ILocation
 
 
 def get_physical_path(context):
