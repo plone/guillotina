@@ -22,7 +22,11 @@ from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
 
 import json
+import logging
 import os
+
+
+logger = logging.getLogger(__name__)
 
 
 class IContentTypeDirective(Interface):
@@ -98,7 +102,7 @@ def register_service(
         layer,
         default_permission,
         name=''):
-    print(configuration)  # noqa
+    logger.debug(configuration)
     factory = import_class(configuration['factory'])
     if factory is None:
         raise TypeError(
@@ -115,8 +119,8 @@ def register_service(
         required[n] = permission
 
     defineChecker(factory, ViewPermissionChecker(required))
-    print('Defining adapter for '  # noqa
-          '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
+    logger.debug('Defining adapter for '  # noqa
+                 '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
         content.__identifier__,
         DICT_METHODS[method].__identifier__,
         layer.__identifier__,
@@ -169,7 +173,7 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
     if 'languages' in json_info:
         for language, language_interface in json_info['languages'].items():
             # We define which Interface is for the languages
-            print(language_interface)  # noqa
+            logger.debug(language_interface)
             DICT_LANGUAGES[language] = import_class(language_interface)
 
     if 'contenttypes' in json_info:

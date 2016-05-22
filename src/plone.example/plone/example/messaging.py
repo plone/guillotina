@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
 from plone.server.api.service import Service
-
+import logging
 import aiohttp
+
+
+logger = logging.getLogger(__name__)
 
 
 class WebsocketsView(Service):
@@ -17,9 +20,9 @@ class WebsocketsView(Service):
                 else:
                     ws.send_str(msg.data + '/answer')
             elif msg.tp == aiohttp.MsgType.error:
-                print('ws connection closed with exception {0:s}'
-                      .format(ws.exception()))
+                logger.debug('ws connection closed with exception {0:s}'
+                             .format(ws.exception()))
 
-        print('websocket connection closed')  # noqa
+        logger.debug('websocket connection closed')
 
         return {}

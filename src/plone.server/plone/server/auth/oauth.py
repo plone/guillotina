@@ -49,15 +49,13 @@ class OAuth(object):
         self._client_id = settings['client_id']
         self._client_password = settings['client_password']
 
-    async def initialize(
-            self,
-            app=None):
+    async def initialize(self, app=None):
         self.app = app
         self._auth_code = None
         self._service_token = None
         # self.service_token = call_auth()
         while(True):
-            print('Renew token')  # noqa
+            logger.debug'Renew token')
             now = timegm(datetime.utcnow().utctimetuple())
             await self.get_service_token()
             expiration = self._service_token['exp']
