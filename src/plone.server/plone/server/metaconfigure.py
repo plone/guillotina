@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from zope.security.checker import undefineChecker
 from plone.dexterity.fti import DexterityFTI
 from plone.dexterity.fti import register
 from plone.server import _
@@ -19,7 +20,6 @@ from zope.configuration.fields import Path
 from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
-from zope.security.checker import undefineChecker
 
 import json
 import logging

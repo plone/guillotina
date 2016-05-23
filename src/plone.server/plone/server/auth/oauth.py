@@ -54,8 +54,8 @@ class OAuth(object):
         self._auth_code = None
         self._service_token = None
         # self.service_token = call_auth()
-        while(True):
-            logger.debug'Renew token')
+        while True:
+            logger.debug('Renew token')
             now = timegm(datetime.utcnow().utctimetuple())
             await self.get_service_token()
             expiration = self._service_token['exp']
@@ -172,15 +172,12 @@ class PloneJWTExtraction(object):
             if schema.lower() == 'bearer':
                 token = encoded_token.encode('ascii')
 
-                creds['jwt'] = jwt.decode(
-                    token,
-                    self.config._jwt_secret,
-                    algorithms=[self.config._jwt_algorithm])
+                creds['jwt'] = jwt.decode(token, self.config._jwt_secret,
+                                          algorithms=[self.config._jwt_algorithm])
 
                 oauth_utility = getUtility(IOAuth)
                 creds['user'] = oauth_utility.validate_token(
-                    self.request,
-                    creds['token'])
+                    self.request, creds['token'])
 
         return creds
 

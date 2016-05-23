@@ -35,13 +35,13 @@ class ElasticSearchUtility(DefaultSearchUtility):
             logger.warn('elasticsearch not installed', exc_info=True)
             return
         except RequestError:
-            pass
+            return
 
         mapping = {'properties': self.settings['mapping']}
         try:
             await conn.indices.put_mapping(
                 self.index_name, self.doc_type, body=mapping)
-        except:
+        except:  # noqa
             logger.warn('elasticsearch not installed', exc_info=True)
         self.initialized = True
 
