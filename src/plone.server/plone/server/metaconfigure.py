@@ -9,7 +9,7 @@ from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
 from plone.server.auth.oauth import IOAuth
-from plone.server.search.interfaces import ISearchUtility
+from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
 from zope.component.zcml import adapter
@@ -230,18 +230,18 @@ def oauthDirective(_context, file):
     utility(_context, provides=IOAuth, component=oauth_utility)
 
 
-class ISearch(Interface):
+class ICatalog(Interface):
     '''
     '''
 
     file = Path(
-        title='The name of a file defining search registration information.',
+        title='The name of a file defining catalog registration information.',
         description='Refers to a file containing a json definition.',
         required=True
     )
 
 
-def searchDirective(_context, file):
+def catalogDirective(_context, file):
     if file:
         file = os.path.abspath(_context.path(file))
         if not os.path.isfile(file):
@@ -251,8 +251,8 @@ def searchDirective(_context, file):
         json_info = json.loads(f.read())
         f.close()
 
-    SearchUtility = import_class(json_info['utility'])
+    CatalogUtility = import_class(json_info['utility'])
     settings = json_info['settings']
-    search_utility = SearchUtility(settings)
+    catalog_utility = CatalogUtility(settings)
 
-    utility(_context, provides=ISearchUtility, component=search_utility)
+    utility(_context, provides=ICatalogUtility, component=catalog_utility)

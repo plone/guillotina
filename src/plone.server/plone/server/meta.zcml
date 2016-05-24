@@ -17,9 +17,9 @@
 	        />
 
         <directive
-            name="search"
-            schema=".metaconfigure.ISearch"
-            handler=".metaconfigure.searchDirective"
+            name="catalog"
+            schema=".metaconfigure.ICatalog"
+            handler=".metaconfigure.catalogDirective"
             />
 
         <directive

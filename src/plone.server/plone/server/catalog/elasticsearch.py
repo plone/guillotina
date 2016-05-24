@@ -3,7 +3,7 @@ from aioes import Elasticsearch
 from aioes.exception import ConnectionError
 from aioes.exception import RequestError
 from aioes.exception import TransportError
-from plone.server.search.search import DefaultSearchUtility
+from plone.server.catalog.catalog import DefaultSearchUtility
 
 import logging
 

@@ -5,7 +5,8 @@
 
   <plone:api file="api.json" />
 
-  <plone:search file="elasticsearch.json" zcml:condition="installed aioes" />
+  <plone:catalog file="elasticsearch.json" zcml:condition="installed aioes" />
+
 
   <!-- index events -->
   <subscriber
@@ -29,4 +30,9 @@
          zope.lifecycleevent.interfaces.IObjectRemovedEvent"
     handler=".index.remove_object" />
 
+
+  <!-- default catalog data adapter -->
+  <adapter factory=".catalog.DefaultCatalogDataAdapter"
+           provides=".interfaces.ICatalogDataAdapter"
+           for="plone.dexterity.interfaces.IDexterityContent" />
 </configure>

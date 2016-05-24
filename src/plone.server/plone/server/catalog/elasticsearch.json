@@ -1,5 +1,5 @@
 {
-  "utility": "plone.server.search.elasticsearch.ElasticSearchUtility",
+  "utility": "plone.server.catalog.elasticsearch.ElasticSearchUtility",
   "settings": {
     "connection_settings": {
       "endpoints": ["localhost:9200"],

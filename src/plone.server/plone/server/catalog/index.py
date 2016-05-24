@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from plone.server import utils
 from plone.server.exceptions import RequestNotFound
-from plone.server.search.interfaces import ISearchUtility
+from plone.server.catalog.interfaces import ICatalogUtility
 from plone.uuid.interfaces import IUUID
 from zope.component import getUtility
 from zope.component import queryUtility
@@ -25,7 +25,7 @@ class CommitHook(object):
             return
 
         loop = asyncio.get_event_loop()
-        search = getUtility(ISearchUtility)
+        search = getUtility(ICatalogUtility)
         asyncio.run_coroutine_threadsafe(search.remove(self.remove), loop)
         asyncio.run_coroutine_threadsafe(search.index(self.index), loop)
 
@@ -35,7 +35,7 @@ class CommitHook(object):
 
 def get_hook():
 
-    search = queryUtility(ISearchUtility)
+    search = queryUtility(ICatalogUtility)
     if not search:
         return  # no search configured
 
@@ -73,5 +73,5 @@ def add_object(obj, event):
     uid = IUUID(obj, None)
     if uid is None:
         return
-    search = queryUtility(ISearchUtility)
+    search = queryUtility(ICatalogUtility)
     hook.index[uid] = search.get_data(obj)

@@ -29,7 +29,7 @@
   <include file="content.zcml" />
 
   <include package=".auth" />
-  <include package=".search" />
+  <include package=".catalog" />
 
   <plone:api file="api/api.json" />
 
