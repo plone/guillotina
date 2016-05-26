@@ -1,11 +1,22 @@
 language: python
 python:
 - 3.5
-sudo: false
+sudo: required
+services:
+  - docker
 cache:
   directories:
   - eggs
+before_install:
+- docker-compose -f docker-compose-dev.yml up -d 
 install:
 - python bootstrap-buildout.py
 - bin/buildout -N -t 3
-script: bin/code-analysis
+- docker ps -a
+- sleep 15
+script:
+- bin/py.test src
+- bin/code-analysis
+after_script:
+  - docker-compose stop
+  - docker-compose rm -f

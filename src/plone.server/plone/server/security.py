@@ -23,7 +23,13 @@ from zope.security.management import system_user
 from zope.security.proxy import Proxy
 from zope.security.proxy import removeSecurityProxy
 from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
+from zope.securitypolicy.interfaces import Allow, Deny, Unset
+from zope.securitypolicy.interfaces import IPrincipalRoleMap
 
+from zope.securitypolicy.principalrole import principalRoleManager
+globalRolesForPrincipal = principalRoleManager.getRolesForPrincipal
+
+SettingAsBoolean = {Allow: True, Deny: False, Unset: None, None: None}
 
 _marker = object()
 
@@ -210,3 +216,39 @@ class Interaction(ZopeSecurityPolicy):
             seen[principal.id] = 1  # mark as seen
 
         return False
+
+    def cached_principal_roles(self, parent, principal):
+        # Redefine it to get global roles
+        cache = self.cache(parent)
+        try:
+            cache_principal_roles = cache.principal_roles
+        except AttributeError:
+            cache_principal_roles = cache.principal_roles = {}
+        try:
+            return cache_principal_roles[principal]
+        except KeyError:
+            pass
+
+        if parent is None:
+            roles = dict(
+                [(role, SettingAsBoolean[setting])
+                 for (role, setting) in globalRolesForPrincipal(principal)])
+            roles['plone.Anonymous'] = True  # Everybody has Anonymous
+            cache_principal_roles[principal] = roles
+            return roles
+
+        roles = self.cached_principal_roles(
+            removeSecurityProxy(getattr(parent, '__parent__', None)),
+            principal)
+
+        prinrole = IPrincipalRoleMap(parent, None)
+
+        if prinrole:
+            roles = roles.copy()
+            for role, setting in prinrole.getRolesForPrincipal(
+                    principal,
+                    self.request):
+                roles[role] = SettingAsBoolean[setting]
+
+        cache_principal_roles[principal] = roles
+        return roles

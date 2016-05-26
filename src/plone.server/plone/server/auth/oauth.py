@@ -9,6 +9,7 @@ from plone.server.auth.participation import AnonymousUser
 from plone.server.auth.participation import PloneUser
 from zope.component import getUtility
 from zope.interface import Interface
+from zope.securitypolicy.interfaces import Allow, Deny, Unset
 
 import aiohttp
 import asyncio
@@ -19,6 +20,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Asyncio Utility
+NON_IAT_VERIFY = {
+    'verify_iat': False,
+}
 
 
 class IOAuth(IAsyncUtility):
@@ -57,7 +61,7 @@ class OAuth(object):
         while True:
             logger.debug('Renew token')
             now = timegm(datetime.utcnow().utctimetuple())
-            await self.get_service_token()
+            stoken = await self.service_token
             expiration = self._service_token['exp']
             time_to_sleep = expiration - now
             await asyncio.sleep(time_to_sleep)
@@ -73,16 +77,13 @@ class OAuth(object):
             'scope': 'plone',
             'response_type': 'code'
         })
-
         if result:
-            self._auth_code = jwt.decode(
-                result.text,
-                self._jwt_secret,
-                algorithms=[self._jwt_algorithm])
+            self._auth_code = result
             return self._auth_code['auth_code']
         return None
 
-    async def get_service_token(self):
+    @property
+    async def service_token(self):
         if self._service_token:
             now = timegm(datetime.utcnow().utctimetuple())
             if self._service_token['exp'] > now:
@@ -96,38 +97,25 @@ class OAuth(object):
             'scope': 'plone'
         })
         if result:
-            self._service_token = jwt.decode(
-                result.text,
-                self.jwt_secret,
-                algorithms=[self._jwt_algorithm])
-        else:
-            self._service_token = None
+            self._service_token = result
+            return self._service_token['access_token']
+        return None
 
-    def validate_token(self, request, token):
+    async def validate_token(self, request, token):
         scope = request.site.id
-
-        loop = asyncio.get_event_loop()
-        future = asyncio.Future()
-        asyncio.ensure_future(self.call_auth(
+        result = await self.call_auth(
             'validToken',
             params={
-                'code': self._service_token,
+                'code': self._service_token['access_token'],
                 'token': token,
                 'scope': scope
-            },
-            future=future
-        ))
-        loop.run_until_complete(future)
-        result = future.result()
+            }
+        )
         if result:
-            plain_result = jwt.decode(
-                result.text,
-                self._jwt_secret,
-                algorithms=[self._jwt_algorithm])
-            if 'user' in plain_result:
-                return plain_result['user']
+            if 'user' in result:
+                return result['user']
             else:
-                None
+                return None
         return None
 
     async def call_auth(self, call, params, future=None, **kw):
@@ -135,25 +123,51 @@ class OAuth(object):
         result = None
         with aiohttp.ClientSession() as session:
             if method == 'GET':
+                print("GET " + url + str(params))
                 async with session.get(
                         self._server + url, params=params) as resp:
                     if resp.status == 200:
-                        result = jwt.decode(
-                            resp.text(),
-                            self._jwt_secret,
-                            algorithms=[self._jwt_algorithm])
+                        try:
+                            result = jwt.decode(
+                                await resp.text(),
+                                self._jwt_secret,
+                                algorithms=[self._jwt_algorithm])
+                        except jwt.InvalidIssuedAtError:
+                            logger.error("Error on Time at OAuth Server")
+                            result = jwt.decode(
+                                await resp.text(),
+                                self._jwt_secret,
+                                algorithms=[self._jwt_algorithm],
+                                options=NON_IAT_VERIFY)
+                    await resp.release()
             elif method == 'POST':
+                print("POST " + url + str(params))
                 async with session.post(
                         self._server + url, data=params) as resp:
                     if resp.status == 200:
-                        result = jwt.decode(
-                            resp.text(),
-                            self._jwt_secret,
-                            algorithms=[self._jwt_algorithm])
+                        try:
+                            result = jwt.decode(
+                                await resp.text(),
+                                self._jwt_secret,
+                                algorithms=[self._jwt_algorithm])
+                        except jwt.InvalidIssuedAtError:
+                            logger.error("Error on Time at OAuth Server")
+                            result = jwt.decode(
+                                await resp.text(),
+                                self._jwt_secret,
+                                algorithms=[self._jwt_algorithm],
+                                options=NON_IAT_VERIFY)
+                    else:
+                        logger.error(
+                            "OAUTH SERVER ERROR %d %s" % (
+                                resp.status,
+                                await resp.text()))
+                    await resp.release()
+            session.close()
         if future is not None:
             future.set_result(result)
         else:
-            return future
+            return result
 
 
 class PloneJWTExtraction(object):
@@ -162,23 +176,28 @@ class PloneJWTExtraction(object):
     def __init__(self, request):
         self.request = request
         self.config = getUtility(IOAuth)
-        self.request._cache_credentials = self.extract_user()
+        if not hasattr(self.request, '_cache_credentials'):
+            self.request._cache_credentials = {}
 
-    def extract_user(self):
+    async def extract_user(self):
         header_auth = self.request.headers.get('AUTHORIZATION')
         creds = {}
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'bearer':
                 token = encoded_token.encode('ascii')
-
                 creds['jwt'] = jwt.decode(token, self.config._jwt_secret,
                                           algorithms=[self.config._jwt_algorithm])
 
                 oauth_utility = getUtility(IOAuth)
-                creds['user'] = oauth_utility.validate_token(
-                    self.request, creds['token'])
+                validation = await oauth_utility.validate_token(
+                    self.request, creds['jwt']['token'])
+                if validation is not None and validation == creds['jwt']['login']:
+                    # We validate that the actual token belongs to the same as
+                    # the user on oauth
+                    creds['user'] = validation
 
+        self.request._cache_credentials.update(creds)
         return creds
 
 
@@ -186,38 +205,40 @@ class OAuthPloneUserFactory(object):
 
     def __init__(self, request):
         self.request = request
-        if 'token' in self.request._cache_credentials:
-            user = AnonymousUser(request)
+
+    async def create_user(self):
+        if 'user' not in self.request._cache_credentials:
+            user = AnonymousUser(self.request)
         else:
             try:
-                user = OAuthPloneUser(request)
+                user = OAuthPloneUser(self.request)
+                await user.get_info()
             except KeyError:
-                user = AnonymousUser(request)
+                user = AnonymousUser(self.request)
         self.request._cache_user = user
 
 
 class OAuthPloneUser(PloneUser):
 
-    _init_call = 'getUser'
-    _search_param = 'user'
-
     def __init__(self, request):
         super(OAuthPloneUser, self).__init__(request)
         self.token = self.request._cache_credentials['jwt']
-        self.id = 'User'
+        self.login = self.request._cache_credentials['user']
+        self.id = self.login
         self._properties = OrderedDict()
 
+    async def get_info(self):
         oauth_utility = getUtility(IOAuth)
 
-        loop = asyncio.get_event_loop()
-        future = asyncio.Future()
-        asyncio.ensure_future(oauth_utility.call_auth(
-            self._init_call,
-            params={self._search_param: id},
-            future=future
-        ))
-        loop.run_until_complete(future)
-        result = future.result()
+        result = await oauth_utility.call_auth(
+            'getUser',
+            params={
+                'service_token': await oauth_utility.service_token,
+                'user_token': self.token['token'],
+                'scope': self.request.site.id,
+                'user': self.login
+            }
+        )
 
         if not result:
             raise KeyError('Not a plone.oauth User')
@@ -226,7 +247,14 @@ class OAuthPloneUser(PloneUser):
 
     def _init_data(self, user_data):
         self._roles = user_data['result']['roles']
-        self._groups = user_data['result']['groups']
+        for key, value in self._roles.items():
+            if value == 1:
+                self._roles[key] = Allow
+            elif value == 0:
+                self._roles[key] = Deny
+            else:
+                self._roles[key] = Unset
+        self._groups = [key for key, value in user_data['result']['groups'].items() if value]
         self.name = user_data['result']['name']
 
         if len(self._roles) == 0:

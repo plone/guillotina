@@ -1,0 +1,30 @@
+oauth:
+  image: plone/plone.oauth
+  links:
+  - redis:redis
+  - ldap:ldap
+  ports:
+  - "6543:6543"
+  environment:
+  - JWTSECRET=secret
+  - LDAP_PROFILE=["person","inetOrgPerson"]
+  - LDAP_USER_FILTER=mail={username},ou=Users,dc=plone,dc=com
+  - LDAP_ROOT_DN=uid=admin,ou=system
+  - LDAP_ROOT_PW=secret
+  - LDAP_BASE_DN=dc=plone,dc=com
+redis:
+  image: redis
+  volumes:
+  - ./db:/data
+  expose:
+  - "6379"  
+ldap:
+  image: greggigon/apacheds
+  volumes:
+  - ./ldap:/data
+  - ./ldap-bootstrap:/bootstrap
+  expose:
+  - "10389"
+  environment:
+  - BOOTSTRAP_FILE=/bootstrap/demo.ldif
+  restart: always

@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 from zope.component.interfaces import ISite
 from zope.interface import Interface
+from plone.supermodel import model
+from zope import schema
 
 DEFAULT_READ_PERMISSION = 'plone.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'plone.ManageContent'
 
 
-class IPloneSite(ISite):
-    pass
+class IPloneSite(model.Schema, ISite):
+    title = schema.TextLine(
+        title='Title',
+        required=False,
+        description=u"Title of the Site",
+        default=u''
+    )
 
 
 class IRequest(Interface):

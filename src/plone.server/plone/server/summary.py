@@ -23,6 +23,7 @@ class DefaultJSONSummarySerializer(object):
 
     def __call__(self):
         # obj = IContentListingObject(self.context)
+
         summary = json_compatible({
             '@id': '/'.join(get_physical_path(self.context)),
             '@type': self.context.portal_type,

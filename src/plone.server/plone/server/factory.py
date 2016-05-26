@@ -34,7 +34,7 @@ def make_app():
     app.config.execute_actions()
 
     # Initialize DB
-    db = ZODB.DB('Data.fs')
+    db = ZODB.DB('data/Data.fs')
     conn = db.open()
     if getattr(conn.root, 'data', None) is None:
         with transaction.manager:
@@ -63,7 +63,7 @@ def make_app():
         asyncio.ensure_future(utility.initialize(app=app))
 
     # Set request aware database for app
-    db = RequestAwareDB('Data.fs')
+    db = RequestAwareDB('data/Data.fs')
     tm_ = RequestAwareTransactionManager()
     # While _p_jar is a funny name, it's consistent with Persistent API
     app._p_jar = db.open(transaction_manager=tm_)

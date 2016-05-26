@@ -36,6 +36,8 @@ async def traverse(request, parent, path):
     assert request is not None  # could be used for permissions, etc
 
     try:
+        if path[0].startswith('_'):
+            raise HTTPUnauthorized()
         context = parent[path[0]]
     except TypeError:
         return parent, path
@@ -49,6 +51,8 @@ async def traverse(request, parent, path):
         request.site_components = context.getSiteManager()
         request.site_settings = request.site_components.getUtility(IRegistry)
         participation = IParticipation(request)
+        # Lets extract the user from the request
+        await participation()
         request.security.add(participation)
         layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
@@ -135,6 +139,7 @@ class TraversalRouter(AbstractRouter):
         #     raise HTTPUnauthorized('No access to content')
 
         permission = getUtility(IPermission, name='plone.AccessContent')
+
         allowed = request.security.checkPermission(permission.id, resource)
 
         if not allowed:

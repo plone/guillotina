@@ -52,8 +52,18 @@ class PloneSite(Container):
             'Anonymous User'
         )
         roles.grantPermissionToPrincipal(
-            'plone.ViewContent',
-            'Anonymous User'
+            'plone.AccessContent',
+            'plone.manager'
+        )
+
+        roles = IRolePermissionManager(self)
+        roles.grantPermissionToRole(
+            'plone.AccessContent',
+            'Manager'
+        )
+        roles.grantPermissionToRole(
+            'plone.AccessContent',
+            'plone.manager'
         )
 
     def getSiteManager(self):

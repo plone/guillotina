@@ -96,66 +96,48 @@
       title="View content"
       />
 
+  <!-- Roles -->
+
   <role
-      id="plone.reader"
+      id="plone.Anonymous"
+      title="Everybody"
+      description="All users have this role implicitly"
+      />
+
+  <role id="plone.Manager" title="Site Manager" />
+
+  <role id="plone.Member" title="Site Member" />
+
+  <role
+      id="plone.Reader"
       title="Reader"
       description="It can read content"
       />
 
   <role
-      id="plone.editor"
+      id="plone.Editor"
       title="Editor"
       description="It can edit content"
       />
 
 
   <role
-      id="plone.reviewer"
+      id="plone.Reviewer"
       title="Reviewer"
       description="It can review content"
       />
 
   <role
-      id="plone.siteadmin"
+      id="plone.Siteadmin"
       title="Site Administrator"
       description="It can set settings on site"
       />
 
   <role
-      id="plone.manager"
-      title="Manager"
-      description="It can create sites"
-      />
-
-  <role
-      id="plone.collaborator"
+      id="plone.Collaborator"
       title="Collaborator"
       description="It can add content"
       />
 
-  <role
-      id="plone.member"
-      title="Member"
-      description="Its a member of the site"
-      />
-
-  <grant
-      permission="plone.ViewContent"
-      role="plone.reader"
-      />
-
-  <grant
-      permission="plone.AccessContent"
-      role="plone.reader"
-      />
-
-  <!-- Zope has 
-
-    zope.Public,
-    zope.View,
-    zope.Security,
-    zope.ManageContent,
-    zope.ManageServices,
-    zope.ManageSite -->
 
 </configure>
