@@ -1,52 +1,19 @@
 #!/bin/bash
 set -e
 
-if [ -n "$OAUTH_PORT_6543_TCP_ADDR" ]; then
-    if [ -z "$OAUTH_HOST" ]; then
-        OAUTH_HOST=$OAUTH_PORT_6543_TCP_ADDR
-    else
-        echo >&2 'warning: both OAUTH_HOST and OAUTH_PORT_6543_TCP_ADDR found'
-        echo >&2 "  Connecting to OAUTH_HOST ($OAUTH_HOST)"
-        echo >&2 '  instead of the linked redis container'
-    fi
-else
+if [ -z "$OAUTH_HOST" ]; then
     OAUTH_HOST='oauth'
 fi
 
-if [ -n "$OAUTH_PORT_6543_TCP_PORT" ]; then
-    if [ -z "$OAUTH_PORT" ]; then
-        OAUTH_PORT=$OAUTH_PORT_6543_TCP_PORT
-    else
-        echo >&2 'warning: both OAUTH_PORT and OAUTH_PORT_6543_TCP_PORT found'
-        echo >&2 "  Connecting to OAUTH_PORT ($OAUTH_PORT)"
-        echo >&2 '  instead of the linked redis container'
-    fi
-else
+if [ -z "$OAUTH_PORT" ]; then
     OAUTH_PORT='6543'
 fi
 
-
-if [ -n "$ELASTICSEARCH_PORT_9200_TCP_ADDR" ]; then
-    if [ -z "$OAUTH_HOST" ]; then
-        ELASTIC_HOST=$ELASTICSEARCH_PORT_9200_TCP_ADDR
-    else
-        echo >&2 'warning: both ELASTIC_HOST and ELASTICSEARCH_PORT_9200_TCP_ADDR found'
-        echo >&2 "  Connecting to ELASTIC_HOST ($OAUTH_HOST)"
-        echo >&2 '  instead of the linked redis container'
-    fi
-else
-    ELASTIC_HOST='oauth'
+if [ -z "$ELASTIC_HOST" ]; then
+    ELASTIC_HOST='elasticsearch'
 fi
 
-if [ -n "$ELASTICSEARCH_PORT_9200_TCP_PORT" ]; then
-    if [ -z "$ELASTIC_PORT" ]; then
-        ELASTIC_PORT=$ELASTICSEARCH_PORT_9200_TCP_PORT
-    else
-        echo >&2 'warning: both ELASTIC_PORT and ELASTICSEARCH_PORT_9200_TCP_PORT found'
-        echo >&2 "  Connecting to ELASTIC_PORT ($ELASTIC_PORT)"
-        echo >&2 '  instead of the linked redis container'
-    fi
-else
+if [ -z "$ELASTIC_PORT" ]; then
     ELASTIC_PORT='9200'
 fi
 
