@@ -28,3 +28,7 @@ ldap:
   environment:
   - BOOTSTRAP_FILE=/bootstrap/demo.ldif
   restart: always
+elasticsearch:
+   image: elasticsearch:2.3.3
+   ports:
+   - "9200:9200"

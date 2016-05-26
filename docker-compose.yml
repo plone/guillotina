@@ -28,12 +28,17 @@ ldap:
   environment:
   - BOOTSTRAP_FILE=/bootstrap/demo.ldif
   restart: always
+elasticsearch:
+   image: elasticsearch:2.3.3
+   ports:
+   - "9200:9200"
 ploneserver:
   image: plone/plone.server
   volumes:
   - ./data:/app/data
   links:
   - oauth:oauth
+  - elasticsearch:elasticsearch
   ports:
   - "8080:8080"
   environment:
