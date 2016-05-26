@@ -59,7 +59,7 @@ echo '{
     "client_id": "$CLIENTID",
     "client_password": "$CLIENTPASSWORD"
   }
-}'
+}' > /app/src/plone.server/plone/server/auth/oauth.json
 
 until nc -z $OAUTH_HOST $OAUTH_PORT;
 do
