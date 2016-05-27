@@ -46,17 +46,16 @@ if [ -z "$CLIENTPASSWORD" ]; then
 fi
 
 echo "SET CONFIG"
-echo '{
-  "utility": "plone.server.auth.oauth.OAuth",
-  "settings": {
-    "server": "http://$OAUTH_HOST:$OAUTH_PORT/",
-    "jwt_secret": "$JWTSECRET",
-    "jwt_algorithm": "$JWTALGORITHM",
-    "client_id": "$CLIENTID",
-    "client_password": "$CLIENTPASSWORD"
+echo "{
+  \"utility\": \"plone.server.auth.oauth.OAuth\",
+  \"settings\": {
+    \"server\": \"http://$OAUTH_HOST:$OAUTH_PORT/\",
+    \"jwt_secret\": \"$JWTSECRET\",
+    \"jwt_algorithm\": \"$JWTALGORITHM\",
+    \"client_id\": \"$CLIENTID\",
+    \"client_password\": \"$CLIENTPASSWORD\"
   }
-}' > /app/src/plone.server/plone/server/auth/oauth.json
-
+}" > /app/src/plone.server/plone/server/auth/oauth.json
 
 sed -i 's/localhost:9200/$ELASTIC_HOST:$ELASTIC_PORT/' /app/src/plone.server/plone/server/catalog/elasticsearch.json
 
