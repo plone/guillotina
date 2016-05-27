@@ -22,6 +22,8 @@ RUN cd /app; python3.5 bootstrap-buildout.py
 # Run buildout
 RUN cd /app; ./bin/buildout -vvv
 
+WORKDIR /app
+
 # Expose
 EXPOSE  8080
 
