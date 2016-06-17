@@ -8,6 +8,14 @@ DEFAULT_READ_PERMISSION = 'plone.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'plone.ManageContent'
 
 
+class IApplication(Interface):
+    pass
+
+
+class IDataBase(Interface):
+    pass
+
+
 class IPloneSite(model.Schema, ISite):
     title = schema.TextLine(
         title='Title',

@@ -18,8 +18,37 @@
       role="plone.Manager"
       />
 
+  <grant
+      permission="plone.AccessContent"
+      role="plone.SiteCreator"
+      />
+
+
+  <grant
+      permission="plone.AddPortal"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.GetPortals"
+      role="plone.SiteCreator"
+      />
+
   <grantAll role="zope.Manager" />
 
   <adapter factory=".security.getCurrentInteraction" />
+  <adapter
+    factory=".factory.DataBaseSpecialPermissions"
+    provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
+    for="plone.server.interfaces.IDataBase"
+    trusted="true"
+    />
+
+  <adapter
+    factory=".factory.DataBaseSpecialPermissions"
+    provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
+    for="plone.server.interfaces.IApplication"
+    trusted="true"
+    />
 
 </configure>

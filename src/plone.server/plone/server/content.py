@@ -71,3 +71,10 @@ class PloneSite(Container):
 
     def setSiteManager(self, sitemanager):
         self['_components'] = sitemanager
+
+
+class StaticFile(object):
+    def __init__(self, file_path):
+        self._file_path = file_path
+
+    

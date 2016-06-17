@@ -25,6 +25,28 @@
         "ca": "plone.server.languages.ICA"
     },
     "contenttypes": {
+        "plone.server.interfaces.IDataBase": {
+            "PUT": {
+                "factory": "plone.server.api.portal.DefaultPUT",
+                "permission": "plone.AddPortal"
+            },
+            "GET": {
+                "factory": "plone.server.api.portal.DefaultGET",
+                "permission": "plone.GetPortals"
+            }
+
+        },
+        "plone.server.interfaces.IApplication": {
+            "PUT": {
+                "factory": "plone.server.api.portal.DefaultPUT",
+                "permission": "plone.AddPortal"
+            },
+            "GET": {
+                "factory": "plone.server.api.portal.DefaultGET",
+                "permission": "plone.GetPortals"
+            }
+
+        },
         "plone.server.interfaces.IPloneSite": {
             "endpoints": {
                 "@registry": {

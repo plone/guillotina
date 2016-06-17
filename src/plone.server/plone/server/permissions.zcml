@@ -96,6 +96,16 @@
       title="View content"
       />
 
+  <permission
+      id="plone.AddPortal"
+      title="Add a portal/DB"
+      />
+
+  <permission
+      id="plone.GetPortals"
+      title="Get a portal/DB"
+      />
+
   <!-- Roles -->
 
   <role
@@ -139,5 +149,10 @@
       description="It can add content"
       />
 
+  <role
+      id="plone.SiteCreator"
+      title="Site DB Manager"
+      description="Can create sites and db connections"
+      />
 
 </configure>

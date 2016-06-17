@@ -9,6 +9,15 @@ from zope.interface import implementer
 from zope.security.interfaces import IParticipation
 
 
+class RootParticipation(object):
+
+    def __init__(self):
+        self.principal = PloneUser(None)
+        self.principal.id = 'RootUser'
+        self.principal._roles.append({'SiteCreator': 1})
+        self.interaction = None
+
+
 class PloneUser(object):
 
     def __init__(self, request):

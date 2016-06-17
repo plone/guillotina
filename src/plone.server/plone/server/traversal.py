@@ -13,6 +13,8 @@ from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
 from plone.server.interfaces import ITraversableView
 from plone.server.interfaces import IView
+from plone.server.interfaces import IDataBase
+from plone.server.interfaces import IApplication
 from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.security import DexterityPermissionChecker
 from plone.server.utils import import_class
@@ -29,11 +31,21 @@ from zope.security.interfaces import IPermission
 from zope.security.proxy import ProxyFactory
 
 
-async def traverse(request, parent, path):
+async def do_traverse(request, parent, path):
+    """ Traverse for the code API
+    """
     if not path:
         return parent, path
 
     assert request is not None  # could be used for permissions, etc
+
+    if ISite.providedBy(parent) and \
+       path[0] != request._db_id:
+        raise HTTPUnauthorized('Tried to access a site outsite the request')
+
+    if IApplication.providedBy(context) and \
+       path[0] != request._site_id:
+        raise HTTPUnauthorized('Tried to access a site outsite the request')
 
     try:
         if path[0].startswith('_'):
@@ -46,7 +58,50 @@ async def traverse(request, parent, path):
 
     context._v_parent = parent
 
+
+    return await traverse(request, context, path[1:])
+
+
+async def traverse(request, parent, path):
+    """ Do not use outside the main router function
+    """
+
+    if IApplication.providedBy(parent):
+        participation = parent.root_participation(request)
+        if participation:
+            request.security.add(participation)
+
+    if not path:
+        return parent, path
+
+    assert request is not None  # could be used for permissions, etc
+
+    dbo = None
+    if IDataBase.providedBy(parent):
+        # Look on the PersistentMapping from the DB
+        dbo = parent
+        parent = request._conn.root()
+
+    try:
+        if path[0].startswith('_'):
+            raise HTTPUnauthorized()
+        context = parent[path[0]]
+    except TypeError:
+        return parent, path
+    except KeyError:
+        return parent, path
+
+    if dbo is not None:
+        context._v_parent = dbo
+    else:
+        context._v_parent = parent
+
+    if IDataBase.providedBy(context):
+        request._conn = context.open()
+        request._db_id = context.id
+
     if ISite.providedBy(context):
+        request._site_id = context.id
         request.site = context
         request.site_components = context.getSiteManager()
         request.site_settings = request.site_components.getUtility(IRegistry)
@@ -88,13 +143,13 @@ class MatchInfo(AbstractMatchInfo):
 
 
 class TraversalRouter(AbstractRouter):
-    _root_factory = None
+    _root = None
 
-    def __init__(self, root_factory=None):
-        self.set_root_factory(root_factory)
+    def __init__(self, root=None):
+        self.set_root(root)
 
-    def set_root_factory(self, root_factory):
-        self._root_factory = root_factory
+    def set_root(self, root):
+        self._root = root
 
     async def resolve(self, request):
         alsoProvides(request, IRequest)
@@ -133,10 +188,6 @@ class TraversalRouter(AbstractRouter):
             ITranslated)
         if translator is not None:
             resource = translator.translate()
-
-        # permission_tool = IPermissionTool(request)
-        # if not checkPermission(resource, 'Access content'):
-        #     raise HTTPUnauthorized('No access to content')
 
         permission = getUtility(IPermission, name='plone.AccessContent')
 
@@ -180,8 +231,5 @@ class TraversalRouter(AbstractRouter):
 
     async def traverse(self, request):
         path = tuple(p for p in request.path.split('/') if p)
-        root = self._root_factory()
-        if path:
-            return await traverse(request, root, path)
-        else:
-            return root, path
+        root = self._root
+        return await traverse(request, root, path)
