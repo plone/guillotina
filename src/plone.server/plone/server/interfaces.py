@@ -16,6 +16,10 @@ class IDataBase(Interface):
     pass
 
 
+class IStaticFile(Interface):
+    pass
+
+
 class IPloneSite(model.Schema, ISite):
     title = schema.TextLine(
         title='Title',
@@ -24,6 +28,9 @@ class IPloneSite(model.Schema, ISite):
         default=u''
     )
 
+
+class IContentNegotiation(Interface):
+    pass
 
 class IRequest(Interface):
     pass
@@ -48,6 +55,10 @@ class ITraversableView(IView):
 
     def publishTraverse(traverse_to):
         pass
+
+
+class IDownloadView(IView):
+    pass
 
 
 class IGET(IView):

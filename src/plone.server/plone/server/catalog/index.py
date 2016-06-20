@@ -40,7 +40,7 @@ def get_hook():
         return  # no search configured
 
     try:
-        trns = utils.tm(utils.get_current_request())
+        trns = utils.tm(utils.get_current_request()).get()
     except RequestNotFound:
         trns = transaction.get()
     hook = None

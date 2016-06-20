@@ -11,10 +11,18 @@ from zope.security.interfaces import IParticipation
 
 class RootParticipation(object):
 
-    def __init__(self):
-        self.principal = PloneUser(None)
+    def __init__(self, request):
+        self.principal = PloneUser(request)
         self.principal.id = 'RootUser'
         self.principal._roles.append({'SiteCreator': 1})
+        self.interaction = None
+
+
+class AnonymousParticipation(object):
+
+    def __init__(self, request):
+        self.principal = AnonymousUser(request)
+        self.principal._roles.append({'Anonymous': 1})
         self.interaction = None
 
 
@@ -35,9 +43,8 @@ class PloneUser(object):
 class AnonymousUser(PloneUser):
 
     def __init__(self, request):
+        super(AnonymousUser, self).__init__(request)
         self.id = 'Anonymous User'
-        self.request = request
-        self.groups = ()
 
 
 @adapter(IRequest)

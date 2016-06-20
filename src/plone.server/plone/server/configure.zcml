@@ -19,9 +19,12 @@
 
   <adapter factory=".renderers.RendererFormatJson" />
   <adapter factory=".renderers.RendererFormatHtml" />
+  <adapter factory=".renderers.RendererFormatRaw" />
   <adapter factory=".renderers.Renderer" />
   <adapter factory=".renderers.RendererJson" />
   <adapter factory=".renderers.RendererHtml" />
+  <adapter factory=".renderers.RendererRaw" />
+
 
   <include file="meta.zcml" />
   <include file="permissions.zcml" />

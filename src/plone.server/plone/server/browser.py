@@ -36,3 +36,10 @@ class View(object):
             'context': str(self.context),
             'path': '/'.join(get_physical_path(self.context))
         }
+
+
+class ResponseWithHeaders(object):
+
+    def __init__(self, response, headers):
+        self.response = response
+        self.headers = headers

@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
+from aiohttp.web import RequestHandler
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
 from plone.server.api.layer import IDefaultLayer
-from plone.server.contentnegotiation import content_negotiation
+from plone.server.contentnegotiation import content_type_negotiation
+from plone.server.contentnegotiation import language_negotiation
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
@@ -17,7 +19,9 @@ from plone.server.interfaces import IDataBase
 from plone.server.interfaces import IApplication
 from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.security import DexterityPermissionChecker
+from plone.server.auth.participation import AnonymousParticipation
 from plone.server.utils import import_class
+from plone.server.utils import locked
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
@@ -29,6 +33,9 @@ from zope.security.interfaces import IInteraction
 from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
 from zope.security.proxy import ProxyFactory
+from plone.server.utils import sync
+
+WRITING_VERBS = ['POST', 'PUT']
 
 
 async def do_traverse(request, parent, path):
@@ -58,7 +65,6 @@ async def do_traverse(request, parent, path):
 
     context._v_parent = parent
 
-
     return await traverse(request, context, path[1:])
 
 
@@ -80,7 +86,7 @@ async def traverse(request, parent, path):
     if IDataBase.providedBy(parent):
         # Look on the PersistentMapping from the DB
         dbo = parent
-        parent = request._conn.root()
+        parent = parent._conn.root()
 
     try:
         if path[0].startswith('_'):
@@ -97,7 +103,7 @@ async def traverse(request, parent, path):
         context._v_parent = parent
 
     if IDataBase.providedBy(context):
-        request._conn = context.open()
+        request.conn = context.conn
         request._db_id = context.id
 
     if ISite.providedBy(context):
@@ -124,7 +130,16 @@ class MatchInfo(AbstractMatchInfo):
         self.rendered = rendered
 
     async def handler(self, request):
-        view_result = await self.view()
+        if request.method in WRITING_VERBS:
+            txn = request.conn.transaction_manager.begin(request)
+            async with locked(self.resource):
+                view_result = await self.view()
+            if txn is None:
+                await sync(request)(txn.commit)
+            else:
+                await sync(request)(txn.abort)
+        else:
+            view_result = await self.view()
         return await self.rendered(view_result)
 
     def get_info(self):
@@ -180,7 +195,7 @@ class TraversalRouter(AbstractRouter):
 
         method = DICT_METHODS[request.method]
 
-        renderer, language = content_negotiation(request)
+        language = language_negotiation(request)
         language_object = language(request)
 
         translator = queryMultiAdapter(
@@ -188,6 +203,10 @@ class TraversalRouter(AbstractRouter):
             ITranslated)
         if translator is not None:
             resource = translator.translate()
+
+        # Add anonymous participation 
+        if len(request.security.participations) == 0:
+            request.security.add(AnonymousParticipation(request))
 
         permission = getUtility(IPermission, name='plone.AccessContent')
 
@@ -219,6 +238,8 @@ class TraversalRouter(AbstractRouter):
         if checker is not None:
             view = ProxyFactory(view, checker)
         # We want to check for the content negotiation
+
+        renderer = content_type_negotiation(request, resource, view)
         renderer_object = renderer(request)
 
         rendered = queryMultiAdapter(
@@ -233,3 +254,4 @@ class TraversalRouter(AbstractRouter):
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
+

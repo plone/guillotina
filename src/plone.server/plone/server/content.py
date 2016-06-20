@@ -3,6 +3,7 @@ from plone.dexterity.content import Container
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IPloneSite
+from plone.server.interfaces import IStaticFile
 from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ILayers
@@ -10,6 +11,7 @@ from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
 from zope.securitypolicy.interfaces import IPrincipalPermissionManager
 from zope.securitypolicy.interfaces import IRolePermissionManager
+from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
 
 @implementer(IPloneSite)
@@ -73,8 +75,13 @@ class PloneSite(Container):
         self['_components'] = sitemanager
 
 
+@implementer(IStaticFile)
 class StaticFile(object):
     def __init__(self, file_path):
         self._file_path = file_path
 
-    
+
+class StaticFileSpecialPermissions(PrincipalPermissionManager):
+    def __init__(self, db):
+        super(StaticFileSpecialPermissions, self).__init__()
+        self.grantPermissionToPrincipal('plone.AccessContent', 'Anonymous User')

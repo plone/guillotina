@@ -4,6 +4,7 @@ from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRenderFormats
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
+from plone.server.browser import ResponseWithHeaders
 from zope.component import adapter
 from zope.interface import implementer
 
@@ -15,6 +16,10 @@ class IRendererFormatHtml(IRenderFormats):
 
 
 class IRendererFormatJson(IRenderFormats):
+    pass
+
+
+class IRendererFormatRaw(IRenderFormats):
     pass
 
 
@@ -38,6 +43,12 @@ class RendererFormatHtml(object):
     def __init__(self, request):
         self.request = request
 
+@adapter(IRequest)
+@implementer(IRendererFormatRaw)
+class RendererFormatRaw(object):
+    def __init__(self, request):
+        self.request = request
+
 # Real objects
 
 
@@ -55,12 +66,29 @@ class Renderer(object):
 @implementer(IRendered)
 class RendererJson(Renderer):
     async def __call__(self, value):
-        return json_response(value)
+        if isinstance(value, ResponseWithHeaders):
+            resp = json_response(value.response)
+            # Add custom headers
+            resp.headers.update(value.headers)
+        else:
+            if not hasattr(value, 'status_code') or \
+                    (hasattr(value, 'status_code') and value.status_code < 400):
+                resp = json_response(value)
+            else:
+                return value
+        return resp
 
 
 @adapter(IRendererFormatHtml, IView, IRequest)
 @implementer(IRendered)
 class RendererHtml(Renderer):
-    async def __call__(self):
-        value = ''
+    async def __call__(self, value):
+        # Safe html transformation
         return value
+
+@adapter(IRendererFormatRaw, IView, IRequest)
+@implementer(IRendered)
+class RendererRaw(Renderer):
+    async def __call__(self, value):
+        return value
+

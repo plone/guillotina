@@ -14,7 +14,11 @@ class DefaultGET(Service):
 
 
 class DefaultPOST(Service):
-    pass
+    async def __call__(self):
+        serializer = getMultiAdapter(
+            (self.context, self.request),
+            ISerializeToJson)
+        return serializer()
 
 
 class DefaultPUT(Service):

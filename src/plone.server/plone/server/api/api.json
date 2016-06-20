@@ -17,7 +17,8 @@
     },
     "renderers": {
         "application/json": "plone.server.renderers.IRendererFormatJson",
-        "text/html": "plone.server.renderers.IRendererFormatHtml"
+        "text/html": "plone.server.renderers.IRendererFormatHTML",
+        "*/*": "plone.server.renderers.IRendererFormatRaw"
     },
     "languages": {
         "en": "plone.server.languages.IEN",
@@ -26,8 +27,8 @@
     },
     "contenttypes": {
         "plone.server.interfaces.IDataBase": {
-            "PUT": {
-                "factory": "plone.server.api.portal.DefaultPUT",
+            "POST": {
+                "factory": "plone.server.api.portal.DefaultPOST",
                 "permission": "plone.AddPortal"
             },
             "GET": {
@@ -46,6 +47,12 @@
                 "permission": "plone.GetPortals"
             }
 
+        },
+        "plone.server.interfaces.IStaticFile": {
+            "GET": {
+                "factory": "plone.server.api.file.DefaultGET",
+                "permission": "plone.AccessContent"
+            }
         },
         "plone.server.interfaces.IPloneSite": {
             "endpoints": {
