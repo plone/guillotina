@@ -23,8 +23,8 @@ class CommitHook(object):
     def __call__(self, trns):
         if not trns:
             return
-
-        loop = asyncio.get_event_loop()
+        # Commits are run in sync thread so there is no asyncloop
+        loop = asyncio.new_event_loop()
         search = getUtility(ICatalogUtility)
         asyncio.run_coroutine_threadsafe(search.remove(self.remove), loop)
         asyncio.run_coroutine_threadsafe(search.index(self.index), loop)
