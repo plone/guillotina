@@ -5,7 +5,7 @@ from plone.server.browser import get_physical_path
 from plone.server.browser import ResponseWithHeaders
 from zope.component import getMultiAdapter
 from plone.dexterity.utils import createContent
-from aiohttp.web_exceptions import HTTPUnauthorized
+from aiohttp.web_exceptions import HTTPUnauthorized, HTTPConflict
 
 
 class DefaultGET(Service):
@@ -35,7 +35,7 @@ class DefaultPOST(Service):
 
         if data['id'] in self.context:
             # Already exist
-            return HTTPUnauthorized()
+            return HTTPConflict(reason="id already exist")
 
         site = createContent(
             'Plone Site',
