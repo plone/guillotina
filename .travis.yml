@@ -11,7 +11,7 @@ before_install:
 - docker-compose -f docker-compose-dev.yml up -d 
 install:
 - python bootstrap-buildout.py
-- bin/buildout -N -t 3
+- bin/buildout -t 3
 - docker ps -a
 - sleep 15
 script:
