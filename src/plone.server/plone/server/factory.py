@@ -26,6 +26,7 @@ from plone.server import DICT_LANGUAGES
 
 from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IContentNegotiation
+from ZEO.ClientStorage import ClientStorage
 
 import asyncio
 import json
@@ -172,17 +173,20 @@ def make_app(config_file):
     # Initialize asyncio executor worker
     app.executor = ThreadPoolExecutor(max_workers=1)
 
+    with open(config_file, 'r') as config:
+        settings = json.load(config)
+    root = ApplicationRoot(config_file)
+    root.app = app
+
     # Initialize global (threadlocal) ZCA configuration
     app.config = ConfigurationMachine()
     registerCommonDirectives(app.config)
+    provideUtility(root, IApplication, 'root')
+
     include(app.config, 'configure.zcml', sys.modules['plone.server'])
     for ep in iter_entry_points('plone.server'):  # auto-include applications
         include(app.config, 'configure.zcml', ep.load())
     app.config.execute_actions()
-
-    with open(config_file, 'r') as config:
-        settings = json.load(config)
-    root = ApplicationRoot(config_file)
 
     content_type = ContentNegotiatorUtility('content_type', DICT_RENDERS.keys())
     language = ContentNegotiatorUtility('language', DICT_LANGUAGES.keys())
@@ -222,6 +226,11 @@ def make_app(config_file):
             if dbconfig['storage'] == 'ZODB':
                 # Set request aware database for app
                 db = RequestAwareDB(dbconfig['folder'] + '/Data.fs')
+                dbo = DataBase(key, db)
+            elif dbconfig['storage'] == 'ZEO':
+                # Set request aware database for app
+                cs = ClientStorage((dbconfig['address'], dbconfig['port']))
+                db = RequestAwareDB(cs)
                 dbo = DataBase(key, db)
             root[key] = dbo
 
