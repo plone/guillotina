@@ -58,4 +58,11 @@
     trusted="true"
     />
 
+  <adapter
+    factory=".content.StaticFileSpecialPermissions"
+    provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
+    for="plone.server.interfaces.IStaticDirectory"
+    trusted="true"
+    />
+
 </configure>

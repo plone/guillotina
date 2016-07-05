@@ -4,6 +4,7 @@ from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IPloneSite
 from plone.server.interfaces import IStaticFile
+from plone.server.interfaces import IStaticDirectory
 from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ILayers
@@ -79,6 +80,18 @@ class PloneSite(Container):
 class StaticFile(object):
     def __init__(self, file_path):
         self._file_path = file_path
+
+
+@implementer(IStaticDirectory)
+class StaticDirectory(object):
+
+    _items = {}
+
+    def __init__(self, file_path):
+        self._file_path = file_path
+        for x in file_path.iterdir():
+            if not x.name.startswith('.') and '/' not in x.name:
+                self._items[x.name] = StaticFile(str(x.absolute()))
 
 
 class StaticFileSpecialPermissions(PrincipalPermissionManager):

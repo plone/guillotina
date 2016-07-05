@@ -20,6 +20,10 @@ class IStaticFile(Interface):
     pass
 
 
+class IStaticDirectory(Interface):
+    pass
+
+
 class IPloneSite(model.Schema, ISite):
     title = schema.TextLine(
         title='Title',

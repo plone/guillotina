@@ -12,8 +12,11 @@ from plone.server.auth.oauth import IOAuth
 from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
+from plone.server.interfaces import IApplication
+from plone.server.content import StaticDirectory
 from zope.component.zcml import adapter
 from zope.component.zcml import utility
+from zope.component import getUtility
 from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
@@ -24,6 +27,7 @@ from zope.security.checker import getCheckerForInstancesOf
 import json
 import logging
 import os
+from pathlib import Path as osPath
 
 
 logger = logging.getLogger(__name__)
@@ -256,3 +260,30 @@ def catalogDirective(_context, file):
     catalog_utility = CatalogUtility(settings)
 
     utility(_context, provides=ICatalogUtility, component=catalog_utility)
+
+
+class IResourceDirectory(Interface):
+    '''
+    '''
+
+    name = configuration_fields.MessageID(
+        title=_('Name where is going to be published'),
+        description='',
+        required=True
+    )
+
+    directory = Path(
+        title='The name of the directory',
+        description='Publish at /static the directory',
+        required=True
+    )
+
+
+def resourceDirectory(_context, name, directory):
+    if directory:
+        directory = osPath(_context.path(directory))
+        if not directory.is_dir():
+            raise ConfigurationError('No such directory', directory)
+    root = getUtility(IApplication, 'root')
+    if name not in root:
+        root[name] = StaticDirectory(directory)

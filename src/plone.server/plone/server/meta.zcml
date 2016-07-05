@@ -28,6 +28,12 @@
             handler=".metaconfigure.oauthDirective"
             />
 
+        <directive
+            name="resourceDirectory"
+            schema=".metaconfigure.IResourceDirectory"
+            handler=".metaconfigure.resourceDirectory"
+            />
+
     </directives>
 
 </configure>
