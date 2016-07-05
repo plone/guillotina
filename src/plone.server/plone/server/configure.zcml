@@ -37,4 +37,8 @@
   <plone:api file="api/api.json" />
 
   <adapter factory=".summary.DefaultJSONSummarySerializer" />
+
+  <!-- Addons -->
+  <include package="plone.i18n" />
+
 </configure>
