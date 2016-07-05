@@ -4,6 +4,11 @@
 		"plone": {
 			"storage": "ZODB",
 			"folder": "data"
+			},
+		"zeo1": {
+			"storage": "ZEO",
+			"address": "127.0.0.1",
+			"port": 8090
 			}
 		}
 	],
