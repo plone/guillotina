@@ -4,6 +4,7 @@ from aiohttp.abc import AbstractRouter
 from aiohttp.web import RequestHandler
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
+from aiohttp.web_exceptions import HTTPError
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
@@ -32,10 +33,11 @@ from zope.security.checker import selectChecker
 from zope.security.interfaces import IInteraction
 from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
+from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 from plone.server.utils import sync
 
-WRITING_VERBS = ['POST', 'PUT']
+WRITING_VERBS = ['POST', 'PUT', 'PATCH']
 
 
 async def do_traverse(request, parent, path):
@@ -50,7 +52,7 @@ async def do_traverse(request, parent, path):
        path[0] != request._db_id:
         raise HTTPUnauthorized('Tried to access a site outsite the request')
 
-    if IApplication.providedBy(context) and \
+    if IApplication.providedBy(parent) and \
        path[0] != request._site_id:
         raise HTTPUnauthorized('Tried to access a site outsite the request')
 
@@ -133,13 +135,21 @@ class MatchInfo(AbstractMatchInfo):
         if request.method in WRITING_VERBS:
             txn = request.conn.transaction_manager.begin(request)
             async with locked(self.resource):
-                view_result = await self.view()
-            if txn is None:
+                try:
+                    view_result = await self.view()
+                except Unauthorized:
+                    view_result = HTTPUnauthorized()
+            try:
                 await sync(request)(txn.commit)
-            else:
-                await sync(request)(txn.abort)
+            except Unauthorized:
+                view_result = HTTPUnauthorized()
+            except Exception as e:
+                view_result = HTTPError(e)
         else:
-            view_result = await self.view()
+            try:
+                view_result = await self.view()
+            except Unauthorized:
+                view_result = HTTPUnauthorized()
         return await self.rendered(view_result)
 
     def get_info(self):
