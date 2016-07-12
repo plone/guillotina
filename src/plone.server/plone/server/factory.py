@@ -167,7 +167,7 @@ class DataBase(object):
 
     def __getitem__(self, key):
         # is there any request active ? -> conn there
-        return self.conn.root[key]
+        return self.conn.root()[key]
 
     def keys(self):
         return list(self.conn.root().keys())

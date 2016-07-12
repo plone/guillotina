@@ -174,7 +174,6 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
         for accept, renderer_interface in json_info['renderers'].items():
             # We define which Interface is for the content negotiation
             # Order is important !!
-            print(accept)
             DICT_RENDERS[accept] = import_class(renderer_interface)
 
     if 'languages' in json_info:

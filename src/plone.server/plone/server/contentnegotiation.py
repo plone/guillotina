@@ -9,6 +9,7 @@ from zope.component import getUtility
 
 import logging
 log = logging.getLogger(__name__)
+log.setLevel(40)
 
 
 class AcceptParameters(object):
@@ -773,10 +774,8 @@ def content_type_negotiation(request, resource, view):
         return accept
 
     np = getUtility(IContentNegotiation, 'content_type')
-    print(accept)
     ap = np.negotiate(accept=accept)
     # We need to check for the accept
-    print(str(ap.content_type))
     accept = DICT_RENDERS[str(ap.content_type)]
     return accept
 

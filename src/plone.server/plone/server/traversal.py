@@ -34,6 +34,8 @@ from zope.security.interfaces import IPermission
 from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 from plone.server.utils import sync
+import traceback
+
 
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
@@ -122,7 +124,7 @@ async def traverse(request, parent, path):
 class MatchInfo(AbstractMatchInfo):
     """Function that returns from traversal request on aiohttp."""
 
-    def __init__(self, request, resource, view, rendered):
+    def __init__(self, resource, request, view, rendered):
         """Value that comes from the traversing."""
         self.request = request
         self.resource = resource
@@ -141,15 +143,18 @@ class MatchInfo(AbstractMatchInfo):
             try:
                 await sync(request)(txn.commit)
             except Unauthorized:
+                await sync(request)(txn.abort)
                 view_result = HTTPUnauthorized()
             except Exception as e:
+
+                traceback.print_tb(e.__traceback__)
+                await sync(request)(txn.abort)
                 view_result = HTTPBadRequest(text=str(e))
         else:
             try:
                 view_result = await self.view()
             except Unauthorized:
                 view_result = HTTPUnauthorized()
-        print(self.rendered)
         return await self.rendered(view_result)
 
     def get_info(self):
@@ -261,7 +266,6 @@ class TraversalRouter(AbstractRouter):
         # We want to check for the content negotiation
 
         renderer = content_type_negotiation(request, resource, view)
-        print(renderer)
         renderer_object = renderer(request)
 
         rendered = queryMultiAdapter(

@@ -22,6 +22,8 @@ class PloneSite(Container):
 
     def __init__(self, *args, **kwargs):
         super(PloneSite, self).__init__(*args, **kwargs)
+
+    def install(self):
         self['_components'] = components = PersistentComponents()
 
         # Creating and registering a local registry

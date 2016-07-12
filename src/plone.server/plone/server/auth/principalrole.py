@@ -20,7 +20,8 @@ class AnnotationPlonePrincipalRoleManager(AnnotationPrincipalRoleManager):
             # We need to check if there is any user information that can give
             # us global roles
             for participation in request.security.participations:
-                if principal_id == participation.principal.id:
+                if participation.principal is not None and \
+                   principal_id == participation.principal.id:
                     global_roles = participation.principal._roles.copy()
         if local_roles:
             roles = global_roles.update(local_roles)
