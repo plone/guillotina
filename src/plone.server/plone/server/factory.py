@@ -26,6 +26,7 @@ from plone.server import DICT_LANGUAGES
 
 from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IContentNegotiation
+from plone.server.utils import import_class
 from ZEO.ClientStorage import ClientStorage
 
 import asyncio
@@ -119,7 +120,9 @@ class DataBaseSpecialPermissions(PrincipalPermissionManager):
         super(DataBaseSpecialPermissions, self).__init__()
         self.grantPermissionToPrincipal('plone.AddPortal', 'RootUser')
         self.grantPermissionToPrincipal('plone.GetPortals', 'RootUser')
+        self.grantPermissionToPrincipal('plone.DeletePortals', 'RootUser')
         self.grantPermissionToPrincipal('plone.AccessContent', 'RootUser')
+        # Access anonymous - needs to be configurable
         self.grantPermissionToPrincipal('plone.AccessContent', 'Anonymous User')
 
 
@@ -194,33 +197,6 @@ def make_app(config_file):
     provideUtility(content_type, IContentNegotiation, 'content_type')
     provideUtility(language, IContentNegotiation, 'language')
 
-    # for database in settings['databases']:
-    #     # Initialize DB
-    #     if database['storage'] == 'ZODB':
-    #         db = ZODB.DB(database['folder'] + 'Data.fs')
-    #         conn = db.open()
-    #         if getattr(conn.root, 'data', None) is None:
-    #             with transaction.manager:
-    #                 dbroot = conn.root()
-
-    #                 # Creating a testing site
-    #                 site = createContent('Plone Site',
-    #                                      id='plone',
-    #                                      title='Demo Site',
-    #                                      description='Awww yeah...')
-    #                 dbroot['plone'] = site
-    #                 site.__parent__ = None  # don't expose dbroot
-
-    #                 # And some example content
-    #                 # obj = createContent('Todo',
-    #                 #                     id='obj1',
-    #                 #                     title="It's a todo!",
-    #                 #                     notes='$240 of pudding.')
-    #                 # site['obj1'] = obj
-    #                 # obj.__parent__ = site
-    #         conn.close()
-    #         db.close()
-
     for database in settings['databases']:
         for key, dbconfig in database.items():
             if dbconfig['storage'] == 'ZODB':
@@ -237,6 +213,12 @@ def make_app(config_file):
     for static in settings['static']:
         for key, file_path in static.items():
             root[key] = StaticFile(file_path)
+
+    for util in settings['utilities']:
+        interface = import_class(util['provides'])
+        factory = import_class(util['factory'])
+        utility_object = factory(util['settings'])
+        provideUtility(utility_object, interface)
 
     root.set_creator_password(settings['creator']['password'])
     root.set_creator_salt(settings['salt'])
