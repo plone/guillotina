@@ -131,10 +131,6 @@ class RequestDataManager(object):
 class RequestAwareConnection(ZODB.Connection.Connection):
     def _register(self, obj=None):
         request = get_current_request()
-        if obj._p_jar != self or self != request.conn:
-            print(obj._p_jar._db.storage)
-            print(self._db.storage)
-            print(request.conn._db.storage)
         assert obj._p_jar == self
         assert self == request.conn
         try:
