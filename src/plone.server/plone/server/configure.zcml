@@ -33,6 +33,7 @@
 
   <include package=".auth" />
   <include package=".catalog" />
+  <include package=".framing" />
 
   <plone:api file="api/api.json" />
 

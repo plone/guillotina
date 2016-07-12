@@ -94,6 +94,8 @@ class IOPTIONS(IView):
 class IRenderFormats(Interface):
     pass
 
+class IFrameFormats(Interface):
+    pass
 
 class ILanguage(Interface):
     pass
