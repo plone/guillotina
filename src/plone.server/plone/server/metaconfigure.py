@@ -23,6 +23,7 @@ from zope.configuration.fields import Path
 from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
+from collections import OrderedDict
 
 import json
 import logging
@@ -147,7 +148,7 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
             raise ConfigurationError('No such file', file)
 
     with open(file, 'r') as f:
-        json_info = json.loads(f.read())
+        json_info = json.loads(f.read(), object_pairs_hook=OrderedDict)
         f.close()
 
     if 'methods' in json_info:
@@ -172,6 +173,8 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
     if 'renderers' in json_info:
         for accept, renderer_interface in json_info['renderers'].items():
             # We define which Interface is for the content negotiation
+            # Order is important !!
+            print(accept)
             DICT_RENDERS[accept] = import_class(renderer_interface)
 
     if 'languages' in json_info:

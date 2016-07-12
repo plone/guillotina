@@ -7,27 +7,8 @@ from plone.server import DICT_LANGUAGES
 from zope.component import getUtility
 
 
-"""
-Negotiator
-==========
-
-From Richard Jones at https://pypi.python.org/pypi/negotiator
-
-Negotiator offers a framework for making content negotiation decisions
-based on the HTTP accept headers.
-
-NOTE it currently only formally supports Accept and Accept-Language,
-but it is a short haul to support for Accept-Charset and
-Accept-Encoding (TODO)
-
-"""
 import logging
 log = logging.getLogger(__name__)
-
-__version__ = "1.0.0"
-
-# Objects used to represent aspects of Content Negotiation
-###########################################################
 
 
 class AcceptParameters(object):
@@ -792,8 +773,10 @@ def content_type_negotiation(request, resource, view):
         return accept
 
     np = getUtility(IContentNegotiation, 'content_type')
+    print(accept)
     ap = np.negotiate(accept=accept)
     # We need to check for the accept
+    print(str(ap.content_type))
     accept = DICT_RENDERS[str(ap.content_type)]
     return accept
 
@@ -803,6 +786,8 @@ def language_negotiation(request):
 
     if 'ACCEPT-LANGUAGE' in request.headers:
         accept_lang = request.headers['ACCEPT-LANGUAGE']
+    else:
+        accept_lang = 'en'
 
     np = getUtility(IContentNegotiation, 'language')
     ap = np.negotiate(accept_language=accept_lang)
