@@ -29,7 +29,13 @@ from zope.securitypolicy.interfaces import IPrincipalRoleMap
 from zope.securitypolicy.principalrole import principalRoleManager
 globalRolesForPrincipal = principalRoleManager.getRolesForPrincipal
 
-SettingAsBoolean = {Allow: True, Deny: False, Unset: None, None: None}
+SettingAsBoolean = {
+    Allow: True,
+    Deny: False,
+    Unset: None,
+    None: None,
+    1: True,
+    0: False}
 
 _marker = object()
 

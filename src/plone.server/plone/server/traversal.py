@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
+"""Main routing traversal class."""
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
-from aiohttp.web import RequestHandler
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from aiohttp.web_exceptions import HTTPError
+from aiohttp.web_exceptions import HTTPBadRequest
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
-from plone.server import DICT_RENDERS
 from plone.server.api.layer import IDefaultLayer
 from plone.server.contentnegotiation import content_type_negotiation
 from plone.server.contentnegotiation import language_negotiation
@@ -15,11 +15,11 @@ from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
 from plone.server.interfaces import ITraversableView
-from plone.server.interfaces import IView
 from plone.server.interfaces import IDataBase
 from plone.server.interfaces import IApplication
+from plone.server.interfaces import IOPTIONS
 from plone.server.registry import ACTIVE_LAYERS_KEY
-from plone.server.security import DexterityPermissionChecker
+from plone.server.registry import CORS_KEY
 from plone.server.auth.participation import AnonymousParticipation
 from plone.server.utils import import_class
 from plone.server.utils import locked
@@ -29,7 +29,6 @@ from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
 from zope.security.checker import getCheckerForInstancesOf
-from zope.security.checker import selectChecker
 from zope.security.interfaces import IInteraction
 from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
@@ -37,12 +36,11 @@ from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 from plone.server.utils import sync
 
-WRITING_VERBS = ['POST', 'PUT', 'PATCH']
+WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
 
 async def do_traverse(request, parent, path):
-    """ Traverse for the code API
-    """
+    """Traverse for the code API."""
     if not path:
         return parent, path
 
@@ -71,9 +69,7 @@ async def do_traverse(request, parent, path):
 
 
 async def traverse(request, parent, path):
-    """ Do not use outside the main router function
-    """
-
+    """Do not use outside the main router function."""
     if IApplication.providedBy(parent):
         participation = parent.root_participation(request)
         if participation:
@@ -97,7 +93,7 @@ async def traverse(request, parent, path):
     except TypeError:
         return parent, path
     except KeyError:
-        return parent, path
+        raise HTTPNotFound()
 
     if dbo is not None:
         context._v_parent = dbo
@@ -125,13 +121,17 @@ async def traverse(request, parent, path):
 
 
 class MatchInfo(AbstractMatchInfo):
+    """Function that returns from traversal request on aiohttp."""
+
     def __init__(self, request, resource, view, rendered):
+        """Value that comes from the traversing."""
         self.request = request
         self.resource = resource
         self.view = view
         self.rendered = rendered
 
     async def handler(self, request):
+        """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             txn = request.conn.transaction_manager.begin(request)
             async with locked(self.resource):
@@ -168,15 +168,20 @@ class MatchInfo(AbstractMatchInfo):
 
 
 class TraversalRouter(AbstractRouter):
+    """Custom router for plone.server."""
+
     _root = None
 
     def __init__(self, root=None):
+        """On traversing aiohttp sets the root object."""
         self.set_root(root)
 
     def set_root(self, root):
+        """Warpper to set the root object."""
         self._root = root
 
     async def resolve(self, request):
+        """Main function to resolve a request."""
         alsoProvides(request, IRequest)
         alsoProvides(request, IDefaultLayer)
         request.site_components = getGlobalSiteManager()
@@ -193,6 +198,9 @@ class TraversalRouter(AbstractRouter):
         request.resource = resource
         request.tail = tail
         request.exc = exc
+
+        if request.resource is None:
+            raise HTTPBadRequest(text=str(request.exc))
 
         traverse_to = None
         if tail and len(tail) == 1:
@@ -214,7 +222,7 @@ class TraversalRouter(AbstractRouter):
         if translator is not None:
             resource = translator.translate()
 
-        # Add anonymous participation 
+        # Add anonymous participation
         if len(request.security.participations) == 0:
             request.security.add(AnonymousParticipation(request))
 
@@ -223,7 +231,10 @@ class TraversalRouter(AbstractRouter):
         allowed = request.security.checkPermission(permission.id, resource)
 
         if not allowed:
-            raise HTTPUnauthorized()
+            # Check if its a CORS call:
+            if IOPTIONS != method or \
+               not request.site_settings.get(CORS_KEY, False):
+                raise HTTPUnauthorized()
 
         # Site registry lookup
         try:
@@ -261,7 +272,7 @@ class TraversalRouter(AbstractRouter):
             raise HTTPNotFound()
 
     async def traverse(self, request):
+        """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
-

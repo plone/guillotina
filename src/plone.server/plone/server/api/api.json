@@ -4,17 +4,11 @@
         "POST": "plone.server.interfaces.IPOST",
         "PATCH": "plone.server.interfaces.IPATCH",
         "DELETE": "plone.server.interfaces.IDELETE",
-        "GET": "plone.server.interfaces.IGET"
+        "GET": "plone.server.interfaces.IGET",
+        "OPTIONS": "plone.server.interfaces.IOPTIONS"
     },
     "layer": "plone.server.api.layer.IDefaultLayer",
     "default_permission": "zope.Public",
-    "default_cors": {
-        "accept": "*",
-        "headers": "*",
-        "expose_headers": true,
-        "max_age": 3660,
-        "auth": true
-    },
     "renderers": {
         "application/json": "plone.server.renderers.IRendererFormatJson",
         "text/html": "plone.server.renderers.IRendererFormatHTML",
@@ -35,7 +29,6 @@
                 "factory": "plone.server.api.portal.DefaultGET",
                 "permission": "plone.GetPortals"
             }
-
         },
         "plone.server.interfaces.IApplication": {
             "PUT": {
@@ -46,7 +39,6 @@
                 "factory": "plone.server.api.portal.DefaultGET",
                 "permission": "plone.GetPortals"
             }
-
         },
         "plone.server.interfaces.IStaticFile": {
             "GET": {
@@ -66,6 +58,10 @@
                         "permission": "ModifyContent"
                     }
                 }
+            },
+            "DELETE": {
+                "factory": "plone.server.api.portal.DefaultDELETE",
+                "permission": "plone.DeletePortals"                
             }
         },
         "plone.dexterity.interfaces.IDexterityContent": {
@@ -96,6 +92,10 @@
             "DELETE": {
                 "factory": "plone.server.api.dexterity.DefaultDELETE",
                 "permission": "plone.ModifyContent"
+            },
+            "OPTIONS": {
+                "factory": "plone.server.api.dexterity.DefaultOPTIONS",
+                "permission": "plone.AccessPreflight"
             }
         }
     },

@@ -23,6 +23,10 @@
       role="plone.SiteCreator"
       />
 
+  <grant
+      permission="plone.AccessPreflight"
+      role="plone.Anonymous"
+      />
 
   <grant
       permission="plone.AddPortal"
@@ -31,6 +35,11 @@
 
   <grant
       permission="plone.GetPortals"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.DeletePortals"
       role="plone.SiteCreator"
       />
 

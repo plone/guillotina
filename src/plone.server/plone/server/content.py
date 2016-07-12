@@ -8,6 +8,8 @@ from plone.server.interfaces import IStaticDirectory
 from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ILayers
+from plone.server.registry import ICors
+
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
 from zope.securitypolicy.interfaces import IPrincipalPermissionManager
@@ -31,12 +33,29 @@ class PloneSite(Container):
         registry.registerInterface(ILayers)
         registry.registerInterface(IAuthPloneUserPlugins)
         registry.registerInterface(IAuthExtractionPlugins)
+        registry.registerInterface(ICors)
         registry.forInterface(ILayers).active_layers = \
             ['plone.server.api.layer.IDefaultLayer']
         registry.forInterface(IAuthExtractionPlugins).active_plugins = \
             ['plone.server.auth.oauth.PloneJWTExtraction']
         registry.forInterface(IAuthPloneUserPlugins).active_plugins = \
             ['plone.server.auth.oauth.OAuthPloneUserFactory']
+
+        # registry['plone.server.registry.ICors.enabled'] = True
+        # registry['plone.server.registry.ICors.allow_origin'] = []
+        # registry['plone.server.registry.ICors.allow_methods'] = []
+        # registry['plone.server.registry.ICors.allow_headers'] = []
+        # registry['plone.server.registry.ICors.expose_headers'] = []
+        # registry['plone.server.registry.ICors.allow_credentials'] = True
+        # registry['plone.server.registry.ICors.max_age'] = '3660'
+        registry.forInterface(ICors).enabled = True
+        registry.forInterface(ICors).allow_origin = ['*']
+        registry.forInterface(ICors).allow_methods = ['GET', 'POST', 'DELETE',
+                                                      'PATCH']
+        registry.forInterface(ICors).allow_headers = ['*']
+        registry.forInterface(ICors).expose_headers = ['*']
+        registry.forInterface(ICors).allow_credentials = True
+        registry.forInterface(ICors).max_age = '3660'
 
         # Default policy
         roles = IRolePermissionManager(self)

@@ -69,4 +69,6 @@ class SharingPOST(Service):
 
 
 class DefaultDELETE(Service):
-    pass
+    async def __call__(self):
+        portal_id = self.context.id
+        del self.request.conn.root()[portal_id]
