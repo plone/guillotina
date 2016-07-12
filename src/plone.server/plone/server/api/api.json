@@ -51,11 +51,17 @@
                 "@registry": {
                     "GET": {
                         "factory": "plone.server.api.registry.Read",
-                        "permission": "View"
+                        "permission": "plone.AccessContent"
                     },
                     "PATCH": {
                         "factory": "plone.server.api.registry.Write",
                         "permission": "ModifyContent"
+                    }
+                },
+                "@types" : {
+                    "GET": {
+                        "factory": "plone.server.api.types.Read",
+                        "permission": "plone.AccessContent"
                     }
                 }
             },

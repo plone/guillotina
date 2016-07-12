@@ -15,6 +15,8 @@ from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDataBase
 from plone.server.utils import get_current_request
 from plone.server.content import StaticFile
+from plone.server.content import IStaticDirectory
+from plone.server.content import IStaticFile
 from plone.server.auth.participation import RootParticipation
 from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
@@ -103,7 +105,9 @@ class DataBaseToJson(object):
         self.dbo = dbo
 
     def __call__(self):
-        return self.dbo.keys()
+        return {
+            'sites': self.dbo.keys()
+        }
 
 
 class ApplicationToJson(object):
@@ -112,7 +116,19 @@ class ApplicationToJson(object):
         self.application = application
 
     def __call__(self):
-        return list(self.application._dbs.keys())
+        result = {
+            'databases': [],
+            'static_file': [],
+            'static_directory': []
+        }
+        for x in self.application._dbs.keys():
+            if IDataBase.providedBy(self.application._dbs[x]):
+                result['databases'].append(x)
+            if IStaticFile.providedBy(self.application._dbs[x]):
+                result['static_file'].append(x)
+            if IStaticDirectory.providedBy(self.application._dbs[x]):
+                result['static_directory'].append(x)
+        return result
 
 
 class DataBaseSpecialPermissions(PrincipalPermissionManager):
