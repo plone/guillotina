@@ -14,7 +14,7 @@ class RootParticipation(object):
     def __init__(self, request):
         self.principal = PloneUser(request)
         self.principal.id = 'RootUser'
-        self.principal._roles.append({'SiteCreator': 1})
+        self.principal._roles['plone.SiteCreator'] = 1
         self.interaction = None
 
 
@@ -22,7 +22,7 @@ class AnonymousParticipation(object):
 
     def __init__(self, request):
         self.principal = AnonymousUser(request)
-        self.principal._roles.append({'Anonymous': 1})
+        self.principal._roles['plone.Anonymous'] = 1
         self.interaction = None
 
 
@@ -32,7 +32,7 @@ class PloneUser(object):
         self.id = 'plone'
         self.request = request
         self._groups = []
-        self._roles = []
+        self._roles = {}
         self._properties = {}
 
     @property

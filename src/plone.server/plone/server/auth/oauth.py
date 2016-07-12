@@ -120,6 +120,7 @@ class OAuth(object):
 
     async def call_auth(self, call, params, future=None, **kw):
         method, url = REST_API[call]
+
         result = None
         with aiohttp.ClientSession() as session:
             if method == 'GET':
@@ -139,6 +140,11 @@ class OAuth(object):
                                 self._jwt_secret,
                                 algorithms=[self._jwt_algorithm],
                                 options=NON_IAT_VERIFY)
+                    else:
+                        logger.error(
+                            "OAUTH SERVER ERROR %d %s" % (
+                                resp.status,
+                                await resp.text()))
                     await resp.release()
             elif method == 'POST':
                 print("POST " + url + str(params))

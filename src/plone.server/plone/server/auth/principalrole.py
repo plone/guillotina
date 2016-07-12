@@ -1,5 +1,4 @@
-"""Mappings between principals and roles, stored in an object locally.
-"""
+"""Mappings between principals and roles, stored in an object locally."""
 from zope.interface import implementer
 
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
@@ -13,12 +12,16 @@ class AnnotationPlonePrincipalRoleManager(AnnotationPrincipalRoleManager):
 
     getPrincipalsForRole = AnnotationSecurityMap.getRow
 
-    def getRolesForPrincipal(self, principal_id, request):
+    def getRolesForPrincipal(self, principal_id, request): # noqa
+        """Look for global roles on request security and add global roles."""
         local_roles = self.getCol(principal_id)
         global_roles = {}
-        if hasattr(request, '_cache_user') and \
-                principal_id == request._cache_user.id:
-            global_roles = request._cache_user._roles.copy()
+        if hasattr(request, 'security'):
+            # We need to check if there is any user information that can give
+            # us global roles
+            for participation in request.security.participations:
+                if principal_id == participation.principal.id:
+                    global_roles = participation.principal._roles.copy()
         if local_roles:
             roles = global_roles.update(local_roles)
         else:
@@ -26,4 +29,3 @@ class AnnotationPlonePrincipalRoleManager(AnnotationPrincipalRoleManager):
         return [(key, value) for key, value in roles.items()]
 
     getPrincipalsAndRoles = AnnotationSecurityMap.getAllCells
-
