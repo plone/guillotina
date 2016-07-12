@@ -4,7 +4,6 @@ from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from aiohttp.web_exceptions import HTTPError
 from aiohttp.web_exceptions import HTTPBadRequest
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
@@ -93,7 +92,7 @@ async def traverse(request, parent, path):
     except TypeError:
         return parent, path
     except KeyError:
-        raise HTTPNotFound()
+        return parent, path
 
     if dbo is not None:
         context._v_parent = dbo
@@ -144,12 +143,13 @@ class MatchInfo(AbstractMatchInfo):
             except Unauthorized:
                 view_result = HTTPUnauthorized()
             except Exception as e:
-                view_result = HTTPError(e)
+                view_result = HTTPBadRequest(text=str(e))
         else:
             try:
                 view_result = await self.view()
             except Unauthorized:
                 view_result = HTTPUnauthorized()
+        print(self.rendered)
         return await self.rendered(view_result)
 
     def get_info(self):
@@ -261,6 +261,7 @@ class TraversalRouter(AbstractRouter):
         # We want to check for the content negotiation
 
         renderer = content_type_negotiation(request, resource, view)
+        print(renderer)
         renderer_object = renderer(request)
 
         rendered = queryMultiAdapter(

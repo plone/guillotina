@@ -78,7 +78,8 @@ class RendererJson(Renderer):
             headers = value.headers
         else:
             if not hasattr(value, 'status_code') or \
-                    (hasattr(value, 'status_code') and value.status_code < 400):
+               (hasattr(value, 'status_code') and
+               value.status_code < 400):
                 json_value = value
             else:
                 # TODO errors on JSON or HTTP
