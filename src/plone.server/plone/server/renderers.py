@@ -5,7 +5,7 @@ from plone.server.interfaces import IRenderFormats
 from plone.server.interfaces import IFrameFormats
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
-from plone.server.browser import ResponseWithHeaders
+from plone.server.browser import Response
 from zope.component import adapter
 from zope.interface import implementer
 from zope.component import queryAdapter
@@ -72,18 +72,13 @@ class Renderer(object):
 class RendererJson(Renderer):
     async def __call__(self, value):
         headers = {}
-        if isinstance(value, ResponseWithHeaders):
+        if hasattr(value, '__class__') and issubclass(value.__class__, Response):
             json_value = value.response
-            # Add custom headers
             headers = value.headers
+            status = value.status
         else:
-            if not hasattr(value, 'status_code') or \
-               (hasattr(value, 'status_code') and
-               value.status_code < 400):
-                json_value = value
-            else:
-                # TODO errors on JSON or HTTP
-                return value
+            # Not a Response object, don't convert
+            return value
         # Framing of options
         frame = self.request.get('frame')
         frame = self.request.GET['frame'] if 'frame' in self.request.GET else ''
@@ -92,6 +87,7 @@ class RendererJson(Renderer):
             json_value = framer(json_value)
         resp = json_response(json_value)
         resp.headers.update(headers)
+        resp.set_status(status)
         # Actions / workflow / roles
 
         return resp
@@ -109,9 +105,10 @@ class RendererHtml(Renderer):
 @implementer(IRendered)
 class RendererRaw(Renderer):
     async def __call__(self, value):
-        if isinstance(value, ResponseWithHeaders):
+        if hasattr(value, '__class__') and issubclass(value.__class__, Response):
             resp = value.response
             resp.headers.update(value.headers)
+            resp.set_status(status)
         else:
             resp = value
         return resp
