@@ -109,3 +109,8 @@ class IRendered(Interface):
 
 class ITranslated(Interface):
     pass
+
+# Get Absolute URL
+
+class IAbsoluteUrl(Interface):
+    pass
