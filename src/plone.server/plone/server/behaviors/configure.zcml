@@ -6,6 +6,7 @@
       title="Dublin Core fields"
       provides=".dublincore.IDublinCore"
       factory=".dublincore.DublinCore"
+      for="plone.dexterity.interfaces.IDexterityContent"
       />
 
 

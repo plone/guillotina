@@ -25,6 +25,8 @@
   <adapter factory=".renderers.RendererHtml" />
   <adapter factory=".renderers.RendererRaw" />
 
+  <adapter factory=".browser.Absolute_URL" />
+
 
   <include file="meta.zcml" />
   <include file="permissions.zcml" />
@@ -34,6 +36,7 @@
   <include package=".auth" />
   <include package=".catalog" />
   <include package=".framing" />
+  <include package=".behaviors" />
 
   <plone:api file="api/api.json" />
 
