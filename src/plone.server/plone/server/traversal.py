@@ -5,6 +5,7 @@ from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from aiohttp.web_exceptions import HTTPBadRequest
+from aiohttp.web_exceptions import HTTPException
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server.api.layer import IDefaultLayer
@@ -34,8 +35,14 @@ from zope.security.interfaces import IPermission
 from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 from plone.server.utils import sync
+from plone.server.browser import Response
+from plone.server.browser import UnauthorizedResponse
+from plone.server.browser import ErrorResponse
 import traceback
+import logging
+from plone.server import _
 
+logger = logging.getLogger(__name__)
 
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
@@ -135,26 +142,45 @@ class MatchInfo(AbstractMatchInfo):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             txn = request.conn.transaction_manager.begin(request)
-            async with locked(self.resource):
-                try:
-                    view_result = await self.view()
-                except Unauthorized:
-                    view_result = HTTPUnauthorized()
             try:
-                await sync(request)(txn.commit)
+                async with locked(self.resource):
+                    view_result = await self.view()
+                    if isinstance(view_result, ErrorResponse):
+                        await sync(request)(txn.abort)
+                    elif isinstance(view_result, UnauthorizedResponse):
+                        await sync(request)(txn.abort)
+                    else:
+                        await sync(request)(txn.commit)
             except Unauthorized:
                 await sync(request)(txn.abort)
-                view_result = HTTPUnauthorized()
+                view_result = UnauthorizedResponse(
+                    _('Not authorized to render operation'))
             except Exception as e:
-
-                traceback.print_tb(e.__traceback__)
+                logger.error(
+                    "Exception on writing execution",
+                    exc_info=e)
                 await sync(request)(txn.abort)
-                view_result = HTTPBadRequest(text=str(e))
+                view_result = ErrorResponse(
+                    'ServiceError',
+                    _('Error on execution of operation')
+                )
         else:
             try:
                 view_result = await self.view()
             except Unauthorized:
-                view_result = HTTPUnauthorized()
+                view_result = UnauthorizedResponse(
+                    _('Not authorized to render view'))
+            except Exception as e:
+                logger.error(
+                    "Exception on view execution",
+                    exc_info=e)
+                view_result = ErrorResponse(
+                    'ViewError',
+                    _('Error on execution of view'))
+
+        # Make sure its a Response object to send to renderer
+        if not isinstance(view_result, Response):
+            view_result = Response(view_result)
         return await self.rendered(view_result)
 
     def get_info(self):
