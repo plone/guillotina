@@ -7,6 +7,7 @@ from plone.server.auth.participation import AnonymousUser
 from plone.server.auth.participation import PloneUser
 from zope.component import getUtility
 from zope.securitypolicy.interfaces import Allow, Deny, Unset
+from zope.interface.interfaces import ComponentLookupError
 
 import aiohttp
 import asyncio
@@ -182,7 +183,11 @@ class PloneJWTExtraction(object):
     def __init__(self, request):
         """Extraction pluggin that sets initial cache value on request."""
         self.request = request
-        self.config = getUtility(IOAuth)
+        try:
+            self.config = getUtility(IOAuth)
+        except ComponentLookupError:
+            logger.error("No IOAuth Utility")
+            self.config = None
         if not hasattr(self.request, '_cache_credentials'):
             self.request._cache_credentials = {}
 
@@ -190,7 +195,7 @@ class PloneJWTExtraction(object):
         """Extract the Authorization header with bearer and decodes on jwt."""
         header_auth = self.request.headers.get('AUTHORIZATION')
         creds = {}
-        if header_auth is not None:
+        if header_auth is not None and self.config is not None:
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'bearer':
                 token = encoded_token.encode('ascii')
