@@ -73,7 +73,7 @@
         "plone.dexterity.interfaces.IDexterityContent": {
             "GET": {
                 "factory": "plone.server.api.dexterity.DefaultGET",
-                "permission": "plone.AccessContent"
+                "permission": "plone.ViewContent"
             },
             "PATCH": {
                 "factory": "plone.server.api.dexterity.DefaultPATCH",
@@ -85,7 +85,7 @@
             },
             "POST": {
                 "factory": "plone.server.api.dexterity.DefaultPOST",
-                "permission": "plone.ModifyContent"
+                "permission": "plone.AddContent"
             },
             "endpoints": {
                 "sharing": {
@@ -97,7 +97,7 @@
             },
             "DELETE": {
                 "factory": "plone.server.api.dexterity.DefaultDELETE",
-                "permission": "plone.ModifyContent"
+                "permission": "plone.DeleteContent"
             },
             "OPTIONS": {
                 "factory": "plone.server.api.dexterity.DefaultOPTIONS",

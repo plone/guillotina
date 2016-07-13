@@ -92,6 +92,16 @@
       />
 
   <permission
+      id="plone.DeleteContent"
+      title="Delete content"
+      />
+
+  <permission
+      id="plone.AddContent"
+      title="Add content"
+      />
+
+  <permission
       id="plone.ViewContent"
       title="View content"
       />

@@ -29,6 +29,26 @@
       />
 
   <grant
+      permission="plone.DeleteContent"
+      role="plone.Editor"
+      />
+
+  <grant
+      permission="plone.ViewContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.DeleteContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.AddContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
       permission="plone.AddPortal"
       role="plone.SiteCreator"
       />
