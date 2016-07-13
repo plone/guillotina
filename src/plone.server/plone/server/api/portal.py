@@ -2,7 +2,7 @@
 from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.api.service import Service
 from plone.server.browser import get_physical_path
-from plone.server.browser import ResponseWithHeaders
+from plone.server.browser import Response
 from zope.component import getMultiAdapter
 from plone.dexterity.utils import createContent
 from aiohttp.web_exceptions import HTTPUnauthorized, HTTPConflict
@@ -56,7 +56,7 @@ class DefaultPOST(Service):
             'Location': '/plone/ttt'
         }
 
-        return ResponseWithHeaders(resp, headers)
+        return Response(response=resp, headers=headers)
 
 
 class DefaultPUT(Service):
