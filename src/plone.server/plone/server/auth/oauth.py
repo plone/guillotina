@@ -25,7 +25,6 @@ NON_IAT_VERIFY = {
 
 class IOAuth(IAsyncUtility):
     """Marker interface for OAuth Utility."""
-
     pass
 
 
@@ -125,7 +124,7 @@ class OAuth(object):
         result = None
         with aiohttp.ClientSession() as session:
             if method == 'GET':
-                print("GET " + url + str(params))
+                logger.debug("GET " + url + str(params))
                 async with session.get(
                         self._server + url, params=params) as resp:
                     if resp.status == 200:
@@ -148,7 +147,7 @@ class OAuth(object):
                                 await resp.text()))
                     await resp.release()
             elif method == 'POST':
-                print("POST " + url + str(params))
+                logger.debug("POST " + url + str(params))
                 async with session.post(
                         self._server + url, data=params) as resp:
                     if resp.status == 200:

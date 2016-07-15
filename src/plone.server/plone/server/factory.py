@@ -2,7 +2,6 @@
 from aiohttp import web
 from concurrent.futures import ThreadPoolExecutor
 from pkg_resources import iter_entry_points
-from plone.dexterity.utils import createContent
 from plone.server.async import IAsyncUtility
 from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
@@ -13,16 +12,15 @@ from zope.configuration.xmlconfig import include
 from zope.configuration.xmlconfig import registerCommonDirectives
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDataBase
-from plone.server.utils import get_current_request
 from plone.server.content import StaticFile
 from plone.server.content import IStaticDirectory
 from plone.server.content import IStaticFile
 from plone.server.auth.participation import RootParticipation
 from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
-from zope.securitypolicy.interfaces import IPrincipalPermissionMap
-from zope.component import adapter
 from zope.component import provideUtility
+from zope.component import getUtility
+from zope.component import getGlobalSiteManager
 from plone.server import DICT_RENDERS
 from plone.server import DICT_LANGUAGES
 
@@ -30,15 +28,13 @@ from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IContentNegotiation
 from plone.server.utils import import_class
 from ZEO.ClientStorage import ClientStorage
+from ZODB.DemoStorage import DemoStorage
 
 import asyncio
 import json
-import os
 import hashlib
 import sys
 import base64
-import transaction
-import ZODB
 
 
 @implementer(IApplication)
@@ -47,6 +43,36 @@ class ApplicationRoot(object):
     def __init__(self, config_file):
         self._dbs = {}
         self._config_file = config_file
+        self._async_utilities = {}
+
+    def add_async_utility(self, config):
+        interface = import_class(config['provides'])
+        factory = import_class(config['factory'])
+        utility_object = factory(config['settings'])
+        provideUtility(utility_object, interface)
+        task = asyncio.ensure_future(utility_object.initialize(app=self))
+        self.add_async_task(config['provides'], task, config)
+
+    def add_async_task(self, ident, task, config):
+        if ident in self._async_utilities:
+            raise KeyError("Already exist an async utility with this id")
+        self._async_utilities[ident] = {
+            'task': task,
+            'config': config
+        }
+
+    def cancel_async_utility(self, ident):
+        if ident in self._async_utilities:
+            self._async_utilities[ident]['task'].cancel()
+        else:
+            raise KeyError("Ident does not exist as utility")
+
+    def del_async_utility(self, config):
+        self.cancel_async_utility(config['provides'])
+        interface = import_class(config['provides'])
+        utility = getUtility(interface)
+        gsm = getGlobalSiteManager()
+        gsm.unregisterUtility(utility, provided=interface)
 
     def set_creator_salt(self, salt):
         self._salt = base64.b64decode(salt)
@@ -185,22 +211,29 @@ class DataBase(object):
         return key in self.conn.root()
 
 
-def make_app(config_file):
+def make_app(config_file=None, settings=None):
     # Initialize aiohttp app
     app = web.Application(router=TraversalRouter())
 
     # Initialize asyncio executor worker
     app.executor = ThreadPoolExecutor(max_workers=1)
 
-    with open(config_file, 'r') as config:
-        settings = json.load(config)
+    if config_file is not None:
+        with open(config_file, 'r') as config:
+            settings = json.load(config)
+    elif settings is not None:
+        settings = settings
+    else:
+        raise StandardError('Neither configuration or settings')
+
+    # Create root Application
     root = ApplicationRoot(config_file)
     root.app = app
+    provideUtility(root, IApplication, 'root')
 
     # Initialize global (threadlocal) ZCA configuration
     app.config = ConfigurationMachine()
     registerCommonDirectives(app.config)
-    provideUtility(root, IApplication, 'root')
 
     include(app.config, 'configure.zcml', sys.modules['plone.server'])
     for ep in iter_entry_points('plone.server'):  # auto-include applications
@@ -224,17 +257,14 @@ def make_app(config_file):
                 cs = ClientStorage((dbconfig['address'], dbconfig['port']))
                 db = RequestAwareDB(cs)
                 dbo = DataBase(key, db)
+            elif dbconfig['storage'] == 'DEMO':
+                db = RequestAwareDB(DemoStorage(name=dbconfig['name']))
+                dbo = DataBase(key, db)
             root[key] = dbo
 
     for static in settings['static']:
         for key, file_path in static.items():
             root[key] = StaticFile(file_path)
-
-    for util in settings['utilities']:
-        interface = import_class(util['provides'])
-        factory = import_class(util['factory'])
-        utility_object = factory(util['settings'])
-        provideUtility(utility_object, interface)
 
     root.set_creator_password(settings['creator']['password'])
     root.set_creator_salt(settings['salt'])
@@ -243,6 +273,11 @@ def make_app(config_file):
     app.router.set_root(root)
 
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
-        asyncio.ensure_future(utility.initialize(app=app))
+        # In case there is Utilties that are registered from zcml
+        ident = asyncio.ensure_future(utility.initialize(app=app))
+        root.add_async_utility(ident, {})
+
+    for util in settings['utilities']:
+        root.add_async_utility(util)
 
     return app

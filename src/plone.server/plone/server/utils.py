@@ -2,6 +2,7 @@
 from aiohttp.web import RequestHandler
 from plone.server.exceptions import RequestNotFound
 from plone.server.interfaces import IView
+from zope.component import provideUtility
 
 import asyncio
 import importlib

@@ -18,7 +18,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     with open(arguments.configuration, 'r') as config:
         settings = json.load(config)
-    web.run_app(make_app(arguments.configuration), port=settings['address'])
+    web.run_app(make_app(config_file=arguments.configuration), port=settings['address'])
 
 
 if __name__ == '__main__':
