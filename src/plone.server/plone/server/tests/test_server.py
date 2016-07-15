@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-from plone.server import factory
-from plone.server.testing import PLONE_LAYER
+from plone.server.testing import PloneServerBaseTestCase
 from plone.server.traversal import TraversalRouter
 
 import pytest
-import unittest
 
 
-class TestServer(unittest.TestCase):
-    layer = PLONE_LAYER
+class TestServer(PloneServerBaseTestCase):
 
     @pytest.yield_fixture
     def test_make_app(self):
-        app = factory.make_app()
-        self.assertTrue(app is not None)
-        self.assertEqual(type(app.router), TraversalRouter)
+        self.assertTrue(self.layer.aioapp is not None)
+        self.assertEqual(type(self.layer.aioapp.router), TraversalRouter)
+        self.assertEqual(self.layer.aioapp, self.layer.app.app)
+
+
