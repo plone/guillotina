@@ -58,6 +58,7 @@ setup(
     },
     tests_require=[
         'pytest',
+        'requests'
     ],
     entry_points={
         'console_scripts': [
