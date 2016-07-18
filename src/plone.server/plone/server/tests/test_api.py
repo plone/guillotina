@@ -63,10 +63,10 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         self.assertTrue(response[0])
 
     def test_create_contenttype(self):
-        resp = self.layer.requester('POST', '/plone/plone/', data={
+        """Try to create a contenttype."""
+        resp = self.layer.requester('POST', '/plone/plone/', data=json.dumps({
             "@type": "Item",
             "title": "Item1",
             "id": "item1"
-        })
-        response = json.loads(resp.text)
-        self.assertTrue(len(response['member']) == 0)
+        }))
+        self.assertTrue(resp.status_code == 201)

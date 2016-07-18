@@ -18,6 +18,8 @@ from zope.component import queryMultiAdapter
 import traceback
 from datetime import datetime
 import logging
+from random import randint
+from plone.jsonserializer.exceptions import DeserializationError
 
 
 logger = logging.getLogger(__name__)
@@ -34,7 +36,6 @@ class DefaultGET(Service):
 class DefaultPOST(Service):
     async def __call__(self):
         """To create a content. Its a copy of plone.restapi"""
-        import pdb; pdb.set_trace()
         data = await self.request.json()
         type_ = data.get('@type', None)
         id_ = data.get('id', None)

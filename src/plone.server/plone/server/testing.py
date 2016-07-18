@@ -58,6 +58,18 @@ OAUTH_UTILITY_CONFIG = {
 ADMIN_TOKEN = 'admin'
 DEBUG = False
 
+class MockView(View):
+
+    def __init__(self, context, conn, func):
+        self.context = context
+        self.request = make_mocked_request('POST', '/')
+        self.request.conn = conn
+        self.func = func
+
+    def __call__(self, *args, **kw):
+        self.func(*args, **kw)
+
+
 
 class PloneRequester(object):
 
@@ -141,17 +153,20 @@ class PloneBaseLayer(PloneServerBaseLayer):
         cls.t = threading.Thread(target=loop_in_thread, args=(loop,))
         cls.t.start()
         cls.requester = PloneRequester('http://localhost:' + str(TESTING_PORT))
-
+        cls.time = time.time()
         resp = cls.requester('POST', '/plone/', data=json.dumps({
             "@type": "Plone Site",
             "title": "Plone Site",
             "id": "plone",
             "description": "Description Plone Site"
         }))
+        assert resp.status_code == 200
+        from copy import deepcopy
+        cls.site = deepcopy(cls.app['plone']['plone'])
 
     @classmethod
     def tearDown(cls):
-        resp = cls.requester('DELETE', '/plone/plone/')
+        cls.requester('DELETE', '/plone/plone/')
         del cls.requester
         loop = cls.aioapp.loop
 
@@ -165,12 +180,13 @@ class PloneBaseLayer(PloneServerBaseLayer):
         loop.run_until_complete(cls.srv.wait_closed())
 
     @classmethod
-    def testSetUp(cls):
-        cls.sp = cls.app['plone'].conn.savepoint()
-
-    @classmethod
     def testTearDown(cls):
-        cls.sp.rollback()
+        # Restore the copy of the DB
+        def restore():
+            from copy import deepcopy
+            cls.app['plone']['plone'] = deepcopy(cls.site)
+        mock = MockView(cls.app['plone'], cls.app['plone'].conn, restore)
+        mock()
 
 
 class PloneServerBaseTestCase(unittest.TestCase):
