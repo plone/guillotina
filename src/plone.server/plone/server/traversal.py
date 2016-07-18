@@ -5,7 +5,6 @@ from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from aiohttp.web_exceptions import HTTPBadRequest
-from aiohttp.web_exceptions import HTTPException
 from plone.registry.interfaces import IRegistry
 from plone.server import DICT_METHODS
 from plone.server.api.layer import IDefaultLayer
@@ -38,7 +37,6 @@ from plone.server.utils import sync
 from plone.server.browser import Response
 from plone.server.browser import UnauthorizedResponse
 from plone.server.browser import ErrorResponse
-import traceback
 import logging
 from plone.server import _
 
@@ -217,7 +215,6 @@ class TraversalRouter(AbstractRouter):
         alsoProvides(request, IDefaultLayer)
         request.site_components = getGlobalSiteManager()
         request.security = IInteraction(request)
-
         try:
             resource, tail = await self.traverse(request)
             exc = None
@@ -282,9 +279,15 @@ class TraversalRouter(AbstractRouter):
         # Traverse view if its needed
         if traverse_to is not None:
             if view is None or not ITraversableView.providedBy(view):
-                return HTTPNotFound('No view defined')
+                raise HTTPNotFound()
             else:
-                view = view.publishTraverse(traverse_to)
+                try:
+                    view = view.publishTraverse(traverse_to)
+                except Exception as e:
+                    logger.error(
+                        "Exception on view execution",
+                        exc_info=e)
+                    raise HTTPNotFound()
 
         checker = getCheckerForInstancesOf(view.__class__)
         if checker is not None:

@@ -63,6 +63,12 @@
                         "factory": "plone.server.api.types.Read",
                         "permission": "plone.AccessContent"
                     }
+                },
+                "@ws": {
+                    "GET": {
+                        "factory": "plone.server.api.ws.WebsocketsView",
+                        "permission": "plone.AccessContent"
+                    }
                 }
             },
             "DELETE": {

@@ -23,6 +23,7 @@ setup(
     namespace_packages=['plone'],
     install_requires=[
         'aiohttp',
+        'ujson',
         'BTrees',
         'cchardet',
         'plone.dexterity',

@@ -70,3 +70,15 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             "id": "item1"
         }))
         self.assertTrue(resp.status_code == 201)
+
+    def test_create_delete_contenttype(self):
+        """Create and delete a content type."""
+        resp = self.layer.requester('POST', '/plone/plone/', data=json.dumps({
+            "@type": "Item",
+            "title": "Item1",
+            "id": "item1"
+        }))
+        self.assertTrue(resp.status_code == 201)
+        resp = self.layer.requester('DELETE', '/plone/plone/item1')
+        self.assertTrue(resp.status_code == 200)
+
