@@ -8,6 +8,22 @@ DEFAULT_READ_PERMISSION = 'plone.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'plone.ManageContent'
 
 
+class IApplication(Interface):
+    pass
+
+
+class IDataBase(Interface):
+    pass
+
+
+class IStaticFile(Interface):
+    pass
+
+
+class IStaticDirectory(Interface):
+    pass
+
+
 class IPloneSite(model.Schema, ISite):
     title = schema.TextLine(
         title='Title',
@@ -16,6 +32,12 @@ class IPloneSite(model.Schema, ISite):
         default=u''
     )
 
+
+class IItem(model.Schema):
+    pass
+
+class IContentNegotiation(Interface):
+    pass
 
 class IRequest(Interface):
     pass
@@ -40,6 +62,10 @@ class ITraversableView(IView):
 
     def publishTraverse(traverse_to):
         pass
+
+
+class IDownloadView(IView):
+    pass
 
 
 class IGET(IView):
@@ -71,6 +97,8 @@ class IOPTIONS(IView):
 class IRenderFormats(Interface):
     pass
 
+class IFrameFormats(Interface):
+    pass
 
 class ILanguage(Interface):
     pass
@@ -83,4 +111,9 @@ class IRendered(Interface):
 
 
 class ITranslated(Interface):
+    pass
+
+# Get Absolute URL
+
+class IAbsoluteUrl(Interface):
     pass

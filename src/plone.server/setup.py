@@ -23,17 +23,20 @@ setup(
     namespace_packages=['plone'],
     install_requires=[
         'aiohttp',
+        'ujson',
         'BTrees',
         'cchardet',
         'plone.dexterity',
         'plone.jsonserializer',
         'plone.registry',
         'plone.supermodel',
+        'plone.i18n',
         'pyjwt',
         'repoze.workflow',
         'setuptools',
         'transaction',
         'ZODB',
+        'ZEO',
         'zope.component',
         'zope.configuration',
         'zope.dottedname',
@@ -52,11 +55,12 @@ setup(
     extras_require={
         'elasticsearch': [
             'aioes'
+        ],
+        'test': [
+            'pytest',
+            'requests'
         ]
     },
-    tests_require=[
-        'pytest',
-    ],
     entry_points={
         'console_scripts': [
             'server = plone.server.server:main',

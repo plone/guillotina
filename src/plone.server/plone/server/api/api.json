@@ -4,20 +4,15 @@
         "POST": "plone.server.interfaces.IPOST",
         "PATCH": "plone.server.interfaces.IPATCH",
         "DELETE": "plone.server.interfaces.IDELETE",
-        "GET": "plone.server.interfaces.IGET"
+        "GET": "plone.server.interfaces.IGET",
+        "OPTIONS": "plone.server.interfaces.IOPTIONS"
     },
     "layer": "plone.server.api.layer.IDefaultLayer",
     "default_permission": "zope.Public",
-    "default_cors": {
-        "accept": "*",
-        "headers": "*",
-        "expose_headers": true,
-        "max_age": 3660,
-        "auth": true
-    },
     "renderers": {
         "application/json": "plone.server.renderers.IRendererFormatJson",
-        "text/html": "plone.server.renderers.IRendererFormatHtml"
+        "text/html": "plone.server.renderers.IRendererFormatHTML",
+        "*/*": "plone.server.renderers.IRendererFormatRaw"
     },
     "languages": {
         "en": "plone.server.languages.IEN",
@@ -25,24 +20,66 @@
         "ca": "plone.server.languages.ICA"
     },
     "contenttypes": {
+        "plone.server.interfaces.IDataBase": {
+            "POST": {
+                "factory": "plone.server.api.portal.DefaultPOST",
+                "permission": "plone.AddPortal"
+            },
+            "GET": {
+                "factory": "plone.server.api.portal.DefaultGET",
+                "permission": "plone.GetPortals"
+            }
+        },
+        "plone.server.interfaces.IApplication": {
+            "PUT": {
+                "factory": "plone.server.api.portal.DefaultPUT",
+                "permission": "plone.AddPortal"
+            },
+            "GET": {
+                "factory": "plone.server.api.portal.DefaultGET",
+                "permission": "plone.GetPortals"
+            }
+        },
+        "plone.server.interfaces.IStaticFile": {
+            "GET": {
+                "factory": "plone.server.api.file.DefaultGET",
+                "permission": "plone.AccessContent"
+            }
+        },
         "plone.server.interfaces.IPloneSite": {
             "endpoints": {
                 "@registry": {
                     "GET": {
                         "factory": "plone.server.api.registry.Read",
-                        "permission": "View"
+                        "permission": "plone.AccessContent"
                     },
                     "PATCH": {
                         "factory": "plone.server.api.registry.Write",
                         "permission": "ModifyContent"
                     }
+                },
+                "@types" : {
+                    "GET": {
+                        "factory": "plone.server.api.types.Read",
+                        "permission": "plone.AccessContent"
+                    }
+                },
+                "@ws": {
+                    "GET": {
+                        "factory": "plone.server.api.ws.WebsocketsView",
+                        "permission": "plone.AccessContent"
+                    }
                 }
+            },
+            "DELETE": {
+                "factory": "plone.server.api.portal.DefaultDELETE",
+                "permission": "plone.DeletePortals"                
             }
         },
         "plone.dexterity.interfaces.IDexterityContent": {
             "GET": {
                 "factory": "plone.server.api.dexterity.DefaultGET",
-                "permission": "plone.AccessContent"
+                "permission": "plone.ViewContent"
             },
             "PATCH": {
                 "factory": "plone.server.api.dexterity.DefaultPATCH",
@@ -54,7 +91,7 @@
             },
             "POST": {
                 "factory": "plone.server.api.dexterity.DefaultPOST",
-                "permission": "plone.ModifyContent"
+                "permission": "plone.AddContent"
             },
             "endpoints": {
                 "sharing": {
@@ -66,7 +103,11 @@
             },
             "DELETE": {
                 "factory": "plone.server.api.dexterity.DefaultDELETE",
-                "permission": "plone.ModifyContent"
+                "permission": "plone.DeleteContent"
+            },
+            "OPTIONS": {
+                "factory": "plone.server.api.dexterity.DefaultOPTIONS",
+                "permission": "plone.AccessPreflight"
             }
         }
     },

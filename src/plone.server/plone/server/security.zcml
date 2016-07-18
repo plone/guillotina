@@ -18,8 +18,80 @@
       role="plone.Manager"
       />
 
+  <grant
+      permission="plone.AccessContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.AccessPreflight"
+      role="plone.Anonymous"
+      />
+
+  <grant
+      permission="plone.DeleteContent"
+      role="plone.Editor"
+      />
+
+  <grant
+      permission="plone.ViewContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.DeleteContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.AddContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.AddPortal"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.GetPortals"
+      role="plone.SiteCreator"
+      />
+
+  <grant
+      permission="plone.DeletePortals"
+      role="plone.SiteCreator"
+      />
+
   <grantAll role="zope.Manager" />
 
   <adapter factory=".security.getCurrentInteraction" />
+  <adapter
+    factory=".factory.DataBaseSpecialPermissions"
+    provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
+    for="plone.server.interfaces.IDataBase"
+    trusted="true"
+    />
+
+  <adapter
+    factory=".factory.DataBaseSpecialPermissions"
+    provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
+    for="plone.server.interfaces.IApplication"
+    trusted="true"
+    />
+
+  <adapter
+    factory=".content.StaticFileSpecialPermissions"
+    provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
+    for="plone.server.interfaces.IStaticFile"
+    trusted="true"
+    />
+
+  <adapter
+    factory=".content.StaticFileSpecialPermissions"
+    provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
+    for="plone.server.interfaces.IStaticDirectory"
+    trusted="true"
+    />
 
 </configure>

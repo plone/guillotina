@@ -2,6 +2,7 @@
 from aiohttp.web import RequestHandler
 from plone.server.exceptions import RequestNotFound
 from plone.server.interfaces import IView
+from zope.component import provideUtility
 
 import asyncio
 import importlib
@@ -23,11 +24,9 @@ def tm(request):
     """Return shared transaction manager (from request)
     :param request:
     """
-    assert getattr(request, 'app', None) is not None, \
-        'Request has no app'
-    assert getattr(request.app, '_p_jar', None) is not None, \
-        'App has no ZODB connection'
-    return request.app._p_jar.transaction_manager
+    assert getattr(request, 'conn', None) is not None, \
+        'Request has no conn'
+    return request.conn.transaction_manager
 
 
 def sync(request):

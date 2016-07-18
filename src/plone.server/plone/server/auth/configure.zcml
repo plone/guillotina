@@ -15,6 +15,6 @@
 	    trusted="true"
 	    />
 
-	<plone:oauth file="oauth.json" />
+<!-- 	<plone:oauth file="oauth.json" /> -->
 
 </configure>

@@ -1,0 +1,13 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:plone="http://namespaces.plone.org/plone">
+
+
+  <plone:behavior
+      title="Dublin Core fields"
+      provides=".dublincore.IDublinCore"
+      factory=".dublincore.DublinCore"
+      for="plone.dexterity.interfaces.IDexterityContent"
+      />
+
+
+</configure>

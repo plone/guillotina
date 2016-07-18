@@ -92,8 +92,38 @@
       />
 
   <permission
+      id="plone.DeleteContent"
+      title="Delete content"
+      />
+
+  <permission
+      id="plone.AddContent"
+      title="Add content"
+      />
+
+  <permission
       id="plone.ViewContent"
       title="View content"
+      />
+
+  <permission
+      id="plone.AddPortal"
+      title="Add a portal/DB"
+      />
+
+  <permission
+      id="plone.GetPortals"
+      title="Get a portal/DB"
+      />
+
+  <permission
+      id="plone.DeletePortals"
+      title="Delete a portal"
+      />
+
+  <permission
+      id="plone.AccessPreflight"
+      title="Access Preflight View"
       />
 
   <!-- Roles -->
@@ -139,5 +169,10 @@
       description="It can add content"
       />
 
+  <role
+      id="plone.SiteCreator"
+      title="Site DB Manager"
+      description="Can create sites and db connections"
+      />
 
 </configure>

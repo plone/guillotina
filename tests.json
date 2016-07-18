@@ -1,0 +1,531 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Plone",
+		"_postman_id": "9cda381e-7c0b-5e2a-142c-ccd0e6ecf9c0",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET ROOT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\nconsole.log(jsonData);\ntests[\"Has Databases\"] = jsonData.databases.length > 1;\n\ntests[\"Has plone database\"] = jsonData.databases.indexOf('plone') > -1;\n\ntests[\"Has zeo database\"] = jsonData.databases.indexOf('zeo1') > -1;\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer admin",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET ZEO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is empty\"] = jsonData.sites.length === 0;"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/zeo1/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": [
+				{
+					"name": "Empty",
+					"originalRequest": {
+						"url": "http://127.0.0.1:8080/zeo1/",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"enabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer admin",
+								"enabled": true
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "javascript",
+					"_postman_previewtype": "html",
+					"header": [
+						{
+							"name": "CONTENT-LENGTH",
+							"key": "CONTENT-LENGTH",
+							"value": "2",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"name": "CONTENT-TYPE",
+							"key": "CONTENT-TYPE",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "DATE",
+							"key": "DATE",
+							"value": "Tue, 12 Jul 2016 10:39:12 GMT",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"name": "SERVER",
+							"key": "SERVER",
+							"value": "Python/3.5 aiohttp/0.21.6",
+							"description": "A name for the server"
+						}
+					],
+					"cookie": [],
+					"responseTime": 85,
+					"body": "[]"
+				}
+			]
+		},
+		{
+			"name": "GET ZODB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is empty\"] = jsonData.sites.length === 0;\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "bearer admin",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "New Plone on ZEO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is created\"] = jsonData.id === 'site1';"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/zeo1/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+				},
+				"description": ""
+			},
+			"response": [
+				{
+					"name": "site1 Creation",
+					"originalRequest": {
+						"url": "http://127.0.0.1:8080/zeo1/",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"enabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer admin",
+								"enabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"enabled": true,
+								"description": "The mime type of this content"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "javascript",
+					"_postman_previewtype": "html",
+					"header": [
+						{
+							"name": "CONTENT-LENGTH",
+							"key": "CONTENT-LENGTH",
+							"value": "57",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"name": "CONTENT-TYPE",
+							"key": "CONTENT-TYPE",
+							"value": "application/json; charset=utf-8",
+							"description": "The mime type of this content"
+						},
+						{
+							"name": "DATE",
+							"key": "DATE",
+							"value": "Tue, 12 Jul 2016 10:42:21 GMT",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"name": "LOCATION",
+							"key": "LOCATION",
+							"value": "/plone/ttt",
+							"description": "Used in redirection, or when a new resource has been created."
+						},
+						{
+							"name": "SERVER",
+							"key": "SERVER",
+							"value": "Python/3.5 aiohttp/0.21.6",
+							"description": "A name for the server"
+						}
+					],
+					"cookie": [],
+					"responseTime": 283,
+					"body": "{\"title\": \"Site 1\", \"@type\": \"Plone Site\", \"id\": \"site1\"}"
+				}
+			]
+		},
+		{
+			"name": "New Plone on ZODB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is created\"] = jsonData.id === 'site1';\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Site1 ZEO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Title is Site 1\"] = jsonData.title === 'Site 1';\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/zeo1/site1/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Site1 ZODB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Title is Site 1\"] = jsonData.title === 'Site 1';\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/site1/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Site1 Get Content Type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/site1/@types/Todo",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Site1 Get Registry",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Cors Max Age\"] = jsonData['plone.server.registry.ICors.max_age'] === '3660';\ntests[\"Cors Enabled\"] = jsonData['plone.server.registry.ICors.enabled'] === true;\ntests[\"Default Layer\"] = jsonData['plone.server.registry.ILayers.active_layers'].indexOf(\"plone.server.api.layer.IDefaultLayer\") > -1;\ntests[\"Extraction Pluggins\"] = jsonData['plone.server.registry.IAuthExtractionPlugins.active_plugins'].indexOf(\"plone.server.auth.oauth.PloneJWTExtraction\") > -1;"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/site1/@registry",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Plone on ZODB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/site1",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Plone on ZEO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/zeo1/site1",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer admin",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

@@ -10,4 +10,27 @@
       behaviors=""
       />
 
+
+  <plone:contenttype
+      portal_type="Item"
+      schema=".content.IItem"
+      class=".content.Item"
+      behaviors=".behaviors.dublincore.IDublinCore"
+    />
+
+   <adapter 
+   	  for="plone.server.interfaces.IDataBase
+   	       plone.server.interfaces.IRequest"
+   	  factory="plone.server.factory.DataBaseToJson"
+   	  provides="plone.jsonserializer.interfaces.ISerializeToJson"
+   	  />
+
+   <adapter 
+   	  for="plone.server.interfaces.IApplication
+   	       plone.server.interfaces.IRequest"
+   	  factory="plone.server.factory.ApplicationToJson"
+   	  provides="plone.jsonserializer.interfaces.ISerializeToJson"
+   	  />
+
+
 </configure>

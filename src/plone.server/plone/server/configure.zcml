@@ -19,9 +19,14 @@
 
   <adapter factory=".renderers.RendererFormatJson" />
   <adapter factory=".renderers.RendererFormatHtml" />
+  <adapter factory=".renderers.RendererFormatRaw" />
   <adapter factory=".renderers.Renderer" />
   <adapter factory=".renderers.RendererJson" />
   <adapter factory=".renderers.RendererHtml" />
+  <adapter factory=".renderers.RendererRaw" />
+
+  <adapter factory=".browser.Absolute_URL" />
+
 
   <include file="meta.zcml" />
   <include file="permissions.zcml" />
@@ -30,8 +35,14 @@
 
   <include package=".auth" />
   <include package=".catalog" />
+  <include package=".framing" />
+  <include package=".behaviors" />
 
   <plone:api file="api/api.json" />
 
   <adapter factory=".summary.DefaultJSONSummarySerializer" />
+
+  <!-- Addons -->
+  <include package="plone.i18n" />
+
 </configure>

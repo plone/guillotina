@@ -1,0 +1,25 @@
+{
+	"databases": [
+		{
+		"plone": {
+			"storage": "ZODB",
+			"folder": "data"
+			},
+		"zeo1": {
+			"storage": "ZEO",
+			"address": "127.0.0.1",
+			"port": 8090
+			}
+		}
+	],
+	"address": 8080,
+	"static": [
+		{"favicon.ico": "static/favicon.ico"}
+	],
+	"creator": {
+		"admin": "admin",
+		"password": "w8E943wOE1Efo4wbvYMOsyK9YGGKoIb69N/2t6Ou2P0="
+	},
+	"salt": "Y+eYNG9cSQjbtw7ba/eBWg==",
+	"utilities": []
+}
