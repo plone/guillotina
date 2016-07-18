@@ -54,12 +54,12 @@ setup(
     extras_require={
         'elasticsearch': [
             'aioes'
+        ],
+        'test': [
+            'pytest',
+            'requests'
         ]
     },
-    tests_require=[
-        'pytest',
-        'requests'
-    ],
     entry_points={
         'console_scripts': [
             'server = plone.server.server:main',

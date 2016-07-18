@@ -3,6 +3,7 @@ from plone.dexterity.content import Container
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IPloneSite
+from plone.server.interfaces import IItem
 from plone.server.interfaces import IStaticFile
 from plone.server.interfaces import IStaticDirectory
 from plone.server.registry import IAuthExtractionPlugins
@@ -95,6 +96,11 @@ class PloneSite(Container):
 
     def setSiteManager(self, sitemanager):
         self['_components'] = sitemanager
+
+
+@implementer(IItem)
+class Item(Container):
+    pass
 
 
 @implementer(IStaticFile)

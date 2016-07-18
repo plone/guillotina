@@ -206,9 +206,21 @@ class DataBase(object):
         """
         self.conn.root()[key] = value
 
+    def __delitem__(self, key):
+        """ This operation can only be done throw HTTP request
+
+        We can check if there is permission to delete a site
+        XXX TODO
+        """
+
+        del self.conn.root()[key]
+
     def __contains__(self, key):
         # is there any request active ? -> conn there
         return key in self.conn.root()
+
+    def __len__(self):
+        return len(self.conn.root())
 
 
 def make_app(config_file=None, settings=None):
@@ -216,7 +228,7 @@ def make_app(config_file=None, settings=None):
     app = web.Application(router=TraversalRouter())
 
     # Initialize asyncio executor worker
-    app.executor = ThreadPoolExecutor(max_workers=1)
+    app.executor = ThreadPoolExecutor(max_workers=2)
 
     if config_file is not None:
         with open(config_file, 'r') as config:

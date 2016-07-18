@@ -15,7 +15,7 @@ install:
 - docker ps -a
 - sleep 15
 script:
-- bin/py.test src
+- bin/py.test -s --cov=plone.server src
 - bin/code-analysis
 after_script:
   - docker-compose stop

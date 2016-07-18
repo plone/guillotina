@@ -33,6 +33,9 @@ class IPloneSite(model.Schema, ISite):
     )
 
 
+class IItem(model.Schema):
+    pass
+
 class IContentNegotiation(Interface):
     pass
 

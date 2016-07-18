@@ -13,12 +13,11 @@ import pytest
 import asyncio
 import requests
 import time
-
-ZCMLLayer = testlayer.ZCMLFileLayer(plone.server, 'configure.zcml')
-
-
-class ZopeComponentLayer(testlayer.LayerBase):
-    pass
+from plone.dexterity.utils import createContent
+from plone.server.browser import View
+from aiohttp.test_utils import make_mocked_request
+from plone.server.utils import sync
+import json
 
 
 TESTING_PORT = 55001
@@ -26,11 +25,11 @@ TESTING_PORT = 55001
 TESTING_SETTINGS = {
     "databases": [
         {
-        "plone": {
-            "storage": "DEMO",
-            "name": "zodbdemo"
+            "plone": {
+                "storage": "DEMO",
+                "name": "zodbdemo"
             }
-        }
+        },
     ],
     "address": TESTING_PORT,
     "static": [
@@ -106,14 +105,6 @@ class PloneServerBaseLayer(object):
         del cls.app
         del cls.aioapp
 
-    @classmethod
-    def testSetUp(cls):
-        print("test setup Plone Server Base Layer")
-
-    @classmethod
-    def testTearDown(cls):
-        print("test teardown Plone Server Base Layer")
-
 
 class PloneOAuthLayer(PloneServerBaseLayer):
 
@@ -140,17 +131,28 @@ class PloneBaseLayer(PloneServerBaseLayer):
             TESTING_PORT))
         print("Started Testing server on port {port}".format(
             port=TESTING_PORT))
+
         import threading
 
         def loop_in_thread(loop):
+            asyncio.set_event_loop(loop)
             loop.run_forever()
 
-        cls.fut = asyncio.Future(loop=loop)
         cls.t = threading.Thread(target=loop_in_thread, args=(loop,))
         cls.t.start()
+        cls.requester = PloneRequester('http://localhost:' + str(TESTING_PORT))
+
+        resp = cls.requester('POST', '/plone/', data=json.dumps({
+            "@type": "Plone Site",
+            "title": "Plone Site",
+            "id": "plone",
+            "description": "Description Plone Site"
+        }))
 
     @classmethod
     def tearDown(cls):
+        resp = cls.requester('DELETE', '/plone/plone/')
+        del cls.requester
         loop = cls.aioapp.loop
 
         loop.call_soon_threadsafe(loop.stop)
@@ -162,16 +164,14 @@ class PloneBaseLayer(PloneServerBaseLayer):
         cls.srv.close()
         loop.run_until_complete(cls.srv.wait_closed())
 
-class RequesterPloneServerLayer(PloneBaseLayer):
+    @classmethod
+    def testSetUp(cls):
+        cls.sp = cls.app['plone'].conn.savepoint()
 
     @classmethod
-    def setUp(cls):
-        """With a Plone Site."""
-        cls.requester = PloneRequester('http://localhost:' + str(TESTING_PORT))
+    def testTearDown(cls):
+        cls.sp.rollback()
 
-    @classmethod
-    def tearDown(cls):
-        del cls.requester
 
 class PloneServerBaseTestCase(unittest.TestCase):
     """ Only the app created """
@@ -183,11 +183,6 @@ class PloneOAuthServerTestCase(unittest.TestCase):
     layer = PloneOAuthLayer
 
 
-class PloneServerTestCase(unittest.TestCase):
-    """ With a plone site and the asyncio loop """
-    layer = PloneBaseLayer
-
-
 class PloneFunctionalTestCase(unittest.TestCase):
-    """ With requester utility """
-    layer = RequesterPloneServerLayer
+    """ With Site and Requester utility """
+    layer = PloneBaseLayer
