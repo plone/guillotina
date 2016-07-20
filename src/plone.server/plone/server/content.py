@@ -44,17 +44,10 @@ class PloneSite(Container):
         registry.forInterface(IAuthPloneUserPlugins).active_plugins = \
             ['plone.server.auth.oauth.OAuthPloneUserFactory']
 
-        # registry['plone.server.registry.ICors.enabled'] = True
-        # registry['plone.server.registry.ICors.allow_origin'] = []
-        # registry['plone.server.registry.ICors.allow_methods'] = []
-        # registry['plone.server.registry.ICors.allow_headers'] = []
-        # registry['plone.server.registry.ICors.expose_headers'] = []
-        # registry['plone.server.registry.ICors.allow_credentials'] = True
-        # registry['plone.server.registry.ICors.max_age'] = '3660'
         registry.forInterface(ICors).enabled = True
         registry.forInterface(ICors).allow_origin = ['*']
         registry.forInterface(ICors).allow_methods = ['GET', 'POST', 'DELETE',
-                                                      'PATCH']
+                                                      'HEAD', 'PATCH']
         registry.forInterface(ICors).allow_headers = ['*']
         registry.forInterface(ICors).expose_headers = ['*']
         registry.forInterface(ICors).allow_credentials = True

@@ -36,8 +36,10 @@ class IPloneSite(model.Schema, ISite):
 class IItem(model.Schema):
     pass
 
+
 class IContentNegotiation(Interface):
     pass
+
 
 class IRequest(Interface):
     pass
@@ -91,14 +93,20 @@ class IDELETE(IView):
 class IOPTIONS(IView):
     pass
 
+
+class IHEAD(IView):
+    pass
+
 # Classes as for marker objects to lookup
 
 
 class IRenderFormats(Interface):
     pass
 
+
 class IFrameFormats(Interface):
     pass
+
 
 class ILanguage(Interface):
     pass
@@ -114,6 +122,7 @@ class ITranslated(Interface):
     pass
 
 # Get Absolute URL
+
 
 class IAbsoluteUrl(Interface):
     pass
