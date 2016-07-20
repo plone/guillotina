@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.web import json_response
+from aiohttp.web import Response as aioResponse
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRenderFormats
 from plone.server.interfaces import IFrameFormats
@@ -9,6 +10,7 @@ from plone.server.browser import Response
 from zope.component import adapter
 from zope.interface import implementer
 from zope.component import queryAdapter
+import json
 
 
 # Marker objects/interfaces to look for
@@ -107,8 +109,10 @@ class RendererRaw(Renderer):
     async def __call__(self, value):
         if hasattr(value, '__class__') and issubclass(value.__class__, Response):
             resp = value.response
+            if isinstance(resp, dict):
+                resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
             resp.headers.update(value.headers)
-            resp.set_status(status)
+            resp.set_status(value.status)
         else:
             resp = value
         return resp
