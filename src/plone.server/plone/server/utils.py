@@ -64,3 +64,10 @@ def get_content_path(content):
         parts.append(content.__name__)
         content = getattr(content, '__parent__', None)
     return '/' + '/'.join(reversed(parts))
+
+def get_authenticated_user_id(request):
+    if hasattr(request, 'security') and hasattr(request.security, 'participations') \
+            and len(request.security.participations) > 0:
+        return request.security.participations[0].principal.id
+    else:
+        return None
