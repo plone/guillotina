@@ -13,13 +13,14 @@ from plone.server import _
 import fnmatch
 from zope.security import checkPermission
 from zope.security.interfaces import Unauthorized
-from plone.dexterity.utils import createContent
+from plone.dexterity.utils import createContentInContainer
 from zope.component import queryMultiAdapter
 import traceback
 from datetime import datetime
 import logging
 from random import randint
 from plone.jsonserializer.exceptions import DeserializationError
+from plone.server.utils import get_authenticated_user_id
 
 
 logger = logging.getLogger(__name__)
@@ -63,13 +64,15 @@ class DefaultPOST(Service):
                 'Conflict',
                 _("Id already exists"))
 
+        user = get_authenticated_user_id(self.request)
         # Create object
         try:
-            obj = createContent(type_, id=new_id, title=title)
-            self.context[new_id] = obj
+            obj = createContentInContainer(
+                self.context, type_, id=new_id, creators=(user,),
+                contributors=(user,))
         except ValueError as e:
             return ErrorResponse(
-                'DeserializationError',
+                'CreatingObject',
                 str(e),
                 status=400)
 
