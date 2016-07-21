@@ -16,8 +16,18 @@ We use buildout of course::
 
 The buildout installs the app itself, code analysis tools, and a test runner.
 
+Run the zeo
+-----------
+
+To run the zeo on a different terminal::
+
+	./bin/runzeo -C zeo.cfg
+
+
 Run the server
 --------------
+
+* By default it mounts a zeo server and a ZODB so you need the ZEO server running.
 
 To run the server::
 
@@ -34,6 +44,20 @@ and for test coverage::
 
     ./bin/py.test --cov=plone.server src/
 
+
+Default
+-------
+
+Default root access can be done with AUTHORIZATION header : Basic YWRtaW4=
+
+
+Postman tests
+-------------
+
+* It tests performance against ZODB and ZEO mount points
+
+npm install -g newman
+newman -c tests.json
 
 Running dependency graph
 ------------------------

@@ -2,7 +2,7 @@
 	"variables": [],
 	"info": {
 		"name": "Plone",
-		"_postman_id": "9cda381e-7c0b-5e2a-142c-ccd0e6ecf9c0",
+		"_postman_id": "e35a5aa9-1d08-c3f5-58be-4dec233dfe53",
 		"description": "",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
@@ -29,7 +29,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					}
 				],
@@ -48,7 +48,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is empty\"] = jsonData.sites.length === 0;"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 20ms\"] = responseTime < 20;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is empty\"] = jsonData.sites.length === 0;"
 					}
 				}
 			],
@@ -63,7 +63,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					}
 				],
@@ -83,12 +83,12 @@
 							{
 								"key": "Accept",
 								"value": "application/json",
-								"enabled": true
+								"description": ""
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer admin",
-								"enabled": true
+								"value": "Basic YWRtaW4=",
+								"description": ""
 							}
 						],
 						"body": {
@@ -139,7 +139,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is empty\"] = jsonData.sites.length === 0;\n"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 20ms\"] = responseTime < 20;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is empty\"] = jsonData.sites.length === 0;\n"
 					}
 				}
 			],
@@ -154,7 +154,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					}
 				],
@@ -173,7 +173,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is created\"] = jsonData.id === 'site1';"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 100ms\"] = responseTime < 100;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is created\"] = jsonData.id === 'site1';"
 					}
 				}
 			],
@@ -188,7 +188,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					},
 					{
@@ -213,18 +213,17 @@
 							{
 								"key": "Accept",
 								"value": "application/json",
-								"enabled": true
+								"description": ""
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer admin",
-								"enabled": true
+								"value": "Basic YWRtaW4=",
+								"description": ""
 							},
 							{
 								"key": "Content-Type",
 								"value": "application/json",
-								"enabled": true,
-								"description": "The mime type of this content"
+								"description": ""
 							}
 						],
 						"body": {
@@ -281,7 +280,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is created\"] = jsonData.id === 'site1';\n"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 100ms\"] = responseTime < 100;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Is created\"] = jsonData.id === 'site1';\n"
 					}
 				}
 			],
@@ -296,7 +295,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					},
 					{
@@ -320,7 +319,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Title is Site 1\"] = jsonData.title === 'Site 1';\n"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 20ms\"] = responseTime < 20;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Title is Site 1\"] = jsonData.title === 'Site 1';\n"
 					}
 				}
 			],
@@ -335,7 +334,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					}
 				],
@@ -354,7 +353,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Title is Site 1\"] = jsonData.title === 'Site 1';\n"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 20ms\"] = responseTime < 20;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Title is Site 1\"] = jsonData.title === 'Site 1';\n"
 					}
 				}
 			],
@@ -369,7 +368,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					}
 				],
@@ -388,12 +387,12 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 10ms\"] = responseTime < 10;"
 					}
 				}
 			],
 			"request": {
-				"url": "http://127.0.0.1:8080/plone/site1/@types/Todo",
+				"url": "http://127.0.0.1:8080/plone/site1/@types/Item",
 				"method": "GET",
 				"header": [
 					{
@@ -403,7 +402,80 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "POST Site1 ZODB Create Item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 201\"] = responseCode.code === 201;\n\ntests[\"Response time is less than 100ms\"] = responseTime < 100;\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/site1/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW4=",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"@type\": \"Item\",\n    \"title\": \"Item 1\",\n    \"id\": \"item1\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET Item1 ZODB",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 20ms\"] = responseTime < 20;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Title is Site 1\"] = jsonData.title === 'Item 1';\n"
+					}
+				}
+			],
+			"request": {
+				"url": "http://127.0.0.1:8080/plone/site1/item1",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					}
 				],
@@ -422,7 +494,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Cors Max Age\"] = jsonData['plone.server.registry.ICors.max_age'] === '3660';\ntests[\"Cors Enabled\"] = jsonData['plone.server.registry.ICors.enabled'] === true;\ntests[\"Default Layer\"] = jsonData['plone.server.registry.ILayers.active_layers'].indexOf(\"plone.server.api.layer.IDefaultLayer\") > -1;\ntests[\"Extraction Pluggins\"] = jsonData['plone.server.registry.IAuthExtractionPlugins.active_plugins'].indexOf(\"plone.server.auth.oauth.PloneJWTExtraction\") > -1;"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 10ms\"] = responseTime < 10;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Cors Max Age\"] = jsonData['plone.server.registry.ICors.max_age'] === '3660';\ntests[\"Cors Enabled\"] = jsonData['plone.server.registry.ICors.enabled'] === true;\ntests[\"Default Layer\"] = jsonData['plone.server.registry.ILayers.active_layers'].indexOf(\"plone.server.api.layer.IDefaultLayer\") > -1;\ntests[\"Extraction Pluggins\"] = jsonData['plone.server.registry.IAuthExtractionPlugins.active_plugins'].indexOf(\"plone.server.auth.oauth.PloneJWTExtraction\") > -1;"
 					}
 				}
 			],
@@ -437,7 +509,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					}
 				],
@@ -456,7 +528,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 100ms\"] = responseTime < 100;\n"
 					}
 				}
 			],
@@ -471,7 +543,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					},
 					{
@@ -495,7 +567,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 200ms\"] = responseTime < 200;\n"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 100ms\"] = responseTime < 100;\n"
 					}
 				}
 			],
@@ -510,7 +582,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer admin",
+						"value": "Basic YWRtaW4=",
 						"description": ""
 					},
 					{
