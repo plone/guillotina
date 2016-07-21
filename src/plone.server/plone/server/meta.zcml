@@ -1,6 +1,5 @@
 <configure
-    xmlns="http://namespaces.zope.org/meta"
-    i18n_domain="plone.server">
+    xmlns="http://namespaces.zope.org/meta">
 
     <directives namespace="http://namespaces.plone.org/plone">
 
