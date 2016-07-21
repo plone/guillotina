@@ -37,9 +37,8 @@ TESTING_SETTINGS = {
     ],
     "creator": {
         "admin": "admin",
-        "password": "w8E943wOE1Efo4wbvYMOsyK9YGGKoIb69N/2t6Ou2P0="
+        "password": "YWRtaW4="
     },
-    "salt": "Y+eYNG9cSQjbtw7ba/eBWg==",
     "utilities": []
 }
 
@@ -55,7 +54,7 @@ OAUTH_UTILITY_CONFIG = {
     }
 }
 
-ADMIN_TOKEN = 'admin'
+ADMIN_TOKEN = 'YWRtaW4='
 DEBUG = False
 
 class MockView(View):
@@ -91,7 +90,7 @@ class PloneRequester(object):
         if accept is not None:
             settings['headers']['ACCEPT'] = accept
         if authenticated and token is not None:
-            settings['headers']['AUTHORIZATION'] = 'bearer %s' % token
+            settings['headers']['AUTHORIZATION'] = 'Basic %s' % token
 
         settings['params'] = params
         settings['data'] = data

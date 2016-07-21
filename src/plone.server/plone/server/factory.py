@@ -23,12 +23,13 @@ from zope.component import getUtility
 from zope.component import getGlobalSiteManager
 from plone.server import DICT_RENDERS
 from plone.server import DICT_LANGUAGES
-
+from zope.security.interfaces import IPermission
 from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IContentNegotiation
 from plone.server.utils import import_class
 from ZEO.ClientStorage import ClientStorage
 from ZODB.DemoStorage import DemoStorage
+from zope.security.interfaces import IInteraction
 
 import asyncio
 import json
@@ -74,15 +75,11 @@ class ApplicationRoot(object):
         gsm = getGlobalSiteManager()
         gsm.unregisterUtility(utility, provided=interface)
 
-    def set_creator_salt(self, salt):
-        self._salt = base64.b64decode(salt)
-
     def set_creator_password(self, password):
         self._creator_password = base64.b64decode(password)
 
     def check_token(self, password):
-        if self._creator_password == hashlib.pbkdf2_hmac(
-                'sha256', bytes(password), self._salt, 100000):
+        if self._creator_password == base64.b64decode(password):
             return True
         else:
             return False
@@ -91,7 +88,7 @@ class ApplicationRoot(object):
         header_auth = request.headers.get('AUTHORIZATION')
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
-            if schema.lower() == 'bearer':
+            if schema.lower() == 'basic':
                 token = encoded_token.encode('ascii')
                 if self.check_token(token):
                     return RootParticipation(request)
@@ -140,6 +137,7 @@ class ApplicationToJson(object):
 
     def __init__(self, application, request):
         self.application = application
+        self.request = request
 
     def __call__(self):
         result = {
@@ -147,8 +145,12 @@ class ApplicationToJson(object):
             'static_file': [],
             'static_directory': []
         }
+
+        allowed = self.request.security.checkPermission(
+            'plone.GetDatabases', self.application)
+
         for x in self.application._dbs.keys():
-            if IDataBase.providedBy(self.application._dbs[x]):
+            if IDataBase.providedBy(self.application._dbs[x]) and allowed:
                 result['databases'].append(x)
             if IStaticFile.providedBy(self.application._dbs[x]):
                 result['static_file'].append(x)
@@ -157,15 +159,18 @@ class ApplicationToJson(object):
         return result
 
 
-class DataBaseSpecialPermissions(PrincipalPermissionManager):
+class RootSpecialPermissions(PrincipalPermissionManager):
+    """No Role Map on Application and DB so permissions set to users."""
     def __init__(self, db):
-        super(DataBaseSpecialPermissions, self).__init__()
+        super(RootSpecialPermissions, self).__init__()
         self.grantPermissionToPrincipal('plone.AddPortal', 'RootUser')
         self.grantPermissionToPrincipal('plone.GetPortals', 'RootUser')
         self.grantPermissionToPrincipal('plone.DeletePortals', 'RootUser')
         self.grantPermissionToPrincipal('plone.AccessContent', 'RootUser')
+        self.grantPermissionToPrincipal('plone.GetDatabases', 'RootUser')
         # Access anonymous - needs to be configurable
-        self.grantPermissionToPrincipal('plone.AccessContent', 'Anonymous User')
+        self.grantPermissionToPrincipal(
+            'plone.AccessContent', 'Anonymous User')
 
 
 @implementer(IDataBase)
@@ -279,7 +284,6 @@ def make_app(config_file=None, settings=None):
             root[key] = StaticFile(file_path)
 
     root.set_creator_password(settings['creator']['password'])
-    root.set_creator_salt(settings['salt'])
 
     # Set router root from the ZODB connection
     app.router.set_root(root)
