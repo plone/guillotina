@@ -89,6 +89,8 @@ class RendererJson(Renderer):
             json_value = framer(json_value)
         resp = json_response(json_value)
         resp.headers.update(headers)
+        resp.headers.update(
+            {'Content-Type': 'application/json'})
         resp.set_status(status)
         # Actions / workflow / roles
 
