@@ -3,6 +3,7 @@ from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.api.service import Service
 from plone.server.browser import get_physical_path
 from plone.server.browser import Response
+from plone.server.browser import ErrorResponse
 from zope.component import getMultiAdapter
 from plone.dexterity.utils import createContent
 from aiohttp.web_exceptions import HTTPUnauthorized, HTTPConflict
@@ -75,3 +76,11 @@ class DefaultDELETE(Service):
     async def __call__(self):
         portal_id = self.context.id
         del self.request.conn.root()[portal_id]
+
+
+class NotImplemented(Service):
+    async def __call__(self):
+        return ErrorResponse(
+            'NotImplemented',
+            'Function not implemented',
+            status=501)

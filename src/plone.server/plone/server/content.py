@@ -71,17 +71,13 @@ class PloneSite(Container):
         )
         roles.grantPermissionToPrincipal(
             'plone.AccessContent',
-            'plone.manager'
+            'RootUser'
         )
 
         roles = IRolePermissionManager(self)
         roles.grantPermissionToRole(
             'plone.AccessContent',
-            'Manager'
-        )
-        roles.grantPermissionToRole(
-            'plone.AccessContent',
-            'plone.manager'
+            'plone.SiteCreator'
         )
 
     def getSiteManager(self):
