@@ -122,8 +122,39 @@
       />
 
   <permission
+      id="plone.MountDatabase"
+      title="Mount a Database"
+      />
+
+  <permission
+      id="plone.GetDatabases"
+      title="Get Databases"
+      />
+
+  <permission
+      id="plone.UmountDatabase"
+      title="Umount a Database"
+      />
+
+  <permission
       id="plone.AccessPreflight"
       title="Access Preflight View"
+      />
+
+  <permission
+      id="plone.ReadConfiguration"
+      title="Read a configuration"
+      />
+
+
+  <permission
+      id="plone.WriteConfiguration"
+      title="Write a configuration"
+      />
+
+  <permission
+      id="plone.RegisterConfigurations"
+      title="Register a new configuration on Registry"
       />
 
   <!-- Roles -->

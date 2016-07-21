@@ -29,16 +29,20 @@
             "GET": {
                 "factory": "plone.server.api.portal.DefaultGET",
                 "permission": "plone.GetPortals"
+            },
+            "DELETE": {
+                "factory": "plone.server.api.portal.NotImplemented",
+                "permission": "plone.UmountDatabase"
             }
         },
         "plone.server.interfaces.IApplication": {
             "PUT": {
-                "factory": "plone.server.api.portal.DefaultPUT",
-                "permission": "plone.AddPortal"
+                "factory": "plone.server.api.portal.NotImplemented",
+                "permission": "plone.MountDatabase"
             },
             "GET": {
-                "factory": "plone.server.api.portal.DefaultGET",
-                "permission": "plone.GetPortals"
+                "factory": "plone.server.api.app.DefaultGET",
+                "permission": "plone.AccessContent"
             }
         },
         "plone.server.interfaces.IStaticFile": {
@@ -52,11 +56,15 @@
                 "@registry": {
                     "GET": {
                         "factory": "plone.server.api.registry.Read",
-                        "permission": "plone.AccessContent"
+                        "permission": "plone.ReadConfiguration"
                     },
                     "PATCH": {
                         "factory": "plone.server.api.registry.Write",
-                        "permission": "ModifyContent"
+                        "permission": "plone.WriteConfiguration"
+                    },
+                    "POST": {
+                        "factory": "plone.server.api.registry.Register",
+                        "permission": "plone.RegisterConfigurations"
                     }
                 },
                 "@types" : {
