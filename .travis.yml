@@ -13,10 +13,15 @@ install:
 - python bootstrap-buildout.py
 - bin/buildout -t 3
 - docker ps -a
+- pip install flake8
+- pip install coverage==4.0.3
 - sleep 15
 script:
-- bin/py.test -s --cov=plone.server src
+- bin/py.test -s --cov=plone.server -v --cov-report term-missing src 
 - bin/code-analysis
 after_script:
   - docker-compose stop
   - docker-compose rm -f
+after_success:
+- coveralls
+- cat .coverage

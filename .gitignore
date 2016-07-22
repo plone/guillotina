@@ -12,3 +12,4 @@
 *.egg-info/
 eggs/
 .eggs
+.cache
