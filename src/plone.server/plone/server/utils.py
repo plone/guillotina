@@ -3,6 +3,8 @@ from aiohttp.web import RequestHandler
 from plone.server.exceptions import RequestNotFound
 from plone.server.interfaces import IView
 from zope.component import provideUtility
+from plone.server.registry import ICors
+import fnmatch
 
 import asyncio
 import importlib
@@ -71,3 +73,28 @@ def get_authenticated_user_id(request):
         return request.security.participations[0].principal.id
     else:
         return None
+
+async def apply_cors(request):
+    """Second part of the cors function to validate."""
+    headers = {}
+    settings = request.site_settings.forInterface(ICors)
+    origin = request.headers.get('Origin', None)
+    if origin:
+        if not any([fnmatch.fnmatchcase(origin, o)
+           for o in settings.allow_origin]):
+            raise HTTPUnauthorized('Origin %s not allowed' % origin)
+        elif request.headers.get('Access-Control-Allow-Credentials', False):
+            headers['Access-Control-Allow-Origin', origin]
+        else:
+            if any([o == "*" for o in settings.allow_origin]):
+                headers['Access-Control-Allow-Origin'] = '*'
+            else:
+                headers['Access-Control-Allow-Origin'] = origin
+    if request.headers.get(
+            'Access-Control-Request-Method', None) != 'OPTIONS':
+        if settings.allow_credentials:
+            headers['Access-Control-Allow-Credentials'] = 'True'
+        if len(settings.allow_headers):
+            headers['Access-Control-Expose-Headers'] = \
+                ', '.join(settings.allow_headers)
+    return headers
