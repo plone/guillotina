@@ -26,7 +26,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         """Get the root plone site."""
         resp = self.layer.requester('GET', '/plone/plone')
         response = json.loads(resp.text)
-        self.assertTrue(len(response['member']) == 0)
+        self.assertTrue(len(response['items']) == 0)
 
     def test_get_contenttypes(self):
         """Check list of content types."""

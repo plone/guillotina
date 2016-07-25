@@ -77,6 +77,8 @@ def get_authenticated_user_id(request):
 async def apply_cors(request):
     """Second part of the cors function to validate."""
     headers = {}
+    if not hasattr(request, 'site_settings'):
+        return {}
     settings = request.site_settings.forInterface(ICors)
     origin = request.headers.get('Origin', None)
     if origin:

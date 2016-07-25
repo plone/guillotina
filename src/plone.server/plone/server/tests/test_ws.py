@@ -28,7 +28,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
                             await ws.close()
                             break
                         else:
-                            self.assertTrue(len(message['member']) == 0)
+                            self.assertTrue(len(message['items']) == 0)
                             await ws.close()
                     elif msg.tp == aiohttp.MsgType.closed:
                         break
