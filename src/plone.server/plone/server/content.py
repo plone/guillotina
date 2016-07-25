@@ -16,6 +16,7 @@ from zope.interface import implementer
 from zope.securitypolicy.interfaces import IPrincipalPermissionManager
 from zope.securitypolicy.interfaces import IRolePermissionManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
+from plone.server.browser import get_physical_path
 
 
 @implementer(IPloneSite)
@@ -89,7 +90,13 @@ class PloneSite(Container):
 
 @implementer(IItem)
 class Item(Container):
-    pass
+
+    def __repr__(self):
+        path = '/'.join(get_physical_path(self))
+        return "< {type} at {path} by {mem} >".format(
+            type=self.portal_type,
+            path=path,
+            mem=id(self))
 
 
 @implementer(IStaticFile)
