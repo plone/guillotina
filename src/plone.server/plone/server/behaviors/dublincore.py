@@ -10,7 +10,6 @@ from plone.server import _
 from plone.server import DICT_LANGUAGES
 from datetime import datetime
 from dateutil.tz import tzlocal
-from plone.server.interfaces import IAbsoluteUrl
 from plone.uuid.interfaces import IUUID
 from dateutil.tz import tzutc
 from plone.dexterity.utils import safe_str

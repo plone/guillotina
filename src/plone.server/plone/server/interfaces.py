@@ -124,5 +124,5 @@ class ITranslated(Interface):
 # Get Absolute URL
 
 
-class IAbsoluteUrl(Interface):
+class IAbsoluteURL(Interface):
     pass

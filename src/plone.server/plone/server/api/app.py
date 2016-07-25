@@ -8,7 +8,6 @@ from zope.component import getMultiAdapter
 from plone.server.browser import Response
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
-from plone.server.interfaces import IAbsoluteUrl
 from plone.server import _
 import fnmatch
 from zope.security import checkPermission

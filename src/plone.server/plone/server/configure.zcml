@@ -27,6 +27,7 @@
   <adapter factory=".renderers.RendererRaw" />
 
   <adapter factory=".browser.Absolute_URL" />
+  <adapter factory=".browser.Absolute_URL_ObtainRequest" />
 
 
   <include file="meta.zcml" />

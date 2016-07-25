@@ -8,7 +8,7 @@ from zope.component import getMultiAdapter
 from plone.server.browser import Response
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
-from plone.server.interfaces import IAbsoluteUrl
+from plone.server.interfaces import IAbsoluteURL
 from plone.server import _
 import fnmatch
 from zope.security import checkPermission
@@ -21,6 +21,8 @@ import logging
 from random import randint
 from plone.jsonserializer.exceptions import DeserializationError
 from plone.server.utils import get_authenticated_user_id
+from plone.server.utils import apply_cors
+from zope.container.interfaces import INameChooser
 
 
 logger = logging.getLogger(__name__)
@@ -48,12 +50,14 @@ class DefaultPOST(Service):
                 _("Property '@type' is required"))
 
         # Generate a temporary id if the id is not given
-        if not id_:
+        if not id_ and title:
+            new_id = INameChooser(self.context).chooseName(title, object())
+        elif not id_:
             now = datetime.now()
             new_id = '{}.{}.{}{:04d}'.format(
                 type_.lower().replace(' ', '_'),
                 now.strftime('%Y-%m-%d'),
-                str(now.millis())[7:],
+                str(now.timestamp())[7:],
                 randint(0, 9999))
         else:
             new_id = id_
@@ -93,16 +97,12 @@ class DefaultPOST(Service):
                 str(e),
                 status=400)
 
-        # Rename if generated id
-        if not id_:
-            self.rename_object(obj)
-
-        absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteUrl)
+        absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 
         headers = {
-            'Location': await absolute_url()
+            'Location': absolute_url()
         }
-        return Response(response={}, headers=headers, status=201)
+        return Response(response={'@id': new_id}, headers=headers, status=201)
 
 
 class DefaultPUT(Service):
@@ -200,35 +200,11 @@ class DefaultOPTIONS(Service):
 
     async def render(self):
         """Need to be overwritten in case you implement OPTIONS."""
-        return HTTPFound()
-
-    async def apply_cors(self):
-        """Second part of the cors function to validate."""
-        headers = {}
-        origin = self.request.headers.get('Origin', None)
-        if origin:
-            if not any([fnmatch.fnmatchcase(origin, o)
-               for o in self.settings.allow_origin]):
-                raise HTTPUnauthorized('Origin %s not allowed' % origin)
-            elif self.request.headers.get('Access-Control-Allow-Credentials', False):
-                headers['Allow-Control-Allow-Origin', origin]
-            else:
-                if any([o == "*" for o in self.settings.allow_origin]):
-                    headers['Allow-Control-Allow-Origin'] = '*'
-                else:
-                    headers['Allow-Control-Allow-Origin'] = origin
-        if self.getRequestMethod() != 'OPTIONS':
-            if self.settings.allow_credentials:
-                headers['Access-Control-Allow-Credentials'] = True
-            if len(self.settings.supported_headers):
-                headers['Access-Control-Expose-Headers'] = \
-                    ', '.join(self.settings.supported_headers)
-        return headers
+        return {}
 
     async def __call__(self):
         """Apply CORS on the OPTIONS view."""
         self.settings = self.request.site_settings.forInterface(ICors)
         headers = await self.preflight()
         resp = await self.render()
-        headers.update(await self.apply_cors())
-        return ResponseWithHeaders(resp, headers)
+        return Response(response=resp, headers=headers, status=200)

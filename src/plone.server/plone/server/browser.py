@@ -2,7 +2,8 @@
 from plone.dexterity.interfaces import IDexterityContent
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
-from plone.server.interfaces import IAbsoluteUrl
+from plone.server.interfaces import IAbsoluteURL
+from plone.server.utils import get_current_request
 from zope.component import adapter
 from zope.interface import implementer
 from zope.location import ILocation
@@ -40,17 +41,29 @@ class View(object):
 
 
 @adapter(IDexterityContent, IRequest)
-@implementer(IAbsoluteUrl)
+@implementer(IAbsoluteURL)
 class Absolute_URL(object):
 
     def __init__(self, context, request):
         self.context = context
         self.request = request
 
-    async def __call__(self):
+    def __call__(self, relative=False):
         path = '/'.join(get_physical_path(self.context))
-        return self.request.scheme + '://' + self.request.host + '/' +\
-            self.request._db_id + path
+        if relative:
+            return '/' + self.request._db_id + path
+        else:
+            return self.request.scheme + '://' + self.request.host + '/' +\
+                self.request._db_id + path
+
+
+@adapter(IDexterityContent)
+@implementer(IAbsoluteURL)
+class Absolute_URL_ObtainRequest(Absolute_URL):
+
+    def __init__(self, context):
+        request = get_current_request()
+        super(Absolute_URL_ObtainRequest, self).__init__(context, request)
 
 
 class Response(object):
@@ -84,3 +97,5 @@ class ErrorResponse(Response):
             }
         }
         super(ErrorResponse, self).__init__(response, headers, status)
+
+
