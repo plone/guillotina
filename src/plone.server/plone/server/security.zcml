@@ -44,6 +44,11 @@
       />
 
   <grant
+      permission="plone.ModifyContent"
+      role="plone.SiteCreator"
+      />
+
+  <grant
       permission="plone.AddContent"
       role="plone.SiteCreator"
       />

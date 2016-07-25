@@ -87,8 +87,8 @@
       />
 
   <permission
-      id="plone.ManageContent"
-      title="Manage content"
+      id="plone.ModifyContent"
+      title="Modify content"
       />
 
   <permission
