@@ -37,7 +37,5 @@ class FunctionalTestServer(PloneFunctionalTestCase):
                 return {}
 
         loop = asyncio.get_event_loop()
-        # loop.run_until_complete(future)
-        # import pdb; pdb.set_trace()
         future = asyncio.run_coroutine_threadsafe(hello(self), loop)
         result = future.result()

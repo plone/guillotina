@@ -37,6 +37,8 @@ from plone.server.utils import sync
 from plone.server.browser import Response
 from plone.server.browser import UnauthorizedResponse
 from plone.server.browser import ErrorResponse
+from plone.server.api.dexterity import DefaultOPTIONS
+from plone.server.utils import apply_cors
 import logging
 from plone.server import _
 
@@ -179,6 +181,10 @@ class MatchInfo(AbstractMatchInfo):
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
             view_result = Response(view_result)
+
+        # Apply cors if its needed
+        view_result.headers.update(await apply_cors(request))
+
         return await self.rendered(view_result)
 
     def get_info(self):
@@ -215,6 +221,7 @@ class TraversalRouter(AbstractRouter):
         alsoProvides(request, IDefaultLayer)
         request.site_components = getGlobalSiteManager()
         request.security = IInteraction(request)
+
         try:
             resource, tail = await self.traverse(request)
             exc = None
@@ -252,6 +259,7 @@ class TraversalRouter(AbstractRouter):
 
         # Add anonymous participation
         if len(request.security.participations) == 0:
+            logger.info("Anonymous User")
             request.security.add(AnonymousParticipation(request))
 
         permission = getUtility(IPermission, name='plone.AccessContent')
@@ -261,7 +269,9 @@ class TraversalRouter(AbstractRouter):
         if not allowed:
             # Check if its a CORS call:
             if IOPTIONS != method or \
-               not request.site_settings.get(CORS_KEY, False):
+                    not request.site_settings.get(CORS_KEY, False):
+                logger.warn("No access content {content}".format(
+                    content=resource))
                 raise HTTPUnauthorized()
 
         # Site registry lookup
@@ -288,6 +298,12 @@ class TraversalRouter(AbstractRouter):
                         "Exception on view execution",
                         exc_info=e)
                     raise HTTPNotFound()
+
+        if view is None and method == IOPTIONS and \
+                request.site_settings.get(CORS_KEY, False):
+            # Its a CORS call, we could not find any OPTION definition
+            # Lets create a default preflight view
+            view = DefaultOPTIONS(resource, request)
 
         checker = getCheckerForInstancesOf(view.__class__)
         if checker is not None:
