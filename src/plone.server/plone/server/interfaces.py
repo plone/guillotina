@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from zope.component.interfaces import ISite
 from zope.interface import Interface
+from zope.interface import interfaces
 from plone.supermodel import model
 from zope import schema
 
@@ -126,3 +127,11 @@ class ITranslated(Interface):
 
 class IAbsoluteURL(Interface):
     pass
+
+# Specific Events
+
+
+class IObjectFinallyCreatedEvent(interfaces.IObjectEvent):
+    """An object has been created.
+
+    The location will usually be ``None`` for this event."""
