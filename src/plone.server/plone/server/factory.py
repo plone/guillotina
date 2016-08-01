@@ -184,6 +184,10 @@ class DataBase(object):
     def _open(self):
         self._conn = self._db.open(transaction_manager=self.tm_)
 
+        @self._conn.onCloseCallback
+        def on_close():
+            self._conn = None
+
     @property
     def conn(self):
         if self._conn is None:
@@ -195,6 +199,7 @@ class DataBase(object):
         if self._conn is None:
             self._open()
         return self._conn
+
 
     def __getitem__(self, key):
         # is there any request active ? -> conn there
@@ -290,7 +295,7 @@ def make_app(config_file=None, settings=None):
 
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
         # In case there is Utilties that are registered from zcml
-        ident = asyncio.ensure_future(utility.initialize(app=app))
+        ident = asyncio.ensure_future(utility.initialize(app=app), loop=app.loop)
         root.add_async_utility(ident, {})
 
     for util in settings['utilities']:
