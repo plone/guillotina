@@ -185,6 +185,9 @@ class MatchInfo(AbstractMatchInfo):
         # Apply cors if its needed
         view_result.headers.update(await apply_cors(request))
 
+        # If we want to close the connection after the request
+        # request.conn.close()
+
         return await self.rendered(view_result)
 
     def get_info(self):
