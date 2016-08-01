@@ -42,6 +42,13 @@ TESTING_SETTINGS = {
     "utilities": []
 }
 
+QUEUE_UTILITY_CONFIG = {
+    "provides": "plone.server.async.IQueueUtility",
+    "factory": "plone.server.async.QueueUtility",
+    "settings": {}
+}
+
+
 OAUTH_UTILITY_CONFIG = {
     "provides": "plone.server.auth.oauth.IOAuth",
     "factory": "plone.server.auth.oauth.OAuth",
@@ -57,6 +64,7 @@ OAUTH_UTILITY_CONFIG = {
 ADMIN_TOKEN = 'YWRtaW4='
 DEBUG = False
 
+
 class MockView(View):
 
     def __init__(self, context, conn, func):
@@ -68,6 +76,17 @@ class MockView(View):
     def __call__(self, *args, **kw):
         self.func(*args, **kw)
 
+
+class AsyncMockView(View):
+
+    def __init__(self, context, conn, func):
+        self.context = context
+        self.request = make_mocked_request('POST', '/')
+        self.request.conn = conn
+        self.func = func
+
+    async def __call__(self, *args, **kw):
+        await self.func(*args, **kw)
 
 
 class PloneRequester(object):
@@ -126,6 +145,34 @@ class PloneOAuthLayer(PloneServerBaseLayer):
     @classmethod
     def tearDown(cls):
         cls.app.del_async_utility(OAUTH_UTILITY_CONFIG)
+
+
+class PloneQueueLayer(PloneServerBaseLayer):
+
+    @classmethod
+    def setUp(cls):
+        cls.app.add_async_utility(QUEUE_UTILITY_CONFIG)
+        loop = cls.aioapp.loop
+
+        import threading
+
+        def loop_in_thread(loop):
+            asyncio.set_event_loop(loop)
+            loop.run_forever()
+
+        cls.t = threading.Thread(target=loop_in_thread, args=(loop,))
+        cls.t.start()
+
+    @classmethod
+    def tearDown(cls):
+        loop = cls.aioapp.loop
+
+        loop.call_soon_threadsafe(loop.stop)
+        while(loop.is_running()):
+            time.sleep(1)
+        cls.app.del_async_utility(QUEUE_UTILITY_CONFIG)
+
+
 
 
 class PloneBaseLayer(PloneServerBaseLayer):
@@ -196,6 +243,11 @@ class PloneServerBaseTestCase(unittest.TestCase):
 class PloneOAuthServerTestCase(unittest.TestCase):
     """ Adding the OAuth utility """
     layer = PloneOAuthLayer
+
+
+class PloneQueueServerTestCase(unittest.TestCase):
+    """ Adding the OAuth utility """
+    layer = PloneQueueLayer
 
 
 class PloneFunctionalTestCase(unittest.TestCase):
