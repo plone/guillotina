@@ -115,6 +115,7 @@ class DefaultPUT(Service):
 
 class DefaultPATCH(Service):
     async def __call__(self):
+        data = await self.request.json()
         deserializer = queryMultiAdapter((self.context, self.request),
                                          IDeserializeFromJson)
         if deserializer is None:
@@ -124,7 +125,7 @@ class DefaultPATCH(Service):
                 status=501)
 
         try:
-            deserializer()
+            deserializer(data)
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',
