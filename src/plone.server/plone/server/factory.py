@@ -29,6 +29,7 @@ from plone.server.interfaces import IContentNegotiation
 from plone.server.utils import import_class
 from ZEO.ClientStorage import ClientStorage
 from ZODB.DemoStorage import DemoStorage
+from ZODB import DB
 from zope.security.interfaces import IInteraction
 
 import asyncio
@@ -271,16 +272,27 @@ def make_app(config_file=None, settings=None):
     for database in settings['databases']:
         for key, dbconfig in database.items():
             if dbconfig['storage'] == 'ZODB':
+                # Open it not Request Aware so it creates the root object
+                db = DB(dbconfig['folder'] + '/Data.fs')
+                db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(dbconfig['folder'] + '/Data.fs')
                 dbo = DataBase(key, db)
             elif dbconfig['storage'] == 'ZEO':
+                # Try to open it normal to create the root object 
+                cs = ClientStorage((dbconfig['address'], dbconfig['port']))
+                db = DB(cs)
+                db.close()
                 # Set request aware database for app
                 cs = ClientStorage((dbconfig['address'], dbconfig['port']))
                 db = RequestAwareDB(cs)
                 dbo = DataBase(key, db)
             elif dbconfig['storage'] == 'DEMO':
-                db = RequestAwareDB(DemoStorage(name=dbconfig['name']))
+                storage = DemoStorage(name=dbconfig['name'])
+                db = DB(storage)
+                db.close()
+                # Set request aware database for app
+                db = RequestAwareDB(storage)
                 dbo = DataBase(key, db)
             root[key] = dbo
 
