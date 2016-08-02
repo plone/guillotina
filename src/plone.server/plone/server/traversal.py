@@ -287,8 +287,8 @@ class TraversalRouter(AbstractRouter):
                 (resource, request), method, name=view_name)
 
         # Traverse view if its needed
-        if traverse_to is not None:
-            if view is None or not ITraversableView.providedBy(view):
+        if traverse_to is not None and view is not None:
+            if not ITraversableView.providedBy(view):
                 raise HTTPNotFound()
             else:
                 try:
