@@ -25,6 +25,8 @@ from plone.jsonserializer.exceptions import DeserializationError
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import apply_cors
 from zope.container.interfaces import INameChooser
+from zope.event import notify
+from plone.server.events import ObjectFinallyCreatedEvent
 
 
 logger = logging.getLogger(__name__)
@@ -99,6 +101,8 @@ class DefaultPOST(Service):
                 str(e),
                 status=400)
 
+        notify(ObjectFinallyCreatedEvent(obj))
+
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 
         headers = {
@@ -113,6 +117,7 @@ class DefaultPUT(Service):
 
 class DefaultPATCH(Service):
     async def __call__(self):
+        data = await self.request.json()
         deserializer = queryMultiAdapter((self.context, self.request),
                                          IDeserializeFromJson)
         if deserializer is None:
@@ -122,7 +127,7 @@ class DefaultPATCH(Service):
                 status=501)
 
         try:
-            deserializer()
+            deserializer(data)
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',
