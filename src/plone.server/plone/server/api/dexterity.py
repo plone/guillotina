@@ -2,6 +2,7 @@
 from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.jsonserializer.interfaces import IDeserializeFromJson
 from plone.server.api.service import Service
+from plone.server.api.service import TraversableService
 from plone.server.registry import ICors
 from plone.server.browser import get_physical_path
 from zope.component import getMultiAdapter
@@ -9,6 +10,7 @@ from plone.server.browser import Response
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
 from plone.server.interfaces import IAbsoluteURL
+from plone.server.interfaces import IObjectComponent
 from plone.server import _
 import fnmatch
 from zope.security import checkPermission
@@ -139,6 +141,30 @@ class DefaultDELETE(Service):
     async def __call__(self):
         content_id = self.context.id
         del self.context.__parent__[content_id]
+
+
+class ComponentsGET(TraversableService):
+
+    def publishTraverse(self, traverse):
+        if len(traverse) == 1:
+            # we want have the key of the registry
+            self.value = queryMultiAdapter(
+                (self.context, self.request),
+                IObjectComponent, name=traverse[0])
+            self.component_id = traverse[0]
+        else:
+            self.value = None
+            self.component_id = None
+        return self
+
+    async def __call__(self):
+        component = {
+            'id': self.component_id,
+            'data': {
+                'items': self.value()
+            }
+        }
+        return component
 
 
 class DefaultOPTIONS(Service):

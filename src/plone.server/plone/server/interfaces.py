@@ -126,3 +126,9 @@ class ITranslated(Interface):
 
 class IAbsoluteURL(Interface):
     pass
+
+
+# Components for REST API
+
+class IObjectComponent(Interface):
+    pass
