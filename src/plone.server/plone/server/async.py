@@ -4,7 +4,7 @@ import asyncio
 import logging
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
-from plone.server.utils import sync
+from plone.server.transactions import sync
 from datetime import datetime
 from plone.server.browser import View
 

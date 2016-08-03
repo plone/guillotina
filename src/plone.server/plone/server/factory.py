@@ -238,9 +238,6 @@ def make_app(config_file=None, settings=None):
     # Initialize aiohttp app
     app = web.Application(router=TraversalRouter())
 
-    # Initialize asyncio executor worker
-    app.executor = ThreadPoolExecutor(max_workers=2)
-
     if config_file is not None:
         with open(config_file, 'r') as config:
             settings = json.load(config)

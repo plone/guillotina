@@ -26,4 +26,3 @@ class TestQueue(PloneQueueServerTestCase):
         total = future.result()
         self.assertTrue('hola' in var)
         self.assertTrue(len(var) == 2)
-        
