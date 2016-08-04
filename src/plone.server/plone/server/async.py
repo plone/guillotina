@@ -4,6 +4,9 @@ import asyncio
 import logging
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
+from plone.server.utils import sync
+from datetime import datetime
+from plone.server.browser import View
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +63,7 @@ class QueueUtility(object):
                 raise
             except:
                 self._exceptions = True
-                self._logger.exception('Worker call failed')
+                logger.error('Worker call failed')
             finally:
                 if got_obj:
                     self._queue.task_done()
@@ -77,3 +80,13 @@ class QueueUtility(object):
         await self._queue.put((priority, view))
         self._total_queued += 1
         return self._queue.qsize()
+
+
+class QueueObject(View):
+
+    def __init__(self, context, request):
+        super(QueueObject, self).__init__(context, request)
+        self.time = datetime.now().timestamp()
+
+    def __lt__(self, view):
+        return self.time < view.time
