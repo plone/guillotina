@@ -82,6 +82,34 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
     def free(self, txn):
         pass
 
+    def __call__(self, request):
+        return RequestBoundTransactionManagerContextManager(self, request)
+
+
+class RequestBoundTransactionManagerContextManager(object):
+    def __init__(self, tm, request):
+        assert isinstance(tm, RequestAwareTransactionManager)
+        self.tm = tm
+        self.request = request
+
+    # with
+    def __enter__(self):
+        raise NotImplementedError()
+
+    def __exit__(self, type_, value, traceback):
+        raise NotImplementedError()
+
+    # async with
+    async def __aenter__(self):
+        return self.tm.begin(self.request)
+
+    async def __aexit__(self, type_, value, traceback):
+        request = self.request
+        if value is None:
+            await sync(request)(self.tm.get(request).commit)
+        else:
+            await sync(request)(self.tm.get(request).abort)
+
 
 @implementer(ISavepointDataManager)
 class RequestDataManager(object):
