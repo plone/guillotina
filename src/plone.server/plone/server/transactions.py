@@ -11,13 +11,13 @@ from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepointDataManager
 from ZODB.POSException import ConflictError
 from zope.interface import implementer
+from zope.proxy import ProxyBase
 
 import asyncio
 import inspect
 import threading
 import time
 import transaction
-import ZODB
 import ZODB.Connection
 
 
@@ -180,6 +180,15 @@ class RequestAwareConnection(ZODB.Connection.Connection):
 
 class RequestAwareDB(ZODB.DB):
     klass = RequestAwareConnection
+
+
+class TransactionProxy(ProxyBase):
+    __slots__ = ('_wrapped', '_txn', '_txn_time')
+
+    def __init__(self, obj):
+        super(TransactionProxy, self).__init__(obj)
+        self._txn = None
+        self._txn_time = None
 
 
 # Utility functions

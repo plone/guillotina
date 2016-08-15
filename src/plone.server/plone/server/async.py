@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from zope.interface import Interface
-import asyncio
-import logging
+from datetime import datetime
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
-from plone.server.transactions import sync
-from datetime import datetime
 from plone.server.browser import View
+from plone.server import _
+from plone.server.transactions import sync
+from plone.server.transactions import TransactionProxy
+from zope.interface import Interface
+from zope.security.interfaces import Unauthorized
+import asyncio
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -35,25 +38,26 @@ class QueueUtility(object):
             got_obj = False
             try:
                 priority, view = await self._queue.get()
+                request = TransactionProxy(view.request)
                 got_obj = True
-                txn = view.request.conn.transaction_manager.begin(view.request)
+                txn = request.conn.transaction_manager.begin(request)
                 try:
                     view_result = await view()
                     if isinstance(view_result, ErrorResponse):
-                        await sync(view.request)(txn.abort)
+                        await sync(request)(txn.abort)
                     elif isinstance(view_result, UnauthorizedResponse):
-                        await sync(view.request)(txn.abort)
+                        await sync(request)(txn.abort)
                     else:
-                        await sync(view.request)(txn.commit)
+                        await sync(request)(txn.commit)
                 except Unauthorized:
-                    await sync(view.request)(txn.abort)
+                    await sync(request)(txn.abort)
                     view_result = UnauthorizedResponse(
                         _('Not authorized to render operation'))
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",
                         exc_info=e)
-                    await sync(view.request)(txn.abort)
+                    await sync(request)(txn.abort)
                     view_result = ErrorResponse(
                         'ServiceError',
                         _('Error on execution of operation')
