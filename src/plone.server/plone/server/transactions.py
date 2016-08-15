@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from plone.server.interfaces import IView
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepointDataManager
+from transaction.interfaces import ISavepoint
 from ZODB.POSException import ConflictError
 from zope.interface import implementer
 from zope.proxy import ProxyBase
@@ -219,8 +220,49 @@ class TransactionProxy(ProxyBase):
         self._txn_time = None
 
 
-# Utility functions
+@implementer(ISavepoint)
+class DummySavepoint:
+    valid = property(lambda self: self.transaction is not None)
 
+    def __init__(self, datamanager):
+        self.datamanager = datamanager
+
+    def rollback(self):
+        pass
+
+
+@implementer(ISavepointDataManager)
+class CallbackTransactionDataManager(object):
+
+    def __init__(self, callback, *args, **kwargs):
+        self.callback = lambda: callback(*args, **kwargs)
+
+    def commit(self, t):
+        pass
+
+    def sortKey(self):
+        return '~'  # sort after connections
+
+    def abort(self, t):
+        pass
+
+    def tpc_begin(self, t):
+        pass
+
+    def tpc_vote(self, t):
+        pass
+
+    def tpc_finish(self, t):
+        self.callback()
+
+    def tpc_abort(self, t):
+        pass
+
+    def savepoint(self):
+        return DummySavepoint(self)
+
+
+# Utility functions
 
 def locked(obj):
     """Return object specfic volatile asyncio lock.
