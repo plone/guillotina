@@ -39,6 +39,7 @@ class QueueUtility(object):
             try:
                 priority, view = await self._queue.get()
                 request = TransactionProxy(view.request)
+                view.request = request
                 got_obj = True
                 txn = request.conn.transaction_manager.begin(request)
                 try:
