@@ -73,6 +73,7 @@ def test_foo_bar_fixture(foo, bar):
     assert foo._p_serial is not bar._p_serial
 
 
+# noinspection PyShadowingNames,PyProtectedMember
 def test_transaction_proxy(root, foo, bar):
     tm = root._p_jar.transaction_manager
 
