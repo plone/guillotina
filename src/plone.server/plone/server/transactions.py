@@ -193,10 +193,6 @@ class RequestAwareConnection(ZODB.Connection.Connection):
     def _register(self, obj=None):
         request = get_current_request()
 
-        # Sanity check
-        assert obj._p_jar == self
-        assert self == request.conn
-
         try:
             assert request._txn_dm is not None
         except (AssertionError, AttributeError):
@@ -212,12 +208,13 @@ class RequestAwareDB(ZODB.DB):
 
 
 class TransactionProxy(ProxyBase):
-    __slots__ = ('_wrapped', '_txn', '_txn_time')
+    __slots__ = ('_wrapped', '_txn', '_txn_time', '_txn_dm')
 
     def __init__(self, obj):
         super(TransactionProxy, self).__init__(obj)
         self._txn = None
         self._txn_time = None
+        self._txn_dm = None
 
 
 @implementer(ISavepoint)
