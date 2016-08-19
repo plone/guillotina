@@ -96,7 +96,7 @@ def test_transaction_proxy(root, foo, bar):
     assert hasattr(request2, '_txn_dm')
     assert bar in request2._txn_dm._registered_objects
 
-    # Check that two transactions are indepedent
+    # Test that two transactions are indepedent
     assert t1 is not t2
     assert t1 is request1._txn
     assert t2 is request2._txn
@@ -109,14 +109,18 @@ def test_transaction_proxy(root, foo, bar):
     # Create /bar/c
     SetItemView(bar, request2)('c', PersistentMapping())
 
+    # Test that registered objects are not affected
+    assert len(request1._txn_dm._registered_objects) == 1
+    assert len(request2._txn_dm._registered_objects) == 1
+
     # Commit
     t1.commit()
     t2.commit()
 
-    # Check that /foo/a and /bar/b have different transaction
+    # Test that /foo/a and /bar/b have different transaction
     assert foo['a']._p_serial != bar['b']._p_serial
 
-    # Check that /bar/b and /bar/c have the same transaction
+    # Test that /bar/b and /bar/c have the same transaction
     assert bar['b']._p_serial == bar['c']._p_serial
 
 
