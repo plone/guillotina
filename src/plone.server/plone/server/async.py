@@ -39,24 +39,24 @@ class QueueUtility(object):
             try:
                 priority, view = await self._queue.get()
                 got_obj = True
-                txn = request.conn.transaction_manager.begin(request)
+                txn = view.request.conn.transaction_manager.begin(view.request)
                 try:
                     view_result = await view()
                     if isinstance(view_result, ErrorResponse):
-                        await sync(request)(txn.abort)
+                        await sync(view.request)(txn.abort)
                     elif isinstance(view_result, UnauthorizedResponse):
-                        await sync(request)(txn.abort)
+                        await sync(view.request)(txn.abort)
                     else:
-                        await sync(request)(txn.commit)
+                        await sync(view.request)(txn.commit)
                 except Unauthorized:
-                    await sync(request)(txn.abort)
+                    await sync(view.request)(txn.abort)
                     view_result = UnauthorizedResponse(
                         _('Not authorized to render operation'))
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",
                         exc_info=e)
-                    await sync(request)(txn.abort)
+                    await sync(view.request)(txn.abort)
                     view_result = ErrorResponse(
                         'ServiceError',
                         _('Error on execution of operation')
