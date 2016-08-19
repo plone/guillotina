@@ -38,8 +38,6 @@ class QueueUtility(object):
             got_obj = False
             try:
                 priority, view = await self._queue.get()
-                request = TransactionProxy(view.request)
-                view.request = request
                 got_obj = True
                 txn = request.conn.transaction_manager.begin(request)
                 try:
@@ -90,7 +88,7 @@ class QueueUtility(object):
 class QueueObject(View):
 
     def __init__(self, context, request):
-        super(QueueObject, self).__init__(context, request)
+        super(QueueObject, self).__init__(context, TransactionProxy(request))
         self.time = datetime.now().timestamp()
 
     def __lt__(self, view):
