@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from zope.interface import Interface
-import asyncio
-import logging
+from datetime import datetime
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
-from plone.server.utils import sync
-from datetime import datetime
 from plone.server.browser import View
+from plone.server import _
+from plone.server.transactions import sync
+from plone.server.transactions import TransactionProxy
+from zope.interface import Interface
+from zope.security.interfaces import Unauthorized
+import asyncio
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +88,7 @@ class QueueUtility(object):
 class QueueObject(View):
 
     def __init__(self, context, request):
-        super(QueueObject, self).__init__(context, request)
+        super(QueueObject, self).__init__(context, TransactionProxy(request))
         self.time = datetime.now().timestamp()
 
     def __lt__(self, view):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from plone.server import utils
-from plone.server.exceptions import RequestNotFound
+from plone.server.transactions import tm
+from plone.server.transactions import get_current_request
+from plone.server.transactions import RequestNotFound
 from plone.server.catalog.interfaces import ICatalogUtility
 from plone.uuid.interfaces import IUUID
 from zope.component import getUtility
@@ -40,7 +41,7 @@ def get_hook():
         return  # no search configured
 
     try:
-        trns = utils.tm(utils.get_current_request()).get()
+        trns = tm(get_current_request()).get()
     except RequestNotFound:
         trns = transaction.get()
     hook = None

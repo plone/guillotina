@@ -1,58 +1,8 @@
 # -*- coding: utf-8 -*-
-from aiohttp.web import RequestHandler
-from plone.server.exceptions import RequestNotFound
-from plone.server.interfaces import IView
-from zope.component import provideUtility
-from plone.server.registry import ICors
 import fnmatch
-
-import asyncio
 import importlib
-import inspect
 
-
-def locked(obj):
-    """Return object specfic volatile asyncio lock
-    :param obj:
-    """
-    try:
-        assert obj._v_lock is not None
-    except (AssertionError, AttributeError):
-        obj._v_lock = asyncio.Lock()
-    return obj._v_lock
-
-
-def tm(request):
-    """Return shared transaction manager (from request)
-    :param request:
-    """
-    assert getattr(request, 'conn', None) is not None, \
-        'Request has no conn'
-    return request.conn.transaction_manager
-
-
-def sync(request):
-    """Return shared asyncio executor instance (from request)
-    :param request:
-    """
-    assert getattr(request, 'app', None) is not None, \
-        'Request has no app'
-    assert getattr(request.app, 'executor', None) is not None, \
-        'App has no executor'
-    return lambda *args, **kwargs: request.app.loop.run_in_executor(
-        request.app.executor, *args, **kwargs)
-
-
-def get_current_request():
-    """Return the nearest request from the current frame"""
-    frame = inspect.currentframe()
-    while frame is not None:
-        if IView.providedBy(frame.f_locals.get('self')):
-            return frame.f_locals.get('self').request
-        elif isinstance(frame.f_locals.get('self'), RequestHandler):
-            return frame.f_locals['request']
-        frame = frame.f_back
-    raise RequestNotFound('Unable to find the current request')
+from plone.server.registry import ICors
 
 
 def import_class(import_string):

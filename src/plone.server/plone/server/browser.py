@@ -3,7 +3,7 @@ from plone.dexterity.interfaces import IDexterityContent
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
 from plone.server.interfaces import IAbsoluteURL
-from plone.server.utils import get_current_request
+from plone.server.transactions import get_current_request
 from zope.component import adapter
 from zope.interface import implementer
 from zope.location import ILocation

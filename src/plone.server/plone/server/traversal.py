@@ -21,7 +21,8 @@ from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.registry import CORS_KEY
 from plone.server.auth.participation import AnonymousParticipation
 from plone.server.utils import import_class
-from plone.server.utils import locked
+from plone.server.transactions import locked
+from plone.server.transactions import sync
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
@@ -33,7 +34,6 @@ from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
-from plone.server.utils import sync
 from plone.server.browser import Response
 from plone.server.browser import UnauthorizedResponse
 from plone.server.browser import ErrorResponse

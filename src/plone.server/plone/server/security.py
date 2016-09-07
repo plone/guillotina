@@ -4,7 +4,7 @@ from plone.dexterity.utils import iterSchemata
 from plone.server.interfaces import DEFAULT_READ_PERMISSION
 from plone.server.interfaces import DEFAULT_WRITE_PERMISSION
 from plone.server.interfaces import IRequest
-from plone.server.utils import get_current_request
+from plone.server.transactions import get_current_request
 from plone.supermodel.interfaces import READ_PERMISSIONS_KEY
 from plone.supermodel.interfaces import WRITE_PERMISSIONS_KEY
 from plone.supermodel.utils import mergedTaggedValueDict

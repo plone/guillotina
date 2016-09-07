@@ -45,6 +45,7 @@ setup(
         'zope.i18nmessageid',
         'zope.interface',
         'zope.location',
+        'zope.proxy',
         'zope.schema',
         'zope.security',
         # required here?

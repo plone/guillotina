@@ -16,7 +16,7 @@ import time
 from plone.dexterity.utils import createContent
 from plone.server.browser import View
 from aiohttp.test_utils import make_mocked_request
-from plone.server.utils import sync
+from plone.server.transactions import sync
 import json
 
 
