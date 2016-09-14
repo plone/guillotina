@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from zope.component.interfaces import ISite
-from zope.interface import Interface
+from zope.interface import Interface, Attribute
 from zope.interface import interfaces
 from plone.supermodel import model
 from zope import schema
@@ -130,6 +130,7 @@ class IAbsoluteURL(Interface):
 
 # Components for REST API
 
+
 class IObjectComponent(Interface):
     pass
 
@@ -140,3 +141,11 @@ class IObjectFinallyCreatedEvent(interfaces.IObjectEvent):
     """An object has been created.
 
     The location will usually be ``None`` for this event."""
+
+
+class INewUserAdded(Interface):
+    """A new user logged in.
+
+    The user is the id from the user logged in"""
+
+    user = Attribute("User id created.")
