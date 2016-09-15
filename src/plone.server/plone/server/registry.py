@@ -104,3 +104,18 @@ class ICors(Interface):
         description=_("""Indicated how long the results of a preflight request
             can be cached"""),
     )
+
+
+ADDONS_KEY = 'plone.server.registry.IAddons.enabled'
+
+
+class IAddons(Interface):
+
+    enabled = schema.List(
+        title=_('Installed addons'),
+        defaultFactory=list,
+        value_type=schema.TextLine(
+            title='Value'
+        ),
+        description=_("""List of enabled addons""")
+    )
