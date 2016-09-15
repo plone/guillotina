@@ -134,6 +134,18 @@ class IAbsoluteURL(Interface):
 class IObjectComponent(Interface):
     pass
 
+
+# Addon interface
+
+class IAddOn(Interface):
+
+    def install(self, site):
+        pass
+
+    def uninstall(self):
+        pass
+
+
 # Specific Events
 
 
@@ -149,3 +161,6 @@ class INewUserAdded(Interface):
     The user is the id from the user logged in"""
 
     user = Attribute("User id created.")
+
+
+
