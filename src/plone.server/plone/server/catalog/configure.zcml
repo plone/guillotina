@@ -5,9 +5,6 @@
 
   <plone:api file="api.json" />
 
-  <plone:catalog file="elasticsearch.json" zcml:condition="installed aioes" />
-
-
   <!-- index events -->
   <subscriber
       for="plone.dexterity.interfaces.IDexterityContent
@@ -35,4 +32,5 @@
   <adapter factory=".catalog.DefaultCatalogDataAdapter"
            provides=".interfaces.ICatalogDataAdapter"
            for="plone.dexterity.interfaces.IDexterityContent" />
+
 </configure>
