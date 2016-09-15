@@ -16,12 +16,6 @@
 	        />
 
         <directive
-            name="catalog"
-            schema=".metaconfigure.ICatalog"
-            handler=".metaconfigure.catalogDirective"
-            />
-
-        <directive
             name="oauth"
             schema=".metaconfigure.IOAuthDirective"
             handler=".metaconfigure.oauthDirective"
@@ -31,6 +25,12 @@
             name="resourceDirectory"
             schema=".metaconfigure.IResourceDirectory"
             handler=".metaconfigure.resourceDirectory"
+            />
+
+        <directive
+            name="addon"
+            schema=".metaconfigure.IAddOn"
+            handler=".metaconfigure.addOn"
             />
 
     </directives>

@@ -9,4 +9,5 @@ DICT_RENDERS = collections.OrderedDict()
 DICT_LANGUAGES = {}
 DEFAULT_LAYER = []
 DEFAULT_PERMISSION = []
+AVAILABLE_ADDONS = {}
 
