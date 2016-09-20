@@ -81,6 +81,7 @@
     title="Review portal content"
     />
 -->
+
   <permission
       id="plone.AccessContent"
       title="Access content"
@@ -157,6 +158,12 @@
       title="Register a new configuration on Registry"
       />
 
+  <permission
+      id="plone.ManageAddons"
+      title="Manage addons on a site"
+      />
+
+
   <!-- Roles -->
 
   <role
@@ -165,9 +172,13 @@
       description="All users have this role implicitly"
       />
 
-  <role id="plone.Manager" title="Site Manager" />
+  <role 
+      id="plone.Manager" 
+      title="Site Manager" />
 
-  <role id="plone.Member" title="Site Member" />
+  <role 
+      id="plone.Member"
+      title="Site Member" />
 
   <role
       id="plone.Reader"
@@ -189,21 +200,27 @@
       />
 
   <role
-      id="plone.Siteadmin"
+      id="plone.SiteAdmin"
       title="Site Administrator"
       description="It can set settings on site"
       />
 
   <role
-      id="plone.Collaborator"
-      title="Collaborator"
-      description="It can add content"
+      id="plone.Owner"
+      title="Content Manager"
+      description="It can add/delete content"
       />
 
   <role
       id="plone.SiteCreator"
       title="Site DB Manager"
       description="Can create sites and db connections"
+      />
+
+  <role
+      id="plone.SiteDeleter"
+      title="Site Remover"
+      description="Can destroy a site"
       />
 
 </configure>

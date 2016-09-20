@@ -4,6 +4,11 @@
   <include package="zope.securitypolicy" />
 
   <grant
+      permission="plone.AccessPreflight"
+      role="plone.Anonymous"
+      />
+
+  <grant
       permission="plone.ViewContent"
       role="plone.Reader"
       />
@@ -19,89 +24,69 @@
       />
 
   <grant
-      permission="plone.AccessContent"
-      role="plone.SiteCreator"
-      />
-
-  <grant
-      permission="plone.AccessPreflight"
-      role="plone.Anonymous"
+      permission="plone.ManageAddons"
+      role="plone.Manager"
       />
 
   <grant
       permission="plone.DeleteContent"
-      role="plone.Editor"
-      />
-
-  <grant
-      permission="plone.ViewContent"
-      role="plone.SiteCreator"
-      />
-
-  <grant
-      permission="plone.DeleteContent"
-      role="plone.SiteCreator"
-      />
-
-  <grant
-      permission="plone.ModifyContent"
-      role="plone.SiteCreator"
+      role="plone.Owner"
       />
 
   <grant
       permission="plone.AddContent"
-      role="plone.SiteCreator"
+      role="plone.Owner"
       />
 
   <grant
-      permission="plone.AddPortal"
-      role="plone.SiteCreator"
+      permission="plone.AccessPreflight"
+      role="plone.Owner"
       />
 
   <grant
-      permission="plone.GetPortals"
-      role="plone.SiteCreator"
+      permission="plone.AccessContent"
+      role="plone.Owner"
+      />
+
+  <grant
+      permission="plone.ViewContent"
+      role="plone.Owner"
+      />
+
+  <grant
+      permission="plone.ModifyContent"
+      role="plone.Owner"
+      />
+
+  <grant
+      permission="plone.ModifyContent"
+      role="plone.Editor"
+      />
+
+  <grant
+      permission="plone.AccessContent"
+      role="plone.Member"
       />
 
   <grant
       permission="plone.DeletePortals"
-      role="plone.SiteCreator"
+      role="plone.SiteDeleter"
       />
 
   <grant
       permission="plone.ReadConfiguration"
-      role="plone.SiteCreator"
+      role="plone.SiteAdmin"
       />
 
   <grant
       permission="plone.WriteConfiguration"
-      role="plone.SiteCreator"
+      role="plone.SiteAdmin"
       />
 
   <grant
       permission="plone.RegisterConfigurations"
-      role="plone.SiteCreator"
+      role="plone.SiteAdmin"
       />
-
-  <!-- TODO: DB permissions should be a different role -->
-
-  <grant
-      permission="plone.MountDatabase"
-      role="plone.SiteCreator"
-      />
-
-  <grant
-      permission="plone.UmountDatabase"
-      role="plone.SiteCreator"
-      />
-
-  <grant
-      permission="plone.GetDatabases"
-      role="plone.SiteCreator"
-      />
-
-
-  <grantAll role="zope.Manager" />
 
   <adapter factory=".security.getCurrentInteraction" />
   <adapter
