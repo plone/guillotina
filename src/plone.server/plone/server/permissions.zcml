@@ -163,6 +163,15 @@
       title="Manage addons on a site"
       />
 
+  <permission
+      id="plone.SeePermissions"
+      title="See permissions"
+      />
+
+  <permission
+      id="plone.ChangePermissions"
+      title="Change permissions"
+      />
 
   <!-- Roles -->
 

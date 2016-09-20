@@ -117,10 +117,14 @@
                 "permission": "plone.AddContent"
             },
             "endpoints": {
-                "sharing": {
+                "@sharing": {
+                    "GET": {
+                        "factory": "plone.server.api.dexterity.SharingGET",
+                        "permission": "plone.SeePermissions"
+                    },
                     "POST": {
                         "factory": "plone.server.api.dexterity.SharingPOST",
-                        "permission": "plone.ViewContent"
+                        "permission": "plone.ChangePermissions"
                     }
                 },
                 "@components": {

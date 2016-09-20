@@ -27,6 +27,9 @@ from plone.server.utils import apply_cors
 from zope.container.interfaces import INameChooser
 from zope.event import notify
 from plone.server.events import ObjectFinallyCreatedEvent
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from zope.securitypolicy.interfaces import IPrincipalPermissionMap
+from zope.securitypolicy.interfaces import IPrincipalRoleMap
 
 
 logger = logging.getLogger(__name__)
@@ -102,7 +105,7 @@ class DefaultPOST(Service):
                 status=400)
 
         # Local Roles assign owner as the creator user
-        roleperm = IRolePermissionMap(obj)
+        roleperm = IPrincipalRoleManager(obj)
         roleperm.assignRoleToPrincipal(
             'plone.Owner',
             user)
@@ -141,6 +144,15 @@ class DefaultPATCH(Service):
                 status=400)
 
         return Response(response={}, status=204)
+
+
+class SharingGET(Service):
+    """ Return the list of permissions """
+
+    async def __call__(self):
+        roleperm = IRolePermissionMap(self.context)
+        prinperm = IPrincipalPermissionMap(self.context)
+        prinrole = IPrincipalRoleMap(self.context)
 
 
 class SharingPOST(Service):

@@ -272,7 +272,8 @@ class TraversalRouter(AbstractRouter):
         if not allowed:
             # Check if its a CORS call:
             if IOPTIONS != method or \
-                    not request.site_settings.get(CORS_KEY, False):
+                    (hasattr(request, 'site_settings') and
+                     not request.site_settings.get(CORS_KEY, False)):
                 logger.warn("No access content {content}".format(
                     content=resource))
                 raise HTTPUnauthorized()

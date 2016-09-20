@@ -39,11 +39,6 @@
       />
 
   <grant
-      permission="plone.AccessPreflight"
-      role="plone.Owner"
-      />
-
-  <grant
       permission="plone.AccessContent"
       role="plone.Owner"
       />
@@ -55,6 +50,16 @@
 
   <grant
       permission="plone.ModifyContent"
+      role="plone.Owner"
+      />
+
+  <grant
+      permission="plone.ChangePermissions"
+      role="plone.Owner"
+      />
+
+  <grant
+      permission="plone.SeePermissions"
       role="plone.Owner"
       />
 

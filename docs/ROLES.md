@@ -47,13 +47,13 @@ Defined at:
 
 ### plone.Owner
 
- * plone.AccessPreflight
  * plone.AccessContent
  * plone.ViewContent
  * plone.ModifyContent
  * plone.DeleteContent
  * plone.AddContent
-
+ * plone.ChangePermissions
+ * plone.SeePermissions
 
 ## Global Roles
 
