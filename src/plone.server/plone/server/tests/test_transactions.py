@@ -151,3 +151,40 @@ def test_callback_transaction_data_manager_with_abort(root):
     assert getattr(view, 'value', None) is None
     txn.abort()
     assert getattr(view, 'value', None) is None
+
+
+# noinspection PyShadowingNames,PyProtectedMember
+def test_concurrent_transaction_abort_has_no_side_effects(root, foo, bar):
+    tm = root._p_jar.transaction_manager
+
+    # Create /foo/a
+    request1 = make_mocked_request('POST', '/foo')
+    t1 = tm.begin(request1)
+    SetItemView(foo, request1)('a', PersistentMapping())
+
+    # Test that object is registered
+    assert foo in request1._txn_dm._registered_objects
+
+    # Create /bar/b
+    request2 = make_mocked_request('POST', '/bar')
+    t2 = tm.begin(request2)
+    SetItemView(bar, request2)('b', PersistentMapping())
+
+    # Test that object is registered
+    assert bar in request2._txn_dm._registered_objects
+
+    # Test that two transactions are indepedent
+    assert bar not in request1._txn_dm._registered_objects
+    assert foo not in request2._txn_dm._registered_objects
+
+    # Abort the first transaction
+    t1.abort()
+
+    # Commit the second transaction
+    t2.commit()
+
+    # Test that /foo/a has not been created by t1
+    assert 'a' not in foo
+
+    # Test that /bar/b has been created by t2
+    assert 'b' in bar
