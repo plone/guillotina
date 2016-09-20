@@ -43,7 +43,7 @@ class DefaultPOST(Service):
             id=data['id'],
             title=data['title'],
             description=data['description'])
-        # import pdb; pdb.set_trace()
+
         self.context[data['id']] = site
 
         site.install()

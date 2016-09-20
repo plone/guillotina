@@ -10,11 +10,10 @@ from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ILayers
 from plone.server.registry import ICors
+from plone.server.registry import IAddons
 
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
-from zope.securitypolicy.interfaces import IPrincipalPermissionManager
-from zope.securitypolicy.interfaces import IRolePermissionManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 from plone.server.browser import get_physical_path
 
@@ -38,6 +37,7 @@ class PloneSite(Container):
         registry.registerInterface(IAuthPloneUserPlugins)
         registry.registerInterface(IAuthExtractionPlugins)
         registry.registerInterface(ICors)
+        registry.registerInterface(IAddons)
         registry.forInterface(ILayers).active_layers = \
             ['plone.server.api.layer.IDefaultLayer']
         registry.forInterface(IAuthExtractionPlugins).active_plugins = \
@@ -53,33 +53,6 @@ class PloneSite(Container):
         registry.forInterface(ICors).expose_headers = ['*']
         registry.forInterface(ICors).allow_credentials = True
         registry.forInterface(ICors).max_age = '3660'
-
-        # Default policy
-        roles = IRolePermissionManager(self)
-        roles.grantPermissionToRole(
-            'plone.AccessContent',
-            'Anonymous User'
-        )
-        roles.grantPermissionToRole(
-            'plone.ViewContent',
-            'Anonymous User'
-        )
-
-        roles = IPrincipalPermissionManager(self)
-        roles.grantPermissionToPrincipal(
-            'plone.AccessContent',
-            'Anonymous User'
-        )
-        roles.grantPermissionToPrincipal(
-            'plone.AccessContent',
-            'RootUser'
-        )
-
-        roles = IRolePermissionManager(self)
-        roles.grantPermissionToRole(
-            'plone.AccessContent',
-            'plone.SiteCreator'
-        )
 
     def getSiteManager(self):
         return self['_components']

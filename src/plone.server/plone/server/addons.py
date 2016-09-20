@@ -8,8 +8,10 @@ class Addon(object):
     """ Prototype of an Addon plugin
     """
 
-    def install(self, site):
+    @classmethod
+    def install(self, request):
         pass
 
-    def uninstall(self):
+    @classmethod
+    def uninstall(request):
         pass

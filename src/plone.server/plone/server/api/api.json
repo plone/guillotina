@@ -73,6 +73,20 @@
                         "permission": "plone.AccessContent"
                     }
                 },
+                "@addons" : {
+                    "POST": {
+                        "factory": "plone.server.api.addons.Install",
+                        "permission": "plone.ManageAddons"
+                    },
+                    "DELETE": {
+                        "factory": "plone.server.api.addons.Uninstall",
+                        "permission": "plone.ManageAddons"                        
+                    },
+                    "GET": {
+                        "factory": "plone.server.api.addons.getAddons",
+                        "permission": "plone.ManageAddons"
+                    }
+                },
                 "@ws": {
                     "GET": {
                         "factory": "plone.server.api.ws.WebsocketsView",
