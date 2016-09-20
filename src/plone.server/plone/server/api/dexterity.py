@@ -101,6 +101,12 @@ class DefaultPOST(Service):
                 str(e),
                 status=400)
 
+        # Local Roles assign owner as the creator user
+        roleperm = IRolePermissionMap(obj)
+        roleperm.assignRoleToPrincipal(
+            'plone.Owner',
+            user)
+
         notify(ObjectFinallyCreatedEvent(obj))
 
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
