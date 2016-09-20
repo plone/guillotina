@@ -52,6 +52,7 @@ class OAuth(object):
         self._jwt_algorithm = settings['jwt_algorithm']
         self._client_id = settings['client_id']
         self._client_password = settings['client_password']
+        self._scope = settings.get('scope', 'plone')
 
     async def initialize(self, app=None):
         self.app = app
@@ -74,7 +75,7 @@ class OAuth(object):
                 return self._auth_code['auth_code']
         result = await self.call_auth('getAuthCode', {
             'client_id': self._client_id,
-            'scope': 'plone',
+            'scope': self._scope,
             'response_type': 'code'
         })
         if result:
@@ -94,7 +95,7 @@ class OAuth(object):
             'client_id': self._client_id,
             'client_secret': self._client_password,
             'grant_type': 'authorization_code',
-            'scope': 'plone'
+            'scope': self._scope
         })
         if result:
             self._service_token = result
