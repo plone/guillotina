@@ -31,12 +31,16 @@ from ZEO.ClientStorage import ClientStorage
 from ZODB.DemoStorage import DemoStorage
 from ZODB import DB
 from zope.security.interfaces import IInteraction
+from zope.configuration.config import ConfigurationConflictError
 
 import asyncio
 import json
 import hashlib
+import logging
 import sys
 import base64
+
+logger = logging.getLogger(__name__)
 
 
 @implementer(IApplication)
@@ -161,7 +165,10 @@ class ApplicationToJson(object):
 
 
 class RootSpecialPermissions(PrincipalPermissionManager):
-    """No Role Map on Application and DB so permissions set to users."""
+    """No Role Map on Application and DB so permissions set to users.
+
+    It will not affect Plone sites as they don't have parent pointers to DB/APP
+    """
     def __init__(self, db):
         super(RootSpecialPermissions, self).__init__()
         self.grantPermissionToPrincipal('plone.AddPortal', 'RootUser')
@@ -258,7 +265,11 @@ def make_app(config_file=None, settings=None):
     include(app.config, 'configure.zcml', sys.modules['plone.server'])
     for ep in iter_entry_points('plone.server'):  # auto-include applications
         include(app.config, 'configure.zcml', ep.load())
-    app.config.execute_actions()
+    try:
+        app.config.execute_actions()
+    except ConfigurationConflictError as e:
+        logger.error(str(e._conflicts))
+        raise e
 
     content_type = ContentNegotiatorUtility('content_type', DICT_RENDERS.keys())
     language = ContentNegotiatorUtility('language', DICT_LANGUAGES.keys())
