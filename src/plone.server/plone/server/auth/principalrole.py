@@ -23,6 +23,10 @@ class AnnotationPlonePrincipalRoleManager(AnnotationPrincipalRoleManager):
                 if participation.principal is not None and \
                    principal_id == participation.principal.id:
                     global_roles = participation.principal._roles.copy()
+            if hasattr(request, '_cache_groups'):
+                for id_group, group in request._cache_groups.items():
+                    if id_group == principal_id:
+                        global_roles = group._roles.copy()
         if local_roles:
             roles = global_roles.update(local_roles)
         else:
