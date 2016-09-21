@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.testing import TESTING_PORT
+from plone.server.testing import ADMIN_TOKEN
 import json
 import aiohttp
 import asyncio
@@ -14,7 +15,8 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             session = aiohttp.ClientSession()
             async with session.ws_connect(
                     'ws://localhost:{port}/plone/plone/@ws'.format(
-                        port=TESTING_PORT)) as ws:
+                        port=TESTING_PORT),
+                    headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
                 # we should check version
                 sending = {
                     'op': 'GET',
