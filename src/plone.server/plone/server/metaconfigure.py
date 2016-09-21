@@ -9,7 +9,6 @@ from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
 from plone.server import AVAILABLE_ADDONS
-from plone.server.auth.oauth import IOAuth
 from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
@@ -207,34 +206,6 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
                             layer,
                             default_permission,
                             endpoint)
-
-
-class IOAuthDirective(Interface):
-    '''
-    '''
-
-    file = Path(
-        title='The name of a file defining oauth registration information.',
-        description='Refers to a file containing a json definition.',
-        required=True
-    )
-
-
-def oauthDirective(_context, file):
-    if file:
-        file = os.path.abspath(_context.path(file))
-        if not os.path.isfile(file):
-            raise ConfigurationError('No such file', file)
-
-    with open(file, 'r') as f:
-        json_info = json.loads(f.read())
-        f.close()
-
-    OAuth = import_class(json_info['utility'])  # noqa
-    settings = json_info['settings']
-    oauth_utility = OAuth(settings)
-
-    utility(_context, provides=IOAuth, component=oauth_utility)
 
 
 class IResourceDirectory(Interface):

@@ -16,12 +16,6 @@
 	        />
 
         <directive
-            name="oauth"
-            schema=".metaconfigure.IOAuthDirective"
-            handler=".metaconfigure.oauthDirective"
-            />
-
-        <directive
             name="resourceDirectory"
             schema=".metaconfigure.IResourceDirectory"
             handler=".metaconfigure.resourceDirectory"

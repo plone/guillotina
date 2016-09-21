@@ -31,7 +31,6 @@ setup(
         'plone.registry',
         'plone.supermodel',
         'plone.i18n',
-        'pyjwt',
         'repoze.workflow',
         'setuptools',
         'transaction',
@@ -48,10 +47,6 @@ setup(
         'zope.proxy',
         'zope.schema',
         'zope.security',
-        # required here?
-        # zc.recipe.egg not respecting plone.server[elasticsearch]
-        # for console scripts?
-        'aioes'
     ],
     extras_require={
         'elasticsearch': [

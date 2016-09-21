@@ -40,10 +40,6 @@ class PloneSite(Container):
         registry.registerInterface(IAddons)
         registry.forInterface(ILayers).active_layers = \
             ['plone.server.api.layer.IDefaultLayer']
-        registry.forInterface(IAuthExtractionPlugins).active_plugins = \
-            ['plone.server.auth.oauth.PloneJWTExtraction']
-        registry.forInterface(IAuthPloneUserPlugins).active_plugins = \
-            ['plone.server.auth.oauth.OAuthPloneUserFactory']
 
         registry.forInterface(ICors).enabled = True
         registry.forInterface(ICors).allow_origin = ['*']
