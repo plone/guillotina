@@ -41,6 +41,8 @@ Defined at:
 
 ### plone.Editor
 
+ * plone.AccessContent
+ * plone.ViewContent
  * plone.ModifyContent
 
 ### plone.Reviewer
@@ -55,10 +57,12 @@ Defined at:
  * plone.ChangePermissions
  * plone.SeePermissions
 
-## Global Roles
+## Site/App Roles
 
 ### plone.SiteAdmin
 
+ * plone.AccessContent
+ * plone.ManageAddons
  * plone.RegisterConfigurations
  * plone.WriteConfiguration
  * plone.ReadConfiguration
@@ -66,11 +70,6 @@ Defined at:
 ### plone.SiteDeleter
 
  * plone.DeletePortal
-
-### plone.Manager
-
- * plone.ManageAddons
-
 
 # Default roles on Plone Site
 
@@ -82,4 +81,10 @@ Created objects set the plone.Owner role to the user who created it.
 
 ## Managers
 
-Has all the permissions of the site
+### RootParticipation
+
+There is a RootUser who has permissions to all site:
+
+DB/APP permissions are defined on factory.py
+
+Plone permissions because belongs to Managers group auth/participation.py

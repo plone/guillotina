@@ -28,9 +28,8 @@ class AnnotationPlonePrincipalRoleManager(AnnotationPrincipalRoleManager):
                     if id_group == principal_id:
                         global_roles = group._roles.copy()
         if local_roles:
-            roles = global_roles.update(local_roles)
-        else:
-            roles = global_roles
+            global_roles.update(local_roles)
+        roles = global_roles
         return [(key, value) for key, value in roles.items()]
 
     getPrincipalsAndRoles = AnnotationSecurityMap.getAllCells

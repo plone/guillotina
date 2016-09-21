@@ -5,83 +5,6 @@
   <include file="meta.zcml" package="zope.security" />
   <include file="meta.zcml" package="zope.securitypolicy" />
 
-<!--
-  <permission
-    id="plone.ListFolderContents"
-    title="List folder contents"
-    />
-
-  <permission
-    id="plone.ListUndoableChanges"
-    title="List undoable changes"
-    />
-
-  <permission
-    id="plone.AccessInactivePortalContent"
-    title="Access inactive portal content"
-    />
-
-  <permission
-    id="plone.ModifyPortalContent"
-    title="Modify portal content"
-    />
-
-  <permission
-    id="plone.ManageProperties"
-    title="Manage properties"
-    />
-
-  <permission
-    id="plone.ListPortalMembers"
-    title="List portal members"
-    />
-
-  <permission
-    id="plone.AddPortalFolders"
-    title="Add portal folders"
-    />
-
-  <permission
-    id="plone.AddPortalContent"
-    title="Add portal content"
-    />
-
-  <permission
-    id="plone.AddPortalMember"
-    title="Add portal member"
-    />
-
-  <permission
-    id="plone.SetOwnPassword"
-    title="Set own password"
-    />
-
-  <permission
-    id="plone.SetOwnProperties"
-    title="Set own properties"
-    />
-
-  <permission
-    id="plone.ChangeLocalRoles"
-    title="Change local roles"
-    />
-
-  <permission
-    id="plone.MailForgottenPassword"
-    title="Mail forgotten password"
-    />
-
-  <permission
-    id="plone.RequestReview"
-    title="Request review"
-    />
-
-  <permission
-    id="plone.ReviewPortalContent"
-    title="Review portal content"
-    />
--->
-
   <permission
       id="plone.AccessContent"
       title="Access content"
@@ -173,17 +96,13 @@
       title="Change permissions"
       />
 
-  <!-- Roles -->
+  <!-- Content Roles -->
 
   <role
       id="plone.Anonymous"
       title="Everybody"
       description="All users have this role implicitly"
       />
-
-  <role 
-      id="plone.Manager" 
-      title="Site Manager" />
 
   <role 
       id="plone.Member"
@@ -201,7 +120,6 @@
       description="It can edit content"
       />
 
-
   <role
       id="plone.Reviewer"
       title="Reviewer"
@@ -209,16 +127,23 @@
       />
 
   <role
+      id="plone.Owner"
+      title="Content Manager"
+      description="It can add/delete content"
+      />
+
+  <!-- Site/App roles -->
+
+  <role 
+      id="plone.Manager" 
+      title="Site Manager" />
+
+  <role
       id="plone.SiteAdmin"
       title="Site Administrator"
       description="It can set settings on site"
       />
 
-  <role
-      id="plone.Owner"
-      title="Content Manager"
-      description="It can add/delete content"
-      />
 
   <role
       id="plone.SiteCreator"

@@ -3,11 +3,13 @@
   <include package="zope.securitypolicy" file="meta.zcml" />
   <include package="zope.securitypolicy" />
 
+  <!-- Anonymous -->
   <grant
       permission="plone.AccessPreflight"
       role="plone.Anonymous"
       />
 
+  <!-- Reader -->
   <grant
       permission="plone.ViewContent"
       role="plone.Reader"
@@ -18,16 +20,7 @@
       role="plone.Reader"
       />
 
-  <grant
-      permission="plone.AccessContent"
-      role="plone.Manager"
-      />
-
-  <grant
-      permission="plone.ManageAddons"
-      role="plone.Manager"
-      />
-
+  <!-- Owner -->
   <grant
       permission="plone.DeleteContent"
       role="plone.Owner"
@@ -63,19 +56,38 @@
       role="plone.Owner"
       />
 
+
+  <!-- Editor -->
   <grant
-      permission="plone.ModifyContent"
+      permission="plone.ViewContent"
       role="plone.Editor"
       />
 
   <grant
       permission="plone.AccessContent"
-      role="plone.Member"
+      role="plone.Editor"
       />
 
   <grant
-      permission="plone.DeletePortals"
-      role="plone.SiteDeleter"
+      permission="plone.ModifyContent"
+      role="plone.Editor"
+      />
+
+  <!-- Member -->
+  <grant
+      permission="plone.AccessContent"
+      role="plone.Member"
+      />
+
+  <!-- SiteAdmin -->
+  <grant
+      permission="plone.AccessContent"
+      role="plone.SiteAdmin"
+      />
+
+  <grant
+      permission="plone.ManageAddons"
+      role="plone.SiteAdmin"
       />
 
   <grant
@@ -91,7 +103,14 @@
   <grant
       permission="plone.RegisterConfigurations"
       role="plone.SiteAdmin"
+      />  
+
+  <!-- SiteDeleter -->
+  <grant
+      permission="plone.DeletePortals"
+      role="plone.SiteDeleter"
       />
+
 
   <adapter factory=".security.getCurrentInteraction" />
   <adapter

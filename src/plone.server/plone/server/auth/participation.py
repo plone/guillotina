@@ -56,16 +56,8 @@ class PloneGroup(PloneUser):
 
         if ident == 'Managers':
             # Special Case its a Manager user
-            self._roles['plone.SiteCreator'] = 1
-            self._roles['plone.Member'] = 1
-            self._roles['plone.Reader'] = 1
-            self._roles['plone.Editor'] = 1
-            self._roles['plone.Reviewer'] = 1
             self._roles['plone.SiteAdmin'] = 1
-            self._roles['plone.ContentManager'] = 1
-            self._roles['plone.SiteCreator'] = 1
-            self._roles['plone.SiteDeleter'] = 1
-            self._roles['plone.Manager'] = 1
+            self._roles['plone.Owner'] = 1
         # else:
         #     # Cached group TODO : Needs better implementation
         #     if not hasattr(self.request, '__cache_group'):
