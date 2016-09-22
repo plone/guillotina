@@ -5,7 +5,6 @@ import asyncio
 from plone.server.testing import AsyncMockView
 
 
-
 class TestQueue(PloneQueueServerTestCase):
 
     def test_add_sync_utility(self):

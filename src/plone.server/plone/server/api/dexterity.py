@@ -11,6 +11,7 @@ from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.interfaces import IObjectComponent
+from plone.server.utils import DefaultRootCors
 from plone.server import _
 import fnmatch
 from zope.security import checkPermission
@@ -253,7 +254,12 @@ class DefaultOPTIONS(Service):
 
     async def __call__(self):
         """Apply CORS on the OPTIONS view."""
-        self.settings = self.request.site_settings.forInterface(ICors)
+        if hasattr(self.request, 'site_settings'):
+            self.settings = self.request.site_settings.forInterface(ICors)
+        else:
+            # CORS method for non plone endpoints
+            self.settings = DefaultRootCors()
+
         headers = await self.preflight()
         resp = await self.render()
         return Response(response=resp, headers=headers, status=200)

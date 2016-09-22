@@ -15,7 +15,10 @@ def main():
     parser.add_argument('-c', '--configuration',
                         default='config.json', help='Configuration file')
     arguments = parser.parse_args()
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(threadName)10s %(name)18s: %(message)s',)
+
     with open(arguments.configuration, 'r') as config:
         settings = json.load(config)
     web.run_app(make_app(config_file=arguments.configuration), port=settings['address'])

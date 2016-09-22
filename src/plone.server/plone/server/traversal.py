@@ -303,11 +303,14 @@ class TraversalRouter(AbstractRouter):
                         exc_info=e)
                     raise HTTPNotFound()
 
-        if view is None and method == IOPTIONS and \
+        if view is None and method == IOPTIONS:
+            if not hasattr(request, 'site_settings') or \
                 request.site_settings.get(CORS_KEY, False):
-            # Its a CORS call, we could not find any OPTION definition
-            # Lets create a default preflight view
-            view = DefaultOPTIONS(resource, request)
+                # Its a CORS call, we could not find any OPTION definition
+                # Lets create a default preflight view
+                # We check for site_settings in case the call is to some url before site
+                view = DefaultOPTIONS(resource, request)
+
 
         checker = getCheckerForInstancesOf(view.__class__)
         if checker is not None:
