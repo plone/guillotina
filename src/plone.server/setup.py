@@ -49,9 +49,6 @@ setup(
         'zope.security',
     ],
     extras_require={
-        'elasticsearch': [
-            'aioes'
-        ],
         'test': [
             'pytest',
             'requests'

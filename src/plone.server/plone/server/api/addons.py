@@ -58,10 +58,18 @@ class Uninstall(Service):
 class getAddons(Service):
     async def __call__(self):
         result = {
-            'items': []
+            'available': [],
+            'installed': []
         }
         for key, addon in AVAILABLE_ADDONS.items():
-            result['items'].append({
+            result['available'].append({
                 'id': key,
                 'title': addon['title']
             })
+
+        registry = self.request.site_settings
+        config = registry.forInterface(IAddons)
+
+        for installed in config.enabled:
+            result['installed'].append(installed)
+        return result
