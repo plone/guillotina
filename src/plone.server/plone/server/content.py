@@ -14,6 +14,7 @@ from plone.server.registry import IAddons
 
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 from plone.server.browser import get_physical_path
 
@@ -49,6 +50,18 @@ class PloneSite(Container):
         registry.forInterface(ICors).expose_headers = ['*']
         registry.forInterface(ICors).allow_credentials = True
         registry.forInterface(ICors).max_age = '3660'
+
+        roles = IPrincipalRoleManager(self)
+        roles.assignRoleToPrincipal(
+            'plone.SiteAdmin',
+            'RootUser'
+        )
+
+        roles.assignRoleToPrincipal(
+            'plone.Owner',
+            'RootUser'
+        )
+
 
     def getSiteManager(self):
         return self['_components']
