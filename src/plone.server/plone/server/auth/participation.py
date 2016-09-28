@@ -55,22 +55,10 @@ class PloneGroup(PloneUser):
         self.id = ident
 
         if ident == 'Managers':
-            # Special Case its a Manager user
+            # Special Case its a Root Manager user
             self._roles['plone.SiteAdmin'] = 1
+            self._roles['plone.SiteDeleter'] = 1
             self._roles['plone.Owner'] = 1
-        # else:
-        #     # Cached group TODO : Needs better implementation
-        #     if not hasattr(self.request, '__cache_group'):
-        #         settings = request.site_components.queryUtility(IRegistry) or {}
-        #         plugins = settings.get(GET_GROUPS_KEY, [])
-        #         for plugin in plugins:
-        #             plugin_object = import_class(plugin)
-        #             plugin_object(request).get_group(ident)
-        #     cache_group = getattr(self.request, '__cache_group', None)
-        #     if cache_group:
-        #         self._roles.update(self._cache_group._roles)
-        #         self._properties.update(self._cache_group._properties)
-        #         self._groups.update(self._cache_group._groups)
 
 
 @adapter(IRequest)
