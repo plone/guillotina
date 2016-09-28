@@ -81,6 +81,7 @@ async def traverse(request, parent, path):
     if IApplication.providedBy(parent):
         participation = parent.root_participation(request)
         if participation:
+            logger.info('Root Participation added')
             request.security.add(participation)
 
     if not path:
@@ -120,7 +121,8 @@ async def traverse(request, parent, path):
         participation = IParticipation(request)
         # Lets extract the user from the request
         await participation()
-        request.security.add(participation)
+        if participation.principal is not None:
+            request.security.add(participation)
         layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
@@ -274,8 +276,10 @@ class TraversalRouter(AbstractRouter):
             if IOPTIONS != method or \
                     (hasattr(request, 'site_settings') and
                      not request.site_settings.get(CORS_KEY, False)):
-                logger.warn("No access content {content}".format(
-                    content=resource))
+                logger.warn("No access content {content} with {auths}".format(
+                    content=resource,
+                    auths=str([x.principal.id
+                               for x in request.security.participations])))
                 raise HTTPUnauthorized()
 
         # Site registry lookup
@@ -310,7 +314,6 @@ class TraversalRouter(AbstractRouter):
                 # Lets create a default preflight view
                 # We check for site_settings in case the call is to some url before site
                 view = DefaultOPTIONS(resource, request)
-
 
         checker = getCheckerForInstancesOf(view.__class__)
         if checker is not None:
