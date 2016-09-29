@@ -39,15 +39,16 @@ class PloneSite(Container):
         registry.registerInterface(IAuthExtractionPlugins)
         registry.registerInterface(ICors)
         registry.registerInterface(IAddons)
-        registry.forInterface(ILayers).active_layers = \
-            ['plone.server.api.layer.IDefaultLayer']
+        registry.forInterface(ILayers).active_layers =\
+            frozenset({'plone.server.api.layer.IDefaultLayer'})
 
         registry.forInterface(ICors).enabled = True
-        registry.forInterface(ICors).allow_origin = ['*']
-        registry.forInterface(ICors).allow_methods = ['GET', 'POST', 'DELETE',
-                                                      'HEAD', 'PATCH']
-        registry.forInterface(ICors).allow_headers = ['*']
-        registry.forInterface(ICors).expose_headers = ['*']
+        registry.forInterface(ICors).allow_origin = frozenset({'*'})
+        registry.forInterface(ICors).allow_methods = frozenset({
+            'GET', 'POST', 'DELETE',
+            'HEAD', 'PATCH'})
+        registry.forInterface(ICors).allow_headers = frozenset({'*'})
+        registry.forInterface(ICors).expose_headers = frozenset({'*'})
         registry.forInterface(ICors).allow_credentials = True
         registry.forInterface(ICors).max_age = '3660'
 

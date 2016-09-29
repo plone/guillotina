@@ -30,7 +30,7 @@ class Install(Service):
                 _("Addon already installed"))
         handler = AVAILABLE_ADDONS[id_to_install]['handler']
         handler.install(self.request)
-        config.enabled.append(id_to_install)
+        config.enabled |= {id_to_install}
 
 
 class Uninstall(Service):
@@ -52,7 +52,7 @@ class Uninstall(Service):
 
         handler = AVAILABLE_ADDONS[id_to_install]['handler']
         handler.uninstall(self.request)
-        config.enabled.remove(id_to_install)
+        config.enabled -= {id_to_install}
 
 
 class getAddons(Service):
