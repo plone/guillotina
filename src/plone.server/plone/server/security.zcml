@@ -111,7 +111,6 @@
       role="plone.SiteDeleter"
       />
 
-
   <adapter factory=".security.getCurrentInteraction" />
   <adapter
     factory=".factory.RootSpecialPermissions"

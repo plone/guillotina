@@ -38,6 +38,7 @@ setup(
         'ZEO',
         'zope.component',
         'zope.configuration',
+        'zope.copy',
         'zope.dottedname',
         'zope.event',
         'zope.i18n',

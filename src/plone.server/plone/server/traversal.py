@@ -111,6 +111,7 @@ async def traverse(request, parent, path):
 
     if IDataBase.providedBy(context):
         request.conn = context.conn
+        request.conn.newTransaction(None)
         request._db_id = context.id
 
     if ISite.providedBy(context):
