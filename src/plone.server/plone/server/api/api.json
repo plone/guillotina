@@ -93,6 +93,12 @@
                         "factory": "plone.server.api.ws.WebsocketsView",
                         "permission": "plone.AccessContent"
                     }
+                },
+                "@user": {
+                    "GET": {
+                        "factory": "plone.server.api.user.GetAuthUserInfo",
+                        "permission": "plone.AccessContent"
+                    }
                 }
             },
             "DELETE": {
