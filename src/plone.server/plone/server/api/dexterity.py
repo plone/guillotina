@@ -28,9 +28,11 @@ from plone.server.utils import apply_cors
 from zope.container.interfaces import INameChooser
 from zope.event import notify
 from plone.server.events import ObjectFinallyCreatedEvent
+from plone.server.utils import iter_parents
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
+from zope.securitypolicy.interfaces import IRolePermissionMap
 
 
 logger = logging.getLogger(__name__)
@@ -154,6 +156,24 @@ class SharingGET(Service):
         roleperm = IRolePermissionMap(self.context)
         prinperm = IPrincipalPermissionMap(self.context)
         prinrole = IPrincipalRoleMap(self.context)
+        result = {
+            'local': {},
+            'inherit': []
+        }
+        result['local']['role_permission'] = roleperm._byrow
+        result['local']['principal_permission'] = prinperm._byrow
+        result['local']['principal_role'] = prinrole._byrow
+        for obj in iter_parents(self.context):
+            roleperm = IRolePermissionMap(obj)
+            prinperm = IPrincipalPermissionMap(obj)
+            prinrole = IPrincipalRoleMap(obj)
+            result['inherit'].append({
+                '@id': IAbsoluteURL(obj, self.request)(),
+                'role_permission': roleperm._byrow,
+                'principal_permission': prinperm._byrow,
+                'principal_role': prinrole._byrow,
+            })
+        return result
 
 
 class SharingPOST(Service):

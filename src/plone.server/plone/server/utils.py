@@ -16,6 +16,14 @@ def get_content_path(content):
         content = getattr(content, '__parent__', None)
     return '/' + '/'.join(reversed(parts))
 
+
+def iter_parents(content):
+    content = getattr(content, '__parent__', None)
+    while content:
+        yield content
+        content = getattr(content, '__parent__', None)
+
+
 def get_authenticated_user_id(request):
     if hasattr(request, 'security') and hasattr(request.security, 'participations') \
             and len(request.security.participations) > 0:
