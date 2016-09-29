@@ -6,7 +6,8 @@
         "DELETE": "plone.server.interfaces.IDELETE",
         "GET": "plone.server.interfaces.IGET",
         "OPTIONS": "plone.server.interfaces.IOPTIONS",
-        "HEAD": "plone.server.interfaces.IHEAD"
+        "HEAD": "plone.server.interfaces.IHEAD",
+        "CONNECT": "plone.server.interfaces.ICONNECT"
     },
     "layer": "plone.server.api.layer.IDefaultLayer",
     "default_permission": "zope.Public",

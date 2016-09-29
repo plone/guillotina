@@ -98,6 +98,10 @@ class IOPTIONS(IView):
 class IHEAD(IView):
     pass
 
+
+class ICONNECT(IView):
+    pass
+
 # Classes as for marker objects to lookup
 
 
