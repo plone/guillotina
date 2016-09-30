@@ -3,6 +3,7 @@ from zope.component.interfaces import ISite
 from zope.interface import Interface, Attribute
 from zope.interface import interfaces
 from plone.supermodel import model
+from zope.schema.interfaces import IObject
 from zope import schema
 
 DEFAULT_READ_PERMISSION = 'plone.ViewContent'
@@ -149,6 +150,57 @@ class IAddOn(Interface):
     def uninstall(self):
         pass
 
+# File related interface
+
+
+class IFileManager(Interface):
+    """ Interface to create uploaders and downloaders
+    """
+
+
+class IFile(Interface):
+
+    contentType = schema.BytesLine(
+        title=u'Content Type',
+        description=u'The content type identifies the type of data.',
+        default=b'',
+        required=False
+    )
+
+    filename = schema.TextLine(title=u'Filename', required=False, default=None)
+
+    data = schema.Bytes(
+        title=u'Data',
+        description=u'The actual content.',
+        required=False,
+    )
+
+    def getSize():
+        """Return the byte-size of the data of the object."""
+
+
+# File Field
+
+class IFileField(IObject):
+    """Field for storing IFile objects.
+    """
+
+
+class IStorage(Interface):
+    """Store file data
+    """
+
+    def store(data, blob):
+        """Store the data into the blob
+        Raises NonStorable if data is not storable.
+        """
+
+
+class NotStorable(Exception):
+    """Data is not storable
+    """
+
+
 
 # Specific Events
 
@@ -165,6 +217,5 @@ class INewUserAdded(Interface):
     The user is the id from the user logged in"""
 
     user = Attribute("User id created.")
-
 
 

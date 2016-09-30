@@ -36,6 +36,7 @@
   <include file="permissions.zcml" />
   <include file="security.zcml" />
   <include file="content.zcml" />
+  <include file="basicfile.zcml" />
 
   <include package=".auth" />
   <include package=".catalog" />

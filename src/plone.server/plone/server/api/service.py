@@ -15,8 +15,6 @@ class DownloadService(View):
     def __init__(self, context, request):
         super(DownloadService, self).__init__(context, request)
         alsoProvides(self, IDownloadView)
-        self.context = context
-        self.request = request
 
 
 class TraversableService(View):
@@ -24,3 +22,11 @@ class TraversableService(View):
     def __init__(self, context, request):
         super(TraversableService, self).__init__(context, request)
         alsoProvides(self, ITraversableView)
+
+
+class TraversableDownloadService(View):
+
+    def __init__(self, context, request):
+        super(TraversableService, self).__init__(context, request)
+        alsoProvides(self, ITraversableView)
+        alsoProvides(self, IDownloadView)
