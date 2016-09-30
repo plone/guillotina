@@ -17,6 +17,7 @@ from plone.server.interfaces import ITraversableView
 from plone.server.interfaces import IDataBase
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IOPTIONS
+from plone.server.interfaces import IAbsoluteURL
 from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.registry import CORS_KEY
 from plone.server.auth.participation import AnonymousParticipation
@@ -45,6 +46,7 @@ from plone.server import _
 logger = logging.getLogger(__name__)
 
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
+SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 
 
 async def do_traverse(request, parent, path):
@@ -75,6 +77,32 @@ async def do_traverse(request, parent, path):
 
     return await traverse(request, context, path[1:])
 
+
+async def subrequest(orig_request, path, relative_to_site=True,
+                     headers={}, body=None, params=None, method='GET'):
+    """Subrequest, initial implementation doing a real request
+    """
+    session = aiohttp.ClientSession()
+    method = method.lower()
+    if method not in SUBREQUEST_METHODS:
+        raise AttributeError('No valid method ' + method)
+    caller = getattr(session, method)
+    if relative_to_site:
+        site_url = IAbsoluteURL(orig_request.site, orig_request)()
+        url = site_url + path
+
+    for head in orig_request.headers:
+        if head not in headers:
+            headers[head] = orig_request.headers[head]
+
+    params = {
+        'headers': headers,
+        'params': params
+    }
+    if method in ['put', 'patch']:
+        params['data'] = body
+
+    return caller(path, **params)
 
 async def traverse(request, parent, path):
     """Do not use outside the main router function."""
