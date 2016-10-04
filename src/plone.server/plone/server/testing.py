@@ -184,6 +184,7 @@ class PloneBaseLayer(PloneServerBaseLayer):
         assert resp.status_code == 200
         from copy import deepcopy
         cls.site = deepcopy(cls.app['plone']['plone'])
+        cls.portal = cls.app['plone']['plone']
 
     @classmethod
     def tearDown(cls):
