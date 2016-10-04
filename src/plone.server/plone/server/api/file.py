@@ -82,7 +82,6 @@ class UploadFile(TraversableService):
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-
         adapter = getMultiAdapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.upload()
@@ -92,20 +91,65 @@ class DownloadFile(TraversableDownloadService):
 
     def publishTraverse(self, traverse):
         if len(traverse) == 1:
-            # we want have the key of the registry
-            self.value = [queryUtility(IDexterityFTI, name=traverse[0])]
+            # we want have the field
+            if not hasattr(self.context, traverse[0]):
+                raise KeyError('No valid name')
+
+            name = traverse[0]
+            schema = queryUtility(IDexterityFTI, name=self.context.portal_type).lookupSchema()
+
+            # Check that its a File Field
+            if name not in schema:
+                raise KeyError('No valid name')
+
+            self.field = schema[name].bind(self.context)
+        else:
+            self.field = None
         return self
 
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        if not hasattr(self, 'value'):
-            self.value = [x[1] for x in getUtilitiesFor(IDexterityFTI)]
-        result = []
-        for x in self.value:
-            serializer = getMultiAdapter(
-                (x, self.request),
-                ISerializeToJson)
+        adapter = getMultiAdapter(
+            (self.context, self.request, self.field), IFileManager)
+        return await adapter.download()
 
-            result.append(serializer())
-        return result
+
+class TusCreateFile(UploadFile):
+
+    async def __call__(self):
+        # We need to get the upload as async IO and look for an adapter
+        # for the field to save there by chunks
+        adapter = getMultiAdapter(
+            (self.context, self.request, self.field), IFileManager)
+        return await adapter.tus_create()
+
+
+class TusHeadFile(UploadFile):
+
+    async def __call__(self):
+        # We need to get the upload as async IO and look for an adapter
+        # for the field to save there by chunks
+        adapter = getMultiAdapter(
+            (self.context, self.request, self.field), IFileManager)
+        return await adapter.tus_head()
+
+
+class TusPatchFile(UploadFile):
+
+    async def __call__(self):
+        # We need to get the upload as async IO and look for an adapter
+        # for the field to save there by chunks
+        adapter = getMultiAdapter(
+            (self.context, self.request, self.field), IFileManager)
+        return await adapter.tus_patch()
+
+
+class TusOptionsFile(UploadFile):
+
+    async def __call__(self):
+        # We need to get the upload as async IO and look for an adapter
+        # for the field to save there by chunks
+        adapter = getMultiAdapter(
+            (self.context, self.request, self.field), IFileManager)
+        return await adapter.tus_options()

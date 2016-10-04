@@ -146,6 +146,24 @@
                         "permission": "plone.ModifyContent"
                     }
                 },
+                "@tusupload": {
+                    "POST": {
+                        "factory": "plone.server.api.file.TusCreateFile",
+                        "permission": "plone.ModifyContent"
+                    },
+                    "HEAD": {
+                        "factory": "plone.server.api.file.TusHeadFile",
+                        "permission": "plone.ModifyContent"
+                    },
+                    "PATCH": {
+                        "factory": "plone.server.api.file.TusPatchFile",
+                        "permission": "plone.ModifyContent"
+                    },
+                    "OPTIONS": {
+                        "factory": "plone.server.api.file.TusOptionsFile",
+                        "permission": "plone.AccessPreflight"
+                    }
+                },
                 "@download": {
                     "GET": {
                         "factory": "plone.server.api.file.DownloadFile",
