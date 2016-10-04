@@ -120,7 +120,12 @@ class DefaultPOST(Service):
         headers = {
             'Location': absolute_url()
         }
-        return Response(response={'@id': new_id}, headers=headers, status=201)
+
+        serializer = queryMultiAdapter(
+            (obj, self.request),
+            ISerializeToJson
+        )
+        return Response(response=serializer(), headers=headers, status=201)
 
 
 class DefaultPUT(Service):
