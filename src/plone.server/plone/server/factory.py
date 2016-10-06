@@ -117,6 +117,9 @@ class ApplicationRoot(object):
 
         del self._dbs[key]
 
+    def __iter__(self):
+        return iter(self._dbs.items())
+
     def __setitem__(self, key, value):
         """ This operation can only be done throw HTTP request
 
@@ -232,6 +235,9 @@ class DataBase(object):
         """
 
         del self.conn.root()[key]
+
+    def __iter__(self):
+        return iter(self.conn.root().items())
 
     def __contains__(self, key):
         # is there any request active ? -> conn there

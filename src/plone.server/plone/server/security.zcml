@@ -56,6 +56,10 @@
       role="plone.Owner"
       />
 
+  <grant
+      permission="plone.ReindexContent"
+      role="plone.Owner"
+      />
 
   <!-- Editor -->
   <grant
@@ -70,6 +74,11 @@
 
   <grant
       permission="plone.ModifyContent"
+      role="plone.Editor"
+      />
+
+  <grant
+      permission="plone.ReindexContent"
       role="plone.Editor"
       />
 

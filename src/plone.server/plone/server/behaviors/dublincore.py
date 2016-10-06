@@ -14,6 +14,8 @@ from plone.uuid.interfaces import IUUID
 from dateutil.tz import tzutc
 from plone.dexterity.utils import safe_str
 from zope.dublincore.interfaces import IWriteZopeDublinCore
+from plone.supermodel.directives import index
+from plone.supermodel.directives import catalog
 
 
 from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
@@ -30,6 +32,7 @@ _utc = tzutc()
 CEILING_DATE = datetime(*datetime.max.timetuple()[:-2], tzutc())
 # always effective
 FLOOR_DATE = datetime(*datetime.min.timetuple()[:-2], tzutc())
+
 
 class ContextProperty(object):
 
@@ -57,7 +60,12 @@ class ContextProperty(object):
 
 @provider(IFormFieldProvider)
 class IDublinCore(model.Schema, IWriteZopeDublinCore):
-    pass
+    catalog(creators='text')
+    catalog(subject='text')
+    catalog(contributors='text')
+    index(contributors='non_analyzed')
+    index(creators='non_analyzed')
+    index(subject='non_analyzed')
 
 
 @adapter(IDexterityContent)

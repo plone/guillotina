@@ -25,6 +25,9 @@ from zope.security.proxy import removeSecurityProxy
 from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
 from zope.securitypolicy.interfaces import Allow, Deny, Unset
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from zope.securitypolicy.interfaces import IPrincipalPermissionMap
+from zope.securitypolicy.interfaces import IRolePermissionMap
 
 from zope.securitypolicy.principalrole import principalRoleManager
 globalRolesForPrincipal = principalRoleManager.getRolesForPrincipal
@@ -258,3 +261,27 @@ class Interaction(ZopeSecurityPolicy):
 
         cache_principal_roles[principal] = roles
         return roles
+
+
+def getRolesWithAccessContent(obj):
+    if obj is None:
+        return {}
+    active_roles = getRolesWithAccessContent(
+        removeSecurityProxy(getattr(obj, '__parent__', None)))
+    roleperm = IRolePermissionMap(obj)
+
+    for role, permission in roleperm.getRow('plone.AccessContent'):
+        active_roles[role] = permission
+    return active_roles
+
+
+def getPrincipalsWithAccessContent(obj):
+    if obj is None:
+        return {}
+    active_roles = getPrincipalsWithAccessContent(
+        removeSecurityProxy(getattr(obj, '__parent__', None)))
+    prinperm = IPrincipalPermissionMap(obj)
+
+    for role, permission in prinperm.getRow('plone.AccessContent'):
+        active_roles[role] = permission
+    return active_roles

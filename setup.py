@@ -31,6 +31,7 @@ setup(
         'plone.registry',
         'plone.supermodel',
         'plone.i18n',
+        'plone.indexer',
         'repoze.workflow',
         'setuptools',
         'transaction',

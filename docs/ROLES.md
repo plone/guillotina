@@ -44,6 +44,7 @@ Defined at:
  * plone.AccessContent
  * plone.ViewContent
  * plone.ModifyContent
+ * plone.ReindexContent
 
 ### plone.Reviewer
 
@@ -56,6 +57,7 @@ Defined at:
  * plone.AddContent
  * plone.ChangePermissions
  * plone.SeePermissions
+ * plone.ReindexContent
 
 ## Site/App Roles
 

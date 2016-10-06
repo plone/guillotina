@@ -96,6 +96,11 @@
       title="Change permissions"
       />
 
+  <permission
+      id="plone.ReindexContent"
+      title="Reindex Content"
+      />
+
   <!-- Content Roles -->
 
   <role

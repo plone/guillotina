@@ -1,6 +1,7 @@
 {
     "methods": {
-        "GET": "plone.server.interfaces.IGET"
+        "GET": "plone.server.interfaces.IGET",
+        "POST": "plone.server.interfaces.IPOST"
     },
     "layer": "plone.server.api.layer.IDefaultLayer",
     "default_permission": "plone.ViewContent",
@@ -10,6 +11,12 @@
                 "@search": {
                     "GET": {
                         "factory": "plone.server.catalog.catalog.SearchGET"
+                    }
+                },
+                "@reindex": {
+                    "POST": {
+                        "factory": "plone.server.catalog.catalog.ReindexPOST",
+                        "permission": "plone.ReindexContent"
                     }
                 }
             }
