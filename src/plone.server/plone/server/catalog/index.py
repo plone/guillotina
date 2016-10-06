@@ -17,18 +17,33 @@ logger = logging.getLogger('plone.server')
 
 class CommitHook(object):
 
-    def __init__(self):
+    def __init__(self, site_id, loop):
         self.remove = []
         self.index = {}
+        self.site_id = site_id
+        self.loop = loop
 
     def __call__(self, trns):
         if not trns:
             return
         # Commits are run in sync thread so there is no asyncloop
-        loop = asyncio.new_event_loop()
         search = getUtility(ICatalogUtility)
-        asyncio.run_coroutine_threadsafe(search.remove(self.remove), loop)
-        asyncio.run_coroutine_threadsafe(search.index(self.index), loop)
+        future = asyncio.run_coroutine_threadsafe(
+            search.remove(self.remove, self.site_id), self.loop)
+        future2 = asyncio.run_coroutine_threadsafe(
+            search.index(self.index, self.site_id), self.loop)
+
+        try:
+            result = future.result(30)
+            result = future2.result(30)
+        except asyncio.TimeoutError:
+            print('The coroutine took too long, cancelling the task...')
+            future.cancel()
+            future2.cancel()
+        except Exception as exc:
+            print('The coroutine raised an exception: {!r}'.format(exc))
+        else:
+            print('The coroutine returned: {!r}'.format(result))
 
         self.index = {}
         self.remove = []
@@ -40,8 +55,9 @@ def get_hook():
     if not search:
         return  # no search configured
 
+    request = get_current_request()
     try:
-        trns = tm(get_current_request()).get()
+        trns = tm(request).get()
     except RequestNotFound:
         trns = transaction.get()
     hook = None
@@ -50,7 +66,8 @@ def get_hook():
             hook = _hook[0]
             break
     if hook is None:
-        hook = CommitHook()
+        loop = asyncio.get_event_loop()
+        hook = CommitHook(request._site_id, loop)
         trns.addAfterCommitHook(hook)
     return hook
 
@@ -76,3 +93,17 @@ def add_object(obj, event):
         return
     search = queryUtility(ICatalogUtility)
     hook.index[uid] = search.get_data(obj)
+
+
+def add_index(obj, event):
+    search = queryUtility(ICatalogUtility)
+    loop = asyncio.new_event_loop()
+    asyncio.run_coroutine_threadsafe(
+        search.create_index(obj.id), loop)
+
+
+def remove_index(obj, event):
+    search = queryUtility(ICatalogUtility)
+    loop = asyncio.new_event_loop()
+    asyncio.run_coroutine_threadsafe(
+        search.remove_index(obj.id), loop)

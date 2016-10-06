@@ -5,6 +5,18 @@
 
   <plone:api file="api.json" />
 
+  <!-- create and remove index -->
+  <subscriber
+      for="plone.server.interfaces.IPloneSite
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      handler=".index.add_index" />
+
+  <subscriber
+      for="plone.server.interfaces.IPloneSite
+           zope.lifecycleevent.interfaces.IObjectRemovedEvent"
+      handler=".index.remove_index" />
+
+
   <!-- index events -->
   <subscriber
       for="plone.dexterity.interfaces.IDexterityContent

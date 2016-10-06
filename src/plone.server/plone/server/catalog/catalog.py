@@ -9,7 +9,6 @@ from zope.component import queryAdapter
 from plone.dexterity.utils import iterSchemata
 from plone.supermodel.interfaces import FIELDSETS_KEY
 from plone.supermodel.interfaces import CATALOG_KEY
-from plone.supermodel.interfaces import INDEX_KEY
 from plone.supermodel.utils import mergedTaggedValueDict
 from plone.dexterity.utils import iterSchemataForType
 from zope.schema import getFields
@@ -55,7 +54,7 @@ class DefaultSearchUtility(object):
     def __init__(self, settings):
         self.settings = settings
 
-    async def search(self, query):
+    async def search(self, query, site_id):
         pass
 
     async def index(self, datas, site_id):
@@ -64,7 +63,7 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    async def remove(self, uids):
+    async def remove(self, uids, site_id):
         """
         list of UIDs to remove from index
         """
@@ -73,6 +72,12 @@ class DefaultSearchUtility(object):
     async def reindexAllContent(self, obj):
         """ For all Dexterity Content add a queue task that reindex the object
         """
+        pass
+
+    def create_index(self, site_id):
+        pass
+
+    def remove_index(self, site_id):
         pass
 
     def get_data(self, content):
@@ -96,9 +101,7 @@ class DefaultCatalogDataAdapter(object):
         for schema in iterSchemataForType(self.content.portal_type):
             # create export of the cataloged fields
             catalog = mergedTaggedValueDict(schema, CATALOG_KEY)
-            index = mergedTaggedValueDict(schema, INDEX_KEY)
             for field_name, field in getFields(schema).items():
-                kind_index = index.get(field_name, False)
                 kind_catalog = catalog.get(field_name, False)
                 if kind_catalog:
                     real_field = field.bind(self.content)
