@@ -169,6 +169,22 @@
                         "factory": "plone.server.api.file.DownloadFile",
                         "permission": "plone.ViewContent"
                     }
+                },
+                "@search": {
+                    "GET": {
+                        "factory": "plone.server.api.search.SearchGET",
+                        "permission": "plone.ViewContent"
+                    },
+                    "POST": {
+                        "factory": "plone.server.api.search.SearchPOST",
+                        "permission": "plone.ViewContent"
+                    }
+                },
+                "@reindex": {
+                    "POST": {
+                        "factory": "plone.server.api.search.ReindexPOST",
+                        "permission": "plone.ReindexContent"
+                    }
                 }
             },
             "DELETE": {

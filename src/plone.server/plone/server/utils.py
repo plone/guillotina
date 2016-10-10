@@ -10,10 +10,15 @@ def import_class(import_string):
 
 
 def get_content_path(content):
+    """ No site id
+    """
     parts = []
-    while content:
+    parent = getattr(content, '__parent__', None)
+    while content is not None and content.__name__ is not None and\
+            parent is not None:
         parts.append(content.__name__)
-        content = getattr(content, '__parent__', None)
+        content = parent
+        parent = getattr(content, '__parent__', None)
     return '/' + '/'.join(reversed(parts))
 
 

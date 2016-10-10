@@ -26,28 +26,6 @@ from zope.securitypolicy.rolepermission import rolePermissionManager
 globalRolesForPermission = rolePermissionManager.getRolesForPermission
 
 
-class SearchGET(Service):
-    async def __call__(self):
-        q = self.request.GET.get('q')
-        utility = queryUtility(ICatalogUtility)
-        if not q or utility is None:
-            return {
-                'items_count': 0,
-                'member': []
-            }
-
-        return await utility.search(q)
-
-
-class ReindexPOST(Service):
-    """ Creates index / catalog and reindex all content
-    """
-    async def __call__(self):
-        utility = queryUtility(ICatalogUtility)
-        await utility.reindexAllContent(self.request.site)
-        return {}
-
-
 @implementer(ICatalogUtility)
 class DefaultSearchUtility(object):
 
@@ -55,6 +33,21 @@ class DefaultSearchUtility(object):
         self.settings = settings
 
     async def search(self, query, site_id):
+        pass
+
+    async def getByUUID(self, uuid, site_id):
+        pass
+
+    async def getObjectByUUID(self, uuid, site_id):
+        pass
+
+    async def getByType(self, doc_type, site_id, query={}):
+        pass
+
+    async def getByPath(self, path, depth, site_id, doc_type=None):
+        pass
+
+    async def getFolderContents(self, parent_uuid, site_id, doc_type=None):
         pass
 
     async def index(self, datas, site_id):
@@ -74,10 +67,14 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    def create_index(self, site_id):
+    async def create_index(self, site_id):
+        """ Creates an index
+        """
         pass
 
-    def remove_index(self, site_id):
+    async def remove_index(self, site_id):
+        """ Deletes an index
+        """
         pass
 
     def get_data(self, content):
@@ -109,6 +106,9 @@ class DefaultCatalogDataAdapter(object):
                     ident = schema.getName() + '-' + real_field.getName()
                     values[ident] = value
 
+        # Look for plone.indexer
+        # TODO
+
         # Global Roles
 
         roles = {}
@@ -133,7 +133,8 @@ class DefaultCatalogDataAdapter(object):
             'uuid': IUUID(self.content),
             'accessRoles': [x for x in roles if roles[x] == Allow],
             'accessUsers': [x for x in users if users[x] == Allow],
-            'path': path
+            'path': path,
+            'portal_type': self.content.portal_type
         })
 
         if hasattr(self.content, '__parent__')\

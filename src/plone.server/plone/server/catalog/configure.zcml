@@ -3,8 +3,6 @@
     xmlns:zcml="http://namespaces.zope.org/zcml"
     xmlns:plone="http://namespaces.plone.org/plone">
 
-  <plone:api file="api.json" />
-
   <!-- create and remove index -->
   <subscriber
       for="plone.server.interfaces.IPloneSite
