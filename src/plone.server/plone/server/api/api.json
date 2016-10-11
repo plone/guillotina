@@ -134,12 +134,6 @@
                         "permission": "plone.ChangePermissions"
                     }
                 },
-                "@components": {
-                    "GET": {
-                        "factory": "plone.server.api.dexterity.ComponentsGET",
-                        "permission": "plone.ViewContent"
-                    }
-                },
                 "@upload": {
                     "PATCH": {
                         "factory": "plone.server.api.file.UploadFile",

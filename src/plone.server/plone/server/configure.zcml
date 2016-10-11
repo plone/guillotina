@@ -29,9 +29,6 @@
   <adapter factory=".browser.Absolute_URL" />
   <adapter factory=".browser.Absolute_URL_ObtainRequest" />
 
-  <adapter factory=".components.Breadcrumbs" name="breadcrumbs" />
-  <adapter factory=".components.Navigation" name="navigation" />
-
   <include file="meta.zcml" />
   <include file="permissions.zcml" />
   <include file="security.zcml" />
