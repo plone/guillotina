@@ -10,11 +10,11 @@ from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ILayers
 from plone.server.registry import ICors
+from plone.server.registry import IAddons
 
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
-from zope.securitypolicy.interfaces import IPrincipalPermissionManager
-from zope.securitypolicy.interfaces import IRolePermissionManager
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 from plone.server.browser import get_physical_path
 
@@ -38,48 +38,31 @@ class PloneSite(Container):
         registry.registerInterface(IAuthPloneUserPlugins)
         registry.registerInterface(IAuthExtractionPlugins)
         registry.registerInterface(ICors)
-        registry.forInterface(ILayers).active_layers = \
-            ['plone.server.api.layer.IDefaultLayer']
-        registry.forInterface(IAuthExtractionPlugins).active_plugins = \
-            ['plone.server.auth.oauth.PloneJWTExtraction']
-        registry.forInterface(IAuthPloneUserPlugins).active_plugins = \
-            ['plone.server.auth.oauth.OAuthPloneUserFactory']
+        registry.registerInterface(IAddons)
+        registry.forInterface(ILayers).active_layers =\
+            frozenset({'plone.server.api.layer.IDefaultLayer'})
 
         registry.forInterface(ICors).enabled = True
-        registry.forInterface(ICors).allow_origin = ['*']
-        registry.forInterface(ICors).allow_methods = ['GET', 'POST', 'DELETE',
-                                                      'HEAD', 'PATCH']
-        registry.forInterface(ICors).allow_headers = ['*']
-        registry.forInterface(ICors).expose_headers = ['*']
+        registry.forInterface(ICors).allow_origin = frozenset({'*'})
+        registry.forInterface(ICors).allow_methods = frozenset({
+            'GET', 'POST', 'DELETE',
+            'HEAD', 'PATCH'})
+        registry.forInterface(ICors).allow_headers = frozenset({'*'})
+        registry.forInterface(ICors).expose_headers = frozenset({'*'})
         registry.forInterface(ICors).allow_credentials = True
         registry.forInterface(ICors).max_age = '3660'
 
-        # Default policy
-        roles = IRolePermissionManager(self)
-        roles.grantPermissionToRole(
-            'plone.AccessContent',
-            'Anonymous User'
-        )
-        roles.grantPermissionToRole(
-            'plone.ViewContent',
-            'Anonymous User'
-        )
-
-        roles = IPrincipalPermissionManager(self)
-        roles.grantPermissionToPrincipal(
-            'plone.AccessContent',
-            'Anonymous User'
-        )
-        roles.grantPermissionToPrincipal(
-            'plone.AccessContent',
+        roles = IPrincipalRoleManager(self)
+        roles.assignRoleToPrincipal(
+            'plone.SiteAdmin',
             'RootUser'
         )
 
-        roles = IRolePermissionManager(self)
-        roles.grantPermissionToRole(
-            'plone.AccessContent',
-            'plone.SiteCreator'
+        roles.assignRoleToPrincipal(
+            'plone.Owner',
+            'RootUser'
         )
+
 
     def getSiteManager(self):
         return self['_components']

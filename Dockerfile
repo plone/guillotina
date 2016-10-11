@@ -28,5 +28,4 @@ WORKDIR /app
 EXPOSE  8080
 
 # Configure and Run
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["/app/bin/server"]

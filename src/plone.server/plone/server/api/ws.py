@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebsocketsView(Service):
+
     async def __call__(self):
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)

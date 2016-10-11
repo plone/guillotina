@@ -7,6 +7,7 @@ from plone.server.utils import import_class
 from zope.component import adapter
 from zope.interface import implementer
 from zope.security.interfaces import IParticipation
+from plone.server.transactions import get_current_request
 
 
 class RootParticipation(object):
@@ -14,7 +15,8 @@ class RootParticipation(object):
     def __init__(self, request):
         self.principal = PloneUser(request)
         self.principal.id = 'RootUser'
-        self.principal._roles['plone.SiteCreator'] = 1
+
+        self.principal._groups.append('Managers')
         self.interaction = None
 
 
@@ -47,6 +49,18 @@ class AnonymousUser(PloneUser):
         self.id = 'Anonymous User'
 
 
+class PloneGroup(PloneUser):
+    def __init__(self, request, ident):
+        super(PloneGroup, self).__init__(request)
+        self.id = ident
+
+        if ident == 'Managers':
+            # Special Case its a Root Manager user
+            self._roles['plone.SiteAdmin'] = 1
+            self._roles['plone.SiteDeleter'] = 1
+            self._roles['plone.Owner'] = 1
+
+
 @adapter(IRequest)
 @implementer(IParticipation)
 class PloneParticipation(object):
@@ -56,7 +70,7 @@ class PloneParticipation(object):
 
     async def __call__(self):
         # Cached user
-        if not hasattr(self.request, '__cache_user'):
+        if not hasattr(self.request, '_cache_user'):
             # Get settings or
             settings = self.request.site_components.queryUtility(IRegistry) or {}
 
@@ -77,6 +91,12 @@ class PloneParticipation(object):
 
 
 class ZopeAuthentication(object):
+    """ Class used to get groups. """
 
     def getPrincipal(self, ident):
-        return PloneUser(None)
+        request = get_current_request()
+        if not hasattr(request, '_cache_groups'):
+            request._cache_groups = {}
+        if ident not in request._cache_groups.keys():
+            request._cache_groups[ident] = PloneGroup(request, ident)
+        return request._cache_groups[ident]

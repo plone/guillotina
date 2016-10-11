@@ -6,7 +6,8 @@
         "DELETE": "plone.server.interfaces.IDELETE",
         "GET": "plone.server.interfaces.IGET",
         "OPTIONS": "plone.server.interfaces.IOPTIONS",
-        "HEAD": "plone.server.interfaces.IHEAD"
+        "HEAD": "plone.server.interfaces.IHEAD",
+        "CONNECT": "plone.server.interfaces.ICONNECT"
     },
     "layer": "plone.server.api.layer.IDefaultLayer",
     "default_permission": "zope.Public",
@@ -73,9 +74,29 @@
                         "permission": "plone.AccessContent"
                     }
                 },
+                "@addons" : {
+                    "POST": {
+                        "factory": "plone.server.api.addons.Install",
+                        "permission": "plone.ManageAddons"
+                    },
+                    "DELETE": {
+                        "factory": "plone.server.api.addons.Uninstall",
+                        "permission": "plone.ManageAddons"                        
+                    },
+                    "GET": {
+                        "factory": "plone.server.api.addons.getAddons",
+                        "permission": "plone.ManageAddons"
+                    }
+                },
                 "@ws": {
                     "GET": {
                         "factory": "plone.server.api.ws.WebsocketsView",
+                        "permission": "plone.AccessContent"
+                    }
+                },
+                "@user": {
+                    "GET": {
+                        "factory": "plone.server.api.user.GetAuthUserInfo",
                         "permission": "plone.AccessContent"
                     }
                 }
@@ -103,16 +124,60 @@
                 "permission": "plone.AddContent"
             },
             "endpoints": {
-                "sharing": {
+                "@sharing": {
+                    "GET": {
+                        "factory": "plone.server.api.dexterity.SharingGET",
+                        "permission": "plone.SeePermissions"
+                    },
                     "POST": {
                         "factory": "plone.server.api.dexterity.SharingPOST",
+                        "permission": "plone.ChangePermissions"
+                    }
+                },
+                "@upload": {
+                    "PATCH": {
+                        "factory": "plone.server.api.file.UploadFile",
+                        "permission": "plone.ModifyContent"
+                    }
+                },
+                "@tusupload": {
+                    "POST": {
+                        "factory": "plone.server.api.file.TusCreateFile",
+                        "permission": "plone.ModifyContent"
+                    },
+                    "HEAD": {
+                        "factory": "plone.server.api.file.TusHeadFile",
+                        "permission": "plone.ModifyContent"
+                    },
+                    "PATCH": {
+                        "factory": "plone.server.api.file.TusPatchFile",
+                        "permission": "plone.ModifyContent"
+                    },
+                    "OPTIONS": {
+                        "factory": "plone.server.api.file.TusOptionsFile",
+                        "permission": "plone.AccessPreflight"
+                    }
+                },
+                "@download": {
+                    "GET": {
+                        "factory": "plone.server.api.file.DownloadFile",
                         "permission": "plone.ViewContent"
                     }
                 },
-                "@components": {
+                "@search": {
                     "GET": {
-                        "factory": "plone.server.api.dexterity.ComponentsGET",
+                        "factory": "plone.server.api.search.SearchGET",
                         "permission": "plone.ViewContent"
+                    },
+                    "POST": {
+                        "factory": "plone.server.api.search.SearchPOST",
+                        "permission": "plone.ViewContent"
+                    }
+                },
+                "@reindex": {
+                    "POST": {
+                        "factory": "plone.server.api.search.ReindexPOST",
+                        "permission": "plone.ReindexContent"
                     }
                 }
             },

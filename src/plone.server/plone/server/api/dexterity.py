@@ -1,32 +1,38 @@
 # -*- coding: utf-8 -*-
-from plone.jsonserializer.interfaces import ISerializeToJson
-from plone.jsonserializer.interfaces import IDeserializeFromJson
-from plone.server.api.service import Service
-from plone.server.api.service import TraversableService
-from plone.server.registry import ICors
-from plone.server.browser import get_physical_path
-from zope.component import getMultiAdapter
-from plone.server.browser import Response
-from plone.server.browser import ErrorResponse
-from plone.server.browser import UnauthorizedResponse
-from plone.server.interfaces import IAbsoluteURL
-from plone.server.interfaces import IObjectComponent
-from plone.server import _
 import fnmatch
-from zope.security import checkPermission
-from zope.security.interfaces import Unauthorized
-from plone.dexterity.utils import createContentInContainer
-from zope.component import queryMultiAdapter
+import logging
 import traceback
 from datetime import datetime
-import logging
 from random import randint
+
+from plone.dexterity.utils import createContentInContainer
 from plone.jsonserializer.exceptions import DeserializationError
-from plone.server.utils import get_authenticated_user_id
+from plone.jsonserializer.interfaces import IDeserializeFromJson
+from plone.jsonserializer.interfaces import ISerializeToJson
+from plone.server import _
+from plone.server.api.service import Service
+from plone.server.api.service import TraversableService
+from plone.server.browser import ErrorResponse
+from plone.server.browser import Response
+from plone.server.browser import UnauthorizedResponse
+from plone.server.browser import get_physical_path
+from plone.server.events import ObjectFinallyCreatedEvent
+from plone.server.interfaces import IAbsoluteURL
+from plone.server.registry import ICors
+from plone.server.utils import DefaultRootCors
 from plone.server.utils import apply_cors
+from plone.server.utils import get_authenticated_user_id
+from plone.server.utils import iter_parents
+from zope.component import getMultiAdapter
+from zope.component import queryMultiAdapter
 from zope.container.interfaces import INameChooser
 from zope.event import notify
-from plone.server.events import ObjectFinallyCreatedEvent
+from zope.security import checkPermission
+from zope.security.interfaces import Unauthorized
+from zope.securitypolicy.interfaces import IPrincipalPermissionMap
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from zope.securitypolicy.interfaces import IPrincipalRoleMap
+from zope.securitypolicy.interfaces import IRolePermissionMap
 
 
 logger = logging.getLogger(__name__)
@@ -101,6 +107,12 @@ class DefaultPOST(Service):
                 str(e),
                 status=400)
 
+        # Local Roles assign owner as the creator user
+        roleperm = IPrincipalRoleManager(obj)
+        roleperm.assignRoleToPrincipal(
+            'plone.Owner',
+            user)
+
         notify(ObjectFinallyCreatedEvent(obj))
 
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
@@ -108,7 +120,12 @@ class DefaultPOST(Service):
         headers = {
             'Location': absolute_url()
         }
-        return Response(response={'@id': new_id}, headers=headers, status=201)
+
+        serializer = queryMultiAdapter(
+            (obj, self.request),
+            ISerializeToJson
+        )
+        return Response(response=serializer(), headers=headers, status=201)
 
 
 class DefaultPUT(Service):
@@ -137,8 +154,43 @@ class DefaultPATCH(Service):
         return Response(response={}, status=204)
 
 
+class SharingGET(Service):
+    """ Return the list of permissions """
+
+    async def __call__(self):
+        roleperm = IRolePermissionMap(self.context)
+        prinperm = IPrincipalPermissionMap(self.context)
+        prinrole = IPrincipalRoleMap(self.context)
+        result = {
+            'local': {},
+            'inherit': []
+        }
+        result['local']['role_permission'] = roleperm._byrow
+        result['local']['principal_permission'] = prinperm._byrow
+        result['local']['principal_role'] = prinrole._byrow
+        for obj in iter_parents(self.context):
+            roleperm = IRolePermissionMap(obj)
+            prinperm = IPrincipalPermissionMap(obj)
+            prinrole = IPrincipalRoleMap(obj)
+            result['inherit'].append({
+                '@id': IAbsoluteURL(obj, self.request)(),
+                'role_permission': roleperm._byrow,
+                'principal_permission': prinperm._byrow,
+                'principal_role': prinrole._byrow,
+            })
+        return result
+
+
 class SharingPOST(Service):
-    pass
+
+    async def __call__(self):
+        data = await self.request.json()
+        prinrole = IPrincipalRoleManager(self.context)
+        if 'prinrole' not in data:
+            raise HTTPNotFound('prinrole missing')
+        for user, roles in data['prinrole'].items():
+            for role in roles:
+                prinrole.assignRoleToPrincipal(role, user)
 
 
 class DefaultDELETE(Service):
@@ -146,30 +198,6 @@ class DefaultDELETE(Service):
     async def __call__(self):
         content_id = self.context.id
         del self.context.__parent__[content_id]
-
-
-class ComponentsGET(TraversableService):
-
-    def publishTraverse(self, traverse):
-        if len(traverse) == 1:
-            # we want have the key of the registry
-            self.value = queryMultiAdapter(
-                (self.context, self.request),
-                IObjectComponent, name=traverse[0])
-            self.component_id = traverse[0]
-        else:
-            self.value = None
-            self.component_id = None
-        return self
-
-    async def __call__(self):
-        component = {
-            'id': self.component_id,
-            'data': {
-                'items': self.value()
-            }
-        }
-        return component
 
 
 class DefaultOPTIONS(Service):
@@ -235,7 +263,12 @@ class DefaultOPTIONS(Service):
 
     async def __call__(self):
         """Apply CORS on the OPTIONS view."""
-        self.settings = self.request.site_settings.forInterface(ICors)
+        if hasattr(self.request, 'site_settings'):
+            self.settings = self.request.site_settings.forInterface(ICors)
+        else:
+            # CORS method for non plone endpoints
+            self.settings = DefaultRootCors()
+
         headers = await self.preflight()
         resp = await self.render()
         return Response(response=resp, headers=headers, status=200)

@@ -1,0 +1,28 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:plone="http://namespaces.plone.org/plone">
+
+  <include package="plone.server" file="meta.zcml" />
+
+  <!-- Basic File Manager for Blobs -->
+  <adapter factory="plone.server.file.BasicFileManager"/>
+
+  <utility
+      name="builtins.str"
+      provides=".interfaces.IStorage"
+      factory=".file.StringStorable"
+      />
+
+  <utility
+      name="builtin.bytes"
+      provides=".interfaces.IStorage"
+      factory=".file.BytesStorable"
+      />
+
+  <utility
+      name="builtin.file"
+      provides=".interfaces.IStorage"
+      factory=".file.FileDescriptorStorable"
+      />
+
+
+</configure>

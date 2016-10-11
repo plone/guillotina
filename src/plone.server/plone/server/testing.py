@@ -49,18 +49,6 @@ QUEUE_UTILITY_CONFIG = {
 }
 
 
-OAUTH_UTILITY_CONFIG = {
-    "provides": "plone.server.auth.oauth.IOAuth",
-    "factory": "plone.server.auth.oauth.OAuth",
-    "settings": {
-        "server": "http://localhost/",
-        "jwt_secret": "secret",
-        "jwt_algorithm": "HS256",
-        "client_id": 11,
-        "client_password": "secret"
-    }
-}
-
 ADMIN_TOKEN = 'YWRtaW4='
 DEBUG = False
 
@@ -136,17 +124,6 @@ class PloneServerBaseLayer(object):
         del cls.aioapp
 
 
-class PloneOAuthLayer(PloneServerBaseLayer):
-
-    @classmethod
-    def setUp(cls):
-        cls.app.add_async_utility(OAUTH_UTILITY_CONFIG)
-
-    @classmethod
-    def tearDown(cls):
-        cls.app.del_async_utility(OAUTH_UTILITY_CONFIG)
-
-
 class PloneQueueLayer(PloneServerBaseLayer):
 
     @classmethod
@@ -171,8 +148,6 @@ class PloneQueueLayer(PloneServerBaseLayer):
         while(loop.is_running()):
             time.sleep(1)
         cls.app.del_async_utility(QUEUE_UTILITY_CONFIG)
-
-
 
 
 class PloneBaseLayer(PloneServerBaseLayer):
@@ -209,6 +184,7 @@ class PloneBaseLayer(PloneServerBaseLayer):
         assert resp.status_code == 200
         from copy import deepcopy
         cls.site = deepcopy(cls.app['plone']['plone'])
+        cls.portal = cls.app['plone']['plone']
 
     @classmethod
     def tearDown(cls):
@@ -240,13 +216,8 @@ class PloneServerBaseTestCase(unittest.TestCase):
     layer = PloneServerBaseLayer
 
 
-class PloneOAuthServerTestCase(unittest.TestCase):
-    """ Adding the OAuth utility """
-    layer = PloneOAuthLayer
-
-
 class PloneQueueServerTestCase(unittest.TestCase):
-    """ Adding the OAuth utility """
+    """ Adding the Queue utility """
     layer = PloneQueueLayer
 
 

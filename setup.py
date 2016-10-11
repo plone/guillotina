@@ -4,9 +4,9 @@ from setuptools import setup
 
 setup(
     name='plone.server',
-    version=open('VERSION').read().strip(),
-    long_description=(open('README.rst').read() + '\n' +
-                      open('CHANGELOG.rst').read()),
+    version=open('src/plone.server/VERSION').read().strip(),
+    long_description=(open('src/plone.server/README.rst').read() + '\n' +
+                      open('src/plone.server/CHANGELOG.rst').read()),
     classifiers=[
         'Framework :: Plone :: 7.0',
         'Programming Language :: Python :: 3.5',
@@ -39,6 +39,7 @@ setup(
         'ZEO',
         'zope.component',
         'zope.configuration',
+        'zope.copy',
         'zope.dottedname',
         'zope.event',
         'zope.i18n',
@@ -47,7 +48,7 @@ setup(
         'zope.location',
         'zope.proxy',
         'zope.schema',
-        'zope.security',
+        'zope.security'
     ],
     extras_require={
         'test': [

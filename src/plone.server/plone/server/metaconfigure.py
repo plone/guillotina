@@ -8,7 +8,7 @@ from plone.server import DEFAULT_PERMISSION
 from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
-from plone.server.auth.oauth import IOAuth
+from plone.server import AVAILABLE_ADDONS
 from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
@@ -208,62 +208,6 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
                             endpoint)
 
 
-class IOAuthDirective(Interface):
-    '''
-    '''
-
-    file = Path(
-        title='The name of a file defining oauth registration information.',
-        description='Refers to a file containing a json definition.',
-        required=True
-    )
-
-
-def oauthDirective(_context, file):
-    if file:
-        file = os.path.abspath(_context.path(file))
-        if not os.path.isfile(file):
-            raise ConfigurationError('No such file', file)
-
-    with open(file, 'r') as f:
-        json_info = json.loads(f.read())
-        f.close()
-
-    OAuth = import_class(json_info['utility'])  # noqa
-    settings = json_info['settings']
-    oauth_utility = OAuth(settings)
-
-    utility(_context, provides=IOAuth, component=oauth_utility)
-
-
-class ICatalog(Interface):
-    '''
-    '''
-
-    file = Path(
-        title='The name of a file defining catalog registration information.',
-        description='Refers to a file containing a json definition.',
-        required=True
-    )
-
-
-def catalogDirective(_context, file):
-    if file:
-        file = os.path.abspath(_context.path(file))
-        if not os.path.isfile(file):
-            raise ConfigurationError('No such file', file)
-
-    with open(file, 'r') as f:
-        json_info = json.loads(f.read())
-        f.close()
-
-    CatalogUtility = import_class(json_info['utility'])
-    settings = json_info['settings']
-    catalog_utility = CatalogUtility(settings)
-
-    utility(_context, provides=ICatalogUtility, component=catalog_utility)
-
-
 class IResourceDirectory(Interface):
     '''
     '''
@@ -289,3 +233,32 @@ def resourceDirectory(_context, name, directory):
     root = getUtility(IApplication, 'root')
     if name not in root:
         root[name] = StaticDirectory(directory)
+
+
+class IAddOn(Interface):
+
+    name = configuration_fields.PythonIdentifier(
+        title=_('Name of the addon'),
+        description='',
+        required=True
+    )
+
+    title = configuration_fields.MessageID(
+        title=_('Name of the addon'),
+        description='',
+        required=True
+    )
+
+    handler = configuration_fields.GlobalObject(
+        title=_('Handler for the addon'),
+        description='',
+        required=True
+    )
+
+
+def addOn(_context, name, title, handler):
+    if name not in AVAILABLE_ADDONS:
+        AVAILABLE_ADDONS[name] = {
+            'title': title,
+            'handler': handler
+        }

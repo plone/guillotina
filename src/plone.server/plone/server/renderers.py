@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-from aiohttp.web import json_response
 from aiohttp.web import Response as aioResponse
+from aiohttp.helpers import sentinel
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRenderFormats
 from plone.server.interfaces import IFrameFormats
@@ -12,6 +12,39 @@ from zope.interface import implementer
 from zope.component import queryAdapter
 import json
 
+# JSON Decoder
+from zope.securitypolicy.settings import PermissionSetting
+
+
+class PServerJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, complex):
+            return [obj.real, obj.imag]
+        try:
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+
+        if isinstance(obj, PermissionSetting):
+            return obj.getName()
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)
+
+
+def json_response(data=sentinel, *, text=None, body=None, status=200,
+                  reason=None, headers=None, content_type='application/json',
+                  dumps=json.dumps):
+    if data is not sentinel:
+        if text or body:
+            raise ValueError(
+                "only one of data, text, or body should be specified"
+            )
+        else:
+            text = dumps(data, cls=PServerJSONEncoder)
+    return aioResponse(text=text, body=body, status=status, reason=reason,
+                    headers=headers, content_type=content_type)
 
 # Marker objects/interfaces to look for
 

@@ -10,9 +10,9 @@ ACTIVE_AUTH_EXTRACTION_KEY = \
 
 class IAuthExtractionPlugins(Interface):
 
-    active_plugins = schema.List(
+    active_plugins = schema.FrozenSet(
         title=_('Active Plugins'),
-        defaultFactory=list,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title=_('Value')
         )
@@ -24,9 +24,9 @@ ACTIVE_AUTH_USER_KEY = \
 
 class IAuthPloneUserPlugins(Interface):
 
-    active_plugins = schema.List(
+    active_plugins = schema.FrozenSet(
         title='Active Plugins',
-        defaultFactory=list,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         )
@@ -37,9 +37,9 @@ ACTIVE_LAYERS_KEY = 'plone.server.registry.ILayers.active_layers'
 
 class ILayers(Interface):
 
-    active_layers = schema.List(
+    active_layers = schema.FrozenSet(
         title=_('Active Layers'),
-        defaultFactory=list,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         )
@@ -56,27 +56,27 @@ class ICors(Interface):
         description=_("""Enables cors on the site"""),
     )
 
-    allow_origin = schema.List(
+    allow_origin = schema.FrozenSet(
         title=_('Allowed Origins'),
-        defaultFactory=list,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         ),
         description=_("""List of origins accepted"""),
     )
 
-    allow_methods = schema.List(
+    allow_methods = schema.FrozenSet(
         title=_('Allowed Methods'),
-        defaultFactory=list,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         ),
         description=_("""List of HTTP methods that are allowed by CORS"""),
     )
 
-    allow_headers = schema.List(
+    allow_headers = schema.FrozenSet(
         title=_('Allowed Headers'),
-        defaultFactory=list,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         ),
@@ -84,9 +84,9 @@ class ICors(Interface):
             client"""),
     )
 
-    expose_headers = schema.List(
+    expose_headers = schema.FrozenSet(
         title=_('Expose Headers'),
-        defaultFactory=list,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         ),
@@ -103,4 +103,19 @@ class ICors(Interface):
         title=_('Max Age'),
         description=_("""Indicated how long the results of a preflight request
             can be cached"""),
+    )
+
+
+ADDONS_KEY = 'plone.server.registry.IAddons.enabled'
+
+
+class IAddons(Interface):
+
+    enabled = schema.FrozenSet(
+        title=_('Installed addons'),
+        defaultFactory=frozenset,
+        value_type=schema.TextLine(
+            title='Value'
+        ),
+        description=_("""List of enabled addons""")
     )

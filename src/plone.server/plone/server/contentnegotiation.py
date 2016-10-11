@@ -764,10 +764,12 @@ class ContentNegotiatorUtility(object):
 def content_type_negotiation(request, resource, view):
     # We need to check for the language
 
+    accept = None
+
     if 'ACCEPT' in request.headers:
         accept = request.headers['ACCEPT']
 
-    if IDownloadView.providedBy(view):
+    if IDownloadView.providedBy(view) or accept is None:
         # Its going to be binary
         # No content negotiation right now
         accept = DICT_RENDERS['*/*']
@@ -791,5 +793,7 @@ def language_negotiation(request):
     np = getUtility(IContentNegotiation, 'language')
     ap = np.negotiate(accept_language=accept_lang)
     # We need to check for the accept
+    if ap is None:
+        language = DICT_LANGUAGES['en']
     language = DICT_LANGUAGES[str(ap.language)]
     return language

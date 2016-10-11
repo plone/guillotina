@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import fnmatch
 import importlib
-
 from plone.server.registry import ICors
 
 
@@ -11,11 +10,24 @@ def import_class(import_string):
 
 
 def get_content_path(content):
+    """ No site id
+    """
     parts = []
-    while content:
+    parent = getattr(content, '__parent__', None)
+    while content is not None and content.__name__ is not None and\
+            parent is not None:
         parts.append(content.__name__)
-        content = getattr(content, '__parent__', None)
+        content = parent
+        parent = getattr(content, '__parent__', None)
     return '/' + '/'.join(reversed(parts))
+
+
+def iter_parents(content):
+    content = getattr(content, '__parent__', None)
+    while content:
+        yield content
+        content = getattr(content, '__parent__', None)
+
 
 def get_authenticated_user_id(request):
     if hasattr(request, 'security') and hasattr(request.security, 'participations') \
@@ -24,12 +36,23 @@ def get_authenticated_user_id(request):
     else:
         return None
 
+
+class DefaultRootCors(object):
+    enabled = True
+    allow_origin = ['*']
+    allow_methods = ['GET', 'POST', 'OPTIONS']
+    allow_headers = ['*']
+    expose_headers = []
+    allow_credentials = True
+    max_age = 3660
+
 async def apply_cors(request):
     """Second part of the cors function to validate."""
     headers = {}
     if not hasattr(request, 'site_settings'):
-        return {}
-    settings = request.site_settings.forInterface(ICors)
+        settings = DefaultRootCors()
+    else:
+        settings = request.site_settings.forInterface(ICors)
     origin = request.headers.get('Origin', None)
     if origin:
         if not any([fnmatch.fnmatchcase(origin, o)

@@ -3,9 +3,16 @@
     xmlns:zcml="http://namespaces.zope.org/zcml"
     xmlns:plone="http://namespaces.plone.org/plone">
 
-  <plone:api file="api.json" />
+  <!-- create and remove index -->
+  <subscriber
+      for="plone.server.interfaces.IPloneSite
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+      handler=".index.add_index" />
 
-  <plone:catalog file="elasticsearch.json" zcml:condition="installed aioes" />
+  <subscriber
+      for="plone.server.interfaces.IPloneSite
+           zope.lifecycleevent.interfaces.IObjectRemovedEvent"
+      handler=".index.remove_index" />
 
 
   <!-- index events -->
@@ -35,4 +42,5 @@
   <adapter factory=".catalog.DefaultCatalogDataAdapter"
            provides=".interfaces.ICatalogDataAdapter"
            for="plone.dexterity.interfaces.IDexterityContent" />
+
 </configure>
