@@ -185,12 +185,12 @@ class SharingPOST(Service):
 
     async def __call__(self):
         data = await self.request.json()
-        prinrole = IPrincipalRoleManager(obj)
+        prinrole = IPrincipalRoleManager(self.context)
         if 'prinrole' not in data:
             raise HTTPNotFound('prinrole missing')
         for user, roles in data['prinrole'].items():
             for role in roles:
-                prinrole.assignRoleToPrincipal(user, role)
+                prinrole.assignRoleToPrincipal(role, user)
 
 
 class DefaultDELETE(Service):
