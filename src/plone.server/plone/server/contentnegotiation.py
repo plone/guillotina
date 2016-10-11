@@ -793,5 +793,7 @@ def language_negotiation(request):
     np = getUtility(IContentNegotiation, 'language')
     ap = np.negotiate(accept_language=accept_lang)
     # We need to check for the accept
+    if ap is None:
+        language = DICT_LANGUAGES['en']
     language = DICT_LANGUAGES[str(ap.language)]
     return language
