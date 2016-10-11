@@ -182,7 +182,13 @@ class SharingGET(Service):
 
 
 class SharingPOST(Service):
-    pass
+    data = await self.request.json()
+    prinrole = IPrincipalRoleManager(obj)
+    if 'prinrole' not in data:
+        raise HTTPNotFound('prinrole missing')
+    for user, roles in data['prinrole'].items():
+        for role in roles:
+            prinrole.assignRoleToPrincipal(user, role)
 
 
 class DefaultDELETE(Service):
