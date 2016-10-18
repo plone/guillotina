@@ -3,6 +3,6 @@
 	xmlns:plone="http://namespaces.plone.org/plone">
 
 	<adapter factory=".actions.Framing" name="actions"/>
-	<adapter factory=".actions.Framing" name="schema"/>
+	<adapter factory=".schema.Framing" name="schema"/>
 
 </configure>
