@@ -795,5 +795,6 @@ def language_negotiation(request):
     # We need to check for the accept
     if ap is None:
         language = DICT_LANGUAGES['en']
-    language = DICT_LANGUAGES[str(ap.language)]
+    else:
+        language = DICT_LANGUAGES[str(ap.language)]
     return language
