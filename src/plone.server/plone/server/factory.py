@@ -93,7 +93,7 @@ class ApplicationRoot(object):
         header_auth = request.headers.get('AUTHORIZATION')
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
-            if schema.lower() == 'basic':
+            if schema.lower() == 'basic' or schema.lower() == 'bearer':
                 token = encoded_token.encode('ascii')
                 if self.check_token(token):
                     return RootParticipation(request)
