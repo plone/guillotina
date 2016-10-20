@@ -25,6 +25,9 @@ from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from collections import OrderedDict
+import plone.server
+from functools import reduce
+
 
 import json
 import logging
@@ -33,6 +36,24 @@ from pathlib import Path as osPath
 
 
 logger = logging.getLogger(__name__)
+
+from collections import MutableMapping
+
+def rec_merge(d1, d2):
+    '''
+    Update two dicts of dicts recursively, 
+    if either mapping has leaves that are non-dicts, 
+    the second's leaf overwrites the first's.
+    '''
+    for k, v in d1.items(): # in Python 2, use .iteritems()!
+        if k in d2:
+            # this next check is the only difference!
+            if all(isinstance(e, MutableMapping) for e in (v, d2[k])):
+                d2[k] = rec_merge(v, d2[k])
+            # we could further check types and merge as appropriate here.
+    d3 = d1.copy()
+    d3.update(d2)
+    return d3
 
 
 class IContentTypeDirective(Interface):
@@ -153,7 +174,9 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
         f.close()
 
     if 'contenttypes' in json_info:
-        JSON_API_DEFINITION.update(json_info['contenttypes'])
+        plone.server.JSON_API_DEFINITION = reduce(
+            rec_merge,
+            (json_info['contenttypes'], plone.server.JSON_API_DEFINITION))
 
     if 'methods' in json_info:
         for method, method_interface in json_info['methods'].items():
