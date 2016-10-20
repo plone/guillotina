@@ -25,7 +25,18 @@
         "plone.server.interfaces.IDataBase": {
             "POST": {
                 "factory": "plone.server.api.portal.DefaultPOST",
-                "permission": "plone.AddPortal"
+                "permission": "plone.AddPortal",
+                "title": "Create a new Portal",
+                "description": "Creates a new site on the database",
+                "params": {
+                    "query": {},
+                    "payload": {
+                        "@type": "string",
+                        "title": "string",
+                        "id": "string"
+                    },
+                    "traversal": []
+                }
             },
             "GET": {
                 "factory": "plone.server.api.portal.DefaultGET",
@@ -44,6 +55,14 @@
             "GET": {
                 "factory": "plone.server.api.app.DefaultGET",
                 "permission": "plone.AccessContent"
+            },
+            "endpoints": {
+                "@apidefinition": {
+                    "GET": {
+                        "factory": "plone.server.api.app.GetAPIDefinition",
+                        "permission": "plone.GetPortals"
+                    }
+                }
             }
         },
         "plone.server.interfaces.IStaticFile": {

@@ -20,7 +20,7 @@ import logging
 from random import randint
 from plone.jsonserializer.exceptions import DeserializationError
 from plone.server.utils import get_authenticated_user_id
-
+from plone.server import JSON_API_DEFINITION
 
 
 logger = logging.getLogger(__name__)
@@ -32,3 +32,8 @@ class DefaultGET(Service):
             (self.context, self.request),
             ISerializeToJson)
         return serializer()
+
+
+class GetAPIDefinition(Service):
+    async def __call__(self):
+        return JSON_API_DEFINITION

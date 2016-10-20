@@ -179,6 +179,7 @@ class RootSpecialPermissions(PrincipalPermissionManager):
         self.grantPermissionToPrincipal('plone.DeletePortals', 'RootUser')
         self.grantPermissionToPrincipal('plone.AccessContent', 'RootUser')
         self.grantPermissionToPrincipal('plone.GetDatabases', 'RootUser')
+        self.grantPermissionToPrincipal('plone.GetAPIDefinition', 'RootUser')
         # Access anonymous - needs to be configurable
         self.grantPermissionToPrincipal(
             'plone.AccessContent', 'Anonymous User')

@@ -9,6 +9,7 @@ from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
 from plone.server import AVAILABLE_ADDONS
+from plone.server import JSON_API_DEFINITION
 from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
@@ -150,6 +151,9 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
     with open(file, 'r') as f:
         json_info = json.loads(f.read(), object_pairs_hook=OrderedDict)
         f.close()
+
+    if 'contenttypes' in json_info:
+        JSON_API_DEFINITION.update(json_info['contenttypes'])
 
     if 'methods' in json_info:
         for method, method_interface in json_info['methods'].items():

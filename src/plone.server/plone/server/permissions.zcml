@@ -101,6 +101,11 @@
       title="Reindex Content"
       />
 
+  <permission
+      id="plone.GetAPIDefinition"
+      title="Get the API definition"
+      />
+
   <!-- Content Roles -->
 
   <role

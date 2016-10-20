@@ -13,17 +13,24 @@ class Read(TraversableService):
     def publishTraverse(self, traverse):
         if len(traverse) == 1:
             # we want have the key of the registry
-            self.value = [queryUtility(IDexterityFTI, name=traverse[0])]
+            self.value = queryUtility(IDexterityFTI, name=traverse[0])
         return self
 
     async def __call__(self):
         if not hasattr(self, 'value'):
             self.value = [x[1] for x in getUtilitiesFor(IDexterityFTI)]
-        result = []
-        for x in self.value:
+        if isinstance(self.value, list):
+            result = []
+            for x in self.value:
+                serializer = getMultiAdapter(
+                    (x, self.request),
+                    ISerializeToJson)
+
+                result.append(serializer())
+        else:
             serializer = getMultiAdapter(
-                (x, self.request),
+                (self.value, self.request),
                 ISerializeToJson)
 
-            result.append(serializer())
+            result = serializer()
         return result
