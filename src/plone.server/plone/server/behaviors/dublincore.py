@@ -1,28 +1,32 @@
 # -*- encoding: utf-8 -*-
-from plone.dexterity.interfaces import IFormFieldProvider
-from plone.supermodel import model
-from zope import schema
-from zope.interface import provider
-from plone.dexterity.interfaces import IDexterityContent
-from zope.component import adapter
-from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
-from plone.server import _
-from plone.server import DICT_LANGUAGES
 from datetime import datetime
 from dateutil.tz import tzlocal
-from plone.uuid.interfaces import IUUID
 from dateutil.tz import tzutc
+from plone.dexterity.interfaces import IDexterityContent
+from plone.dexterity.interfaces import IFormFieldProvider
 from plone.dexterity.utils import safe_str
-from zope.dublincore.interfaces import IWriteZopeDublinCore
-from plone.supermodel.directives import index
-from plone.supermodel.directives import catalog
-
-
-from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
 from plone.i18n.locales.languages import _languagelist
+from plone.server import _
+from plone.server import DICT_LANGUAGES
+from plone.supermodel import model
+from plone.supermodel.directives import catalog
+from plone.supermodel.directives import index
+from plone.uuid.interfaces import IUUID
+from zope import schema
+from zope.component import adapter
+from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
+from zope.dublincore.interfaces import IWriteZopeDublinCore
+from zope.interface import provider
+from zope.schema.vocabulary import SimpleTerm
+from zope.schema.vocabulary import SimpleVocabulary
+from plone.server.behaviors.properties import ContextProperty
+
 
 OPTIONS = [
-    SimpleTerm(value=_languagelist[l]['native'], token=l, title=_languagelist[l]['name']) for l in DICT_LANGUAGES.keys() if l in _languagelist
+    SimpleTerm(value=_languagelist[l]['native'],
+               token=l,
+               title=_languagelist[l]['name'])
+    for l in DICT_LANGUAGES.keys() if l in _languagelist
 ]
 language_vocabulary = SimpleVocabulary(OPTIONS)
 _zone = tzlocal()
@@ -32,30 +36,6 @@ _utc = tzutc()
 CEILING_DATE = datetime(*datetime.max.timetuple()[:-2], tzutc())
 # always effective
 FLOOR_DATE = datetime(*datetime.min.timetuple()[:-2], tzutc())
-
-
-class ContextProperty(object):
-
-    def __init__(self, attribute, default):
-        self.__name__ = attribute
-        self.default = default
-
-    def __get__(self, inst, klass):
-        if inst is None:
-            return self
-
-        if hasattr(inst.context, self.__name__):
-            return getattr(inst.context, self.__name__, self.default)
-        else:
-            raise AttributeError('{field} not found on {context}'.format(
-                field=self.__name__, context=str(inst.context)))
-
-    def __set__(self, inst, value):
-        if hasattr(inst.context, self.__name__):
-            setattr(inst.context, self.__name__, value)
-        else:
-            raise AttributeError('{field} not found on {context}'.format(
-                field=self.__name__, context=str(inst.context)))
 
 
 @provider(IFormFieldProvider)

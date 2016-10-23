@@ -9,5 +9,12 @@
       for="plone.dexterity.interfaces.IDexterityContent"
       />
 
+  <plone:behavior
+      title="Attachment"
+      provides=".attachment.IAttachment"
+      factory=".attachment.Attachment"
+      for="plone.dexterity.interfaces.IDexterityContent"
+      />
+
 
 </configure>

@@ -4,10 +4,12 @@ from plone.server.browser import View
 from plone.server.factory import IApplication
 from plone.server.factory import make_app
 from zope.component import getUtility
+from zope.configuration.xmlconfig import include
 
 import asyncio
 import json
 import requests
+import sys
 import time
 import unittest
 
@@ -109,6 +111,7 @@ class PloneServerBaseLayer(object):
         cls.aioapp = make_app(settings=TESTING_SETTINGS)
         # Plone App Object
         cls.app = getUtility(IApplication, name='root')
+        include(cls.app.app.config, 'testing.zcml', sys.modules['plone.server'])
 
     @classmethod
     def tearDown(cls):

@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from aiohttp.web_exceptions import HTTPMethodNotAllowed
+from aiohttp.web_exceptions import HTTPNotFound
+from aiohttp.web_exceptions import HTTPUnauthorized
 from datetime import datetime
 from plone.dexterity.utils import createContentInContainer
 from plone.jsonserializer.exceptions import DeserializationError
@@ -41,6 +44,7 @@ class DefaultGET(Service):
 class DefaultPOST(Service):
     async def __call__(self):
         """To create a content. Its a copy of plone.restapi"""
+
         data = await self.request.json()
         type_ = data.get('@type', None)
         id_ = data.get('id', None)

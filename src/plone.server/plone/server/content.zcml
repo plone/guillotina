@@ -18,14 +18,14 @@
       behaviors=".behaviors.dublincore.IDublinCore"
     />
 
-   <adapter 
+   <adapter
    	  for="plone.server.interfaces.IDataBase
    	       plone.server.interfaces.IRequest"
    	  factory="plone.server.factory.DataBaseToJson"
    	  provides="plone.jsonserializer.interfaces.ISerializeToJson"
    	  />
 
-   <adapter 
+   <adapter
    	  for="plone.server.interfaces.IApplication
    	       plone.server.interfaces.IRequest"
    	  factory="plone.server.factory.ApplicationToJson"
