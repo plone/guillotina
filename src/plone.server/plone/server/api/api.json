@@ -113,6 +113,12 @@
                         "permission": "plone.AccessContent"
                     }
                 },
+                "@wstoken": {
+                    "GET": {
+                        "factory": "plone.server.api.ws.WebsocketGetToken",
+                        "permission": "plone.AccessContent"
+                    }
+                },
                 "@user": {
                     "GET": {
                         "factory": "plone.server.api.user.GetAuthUserInfo",

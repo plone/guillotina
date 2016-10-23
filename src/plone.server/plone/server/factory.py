@@ -27,11 +27,19 @@ from zope.security.interfaces import IPermission
 from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IContentNegotiation
 from plone.server.utils import import_class
+from plone.server import jose
 from ZEO.ClientStorage import ClientStorage
 from ZODB.DemoStorage import DemoStorage
 from ZODB import DB
 from zope.security.interfaces import IInteraction
 from zope.configuration.config import ConfigurationConflictError
+from datetime import datetime, timedelta
+from time import time
+
+try:
+    from Crypto.PublicKey import RSA
+except ImportError:
+    RSA = None
 
 import asyncio
 import json
@@ -50,6 +58,7 @@ class ApplicationRoot(object):
         self._dbs = {}
         self._config_file = config_file
         self._async_utilities = {}
+        self._websockets_ttl = 60
 
     def add_async_utility(self, config):
         interface = import_class(config['provides'])
@@ -83,6 +92,30 @@ class ApplicationRoot(object):
     def set_creator_password(self, password):
         self._creator_password = base64.b64decode(password)
 
+    def set_priv_key(self, key):
+        self._websockets_priv_key = key
+
+    def set_pub_key(self, key):
+        self._websockets_pub_key = key
+
+    def generate_websocket_token(self, real_token):
+        exp = datetime.utcnow() + timedelta(
+            seconds=self._websockets_ttl)
+
+        claims = {
+            'iat': int(datetime.utcnow().timestamp()),
+            'exp': int(exp.timestamp()),
+            'token': real_token
+        }
+        jwe = jose.encrypt(claims, self._websockets_pub_key)
+        token = jose.serialize_compact(jwe)
+        return token.decode('utf-8')
+
+    def extract_websocket_token(self, jwt_token):
+        jwt = jose.decrypt(
+            jose.deserialize_compact(jwt_token), self._websockets_priv_key)
+        return jwt.claims['token']
+
     def check_token(self, password):
         if self._creator_password == base64.b64decode(password):
             return True
@@ -91,12 +124,17 @@ class ApplicationRoot(object):
 
     def root_participation(self, request):
         header_auth = request.headers.get('AUTHORIZATION')
+        token = None
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'basic' or schema.lower() == 'bearer':
                 token = encoded_token.encode('ascii')
-                if self.check_token(token):
-                    return RootParticipation(request)
+
+        if 'ws_token' in request.GET:
+            token = self.extract_websocket_token(request.GET['ws_token'].encode('utf-8'))
+
+        if token and self.check_token(token):
+            return RootParticipation(request)
         return None
 
     def __contains__(self, key):
@@ -316,6 +354,14 @@ def make_app(config_file=None, settings=None):
             root[key] = StaticFile(file_path)
 
     root.set_creator_password(settings['creator']['password'])
+
+    if RSA is not None:
+        key = RSA.generate(2048)
+        pub_jwk = {'k': key.publickey().exportKey('PEM')}
+        priv_jwk = {'k': key.exportKey('PEM')}
+        root.set_priv_key(priv_jwk)
+        root.set_pub_key(pub_jwk)
+
 
     # Set router root from the ZODB connection
     app.router.set_root(root)

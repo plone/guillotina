@@ -11,10 +11,30 @@ from zope.component import queryMultiAdapter
 from plone.server import DICT_METHODS
 from plone.server.interfaces import ITraversableView
 from plone.server.browser import Response
-
+from plone.server.auth.participation import RootParticipation
 
 
 logger = logging.getLogger(__name__)
+
+
+class WebsocketGetToken(Service):
+
+    async def __call__(self):
+        # Get app root
+        app = self.request.app.router._root
+        # Get token
+        header_auth = self.request.headers.get('AUTHORIZATION')
+        token = None
+        if header_auth is not None:
+            schema, _, encoded_token = header_auth.partition(' ')
+            if schema.lower() == 'basic' or schema.lower() == 'bearer':
+                token = encoded_token.encode('ascii')
+
+        # Create ws token
+        new_token = app.generate_websocket_token(token)
+        return {
+            "token": new_token
+        }
 
 
 class WebsocketsView(Service):
@@ -28,6 +48,11 @@ class WebsocketsView(Service):
                 message = ujson.loads(msg.data)
                 if message['op'] == 'close':
                     await ws.close()
+                elif message['op'] == 'login':
+                    token = message['value']
+                    if self.check_token(token):
+                        participation = RootParticipation(self.request)
+                        self.request.security.add(participation)
                 elif message['op'] == 'GET':
                     method = DICT_METHODS['GET']
                     path = tuple(p for p in message['value'].split('/') if p)

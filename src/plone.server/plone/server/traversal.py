@@ -253,6 +253,7 @@ class TraversalRouter(AbstractRouter):
         """Main function to resolve a request."""
         alsoProvides(request, IRequest)
         alsoProvides(request, IDefaultLayer)
+
         request.site_components = getGlobalSiteManager()
         request.security = IInteraction(request)
 

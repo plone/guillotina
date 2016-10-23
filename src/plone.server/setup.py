@@ -24,6 +24,7 @@ setup(
     install_requires=[
         'aiohttp',
         'ujson',
+        'crypto',
         'BTrees',
         'cchardet',
         'plone.dexterity',
