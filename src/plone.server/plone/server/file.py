@@ -1,18 +1,22 @@
 # -*- encoding: utf-8 -*-
-from zope.interface import implementer
-from zope.component import adapter
+from persistent import Persistent
+from plone.dexterity.interfaces import IDexterityContent
 from plone.server.interfaces import IFile
 from plone.server.interfaces import IFileField
+from plone.server.interfaces import IFileManager
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IStorage
 from plone.server.interfaces import NotStorable
-from plone.server.interfaces import IFileManager
-from plone.dexterity.interfaces import IDexterityContent
 from ZODB.blob import Blob
-from persistent import Persistent
-from zope.schema.fieldproperty import FieldProperty
-from zope.schema import Object
+from zope.component import adapter
 from zope.component import getUtility
+from zope.interface import implementer
+from zope.schema import Object
+from zope.schema.fieldproperty import FieldProperty
+
+import io
+import mimetypes
+import os
 
 
 def get_contenttype(
@@ -132,7 +136,7 @@ class BasicFileField(Object):
     def __init__(self, **kw):
         if 'schema' in kw:
             self.schema = kw.pop('schema')
-        super(FileField, self).__init__(schema=self.schema, **kw)
+        super(Object, self).__init__(schema=self.schema, **kw)
 
 
 # This file was borrowed from z3c.blobfile and is licensed under the terms of
@@ -157,50 +161,20 @@ class StringStorable(object):
 class BytesStorable(StringStorable):
 
     def store(self, data, blob):
-        if not isinstance(data, unicode):
+        if not isinstance(data, str):
             raise NotStorable('Could not store data (not of "unicode" type).')
 
         StringStorable.store(self, data, blob)
 
 
 @implementer(IStorage)
-class FileChunkStorable(object):
-
-    def store(self, data, blob):
-        if not isinstance(data, FileChunk):
-            raise NotStorable('Could not store data (not a of "FileChunk" type).')  # noqa
-
-        with blob.open('w') as fp:
-            chunk = data
-            while chunk:
-                fp.write(chunk._data)
-                chunk = chunk.next
-
-
-@implementer(IStorage)
 class FileDescriptorStorable(object):
 
     def store(self, data, blob):
-        if not isinstance(data, file):
+        if not isinstance(data, io.IOBase):
             raise NotStorable('Could not store data (not of "file").')
 
         filename = getattr(data, 'name', None)
         if filename is not None:
             blob.consumeFile(filename)
             return
-
-
-@implementer(IStorage)
-class FileUploadStorable(object):
-
-    def store(self, data, blob):
-        if not isinstance(data, FileUpload):
-            raise NotStorable('Could not store data (not of "FileUpload").')
-
-        data.seek(0)
-
-        with blob.open('w') as fp:
-            block = data.read(MAXCHUNKSIZE)
-            while block:
-                fp.write(block)
-                block = data.read(MAXCHUNKSIZE)
