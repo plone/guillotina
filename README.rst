@@ -33,6 +33,34 @@ To run the server::
 
     ./bin/server
 
+Creating default content
+------------------------
+
+Once started, you will require to add at least a Plone site to start fiddling around::
+
+  curl -X POST -H "Accept: application/json" -H "Authorization: Basic YWRtaW4=" -H "Content-Type: application/json" -d '{
+    "@type": "Plone Site",
+    "title": "Plone 1",
+    "id": "plone",
+    "description": "Description"
+  }' "http://127.0.0.1:8080/zodb1/"
+
+and give permissions to add content to it::
+
+  curl -X POST -H "Accept: application/json" -H "Authorization: Basic YWRtaW4=" -H "Content-Type: application/json" -d '{
+    "prinrole": {
+        "Anonymous User": ["plone.Member", "plone.Reader"]
+    }
+  }' "http://127.0.0.1:8080/zodb1/plone/@sharing"
+
+and create actual content::
+
+  curl -X POST -H "Accept: application/json" -H "Authorization: Basic YWRtaW4=" -H "Content-Type: application/json" -d '{
+    "@type": "Item",
+    "title": "News",
+    "id": "news"
+  }' "http://127.0.0.1:8080/zodb1/plone/"
+
 Run tests
 ---------
 
