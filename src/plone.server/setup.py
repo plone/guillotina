@@ -25,6 +25,7 @@ setup(
         'aiohttp',
         'ujson',
         'crypto',
+        'pycrypto',
         'BTrees',
         'cchardet',
         'plone.dexterity',
