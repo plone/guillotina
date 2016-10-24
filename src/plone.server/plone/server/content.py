@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from plone.dexterity import Container
+from plone.dexterity.content import Container
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.browser import get_physical_path
