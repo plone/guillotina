@@ -29,16 +29,16 @@ class FunctionalTestServer(PloneFunctionalTestCase):
                         message = json.loads(msg.data)
                         if 'op' in message and message['op'] == 'close':
                             await ws.close()
-                            break
+                            break  # noqa
                         else:
                             self.assertTrue(len(message['items']) == 0)
                             await ws.close()
                     elif msg.tp == aiohttp.MsgType.closed:
-                        break
+                        break  # noqa
                     elif msg.tp == aiohttp.MsgType.error:
-                        break
+                        break  # noqa
                 return {}
 
         loop = asyncio.get_event_loop()
         future = asyncio.run_coroutine_threadsafe(hello(self), loop)
-        result = future.result()
+        result = future.result()  # noqa

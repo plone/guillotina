@@ -16,7 +16,6 @@ from plone.server.browser import Response
 from plone.server.browser import UnauthorizedResponse
 from plone.server.contentnegotiation import content_type_negotiation
 from plone.server.contentnegotiation import language_negotiation
-from plone.server.interfaces import IAbsoluteURL
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDataBase
 from plone.server.interfaces import IOPTIONS

@@ -66,7 +66,7 @@ class QueueUtility(object):
             except KeyboardInterrupt or MemoryError or SystemExit or asyncio.CancelledError:
                 self._exceptions = True
                 raise
-            except:
+            except:  # noqa
                 self._exceptions = True
                 logger.error('Worker call failed')
             finally:

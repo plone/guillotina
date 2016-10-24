@@ -4,14 +4,12 @@ from dateutil.tz import tzlocal
 from dateutil.tz import tzutc
 from plone.dexterity.interfaces import IDexterityContent
 from plone.dexterity.interfaces import IFormFieldProvider
-from plone.dexterity.utils import safe_str
 from plone.i18n.locales.languages import _languagelist
-from plone.server import _
 from plone.server import DICT_LANGUAGES
+from plone.server.behaviors.properties import ContextProperty
 from plone.supermodel import model
 from plone.supermodel.directives import catalog
 from plone.supermodel.directives import index
-from plone.uuid.interfaces import IUUID
 from zope import schema
 from zope.component import adapter
 from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
@@ -19,7 +17,6 @@ from zope.dublincore.interfaces import IWriteZopeDublinCore
 from zope.interface import provider
 from zope.schema.vocabulary import SimpleTerm
 from zope.schema.vocabulary import SimpleVocabulary
-from plone.server.behaviors.properties import ContextProperty
 
 
 OPTIONS = [
@@ -61,28 +58,3 @@ class DublinCore(ZDCAnnotatableAdapter):
         super(DublinCore, self).__init__(context)
         self.expires = CEILING_DATE
         self.effective = FLOOR_DATE
-
-
-# @provider(IFormFieldProvider)
-# class IHistory(model.Schema):
-#     """JSON stored versions"""
-
-#     history = schema.List(
-#         value_type=schema.Text(title=_(u'Version')),
-#         title=u'History',
-#         description="""A structure like
-#             {
-#                 "user": "login",
-#                 "time": "date",
-#                 "modified": {
-#                     "field1": "diff", # Text
-#                     "field2": ["old", "new"] # Date/Number
-#                 }
-#             }
-#         """
-#         )
-
-
-# @adapter(IDexterityContent)
-# class History(ZDCAnnotatableAdapter):
-#     pass

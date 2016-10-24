@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
 from plone.server.api.service import Service
-import logging
+
 import aiohttp
+import logging
 
 
 logger = logging.getLogger(__name__)

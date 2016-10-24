@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import os
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.tests import TEST_RESOURCES_DIR
 
 import json
+import os
 
 
 class FunctionalTestServer(PloneFunctionalTestCase):

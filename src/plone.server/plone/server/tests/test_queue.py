@@ -23,6 +23,6 @@ class TestQueue(PloneQueueServerTestCase):
         total = future2.result()
 
         future = asyncio.run_coroutine_threadsafe(util._queue.join(), loop)
-        total = future.result()
+        total = future.result()  # noqa
         self.assertTrue('hola' in var)
         self.assertTrue(len(var) == 2)

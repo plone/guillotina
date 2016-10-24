@@ -1,3 +1,19 @@
+from base64 import urlsafe_b64decode
+from base64 import urlsafe_b64encode
+from collections import namedtuple
+from copy import deepcopy
+from Crypto.Cipher import AES
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import HMAC
+from Crypto.Hash import SHA256
+from Crypto.Hash import SHA384
+from Crypto.Hash import SHA512
+from Crypto.PublicKey import RSA
+from Crypto.Random import get_random_bytes
+from Crypto.Signature import PKCS1_v1_5 as PKCS1_v1_5_SIG
+from struct import pack
+from time import time
+
 import binascii
 import datetime
 import json
@@ -5,17 +21,6 @@ import logging
 import six
 import zlib
 
-from base64 import urlsafe_b64encode, urlsafe_b64decode
-from collections import namedtuple
-from copy import deepcopy
-from struct import pack
-from time import time
-
-from Crypto.Hash import HMAC, SHA256, SHA384, SHA512
-from Crypto.Cipher import PKCS1_OAEP, AES
-from Crypto.PublicKey import RSA
-from Crypto.Random import get_random_bytes
-from Crypto.Signature import PKCS1_v1_5 as PKCS1_v1_5_SIG
 
 logger = logging.getLogger(__name__)
 

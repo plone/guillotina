@@ -65,15 +65,20 @@ class AcceptParameters(object):
         """
         if other is None:
             return False
-        ct_match = self.content_type.matches(other.content_type) if self.content_type is not None else True  # noqa
+        ct_match = self.content_type.matches(other.content_type) \
+            if self.content_type is not None else True
+
         e_match = self.encoding == other.encoding
         c_match = self.charset == other.charset
         p_match = False
         if packaging_wildcard:
-            p_match = self.packaging is None or other.packaging is None or self.packaging == other.packaging  # noqa
+            p_match = (self.packaging is None or
+                       other.packaging is None or
+                       self.packaging == other.packaging)
         else:
             p_match = self.packaging == other.packaging
-        l_match = self.language.matches(other.language, ignore_language_variants, as_client) if self.language is not None else True  # noqa
+        l_match = self.language.matches(other.language, ignore_language_variants, as_client) \
+            if self.language is not None else True
 
         return ct_match and l_match and e_match and c_match and p_match
 
@@ -372,7 +377,8 @@ class ContentNegotiator(object):
     >>> acceptable
     AcceptParameters:: Content Type: text/html;Language: de;
     """
-    def __init__(self, default_accept_parameters=None, acceptable=[], weights=None, ignore_language_variants=False):
+    def __init__(self, default_accept_parameters=None, acceptable=[], weights=None,
+                 ignore_language_variants=False):
         """
         There are 4 parameters which must be set in order to start content negotiation
         - default_accept_parameters - the parameters to use when all or part of
@@ -417,12 +423,14 @@ class ContentNegotiator(object):
         - accept_language - HTTP Header: Accept-Language; for example "en, de;q=0.8"
         - accept_encoding - HTTP Header: Accept-Encoding; not currently supported in negotiation
         - accept_charset - HTTP Header: Accept-Charset; not currently supported in negotiation
-        - accept_packaging - HTTP Header: Accept-Packaging (from SWORD 2.0); a URI only, no q values
+        - accept_packaging - HTTP Header: Accept-Packaging (from SWORD 2.0); a URI only, no
+                             q values
 
         If verbose=True, then this will print to stdout
         """
-        if (accept is None and accept_language is None and accept_encoding is None
-                and accept_charset is None and accept_packaging is None):
+
+        if (accept is None and accept_language is None and accept_encoding is None and
+                accept_charset is None and accept_packaging is None):
             # if it is not available just return the defaults
             return self.default_accept_parameters
 
@@ -495,8 +503,8 @@ class ContentNegotiator(object):
                                 for q4, vals4 in charsets.items():
                                     for v4 in vals4:
                                         for q5, vals5 in packaging.items():
-                                            wq = ((weights['content_type'] * q1) + (weights['language'] * q2) +
-                                                    (weights['encoding'] * q3) + (weights['charset'] * q4) +
+                                            wq = ((weights['content_type'] * q1) + (weights['language'] * q2) +  # noqa
+                                                    (weights['encoding'] * q3) + (weights['charset'] * q4) + # noqa
                                                     (weights['packaging'] * q5))
                                             for v5 in vals5:
                                                 ap = AcceptParameters(v1, v2, v3, v4, v5)
@@ -695,7 +703,8 @@ class ContentNegotiator(object):
         """
         Does the target list of AcceptParameters objects contain a match for the supplied source
         Args:
-        - source: An AcceptParameters object which we want to see if it matches anything in the target
+        - source: An AcceptParameters object which we want to see if it matches anything in the
+                  target
         - target: A list of AcceptParameters objects to try to match the source against
         Returns the matching AcceptParameters from the target list, or None if no such match
         """
@@ -711,27 +720,30 @@ class ContentNegotiator(object):
     def _get_acceptable(self, client, server):
         """
         Take the client content negotiation requirements and the server's
-        array of supported types (in order of preference) and determine the most acceptable format to return.
+        array of supported types (in order of preference) and determine the most
+        acceptable format to return.
 
-        This method always returns the client's most preferred format if the server supports it, irrespective of the
-        server's preference.  If the client has no discernable preference between two formats (i.e. they have the same
+        This method always returns the client's most preferred format if the server
+        supports it, irrespective of the server's preference.  If the client has no
+        discernable preference between two formats (i.e. they have the same
         q value) then the server's preference is taken into account.
 
-        Returns an AcceptParameters object represening the mutually acceptable content type, or None if no agreement could
-        be reached.
+        Returns an AcceptParameters object represening the mutually acceptable content
+        type, or None if no agreement could be reached.
         """
         log.info("Client: " + str(client))
         log.info("Server: " + str(server))
 
-        # get the client requirement keys sorted with the highest q first (the server is a list which should be
-        # in order of preference already)
+        # get the client requirement keys sorted with the highest q first (the
+        # server is a list which should be in order of preference already)
         ckeys = client.keys()
         sorted(ckeys, reverse=True)
 
-        # the rule for determining what to return is that "the client's preference always wins", so we look for the
-        # highest q ranked item that the server is capable of returning.  We only take into account the server's
-        # preference when the client has two equally weighted preferences - in that case we take the server's
-        # preferred content type
+        # the rule for determining what to return is that "the client's preference
+        # always wins", so we look for the highest q ranked item that the server is
+        # capable of returning.  We only take into account the server's preference
+        # when the client has two equally weighted preferences - in that case we
+        # take the server's preferred content type
         for q in ckeys:
             # for each q in order starting at the highest
             possibilities = client[q]
@@ -739,9 +751,10 @@ class ContentNegotiator(object):
             for p in possibilities:
                 # for each accept parameter with the same q value
 
-                # find out if the possibility p matches anything in the server.  This uses the AcceptParameter's
-                # matches() method which will take into account wildcards, so content types like */* will match
-                # appropriately.  We get back from this the concrete AcceptParameter as specified by the server
+                # find out if the possibility p matches anything in the server.  This uses
+                # the AcceptParameter's matches() method which will take into account
+                # wildcards, so content types like */* will match appropriately.  We ge
+                # back from this the concrete AcceptParameter as specified by the server
                 # if there is a match, so we know the result contains no unintentional wildcards
                 match = self._contains_match(p, server)
                 if match is not None:
@@ -758,17 +771,19 @@ class ContentNegotiator(object):
                 # we found exactly one match, so this is our content type to use
                 return allowable[0]
             else:
-                # we found multiple supported content types at this q value, so now we need to choose the server's
-                # preference
+                # we found multiple supported content types at this q value, so now we need
+                # to choose the server's preference
                 for i in range(len(server)):
                     # iterate through the server explicitly by numerical position
                     if server[i] in allowable:
-                        # when we find our first content type in the allowable list, it is the highest ranked server content
-                        # type that is allowable, so this is our type
+                        # when we find our first content type in the allowable list, it is
+                        # the highest ranked server content type that is allowable, so
+                        # this is our type
                         return server[i]
 
-        # we've got to here without returning anything, which means that the client and server can't come to
-        # an agreement on what content type they want and can deliver.  There's nothing more we can do!
+        # we've got to here without returning anything, which means that the client and
+        # server can't come to an agreement on what content type they want and can deliver.
+        # There's nothing more we can do!
         return None
 
 

@@ -8,9 +8,8 @@ from plone.supermodel.directives import read_permission
 from zope import schema
 from zope.component import adapter
 from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
-from zope.dublincore.interfaces import IWriteZopeDublinCore
-from zope.interface import provider
 from zope.interface import implementer
+from zope.interface import provider
 
 
 class IExampleBase(model.Schema):
@@ -70,18 +69,16 @@ class IDublinCore(model.Schema):
     """We basically just want the IFormFieldProvider interface applied
         There's probably a zcml way of doing this. """
     created = schema.Datetime(
-        title = u'Creation Date',
-        description =
-        u"The date and time that an object is created. "
-        u"\nThis is normally set automatically."
-        )
+        title=u'Creation Date',
+        description=u"The date and time that an object is created. "
+                    u"\nThis is normally set automatically."
+    )
 
     modified = schema.Datetime(
-        title = u'Modification Date',
-        description =
-        u"The date and time that the object was last modified in a\n"
-        u"meaningful way."
-        )
+        title=u'Modification Date',
+        description=u"The date and time that the object was last modified in a\n"
+                    u"meaningful way."
+    )
 
 
 @adapter(IDexterityContent)
