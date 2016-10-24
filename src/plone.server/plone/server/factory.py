@@ -33,6 +33,7 @@ from zope.configuration.xmlconfig import registerCommonDirectives
 from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
+import ZODB.FileStorage
 import asyncio
 import base64
 import json
@@ -320,20 +321,26 @@ def make_app(config_file=None, settings=None):
 
     for database in settings['databases']:
         for key, dbconfig in database.items():
+            config = dbconfig.get('configuration', {})
             if dbconfig['storage'] == 'ZODB':
                 # Open it not Request Aware so it creates the root object
-                db = DB(dbconfig['folder'] + '/Data.fs')
+                fs = ZODB.FileStorage.FileStorage(dbconfig['path'], **config)
+
+                db = DB(fs)
                 db.close()
                 # Set request aware database for app
-                db = RequestAwareDB(dbconfig['folder'] + '/Data.fs')
+                db = RequestAwareDB(dbconfig['path'], **config)
                 dbo = DataBase(key, db)
             elif dbconfig['storage'] == 'ZEO':
                 # Try to open it normal to create the root object
-                cs = ClientStorage((dbconfig['address'], dbconfig['port']))
+                address = (dbconfig['address'], dbconfig['port'])
+
+                cs = ClientStorage(address, **config)
                 db = DB(cs)
                 db.close()
+
                 # Set request aware database for app
-                cs = ClientStorage((dbconfig['address'], dbconfig['port']))
+                cs = ClientStorage(address, **config)
                 db = RequestAwareDB(cs)
                 dbo = DataBase(key, db)
             elif dbconfig['storage'] == 'DEMO':

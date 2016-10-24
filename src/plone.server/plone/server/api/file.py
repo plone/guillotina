@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
+from aiohttp.web import StreamResponse
+from os.path import basename
+from plone.dexterity.fti import IDexterityFTI
 from plone.jsonserializer.interfaces import ISerializeToJson
-from plone.server.api.service import Service
 from plone.server.api.service import DownloadService
-from plone.server.api.service import TraversableService
+from plone.server.api.service import Service
 from plone.server.api.service import TraversableDownloadService
+from plone.server.api.service import TraversableFieldService
+from plone.server.api.service import TraversableService
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import IFileManager
 from zope.component import getMultiAdapter
-import mimetypes
-from aiohttp.web import StreamResponse
-from os.path import basename
-import aiohttp
-from zope.interface.interfaces import ComponentLookupError
-from plone.dexterity.fti import IDexterityFTI
 from zope.component import getUtilitiesFor
 from zope.component import queryUtility
+from zope.interface.interfaces import ComponentLookupError
+
+import aiohttp
+import mimetypes
 
 
 # Static File
@@ -22,7 +24,6 @@ class DefaultGET(DownloadService):
 
     async def __call__(self):
         if hasattr(self.context, '_file_path'):
-            contenttype = mimetypes.guess_type(self.context._file_path)
             with open(self.context._file_path, 'rb') as f:
                 filename = basename(self.context._file_path)
                 resp = StreamResponse(headers=aiohttp.MultiDict({
@@ -59,25 +60,7 @@ class DefaultDELETE(Service):
 
 # Field File
 
-class UploadFile(TraversableService):
-
-    def publishTraverse(self, traverse):
-        if len(traverse) == 1:
-            # we want have the field
-            if not hasattr(self.context, traverse[0]):
-                raise KeyError('No valid name')
-
-            name = traverse[0]
-            schema = queryUtility(IDexterityFTI, name=self.context.portal_type).lookupSchema()
-
-            # Check that its a File Field
-            if name not in schema:
-                raise KeyError('No valid name')
-
-            self.field = schema[name].bind(self.context)
-        else:
-            self.field = None
-        return self
+class UploadFile(TraversableFieldService):
 
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
@@ -88,24 +71,6 @@ class UploadFile(TraversableService):
 
 
 class DownloadFile(TraversableDownloadService):
-
-    def publishTraverse(self, traverse):
-        if len(traverse) == 1:
-            # we want have the field
-            if not hasattr(self.context, traverse[0]):
-                raise KeyError('No valid name')
-
-            name = traverse[0]
-            schema = queryUtility(IDexterityFTI, name=self.context.portal_type).lookupSchema()
-
-            # Check that its a File Field
-            if name not in schema:
-                raise KeyError('No valid name')
-
-            self.field = schema[name].bind(self.context)
-        else:
-            self.field = None
-        return self
 
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter

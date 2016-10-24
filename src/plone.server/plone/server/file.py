@@ -13,6 +13,7 @@ from zope.component import getUtility
 from zope.interface import implementer
 from zope.schema import Object
 from zope.schema.fieldproperty import FieldProperty
+import aiohttp
 
 import io
 import mimetypes
@@ -56,13 +57,24 @@ class BasicFileManager(object):
         with file.open('w') as fd:
             while True:
                 chunk = await self.request.content.read(chunk_size)
-                print('hola')
                 if not chunk:
                     break
                 fd.write(chunk)
 
     async def download(self):
-        pass
+        file = self.field.get(self.context)
+        if file is None:
+            raise AttributeError('No field value')
+
+        resp = aiohttp.web.StreamResponse(headers=aiohttp.MultiDict({
+            'CONTENT-DISPOSITION': 'attachment; filename="%s"' % file.filename
+        }))
+        resp.content_type = file.contentType
+        resp.content_length = file.size
+        await resp.prepare(self.request)
+        resp.write(file.data)
+        await resp.drain()
+        return resp
 
 
 @implementer(IFile)
@@ -136,7 +148,7 @@ class BasicFileField(Object):
     def __init__(self, **kw):
         if 'schema' in kw:
             self.schema = kw.pop('schema')
-        super(Object, self).__init__(schema=self.schema, **kw)
+        super(BasicFileField, self).__init__(schema=self.schema, **kw)
 
 
 # This file was borrowed from z3c.blobfile and is licensed under the terms of

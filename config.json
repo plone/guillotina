@@ -3,15 +3,21 @@
 		{
 		"plone": {
 			"storage": "ZODB",
-			"folder": "data"
-			},
+			"path": "data/Data.fs",
+			"configuration": {
+		    "blob_dir": "data/blobstorage"
+			}
+		},
 		"zeo1": {
 			"storage": "ZEO",
 			"address": "127.0.0.1",
-			"port": 8090
+			"port": 8090,
+			"configuration": {
+		    "blob_dir": "data/zeoblobstorage",
+				"shared_blob_dir": true
 			}
 		}
-	],
+	}],
 	"address": 8080,
 	"static": [
 		{"favicon.ico": "static/favicon.ico"}

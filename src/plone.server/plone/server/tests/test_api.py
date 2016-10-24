@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
+import os
 from plone.server.testing import PloneFunctionalTestCase
+from plone.server.tests import TEST_RESOURCES_DIR
 
 import json
 
 
 class FunctionalTestServer(PloneFunctionalTestCase):
     """Functional testing of the API REST."""
+
+    def _get_site(self):
+        """
+        sometimes the site does not get updated data from zodb
+        this seems to make it
+        """
+        return self.layer.app._dbs['plone']['plone']
 
     def test_get_root(self):
         """Get the application root."""
@@ -42,8 +51,8 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         resp = self.layer.requester('GET', '/plone/plone/@types/Item')
         self.assertTrue(resp.status_code == 200)
         response = json.loads(resp.text)
-        self.assertTrue(len(response[0]['properties']), 5)
-        self.assertTrue(response[0]['title'] == 'Item')
+        self.assertTrue(len(response['schemas']), 2)
+        self.assertTrue(response['title'] == 'Item')
 
     def test_get_registries(self):
         """Get the list of registries."""
@@ -116,3 +125,34 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             '/plone/plone/@registry/plone.server.registry.ICors.enabled')
         response = json.loads(resp.text)
         self.assertFalse(response[0])
+
+    def test_file_upload(self):
+        resp = self.layer.requester(
+            'POST',
+            '/plone/plone/',
+            data=json.dumps({
+                "@type": "File",
+                "title": "File1",
+                "id": "file1"
+            })
+        )
+        self.assertTrue(resp.status_code == 201)
+        site = self._get_site()
+        self.assertTrue('file1' in site)
+        fi = open(os.path.join(TEST_RESOURCES_DIR, 'plone.png'), 'rb')
+        data = fi.read()
+        fi.close()
+        resp = self.layer.requester(
+            'PATCH',
+            '/plone/plone/file1/@upload/file',
+            data=data)
+        self.assertEquals(site['file1'].file.data, data)
+
+    def test_file_download(self):
+        # first, get a file on...
+        self.test_file_upload()
+        resp = self.layer.requester(
+            'GET',
+            '/plone/plone/file1/@download/file')
+        site = self._get_site()
+        self.assertEquals(site['file1'].file.data, resp.content)
