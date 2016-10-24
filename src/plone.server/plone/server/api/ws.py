@@ -49,11 +49,6 @@ class WebsocketsView(Service):
                 message = ujson.loads(msg.data)
                 if message['op'] == 'close':
                     await ws.close()
-                elif message['op'] == 'login':
-                    token = message['value']
-                    if self.check_token(token):
-                        participation = RootParticipation(self.request)
-                        self.request.security.add(participation)
                 elif message['op'] == 'GET':
                     method = DICT_METHODS['GET']
                     path = tuple(p for p in message['value'].split('/') if p)
