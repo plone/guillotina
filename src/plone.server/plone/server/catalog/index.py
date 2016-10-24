@@ -37,13 +37,13 @@ class CommitHook(object):
             result = future.result(30)
             result = future2.result(30)
         except asyncio.TimeoutError:
-            print('The coroutine took too long, cancelling the task...')
+            logger.info('The coroutine took too long, cancelling the task...')
             future.cancel()
             future2.cancel()
         except Exception as exc:
-            print('The coroutine raised an exception: {!r}'.format(exc))
+            logger.info('The coroutine raised an exception: {!r}'.format(exc))
         else:
-            print('The coroutine returned: {!r}'.format(result))
+            logger.info('The coroutine returned: {!r}'.format(result))
 
         self.index = {}
         self.remove = []
