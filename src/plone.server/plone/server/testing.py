@@ -183,8 +183,15 @@ class PloneBaseLayer(PloneServerBaseLayer):
 
     @classmethod
     def tearDown(cls):
-        cls.requester('DELETE', '/plone/plone/')
-        del cls.requester
+        try:
+            cls.requester('DELETE', '/plone/plone/')
+        except requests.exceptions.ConnectionError:
+            pass
+        try:
+            del cls.requester
+        except AttributeError:
+            pass
+
         loop = cls.aioapp.loop
 
         loop.call_soon_threadsafe(loop.stop)
