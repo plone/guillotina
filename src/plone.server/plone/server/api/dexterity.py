@@ -1,38 +1,30 @@
 # -*- coding: utf-8 -*-
-import fnmatch
-import logging
-import traceback
 from datetime import datetime
-from random import randint
-
 from plone.dexterity.utils import createContentInContainer
 from plone.jsonserializer.exceptions import DeserializationError
 from plone.jsonserializer.interfaces import IDeserializeFromJson
 from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server import _
 from plone.server.api.service import Service
-from plone.server.api.service import TraversableService
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
-from plone.server.browser import UnauthorizedResponse
-from plone.server.browser import get_physical_path
 from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.registry import ICors
 from plone.server.utils import DefaultRootCors
-from plone.server.utils import apply_cors
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
+from random import randint
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from zope.container.interfaces import INameChooser
 from zope.event import notify
-from zope.security import checkPermission
-from zope.security.interfaces import Unauthorized
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
 from zope.securitypolicy.interfaces import IRolePermissionMap
+
+import logging
 
 
 logger = logging.getLogger(__name__)
@@ -140,7 +132,7 @@ class DefaultPATCH(Service):
         if deserializer is None:
             return ErrorResponse(
                 'DeserializationError',
-                'Cannot deserialize type {}'.format(obj.portal_type),
+                'Cannot deserialize type {}'.format(self.context.portal_type),
                 status=501)
 
         try:

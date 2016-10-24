@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
-from plone.jsonserializer.interfaces import ISerializeToJson
-from plone.server.api.service import Service
-from plone.server.browser import get_physical_path
-from plone.server.browser import Response
-from plone.server.browser import ErrorResponse
-from zope.component import getMultiAdapter
-from plone.dexterity.utils import createContent
-from aiohttp.web_exceptions import HTTPUnauthorized, HTTPConflict
-from plone.server import AVAILABLE_ADDONS
 from plone.server import _
+from plone.server import AVAILABLE_ADDONS
+from plone.server.api.service import Service
+from plone.server.browser import ErrorResponse
 from plone.server.registry import IAddons
 
 

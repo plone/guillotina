@@ -1,9 +1,8 @@
 """Mappings between principals and roles, stored in an object locally."""
 from zope.interface import implementer
-
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
-from zope.securitypolicy.securitymap import AnnotationSecurityMap
 from zope.securitypolicy.principalrole import AnnotationPrincipalRoleManager
+from zope.securitypolicy.securitymap import AnnotationSecurityMap
 
 
 @implementer(IPrincipalRoleManager)

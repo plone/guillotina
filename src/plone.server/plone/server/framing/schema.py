@@ -1,11 +1,11 @@
-from zope.component import adapter
-from zope.component import queryUtility
-from zope.component import getMultiAdapter
-from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.dexterity.interfaces import IDexterityFTI
-from zope.interface import implementer
-from plone.server.renderers import IFrameFormatsJson
+from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.interfaces import IRequest
+from plone.server.renderers import IFrameFormatsJson
+from zope.component import adapter
+from zope.component import getMultiAdapter
+from zope.component import queryUtility
+from zope.interface import implementer
 
 
 @adapter(IRequest)

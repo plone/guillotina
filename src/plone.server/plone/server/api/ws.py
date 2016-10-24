@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
-from plone.server.api.service import Service
-from plone.server.traversal import do_traverse
-import logging
-import aiohttp
-import ujson
-from zope.component import getUtility
-from zope.security.interfaces import IPermission
-from zope.component import queryMultiAdapter
 from plone.server import DICT_METHODS
-from plone.server.interfaces import ITraversableView
-from plone.server.browser import Response
+from plone.server.api.service import Service
 from plone.server.auth.participation import RootParticipation
+from plone.server.browser import Response
+from plone.server.interfaces import ITraversableView
+from plone.server.traversal import do_traverse
+from zope.component import getUtility
+from zope.component import queryMultiAdapter
+from zope.security.interfaces import IPermission
+
+import aiohttp
+import logging
+import ujson
 
 
 logger = logging.getLogger(__name__)

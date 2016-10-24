@@ -1,19 +1,19 @@
 # -*- encoding: utf-8 -*-
-from aiohttp.web import Response as aioResponse
 from aiohttp.helpers import sentinel
+from aiohttp.web import Response as aioResponse
+from plone.server.browser import Response
+from plone.server.interfaces import IFrameFormats
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRenderFormats
-from plone.server.interfaces import IFrameFormats
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
-from plone.server.browser import Response
 from zope.component import adapter
-from zope.interface import implementer
 from zope.component import queryAdapter
-import json
-
+from zope.interface import implementer
 # JSON Decoder
 from zope.securitypolicy.settings import PermissionSetting
+
+import json
 
 
 class PServerJSONEncoder(json.JSONEncoder):
@@ -43,17 +43,19 @@ def json_response(data=sentinel, *, text=None, body=None, status=200,
             )
         else:
             text = dumps(data, cls=PServerJSONEncoder)
-    return aioResponse(text=text, body=body, status=status, reason=reason,
-                    headers=headers, content_type=content_type)
+    return aioResponse(
+        text=text, body=body, status=status, reason=reason,
+        headers=headers, content_type=content_type)
+
 
 # Marker objects/interfaces to look for
-
 class IRendererFormatHtml(IRenderFormats):
     pass
 
 
 class IRendererFormatJson(IRenderFormats):
     pass
+
 
 class IRendererFormatRaw(IRenderFormats):
     pass
@@ -82,6 +84,7 @@ class RendererFormatJson(object):
 class RendererFormatHtml(object):
     def __init__(self, request):
         self.request = request
+
 
 @adapter(IRequest)
 @implementer(IRendererFormatRaw)

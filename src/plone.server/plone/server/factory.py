@@ -1,52 +1,49 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
-from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from datetime import timedelta
 from pkg_resources import iter_entry_points
+from plone.server import DICT_LANGUAGES
+from plone.server import DICT_RENDERS
+from plone.server import jose
 from plone.server.async import IAsyncUtility
+from plone.server.auth.participation import RootParticipation
+from plone.server.content import IStaticDirectory
+from plone.server.content import IStaticFile
+from plone.server.content import StaticFile
+from plone.server.contentnegotiation import ContentNegotiatorUtility
+from plone.server.interfaces import IApplication
+from plone.server.interfaces import IContentNegotiation
+from plone.server.interfaces import IDataBase
 from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter
+from plone.server.utils import import_class
+from ZEO.ClientStorage import ClientStorage
+from ZODB import DB
+from ZODB.DemoStorage import DemoStorage
 from zope.component import getAllUtilitiesRegisteredFor
+from zope.component import getGlobalSiteManager
+from zope.component import getUtility
+from zope.component import provideUtility
+from zope.configuration.config import ConfigurationConflictError
 from zope.configuration.config import ConfigurationMachine
 from zope.configuration.xmlconfig import include
 from zope.configuration.xmlconfig import registerCommonDirectives
-from plone.server.interfaces import IApplication
-from plone.server.interfaces import IDataBase
-from plone.server.content import StaticFile
-from plone.server.content import IStaticDirectory
-from plone.server.content import IStaticFile
-from plone.server.auth.participation import RootParticipation
 from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
-from zope.component import provideUtility
-from zope.component import getUtility
-from zope.component import getGlobalSiteManager
-from plone.server import DICT_RENDERS
-from plone.server import DICT_LANGUAGES
-from zope.security.interfaces import IPermission
-from plone.server.contentnegotiation import ContentNegotiatorUtility
-from plone.server.interfaces import IContentNegotiation
-from plone.server.utils import import_class
-from plone.server import jose
-from ZEO.ClientStorage import ClientStorage
-from ZODB.DemoStorage import DemoStorage
-from ZODB import DB
-from zope.security.interfaces import IInteraction
-from zope.configuration.config import ConfigurationConflictError
-from datetime import datetime, timedelta
-from time import time
+
+import asyncio
+import base64
+import json
+import logging
+import sys
+
 
 try:
     from Crypto.PublicKey import RSA
 except ImportError:
     RSA = None
-
-import asyncio
-import json
-import hashlib
-import logging
-import sys
-import base64
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +247,6 @@ class DataBase(object):
             self._open()
         return self._conn
 
-
     def __getitem__(self, key):
         # is there any request active ? -> conn there
         return self.conn.root()[key]
@@ -296,7 +292,7 @@ def make_app(config_file=None, settings=None):
     elif settings is not None:
         settings = settings
     else:
-        raise StandardError('Neither configuration or settings')
+        raise Exception('Neither configuration or settings')
 
     # Create root Application
     root = ApplicationRoot(config_file)
@@ -332,7 +328,7 @@ def make_app(config_file=None, settings=None):
                 db = RequestAwareDB(dbconfig['folder'] + '/Data.fs')
                 dbo = DataBase(key, db)
             elif dbconfig['storage'] == 'ZEO':
-                # Try to open it normal to create the root object 
+                # Try to open it normal to create the root object
                 cs = ClientStorage((dbconfig['address'], dbconfig['port']))
                 db = DB(cs)
                 db.close()
@@ -361,7 +357,6 @@ def make_app(config_file=None, settings=None):
         priv_jwk = {'k': key.exportKey('PEM')}
         root.set_priv_key(priv_jwk)
         root.set_pub_key(pub_jwk)
-
 
     # Set router root from the ZODB connection
     app.router.set_root(root)

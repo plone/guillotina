@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from zope.component.interfaces import ISite
-from zope.interface import Interface, Attribute
-from zope.interface import interfaces
 from plone.supermodel import model
-from zope.schema.interfaces import IObject
 from zope import schema
+from zope.component.interfaces import ISite
 from zope.i18nmessageid.message import MessageFactory
+from zope.interface import Attribute
+from zope.interface import Interface
+from zope.interface import interfaces
+from zope.schema.interfaces import IObject
+
 
 _ = MessageFactory('plone.server')
 
@@ -337,5 +339,3 @@ class INewUserAdded(Interface):
     The user is the id from the user logged in"""
 
     user = Attribute("User id created.")
-
-

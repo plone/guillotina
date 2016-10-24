@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-from zope.interface import implementer
 from plone.server.interfaces import IAddOn
+from zope.interface import implementer
 
 
 @implementer(IAddOn)

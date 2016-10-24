@@ -1,16 +1,20 @@
 # -*- encoding: utf-8 -*-
 """Module to define the text field."""
 from persistent import Persistent
-from plone.server.interfaces import IRichTextValue, ITransformer, IRichText
+from plone.server import _
+from plone.server.interfaces import IRichText
+from plone.server.interfaces import IRichTextValue
+from plone.server.interfaces import ITransformer
+from zope.component import queryAdapter
 from zope.interface import implementer
-import logging
 from zope.interface import Invalid
 from zope.schema import Object
 from zope.schema._bootstrapinterfaces import ConstraintNotSatisfied
 from zope.schema.interfaces import IFromUnicode
 from zope.schema.interfaces import WrongType
-from plone.server import _
-from zope.component import queryAdapter
+
+import logging
+
 
 LOG = logging.getLogger(__name__)
 

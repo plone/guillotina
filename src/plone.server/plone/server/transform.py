@@ -1,7 +1,7 @@
-from zope.component import adapter
-from zope.interface import implementer
 from plone.server.interfaces import IRichTextValue
 from plone.server.interfaces import ITransformer
+from zope.component import adapter
+from zope.interface import implementer
 
 
 @adapter(IRichTextValue)

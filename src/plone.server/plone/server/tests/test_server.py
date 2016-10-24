@@ -12,5 +12,3 @@ class TestServer(PloneServerBaseTestCase):
         self.assertTrue(self.layer.aioapp is not None)
         self.assertEqual(type(self.layer.aioapp.router), TraversalRouter)
         self.assertEqual(self.layer.aioapp, self.layer.app.app)
-
-

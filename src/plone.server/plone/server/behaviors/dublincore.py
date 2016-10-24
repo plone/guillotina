@@ -90,7 +90,7 @@ class DublinCore(ZDCAnnotatableAdapter):
 #     history = schema.List(
 #         value_type=schema.Text(title=_(u'Version')),
 #         title=u'History',
-#         description="""A structure like 
+#         description="""A structure like
 #             {
 #                 "user": "login",
 #                 "time": "date",

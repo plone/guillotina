@@ -1,23 +1,15 @@
 # -*- coding: utf-8 -*-
-from zope.component import testlayer
-
-import plone.server
-from plone.server.factory import make_app
-import zope.component
-import unittest
-from gocept.pytestlayer.testing import log_to_terminal
-from zope.component import getUtility
+from aiohttp.test_utils import make_mocked_request
+from plone.server.browser import View
 from plone.server.factory import IApplication
-import aiohttp
-import pytest
+from plone.server.factory import make_app
+from zope.component import getUtility
+
 import asyncio
+import json
 import requests
 import time
-from plone.dexterity.utils import createContent
-from plone.server.browser import View
-from aiohttp.test_utils import make_mocked_request
-from plone.server.transactions import sync
-import json
+import unittest
 
 
 TESTING_PORT = 55001

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from plone.server.testing import ADMIN_TOKEN
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.testing import TESTING_PORT
-from plone.server.testing import ADMIN_TOKEN
-import json
+
 import aiohttp
 import asyncio
+import json
 
 
 class FunctionalTestServer(PloneFunctionalTestCase):

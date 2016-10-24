@@ -2,28 +2,34 @@
 """Main routing traversal class."""
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
+from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from aiohttp.web_exceptions import HTTPBadRequest
 from plone.registry.interfaces import IRegistry
+from plone.server import _
 from plone.server import DICT_METHODS
+from plone.server.api.dexterity import DefaultOPTIONS
 from plone.server.api.layer import IDefaultLayer
+from plone.server.auth.participation import AnonymousParticipation
+from plone.server.browser import ErrorResponse
+from plone.server.browser import Response
+from plone.server.browser import UnauthorizedResponse
 from plone.server.contentnegotiation import content_type_negotiation
 from plone.server.contentnegotiation import language_negotiation
+from plone.server.interfaces import IAbsoluteURL
+from plone.server.interfaces import IApplication
+from plone.server.interfaces import IDataBase
+from plone.server.interfaces import IOPTIONS
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
 from plone.server.interfaces import ITraversableView
-from plone.server.interfaces import IDataBase
-from plone.server.interfaces import IApplication
-from plone.server.interfaces import IOPTIONS
-from plone.server.interfaces import IAbsoluteURL
 from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.registry import CORS_KEY
-from plone.server.auth.participation import AnonymousParticipation
-from plone.server.utils import import_class
 from plone.server.transactions import locked
 from plone.server.transactions import sync
+from plone.server.utils import apply_cors
+from plone.server.utils import import_class
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
@@ -35,13 +41,10 @@ from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
-from plone.server.browser import Response
-from plone.server.browser import UnauthorizedResponse
-from plone.server.browser import ErrorResponse
-from plone.server.api.dexterity import DefaultOPTIONS
-from plone.server.utils import apply_cors
+
+import aiohttp
 import logging
-from plone.server import _
+
 
 logger = logging.getLogger(__name__)
 
@@ -87,9 +90,6 @@ async def subrequest(orig_request, path, relative_to_site=True,
     if method not in SUBREQUEST_METHODS:
         raise AttributeError('No valid method ' + method)
     caller = getattr(session, method)
-    if relative_to_site:
-        site_url = IAbsoluteURL(orig_request.site, orig_request)()
-        url = site_url + path
 
     for head in orig_request.headers:
         if head not in headers:
@@ -103,6 +103,7 @@ async def subrequest(orig_request, path, relative_to_site=True,
         params['data'] = body
 
     return caller(path, **params)
+
 
 async def traverse(request, parent, path):
     """Do not use outside the main router function."""
@@ -338,8 +339,8 @@ class TraversalRouter(AbstractRouter):
                     raise HTTPNotFound()
 
         if view is None and method == IOPTIONS:
-            if not hasattr(request, 'site_settings') or \
-                request.site_settings.get(CORS_KEY, False):
+            if (not hasattr(request, 'site_settings') or
+                    request.site_settings.get(CORS_KEY, False)):
                 # Its a CORS call, we could not find any OPTION definition
                 # Lets create a default preflight view
                 # We check for site_settings in case the call is to some url before site

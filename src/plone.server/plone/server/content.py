@@ -2,21 +2,20 @@
 from plone.dexterity.content import Container
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
-from plone.server.interfaces import IPloneSite
+from plone.server.browser import get_physical_path
 from plone.server.interfaces import IItem
-from plone.server.interfaces import IStaticFile
+from plone.server.interfaces import IPloneSite
 from plone.server.interfaces import IStaticDirectory
+from plone.server.interfaces import IStaticFile
+from plone.server.registry import IAddons
 from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
-from plone.server.registry import ILayers
 from plone.server.registry import ICors
-from plone.server.registry import IAddons
-
+from plone.server.registry import ILayers
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
-from plone.server.browser import get_physical_path
 
 
 @implementer(IPloneSite)
@@ -62,7 +61,6 @@ class PloneSite(Container):
             'plone.Owner',
             'RootUser'
         )
-
 
     def getSiteManager(self):
         return self['_components']

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from aiohttp.web_exceptions import HTTPUnauthorized
+from plone.server.registry import ICors
+
 import fnmatch
 import importlib
-from plone.server.registry import ICors
 
 
 def import_class(import_string):

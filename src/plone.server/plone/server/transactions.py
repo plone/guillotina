@@ -8,8 +8,8 @@ from aiohttp.web import RequestHandler
 from concurrent.futures import ThreadPoolExecutor
 from plone.server.interfaces import IView
 from transaction._manager import _new_transaction
-from transaction.interfaces import ISavepointDataManager
 from transaction.interfaces import ISavepoint
+from transaction.interfaces import ISavepointDataManager
 from ZODB.POSException import ConflictError
 from zope.interface import implementer
 from zope.proxy import ProxyBase

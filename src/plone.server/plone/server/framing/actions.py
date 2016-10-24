@@ -1,7 +1,7 @@
+from plone.server.interfaces import IRequest
+from plone.server.renderers import IFrameFormatsJson
 from zope.component import adapter
 from zope.interface import implementer
-from plone.server.renderers import IFrameFormatsJson
-from plone.server.interfaces import IRequest
 
 
 @adapter(IRequest)

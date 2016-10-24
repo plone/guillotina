@@ -1,28 +1,22 @@
 # -*- coding: utf-8 -*-
-from plone.server.api.service import Service
-from plone.server.catalog.interfaces import ICatalogUtility
+from plone.dexterity.utils import iterSchemataForType
 from plone.server.catalog.interfaces import ICatalogDataAdapter
+from plone.server.catalog.interfaces import ICatalogUtility
+from plone.server.security import getPrincipalsWithAccessContent
+from plone.server.security import getRolesWithAccessContent
 from plone.server.utils import get_content_path
-from zope.component import queryUtility
-from zope.interface import implementer
-from zope.component import queryAdapter
-from plone.dexterity.utils import iterSchemata
-from plone.supermodel.interfaces import FIELDSETS_KEY
 from plone.supermodel.interfaces import CATALOG_KEY
 from plone.supermodel.utils import mergedTaggedValueDict
-from plone.dexterity.utils import iterSchemataForType
-from zope.schema import getFields
-from plone.server.utils import get_content_path
-from zope.securitypolicy.settings import Allow
-from plone.server.security import getRolesWithAccessContent
-from plone.server.security import getPrincipalsWithAccessContent
-import json
 from plone.uuid.interfaces import IUUID
-
+from zope.component import queryAdapter
+from zope.interface import implementer
+from zope.schema import getFields
 from zope.securitypolicy.principalpermission import principalPermissionManager
-globalPrincipalPermissionSetting = principalPermissionManager.getSetting
-
 from zope.securitypolicy.rolepermission import rolePermissionManager
+from zope.securitypolicy.settings import Allow
+
+
+globalPrincipalPermissionSetting = principalPermissionManager.getSetting
 globalRolesForPermission = rolePermissionManager.getRolesForPermission
 
 

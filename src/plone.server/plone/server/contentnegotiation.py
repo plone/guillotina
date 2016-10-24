@@ -1,13 +1,14 @@
 # -*- encoding: utf-8 -*-
-from plone.server.interfaces import IDownloadView
-from plone.server.interfaces import IContentNegotiation
-from zope.interface import implementer
-from plone.server import DICT_RENDERS
 from plone.server import DICT_LANGUAGES
+from plone.server import DICT_RENDERS
+from plone.server.interfaces import IContentNegotiation
+from plone.server.interfaces import IDownloadView
 from zope.component import getUtility
-
+from zope.interface import implementer
 
 import logging
+
+
 log = logging.getLogger(__name__)
 log.setLevel(40)
 
@@ -59,19 +60,20 @@ class AcceptParameters(object):
         ignore_language_variants will ensure that en matches en-gb, and so on
         as_client will ensure that this object acts as a client parameter, and therefore
             will implicitly ignore language variants
-        packaging_wildcard will allow the packaging parameter to be * in either or both cases and still match
+        packaging_wildcard will allow the packaging parameter to be * in either or both
+        cases and still match
         """
         if other is None:
             return False
-        ct_match = self.content_type.matches(other.content_type) if self.content_type is not None else True
+        ct_match = self.content_type.matches(other.content_type) if self.content_type is not None else True  # noqa
         e_match = self.encoding == other.encoding
         c_match = self.charset == other.charset
         p_match = False
         if packaging_wildcard:
-            p_match = self.packaging is None or other.packaging is None or self.packaging == other.packaging
+            p_match = self.packaging is None or other.packaging is None or self.packaging == other.packaging  # noqa
         else:
             p_match = self.packaging == other.packaging
-        l_match = self.language.matches(other.language, ignore_language_variants, as_client) if self.language is not None else True
+        l_match = self.language.matches(other.language, ignore_language_variants, as_client) if self.language is not None else True  # noqa
 
         return ct_match and l_match and e_match and c_match and p_match
 
@@ -93,10 +95,10 @@ class AcceptParameters(object):
             params += "(packaging=\"" + str(self.packaging) + "\") "
         mf = "(& " + params + ")"
         return mf
-    
+
     def __eq__(self, other):
         return self.media_format() == other.media_format()
-    
+
     def __str__(self):
         s = "AcceptParameters:: "
         if self.content_type is not None:
@@ -110,20 +112,21 @@ class AcceptParameters(object):
         if self.packaging is not None:
             s += "Packaging: " + str(self.packaging) + ";"
         return s
-    
+
     def __repr__(self):
         return str(self)
+
 
 class Language(object):
     """
     Class to represent a language code as per the conneg spec.
-    
+
     Languages can have a main language term and a language variant.
     For example:
         en  - English
         en-gb   - British English
     """
-    def __init__(self, range=None, language=None, variant=None):        
+    def __init__(self, range=None, language=None, variant=None):
         """
         This object can be initiased in 2 ways:
             1/ With a Language range, containing the language and optionally the variant parts:
@@ -138,36 +141,36 @@ class Language(object):
         else:
             self.language = language
             self.variant = variant
-        
+
     def matches(self, other, ignore_language_variants=False, as_client=True):
         """
         Does this language match the other language.  This is not strictly
         equivalence, depending on the ignore_language_variants and as_client
         arguments
-        
+
         ignore_language_variants will cause this operation to only look for
             matches on the main language part (e.g. en will match en-us and en-gb)
-            
+
         as_client will cause this operation to ignore language variants from
             the client only
         """
         if other is None:
             return False
-        
+
         if self.language == "*" or other.language == "*":
             return True
-        
+
         l_match = self.language == other.language
         v_match = self.variant == other.variant
-        
+
         if as_client and self.variant is None and other.variant is not None:
             v_match = True
         elif as_client and self.variant is not None and other.variant is None:
             if ignore_language_variants:
                 v_match = True
-        
+
         return l_match and v_match
-    
+
     def _from_range(self, range):
         """
         parse the lang and variant from the supplied range
@@ -179,16 +182,16 @@ class Language(object):
             lang = lang_parts[0]
             sublang = lang_parts[1]
             return lang, sublang
-    
+
     def __eq__(self, other):
         return str(self) == str(other)
-    
+
     def __str__(self):
         s = str(self.language)
         if self.variant is not None:
             s += "-" + str(self.variant)
         return s
-            
+
     def __repr__(self):
         return str(self)
 
@@ -205,21 +208,23 @@ class ContentType(object):
                 ct = ContentType("application/atom+xml;type=entry")
             2/ With the parts of the Content Type
                 ct = ContentType(type="application", subtype="atom+xml", params="type=entry")
-        
+
         Properties:
         mimetype - the standard mimetype
         type    - the main type of the content.  e.g. in text/html, the type is "text"
         subtype - the subtype of the content.  e.g. in text/html the subtype is "html"
-        params  - as per the mime specification, his represents the parameter extension to the type, e.g. with
-                    application/atom+xml;type=entry, the params are "type=entry"
+        params  - as per the mime specification, his represents the parameter extension
+                  to the type, e.g. with application/atom+xml;type=entry, the params
+                  are "type=entry"
 
         So, for example:
-        application/atom+xml;type=entry => type="application", subtype="atom+xml", params="type=entry"
+        application/atom+xml;type=entry => type="application", subtype="atom+xml",
+        params="type=entry"
         """
         self.type = None
         self.subtype = None
         self.params = None
-        
+
         if mimetype is not None:
             self.from_mimetype(mimetype)
         else:
@@ -250,10 +255,11 @@ class ContentType(object):
 
     def matches(self, other):
         """
-        Determine whether this ContentType and the supplied other ContentType are matches.  This includes full equality
-        or whether the wildcards (*) which can be supplied for type or subtype properties are in place in either
-        partner in the match.
-        
+        Determine whether this ContentType and the supplied other ContentType are matches.
+        This includes full equality
+        or whether the wildcards (*) which can be supplied for type or subtype properties
+        are in place in either partner in the match.
+
         For example:
             text/html matches */*
             text/html matches text/*
@@ -263,12 +269,13 @@ class ContentType(object):
         # assume None to be a wildcard
         if other is None:
             return False
-        
+
         tmatch = self.type == "*" or other.type == "*" or self.type == other.type
         smatch = self.subtype == "*" or other.subtype == "*" or self.subtype == other.subtype
-        # FIXME: there is some ambiguity in mime as to whether the omission of the params part is the same as
-        # a wildcard.  For the purposes of convenience we have assumed here that it is, otherwise a request for
-        # */* will not match any content type which has parameters
+        # FIXME: there is some ambiguity in mime as to whether the omission of the params part
+        # is the same as a wildcard.  For the purposes of convenience we have assumed here
+        # that it is, otherwise a request for */* will not match any content type which has
+        # parameters
         pmatch = self.params is None or other.params is None or self.params == other.params
 
         return tmatch and smatch and pmatch
@@ -289,47 +296,47 @@ class ContentType(object):
 class ContentNegotiator(object):
     """
     Class to manage content negotiation.
-    
+
     Basic Usage
     -----------
-    
+
     # Import all the objects from the negotiator module
     >>> from negotiator import ContentNegotiator, AcceptParameters, ContentType, Language
-    
+
     # Specify the default parameters.  These are the parameters which will be used in
     # place of any HTTP Accept headers which are not present in the negotiation request
-    # For example, if the Accept-Language header is not passed to the negotiator 
+    # For example, if the Accept-Language header is not passed to the negotiator
     # it will assume that the client request is for "en"
     >>> default_params = AcceptParameters(ContentType("text/html"), Language("en"))
-    
+
     # Specify the list of acceptable formats that the server supports
     >>> acceptable = [AcceptParameters(ContentType("text/html"), Language("en"))]
     >>> acceptable.append(AcceptParameters(ContentType("text/json"), Language("en")))
-    
+
     # Create an instance of the negotiator, ready to accept negotiation requests
     >>> cn = ContentNegotiator(default_params, acceptable)
-    
+
     # A simple negotiate on the HTTP Accept header "text/json;q=1.0, text/html;q=0.9",
     # asking for json, and if not json then html
     >>> acceptable = cn.negotiate(accept="text/json;q=1.0, text/html;q=0.9")
-    
-    # The negotiator indicates that the best match the server can give to the 
+
+    # The negotiator indicates that the best match the server can give to the
     # client's request is text/json in english
     >>> acceptable
     AcceptParameters:: Content Type: text/json;Language: en;
 
     Advanced Usage
     --------------
-    
+
     # Import all the objects from the negotiator module
     >>> from negotiator import ContentNegotiator, AcceptParameters, ContentType, Language
-    
+
     # Specify the default parameters.  These are the parameters which will be used in
     # place of any HTTP Accept headers which are not present in the negotiation request
-    # For example, if the Accept-Language header is not passed to the negotiator 
+    # For example, if the Accept-Language header is not passed to the negotiator
     # it will assume that the client request is for "en"
     >>> default_params = AcceptParameters(ContentType("text/html"), Language("en"))
-    
+
     # Specify the list of acceptable formats that the server supports.  For this
     # advanced example we specify html, json and pdf in a variety of languages
     >>> acceptable = [AcceptParameters(ContentType("text/html"), Language("en"))]
@@ -338,28 +345,28 @@ class ContentNegotiator(object):
     >>> acceptable.append(AcceptParameters(ContentType("text/json"), Language("en")))
     >>> acceptable.append(AcceptParameters(ContentType("text/json"), Language("cz")))
     >>> acceptable.append(AcceptParameters(ContentType("application/pdf"), Language("de")))
-    
+
     # specify the weighting that the negotiator should apply to the different
     # Accept headers.  A higher weighting towards content type will prefer content
-    # type variations over language variations (e.g. if there are two formats 
+    # type variations over language variations (e.g. if there are two formats
     # which are equally acceptable to the client, in different languages, a
     # content_type weight higher than a language weight will return the parameters
     # according to the server's preferred content type.
     >>> weights = {"content_type" : 1.0, "language" : 0.5}
-    
+
     # Create an instance of the negotiator, ready to accept negotiation requests
     >>> cn = ContentNegotiator(default_params, acceptable, weights)
-    
+
     # set up some more complex accept headers (you can try modifying the order
     # of the elements without q values, and the q values themselves, to see
     # different results).
     >>> accept = "text/html, text/json;q=1.0, application/pdf;q=0.5"
     >>> accept_language = "en;q=0.5, de, cz, fr"
-    
+
     # negotiate over both headers, looking for an optimal solution to the client
     # request
     >>> acceptable = cn.negotiate(accept, accept_language)
-    
+
     # The negotiator indicates the best fit to the client request is text/html
     # in german
     >>> acceptable
@@ -368,9 +375,9 @@ class ContentNegotiator(object):
     def __init__(self, default_accept_parameters=None, acceptable=[], weights=None, ignore_language_variants=False):
         """
         There are 4 parameters which must be set in order to start content negotiation
-        - default_accept_parameters - the parameters to use when all or part of 
+        - default_accept_parameters - the parameters to use when all or part of
             the analysed accept headers is not present
-        - acceptable - What AcceptParameter objects are acceptable to 
+        - acceptable - What AcceptParameter objects are acceptable to
             return (in order of preference)
         - weights - the relative weights to apply to the different accept headers
         - ignore_language_variants - whether the content negotiator should ignore language
@@ -397,23 +404,25 @@ class ContentNegotiator(object):
         if "packaging" not in self.weights:
             self.weights["packaging"] = 1.0
 
-    def negotiate(self, accept=None, accept_language=None, accept_encoding=None, accept_charset=None, accept_packaging=None):
+    def negotiate(self, accept=None, accept_language=None, accept_encoding=None,
+                  accept_charset=None, accept_packaging=None):
         """
         Main method for carrying out content negotiation over the supplied HTTP headers.
-        Returns either the preferred AcceptParameters as per the settings of the object, or 
+        Returns either the preferred AcceptParameters as per the settings of the object, or
         None if no agreement could be reached.
-        
+
         The arguments are the raw strings from the relevant HTTP headers
-        
+
         - accept - HTTP Header: Accept; for example "text/html;q=1.0, text/plain;q=0.4"
         - accept_language - HTTP Header: Accept-Language; for example "en, de;q=0.8"
         - accept_encoding - HTTP Header: Accept-Encoding; not currently supported in negotiation
         - accept_charset - HTTP Header: Accept-Charset; not currently supported in negotiation
         - accept_packaging - HTTP Header: Accept-Packaging (from SWORD 2.0); a URI only, no q values
-        
+
         If verbose=True, then this will print to stdout
         """
-        if accept is None and accept_language is None and accept_encoding is None and accept_charset is None and accept_packaging is None:
+        if (accept is None and accept_language is None and accept_encoding is None
+                and accept_charset is None and accept_packaging is None):
             # if it is not available just return the defaults
             return self.default_accept_parameters
 
@@ -421,35 +430,36 @@ class ContentNegotiator(object):
         log.info("Accept-Language: " + str(accept_language))
         log.info("Accept-Packaging: " + str(accept_packaging))
 
-        # get us back a dictionary keyed by q value which tells us the order of preference that the client has
-        # requested
+        # get us back a dictionary keyed by q value which tells us the order of
+        # preference that the client has requested
         accept_analysed = self._analyse_accept(accept)
         lang_analysed = self._analyse_language(accept_language)
         encoding_analysed = self._analyse_encoding(accept_encoding)
         charset_analysed = self._analyse_charset(accept_charset)
         packaging_analysed = self._analyse_packaging(accept_packaging)
-        
+
         log.info("Accept Analysed: " + str(accept_analysed))
         log.info("Language Analysed: " + str(lang_analysed))
         log.info("Packaging Analysed: " + str(packaging_analysed))
-        
+
         # now combine these results into one list of preferred accepts
         preferences = self._list_acceptable(
             self.weights, accept_analysed, lang_analysed, encoding_analysed,
             charset_analysed, packaging_analysed)
-        
+
         log.info("Preference List: " + str(preferences))
-        
+
         # go through the analysed formats and cross reference them with the acceptable formats
         accept_parameters = self._get_acceptable(preferences, self.acceptable)
-        
+
         log.info("Acceptable: " + str(accept_parameters))
 
-        # return the acceptable type.  If this is None (which get_acceptable can return), then the caller
-        # will know that we failed to negotiate a type and should 415 the client
+        # return the acceptable type.  If this is None (which get_acceptable can return),
+        # then the caller will know that we failed to negotiate a type and should 415 the client
         return accept_parameters
 
-    def _list_acceptable(self, weights, content_types=None, languages=None, encodings=None, charsets=None, packaging=None):
+    def _list_acceptable(self, weights, content_types=None, languages=None, encodings=None,
+                         charsets=None, packaging=None):
 
         log.debug("Relative weights: " + str(weights))
 
@@ -486,26 +496,26 @@ class ContentNegotiator(object):
                                     for v4 in vals4:
                                         for q5, vals5 in packaging.items():
                                             wq = ((weights['content_type'] * q1) + (weights['language'] * q2) +
-                                                    (weights['encoding'] * q3) + (weights['charset'] * q4) + 
+                                                    (weights['encoding'] * q3) + (weights['charset'] * q4) +
                                                     (weights['packaging'] * q5))
                                             for v5 in vals5:
                                                 ap = AcceptParameters(v1, v2, v3, v4, v5)
                                                 unsorted.append((ap, wq))
-        
+
         sorted = self._sort_by_q(unsorted, 0.0)
         return sorted
 
     def _analyse_packaging(self, accept):
         if accept is None:
             return None
-            
+
         # if the header is not none, then it should be a straightforward uri,
         # with no q value, so our return is simple:
-        return {1.0 : [accept]}
+        return {1.0: [accept]}
 
     def _analyse_encoding(self, accept):
         return None
-        
+
     def _analyse_charset(self, accept):
         return None
 
@@ -529,8 +539,8 @@ class ContentNegotiator(object):
 
     def _analyse_accept(self, accept):
         """
-        Analyse the Accept header string from the HTTP headers and return a structured dictionary with each
-        content types grouped by their common q values, thus:
+        Analyse the Accept header string from the HTTP headers and return a structured
+        dictionary with each content types grouped by their common q values, thus:
 
         dict = {
             1.0 : [<ContentType>, <ContentType>],
@@ -538,18 +548,20 @@ class ContentNegotiator(object):
             0.5 : [<ContentType>, <ContentType>]
         }
 
-        This method will guarantee that every content type has some q value associated with it, even if this was not
-        supplied in the original Accept header; it will be inferred based on the rules of content negotiation
+        This method will guarantee that every content type has some q value associated
+        with it, even if this was not supplied in the original Accept header; it will
+        be inferred based on the rules of content negotiation
         """
         if accept is None:
             return None
-            
+
         # the accept header is a list of content types and q values, in a comma separated list
         parts = self._split_accept_header(accept)
 
-        # set up some registries for the coming analysis.  unsorted will hold each part of the accept header following
-        # its analysis, but without respect to its position in the preferences list.  highest_q and counter will be
-        # recorded during this first run so that we can use them to sort the list later
+        # set up some registries for the coming analysis.  unsorted will hold each part
+        # of the accept header following its analysis, but without respect to its position
+        # in the preferences list.  highest_q and counter will be recorded during this
+        # first run so that we can use them to sort the list later
         unsorted = []
         highest_q = 0.0
         counter = 0
@@ -558,19 +570,21 @@ class ContentNegotiator(object):
         for part in parts:
             # count the part number that we are working on, starting from 1
             counter += 1
-            
+
             type, params, q = self._interpret_accept_field(part, -1 * counter)
             supertype, subtype = type.split("/", 1)
             if q > highest_q:
                 highest_q = q
 
-            # at the end of the analysis we have all of the components with or without their default values, so we
-            # just record the analysed version for the time being as a tuple in the unsorted array
+            # at the end of the analysis we have all of the components with or without
+            # their default values, so we just record the analysed version for the time
+            # being as a tuple in the unsorted array
             unsorted.append((ContentType(type=supertype, subtype=subtype, params=params), q))
 
-        # once we've finished the analysis we'll know what the highest explicitly requested q will be.  This may leave
-        # us with a gap between 1.0 and the highest requested q, into which we will want to put the content types which
-        # did not have explicitly assigned q values.  Here we calculate the size of that gap, so that we can use it
+        # once we've finished the analysis we'll know what the highest explicitly requested
+        # q will be.  This may leave us with a gap between 1.0 and the highest requested q,
+        # into which we will want to put the content types which did not have explicitly
+        # assigned q values.  Here we calculate the size of that gap, so that we can use it
         # later on in positioning those elements.  Note that the gap may be 0.0.
         sorted = self._sort_by_q(unsorted, highest_q)
 
@@ -578,23 +592,29 @@ class ContentNegotiator(object):
         return sorted
 
     def _sort_by_q(self, unsorted, q_max):
-        # set up a dictionary to hold our sorted results.  The dictionary will be keyed with the q value, and the
-        # value of each key will be an array of ContentType objects (in no particular order)
+        # set up a dictionary to hold our sorted results.  The dictionary will be keyed
+        # with the q value, and the value of each key will be an array of ContentType
+        # objects (in no particular order)
         sorted = {}
 
         # go through the unsorted list
         for (value, q) in unsorted:
             if q > 0:
-                # if the q value is greater than 0 it was explicitly assigned in the Accept header and we can just place
-                # it into the sorted dictionary
+                # if the q value is greater than 0 it was explicitly assigned in the
+                # Accept header and we can just place it into the sorted dictionary
                 self.insert(sorted, q, value)
             else:
-                # otherwise, we have to calculate the q value using the following equation which creates a q value "qv"
-                # within "q_range" of 1.0 [the first part of the eqn] based on the fraction of the way through the total
+                # otherwise, we have to calculate the q value using the following equation
+                # which creates a q value "qv" within "q_range" of 1.0 [the first part of
+                # the eqn] based on the fraction of the way through the total
                 # accept header list scaled by the q_range [the second part of the eqn]
-                #qv = (1.0 - q_range) + (((-1 * q)/scale_factor) * q_range)
-                q_fraction = 1.0 / (-1.0 * q) # this is the fraction of the remaining spare q values that we can assign
-                qv = q_max + ((1.0 - q_max) * q_fraction) # this scales the fraction to the remaining q range and adds it onto the highest other qs (this also handles q_max = 1.0 implicitly)
+                # qv = (1.0 - q_range) + (((-1 * q)/scale_factor) * q_range)
+
+                # this is the fraction of the remaining spare q values that we can assign
+                q_fraction = 1.0 / (-1.0 * q)
+                # this scales the fraction to the remaining q range and adds it onto the
+                # highest other qs (this also handles q_max = 1.0 implicitly)
+                qv = q_max + ((1.0 - q_max) * q_fraction)
                 self.insert(sorted, qv, value)
 
         # now we have a dictionary keyed by q value which we can return
@@ -605,11 +625,11 @@ class ContentNegotiator(object):
 
     def _interpret_accept_language_field(self, accept, default_q):
         components = accept.split(";")
-        
+
         lang = None
         sublang = None
         q = default_q
-        
+
         # the first part can be a language, or a language-sublanguage pair (like en, or en-gb)
         langs = components[0].strip()
         lang_parts = langs.split("-")
@@ -618,48 +638,53 @@ class ContentNegotiator(object):
         elif len(lang_parts) == 2:
             lang = lang_parts[0]
             sublang = lang_parts[1]
-            
+
         if len(components) == 2:
-            q = components[1].strip()[2:] # strip the "q=" from the start of the q value
-            
+            # strip the "q=" from the start of the q value
+            q = components[1].strip()[2:]
+
         return (lang, sublang, float(q))
-        
 
     def _interpret_accept_field(self, accept, default_q):
-    
+
         # the components of the part can be "type;params;q" "type;params", "type;q" or just "type"
         components = accept.split(";")
-    
+
         # the first part is always the type (see above comment)
         type = components[0].strip()
-    
-        # create some default values for the other parts.  If there is no params, we will use None, if there is
-        # no q we will use a negative number multiplied by the position in the list of this part.  This allows us
-        # to later see the order in which the parts with no q value were listed, which is important
+
+        # create some default values for the other parts.  If there is no params, we
+        # will use None, if there is no q we will use a negative number multiplied
+        # by the position in the list of this part.  This allows us to later see the
+        # order in which the parts with no q value were listed, which is important
         params = None
         q = default_q
-    
-        # There are then 3 possibilities remaining to check for: "type;q", "type;params" and "type;params;q"
+
+        # There are then 3 possibilities remaining to check for: "type;q",
+        # "type;params" and "type;params;q"
         # ("type" is already handled by the default cases set up above)
         if len(components) == 2:
             # "type;q" or "type;params"
             if components[1].strip().startswith("q="):
                 # "type;q"
-                q = components[1].strip()[2:] # strip the "q=" from the start of the q value
+                # strip the "q=" from the start of the q value
+                q = components[1].strip()[2:]
             else:
                 # "type;params"
                 params = components[1].strip()
         elif len(components) == 3:
             # "type;params;q"
+            # strip the "q=" from the start of the q value
             params = components[1].strip()
-            q = components[1].strip()[2:] # strip the "q=" from the start of the q value
-            
+            q = components[1].strip()[2:]
+
         return (type, params, float(q))
 
     def insert(self, d, q, v):
         """
-        Utility method: if dict d contains key q, then append value v to the array which is identified by that key
-        otherwise create a new key with the value of an array with a single value v
+        Utility method: if dict d contains key q, then append value v to the array which
+        is identified by that key otherwise create a new key with the value of an array
+        with a single value v
         """
         if q in d:
             d[q].append(v)
@@ -670,15 +695,16 @@ class ContentNegotiator(object):
         """
         Does the target list of AcceptParameters objects contain a match for the supplied source
         Args:
-        - source:   An AcceptParameters object which we want to see if it matches anything in the target
-        - target:   A list of AcceptParameters objects to try to match the source against
+        - source: An AcceptParameters object which we want to see if it matches anything in the target
+        - target: A list of AcceptParameters objects to try to match the source against
         Returns the matching AcceptParameters from the target list, or None if no such match
         """
         for ap in target:
             if source.matches(ap, ignore_language_variants=self.ignore_language_variants):
-                # matches are symmetrical, so source.matches(ap) == ap.matches(source) so way round is irrelevant
-                # we return the target's content type, as this is considered the definitive list of allowed
-                # content types, while the source may contain wildcards
+                # matches are symmetrical, so source.matches(ap) == ap.matches(source) so
+                # way round is irrelevant we return the target's content type, as this is
+                # considered the definitive list of allowed content types, while the
+                # source may contain wildcards
                 return ap
         return None
 
@@ -755,7 +781,7 @@ class ContentNegotiatorUtility(object):
             self.cn = ContentNegotiator(acceptable=server)
         if header == 'language':
             server = [AcceptParameters(language=Language(x)) for x in enabled_values]
-            self.cn = ContentNegotiator(acceptable=server)        
+            self.cn = ContentNegotiator(acceptable=server)
 
     def negotiate(self, **kwargs):
         return self.cn.negotiate(**kwargs)

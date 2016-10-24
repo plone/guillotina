@@ -1,17 +1,19 @@
 # -*- encoding: utf-8 -*-
+from persistent import Persistent
+from persistent.interfaces import IPersistent
+from plone.server.interfaces import ITransformer
+from plone.server.interfaces import TransformError
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.text import RichText
-from zope.interface import Interface, implementer
-from persistent import Persistent
 from plone.server.text import RichTextValue
-from plone.server.interfaces import ITransformer, TransformError
-from zope.component import provideAdapter
-from zope.schema.interfaces import IFromUnicode
-from persistent.interfaces import IPersistent
 from zope.component import adapter
-from zope.schema._bootstrapinterfaces import WrongType
+from zope.component import provideAdapter
+from zope.interface import implementer
+from zope.interface import Interface
 from zope.interface.exceptions import Invalid
 from zope.schema._bootstrapinterfaces import ConstraintNotSatisfied
+from zope.schema._bootstrapinterfaces import WrongType
+from zope.schema.interfaces import IFromUnicode
 
 
 class IContent(Interface):

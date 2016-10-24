@@ -1,8 +1,8 @@
 
-from plone.server.interfaces import IObjectFinallyCreatedEvent
-from zope.interface.interfaces import ObjectEvent
 from plone.server.interfaces import INewUserAdded
+from plone.server.interfaces import IObjectFinallyCreatedEvent
 from zope.interface import implementer
+from zope.interface.interfaces import ObjectEvent
 
 
 @implementer(IObjectFinallyCreatedEvent)

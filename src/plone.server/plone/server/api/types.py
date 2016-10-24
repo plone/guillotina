@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
+from plone.dexterity.fti import IDexterityFTI
 from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.api.service import TraversableService
 from zope.component import getMultiAdapter
-from zope.interface.interfaces import ComponentLookupError
-from plone.dexterity.fti import IDexterityFTI
 from zope.component import getUtilitiesFor
 from zope.component import queryUtility
 

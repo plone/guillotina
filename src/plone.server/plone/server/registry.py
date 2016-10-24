@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from zope import schema
 from plone.server import _
+from zope import schema
 from zope.interface import Interface
 
 

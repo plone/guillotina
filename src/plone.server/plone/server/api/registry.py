@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
+from plone.jsonserializer.exceptions import DeserializationError
+from plone.jsonserializer.interfaces import IFieldDeserializer
 from plone.jsonserializer.interfaces import ISerializeToJson
-from plone.server.api.service import TraversableService
-from plone.server.api.service import Service
-from zope.component import getMultiAdapter
-from zope.component import queryMultiAdapter
-from zope.interface.interfaces import ComponentLookupError
 from plone.registry.interfaces import IRegistry
+from plone.server import _
+from plone.server.api.service import Service
+from plone.server.api.service import TraversableService
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
 from plone.server.utils import import_class
-from plone.jsonserializer.interfaces import IFieldDeserializer
-from plone.server import _
+from zope.component import getMultiAdapter
+from zope.component import queryMultiAdapter
+from zope.interface.interfaces import ComponentLookupError
 from zope.schema import getFields
 
 
@@ -78,7 +79,7 @@ class Register(Service):
         # If its defined on the zope.schema default will not be overwritten
         #  you will need to PATCH
         for key, field in getFields(iObject).items():
-            if key in initial_values and  not getattr(config, key, False):
+            if key in initial_values and not getattr(config, key, False):
                 # We don't have a value
                 setattr(config, key, initial_values[key])
 
@@ -93,7 +94,7 @@ class Write(TraversableService):
             self.record = self.request.site_settings._records[traverse[0]]
         else:
             self.record = None
-        return self  
+        return self
 
     async def __call__(self):
         if getattr(self, 'record', None) is None:
@@ -126,5 +127,3 @@ class Write(TraversableService):
                 status=400)
 
         return Response(response={}, status=204)
-
-

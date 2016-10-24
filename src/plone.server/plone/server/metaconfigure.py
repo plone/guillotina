@@ -1,51 +1,48 @@
 # -*- coding: utf-8 -*-
-from zope.security.checker import undefineChecker
+from collections import MutableMapping
+from collections import OrderedDict
+from functools import reduce
+from pathlib import Path as osPath
 from plone.dexterity.fti import DexterityFTI
 from plone.dexterity.fti import register
 from plone.server import _
+from plone.server import AVAILABLE_ADDONS
 from plone.server import DEFAULT_LAYER
 from plone.server import DEFAULT_PERMISSION
 from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
-from plone.server import AVAILABLE_ADDONS
-from plone.server import JSON_API_DEFINITION
-from plone.server.catalog.interfaces import ICatalogUtility
+from plone.server.content import StaticDirectory
+from plone.server.interfaces import IApplication
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
-from plone.server.interfaces import IApplication
-from plone.server.content import StaticDirectory
-from zope.component.zcml import adapter
-from zope.component.zcml import utility
 from zope.component import getUtility
+from zope.component.zcml import adapter
 from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
 from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
-from collections import OrderedDict
-import plone.server
-from functools import reduce
-
+from zope.security.checker import undefineChecker
 
 import json
 import logging
 import os
-from pathlib import Path as osPath
+import plone.server
 
 
 logger = logging.getLogger(__name__)
 
-from collections import MutableMapping
 
 def rec_merge(d1, d2):
     '''
-    Update two dicts of dicts recursively, 
-    if either mapping has leaves that are non-dicts, 
+    Update two dicts of dicts recursively,
+    if either mapping has leaves that are non-dicts,
     the second's leaf overwrites the first's.
     '''
-    for k, v in d1.items(): # in Python 2, use .iteritems()!
+    # in Python 2, use .iteritems()!
+    for k, v in d1.items():
         if k in d2:
             # this next check is the only difference!
             if all(isinstance(e, MutableMapping) for e in (v, d2[k])):

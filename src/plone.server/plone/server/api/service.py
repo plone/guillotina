@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from plone.server.browser import View
-from plone.server.interfaces import ITraversableView
 from plone.server.interfaces import IDownloadView
-
+from plone.server.interfaces import ITraversableView
 from zope.interface import alsoProvides
 
 

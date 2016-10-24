@@ -1,8 +1,9 @@
+from plone.server.async import IQueueUtility
+from plone.server.testing import AsyncMockView
 from plone.server.testing import PloneQueueServerTestCase
 from zope.component import getUtility
-from plone.server.async import IQueueUtility
+
 import asyncio
-from plone.server.testing import AsyncMockView
 
 
 class TestQueue(PloneQueueServerTestCase):

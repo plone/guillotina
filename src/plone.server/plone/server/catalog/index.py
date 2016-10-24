@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from plone.server.transactions import tm
+from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.transactions import get_current_request
 from plone.server.transactions import RequestNotFound
-from plone.server.catalog.interfaces import ICatalogUtility
+from plone.server.transactions import tm
 from plone.uuid.interfaces import IUUID
 from zope.component import getUtility
 from zope.component import queryUtility

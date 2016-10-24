@@ -22,14 +22,16 @@ from zope.security.interfaces import Unauthorized
 from zope.security.management import system_user
 from zope.security.proxy import Proxy
 from zope.security.proxy import removeSecurityProxy
-from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
-from zope.securitypolicy.interfaces import Allow, Deny, Unset
-from zope.securitypolicy.interfaces import IPrincipalRoleMap
-from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from zope.securitypolicy.interfaces import Allow
+from zope.securitypolicy.interfaces import Deny
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
+from zope.securitypolicy.interfaces import IPrincipalRoleMap
 from zope.securitypolicy.interfaces import IRolePermissionMap
-
+from zope.securitypolicy.interfaces import Unset
 from zope.securitypolicy.principalrole import principalRoleManager
+from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
+
+
 globalRolesForPrincipal = principalRoleManager.getRolesForPrincipal
 
 SettingAsBoolean = {

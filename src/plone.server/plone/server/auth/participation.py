@@ -3,11 +3,11 @@ from plone.registry.interfaces import IRegistry
 from plone.server.interfaces import IRequest
 from plone.server.registry import ACTIVE_AUTH_EXTRACTION_KEY
 from plone.server.registry import ACTIVE_AUTH_USER_KEY
+from plone.server.transactions import get_current_request
 from plone.server.utils import import_class
 from zope.component import adapter
 from zope.interface import implementer
 from zope.security.interfaces import IParticipation
-from plone.server.transactions import get_current_request
 
 
 class RootParticipation(object):
