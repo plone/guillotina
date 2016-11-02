@@ -17,12 +17,23 @@ class SetItemView(View):
 
 
 @pytest.yield_fixture(scope='function')
-def conn():
+def storage():
     storage = ZODB.DemoStorage.DemoStorage()
     ZODB.DB(storage).close()  # init storage with root
+    yield storage
+
+
+@pytest.yield_fixture(scope='function')
+def conn(storage):
     db = RequestAwareDB(storage)
     tm = RequestAwareTransactionManager()
     yield db.open(transaction_manager=tm)
+
+
+@pytest.yield_fixture(scope='function')
+def default_conn(storage):
+    db = ZODB.DB(storage)
+    yield db.open()
 
 
 # noinspection PyShadowingNames

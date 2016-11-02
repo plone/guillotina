@@ -146,7 +146,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'PATCH',
             '/plone/plone/file1/@upload/file',
             data=data)
-        self.assertEquals(site['file1'].file.data, data)
+        self.assertEqual(site['file1'].file.data, data)
 
     def test_file_download(self):
         # first, get a file on...
@@ -155,4 +155,4 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'GET',
             '/plone/plone/file1/@download/file')
         site = self._get_site()
-        self.assertEquals(site['file1'].file.data, resp.content)
+        self.assertEqual(site['file1'].file.data, resp.content)

@@ -29,7 +29,7 @@ class RawValueHolder(Persistent):
         self.value = value
 
     def __repr__(self):
-        return u"<RawValueHolder: %s>" % self.value
+        return u"<RawValueHolder: {0:s}>".format(self.value)
 
     def __eq__(self, other):
         if not isinstance(other, RawValueHolder):
