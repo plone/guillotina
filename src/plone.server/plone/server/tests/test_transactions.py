@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 from aiohttp.test_utils import make_mocked_request
-from persistent.mapping import PersistentMapping
+from BTrees import OOBTree
 from plone.server.browser import View
 from plone.server.transactions import CallbackTransactionDataManager
 from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.transactions import TransactionProxy
+from ZODB.POSException import ConflictError
+from ZODB.POSException import ReadConflictError
+from ZODB.tests.test_storage import MinimalMemoryStorage
 
 import pytest
-import ZODB.DemoStorage
+import ZODB
 
 
 class SetItemView(View):
@@ -16,30 +19,46 @@ class SetItemView(View):
         self.context[name] = value
 
 
+class RegisterView(View):
+    def __call__(self):
+        # noinspection PyProtectedMember
+        self.context._p_changed = True
+
+
+class CommitView(View):
+    def __call__(self):
+        # noinspection PyProtectedMember
+        self.request._txn.commit()
+
+
 @pytest.yield_fixture(scope='function')
 def storage():
-    storage = ZODB.DemoStorage.DemoStorage()
+    storage = MinimalMemoryStorage()
     ZODB.DB(storage).close()  # init storage with root
     yield storage
 
 
 @pytest.yield_fixture(scope='function')
-def conn(storage):
-    db = RequestAwareDB(storage)
+def db(storage):
+    yield RequestAwareDB(storage)
+
+
+@pytest.yield_fixture(scope='function')
+def conn1(db):
     tm = RequestAwareTransactionManager()
     yield db.open(transaction_manager=tm)
 
 
 @pytest.yield_fixture(scope='function')
-def default_conn(storage):
-    db = ZODB.DB(storage)
-    yield db.open()
+def conn2(db):
+    tm = RequestAwareTransactionManager()
+    yield db.open(transaction_manager=tm)
 
 
 # noinspection PyShadowingNames
 @pytest.yield_fixture(scope='function')
-def root(conn):
-    yield conn.root()
+def root(conn1):
+    yield conn1.root()
 
 
 # noinspection PyShadowingNames,PyProtectedMember
@@ -47,7 +66,7 @@ def root(conn):
 def foo(root):
     request = make_mocked_request('POST', '/')
     txn = root._p_jar.transaction_manager.begin(request)
-    SetItemView(root, request)('foo', PersistentMapping())
+    SetItemView(root, request)('foo', OOBTree.OOBTree())
     txn.commit()
     yield root['foo']
 
@@ -57,7 +76,7 @@ def foo(root):
 def bar(root):
     request = make_mocked_request('POST', '/')
     txn = root._p_jar.transaction_manager.begin(request)
-    SetItemView(root, request)('bar', PersistentMapping())
+    SetItemView(root, request)('bar', OOBTree.OOBTree())
     txn.commit()
     yield root['bar']
 
@@ -92,7 +111,7 @@ def test_transaction_proxy(root, foo, bar):
     # Create /foo/a
     request1 = make_mocked_request('POST', '/foo')
     t1 = tm.begin(request1)
-    SetItemView(foo, request1)('a', PersistentMapping())
+    SetItemView(foo, request1)('a', OOBTree.OOBTree())
     # Test that object is registered
     assert hasattr(request1, '_txn')
     assert hasattr(request1, '_txn_time')
@@ -102,7 +121,7 @@ def test_transaction_proxy(root, foo, bar):
     # Create /bar/b
     request2 = TransactionProxy(request1)
     t2 = tm.begin(request2)
-    SetItemView(bar, request2)('b', PersistentMapping())
+    SetItemView(bar, request2)('b', OOBTree.OOBTree())
     # Test that object is registered
     assert hasattr(request2, '_txn')
     assert hasattr(request2, '_txn_time')
@@ -120,7 +139,7 @@ def test_transaction_proxy(root, foo, bar):
     assert len(request2._txn_dm._registered_objects) == 1
 
     # Create /bar/c
-    SetItemView(bar, request2)('c', PersistentMapping())
+    SetItemView(bar, request2)('c', OOBTree.OOBTree())
 
     # Test that registered objects are not affected
     assert len(request1._txn_dm._registered_objects) == 1
@@ -166,13 +185,13 @@ def test_callback_transaction_data_manager_with_abort(root):
 
 
 # noinspection PyShadowingNames,PyProtectedMember
-def test_concurrent_transaction_abort_has_no_side_effects(root, foo, bar):
+def test_concurrent_transaction_abort_has_no_side_effects(root, foo, bar):  # noqa
     tm = root._p_jar.transaction_manager
 
     # Create /foo/a
     request1 = make_mocked_request('POST', '/foo')
     t1 = tm.begin(request1)
-    SetItemView(foo, request1)('a', PersistentMapping())
+    SetItemView(foo, request1)('a', OOBTree.OOBTree())
 
     # Test that object is registered
     assert foo in request1._txn_dm._registered_objects
@@ -180,7 +199,7 @@ def test_concurrent_transaction_abort_has_no_side_effects(root, foo, bar):
     # Create /bar/b
     request2 = make_mocked_request('POST', '/bar')
     t2 = tm.begin(request2)
-    SetItemView(bar, request2)('b', PersistentMapping())
+    SetItemView(bar, request2)('b', OOBTree.OOBTree())
 
     # Test that object is registered
     assert bar in request2._txn_dm._registered_objects
@@ -200,3 +219,157 @@ def test_concurrent_transaction_abort_has_no_side_effects(root, foo, bar):
 
     # Test that /bar/b has been created by t2
     assert 'b' in bar
+
+
+# noinspection PyShadowingNames,PyProtectedMember
+def test_multiple_connections(conn1, conn2):  # noqa
+    root1 = conn1.root()
+    root2 = conn2.root()
+
+    request = make_mocked_request('POST', '/')
+    txn = root1._p_jar.transaction_manager.begin(request)
+    SetItemView(root1, request)('foo', OOBTree.OOBTree())
+    txn.commit()
+
+    assert 'foo' in root1
+    assert 'foo' not in root2
+
+    conn2.newTransaction(None)
+
+    assert 'foo' in root2
+
+    request1 = make_mocked_request('POST', '/')
+    txn1 = root1._p_jar.transaction_manager.begin(request1)
+    SetItemView(root1['foo'], request1)('bar', True)
+
+    request2 = make_mocked_request('POST', '/')
+    txn2 = root2._p_jar.transaction_manager.begin(request2)
+    SetItemView(root2['foo'], request2)('bar', False)
+
+    txn1.commit()
+
+    assert root1['foo']['bar']
+    assert not root2['foo']['bar']
+
+    with pytest.raises(ConflictError):
+        txn2.commit()
+
+    assert root2['foo']['bar']
+
+
+# noinspection PyShadowingNames,PyProtectedMember
+def test_request_aware_read_current(foo):  # noqa
+    request1 = make_mocked_request('POST', '/')
+    foo._p_jar.transaction_manager.begin(request1)
+
+    request2 = make_mocked_request('POST', '/')
+    foo._p_jar.transaction_manager.begin(request2)
+
+    for i in range(0, 5):
+        SetItemView(foo, request1)(str(i), OOBTree.OOBTree())
+
+    assert '_txn_readCurrent' in request1.__dict__
+    assert len(request1._txn_readCurrent) > 0
+
+    CommitView(foo, request1)()
+
+    assert len(request1._txn_readCurrent) == 0
+
+    for i in range(5, 10):
+        SetItemView(foo, request2)(str(i), OOBTree.OOBTree())
+
+    assert '_txn_readCurrent' in request2.__dict__
+    assert len(request2._txn_readCurrent) > 0
+
+    CommitView(foo, request2)()
+
+    assert len(request2._txn_readCurrent) == 0
+
+
+# noinspection PyShadowingNames,PyProtectedMember
+def test_concurrent_btree_write(foo, conn2):  # noqa
+    bar = conn2.root()['foo']
+
+    # Init a few buckets
+    request = make_mocked_request('POST', '/')
+    foo._p_jar.transaction_manager.begin(request)
+    for i in range(0, 50):
+        SetItemView(foo, request)(str(i), OOBTree.OOBTree())
+    CommitView(foo, request)()
+
+    assert '1' in foo
+    assert '1' not in bar
+
+    bar._p_jar.newTransaction(None)
+    assert '1' in bar
+
+    # Concurrent requests on different connections
+    request1 = make_mocked_request('POST', '/')
+    foo._p_jar.transaction_manager.begin(request1)
+
+    request2 = make_mocked_request('POST', '/')
+    bar._p_jar.transaction_manager.begin(request2)
+
+    # Mutate one bucket
+    for i in range(100, 101):
+        SetItemView(foo, request1)(str(i), OOBTree.OOBTree())
+
+    assert '_txn_readCurrent' in request1.__dict__
+    assert len(request1._txn_readCurrent) > 0
+
+    CommitView(foo, request1)()
+
+    assert len(request1._txn_readCurrent) == 0
+
+    # Mutate another bucket on another connection without sync
+    for i in range(500, 501):
+        SetItemView(bar, request2)(str(i), OOBTree.OOBTree())
+
+    assert '_txn_readCurrent' in request2.__dict__
+    assert len(request2._txn_readCurrent) > 0
+
+    CommitView(bar, request2)()
+
+    assert len(request2._txn_readCurrent) == 0
+
+
+# noinspection PyShadowingNames,PyProtectedMember
+def test_concurrent_read_current_conflict(foo, conn2):  # noqa
+    bar = conn2.root()['foo']
+
+    # Init a few buckets
+    request = make_mocked_request('POST', '/')
+    foo._p_jar.transaction_manager.begin(request)
+    for i in range(0, 50):
+        SetItemView(foo, request)(str(i), OOBTree.OOBTree())
+    CommitView(foo, request)()
+
+    bar._p_jar.newTransaction(None)
+
+    # Concurrent requests on different connections
+    request1 = make_mocked_request('POST', '/')
+    foo._p_jar.transaction_manager.begin(request1)
+
+    request2 = make_mocked_request('POST', '/')
+    bar._p_jar.transaction_manager.begin(request2)
+
+    # Mutate one bucket
+    for i in range(100, 101):
+        SetItemView(foo, request1)(str(i), OOBTree.OOBTree())
+
+    # Force BTree mutation only on the first connection
+    RegisterView(foo, request1)()
+    CommitView(foo, request1)()
+
+    # Mutate another bucket on another connection without sync
+    for i in range(500, 501):
+        SetItemView(bar, request2)(str(i), OOBTree.OOBTree())
+
+    # ReadConflictError should be raised, because 'bar' has
+    # been marked as current
+
+    assert bar._p_oid in request2._txn_readCurrent.keys()
+    assert request2._txn_readCurrent[bar._p_oid] == bar._p_serial
+
+    with pytest.raises(ReadConflictError):
+        CommitView(bar, request2)()
