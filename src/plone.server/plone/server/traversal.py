@@ -43,6 +43,8 @@ from zope.security.proxy import ProxyFactory
 
 import aiohttp
 import logging
+import traceback
+import json
 
 
 logger = logging.getLogger(__name__)
@@ -259,18 +261,22 @@ class TraversalRouter(AbstractRouter):
 
         try:
             resource, tail = await self.traverse(request)
-            exc = None
         except Exception as _exc:
-            resource = None
-            tail = None
-            exc = _exc
+            request.resource = request.tail = None
+            request.exc = _exc
+            # XXX should only should traceback if in some sort of dev mode?
+            raise HTTPBadRequest(text=json.dumps({
+                'success': False,
+                'exception_message': str(_exc),
+                'exception_type': getattr(type(_exc), '__name__', str(type(_exc))),
+                'traceback': traceback.format_exc()
+            }))
 
         request.resource = resource
         request.tail = tail
-        request.exc = exc
 
         if request.resource is None:
-            raise HTTPBadRequest(text=str(request.exc))
+            raise HTTPBadRequest(text='Resource not found')
 
         traverse_to = None
         if tail and len(tail) == 1:
