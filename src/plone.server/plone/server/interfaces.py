@@ -44,6 +44,10 @@ class IItem(model.Schema):
     pass
 
 
+class IFolder(model.Schema):
+    pass
+
+
 class IContentNegotiation(Interface):
     pass
 

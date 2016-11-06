@@ -26,7 +26,7 @@ from zope.securitypolicy.interfaces import IPrincipalPermissionMap
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
 from zope.securitypolicy.interfaces import IRolePermissionMap
-
+import uuid
 import logging
 
 
@@ -57,7 +57,8 @@ class DefaultPOST(Service):
 
         # Generate a temporary id if the id is not given
         if not id_ and title:
-            new_id = INameChooser(self.context).chooseName(title, object())
+            # new_id = INameChooser(self.context).chooseName(title, object())
+            new_id = uuid.uuid4().hex
         elif not id_:
             now = datetime.now()
             new_id = '{}.{}.{}{:04d}'.format(
@@ -67,12 +68,6 @@ class DefaultPOST(Service):
                 randint(0, 9999))
         else:
             new_id = id_
-
-        # It already exists
-        if new_id in self.context:
-            return ErrorResponse(
-                'Conflict',
-                _("Id already exists"))
 
         user = get_authenticated_user_id(self.request)
         # Create object

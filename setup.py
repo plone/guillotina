@@ -54,7 +54,8 @@ setup(
     extras_require={
         'test': [
             'pytest',
-            'requests'
+            'requests',
+            'zope.testing'
         ]
     },
     entry_points={

@@ -10,7 +10,6 @@ from plone.server.interfaces import IView
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
-from ZODB.POSException import ConflictError
 from zope.interface import implementer
 from zope.proxy import ProxyBase
 
@@ -157,11 +156,6 @@ class RequestDataManager(object):
             pass
 
     def tpc_vote(self, txn):
-        # Check that objects have been updated during commit
-        for ob in self._registered_objects:
-            if ob._p_mtime and ob._p_mtime > self.request._txn_time:
-                raise ConflictError()  # vote 'no'
-
         self.connection.tpc_vote(txn)
 
     def tpc_finish(self, txn):
@@ -190,6 +184,26 @@ class RequestAwareConnection(ZODB.Connection.Connection):
     executor = ThreadPoolExecutor(max_workers=1)
     lock = threading.Lock()
 
+    def _getReadCurrent(self):
+        try:
+            request = get_current_request()
+        except RequestNotFound:
+            return dict()
+        try:
+            return request._txn_readCurrent
+        except AttributeError:
+            request._txn_readCurrent = {}
+            return request._txn_readCurrent
+
+    def _setReadCurrent(self, value):
+        try:
+            request = get_current_request()
+        except RequestNotFound:
+            return
+        request._txn_readCurrent = value
+
+    _readCurrent = property(_getReadCurrent, _setReadCurrent)
+
     def _register(self, obj=None):
         request = get_current_request()
 
@@ -208,13 +222,15 @@ class RequestAwareDB(ZODB.DB):
 
 
 class TransactionProxy(ProxyBase):
-    __slots__ = ('_wrapped', '_txn', '_txn_time', '_txn_dm')
+    __slots__ = ('_wrapped',
+                 '_txn', '_txn_time', '_txn_dm', '_txn_readCurrent')
 
     def __init__(self, obj):
         super(TransactionProxy, self).__init__(obj)
         self._txn = None
         self._txn_time = None
         self._txn_dm = None
+        self._txn_readCurrent = {}
 
 
 @implementer(ISavepoint)
@@ -336,9 +352,14 @@ def get_current_request():
     """
     frame = inspect.currentframe()
     while frame is not None:
-        if IView.providedBy(frame.f_locals.get('self')):
-            return frame.f_locals.get('self').request
+        request = getattr(frame.f_locals.get('self'), 'request', None)
+        if request is not None:
+            return request
         elif isinstance(frame.f_locals.get('self'), RequestHandler):
             return frame.f_locals['request']
+        # if isinstance(frame.f_locals.get('self'), RequestHandler):
+        #     return frame.f_locals.get('self').request
+        # elif IView.providedBy(frame.f_locals.get('self')):
+        #     return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
