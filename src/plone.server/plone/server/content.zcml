@@ -18,6 +18,12 @@
       behaviors=".behaviors.dublincore.IDublinCore"
     />
 
+  <plone:contenttype
+      portal_type="Folder"
+      schema=".content.IFolder"
+      class=".content.Folder"
+    />
+
    <adapter
    	  for="plone.server.interfaces.IDataBase
    	       plone.server.interfaces.IRequest"

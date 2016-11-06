@@ -229,6 +229,10 @@ class DataBase(object):
         self._conn = None
         self.tm_ = RequestAwareTransactionManager()
 
+    def open(self):
+        tm_ = RequestAwareTransactionManager()
+        return self._db.open(transaction_manager=self.tm_)
+
     def _open(self):
         self._conn = self._db.open(transaction_manager=self.tm_)
 
@@ -324,7 +328,7 @@ def make_app(config_file=None, settings=None):
             config = dbconfig.get('configuration', {})
             if dbconfig['storage'] == 'ZODB':
                 # Open it not Request Aware so it creates the root object
-                fs = ZODB.FileStorage.FileStorage(dbconfig['path'], **config)
+                fs = ZODB.FileStorage.FileStorage(dbconfig['path'])
 
                 db = DB(fs)
                 db.close()
@@ -335,13 +339,13 @@ def make_app(config_file=None, settings=None):
                 # Try to open it normal to create the root object
                 address = (dbconfig['address'], dbconfig['port'])
 
-                cs = ClientStorage(address, **config)
+                cs = ClientStorage(address)
                 db = DB(cs)
                 db.close()
 
                 # Set request aware database for app
-                cs = ClientStorage(address, **config)
-                db = RequestAwareDB(cs)
+                cs = ClientStorage(address)
+                db = RequestAwareDB(cs, **config)
                 dbo = DataBase(key, db)
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])

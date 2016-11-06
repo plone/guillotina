@@ -47,6 +47,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+SHARED_CONNECTION = True
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 
@@ -121,7 +122,7 @@ async def traverse(request, parent, path):
     if IDataBase.providedBy(parent):
         # Look on the PersistentMapping from the DB
         dbo = parent
-        parent = parent._conn.root()
+        parent = parent.conn.root()
 
     try:
         if path[0].startswith('_'):
@@ -138,8 +139,10 @@ async def traverse(request, parent, path):
         context._v_parent = parent
 
     if IDataBase.providedBy(context):
-        request.conn = context.conn
-        request.conn.newTransaction(None)
+        if SHARED_CONNECTION:
+            request.conn = context.conn
+        else:
+            request.conn = context.open()
         request._db_id = context.id
 
     if ISite.providedBy(context):
@@ -217,7 +220,8 @@ class MatchInfo(AbstractMatchInfo):
         view_result.headers.update(await apply_cors(request))
 
         # If we want to close the connection after the request
-        # request.conn.close()
+        if SHARED_CONNECTION is False:
+            request.conn.close()
 
         return await self.rendered(view_result)
 

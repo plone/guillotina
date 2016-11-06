@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from plone.dexterity.content import Container
+from plone.dexterity.content import BTreeContainer
 from plone.registry import Registry
 from plone.registry.interfaces import IRegistry
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import IItem
+from plone.server.interfaces import IFolder
 from plone.server.interfaces import IPloneSite
 from plone.server.interfaces import IStaticDirectory
 from plone.server.interfaces import IStaticFile
@@ -71,6 +73,17 @@ class PloneSite(Container):
 
 @implementer(IItem)
 class Item(Container):
+
+    def __repr__(self):
+        path = '/'.join(get_physical_path(self))
+        return "< {type} at {path} by {mem} >".format(
+            type=self.portal_type,
+            path=path,
+            mem=id(self))
+
+
+@implementer(IFolder)
+class Folder(BTreeContainer):
 
     def __repr__(self):
         path = '/'.join(get_physical_path(self))

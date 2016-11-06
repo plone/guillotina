@@ -352,9 +352,14 @@ def get_current_request():
     """
     frame = inspect.currentframe()
     while frame is not None:
-        if IView.providedBy(frame.f_locals.get('self')):
-            return frame.f_locals.get('self').request
+        request = getattr(frame.f_locals.get('self'), 'request', None)
+        if request is not None:
+            return request
         elif isinstance(frame.f_locals.get('self'), RequestHandler):
             return frame.f_locals['request']
+        # if isinstance(frame.f_locals.get('self'), RequestHandler):
+        #     return frame.f_locals.get('self').request
+        # elif IView.providedBy(frame.f_locals.get('self')):
+        #     return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
