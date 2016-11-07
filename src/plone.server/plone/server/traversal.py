@@ -49,7 +49,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-SHARED_CONNECTION = True
+SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 
@@ -119,7 +119,6 @@ async def traverse(request, parent, path):
         return parent, path
 
     assert request is not None  # could be used for permissions, etc
-
     dbo = None
     if IDataBase.providedBy(parent):
         # Look on the PersistentMapping from the DB
@@ -173,6 +172,8 @@ class MatchInfo(AbstractMatchInfo):
         self.resource = resource
         self.view = view
         self.rendered = rendered
+        self._apps = []
+        self._frozen = False
 
     async def handler(self, request):
         """Main handler function for aiohttp."""
@@ -234,6 +235,18 @@ class MatchInfo(AbstractMatchInfo):
             'view': self.view,
             'rendered': self.rendered
         }
+
+    @property
+    def apps(self):
+        return tuple(self._apps)
+
+    def add_app(self, app):
+        if self._frozen:
+            raise RuntimeError("Cannot change apps stack after .freeze() call")
+        self._apps.insert(0, app)
+
+    def freeze(self):
+        self._frozen = True
 
     async def expect_handler(self, request):
         return None

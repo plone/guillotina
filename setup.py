@@ -22,7 +22,9 @@ setup(
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages=['plone'],
     install_requires=[
-        'aiohttp',
+        'aiohttp==1.0.5',
+        'cchardet',
+        'aiodns',
         'ujson',
         'pycrypto',
         'BTrees',
