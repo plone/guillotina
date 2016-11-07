@@ -223,7 +223,7 @@ class MatchInfo(AbstractMatchInfo):
         view_result.headers.update(await apply_cors(request))
 
         # If we want to close the connection after the request
-        if SHARED_CONNECTION is False:
+        if SHARED_CONNECTION is False and hasattr(request, 'conn'):
             request.conn.close()
 
         return await self.rendered(view_result)
