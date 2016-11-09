@@ -24,7 +24,6 @@ setup(
     install_requires=[
         'aiohttp==1.0.5',
         'cchardet',
-        'aiodns',
         'ujson',
         'pycrypto',
         'BTrees',
