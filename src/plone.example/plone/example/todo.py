@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 from plone.dexterity.content import Item
-from plone.dexterity.interfaces import IDexterityContent
-from plone.dexterity.interfaces import IFormFieldProvider
+from plone.server.interfaces import IResource
+from plone.server.interfaces import IFormFieldProvider
 from plone.server.api.service import Service
-from plone.supermodel import model
-from plone.supermodel.directives import read_permission
+from zope.interface import Interface
+from plone.server.directives import read_permission
 from zope import schema
 from zope.component import adapter
 from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
@@ -12,7 +12,7 @@ from zope.interface import implementer
 from zope.interface import provider
 
 
-class IExampleBase(model.Schema):
+class IExampleBase(Interface):
     title = schema.TextLine(
         title='Title',
         required=False,
@@ -65,7 +65,7 @@ class View(Service):
 
 
 @provider(IFormFieldProvider)
-class IDublinCore(model.Schema):
+class IDublinCore(Interface):
     """We basically just want the IFormFieldProvider interface applied
         There's probably a zcml way of doing this. """
     created = schema.Datetime(
@@ -81,6 +81,6 @@ class IDublinCore(model.Schema):
     )
 
 
-@adapter(IDexterityContent)
+@adapter(IResource)
 class DublinCore(ZDCAnnotatableAdapter):
     pass

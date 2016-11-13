@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPConflict
 from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.dexterity.utils import createContent
 from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
+from plone.server.content import createContent
 from zope.component import getMultiAdapter
 
 

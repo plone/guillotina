@@ -18,6 +18,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
 
     def test_get_root(self):
         """Get the application root."""
+        import pdb; pdb.set_trace()
         resp = self.layer.requester('GET', '/')
         response = json.loads(resp.text)
         self.assertEqual(response['static_file'], ['favicon.ico'])

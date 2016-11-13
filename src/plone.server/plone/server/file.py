@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 from persistent import Persistent
-from plone.dexterity.interfaces import IDexterityContent
 from plone.server.interfaces import IFile
 from plone.server.interfaces import IFileField
 from plone.server.interfaces import IFileManager
 from plone.server.interfaces import IRequest
+from plone.server.interfaces import IResource
 from plone.server.interfaces import IStorage
 from plone.server.interfaces import NotStorable
 from ZODB.blob import Blob
@@ -13,8 +13,8 @@ from zope.component import getUtility
 from zope.interface import implementer
 from zope.schema import Object
 from zope.schema.fieldproperty import FieldProperty
-import aiohttp
 
+import aiohttp
 import io
 import mimetypes
 import os
@@ -39,7 +39,7 @@ def get_contenttype(
     return default
 
 
-@adapter(IDexterityContent, IRequest, IFileField)
+@adapter(IResource, IRequest, IFileField)
 @implementer(IFileManager)
 class BasicFileManager(object):
 

@@ -1,18 +1,42 @@
 # -*- coding: utf-8 -*-
-from plone.supermodel import model
 from zope import schema
+from zope.component.interfaces import IFactory
 from zope.component.interfaces import ISite
 from zope.i18nmessageid.message import MessageFactory
 from zope.interface import Attribute
 from zope.interface import Interface
 from zope.interface import interfaces
+from zope.interface.common.mapping import IFullMapping
+from zope.location.interfaces import IContained
 from zope.schema.interfaces import IObject
+
+import zope.schema
 
 
 _ = MessageFactory('plone.server')
 
+DEFAULT_ADD_PERMISSION = 'plone.AddContent'
 DEFAULT_READ_PERMISSION = 'plone.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'plone.ManageContent'
+
+CATALOG_KEY = 'plone.server.directives.catalog'
+FIELDSETS_KEY = 'plone.server.directives.fieldsets'
+INDEX_KEY = 'plone.server.directives.index'
+READ_PERMISSIONS_KEY = 'plone.server.directives.read-permissions'
+WRITE_PERMISSIONS_KEY = 'plone.server.directives.write-permissions'
+
+
+class IFormFieldProvider(Interface):
+    """Marker interface for schemata that provide form fields.
+    """
+
+
+class IUUID(Interface):
+    """Abstract representation of a UUID.
+
+    Adapt an object to this interface to obtain its UUID. Adaptation will
+    fail if the object does not have a UUID (yet).
+    """
 
 
 class IApplication(Interface):
@@ -31,7 +55,58 @@ class IStaticDirectory(Interface):
     pass
 
 
-class IPloneSite(model.Schema, ISite):
+class IRegistry(IFullMapping):
+
+    def forInterface(interface, check=True, omit=(), prefix=None):
+        """Get an IRecordsProxy for the given interface. If `check` is True,
+        an error will be raised if one or more fields in the interface does
+        not have an equivalent setting.
+        """
+
+    def registerInterface(interface, omit=(), prefix=None):
+        """Create a set of records based on the given interface. For each
+        schema field in the interface, a record will be inserted with a
+        name like `${interface.__identifier__}.${field.__name__}`, and a
+        value equal to default value of that field. Any field with a name
+        listed in `omit`, or with the `readonly` property set to True, will
+        be ignored. Supply an alternative identifier with `prefix`.
+        """
+
+
+class IResource(IContained):
+    portal_type = schema.TextLine()
+
+
+class IResourceFactory(IFactory):
+
+    portal_type = schema.TextLine(
+        title='Portal type name',
+        description='The portal type this is an FTI for'
+    )
+
+    schema = schema.DottedName(
+        title='Schema interface',
+        description='Dotted name to an interface describing the type. '
+                    'This is not required if there is a model file or a '
+                    'model source string containing an unnamed schema.'
+    )
+
+    behaviors = zope.schema.List(
+        title='Behaviors',
+        description='A list of behaviors that are enabled for this type. '
+                    'See plone.behavior for more details.',
+        value_type=zope.schema.DottedName(title='Behavior name')
+    )
+
+    add_permission = zope.schema.DottedName(
+        title='Add permission',
+        description='A oermission name for the permission required to '
+                    'construct this content',
+    )
+
+
+
+class IPloneSite(IResource, ISite):
     title = schema.TextLine(
         title='Title',
         required=False,
@@ -40,11 +115,11 @@ class IPloneSite(model.Schema, ISite):
     )
 
 
-class IItem(model.Schema):
+class IItem(IResource):
     pass
 
 
-class IFolder(model.Schema):
+class IContainer(IResource, IFullMapping):
     pass
 
 

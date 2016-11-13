@@ -6,7 +6,6 @@ we'll see how far we get and learn more about ZODB while doing it...
 """
 from aiohttp.web import RequestHandler
 from concurrent.futures import ThreadPoolExecutor
-from plone.server.interfaces import IView
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager

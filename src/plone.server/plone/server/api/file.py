@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import StreamResponse
 from os.path import basename
-from plone.dexterity.fti import IDexterityFTI
-from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server.api.service import DownloadService
 from plone.server.api.service import Service
 from plone.server.api.service import TraversableDownloadService
 from plone.server.api.service import TraversableFieldService
-from plone.server.api.service import TraversableService
-from plone.server.browser import get_physical_path
 from plone.server.interfaces import IFileManager
 from zope.component import getMultiAdapter
-from zope.component import getUtilitiesFor
-from zope.component import queryUtility
-from zope.interface.interfaces import ComponentLookupError
 
 import aiohttp
 import mimetypes

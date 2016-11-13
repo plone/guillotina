@@ -14,7 +14,7 @@ class DefaultJSONSummarySerializer(object):
     """Default ISerializeToJsonSummary adapter.
 
     Requires context to be adaptable to IContentListingObject, which is
-    the case for all content objects providing IContentish.
+    the case for all content objects providing IResource.
     """
 
     def __init__(self, context, request):

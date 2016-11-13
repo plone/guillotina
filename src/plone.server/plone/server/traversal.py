@@ -5,7 +5,6 @@ from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.registry.interfaces import IRegistry
 from plone.server import _
 from plone.server import DICT_METHODS
 from plone.server.api.dexterity import DefaultOPTIONS
@@ -19,6 +18,7 @@ from plone.server.contentnegotiation import language_negotiation
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDataBase
 from plone.server.interfaces import IOPTIONS
+from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
@@ -42,9 +42,9 @@ from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 
 import aiohttp
+import json
 import logging
 import traceback
-import json
 
 
 logger = logging.getLogger(__name__)

@@ -11,7 +11,7 @@
 	<adapter
         factory=".principalrole.AnnotationPlonePrincipalRoleManager"
   	    provides="zope.securitypolicy.interfaces.IPrincipalRoleManager"
-	    for="plone.dexterity.interfaces.IDexterityContent"
+	    for="plone.server.interfaces.IResource"
 	    trusted="true"
 	    />
 

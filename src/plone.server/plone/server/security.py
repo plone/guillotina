@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from plone.dexterity.interfaces import IDexterityContent
-from plone.dexterity.utils import iterSchemata
+from plone.server.content import iterSchemata
+from plone.server.directives import mergedTaggedValueDict
 from plone.server.interfaces import DEFAULT_READ_PERMISSION
 from plone.server.interfaces import DEFAULT_WRITE_PERMISSION
 from plone.server.interfaces import IRequest
+from plone.server.interfaces import IResource
+from plone.server.interfaces import READ_PERMISSIONS_KEY
+from plone.server.interfaces import WRITE_PERMISSIONS_KEY
 from plone.server.transactions import get_current_request
-from plone.supermodel.interfaces import READ_PERMISSIONS_KEY
-from plone.supermodel.interfaces import WRITE_PERMISSIONS_KEY
-from plone.supermodel.utils import mergedTaggedValueDict
 from zope.component import adapter
 from zope.interface import implementer
 from zope.security._zope_security_checker import selectChecker
@@ -113,7 +113,7 @@ class DexterityPermissionChecker(object):
                 return
             permission = DEFAULT_READ_PERMISSION
 
-        adapted = IDexterityContent(obj, None)
+        adapted = IResource(obj, None)
 
         if adapted is not None:
             for schema in iterSchemata(adapted):
@@ -141,7 +141,7 @@ class DexterityPermissionChecker(object):
                 return
             permission = DEFAULT_WRITE_PERMISSION
 
-        adapted = IDexterityContent(obj, None)
+        adapted = IResource(obj, None)
 
         if adapted is not None:
             for schema in iterSchemata(adapted):

@@ -2,12 +2,12 @@
 from plone.jsonserializer.exceptions import DeserializationError
 from plone.jsonserializer.interfaces import IFieldDeserializer
 from plone.jsonserializer.interfaces import ISerializeToJson
-from plone.registry.interfaces import IRegistry
 from plone.server import _
 from plone.server.api.service import Service
 from plone.server.api.service import TraversableService
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
+from plone.server.interfaces import IRegistry
 from plone.server.utils import import_class
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
@@ -91,7 +91,7 @@ class Write(TraversableService):
     def publishTraverse(self, traverse):
         if len(traverse) == 1 and traverse[0] in self.request.site_settings:
             # we want have the key of the registry
-            self.record = self.request.site_settings._records[traverse[0]]
+            self.record = self.request.site_settings._data[traverse[0]]
         else:
             self.record = None
         return self

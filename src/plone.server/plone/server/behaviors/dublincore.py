@@ -2,18 +2,17 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
 from dateutil.tz import tzutc
-from plone.dexterity.interfaces import IDexterityContent
-from plone.dexterity.interfaces import IFormFieldProvider
-from plone.i18n.locales.languages import _languagelist
 from plone.server import DICT_LANGUAGES
 from plone.server.behaviors.properties import ContextProperty
-from plone.supermodel import model
-from plone.supermodel.directives import catalog
-from plone.supermodel.directives import index
-from zope import schema
+from plone.server.directives import catalog
+from plone.server.directives import index
+from plone.server.interfaces import IFormFieldProvider
+from plone.server.interfaces import IResource
+from plone.server.languages import _languagelist
 from zope.component import adapter
 from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
 from zope.dublincore.interfaces import IWriteZopeDublinCore
+from zope.interface import Interface
 from zope.interface import provider
 from zope.schema.vocabulary import SimpleTerm
 from zope.schema.vocabulary import SimpleVocabulary
@@ -36,7 +35,7 @@ FLOOR_DATE = datetime(*datetime.min.timetuple()[:-2], tzutc())
 
 
 @provider(IFormFieldProvider)
-class IDublinCore(model.Schema, IWriteZopeDublinCore):
+class IDublinCore(Interface, IWriteZopeDublinCore):
     catalog(creators='text')
     catalog(subject='text')
     catalog(contributors='text')
@@ -45,7 +44,7 @@ class IDublinCore(model.Schema, IWriteZopeDublinCore):
     index(subject='non_analyzed')
 
 
-@adapter(IDexterityContent)
+@adapter(IResource)
 class DublinCore(ZDCAnnotatableAdapter):
 
     creators = ContextProperty(u'creators', ())

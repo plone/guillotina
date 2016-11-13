@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
 
-from plone.dexterity.interfaces import IDexterityContent
 from plone.server.interfaces import ILanguage
 from plone.server.interfaces import IRequest
+from plone.server.interfaces import IResource
 from plone.server.interfaces import ITranslated
 from zope.component import adapter
 from zope.interface import implementer
 
 
-@adapter(ILanguage, IDexterityContent, IRequest)
+@adapter(ILanguage, IResource, IRequest)
 @implementer(ITranslated)
 class GenericTranslation(object):
 

@@ -20,7 +20,7 @@
 
   <plone:contenttype
       portal_type="Folder"
-      schema=".content.IFolder"
+      schema=".content.IContainer"
       class=".content.Folder"
     />
 

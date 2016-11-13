@@ -1,4 +1,3 @@
-
 from plone.server.interfaces import INewUserAdded
 from plone.server.interfaces import IObjectFinallyCreatedEvent
 from zope.interface import implementer
