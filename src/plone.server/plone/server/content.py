@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from BTrees.OOBTree import OOBTree
+from BTrees.Length import Length
 from persistent import Persistent
 from persistent.mapping import PersistentMapping
 from plone.server.browser import get_physical_path
@@ -27,6 +28,9 @@ from zope.interface import implementer
 from zope.interface import Interface
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
+from zope.lifecycleevent import ObjectAddedEvent
+from zope.lifecycleevent import ObjectRemovedEvent
+from zope.event import notify
 
 
 @implementer(IResourceFactory)
@@ -139,7 +143,25 @@ class Folder(PersistentMapping):
         if id_ is not None:
             self.__name__ = id_
         self._data = OOBTree()
+        self._length = Length()
         super(Folder, self).__init__()
+
+    def __len__(self):
+        return self._length()
+
+    def __setitem__(self, key, value):
+        super(Folder, self).__setitem__(key, value)
+        l = self._length
+        value.__parent__ = self
+        l.change(1)
+        notify(ObjectAddedEvent(value, self, key))
+
+    def __delitem__(self, key):
+        super(Folder, self).__delitem__(key)
+        item = self._data[key]
+        l = self._length
+        l.change(-1)
+        notify(ObjectRemovedEvent(item, self, item.__name__))
 
     def __repr__(self):
         path = '/'.join([name or 'n/a' for name in get_physical_path(self)])
