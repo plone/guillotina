@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from BTrees._OOBTree import OOBTree
 from persistent.mapping import PersistentMapping
-from plone.server import _
-from plone.server.interfaces import IRegistry
-from plone.server.interfaces import IResource
 from zope import schema
+from zope.interface import Interface
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from zope.interface import Interface
 from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
+
+from plone.server import _
+from plone.server.interfaces import IRegistry
 
 
 class RecordsProxy(object):
