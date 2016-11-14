@@ -18,13 +18,11 @@ class FunctionalTestServer(PloneFunctionalTestCase):
 
     def test_get_root(self):
         """Get the application root."""
-        import pdb; pdb.set_trace()
         resp = self.layer.requester('GET', '/')
         response = json.loads(resp.text)
         self.assertEqual(response['static_file'], ['favicon.ico'])
         self.assertEqual(response['databases'], ['plone'])
-        self.assertTrue('country-flags' in response['static_directory'])
-        self.assertTrue('language-flags' in response['static_directory'])
+        self.assertEqual(response['static_directory'], [])
 
     def test_get_database(self):
         """Get the database object."""
