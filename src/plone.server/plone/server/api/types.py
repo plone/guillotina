@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from plone.jsonserializer.interfaces import ISerializeToJson
+from plone.server.json.interfaces import IFactorySerializeToJson
 from plone.server.api.service import TraversableService
 from plone.server.interfaces import IResourceFactory
 from zope.component import getMultiAdapter
@@ -23,13 +23,13 @@ class Read(TraversableService):
             for x in self.value:
                 serializer = getMultiAdapter(
                     (x, self.request),
-                    ISerializeToJson)
+                    IFactorySerializeToJson)
 
                 result.append(serializer())
         else:
             serializer = getMultiAdapter(
                 (self.value, self.request),
-                ISerializeToJson)
+                IFactorySerializeToJson)
 
             result = serializer()
         return result

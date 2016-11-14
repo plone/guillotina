@@ -7,7 +7,7 @@ from plone.server.browser import get_physical_path
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IItem
-from plone.server.interfaces import IPloneSite
+from plone.server.interfaces import ISite
 from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IResourceFactory
@@ -181,8 +181,8 @@ class Folder(PersistentMapping):
             mem=id(self))
 
 
-@implementer(IPloneSite)
-class PloneSite(Folder):
+@implementer(ISite)
+class Site(Folder):
 
     def install(self):
         self['_components'] = components = PersistentComponents()

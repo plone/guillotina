@@ -1,0 +1,53 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="plone.server">
+
+    <!-- Content -->
+    <adapter factory=".serialize_content.SerializeToJson" />
+    <adapter factory=".serialize_content.SerializeFolderToJson" />
+
+    <!-- Summary -->
+    <adapter factory=".serialize_content.DefaultJSONSummarySerializer" />
+
+    <!-- Content Field -->
+    <adapter factory=".serialize_content_field.DefaultFieldSerializer" />
+
+    <!-- Schema -->
+    <adapter factory=".serialize_schema.SerializeFactoryToJson" />
+    <adapter factory=".serialize_schema.DefaultSchemaSerializer" />
+
+    <!-- Fields -->
+    <adapter factory=".serialize_schema_field.DefaultSchemaFieldSerializer" />
+
+    <adapter factory=".serialize_schema_field.DefaultTextSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultTextLineSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultFloatSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultIntSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultBoolSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultCollectionSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultChoiceSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultObjectSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultRichTextSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultDateSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultTimeSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultDictSchemaFieldSerializer" />
+
+    <!-- Value -->
+    <adapter factory=".serialize_value.date_converter" />
+    <adapter factory=".serialize_value.default_converter" />
+    <adapter factory=".serialize_value.dict_converter" />
+    <adapter factory=".serialize_value.frozenset_converter" />
+    <adapter factory=".serialize_value.i18n_message_converter" />
+    <adapter factory=".serialize_value.list_converter" />
+    <adapter factory=".serialize_value.persistent_list_converter" />
+    <adapter factory=".serialize_value.persistent_mapping_converter" />
+    <adapter factory=".serialize_value.python_datetime_converter" />
+    <adapter factory=".serialize_value.set_converter" />
+    <adapter factory=".serialize_value.string_converter" />
+    <adapter factory=".serialize_value.time_converter" />
+    <adapter factory=".serialize_value.timedelta_converter" />
+    <adapter factory=".serialize_value.tuple_converter" />
+
+
+</configure>

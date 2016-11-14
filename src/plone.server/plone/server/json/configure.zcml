@@ -1,0 +1,9 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="plone.server">
+
+  <include file="serializers.zcml" />
+  <include file="deserializer.zcml" />
+
+</configure>

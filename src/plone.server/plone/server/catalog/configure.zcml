@@ -5,12 +5,12 @@
 
   <!-- create and remove index -->
   <subscriber
-      for="plone.server.interfaces.IPloneSite
+      for="plone.server.interfaces.ISite
            zope.lifecycleevent.interfaces.IObjectAddedEvent"
       handler=".index.add_index" />
 
   <subscriber
-      for="plone.server.interfaces.IPloneSite
+      for="plone.server.interfaces.ISite
            zope.lifecycleevent.interfaces.IObjectRemovedEvent"
       handler=".index.remove_index" />
 

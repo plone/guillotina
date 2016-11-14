@@ -33,7 +33,6 @@ setup(
         'BTrees',
         'persistent',
         'plone.behavior',
-        'plone.jsonserializer',
         'pycrypto',
         'setuptools',
         'six',

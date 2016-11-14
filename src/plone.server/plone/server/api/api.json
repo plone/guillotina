@@ -71,7 +71,7 @@
                 "permission": "plone.AccessContent"
             }
         },
-        "plone.server.interfaces.IPloneSite": {
+        "plone.server.interfaces.ISite": {
             "endpoints": {
                 "@registry": {
                     "GET": {

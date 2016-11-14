@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from zope import schema
 from zope.component.interfaces import IFactory
-from zope.component.interfaces import ISite
+from zope.component.interfaces import ISite as IZopeSite
 from zope.i18nmessageid.message import MessageFactory
 from zope.interface import Attribute
 from zope.interface import Interface
@@ -106,7 +106,7 @@ class IResourceFactory(IFactory):
 
 
 
-class IPloneSite(IResource, ISite):
+class ISite(IResource, IZopeSite):
     title = schema.TextLine(
         title='Title',
         required=False,

@@ -1,11 +1,11 @@
 {
 	"databases": [
 		{
-		"plone": {
+		"zodb1": {
 			"storage": "ZODB",
 			"path": "data/Data.fs",
 			"configuration": {
-		    "blob_dir": "data/blobstorage"
+		        	"blob_dir": "data/blobstorage"
 			}
 		},
 		"zeo1": {
@@ -13,9 +13,9 @@
 			"address": "127.0.0.1",
 			"port": 8090,
 			"configuration": {
-		    "blob_dir": "data/zeoblobstorage",
-				"shared_blob_dir": true
-			}
+                		"pool_size": 100,
+                		"cache_size": 100
+                	}
 		}
 	}],
 	"address": 8080,

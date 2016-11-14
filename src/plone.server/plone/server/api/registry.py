@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from plone.jsonserializer.exceptions import DeserializationError
-from plone.jsonserializer.interfaces import IFieldDeserializer
-from plone.jsonserializer.interfaces import ISerializeToJson
+from plone.server.json.exceptions import DeserializationError
+from plone.server.json.interfaces import IResourceFieldDeserializer
+from plone.server.json.interfaces import IValueToJson
 from plone.server import _
 from plone.server.api.service import Service
 from plone.server.api.service import TraversableService
@@ -35,7 +35,7 @@ class Read(TraversableService):
                 try:
                     serializer = getMultiAdapter(
                         (self.value[x], self.request),
-                        ISerializeToJson)
+                        IValueToJson)
                     value = serializer()
                 except ComponentLookupError:
                     value = self.value[x]
@@ -44,16 +44,16 @@ class Read(TraversableService):
             try:
                 serializer = getMultiAdapter(
                     (self.value, self.request),
-                    ISerializeToJson)
+                    IValueToJson)
 
                 result = serializer()
             except ComponentLookupError:
                 result = self.value
         return result
 
-
+    
 class Register(Service):
-    """Register an Interface on the Registry"""
+    """Register an Interface on the Registry."""
 
     async def __call__(self):
         """ data input : { 'interface': 'INTERFACE' }"""
@@ -110,7 +110,7 @@ class Write(TraversableService):
 
         deserializer = queryMultiAdapter(
             (self.record.field, self.request.site_settings, self.request),
-            IFieldDeserializer)
+            IResourceFieldDeserializer)
 
         if deserializer is None:
             return ErrorResponse(

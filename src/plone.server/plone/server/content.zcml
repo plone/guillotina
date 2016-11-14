@@ -4,9 +4,9 @@
   <include package="plone.server" file="meta.zcml" />
 
   <plone:contenttype
-      portal_type="Plone Site"
-      schema=".interfaces.IPloneSite"
-      class=".content.PloneSite"
+      portal_type="Site"
+      schema=".interfaces.ISite"
+      class=".content.Site"
       behaviors=""
       />
 
@@ -28,14 +28,14 @@
    	  for="plone.server.interfaces.IDataBase
    	       plone.server.interfaces.IRequest"
    	  factory="plone.server.factory.DataBaseToJson"
-   	  provides="plone.jsonserializer.interfaces.ISerializeToJson"
+   	  provides="plone.server.json.interfaces.IResourceSerializeToJson"
    	  />
 
    <adapter
    	  for="plone.server.interfaces.IApplication
    	       plone.server.interfaces.IRequest"
    	  factory="plone.server.factory.ApplicationToJson"
-   	  provides="plone.jsonserializer.interfaces.ISerializeToJson"
+   	  provides="plone.server.json.interfaces.IResourceSerializeToJson"
    	  />
 
 

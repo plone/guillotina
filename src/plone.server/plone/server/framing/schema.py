@@ -1,4 +1,4 @@
-from plone.jsonserializer.interfaces import ISerializeToJson
+from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.interfaces import IRequest
 from plone.server.renderers import IFrameFormatsJson
 from zope.component import adapter
@@ -20,6 +20,6 @@ class Framing(object):
             fti = queryUtility(
                 IFactory, name=self.request.resource.portal_type)
             schema_summary = getMultiAdapter(
-                (fti, self.request), ISerializeToJson)()
+                (fti, self.request), IResourceSerializeToJson)()
             json_value['schema'] = schema_summary
         return json_value

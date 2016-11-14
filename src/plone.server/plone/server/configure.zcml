@@ -34,13 +34,12 @@
   <include file="basicfile.zcml" />
   <include file="transform.zcml" />
 
+  <include package=".json" />
   <include package=".auth" />
   <include package=".catalog" />
   <include package=".framing" />
   <include package=".behaviors" />
 
   <plone:api file="api/api.json" />
-
-  <adapter factory=".summary.DefaultJSONSummarySerializer" />
 
 </configure>

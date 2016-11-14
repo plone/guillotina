@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPConflict
 from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.jsonserializer.interfaces import ISerializeToJson
+from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
@@ -13,16 +13,16 @@ class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
             (self.context, self.request),
-            ISerializeToJson)
+            IResourceSerializeToJson)
         return serializer()
 
 
 class DefaultPOST(Service):
-    """ Creates a new Site for DB Mounting Points
-    """
+    """Create a new Site for DB Mounting Points."""
+
     async def __call__(self):
         data = await self.request.json()
-        if '@type' not in data and data['@type'] != 'Plone Site':
+        if '@type' not in data and data['@type'] != 'Site':
             return HTTPUnauthorized('Not allowed type %s' % data['@type'])
 
         if 'title' not in data and not data['title']:
@@ -39,7 +39,7 @@ class DefaultPOST(Service):
             return HTTPConflict(reason="id already exist")
 
         site = createContent(
-            'Plone Site',
+            'Site',
             id=data['id'],
             title=data['title'],
             description=data['description'])
@@ -49,7 +49,7 @@ class DefaultPOST(Service):
         site.install()
 
         resp = {
-            '@type': 'Plone Site',
+            '@type': 'Site',
             'id': data['id'],
             'title': data['title']
         }
