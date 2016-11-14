@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from BTrees.OOBTree import OOBTree
 from BTrees.Length import Length
+from BTrees.OOBTree import OOBTree
 from persistent import Persistent
 from persistent.mapping import PersistentMapping
 from plone.server.browser import get_physical_path
@@ -24,13 +24,13 @@ from zope.component import getUtility
 from zope.component.factory import Factory
 from zope.component.interfaces import IFactory
 from zope.component.persistentregistry import PersistentComponents
+from zope.event import notify
 from zope.interface import implementer
 from zope.interface import Interface
-from zope.securitypolicy.interfaces import IPrincipalRoleManager
-from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
-from zope.event import notify
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
 
 @implementer(IResourceFactory)

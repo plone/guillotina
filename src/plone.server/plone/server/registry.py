@@ -2,11 +2,14 @@
 from BTrees._OOBTree import OOBTree
 from persistent.mapping import PersistentMapping
 from plone.server import _
+from plone.server.browser import get_physical_path
 from plone.server.interfaces import IRegistry
 from zope import schema
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
+from zope.location import ILocation
+from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 
 
 class RecordsProxy(object):
@@ -48,8 +51,11 @@ class RecordsProxy(object):
             self.__dict__['records'][prefixed_name] = value
 
 
-@implementer(IRegistry)
+@implementer(IRegistry, ILocation)
 class Registry(PersistentMapping):
+
+    __name__ = None
+    __parent__ = None
 
     def __init__(self):
         self._data = OOBTree()
@@ -59,7 +65,18 @@ class Registry(PersistentMapping):
         return RecordsProxy(self, iface, prefix=prefix)
 
     def registerInterface(self, iface, omit=(), prefix=None):
-        pass
+        proxy = RecordsProxy(self, iface, prefix)
+        for name in iface.names():
+            if name in omit:
+                continue
+            field = iface[name]
+            if field.defaultFactory is not None:
+                if IContextAwareDefaultFactory.providedBy(field.defaultFactory):  # noqa
+                    setattr(proxy, name, field.defaultFactory(self))
+                else:
+                    setattr(proxy, name, field.defaultFactory())
+            elif field.default is not None:
+                setattr(proxy, name, field.default)
 
 
 ACTIVE_AUTH_EXTRACTION_KEY = \
