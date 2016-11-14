@@ -38,7 +38,6 @@
   <include package=".catalog" />
   <include package=".framing" />
   <include package=".behaviors" />
-  <include package=".resources" />
 
   <plone:api file="api/api.json" />
 
