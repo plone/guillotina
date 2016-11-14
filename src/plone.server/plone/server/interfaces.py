@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from zope import schema
-from zope.component.interfaces import IFactory
 from zope.component.interfaces import ISite as IZopeSite
+from zope.component.interfaces import IFactory
 from zope.i18nmessageid.message import MessageFactory
 from zope.interface import Attribute
 from zope.interface import Interface

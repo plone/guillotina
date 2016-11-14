@@ -2,15 +2,14 @@
 from BTrees.OOBTree import OOBTree
 from persistent import Persistent
 from persistent.mapping import PersistentMapping
-from plone.behavior.annotation import AnnotationsFactoryImpl
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IItem
-from plone.server.interfaces import ISite
 from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IResourceFactory
+from plone.server.interfaces import ISite
 from plone.server.interfaces import IStaticDirectory
 from plone.server.interfaces import IStaticFile
 from plone.server.registry import IAddons
@@ -18,6 +17,7 @@ from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ICors
 from plone.server.registry import ILayers
+from plone.server.registry import Registry
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtility
 from zope.component.factory import Factory
@@ -25,40 +25,8 @@ from zope.component.interfaces import IFactory
 from zope.component.persistentregistry import PersistentComponents
 from zope.interface import implementer
 from zope.interface import Interface
-from zope.interface.declarations import alsoProvides
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
-
-
-class RecordsProxy(AnnotationsFactoryImpl):
-
-    # noinspection PyMissingConstructor
-    def __init__(self, context, iface, prefix=None):
-        self.__dict__['schema'] = iface
-        self.__dict__['prefix'] = iface.__identifier__ + '.'
-        self.__dict__['annotations'] = context
-        alsoProvides(self, iface)
-
-        if prefix is not None:
-            self.__dict__['prefix'] = prefix + '.'
-
-
-@implementer(IRegistry)
-class Registry(PersistentMapping):
-
-    def __init__(self):
-        self._data = OOBTree()
-        super(Registry, self).__init__()
-
-    def forInterface(self, iface, check=True, omit=(), prefix=None):
-        return RecordsProxy(self, iface, prefix=prefix)
-
-    def registerInterface(self, iface, omit=(), prefix=None):
-        proxy = self.forInterface(iface)
-        for name in iface.names():
-            if name in omit:
-                continue
-            setattr(proxy, name, None)
 
 
 @implementer(IResourceFactory)
