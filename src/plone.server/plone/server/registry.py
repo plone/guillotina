@@ -2,13 +2,12 @@
 from BTrees._OOBTree import OOBTree
 from persistent.mapping import PersistentMapping
 from plone.server import _
-from plone.server.browser import get_physical_path
 from plone.server.interfaces import IRegistry
+from plone.server.interfaces import IResource
 from zope import schema
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
-from zope.location import ILocation
 from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 
 
@@ -51,11 +50,13 @@ class RecordsProxy(object):
             self.__dict__['records'][prefixed_name] = value
 
 
-@implementer(IRegistry, ILocation)
+@implementer(IRegistry, IResource)
 class Registry(PersistentMapping):
 
     __name__ = None
     __parent__ = None
+
+    portal_type = None
 
     def __init__(self):
         self._data = OOBTree()

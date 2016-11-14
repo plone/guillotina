@@ -123,7 +123,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'GET',
             '/plone/plone/@registry/plone.server.registry.ICors.enabled')
         response = json.loads(resp.text)
-        self.assertFalse(response[0])
+        self.assertFalse(response)
 
     def test_file_upload(self):
         resp = self.layer.requester(

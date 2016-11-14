@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from plone.server.json.interfaces import IFactorySerializeToJson
 from plone.server.api.service import TraversableService
 from plone.server.interfaces import IResourceFactory
+from plone.server.json.interfaces import IFactorySerializeToJson
 from zope.component import getMultiAdapter
 from zope.component import getUtilitiesFor
 from zope.component import queryUtility

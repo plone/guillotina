@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server import JSON_API_DEFINITION
 from plone.server.api.service import Service
+from plone.server.json.interfaces import IResourceSerializeToJson
 from zope.component import getMultiAdapter
 
 import logging
