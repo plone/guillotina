@@ -369,6 +369,67 @@ let self = rec {
     doCheck = false;
   };
 
+  zope_contenttype = pythonPackages.buildPythonPackage {
+    name = "zope.contenttype-4.2.0";
+    src = pkgs.fetchurl {
+      url = "https://pypi.python.org/packages/e0/56/25c9ea14b6632a9e90f96ecc88e10caf743e66a6365b06d6ff881e16af06/zope.contenttype-4.2.0.tar.gz";
+      sha256 = "083w0hk69dja3g53q5iqpmfcdgp8hb8nq5zpkp600s90956grfyw";
+    };
+    doCheck = false;
+  };
+
+  zope_publisher = pythonPackages.buildPythonPackage {
+    name = "zope.publisher-4.3.0";
+    src = pkgs.fetchurl {
+      url = "https://pypi.python.org/packages/40/41/5ae28958933468909399501241588ef309d7431e49103ae31604257e74a2/zope.publisher-4.3.0.tar.gz";
+      sha256 = "0j3rahjmq5fqp3808gc9jd5wsn0pp9d89zbnfxr10slm3j2rhvgp";
+    };
+    propagatedBuildInputs = [
+      pythonPackages.six
+      zope_browser
+      zope_component
+      zope_configuration
+      zope_contenttype
+      zope_contenttype
+      zope_event
+      zope_exceptions
+      zope_i18n
+      zope_interface
+      zope_location
+      zope_security
+    ];
+    doCheck = false;
+  };
+
+  zope_traversing = pythonPackages.buildPythonPackage {
+    name = "zope.traversing-4.1.0";
+    src = pkgs.fetchurl {
+      url = "https://pypi.python.org/packages/5a/59/61da8ee69088c06fec5c2efc6163d56860856a7afb3c91903eb58aadc610/zope.traversing-4.1.0.tar.gz";
+      sha256 = "03sgmbyy3m0a4c2a5k5p6hwjp5h982hg9hl6dbvlgf3fgs18ishy";
+    };
+    propagatedBuildInputs = [
+      transaction
+      zope_interface
+      zope_publisher
+    ];
+    doCheck = false;
+  };
+
+  zope_browserresource = pythonPackages.buildPythonPackage {
+    name = "zope.browserresource-4.1.0";
+    src = pkgs.fetchurl {
+      url = "https://pypi.python.org/packages/3e/0e/ec62ea5add913309ef92091eb5b1522b643bd82f7db396f2f9c747782873/zope.browserresource-4.1.0.tar.gz";
+      sha256 = "1j5qlqnzjq7aww7jpl8r9p3r8yic12mwfsmgghwz13rf1zri2cvr";
+    };
+    propagatedBuildInputs = [
+      zope_interface
+      zope_location
+      zope_configuration
+      zope_traversing
+    ];
+    doCheck = false;
+  };
+
   zope_authentication = pythonPackages.buildPythonPackage {
     name = "zope.authentication-4.2.1";
     src = pkgs.fetchurl {
@@ -550,5 +611,6 @@ in pythonPackages.buildPythonPackage rec {
     zope_schema
     zope_security
     zope_securitypolicy
+    zope_browserresource
   ];
 }
