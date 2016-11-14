@@ -129,6 +129,7 @@ class ICors(Interface):
     enabled = schema.Bool(
         title=_('Enabled Cors'),
         description=_("""Enables cors on the site"""),
+        default=False
     )
 
     allow_origin = schema.FrozenSet(

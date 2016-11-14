@@ -91,7 +91,7 @@ class Write(TraversableService):
     def publishTraverse(self, traverse):
         if len(traverse) == 1 and traverse[0] in self.request.site_settings:
             # we want have the key of the registry
-            self.record = self.request.site_settings._data[traverse[0]]
+            self.record = self.request.site_settings[traverse[0]]
         else:
             self.record = None
         return self
