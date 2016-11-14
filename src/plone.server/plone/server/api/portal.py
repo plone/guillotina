@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from aiohttp.web_exceptions import HTTPConflict
-from aiohttp.web_exceptions import HTTPUnauthorized
 from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
@@ -23,26 +21,41 @@ class DefaultPOST(Service):
     async def __call__(self):
         data = await self.request.json()
         if '@type' not in data and data['@type'] != 'Site':
-            return HTTPUnauthorized('Not allowed type %s' % data['@type'])
+            return ErrorResponse(
+                'NotAllowed',
+                'can not create this type %s' % data['@type'],
+                status=401)
 
         if 'title' not in data and not data['title']:
-            return HTTPUnauthorized('Not allowed empty title')
+            return ErrorResponse(
+                'NotAllowed',
+                'We need a title',
+                status=401)
 
         if 'id' not in data:
-            data['id'] = 'ttt'
+            return ErrorResponse(
+                'NotAllowed',
+                'We need an id',
+                status=401)
 
         if 'description' not in data:
             data['description'] = ''
 
         if data['id'] in self.context:
             # Already exist
-            return HTTPConflict(reason="id already exist")
+            return ErrorResponse(
+                'NotAllowed',
+                'Duplicate id',
+                status=401)
 
         site = createContent(
             'Site',
             id=data['id'],
             title=data['title'],
             description=data['description'])
+
+        # Special case we don't want the parent pointer
+        site.__name__ = data['id']
 
         self.context[data['id']] = site
 

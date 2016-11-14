@@ -76,12 +76,16 @@ class PloneParticipation(object):
 
             # Plugin to extract the credentials to request._cache_credentials
             plugins = settings.get(ACTIVE_AUTH_EXTRACTION_KEY, [])
+            if plugins is None:
+                raise AttributeError('No Extraction Plugins')
             for plugin in plugins:
                 plugin_object = import_class(plugin)
                 await plugin_object(self.request).extract_user()
 
             # Plugin to set the user to request._cache_user
             plugins = settings.get(ACTIVE_AUTH_USER_KEY, [])
+            if plugins is None:
+                raise AttributeError('No Auth Plugins')
             for plugin in plugins:
                 plugin_object = import_class(plugin)
                 await plugin_object(self.request).create_user()
