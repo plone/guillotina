@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import uuid
+from datetime import datetime
+from dateutil.tz import tzlocal
 from BTrees.Length import Length
 from BTrees.OOBTree import OOBTree
 from persistent import Persistent
@@ -31,6 +34,8 @@ from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
+
+_zone = tzlocal()
 
 
 @implementer(IResourceFactory)
@@ -94,6 +99,10 @@ def iterSchemata(obj):
 def createContent(type_, **kw):
     factory = getUtility(IFactory, type_)
     obj = factory()
+    now = datetime.now(tz=_zone)
+    obj.creation_date = now
+    obj.modification_date = now
+    obj.uuid = uuid.uuid4().hex
     for key, value in kw.items():
         setattr(obj, key, value)
     return obj
@@ -117,6 +126,7 @@ class Item(Persistent):
     __parent__ = None
 
     portal_type = None
+    uuid = None
 
     def __init__(self, id_=None):
         if id_ is not None:

@@ -4,7 +4,6 @@ from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.content import iterSchemataForType
 from plone.server.directives import mergedTaggedValueDict
 from plone.server.interfaces import CATALOG_KEY
-from plone.server.interfaces import IUUID
 from plone.server.security import getPrincipalsWithAccessContent
 from plone.server.security import getRolesWithAccessContent
 from plone.server.utils import get_content_path
@@ -124,7 +123,7 @@ class DefaultCatalogDataAdapter(object):
         path = get_content_path(self.content)
 
         values.update({
-            'uuid': IUUID(self.content),
+            'uuid': self.content.uuid,
             'accessRoles': [x for x in roles if roles[x] == Allow],
             'accessUsers': [x for x in users if users[x] == Allow],
             'path': path,

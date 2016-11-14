@@ -31,14 +31,6 @@ class IFormFieldProvider(Interface):
     """
 
 
-class IUUID(Interface):
-    """Abstract representation of a UUID.
-
-    Adapt an object to this interface to obtain its UUID. Adaptation will
-    fail if the object does not have a UUID (yet).
-    """
-
-
 class IApplication(Interface):
     pass
 

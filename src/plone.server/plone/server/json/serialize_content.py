@@ -5,7 +5,6 @@ from plone.server.content import iterSchemata
 from plone.server.json.interfaces import IResourceFieldSerializer
 from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.json.interfaces import IResourceSerializeToJsonSummary
-from plone.server.interfaces import IUUID
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.json.serialize_value import json_compatible
 from plone.server.browser import get_physical_path
@@ -53,7 +52,7 @@ class SerializeToJson(object):
             'parent': parent_summary,
             'created': json_compatible(self.context.creation_date),
             'modified': json_compatible(self.context.modification_date),
-            'UID': IUUID(self.context),
+            'UID': self.context.uuid,
         }
 
         for schema in iterSchemata(self.context):
