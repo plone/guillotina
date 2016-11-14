@@ -50,13 +50,8 @@ class RecordsProxy(object):
             self.__dict__['records'][prefixed_name] = value
 
 
-@implementer(IRegistry, IResource)
+@implementer(IRegistry)
 class Registry(PersistentMapping):
-
-    __name__ = None
-    __parent__ = None
-
-    portal_type = None
 
     def __init__(self):
         self._data = OOBTree()

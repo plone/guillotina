@@ -6,10 +6,10 @@ from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
 from plone.server.interfaces import IRegistry
 from plone.server.json.exceptions import DeserializationError
-from plone.server.json.interfaces import IResourceFieldDeserializer
+from plone.server.json.interfaces import IJSONToValue
 from plone.server.json.interfaces import IValueToJson
 from plone.server.utils import import_class
-from zope.component import queryMultiAdapter
+from zope.component import getMultiAdapter
 from zope.dottedname.resolve import resolve
 from zope.interface.interfaces import ComponentLookupError
 from zope.schema import getFields
@@ -37,14 +37,12 @@ class Read(TraversableService):
             result = {}
             for x in self.value:
                 try:
-                    # TODO: Do field based serialization
                     value = IValueToJson(self.value[x])
                 except ComponentLookupError:
                     value = self.value[x]
                 result[x] = value
         else:
             try:
-                # TODO: Do field based serialization
                 result = IValueToJson(self.value)
             except ComponentLookupError:
                 result = self.value
@@ -112,18 +110,16 @@ class Write(TraversableService):
         iface = resolve(iface)
         field = iface[name]
 
-        deserializer = queryMultiAdapter(
-            (field, self.request.site_settings, self.request),
-            IResourceFieldDeserializer)
-
-        if deserializer is None:
+        try:
+            new_value = getMultiAdapter((value, field), IJSONToValue)
+        except ComponentLookupError:
             return ErrorResponse(
                 'DeserializationError',
                 'Cannot deserialize type {}'.format(str(self.field)),
                 status=501)
 
         try:
-            self.request.site_settings[self.key] = deserializer(value)
+            self.request.site_settings[self.key] = new_value
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',
