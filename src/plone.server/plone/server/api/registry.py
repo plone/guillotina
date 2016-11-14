@@ -9,7 +9,6 @@ from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceFieldDeserializer
 from plone.server.json.interfaces import IValueToJson
 from plone.server.utils import import_class
-from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from zope.dottedname.resolve import resolve
 from zope.interface.interfaces import ComponentLookupError
