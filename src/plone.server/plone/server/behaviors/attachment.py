@@ -19,11 +19,3 @@ class IAttachment(Interface):
 class IMarkerAttachment(Interface):
     """Marker interface for content with attachment."""
 
-
-@adapter(IResource)
-class Attachment(object):
-
-    file = AnnotationProperty(u'file', IAttachment['file'])
-
-    def __init__(self, context):
-        self.context = context

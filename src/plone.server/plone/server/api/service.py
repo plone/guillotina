@@ -34,19 +34,20 @@ class TraversableFieldService(View):
             fti = queryUtility(IFactory, name=self.context.portal_type)
             schema = fti.schema
             field = None
+            self.behavior = None
             if name in schema:
                 field = schema[name]
             else:
                 for behavior_schema in fti.behaviors or ():
                     if name in behavior_schema:
                         field = behavior_schema[name]
-                        self.context = behavior_schema(self.context)
+                        self.behavior = behavior_schema(self.context)
                         break
             # Check that its a File Field
             if field is None:
                 raise KeyError('No valid name')
 
-            self.field = field.bind(self.context)
+            self.field = field.bind(self.behavior)
         else:
             self.field = None
         return self

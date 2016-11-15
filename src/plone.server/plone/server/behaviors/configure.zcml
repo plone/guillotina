@@ -14,7 +14,7 @@
       title="Attachment"
       provides=".attachment.IAttachment"
       marker=".attachment.IMarkerAttachment"
-      factory=".attachment.Attachment"
+      factory="plone.behavior.AnnotationStorage"
       for="plone.server.interfaces.IResource"
       />
 

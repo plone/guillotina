@@ -147,7 +147,6 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             '/plone/plone/file1/@upload/file',
             data=data)
         behavior = IAttachment(site['file1'])
-        import pdb; pdb.set_trace()
         self.assertEqual(behavior.file.data, data)
 
     def test_file_download(self):
@@ -158,5 +157,4 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             '/plone/plone/file1/@download/file')
         site = self._get_site()
         behavior = IAttachment(site['file1'])
-        import pdb; pdb.set_trace()
         self.assertEqual(behavior.file.data, resp.content)

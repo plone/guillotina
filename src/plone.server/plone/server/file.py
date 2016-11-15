@@ -50,10 +50,10 @@ class BasicFileManager(object):
 
     async def upload(self):
         chunk_size = 8400
-        file = self.field.get(self.context)
+        file = self.field.get(self.field.context)
         if file is None:
             file = BasicFile()
-            self.field.set(self.context, file)
+            self.field.set(self.field.context, file)
         with file.open('w') as fd:
             while True:
                 chunk = await self.request.content.read(chunk_size)
@@ -62,7 +62,7 @@ class BasicFileManager(object):
                 fd.write(chunk)
 
     async def download(self):
-        file = self.field.get(self.context)
+        file = self.field.get(self.field.context)
         if file is None:
             raise AttributeError('No field value')
 
