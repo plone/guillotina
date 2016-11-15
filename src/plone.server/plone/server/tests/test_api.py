@@ -2,6 +2,7 @@
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.tests import TEST_RESOURCES_DIR
 
+from plone.server.behaviors.attachment import IAttachment
 import json
 import os
 
@@ -43,14 +44,14 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         response = json.loads(resp.text)
         self.assertTrue(len(response) > 1)
         self.assertTrue(any("Item" in s['title'] for s in response))
-        self.assertTrue(any("Plone Site" in s['title'] for s in response))
+        self.assertTrue(any("Site" in s['title'] for s in response))
 
     def test_get_contenttype(self):
         """Get a content type definition."""
         resp = self.layer.requester('GET', '/plone/plone/@types/Item')
         self.assertTrue(resp.status_code == 200)
         response = json.loads(resp.text)
-        self.assertTrue(len(response['schemas']), 2)
+        self.assertTrue(len(response['definitions']), 1)
         self.assertTrue(response['title'] == 'Item')
 
     def test_get_registries(self):
@@ -68,7 +69,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'GET',
             '/plone/plone/@registry/plone.server.registry.ICors.enabled')
         response = json.loads(resp.text)
-        self.assertTrue(response[0])
+        self.assertTrue(response)
 
     def test_create_contenttype(self):
         """Try to create a contenttype."""
@@ -145,7 +146,9 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'PATCH',
             '/plone/plone/file1/@upload/file',
             data=data)
-        self.assertEqual(site['file1'].file.data, data)
+        behavior = IAttachment(site['file1'])
+        import pdb; pdb.set_trace()
+        self.assertEqual(behavior.file.data, data)
 
     def test_file_download(self):
         # first, get a file on...
@@ -154,4 +157,6 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'GET',
             '/plone/plone/file1/@download/file')
         site = self._get_site()
-        self.assertEqual(site['file1'].file.data, resp.content)
+        behavior = IAttachment(site['file1'])
+        import pdb; pdb.set_trace()
+        self.assertEqual(behavior.file.data, resp.content)

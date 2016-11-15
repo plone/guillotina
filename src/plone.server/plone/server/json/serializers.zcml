@@ -32,6 +32,7 @@
     <adapter factory=".serialize_schema_field.DefaultDateSchemaFieldSerializer" />
     <adapter factory=".serialize_schema_field.DefaultTimeSchemaFieldSerializer" />
     <adapter factory=".serialize_schema_field.DefaultDictSchemaFieldSerializer" />
+    <adapter factory=".serialize_schema_field.DefaultDateTimeSchemaFieldSerializer" />
 
     <!-- Value -->
     <adapter factory=".serialize_value.date_converter" />

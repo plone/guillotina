@@ -11,7 +11,7 @@ from zope.interface import Interface
 from zope.schema.interfaces import IField
 
 
-@adapter(IField, IResource, Interface)
+@adapter(IField, Interface, Interface)
 @implementer(IResourceFieldSerializer)
 class DefaultFieldSerializer(object):
 
@@ -24,6 +24,6 @@ class DefaultFieldSerializer(object):
         return json_compatible(self.get_value())
 
     def get_value(self, default=None):
-        return getattr(self.field.interface(self.context),
+        return getattr(self.context,
                        self.field.__name__,
                        default)

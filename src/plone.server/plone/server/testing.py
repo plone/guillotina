@@ -111,7 +111,9 @@ class PloneServerBaseLayer(object):
         cls.aioapp = make_app(settings=TESTING_SETTINGS)
         # Plone App Object
         cls.app = getUtility(IApplication, name='root')
+        cls.db = cls.app['plone'].conn.root()
         include(cls.app.app.config, 'testing.zcml', sys.modules['plone.server'])
+        cls.app.app.config.execute_actions()
 
     @classmethod
     def tearDown(cls):

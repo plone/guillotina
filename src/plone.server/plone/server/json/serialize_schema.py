@@ -32,13 +32,13 @@ class SerializeFactoryToJson(object):
         }
 
         # Base object class serialized
-        for field in getFieldsInOrder(factory.schema):
+        for name, field in getFieldsInOrder(factory.schema):
             if field.required:
-                result['required'].append(field.name)
+                result['required'].append(name)
             serializer = getMultiAdapter(
                 (field, factory.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            result['properties'][field.name] = serializer()
+            result['properties'][name] = serializer()
 
             invariants = []
             for i in factory.schema.queryTaggedValue('invariants', []):
@@ -52,9 +52,8 @@ class SerializeFactoryToJson(object):
                 (schema, factory, self.request), ISchemaSerializeToJson)
 
             serialization = schema_serializer()
-            for key in serialization['properties'].keys():
-                result['properties'][schema_serializer.name + '-' + key] = \
-                    {'$ref': '#/definitions/' + schema_serializer.name},
+            result['properties'][schema_serializer.name] = \
+                {'$ref': '#/definitions/' + schema_serializer.name},
             result['definitions'][schema_serializer.name] = serialization
 
         return result
@@ -76,13 +75,13 @@ class DefaultSchemaSerializer(object):
         }
 
     def __call__(self):
-        for field in getFieldsInOrder(self.schema):
+        for name, field in getFieldsInOrder(self.schema):
             serializer = getMultiAdapter(
                 (field, self.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            self.schema_json['properties'][field.name] = serializer()
+            self.schema_json['properties'][name] = serializer()
             if field.required:
-                self.schema_json['required'].append(field.name)
+                self.schema_json['required'].append(name)
         self.schema_json['invariants'] = self.invariants
 
         return self.schema_json

@@ -4,9 +4,11 @@ from zope.interface import Interface
 from zope.component import adapter
 from zope.interface import implementer
 from plone.server.json.interfaces import ISchemaFieldSerializeToJson
+from zope.component import getMultiAdapter
 from zope.schema import getFields
 from zope.schema.interfaces import ICollection
 from zope.schema.interfaces import IDict
+from zope.schema.interfaces import IDatetime
 from zope.schema.interfaces import ITime
 from zope.schema.interfaces import ITextLine
 from zope.schema.interfaces import IObject
@@ -17,6 +19,7 @@ from zope.schema.interfaces import IFloat
 from zope.schema.interfaces import IDate
 from zope.schema.interfaces import IText
 from plone.server.interfaces import IRichText
+from plone.server.json.interfaces import IValueToJson
 from zope.interface import implementedBy
 
 
@@ -47,7 +50,7 @@ class DefaultSchemaFieldSerializer(object):
         self.field_attributes = {}
 
     def __call__(self):
-        schema = {'type': self.field_type}
+        result = {'type': self.field_type}
         for schema in implementedBy(self.field.__class__).flattened():
             self.field_attributes.update(getFields(schema))
 
@@ -72,8 +75,13 @@ class DefaultSchemaFieldSerializer(object):
                 text = value.decode('utf-8')
             elif isinstance(value, str):
                 text = value
+            elif IField.providedBy(value):
+                serializer = getMultiAdapter(
+                    (value, self.field, self.request),
+                    ISchemaFieldSerializeToJson)
+                text = serializer()
             elif value is not None and (force or value != self.field.missing_value):
-                text = str(value)
+                text = IValueToJson(value)
 
                 # handle i18n
                 # if isinstance(value, Message):
@@ -83,9 +91,9 @@ class DefaultSchemaFieldSerializer(object):
                 #     else:
                 #         child.set(ns('translate', I18N_NAMESPACE), child.text)
                 #         child.text = converter.toUnicode(value.default)
-                schema[attribute_name] = text
+                result[attribute_name] = text
 
-        return schema
+        return result
 
     @property
     def field_type(self):
@@ -172,6 +180,15 @@ class DefaultRichTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return 'string'
+
+
+@adapter(IDatetime, Interface, Interface)
+@implementer(ISchemaFieldSerializeToJson)
+class DefaultDateTimeSchemaFieldSerializer(DefaultSchemaFieldSerializer):
+
+    @property
+    def field_type(self):
+        return 'datetime'
 
 
 @adapter(IDate, Interface, Interface)

@@ -13,6 +13,7 @@
   <plone:behavior
       title="Attachment"
       provides=".attachment.IAttachment"
+      marker=".attachment.IMarkerAttachment"
       factory=".attachment.Attachment"
       for="plone.server.interfaces.IResource"
       />

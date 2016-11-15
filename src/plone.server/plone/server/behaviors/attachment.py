@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from plone.server.behaviors.properties import ContextProperty
+from plone.server.behaviors.properties import AnnotationProperty
 from plone.server.file import BasicFileField
 from plone.server.interfaces import IFormFieldProvider
 from plone.server.interfaces import IResource
 from zope.component import adapter
-from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
 from zope.interface import Interface
 from zope.interface import provider
 
@@ -17,11 +16,14 @@ class IAttachment(Interface):
     )
 
 
-@adapter(IResource)
-class Attachment(ZDCAnnotatableAdapter):
+class IMarkerAttachment(Interface):
+    """Marker interface for content with attachment."""
 
-    file = ContextProperty(u'file', None)
+
+@adapter(IResource)
+class Attachment(object):
+
+    file = AnnotationProperty(u'file', IAttachment['file'])
 
     def __init__(self, context):
         self.context = context
-        super(Attachment, self).__init__(context)

@@ -2,8 +2,9 @@
 	"databases": [
 		{
 		"zodb1": {
-			"storage": "ZODB",
-			"path": "data/Data.fs",
+			"storage": "ZEO",
+			"address": "127.0.0.1",
+                        "port": 8090,
 			"configuration": {
                 "pool_size": 100,
                 "cache_size": 100

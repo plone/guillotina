@@ -105,8 +105,17 @@ class ResourceFactory(Factory):
                                           self.portal_type)
 
 
+def getCachedFactory(portal_type):
+    if portal_type in FACTORY_CACHE:
+        factory = FACTORY_CACHE[portal_type]
+    else:
+        factory = getUtility(IResourceFactory, portal_type)
+        FACTORY_CACHE[portal_type] = factory
+    return factory
+
+
 def iterSchemataForType(portal_type):
-    factory = getUtility(IResourceFactory, portal_type)
+    factory = getCachedFactory(portal_type)
     if factory.schema is not None:
         yield factory.schema
     for schema in factory.behaviors or ():
@@ -148,11 +157,7 @@ def createContent(type_, **kw):
     
     This method should not be used to add content, just internally.
     """
-    if type_ in FACTORY_CACHE:
-        factory = FACTORY_CACHE[type_]
-    else:
-        factory = getUtility(IFactory, type_)
-        FACTORY_CACHE[type_] = factory
+    factory = getCachedFactory(type_)
     obj = factory()
     for key, value in kw.items():
         setattr(obj, key, value)
@@ -164,11 +169,8 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
 
     This method is the one to use to create content.
     """
-    if type_ in FACTORY_CACHE:
-        factory = FACTORY_CACHE[type_]
-    else:
-        factory = getUtility(IFactory, type_)
-        FACTORY_CACHE[type_] = factory
+    factory = getCachedFactory(type_)
+
     if factory.add_permission:
         if factory.add_permission in PERMISSIONS_CACHE:
             permission = PERMISSIONS_CACHE[factory.add_permission]
@@ -215,64 +217,8 @@ class BehaviorAssignable(object):
             yield behavior
 
 
-class FactoryAwareSpecification(ObjectSpecificationDescriptor):
-    """A __providedBy__ decorator that returns the interfaces provided by
-    the object, plus the schema interface set in the FTI.
-    """
-
-    def __get__(self, inst, cls=None):  # noqa
-        # We're looking at a class - fall back on default
-        if inst is None:
-            return getObjectSpecification(cls)
-
-        direct_spec = getattr(inst, '__provides__', None)
-
-        # avoid recursion - fall back on default
-        if getattr(self, '__recursion__', False):
-            return direct_spec
-
-        spec = direct_spec
-
-        # If the instance doesn't have a __provides__ attribute, get the
-        # interfaces implied by the class as a starting point.
-        if spec is None:
-            spec = implementedBy(cls)
-        # Find the data we need to know if our cache needs to be invalidated
-        portal_type = getattr(inst, 'portal_type', None)
-
-        # If the instance has no portal type, then we're done.
-        if portal_type is None:
-            return spec
-
-        # Find the cached value. This calculation is expensive and called
-        # hundreds of times during each request, so we require a fast cache
-        cache = getattr(inst, '_v__providedBy__', None)
-
-        # See if we have a current cache. Reasons to do this include:
-        #
-        #  - The FTI was modified.
-        #  - The instance was modified and persisted since the cache was built.
-        #  - The instance has a different direct specification.
-        if cache is not None:
-            return cache
-
-        main_schema = SCHEMA_CACHE.get(portal_type)
-
-        # if main_schema:
-        #     dynamically_provided = [main_schema['schema']]
-        # else:
-        #     dynamically_provided = []
-
-        # dynamically_provided.append(spec)
-        # all_spec = Implements(*dynamically_provided)
-        inst._v__providedBy__ = all_spec
-
-        return all_spec
-
-
 @implementer(IResource, IAttributeAnnotatable)
 class Resource(Persistent):
-    # __providedBy__ = FactoryAwareSpecification()
 
     __name__ = None
     __parent__ = None

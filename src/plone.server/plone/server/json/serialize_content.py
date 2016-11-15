@@ -6,6 +6,7 @@ from plone.server.json.interfaces import IResourceFieldSerializer
 from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.json.interfaces import IResourceSerializeToJsonSummary
 from plone.server.interfaces import IAbsoluteURL
+from plone.server.content import getCachedFactory
 from plone.server.json.serialize_value import json_compatible
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import READ_PERMISSIONS_KEY
@@ -55,21 +56,31 @@ class SerializeToJson(object):
             'UID': self.context.uuid,
         }
 
-        for schema in iterSchemata(self.context):
+        factory = getCachedFactory(self.context.portal_type)
 
-            read_permissions = mergedTaggedValueDict(schema, READ_PERMISSIONS_KEY)
+        main_schema = factory.schema
+        self.get_schema(main_schema, self.context, result)
 
-            for name, field in getFields(schema).items():
-
-                if not self.check_permission(read_permissions.get(name)):
-                    continue
-                serializer = queryMultiAdapter(
-                    (field, self.context, self.request),
-                    IResourceFieldSerializer)
-                value = serializer()
-                result[json_compatible(name)] = value
+        for behavior_schema in factory.behaviors or ():
+            behavior = behavior_schema(self.context)
+            self.get_schema(behavior_schema, behavior, result)
 
         return result
+
+    def get_schema(self, schema, context, result):
+        read_permissions = mergedTaggedValueDict(schema, READ_PERMISSIONS_KEY)
+        schema_serial = {}
+        for name, field in getFields(schema).items():
+
+            if not self.check_permission(read_permissions.get(name)):
+                continue
+            serializer = queryMultiAdapter(
+                (field, context, self.request),
+                IResourceFieldSerializer)
+            value = serializer()
+            schema_serial[name] = value
+
+        result[schema.__name__] = schema_serial
 
     def check_permission(self, permission_name):
         if permission_name is None:
