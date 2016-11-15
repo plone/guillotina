@@ -59,15 +59,15 @@ class SerializeToJson(object):
         factory = getCachedFactory(self.context.portal_type)
 
         main_schema = factory.schema
-        self.get_schema(main_schema, self.context, result)
+        self.get_schema(main_schema, self.context, result, False)
 
         for behavior_schema in factory.behaviors or ():
             behavior = behavior_schema(self.context)
-            self.get_schema(behavior_schema, behavior, result)
+            self.get_schema(behavior_schema, behavior, result, True)
 
         return result
 
-    def get_schema(self, schema, context, result):
+    def get_schema(self, schema, context, result, behavior):
         read_permissions = mergedTaggedValueDict(schema, READ_PERMISSIONS_KEY)
         schema_serial = {}
         for name, field in getFields(schema).items():
@@ -78,9 +78,13 @@ class SerializeToJson(object):
                 (field, context, self.request),
                 IResourceFieldSerializer)
             value = serializer()
-            schema_serial[name] = value
+            if not behavior:
+                result[name] = value
+            else:
+                schema_serial[name] = value
 
-        result[schema.__name__] = schema_serial
+        if behavior:
+            result[schema.__name__] = schema_serial
 
     def check_permission(self, permission_name):
         if permission_name is None:
