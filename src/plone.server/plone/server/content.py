@@ -9,6 +9,7 @@ from zope.interface.declarations import Implements
 from zope.interface.declarations import ObjectSpecificationDescriptor
 from zope.interface.declarations import getObjectSpecification
 from zope.interface.declarations import implementedBy
+from plone.behavior.markers import applyMarkers
 from plone.behavior.interfaces import IBehaviorAssignable
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
@@ -23,6 +24,7 @@ from plone.server.interfaces import IStaticFile
 from plone.server.interfaces import SCHEMA_CACHE
 from plone.server.interfaces import PERMISSIONS_CACHE
 from plone.server.interfaces import FACTORY_CACHE
+from plone.behavior.interfaces import IBehavior
 from plone.server.registry import IAddons
 from plone.server.registry import IAuthExtractionPlugins
 from plone.server.registry import IAuthPloneUserPlugins
@@ -71,12 +73,26 @@ class ResourceFactory(Factory):
         self.allowed_types = allowed_types
 
     def __call__(self, *args, **kw):
+        if self.portal_type not in SCHEMA_CACHE:
+            behaviors_registrations = []
+            for iface in self.behaviors or ():
+                if Interface.providedBy(iface):
+                    name = iface.__identifier__
+                else:
+                    name = iface
+                behaviors_registrations.append(getUtility(IBehavior, name=name))
+            SCHEMA_CACHE[self.portal_type] = {
+                'behaviors': behaviors_registrations,
+                'schema': self.schema
+            }
+
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.portal_type = self.portal_type
         now = datetime.now(tz=_zone)
         obj.creation_date = now
         obj.modification_date = now
         obj.uuid = uuid.uuid4().hex
+        applyMarkers(obj, None)
         return obj
 
     def getInterfaces(self):
@@ -129,7 +145,7 @@ class NoPermissionToAdd(Exception):
 
 def createContent(type_, **kw):
     """Utility to create a content.
-
+    
     This method should not be used to add content, just internally.
     """
     if type_ in FACTORY_CACHE:
@@ -190,7 +206,7 @@ class BehaviorAssignable(object):
 
     def supports(self, behavior_interface):
         for behavior in self.enumerateBehaviors():
-            if behavior_interface in behavior._implied:
+            if behavior_interface in behavior.interface._implied:
                 return True
         return False
 
@@ -199,75 +215,62 @@ class BehaviorAssignable(object):
             yield behavior
 
 
-# class FactoryAwareSpecification(ObjectSpecificationDescriptor):
-#     """A __providedBy__ decorator that returns the interfaces provided by
-#     the object, plus the schema interface set in the FTI.
-#     """
+class FactoryAwareSpecification(ObjectSpecificationDescriptor):
+    """A __providedBy__ decorator that returns the interfaces provided by
+    the object, plus the schema interface set in the FTI.
+    """
 
-#     def __get__(self, inst, cls=None):  # noqa
-#         # We're looking at a class - fall back on default
-#         if inst is None:
-#             return getObjectSpecification(cls)
+    def __get__(self, inst, cls=None):  # noqa
+        # We're looking at a class - fall back on default
+        if inst is None:
+            return getObjectSpecification(cls)
 
-#         direct_spec = getattr(inst, '__provides__', None)
+        direct_spec = getattr(inst, '__provides__', None)
 
-#         # avoid recursion - fall back on default
-#         if getattr(self, '__recursion__', False):
-#             return direct_spec
+        # avoid recursion - fall back on default
+        if getattr(self, '__recursion__', False):
+            return direct_spec
 
-#         spec = direct_spec
+        spec = direct_spec
 
-#         # If the instance doesn't have a __provides__ attribute, get the
-#         # interfaces implied by the class as a starting point.
-#         if spec is None:
-#             spec = implementedBy(cls)
+        # If the instance doesn't have a __provides__ attribute, get the
+        # interfaces implied by the class as a starting point.
+        if spec is None:
+            spec = implementedBy(cls)
+        # Find the data we need to know if our cache needs to be invalidated
+        portal_type = getattr(inst, 'portal_type', None)
 
-#         # Find the data we need to know if our cache needs to be invalidated
-#         portal_type = getattr(inst, 'portal_type', None)
+        # If the instance has no portal type, then we're done.
+        if portal_type is None:
+            return spec
 
-#         # If the instance has no portal type, then we're done.
-#         if portal_type is None:
-#             return spec
+        # Find the cached value. This calculation is expensive and called
+        # hundreds of times during each request, so we require a fast cache
+        cache = getattr(inst, '_v__providedBy__', None)
 
-#         # Find the cached value. This calculation is expensive and called
-#         # hundreds of times during each request, so we require a fast cache
-#         cache = getattr(inst, '_v__providedBy__', None)
+        # See if we have a current cache. Reasons to do this include:
+        #
+        #  - The FTI was modified.
+        #  - The instance was modified and persisted since the cache was built.
+        #  - The instance has a different direct specification.
+        if cache is not None:
+            return cache
 
-#         # See if we have a current cache. Reasons to do this include:
-#         #
-#         #  - The FTI was modified.
-#         #  - The instance was modified and persisted since the cache was built.
-#         #  - The instance has a different direct specification.
-#         if cache is not None:
-#             return cache
+        main_schema = SCHEMA_CACHE.get(portal_type)
 
-#         main_schema = SCHEMA_CACHE.get(portal_type)
-#         if main_schema:
-#             dynamically_provided = [main_schema['schema']]
-#         else:
-#             dynamically_provided = []
+        # if main_schema:
+        #     dynamically_provided = [main_schema['schema']]
+        # else:
+        #     dynamically_provided = []
 
-#         # block recursion
-#         self.__recursion__ = True
-#         try:
-#             assignable = IBehaviorAssignable(inst, None)
-#             if assignable is not None:
-#                 for behavior_registration in assignable.enumerateBehaviors():
-#                     if behavior_registration.marker:
-#                         dynamically_provided.append(
-#                             behavior_registration.marker
-#                         )
-#         finally:
-#             del self.__recursion__
+        # dynamically_provided.append(spec)
+        # all_spec = Implements(*dynamically_provided)
+        inst._v__providedBy__ = all_spec
 
-#         dynamically_provided.append(spec)
-#         all_spec = Implements(*dynamically_provided)
-#         inst._v__providedBy__ = all_spec
-
-#         return all_spec
+        return all_spec
 
 
-@implementer(IResource)
+@implementer(IResource, IAttributeAnnotatable)
 class Resource(Persistent):
     # __providedBy__ = FactoryAwareSpecification()
 
@@ -292,7 +295,7 @@ class Resource(Persistent):
             mem=id(self))
 
 
-@implementer(IItem, IAttributeAnnotatable)
+@implementer(IItem)
 class Item(Resource):
     pass
 
@@ -316,7 +319,7 @@ class Lazy(object):
         return value
 
 
-@implementer(IContainer, IAttributeAnnotatable)
+@implementer(IContainer)
 class Folder(Resource):
 
     def __init__(self, id_=None):
@@ -384,7 +387,7 @@ class Folder(Resource):
             mem=id(self))
 
 
-@implementer(ISite, IAttributeAnnotatable)
+@implementer(ISite)
 class Site(Folder):
 
     def install(self):

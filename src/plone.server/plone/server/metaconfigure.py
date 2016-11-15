@@ -13,12 +13,10 @@ from plone.server import DICT_RENDERS
 from plone.server.content import ResourceFactory
 from plone.server.content import StaticDirectory
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
-from plone.server.interfaces import SCHEMA_CACHE
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IResourceFactory
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
-from plone.behavior.interfaces import IBehavior
 from zope.component import getUtility
 from zope.component.zcml import adapter
 from zope.component.zcml import utility
@@ -118,17 +116,6 @@ def contenttypeDirective(_context,
         component=factory,
         name=portal_type,
     )
-    behaviors_registrations = []
-    for iface in behaviors or ():
-        if Interface.providedBy(iface):
-            name = iface.__identifier__
-        else:
-            name = iface
-        behaviors_registrations.append(getUtility(IBehavior, name=name))
-    SCHEMA_CACHE[portal_type] = {
-        'behaviors': behaviors_registrations,
-        'schema': schema
-    }
 
 
 class IApi(Interface):

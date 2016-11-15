@@ -27,8 +27,6 @@
   <adapter factory=".browser.Absolute_URL" />
   <adapter factory=".browser.Absolute_URL_ObtainRequest" />
 
-  <include package=".behaviors" />
-
   <include file="meta.zcml" />
   <include file="permissions.zcml" />
   <include file="security.zcml" />
@@ -40,6 +38,7 @@
   <include package=".auth" />
   <include package=".catalog" />
   <include package=".framing" />
+  <include package=".behaviors" />
 
   <subscriber
     for="plone.server.interfaces.IResource
