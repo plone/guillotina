@@ -82,13 +82,21 @@ class IContentTypeDirective(Interface):
         required=False
     )
 
+    allowed_types = configuration_fields.Tokens(
+        title='',
+        description='',
+        value_type=configuration_fields.MessageID(),
+        required=False
+    )
+
 
 def contenttypeDirective(_context,
                          portal_type,
                          class_,
                          schema,
                          behaviors=None,
-                         add_permission=None):
+                         add_permission=None,
+                         allowed_types=None):
     """
     Generate factory for the passed schema
     """
@@ -100,6 +108,7 @@ def contenttypeDirective(_context,
         schema=schema,
         behaviors=behaviors or (),
         add_permission=add_permission or DEFAULT_ADD_PERMISSION,
+        allowed_types=allowed_types
     )
     utility(
         _context,

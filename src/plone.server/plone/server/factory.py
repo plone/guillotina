@@ -288,6 +288,7 @@ class DataBase(object):
 
 
 def make_app(config_file=None, settings=None):
+
     # Initialize aiohttp app
     app = web.Application(router=TraversalRouter())
 

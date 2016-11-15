@@ -39,6 +39,7 @@ class DeserializeFromJson(object):
             write_permissions = mergedTaggedValueDict(
                 schema, WRITE_PERMISSIONS_KEY)
 
+            behavior = schema(self.context)
             for name, field in getFields(schema).items():
 
                 if field.readonly:
@@ -72,7 +73,7 @@ class DeserializeFromJson(object):
                             errors.append({
                                 'message': e.doc(), 'field': name, 'error': e})
                         else:
-                            setattr(schema(self.context), name, value)
+                            setattr(behavior, name, value)
 
             if validate_all:
                 validation = getValidationErrors(schema, schema(self.context))

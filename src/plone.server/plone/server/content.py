@@ -22,10 +22,13 @@ from plone.server.registry import IAuthPloneUserPlugins
 from plone.server.registry import ICors
 from plone.server.registry import ILayers
 from plone.server.registry import Registry
+from plone.server.transactions import get_current_request
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtility
 from zope.component.factory import Factory
 from zope.component.interfaces import IFactory
+from zope.security.interfaces import IPermission
+from zope.component import queryUtility
 from zope.component.persistentregistry import PersistentComponents
 from zope.event import notify
 from zope.interface import implementer
@@ -39,7 +42,7 @@ _zone = tzlocal()
 
 
 @implementer(IResourceFactory)
-class ResourceFactory(Persistent, Factory):
+class ResourceFactory(Factory):
     portal_type = None
     schema = None
     behaviors = None
@@ -47,7 +50,8 @@ class ResourceFactory(Persistent, Factory):
 
     def __init__(self, klass, title='', description='',
                  portal_type='', schema=None, behaviors=None,
-                 add_permission=DEFAULT_ADD_PERMISSION):
+                 add_permission=DEFAULT_ADD_PERMISSION,
+                 allowed_types=None):
         super(ResourceFactory, self).__init__(
             klass, title, description,
             tuple(filter(bool, [schema] + list(behaviors) or list())))
@@ -55,10 +59,15 @@ class ResourceFactory(Persistent, Factory):
         self.schema = schema or Interface
         self.behaviors = behaviors or ()
         self.add_permission = add_permission
+        self.allowed_types = allowed_types
 
     def __call__(self, *args, **kw):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.portal_type = self.portal_type
+        now = datetime.now(tz=_zone)
+        obj.creation_date = now
+        obj.modification_date = now
+        obj.uuid = uuid.uuid4().hex
         return obj
 
     def getInterfaces(self):
@@ -85,31 +94,61 @@ def iterSchemata(obj):
         yield schema
 
 
-# def isConstructionAllowed(factory, container, request=None):
-#     if not factory.add_permission:
-#        return False
+class NotAllowedContentType(Exception):
 
-#   permission = queryUtility(IPermission, name=factory.add_permission)
-#   if permission is None:
-#       return False
+    def __init__(self, container, content_type):
+        self.container = container
+        self.content_type = content_type
 
-#   return request.security.checkPermission(permission.id, container)
+    def __repr__(self):
+        return "Not allowed {content_type} on {path}".format(
+            content_type=self.content_type,
+            path=self.path)
+
+
+class NoPermissionToAdd(Exception):
+
+    def __init__(self, container, content_type):
+        self.container = container
+        self.content_type = content_type
+
+    def __repr__(self):
+        return "Not permission to add {content_type} on {path}".format(
+            content_type=self.content_type,
+            path=self.path)
 
 
 def createContent(type_, **kw):
+    """Utility to create a content.
+
+    This method should not be used to add content, just internally.
+    """
     factory = getUtility(IFactory, type_)
     obj = factory()
-    now = datetime.now(tz=_zone)
-    obj.creation_date = now
-    obj.modification_date = now
-    obj.uuid = uuid.uuid4().hex
     for key, value in kw.items():
         setattr(obj, key, value)
     return obj
 
 
-def createContentInContainer(container, type_, id_, **kw):
+def createContentInContainer(container, type_, id_, request=None, **kw):
+    """Utility to create a content.
+
+    This method is the one to use to create content.
+    """
     factory = getUtility(IFactory, type_)
+    if factory.add_permission:
+        permission = queryUtility(IPermission, name=factory.add_permission)
+
+        if request is None:
+            request = get_current_request()
+
+        if permission is not None and \
+                not request.security.checkPermission(permission.id, container):
+            raise NoPermissionToAdd(str(container), type_)
+
+    if factory.allowed_types is not None and \
+            type_ not in factory.allowed_types:
+        raise NotAllowedContentType(str(container), type_)
     obj = factory()
     obj.__name__ = id_
     obj.__parent__ = container
@@ -127,6 +166,8 @@ class Item(Persistent):
 
     portal_type = None
     uuid = None
+    creation_date = None
+    modification_date = None
 
     def __init__(self, id_=None):
         if id_ is not None:
@@ -148,6 +189,9 @@ class Folder(PersistentMapping):
     __parent__ = None
 
     portal_type = None
+    uuid = None
+    creation_date = None
+    modification_date = None
 
     def __init__(self, id_=None):
         if id_ is not None:
@@ -181,7 +225,7 @@ class Folder(PersistentMapping):
             mem=id(self))
 
 
-@implementer(ISite)
+@implementer(ISite, IAttributeAnnotatable)
 class Site(Folder):
 
     def install(self):

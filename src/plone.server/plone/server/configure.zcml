@@ -40,6 +40,11 @@
   <include package=".framing" />
   <include package=".behaviors" />
 
+  <subscriber
+    for="plone.server.interfaces.IResource
+         zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+    handler=".events.modified_object" />
+
   <plone:api file="api/api.json" />
 
 </configure>
