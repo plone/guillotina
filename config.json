@@ -5,17 +5,9 @@
 			"storage": "ZODB",
 			"path": "data/Data.fs",
 			"configuration": {
-		        	"blob_dir": "data/blobstorage"
-			}
-		},
-		"zeo1": {
-			"storage": "ZEO",
-			"address": "127.0.0.1",
-			"port": 8090,
-			"configuration": {
-                		"pool_size": 100,
-                		"cache_size": 100
-                	}
+                "pool_size": 100,
+                "cache_size": 100
+           	}
 		}
 	}],
 	"address": 8080,

@@ -25,6 +25,10 @@ INDEX_KEY = 'plone.server.directives.index'
 READ_PERMISSIONS_KEY = 'plone.server.directives.read-permissions'
 WRITE_PERMISSIONS_KEY = 'plone.server.directives.write-permissions'
 
+SCHEMA_CACHE = {}
+PERMISSIONS_CACHE = {}
+FACTORY_CACHE = {}
+
 
 class IFormFieldProvider(Interface):
     """Marker interface for schemata that provide form fields.
@@ -95,7 +99,6 @@ class IResourceFactory(IFactory):
         description='A oermission name for the permission required to '
                     'construct this content',
     )
-
 
 
 class ISite(IResource, IZopeSite):

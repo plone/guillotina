@@ -362,3 +362,24 @@ def get_current_request():
         #     return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
+
+
+def synccontext(context):
+    """Return connections asyncio executor instance (from context) to be used
+    together with "await" syntax to queue or commit to be executed in
+    series in a dedicated thread.
+
+    :param request: current request
+
+    Example::
+
+        await synccontext(request)(txn.commit)
+
+    """
+    loop = asyncio.get_event_loop()
+    assert getattr(context, '_p_jar', None) is not None, \
+        'Request has no conn'
+    assert getattr(context._p_jar, 'executor', None) is not None, \
+        'Connection has no executor'
+    return lambda *args, **kwargs: loop.run_in_executor(
+        context._p_jar.executor, *args, **kwargs)

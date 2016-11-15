@@ -5,6 +5,7 @@
   <plone:behavior
       title="Dublin Core fields"
       provides=".dublincore.IDublinCore"
+      marker=".dublincore.IMarkerDublinCore"
       factory=".dublincore.DublinCore"
       for="plone.server.interfaces.IResource"
       />

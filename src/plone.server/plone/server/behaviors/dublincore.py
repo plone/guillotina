@@ -34,6 +34,10 @@ CEILING_DATE = datetime(*datetime.max.timetuple()[:-2], tzutc())
 FLOOR_DATE = datetime(*datetime.min.timetuple()[:-2], tzutc())
 
 
+class IMarkerDublinCore(Interface):
+    """Marker interface for content with dublin core."""
+
+
 @provider(IFormFieldProvider)
 class IDublinCore(Interface, IWriteZopeDublinCore):
     catalog(creators='text')
