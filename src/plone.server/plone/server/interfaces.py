@@ -25,9 +25,9 @@ INDEX_KEY = 'plone.server.directives.index'
 READ_PERMISSIONS_KEY = 'plone.server.directives.read-permissions'
 WRITE_PERMISSIONS_KEY = 'plone.server.directives.write-permissions'
 
-SCHEMA_CACHE = {}
-PERMISSIONS_CACHE = {}
-FACTORY_CACHE = {}
+SHARED_CONNECTION = False
+WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
+SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 
 
 class IFormFieldProvider(Interface):

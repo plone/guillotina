@@ -133,29 +133,29 @@
         },
         "plone.server.interfaces.IResource": {
             "GET": {
-                "factory": "plone.server.api.dexterity.DefaultGET",
+                "factory": "plone.server.api.content.DefaultGET",
                 "permission": "plone.ViewContent"
             },
             "PATCH": {
-                "factory": "plone.server.api.dexterity.DefaultPATCH",
+                "factory": "plone.server.api.content.DefaultPATCH",
                 "permission": "plone.ModifyContent"
             },
             "PUT": {
-                "factory": "plone.server.api.dexterity.DefaultPUT",
+                "factory": "plone.server.api.content.DefaultPUT",
                 "permission": "plone.ModifyContent"
             },
             "POST": {
-                "factory": "plone.server.api.dexterity.DefaultPOST",
+                "factory": "plone.server.api.content.DefaultPOST",
                 "permission": "plone.AddContent"
             },
             "endpoints": {
                 "@sharing": {
                     "GET": {
-                        "factory": "plone.server.api.dexterity.SharingGET",
+                        "factory": "plone.server.api.content.SharingGET",
                         "permission": "plone.SeePermissions"
                     },
                     "POST": {
-                        "factory": "plone.server.api.dexterity.SharingPOST",
+                        "factory": "plone.server.api.content.SharingPOST",
                         "permission": "plone.ChangePermissions"
                     }
                 },
@@ -207,11 +207,11 @@
                 }
             },
             "DELETE": {
-                "factory": "plone.server.api.dexterity.DefaultDELETE",
+                "factory": "plone.server.api.content.DefaultDELETE",
                 "permission": "plone.DeleteContent"
             },
             "OPTIONS": {
-                "factory": "plone.server.api.dexterity.DefaultOPTIONS",
+                "factory": "plone.server.api.content.DefaultOPTIONS",
                 "permission": "plone.AccessPreflight"
             }
         }

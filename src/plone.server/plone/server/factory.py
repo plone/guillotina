@@ -5,6 +5,7 @@ from datetime import timedelta
 from pkg_resources import iter_entry_points
 from plone.server import DICT_LANGUAGES
 from plone.server import DICT_RENDERS
+from plone.server import CORS
 from plone.server import jose
 from plone.server.async import IAsyncUtility
 from plone.server.auth.participation import RootParticipation
@@ -380,5 +381,8 @@ def make_app(config_file=None, settings=None):
 
     for util in settings['utilities']:
         root.add_async_utility(util)
+
+    if 'cors' in settings:
+        CORS.update(settings['cors'])
 
     return app

@@ -58,7 +58,6 @@ class Register(Service):
             return ErrorResponse(
                 'BadRequest',
                 _("Not in a site request"))
-
         data = await self.request.json()
         interface = data.get('interface', None)
         initial_values = data.get('initial_values', {})

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IRequest
-from plone.server.registry import ACTIVE_AUTH_EXTRACTION_KEY
-from plone.server.registry import ACTIVE_AUTH_USER_KEY
+from plone.server import ACTIVE_AUTH_EXTRACTION_KEY
+from plone.server import ACTIVE_AUTH_USER_KEY
 from plone.server.transactions import get_current_request
 from plone.server.utils import import_class
 from zope.component import adapter
@@ -71,24 +71,12 @@ class PloneParticipation(object):
     async def __call__(self):
         # Cached user
         if not hasattr(self.request, '_cache_user'):
-            # Get settings or
-            settings = self.request.site_components.queryUtility(IRegistry) or {}
 
-            # Plugin to extract the credentials to request._cache_credentials
-            plugins = settings.get(ACTIVE_AUTH_EXTRACTION_KEY, [])
-            if plugins is None:
-                raise AttributeError('No Extraction Plugins')
-            for plugin in plugins:
-                plugin_object = import_class(plugin)
-                await plugin_object(self.request).extract_user()
+            for plugin in ACTIVE_AUTH_EXTRACTION_KEY:
+                await plugin(self.request).extract_user()
 
-            # Plugin to set the user to request._cache_user
-            plugins = settings.get(ACTIVE_AUTH_USER_KEY, [])
-            if plugins is None:
-                raise AttributeError('No Auth Plugins')
-            for plugin in plugins:
-                plugin_object = import_class(plugin)
-                await plugin_object(self.request).create_user()
+            for plugin in ACTIVE_AUTH_USER_KEY:
+                await plugin(self.request).create_user()
 
         self.principal = getattr(self.request, '_cache_user', None)
         self.interaction = None

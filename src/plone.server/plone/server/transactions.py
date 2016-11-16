@@ -11,6 +11,8 @@ from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
 from zope.proxy import ProxyBase
+from plone.server.interfaces import WRITING_VERBS
+from zope.security.interfaces import Unauthorized
 
 import asyncio
 import inspect
@@ -18,6 +20,9 @@ import threading
 import time
 import transaction
 import ZODB.Connection
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 class RequestAwareTransactionManager(transaction.TransactionManager):
@@ -205,6 +210,8 @@ class RequestAwareConnection(ZODB.Connection.Connection):
 
     def _register(self, obj=None):
         request = get_current_request()
+        if hasattr(request, '_db_write_enabled') and not request._db_write_enabled:
+            raise Unauthorized('Adding content not permited')
 
         try:
             assert request._txn_dm is not None

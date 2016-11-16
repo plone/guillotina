@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.tests import TEST_RESOURCES_DIR
-
+from zope.interface import Interface
+from zope import schema
 from plone.server.behaviors.attachment import IAttachment
 import json
 import os
+
+
+class ITestingRegistry(Interface):
+    enabled = schema.Bool(
+        title="Example attribute")
 
 
 class FunctionalTestServer(PloneFunctionalTestCase):
@@ -59,7 +65,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         resp = self.layer.requester('GET', '/plone/plone/@registry')
         self.assertTrue(resp.status_code == 200)
         response = json.loads(resp.text)
-        self.assertTrue(len(response) >= 10)
+        self.assertTrue(len(response) == 2)
         self.assertTrue(
             'plone.server.registry.ILayers.active_layers' in response)
 
@@ -67,7 +73,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         """Check a value from registry."""
         resp = self.layer.requester(
             'GET',
-            '/plone/plone/@registry/plone.server.registry.ICors.enabled')
+            '/plone/plone/@registry/plone.server.registry.ILayers.active_layers')
         response = json.loads(resp.text)
         self.assertTrue(response)
 
@@ -105,16 +111,17 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'POST',
             '/plone/plone/@registry',
             data=json.dumps({
-                "interface": "plone.server.registry.ICors"
+                "interface": "plone.server.tests.test_api.ITestingRegistry",
+                "initial_values": {
+                    "enabled": True
+                }
             })
         )
         self.assertTrue(resp.status_code == 201)
 
-    def test_update_registry(self):
-        """Try to create a contenttype."""
         resp = self.layer.requester(
             'PATCH',
-            '/plone/plone/@registry/plone.server.registry.ICors.enabled',
+            '/plone/plone/@registry/plone.server.tests.test_api.ITestingRegistry.enabled',
             data=json.dumps({
                 "value": False
             })
@@ -122,7 +129,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         self.assertTrue(resp.status_code == 204)
         resp = self.layer.requester(
             'GET',
-            '/plone/plone/@registry/plone.server.registry.ICors.enabled')
+            '/plone/plone/@registry/plone.server.tests.test_api.ITestingRegistry.enabled')
         response = json.loads(resp.text)
         self.assertFalse(response)
 

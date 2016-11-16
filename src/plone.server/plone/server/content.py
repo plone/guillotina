@@ -5,10 +5,6 @@ from dateutil.tz import tzlocal
 from BTrees.Length import Length
 from BTrees.OOBTree import OOBTree
 from persistent import Persistent
-from zope.interface.declarations import Implements
-from zope.interface.declarations import ObjectSpecificationDescriptor
-from zope.interface.declarations import getObjectSpecification
-from zope.interface.declarations import implementedBy
 from plone.behavior.markers import applyMarkers
 from plone.behavior.interfaces import IBehaviorAssignable
 from plone.server.browser import get_physical_path
@@ -21,22 +17,19 @@ from plone.server.interfaces import IResourceFactory
 from plone.server.interfaces import ISite
 from plone.server.interfaces import IStaticDirectory
 from plone.server.interfaces import IStaticFile
-from plone.server.interfaces import SCHEMA_CACHE
-from plone.server.interfaces import PERMISSIONS_CACHE
-from plone.server.interfaces import FACTORY_CACHE
+from plone.server import SCHEMA_CACHE
+from plone.server import PERMISSIONS_CACHE
+from plone.server import FACTORY_CACHE
 from plone.behavior.interfaces import IBehavior
 from plone.server.registry import IAddons
-from plone.server.registry import IAuthExtractionPlugins
-from plone.server.registry import IAuthPloneUserPlugins
-from plone.server.registry import ICors
 from plone.server.registry import ILayers
 from plone.server.registry import Registry
+from plone.server.utils import Lazy
 from plone.server.transactions import synccontext
 from plone.server.transactions import get_current_request
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtility
 from zope.component.factory import Factory
-from zope.component.interfaces import IFactory
 from zope.security.interfaces import IPermission
 from zope.component import queryUtility
 from zope.component import adapter
@@ -246,25 +239,6 @@ class Item(Resource):
     pass
 
 
-class Lazy(object):
-    """Lazy Attributes."""
-
-    def __init__(self, func, name=None):
-        if name is None:
-            name = func.__name__
-        self.data = (func, name)
-
-    def __get__(self, inst, class_):
-        if inst is None:
-            return self
-
-        func, name = self.data
-        value = func(inst)
-        inst.__dict__[name] = value
-
-        return value
-
-
 @implementer(IContainer)
 class Folder(Resource):
 
@@ -346,22 +320,9 @@ class Site(Folder):
 
         # Set default plugins
         registry.registerInterface(ILayers)
-        registry.registerInterface(IAuthPloneUserPlugins)
-        registry.registerInterface(IAuthExtractionPlugins)
-        registry.registerInterface(ICors)
         registry.registerInterface(IAddons)
         registry.forInterface(ILayers).active_layers =\
             frozenset({'plone.server.api.layer.IDefaultLayer'})
-
-        registry.forInterface(ICors).enabled = True
-        registry.forInterface(ICors).allow_origin = frozenset({'*'})
-        registry.forInterface(ICors).allow_methods = frozenset({
-            'GET', 'POST', 'DELETE',
-            'HEAD', 'PATCH'})
-        registry.forInterface(ICors).allow_headers = frozenset({'*'})
-        registry.forInterface(ICors).expose_headers = frozenset({'*'})
-        registry.forInterface(ICors).allow_credentials = True
-        registry.forInterface(ICors).max_age = '3660'
 
         roles = IPrincipalRoleManager(self)
         roles.assignRoleToPrincipal(

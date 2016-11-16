@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.server.registry import ICors
+from plone.server import CORS
 
 import fnmatch
 import importlib
@@ -39,41 +39,28 @@ def get_authenticated_user_id(request):
         return None
 
 
-class DefaultRootCors(object):
-    enabled = True
-    allow_origin = ['*']
-    allow_methods = ['GET', 'POST', 'OPTIONS']
-    allow_headers = ['*']
-    expose_headers = []
-    allow_credentials = True
-    max_age = 3660
-
 async def apply_cors(request):
     """Second part of the cors function to validate."""
     headers = {}
-    if not hasattr(request, 'site_settings'):
-        settings = DefaultRootCors()
-    else:
-        settings = request.site_settings.forInterface(ICors)
     origin = request.headers.get('Origin', None)
     if origin:
         if not any([fnmatch.fnmatchcase(origin, o)
-           for o in settings.allow_origin]):
+           for o in CORS['allow_origin']]):
             raise HTTPUnauthorized('Origin %s not allowed' % origin)
         elif request.headers.get('Access-Control-Allow-Credentials', False):
             headers['Access-Control-Allow-Origin', origin]
         else:
-            if any([o == "*" for o in settings.allow_origin]):
+            if any([o == "*" for o in CORS['allow_origin']]):
                 headers['Access-Control-Allow-Origin'] = '*'
             else:
                 headers['Access-Control-Allow-Origin'] = origin
     if request.headers.get(
             'Access-Control-Request-Method', None) != 'OPTIONS':
-        if settings.allow_credentials:
+        if CORS['allow_credentials']:
             headers['Access-Control-Allow-Credentials'] = 'True'
-        if len(settings.allow_headers):
+        if len(CORS['allow_headers']):
             headers['Access-Control-Expose-Headers'] = \
-                ', '.join(settings.allow_headers)
+                ', '.join(CORS['allow_headers'])
     return headers
 
 
@@ -96,3 +83,22 @@ def strings_differ(string1, string2):
         invalid_bits += a != b
 
     return invalid_bits != 0
+
+
+class Lazy(object):
+    """Lazy Attributes."""
+
+    def __init__(self, func, name=None):
+        if name is None:
+            name = func.__name__
+        self.data = (func, name)
+
+    def __get__(self, inst, class_):
+        if inst is None:
+            return self
+
+        func, name = self.data
+        value = func(inst)
+        inst.__dict__[name] = value
+
+        return value

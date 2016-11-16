@@ -13,8 +13,7 @@ from plone.server.interfaces import IAbsoluteURL
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceDeserializeFromJson
 from plone.server.json.interfaces import IResourceSerializeToJson
-from plone.server.registry import ICors
-from plone.server.utils import DefaultRootCors
+from plone.server import CORS
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
 from random import randint
@@ -202,7 +201,7 @@ class DefaultOPTIONS(Service):
         """We need to check if there is cors enabled and is valid."""
         headers = {}
 
-        if self.settings.enabled is False:
+        if not CORS:
             return {}
 
         origin = self.request.headers.get('Origin', None)
@@ -221,13 +220,13 @@ class DefaultOPTIONS(Service):
             requested_headers = map(str.strip, requested_headers.split(', '))
 
         requested_method = requested_method.upper()
-        allowed_methods = self.settings.allow_methods
+        allowed_methods = CORS['allow_methods']
         if requested_method not in allowed_methods:
             raise HTTPMethodNotAllowed(
                 requested_method, allowed_methods,
                 text='Access-Control-Request-Method Method not allowed')
 
-        supported_headers = self.settings.allow_headers
+        supported_headers = CORS['allow_headers']
         if '*' not in supported_headers and requested_headers:
             supported_headers = [s.lower() for s in supported_headers]
             for h in requested_headers:
@@ -243,8 +242,8 @@ class DefaultOPTIONS(Service):
         headers['Access-Control-Allow-Headers'] = ','.join(
             supported_headers)
         headers['Access-Control-Allow-Methods'] = ','.join(
-            self.settings.allow_methods)
-        headers['Access-Control-Max-Age'] = str(self.settings.max_age)
+            CORS['allow_methods'])
+        headers['Access-Control-Max-Age'] = str(CORS['max_age'])
         return headers
 
     async def render(self):
@@ -253,12 +252,6 @@ class DefaultOPTIONS(Service):
 
     async def __call__(self):
         """Apply CORS on the OPTIONS view."""
-        if hasattr(self.request, 'site_settings'):
-            self.settings = self.request.site_settings.forInterface(ICors)
-        else:
-            # CORS method for non plone endpoints
-            self.settings = DefaultRootCors()
-
         headers = await self.preflight()
         resp = await self.render()
         return Response(response=resp, headers=headers, status=200)

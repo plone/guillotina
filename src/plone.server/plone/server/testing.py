@@ -33,6 +33,14 @@ TESTING_SETTINGS = {
         "admin": "admin",
         "password": "YWRtaW4="
     },
+    "cors": {
+        "allow_origin": ["*"],
+        "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+        "allow_headers": ["*"],
+        "expose_headers": ["*"],
+        "allow_credentials": True,
+        "max_age": 3660
+    },
     "utilities": []
 }
 
@@ -53,6 +61,7 @@ class MockView(View):
         self.context = context
         self.request = make_mocked_request('POST', '/')
         self.request.conn = conn
+        self.request._db_write_enabled = True
         self.func = func
 
     def __call__(self, *args, **kw):
@@ -65,6 +74,7 @@ class AsyncMockView(View):
         self.context = context
         self.request = make_mocked_request('POST', '/')
         self.request.conn = conn
+        self.request._db_write_enabled = True
         self.func = func
 
     async def __call__(self, *args, **kw):
