@@ -65,7 +65,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'server = plone.server.server:main',
+            'pserver = plone.server.server:main',
         ]
     }
 )

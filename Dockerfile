@@ -28,4 +28,4 @@ WORKDIR /app
 EXPOSE  8080
 
 # Configure and Run
-CMD ["/app/bin/server"]
+CMD ["/app/bin/pserver"]
