@@ -1,0 +1,3 @@
+graft plone
+include *.rst
+global-exclude *.pyc
