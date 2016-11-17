@@ -335,9 +335,14 @@ def make_app(config_file=None, settings=None):
                 fs = ZODB.FileStorage.FileStorage(dbconfig['path'])
 
                 db = DB(fs)
-                alsoProvides(db.open().root(), IDataBase)
-                transaction.commit()
-                db.close()
+                try:
+                    if not IDataBase.providedBy(root):
+                        alsoProvides(db.open().root(), IDataBase)
+                    transaction.commit()
+                except:
+                    pass
+                finally:
+                    db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(dbconfig['path'], **config)
                 dbo = DataBase(key, db)
@@ -348,9 +353,14 @@ def make_app(config_file=None, settings=None):
                 cs = ClientStorage(address)
                 db = DB(cs)
 
-                alsoProvides(db.open().root(), IDataBase)
-                transaction.commit()
-                db.close()
+                try:
+                    if not IDataBase.providedBy(root):
+                        alsoProvides(db.open().root(), IDataBase)
+                    transaction.commit()
+                except:
+                    pass
+                finally:
+                    db.close()
 
                 # Set request aware database for app
                 cs = ClientStorage(address)
