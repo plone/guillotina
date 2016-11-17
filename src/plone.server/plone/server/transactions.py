@@ -24,6 +24,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+ASYNCIO_LOCKS = {}
+
 
 class RequestAwareTransactionManager(transaction.TransactionManager):
     """Transaction manager for storing the managed transaction in the
@@ -303,10 +305,11 @@ def locked(obj):
 
     """
     try:
-        assert obj._v_lock is not None
-    except (AssertionError, AttributeError):
-        obj._v_lock = asyncio.Lock()
-    return obj._v_lock
+        return ASYNCIO_LOCKS.get(obj._p_oid) or \
+               ASYNCIO_LOCKS.setdefault(obj._p_oid, asyncio.Lock())
+    except AttributeError:  # obj has no _p_oid
+        return ASYNCIO_LOCKS.get(id(obj)) or \
+               ASYNCIO_LOCKS.setdefault(id(obj), asyncio.Lock())
 
 
 def tm(request):
