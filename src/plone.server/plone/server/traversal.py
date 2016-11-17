@@ -130,7 +130,7 @@ async def traverse(request, parent, path):
     if IDataBase.providedBy(parent):
         # Look on the PersistentMapping from the DB
         dbo = parent
-        parent = parent.conn.root()
+        parent = request.conn.root()
 
     try:
         if path[0].startswith('_'):

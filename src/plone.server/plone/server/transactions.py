@@ -11,7 +11,7 @@ from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
 from zope.proxy import ProxyBase
-from plone.server.interfaces import WRITING_VERBS
+from plone.server.interfaces import SHARED_CONNECTION
 from zope.security.interfaces import Unauthorized
 
 import asyncio
@@ -216,7 +216,10 @@ class RequestAwareConnection(ZODB.Connection.Connection):
         try:
             assert request._txn_dm is not None
         except (AssertionError, AttributeError):
-            request._txn_dm = RequestDataManager(request, self)
+            if not SHARED_CONNECTION:
+                request._txn_dm = request.conn
+            else:
+                request._txn_dm = RequestDataManager(request, self)
             self.transaction_manager.get(request).join(request._txn_dm)
 
         if obj is not None:
