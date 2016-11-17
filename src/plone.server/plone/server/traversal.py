@@ -126,12 +126,12 @@ async def traverse(request, parent, path):
         return parent, path
 
     assert request is not None  # could be used for permissions, etc
-    dbo = None
-    if IDataBase.providedBy(parent):
-        # Look on the PersistentMapping from the DB
-        dbo = parent
-        parent = request.conn.root()
-
+    # dbo = None
+    # import pdb; pdb.set_trace()
+    # if IDataBase.providedBy(parent):
+    #     # Look on the PersistentMapping from the DB
+    #     dbo = parent
+    #     parent = request.conn.root()
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
@@ -141,10 +141,10 @@ async def traverse(request, parent, path):
     except KeyError:
         return parent, path
 
-    if dbo is not None:
-        context._v_parent = dbo
-    else:
-        context._v_parent = parent
+    # if dbo is not None:
+    #     context._v_parent = dbo
+    # else:
+    #     context._v_parent = parent
 
     if IDataBase.providedBy(context):
         if SHARED_CONNECTION:
@@ -155,6 +155,7 @@ async def traverse(request, parent, path):
         # Check the transaction
         request._db_write_enabled = False
         request._db_id = context.id
+        context = request.conn.root()
 
     if ISite.providedBy(context):
         request._site_id = context.id

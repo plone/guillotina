@@ -27,6 +27,7 @@ from zope.component import getAllUtilitiesRegisteredFor
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import provideUtility
+from zope.interface import alsoProvides
 from zope.configuration.config import ConfigurationConflictError
 from zope.configuration.config import ConfigurationMachine
 from zope.configuration.xmlconfig import include
@@ -35,6 +36,7 @@ from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
 import asyncio
+import transaction
 import base64
 import json
 import logging
@@ -333,6 +335,8 @@ def make_app(config_file=None, settings=None):
                 fs = ZODB.FileStorage.FileStorage(dbconfig['path'])
 
                 db = DB(fs)
+                alsoProvides(db.open().root(), IDataBase)
+                transaction.commit()
                 db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(dbconfig['path'], **config)
@@ -343,6 +347,9 @@ def make_app(config_file=None, settings=None):
 
                 cs = ClientStorage(address)
                 db = DB(cs)
+
+                alsoProvides(db.open().root(), IDataBase)
+                transaction.commit()
                 db.close()
 
                 # Set request aware database for app
@@ -352,6 +359,8 @@ def make_app(config_file=None, settings=None):
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])
                 db = DB(storage)
+                alsoProvides(db.open().root(), IDataBase)
+                transaction.commit()
                 db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(storage)

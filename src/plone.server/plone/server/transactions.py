@@ -216,7 +216,7 @@ class RequestAwareConnection(ZODB.Connection.Connection):
         try:
             assert request._txn_dm is not None
         except (AssertionError, AttributeError):
-            if not SHARED_CONNECTION:
+            if not SHARED_CONNECTION and hasattr(request, 'conn'):
                 request._txn_dm = request.conn
             else:
                 request._txn_dm = RequestDataManager(request, self)
