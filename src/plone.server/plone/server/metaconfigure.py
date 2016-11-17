@@ -3,8 +3,6 @@ from collections import MutableMapping
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path as osPath
-from plone.dexterity.fti import DexterityFTI
-from plone.dexterity.fti import register
 from plone.server import _
 from plone.server import AVAILABLE_ADDONS
 from plone.server import DEFAULT_LAYER
@@ -12,12 +10,16 @@ from plone.server import DEFAULT_PERMISSION
 from plone.server import DICT_LANGUAGES
 from plone.server import DICT_METHODS
 from plone.server import DICT_RENDERS
+from plone.server.content import ResourceFactory
 from plone.server.content import StaticDirectory
+from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IApplication
+from plone.server.interfaces import IResourceFactory
 from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
 from zope.component import getUtility
 from zope.component.zcml import adapter
+from zope.component.zcml import utility
 from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
@@ -36,11 +38,11 @@ logger = logging.getLogger(__name__)
 
 
 def rec_merge(d1, d2):
-    '''
+    """
     Update two dicts of dicts recursively,
     if either mapping has leaves that are non-dicts,
     the second's leaf overwrites the first's.
-    '''
+    """
     # in Python 2, use .iteritems()!
     for k, v in d1.items():
         if k in d2:
@@ -80,36 +82,43 @@ class IContentTypeDirective(Interface):
         required=False
     )
 
+    allowed_types = configuration_fields.Tokens(
+        title='',
+        description='',
+        value_type=configuration_fields.MessageID(),
+        required=False
+    )
+
 
 def contenttypeDirective(_context,
                          portal_type,
                          class_,
                          schema,
-                         behaviors=[],
-                         add_permission=None):
-    ''' Generate a Dexterity FTI and factory for the passed schema '''
-    interface_name = schema.__identifier__
-    behavior_names = [a.__identifier__ for a in behaviors]
-    dotted_name = None
-    if class_:
-        if not hasattr(class_, 'meta_type'):
-            class_.meta_type = portal_type
-        dotted_name = '{0}.{1}'.format(class_.__module__, class_.__name__)
-    fti_args = {'id': portal_type,
-                'klass': dotted_name,
-                'schema': interface_name,
-                'behaviors': behavior_names}
-    if add_permission is not None:
-        fti_args['add_permission'] = add_permission
-
-    fti = DexterityFTI(**fti_args)
-
-    register(fti)
+                         behaviors=None,
+                         add_permission=None,
+                         allowed_types=None):
+    """
+    Generate factory for the passed schema
+    """
+    factory = ResourceFactory(
+        class_,
+        title='',
+        description='',
+        portal_type=portal_type,
+        schema=schema,
+        behaviors=behaviors or (),
+        add_permission=add_permission or DEFAULT_ADD_PERMISSION,
+        allowed_types=allowed_types
+    )
+    utility(
+        _context,
+        provides=IResourceFactory,
+        component=factory,
+        name=portal_type,
+    )
 
 
 class IApi(Interface):
-    '''
-    '''
 
     file = Path(
         title='The name of a file defining the api.',
@@ -233,8 +242,6 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
 
 
 class IResourceDirectory(Interface):
-    '''
-    '''
 
     name = configuration_fields.MessageID(
         title=_('Name where is going to be published'),

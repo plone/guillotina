@@ -9,7 +9,6 @@ import logging
 
 logger = logging.getLogger('plone.server')
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--configuration',

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from plone.jsonserializer.interfaces import ISerializeToJson
 from plone.server import JSON_API_DEFINITION
 from plone.server.api.service import Service
+from plone.server.json.interfaces import IResourceSerializeToJson
 from zope.component import getMultiAdapter
 
 import logging
@@ -14,7 +14,7 @@ class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
             (self.context, self.request),
-            ISerializeToJson)
+            IResourceSerializeToJson)
         return serializer()
 
 

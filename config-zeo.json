@@ -1,0 +1,31 @@
+{
+	"databases": [
+		{
+		"zodb1": {
+			"storage": "ZEO",
+			"address": "localhost",
+                        "port": "8090"
+			"configuration": {
+                "pool_size": 100,
+                "cache_size": 100
+           	}
+		}
+	}],
+	"address": 8080,
+	"static": [
+		{"favicon.ico": "static/favicon.ico"}
+	],
+	"creator": {
+		"admin": "admin",
+		"password": "YWRtaW4="
+	},
+	"cors": {
+		"allow_origin": ["*"],
+		"allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+		"allow_headers": ["*"],
+		"expose_headers": ["*"],
+		"allow_credentials": true,
+		"max_age": 3660
+	},
+	"utilities": []
+}

@@ -1,21 +1,14 @@
 {
 	"databases": [
 		{
-		"plone": {
-			"storage": "ZODB",
-			"path": "data/Data.fs",
-			"configuration": {
-		    "blob_dir": "data/blobstorage"
-			}
-		},
-		"zeo1": {
+		"zodb1": {
 			"storage": "ZEO",
 			"address": "127.0.0.1",
-			"port": 8090,
+                        "port": 8090,
 			"configuration": {
-		    "blob_dir": "data/zeoblobstorage",
-				"shared_blob_dir": true
-			}
+                "pool_size": 100,
+                "cache_size": 100
+           	}
 		}
 	}],
 	"address": 8080,
@@ -25,6 +18,14 @@
 	"creator": {
 		"admin": "admin",
 		"password": "YWRtaW4="
+	},
+	"cors": {
+		"allow_origin": ["*"],
+		"allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+		"allow_headers": ["*"],
+		"expose_headers": ["*"],
+		"allow_credentials": true,
+		"max_age": 3660
 	},
 	"utilities": []
 }

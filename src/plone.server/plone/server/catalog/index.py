@@ -3,7 +3,6 @@ from plone.server.catalog.interfaces import ICatalogUtility
 from plone.server.transactions import get_current_request
 from plone.server.transactions import RequestNotFound
 from plone.server.transactions import tm
-from plone.uuid.interfaces import IUUID
 from zope.component import getUtility
 from zope.component import queryUtility
 
@@ -76,7 +75,7 @@ def remove_object(obj, event):
     hook = get_hook()
     if hook is None:
         return
-    uid = IUUID(obj, None)
+    uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
     hook.remove.append(uid)
@@ -88,7 +87,7 @@ def add_object(obj, event):
     hook = get_hook()
     if hook is None:
         return
-    uid = IUUID(obj, None)
+    uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
     search = queryUtility(ICatalogUtility)

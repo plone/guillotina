@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.tests import TEST_RESOURCES_DIR
-
+from zope.interface import Interface
+from zope import schema
+from plone.server.behaviors.attachment import IAttachment
 import json
 import os
+
+
+class ITestingRegistry(Interface):
+    enabled = schema.Bool(
+        title="Example attribute")
 
 
 class FunctionalTestServer(PloneFunctionalTestCase):
@@ -22,8 +29,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         response = json.loads(resp.text)
         self.assertEqual(response['static_file'], ['favicon.ico'])
         self.assertEqual(response['databases'], ['plone'])
-        self.assertTrue('country-flags' in response['static_directory'])
-        self.assertTrue('language-flags' in response['static_directory'])
+        self.assertEqual(response['static_directory'], [])
 
     def test_get_database(self):
         """Get the database object."""
@@ -44,14 +50,14 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         response = json.loads(resp.text)
         self.assertTrue(len(response) > 1)
         self.assertTrue(any("Item" in s['title'] for s in response))
-        self.assertTrue(any("Plone Site" in s['title'] for s in response))
+        self.assertTrue(any("Site" in s['title'] for s in response))
 
     def test_get_contenttype(self):
         """Get a content type definition."""
         resp = self.layer.requester('GET', '/plone/plone/@types/Item')
         self.assertTrue(resp.status_code == 200)
         response = json.loads(resp.text)
-        self.assertTrue(len(response['schemas']), 2)
+        self.assertTrue(len(response['definitions']), 1)
         self.assertTrue(response['title'] == 'Item')
 
     def test_get_registries(self):
@@ -59,7 +65,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         resp = self.layer.requester('GET', '/plone/plone/@registry')
         self.assertTrue(resp.status_code == 200)
         response = json.loads(resp.text)
-        self.assertTrue(len(response) >= 10)
+        self.assertTrue(len(response) == 2)
         self.assertTrue(
             'plone.server.registry.ILayers.active_layers' in response)
 
@@ -67,9 +73,9 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         """Check a value from registry."""
         resp = self.layer.requester(
             'GET',
-            '/plone/plone/@registry/plone.server.registry.ICors.enabled')
+            '/plone/plone/@registry/plone.server.registry.ILayers.active_layers')
         response = json.loads(resp.text)
-        self.assertTrue(response[0])
+        self.assertTrue(response)
 
     def test_create_contenttype(self):
         """Try to create a contenttype."""
@@ -105,16 +111,17 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'POST',
             '/plone/plone/@registry',
             data=json.dumps({
-                "interface": "plone.server.registry.ICors"
+                "interface": "plone.server.tests.test_api.ITestingRegistry",
+                "initial_values": {
+                    "enabled": True
+                }
             })
         )
         self.assertTrue(resp.status_code == 201)
 
-    def test_update_registry(self):
-        """Try to create a contenttype."""
         resp = self.layer.requester(
             'PATCH',
-            '/plone/plone/@registry/plone.server.registry.ICors.enabled',
+            '/plone/plone/@registry/plone.server.tests.test_api.ITestingRegistry.enabled',
             data=json.dumps({
                 "value": False
             })
@@ -122,9 +129,9 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         self.assertTrue(resp.status_code == 204)
         resp = self.layer.requester(
             'GET',
-            '/plone/plone/@registry/plone.server.registry.ICors.enabled')
+            '/plone/plone/@registry/plone.server.tests.test_api.ITestingRegistry.enabled')
         response = json.loads(resp.text)
-        self.assertFalse(response[0])
+        self.assertFalse(response)
 
     def test_file_upload(self):
         resp = self.layer.requester(
@@ -146,7 +153,8 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'PATCH',
             '/plone/plone/file1/@upload/file',
             data=data)
-        self.assertEqual(site['file1'].file.data, data)
+        behavior = IAttachment(site['file1'])
+        self.assertEqual(behavior.file.data, data)
 
     def test_file_download(self):
         # first, get a file on...
@@ -155,4 +163,5 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'GET',
             '/plone/plone/file1/@download/file')
         site = self._get_site()
-        self.assertEqual(site['file1'].file.data, resp.content)
+        behavior = IAttachment(site['file1'])
+        self.assertEqual(behavior.file.data, resp.content)

@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from plone.dexterity.utils import iterSchemataForType
 from plone.server.catalog.interfaces import ICatalogDataAdapter
 from plone.server.catalog.interfaces import ICatalogUtility
+from plone.server.content import iterSchemataForType
+from plone.server.directives import mergedTaggedValueDict
+from plone.server.interfaces import CATALOG_KEY
 from plone.server.security import getPrincipalsWithAccessContent
 from plone.server.security import getRolesWithAccessContent
 from plone.server.utils import get_content_path
-from plone.supermodel.interfaces import CATALOG_KEY
-from plone.supermodel.utils import mergedTaggedValueDict
-from plone.uuid.interfaces import IUUID
 from zope.component import queryAdapter
 from zope.interface import implementer
 from zope.schema import getFields
@@ -124,7 +123,7 @@ class DefaultCatalogDataAdapter(object):
         path = get_content_path(self.content)
 
         values.update({
-            'uuid': IUUID(self.content),
+            'uuid': self.content.uuid,
             'accessRoles': [x for x in roles if roles[x] == Allow],
             'accessUsers': [x for x in users if users[x] == Allow],
             'path': path,

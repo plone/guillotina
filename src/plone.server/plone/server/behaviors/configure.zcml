@@ -5,15 +5,17 @@
   <plone:behavior
       title="Dublin Core fields"
       provides=".dublincore.IDublinCore"
+      marker=".dublincore.IMarkerDublinCore"
       factory=".dublincore.DublinCore"
-      for="plone.dexterity.interfaces.IDexterityContent"
+      for="plone.server.interfaces.IResource"
       />
 
   <plone:behavior
       title="Attachment"
       provides=".attachment.IAttachment"
-      factory=".attachment.Attachment"
-      for="plone.dexterity.interfaces.IDexterityContent"
+      marker=".attachment.IMarkerAttachment"
+      factory="plone.behavior.AnnotationStorage"
+      for="plone.server.interfaces.IResource"
       />
 
 

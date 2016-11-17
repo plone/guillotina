@@ -2,7 +2,6 @@
 from aiohttp import web
 from plone.server import DICT_METHODS
 from plone.server.api.service import Service
-from plone.server.auth.participation import RootParticipation
 from plone.server.browser import Response
 from plone.server.interfaces import ITraversableView
 from plone.server.traversal import do_traverse

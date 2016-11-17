@@ -2,6 +2,9 @@
 from setuptools import find_packages
 from setuptools import setup
 
+import os
+
+
 setup(
     name='plone.server',
     version=open('VERSION').read().strip(),
@@ -19,38 +22,39 @@ setup(
     ],
     zip_safe=True,
     include_package_data=True,
-    packages=find_packages(exclude=['ez_setup']),
+    package_dir=None if os.path.isdir('plone') else {'':
+      os.path.join('src', 'plone.server')},
+    packages=find_packages('./' if os.path.isdir('plone') else
+      os.path.join('src', 'plone.server'), exclude=['ez_setup']),
     namespace_packages=['plone'],
     install_requires=[
         'aiohttp==1.0.5',
-        'cchardet',
-        'ujson',
-        'crypto',
-        'pycrypto',
+        'python-dateutil',
         'BTrees',
-        'cchardet',
-        'plone.dexterity',
-        'plone.jsonserializer',
-        'plone.registry',
-        'plone.supermodel',
-        'plone.i18n',
-        'plone.indexer',
-        'repoze.workflow',
+        'persistent',
+        'plone.behavior',
+        'pycrypto',
         'setuptools',
+        'six',
         'transaction',
-        'ZODB',
+        'ujson',
         'ZEO',
+        'ZODB',
+        'zope.authentication',
         'zope.component',
         'zope.configuration',
         'zope.dottedname',
+        'zope.dublincore',
         'zope.event',
         'zope.i18n',
         'zope.i18nmessageid',
         'zope.interface',
+        'zope.lifecycleevent',
         'zope.location',
         'zope.proxy',
         'zope.schema',
         'zope.security',
+        'zope.securitypolicy',
     ],
     extras_require={
         'test': [

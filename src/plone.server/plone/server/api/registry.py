@@ -1,59 +1,56 @@
 # -*- coding: utf-8 -*-
-from plone.jsonserializer.exceptions import DeserializationError
-from plone.jsonserializer.interfaces import IFieldDeserializer
-from plone.jsonserializer.interfaces import ISerializeToJson
-from plone.registry.interfaces import IRegistry
 from plone.server import _
 from plone.server.api.service import Service
 from plone.server.api.service import TraversableService
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
+from plone.server.interfaces import IRegistry
+from plone.server.json.exceptions import DeserializationError
+from plone.server.json.interfaces import IJSONToValue
+from plone.server.json.interfaces import IValueToJson
 from plone.server.utils import import_class
 from zope.component import getMultiAdapter
-from zope.component import queryMultiAdapter
+from zope.dottedname.resolve import resolve
 from zope.interface.interfaces import ComponentLookupError
 from zope.schema import getFields
 
 
+_marker = object()
+
+
 class Read(TraversableService):
+    key = _marker
+    value = None
 
     def publishTraverse(self, traverse):
         if len(traverse) == 1:
             # we want have the key of the registry
-            self.value = [self.request.site_settings[traverse[0]]]
-        else:
-            self.value = None
+            self.key = traverse[0]
+            self.value = self.request.site_settings[self.key]
         return self
 
     async def __call__(self):
-        if not hasattr(self, 'value'):
+        if self.key is _marker:
             # Root of registry
             self.value = self.request.site_settings
         if IRegistry.providedBy(self.value):
             result = {}
-            for x in self.value.records:
+            for x in self.value:
                 try:
-                    serializer = getMultiAdapter(
-                        (self.value[x], self.request),
-                        ISerializeToJson)
-                    value = serializer()
+                    value = IValueToJson(self.value[x])
                 except ComponentLookupError:
                     value = self.value[x]
                 result[x] = value
         else:
             try:
-                serializer = getMultiAdapter(
-                    (self.value, self.request),
-                    ISerializeToJson)
-
-                result = serializer()
+                result = IValueToJson(self.value)
             except ComponentLookupError:
                 result = self.value
         return result
 
 
 class Register(Service):
-    """Register an Interface on the Registry"""
+    """Register an Interface on the Registry."""
 
     async def __call__(self):
         """ data input : { 'interface': 'INTERFACE' }"""
@@ -61,7 +58,6 @@ class Register(Service):
             return ErrorResponse(
                 'BadRequest',
                 _("Not in a site request"))
-
         data = await self.request.json()
         interface = data.get('interface', None)
         initial_values = data.get('initial_values', {})
@@ -87,39 +83,42 @@ class Register(Service):
 
 
 class Write(TraversableService):
+    key = _marker
+    value = None
 
     def publishTraverse(self, traverse):
         if len(traverse) == 1 and traverse[0] in self.request.site_settings:
             # we want have the key of the registry
-            self.record = self.request.site_settings._records[traverse[0]]
-        else:
-            self.record = None
+            self.key = traverse[0]
+            self.value = self.request.site_settings[self.key]
         return self
 
     async def __call__(self):
-        if getattr(self, 'record', None) is None:
+        if self.key is _marker:
             # No option to write the root of registry
-            return ErrorResponse(
-                'InvalidRequest',
-                'Needs the registry field')
+            return ErrorResponse('InvalidRequest', 'Needs the registry key')
+
         data = await self.request.json()
         if 'value' in data:
             value = data['value']
         else:
             value = data
 
-        deserializer = queryMultiAdapter(
-            (self.record.field, self.request.site_settings, self.request),
-            IFieldDeserializer)
+        assert '.' in self.key, 'Registry key must be dotted.iface.name.fieldname'  # noqa
+        iface, name = self.key.rsplit('.', 1)
+        iface = resolve(iface)
+        field = iface[name]
 
-        if deserializer is None:
+        try:
+            new_value = getMultiAdapter((value, field), IJSONToValue)
+        except ComponentLookupError:
             return ErrorResponse(
                 'DeserializationError',
-                'Cannot deserialize type {}'.format(str(self.record)),
+                'Cannot deserialize type {}'.format(str(self.field)),
                 status=501)
 
         try:
-            self.record.value = deserializer(value)
+            self.request.site_settings[self.key] = new_value
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',

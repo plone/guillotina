@@ -13,6 +13,28 @@ import sys
 import time
 import unittest
 
+# TO REMOVE ON ZODB 5.0.1
+import ZODB
+def storeBlob(self, oid, oldserial, data, blobfilename, version,
+              transaction):
+    assert version=='', "versions aren't supported"
+    if transaction is not self._transaction:
+        raise ZODB.POSException.StorageTransactionError(self, transaction)
+
+    # Since the OID is being used, we don't have to keep up with it any
+    # more. Save it now so we can forget it later. :)
+    self._stored_oids.add(oid)
+
+    try:
+        self.changes.storeBlob(
+            oid, oldserial, data, blobfilename, '', transaction)
+    except AttributeError:
+        if not self._blobify():
+            raise
+        self.changes.storeBlob(
+            oid, oldserial, data, blobfilename, '', transaction)
+ZODB.DemoStorage.DemoStorage.storeBlob = storeBlob
+###################
 
 TESTING_PORT = 55001
 
@@ -32,6 +54,14 @@ TESTING_SETTINGS = {
     "creator": {
         "admin": "admin",
         "password": "YWRtaW4="
+    },
+    "cors": {
+        "allow_origin": ["*"],
+        "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+        "allow_headers": ["*"],
+        "expose_headers": ["*"],
+        "allow_credentials": True,
+        "max_age": 3660
     },
     "utilities": []
 }
@@ -53,6 +83,7 @@ class MockView(View):
         self.context = context
         self.request = make_mocked_request('POST', '/')
         self.request.conn = conn
+        self.request._db_write_enabled = True
         self.func = func
 
     def __call__(self, *args, **kw):
@@ -65,6 +96,7 @@ class AsyncMockView(View):
         self.context = context
         self.request = make_mocked_request('POST', '/')
         self.request.conn = conn
+        self.request._db_write_enabled = True
         self.func = func
 
     async def __call__(self, *args, **kw):
@@ -111,7 +143,9 @@ class PloneServerBaseLayer(object):
         cls.aioapp = make_app(settings=TESTING_SETTINGS)
         # Plone App Object
         cls.app = getUtility(IApplication, name='root')
+        cls.db = cls.app['plone']
         include(cls.app.app.config, 'testing.zcml', sys.modules['plone.server'])
+        cls.app.app.config.execute_actions()
 
     @classmethod
     def tearDown(cls):
@@ -170,23 +204,9 @@ class PloneBaseLayer(PloneServerBaseLayer):
         cls.t.start()
         cls.requester = PloneRequester('http://localhost:' + str(TESTING_PORT))
         cls.time = time.time()
-        resp = cls.requester('POST', '/plone/', data=json.dumps({
-            "@type": "Plone Site",
-            "title": "Plone Site",
-            "id": "plone",
-            "description": "Description Plone Site"
-        }))
-        assert resp.status_code == 200
-        from copy import deepcopy
-        cls.site = deepcopy(cls.app['plone']['plone'])
-        cls.portal = cls.app['plone']['plone']
 
     @classmethod
     def tearDown(cls):
-        try:
-            cls.requester('DELETE', '/plone/plone/')
-        except requests.exceptions.ConnectionError:
-            pass
         try:
             del cls.requester
         except AttributeError:
@@ -204,13 +224,32 @@ class PloneBaseLayer(PloneServerBaseLayer):
         loop.run_until_complete(cls.srv.wait_closed())
 
     @classmethod
+    def testSetUp(cls):
+        resp = cls.requester('POST', '/plone/', data=json.dumps({
+            "@type": "Plone Site",
+            "title": "Plone Site",
+            "id": "plone",
+            "description": "Description Plone Site"
+        }))
+        assert resp.status_code == 200
+        cls.portal = cls.app['plone']['plone']
+
+    @classmethod
     def testTearDown(cls):
         # Restore the copy of the DB
-        def restore():
-            from copy import deepcopy
-            cls.app['plone']['plone'] = deepcopy(cls.site)
-        mock = MockView(cls.app['plone'], cls.app['plone'].conn, restore)
-        mock()
+        try:
+            resp = cls.requester('DELETE', '/plone/plone/')
+        except requests.exceptions.ConnectionError:
+            pass
+
+        assert resp.status_code == 200
+        # def restore(conn):
+        #     from copy import deepcopy
+        #     del conn.root()['plone']['plone']
+        #     conn.root()['plone']['plone'] = deepcopy(cls.site)
+        # restore_connection = cls.app['plone'].open()
+        # mock = MockView(cls.app['plone'], restore_connection, restore)
+        # mock()
 
 
 class PloneServerBaseTestCase(unittest.TestCase):

@@ -5,6 +5,7 @@ from datetime import timedelta
 from pkg_resources import iter_entry_points
 from plone.server import DICT_LANGUAGES
 from plone.server import DICT_RENDERS
+from plone.server import CORS
 from plone.server import jose
 from plone.server.async import IAsyncUtility
 from plone.server.auth.participation import RootParticipation
@@ -26,6 +27,7 @@ from zope.component import getAllUtilitiesRegisteredFor
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import provideUtility
+from zope.interface import alsoProvides
 from zope.configuration.config import ConfigurationConflictError
 from zope.configuration.config import ConfigurationMachine
 from zope.configuration.xmlconfig import include
@@ -34,6 +36,7 @@ from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
 import asyncio
+import transaction
 import base64
 import json
 import logging
@@ -288,6 +291,7 @@ class DataBase(object):
 
 
 def make_app(config_file=None, settings=None):
+
     # Initialize aiohttp app
     app = web.Application(router=TraversalRouter())
 
@@ -331,6 +335,8 @@ def make_app(config_file=None, settings=None):
                 fs = ZODB.FileStorage.FileStorage(dbconfig['path'])
 
                 db = DB(fs)
+                alsoProvides(db.open().root(), IDataBase)
+                transaction.commit()
                 db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(dbconfig['path'], **config)
@@ -341,6 +347,9 @@ def make_app(config_file=None, settings=None):
 
                 cs = ClientStorage(address)
                 db = DB(cs)
+
+                alsoProvides(db.open().root(), IDataBase)
+                transaction.commit()
                 db.close()
 
                 # Set request aware database for app
@@ -350,6 +359,8 @@ def make_app(config_file=None, settings=None):
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])
                 db = DB(storage)
+                alsoProvides(db.open().root(), IDataBase)
+                transaction.commit()
                 db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(storage)
@@ -379,5 +390,8 @@ def make_app(config_file=None, settings=None):
 
     for util in settings['utilities']:
         root.add_async_utility(util)
+
+    if 'cors' in settings:
+        CORS.update(settings['cors'])
 
     return app

@@ -37,7 +37,7 @@ class Content(Persistent):
 
 @adapter(Interface)
 @implementer(ITransformer)
-class TestTransformer(object):
+class Transformer(object):
 
     def __init__(self, context):
         self.context = context
@@ -66,7 +66,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             outputmimetype=field.output_mime_type,
             encoding='utf-8')
         self.assertEqual(value.output, None)
-        provideAdapter(TestTransformer, name='text/x-uppercase')
+        provideAdapter(Transformer, name='text/x-uppercase')
         self.assertEqual(value.output, 'SOME PLAIN TEXT')
         self.assertEqual(value.encoding, 'utf-8')
         self.assertEqual(value.raw_encoded, b'Some plain text')

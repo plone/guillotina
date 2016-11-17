@@ -5,10 +5,9 @@ from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.registry.interfaces import IRegistry
 from plone.server import _
 from plone.server import DICT_METHODS
-from plone.server.api.dexterity import DefaultOPTIONS
+from plone.server.api.content import DefaultOPTIONS
 from plone.server.api.layer import IDefaultLayer
 from plone.server.auth.participation import AnonymousParticipation
 from plone.server.browser import ErrorResponse
@@ -19,12 +18,16 @@ from plone.server.contentnegotiation import language_negotiation
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDataBase
 from plone.server.interfaces import IOPTIONS
+from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
 from plone.server.interfaces import ITraversableView
 from plone.server.registry import ACTIVE_LAYERS_KEY
-from plone.server.registry import CORS_KEY
+from plone.server import CORS
+from plone.server.interfaces import SHARED_CONNECTION
+from plone.server.interfaces import WRITING_VERBS
+from plone.server.interfaces import SUBREQUEST_METHODS
 from plone.server.transactions import locked
 from plone.server.transactions import sync
 from plone.server.utils import apply_cors
@@ -42,16 +45,12 @@ from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 
 import aiohttp
+import json
 import logging
 import traceback
-import json
 
 
 logger = logging.getLogger(__name__)
-
-SHARED_CONNECTION = False
-WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
-SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 
 
 async def do_traverse(request, parent, path):
@@ -110,21 +109,29 @@ async def subrequest(orig_request, path, relative_to_site=True,
 async def traverse(request, parent, path):
     """Do not use outside the main router function."""
     if IApplication.providedBy(parent):
+        # Manager participation
         participation = parent.root_participation(request)
         if participation:
             logger.info('Root Participation added')
+            request.security.add(participation)
+
+        # User participation
+        participation = IParticipation(request)
+        # Lets extract the user from the request
+        await participation()
+        if participation.principal is not None:
             request.security.add(participation)
 
     if not path:
         return parent, path
 
     assert request is not None  # could be used for permissions, etc
-    dbo = None
-    if IDataBase.providedBy(parent):
-        # Look on the PersistentMapping from the DB
-        dbo = parent
-        parent = parent.conn.root()
-
+    # dbo = None
+    # import pdb; pdb.set_trace()
+    # if IDataBase.providedBy(parent):
+    #     # Look on the PersistentMapping from the DB
+    #     dbo = parent
+    #     parent = request.conn.root()
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
@@ -134,28 +141,27 @@ async def traverse(request, parent, path):
     except KeyError:
         return parent, path
 
-    if dbo is not None:
-        context._v_parent = dbo
-    else:
-        context._v_parent = parent
+    # if dbo is not None:
+    #     context._v_parent = dbo
+    # else:
+    #     context._v_parent = parent
 
     if IDataBase.providedBy(context):
         if SHARED_CONNECTION:
             request.conn = context.conn
         else:
+            # Create a new conection
             request.conn = context.open()
+        # Check the transaction
+        request._db_write_enabled = False
         request._db_id = context.id
+        context = request.conn.root()
 
     if ISite.providedBy(context):
         request._site_id = context.id
         request.site = context
         request.site_components = context.getSiteManager()
         request.site_settings = request.site_components.getUtility(IRegistry)
-        participation = IParticipation(request)
-        # Lets extract the user from the request
-        await participation()
-        if participation.principal is not None:
-            request.security.add(participation)
         layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
@@ -178,6 +184,7 @@ class MatchInfo(AbstractMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
+            request._db_write_enabled = True
             txn = request.conn.transaction_manager.begin(request)
             try:
                 async with locked(self.resource):
@@ -219,12 +226,12 @@ class MatchInfo(AbstractMatchInfo):
         if not isinstance(view_result, Response):
             view_result = Response(view_result)
 
-        # Apply cors if its needed
-        view_result.headers.update(await apply_cors(request))
-
         # If we want to close the connection after the request
         if SHARED_CONNECTION is False and hasattr(request, 'conn'):
             request.conn.close()
+
+        # Apply cors if its needed
+        view_result.headers.update(await apply_cors(request))
 
         return await self.rendered(view_result)
 
@@ -269,12 +276,31 @@ class TraversalRouter(AbstractRouter):
         self._root = root
 
     async def resolve(self, request):
+        result = None
+        try:
+            result = await self.real_resolve(request)
+        except Exception as e:
+            logger.error(
+                "Exception on resolve execution",
+                exc_info=e)
+            raise e
+        if result is not None:
+            return result
+        else:
+            raise HTTPNotFound()
+
+    async def real_resolve(self, request):
         """Main function to resolve a request."""
         alsoProvides(request, IRequest)
         alsoProvides(request, IDefaultLayer)
 
         request.site_components = getGlobalSiteManager()
         request.security = IInteraction(request)
+
+        method = DICT_METHODS[request.method]
+
+        language = language_negotiation(request)
+        language_object = language(request)
 
         try:
             resource, tail = await self.traverse(request)
@@ -304,11 +330,6 @@ class TraversalRouter(AbstractRouter):
             view_name = tail[0]
             traverse_to = tail[1:]
 
-        method = DICT_METHODS[request.method]
-
-        language = language_negotiation(request)
-        language_object = language(request)
-
         translator = queryMultiAdapter(
             (language_object, resource, request),
             ITranslated)
@@ -326,9 +347,7 @@ class TraversalRouter(AbstractRouter):
 
         if not allowed:
             # Check if its a CORS call:
-            if IOPTIONS != method or \
-                    (hasattr(request, 'site_settings') and
-                     not request.site_settings.get(CORS_KEY, False)):
+            if IOPTIONS != method or not CORS:
                 logger.warn("No access content {content} with {auths}".format(
                     content=resource,
                     auths=str([x.principal.id
@@ -362,7 +381,7 @@ class TraversalRouter(AbstractRouter):
 
         if view is None and method == IOPTIONS:
             if (not hasattr(request, 'site_settings') or
-                    request.site_settings.get(CORS_KEY, False)):
+                    request.site_settings.get(CORS, False)):
                 # Its a CORS call, we could not find any OPTION definition
                 # Lets create a default preflight view
                 # We check for site_settings in case the call is to some url before site

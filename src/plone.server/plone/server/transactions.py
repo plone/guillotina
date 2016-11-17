@@ -6,12 +6,13 @@ we'll see how far we get and learn more about ZODB while doing it...
 """
 from aiohttp.web import RequestHandler
 from concurrent.futures import ThreadPoolExecutor
-from plone.server.interfaces import IView
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
 from zope.proxy import ProxyBase
+from plone.server.interfaces import SHARED_CONNECTION
+from zope.security.interfaces import Unauthorized
 
 import asyncio
 import inspect
@@ -19,6 +20,9 @@ import threading
 import time
 import transaction
 import ZODB.Connection
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 class RequestAwareTransactionManager(transaction.TransactionManager):
@@ -181,7 +185,7 @@ class RequestDataManager(object):
 
 
 class RequestAwareConnection(ZODB.Connection.Connection):
-    executor = ThreadPoolExecutor(max_workers=1)
+    executor = ThreadPoolExecutor(max_workers=100)
     lock = threading.Lock()
 
     def _getReadCurrent(self):
@@ -206,11 +210,16 @@ class RequestAwareConnection(ZODB.Connection.Connection):
 
     def _register(self, obj=None):
         request = get_current_request()
+        if hasattr(request, '_db_write_enabled') and not request._db_write_enabled:
+            raise Unauthorized('Adding content not permited')
 
         try:
             assert request._txn_dm is not None
         except (AssertionError, AttributeError):
-            request._txn_dm = RequestDataManager(request, self)
+            if not SHARED_CONNECTION and hasattr(request, 'conn'):
+                request._txn_dm = request.conn
+            else:
+                request._txn_dm = RequestDataManager(request, self)
             self.transaction_manager.get(request).join(request._txn_dm)
 
         if obj is not None:
@@ -363,3 +372,24 @@ def get_current_request():
         #     return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
+
+
+def synccontext(context):
+    """Return connections asyncio executor instance (from context) to be used
+    together with "await" syntax to queue or commit to be executed in
+    series in a dedicated thread.
+
+    :param request: current request
+
+    Example::
+
+        await synccontext(request)(txn.commit)
+
+    """
+    loop = asyncio.get_event_loop()
+    assert getattr(context, '_p_jar', None) is not None, \
+        'Request has no conn'
+    assert getattr(context._p_jar, 'executor', None) is not None, \
+        'Connection has no executor'
+    return lambda *args, **kwargs: loop.run_in_executor(
+        context._p_jar.executor, *args, **kwargs)
