@@ -3,7 +3,7 @@
 		{
 		"zodb1": {
 			"storage": "ZODB",
-			"path": "data/zeo.fs",
+			"path": "data/Data.fs",
 			"configuration": {
                 "pool_size": 100,
                 "cache_size": 100
