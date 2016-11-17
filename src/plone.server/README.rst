@@ -1,24 +1,88 @@
-Asyncio and ZODB
-================
+Introduction
+============
 
-The official instruction is to just keep using worker threads for all ZODB accessing application code as usual.
+This is the working project of the next generation plone server based on asyncio.
 
-This sandbox, however, experiments using single ZODB connection asynchronously so that each
-request still has its own transaction manager independently form each other.
+* depends on python 3.5
 
-Compromises
------------ 
 
-* Frame inspection magic to resolve the current request when object registered for
-  transaction. Persistent object API is so implicit that request cannot be
-  passed explicitly.
+Getting started
+---------------
 
-* No MVCC. ZODB relies on single active transaction per each ZODB connection and cache for MVCC.
-  Once multiple concurrent transactions see the same connection cache, no MVCC can be guaranteed.
-  
-* Manual locking for modified objects required. Because multiple concurrent transaction see the
-  same object instances in memory, each modified object is only registered for the first
-  modifying transaction. To prevent modifying object already registered for another transaction,
-  manual locking in code is required.
-  
-* ... (probably weird conflicts may happend) 
+We use buildout of course::
+
+    python3.5 bootstrap-buildout.py
+    ./bin/buildout
+
+The buildout installs the app itself, code analysis tools, and a test runner.
+
+Run the zeo
+-----------
+
+To run the zeo on a different terminal::
+
+	./bin/runzeo -C zeo.cfg
+
+
+Run the server
+--------------
+
+* By default it mounts a zeo server and a ZODB so you need the ZEO server running.
+
+To run the server::
+
+    ./bin/server
+
+Creating default content
+------------------------
+
+Once started, you will require to add at least a Plone site to start fiddling around::
+
+  curl -X POST -H "Accept: application/json" -H "Authorization: Basic YWRtaW4=" -H "Content-Type: application/json" -d '{
+    "@type": "Plone Site",
+    "title": "Plone 1",
+    "id": "plone",
+    "description": "Description"
+  }' "http://127.0.0.1:8080/zodb1/"
+
+and give permissions to add content to it::
+
+  curl -X POST -H "Accept: application/json" -H "Authorization: Basic YWRtaW4=" -H "Content-Type: application/json" -d '{
+    "prinrole": {
+        "Anonymous User": ["plone.Member", "plone.Reader"]
+    }
+  }' "http://127.0.0.1:8080/zodb1/plone/@sharing"
+
+and create actual content::
+
+  curl -X POST -H "Accept: application/json" -H "Authorization: Basic YWRtaW4=" -H "Content-Type: application/json" -d '{
+    "@type": "Item",
+    "title": "News",
+    "id": "news"
+  }' "http://127.0.0.1:8080/zodb1/plone/"
+
+Run tests
+---------
+
+We're using py.test::
+
+    ./bin/py.test src
+
+and for test coverage::
+
+    ./bin/py.test --cov=plone.server src/
+
+
+Default
+-------
+
+Default root access can be done with AUTHORIZATION header : Basic YWRtaW4=
+
+
+Running dependency graph
+------------------------
+
+Using buildout::
+
+    ./bin/buildout -c dependency-graph.cfg
+    ./bin/dependencies-eggdeps > docs/dependency-graph.txt

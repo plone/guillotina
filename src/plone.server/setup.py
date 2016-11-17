@@ -11,9 +11,14 @@ setup(
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
     classifiers=[
-        'Framework :: Plone :: 7.0',
+        'License :: OSI Approved :: BSD License',
+        'Framework :: ZODB',
+        'Framework :: Zope3',
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'Topic :: Internet :: WWW/HTTP',
         'Programming Language :: Python :: 3.5',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     url='https://pypi.python.org/pypi/plone.server',
     license='GPL version 3',
