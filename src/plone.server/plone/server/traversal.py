@@ -190,11 +190,20 @@ class MatchInfo(AbstractMatchInfo):
                 async with locked(self.resource):
                     view_result = await self.view()
                     if isinstance(view_result, ErrorResponse):
-                        await sync(request)(txn.abort)
+                        if SHARED_CONNECTION is False:
+                            txn.abort()
+                        else:
+                            await sync(request)(txn.abort)
                     elif isinstance(view_result, UnauthorizedResponse):
-                        await sync(request)(txn.abort)
+                        if SHARED_CONNECTION is False:
+                            txn.abort()
+                        else:
+                            await sync(request)(txn.abort)
                     else:
-                        await sync(request)(txn.commit)
+                        if SHARED_CONNECTION is False:
+                            txn.commit()
+                        else:
+                            await sync(request)(txn.commit)
             except Unauthorized:
                 await sync(request)(txn.abort)
                 view_result = UnauthorizedResponse(
