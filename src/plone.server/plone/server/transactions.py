@@ -185,7 +185,7 @@ class RequestDataManager(object):
 
 
 class RequestAwareConnection(ZODB.Connection.Connection):
-    executor = ThreadPoolExecutor(max_workers=100)
+    executor = ThreadPoolExecutor(max_workers=1)
     lock = threading.Lock()
 
     def _getReadCurrent(self):
