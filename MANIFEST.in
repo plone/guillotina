@@ -1,4 +1,5 @@
 graft src/plone.server
 graft src/plone.example
 include *.rst
+include VERSION
 global-exclude *.pyc
