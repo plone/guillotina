@@ -147,7 +147,7 @@ class NoPermissionToAdd(Exception):
 
 def createContent(type_, **kw):
     """Utility to create a content.
-    
+
     This method should not be used to add content, just internally.
     """
     factory = getCachedFactory(type_)
@@ -185,6 +185,8 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
     obj.__name__ = id_
     obj.__parent__ = container
     container[id_] = obj
+    if 'id' not in kw:
+        kw['id'] = id_
     for key, value in kw.items():
         setattr(obj, key, value)
     return obj

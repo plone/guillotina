@@ -226,12 +226,12 @@ class PloneBaseLayer(PloneServerBaseLayer):
     @classmethod
     def testSetUp(cls):
         resp = cls.requester('POST', '/plone/', data=json.dumps({
-            "@type": "Plone Site",
+            "@type": "Site",
             "title": "Plone Site",
             "id": "plone",
             "description": "Description Plone Site"
         }))
-        assert resp.status_code == 200
+        assert resp.status_code in (200, 401)  # 401 is if site already exists...
         cls.portal = cls.app['plone']['plone']
 
     @classmethod

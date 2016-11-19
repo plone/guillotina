@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IRequest
-from plone.server import ACTIVE_AUTH_EXTRACTION_KEY
-from plone.server import ACTIVE_AUTH_USER_KEY
+from plone.server import AUTH_EXTRACTION_PLUGINS
+from plone.server import AUTH_USER_PLUGINS
 from plone.server.transactions import get_current_request
-from plone.server.utils import import_class
 from zope.component import adapter
 from zope.interface import implementer
 from zope.security.interfaces import IParticipation
@@ -72,10 +70,10 @@ class PloneParticipation(object):
         # Cached user
         if not hasattr(self.request, '_cache_user'):
 
-            for plugin in ACTIVE_AUTH_EXTRACTION_KEY:
+            for plugin in AUTH_EXTRACTION_PLUGINS:
                 await plugin(self.request).extract_user()
 
-            for plugin in ACTIVE_AUTH_USER_KEY:
+            for plugin in AUTH_USER_PLUGINS:
                 await plugin(self.request).create_user()
 
         self.principal = getattr(self.request, '_cache_user', None)

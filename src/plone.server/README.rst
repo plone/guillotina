@@ -39,7 +39,7 @@ Creating default content
 Once started, you will require to add at least a Plone site to start fiddling around::
 
   curl -X POST -H "Accept: application/json" -H "Authorization: Basic YWRtaW4=" -H "Content-Type: application/json" -d '{
-    "@type": "Plone Site",
+    "@type": "Site",
     "title": "Plone 1",
     "id": "plone",
     "description": "Description"
