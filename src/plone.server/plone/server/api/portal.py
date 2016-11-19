@@ -67,7 +67,7 @@ class DefaultPOST(Service):
             'title': data['title']
         }
         headers = {
-            'Location': '/plone/ttt'
+            'Location': self.request.path + data['id']
         }
 
         return Response(response=resp, headers=headers)

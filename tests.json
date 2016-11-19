@@ -199,7 +199,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+					"raw": "{\n    \"@type\": \"Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
 				},
 				"description": ""
 			},
@@ -228,7 +228,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+							"raw": "{\n    \"@type\": \"Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
 						}
 					},
 					"status": "OK",
@@ -269,7 +269,7 @@
 					],
 					"cookie": [],
 					"responseTime": 283,
-					"body": "{\"title\": \"Site 1\", \"@type\": \"Plone Site\", \"id\": \"site1\"}"
+					"body": "{\"title\": \"Site 1\", \"@type\": \"Site\", \"id\": \"site1\"}"
 				}
 			]
 		},
@@ -306,7 +306,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+					"raw": "{\n    \"@type\": \"Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
 				},
 				"description": ""
 			},
@@ -554,7 +554,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+					"raw": "{\n    \"@type\": \"Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
 				},
 				"description": ""
 			},
@@ -593,7 +593,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"@type\": \"Plone Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
+					"raw": "{\n    \"@type\": \"Site\",\n    \"title\": \"Site 1\",\n    \"id\": \"site1\",\n    \"description\": \"Description\"\n}"
 				},
 				"description": ""
 			},
