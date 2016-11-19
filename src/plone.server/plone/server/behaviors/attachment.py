@@ -18,4 +18,3 @@ class IAttachment(Interface):
 
 class IMarkerAttachment(Interface):
     """Marker interface for content with attachment."""
-

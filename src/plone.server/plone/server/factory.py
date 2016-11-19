@@ -234,7 +234,7 @@ class DataBase(object):
 
     def open(self):
         tm_ = RequestAwareTransactionManager()
-        return self._db.open(transaction_manager=self.tm_)
+        return self._db.open(transaction_manager=tm_)
 
     def _open(self):
         self._conn = self._db.open(transaction_manager=self.tm_)

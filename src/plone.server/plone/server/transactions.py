@@ -306,10 +306,10 @@ def locked(obj):
     """
     try:
         return ASYNCIO_LOCKS.get(obj._p_oid) or \
-               ASYNCIO_LOCKS.setdefault(obj._p_oid, asyncio.Lock())
+            ASYNCIO_LOCKS.setdefault(obj._p_oid, asyncio.Lock())
     except AttributeError:  # obj has no _p_oid
         return ASYNCIO_LOCKS.get(id(obj)) or \
-               ASYNCIO_LOCKS.setdefault(id(obj), asyncio.Lock())
+            ASYNCIO_LOCKS.setdefault(id(obj), asyncio.Lock())
 
 
 def tm(request):

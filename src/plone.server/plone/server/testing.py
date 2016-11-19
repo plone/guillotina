@@ -13,28 +13,6 @@ import sys
 import time
 import unittest
 
-# TO REMOVE ON ZODB 5.0.1
-import ZODB
-def storeBlob(self, oid, oldserial, data, blobfilename, version,
-              transaction):
-    assert version=='', "versions aren't supported"
-    if transaction is not self._transaction:
-        raise ZODB.POSException.StorageTransactionError(self, transaction)
-
-    # Since the OID is being used, we don't have to keep up with it any
-    # more. Save it now so we can forget it later. :)
-    self._stored_oids.add(oid)
-
-    try:
-        self.changes.storeBlob(
-            oid, oldserial, data, blobfilename, '', transaction)
-    except AttributeError:
-        if not self._blobify():
-            raise
-        self.changes.storeBlob(
-            oid, oldserial, data, blobfilename, '', transaction)
-ZODB.DemoStorage.DemoStorage.storeBlob = storeBlob
-###################
 
 TESTING_PORT = 55001
 

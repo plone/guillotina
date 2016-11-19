@@ -132,5 +132,5 @@ class DefaultCatalogDataAdapter(object):
 
         if hasattr(self.content, '__parent__')\
                 and self.content.__parent__ is not None:
-            values['parent'] = IUUID(self.content.__parent__)
+            values['parent'] = self.content.__parent__.uuid
         return values

@@ -9,6 +9,7 @@ import logging
 
 logger = logging.getLogger('plone.server')
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--configuration',
@@ -20,7 +21,8 @@ def main():
 
     with open(arguments.configuration, 'r') as config:
         settings = json.load(config)
-    web.run_app(make_app(config_file=arguments.configuration), port=settings['address'])
+    web.run_app(make_app(
+        config_file=arguments.configuration), port=settings['address'])
 
 
 if __name__ == '__main__':

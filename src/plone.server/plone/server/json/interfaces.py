@@ -104,4 +104,3 @@ class IResourceFieldDeserializer(Interface):
 
 class IJSONToValue(Interface):
     """Adapter to transform JSON value to zope.schema value."""
-
