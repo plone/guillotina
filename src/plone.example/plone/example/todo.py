@@ -44,9 +44,10 @@ class ITodo(IExampleBase):
         default=u''
     )
 
-    fieldset(u'other',
-                   label=u'Additional Information',
-                   fields=['assigned_to', 'notes'])
+    fieldset(
+        u'other',
+        label=u'Additional Information',
+        fields=['assigned_to', 'notes'])
 
 
 @implementer(ITodo)
