@@ -211,10 +211,13 @@ class PloneBaseLayer(PloneServerBaseLayer):
         }))
         assert resp.status_code in (200, 401)  # 401 is if site already exists...
         cls.portal = cls.app['plone']['plone']
+        cls.active_connections = []
 
     @classmethod
     def testTearDown(cls):
         # Restore the copy of the DB
+        for conn in cls.active_connections:
+            conn.close()
         try:
             resp = cls.requester('DELETE', '/plone/plone/')
         except requests.exceptions.ConnectionError:
@@ -228,6 +231,12 @@ class PloneBaseLayer(PloneServerBaseLayer):
         # restore_connection = cls.app['plone'].open()
         # mock = MockView(cls.app['plone'], restore_connection, restore)
         # mock()
+
+    @classmethod
+    def new_root(cls):
+        conn = cls.app._dbs['plone'].open()
+        cls.active_connections.append(conn)
+        return conn.root()
 
 
 class PloneServerBaseTestCase(unittest.TestCase):

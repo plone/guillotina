@@ -58,6 +58,9 @@ class RecordsProxy(object):
 @implementer(IRegistry)
 class Registry(Persistent):
 
+    __name__ = '_registry'
+    portal_type = 'Registry'
+
     def __init__(self):
         self._Registry__data = OOBTree()
         self.__len = Length()

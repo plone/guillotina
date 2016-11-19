@@ -5,6 +5,8 @@ from plone.server.browser import Response
 from plone.server.content import createContent
 from plone.server.json.interfaces import IResourceSerializeToJson
 from zope.component import getMultiAdapter
+from zope.lifecycleevent import ObjectAddedEvent
+from zope.event import notify
 
 
 class DefaultGET(Service):
@@ -60,6 +62,8 @@ class DefaultPOST(Service):
         self.context[data['id']] = site
 
         site.install()
+
+        notify(ObjectAddedEvent(site, self.context, data['id']))
 
         resp = {
             '@type': 'Site',

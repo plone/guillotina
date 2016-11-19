@@ -21,7 +21,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         sometimes the site does not get updated data from zodb
         this seems to make it
         """
-        return self.layer.app._dbs['plone']['plone']
+        return self.layer.new_root()['plone']
 
     def test_get_root(self):
         """Get the application root."""
@@ -153,6 +153,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'PATCH',
             '/plone/plone/file1/@upload/file',
             data=data)
+        site = self._get_site()
         behavior = IAttachment(site['file1'])
         self.assertEqual(behavior.file.data, data)
 
