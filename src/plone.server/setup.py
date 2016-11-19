@@ -27,10 +27,8 @@ setup(
     ],
     zip_safe=True,
     include_package_data=True,
-    package_dir=None if os.path.isdir('plone') else {'':
-      os.path.join('src', 'plone.server')},
-    packages=find_packages('./' if os.path.isdir('plone') else
-      os.path.join('src', 'plone.server'), exclude=['ez_setup']),
+    package_dir=None if os.path.isdir('plone') else {'': os.path.join('src', 'plone.server')},  # noqa
+    packages=find_packages('./' if os.path.isdir('plone') else os.path.join('src', 'plone.server'), exclude=['ez_setup']),  # noqa
     namespace_packages=['plone'],
     install_requires=[
         'aiohttp==1.0.5',
