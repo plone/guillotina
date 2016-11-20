@@ -27,6 +27,7 @@ from plone.server.registry import Registry
 from plone.server.utils import Lazy
 from plone.server.transactions import synccontext
 from plone.server.transactions import get_current_request
+from plone.server.utils import get_authenticated_user_id
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtility
 from zope.component.factory import Factory
@@ -184,11 +185,11 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
     obj = factory()
     obj.__name__ = id_
     obj.__parent__ = container
-    container[id_] = obj
     if 'id' not in kw:
         kw['id'] = id_
     for key, value in kw.items():
         setattr(obj, key, value)
+    container[id_] = obj
     return obj
 
 

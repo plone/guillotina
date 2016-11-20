@@ -22,27 +22,13 @@ class CommitHook(object):
         self.site_id = site_id
         self.loop = loop
 
-    def __call__(self, trns):
+    async def __call__(self, trns):
         if not trns:
             return
         # Commits are run in sync thread so there is no asyncloop
         search = getUtility(ICatalogUtility)
-        future = asyncio.run_coroutine_threadsafe(
-            search.remove(self.remove, self.site_id), self.loop)
-        future2 = asyncio.run_coroutine_threadsafe(
-            search.index(self.index, self.site_id), self.loop)
-
-        try:
-            result = future.result(30)
-            result = future2.result(30)
-        except asyncio.TimeoutError:
-            logger.info('The coroutine took too long, cancelling the task...')
-            future.cancel()
-            future2.cancel()
-        except Exception as exc:
-            logger.info('The coroutine raised an exception: {!r}'.format(exc))
-        else:
-            logger.info('The coroutine returned: {!r}'.format(result))
+        await search.remove(self.remove, self.site_id)
+        await search.index(self.index, self.site_id)
 
         self.index = {}
         self.remove = []
