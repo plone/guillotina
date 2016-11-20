@@ -95,17 +95,13 @@ def add_object(obj, event):
         hook.index[uid] = search.get_data(obj)
 
 
-def add_index(obj, event):
+async def add_index(obj, event):
     search = queryUtility(ICatalogUtility)
     if search is not None:
-        loop = asyncio.new_event_loop()
-        asyncio.run_coroutine_threadsafe(
-            search.create_index(obj.id), loop)
+        await search.create_index(obj.id)
 
 
-def remove_index(obj, event):
+async def remove_index(obj, event):
     search = queryUtility(ICatalogUtility)
     if search is not None:
-        loop = asyncio.new_event_loop()
-        asyncio.run_coroutine_threadsafe(
-            search.remove_index(obj.id), loop)
+        await search.remove_index(obj.id)

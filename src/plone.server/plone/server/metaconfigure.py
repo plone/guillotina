@@ -27,6 +27,13 @@ from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
+from zope.security.zcml import Permission
+from zope.component._declaration import adaptedBy
+from zope.component.security import protectedFactory
+from zope.component.security import securityAdapterFactory
+from zope.component._compat import _BLANK
+from zope.component.interface import provideInterface
+from zope.component._api import getSiteManager
 
 import json
 import logging
@@ -293,3 +300,4 @@ def addOn(_context, name, title, handler):
             'title': title,
             'handler': handler
         }
+

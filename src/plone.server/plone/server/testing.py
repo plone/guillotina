@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import plone.server.patch  # noqa
 from aiohttp.test_utils import make_mocked_request
 from plone.server.browser import View
 from plone.server.factory import IApplication

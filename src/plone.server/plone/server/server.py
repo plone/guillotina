@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
+import plone.server.patch  # noqa
 from plone.server.factory import make_app
 
 import argparse
