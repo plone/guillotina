@@ -6,7 +6,7 @@ from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from plone.server import _
-from plone.server import DICT_METHODS
+from plone.server import app_settings
 from plone.server.api.content import DefaultOPTIONS
 from plone.server.api.layer import IDefaultLayer
 from plone.server.auth.participation import AnonymousParticipation
@@ -24,7 +24,6 @@ from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
 from plone.server.interfaces import ITraversableView
 from plone.server.registry import ACTIVE_LAYERS_KEY
-from plone.server import CORS
 from plone.server.interfaces import SHARED_CONNECTION
 from plone.server.interfaces import WRITING_VERBS
 from plone.server.interfaces import SUBREQUEST_METHODS
@@ -285,7 +284,7 @@ class TraversalRouter(AbstractRouter):
         request.site_components = getGlobalSiteManager()
         request.security = IInteraction(request)
 
-        method = DICT_METHODS[request.method]
+        method = app_settings['http_methods'][request.method]
 
         language = language_negotiation(request)
         language_object = language(request)
@@ -337,7 +336,7 @@ class TraversalRouter(AbstractRouter):
 
         if not allowed:
             # Check if its a CORS call:
-            if IOPTIONS != method or not CORS:
+            if IOPTIONS != method or not app_settings['cors']:
                 logger.warn("No access content {content} with {auths}".format(
                     content=resource,
                     auths=str([x.principal.id
@@ -371,7 +370,7 @@ class TraversalRouter(AbstractRouter):
 
         if view is None and method == IOPTIONS:
             if (not hasattr(request, 'site_settings') or
-                    request.site_settings.get(CORS, False)):
+                    request.site_settings.get(app_settings['cors'], False)):
                 # Its a CORS call, we could not find any OPTION definition
                 # Lets create a default preflight view
                 # We check for site_settings in case the call is to some url before site
@@ -400,12 +399,6 @@ class TraversalRouter(AbstractRouter):
         return await traverse(request, root, path)
 
     async def apply_authorization(self, request):
-        # first, use default root participation
-        participation = request.application.root_participation(request)
-        if participation:
-            logger.info('Root Participation added')
-            request.security.add(participation)
-
         # User participation
         participation = IParticipation(request)
         # Lets extract the user from the request

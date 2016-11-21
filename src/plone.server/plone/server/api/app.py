@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from plone.server import JSON_API_DEFINITION
+from plone.server import app_settings
 from plone.server.api.service import Service
 from plone.server.json.interfaces import IResourceSerializeToJson
 from zope.component import getMultiAdapter
@@ -20,4 +20,4 @@ class DefaultGET(Service):
 
 class GetAPIDefinition(Service):
     async def __call__(self):
-        return JSON_API_DEFINITION
+        return app_settings['api_definition']

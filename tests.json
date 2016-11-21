@@ -29,7 +29,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -63,7 +63,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -87,7 +87,7 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Basic YWRtaW4=",
+								"value": "Basic admin",
 								"description": ""
 							}
 						],
@@ -154,7 +154,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -188,7 +188,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					},
 					{
@@ -217,7 +217,7 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Basic YWRtaW4=",
+								"value": "Basic admin",
 								"description": ""
 							},
 							{
@@ -295,7 +295,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					},
 					{
@@ -334,7 +334,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -368,7 +368,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -402,7 +402,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -436,7 +436,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					},
 					{
@@ -475,7 +475,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -509,7 +509,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					}
 				],
@@ -543,7 +543,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					},
 					{
@@ -582,7 +582,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic YWRtaW4=",
+						"value": "Basic admin",
 						"description": ""
 					},
 					{

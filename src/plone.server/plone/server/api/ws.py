@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
-from plone.server import DICT_METHODS
+from plone.server import app_settings
+from plone.server import jose
+from datetime import datetime
+from datetime import timedelta
 from plone.server.api.service import Service
 from plone.server.browser import Response
 from plone.server.interfaces import ITraversableView
@@ -15,6 +18,20 @@ import ujson
 
 
 logger = logging.getLogger(__name__)
+
+
+def generate_websocket_token(self, real_token):
+    exp = datetime.utcnow() + timedelta(
+        seconds=self._websockets_ttl)
+
+    claims = {
+        'iat': int(datetime.utcnow().timestamp()),
+        'exp': int(exp.timestamp()),
+        'token': real_token
+    }
+    jwe = jose.encrypt(claims, app_settings['rsa']['priv'])
+    token = jose.serialize_compact(jwe)
+    return token.decode('utf-8')
 
 
 class WebsocketGetToken(Service):
@@ -49,7 +66,7 @@ class WebsocketsView(Service):
                 if message['op'] == 'close':
                     await ws.close()
                 elif message['op'] == 'GET':
-                    method = DICT_METHODS['GET']
+                    method = app_settings['http_methods']['GET']
                     path = tuple(p for p in message['value'].split('/') if p)
                     obj, tail = await do_traverse(
                         self.request, self.request.site, path)
