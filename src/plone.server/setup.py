@@ -8,8 +8,12 @@ import os
 setup(
     name='plone.server',
     version=open('VERSION').read().strip(),
+    description='asyncio transactional server to build REST API / Websocket with ZODB',  # noqa
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
+    keywords=['asyncio', 'ZODB', 'REST', 'Framework', 'transactional'],
+    author='Ramon & Asko & Nathan',
+    author_email='ramon@plone.org',
     classifiers=[
         'License :: OSI Approved :: BSD License',
         'Framework :: ZODB',
