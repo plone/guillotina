@@ -49,15 +49,13 @@ def subscribers(self, objects, provided):
                 result.append(subscriber)
     return result
 
+
 AdapterLookupBase.asubscribers = asubscribers
 AdapterLookupBase.subscribers = subscribers
 
 
-
-
 async def acommit(self):
-    """ See ITransaction.
-    """
+    """See ITransaction."""
     if self.status is Status.DOOMED:
         raise interfaces.DoomedTransaction(
             'transaction doomed, cannot commit')
@@ -66,7 +64,7 @@ async def acommit(self):
         self._invalidate_all_savepoints()
 
     if self.status is Status.COMMITFAILED:
-        self._prior_operation_failed() # doesn't return
+        self._prior_operation_failed()  # doesn't return
 
     await self._acallBeforeCommitHooks()
 

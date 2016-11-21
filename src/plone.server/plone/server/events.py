@@ -40,6 +40,7 @@ async def notify(event):
     for subscriber in asyncsubscribers:
         await subscriber(event)
 
+
 async def dispatch(*event):
     try:
         sitemanager = getSiteManager()
