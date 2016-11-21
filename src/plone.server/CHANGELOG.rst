@@ -1,4 +1,4 @@
-1.0a6 (unreleased)
+1.0a6 (2016-11-21)
 ------------------
 
 - Fix issue where you could not save data with the API
