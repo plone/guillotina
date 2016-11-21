@@ -179,9 +179,13 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
                 not request.security.checkPermission(permission.id, container):
             raise NoPermissionToAdd(str(container), type_)
 
-    if factory.allowed_types is not None and \
-            type_ not in factory.allowed_types:
-        raise NotAllowedContentType(str(container), type_)
+    # allowed types is defined on the parent object
+    parent_pt = getattr(container, 'portal_type', None)
+    if parent_pt:
+        parent_factory = getCachedFactory(parent_pt)
+        if parent_factory.allowed_types is not None and \
+                type_ not in parent_factory.allowed_types:
+            raise NotAllowedContentType(str(container), type_)
     obj = factory()
     obj.__name__ = id_
     obj.__parent__ = container
