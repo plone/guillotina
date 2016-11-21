@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from plone.server.interfaces import IFactory
 from plone.server.interfaces import IRequest
+from plone.server.json.interfaces import IFactorySerializeToJson
 from plone.server.json.interfaces import ISchemaFieldSerializeToJson
 from plone.server.json.interfaces import ISchemaSerializeToJson
-from plone.server.json.interfaces import IFactorySerializeToJson
-from zope.schema import getFieldsInOrder
 from zope.component import adapter
 from zope.component import getMultiAdapter
+from zope.component.interfaces import IFactory
 from zope.interface import implementer
 from zope.interface import Interface
+from zope.schema import getFieldsInOrder
 
 
 @implementer(IFactorySerializeToJson)
