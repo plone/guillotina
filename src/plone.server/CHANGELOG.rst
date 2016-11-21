@@ -1,4 +1,4 @@
-1.0a5 (unreleased)
+1.0a5 (2016-11-21)
 ------------------
 
 - Adding zope.event compatible async handlers for ElasticSearch and other events handlers [@bloodbare]
