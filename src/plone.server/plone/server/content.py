@@ -223,6 +223,7 @@ class Resource(Persistent):
     uuid = None
     creation_date = None
     modification_date = None
+    title = None
 
     def __init__(self, id=None):
         if id is not None:
