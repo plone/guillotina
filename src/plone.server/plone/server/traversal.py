@@ -109,18 +109,7 @@ async def subrequest(orig_request, path, relative_to_site=True,
 async def traverse(request, parent, path):
     """Do not use outside the main router function."""
     if IApplication.providedBy(parent):
-        # Manager participation
-        participation = parent.root_participation(request)
-        if participation:
-            logger.info('Root Participation added')
-            request.security.add(participation)
-
-        # User participation
-        participation = IParticipation(request)
-        # Lets extract the user from the request
-        await participation()
-        if participation.principal is not None:
-            request.security.add(participation)
+        request.application = parent
 
     if not path:
         return parent, path
@@ -329,6 +318,8 @@ class TraversalRouter(AbstractRouter):
             view_name = tail[0]
             traverse_to = tail[1:]
 
+        await self.apply_authorization(request)
+
         translator = queryMultiAdapter(
             (language_object, resource, request),
             ITranslated)
@@ -407,3 +398,17 @@ class TraversalRouter(AbstractRouter):
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
+
+    async def apply_authorization(self, request):
+        # first, use default root participation
+        participation = request.application.root_participation(request)
+        if participation:
+            logger.info('Root Participation added')
+            request.security.add(participation)
+
+        # User participation
+        participation = IParticipation(request)
+        # Lets extract the user from the request
+        await participation()
+        if participation.principal is not None:
+            request.security.add(participation)
