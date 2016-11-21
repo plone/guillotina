@@ -72,6 +72,13 @@ class IRegistry(IFullMapping):
 class IResource(IContained):
     portal_type = schema.TextLine()
 
+    title = schema.TextLine(
+        title='Title',
+        required=False,
+        description=u"Title of the Site",
+        default=u''
+    )
+
 
 class IResourceFactory(IFactory):
 
@@ -102,12 +109,7 @@ class IResourceFactory(IFactory):
 
 
 class ISite(IResource, IZopeSite):
-    title = schema.TextLine(
-        title='Title',
-        required=False,
-        description=u"Title of the Site",
-        default=u''
-    )
+    pass
 
 
 class IItem(IResource):

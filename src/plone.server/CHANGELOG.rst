@@ -1,7 +1,8 @@
 1.0a6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix issue where you could not save data with the API
+  [vangheem]
 
 
 1.0a5 (2016-11-21)

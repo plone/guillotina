@@ -89,6 +89,9 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             })
         )
         self.assertTrue(resp.status_code == 201)
+        root = self.layer.new_root()
+        obj = root['plone']['item1']
+        self.assertEqual(obj.title, 'Item1')
 
     def test_create_delete_contenttype(self):
         """Create and delete a content type."""

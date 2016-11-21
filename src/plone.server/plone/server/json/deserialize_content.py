@@ -98,7 +98,7 @@ class DeserializeFromJson(object):
                         errors.append({
                             'message': e.doc(), 'field': name, 'error': e})
                     else:
-                        setattr(schema, name, value)
+                        setattr(obj, name, value)
         if validate_all:
             validation = getValidationErrors(schema, schema(self.context))
 
