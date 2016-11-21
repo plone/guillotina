@@ -7,6 +7,9 @@
 1.0a6 (2016-11-21)
 ------------------
 
+- Move authorization to after traversal
+  [vangheem]
+
 - Fix issue where you could not save data with the API
   [vangheem]
 
