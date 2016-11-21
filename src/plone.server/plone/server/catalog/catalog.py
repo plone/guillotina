@@ -91,11 +91,12 @@ class DefaultCatalogDataAdapter(object):
         for schema in iterSchemataForType(self.content.portal_type):
             # create export of the cataloged fields
             catalog = mergedTaggedValueDict(schema, CATALOG_KEY)
+            behavior = schema(self.content)
             for field_name, field in getFields(schema).items():
                 kind_catalog = catalog.get(field_name, False)
                 if kind_catalog:
-                    real_field = field.bind(self.content)
-                    value = real_field.get(self.content)
+                    real_field = field.bind(behavior)
+                    value = real_field.get(behavior)
                     ident = schema.getName() + '-' + real_field.getName()
                     values[ident] = value
 

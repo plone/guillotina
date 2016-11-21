@@ -126,12 +126,7 @@ async def traverse(request, parent, path):
         return parent, path
 
     assert request is not None  # could be used for permissions, etc
-    # dbo = None
-    # import pdb; pdb.set_trace()
-    # if IDataBase.providedBy(parent):
-    #     # Look on the PersistentMapping from the DB
-    #     dbo = parent
-    #     parent = request.conn.root()
+
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
@@ -140,11 +135,6 @@ async def traverse(request, parent, path):
         return parent, path
     except KeyError:
         return parent, path
-
-    # if dbo is not None:
-    #     context._v_parent = dbo
-    # else:
-    #     context._v_parent = parent
 
     if IDataBase.providedBy(context):
         if SHARED_CONNECTION:
@@ -201,7 +191,7 @@ class MatchInfo(AbstractMatchInfo):
                             await sync(request)(txn.abort)
                     else:
                         if SHARED_CONNECTION is False:
-                            txn.commit()
+                            await txn.acommit()
                         else:
                             await sync(request)(txn.commit)
             except Unauthorized:
