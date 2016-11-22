@@ -8,6 +8,9 @@
 - Correctly check parent object for allowed addable types
   [vangheem]
 
+- Get default values from schema when attribute on object is not set
+  [bloodbare]
+
 
 1.0a6 (2016-11-21)
 ------------------

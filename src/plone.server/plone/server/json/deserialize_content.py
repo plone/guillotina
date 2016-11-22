@@ -2,6 +2,10 @@
 from plone.server.interfaces import WRITE_PERMISSIONS_KEY
 from plone.server.interfaces import IResource
 from plone.server.content import iterSchemata
+from zope.interface.exceptions import Invalid
+from zope.interface.interfaces import IMethod
+from zope.schema.interfaces import IField
+from zope.schema.interfaces import SchemaNotFullyImplemented
 from plone.server.json.interfaces import IResourceDeserializeFromJson
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceFieldDeserializer
@@ -15,7 +19,6 @@ from zope.interface import Interface
 from zope.interface import implementer
 from zope.lifecycleevent import ObjectModifiedEvent
 from zope.schema import getFields
-from zope.schema import getValidationErrors
 from zope.schema.interfaces import ValidationError
 from zope.security.interfaces import IPermission
 from zope.security import checkPermission
@@ -70,6 +73,7 @@ class DeserializeFromJson(object):
             else:
                 data_value = data[name] if name in data else None
 
+            f = schema.get(name)
             if data_value is not None:
 
                 if not self.check_permission(write_permissions.get(name)):
@@ -91,7 +95,6 @@ class DeserializeFromJson(object):
                     errors.append({
                         'message': e.doc(), 'field': name, 'error': e})
                 else:
-                    f = schema.get(name)
                     try:
                         f.validate(value)
                     except ValidationError as e:
@@ -99,8 +102,20 @@ class DeserializeFromJson(object):
                             'message': e.doc(), 'field': name, 'error': e})
                     else:
                         setattr(obj, name, value)
+            else:
+                if f.required and not hasattr(obj, name):
+                    errors.append({
+                        'message': 'Required parameter', 'field': name,
+                        'error': ValueError('Required parameter')})
+
         if validate_all:
-            validation = getValidationErrors(schema, schema(self.context))
+            invariant_errors = []
+            try:
+                schema.validateInvariants(object, invariant_errors)
+            except Invalid:
+                # Just collect errors
+                pass
+            validation = [(None, e) for e in invariant_errors]
 
             if len(validation):
                 for e in validation:
@@ -123,3 +138,5 @@ class DeserializeFromJson(object):
                 self.permission_cache[permission_name] = bool(
                     checkPermission(permission.title, self.context))
         return self.permission_cache[permission_name]
+
+
