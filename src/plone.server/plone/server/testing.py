@@ -6,6 +6,12 @@ from plone.server.factory import IApplication
 from plone.server.factory import make_app
 from zope.component import getUtility
 from zope.configuration.xmlconfig import include
+from zope.component import getGlobalSiteManager
+from zope.security.interfaces import IInteraction
+from plone.server.api.layer import IDefaultLayer
+from plone.server.interfaces import IRequest
+from zope.interface import implementer
+from plone.server.auth.participation import RootParticipation
 
 import asyncio
 import json
@@ -240,16 +246,35 @@ class PloneBaseLayer(PloneServerBaseLayer):
         return conn.root()
 
 
-class PloneServerBaseTestCase(unittest.TestCase):
+@implementer(IRequest, IDefaultLayer)
+class FakeRequest(object):
+
+    def __init__(self):
+        self.site_components = getGlobalSiteManager()
+        self.security = IInteraction(self)
+
+
+class PloneBaseTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.request = FakeRequest()
+
+    def login(self):
+        self.request.security.add(RootParticipation(self.request))
+        self.request.security.invalidate_cache()
+        self.request._cache_groups = {}
+
+
+class PloneServerBaseTestCase(PloneBaseTestCase):
     """ Only the app created """
     layer = PloneServerBaseLayer
 
 
-class PloneQueueServerTestCase(unittest.TestCase):
+class PloneQueueServerTestCase(PloneBaseTestCase):
     """ Adding the Queue utility """
     layer = PloneQueueLayer
 
 
-class PloneFunctionalTestCase(unittest.TestCase):
+class PloneFunctionalTestCase(PloneBaseTestCase):
     """ With Site and Requester utility """
     layer = PloneBaseLayer

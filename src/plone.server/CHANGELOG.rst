@@ -1,7 +1,8 @@
 1.0a7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Correctly check parent object for allowed addable types
+  [vangheem]
 
 
 1.0a6 (2016-11-21)
