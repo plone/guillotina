@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
-from datetime import datetime
-from datetime import timedelta
 from pkg_resources import iter_entry_points
-from plone.server import DICT_LANGUAGES
-from plone.server import DICT_RENDERS
-from plone.server import CORS
-from plone.server import jose
+from plone.server import app_settings
 from plone.server.async import IAsyncUtility
-from plone.server.auth.participation import RootParticipation
+from plone.server.auth.checkers import hash_password
+from plone.server.auth.participation import ROOT_USER_ID
+from plone.server.auth.participation import RootUser
 from plone.server.content import IStaticDirectory
 from plone.server.content import IStaticFile
 from plone.server.content import StaticFile
@@ -27,20 +24,19 @@ from zope.component import getAllUtilitiesRegisteredFor
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import provideUtility
-from zope.interface import alsoProvides
 from zope.configuration.config import ConfigurationConflictError
 from zope.configuration.config import ConfigurationMachine
 from zope.configuration.xmlconfig import include
 from zope.configuration.xmlconfig import registerCommonDirectives
+from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
 import asyncio
-import transaction
-import base64
 import json
 import logging
 import sys
+import transaction
 import ZODB.FileStorage
 
 
@@ -54,6 +50,8 @@ logger = logging.getLogger(__name__)
 
 @implementer(IApplication)
 class ApplicationRoot(object):
+
+    root_user = None
 
     def __init__(self, config_file):
         self._dbs = {}
@@ -90,53 +88,11 @@ class ApplicationRoot(object):
         gsm = getGlobalSiteManager()
         gsm.unregisterUtility(utility, provided=interface)
 
-    def set_creator_password(self, password):
-        self._creator_password = base64.b64decode(password)
-
-    def set_priv_key(self, key):
-        self._websockets_priv_key = key
-
-    def set_pub_key(self, key):
-        self._websockets_pub_key = key
-
-    def generate_websocket_token(self, real_token):
-        exp = datetime.utcnow() + timedelta(
-            seconds=self._websockets_ttl)
-
-        claims = {
-            'iat': int(datetime.utcnow().timestamp()),
-            'exp': int(exp.timestamp()),
-            'token': real_token
-        }
-        jwe = jose.encrypt(claims, self._websockets_pub_key)
-        token = jose.serialize_compact(jwe)
-        return token.decode('utf-8')
-
-    def extract_websocket_token(self, jwt_token):
-        jwt = jose.decrypt(
-            jose.deserialize_compact(jwt_token), self._websockets_priv_key)
-        return jwt.claims['token']
-
-    def check_token(self, password):
-        if self._creator_password == base64.b64decode(password):
-            return True
-        else:
-            return False
-
-    def root_participation(self, request):
-        header_auth = request.headers.get('AUTHORIZATION')
-        token = None
-        if header_auth is not None:
-            schema, _, encoded_token = header_auth.partition(' ')
-            if schema.lower() == 'basic' or schema.lower() == 'bearer':
-                token = encoded_token.encode('ascii')
-
-        if 'ws_token' in request.GET:
-            token = self.extract_websocket_token(request.GET['ws_token'].encode('utf-8'))
-
-        if token and self.check_token(token):
-            return RootParticipation(request)
-        return None
+    def set_root_user(self, user):
+        password = user['password']
+        if password:
+            password = hash_password(password)
+        self.root_user = RootUser(password)
 
     def __contains__(self, key):
         return True if key in self._dbs else False
@@ -213,12 +169,12 @@ class RootSpecialPermissions(PrincipalPermissionManager):
     """
     def __init__(self, db):
         super(RootSpecialPermissions, self).__init__()
-        self.grantPermissionToPrincipal('plone.AddPortal', 'RootUser')
-        self.grantPermissionToPrincipal('plone.GetPortals', 'RootUser')
-        self.grantPermissionToPrincipal('plone.DeletePortals', 'RootUser')
-        self.grantPermissionToPrincipal('plone.AccessContent', 'RootUser')
-        self.grantPermissionToPrincipal('plone.GetDatabases', 'RootUser')
-        self.grantPermissionToPrincipal('plone.GetAPIDefinition', 'RootUser')
+        self.grantPermissionToPrincipal('plone.AddPortal', ROOT_USER_ID)
+        self.grantPermissionToPrincipal('plone.GetPortals', ROOT_USER_ID)
+        self.grantPermissionToPrincipal('plone.DeletePortals', ROOT_USER_ID)
+        self.grantPermissionToPrincipal('plone.AccessContent', ROOT_USER_ID)
+        self.grantPermissionToPrincipal('plone.GetDatabases', ROOT_USER_ID)
+        self.grantPermissionToPrincipal('plone.GetAPIDefinition', ROOT_USER_ID)
         # Access anonymous - needs to be configurable
         self.grantPermissionToPrincipal(
             'plone.AccessContent', 'Anonymous User')
@@ -303,6 +259,14 @@ def make_app(config_file=None, settings=None):
     else:
         raise Exception('Neither configuration or settings')
 
+    # with settings, update app_settings, where defaults are defined and
+    # we setup the app from
+    for key, value in settings.items():
+        if isinstance(app_settings.get(key), dict):
+            app_settings[key].update(value)
+        else:
+            app_settings[key] = value
+
     # Create root Application
     root = ApplicationRoot(config_file)
     root.app = app
@@ -321,13 +285,15 @@ def make_app(config_file=None, settings=None):
         logger.error(str(e._conflicts))
         raise e
 
-    content_type = ContentNegotiatorUtility('content_type', DICT_RENDERS.keys())
-    language = ContentNegotiatorUtility('language', DICT_LANGUAGES.keys())
+    content_type = ContentNegotiatorUtility(
+        'content_type', app_settings['renderers'].keys())
+    language = ContentNegotiatorUtility(
+        'language', app_settings['languages'].keys())
 
     provideUtility(content_type, IContentNegotiation, 'content_type')
     provideUtility(language, IContentNegotiation, 'language')
 
-    for database in settings['databases']:
+    for database in app_settings['databases']:
         for key, dbconfig in database.items():
             config = dbconfig.get('configuration', {})
             if dbconfig['storage'] == 'ZODB':
@@ -377,18 +343,20 @@ def make_app(config_file=None, settings=None):
                 dbo = DataBase(key, db)
             root[key] = dbo
 
-    for static in settings['static']:
+    for static in app_settings['static']:
         for key, file_path in static.items():
             root[key] = StaticFile(file_path)
 
-    root.set_creator_password(settings['creator']['password'])
+    root.set_root_user(app_settings['root_user'])
 
-    if RSA is not None:
+    if RSA is not None and not app_settings.get('rsa'):
         key = RSA.generate(2048)
         pub_jwk = {'k': key.publickey().exportKey('PEM')}
         priv_jwk = {'k': key.exportKey('PEM')}
-        root.set_priv_key(priv_jwk)
-        root.set_pub_key(pub_jwk)
+        app_settings['rsa'] = {
+            'pub': pub_jwk,
+            'priv': priv_jwk
+        }
 
     # Set router root from the ZODB connection
     app.router.set_root(root)
@@ -398,10 +366,7 @@ def make_app(config_file=None, settings=None):
         ident = asyncio.ensure_future(utility.initialize(app=app), loop=app.loop)
         root.add_async_utility(ident, {})
 
-    for util in settings['utilities']:
+    for util in app_settings['utilities']:
         root.add_async_utility(util)
-
-    if 'cors' in settings:
-        CORS.update(settings['cors'])
 
     return app

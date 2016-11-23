@@ -2,7 +2,7 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
 from dateutil.tz import tzutc
-from plone.server import DICT_LANGUAGES
+from plone.server import app_settings
 from plone.server.behaviors.properties import ContextProperty
 from plone.server.directives import catalog
 from plone.server.directives import index
@@ -22,7 +22,7 @@ OPTIONS = [
     SimpleTerm(value=_languagelist[l]['native'],
                token=l,
                title=_languagelist[l]['name'])
-    for l in DICT_LANGUAGES.keys() if l in _languagelist
+    for l in app_settings['languages'].keys() if l in _languagelist
 ]
 language_vocabulary = SimpleVocabulary(OPTIONS)
 _zone = tzlocal()

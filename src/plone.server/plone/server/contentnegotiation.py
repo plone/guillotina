@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
-from plone.server import DICT_LANGUAGES
-from plone.server import DICT_RENDERS
+from plone.server import app_settings
 from plone.server.interfaces import IContentNegotiation
 from plone.server.interfaces import IDownloadView
 from zope.component import getUtility
@@ -813,13 +812,13 @@ def content_type_negotiation(request, resource, view):
     if IDownloadView.providedBy(view) or accept is None:
         # Its going to be binary
         # No content negotiation right now
-        accept = DICT_RENDERS['*/*']
+        accept = app_settings['renderers']['*/*']
         return accept
 
     np = getUtility(IContentNegotiation, 'content_type')
     ap = np.negotiate(accept=accept)
     # We need to check for the accept
-    accept = DICT_RENDERS[str(ap.content_type)]
+    accept = app_settings['renderers'][str(ap.content_type)]
     return accept
 
 
@@ -835,7 +834,7 @@ def language_negotiation(request):
     ap = np.negotiate(accept_language=accept_lang)
     # We need to check for the accept
     if ap is None:
-        language = DICT_LANGUAGES['en']
+        language = app_settings['languages']['en']
     else:
-        language = DICT_LANGUAGES[str(ap.language)]
+        language = app_settings['languages'][str(ap.language)]
     return language

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.server import CORS
+from plone.server import app_settings
+from zope.dottedname.resolve import resolve
 
 import fnmatch
 import importlib
@@ -45,22 +46,22 @@ async def apply_cors(request):
     origin = request.headers.get('Origin', None)
     if origin:
         if not any([fnmatch.fnmatchcase(origin, o)
-           for o in CORS['allow_origin']]):
+           for o in app_settings['cors']['allow_origin']]):
             raise HTTPUnauthorized('Origin %s not allowed' % origin)
         elif request.headers.get('Access-Control-Allow-Credentials', False):
             headers['Access-Control-Allow-Origin', origin]
         else:
-            if any([o == "*" for o in CORS['allow_origin']]):
+            if any([o == "*" for o in app_settings['cors']['allow_origin']]):
                 headers['Access-Control-Allow-Origin'] = '*'
             else:
                 headers['Access-Control-Allow-Origin'] = origin
     if request.headers.get(
             'Access-Control-Request-Method', None) != 'OPTIONS':
-        if CORS['allow_credentials']:
+        if app_settings['cors']['allow_credentials']:
             headers['Access-Control-Allow-Credentials'] = 'True'
-        if len(CORS['allow_headers']):
+        if len(app_settings['cors']['allow_headers']):
             headers['Access-Control-Expose-Headers'] = \
-                ', '.join(CORS['allow_headers'])
+                ', '.join(app_settings['cors']['allow_headers'])
     return headers
 
 
@@ -102,3 +103,9 @@ class Lazy(object):
         inst.__dict__[name] = value
 
         return value
+
+
+def resolve_or_get(potential_dotted_name):
+    if isinstance(potential_dotted_name, str):
+        return resolve(potential_dotted_name)
+    return potential_dotted_name

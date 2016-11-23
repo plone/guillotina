@@ -4,12 +4,7 @@ from collections import OrderedDict
 from functools import reduce
 from pathlib import Path as osPath
 from plone.server import _
-from plone.server import AVAILABLE_ADDONS
-from plone.server import DEFAULT_LAYER
-from plone.server import DEFAULT_PERMISSION
-from plone.server import DICT_LANGUAGES
-from plone.server import DICT_METHODS
-from plone.server import DICT_RENDERS
+from plone.server import app_settings
 from plone.server.content import ResourceFactory
 from plone.server.content import StaticDirectory
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
@@ -27,18 +22,10 @@ from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
-from zope.security.zcml import Permission
-from zope.component._declaration import adaptedBy
-from zope.component.security import protectedFactory
-from zope.component.security import securityAdapterFactory
-from zope.component._compat import _BLANK
-from zope.component.interface import provideInterface
-from zope.component._api import getSiteManager
 
 import json
 import logging
 import os
-import plone.server
 
 
 logger = logging.getLogger(__name__)
@@ -162,14 +149,14 @@ def register_service(
     logger.debug('Defining adapter for '  # noqa
                  '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
         content.__identifier__,
-        DICT_METHODS[method].__identifier__,
+        app_settings['http_methods'][method].__identifier__,
         layer.__identifier__,
         str(factory),
         name))
     adapter(
         _context,
         factory=(factory,),
-        provides=DICT_METHODS[method],
+        provides=app_settings['http_methods'][method],
         for_=(content, layer),
         name=name
     )
@@ -187,40 +174,41 @@ def apiDirective(_context, file):  # noqa 'too complex' :)
         f.close()
 
     if 'contenttypes' in json_info:
-        plone.server.JSON_API_DEFINITION = reduce(
+        app_settings['api_definition'] = reduce(
             rec_merge,
-            (json_info['contenttypes'], plone.server.JSON_API_DEFINITION))
+            (json_info['contenttypes'], app_settings['api_definition']))
 
     if 'methods' in json_info:
         for method, method_interface in json_info['methods'].items():
-            DICT_METHODS[method] = import_class(method_interface)
+            app_settings['http_methods'][method] = import_class(method_interface)
 
     if 'layer' in json_info:
         layer = json_info['layer']
         layer = import_class(layer)
-        if len(DEFAULT_LAYER) == 0:
-            DEFAULT_LAYER.append(layer)
+        if len(app_settings['default_layers']) == 0:
+            app_settings['default_layers'].append(layer)
     else:
-        layer = DEFAULT_LAYER[0]
+        layer = app_settings['default_layers'][0]
 
     if 'default_permission' in json_info:
         default_permission = json_info['default_permission']
-        if len(DEFAULT_PERMISSION) == 0:
-            DEFAULT_PERMISSION.append(default_permission)
+
+        if not app_settings['default_permission']:
+            app_settings['default_permission'] = default_permission
     else:
-        default_permission = DEFAULT_PERMISSION[0]
+        default_permission = app_settings['default_permission']
 
     if 'renderers' in json_info:
         for accept, renderer_interface in json_info['renderers'].items():
             # We define which Interface is for the content negotiation
             # Order is important !!
-            DICT_RENDERS[accept] = import_class(renderer_interface)
+            app_settings['renderers'][accept] = import_class(renderer_interface)
 
     if 'languages' in json_info:
         for language, language_interface in json_info['languages'].items():
             # We define which Interface is for the languages
             logger.debug(language_interface)
-            DICT_LANGUAGES[language] = import_class(language_interface)
+            app_settings['languages'][language] = import_class(language_interface)
 
     if 'contenttypes' in json_info:
         for contenttype, configuration in json_info['contenttypes'].items():
@@ -295,8 +283,8 @@ class IAddOn(Interface):
 
 
 def addOn(_context, name, title, handler):
-    if name not in AVAILABLE_ADDONS:
-        AVAILABLE_ADDONS[name] = {
+    if name not in app_settings['available_addons']:
+        app_settings['available_addons'][name] = {
             'title': title,
             'handler': handler
         }

@@ -11,7 +11,7 @@ from zope.security.interfaces import IInteraction
 from plone.server.api.layer import IDefaultLayer
 from plone.server.interfaces import IRequest
 from zope.interface import implementer
-from plone.server.auth.participation import RootParticipation
+from plone.server.auth.participation import RootUser
 
 import asyncio
 import json
@@ -38,7 +38,7 @@ TESTING_SETTINGS = {
     ],
     "creator": {
         "admin": "admin",
-        "password": "YWRtaW4="
+        "password": "admin"
     },
     "cors": {
         "allow_origin": ["*"],
@@ -47,6 +47,9 @@ TESTING_SETTINGS = {
         "expose_headers": ["*"],
         "allow_credentials": True,
         "max_age": 3660
+    },
+    "root_user": {
+        "password": "admin"
     },
     "utilities": []
 }
@@ -58,7 +61,7 @@ QUEUE_UTILITY_CONFIG = {
 }
 
 
-ADMIN_TOKEN = 'YWRtaW4='
+ADMIN_TOKEN = 'admin'
 DEBUG = False
 
 
@@ -216,7 +219,7 @@ class PloneBaseLayer(PloneServerBaseLayer):
             "id": "plone",
             "description": "Description Plone Site"
         }))
-        assert resp.status_code in (200, 401)  # 401 is if site already exists...
+        assert resp.status_code == 200
         cls.portal = cls.app['plone']['plone']
         cls.active_connections = []
 
@@ -254,13 +257,20 @@ class FakeRequest(object):
         self.security = IInteraction(self)
 
 
+class TestParticipation(object):
+
+    def __init__(self, request):
+        self.principal = RootUser('foobar')
+        self.interaction = None
+
+
 class PloneBaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.request = FakeRequest()
 
     def login(self):
-        self.request.security.add(RootParticipation(self.request))
+        self.request.security.add(TestParticipation(self.request))
         self.request.security.invalidate_cache()
         self.request._cache_groups = {}
 

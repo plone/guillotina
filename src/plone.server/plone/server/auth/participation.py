@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
+from plone.server.auth import authenticate_request
 from plone.server.interfaces import IRequest
-from plone.server import AUTH_EXTRACTION_PLUGINS
-from plone.server import AUTH_USER_PLUGINS
 from plone.server.transactions import get_current_request
 from zope.component import adapter
 from zope.interface import implementer
 from zope.security.interfaces import IParticipation
 
 
-class RootParticipation(object):
+ROOT_USER_ID = 'RootUser'
 
-    def __init__(self, request):
-        self.principal = PloneUser(request)
-        self.principal.id = 'RootUser'
 
-        self.principal._groups.append('Managers')
-        self.interaction = None
+class RootUser(object):
+    def __init__(self, password):
+        self.id = ROOT_USER_ID
+        self.password = password
+        self.groups = ['Managers']
+        self._roles = {}
+        self._properties = {}
 
 
 class AnonymousParticipation(object):
@@ -62,6 +63,7 @@ class PloneGroup(PloneUser):
 @adapter(IRequest)
 @implementer(IParticipation)
 class PloneParticipation(object):
+    principal = None
 
     def __init__(self, request):
         self.request = request
@@ -69,14 +71,13 @@ class PloneParticipation(object):
     async def __call__(self):
         # Cached user
         if not hasattr(self.request, '_cache_user'):
+            user = await authenticate_request(self.request)
+            if user:
+                self.request._cache_user = user
+                self.principal = user
+        else:
+            self.principal = getattr(self.request, '_cache_user', None)
 
-            for plugin in AUTH_EXTRACTION_PLUGINS:
-                await plugin(self.request).extract_user()
-
-            for plugin in AUTH_USER_PLUGINS:
-                await plugin(self.request).create_user()
-
-        self.principal = getattr(self.request, '_cache_user', None)
         self.interaction = None
 
 

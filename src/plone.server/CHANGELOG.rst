@@ -1,6 +1,10 @@
 1.0a7 (unreleased)
 ------------------
 
+- Remove `AUTH_USER_PLUGINS` and `AUTH_EXTRACTION_PLUGINS`. Authentication now
+  consists of auth policies, user identifiers and token checkers.
+  [vangheem]
+
 - Correctly check parent object for allowed addable types
   [vangheem]
 

@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
-import uuid
-from datetime import datetime
-from dateutil.tz import tzlocal
 from BTrees.Length import Length
 from BTrees.OOBTree import OOBTree
+from datetime import datetime
+from dateutil.tz import tzlocal
 from persistent import Persistent
-from plone.behavior.markers import applyMarkers
+from plone.behavior.interfaces import IBehavior
 from plone.behavior.interfaces import IBehaviorAssignable
+from plone.behavior.markers import applyMarkers
+from plone.server import FACTORY_CACHE
+from plone.server import PERMISSIONS_CACHE
+from plone.server import SCHEMA_CACHE
+from plone.server.auth.participation import ROOT_USER_ID
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IContainer
@@ -17,31 +21,29 @@ from plone.server.interfaces import IResourceFactory
 from plone.server.interfaces import ISite
 from plone.server.interfaces import IStaticDirectory
 from plone.server.interfaces import IStaticFile
-from plone.server import SCHEMA_CACHE
-from plone.server import PERMISSIONS_CACHE
-from plone.server import FACTORY_CACHE
-from plone.behavior.interfaces import IBehavior
 from plone.server.registry import IAddons
 from plone.server.registry import ILayers
 from plone.server.registry import Registry
-from plone.server.utils import Lazy
-from plone.server.transactions import synccontext
 from plone.server.transactions import get_current_request
-from plone.server.utils import get_authenticated_user_id
+from plone.server.transactions import synccontext
+from plone.server.utils import Lazy
 from zope.annotation.interfaces import IAttributeAnnotatable
-from zope.component import getUtility
-from zope.component.factory import Factory
-from zope.security.interfaces import IPermission
-from zope.component import queryUtility
 from zope.component import adapter
+from zope.component import getUtility
+from zope.component import queryUtility
+from zope.component.factory import Factory
 from zope.component.persistentregistry import PersistentComponents
 from zope.event import notify
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
+from zope.security.interfaces import IPermission
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
+
+import uuid
+
 
 _zone = tzlocal()
 
@@ -335,12 +337,12 @@ class Site(Folder):
         roles = IPrincipalRoleManager(self)
         roles.assignRoleToPrincipal(
             'plone.SiteAdmin',
-            'RootUser'
+            ROOT_USER_ID
         )
 
         roles.assignRoleToPrincipal(
             'plone.Owner',
-            'RootUser'
+            ROOT_USER_ID
         )
 
     def getSiteManager(self):

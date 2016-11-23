@@ -16,7 +16,7 @@
 	],
 	"creator": {
 		"admin": "admin",
-		"password": "YWRtaW4="
+		"password": "admin"
 	},
 	"cors": {
 		"allow_origin": ["*"],

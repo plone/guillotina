@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from plone.server import _
-from plone.server import AVAILABLE_ADDONS
+from plone.server import app_settings
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.registry import IAddons
@@ -10,7 +10,7 @@ class Install(Service):
     async def __call__(self):
         data = await self.request.json()
         id_to_install = data.get('id', None)
-        if id_to_install not in AVAILABLE_ADDONS:
+        if id_to_install not in app_settings['available_addons']:
             return ErrorResponse(
                 'RequiredParam',
                 _("Property 'id' is required to be valid"))
@@ -22,7 +22,7 @@ class Install(Service):
             return ErrorResponse(
                 'Duplicate',
                 _("Addon already installed"))
-        handler = AVAILABLE_ADDONS[id_to_install]['handler']
+        handler = app_settings['available_addons'][id_to_install]['handler']
         handler.install(self.request)
         config.enabled |= {id_to_install}
 
@@ -31,7 +31,7 @@ class Uninstall(Service):
     async def __call__(self):
         data = await self.request.json()
         id_to_install = data.get('id', None)
-        if id_to_install not in AVAILABLE_ADDONS:
+        if id_to_install not in app_settings['available_addons']:
             return ErrorResponse(
                 'RequiredParam',
                 _("Property 'id' is required to be valid"))
@@ -44,7 +44,7 @@ class Uninstall(Service):
                 'Duplicate',
                 _("Addon not installed"))
 
-        handler = AVAILABLE_ADDONS[id_to_install]['handler']
+        handler = app_settings['available_addons'][id_to_install]['handler']
         handler.uninstall(self.request)
         config.enabled -= {id_to_install}
 
@@ -55,7 +55,7 @@ class getAddons(Service):
             'available': [],
             'installed': []
         }
-        for key, addon in AVAILABLE_ADDONS.items():
+        for key, addon in app_settings['available_addons'].items():
             result['available'].append({
                 'id': key,
                 'title': addon['title']
