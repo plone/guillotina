@@ -54,7 +54,3 @@ class BasicAuthPolicy(BasePolicy):
                     'id': userid.strip(),
                     'token': password.strip()
                 }
-
-
-class JWTAuthPolicy(BasePolicy):
-    pass

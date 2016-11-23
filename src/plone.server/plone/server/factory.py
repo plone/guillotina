@@ -3,7 +3,7 @@ from aiohttp import web
 from pkg_resources import iter_entry_points
 from plone.server import app_settings
 from plone.server.async import IAsyncUtility
-from plone.server.auth.checkers import hash_password
+from plone.server.auth.validators import hash_password
 from plone.server.auth.participation import ROOT_USER_ID
 from plone.server.auth.participation import RootUser
 from plone.server.content import IStaticDirectory
