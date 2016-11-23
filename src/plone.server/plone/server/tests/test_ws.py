@@ -17,7 +17,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             async with session.ws_connect(
                     'ws://localhost:{port}/plone/plone/@ws'.format(
                         port=TESTING_PORT),
-                    headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
+                    headers={'AUTHORIZATION': 'Bearer %s' % ADMIN_TOKEN}) as ws:
                 # we should check version
                 sending = {
                     'op': 'GET',

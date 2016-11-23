@@ -111,7 +111,7 @@ class PloneRequester(object):
         if accept is not None:
             settings['headers']['ACCEPT'] = accept
         if authenticated and token is not None:
-            settings['headers']['AUTHORIZATION'] = 'Basic %s' % token
+            settings['headers']['AUTHORIZATION'] = 'Bearer %s' % token
 
         settings['params'] = params
         settings['data'] = data

@@ -27,7 +27,7 @@ class SaltedHashPasswordChecker(object):
         user_pw = getattr(user, 'password', None)
         if (not user_pw or
                 ':' not in user_pw or
-                'password' not in token):
+                'token' not in token):
             return False
         salt = user.password.split(':')[0]
-        return not strings_differ(hash_password(token['password'], salt), user_pw)
+        return not strings_differ(hash_password(token['token'], salt), user_pw)

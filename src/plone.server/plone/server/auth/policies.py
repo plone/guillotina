@@ -23,7 +23,8 @@ class BearerAuthPolicy(BasePolicy):
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'bearer':
                 return {
-                    'password': encoded_token.strip()
+                    'type': 'bearer',
+                    'token': encoded_token.strip()
                 }
 
 
@@ -36,7 +37,8 @@ class WSTokenAuthPolicy(BasePolicy):
             jwt = jose.decrypt(
                 jose.deserialize_compact(jwt_token), app_settings['rsa']['priv'])
             return {
-                'password': jwt.claims['token']
+                'type': 'wstoken',
+                'token': jwt.claims['token']
             }
 
 
@@ -48,8 +50,9 @@ class BasicAuthPolicy(BasePolicy):
             if schema.lower() == 'basic':
                 userid, _, password = encoded_token.partition(':')
                 return {
+                    'type': 'basic',
                     'id': userid.strip(),
-                    'password': password.strip()
+                    'token': password.strip()
                 }
 
 
