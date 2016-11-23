@@ -14,7 +14,7 @@ class BaseValidator(object):
         self.request = request
 
 
-def hash_password(password, salt=None):
+def hash_password(password, salt=None, algorithm='sha512'):
     if salt is None:
         salt = uuid.uuid4().hex
 
@@ -24,8 +24,9 @@ def hash_password(password, salt=None):
     if isinstance(password, str):
         password = password.encode('utf-8')
 
-    hashed_password = hashlib.sha512(password + salt).hexdigest()
-    return '{}:{}'.format(salt.decode('utf-8'), hashed_password)
+    hash_func = getattr(hashlib, algorithm)
+    hashed_password = hash_func(password + salt).hexdigest()
+    return '{}:{}:{}'.format(algorithm, salt.decode('utf-8'), hashed_password)
 
 
 class SaltedHashPasswordValidator(object):
@@ -40,9 +41,13 @@ class SaltedHashPasswordValidator(object):
         if (not user_pw or
                 ':' not in user_pw or
                 'token' not in token):
+            return
+        split = user.password.split(':')
+        if len(split) != 3:
             return False
-        salt = user.password.split(':')[0]
-        if not strings_differ(hash_password(token['token'], salt), user_pw):
+        algorithm = split[0]
+        salt = split[1]
+        if not strings_differ(hash_password(token['token'], salt, algorithm), user_pw):
             return user
 
 
@@ -54,11 +59,11 @@ class JWTValidator(object):
 
     async def validate(self, token):
         if token.get('type') != 'bearer':
-            return False
+            return
 
         if '.' not in token.get('token', ''):
             # quick way to check if actually might be jwt
-            return False
+            return
 
         try:
             validated_jwt = jwt.decode(
@@ -72,4 +77,4 @@ class JWTValidator(object):
         except jwt.exceptions.DecodeError:
             pass
 
-        return False
+        return

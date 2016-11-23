@@ -24,5 +24,5 @@ async def find_user(request, token):
     for identifier in app_settings['auth_user_identifiers']:
         identifier = resolve_or_get(identifier)
         user = await identifier(request).get_user(token)
-        if user:
+        if user is not None:
             return user
