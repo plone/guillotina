@@ -3,6 +3,10 @@
 
   <include package="plone.server" file="meta.zcml" />
 
+  <adapter
+      factory="plone.server.content.BehaviorAssignable" />
+
+
   <plone:contenttype
       portal_type="Site"
       schema=".interfaces.ISite"
@@ -37,9 +41,5 @@
    	  factory="plone.server.factory.ApplicationToJson"
    	  provides="plone.server.json.interfaces.IResourceSerializeToJson"
    	  />
-
-    <adapter
-      factory="plone.server.content.BehaviorAssignable" />
-
 
 </configure>

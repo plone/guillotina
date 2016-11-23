@@ -43,6 +43,7 @@ from zope.lifecycleevent import ObjectRemovedEvent
 from zope.security.interfaces import IPermission
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
+from zope.component import getUtilitiesFor
 
 import uuid
 
@@ -72,19 +73,6 @@ class ResourceFactory(Factory):
         self.allowed_types = allowed_types
 
     def __call__(self, *args, **kw):
-        if self.portal_type not in SCHEMA_CACHE:
-            behaviors_registrations = []
-            for iface in self.behaviors or ():
-                if Interface.providedBy(iface):
-                    name = iface.__identifier__
-                else:
-                    name = iface
-                behaviors_registrations.append(getUtility(IBehavior, name=name))
-            SCHEMA_CACHE[self.portal_type] = {
-                'behaviors': behaviors_registrations,
-                'schema': self.schema
-            }
-
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.portal_type = self.portal_type
         now = datetime.now(tz=_zone)
@@ -102,6 +90,23 @@ class ResourceFactory(Factory):
     def __repr__(self):
         return '<{0:s} for {1:s}>'.format(self.__class__.__name__,
                                           self.portal_type)
+
+
+def loadCachedSchema():
+    for x in getUtilitiesFor(IResourceFactory):
+        factory = x[1]
+        if factory.portal_type not in SCHEMA_CACHE:
+            behaviors_registrations = []
+            for iface in factory.behaviors or ():
+                if Interface.providedBy(iface):
+                    name = iface.__identifier__
+                else:
+                    name = iface
+                behaviors_registrations.append(getUtility(IBehavior, name=name))
+            SCHEMA_CACHE[factory.portal_type] = {
+                'behaviors': behaviors_registrations,
+                'schema': factory.schema
+            }
 
 
 def getCachedFactory(portal_type):

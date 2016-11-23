@@ -118,6 +118,8 @@ async def _acallAfterCommitHooks(self, status=True):
         try:
             if asyncio.iscoroutinefunction(hook):
                 await hook(status, *args, **kws)
+            elif asyncio.iscoroutine(hook):
+                await hook(status, *args, **kws)
             else:
                 hook(status, *args, **kws)
         except:

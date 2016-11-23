@@ -17,6 +17,7 @@ from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter
 from plone.server.utils import import_class
+from plone.server.content import loadCachedSchema
 from ZEO.ClientStorage import ClientStorage
 from ZODB import DB
 from ZODB.DemoStorage import DemoStorage
@@ -374,5 +375,8 @@ def make_app(config_file=None, settings=None):
 
     for util in app_settings['utilities']:
         root.add_async_utility(util)
+
+    # Load cached Schemas
+    loadCachedSchema()
 
     return app

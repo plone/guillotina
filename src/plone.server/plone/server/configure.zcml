@@ -32,15 +32,16 @@
   <include file="meta.zcml" />
   <include file="permissions.zcml" />
   <include file="security.zcml" />
-  <include file="content.zcml" />
-  <include file="basicfile.zcml" />
-  <include file="transform.zcml" />
 
   <include package=".json" />
   <include package=".auth" />
   <include package=".catalog" />
   <include package=".framing" />
   <include package=".behaviors" />
+
+  <include file="content.zcml" />
+  <include file="basicfile.zcml" />
+  <include file="transform.zcml" />
 
   <subscriber
     for="plone.server.interfaces.IResource
