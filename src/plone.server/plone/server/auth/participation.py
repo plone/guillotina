@@ -29,7 +29,7 @@ class PloneParticipation(object):
         # Cached user
         if not hasattr(self.request, '_cache_user'):
             user = await authenticate_request(self.request)
-            if user:
+            if user is not None:
                 self.request._cache_user = user
                 self.principal = user
         else:

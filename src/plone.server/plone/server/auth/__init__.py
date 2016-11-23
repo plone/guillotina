@@ -14,7 +14,7 @@ async def authenticate_request(request):
                         policy.name not in validator.for_validators):
                     continue
                 user = await validator(request).validate(token)
-                if user:
+                if user is not None:
                     return user
 
 

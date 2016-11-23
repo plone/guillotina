@@ -72,7 +72,7 @@ class JWTValidator(object):
                 algorithms=[app_settings['jwt']['algorithm']])
             token['id'] = validated_jwt['id']
             user = await find_user(self.request, token)
-            if user and user.id == token['id']:
+            if user is not None and user.id == token['id']:
                 return user
         except jwt.exceptions.DecodeError:
             pass
