@@ -32,12 +32,19 @@ def iter_parents(content):
         content = getattr(content, '__parent__', None)
 
 
-def get_authenticated_user_id(request):
-    if hasattr(request, 'security') and hasattr(request.security, 'participations') \
-            and len(request.security.participations) > 0:
-        return request.security.participations[0].principal.id
+def get_authenticated_user(request):
+    if (hasattr(request, 'security') and
+            hasattr(request.security, 'participations') and
+            len(request.security.participations) > 0):
+        return request.security.participations[0].principal
     else:
         return None
+
+
+def get_authenticated_user_id(request):
+    user = get_authenticated_user(request)
+    if user:
+        return user.id
 
 
 async def apply_cors(request):

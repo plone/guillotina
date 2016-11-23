@@ -62,6 +62,7 @@ setup(
         'zope.schema',
         'zope.security',
         'zope.securitypolicy',
+        'pyjwt'
     ],
     extras_require={
         'test': [

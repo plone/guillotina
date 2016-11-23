@@ -14,15 +14,16 @@ app_settings = {
         'id': 'admin',
         'password': ''
     },
-    'auth_policies': [
-        'plone.server.auth.policies.BearerAuthPolicy',
-        'plone.server.auth.policies.WSTokenAuthPolicy',
+    'auth_extractors': [
+        'plone.server.auth.extractors.BearerAuthPolicy',
+        'plone.server.auth.extractors.WSTokenAuthPolicy',
     ],
     'auth_user_identifiers': [
         'plone.server.auth.users.RootUserIdentifier'
     ],
-    'auth_token_checker': [
-        'plone.server.auth.checkers.SaltedHashPasswordChecker',
+    'auth_token_validators': [
+        'plone.server.auth.validators.SaltedHashPasswordValidator',
+        'plone.server.auth.validators.JWTValidator'
     ],
     'default_layers': [],
     'http_methods': {},
@@ -31,7 +32,11 @@ app_settings = {
     'default_permission': '',
     'available_addons': {},
     'api_definition': {},
-    'cors': {}
+    'cors': {},
+    'jwt': {
+        'secret': 'foobar',
+        'algorithm': 'HS256'
+    }
 }
 
 SCHEMA_CACHE = {}
