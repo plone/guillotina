@@ -63,7 +63,9 @@ QUEUE_UTILITY_CONFIG = {
 }
 
 
-ADMIN_TOKEN = base64.b64encode('{}:admin'.format(ROOT_USER_ID).encode('utf-8')).decode('utf-8')
+ADMIN_TOKEN = base64.b64encode(
+    '{}:{}'.format(ROOT_USER_ID, TESTING_SETTINGS['root_user']['password']).encode(
+        'utf-8')).decode('utf-8')
 DEBUG = False
 
 
