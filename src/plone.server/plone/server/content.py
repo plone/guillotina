@@ -11,7 +11,7 @@ from plone.behavior.markers import applyMarkers
 from plone.server import FACTORY_CACHE
 from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
-from plone.server.auth.participation import ROOT_USER_ID
+from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IContainer

@@ -38,7 +38,7 @@ Creating default content
 
 Once started, you will require to add at least a Plone site to start fiddling around::
 
-  curl -X POST -H "Accept: application/json" -H "Authorization: Basic admin" -H "Content-Type: application/json" -d '{
+  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
     "@type": "Site",
     "title": "Plone 1",
     "id": "plone",
@@ -47,7 +47,7 @@ Once started, you will require to add at least a Plone site to start fiddling ar
 
 and give permissions to add content to it::
 
-  curl -X POST -H "Accept: application/json" -H "Authorization: Basic admin" -H "Content-Type: application/json" -d '{
+  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
     "prinrole": {
         "Anonymous User": ["plone.Member", "plone.Reader"]
     }
@@ -55,7 +55,7 @@ and give permissions to add content to it::
 
 and create actual content::
 
-  curl -X POST -H "Accept: application/json" -H "Authorization: Basic admin" -H "Content-Type: application/json" -d '{
+  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
     "@type": "Item",
     "title": "News",
     "id": "news"

@@ -16,7 +16,7 @@
 		{"favicon.ico": "static/favicon.ico"}
 	],
 	"root_user": {
-		"password": "admin"
+		"password": "root"
 	},
 	"cors": {
 		"allow_origin": ["*"],

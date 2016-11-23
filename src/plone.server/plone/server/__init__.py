@@ -11,16 +11,14 @@ app_settings = {
     'static': [],
     'utilities': [],
     'root_user': {
-        'id': 'admin',
         'password': ''
     },
     'auth_extractors': [
         'plone.server.auth.extractors.BearerAuthPolicy',
+        'plone.server.auth.extractors.BasicAuthPolicy',
         'plone.server.auth.extractors.WSTokenAuthPolicy',
     ],
-    'auth_user_identifiers': [
-        'plone.server.auth.users.RootUserIdentifier'
-    ],
+    'auth_user_identifiers': [],
     'auth_token_validators': [
         'plone.server.auth.validators.SaltedHashPasswordValidator',
         'plone.server.auth.validators.JWTValidator'
