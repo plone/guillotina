@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from BTrees.Length import Length
 from BTrees.OOBTree import OOBTree
 from datetime import datetime
@@ -27,6 +28,7 @@ from plone.server.registry import Registry
 from plone.server.transactions import get_current_request
 from plone.server.transactions import synccontext
 from plone.server.utils import Lazy
+from zope.schema.interfaces import IContextAwareDefaultFactory
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import adapter
 from zope.component import getUtility
@@ -46,6 +48,7 @@ import uuid
 
 
 _zone = tzlocal()
+_marker = object()
 
 
 @implementer(IResourceFactory)
@@ -219,6 +222,24 @@ class BehaviorAssignable(object):
             yield behavior
 
 
+def _default_from_schema(context, schema, fieldname):
+    """helper to lookup default value of a field
+    """
+    if schema is None:
+        return _marker
+    field = schema.get(fieldname, None)
+    if field is None:
+        return _marker
+    if IContextAwareDefaultFactory.providedBy(
+            getattr(field, 'defaultFactory', None)
+    ):
+        bound = field.bind(context)
+        return deepcopy(bound.default)
+    else:
+        return deepcopy(field.default)
+    return _marker
+
+
 @implementer(IResource, IAttributeAnnotatable)
 class Resource(Persistent):
 
@@ -242,6 +263,30 @@ class Resource(Persistent):
             type=self.portal_type,
             path=path,
             mem=id(self))
+
+    def __getattr__(self, name):
+        # python basics:  __getattr__ is only invoked if the attribute wasn't
+        # found by __getattribute__
+        #
+        # optimization: sometimes we're asked for special attributes
+        # such as __conform__ that we can disregard (because we
+        # wouldn't be in here if the class had such an attribute
+        # defined).
+        # also handle special dynamic providedBy cache here.
+        # also handle the get_current_request call
+        if name.startswith('__') or name == '_v__providedBy__' or name == 'request':
+            raise AttributeError(name)
+
+        # attribute was not found; try to look it up in the schema and return
+        # a default
+        value = _default_from_schema(
+            self,
+            SCHEMA_CACHE.get(self.portal_type).get('schema'),
+            name
+        )
+        if value is not _marker:
+            return value
+        raise AttributeError(name)
 
 
 @implementer(IItem)
