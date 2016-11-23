@@ -1,6 +1,9 @@
 1.0a7 (unreleased)
 ------------------
 
+- Add to finalize an AsyncUtil when its finishing the software
+  [ramon]
+
 - Remove `AUTH_USER_PLUGINS` and `AUTH_EXTRACTION_PLUGINS`. Authentication now
   consists of auth policies, user identifiers and token checkers.
   [vangheem]
