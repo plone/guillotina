@@ -358,13 +358,19 @@ def make_app(config_file=None, settings=None):
             'priv': priv_jwk
         }
 
-    # Set router root from the ZODB connection
+    # Set router root
     app.router.set_root(root)
 
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
         # In case there is Utilties that are registered from zcml
         ident = asyncio.ensure_future(utility.initialize(app=app), loop=app.loop)
         root.add_async_utility(ident, {})
+
+    async def close_utilities(app):
+        for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
+            asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
+
+    app.on_cleanup.append(close_utilities)
 
     for util in app_settings['utilities']:
         root.add_async_utility(util)

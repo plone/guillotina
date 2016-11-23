@@ -86,6 +86,9 @@ class QueueUtility(object):
         self._total_queued += 1
         return self._queue.qsize()
 
+    async def finalize(self, app):
+        pass
+
 
 class QueueObject(View):
 
