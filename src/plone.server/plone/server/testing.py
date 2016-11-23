@@ -11,7 +11,8 @@ from zope.security.interfaces import IInteraction
 from plone.server.api.layer import IDefaultLayer
 from plone.server.interfaces import IRequest
 from zope.interface import implementer
-from plone.server.auth.participation import RootUser
+from plone.server.auth.users import RootUser
+from plone.server.auth.users import ROOT_USER_ID
 
 import asyncio
 import json
@@ -19,6 +20,7 @@ import requests
 import sys
 import time
 import unittest
+import base64
 
 
 TESTING_PORT = 55001
@@ -61,7 +63,7 @@ QUEUE_UTILITY_CONFIG = {
 }
 
 
-ADMIN_TOKEN = 'admin'
+ADMIN_TOKEN = base64.b64encode('{}:admin'.format(ROOT_USER_ID).encode('utf-8')).decode('utf-8')
 DEBUG = False
 
 
@@ -103,6 +105,7 @@ class PloneRequester(object):
             params=None,
             data=None,
             authenticated=True,
+            auth_type='Basic',
             token=ADMIN_TOKEN,
             accept='application/json'):
 
@@ -111,7 +114,8 @@ class PloneRequester(object):
         if accept is not None:
             settings['headers']['ACCEPT'] = accept
         if authenticated and token is not None:
-            settings['headers']['AUTHORIZATION'] = 'Bearer %s' % token
+            settings['headers']['AUTHORIZATION'] = '{} {}'.format(
+                auth_type, token)
 
         settings['params'] = params
         settings['data'] = data

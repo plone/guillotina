@@ -8,6 +8,8 @@ import uuid
 
 
 class BaseValidator(object):
+    for_validators = None
+
     def __init__(self, request):
         self.request = request
 
@@ -27,6 +29,7 @@ def hash_password(password, salt=None):
 
 
 class SaltedHashPasswordValidator(object):
+    for_validators = ('basic', )
 
     def __init__(self, request):
         self.request = request
@@ -44,6 +47,8 @@ class SaltedHashPasswordValidator(object):
 
 
 class JWTValidator(object):
+    for_validators = ('bearer', 'wstoken')
+
     def __init__(self, request):
         self.request = request
 

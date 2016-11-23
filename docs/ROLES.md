@@ -5,7 +5,7 @@ By default request has participation of anonymous user plus the ones added by au
 # Databases, Application and static files objects
 
 Databases and static files has an specific permission system. They don't have roles by default
-and the permissions are specified to RootUser
+and the permissions are specified to root user
 
  * plone.AddPortal
  * plone.GetPortals
@@ -85,7 +85,7 @@ Created objects set the plone.Owner role to the user who created it.
 
 ### RootParticipation
 
-There is a RootUser who has permissions to all site:
+There is a `root` user who has permissions to all site:
 
 DB/APP permissions are defined on factory.py
 

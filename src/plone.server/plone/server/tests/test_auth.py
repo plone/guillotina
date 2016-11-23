@@ -10,7 +10,7 @@ import jwt
 class TestAuth(PloneFunctionalTestCase):
 
     def test_jwt_auth(self):
-        from plone.server.auth.participation import ROOT_USER_ID
+        from plone.server.auth.users import ROOT_USER_ID
         jwt_token = jwt.encode({
             'exp': datetime.utcnow() + timedelta(seconds=60),
             'id': ROOT_USER_ID
@@ -18,6 +18,7 @@ class TestAuth(PloneFunctionalTestCase):
 
         resp = self.layer.requester(
             'GET', '/plone/plone/@addons',
-            token=jwt_token
+            token=jwt_token,
+            auth_type='Bearer'
         )
         assert resp.status_code == 200

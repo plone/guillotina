@@ -1,22 +1,12 @@
 # -*- coding: utf-8 -*-
 from plone.server.auth import authenticate_request
+from plone.server.auth.groups import PloneGroup
+from plone.server.auth.users import AnonymousUser
 from plone.server.interfaces import IRequest
 from plone.server.transactions import get_current_request
 from zope.component import adapter
 from zope.interface import implementer
 from zope.security.interfaces import IParticipation
-
-
-ROOT_USER_ID = 'RootUser'
-
-
-class RootUser(object):
-    def __init__(self, password):
-        self.id = ROOT_USER_ID
-        self.password = password
-        self.groups = ['Managers']
-        self._roles = {}
-        self._properties = {}
 
 
 class AnonymousParticipation(object):
@@ -25,39 +15,6 @@ class AnonymousParticipation(object):
         self.principal = AnonymousUser(request)
         self.principal._roles['plone.Anonymous'] = 1
         self.interaction = None
-
-
-class PloneUser(object):
-
-    def __init__(self, request):
-        self.id = 'plone'
-        self.request = request
-        self._groups = []
-        self._roles = {}
-        self._properties = {}
-
-    @property
-    def groups(self):
-        return self._groups
-
-
-class AnonymousUser(PloneUser):
-
-    def __init__(self, request):
-        super(AnonymousUser, self).__init__(request)
-        self.id = 'Anonymous User'
-
-
-class PloneGroup(PloneUser):
-    def __init__(self, request, ident):
-        super(PloneGroup, self).__init__(request)
-        self.id = ident
-
-        if ident == 'Managers':
-            # Special Case its a Root Manager user
-            self._roles['plone.SiteAdmin'] = 1
-            self._roles['plone.SiteDeleter'] = 1
-            self._roles['plone.Owner'] = 1
 
 
 @adapter(IRequest)

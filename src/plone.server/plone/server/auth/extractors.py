@@ -1,8 +1,10 @@
 from plone.server import app_settings
 from plone.server import jose
+import base64
 
 
 class BasePolicy(object):
+    name = '<FILL IN>'
 
     def __init__(self, request):
         self.request = request
@@ -17,6 +19,8 @@ class BasePolicy(object):
 
 
 class BearerAuthPolicy(BasePolicy):
+    name = 'bearer'
+
     async def extract_token(self):
         header_auth = self.request.headers.get('AUTHORIZATION')
         if header_auth is not None:
@@ -29,6 +33,8 @@ class BearerAuthPolicy(BasePolicy):
 
 
 class WSTokenAuthPolicy(BasePolicy):
+    name = 'wstoken'
+
     async def extract_token(self):
         request = self.request
         if 'ws_token' in request.GET:
@@ -43,12 +49,15 @@ class WSTokenAuthPolicy(BasePolicy):
 
 
 class BasicAuthPolicy(BasePolicy):
+    name = 'basic'
+
     async def extract_token(self):
         header_auth = self.request.headers.get('AUTHORIZATION')
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'basic':
-                userid, _, password = encoded_token.partition(':')
+                token = base64.b64decode(encoded_token).decode('utf-8')
+                userid, _, password = token.partition(':')
                 return {
                     'type': 'basic',
                     'id': userid.strip(),

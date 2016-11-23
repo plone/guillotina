@@ -1,5 +1,6 @@
 from plone.server import app_settings
 from plone.server.utils import resolve_or_get
+from plone.server.auth.users import ROOT_USER_ID
 
 
 async def authenticate_request(request):
@@ -9,12 +10,17 @@ async def authenticate_request(request):
         if token:
             for validator in app_settings['auth_token_validators']:
                 validator = resolve_or_get(validator)
+                if (validator.for_validators is not None and
+                        policy.name not in validator.for_validators):
+                    continue
                 user = await validator(request).validate(token)
                 if user:
                     return user
 
 
 async def find_user(request, token):
+    if token.get('id') == ROOT_USER_ID:
+        return request.application.root_user
     for identifier in app_settings['auth_user_identifiers']:
         identifier = resolve_or_get(identifier)
         user = await identifier(request).get_user(token)
