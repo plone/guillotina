@@ -20,25 +20,23 @@ import ujson
 logger = logging.getLogger(__name__)
 
 
-def generate_websocket_token(self, real_token):
-    exp = datetime.utcnow() + timedelta(
-        seconds=self._websockets_ttl)
-
-    claims = {
-        'iat': int(datetime.utcnow().timestamp()),
-        'exp': int(exp.timestamp()),
-        'token': real_token
-    }
-    jwe = jose.encrypt(claims, app_settings['rsa']['priv'])
-    token = jose.serialize_compact(jwe)
-    return token.decode('utf-8')
-
-
 class WebsocketGetToken(Service):
+    _websockets_ttl = 60
+
+    def generate_websocket_token(self, real_token):
+        exp = datetime.utcnow() + timedelta(
+            seconds=self._websockets_ttl)
+
+        claims = {
+            'iat': int(datetime.utcnow().timestamp()),
+            'exp': int(exp.timestamp()),
+            'token': real_token
+        }
+        jwe = jose.encrypt(claims, app_settings['rsa']['priv'])
+        token = jose.serialize_compact(jwe)
+        return token.decode('utf-8')
 
     async def __call__(self):
-        # Get app root
-        app = self.request.app.router._root
         # Get token
         header_auth = self.request.headers.get('AUTHORIZATION')
         token = None
@@ -48,7 +46,7 @@ class WebsocketGetToken(Service):
                 token = encoded_token.encode('ascii')
 
         # Create ws token
-        new_token = app.generate_websocket_token(token)
+        new_token = self.generate_websocket_token(token)
         return {
             "token": new_token
         }

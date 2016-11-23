@@ -57,7 +57,6 @@ class ApplicationRoot(object):
         self._dbs = {}
         self._config_file = config_file
         self._async_utilities = {}
-        self._websockets_ttl = 60
 
     def add_async_utility(self, config):
         interface = import_class(config['provides'])

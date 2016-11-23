@@ -2,6 +2,7 @@ from plone.server.utils import strings_differ
 
 import hashlib
 import uuid
+import logging
 
 
 def hash_password(password, salt=None):
