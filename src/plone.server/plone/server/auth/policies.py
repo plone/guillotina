@@ -21,9 +21,9 @@ class BearerAuthPolicy(BasePolicy):
         header_auth = self.request.headers.get('AUTHORIZATION')
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
-            if schema.lower() == 'basic' or schema.lower() == 'bearer':
+            if schema.lower() == 'bearer':
                 return {
-                    'password': encoded_token
+                    'password': encoded_token.strip()
                 }
 
 
@@ -45,11 +45,11 @@ class BasicAuthPolicy(BasePolicy):
         header_auth = self.request.headers.get('AUTHORIZATION')
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
-            if schema.lower() == 'basic' or schema.lower() == 'bearer':
+            if schema.lower() == 'basic':
                 userid, _, password = encoded_token.partition(':')
                 return {
-                    'id': userid,
-                    'password': password
+                    'id': userid.strip(),
+                    'password': password.strip()
                 }
 
 
