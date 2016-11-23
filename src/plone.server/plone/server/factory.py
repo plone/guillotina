@@ -246,6 +246,11 @@ class DataBase(object):
         return len(self.conn.root())
 
 
+async def close_utilities(app):
+    for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
+        asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
+
+
 def make_app(config_file=None, settings=None):
 
     # Initialize aiohttp app
@@ -365,10 +370,6 @@ def make_app(config_file=None, settings=None):
         # In case there is Utilties that are registered from zcml
         ident = asyncio.ensure_future(utility.initialize(app=app), loop=app.loop)
         root.add_async_utility(ident, {})
-
-    async def close_utilities(app):
-        for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
-            asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
 
     app.on_cleanup.append(close_utilities)
 
