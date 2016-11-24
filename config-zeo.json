@@ -4,7 +4,7 @@
 		"zodb1": {
 			"storage": "ZEO",
 			"address": "localhost",
-                        "port": "8090"
+            "port": "8090",
 			"configuration": {
                 "pool_size": 100,
                 "cache_size": 100
@@ -15,9 +15,8 @@
 	"static": [
 		{"favicon.ico": "static/favicon.ico"}
 	],
-	"creator": {
-		"admin": "admin",
-		"password": "admin"
+	"root_user": {
+		"password": "root"
 	},
 	"cors": {
 		"allow_origin": ["*"],

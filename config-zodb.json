@@ -14,9 +14,8 @@
 	"static": [
 		{"favicon.ico": "static/favicon.ico"}
 	],
-	"creator": {
-		"admin": "admin",
-		"password": "admin"
+	"root_user": {
+		"password": "root"
 	},
 	"cors": {
 		"allow_origin": ["*"],
