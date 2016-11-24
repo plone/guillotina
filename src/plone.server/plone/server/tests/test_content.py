@@ -2,6 +2,7 @@ from plone.server.content import createContent
 from plone.server.content import createContentInContainer
 from plone.server.content import Folder
 from plone.server.content import NotAllowedContentType
+from plone.server.content import loadCachedSchema
 from plone.server.metaconfigure import contenttypeDirective
 from plone.server.testing import PloneServerBaseTestCase
 
@@ -27,6 +28,7 @@ class TestContent(PloneServerBaseTestCase):
             add_permission=None,
             allowed_types=['Item'])
         self.layer.app.app.config.execute_actions()
+        loadCachedSchema()
         obj = createContentInContainer(site, 'TestType', 'foobar')
         with self.assertRaises(NotAllowedContentType):
             createContentInContainer(obj, 'TestType', 'foobar')
