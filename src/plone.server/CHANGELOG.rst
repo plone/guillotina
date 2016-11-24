@@ -1,4 +1,4 @@
-1.0a7 (unreleased)
+1.0a7 (2016-11-24)
 ------------------
 
 - add jwt token validator
