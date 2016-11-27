@@ -307,11 +307,11 @@ def make_app(config_file=None, settings=None):
 
                 db = DB(fs)
                 try:
-                    root = db.open().root()
-                    if not IDataBase.providedBy(root):
-                        alsoProvides(root, IDataBase)
+                    rootobj = db.open().root()
+                    if not IDataBase.providedBy(rootobj):
+                        alsoProvides(rootobj, IDataBase)
                     transaction.commit()
-                    root = None
+                    rootobj = None
                 except:
                     pass
                 finally:
@@ -328,11 +328,11 @@ def make_app(config_file=None, settings=None):
                 db = DB(cs)
 
                 try:
-                    root = db.open().root()
-                    if not IDataBase.providedBy(root):
-                        alsoProvides(root, IDataBase)
+                    rootobj = db.open().root()
+                    if not IDataBase.providedBy(rootobj):
+                        alsoProvides(rootobj, IDataBase)
                     transaction.commit()
-                    root = None
+                    rootobj = None
                 except:
                     pass
                 finally:
