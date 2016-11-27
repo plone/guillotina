@@ -97,10 +97,7 @@ async def _acallBeforeCommitHooks(self):
     # add additional hooks while hooks are running, and iterating over a
     # growing list is well-defined in Python.
     for hook, args, kws in self._before_commit:
-        if asyncio.iscoroutinefunction(hook):
-            await hook(*args, **kws)
-        else:
-            hook(*args, **kws)
+        await hook(*args, **kws)
     self._before_commit = []
 
 
@@ -116,17 +113,13 @@ async def _acallAfterCommitHooks(self, status=True):
         # The first argument passed to the hook is a Boolean value,
         # true if the commit succeeded, or false if the commit aborted.
         try:
-            if asyncio.iscoroutinefunction(hook):
-                await hook(status, *args, **kws)
-            elif asyncio.iscoroutine(hook):
-                await hook(status, *args, **kws)
-            else:
-                hook(status, *args, **kws)
+            await hook(status, *args, **kws)
         except:
             # We need to catch the exceptions if we want all hooks
             # to be called
             self.log.error("Error in after commit hook exec in %s ",
                            hook, exc_info=sys.exc_info())
+
     # The transaction is already committed. It must not have
     # further effects after the commit.
     for rm in self._resources:
