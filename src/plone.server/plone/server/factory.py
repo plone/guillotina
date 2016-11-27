@@ -307,9 +307,11 @@ def make_app(config_file=None, settings=None):
 
                 db = DB(fs)
                 try:
+                    root = db.open().root()
                     if not IDataBase.providedBy(root):
-                        alsoProvides(db.open().root(), IDataBase)
+                        alsoProvides(root, IDataBase)
                     transaction.commit()
+                    root = None
                 except:
                     pass
                 finally:
@@ -321,20 +323,23 @@ def make_app(config_file=None, settings=None):
                 # Try to open it normal to create the root object
                 address = (dbconfig['address'], dbconfig['port'])
 
-                cs = ClientStorage(address)
+                zeoconfig = dbconfig.get('zeoconfig', {})
+                cs = ClientStorage(address, **zeoconfig)
                 db = DB(cs)
 
                 try:
+                    root = db.open().root()
                     if not IDataBase.providedBy(root):
-                        alsoProvides(db.open().root(), IDataBase)
+                        alsoProvides(root, IDataBase)
                     transaction.commit()
+                    root = None
                 except:
                     pass
                 finally:
                     db.close()
 
                 # Set request aware database for app
-                cs = ClientStorage(address)
+                cs = ClientStorage(address, **zeoconfig)
                 db = RequestAwareDB(cs, **config)
                 dbo = DataBase(key, db)
             elif dbconfig['storage'] == 'DEMO':
