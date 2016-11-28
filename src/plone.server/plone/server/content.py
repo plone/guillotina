@@ -35,7 +35,7 @@ from zope.component import getUtility
 from zope.component import queryUtility
 from zope.component.factory import Factory
 from zope.component.persistentregistry import PersistentComponents
-from plone.server.events import notify
+from zope.event import notify
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.lifecycleevent import ObjectAddedEvent
