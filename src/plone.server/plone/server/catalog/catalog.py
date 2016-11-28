@@ -13,7 +13,7 @@ from zope.interface import implementer
 from zope.schema import getFields
 from zope.securitypolicy.principalpermission import principalPermissionManager
 from zope.securitypolicy.rolepermission import rolePermissionManager
-from zope.securitypolicy.settings import Allow
+from zope.securitypolicy.settings import Allow, Deny
 
 
 globalPrincipalPermissionSetting = principalPermissionManager.getSetting
@@ -125,6 +125,8 @@ class DefaultCatalogDataAdapter(object):
             'uuid': self.content.uuid,
             'accessRoles': [x for x in roles if roles[x] == Allow],
             'accessUsers': [x for x in users if users[x] == Allow],
+            'denyedRoles': [x for x in roles if roles[x] == Deny],
+            'denyedUsers': [x for x in users if users[x] == Deny],
             'path': path,
             'portal_type': self.content.portal_type
         })

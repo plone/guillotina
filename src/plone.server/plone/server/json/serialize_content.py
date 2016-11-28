@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IResource
-from plone.server.content import iterSchemata
 from plone.server.json.interfaces import IResourceFieldSerializer
 from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.json.interfaces import IResourceSerializeToJsonSummary
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.content import getCachedFactory
 from plone.server.json.serialize_value import json_compatible
-from plone.server.browser import get_physical_path
 from plone.server.interfaces import READ_PERMISSIONS_KEY
 from plone.server.directives import mergedTaggedValueDict
 from zope.component import adapter
@@ -47,7 +45,7 @@ class SerializeToJson(object):
             parent_summary = {}
 
         result = {
-            '@id': '/'.join(get_physical_path(self.context)),
+            '@id': IAbsoluteURL(self.context, self.request)(),
             'id': self.context.id,
             '@type': self.context.portal_type,
             'parent': parent_summary,
