@@ -64,7 +64,10 @@ def remove_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
-    hook.remove.append(uid)
+    portal_type = getattr(obj, 'portal_type', None)
+    if portal_type is None:
+        return
+    hook.remove.append((uid, portal_type))
     if uid in hook.index:
         del hook.index[uid]
 
@@ -75,6 +78,9 @@ def add_object(obj, event):
         return
     uid = getattr(obj, 'uuid', None)
     if uid is None:
+        return
+    portal_type = getattr(obj, 'portal_type', None)
+    if portal_type is None:
         return
     search = queryUtility(ICatalogUtility)
     if search is not None:

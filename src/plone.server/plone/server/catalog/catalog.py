@@ -101,9 +101,6 @@ class DefaultCatalogDataAdapter(object):
                     ident = schema.getName() + '-' + real_field.getName()
                     values[ident] = json_compatible(value)
 
-        # Look for plone.indexer
-        # TODO
-
         # Global Roles
 
         roles = {}
