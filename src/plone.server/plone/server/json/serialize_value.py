@@ -11,6 +11,7 @@ from zope.i18nmessageid.message import Message
 from zope.interface import implementer
 from zope.interface import Interface
 from plone.server.text import IRichTextValue
+from zope.schema.vocabulary import SimpleVocabulary
 
 try:
     import Missing
@@ -58,6 +59,12 @@ def default_converter(value):
     raise TypeError(
         'No converter for making'
         ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
+
+
+@adapter(SimpleVocabulary)
+@implementer(IValueToJson)
+def vocabulary_converter(value):
+    return [x.token for x in value]
 
 
 @adapter(str)
