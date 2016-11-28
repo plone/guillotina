@@ -30,7 +30,14 @@ app_settings = {
     'default_permission': '',
     'available_addons': {},
     'api_definition': {},
-    'cors': {},
+    'cors': {
+        "allow_origin": [],
+        "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+        "allow_headers": [],
+        "expose_headers": [],
+        "allow_credentials": True,
+        "max_age": 3660
+    },
     'jwt': {
         'secret': 'foobar',
         'algorithm': 'HS256'
