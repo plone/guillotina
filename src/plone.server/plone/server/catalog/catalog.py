@@ -7,6 +7,7 @@ from plone.server.interfaces import CATALOG_KEY
 from plone.server.security import getPrincipalsWithAccessContent
 from plone.server.security import getRolesWithAccessContent
 from plone.server.utils import get_content_path
+from plone.server.json.serialize_value import json_compatible
 from zope.component import queryAdapter
 from zope.interface import implementer
 from zope.schema import getFields
@@ -98,7 +99,7 @@ class DefaultCatalogDataAdapter(object):
                     real_field = field.bind(behavior)
                     value = real_field.get(behavior)
                     ident = schema.getName() + '-' + real_field.getName()
-                    values[ident] = value
+                    values[ident] = json_compatible(value)
 
         # Look for plone.indexer
         # TODO
