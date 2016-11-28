@@ -59,5 +59,3 @@ class DublinCore(ZDCAnnotatableAdapter):
     def __init__(self, context):
         self.context = context
         super(DublinCore, self).__init__(context)
-        self.expires = CEILING_DATE
-        self.effective = FLOOR_DATE
