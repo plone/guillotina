@@ -9,6 +9,7 @@ from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
 from plone.server.content import createContentInContainer
 from plone.server.events import ObjectFinallyCreatedEvent
+from plone.server.events import ObjectFinallyDeletedEvent
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceDeserializeFromJson
@@ -19,7 +20,7 @@ from plone.server.utils import iter_parents
 from random import randint
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
-from zope.event import notify
+from plone.server.events import notify
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
@@ -89,7 +90,7 @@ class DefaultPOST(Service):
                 status=501)
 
         try:
-            deserializer(data, validate_all=True)
+            await deserializer(data, validate_all=True)
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',
@@ -102,7 +103,7 @@ class DefaultPOST(Service):
             'plone.Owner',
             user)
 
-        notify(ObjectFinallyCreatedEvent(obj))
+        await notify(ObjectFinallyCreatedEvent(obj))
 
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 
@@ -133,7 +134,7 @@ class DefaultPATCH(Service):
                 status=501)
 
         try:
-            deserializer(data)
+            await deserializer(data)
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',
@@ -187,6 +188,7 @@ class DefaultDELETE(Service):
     async def __call__(self):
         content_id = self.context.id
         del self.context.__parent__[content_id]
+        await notify(ObjectFinallyDeletedEvent(self.context))
 
 
 class DefaultOPTIONS(Service):

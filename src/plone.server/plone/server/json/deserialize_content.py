@@ -14,7 +14,7 @@ from plone.server.content import getCachedFactory
 from zope.component import adapter
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
-from zope.event import notify
+from plone.server.events import notify
 from zope.interface import Interface
 from zope.interface import implementer
 from zope.lifecycleevent import ObjectModifiedEvent
@@ -33,7 +33,7 @@ class DeserializeFromJson(object):
 
         self.permission_cache = {}
 
-    def __call__(self, data, validate_all=False):
+    async def __call__(self, data, validate_all=False):
 
         modified = False
         errors = []
@@ -54,7 +54,7 @@ class DeserializeFromJson(object):
             raise DeserializationError(errors)
 
         if modified:
-            notify(ObjectModifiedEvent(self.context))
+            await notify(ObjectModifiedEvent(self.context))
 
         return self.context
 

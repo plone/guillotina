@@ -9,6 +9,12 @@ class IObjectFinallyCreatedEvent(interfaces.IObjectEvent):
     The location will usually be ``None`` for this event."""
 
 
+class IObjectFinallyDeletedEvent(interfaces.IObjectEvent):
+    """An object has been deleted.
+
+    The location will usually be ``None`` for this event."""
+
+
 class INewUserAdded(Interface):
     """A new user logged in.
 

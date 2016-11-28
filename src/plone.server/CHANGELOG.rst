@@ -1,7 +1,8 @@
 1.0a8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added zope.event async version on plone.server.events (notify and async handlers)
+  [ramonnb]
 
 
 1.0a7 (2016-11-24)
@@ -11,7 +12,7 @@
   [vangheem]
 
 - Add to finalize an AsyncUtil when its finishing the software
-  [ramon]
+  [ramonnb]
 
 - Remove `AUTH_USER_PLUGINS` and `AUTH_EXTRACTION_PLUGINS`. Authentication now
   consists of auth extractors, user identifiers and token validators.
@@ -21,7 +22,7 @@
   [vangheem]
 
 - Get default values from schema when attribute on object is not set
-  [bloodbare]
+  [ramonnb]
 
 
 1.0a6 (2016-11-21)

@@ -2,6 +2,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from plone.server.interfaces import INewUserAdded
 from plone.server.interfaces import IObjectFinallyCreatedEvent
+from plone.server.interfaces import IObjectFinallyDeletedEvent
 from zope.interface import implementer
 from zope.interface.interfaces import ObjectEvent
 from zope.event import subscribers as syncsubscribers
@@ -17,6 +18,11 @@ asyncsubscribers = []
 @implementer(IObjectFinallyCreatedEvent)
 class ObjectFinallyCreatedEvent(ObjectEvent):
     """An object has been created."""
+
+
+@implementer(IObjectFinallyDeletedEvent)
+class ObjectFinallyDeletedEvent(ObjectEvent):
+    """An object has been deleted."""
 
 
 @implementer(INewUserAdded)
