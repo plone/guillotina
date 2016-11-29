@@ -3,11 +3,13 @@ from aiohttp import web
 from pkg_resources import iter_entry_points
 from plone.server import app_settings
 from plone.server.async import IAsyncUtility
-from plone.server.auth.validators import hash_password
+from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.auth.users import RootUser
+from plone.server.auth.validators import hash_password
 from plone.server.content import IStaticDirectory
 from plone.server.content import IStaticFile
+from plone.server.content import loadCachedSchema
 from plone.server.content import StaticFile
 from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IApplication
@@ -17,7 +19,6 @@ from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter
 from plone.server.utils import import_class
-from plone.server.content import loadCachedSchema
 from ZEO.ClientStorage import ClientStorage
 from ZODB import DB
 from ZODB.DemoStorage import DemoStorage
@@ -177,7 +178,7 @@ class RootSpecialPermissions(PrincipalPermissionManager):
         self.grantPermissionToPrincipal('plone.GetAPIDefinition', ROOT_USER_ID)
         # Access anonymous - needs to be configurable
         self.grantPermissionToPrincipal(
-            'plone.AccessContent', 'Anonymous User')
+            'plone.AccessContent', ANONYMOUS_USER_ID)
 
 
 @implementer(IDataBase)
