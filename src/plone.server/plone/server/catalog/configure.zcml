@@ -18,15 +18,11 @@
   <!-- index events -->
   <subscriber
       for="plone.server.interfaces.IResource
-           zope.lifecycleevent.interfaces.IObjectAddedEvent"
+           plone.server.interfaces.IObjectFinallyCreatedEvent"
       handler=".index.add_object" />
   <subscriber
     for="plone.server.interfaces.IResource
-         zope.lifecycleevent.interfaces.IObjectCopiedEvent"
-    handler=".index.add_object" />
-  <subscriber
-    for="plone.server.interfaces.IResource
-         zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+         plone.server.interfaces.IObjectFinallyModifiedEvent"
     handler=".index.add_object" />
   <!-- will need workflow events as well -->
 
@@ -34,7 +30,7 @@
   <!-- unindex events -->
   <subscriber
     for="plone.server.interfaces.IResource
-         zope.lifecycleevent.interfaces.IObjectRemovedEvent"
+         plone.server.interfaces.IObjectFinallyDeletedEvent"
     handler=".index.remove_object" />
 
 

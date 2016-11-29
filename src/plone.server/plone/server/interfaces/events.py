@@ -15,6 +15,12 @@ class IObjectFinallyDeletedEvent(interfaces.IObjectEvent):
     The location will usually be ``None`` for this event."""
 
 
+class IObjectFinallyModifiedEvent(interfaces.IObjectEvent):
+    """An object has been modified.
+
+    The location will usually be ``None`` for this event."""
+
+
 class INewUserAdded(Interface):
     """A new user logged in.
 

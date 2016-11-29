@@ -13,6 +13,7 @@ from plone.server.interfaces.content import IStaticFile  # noqa
 from plone.server.interfaces.events import INewUserAdded  # noqa
 from plone.server.interfaces.events import IObjectFinallyCreatedEvent  # noqa
 from plone.server.interfaces.events import IObjectFinallyDeletedEvent  # noqa
+from plone.server.interfaces.events import IObjectFinallyModifiedEvent  # noqa
 from plone.server.interfaces.files import IFile  # noqa
 from plone.server.interfaces.files import IFileField  # noqa
 from plone.server.interfaces.files import IFileManager  # noqa

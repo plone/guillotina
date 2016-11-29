@@ -3,6 +3,7 @@ from dateutil.tz import tzlocal
 from plone.server.interfaces import INewUserAdded
 from plone.server.interfaces import IObjectFinallyCreatedEvent
 from plone.server.interfaces import IObjectFinallyDeletedEvent
+from plone.server.interfaces import IObjectFinallyModifiedEvent
 from zope.interface import implementer
 from zope.interface.interfaces import ObjectEvent
 from zope.event import subscribers as syncsubscribers
@@ -23,6 +24,11 @@ class ObjectFinallyCreatedEvent(ObjectEvent):
 @implementer(IObjectFinallyDeletedEvent)
 class ObjectFinallyDeletedEvent(ObjectEvent):
     """An object has been deleted."""
+
+
+@implementer(IObjectFinallyModifiedEvent)
+class ObjectFinallyModifiedEvent(ObjectEvent):
+    """An object has been modified."""
 
 
 @implementer(INewUserAdded)

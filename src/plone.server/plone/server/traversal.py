@@ -44,6 +44,7 @@ from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 
 import aiohttp
+import uuid
 import json
 import logging
 import traceback
@@ -187,13 +188,15 @@ class MatchInfo(AbstractMatchInfo):
                 view_result = UnauthorizedResponse(
                     _('Not authorized to render operation'))
             except Exception as e:
+                eid = uuid.uuid4().hex
+                message = _('Error on execution of view') + eid
                 logger.error(
-                    "Exception on writing execution",
+                    message,
                     exc_info=e)
                 await sync(request)(txn.abort)
                 view_result = ErrorResponse(
                     'ServiceError',
-                    _('Error on execution of operation')
+                    message
                 )
         else:
             try:
@@ -202,12 +205,14 @@ class MatchInfo(AbstractMatchInfo):
                 view_result = UnauthorizedResponse(
                     _('Not authorized to render view'))
             except Exception as e:
+                eid = uuid.uuid4().hex
+                message = _('Error on execution of view') + eid
                 logger.error(
-                    "Exception on view execution",
+                    message,
                     exc_info=e)
                 view_result = ErrorResponse(
                     'ViewError',
-                    _('Error on execution of view'))
+                    message)
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):

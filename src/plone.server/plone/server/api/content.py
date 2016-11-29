@@ -10,6 +10,7 @@ from plone.server.browser import Response
 from plone.server.content import createContentInContainer
 from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.events import ObjectFinallyDeletedEvent
+from plone.server.events import ObjectFinallyModifiedEvent
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceDeserializeFromJson
@@ -141,6 +142,8 @@ class DefaultPATCH(Service):
                 str(e),
                 status=400)
 
+        await notify(ObjectFinallyModifiedEvent(self.context))
+
         return Response(response={}, status=204)
 
 
@@ -181,6 +184,7 @@ class SharingPOST(Service):
         for user, roles in data['prinrole'].items():
             for role in roles:
                 prinrole.assignRoleToPrincipal(role, user)
+        await notify(ObjectFinallyModifiedEvent(self.context))
 
 
 class DefaultDELETE(Service):
