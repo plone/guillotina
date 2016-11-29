@@ -72,13 +72,17 @@ class ResourceFactory(Factory):
         self.add_permission = add_permission
         self.allowed_types = allowed_types
 
-    def __call__(self, *args, **kw):
+    def __call__(self, id, *args, **kw):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.portal_type = self.portal_type
         now = datetime.now(tz=_zone)
         obj.creation_date = now
         obj.modification_date = now
         obj.uuid = uuid.uuid4().hex
+        if id is None:
+            obj.id = obj.uuid
+        else:
+            obj.id = id
         applyMarkers(obj, None)
         return obj
 
@@ -162,7 +166,13 @@ def createContent(type_, **kw):
     This method should not be used to add content, just internally.
     """
     factory = getCachedFactory(type_)
-    obj = factory()
+    if 'id' in kw:
+        id_ = kw['id']
+    else:
+        id_ = None
+
+    # We create the object with at least the ID
+    obj = factory(id=id_)
     for key, value in kw.items():
         setattr(obj, key, value)
     return obj
@@ -172,6 +182,7 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
     """Utility to create a content.
 
     This method is the one to use to create content.
+    id_ can be None
     """
     factory = getCachedFactory(type_)
 
@@ -196,14 +207,12 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
         if parent_factory.allowed_types is not None and \
                 type_ not in parent_factory.allowed_types:
             raise NotAllowedContentType(str(container), type_)
-    obj = factory()
-    obj.__name__ = id_
+    # We create the object with at least the ID
+    obj = factory(id=id_)
     obj.__parent__ = container
-    if 'id' not in kw:
-        kw['id'] = id_
     for key, value in kw.items():
         setattr(obj, key, value)
-    container[id_] = obj
+    container[obj.id] = obj
     return obj
 
 
@@ -268,6 +277,15 @@ class Resource(Persistent):
             type=self.portal_type,
             path=path,
             mem=id(self))
+
+    def set_id(self, id_):
+        if id_ is not None:
+            self.__name__ = id_
+
+    def get_id(self):
+        return self.__name__
+
+    id = property(get_id, set_id)
 
     def __getattr__(self, name):
         # python basics:  __getattr__ is only invoked if the attribute wasn't

@@ -46,7 +46,6 @@ class SerializeToJson(object):
 
         result = {
             '@id': IAbsoluteURL(self.context, self.request)(),
-            'id': self.context.id,
             '@type': self.context.portal_type,
             'parent': parent_summary,
             'created': json_compatible(self.context.creation_date),

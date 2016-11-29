@@ -19,6 +19,7 @@ from plone.server import app_settings
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
 from random import randint
+from dateutil.tz import tzlocal
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from plone.server.events import notify
@@ -28,7 +29,8 @@ from zope.securitypolicy.interfaces import IPrincipalRoleMap
 from zope.securitypolicy.interfaces import IRolePermissionMap
 
 import logging
-import uuid
+
+_zone = tzlocal()
 
 
 logger = logging.getLogger(__name__)
@@ -57,10 +59,9 @@ class DefaultPOST(Service):
 
         # Generate a temporary id if the id is not given
         if not id_ and title:
-            # new_id = INameChooser(self.context).chooseName(title, object())
-            new_id = uuid.uuid4().hex
+            new_id = None
         elif not id_:
-            now = datetime.now()
+            now = datetime.now(tz=_zone)
             new_id = '{}.{}.{}{:04d}'.format(
                 type_.lower().replace(' ', '_'),
                 now.strftime('%Y-%m-%d'),

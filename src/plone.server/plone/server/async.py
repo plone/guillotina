@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from dateutil.tz import tzlocal
 from plone.server import _
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
@@ -13,6 +14,7 @@ import asyncio
 import logging
 
 
+_zone = tzlocal()
 logger = logging.getLogger(__name__)
 
 
@@ -94,7 +96,7 @@ class QueueObject(View):
 
     def __init__(self, context, request):
         super(QueueObject, self).__init__(context, TransactionProxy(request))
-        self.time = datetime.now().timestamp()
+        self.time = datetime.now(tz=_zone).timestamp()
 
     def __lt__(self, view):
         return self.time < view.time

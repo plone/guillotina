@@ -48,7 +48,7 @@ class IResource(IContained):
     title = zope.schema.TextLine(
         title='Title',
         required=False,
-        description=u"Title of the Site",
+        description=u"Title of the Resource",
         default=u''
     )
 
