@@ -1,6 +1,9 @@
 1.0a8 (unreleased)
 ------------------
 
+- provide basic command line utility to interact with APIs
+  [vangheem]
+
 - fix fallback cors check
   [vangheem]
 
