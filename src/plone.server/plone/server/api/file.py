@@ -58,6 +58,7 @@ class UploadFile(TraversableFieldService):
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
+        import pdb; pdb.set_trace()
         adapter = getMultiAdapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.upload()

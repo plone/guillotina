@@ -82,10 +82,10 @@ async def do_traverse(request, parent, path):
     return await traverse(request, context, path[1:])
 
 
-async def subrequest(orig_request, path, relative_to_site=True,
-                     headers={}, body=None, params=None, method='GET'):
-    """Subrequest, initial implementation doing a real request
-    """
+async def subrequest(
+        orig_request, path, relative_to_site=True,
+        headers={}, body=None, params=None, method='GET'):
+    """Subrequest, initial implementation doing a real request."""
     session = aiohttp.ClientSession()
     method = method.lower()
     if method not in SUBREQUEST_METHODS:
@@ -189,7 +189,7 @@ class MatchInfo(AbstractMatchInfo):
                     _('Not authorized to render operation'))
             except Exception as e:
                 eid = uuid.uuid4().hex
-                message = _('Error on execution of view') + eid
+                message = _('Error on execution of view') + ' ' + eid
                 logger.error(
                     message,
                     exc_info=e)
@@ -206,7 +206,7 @@ class MatchInfo(AbstractMatchInfo):
                     _('Not authorized to render view'))
             except Exception as e:
                 eid = uuid.uuid4().hex
-                message = _('Error on execution of view') + eid
+                message = _('Error on execution of view') + ' ' + eid
                 logger.error(
                     message,
                     exc_info=e)
@@ -303,7 +303,7 @@ class TraversalRouter(AbstractRouter):
             raise HTTPBadRequest(text=json.dumps({
                 'success': False,
                 'exception_message': str(_exc),
-                'exception_type': getattr(type(_exc), '__name__', str(type(_exc))),
+                'exception_type': getattr(type(_exc), '__name__', str(type(_exc))),  # noqa
                 'traceback': traceback.format_exc()
             }))
 
@@ -378,7 +378,8 @@ class TraversalRouter(AbstractRouter):
                     request.site_settings.get(app_settings['cors'], False)):
                 # Its a CORS call, we could not find any OPTION definition
                 # Lets create a default preflight view
-                # We check for site_settings in case the call is to some url before site
+                # We check for site_settings in case the call is to some url
+                # before site
                 view = DefaultOPTIONS(resource, request)
 
         checker = getCheckerForInstancesOf(view.__class__)
