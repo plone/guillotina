@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from copy import deepcopy
 from BTrees.Length import Length
 from BTrees.OOBTree import OOBTree
+from copy import deepcopy
 from datetime import datetime
 from dateutil.tz import tzlocal
 from persistent import Persistent
@@ -11,6 +11,7 @@ from plone.behavior.markers import applyMarkers
 from plone.server import FACTORY_CACHE
 from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
+from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
@@ -28,9 +29,9 @@ from plone.server.registry import Registry
 from plone.server.transactions import get_current_request
 from plone.server.transactions import synccontext
 from plone.server.utils import Lazy
-from zope.schema.interfaces import IContextAwareDefaultFactory
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import adapter
+from zope.component import getUtilitiesFor
 from zope.component import getUtility
 from zope.component import queryUtility
 from zope.component.factory import Factory
@@ -40,10 +41,10 @@ from zope.interface import implementer
 from zope.interface import Interface
 from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
+from zope.schema.interfaces import IContextAwareDefaultFactory
 from zope.security.interfaces import IPermission
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
-from zope.component import getUtilitiesFor
 
 import uuid
 
@@ -441,4 +442,4 @@ class StaticDirectory(object):
 class StaticFileSpecialPermissions(PrincipalPermissionManager):
     def __init__(self, db):
         super(StaticFileSpecialPermissions, self).__init__()
-        self.grantPermissionToPrincipal('plone.AccessContent', 'Anonymous User')
+        self.grantPermissionToPrincipal('plone.AccessContent', ANONYMOUS_USER_ID)

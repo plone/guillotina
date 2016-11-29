@@ -1,6 +1,7 @@
 
 
 ROOT_USER_ID = 'root'
+ANONYMOUS_USER_ID = 'Anonymous User'
 
 
 class RootUser(object):
@@ -30,4 +31,4 @@ class AnonymousUser(PloneUser):
 
     def __init__(self, request):
         super(AnonymousUser, self).__init__(request)
-        self.id = 'Anonymous User'
+        self.id = ANONYMOUS_USER_ID

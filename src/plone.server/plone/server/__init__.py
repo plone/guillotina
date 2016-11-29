@@ -31,10 +31,10 @@ app_settings = {
     'available_addons': {},
     'api_definition': {},
     'cors': {
-        "allow_origin": [],
+        "allow_origin": ['*'],
         "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
-        "allow_headers": [],
-        "expose_headers": [],
+        "allow_headers": ['*'],
+        "expose_headers": ['*'],
         "allow_credentials": True,
         "max_age": 3660
     },

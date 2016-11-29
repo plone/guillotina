@@ -5,6 +5,10 @@ from zope.dottedname.resolve import resolve
 
 import fnmatch
 import importlib
+import logging
+
+
+logger = logging.getLogger('plone.server')
 
 
 def import_class(import_string):
@@ -53,8 +57,9 @@ async def apply_cors(request):
     origin = request.headers.get('Origin', None)
     if origin:
         if not any([fnmatch.fnmatchcase(origin, o)
-           for o in app_settings['cors']['allow_origin']]):
-            raise HTTPUnauthorized('Origin %s not allowed' % origin)
+                    for o in app_settings['cors']['allow_origin']]):
+            logger.info('Origin %s not allowed' % origin)
+            raise HTTPUnauthorized()
         elif request.headers.get('Access-Control-Allow-Credentials', False):
             headers['Access-Control-Allow-Origin', origin]
         else:

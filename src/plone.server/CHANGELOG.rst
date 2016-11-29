@@ -1,6 +1,9 @@
 1.0a8 (unreleased)
 ------------------
 
+- fix fallback cors check
+  [vangheem]
+
 - Added zope.event async version on plone.server.events (notify and async handlers)
   [ramonnb]
 
