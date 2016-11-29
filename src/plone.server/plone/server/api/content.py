@@ -50,7 +50,6 @@ class DefaultPOST(Service):
         data = await self.request.json()
         type_ = data.get('@type', None)
         id_ = data.get('id', None)
-        title = data.get('title', None)
 
         if not type_:
             return ErrorResponse(
@@ -58,15 +57,8 @@ class DefaultPOST(Service):
                 _("Property '@type' is required"))
 
         # Generate a temporary id if the id is not given
-        if not id_ and title:
+        if not id_:
             new_id = None
-        elif not id_:
-            now = datetime.now(tz=_zone)
-            new_id = '{}.{}.{}{:04d}'.format(
-                type_.lower().replace(' ', '_'),
-                now.strftime('%Y-%m-%d'),
-                str(now.timestamp())[7:],
-                randint(0, 9999))
         else:
             new_id = id_
 
