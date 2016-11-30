@@ -169,3 +169,32 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         site = self._get_site()
         behavior = IAttachment(site['file1'])
         self.assertEqual(behavior.file.data, resp.content)
+
+
+    def test_create_contenttype_with_date(self):
+        """Try to create a contenttype."""
+        resp = self.layer.requester(
+            'POST',
+            '/plone/plone/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        self.assertTrue(resp.status_code == 201)
+        date_to_test = "2016-11-30T14:39:07.394273+01:00"
+        resp = self.layer.requester(
+            'PATCH',
+            '/plone/plone/item1',
+            data=json.dumps({
+                "IDublinCore": {
+                    "modified": date_to_test
+                }
+            })
+        )
+
+        root = self.layer.new_root()
+        obj = root['plone']['item1']
+        from plone.server.behaviors.dublincore import IDublinCore
+        self.assertEqual(IDublinCore(obj).modified.isoformat(), date_to_test)

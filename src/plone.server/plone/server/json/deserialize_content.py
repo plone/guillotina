@@ -39,7 +39,6 @@ class DeserializeFromJson(object):
         errors = []
 
         factory = getCachedFactory(self.context.portal_type)
-
         main_schema = factory.schema
         self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)
@@ -81,7 +80,7 @@ class DeserializeFromJson(object):
 
                 # Deserialize to field value
                 deserializer = queryMultiAdapter(
-                    (field, obj, self.request),
+                    (f, obj, self.request),
                     IResourceFieldDeserializer)
                 if deserializer is None:
                     continue
@@ -95,13 +94,7 @@ class DeserializeFromJson(object):
                     errors.append({
                         'message': e.doc(), 'field': name, 'error': e})
                 else:
-                    try:
-                        f.validate(value)
-                    except ValidationError as e:
-                        errors.append({
-                            'message': e.doc(), 'field': name, 'error': e})
-                    else:
-                        setattr(obj, name, value)
+                    setattr(obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):
                     errors.append({

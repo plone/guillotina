@@ -4,7 +4,7 @@ from zope.component import adapter
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema.interfaces import IField
-from zope.schema.interfaces import IFromUnicode
+from plone.server.json.deserialize_value import schema_compatible
 
 
 @implementer(IResourceFieldDeserializer)
@@ -17,6 +17,8 @@ class DefaultResourceFieldDeserializer(object):
         self.request = request
 
     def __call__(self, value):
-        if not isinstance(value, str) or not isinstance(value, bytes):
-            return value
-        return IFromUnicode(self.field).fromUnicode(value)
+        # if not isinstance(value, str) and not isinstance(value, bytes):
+        #     return value
+        value = schema_compatible(value, self.field)
+        self.field.validate(value)
+        return value

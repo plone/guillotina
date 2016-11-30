@@ -13,6 +13,8 @@ from zope.schema.interfaces import IFrozenSet
 from zope.schema.interfaces import IList
 from zope.schema.interfaces import ISet
 from zope.schema.interfaces import ITuple
+from zope.schema.interfaces import IDatetime
+from dateutil.parser import parse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -104,3 +106,9 @@ def dict_converter(value, field):
     values = [schema_compatible(values[idx], field.value_type)
               for idx in range(len(values))]
     return dict(zip(keys, values))
+
+
+@adapter(str, IDatetime)
+@implementer(IJSONToValue)
+def datetime_converter(value, field):
+    return parse(value)

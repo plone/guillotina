@@ -19,5 +19,6 @@
     <adapter factory=".deserialize_value.set_converter" />
     <adapter factory=".deserialize_value.tuple_converter" />
     <adapter factory=".deserialize_value.bool_converter" />
+    <adapter factory=".deserialize_value.datetime_converter" />
 
 </configure>
