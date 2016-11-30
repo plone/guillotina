@@ -183,10 +183,14 @@ class MatchInfo(AbstractMatchInfo):
                             await txn.acommit()
                         else:
                             await sync(request)(txn.commit)
-            except Unauthorized:
+            except Unauthorized as e:
+                eid = uuid.uuid4().hex
+                message = _('Not authorized to render operation') + ' ' + eid
+                logger.error(
+                    message,
+                    exc_info=e)
                 await sync(request)(txn.abort)
-                view_result = UnauthorizedResponse(
-                    _('Not authorized to render operation'))
+                view_result = UnauthorizedResponse(message)
             except Exception as e:
                 eid = uuid.uuid4().hex
                 message = _('Error on execution of view') + ' ' + eid
@@ -202,8 +206,13 @@ class MatchInfo(AbstractMatchInfo):
             try:
                 view_result = await self.view()
             except Unauthorized:
-                view_result = UnauthorizedResponse(
-                    _('Not authorized to render view'))
+                eid = uuid.uuid4().hex
+                message = _('Not authorized to render operation') + ' ' + eid
+                logger.error(
+                    message,
+                    exc_info=e)
+                await sync(request)(txn.abort)
+                view_result = UnauthorizedResponse(message)
             except Exception as e:
                 eid = uuid.uuid4().hex
                 message = _('Error on execution of view') + ' ' + eid
