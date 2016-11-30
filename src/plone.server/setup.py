@@ -62,7 +62,8 @@ setup(
         'zope.schema',
         'zope.security',
         'zope.securitypolicy',
-        'pyjwt'
+        'pyjwt',
+        'requests'
     ],
     extras_require={
         'test': [
@@ -74,6 +75,7 @@ setup(
     entry_points={
         'console_scripts': [
             'pserver = plone.server.server:main',
+            'pscli = plone.server.cli:main',
         ]
     }
 )
