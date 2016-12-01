@@ -211,7 +211,6 @@ class MatchInfo(AbstractMatchInfo):
                 logger.error(
                     message,
                     exc_info=e)
-                await sync(request)(txn.abort)
                 view_result = UnauthorizedResponse(message)
             except Exception as e:
                 eid = uuid.uuid4().hex
