@@ -198,3 +198,39 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         obj = root['plone']['item1']
         from plone.server.behaviors.dublincore import IDublinCore
         self.assertEqual(IDublinCore(obj).modified.isoformat(), date_to_test)
+
+    def test_create_duplicate_id(self):
+        """Try to create a contenttype."""
+        resp = self.layer.requester(
+            'POST',
+            '/plone/plone/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        self.assertTrue(resp.status_code == 201)
+        resp = self.layer.requester(
+            'POST',
+            '/plone/plone/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        self.assertTrue(resp.status_code == 400)
+        resp = self.layer.requester(
+            'POST',
+            '/plone/plone/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            }),
+            headers={
+                "OVERWRITE": "TRUE"
+            }
+        )
+        self.assertTrue(resp.status_code == 201)

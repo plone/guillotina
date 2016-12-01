@@ -108,11 +108,12 @@ class PloneRequester(object):
             data=None,
             authenticated=True,
             auth_type='Basic',
+            headers={},
             token=ADMIN_TOKEN,
             accept='application/json'):
 
         settings = {}
-        settings['headers'] = {}
+        settings['headers'] = headers
         if accept is not None:
             settings['headers']['ACCEPT'] = accept
         if authenticated and token is not None:
@@ -261,6 +262,7 @@ class FakeRequest(object):
     def __init__(self):
         self.site_components = getGlobalSiteManager()
         self.security = IInteraction(self)
+        self.headers = {}
 
 
 class TestParticipation(object):

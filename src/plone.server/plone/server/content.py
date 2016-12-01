@@ -213,6 +213,9 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
     obj.__parent__ = container
     for key, value in kw.items():
         setattr(obj, key, value)
+    if request is None or 'OVERWRITE' not in request.headers:
+        if obj.id in container:
+            raise KeyError('Key already exist on this container')
     container[obj.id] = obj
     return obj
 
