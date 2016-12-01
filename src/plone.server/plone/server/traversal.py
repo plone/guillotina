@@ -205,7 +205,7 @@ class MatchInfo(AbstractMatchInfo):
         else:
             try:
                 view_result = await self.view()
-            except Unauthorized:
+            except Unauthorized as e:
                 eid = uuid.uuid4().hex
                 message = _('Not authorized to render operation') + ' ' + eid
                 logger.error(
