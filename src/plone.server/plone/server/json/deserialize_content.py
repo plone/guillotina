@@ -4,6 +4,7 @@ from plone.server.interfaces import IResource
 from plone.server.content import iterSchemata
 from zope.interface.exceptions import Invalid
 from zope.interface.interfaces import IMethod
+from plone.server import BEHAVIOR_CACHE
 from zope.schema.interfaces import IField
 from zope.schema.interfaces import SchemaNotFullyImplemented
 from plone.server.json.interfaces import IResourceDeserializeFromJson
@@ -44,10 +45,19 @@ class DeserializeFromJson(object):
             main_schema, self.context, data, errors, validate_all, False)
 
         for behavior_schema in factory.behaviors or ():
-            if behavior_schema.__name__ in data:
+            if behavior_schema.__identifier__ in data:
                 behavior = behavior_schema(self.context)
                 self.set_schema(
-                    behavior_schema, behavior, data, errors, validate_all, True)
+                    behavior_schema, behavior, data, errors,
+                    validate_all, True)
+
+        for dynamic_behavior in self.context.__behaviors__ or ():
+            dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
+            if behavior_schema.__identifier__ in data:
+                behavior = dynamic_behavior_obj(self.context)
+                self.set_schema(
+                    dynamic_behavior_obj, behavior, data, errors,
+                    validate_all, True)
 
         if errors:
             raise DeserializationError(errors)
@@ -68,7 +78,7 @@ class DeserializeFromJson(object):
                 continue
 
             if behavior:
-                data_value = data[schema.__name__][name] if name in data[schema.__name__] else None
+                data_value = data[schema.__identifier__][name] if name in data[schema.__identifier__] else None  # noqa
             else:
                 data_value = data[name] if name in data else None
 

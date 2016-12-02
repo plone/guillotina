@@ -47,3 +47,4 @@ app_settings = {
 SCHEMA_CACHE = {}
 PERMISSIONS_CACHE = {}
 FACTORY_CACHE = {}
+BEHAVIOR_CACHE = {}

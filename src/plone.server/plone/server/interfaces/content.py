@@ -48,8 +48,15 @@ class IResource(IContained):
     title = zope.schema.TextLine(
         title='Title',
         required=False,
-        description=u"Title of the Resource",
+        description=u'Title of the Resource',
         default=u''
+    )
+
+    __behaviors__ = zope.schema.FrozenSet(
+        title='Enabled behaviors',
+        required=False,
+        description=u'Dynamic behaviors for the content type',
+        default=frozenset({})
     )
 
 

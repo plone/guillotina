@@ -12,6 +12,7 @@ from zope.interface import implementer
 from zope.interface import Interface
 from plone.server.text import IRichTextValue
 from zope.schema.vocabulary import SimpleVocabulary
+from plone.server.file import BasicFile
 
 try:
     import Missing
@@ -59,6 +60,16 @@ def default_converter(value):
     raise TypeError(
         'No converter for making'
         ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
+
+
+@adapter(BasicFile)
+@implementer(IValueToJson)
+def file_converter(value):
+    return {
+        'filename': value.filename,
+        'size': value.size,
+        'contenttype': value.contentType
+    }
 
 
 @adapter(SimpleVocabulary)

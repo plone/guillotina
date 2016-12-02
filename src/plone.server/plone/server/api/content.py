@@ -50,6 +50,7 @@ class DefaultPOST(Service):
         data = await self.request.json()
         type_ = data.get('@type', None)
         id_ = data.get('id', None)
+        behaviors = data.get('behaviors', None)
 
         if not type_:
             return ErrorResponse(
@@ -73,6 +74,9 @@ class DefaultPOST(Service):
                 'CreatingObject',
                 str(e),
                 status=400)
+
+        for behavior in behaviors or ():
+            obj.add_behavior(behavior)
 
         # Update fields
         deserializer = queryMultiAdapter((obj, self.request),
@@ -119,6 +123,9 @@ class DefaultPUT(Service):
 class DefaultPATCH(Service):
     async def __call__(self):
         data = await self.request.json()
+        behaviors = data.get('behaviors', None)
+        for behavior in behaviors or ():
+            self.context.add_behavior(behavior)
         deserializer = queryMultiAdapter((self.context, self.request),
                                          IResourceDeserializeFromJson)
         if deserializer is None:

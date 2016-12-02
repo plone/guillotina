@@ -6,6 +6,7 @@ from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.json.interfaces import IResourceSerializeToJsonSummary
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.content import getCachedFactory
+from plone.server import BEHAVIOR_CACHE
 from plone.server.json.serialize_value import json_compatible
 from plone.server.interfaces import READ_PERMISSIONS_KEY
 from plone.server.directives import mergedTaggedValueDict
@@ -62,6 +63,11 @@ class SerializeToJson(object):
             behavior = behavior_schema(self.context)
             self.get_schema(behavior_schema, behavior, result, True)
 
+        for dynamic_behavior in self.context.__behaviors__ or ():
+            dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
+            behavior = dynamic_behavior_obj(self.context)
+            self.get_schema(dynamic_behavior_obj, behavior, result, True)
+
         return result
 
     def get_schema(self, schema, context, result, behavior):
@@ -81,7 +87,7 @@ class SerializeToJson(object):
                 schema_serial[name] = value
 
         if behavior:
-            result[schema.__name__] = schema_serial
+            result[schema.__identifier__] = schema_serial
 
     def check_permission(self, permission_name):
         if permission_name is None:
@@ -117,7 +123,8 @@ class SerializeFolderToJson(SerializeToJson):
                     (member, self.request), IResourceSerializeToJsonSummary)()
                 for ident, member in self.context.items()
                 if not ident.startswith('_') and
-                bool(security.checkPermission('plone.AccessContent', self.context))
+                bool(security.checkPermission(
+                    'plone.AccessContent', self.context))
             ]
         result['length'] = length
 
