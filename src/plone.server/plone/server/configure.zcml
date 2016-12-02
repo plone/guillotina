@@ -50,4 +50,6 @@
 
   <plone:api file="api/api.json" />
 
+  <adapter factory="plone.server.types.FTIConstrainAllowedTypes" />
+
 </configure>

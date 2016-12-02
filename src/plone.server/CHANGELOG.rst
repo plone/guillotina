@@ -1,6 +1,9 @@
 1.0a8 (unreleased)
 ------------------
 
+- provide IConstrainTypes adapter interface to override allowed types in a folder
+  [vangheem]
+
 - provide dynamic behavior for objects
   [ramonnb]
 

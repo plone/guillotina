@@ -21,6 +21,7 @@ from plone.server.interfaces.files import IStorage  # noqa
 from plone.server.interfaces.files import NotStorable  # noqa
 from plone.server.interfaces.text import IRichText  # noqa
 from plone.server.interfaces.text import IRichTextValue  # noqa
+from plone.server.interfaces.types import IConstrainTypes  # noqa
 from plone.server.interfaces.views import ICONNECT  # noqa
 from plone.server.interfaces.views import IDELETE  # noqa
 from plone.server.interfaces.views import IDownloadView  # noqa
