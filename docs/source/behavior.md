@@ -10,12 +10,17 @@ If you want to have a shared behavior based on some fields and operations that n
     from plone.server.interfaces import IFormFieldProvider
     from zope.interface import Interface
     from zope.interface import provider
-    from plone.server.file import BasicFileField
+    from zope.schema import Textline
 
     @provider(IFormFieldProvider)
-    class IAttachment(Interface):
-        file = BasicFileField(
-            title=u'File',
+    class IMyLovedBehavior(Interface):
+        text = Textline(
+            title=u'Text line field',
+            required=False
+        )
+
+        text2 = Textline(
+            title=u'Text line field',
             required=False
         )
 
@@ -25,7 +30,7 @@ Once you define the schema you can define a specific marker interface that will 
 
 ```python
 
-    class IMarkerAttachment(Interface):
+    class IMarkerBehavior(Interface):
         """Marker interface for content with attachment."""
 
 ```
@@ -36,23 +41,28 @@ For example in case you want to have a class that stores the field on the conten
 
 ```python
 from plone.server.behaviors.properties import ContextProperty
-from plone.behavior import AnnotationStorage
+from plone.server.behaviors.intrance import AnnotationBehavior
 from zope.component import adapter
 from plone.server.interfaces import IResource
 
+@implementer(IMyLovedBehavior)
 @adapter(IResource)
-class MyBehavior(AnnotationStorage):
-    attribute = ContextProperty(u'attribute', ())
+class MyBehavior(AnnotationBehavior):
+    """If attributes 
+    """
+    text = ContextProperty(u'attribute', ())
 ```
+
+On this example text will be stored on the context object and text2 as a annotation.
 
 Once you have the schema, marker interface and the factory you can register on zcml:
 
 ```xml
       <plone:behavior
           title="Attachment"
-          provides=".attachment.IAttachment"
-          marker=".attachment.IMarkerAttachment"
-          factory=".attachment.MyBehavior"
+          provides=".mybehavior.IMyLovedBehavior"
+          marker=".mybehavior.IMarkerBehavior"
+          factory=".mybehavior.MyBehavior"
           for="plone.server.interfaces.IResource"
           />
 
