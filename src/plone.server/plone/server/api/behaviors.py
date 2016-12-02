@@ -35,7 +35,7 @@ class DefaultDELETE(Service):
         """
         data = await self.request.json()
         behavior = data.get('behavior', None)
-        self.context.del_behavior(behavior)
+        self.context.remove_behavior(behavior)
         return {}
 
 

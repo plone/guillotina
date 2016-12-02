@@ -1,6 +1,9 @@
 1.0a8 (unreleased)
 ------------------
 
+- provide dynamic behavior for objects
+  [ramonnb]
+
 - provide basic command line utility to interact with APIs
   [vangheem]
 

@@ -329,7 +329,7 @@ class Resource(Persistent):
             if behavior_registration.marker is not None:
                 alsoProvides(self, behavior_registration.marker)
 
-    def del_behavior(self, iface):
+    def remove_behavior(self, iface):
         """We need to apply the marker interface.
 
         value: Interface to add

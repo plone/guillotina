@@ -208,7 +208,7 @@
                 "@behaviors": {
                     "GET": {
                         "factory": "plone.server.api.behaviors.DefaultGET",
-                        "permission": "plone.ModifyContent"
+                        "permission": "plone.AccessContent"
                     },
                     "PATCH": {
                         "factory": "plone.server.api.behaviors.DefaultPATCH",
