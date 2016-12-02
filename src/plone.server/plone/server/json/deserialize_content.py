@@ -53,7 +53,7 @@ class DeserializeFromJson(object):
 
         for dynamic_behavior in self.context.__behaviors__ or ():
             dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
-            if behavior_schema.__identifier__ in data:
+            if dynamic_behavior_obj.__identifier__ in data:
                 behavior = dynamic_behavior_obj(self.context)
                 self.set_schema(
                     dynamic_behavior_obj, behavior, data, errors,
