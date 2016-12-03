@@ -31,7 +31,7 @@ app_settings = {
     'available_addons': {},
     'api_definition': {},
     'cors': {
-        "allow_origin": ['*'],
+        "allow_origin": ['http://localhost:8080'],
         "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
         "allow_headers": ['*'],
         "expose_headers": ['*'],
