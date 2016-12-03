@@ -50,6 +50,7 @@
     <adapter factory=".serialize_value.timedelta_converter" />
     <adapter factory=".serialize_value.tuple_converter" />
     <adapter factory=".serialize_value.vocabulary_converter" />
+    <adapter factory=".serialize_value.file_converter" />
     
 
 

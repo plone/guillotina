@@ -27,8 +27,7 @@ class SerializeFactoryToJson(object):
             'type': 'object',
             'required': [],
             'definitions': {},
-            'properties': {
-            },
+            'properties': {}
         }
 
         # Base object class serialized
@@ -49,7 +48,7 @@ class SerializeFactoryToJson(object):
         for schema in factory.behaviors or ():
 
             schema_serializer = getMultiAdapter(
-                (schema, factory, self.request), ISchemaSerializeToJson)
+                (schema, self.request), ISchemaSerializeToJson)
 
             serialization = schema_serializer()
             result['properties'][schema_serializer.name] = \
@@ -59,13 +58,12 @@ class SerializeFactoryToJson(object):
         return result
 
 
-@adapter(Interface, IFactory, Interface)
+@adapter(Interface, Interface)
 @implementer(ISchemaSerializeToJson)
 class DefaultSchemaSerializer(object):
 
-    def __init__(self, schema, factory, request):
+    def __init__(self, schema, request):
         self.schema = schema
-        self.factory = factory
         self.request = request
         self.schema_json = {
             'type': 'object',

@@ -188,7 +188,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'PATCH',
             '/plone/plone/item1',
             data=json.dumps({
-                "IDublinCore": {
+                "plone.server.behaviors.dublincore.IDublinCore": {
                     "modified": date_to_test
                 }
             })

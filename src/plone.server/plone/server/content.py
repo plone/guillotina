@@ -11,6 +11,7 @@ from plone.behavior.markers import applyMarkers
 from plone.server import FACTORY_CACHE
 from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
+from plone.server import BEHAVIOR_CACHE
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
@@ -29,6 +30,8 @@ from plone.server.registry import Registry
 from plone.server.transactions import get_current_request
 from plone.server.transactions import synccontext
 from plone.server.utils import Lazy
+from zope.interface import alsoProvides
+from zope.interface import noLongerProvides
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import adapter
 from zope.component import getUtilitiesFor
@@ -112,6 +115,13 @@ def loadCachedSchema():
                 'behaviors': behaviors_registrations,
                 'schema': factory.schema
             }
+    for iface, utility in getUtilitiesFor(IBehavior):
+        if isinstance(iface, str):
+            name = iface
+        elif Interface.providedBy(iface):
+            name = iface.__identifier__
+        if name not in BEHAVIOR_CACHE:
+            BEHAVIOR_CACHE[name] = utility.interface
 
 
 def getCachedFactory(portal_type):
@@ -134,6 +144,8 @@ def iterSchemataForType(portal_type):
 def iterSchemata(obj):
     portal_type = IResource(obj).portal_type
     for schema in iterSchemataForType(portal_type):
+        yield schema
+    for schema in obj.__behaviors_schemas__:
         yield schema
 
 
@@ -230,14 +242,14 @@ class BehaviorAssignable(object):
         self.context = context
 
     def supports(self, behavior_interface):
-        for behavior in self.enumerateBehaviors():
-            if behavior_interface in behavior.interface._implied:
-                return True
-        return False
+        """We support all behaviors that accomplish the for_."""
+        return True
 
     def enumerateBehaviors(self):
         for behavior in SCHEMA_CACHE[self.context.portal_type]['behaviors']:
             yield behavior
+        for behavior in self.context.__behaviors__:
+            yield BEHAVIOR_CACHE[behavior]
 
 
 def _default_from_schema(context, schema, fieldname):
@@ -263,6 +275,7 @@ class Resource(Persistent):
 
     __name__ = None
     __parent__ = None
+    __behaviors__ = frozenset({})
 
     portal_type = None
     uuid = None
@@ -290,6 +303,47 @@ class Resource(Persistent):
         return self.__name__
 
     id = property(get_id, set_id)
+
+    @property
+    def __behaviors_schemas__(self):
+        """Get the dynamic schemas."""
+        for behavior in self.__behaviors__:
+            yield BEHAVIOR_CACHE[behavior]
+
+    def add_behavior(self, iface):
+        """We need to apply the marker interface.
+
+        value: Interface to add
+        """
+        if isinstance(iface, str):
+            name = iface
+        elif Interface.providedBy(iface):
+            name = iface.__identifier__
+        else:
+            raise AttributeError('Cant identify Interface')
+        behavior_registration = getUtility(IBehavior, name=name)
+        if behavior_registration is not None and\
+                behavior_registration.interface(self) is not None:
+            # We can adapt so we can apply this dynamic behavior
+            self.__behaviors__ |= {name}
+            if behavior_registration.marker is not None:
+                alsoProvides(self, behavior_registration.marker)
+
+    def remove_behavior(self, iface):
+        """We need to apply the marker interface.
+
+        value: Interface to add
+        """
+        if isinstance(iface, str):
+            name = iface
+        elif Interface.providedBy(iface):
+            name = iface.__identifier__
+        behavior_registration = getUtility(IBehavior, name=name)
+        if behavior_registration is not None and\
+                behavior_registration.marker is not None:
+            noLongerProvides(self, behavior_registration.marker)
+        if iface in self.__behaviors__:
+            self.__behaviors__ -= {name}
 
     def __getattr__(self, name):
         # python basics:  __getattr__ is only invoked if the attribute wasn't

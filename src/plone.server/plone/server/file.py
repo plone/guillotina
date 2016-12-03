@@ -52,7 +52,10 @@ class BasicFileManager(object):
         chunk_size = 8400
         file = self.field.get(self.field.context)
         if file is None:
-            file = BasicFile()
+            filename = None
+            if 'X-UPLOAD-FILENAME' in self.request.headers:
+                filename = self.request.headers['X-UPLOAD-FILENAME']
+            file = BasicFile(filename=filename)
             self.field.set(self.field.context, file)
         with file.open('w') as fd:
             while True:

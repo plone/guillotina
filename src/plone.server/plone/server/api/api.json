@@ -204,6 +204,20 @@
                         "factory": "plone.server.api.search.ReindexPOST",
                         "permission": "plone.ReindexContent"
                     }
+                },
+                "@behaviors": {
+                    "GET": {
+                        "factory": "plone.server.api.behaviors.DefaultGET",
+                        "permission": "plone.AccessContent"
+                    },
+                    "PATCH": {
+                        "factory": "plone.server.api.behaviors.DefaultPATCH",
+                        "permission": "plone.ModifyContent"
+                    },
+                    "DELETE": {
+                        "factory": "plone.server.api.behaviors.DefaultDELETE",
+                        "permission": "plone.ModifyContent"
+                    }
                 }
             },
             "DELETE": {

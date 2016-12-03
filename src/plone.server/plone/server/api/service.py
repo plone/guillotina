@@ -6,6 +6,7 @@ from zope.component import queryUtility
 from zope.component.interfaces import IFactory
 from zope.dottedname.resolve import resolve
 from zope.interface import alsoProvides
+from plone.server import BEHAVIOR_CACHE
 
 
 class Service(View):
@@ -38,7 +39,14 @@ class TraversableFieldService(View):
             if name in schema:
                 field = schema[name]
             else:
+                # TODO : We need to optimize and move to content.py iterSchema
                 for behavior_schema in fti.behaviors or ():
+                    if name in behavior_schema:
+                        field = behavior_schema[name]
+                        self.behavior = behavior_schema(self.context)
+                        break
+                for behavior_name in self.context.__behaviors__ or ():
+                    behavior_schema = BEHAVIOR_CACHE[behavior_name]
                     if name in behavior_schema:
                         field = behavior_schema[name]
                         self.behavior = behavior_schema(self.context)

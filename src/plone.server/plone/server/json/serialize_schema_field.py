@@ -62,6 +62,7 @@ class DefaultSchemaFieldSerializer(object):
             element_name = attribute_field.__name__
             attribute_field = attribute_field.bind(self.field)
             force = (element_name in self.forced_fields)
+
             value = attribute_field.get(self.field)
 
             # For 'default', 'missing_value' etc, we want to validate against
