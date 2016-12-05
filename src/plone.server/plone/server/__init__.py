@@ -32,7 +32,7 @@ app_settings = {
     'api_definition': {},
     'cors': {
         "allow_origin": ['http://localhost:8080'],
-        "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+        "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH", "OPTIONS"],
         "allow_headers": ['*'],
         "expose_headers": ['*'],
         "allow_credentials": True,
