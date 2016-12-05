@@ -7,6 +7,10 @@ class FunctionalCorsTestServer(PloneFunctionalTestCase):
 
     def test_get_root(self):
         """Get the application root."""
-        resp = self.layer.requester('OPTIONS', '/plone/plone')
+        resp = self.layer.requester('OPTIONS', '/plone/plone', headers={
+            'Origin': 'http://localhost',
+            'Access-Control-Request-Method': 'Get'
+        })
         self.assertTrue('ACCESS-CONTROL-ALLOW-CREDENTIALS' in resp.headers)
         self.assertTrue('ACCESS-CONTROL-EXPOSE-HEADERS' in resp.headers)
+        self.assertTrue('ACCESS-CONTROL-ALLOW-HEADERS' in resp.headers)
