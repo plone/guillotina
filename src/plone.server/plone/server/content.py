@@ -15,7 +15,10 @@ from plone.server import BEHAVIOR_CACHE
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
+from plone.server.exceptions import NoPermissionToAdd
+from plone.server.exceptions import NotAllowedContentType
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
+from plone.server.interfaces import IConstrainTypes
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IItem
 from plone.server.interfaces import IRegistry
@@ -149,30 +152,6 @@ def iterSchemata(obj):
         yield schema
 
 
-class NotAllowedContentType(Exception):
-
-    def __init__(self, container, content_type):
-        self.container = container
-        self.content_type = content_type
-
-    def __repr__(self):
-        return "Not allowed {content_type} on {path}".format(
-            content_type=self.content_type,
-            path=self.path)
-
-
-class NoPermissionToAdd(Exception):
-
-    def __init__(self, container, content_type):
-        self.container = container
-        self.content_type = content_type
-
-    def __repr__(self):
-        return "Not permission to add {content_type} on {path}".format(
-            content_type=self.content_type,
-            path=self.path)
-
-
 def createContent(type_, **kw):
     """Utility to create a content.
 
@@ -213,13 +192,11 @@ def createContentInContainer(container, type_, id_, request=None, **kw):
                 not request.security.checkPermission(permission.id, container):
             raise NoPermissionToAdd(str(container), type_)
 
-    # allowed types is defined on the parent object
-    parent_pt = getattr(container, 'portal_type', None)
-    if parent_pt:
-        parent_factory = getCachedFactory(parent_pt)
-        if parent_factory.allowed_types is not None and \
-                type_ not in parent_factory.allowed_types:
+    constrains = IConstrainTypes(container, None)
+    if constrains is not None:
+        if not constrains.is_type_allowed(type_):
             raise NotAllowedContentType(str(container), type_)
+
     # We create the object with at least the ID
     obj = factory(id=id_)
     obj.__parent__ = container
