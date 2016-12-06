@@ -135,7 +135,10 @@ def persistent_mapping_converter(value):
 @adapter(datetime)
 @implementer(IValueToJson)
 def python_datetime_converter(value):
-    return json_compatible(value.isoformat())
+    try:
+        return json_compatible(value.isoformat())
+    except AttributeError:  # handle date problems
+        return None
 
 
 @adapter(date)
