@@ -1,72 +1,66 @@
 # -*- coding: utf-8 -*-
-from plone.server.catalog.interfaces import ICatalogDataAdapter
-from plone.server.catalog.interfaces import ICatalogUtility
-from plone.server.content import iterSchemataForType
-from plone.server.directives import mergedTaggedValueDict
-from plone.server.interfaces import CATALOG_KEY
-from plone.server.security import getPrincipalsWithAccessContent
-from plone.server.security import getRolesWithAccessContent
-from plone.server.utils import get_content_path
+from plone.server.content import iter_schemata_for_type
+from plone.server.directives import index, metadata
+from plone.server.directives import merged_tagged_value_dict
+from plone.server.directives import merged_tagged_value_list
+from plone.server.interfaces import ICatalogDataAdapter
+from plone.server.interfaces import ICatalogUtility
 from plone.server.json.serialize_value import json_compatible
 from zope.component import queryAdapter
 from zope.interface import implementer
 from zope.schema import getFields
 from zope.securitypolicy.principalpermission import principalPermissionManager
 from zope.securitypolicy.rolepermission import rolePermissionManager
-from zope.securitypolicy.settings import Allow, Deny
 
 
-globalPrincipalPermissionSetting = principalPermissionManager.getSetting
-globalRolesForPermission = rolePermissionManager.getRolesForPermission
+global_principal_permission_setting = principalPermissionManager.getSetting
+global_roles_for_permission = rolePermissionManager.getRolesForPermission
 
 
 @implementer(ICatalogUtility)
 class DefaultSearchUtility(object):
 
-    def __init__(self, settings):
-        self.settings = settings
-
-    async def search(self, query, site_id):
+    async def search(self, query):
         pass
 
-    async def getByUUID(self, uuid, site_id):
+    async def get_by_uuid(self, uuid):
         pass
 
-    async def getObjectByUUID(self, uuid, site_id):
+    async def get_object_by_uuid(self, uuid):
         pass
 
-    async def getByType(self, doc_type, site_id, query={}):
+    async def get_by_type(self, doc_type, query={}):
         pass
 
-    async def getByPath(self, path, depth, site_id, doc_type=None):
+    async def get_by_path(self, path, depth, doc_type=None):
         pass
 
-    async def getFolderContents(self, parent_uuid, site_id, doc_type=None):
+    async def get_folder_contents(self, obj):
         pass
 
-    async def index(self, datas, site_id):
+    async def index(self, datas):
         """
         {uid: <dict>}
         """
         pass
 
-    async def remove(self, uids, site_id):
+    async def remove(self, uids):
         """
         list of UIDs to remove from index
         """
         pass
 
-    async def reindexAllContent(self, obj):
+    async def reindex_all_content(self):
         """ For all Dexterity Content add a queue task that reindex the object
         """
         pass
 
-    async def create_index(self, site_id):
+    async def initialize_catalog(self):
         """ Creates an index
         """
         pass
 
-    async def remove_index(self, site_id):
+    async def remove_catalog(self):
         """ Deletes an index
         """
         pass
@@ -85,53 +79,31 @@ class DefaultCatalogDataAdapter(object):
     def __init__(self, content):
         self.content = content
 
-    def __call__(self):
+    def get_data(self, ob, iface, field_name):
+        try:
+            field = iface[field_name]
+            real_field = field.bind(ob)
+            try:
+                value = real_field.get(ob)
+                json_compatible(value)
+            except AttributeError:
+                pass
+        except KeyError:
+            pass
 
+        return json_compatible(getattr(ob, field_name, None))
+
+    def __call__(self):
         # For each type
         values = {}
-        for schema in iterSchemataForType(self.content.portal_type):
-            # create export of the cataloged fields
-            catalog = mergedTaggedValueDict(schema, CATALOG_KEY)
+        for schema in iter_schemata_for_type(self.content.portal_type):
             behavior = schema(self.content)
-            for field_name, field in getFields(schema).items():
-                kind_catalog = catalog.get(field_name, False)
-                if kind_catalog:
-                    real_field = field.bind(behavior)
-                    value = real_field.get(behavior)
-                    ident = schema.getName() + '-' + real_field.getName()
-                    values[ident] = json_compatible(value)
+            for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
+                if 'accessor' in index_data:
+                    values[index_name] = index_data['accessor'](behavior)
+                else:
+                    values[index_name] = self.get_data(behavior, schema, index_name)
+            for metadata_name in merged_tagged_value_list(schema, metadata.key):
+                values[index_name] = self.get_data(behavior, schema, index_name)
 
-        # Global Roles
-
-        roles = {}
-        users = {}
-
-        groles = globalRolesForPermission('plone.AccessContent')
-
-        for r in groles:
-            roles[r[0]] = r[1]
-
-        # Local Roles
-
-        lroles = getRolesWithAccessContent(self.content)
-        lusers = getPrincipalsWithAccessContent(self.content)
-
-        roles.update(lroles)
-        users.update(lusers)
-
-        path = get_content_path(self.content)
-
-        values.update({
-            'uuid': self.content.uuid,
-            'accessRoles': [x for x in roles if roles[x] == Allow],
-            'accessUsers': [x for x in users if users[x] == Allow],
-            'denyedRoles': [x for x in roles if roles[x] == Deny],
-            'denyedUsers': [x for x in users if users[x] == Deny],
-            'path': path,
-            'portal_type': self.content.portal_type
-        })
-
-        if hasattr(self.content, '__parent__')\
-                and self.content.__parent__ is not None:
-            values['parent'] = self.content.__parent__.uuid
         return values

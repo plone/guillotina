@@ -68,6 +68,7 @@ Defined at:
  * plone.RegisterConfigurations
  * plone.WriteConfiguration
  * plone.ReadConfiguration
+ * plone.ManageCatalog
 
 ### plone.SiteDeleter
 

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from plone.server.content import iterSchemata
-from plone.server.directives import mergedTaggedValueDict
+from plone.server.directives import merged_tagged_value_dict
+from plone.server.directives import read_permission
+from plone.server.directives import write_permission
 from plone.server.interfaces import DEFAULT_READ_PERMISSION
 from plone.server.interfaces import DEFAULT_WRITE_PERMISSION
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResource
-from plone.server.interfaces import READ_PERMISSIONS_KEY
-from plone.server.interfaces import WRITE_PERMISSIONS_KEY
 from plone.server.transactions import get_current_request
 from zope.component import adapter
 from zope.interface import implementer
@@ -117,7 +117,7 @@ class DexterityPermissionChecker(object):
 
         if adapted is not None:
             for schema in iterSchemata(adapted):
-                mapping = mergedTaggedValueDict(schema, READ_PERMISSIONS_KEY)
+                mapping = merged_tagged_value_dict(schema, read_permission.key)
                 if name in mapping:
                     permission = mapping.get(name)
                     break
@@ -145,7 +145,7 @@ class DexterityPermissionChecker(object):
 
         if adapted is not None:
             for schema in iterSchemata(adapted):
-                mapping = mergedTaggedValueDict(schema, WRITE_PERMISSIONS_KEY)
+                mapping = merged_tagged_value_dict(schema, write_permission.key)
                 if name in mapping:
                     permission = mapping.get(name)
                     break
@@ -173,7 +173,7 @@ class DexterityPermissionChecker(object):
 
 @adapter(IRequest)
 @implementer(IInteraction)
-def getCurrentInteraction(request):
+def get_current_interaction(request):
     interaction = getattr(request, 'security', None)
     if IInteraction.providedBy(interaction):
         return interaction
@@ -265,10 +265,10 @@ class Interaction(ZopeSecurityPolicy):
         return roles
 
 
-def getRolesWithAccessContent(obj):
+def get_roles_with_access_content(obj):
     if obj is None:
         return {}
-    active_roles = getRolesWithAccessContent(
+    active_roles = get_roles_with_access_content(
         removeSecurityProxy(getattr(obj, '__parent__', None)))
     roleperm = IRolePermissionMap(obj)
 
@@ -277,10 +277,10 @@ def getRolesWithAccessContent(obj):
     return active_roles
 
 
-def getPrincipalsWithAccessContent(obj):
+def get_principals_with_access_content(obj):
     if obj is None:
         return {}
-    active_roles = getPrincipalsWithAccessContent(
+    active_roles = get_principals_with_access_content(
         removeSecurityProxy(getattr(obj, '__parent__', None)))
     prinperm = IPrincipalPermissionMap(obj)
 

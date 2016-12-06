@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
+from plone.server import BEHAVIOR_CACHE
+from plone.server.content import getCachedFactory
+from plone.server.directives import merged_tagged_value_dict
+from plone.server.directives import read_permission
+from plone.server.interfaces import IAbsoluteURL
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IResource
 from plone.server.json.interfaces import IResourceFieldSerializer
 from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.json.interfaces import IResourceSerializeToJsonSummary
-from plone.server.interfaces import IAbsoluteURL
-from plone.server.content import getCachedFactory
-from plone.server import BEHAVIOR_CACHE
 from plone.server.json.serialize_value import json_compatible
-from plone.server.interfaces import READ_PERMISSIONS_KEY
-from plone.server.directives import mergedTaggedValueDict
 from zope.component import adapter
 from zope.component import ComponentLookupError
 from zope.component import getMultiAdapter
@@ -20,6 +20,7 @@ from zope.interface import Interface
 from zope.schema import getFields
 from zope.security.interfaces import IInteraction
 from zope.security.interfaces import IPermission
+
 
 MAX_ALLOWED = 200
 
@@ -71,7 +72,7 @@ class SerializeToJson(object):
         return result
 
     def get_schema(self, schema, context, result, behavior):
-        read_permissions = mergedTaggedValueDict(schema, READ_PERMISSIONS_KEY)
+        read_permissions = merged_tagged_value_dict(schema, read_permission.key)
         schema_serial = {}
         for name, field in getFields(schema).items():
 

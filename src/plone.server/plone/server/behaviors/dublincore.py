@@ -4,7 +4,6 @@ from dateutil.tz import tzlocal
 from dateutil.tz import tzutc
 from plone.server import app_settings
 from plone.server.behaviors.properties import ContextProperty
-from plone.server.directives import catalog
 from plone.server.directives import index
 from plone.server.interfaces import IFormFieldProvider
 from plone.server.interfaces import IResource
@@ -40,12 +39,9 @@ class IMarkerDublinCore(Interface):
 
 @provider(IFormFieldProvider)
 class IDublinCore(Interface, IWriteZopeDublinCore):
-    catalog(creators='text')
-    catalog(subject='text')
-    catalog(contributors='text')
-    index(contributors='non_analyzed')
-    index(creators='non_analyzed')
-    index(subject='non_analyzed')
+    index('creators', type='keyword')
+    index('subject', type='keyword')
+    index('contributors', type='keyword')
 
 
 @adapter(IResource)

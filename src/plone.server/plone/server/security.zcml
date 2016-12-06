@@ -42,6 +42,16 @@
       />
 
   <grant
+      permission="plone.SearchContent"
+      role="plone.Member"
+      />
+
+  <grant
+      permission="plone.RawSearchContent"
+      role="plone.SiteAdmin"
+      />
+
+  <grant
       permission="plone.ModifyContent"
       role="plone.Owner"
       />
@@ -114,13 +124,18 @@
       role="plone.SiteAdmin"
       />
 
+  <grant
+      permission="plone.ManageCatalog"
+      role="plone.SiteAdmin"
+      />
+
   <!-- SiteDeleter -->
   <grant
       permission="plone.DeletePortals"
       role="plone.SiteDeleter"
       />
 
-  <adapter factory=".security.getCurrentInteraction" />
+  <adapter factory=".security.get_current_interaction" />
   <adapter
     factory=".factory.RootSpecialPermissions"
     provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"

@@ -11,6 +11,16 @@
       />
 
   <permission
+      id="plone.SearchContent"
+      title="Search content"
+      />
+
+  <permission
+      id="plone.RawSearchContent"
+      title="Raw search content"
+      />
+
+  <permission
       id="plone.ModifyContent"
       title="Modify content"
       />
@@ -98,6 +108,11 @@
 
   <permission
       id="plone.ReindexContent"
+      title="Reindex Content"
+      />
+
+  <permission
+      id="plone.ManageCatalog"
       title="Reindex Content"
       />
 

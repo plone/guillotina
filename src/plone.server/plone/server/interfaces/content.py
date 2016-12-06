@@ -4,6 +4,7 @@ from zope.interface import Interface
 from zope.interface.common.mapping import IFullMapping
 from zope.location.interfaces import IContained
 
+
 # NEED use this import because we have a "schema" attribute below
 import zope.schema
 
@@ -43,6 +44,7 @@ class IStaticDirectory(Interface):
 
 
 class IResource(IContained):
+
     portal_type = zope.schema.TextLine()
 
     title = zope.schema.TextLine(

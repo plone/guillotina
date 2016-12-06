@@ -1,6 +1,19 @@
 1.0a8 (unreleased)
 ------------------
 
+- remove local component registry
+  [vangheem]
+
+- GET @search(plone.SearchContent) passed to search method and
+  POST @search(plone.RawSearchContent) passed to query method
+  on ICatalogUtility. GET is now meant to be query the search utility will
+  do something clever with and POST is meant to be a raw query passed to utility
+  [vangheem]
+
+- provide new `plone.SearchContent`, `plone.RawSearchContent` and
+  `plone.ManageCatalog` permissions
+  [vangheem]
+
 - provide IConstrainTypes adapter interface to override allowed types in a folder
   [vangheem]
 
@@ -18,6 +31,7 @@
 
 - Improve code analysis, add configurations for it and remove all tabs.
   [gforcada]
+
 
 1.0a7 (2016-11-24)
 ------------------

@@ -252,26 +252,18 @@ async def close_utilities(app):
         asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
 
 
-def make_app(config_file=None, settings=None):
-
-    # Initialize aiohttp app
-    app = web.Application(router=TraversalRouter())
-
-    if config_file is not None:
-        with open(config_file, 'r') as config:
-            settings = json.load(config)
-    elif settings is not None:
-        settings = settings
-    else:
-        raise Exception('Neither configuration or settings')
-
-    # with settings, update app_settings, where defaults are defined and
-    # we setup the app from
+def update_app_settings(settings):
     for key, value in settings.items():
         if isinstance(app_settings.get(key), dict):
             app_settings[key].update(value)
         else:
             app_settings[key] = value
+
+
+def make_app(config_file=None, settings=None):
+
+    # Initialize aiohttp app
+    app = web.Application(router=TraversalRouter())
 
     # Create root Application
     root = ApplicationRoot(config_file)
@@ -282,14 +274,40 @@ def make_app(config_file=None, settings=None):
     app.config = ConfigurationMachine()
     registerCommonDirectives(app.config)
 
+    if config_file is not None:
+        with open(config_file, 'r') as config:
+            settings = json.load(config)
+    elif settings is None:
+        raise Exception('Neither configuration or settings')
+
     include(app.config, 'configure.zcml', sys.modules['plone.server'])
-    for ep in iter_entry_points('plone.server'):  # auto-include applications
-        include(app.config, 'configure.zcml', ep.load())
+    for ep in iter_entry_points('plone.server'):
+        # auto-include applications
+        # What an "app" include consists of...
+        # 1. load zcml if present
+        # 2. load "includeme" module function if present
+        # 3. load app_settings dict if present in the module
+        if ep.module_name not in settings.get('applications', []):
+            continue
+
+        module = ep.load()
+        try:
+            include(app.config, 'configure.zcml', module)
+        except FileNotFoundError:
+            # addons do not need to have zcml
+            pass
+        if hasattr(module, 'includeme'):
+            module.includeme(root)
+        if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+            update_app_settings(module.app_settings)
     try:
         app.config.execute_actions()
     except ConfigurationConflictError as e:
         logger.error(str(e._conflicts))
         raise e
+
+    # update *after* plugins loaded
+    update_app_settings(settings)
 
     content_type = ContentNegotiatorUtility(
         'content_type', app_settings['renderers'].keys())

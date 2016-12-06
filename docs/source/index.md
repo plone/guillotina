@@ -13,6 +13,10 @@ Contents:
 
 [Behaviors](behavior.md)
 [Roles](roles.md)
+[Applications](applications.md)
+[Addons](addons.md)
+[Configuration](configuration.md)
+[Design](design.md)
 
 Indices and tables
 ==================
@@ -20,4 +24,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

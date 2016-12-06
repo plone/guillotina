@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-from plone.server.interfaces import CATALOG_KEY
-from plone.server.interfaces import FIELDSETS_KEY
-from plone.server.interfaces import INDEX_KEY
-from plone.server.interfaces import READ_PERMISSIONS_KEY
-from plone.server.interfaces import WRITE_PERMISSIONS_KEY
 from zope.interface.interface import TAGGED_DATA
 
 import sys
@@ -40,6 +35,18 @@ class DirectiveClass(type):
         tags = frame.f_locals.setdefault(TAGGED_DATA, {})
         value = instance.factory(*args, **kw)
         instance.store(tags, value)
+        return self
+
+    def apply(self, IClass, *args, **kw):
+        instance = self.__instance
+        existing = IClass.queryTaggedValue(instance.key)
+        tags = {}
+        if existing:
+            tags[instance.key] = existing
+        value = instance.factory(*args, **kw)
+        instance.store(tags, value)
+        IClass.setTaggedValue(instance.key, tags[instance.key])
+        return self
 
 Directive = DirectiveClass('Directive', (), dict(__module__='plone.server.directives',),)  # noqa
 
@@ -53,7 +60,7 @@ class MetadataListDirective(Directive):
         tags.setdefault(self.key, []).extend(value)
 
 
-def mergedTaggedValueList(schema, name):
+def merged_tagged_value_list(schema, name):
     """Look up the tagged value 'name' in schema and all its bases, assuming
     that the value under 'name' is a list. Return a list that consists of
     all elements from all interfaces and base interfaces, with values from
@@ -74,7 +81,7 @@ class MetadataDictDirective(Directive):
         tags.setdefault(self.key, {}).update(value)
 
 
-def mergedTaggedValueDict(iface, name):
+def merged_tagged_value_dict(iface, name):
     """Look up the tagged value 'name' in schema and all its bases, assuming
     that the value under 'name' is a dict. Return a dict that consists of
     all dict items, with those from more-specific interfaces overriding those
@@ -89,7 +96,7 @@ def mergedTaggedValueDict(iface, name):
 class fieldset(MetadataListDirective):
     """Directive used to create fieldsets
     """
-    key = FIELDSETS_KEY
+    key = 'plone.server.directives.fieldsets'
 
     def factory(self, name, label=None, description=None, fields=None, **kw):
         fieldset = Fieldset(name, label=label, description=description, fields=fields)  # noqa
@@ -101,7 +108,7 @@ class fieldset(MetadataListDirective):
 class read_permission(MetadataDictDirective):
     """Directive used to set a field read permission
     """
-    key = READ_PERMISSIONS_KEY
+    key = 'plone.server.directives.read-permissions'
 
     def factory(self, **kw):
         return kw
@@ -110,22 +117,58 @@ class read_permission(MetadataDictDirective):
 class write_permission(read_permission):
     """Directive used to set a field write permission
     """
-    key = WRITE_PERMISSIONS_KEY
+    key = 'plone.server.directives.write-permissions'
 
 
-class catalog(MetadataDictDirective):
-    """Directive used to set a field read permission
+class metadata(MetadataListDirective):
     """
-    key = CATALOG_KEY
+    define data to be included and stored with the indexing data
+    but is not able to be queried
+    """
+    key = 'plone.server.directives.metadata'
 
-    def factory(self, **kw):
-        return kw
+    def factory(self, *names):
+        return names
 
 
 class index(MetadataDictDirective):
-    """Directive used to set a field read permission
     """
-    key = INDEX_KEY
+    Directive used to set indexed attributes.
 
-    def factory(self, **kw):
-        return kw
+    Allowed options:
+        - type
+        - accessor
+    """
+    key = 'plone.server.directives.index'
+
+    allowed_types = (
+        'searchabletext',
+        'text',
+        'keyword',
+        'int',
+        'date',
+        'boolean',
+        'binary',
+        'float',
+        'path'
+    )
+
+    def factory(self, name, **kw):
+        kw.setdefault('type', 'text')
+        if kw.get('type') not in self.allowed_types:
+            raise Exception('Invalid index type {}. Avilable types are: {}'.format(
+                name, ', '.join(self.allowed_types)
+            ))
+        return {
+            name: kw
+        }
+
+    @classmethod
+    def with_accessor(kls, *args, **kwargs):
+        """
+        decorator to specify a different method to get the data
+        """
+        def _func(func):
+            kwargs['accessor'] = func
+            kls.apply(*args, **kwargs)
+        return _func

@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
-from plone.server.interfaces import WRITE_PERMISSIONS_KEY
-from plone.server.interfaces import IResource
-from plone.server.content import iterSchemata
-from zope.interface.exceptions import Invalid
-from zope.interface.interfaces import IMethod
 from plone.server import BEHAVIOR_CACHE
-from zope.schema.interfaces import IField
-from zope.schema.interfaces import SchemaNotFullyImplemented
-from plone.server.json.interfaces import IResourceDeserializeFromJson
-from plone.server.json.exceptions import DeserializationError
-from plone.server.json.interfaces import IResourceFieldDeserializer
-from plone.server.directives import mergedTaggedValueDict
 from plone.server.content import getCachedFactory
+from plone.server.content import iterSchemata
+from plone.server.directives import merged_tagged_value_dict
+from plone.server.directives import write_permission
+from plone.server.events import notify
+from plone.server.interfaces import IResource
+from plone.server.json.exceptions import DeserializationError
+from plone.server.json.interfaces import IResourceDeserializeFromJson
+from plone.server.json.interfaces import IResourceFieldDeserializer
 from zope.component import adapter
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
-from plone.server.events import notify
-from zope.interface import Interface
 from zope.interface import implementer
+from zope.interface import Interface
+from zope.interface.exceptions import Invalid
+from zope.interface.interfaces import IMethod
 from zope.lifecycleevent import ObjectModifiedEvent
 from zope.schema import getFields
+from zope.schema.interfaces import IField
+from zope.schema.interfaces import SchemaNotFullyImplemented
 from zope.schema.interfaces import ValidationError
-from zope.security.interfaces import IPermission
 from zope.security import checkPermission
+from zope.security.interfaces import IPermission
 
 
 @implementer(IResourceDeserializeFromJson)
@@ -70,8 +70,7 @@ class DeserializeFromJson(object):
     def set_schema(
             self, schema, obj, data, errors,
             validate_all=False, behavior=False):
-        write_permissions = mergedTaggedValueDict(
-            schema, WRITE_PERMISSIONS_KEY)
+        write_permissions = merged_tagged_value_dict(schema, write_permission.key)
         for name, field in getFields(schema).items():
 
             if field.readonly:
@@ -141,5 +140,3 @@ class DeserializeFromJson(object):
                 self.permission_cache[permission_name] = bool(
                     checkPermission(permission.title, self.context))
         return self.permission_cache[permission_name]
-
-

@@ -25,6 +25,7 @@ class Install(Service):
         handler = app_settings['available_addons'][id_to_install]['handler']
         handler.install(self.request)
         config.enabled |= {id_to_install}
+        return await getAddons(self.context, self.request)()
 
 
 class Uninstall(Service):

@@ -8,20 +8,20 @@ from persistent import Persistent
 from plone.behavior.interfaces import IBehavior
 from plone.behavior.interfaces import IBehaviorAssignable
 from plone.behavior.markers import applyMarkers
+from plone.server import BEHAVIOR_CACHE
 from plone.server import FACTORY_CACHE
 from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
-from plone.server import BEHAVIOR_CACHE
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
+from plone.server.directives import index
 from plone.server.exceptions import NoPermissionToAdd
 from plone.server.exceptions import NotAllowedContentType
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IConstrainTypes
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IItem
-from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IResourceFactory
 from plone.server.interfaces import ISite
@@ -33,18 +33,17 @@ from plone.server.registry import Registry
 from plone.server.transactions import get_current_request
 from plone.server.transactions import synccontext
 from plone.server.utils import Lazy
-from zope.interface import alsoProvides
-from zope.interface import noLongerProvides
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import adapter
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
 from zope.component import queryUtility
 from zope.component.factory import Factory
-from zope.component.persistentregistry import PersistentComponents
 from zope.event import notify
+from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
+from zope.interface import noLongerProvides
 from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
 from zope.schema.interfaces import IContextAwareDefaultFactory
@@ -136,7 +135,7 @@ def getCachedFactory(portal_type):
     return factory
 
 
-def iterSchemataForType(portal_type):
+def iter_schemata_for_type(portal_type):
     factory = getCachedFactory(portal_type)
     if factory.schema is not None:
         yield factory.schema
@@ -146,7 +145,7 @@ def iterSchemataForType(portal_type):
 
 def iterSchemata(obj):
     portal_type = IResource(obj).portal_type
-    for schema in iterSchemataForType(portal_type):
+    for schema in iter_schemata_for_type(portal_type):
         yield schema
     for schema in obj.__behaviors_schemas__:
         yield schema
@@ -424,12 +423,8 @@ class Folder(Resource):
 class Site(Folder):
 
     def install(self):
-        self['_components'] = components = PersistentComponents()
-
         # Creating and registering a local registry
         self['_registry'] = registry = Registry()
-        components.registerUtility(
-            self['_registry'], provided=IRegistry)
 
         # Set default plugins
         registry.registerInterface(ILayers)
@@ -447,12 +442,6 @@ class Site(Folder):
             'plone.Owner',
             ROOT_USER_ID
         )
-
-    def getSiteManager(self):
-        return self['_components']
-
-    def setSiteManager(self, sitemanager):
-        self['_components'] = sitemanager
 
 
 @implementer(IStaticFile)
