@@ -28,18 +28,18 @@
       class=".content.Folder"
     />
 
-   <adapter
-   	  for="plone.server.interfaces.IDataBase
-   	       plone.server.interfaces.IRequest"
-   	  factory="plone.server.factory.DataBaseToJson"
-   	  provides="plone.server.json.interfaces.IResourceSerializeToJson"
-   	  />
+  <adapter
+      for="plone.server.interfaces.IDataBase
+           plone.server.interfaces.IRequest"
+      factory="plone.server.factory.DataBaseToJson"
+      provides="plone.server.json.interfaces.IResourceSerializeToJson"
+    />
 
-   <adapter
-   	  for="plone.server.interfaces.IApplication
-   	       plone.server.interfaces.IRequest"
-   	  factory="plone.server.factory.ApplicationToJson"
-   	  provides="plone.server.json.interfaces.IResourceSerializeToJson"
-   	  />
+  <adapter
+      for="plone.server.interfaces.IApplication
+           plone.server.interfaces.IRequest"
+      factory="plone.server.factory.ApplicationToJson"
+      provides="plone.server.json.interfaces.IResourceSerializeToJson"
+    />
 
 </configure>
