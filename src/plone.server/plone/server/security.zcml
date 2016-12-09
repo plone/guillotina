@@ -112,7 +112,7 @@
   <grant
       permission="plone.RegisterConfigurations"
       role="plone.SiteAdmin"
-      />  
+      />
 
   <!-- SiteDeleter -->
   <grant

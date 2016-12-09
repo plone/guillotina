@@ -1,8 +1,8 @@
-<configure 
-	xmlns="http://namespaces.zope.org/zope"
-	xmlns:plone="http://namespaces.plone.org/plone">
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:plone="http://namespaces.plone.org/plone">
 
-	<adapter factory=".actions.Framing" name="actions"/>
-	<adapter factory=".schema.Framing" name="schema"/>
+  <adapter factory=".actions.Framing" name="actions"/>
+  <adapter factory=".schema.Framing" name="schema"/>
 
 </configure>

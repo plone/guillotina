@@ -21,7 +21,7 @@ Run the zeo
 
 To run the zeo on a different terminal::
 
-	./bin/runzeo -C zeo.cfg
+  ./bin/runzeo -C zeo.cfg
 
 
 Run the server

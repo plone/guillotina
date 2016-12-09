@@ -16,6 +16,8 @@
 - Added zope.event async version on plone.server.events (notify and async handlers)
   [ramonnb]
 
+- Improve code analysis, add configurations for it and remove all tabs.
+  [gforcada]
 
 1.0a7 (2016-11-24)
 ------------------
