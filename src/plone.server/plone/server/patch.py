@@ -10,6 +10,7 @@ from transaction._compat import reraise
 import asyncio
 import sys
 
+
 BaseAdapterRegistry._delegated = (
     'lookup', 'queryMultiAdapter', 'lookup1', 'queryAdapter',
     'adapter_hook', 'lookupAll', 'names',

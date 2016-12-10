@@ -1,6 +1,9 @@
 1.0a8 (unreleased)
 ------------------
 
+- Fix imports with isort.
+  [gforcada]
+
 - remove local component registry
   [vangheem]
 
@@ -31,7 +34,6 @@
 
 - Improve code analysis, add configurations for it and remove all tabs.
   [gforcada]
-
 
 1.0a7 (2016-11-24)
 ------------------

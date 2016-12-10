@@ -1,6 +1,6 @@
 from plone.server import app_settings
-from plone.server.utils import resolve_or_get
 from plone.server.auth.users import ROOT_USER_ID
+from plone.server.utils import resolve_or_get
 
 
 async def authenticate_request(request):

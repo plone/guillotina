@@ -6,21 +6,23 @@ we'll see how far we get and learn more about ZODB while doing it...
 """
 from aiohttp.web import RequestHandler
 from concurrent.futures import ThreadPoolExecutor
+from plone.server.interfaces import SHARED_CONNECTION
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
 from zope.proxy import ProxyBase
-from plone.server.interfaces import SHARED_CONNECTION
 from zope.security.interfaces import Unauthorized
 
 import asyncio
 import inspect
+import logging
 import threading
 import time
 import transaction
 import ZODB.Connection
-import logging
+
+
 logger = logging.getLogger(__name__)
 
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from plone.server import BEHAVIOR_CACHE
 from plone.server.browser import View
 from plone.server.interfaces import IDownloadView
 from plone.server.interfaces import ITraversableView
@@ -6,7 +7,6 @@ from zope.component import queryUtility
 from zope.component.interfaces import IFactory
 from zope.dottedname.resolve import resolve
 from zope.interface import alsoProvides
-from plone.server import BEHAVIOR_CACHE
 
 
 class Service(View):

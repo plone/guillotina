@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
-from plone.server import app_settings
-from plone.server import jose
 from datetime import datetime
 from datetime import timedelta
+from plone.server import app_settings
+from plone.server import jose
 from plone.server.api.service import Service
 from plone.server.browser import Response
 from plone.server.interfaces import ITraversableView

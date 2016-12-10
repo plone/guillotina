@@ -15,7 +15,6 @@ from plone.server import SCHEMA_CACHE
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
-from plone.server.directives import index
 from plone.server.exceptions import NoPermissionToAdd
 from plone.server.exceptions import NotAllowedContentType
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION

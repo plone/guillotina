@@ -5,14 +5,15 @@ from datetime import time
 from datetime import timedelta
 from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
+from plone.server.file import BasicFile
 from plone.server.json.interfaces import IValueToJson
+from plone.server.text import IRichTextValue
 from zope.component import adapter
 from zope.i18nmessageid.message import Message
 from zope.interface import implementer
 from zope.interface import Interface
-from plone.server.text import IRichTextValue
 from zope.schema.vocabulary import SimpleVocabulary
-from plone.server.file import BasicFile
+
 
 try:
     import Missing

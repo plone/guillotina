@@ -3,10 +3,10 @@ from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
 from plone.server.content import createContent
+from plone.server.events import notify
 from plone.server.json.interfaces import IResourceSerializeToJson
 from zope.component import getMultiAdapter
 from zope.lifecycleevent import ObjectAddedEvent
-from plone.server.events import notify
 
 
 class DefaultGET(Service):
