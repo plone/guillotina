@@ -29,6 +29,13 @@ application is available to be used. Your `config.json` file will also need
 to provide the application name in the `applications` array for it to be initialized.
 
 
+```json
+{
+  "applications": ["pserver.elasticsearch"]
+}
+```
+
+
 ## APPLICATION CONFIGURATION
 
 Once you create a `plone.server` application, there are three primary ways for it
