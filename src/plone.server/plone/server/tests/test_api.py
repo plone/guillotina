@@ -221,7 +221,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
                 "id": "item1",
             })
         )
-        self.assertTrue(resp.status_code == 400)
+        self.assertTrue(resp.status_code == 409)
         resp = self.layer.requester(
             'POST',
             '/plone/plone/',

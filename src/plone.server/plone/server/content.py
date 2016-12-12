@@ -17,6 +17,7 @@ from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
 from plone.server.exceptions import NoPermissionToAdd
 from plone.server.exceptions import NotAllowedContentType
+from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IConstrainTypes
 from plone.server.interfaces import IContainer
@@ -202,7 +203,7 @@ def create_content_in_container(container, type_, id_, request=None, **kw):
         setattr(obj, key, value)
     if request is None or 'OVERWRITE' not in request.headers:
         if obj.id in container:
-            raise KeyError('Key already exist on this container')
+            raise ConflictIdOnContainer(str(container), obj.id)
     container[obj.id] = obj
     return obj
 

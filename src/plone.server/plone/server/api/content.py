@@ -14,6 +14,7 @@ from plone.server.events import notify
 from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.events import ObjectFinallyDeletedEvent
 from plone.server.events import ObjectFinallyModifiedEvent
+from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceDeserializeFromJson
@@ -70,6 +71,11 @@ class DefaultPOST(Service):
             obj = create_content_in_container(
                 self.context, type_, new_id, id=new_id, creators=(user,),
                 contributors=(user,))
+        except ConflictIdOnContainer as e:
+            return ErrorResponse(
+                'ConflictId',
+                str(e),
+                status=409)
         except ValueError as e:
             return ErrorResponse(
                 'CreatingObject',
