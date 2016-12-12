@@ -89,17 +89,12 @@ class WebsocketsView(Service):
                             'error': 'Not allowed'
                         }
                         ws.send_str(ujson.dumps(response))
-                    # Site registry lookup
+
                     try:
-                        view = self.request.site_components.queryMultiAdapter(
+                        view = queryMultiAdapter(
                             (obj, self.request), method, name=view_name)
                     except AttributeError:
                         view = None
-
-                    # Global registry lookup
-                    if view is None:
-                        view = queryMultiAdapter(
-                            (obj, self.request), method, name=view_name)
 
                     if traverse_to is not None:
                         if view is None or not ITraversableView.providedBy(view):

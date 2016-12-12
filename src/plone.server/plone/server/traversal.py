@@ -139,8 +139,7 @@ async def traverse(request, parent, path):
     if ISite.providedBy(context):
         request._site_id = context.id
         request.site = context
-        request.site_components = context.getSiteManager()
-        request.site_settings = request.site_components.getUtility(IRegistry)
+        request.site_settings = context['_registry']
         layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
@@ -294,7 +293,6 @@ class TraversalRouter(AbstractRouter):
         alsoProvides(request, IRequest)
         alsoProvides(request, IDefaultLayer)
 
-        request.site_components = getGlobalSiteManager()
         request.security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
@@ -358,15 +356,10 @@ class TraversalRouter(AbstractRouter):
 
         # Site registry lookup
         try:
-            view = request.site_components.queryMultiAdapter(
+            view = queryMultiAdapter(
                 (resource, request), method, name=view_name)
         except AttributeError:
             view = None
-
-        # Global registry lookup
-        if view is None:
-            view = queryMultiAdapter(
-                (resource, request), method, name=view_name)
 
         # Traverse view if its needed
         if traverse_to is not None and view is not None:

@@ -100,7 +100,7 @@
                     },
                     "DELETE": {
                         "factory": "plone.server.api.addons.Uninstall",
-                        "permission": "plone.ManageAddons"                        
+                        "permission": "plone.ManageAddons"
                     },
                     "GET": {
                         "factory": "plone.server.api.addons.getAddons",
@@ -128,7 +128,7 @@
             },
             "DELETE": {
                 "factory": "plone.server.api.portal.DefaultDELETE",
-                "permission": "plone.DeletePortals"                
+                "permission": "plone.DeletePortals"
             }
         },
         "plone.server.interfaces.IResource": {
@@ -192,14 +192,24 @@
                 "@search": {
                     "GET": {
                         "factory": "plone.server.api.search.SearchGET",
-                        "permission": "plone.ViewContent"
+                        "permission": "plone.SearchContent"
                     },
                     "POST": {
                         "factory": "plone.server.api.search.SearchPOST",
-                        "permission": "plone.ViewContent"
+                        "permission": "plone.RawSearchContent"
                     }
                 },
-                "@reindex": {
+                "@catalog": {
+                    "POST": {
+                        "factory": "plone.server.api.search.CatalogPOST",
+                        "permission": "plone.ManageCatalog"
+                    },
+                    "DELETE": {
+                        "factory": "plone.server.api.search.CatalogDELETE",
+                        "permission": "plone.ManageCatalog"
+                    }
+                },
+                "@catalog-reindex": {
                     "POST": {
                         "factory": "plone.server.api.search.ReindexPOST",
                         "permission": "plone.ReindexContent"

@@ -1,39 +1,53 @@
 # -*- coding: utf-8 -*-
 from plone.server.api.service import Service
-from plone.server.catalog.interfaces import ICatalogUtility
+from plone.server.interfaces import ICatalogUtility
 from zope.component import queryUtility
 
 
 class SearchGET(Service):
     async def __call__(self):
         q = self.request.GET.get('q')
-        utility = queryUtility(ICatalogUtility)
-        if utility is None:
+        search = queryUtility(ICatalogUtility)
+        if search is None:
             return {
                 'items_count': 0,
                 'member': []
             }
 
-        return await utility.search(q, self.request._site_id)
+        return await search.search(self.context, q)
 
 
 class SearchPOST(Service):
     async def __call__(self):
         q = await self.request.json()
-        utility = queryUtility(ICatalogUtility)
-        if utility is None:
+        search = queryUtility(ICatalogUtility)
+        if search is None:
             return {
                 'items_count': 0,
                 'member': []
             }
 
-        return await utility.search(q, self.request._site_id)
+        return await search.query(self.context, q)
 
 
 class ReindexPOST(Service):
     """ Creates index / catalog and reindex all content
     """
     async def __call__(self):
-        utility = queryUtility(ICatalogUtility)
-        await utility.reindexAllContent(self.request.site)
+        search = queryUtility(ICatalogUtility)
+        await search.reindex_all_content(self.context)
+        return {}
+
+
+class CatalogPOST(Service):
+    async def __call__(self):
+        search = queryUtility(ICatalogUtility)
+        await search.initialize_catalog(self.context)
+        return {}
+
+
+class CatalogDELETE(Service):
+    async def __call__(self):
+        search = queryUtility(ICatalogUtility)
+        await search.remove_catalog(self.context)
         return {}

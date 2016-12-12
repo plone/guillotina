@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from plone.server.interfaces.catalog import ICatalogDataAdapter  # noqa
+from plone.server.interfaces.catalog import ICatalogUtility  # noqa
 from plone.server.interfaces.content import IApplication  # noqa
 from plone.server.interfaces.content import IContainer  # noqa
 from plone.server.interfaces.content import IContentNegotiation  # noqa
@@ -42,12 +44,6 @@ _ = MessageFactory('plone.server')
 DEFAULT_ADD_PERMISSION = 'plone.AddContent'
 DEFAULT_READ_PERMISSION = 'plone.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'plone.ManageContent'
-
-CATALOG_KEY = 'plone.server.directives.catalog'
-FIELDSETS_KEY = 'plone.server.directives.fieldsets'
-INDEX_KEY = 'plone.server.directives.index'
-READ_PERMISSIONS_KEY = 'plone.server.directives.read-permissions'
-WRITE_PERMISSIONS_KEY = 'plone.server.directives.write-permissions'
 
 SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']

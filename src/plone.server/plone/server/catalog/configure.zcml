@@ -7,12 +7,12 @@
   <subscriber
       for="plone.server.interfaces.ISite
            zope.lifecycleevent.interfaces.IObjectAddedEvent"
-      handler=".index.add_index" />
+      handler=".index.initialize_catalog" />
 
   <subscriber
       for="plone.server.interfaces.ISite
            zope.lifecycleevent.interfaces.IObjectRemovedEvent"
-      handler=".index.remove_index" />
+      handler=".index.remove_catalog" />
 
 
   <!-- index events -->
@@ -36,7 +36,7 @@
 
   <!-- default catalog data adapter -->
   <adapter factory=".catalog.DefaultCatalogDataAdapter"
-           provides=".interfaces.ICatalogDataAdapter"
+           provides="..interfaces.ICatalogDataAdapter"
            for="plone.server.interfaces.IResource" />
 
 </configure>

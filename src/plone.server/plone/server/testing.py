@@ -260,7 +260,6 @@ class PloneBaseLayer(PloneServerBaseLayer):
 class FakeRequest(object):
 
     def __init__(self):
-        self.site_components = getGlobalSiteManager()
         self.security = IInteraction(self)
         self.headers = {}
 
