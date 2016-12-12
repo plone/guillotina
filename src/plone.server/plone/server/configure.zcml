@@ -14,7 +14,7 @@
   <adapter factory=".languages.FI" />
   <adapter factory=".languages.ENUS" />
 
-  <subscriber handler=".events.objectEventNotify" />
+  <subscriber handler=".events.object_event_notify" />
 
   <adapter factory=".translation.GenericTranslation" />
 

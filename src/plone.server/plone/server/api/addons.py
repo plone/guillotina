@@ -16,7 +16,7 @@ class Install(Service):
                 _("Property 'id' is required to be valid"))
 
         registry = self.request.site_settings
-        config = registry.forInterface(IAddons)
+        config = registry.for_interface(IAddons)
 
         if id_to_install in config.enabled:
             return ErrorResponse(
@@ -38,7 +38,7 @@ class Uninstall(Service):
                 _("Property 'id' is required to be valid"))
 
         registry = self.request.site_settings
-        config = registry.forInterface(IAddons)
+        config = registry.for_interface(IAddons)
 
         if id_to_install not in config.enabled:
             return ErrorResponse(
@@ -63,7 +63,7 @@ class getAddons(Service):
             })
 
         registry = self.request.site_settings
-        config = registry.forInterface(IAddons)
+        config = registry.for_interface(IAddons)
 
         for installed in config.enabled:
             result['installed'].append(installed)

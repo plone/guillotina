@@ -84,13 +84,8 @@ class IContentTypeDirective(Interface):
     )
 
 
-def contenttypeDirective(_context,
-                         portal_type,
-                         class_,
-                         schema,
-                         behaviors=None,
-                         add_permission=None,
-                         allowed_types=None):
+def contenttype_directive(_context, portal_type, class_, schema, behaviors=None,
+                          add_permission=None, allowed_types=None):
     """
     Generate factory for the passed schema
     """
@@ -121,14 +116,8 @@ class IApi(Interface):
     )
 
 
-def register_service(
-        _context,
-        configuration,
-        content,
-        method,
-        layer,
-        default_permission,
-        name=''):
+def register_service(_context, configuration, content, method, layer,
+                     default_permission, name=''):
     logger.debug(configuration)
     factory = import_class(configuration['factory'])
     if factory is None:
@@ -162,7 +151,7 @@ def register_service(
     )
 
 
-def apiDirective(_context, file):  # noqa 'too complex' :)
+def api_directive(_context, file):  # noqa 'too complex' :)
 
     if file:
         file = os.path.abspath(_context.path(file))
@@ -251,7 +240,7 @@ class IResourceDirectory(Interface):
     )
 
 
-def resourceDirectory(_context, name, directory):
+def resource_directory(_context, name, directory):
     if directory:
         directory = osPath(_context.path(directory))
         if not directory.is_dir():
@@ -282,7 +271,7 @@ class IAddOn(Interface):
     )
 
 
-def addOn(_context, name, title, handler):
+def add_on(_context, name, title, handler):
     if name not in app_settings['available_addons']:
         app_settings['available_addons'][name] = {
             'title': title,

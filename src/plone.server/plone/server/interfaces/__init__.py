@@ -4,7 +4,7 @@ from plone.server.interfaces.catalog import ICatalogUtility  # noqa
 from plone.server.interfaces.content import IApplication  # noqa
 from plone.server.interfaces.content import IContainer  # noqa
 from plone.server.interfaces.content import IContentNegotiation  # noqa
-from plone.server.interfaces.content import IDataBase  # noqa
+from plone.server.interfaces.content import IDatabase  # noqa
 from plone.server.interfaces.content import IItem  # noqa
 from plone.server.interfaces.content import IRegistry  # noqa
 from plone.server.interfaces.content import IResource  # noqa

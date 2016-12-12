@@ -5,7 +5,7 @@
     <directive
         name="api"
         schema=".zcml.IApi"
-        handler=".zcml.apiDirective"
+        handler=".zcml.api_directive"
         />
   </directives>
 </configure>

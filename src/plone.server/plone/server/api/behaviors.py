@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from plone.behavior.interfaces import IBehavior
 from plone.server.api.service import Service
-from plone.server.content import getCachedFactory
+from plone.server.content import get_cached_factory
 from plone.server.json.interfaces import ISchemaSerializeToJson
 from zope.component import getMultiAdapter
 from zope.component import getUtilitiesFor
@@ -43,7 +43,7 @@ class DefaultGET(Service):
     async def __call__(self):
         """We show the available schemas."""
         result = {}
-        factory = getCachedFactory(self.context.portal_type)
+        factory = get_cached_factory(self.context.portal_type)
         result['static'] = []
         for schema in factory.behaviors or ():
             result['static'].append(schema.__identifier__)

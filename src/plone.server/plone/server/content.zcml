@@ -29,9 +29,9 @@
     />
 
   <adapter
-      for="plone.server.interfaces.IDataBase
+      for="plone.server.interfaces.IDatabase
            plone.server.interfaces.IRequest"
-      factory="plone.server.factory.DataBaseToJson"
+      factory="plone.server.factory.DatabaseToJson"
       provides="plone.server.json.interfaces.IResourceSerializeToJson"
     />
 

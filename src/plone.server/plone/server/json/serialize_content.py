@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from plone.server import BEHAVIOR_CACHE
-from plone.server.content import getCachedFactory
+from plone.server.content import get_cached_factory
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import read_permission
 from plone.server.interfaces import IAbsoluteURL
@@ -55,7 +55,7 @@ class SerializeToJson(object):
             'UID': self.context.uuid,
         }
 
-        factory = getCachedFactory(self.context.portal_type)
+        factory = get_cached_factory(self.context.portal_type)
 
         main_schema = factory.schema
         self.get_schema(main_schema, self.context, result, False)

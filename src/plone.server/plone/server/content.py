@@ -101,7 +101,7 @@ class ResourceFactory(Factory):
                                           self.portal_type)
 
 
-def loadCachedSchema():
+def load_cached_schema():
     for x in getUtilitiesFor(IResourceFactory):
         factory = x[1]
         if factory.portal_type not in SCHEMA_CACHE:
@@ -125,7 +125,7 @@ def loadCachedSchema():
             BEHAVIOR_CACHE[name] = utility.interface
 
 
-def getCachedFactory(portal_type):
+def get_cached_factory(portal_type):
     if portal_type in FACTORY_CACHE:
         factory = FACTORY_CACHE[portal_type]
     else:
@@ -135,14 +135,14 @@ def getCachedFactory(portal_type):
 
 
 def iter_schemata_for_type(portal_type):
-    factory = getCachedFactory(portal_type)
+    factory = get_cached_factory(portal_type)
     if factory.schema is not None:
         yield factory.schema
     for schema in factory.behaviors or ():
         yield schema
 
 
-def iterSchemata(obj):
+def iter_schemata(obj):
     portal_type = IResource(obj).portal_type
     for schema in iter_schemata_for_type(portal_type):
         yield schema
@@ -150,12 +150,12 @@ def iterSchemata(obj):
         yield schema
 
 
-def createContent(type_, **kw):
+def create_content(type_, **kw):
     """Utility to create a content.
 
     This method should not be used to add content, just internally.
     """
-    factory = getCachedFactory(type_)
+    factory = get_cached_factory(type_)
     if 'id' in kw:
         id_ = kw['id']
     else:
@@ -168,13 +168,13 @@ def createContent(type_, **kw):
     return obj
 
 
-def createContentInContainer(container, type_, id_, request=None, **kw):
+def create_content_in_container(container, type_, id_, request=None, **kw):
     """Utility to create a content.
 
     This method is the one to use to create content.
     id_ can be None
     """
-    factory = getCachedFactory(type_)
+    factory = get_cached_factory(type_)
 
     if factory.add_permission:
         if factory.add_permission in PERMISSIONS_CACHE:
@@ -426,9 +426,9 @@ class Site(Folder):
         self['_registry'] = registry = Registry()
 
         # Set default plugins
-        registry.registerInterface(ILayers)
-        registry.registerInterface(IAddons)
-        registry.forInterface(ILayers).active_layers =\
+        registry.register_interface(ILayers)
+        registry.register_interface(IAddons)
+        registry.for_interface(ILayers).active_layers =\
             frozenset({'plone.server.api.layer.IDefaultLayer'})
 
         roles = IPrincipalRoleManager(self)

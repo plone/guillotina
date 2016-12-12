@@ -68,8 +68,8 @@ class Register(Service):
 
         registry = self.request.site_settings
         iObject = import_class(interface)
-        registry.registerInterface(iObject)
-        config = registry.forInterface(iObject)
+        registry.register_interface(iObject)
+        config = registry.for_interface(iObject)
 
         # Initialize values
         # If its defined on the zope.schema default will not be overwritten

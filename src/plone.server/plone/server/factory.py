@@ -9,12 +9,12 @@ from plone.server.auth.users import RootUser
 from plone.server.auth.validators import hash_password
 from plone.server.content import IStaticDirectory
 from plone.server.content import IStaticFile
-from plone.server.content import loadCachedSchema
+from plone.server.content import load_cached_schema
 from plone.server.content import StaticFile
 from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IContentNegotiation
-from plone.server.interfaces import IDataBase
+from plone.server.interfaces import IDatabase
 from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter
@@ -126,7 +126,7 @@ class ApplicationRoot(object):
         self._dbs[key] = value
 
 
-class DataBaseToJson(object):
+class DatabaseToJson(object):
 
     def __init__(self, dbo, request):
         self.dbo = dbo
@@ -154,7 +154,7 @@ class ApplicationToJson(object):
             'plone.GetDatabases', self.application)
 
         for x in self.application._dbs.keys():
-            if IDataBase.providedBy(self.application._dbs[x]) and allowed:
+            if IDatabase.providedBy(self.application._dbs[x]) and allowed:
                 result['databases'].append(x)
             if IStaticFile.providedBy(self.application._dbs[x]):
                 result['static_file'].append(x)
@@ -181,8 +181,8 @@ class RootSpecialPermissions(PrincipalPermissionManager):
             'plone.AccessContent', ANONYMOUS_USER_ID)
 
 
-@implementer(IDataBase)
-class DataBase(object):
+@implementer(IDatabase)
+class Database(object):
     def __init__(self, id, db):
         self.id = id
         self._db = db
@@ -327,8 +327,8 @@ def make_app(config_file=None, settings=None):
                 db = DB(fs)
                 try:
                     rootobj = db.open().root()
-                    if not IDataBase.providedBy(rootobj):
-                        alsoProvides(rootobj, IDataBase)
+                    if not IDatabase.providedBy(rootobj):
+                        alsoProvides(rootobj, IDatabase)
                     transaction.commit()
                     rootobj = None
                 except:
@@ -337,7 +337,7 @@ def make_app(config_file=None, settings=None):
                     db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(dbconfig['path'], **config)
-                dbo = DataBase(key, db)
+                dbo = Database(key, db)
             elif dbconfig['storage'] == 'ZEO':
                 # Try to open it normal to create the root object
                 address = (dbconfig['address'], dbconfig['port'])
@@ -348,8 +348,8 @@ def make_app(config_file=None, settings=None):
 
                 try:
                     rootobj = db.open().root()
-                    if not IDataBase.providedBy(rootobj):
-                        alsoProvides(rootobj, IDataBase)
+                    if not IDatabase.providedBy(rootobj):
+                        alsoProvides(rootobj, IDatabase)
                     transaction.commit()
                     rootobj = None
                 except:
@@ -360,16 +360,16 @@ def make_app(config_file=None, settings=None):
                 # Set request aware database for app
                 cs = ClientStorage(address, **zeoconfig)
                 db = RequestAwareDB(cs, **config)
-                dbo = DataBase(key, db)
+                dbo = Database(key, db)
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])
                 db = DB(storage)
-                alsoProvides(db.open().root(), IDataBase)
+                alsoProvides(db.open().root(), IDatabase)
                 transaction.commit()
                 db.close()
                 # Set request aware database for app
                 db = RequestAwareDB(storage)
-                dbo = DataBase(key, db)
+                dbo = Database(key, db)
             root[key] = dbo
 
     for static in app_settings['static']:
@@ -401,6 +401,6 @@ def make_app(config_file=None, settings=None):
         root.add_async_utility(util)
 
     # Load cached Schemas
-    loadCachedSchema()
+    load_cached_schema()
 
     return app

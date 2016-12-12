@@ -9,7 +9,7 @@ from plone.server import app_settings
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
-from plone.server.content import createContentInContainer
+from plone.server.content import create_content_in_container
 from plone.server.events import notify
 from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.events import ObjectFinallyDeletedEvent
@@ -67,7 +67,7 @@ class DefaultPOST(Service):
         user = get_authenticated_user_id(self.request)
         # Create object
         try:
-            obj = createContentInContainer(
+            obj = create_content_in_container(
                 self.context, type_, new_id, id=new_id, creators=(user,),
                 contributors=(user,))
         except ValueError as e:

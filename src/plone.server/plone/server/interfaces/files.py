@@ -42,7 +42,7 @@ class IFile(Interface):
         required=False,
     )
 
-    def getSize():
+    def get_size():
         """Return the byte-size of the data of the object."""
 
 
