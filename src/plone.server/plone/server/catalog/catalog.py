@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from plone.server.content import iter_schemata_for_type
-from plone.server.directives import index, metadata
+from plone.server.directives import index
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import merged_tagged_value_list
+from plone.server.directives import metadata
 from plone.server.interfaces import ICatalogDataAdapter
 from plone.server.interfaces import ICatalogUtility
 from plone.server.json.serialize_value import json_compatible
 from zope.component import queryAdapter
 from zope.interface import implementer
-from zope.schema import getFields
 from zope.securitypolicy.principalpermission import principalPermissionManager
 from zope.securitypolicy.rolepermission import rolePermissionManager
 

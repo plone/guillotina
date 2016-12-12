@@ -1,5 +1,8 @@
 # -*- encoding: utf-8 -*-
+# load the patch before anything else.
+from plone.server import patch  # noqa
 from zope.i18nmessageid import MessageFactory
+
 import collections
 
 

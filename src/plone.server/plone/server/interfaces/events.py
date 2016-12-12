@@ -1,6 +1,6 @@
 from zope.interface import Attribute
-from zope.interface import interfaces
 from zope.interface import Interface
+from zope.interface import interfaces
 
 
 class IObjectFinallyCreatedEvent(interfaces.IObjectEvent):

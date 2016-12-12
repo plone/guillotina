@@ -1,5 +1,5 @@
-from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.interfaces import IRequest
+from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.renderers import IFrameFormatsJson
 from zope.component import adapter
 from zope.component import getMultiAdapter

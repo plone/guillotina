@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+from plone.server.json.deserialize_value import schema_compatible
 from plone.server.json.interfaces import IResourceFieldDeserializer
 from zope.component import adapter
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema.interfaces import IField
-from plone.server.json.deserialize_value import schema_compatible
 
 
 @implementer(IResourceFieldDeserializer)

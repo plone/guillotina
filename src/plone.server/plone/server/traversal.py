@@ -23,10 +23,10 @@ from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
 from plone.server.interfaces import ITraversableView
-from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.interfaces import SHARED_CONNECTION
-from plone.server.interfaces import WRITING_VERBS
 from plone.server.interfaces import SUBREQUEST_METHODS
+from plone.server.interfaces import WRITING_VERBS
+from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.transactions import locked
 from plone.server.transactions import sync
 from plone.server.utils import apply_cors
@@ -44,10 +44,10 @@ from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 
 import aiohttp
-import uuid
 import json
 import logging
 import traceback
+import uuid
 
 
 logger = logging.getLogger(__name__)

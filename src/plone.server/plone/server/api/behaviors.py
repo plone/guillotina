@@ -1,12 +1,12 @@
 # -*- encoding: utf-8 -*-
-from plone.server.api.service import Service
 from plone.behavior.interfaces import IBehavior
-from zope.component import getUtilitiesFor
-from zope.component import getMultiAdapter
-from plone.server.json.interfaces import ISchemaSerializeToJson
-from zope.interface import Interface
+from plone.server.api.service import Service
 from plone.server.content import getCachedFactory
+from plone.server.json.interfaces import ISchemaSerializeToJson
+from zope.component import getMultiAdapter
+from zope.component import getUtilitiesFor
 from zope.component import queryAdapter
+from zope.interface import Interface
 
 
 class DefaultPATCH(Service):

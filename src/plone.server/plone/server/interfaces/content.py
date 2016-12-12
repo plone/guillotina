@@ -1,9 +1,9 @@
+# NEED use this import because we have a "schema" attribute below
 from zope.component.interfaces import ISite as IZopeSite
 from zope.component.interfaces import IFactory
 from zope.interface import Interface
 from zope.interface.common.mapping import IFullMapping
 from zope.location.interfaces import IContained
-
 
 # NEED use this import because we have a "schema" attribute below
 import zope.schema

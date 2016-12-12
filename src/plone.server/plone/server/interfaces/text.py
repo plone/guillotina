@@ -1,7 +1,7 @@
 from plone.server import _
-from zope.schema.interfaces import IObject
-from zope.interface import Interface
 from zope import schema
+from zope.interface import Interface
+from zope.schema.interfaces import IObject
 
 
 class IRichText(IObject):

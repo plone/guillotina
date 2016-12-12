@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from plone.server.behaviors.attachment import IAttachment
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.tests import TEST_RESOURCES_DIR
-from zope.interface import Interface
 from zope import schema
-from plone.server.behaviors.attachment import IAttachment
+from zope.interface import Interface
+
 import json
 import os
 

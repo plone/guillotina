@@ -1,16 +1,15 @@
 # -*- encoding: utf-8 -*-
-from plone.server.content import Item
-from plone.server.interfaces import IResource
-from plone.server.interfaces import IFormFieldProvider
 from plone.server.api.service import Service
-from zope.interface import Interface
-from plone.server.directives import read_permission
+from plone.server.content import Item
 from plone.server.directives import fieldset
-
+from plone.server.directives import read_permission
+from plone.server.interfaces import IFormFieldProvider
+from plone.server.interfaces import IResource
 from zope import schema
 from zope.component import adapter
 from zope.dublincore.annotatableadapter import ZDCAnnotatableAdapter
 from zope.interface import implementer
+from zope.interface import Interface
 from zope.interface import provider
 
 

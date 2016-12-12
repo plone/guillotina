@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from plone.server import BEHAVIOR_CACHE
 from plone.server.content import getCachedFactory
-from plone.server.content import iterSchemata
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import write_permission
 from plone.server.events import notify
@@ -15,11 +14,8 @@ from zope.component import queryUtility
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
-from zope.interface.interfaces import IMethod
 from zope.lifecycleevent import ObjectModifiedEvent
 from zope.schema import getFields
-from zope.schema.interfaces import IField
-from zope.schema.interfaces import SchemaNotFullyImplemented
 from zope.schema.interfaces import ValidationError
 from zope.security import checkPermission
 from zope.security.interfaces import IPermission

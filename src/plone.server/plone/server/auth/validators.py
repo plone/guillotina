@@ -1,9 +1,9 @@
-from plone.server.utils import strings_differ
 from plone.server import app_settings
 from plone.server.auth import find_user
-import jwt
+from plone.server.utils import strings_differ
 
 import hashlib
+import jwt
 import uuid
 
 
