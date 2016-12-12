@@ -6,25 +6,25 @@
         <directive
             name="contenttype"
             schema=".metaconfigure.IContentTypeDirective"
-            handler=".metaconfigure.contenttypeDirective"
+            handler=".metaconfigure.contenttype_directive"
             />
 
         <directive
             name="api"
             schema=".metaconfigure.IApi"
-            handler=".metaconfigure.apiDirective"
+            handler=".metaconfigure.api_directive"
             />
 
         <directive
-            name="resourceDirectory"
+            name="resource_directory"
             schema=".metaconfigure.IResourceDirectory"
-            handler=".metaconfigure.resourceDirectory"
+            handler=".metaconfigure.resource_directory"
             />
 
         <directive
             name="addon"
             schema=".metaconfigure.IAddOn"
-            handler=".metaconfigure.addOn"
+            handler=".metaconfigure.add_on"
             />
 
     </directives>

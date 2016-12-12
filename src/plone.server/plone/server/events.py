@@ -66,7 +66,7 @@ async def dispatch(*event):
 
 
 @adapter(IObjectEvent)
-async def objectEventNotify(event):
+async def object_event_notify(event):
     """Dispatch ObjectEvents to interested adapters."""
     try:
         sitemanager = getSiteManager()

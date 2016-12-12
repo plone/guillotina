@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from plone.server import BEHAVIOR_CACHE
-from plone.server.content import getCachedFactory
+from plone.server.content import get_cached_factory
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import write_permission
 from plone.server.events import notify
@@ -35,7 +35,7 @@ class DeserializeFromJson(object):
         modified = False
         errors = []
 
-        factory = getCachedFactory(self.context.portal_type)
+        factory = get_cached_factory(self.context.portal_type)
         main_schema = factory.schema
         self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)

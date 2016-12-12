@@ -16,7 +16,7 @@ from plone.server.browser import UnauthorizedResponse
 from plone.server.contentnegotiation import content_type_negotiation
 from plone.server.contentnegotiation import language_negotiation
 from plone.server.interfaces import IApplication
-from plone.server.interfaces import IDataBase
+from plone.server.interfaces import IDatabase
 from plone.server.interfaces import IOPTIONS
 from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IRendered
@@ -125,7 +125,7 @@ async def traverse(request, parent, path):
     except KeyError:
         return parent, path
 
-    if IDataBase.providedBy(context):
+    if IDatabase.providedBy(context):
         if SHARED_CONNECTION:
             request.conn = context.conn
         else:

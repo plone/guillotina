@@ -139,7 +139,7 @@
   <adapter
     factory=".factory.RootSpecialPermissions"
     provides="zope.securitypolicy.interfaces.IPrincipalPermissionManager"
-    for="plone.server.interfaces.IDataBase"
+    for="plone.server.interfaces.IDatabase"
     trusted="true"
     />
 

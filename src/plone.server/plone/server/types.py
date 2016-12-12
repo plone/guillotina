@@ -1,4 +1,4 @@
-from plone.server.content import getCachedFactory
+from plone.server.content import get_cached_factory
 from plone.server.interfaces import IConstrainTypes
 from zope.component import adapter
 from zope.interface import implementer
@@ -22,6 +22,6 @@ class FTIConstrainAllowedTypes(object):
     def get_allowed_types(self) -> list:
         pt = getattr(self.context, 'portal_type', None)
         if pt:
-            factory = getCachedFactory(pt)
+            factory = get_cached_factory(pt)
             return factory.allowed_types
         return None

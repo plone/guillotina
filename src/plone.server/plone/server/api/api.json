@@ -22,7 +22,7 @@
         "ca": "plone.server.languages.ICA"
     },
     "contenttypes": {
-        "plone.server.interfaces.IDataBase": {
+        "plone.server.interfaces.IDatabase": {
             "POST": {
                 "factory": "plone.server.api.portal.DefaultPOST",
                 "permission": "plone.AddPortal",

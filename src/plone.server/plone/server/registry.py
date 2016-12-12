@@ -115,10 +115,10 @@ class Registry(Persistent):
             path=path,
             mem=id(self))
 
-    def forInterface(self, iface, check=True, omit=(), prefix=None):
+    def for_interface(self, iface, check=True, omit=(), prefix=None):
         return RecordsProxy(self, iface, prefix=prefix)
 
-    def registerInterface(self, iface, omit=(), prefix=None):
+    def register_interface(self, iface, omit=(), prefix=None):
         proxy = RecordsProxy(self, iface, prefix)
         for name in iface.names():
             if name in omit:

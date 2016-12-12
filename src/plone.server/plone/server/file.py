@@ -96,7 +96,7 @@ class BasicFile(Persistent):
         f = self._blob.open('w')
         f.write(b'')
         f.close()
-        self._setData(data)
+        self._set_data(data)
         self.filename = filename
 
     def open(self, mode='r'):
@@ -104,10 +104,10 @@ class BasicFile(Persistent):
             del self.__dict__['size']
         return self._blob.open(mode)
 
-    def openDetached(self):
+    def open_detached(self):
         return open(self._blob.committed(), 'rb')
 
-    def _setData(self, data):
+    def _set_data(self, data):
         if 'size' in self.__dict__:
             del self.__dict__['size']
         # Search for a storable that is able to store the data
@@ -116,14 +116,14 @@ class BasicFile(Persistent):
         storable = getUtility(IStorage, name=dottedName)
         storable.store(data, self._blob)
 
-    def _getData(self):
+    def _get_data(self):
         fp = self._blob.open('r')
         data = fp.read()
         fp.close()
         return data
 
-    _data = property(_getData, _setData)
-    data = property(_getData, _setData)
+    _data = property(_get_data, _set_data)
+    data = property(_get_data, _set_data)
 
     @property
     def size(self):
@@ -136,7 +136,7 @@ class BasicFile(Persistent):
         self.__dict__['size'] = size
         return size
 
-    def getSize(self):
+    def get_size(self):
         return self.size
 
 

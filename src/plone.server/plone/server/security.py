@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from plone.server.content import iterSchemata
+from plone.server.content import iter_schemata
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import read_permission
 from plone.server.directives import write_permission
@@ -116,7 +116,7 @@ class DexterityPermissionChecker(object):
         adapted = IResource(obj, None)
 
         if adapted is not None:
-            for schema in iterSchemata(adapted):
+            for schema in iter_schemata(adapted):
                 mapping = merged_tagged_value_dict(schema, read_permission.key)
                 if name in mapping:
                     permission = mapping.get(name)
@@ -144,7 +144,7 @@ class DexterityPermissionChecker(object):
         adapted = IResource(obj, None)
 
         if adapted is not None:
-            for schema in iterSchemata(adapted):
+            for schema in iter_schemata(adapted):
                 mapping = merged_tagged_value_dict(schema, write_permission.key)
                 if name in mapping:
                     permission = mapping.get(name)

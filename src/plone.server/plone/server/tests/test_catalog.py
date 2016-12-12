@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from plone.server.testing import PloneServerBaseTestCase
 from plone.server.catalog.utils import get_index_fields
-from plone.server.content import createContentInContainer, createContent
+from plone.server.content import create_content_in_container, create_content
 from plone.server.interfaces import ICatalogDataAdapter
 
 
@@ -19,13 +19,13 @@ class TestCatalog(PloneServerBaseTestCase):
     def test_get_index_data(self):
         self.login()
         db = self.layer.app['plone']
-        site = createContent(
+        site = create_content(
             'Site',
             id='plone',
             title='Plone')
         site.__name__ = 'plone'
         db['plone'] = site
-        ob = createContentInContainer(site, 'Item', 'foobar')
+        ob = create_content_in_container(site, 'Item', 'foobar')
 
         data = ICatalogDataAdapter(ob)
         fields = data()

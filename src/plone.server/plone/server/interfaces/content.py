@@ -11,13 +11,13 @@ import zope.schema
 
 class IRegistry(IFullMapping):
 
-    def forInterface(interface, check=True, omit=(), prefix=None):
+    def for_interface(interface, check=True, omit=(), prefix=None):
         """Get an IRecordsProxy for the given interface. If `check` is True,
         an error will be raised if one or more fields in the interface does
         not have an equivalent setting.
         """
 
-    def registerInterface(interface, omit=(), prefix=None):
+    def register_interface(interface, omit=(), prefix=None):
         """Create a set of records based on the given interface. For each
         schema field in the interface, a record will be inserted with a
         name like `${interface.__identifier__}.${field.__name__}`, and a
@@ -31,7 +31,7 @@ class IApplication(Interface):
     pass
 
 
-class IDataBase(Interface):
+class IDatabase(Interface):
     pass
 
 

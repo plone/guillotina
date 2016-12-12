@@ -1,6 +1,9 @@
 1.0a8 (unreleased)
 ------------------
 
+- Fix various function naming standard issues to not use camel case.
+  [vangheem]
+
 - Fix imports with isort.
   [gforcada]
 
