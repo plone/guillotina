@@ -27,7 +27,7 @@ class ContextProperty(object):
 
 class AnnotationProperty(object):
 
-    def __init__(self, attribute, field, default):
+    def __init__(self, attribute, default):
         self.__name__ = attribute
         self.default = default
 
@@ -48,3 +48,20 @@ class AnnotationProperty(object):
             + '.' + self.__name__
         annotations = IAnnotations(inst.context)
         annotations[key] = value
+
+
+class FunctionProperty(object):
+
+    def __init__(self, attribute, getter, setter):
+        self.__name__ = attribute
+        self.setter = setter
+        self.getter = getter
+
+    def __get__(self, inst, klass):
+        if inst is None:
+            return self
+
+        return self.getter(inst)
+
+    def __set__(self, inst, value):
+        return self.setter(inst, value)
