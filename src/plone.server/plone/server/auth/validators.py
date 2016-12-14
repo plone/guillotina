@@ -76,5 +76,7 @@ class JWTValidator(object):
                 return user
         except jwt.exceptions.DecodeError:
             pass
+        except jwt.exceptions.ExpiredSignatureError:
+            pass
 
         return
