@@ -83,6 +83,11 @@ class IContentTypeDirective(Interface):
         required=False
     )
 
+    add_permission = configuration_fields.MessageID(
+        title=_('Add permission'),
+        default=DEFAULT_ADD_PERMISSION
+    )
+
 
 def contenttype_directive(_context, portal_type, class_, schema, behaviors=None,
                           add_permission=None, allowed_types=None):
