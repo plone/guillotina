@@ -20,5 +20,6 @@
     <adapter factory=".deserialize_value.tuple_converter" />
     <adapter factory=".deserialize_value.bool_converter" />
     <adapter factory=".deserialize_value.datetime_converter" />
+    <adapter factory=".deserialize_value.json_dict_converter" />
 
 </configure>

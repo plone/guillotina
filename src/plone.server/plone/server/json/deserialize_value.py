@@ -15,6 +15,7 @@ from zope.schema.interfaces import IFrozenSet
 from zope.schema.interfaces import IList
 from zope.schema.interfaces import ISet
 from zope.schema.interfaces import ITuple
+from plone.server.interfaces.json import IJSONField
 
 import logging
 
@@ -51,6 +52,15 @@ def schema_dict_converter(value, schema):
     values = [schema_compatible(values[idx], schema[keys[idx]])
               for idx in range(len(keys))]
     return dict(zip(keys, values))
+
+
+@adapter(dict, IJSONField)
+@implementer(IJSONToValue)
+def json_dict_converter(value, schemafield):
+    if value == {}:
+        return {}
+
+    return value
 
 
 @adapter(Interface, IField)
