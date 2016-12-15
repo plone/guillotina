@@ -1,6 +1,14 @@
 1.0a8 (unreleased)
 ------------------
 
+- On deserialization errors, provide error info on what fields could not be
+  deserialized in the api response.
+  [vangheem]
+
+- Be able to provide data from serializable exception data to be used with
+  ErrorResponse objects with Exceptions that implement ISerializableException.
+  [vangheem]
+
 - Add the JSON Field
   [ramonnb]
 

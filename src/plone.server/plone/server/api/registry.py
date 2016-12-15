@@ -123,6 +123,7 @@ class Write(TraversableService):
             return ErrorResponse(
                 'DeserializationError',
                 str(e),
+                exc=e,
                 status=400)
 
         return Response(response={}, status=204)

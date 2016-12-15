@@ -2,7 +2,6 @@
 from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from datetime import datetime
 from dateutil.tz import tzlocal
 from plone.server import _
 from plone.server import app_settings
@@ -21,7 +20,6 @@ from plone.server.json.interfaces import IResourceDeserializeFromJson
 from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
-from random import randint
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
@@ -47,6 +45,7 @@ class DefaultGET(Service):
 
 
 class DefaultPOST(Service):
+
     async def __call__(self):
         """To create a content."""
         data = await self.request.json()
@@ -100,6 +99,7 @@ class DefaultPOST(Service):
             return ErrorResponse(
                 'DeserializationError',
                 str(e),
+                exc=e,
                 status=400)
 
         # Local Roles assign owner as the creator user
