@@ -36,6 +36,7 @@ setup(
     namespace_packages=['plone'],
     install_requires=[
         'aiohttp==1.0.5',
+        'jsonschema',
         'python-dateutil',
         'BTrees',
         'persistent',
