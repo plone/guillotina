@@ -1,6 +1,9 @@
 1.0a8 (unreleased)
 ------------------
 
+- Add the JSON Field
+  [ramonnb]
+
 - Fix various function naming standard issues to not use camel case.
   [vangheem]
 
