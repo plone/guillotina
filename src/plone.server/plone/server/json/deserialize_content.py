@@ -98,6 +98,9 @@ class DeserializeFromJson(object):
                 except ValidationError as e:
                     errors.append({
                         'message': e.doc(), 'field': name, 'error': e})
+                except Invalid as e:
+                    errors.append({
+                        'message': e.args[0], 'field': name, 'error': e})
                 else:
                     setattr(obj, name, value)
             else:

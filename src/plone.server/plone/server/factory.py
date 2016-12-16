@@ -35,6 +35,7 @@ from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
 import asyncio
+import inspect
 import json
 import logging
 import sys
@@ -297,7 +298,10 @@ def make_app(config_file=None, settings=None):
             # addons do not need to have zcml
             pass
         if hasattr(module, 'includeme'):
-            module.includeme(root)
+            args = [root]
+            if len(inspect.getargspec(module.includeme).args) == 2:
+                args.append(settings)
+            module.includeme(*args)
         if hasattr(module, 'app_settings') and app_settings != module.app_settings:
             update_app_settings(module.app_settings)
     try:

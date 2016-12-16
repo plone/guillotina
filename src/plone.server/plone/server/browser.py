@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from plone.server.interfaces import IAbsoluteURL
+from plone.server.interfaces import ISerializableException
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IView
@@ -98,11 +99,14 @@ class UnauthorizedResponse(Response):
 
 class ErrorResponse(Response):
 
-    def __init__(self, type, message, headers={}, status=400):
+    def __init__(self, type, message, exc=None, headers={}, status=400):
+        data = {
+            'type': type,
+            'message': message
+        }
+        if ISerializableException.providedBy(exc):
+            data.update(exc.json_data())
         response = {
-            'error': {
-                'type': type,
-                'message': message
-            }
+            'error': data
         }
         super(ErrorResponse, self).__init__(response, headers, status)
