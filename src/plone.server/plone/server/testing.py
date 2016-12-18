@@ -6,13 +6,18 @@ from plone.server.factory import IApplication
 from plone.server.factory import make_app
 from zope.component import getUtility
 from zope.configuration.xmlconfig import include
-from zope.component import getGlobalSiteManager
+from zope.interface import Interface
 from zope.security.interfaces import IInteraction
 from plone.server.api.layer import IDefaultLayer
 from plone.server.interfaces import IRequest
 from zope.interface import implementer
 from plone.server.auth.users import RootUser
 from plone.server.auth.users import ROOT_USER_ID
+from plone.server.directives import index
+from plone.server.directives import metadata
+from plone.server.jsonfield import JSONField
+from plone.server.content import Resource
+from zope.schema import List
 
 import asyncio
 import json
@@ -67,6 +72,33 @@ ADMIN_TOKEN = base64.b64encode(
     '{}:{}'.format(ROOT_USER_ID, TESTING_SETTINGS['root_user']['password']).encode(
         'utf-8')).decode('utf-8')
 DEBUG = False
+
+TERM_SCHEMA = json.dumps({
+    'type': 'object',
+    'properties': {
+        'label': {'type': 'string'},
+        'number': {'type': 'number'}
+    },
+})
+
+
+class IExample(Interface):
+
+    metadata('categories')
+
+    index('categories', type='nested')
+    categories = List(
+        title='categories',
+        default=[],
+        value_type=JSONField(
+            title='term',
+            schema=TERM_SCHEMA)
+    )
+
+
+@implementer(IExample)
+class Example(Resource):
+    pass
 
 
 class MockView(View):

@@ -12,4 +12,12 @@
                  .behaviors.attachment.IAttachment"
     />
 
+  <plone:contenttype
+      portal_type="Example"
+      schema=".testing.IExample"
+      class=".testing.Example"
+      behaviors=".behaviors.dublincore.IDublinCore
+                 .behaviors.attachment.IAttachment"
+    />
+
 </configure>

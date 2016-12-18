@@ -7,6 +7,7 @@ from plone.server.interfaces import IObjectFinallyModifiedEvent
 from plone.server.interfaces import IObjectFinallyVisitedEvent
 from plone.server.interfaces import IObjectPermissionsViewEvent
 from plone.server.interfaces import IObjectPermissionsModifiedEvent
+from plone.server.interfaces import IBeforeJSONAssignedEvent
 from zope.component._api import getSiteManager
 from zope.component._declaration import adapter
 from zope.component.interfaces import ComponentLookupError
@@ -57,6 +58,16 @@ class NewUserAdded(object):
 
     def __init__(self, user):
         self.user = user
+
+
+@implementer(IBeforeJSONAssignedEvent)
+class BeforeJSONAssignedEvent(object):
+    """An object is going to be assigned to an attribute on another object."""
+
+    def __init__(self, object, name, context):
+        self.object = object
+        self.name = name
+        self.context = context
 
 
 def modified_object(obj, event):

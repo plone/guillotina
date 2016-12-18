@@ -15,7 +15,7 @@ from zope.schema.interfaces import IFrozenSet
 from zope.schema.interfaces import IList
 from zope.schema.interfaces import ISet
 from zope.schema.interfaces import ITuple
-from plone.server.interfaces.json import IJSONField
+from plone.server.interfaces import IJSONField
 
 import logging
 

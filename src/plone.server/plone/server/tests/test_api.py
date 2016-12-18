@@ -235,3 +235,22 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             }
         )
         self.assertTrue(resp.status_code == 201)
+
+    def test_create_nested_object(self):
+        resp = self.layer.requester(
+            'POST',
+            '/plone/plone/',
+            data=json.dumps({
+                '@type': 'Example',
+                'title': 'Item1',
+                'id': 'item1',
+                'categories': [{
+                    'label': 'term1',
+                    'number': 1.0
+                }, {
+                    'label': 'term2',
+                    'number': 2.0
+                }]
+            })
+        )
+        self.assertTrue(resp.status_code == 201)
