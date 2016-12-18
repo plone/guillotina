@@ -18,6 +18,7 @@ from plone.server.directives import metadata
 from plone.server.jsonfield import JSONField
 from plone.server.content import Resource
 from zope.schema import List
+from plone.server.content import load_cached_schema
 
 import asyncio
 import json
@@ -173,6 +174,7 @@ class PloneServerBaseLayer(object):
         cls.db = cls.app['plone']
         include(cls.app.app.config, 'testing.zcml', sys.modules['plone.server'])
         cls.app.app.config.execute_actions()
+        load_cached_schema()
 
     @classmethod
     def tearDown(cls):
@@ -273,13 +275,6 @@ class PloneBaseLayer(PloneServerBaseLayer):
             pass
 
         assert resp.status_code == 200
-        # def restore(conn):
-        #     from copy import deepcopy
-        #     del conn.root()['plone']['plone']
-        #     conn.root()['plone']['plone'] = deepcopy(cls.site)
-        # restore_connection = cls.app['plone'].open()
-        # mock = MockView(cls.app['plone'], restore_connection, restore)
-        # mock()
 
     @classmethod
     def new_root(cls):

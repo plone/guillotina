@@ -11,3 +11,4 @@ class PloneGroup(PloneUser):
             self._roles['plone.SiteAdmin'] = 1
             self._roles['plone.SiteDeleter'] = 1
             self._roles['plone.Owner'] = 1
+            self._roles['plone.Member'] = 1

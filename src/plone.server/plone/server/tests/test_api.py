@@ -171,7 +171,6 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         behavior = IAttachment(site['file1'])
         self.assertEqual(behavior.file.data, resp.content)
 
-
     def test_create_contenttype_with_date(self):
         """Try to create a contenttype."""
         resp = self.layer.requester(

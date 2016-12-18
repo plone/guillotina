@@ -1,8 +1,8 @@
 1.0a9 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Role member for Manager group
+  [ramonnb]
 
 1.0a8 (2016-12-18)
 ------------------
