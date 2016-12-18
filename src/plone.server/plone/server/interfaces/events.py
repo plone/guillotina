@@ -21,6 +21,18 @@ class IObjectFinallyModifiedEvent(interfaces.IObjectEvent):
     The location will usually be ``None`` for this event."""
 
 
+class IObjectFinallyVisitedEvent(interfaces.IObjectEvent):
+    """An object has been visited."""
+
+
+class IObjectPermissionsViewEvent(interfaces.IObjectEvent):
+    """An object permissions has been visited."""
+
+
+class IObjectPermissionsModifiedEvent(interfaces.IObjectEvent):
+    """An object permissions has been modified."""
+
+
 class INewUserAdded(Interface):
     """A new user logged in.
 

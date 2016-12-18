@@ -4,6 +4,9 @@ from plone.server.interfaces import INewUserAdded
 from plone.server.interfaces import IObjectFinallyCreatedEvent
 from plone.server.interfaces import IObjectFinallyDeletedEvent
 from plone.server.interfaces import IObjectFinallyModifiedEvent
+from plone.server.interfaces import IObjectFinallyVisitedEvent
+from plone.server.interfaces import IObjectPermissionsViewEvent
+from plone.server.interfaces import IObjectPermissionsModifiedEvent
 from zope.component._api import getSiteManager
 from zope.component._declaration import adapter
 from zope.component.interfaces import ComponentLookupError
@@ -30,6 +33,21 @@ class ObjectFinallyDeletedEvent(ObjectEvent):
 
 @implementer(IObjectFinallyModifiedEvent)
 class ObjectFinallyModifiedEvent(ObjectEvent):
+    """An object has been modified."""
+
+
+@implementer(IObjectFinallyVisitedEvent)
+class ObjectFinallyVisitedEvent(ObjectEvent):
+    """An object has been modified."""
+
+
+@implementer(IObjectPermissionsViewEvent)
+class ObjectPermissionsViewEvent(ObjectEvent):
+    """An object has been modified."""
+
+
+@implementer(IObjectPermissionsModifiedEvent)
+class ObjectPermissionsModifiedEvent(ObjectEvent):
     """An object has been modified."""
 
 

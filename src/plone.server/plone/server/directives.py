@@ -149,6 +149,7 @@ class index(MetadataDictDirective):
         'date',
         'boolean',
         'binary',
+        'object',
         'float',
         'path'
     )

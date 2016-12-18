@@ -9,6 +9,9 @@
   ErrorResponse objects with Exceptions that implement ISerializableException.
   [vangheem]
 
+- Add Events to enable audit of activity
+  [ramonnb]
+
 - Add the JSON Field
   [ramonnb]
 

@@ -13,6 +13,9 @@ from plone.server.events import notify
 from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.events import ObjectFinallyDeletedEvent
 from plone.server.events import ObjectFinallyModifiedEvent
+from plone.server.events import ObjectFinallyVisitedEvent
+from plone.server.events import ObjectPermissionsViewEvent
+from plone.server.events import ObjectPermissionsModifiedEvent
 from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.json.exceptions import DeserializationError
@@ -41,7 +44,9 @@ class DefaultGET(Service):
         serializer = getMultiAdapter(
             (self.context, self.request),
             IResourceSerializeToJson)
-        return serializer()
+        result = serializer()
+        await notify(ObjectFinallyVisitedEvent(self.context))
+        return result
 
 
 class DefaultPOST(Service):
@@ -178,6 +183,7 @@ class SharingGET(Service):
                 'principal_permission': prinperm._byrow,
                 'principal_role': prinrole._byrow,
             })
+        await notify(ObjectPermissionsViewEvent(self.context))
         return result
 
 
@@ -191,7 +197,7 @@ class SharingPOST(Service):
         for user, roles in data['prinrole'].items():
             for role in roles:
                 prinrole.assignRoleToPrincipal(role, user)
-        await notify(ObjectFinallyModifiedEvent(self.context))
+        await notify(ObjectPermissionsModifiedEvent(self.context))
 
 
 class DefaultDELETE(Service):

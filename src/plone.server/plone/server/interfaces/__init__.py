@@ -17,6 +17,9 @@ from plone.server.interfaces.events import IObjectFinallyCreatedEvent  # noqa
 from plone.server.interfaces.events import IObjectFinallyDeletedEvent  # noqa
 from plone.server.interfaces.events import IObjectFinallyModifiedEvent  # noqa
 from plone.server.interfaces.exceptions import ISerializableException  # noqa
+from plone.server.interfaces.events import IObjectFinallyVisitedEvent  # noqa
+from plone.server.interfaces.events import IObjectPermissionsViewEvent  # noqa
+from plone.server.interfaces.events import IObjectPermissionsModifiedEvent  # noqa
 from plone.server.interfaces.files import IFile  # noqa
 from plone.server.interfaces.files import IFileField  # noqa
 from plone.server.interfaces.files import IFileManager  # noqa
