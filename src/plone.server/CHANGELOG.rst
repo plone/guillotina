@@ -1,4 +1,4 @@
-1.0a8 (unreleased)
+1.0a8 (2016-12-18)
 ------------------
 
 - On deserialization errors, provide error info on what fields could not be
