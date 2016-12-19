@@ -85,7 +85,7 @@ class DefaultCatalogDataAdapter(object):
             real_field = field.bind(ob)
             try:
                 value = real_field.get(ob)
-                json_compatible(value)
+                return json_compatible(value)
             except AttributeError:
                 pass
         except KeyError:
@@ -96,6 +96,7 @@ class DefaultCatalogDataAdapter(object):
     def __call__(self):
         # For each type
         values = {}
+
         for schema in iter_schemata_for_type(self.content.portal_type):
             behavior = schema(self.content)
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():

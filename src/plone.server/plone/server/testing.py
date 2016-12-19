@@ -6,7 +6,7 @@ from plone.server.factory import IApplication
 from plone.server.factory import make_app
 from zope.component import getUtility
 from zope.configuration.xmlconfig import include
-from zope.interface import Interface
+from plone.server.interfaces import IResource
 from zope.security.interfaces import IInteraction
 from plone.server.api.layer import IDefaultLayer
 from plone.server.interfaces import IRequest
@@ -83,7 +83,7 @@ TERM_SCHEMA = json.dumps({
 })
 
 
-class IExample(Interface):
+class IExample(IResource):
 
     metadata('categories')
 
