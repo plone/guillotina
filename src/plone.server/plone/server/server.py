@@ -5,10 +5,13 @@ from plone.server.factory import make_app
 
 import argparse
 import json
-import logging
+# import logging
 
 
-logger = logging.getLogger('plone.server')
+# logger = logging.getLogger('plone.server')
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='%(threadName)10s %(name)18s: %(message)s',)
 
 
 def main():
@@ -16,9 +19,6 @@ def main():
     parser.add_argument('-c', '--configuration',
                         default='config.json', help='Configuration file')
     arguments = parser.parse_args()
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(threadName)10s %(name)18s: %(message)s',)
 
     with open(arguments.configuration, 'r') as config:
         settings = json.load(config)

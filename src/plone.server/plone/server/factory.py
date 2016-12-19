@@ -48,7 +48,7 @@ try:
 except ImportError:
     RSA = None
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('plone.server')
 
 
 @implementer(IApplication)
@@ -264,7 +264,7 @@ def update_app_settings(settings):
 def make_app(config_file=None, settings=None):
 
     # Initialize aiohttp app
-    app = web.Application(router=TraversalRouter())
+    app = web.Application(router=TraversalRouter(), logger=logger)
 
     # Create root Application
     root = ApplicationRoot(config_file)
