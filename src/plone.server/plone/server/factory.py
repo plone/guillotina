@@ -264,7 +264,7 @@ def update_app_settings(settings):
 def make_app(config_file=None, settings=None):
 
     # Initialize aiohttp app
-    app = web.Application(router=TraversalRouter(), logger=logger)
+    app = web.Application(router=TraversalRouter())
 
     # Create root Application
     root = ApplicationRoot(config_file)
