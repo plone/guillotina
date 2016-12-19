@@ -338,7 +338,7 @@ class TraversalRouter(AbstractRouter):
 
         # Add anonymous participation
         if len(request.security.participations) == 0:
-            logger.info("Anonymous User")
+            # logger.info("Anonymous User")
             request.security.add(AnonymousParticipation(request))
 
         permission = getUtility(IPermission, name='plone.AccessContent')
