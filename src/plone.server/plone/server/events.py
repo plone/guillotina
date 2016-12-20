@@ -8,6 +8,7 @@ from plone.server.interfaces import IObjectFinallyVisitedEvent
 from plone.server.interfaces import IObjectPermissionsViewEvent
 from plone.server.interfaces import IObjectPermissionsModifiedEvent
 from plone.server.interfaces import IBeforeJSONAssignedEvent
+from plone.server.interfaces import IFileFinishUploaded
 from zope.component._api import getSiteManager
 from zope.component._declaration import adapter
 from zope.component.interfaces import ComponentLookupError
@@ -50,6 +51,11 @@ class ObjectPermissionsViewEvent(ObjectEvent):
 @implementer(IObjectPermissionsModifiedEvent)
 class ObjectPermissionsModifiedEvent(ObjectEvent):
     """An object has been modified."""
+
+
+@implementer(IFileFinishUploaded)
+class FileFinishUploaded(ObjectEvent):
+    """A file has finish uploading."""
 
 
 @implementer(INewUserAdded)

@@ -33,6 +33,10 @@ class IObjectPermissionsModifiedEvent(interfaces.IObjectEvent):
     """An object permissions has been modified."""
 
 
+class IFileFinishUploaded(interfaces.IObjectEvent):
+    """A file has been finish uploaded."""
+
+
 class INewUserAdded(Interface):
     """A new user logged in.
 
