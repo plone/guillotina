@@ -2,6 +2,7 @@
 from persistent import Persistent
 from plone.server.interfaces import IFile
 from plone.server.interfaces import IFileField
+from plone.server.interfaces import ICloudFileField
 from plone.server.interfaces import IFileManager
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResource
@@ -13,6 +14,10 @@ from zope.component import getUtility
 from zope.interface import implementer
 from zope.schema import Object
 from zope.schema.fieldproperty import FieldProperty
+from plone.server.utils import import_class
+from plone.server import app_settings
+from zope.interface import alsoProvides
+from zope.component import getMultiAdapter
 
 import aiohttp
 import io
@@ -152,6 +157,55 @@ class BasicFileField(Object):
         if 'schema' in kw:
             self.schema = kw.pop('schema')
         super(BasicFileField, self).__init__(schema=self.schema, **kw)
+
+
+@implementer(ICloudFileField)
+class CloudFileField(Object):
+    """A cloud file hosted file.
+
+    Its configured on config.json with :
+
+    "cloud_storage": "pserver.s3storage.interfaces.IS3FileField"
+
+    or
+
+    "cloud_storage": "pserver.gcloudstorage.interfaces.IGCloudFileField"
+
+    """
+
+    schema = IFile
+
+    def __init__(self, **kw):
+        super(CloudFileField, self).__init__(schema=self.schema, **kw)
+
+
+@adapter(IResource, IRequest, ICloudFileField)
+@implementer(IFileManager)
+class CloudFileManager(object):
+
+    def __init__(self, context, request, field):
+        iface = import_class(app_settings['cloud_storage'])
+        alsoProvides(field, iface)
+        self.real_file_manager = getMultiAdapter(
+            (context, request, field), IFileManager)
+
+    async def download(self):
+        return await self.real_file_manager.download()
+
+    async def tus_options(self):
+        return await self.real_file_manager.tus_options()
+
+    async def tus_head(self):
+        return await self.real_file_manager.tus_head()
+
+    async def tus_patch(self):
+        return await self.real_file_manager.tus_patch()
+
+    async def tus_create(self):
+        return await self.real_file_manager.tus_create()
+
+    async def upload(self):
+        return await self.real_file_manager.upload()
 
 
 # This file was borrowed from z3c.blobfile and is licensed under the terms of

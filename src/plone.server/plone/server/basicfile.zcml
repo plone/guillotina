@@ -6,6 +6,9 @@
   <!-- Basic File Manager for Blobs -->
   <adapter factory="plone.server.file.BasicFileManager"/>
 
+  <!-- Generic Cloud File Manager for Blobs -->
+  <adapter factory="plone.server.file.CloudFileManager"/>
+
   <utility
       name="builtins.str"
       provides=".interfaces.IStorage"

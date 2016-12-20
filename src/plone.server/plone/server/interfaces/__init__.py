@@ -23,6 +23,7 @@ from plone.server.interfaces.events import IObjectPermissionsModifiedEvent  # no
 from plone.server.interfaces.events import IFileFinishUploaded  # noqa
 from plone.server.interfaces.files import IFile  # noqa
 from plone.server.interfaces.files import IFileField  # noqa
+from plone.server.interfaces.files import ICloudFileField  # noqa
 from plone.server.interfaces.files import IFileManager  # noqa
 from plone.server.interfaces.files import IStorage  # noqa
 from plone.server.interfaces.files import NotStorable  # noqa
