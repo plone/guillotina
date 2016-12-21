@@ -364,7 +364,7 @@ class TraversalRouter(AbstractRouter):
         # Traverse view if its needed
         if traverse_to is not None and view is not None:
             if not ITraversableView.providedBy(view):
-                raise HTTPNotFound()
+                return None
             else:
                 try:
                     view = view.publishTraverse(traverse_to)
@@ -372,7 +372,7 @@ class TraversalRouter(AbstractRouter):
                     logger.error(
                         "Exception on view execution",
                         exc_info=e)
-                    raise HTTPNotFound()
+                    return None
 
         if view is None and method == IOPTIONS:
             view = DefaultOPTIONS(resource, request)
@@ -391,7 +391,7 @@ class TraversalRouter(AbstractRouter):
         if rendered is not None:
             return MatchInfo(resource, request, view, rendered)
         else:
-            raise HTTPNotFound()
+            return None
 
     async def traverse(self, request):
         """Wrapper that looks for the path based on aiohttp API."""
