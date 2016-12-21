@@ -1,11 +1,22 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPUnauthorized
+from hashlib import sha256 as sha
 from plone.server import app_settings
 from zope.dottedname.resolve import resolve
 
 import fnmatch
 import importlib
 import logging
+import random
+import time
+import string
+
+
+try:
+    random = random.SystemRandom()
+    using_sys_random = True
+except NotImplementedError:
+    using_sys_random = False
 
 
 logger = logging.getLogger('plone.server')
@@ -121,3 +132,18 @@ def resolve_or_get(potential_dotted_name):
     if isinstance(potential_dotted_name, str):
         return resolve(potential_dotted_name)
     return potential_dotted_name
+
+
+RANDOM_SECRET = random.randint(0, 1000000)
+
+
+def get_random_string(length=30, allowed_chars=string.ascii_letters + string.digits):
+    """
+    Heavily inspired by Plone/Django
+    Returns a securely generated random string.
+    """
+    if not using_sys_random:
+        # do our best to get secure random without sysrandom
+        seed_value = "%s%s%s" % (random.getstate(), time.time(), RANDOM_SECRET)
+        random.seed(sha(seed_value).digest())
+    return ''.join([random.choice(allowed_chars) for i in range(length)])
