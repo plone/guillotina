@@ -1,6 +1,9 @@
 1.0a9 (unreleased)
 ------------------
 
+- add `pshell` command
+  [vangheem]
+
 - Role member for Manager group
   [ramonnb]
 

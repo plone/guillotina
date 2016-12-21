@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from aiohttp import web
-import plone.server.patch  # noqa
 from plone.server.factory import make_app
 from plone.server import app_settings
 from plone.server.testing import TESTING_SETTINGS, PloneRequester
