@@ -1,6 +1,10 @@
 1.0a9 (unreleased)
 ------------------
 
+- Handle error when deserializing content when not authenticated and checking
+  permissions
+  [vangheem]
+
 - add `pshell` command
   [vangheem]
 
