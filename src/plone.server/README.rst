@@ -11,7 +11,8 @@ Getting started
 
 We use buildout of course::
 
-    python3.5 bootstrap-buildout.py
+    virtualenv .
+    ./bin/pip install zc.buildout
     ./bin/buildout
 
 The buildout installs the app itself, code analysis tools, and a test runner.
