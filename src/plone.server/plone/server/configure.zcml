@@ -45,7 +45,7 @@
 
   <subscriber
     for="plone.server.interfaces.IResource
-         zope.lifecycleevent.interfaces.IObjectModifiedEvent"
+         plone.server.interfaces.IObjectFinallyModifiedEvent"
     handler=".events.modified_object" />
 
   <plone:api file="api/api.json" />
