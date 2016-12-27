@@ -17,6 +17,7 @@ Contents:
 [Addons](addons.md)
 [Configuration](configuration.md)
 [Design](design.md)
+[Command](commands.md)
 
 Indices and tables
 ==================
