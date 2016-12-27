@@ -189,7 +189,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             '/plone/plone/item1',
             data=json.dumps({
                 "plone.server.behaviors.dublincore.IDublinCore": {
-                    "modified": date_to_test
+                    "created": date_to_test
                 }
             })
         )
@@ -197,7 +197,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         root = self.layer.new_root()
         obj = root['plone']['item1']
         from plone.server.behaviors.dublincore import IDublinCore
-        self.assertEqual(IDublinCore(obj).modified.isoformat(), date_to_test)
+        self.assertEqual(IDublinCore(obj).created.isoformat(), date_to_test)
 
     def test_create_duplicate_id(self):
         """Try to create a contenttype."""
