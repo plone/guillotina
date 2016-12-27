@@ -1,32 +1,32 @@
 # -*- coding: utf-8 -*-
-import plone.server.patch  # noqa
 from aiohttp.test_utils import make_mocked_request
-from plone.server.browser import View
-from plone.server.factory import IApplication
-from plone.server.factory import make_app
-from zope.component import getUtility
-from zope.configuration.xmlconfig import include
-from plone.server.interfaces import IResource
-from zope.security.interfaces import IInteraction
 from plone.server.api.layer import IDefaultLayer
-from plone.server.interfaces import IRequest
-from zope.interface import implementer
-from plone.server.auth.users import RootUser
 from plone.server.auth.users import ROOT_USER_ID
+from plone.server.auth.users import RootUser
+from plone.server.browser import View
+from plone.server.content import load_cached_schema
+from plone.server.content import Resource
 from plone.server.directives import index
 from plone.server.directives import metadata
+from plone.server.factory import IApplication
+from plone.server.factory import make_app
+from plone.server.interfaces import IRequest
+from plone.server.interfaces import IResource
 from plone.server.jsonfield import JSONField
-from plone.server.content import Resource
+from plone.server.security import Interaction
+from zope.component import getUtility
+from zope.configuration.xmlconfig import include
+from zope.interface import implementer
 from zope.schema import List
-from plone.server.content import load_cached_schema
 
 import asyncio
+import base64
 import json
+import plone.server.patch  # noqa
 import requests
 import sys
 import time
 import unittest
-import base64
 
 
 TESTING_PORT = 55001
@@ -287,7 +287,7 @@ class PloneBaseLayer(PloneServerBaseLayer):
 class FakeRequest(object):
 
     def __init__(self):
-        self.security = IInteraction(self)
+        self.security = Interaction(self)
         self.headers = {}
 
 

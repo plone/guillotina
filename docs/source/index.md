@@ -16,6 +16,7 @@ Contents:
 [Applications](applications.md)
 [Addons](addons.md)
 [Configuration](configuration.md)
+[Migrations](migrations.md)
 [Design](design.md)
 [Command](commands.md)
 

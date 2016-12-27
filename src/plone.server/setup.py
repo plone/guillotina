@@ -78,6 +78,7 @@ setup(
             'pserver = plone.server.commands.server:ServerCommand',
             'pcli = plone.server.commands.cli:CliCommand',
             'pshell = plone.server.commands.shell:ShellCommand',
+            'pmigrate = plone.server.commands.migrate:MigrateCommand'
         ]
     }
 )
