@@ -75,9 +75,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'pserver = plone.server.server:main',
-            'pcli = plone.server.cli:main',
-            'pshell = plone.server.pshell:main',
+            'pserver = plone.server.commands.server:ServerCommand',
+            'pcli = plone.server.commands.cli:CliCommand',
+            'pshell = plone.server.commands.shell:ShellCommand',
         ]
     }
 )
