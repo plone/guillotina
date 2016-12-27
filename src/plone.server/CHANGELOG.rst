@@ -1,6 +1,9 @@
 1.0a9 (unreleased)
 ------------------
 
+- Automatically give authenticated users new `plone.Authenticated` role
+  [vangheem]
+
 - Handle error when deserializing content when not authenticated and checking
   permissions
   [vangheem]
