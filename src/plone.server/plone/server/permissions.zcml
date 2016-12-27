@@ -130,6 +130,12 @@
       />
 
   <role
+      id="plone.Authenticated"
+      title="Authenticated user"
+      description="Role automatically assigned to authenticated users"
+      />
+
+  <role
       id="plone.Member"
       title="Site Member" />
 

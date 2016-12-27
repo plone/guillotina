@@ -32,6 +32,8 @@ class PloneParticipation(object):
             if user is not None:
                 self.request._cache_user = user
                 self.principal = user
+                if hasattr(user, '_roles') and 'plone.Authenticated' not in user._roles:
+                    user._roles['plone.Authenticated'] = 1
         else:
             self.principal = getattr(self.request, '_cache_user', None)
 
