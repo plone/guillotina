@@ -1,8 +1,20 @@
-# Requests security
+# Security
+
+`plone.server` implements robust ACL security.
+
+An overview of our security features are:
+
+* Users are given roles and groups
+* Roles are granted permissions
+* Groups are granted roles
+* Roles can be granted to users on specific objects
+
+
+## Requests security
 
 By default request has participation of anonymous user plus the ones added by auth pluggins
 
-# Databases, Application and static files objects
+## Databases, Application and static files objects
 
 Databases and static files has an specific permission system. They don't have roles by default
 and the permissions are specified to root user
@@ -17,7 +29,7 @@ Anonymous user has on DB/StaticFiles/StaticDirectories/Application object :
 
  * plone.AccessContent
 
-# Roles in plone.server Site objects
+## Roles in plone.server Site objects
 
 Defined at:
 
@@ -74,17 +86,17 @@ Defined at:
 
  * plone.DeletePortal
 
-# Default roles on Plone Site
+## Default roles on Plone Site
 
 They are stored in anontations using IRolePermissionMap.
 
 Created objects set the plone.Owner role to the user who created it.
 
-# Default groups on Plone Site
+## Default groups on Plone Site
 
-## Managers
+### Managers
 
-### RootParticipation
+#### RootParticipation
 
 There is a `root` user who has permissions to all site:
 

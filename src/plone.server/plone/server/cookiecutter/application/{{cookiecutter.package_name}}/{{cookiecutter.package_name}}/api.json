@@ -1,0 +1,18 @@
+{
+	"methods": {
+		"POST": "plone.server.interfaces.IPOST"
+	},
+	"layer": "pserver.zodbusers.interfaces.IZODBUsersLayer",
+	"contenttypes": {
+		"plone.server.interfaces.ISite": {
+      "endpoints": {
+        "@example-endpoint": {
+          "POST": {
+            "factory": "{{cookiecutter.package_name}}.api.ExampleService",
+            "permission": "plone.AccessContent"
+          }
+        }
+			}
+		}
+	}
+}

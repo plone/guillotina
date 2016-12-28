@@ -51,8 +51,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'plone.server'
-copyright = '2016, Ramon Navarro Bosch & Asko Soukka & Nathan Van Gheem'
-author = 'Ramon Navarro Bosch & Asko Soukka & Nathan Van Gheem'
+copyright = '2016, Ramon Navarro Bosch, Asko Soukka & Nathan Van Gheem'
+author = 'Ramon Navarro Bosch, Asko Soukka & Nathan Van Gheem'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

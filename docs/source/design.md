@@ -1,10 +1,10 @@
-# DESIGN
+# Design
 
 This section is meant to explain and defend the design of `plone.server`.
 
 
 
-## JAVASCRIPT APPLICATION DEVELOPMENT FOCUS
+## JavaScript application development focus
 
 
 One of the main driving factors behind the development of `plone.server` is to
@@ -27,7 +27,7 @@ platform are:
 It uses the ZODB, a database well suited for CMS.
 
 
-## SPEED
+## Speed
 
 A primary focus of `plone.server` is speed. We take shortcuts and may use some
 ugly or less-well conceptually architected solutions in some areas in order
@@ -44,7 +44,7 @@ of functionality so it will never be as fast as say Pyramid.
 "There are no solutions. There are only trade-offs." - Thomas Sowell
 
 
-## ASYNCHRONOUS
+## Asynchronous
 
 `plone.server` is asynchronous from the group up, built on top of `aiohttp`
 using Python 3.5's asyncio features.
@@ -59,7 +59,7 @@ loop and async content events.
 Finally, the web server can also support web sockets OOTB.
 
 
-## TOOLING
+## Tooling
 
 I've talked some about it but these are the basic technologies `plone.server`
 is built with:
@@ -69,18 +69,25 @@ is built with:
 - ZCA
 
 
-## SECURITY
+## Security
 
 `plone.server` uses the same great security infrastructure that has made Plone
 such a great product for the past 15 years.
 
 
-## STYLE
+## Style
 
-Stylistically, currently the project isn't very coherent right now so I'll speak
-to what we'd like to work toward stylistically::
+Stylistically, currently the project isn't extremely coherent right now so I'll speak
+to what we'd like to work toward stylistically long term::
 
 - JSON configuration
 - No ZCML
 - Pyramid-like idioms and syntax where it makes sense
 - Functions + decorators over classes
+
+## ZODB
+
+`plone.server` uses the [ZODB](http://www.zodb.org/en/latest/) as its database engine.
+
+The ZODB database server maps very nicely onto a CMS application where content
+is stored in a tree data structure.

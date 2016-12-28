@@ -1,9 +1,18 @@
-# COMMAND
+# Commands
 
 You can provide your own CLI commands for plone.server through a simple interface.
 
 
-## CREATING THE COMMAND
+## Available commands
+
+* pserver: run the http rest api server
+* pmigrate: run available migration steps
+* pcli: command line utility to run manually RUN API requests with
+* pshell: drop into a shell with root object to manually work with
+* pcreate: use cookiecutter to generate plone.server applications
+
+
+## Creating commands
 
 plone.server provides a simple API to write your own CLI commands.
 

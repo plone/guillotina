@@ -6,10 +6,25 @@ from plone.server.testing import TestParticipation
 import argparse
 import json
 import logging
+import os
 import sys
 
 
 logger = logging.getLogger('plone.server')
+
+
+MISSING_SETTINGS = {
+    "databases": [{
+        "zodb": {
+            "storage": "ZODB",
+            "path": "Data.fs"
+        }
+    }],
+    "address": 8080,
+    "root_user": {
+        "password": "root"
+    }
+}
 
 
 class Command(object):
@@ -24,10 +39,17 @@ class Command(object):
 
         parser = self.get_parser()
         arguments = parser.parse_args()
-        app = make_app(config_file=arguments.configuration)
 
-        with open(arguments.configuration, 'r') as config:
-            settings = json.load(config)
+        if os.path.exists(arguments.configuration):
+            with open(arguments.configuration, 'r') as config:
+                settings = json.load(config)
+        else:
+            logger.warn('Could not find the configuration file {}. Using default settings.'.format(
+                arguments.configuration
+            ))
+            settings = MISSING_SETTINGS.copy()
+
+        app = self.make_app(settings)
 
         logging.basicConfig(stream=sys.stdout)
         logger.setLevel(logging.INFO)
@@ -42,6 +64,9 @@ class Command(object):
             ch.setLevel(logging.DEBUG)
 
         self.run(arguments, settings, app)
+
+    def make_app(self, settings):
+        return make_app(settings=settings)
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)

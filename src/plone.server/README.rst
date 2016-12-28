@@ -5,9 +5,11 @@ This is the working project of the next generation plone server based on asyncio
 
 * depends on python 3.5
 
+Please `read the detailed docs <http://ploneserver.readthedocs.io/en/latest/>`_
 
-Getting started
----------------
+
+Getting started with development
+--------------------------------
 
 We use buildout of course::
 
@@ -34,33 +36,6 @@ To run the server::
 
     ./bin/server
 
-Creating default content
-------------------------
-
-Once started, you will require to add at least a Plone site to start fiddling around::
-
-  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
-    "@type": "Site",
-    "title": "Plone 1",
-    "id": "plone",
-    "description": "Description"
-  }' "http://127.0.0.1:8080/zodb1/"
-
-and give permissions to add content to it::
-
-  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
-    "prinrole": {
-        "Anonymous User": ["plone.Member", "plone.Reader"]
-    }
-  }' "http://127.0.0.1:8080/zodb1/plone/@sharing"
-
-and create actual content::
-
-  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
-    "@type": "Item",
-    "title": "News",
-    "id": "news"
-  }' "http://127.0.0.1:8080/zodb1/plone/"
 
 Run tests
 ---------
@@ -77,13 +52,4 @@ and for test coverage::
 Default
 -------
 
-Default root access can be done with AUTHORIZATION header : Basic admin
-
-
-Running dependency graph
-------------------------
-
-Using buildout::
-
-    ./bin/buildout -c dependency-graph.cfg
-    ./bin/dependencies-eggdeps > docs/dependency-graph.txt
+Default root access can be done with AUTHORIZATION header : Basic root:root

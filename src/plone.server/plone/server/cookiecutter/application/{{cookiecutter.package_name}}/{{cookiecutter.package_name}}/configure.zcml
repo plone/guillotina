@@ -1,0 +1,13 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:plone="http://namespaces.plone.org/plone"
+           i18n_domain="plone.server">
+
+  <include package="plone.server" file="meta.zcml" />
+  <plone:addon
+  		name="{{cookiecutter.package_name}}"
+  		title="{{cookiecutter.project_short_description}}"
+  		handler="{{cookiecutter.package_name}}.install.ManageAddon" />
+
+  <plone:api file="api.json" />
+
+</configure>

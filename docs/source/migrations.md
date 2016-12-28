@@ -1,4 +1,4 @@
-# MIGRATIONS
+# Migrations
 
 plone.server provides an interface to run migrations for itself and the applications
 it currently has activated.
@@ -8,7 +8,7 @@ those application migration steps need to check for the installation of their
 addon in the migration step.
 
 
-## RUNNING MIGRATIONS
+## Running migrations
 
 plone.server provides a command line utility to manage and run migrations
 against your entire install or against a particular site.
@@ -24,7 +24,7 @@ By default, the `pmigrate` command will migrate all sites on all available
 databases.
 
 
-## PMIGRATE COMMAND OPTIONS
+## pmigrate command options
 
 * dry-run: do test running the migration but not commit to the database
 * site: path to site to run the command against
@@ -33,14 +33,14 @@ databases.
 * to-version: run migrations to a provided version
 
 
-Complicated command usages example:
+Advanced command usages example:
 
 ```
 ./bin/pmigrate --site=/zodb/plone --app=pserver.elasticsearch --to-version=1.0.1 --dry-run
 ```
 
 
-## DEFINING MIGRATIONS
+## Defining migrations
 
 To define migrations in your own applications, `plone.server` provides a simple
 decorator::

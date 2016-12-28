@@ -1,4 +1,4 @@
-# ADDONS
+# Add-ons
 
 Addons are integrations that can be installed or uninstalled against a Plone site.
 `plone.server` applications can provide potentially many addons. If you have
@@ -6,7 +6,7 @@ not read the section on applications, please read that before you come here. The
 only way to provide addons is to first implement a `plone.server` application.
 
 
-## CREATING AN ADDON
+## Creating an add-on
 
 Create an addon installer class in an `install.py` file in your `plone.server` application:
 
@@ -42,7 +42,7 @@ Then, in your `configure.zcml` file, register the addon::
 ```
 
 
-## LAYERS
+## Layers
 
 Your addon can also install layers for your application to lookup views and adapters
 from:

@@ -1,4 +1,4 @@
-# CONFIGURATION
+# Configuration
 
 `plone.server` and it's addon define global configuration that is used throughout
 the `plone.server`. All of these settings are configurable by providing a
@@ -33,7 +33,7 @@ map 1-to-1 to ZODB setup:
 }
 ```
 
-## STATIC FILES
+## Static files
 
 ```json
 {
@@ -44,7 +44,7 @@ map 1-to-1 to ZODB setup:
 ```
 
 
-## SERVER PORT
+## Server port
 
 ```json
 {
@@ -53,7 +53,7 @@ map 1-to-1 to ZODB setup:
 ```
 
 
-## ROOT USER PASSWORD
+## Root user password
 
 ```json
 {
@@ -78,7 +78,7 @@ map 1-to-1 to ZODB setup:
 }
 ```
 
-# ASYNC UTILITIES
+## Async utilities
 
 ```json
 {

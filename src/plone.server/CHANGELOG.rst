@@ -1,6 +1,9 @@
 1.0a9 (unreleased)
 ------------------
 
+- Add new pcreate command
+  [vangheem]
+
 - Add new pmigrate command and migration framework
   [vangheem]
 
