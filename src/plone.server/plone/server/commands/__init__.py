@@ -14,6 +14,8 @@ logger = logging.getLogger('plone.server')
 
 class Command(object):
 
+    description = ''
+
     def __init__(self):
         self.request = FakeRequest()
         self.request.security.add(TestParticipation(self.request))
@@ -42,7 +44,7 @@ class Command(object):
         self.run(arguments, settings, app)
 
     def get_parser(self):
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(description=self.description)
         parser.add_argument('-c', '--configuration',
                             default='config.json', help='Configuration file')
         parser.add_argument('--debug', dest='debug', action='store_true',

@@ -19,6 +19,7 @@ def format_headers(headers):
 
 
 class CliCommand(Command):
+    description = 'Plone server CLI utility'
 
     def get_parser(self):
         parser = super(CliCommand, self).get_parser()

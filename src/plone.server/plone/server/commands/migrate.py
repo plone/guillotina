@@ -17,6 +17,7 @@ def traverse_to_path(app, path):
 
 
 class MigrateCommand(Command):
+    description = 'Plone server migration utility'
 
     def get_parser(self):
         parser = super(MigrateCommand, self).get_parser()

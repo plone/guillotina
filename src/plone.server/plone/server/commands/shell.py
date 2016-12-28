@@ -7,6 +7,7 @@ from zope.component import getUtility
 
 
 class ShellCommand(Command):
+    description = 'Plone server shell'
 
     def run(self, arguments, settings, app):
         app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
