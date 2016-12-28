@@ -18,7 +18,6 @@ from plone.server.contentnegotiation import language_negotiation
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDatabase
 from plone.server.interfaces import IOPTIONS
-from plone.server.interfaces import IRegistry
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import ITranslated
@@ -31,7 +30,6 @@ from plone.server.transactions import locked
 from plone.server.transactions import sync
 from plone.server.utils import apply_cors
 from plone.server.utils import import_class
-from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite

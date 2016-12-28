@@ -1,6 +1,9 @@
 1.0a9 (unreleased)
 ------------------
 
+- Add new pmigrate command and migration framework
+  [vangheem]
+
 - Provide base plone.server.commands.Command class to provide your own commands.
   Commands have been moved in code so you'll need to re-run buildout to get
   pserver to work after this update.
