@@ -190,6 +190,9 @@ class Database(object):
         self._conn = None
         self.tm_ = RequestAwareTransactionManager()
 
+    def get_transaction_manager(self):
+        return self.tm_
+
     def open(self):
         tm_ = RequestAwareTransactionManager()
         return self._db.open(transaction_manager=tm_)
@@ -221,7 +224,7 @@ class Database(object):
         return list(self.conn.root().keys())
 
     def __setitem__(self, key, value):
-        """ This operation can only be done throw HTTP request
+        """ This operation can only be done through HTTP request
 
         We can check if there is permission to delete a site
         XXX TODO

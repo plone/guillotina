@@ -32,7 +32,11 @@ class IApplication(Interface):
 
 
 class IDatabase(Interface):
-    pass
+    def get_transaction_manager():
+        pass
+
+    def open():
+        pass
 
 
 class IStaticFile(Interface):

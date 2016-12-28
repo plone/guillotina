@@ -118,10 +118,11 @@ class MigrateCommand(Command):
                         app, to_version=arguments.to_version,
                         from_version=installed_versions.get(app))
                     if len(_migrations) > 0:
+                        trns = db.get_transaction_manager()
                         if not arguments.dry_run and not arguments.report:
-                            db.tm_.begin()
+                            trns.begin()
                         migrate.run_site_migrations(site, _migrations, db)
                         if not arguments.dry_run and not arguments.report:
-                            db.tm_.commit()
+                            trns.commit()
 
         self.report(arguments, sites, apps)
