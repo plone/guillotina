@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from aiohttp.test_utils import make_mocked_request
-from plone.server.api.layer import IDefaultLayer
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.auth.users import RootUser
 from plone.server.browser import View
@@ -8,8 +7,9 @@ from plone.server.content import load_cached_schema
 from plone.server.content import Resource
 from plone.server.directives import index
 from plone.server.directives import metadata
-from plone.server.factory import IApplication
 from plone.server.factory import make_app
+from plone.server.interfaces import IApplication
+from plone.server.interfaces import IDefaultLayer
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResource
 from plone.server.jsonfield import JSONField

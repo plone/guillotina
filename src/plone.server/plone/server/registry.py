@@ -2,15 +2,18 @@
 from BTrees._OOBTree import OOBTree
 from BTrees.Length import Length
 from persistent import Persistent
-from plone.server import _
 from plone.server.browser import get_physical_path
 from plone.server.interfaces import IRegistry
 from plone.server.utils import Lazy
 from zope import schema
+from zope.i18nmessageid import MessageFactory
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
+
+
+_ = MessageFactory('plone')
 
 
 class RecordsProxy(object):

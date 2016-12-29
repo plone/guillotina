@@ -2,6 +2,7 @@
 from aiohttp import web
 from pkg_resources import iter_entry_points
 from plone.server import app_settings
+from plone.server import configure
 from plone.server.async import IAsyncUtility
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
@@ -134,7 +135,7 @@ class DatabaseToJson(object):
 
     def __call__(self):
         return {
-            'sites': self.dbo.keys()
+            'sites': list(self.dbo.keys())
         }
 
 
@@ -264,6 +265,27 @@ def update_app_settings(settings):
             app_settings[key] = value
 
 
+def load_application(module, root, settings):
+    app = root.app
+    # zcml
+    try:
+        include(app.config, 'configure.zcml', module)
+    except FileNotFoundError:
+        # addons do not need to have zcml
+        pass
+    # includeme function
+    if hasattr(module, 'includeme'):
+        args = [root]
+        if len(inspect.getargspec(module.includeme).args) == 2:
+            args.append(settings)
+        module.includeme(*args)
+    # app_settings
+    if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+        update_app_settings(module.app_settings)
+    # services
+    configure.load_services(app.config, module.__name__)
+
+
 def make_app(config_file=None, settings=None):
 
     # Initialize aiohttp app
@@ -284,7 +306,10 @@ def make_app(config_file=None, settings=None):
     elif settings is None:
         raise Exception('Neither configuration or settings')
 
-    include(app.config, 'configure.zcml', sys.modules['plone.server'])
+    import plone.server
+    import plone.server.api  # load plone.server services
+    load_application(plone.server, root, settings)
+
     for ep in iter_entry_points('plone.server'):
         # auto-include applications
         # What an "app" include consists of...
@@ -294,19 +319,7 @@ def make_app(config_file=None, settings=None):
         if ep.module_name not in settings.get('applications', []):
             continue
 
-        module = ep.load()
-        try:
-            include(app.config, 'configure.zcml', module)
-        except FileNotFoundError:
-            # addons do not need to have zcml
-            pass
-        if hasattr(module, 'includeme'):
-            args = [root]
-            if len(inspect.getargspec(module.includeme).args) == 2:
-                args.append(settings)
-            module.includeme(*args)
-        if hasattr(module, 'app_settings') and app_settings != module.app_settings:
-            update_app_settings(module.app_settings)
+        load_application(ep.load(), root, settings)
     try:
         app.config.execute_actions()
     except ConfigurationConflictError as e:

@@ -1,11 +1,18 @@
 1.0a9 (unreleased)
 ------------------
 
+Fixes:
+
+- Use zope.schema getter and setter to set attributes
+  [ramonnb]
+
+New features:
+
 - Adding HTTP Precondition exception
   [ramonnb]
 
-- User zope.schema getter and setter to set attributes
-  [ramonnb]
+- New way to create services with decorators instead of zcml/json configuration
+  [vangheem]
 
 - Add functionality like virtualhost monster to define the urls
   [ramonnb]
@@ -33,6 +40,13 @@
 
 - Role member for Manager group
   [ramonnb]
+
+
+Breaking changes:
+
+- plone:api zcml directive deprecated in favor of decorator variant
+  [vangheem]
+
 
 1.0a8 (2016-12-18)
 ------------------

@@ -3,22 +3,23 @@ from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from dateutil.tz import tzlocal
-from plone.server import _
 from plone.server import app_settings
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
+from plone.server.configure import service
 from plone.server.content import create_content_in_container
 from plone.server.events import notify
 from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.events import ObjectFinallyDeletedEvent
 from plone.server.events import ObjectFinallyModifiedEvent
 from plone.server.events import ObjectFinallyVisitedEvent
-from plone.server.events import ObjectPermissionsViewEvent
 from plone.server.events import ObjectPermissionsModifiedEvent
+from plone.server.events import ObjectPermissionsViewEvent
 from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.exceptions import PreconditionFailed
 from plone.server.interfaces import IAbsoluteURL
+from plone.server.interfaces import IResource
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceDeserializeFromJson
 from plone.server.json.interfaces import IResourceSerializeToJson
@@ -26,6 +27,7 @@ from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
+from zope.i18nmessageid import MessageFactory
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
@@ -34,12 +36,16 @@ from zope.securitypolicy.interfaces import IRolePermissionMap
 import logging
 
 
+_ = MessageFactory('plone')
+
+
 _zone = tzlocal()
 
 
 logger = logging.getLogger(__name__)
 
 
+@service(context=IResource, method='GET', permission='plone.ViewContent')
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
@@ -50,6 +56,7 @@ class DefaultGET(Service):
         return result
 
 
+@service(context=IResource, method='POST', permission='plone.AddContent')
 class DefaultPOST(Service):
 
     async def __call__(self):
@@ -134,10 +141,12 @@ class DefaultPOST(Service):
         return Response(response=serializer(), headers=headers, status=201)
 
 
+@service(context=IResource, method='PUT', permission='plone.ModifyContent')
 class DefaultPUT(Service):
     pass
 
 
+@service(context=IResource, method='PATCH', permission='plone.ModifyContent')
 class DefaultPATCH(Service):
     async def __call__(self):
         data = await self.request.json()
@@ -174,47 +183,47 @@ class DefaultPATCH(Service):
         return Response(response={}, status=204)
 
 
-class SharingGET(Service):
-    """Return the list of permissions."""
-
-    async def __call__(self):
-        roleperm = IRolePermissionMap(self.context)
-        prinperm = IPrincipalPermissionMap(self.context)
-        prinrole = IPrincipalRoleMap(self.context)
-        result = {
-            'local': {},
-            'inherit': []
-        }
-        result['local']['role_permission'] = roleperm._byrow
-        result['local']['principal_permission'] = prinperm._byrow
-        result['local']['principal_role'] = prinrole._byrow
-        for obj in iter_parents(self.context):
-            roleperm = IRolePermissionMap(obj)
-            prinperm = IPrincipalPermissionMap(obj)
-            prinrole = IPrincipalRoleMap(obj)
-            result['inherit'].append({
-                '@id': IAbsoluteURL(obj, self.request)(),
-                'role_permission': roleperm._byrow,
-                'principal_permission': prinperm._byrow,
-                'principal_role': prinrole._byrow,
-            })
-        await notify(ObjectPermissionsViewEvent(self.context))
-        return result
-
-
-class SharingPOST(Service):
-
-    async def __call__(self):
-        data = await self.request.json()
-        prinrole = IPrincipalRoleManager(self.context)
-        if 'prinrole' not in data:
-            raise HTTPNotFound('prinrole missing')
-        for user, roles in data['prinrole'].items():
-            for role in roles:
-                prinrole.assignRoleToPrincipal(role, user)
-        await notify(ObjectPermissionsModifiedEvent(self.context))
+@service(context=IResource, method='GET', permission='plone.SeePermissions',
+         name='@sharing')
+async def sharing_get(context, request):
+    roleperm = IRolePermissionMap(context)
+    prinperm = IPrincipalPermissionMap(context)
+    prinrole = IPrincipalRoleMap(context)
+    result = {
+        'local': {},
+        'inherit': []
+    }
+    result['local']['role_permission'] = roleperm._byrow
+    result['local']['principal_permission'] = prinperm._byrow
+    result['local']['principal_role'] = prinrole._byrow
+    for obj in iter_parents(context):
+        roleperm = IRolePermissionMap(obj)
+        prinperm = IPrincipalPermissionMap(obj)
+        prinrole = IPrincipalRoleMap(obj)
+        result['inherit'].append({
+            '@id': IAbsoluteURL(obj, request)(),
+            'role_permission': roleperm._byrow,
+            'principal_permission': prinperm._byrow,
+            'principal_role': prinrole._byrow,
+        })
+    await notify(ObjectPermissionsViewEvent(context))
+    return result
 
 
+@service(context=IResource, method='POST', permission='plone.ChangePermissions',
+         name='@sharing')
+async def sharing_post(self):
+    data = await self.request.json()
+    prinrole = IPrincipalRoleManager(self.context)
+    if 'prinrole' not in data:
+        raise HTTPNotFound('prinrole missing')
+    for user, roles in data['prinrole'].items():
+        for role in roles:
+            prinrole.assignRoleToPrincipal(role, user)
+    await notify(ObjectPermissionsModifiedEvent(self.context))
+
+
+@service(context=IResource, method='DELETE', permission='plone.DeleteContent')
 class DefaultDELETE(Service):
 
     async def __call__(self):
@@ -223,6 +232,7 @@ class DefaultDELETE(Service):
         await notify(ObjectFinallyDeletedEvent(self.context))
 
 
+@service(context=IResource, method='OPTIONS', permission='plone.AccessPreflight')
 class DefaultOPTIONS(Service):
     """Preflight view for Cors support on DX content."""
 

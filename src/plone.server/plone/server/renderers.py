@@ -1,16 +1,19 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.helpers import sentinel
 from aiohttp.web import Response as aioResponse
+from datetime import datetime
 from plone.server.browser import Response
-from plone.server.interfaces import IFrameFormats
+from plone.server.interfaces import IFrameFormatsJson
 from plone.server.interfaces import IRendered
+from plone.server.interfaces import IRendererFormatHtml
+from plone.server.interfaces import IRendererFormatJson
+from plone.server.interfaces import IRendererFormatRaw
 from plone.server.interfaces import IRenderFormats
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
 from zope.component import adapter
 from zope.component import queryAdapter
 from zope.interface import implementer
-from datetime import datetime
 # JSON Decoder
 from zope.securitypolicy.settings import PermissionSetting
 
@@ -49,23 +52,6 @@ def json_response(data=sentinel, *, text=None, body=None, status=200,
     return aioResponse(
         text=text, body=body, status=status, reason=reason,
         headers=headers, content_type=content_type)
-
-
-# Marker objects/interfaces to look for
-class IRendererFormatHtml(IRenderFormats):
-    pass
-
-
-class IRendererFormatJson(IRenderFormats):
-    pass
-
-
-class IRendererFormatRaw(IRenderFormats):
-    pass
-
-
-class IFrameFormatsJson(IFrameFormats):
-    pass
 
 
 @adapter(IRequest)
@@ -153,8 +139,15 @@ class RendererRaw(Renderer):
             if isinstance(resp, dict):
                 resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
                 resp.headers['Content-Type'] = 'application/json'
-            if isinstance(resp, list):
+            elif isinstance(resp, list):
                 resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
+                resp.headers['Content-Type'] = 'application/json'
+            elif isinstance(resp, str):
+                resp = aioResponse(body=bytes(resp, 'utf-8'))
+                resp.headers['Content-Type'] = 'text/html'
+            elif resp is None:
+                # missing result...
+                resp = aioResponse(body=b'{}')
                 resp.headers['Content-Type'] = 'application/json'
             resp.headers.update(value.headers)
             resp.set_status(value.status)

@@ -1,23 +1,30 @@
 # -*- coding: utf-8 -*-
-from plone.server import _
 from plone.server.api.service import Service
 from plone.server.api.service import TraversableService
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
+from plone.server.configure import service
 from plone.server.interfaces import IRegistry
+from plone.server.interfaces import ISite
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IJSONToValue
 from plone.server.json.interfaces import IValueToJson
 from plone.server.utils import import_class
 from zope.component import getMultiAdapter
 from zope.dottedname.resolve import resolve
+from zope.i18nmessageid import MessageFactory
 from zope.interface.interfaces import ComponentLookupError
 from zope.schema import getFields
+
+
+_ = MessageFactory('plone')
 
 
 _marker = object()
 
 
+@service(context=ISite, method='GET', permission='plone.ReadConfiguration',
+         name='@registry')
 class Read(TraversableService):
     key = _marker
     value = None
@@ -46,9 +53,13 @@ class Read(TraversableService):
                 result = IValueToJson(self.value)
             except ComponentLookupError:
                 result = self.value
-        return result
+        return {
+            'value': result
+        }
 
 
+@service(context=ISite, method='POST', permission='plone.RegisterConfigurations',
+         name='@registry')
 class Register(Service):
     """Register an Interface on the Registry."""
 
@@ -82,6 +93,8 @@ class Register(Service):
         return Response(response={}, status=201)
 
 
+@service(context=ISite, method='PATCH', permission='plone.WriteConfiguration',
+         name='@registry')
 class Write(TraversableService):
     key = _marker
     value = None

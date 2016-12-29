@@ -65,7 +65,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
         """Get the list of registries."""
         resp = self.layer.requester('GET', '/plone/plone/@registry')
         self.assertTrue(resp.status_code == 200)
-        response = json.loads(resp.text)
+        response = json.loads(resp.text)['value']
         self.assertTrue(len(response) == 2)
         self.assertTrue(
             'plone.server.registry.ILayers.active_layers' in response)
@@ -135,7 +135,7 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             'GET',
             '/plone/plone/@registry/plone.server.tests.test_api.ITestingRegistry.enabled')
         response = json.loads(resp.text)
-        self.assertFalse(response)
+        self.assertEqual({'value': False}, response)
 
     def test_file_upload(self):
         resp = self.layer.requester(
@@ -253,3 +253,9 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             })
         )
         self.assertTrue(resp.status_code == 201)
+
+    def test_get_addons(self):
+        resp = self.layer.requester(
+            'GET', '/plone/plone/@addons'
+        )
+        self.assertEqual(resp.status_code, 200)
