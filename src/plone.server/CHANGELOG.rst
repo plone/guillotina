@@ -1,6 +1,9 @@
 1.0a9 (unreleased)
 ------------------
 
+- Add functionality like virtualhost monster to define the urls
+  [ramonnb]
+
 - Add new pcreate command
   [vangheem]
 
