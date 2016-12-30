@@ -58,10 +58,17 @@ class Absolute_URL(object):
         else:
             path = '/'.join(get_physical_path(self.context))
 
+        if 'X-VirtualHost-Monster' in self.request.headers:
+            virtualhost = self.request.headers['X-VirtualHost-Monster']
+        else:
+            virtualhost = None
+
         if site_url:
             return path
         elif relative:
             return '/' + self.request._db_id + path
+        elif virtualhost:
+            return virtualhost + self.request._db_id + path
         else:
             return self.request.scheme + '://' + self.request.host + '/' +\
                 self.request._db_id + path
