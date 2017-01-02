@@ -93,10 +93,6 @@
       />
 
   <!-- Member -->
-  <grant
-      permission="plone.AccessContent"
-      role="plone.Member"
-      />
 
   <!-- SiteAdmin -->
   <grant
