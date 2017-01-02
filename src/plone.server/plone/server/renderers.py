@@ -10,6 +10,7 @@ from plone.server.interfaces import IView
 from zope.component import adapter
 from zope.component import queryAdapter
 from zope.interface import implementer
+from datetime import datetime
 # JSON Decoder
 from zope.securitypolicy.settings import PermissionSetting
 
@@ -20,6 +21,9 @@ class PServerJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, complex):
             return [obj.real, obj.imag]
+        if isinstance(obj, datetime):
+                serial = obj.isoformat()
+        return serial
         try:
             iterable = iter(obj)
         except TypeError:
