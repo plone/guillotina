@@ -22,8 +22,7 @@ class PServerJSONEncoder(json.JSONEncoder):
         if isinstance(obj, complex):
             return [obj.real, obj.imag]
         if isinstance(obj, datetime):
-                serial = obj.isoformat()
-        return serial
+                return obj.isoformat()
         try:
             iterable = iter(obj)
         except TypeError:
