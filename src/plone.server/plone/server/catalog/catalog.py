@@ -32,7 +32,7 @@ class DefaultSearchUtility(object):
     async def get_by_type(self, doc_type, query={}):
         pass
 
-    async def get_by_path(self, path, depth, doc_type=None):
+    async def get_by_path(self, site, path, depth=-1, query={}, doc_type=None):
         pass
 
     async def get_folder_contents(self, obj):

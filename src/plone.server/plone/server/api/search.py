@@ -2,6 +2,7 @@
 from plone.server.api.service import Service
 from plone.server.interfaces import ICatalogUtility
 from zope.component import queryUtility
+from plone.server.utils import get_content_path
 
 
 class SearchGET(Service):
@@ -27,7 +28,10 @@ class SearchPOST(Service):
                 'member': []
             }
 
-        return await search.query(self.context, q)
+        return await search.get_by_path(
+            site=self.request.site,
+            path=get_content_path(self.context),
+            query=q)
 
 
 class ReindexPOST(Service):
