@@ -153,6 +153,9 @@ class RendererRaw(Renderer):
             if isinstance(resp, dict):
                 resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
                 resp.headers['Content-Type'] = 'application/json'
+            if isinstance(resp, list):
+                resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
+                resp.headers['Content-Type'] = 'application/json'
             resp.headers.update(value.headers)
             resp.set_status(value.status)
         else:
