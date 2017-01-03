@@ -43,6 +43,8 @@ def rec_merge(d1, d2):
             # this next check is the only difference!
             if all(isinstance(e, MutableMapping) for e in (v, d2[k])):
                 d2[k] = rec_merge(v, d2[k])
+            if isinstance(v, list):
+                d2[k].extend(v)
             # we could further check types and merge as appropriate here.
     d3 = d1.copy()
     d3.update(d2)
