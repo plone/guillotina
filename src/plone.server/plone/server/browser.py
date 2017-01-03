@@ -11,13 +11,16 @@ from zope.location import ILocation
 
 
 def get_physical_path(context):
+    if hasattr(context, '_v_physical_path'):
+        return context._v_physical_path
     parts = [context.__name__]
     parent = context.__parent__
     while parent is not None and parent.__name__ is not None:
         parts.append(parent.__name__)
         parent = parent.__parent__
     parts.append('')
-    return reversed(parts)
+    context._v_physical_path = reversed(parts)
+    return context._v_physical_path
 
 
 @adapter(IResource, IRequest)

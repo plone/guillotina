@@ -31,6 +31,8 @@ def import_class(import_string):
 def get_content_path(content):
     """ No site id
     """
+    if hasattr(content, '_v_get_content_path'):
+        return '/' + '/'.join(reversed(content._v_get_content_path))
     parts = []
     parent = getattr(content, '__parent__', None)
     while content is not None and content.__name__ is not None and\
@@ -38,7 +40,17 @@ def get_content_path(content):
         parts.append(content.__name__)
         content = parent
         parent = getattr(content, '__parent__', None)
+    content._v_get_content_path = parts
     return '/' + '/'.join(reversed(parts))
+
+
+def get_content_depth(content):
+    if hasattr(content, '_v_get_content_path'):
+        return len(content._v_get_content_path)
+    depth = 0
+    for parent in iter_parents(content):
+        depth += 1
+    return depth
 
 
 def iter_parents(content):
