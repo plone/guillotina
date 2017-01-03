@@ -151,6 +151,7 @@ class index(MetadataDictDirective):
         'binary',
         'object',
         'float',
+        'long',
         'nested',
         'path'
     )
