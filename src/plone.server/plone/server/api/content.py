@@ -138,6 +138,15 @@ class DefaultPATCH(Service):
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
             self.context.add_behavior(behavior)
+
+        if '__name__' in data:
+            # Special case we need to change the id of the content we 
+            # also need to delete the caches of the paths
+            if hasattr(self.context, '_v_physical_path'):
+                del self.context._v_physical_path
+            if hasattr(self.context, '_v_get_content_path'):
+                del self.context._v_get_content_path
+
         deserializer = queryMultiAdapter((self.context, self.request),
                                          IResourceDeserializeFromJson)
         if deserializer is None:

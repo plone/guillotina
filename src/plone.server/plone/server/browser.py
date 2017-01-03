@@ -19,7 +19,7 @@ def get_physical_path(context):
         parts.append(parent.__name__)
         parent = parent.__parent__
     parts.append('')
-    context._v_physical_path = reversed(parts)
+    context._v_physical_path = [x for x in reversed(parts)]
     return context._v_physical_path
 
 
