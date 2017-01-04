@@ -103,7 +103,10 @@ class DeserializeFromJson(object):
                     errors.append({
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
-                    setattr(obj, name, value)
+                    try:
+                        field.set(obj, value)
+                    except:
+                        setattr(obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):
                     errors.append({

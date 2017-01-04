@@ -24,6 +24,9 @@ class DefaultFieldSerializer(object):
         return json_compatible(self.get_value())
 
     def get_value(self, default=None):
-        return getattr(self.context,
-                       self.field.__name__,
-                       default)
+        try:
+            return self.field.get(self.context)
+        except:
+            return getattr(self.context,
+                           self.field.__name__,
+                           default)

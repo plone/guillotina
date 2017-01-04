@@ -1,6 +1,9 @@
 1.0a9 (unreleased)
 ------------------
 
+- User zope.schema getter and setter to set attributes
+  [ramonnb]
+
 - Add functionality like virtualhost monster to define the urls
   [ramonnb]
 
