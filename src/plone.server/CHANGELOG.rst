@@ -1,6 +1,9 @@
 1.0a9 (unreleased)
 ------------------
 
+- Adding HTTP Precondition exception
+  [ramonnb]
+
 - User zope.schema getter and setter to set attributes
   [ramonnb]
 

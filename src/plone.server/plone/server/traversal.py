@@ -60,11 +60,13 @@ async def do_traverse(request, parent, path):
 
     if ISite.providedBy(parent) and \
        path[0] != request._db_id:
-        raise HTTPUnauthorized('Tried to access a site outsite the request')
+        # Tried to access a site outsite the request
+        raise HTTPUnauthorized()
 
     if IApplication.providedBy(parent) and \
        path[0] != request._site_id:
-        raise HTTPUnauthorized('Tried to access a site outsite the request')
+        # Tried to access a site outsite the request
+        raise HTTPUnauthorized()
 
     try:
         if path[0].startswith('_'):
