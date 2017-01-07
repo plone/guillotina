@@ -33,3 +33,15 @@ class ConflictIdOnContainer(Exception):
         return "Conflict ID {ident} on {path}".format(
             ident=self.ident,
             path=self.container)
+
+
+class PreconditionFailed(Exception):
+
+    def __init__(self, container, precondition):
+        self.container = container
+        self.precondition = precondition
+
+    def __repr__(self):
+        return "Precondition Failed {precondition} on {path}".format(
+            precondition=self.precondition,
+            path=self.container)

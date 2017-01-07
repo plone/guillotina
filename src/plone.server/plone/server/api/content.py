@@ -17,6 +17,7 @@ from plone.server.events import ObjectFinallyVisitedEvent
 from plone.server.events import ObjectPermissionsViewEvent
 from plone.server.events import ObjectPermissionsModifiedEvent
 from plone.server.exceptions import ConflictIdOnContainer
+from plone.server.exceptions import PreconditionFailed
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.json.exceptions import DeserializationError
 from plone.server.json.interfaces import IResourceDeserializeFromJson
@@ -75,6 +76,11 @@ class DefaultPOST(Service):
             obj = create_content_in_container(
                 self.context, type_, new_id, id=new_id, creators=(user,),
                 contributors=(user,))
+        except PreconditionFailed as e:
+            return ErrorResponse(
+                'PreconditionFailed',
+                str(e),
+                status=412)
         except ConflictIdOnContainer as e:
             return ErrorResponse(
                 'ConflictId',
