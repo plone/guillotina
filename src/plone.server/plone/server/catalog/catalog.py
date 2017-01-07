@@ -105,6 +105,6 @@ class DefaultCatalogDataAdapter(object):
                 else:
                     values[index_name] = self.get_data(behavior, schema, index_name)
             for metadata_name in merged_tagged_value_list(schema, metadata.key):
-                values[index_name] = self.get_data(behavior, schema, index_name)
+                values[metadata_name] = self.get_data(behavior, schema, metadata_name)
 
         return values
