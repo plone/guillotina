@@ -75,11 +75,13 @@ class DeserializeFromJson(object):
 
             if behavior:
                 data_value = data[schema.__identifier__][name] if name in data[schema.__identifier__] else None  # noqa
+                found = True if name in data[schema.__identifier__] else False
             else:
                 data_value = data[name] if name in data else None
+                found = True if name in data else False
 
             f = schema.get(name)
-            if data_value is not None:
+            if found:
 
                 if not self.check_permission(write_permissions.get(name)):
                     continue
