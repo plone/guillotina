@@ -153,6 +153,7 @@ class index(MetadataDictDirective):
         'float',
         'long',
         'nested',
+        'completion',
         'path'
     )
 
