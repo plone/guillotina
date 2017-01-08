@@ -77,3 +77,7 @@ def get_parent_uuid(ob):
     if hasattr(ob, '__parent__')\
             and ob.__parent__ is not None:
         return ob.__parent__.uuid
+
+
+class NoIndexField(Exception):
+    pass

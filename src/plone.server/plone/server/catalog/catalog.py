@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from plone.server.catalog import NoIndexField
 from plone.server.content import iter_schemata_for_type
 from plone.server.directives import index
 from plone.server.directives import merged_tagged_value_dict
@@ -100,10 +101,13 @@ class DefaultCatalogDataAdapter(object):
         for schema in iter_schemata_for_type(self.content.portal_type):
             behavior = schema(self.content)
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
-                if 'accessor' in index_data:
-                    values[index_name] = index_data['accessor'](behavior)
-                else:
-                    values[index_name] = self.get_data(behavior, schema, index_name)
+                try:
+                    if 'accessor' in index_data:
+                        values[index_name] = index_data['accessor'](behavior)
+                    else:
+                        values[index_name] = self.get_data(behavior, schema, index_name)
+                except NoIndexField:
+                    pass
             for metadata_name in merged_tagged_value_list(schema, metadata.key):
                 values[metadata_name] = self.get_data(behavior, schema, metadata_name)
 
