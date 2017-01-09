@@ -1,7 +1,7 @@
 # Services
 
 Services provide responses to api endpoint requests. A service is the same as
-a "view" that you mean see in many web frameworks.
+a "view" that you might see in many web frameworks.
 
 The reason we're using the convention "service" is because we're focusing on
 creating API endpoints.
@@ -30,3 +30,28 @@ your service will be loaded for you.
 
 In this example, the service will apply to a GET request against a site,
 `/zodb/plone/@myservice`.
+
+
+## class based services
+
+For more complex services, you might want to use class based services.
+
+The example above, with the class based approach will look like:
+
+```python
+from plone.server.configure import service
+from plone.server.interfaces import ISite
+from plone.server.api.service import Service
+
+
+@service(context=ISite, name='@myservice', method='GET',
+         permission='plone.AccessContent')
+class DefaultGET(Service):
+    async def __call__(self):
+      # self.context
+      # self.request
+      return {
+          'foo': 'bar'
+      }
+
+```
