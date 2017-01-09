@@ -5,10 +5,8 @@ from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from plone.server import _
 from plone.server import app_settings
 from plone.server.api.content import DefaultOPTIONS
-from plone.server.api.layer import IDefaultLayer
 from plone.server.auth.participation import AnonymousParticipation
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
@@ -17,6 +15,7 @@ from plone.server.contentnegotiation import content_type_negotiation
 from plone.server.contentnegotiation import language_negotiation
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDatabase
+from plone.server.interfaces import IDefaultLayer
 from plone.server.interfaces import IOPTIONS
 from plone.server.interfaces import IRendered
 from plone.server.interfaces import IRequest
@@ -33,6 +32,7 @@ from plone.server.utils import import_class
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
+from zope.i18nmessageid import MessageFactory
 from zope.interface import alsoProvides
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.interfaces import IInteraction
@@ -46,6 +46,9 @@ import json
 import logging
 import traceback
 import uuid
+
+
+_ = MessageFactory('plone')
 
 
 logger = logging.getLogger(__name__)
@@ -224,6 +227,9 @@ class MatchInfo(AbstractMatchInfo):
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
             view_result = Response(view_result)
+        elif view_result is None:
+            # Always provide some response to work with
+            view_result = Response({})
 
         # If we want to close the connection after the request
         if SHARED_CONNECTION is False and hasattr(request, 'conn'):

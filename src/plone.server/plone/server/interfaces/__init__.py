@@ -1,48 +1,53 @@
 # -*- coding: utf-8 -*-
-from plone.server.interfaces.catalog import ICatalogDataAdapter  # noqa
-from plone.server.interfaces.catalog import ICatalogUtility  # noqa
-from plone.server.interfaces.content import IApplication  # noqa
-from plone.server.interfaces.content import IContainer  # noqa
-from plone.server.interfaces.content import IContentNegotiation  # noqa
-from plone.server.interfaces.content import IDatabase  # noqa
-from plone.server.interfaces.content import IItem  # noqa
-from plone.server.interfaces.content import IRegistry  # noqa
-from plone.server.interfaces.content import IResource  # noqa
-from plone.server.interfaces.content import IResourceFactory  # noqa
-from plone.server.interfaces.content import ISite  # noqa
-from plone.server.interfaces.content import IStaticDirectory  # noqa
-from plone.server.interfaces.content import IStaticFile  # noqa
-from plone.server.interfaces.events import INewUserAdded  # noqa
-from plone.server.interfaces.events import IObjectFinallyCreatedEvent  # noqa
-from plone.server.interfaces.events import IObjectFinallyDeletedEvent  # noqa
-from plone.server.interfaces.events import IObjectFinallyModifiedEvent  # noqa
-from plone.server.interfaces.exceptions import ISerializableException  # noqa
-from plone.server.interfaces.events import IObjectFinallyVisitedEvent  # noqa
-from plone.server.interfaces.events import IObjectPermissionsViewEvent  # noqa
-from plone.server.interfaces.events import IObjectPermissionsModifiedEvent  # noqa
-from plone.server.interfaces.events import IFileFinishUploaded  # noqa
-from plone.server.interfaces.files import IFile  # noqa
-from plone.server.interfaces.files import IFileField  # noqa
-from plone.server.interfaces.files import ICloudFileField  # noqa
-from plone.server.interfaces.files import IFileManager  # noqa
-from plone.server.interfaces.files import IStorage  # noqa
-from plone.server.interfaces.files import NotStorable  # noqa
-from plone.server.interfaces.json import IJSONField  # noqa
-from plone.server.interfaces.json import IBeforeJSONAssignedEvent  # noqa
-from plone.server.interfaces.text import IRichText  # noqa
-from plone.server.interfaces.text import IRichTextValue  # noqa
-from plone.server.interfaces.types import IConstrainTypes  # noqa
-from plone.server.interfaces.views import ICONNECT  # noqa
-from plone.server.interfaces.views import IDELETE  # noqa
-from plone.server.interfaces.views import IDownloadView  # noqa
-from plone.server.interfaces.views import IGET  # noqa
-from plone.server.interfaces.views import IHEAD  # noqa
-from plone.server.interfaces.views import IOPTIONS  # noqa
-from plone.server.interfaces.views import IPATCH  # noqa
-from plone.server.interfaces.views import IPOST  # noqa
-from plone.server.interfaces.views import IPUT  # noqa
-from plone.server.interfaces.views import ITraversableView  # noqa
-from plone.server.interfaces.views import IView  # noqa
+from .catalog import ICatalogDataAdapter  # noqa
+from .catalog import ICatalogUtility  # noqa
+from .content import IApplication  # noqa
+from .content import IContainer  # noqa
+from .content import IContentNegotiation  # noqa
+from .content import IDatabase  # noqa
+from .content import IItem  # noqa
+from .content import IRegistry  # noqa
+from .content import IResource  # noqa
+from .content import IResourceFactory  # noqa
+from .content import ISite  # noqa
+from .content import IStaticDirectory  # noqa
+from .content import IStaticFile  # noqa
+from .events import IFileFinishUploaded  # noqa
+from .events import INewUserAdded  # noqa
+from .events import IObjectFinallyCreatedEvent  # noqa
+from .events import IObjectFinallyDeletedEvent  # noqa
+from .events import IObjectFinallyModifiedEvent  # noqa
+from .events import IObjectFinallyVisitedEvent  # noqa
+from .events import IObjectPermissionsModifiedEvent  # noqa
+from .events import IObjectPermissionsViewEvent  # noqa
+from .exceptions import ISerializableException  # noqa
+from .files import ICloudFileField  # noqa
+from .files import IFile  # noqa
+from .files import IFileField  # noqa
+from .files import IFileManager  # noqa
+from .files import IStorage  # noqa
+from .files import NotStorable  # noqa
+from .json import IBeforeJSONAssignedEvent  # noqa
+from .json import IJSONField  # noqa
+from .layer import IDefaultLayer  # noqa
+from .renderers import IRendererFormatHtml  # noqa
+from .renderers import IRendererFormatJson  # noqa
+from .renderers import IRendererFormatRaw  # noqa
+from .renderers import IRenderFormats  # noqa
+from .text import IRichText  # noqa
+from .text import IRichTextValue  # noqa
+from .types import IConstrainTypes  # noqa
+from .views import ICONNECT  # noqa
+from .views import IDELETE  # noqa
+from .views import IDownloadView  # noqa
+from .views import IGET  # noqa
+from .views import IHEAD  # noqa
+from .views import IOPTIONS  # noqa
+from .views import IPATCH  # noqa
+from .views import IPOST  # noqa
+from .views import IPUT  # noqa
+from .views import ITraversableView  # noqa
+from .views import IView  # noqa
 from zope.i18nmessageid.message import MessageFactory
 from zope.interface import Interface
 
@@ -73,14 +78,11 @@ class IResponse(Interface):
         pass
 
 
-# Classes as for marker objects to lookup
-
-
-class IRenderFormats(Interface):
+class IFrameFormats(Interface):
     pass
 
 
-class IFrameFormats(Interface):
+class IFrameFormatsJson(IFrameFormats):
     pass
 
 
@@ -96,6 +98,7 @@ class IRendered(Interface):
 
 class ITranslated(Interface):
     pass
+
 
 # Get Absolute URL
 

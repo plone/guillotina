@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from dateutil.tz import tzlocal
-from plone.server import _
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
 from plone.server.browser import View
 from plone.server.transactions import sync
 from plone.server.transactions import TransactionProxy
+from zope.i18nmessageid import MessageFactory
 from zope.interface import Interface
 from zope.security.interfaces import Unauthorized
 
 import asyncio
 import logging
+
+
+_ = MessageFactory('plone')
 
 
 _zone = tzlocal()

@@ -5,7 +5,6 @@ from plone.server.interfaces import IDownloadView
 from plone.server.interfaces import ITraversableView
 from zope.component import queryUtility
 from zope.component.interfaces import IFactory
-from zope.dottedname.resolve import resolve
 from zope.interface import alsoProvides
 
 

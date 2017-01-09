@@ -48,8 +48,6 @@
          plone.server.interfaces.IObjectFinallyModifiedEvent"
     handler=".events.modified_object" />
 
-  <plone:api file="api/api.json" />
-
   <adapter factory="plone.server.types.FTIConstrainAllowedTypes" />
 
 </configure>

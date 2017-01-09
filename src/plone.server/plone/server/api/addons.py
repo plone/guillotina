@@ -1,70 +1,77 @@
 # -*- coding: utf-8 -*-
-from plone.server import _
 from plone.server import app_settings
-from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
+from plone.server.configure import service
+from plone.server.interfaces import ISite
 from plone.server.registry import IAddons
+from zope.i18nmessageid import MessageFactory
 
 
-class Install(Service):
-    async def __call__(self):
-        data = await self.request.json()
-        id_to_install = data.get('id', None)
-        if id_to_install not in app_settings['available_addons']:
-            return ErrorResponse(
-                'RequiredParam',
-                _("Property 'id' is required to be valid"))
-
-        registry = self.request.site_settings
-        config = registry.for_interface(IAddons)
-
-        if id_to_install in config.enabled:
-            return ErrorResponse(
-                'Duplicate',
-                _("Addon already installed"))
-        handler = app_settings['available_addons'][id_to_install]['handler']
-        handler.install(self.request)
-        config.enabled |= {id_to_install}
-        return await getAddons(self.context, self.request)()
+_ = MessageFactory('plone')
 
 
-class Uninstall(Service):
-    async def __call__(self):
-        data = await self.request.json()
-        id_to_install = data.get('id', None)
-        if id_to_install not in app_settings['available_addons']:
-            return ErrorResponse(
-                'RequiredParam',
-                _("Property 'id' is required to be valid"))
+@service(context=ISite, name='@addons', method='POST',
+         permission='plone.ManageAddons')
+async def install(context, request):
+    data = await request.json()
+    id_to_install = data.get('id', None)
+    if id_to_install not in app_settings['available_addons']:
+        return ErrorResponse(
+            'RequiredParam',
+            _("Property 'id' is required to be valid"))
 
-        registry = self.request.site_settings
-        config = registry.for_interface(IAddons)
+    registry = request.site_settings
+    config = registry.for_interface(IAddons)
 
-        if id_to_install not in config.enabled:
-            return ErrorResponse(
-                'Duplicate',
-                _("Addon not installed"))
+    if id_to_install in config.enabled:
+        return ErrorResponse(
+            'Duplicate',
+            _("Addon already installed"))
+    handler = app_settings['available_addons'][id_to_install]['handler']
+    handler.install(request)
+    config.enabled |= {id_to_install}
+    return await get_addons(context, request)()
 
-        handler = app_settings['available_addons'][id_to_install]['handler']
-        handler.uninstall(self.request)
-        config.enabled -= {id_to_install}
+
+@service(context=ISite, name='@addons', method='DELETE',
+         permission='plone.ManageAddons')
+async def uninstall(context, request):
+    data = await request.json()
+    id_to_install = data.get('id', None)
+    if id_to_install not in app_settings['available_addons']:
+        return ErrorResponse(
+            'RequiredParam',
+            _("Property 'id' is required to be valid"))
+
+    registry = request.site_settings
+    config = registry.for_interface(IAddons)
+
+    if id_to_install not in config.enabled:
+        return ErrorResponse(
+            'Duplicate',
+            _("Addon not installed"))
+
+    handler = app_settings['available_addons'][id_to_install]['handler']
+    handler.uninstall(request)
+    config.enabled -= {id_to_install}
 
 
-class getAddons(Service):
-    async def __call__(self):
-        result = {
-            'available': [],
-            'installed': []
-        }
-        for key, addon in app_settings['available_addons'].items():
-            result['available'].append({
-                'id': key,
-                'title': addon['title']
-            })
+@service(context=ISite, name='@addons', method='GET',
+         permission='plone.ManageAddons')
+async def get_addons(context, request):
+    result = {
+        'available': [],
+        'installed': []
+    }
+    for key, addon in app_settings['available_addons'].items():
+        result['available'].append({
+            'id': key,
+            'title': addon['title']
+        })
 
-        registry = self.request.site_settings
-        config = registry.for_interface(IAddons)
+    registry = request.site_settings
+    config = registry.for_interface(IAddons)
 
-        for installed in config.enabled:
-            result['installed'].append(installed)
-        return result
+    for installed in config.enabled:
+        result['installed'].append(installed)
+    return result

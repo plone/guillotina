@@ -1,7 +1,9 @@
-from plone.server import _
-from zope.interface import Interface, Attribute
-from zope.interface import implementer
+from zope.i18nmessageid import MessageFactory
+from zope.interface import Attribute
+from zope.interface import Interface
 from zope.schema.interfaces import IField
+
+_ = MessageFactory('plone')
 
 
 class IJSONField(IField):

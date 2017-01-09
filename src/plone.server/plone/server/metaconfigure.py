@@ -3,7 +3,6 @@ from collections import MutableMapping
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path as osPath
-from plone.server import _
 from plone.server import app_settings
 from plone.server.content import ResourceFactory
 from plone.server.content import StaticDirectory
@@ -18,6 +17,7 @@ from zope.component.zcml import utility
 from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
+from zope.i18nmessageid import MessageFactory
 from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
@@ -26,6 +26,9 @@ from zope.security.checker import undefineChecker
 import json
 import logging
 import os
+
+
+_ = MessageFactory('plone')
 
 
 logger = logging.getLogger(__name__)
@@ -126,7 +129,10 @@ class IApi(Interface):
 def register_service(_context, configuration, content, method, layer,
                      default_permission, name=''):
     logger.debug(configuration)
-    factory = import_class(configuration['factory'])
+    factory = configuration['factory']
+    if isinstance(factory, str):
+        factory = import_class(factory)
+
     if factory is None:
         raise TypeError(
             'Factory not defined {0:s} '.format(configuration['factory']))
@@ -159,6 +165,7 @@ def register_service(_context, configuration, content, method, layer,
 
 
 def api_directive(_context, file):  # noqa 'too complex' :)
+    logger.warn('plone:api directive will be removed in 1.0.0 final')
 
     if file:
         file = os.path.abspath(_context.path(file))

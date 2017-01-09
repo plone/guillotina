@@ -430,7 +430,7 @@ class Site(Folder):
         registry.register_interface(ILayers)
         registry.register_interface(IAddons)
         registry.for_interface(ILayers).active_layers =\
-            frozenset({'plone.server.api.layer.IDefaultLayer'})
+            frozenset({'plone.server.interfaces.layer.IDefaultLayer'})
 
         roles = IPrincipalRoleManager(self)
         roles.assignRoleToPrincipal(

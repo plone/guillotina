@@ -12,6 +12,7 @@ Contents:
    roles
    applications
    addons
+   services
    migrations
    behavior
    commands

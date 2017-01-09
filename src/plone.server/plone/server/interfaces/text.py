@@ -1,7 +1,10 @@
-from plone.server import _
 from zope import schema
+from zope.i18nmessageid import MessageFactory
 from zope.interface import Interface
 from zope.schema.interfaces import IObject
+
+
+_ = MessageFactory('plone')
 
 
 class IRichText(IObject):

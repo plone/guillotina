@@ -6,8 +6,9 @@ from plone.server import app_settings
 from plone.server import jose
 from plone.server.api.service import Service
 from plone.server.browser import Response
+from plone.server.configure import service
+from plone.server.interfaces import ISite
 from plone.server.interfaces import ITraversableView
-from plone.server.traversal import do_traverse
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.security.interfaces import IPermission
@@ -20,6 +21,8 @@ import ujson
 logger = logging.getLogger(__name__)
 
 
+@service(context=ISite, method='GET', permission='plone.AccessContent',
+         name='@wstoken')
 class WebsocketGetToken(Service):
     _websockets_ttl = 60
 
@@ -52,6 +55,8 @@ class WebsocketGetToken(Service):
         }
 
 
+@service(context=ISite, method='GET', permission='plone.AccessContent',
+         name='@ws')
 class WebsocketsView(Service):
 
     async def __call__(self):
@@ -66,6 +71,10 @@ class WebsocketsView(Service):
                 elif message['op'] == 'GET':
                     method = app_settings['http_methods']['GET']
                     path = tuple(p for p in message['value'].split('/') if p)
+
+                    # avoid circular import
+                    from plone.server.traversal import do_traverse
+
                     obj, tail = await do_traverse(
                         self.request, self.request.site, path)
 

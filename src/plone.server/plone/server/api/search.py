@@ -1,57 +1,61 @@
 # -*- coding: utf-8 -*-
-from plone.server.api.service import Service
+from plone.server.configure import service
 from plone.server.interfaces import ICatalogUtility
+from plone.server.interfaces import IResource
 from zope.component import queryUtility
 from plone.server.utils import get_content_path
 
 
-class SearchGET(Service):
-    async def __call__(self):
-        q = self.request.GET.get('q')
-        search = queryUtility(ICatalogUtility)
-        if search is None:
-            return {
-                'items_count': 0,
-                'member': []
-            }
+@service(context=IResource, method='GET', permission='plone.SearchContent',
+         name='@search')
+async def search_get(context, request):
+    q = request.GET.get('q')
+    search = queryUtility(ICatalogUtility)
+    if search is None:
+        return {
+            'items_count': 0,
+            'member': []
+        }
 
-        return await search.search(self.context, q)
-
-
-class SearchPOST(Service):
-    async def __call__(self):
-        q = await self.request.json()
-        search = queryUtility(ICatalogUtility)
-        if search is None:
-            return {
-                'items_count': 0,
-                'member': []
-            }
-
-        return await search.get_by_path(
-            site=self.request.site,
-            path=get_content_path(self.context),
-            query=q)
+    return await search.get_by_path(
+        site=request.site,
+        path=get_content_path(context),
+        query=q)
 
 
-class ReindexPOST(Service):
-    """ Creates index / catalog and reindex all content
-    """
-    async def __call__(self):
-        search = queryUtility(ICatalogUtility)
-        await search.reindex_all_content(self.context)
-        return {}
+@service(context=IResource, method='POST', permission='plone.RawSearchContent',
+         name='@search')
+async def search_post(context, request):
+    q = await request.json()
+    search = queryUtility(ICatalogUtility)
+    if search is None:
+        return {
+            'items_count': 0,
+            'member': []
+        }
+
+    return await search.query(context, q)
 
 
-class CatalogPOST(Service):
-    async def __call__(self):
-        search = queryUtility(ICatalogUtility)
-        await search.initialize_catalog(self.context)
-        return {}
+@service(context=IResource, method='POST', permission='plone.ReindexContent',
+         name='@catalog-reindex')
+async def catalog_reindex(context, request):
+    search = queryUtility(ICatalogUtility)
+    await search.reindex_all_content(context)
+    return {}
 
 
-class CatalogDELETE(Service):
-    async def __call__(self):
-        search = queryUtility(ICatalogUtility)
-        await search.remove_catalog(self.context)
-        return {}
+@service(context=IResource, method='POST', permission='plone.ManageCatalog',
+         name='@catalog')
+async def catalog_post(context, request):
+    search = queryUtility(ICatalogUtility)
+    await search.initialize_catalog(context)
+    return {}
+
+
+@service(context=IResource, method='DELETE', permission='plone.ManageCatalog',
+         name='@catalog')
+async def catalog_delete(context, request):
+    search = queryUtility(ICatalogUtility)
+    await search.remove_catalog(context)
+    return {}

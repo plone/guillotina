@@ -1,6 +1,8 @@
-# -*- encoding: utf-8 -*-
-from zope.interface import Interface
+from plone.server.interfaces import IDefaultLayer  # noqa
+import logging
 
 
-class IDefaultLayer(Interface):
-    pass
+logger = logging.getLogger('plone.server')
+logger.warn('plone.server.api.layer.IDefaultLayer has been moved to '
+            'plone.server.interfaces.IDefaultLayer. This import will '
+            'no longer work in version 2.0.0 of plone.server')

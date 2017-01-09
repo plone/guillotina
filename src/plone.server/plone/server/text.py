@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 """Module to define the text field."""
 from persistent import Persistent
-from plone.server import _
 from plone.server.interfaces import IRichText
 from plone.server.interfaces import IRichTextValue
 from plone.server.interfaces import ITransformer
 from zope.component import queryAdapter
+from zope.i18nmessageid import MessageFactory
 from zope.interface import implementer
 from zope.interface import Invalid
 from zope.schema import Object
@@ -14,6 +14,9 @@ from zope.schema.interfaces import IFromUnicode
 from zope.schema.interfaces import WrongType
 
 import logging
+
+
+_ = MessageFactory('plone')
 
 
 LOG = logging.getLogger(__name__)
