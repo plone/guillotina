@@ -13,6 +13,7 @@ Contents:
    applications
    addons
    services
+   interfaces
    migrations
    behavior
    commands
