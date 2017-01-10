@@ -133,24 +133,31 @@ class RendererHtml(Renderer):
 @adapter(IRendererFormatRaw, IView, IRequest)
 @implementer(IRendered)
 class RendererRaw(Renderer):
+
+    def guess_response(self, value):
+        resp = value.response
+        if isinstance(resp, dict):
+            resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
+            resp.headers['Content-Type'] = 'application/json'
+        elif isinstance(resp, list):
+            resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
+            resp.headers['Content-Type'] = 'application/json'
+        elif isinstance(resp, str):
+            resp = aioResponse(body=bytes(resp, 'utf-8'))
+            resp.headers['Content-Type'] = 'text/html'
+        elif resp is None:
+            # missing result...
+            resp = aioResponse(body=b'{}')
+            resp.headers['Content-Type'] = 'application/json'
+
+        resp.headers.update(value.headers)
+        resp.set_status(value.status)
+        return resp
+
     async def __call__(self, value):
-        if hasattr(value, '__class__') and issubclass(value.__class__, Response):
-            resp = value.response
-            if isinstance(resp, dict):
-                resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
-                resp.headers['Content-Type'] = 'application/json'
-            elif isinstance(resp, list):
-                resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
-                resp.headers['Content-Type'] = 'application/json'
-            elif isinstance(resp, str):
-                resp = aioResponse(body=bytes(resp, 'utf-8'))
-                resp.headers['Content-Type'] = 'text/html'
-            elif resp is None:
-                # missing result...
-                resp = aioResponse(body=b'{}')
-                resp.headers['Content-Type'] = 'application/json'
-            resp.headers.update(value.headers)
-            resp.set_status(value.status)
-        else:
-            resp = value
+        resp = value
+        if (hasattr(value, '__class__') and
+                issubclass(value.__class__, Response) and
+                'Content-Type' not in value.headers):
+            resp = self.guess_response(value)
         return resp
