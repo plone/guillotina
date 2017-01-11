@@ -8,6 +8,9 @@ Fixes:
 
 New features:
 
+- RelStorage Support (postgres)
+  [ramonnb]
+
 - Adding HTTP Precondition exception
   [ramonnb]
 
