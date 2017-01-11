@@ -41,7 +41,13 @@ def load_services(_context, module_name):
         if ct_name not in api:
             api[ct_name] = OrderedDict()
         ct_api = api[ct_name]
-        ct_api[service_conf.get('method', 'GET')] = OrderedDict(service_conf)
+        if service_conf.get('name', False):
+            if 'endpoints' not in ct_api:
+                ct_api['endpoints'] = OrderedDict()
+            ct_api['endpoints'][service_conf.get('method', 'GET')] = \
+                OrderedDict(service_conf)
+        else:
+            ct_api[service_conf.get('method', 'GET')] = OrderedDict(service_conf)
 
 
 class service(object):

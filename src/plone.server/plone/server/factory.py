@@ -35,6 +35,13 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
+try:
+    from relstorage.options import Options
+    from relstorage.storage import RelStorage
+    RELSTORAGE = True
+except ImportError:
+    RELSTORAGE = False
+
 import asyncio
 import inspect
 import json
@@ -367,19 +374,30 @@ def make_app(config_file=None, settings=None):
                 db = DB(cs)
 
                 try:
-                    rootobj = db.open().root()
+                    conn = db.open()
+                    rootobj = conn.root()
                     if not IDatabase.providedBy(rootobj):
                         alsoProvides(rootobj, IDatabase)
                     transaction.commit()
-                    rootobj = None
                 except:
                     pass
                 finally:
+                    rootobj = None
+                    conn.close()
                     db.close()
 
                 # Set request aware database for app
                 cs = ClientStorage(address, **zeoconfig)
                 db = RequestAwareDB(cs, **config)
+                dbo = Database(key, db)
+            elif dbconfig['storage'] == 'RELSTORAGE' and RELSTORAGE:
+                options = Options(**dbconfig['options'])
+                if dbconfig['type'] == 'postgres':
+                    from relstorage.adapters.postgresql import PostgreSQLAdapter
+                    dsn = "dbname={dbname} user={username} host={host} password={password} port={port}".format(**dbconfig['dsn'])
+                    adapter = PostgreSQLAdapter(dsn=dsn, options=options)
+                rs = RelStorage(adapter=adapter, options=options)
+                db = RequestAwareDB(rs, **config)
                 dbo = Database(key, db)
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])
