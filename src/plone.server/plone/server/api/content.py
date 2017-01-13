@@ -212,15 +212,15 @@ async def sharing_get(context, request):
 
 @service(context=IResource, method='POST', permission='plone.ChangePermissions',
          name='@sharing')
-async def sharing_post(self):
-    data = await self.request.json()
-    prinrole = IPrincipalRoleManager(self.context)
+async def sharing_post(context, request):
+    data = await request.json()
+    prinrole = IPrincipalRoleManager(context)
     if 'prinrole' not in data:
         raise HTTPNotFound('prinrole missing')
     for user, roles in data['prinrole'].items():
         for role in roles:
             prinrole.assignRoleToPrincipal(role, user)
-    await notify(ObjectPermissionsModifiedEvent(self.context))
+    await notify(ObjectPermissionsModifiedEvent(context))
 
 
 @service(context=IResource, method='DELETE', permission='plone.DeleteContent')

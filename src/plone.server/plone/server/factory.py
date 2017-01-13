@@ -397,6 +397,20 @@ def make_app(config_file=None, settings=None):
                     dsn = "dbname={dbname} user={username} host={host} password={password} port={port}".format(**dbconfig['dsn'])
                     adapter = PostgreSQLAdapter(dsn=dsn, options=options)
                 rs = RelStorage(adapter=adapter, options=options)
+                db = DB(rs)
+                try:
+                    conn = db.open()
+                    rootobj = conn.root()
+                    if not IDatabase.providedBy(rootobj):
+                        alsoProvides(rootobj, IDatabase)
+                    transaction.commit()
+                except:
+                    pass
+                finally:
+                    rootobj = None
+                    conn.close()
+                    db.close()
+                rs = RelStorage(adapter=adapter, options=options)
                 db = RequestAwareDB(rs, **config)
                 dbo = Database(key, db)
             elif dbconfig['storage'] == 'DEMO':
