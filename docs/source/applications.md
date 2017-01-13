@@ -2,6 +2,14 @@
 
 Applications are used to provide additional functionality to plone.server.
 
+## Community Addons
+
+Some useful addons to use in your own development:
+
+- [pserver.elasticsearch](https://github.com/pyrenees/pserver.elasticsearch): Index content in elastic search
+- [pserver.zodbusers](https://github.com/pyrenees/pserver.zodbusers): Store and authenticate users in the database
+- [pserver.mailer](https://github.com/pyrenees/pserver.mailer): async send mail
+
 
 ## Creating
 
@@ -46,12 +54,6 @@ Once you create a `plone.server` application, there are three primary ways for i
 to hook into `plone.server`.
 
 
-### ZCML
-
-If you're application is activated and has a `configure.zcml` file in it, it
-will automatically be loaded.
-
-
 ### Call includeme function
 
 Your application can provide an `includeme` function at the root of the module
@@ -69,3 +71,9 @@ def includeme(root):
 If an `app_settings` dict is provided at the module root, it will automatically
 merge the global `plone.server` app_settings with the module's. This allows you
 to provide custom configuration.
+
+
+### ZCML
+
+If you're application is activated and has a `configure.zcml` file in it, it
+will automatically be loaded.

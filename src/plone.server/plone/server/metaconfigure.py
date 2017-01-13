@@ -4,12 +4,9 @@ from collections import OrderedDict
 from functools import reduce
 from pathlib import Path as osPath
 from plone.server import app_settings
-from plone.server.content import ResourceFactory
-from plone.server.content import StaticDirectory
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IResourceFactory
-from plone.server.security import ViewPermissionChecker
 from plone.server.utils import import_class
 from zope.component import getUtility
 from zope.component.zcml import adapter
@@ -99,6 +96,11 @@ def contenttype_directive(_context, portal_type, class_, schema, behaviors=None,
     """
     Generate factory for the passed schema
     """
+    logger.warn('plone:contenttype directive will be removed in 1.0.0 final')
+
+    # prevent circular import
+    from plone.server.content import ResourceFactory
+
     factory = ResourceFactory(
         class_,
         title='',
@@ -146,6 +148,9 @@ def register_service(_context, configuration, content, method, layer,
     required = {}
     for n in ('__call__', 'publishTraverse'):
         required[n] = permission
+
+    # prevent circular import
+    from plone.server.security import ViewPermissionChecker
 
     defineChecker(factory, ViewPermissionChecker(required))
     logger.debug('Defining adapter for '  # noqa
@@ -261,6 +266,8 @@ def resource_directory(_context, name, directory):
             raise ConfigurationError('No such directory', directory)
     root = getUtility(IApplication, 'root')
     if name not in root:
+        # prevent circular import
+        from plone.server.content import StaticDirectory
         root[name] = StaticDirectory(directory)
 
 
@@ -286,6 +293,7 @@ class IAddOn(Interface):
 
 
 def add_on(_context, name, title, handler):
+    logger.warn('plone:addon directive will be removed in 1.0.0 final')
     if name not in app_settings['available_addons']:
         app_settings['available_addons'][name] = {
             'title': title,

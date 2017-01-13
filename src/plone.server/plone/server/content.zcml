@@ -6,28 +6,6 @@
   <adapter
       factory="plone.server.content.BehaviorAssignable" />
 
-
-  <plone:contenttype
-      portal_type="Site"
-      schema=".interfaces.ISite"
-      class=".content.Site"
-      behaviors=""
-      />
-
-
-  <plone:contenttype
-      portal_type="Item"
-      schema=".content.IItem"
-      class=".content.Item"
-      behaviors=".behaviors.dublincore.IDublinCore"
-    />
-
-  <plone:contenttype
-      portal_type="Folder"
-      schema=".content.IContainer"
-      class=".content.Folder"
-    />
-
   <adapter
       for="plone.server.interfaces.IDatabase
            plone.server.interfaces.IRequest"

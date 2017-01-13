@@ -291,6 +291,9 @@ def load_application(module, root, settings):
         update_app_settings(module.app_settings)
     # services
     configure.load_services(app.config, module.__name__)
+    configure.load_contenttypes(app.config, module.__name__)
+    configure.load_behaviors(app.config, module.__name__)
+    configure.load_addons(app.config, module.__name__)
 
 
 def make_app(config_file=None, settings=None):
@@ -314,7 +317,9 @@ def make_app(config_file=None, settings=None):
         raise Exception('Neither configuration or settings')
 
     import plone.server
-    import plone.server.api  # load plone.server services
+    configure.scan('plone.server.api')
+    configure.scan('plone.server.content')
+    configure.scan('plone.server.behaviors')
     load_application(plone.server, root, settings)
 
     for ep in iter_entry_points('plone.server'):

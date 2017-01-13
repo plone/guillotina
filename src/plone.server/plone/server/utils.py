@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPUnauthorized
 from hashlib import sha256 as sha
-from plone.server import app_settings
 from zope.dottedname.resolve import resolve
 
 import fnmatch
 import importlib
-import json
 import logging
 import random
 import string
+import sys
 import time
 
 
@@ -72,6 +71,7 @@ def get_authenticated_user_id(request):
 
 async def apply_cors(request):
     """Second part of the cors function to validate."""
+    from plone.server import app_settings
     headers = {}
     origin = request.headers.get('Origin', None)
     if origin:
@@ -155,3 +155,28 @@ def get_random_string(length=30, allowed_chars=string.ascii_letters + string.dig
         seed_value = "%s%s%s" % (random.getstate(), time.time(), RANDOM_SECRET)
         random.seed(sha(seed_value).digest())
     return ''.join([random.choice(allowed_chars) for i in range(length)])
+
+
+def caller_module(level=2, sys=sys):
+    """
+    Pulled out of pyramid
+    """
+    module_globals = sys._getframe(level).f_globals
+    module_name = module_globals.get('__name__') or '__main__'
+    module = sys.modules[module_name]
+    return module
+
+
+def caller_package(level=2, caller_module=caller_module):
+    """
+    Pulled out of pyramid
+    """
+    # caller_module in arglist for tests
+    module = caller_module(level+1)
+    f = getattr(module, '__file__', '')
+    if (('__init__.py' in f) or ('__init__$py' in f)):  # empty at >>>
+        # Module is a package
+        return module
+    # Go up one level to get package
+    package_name = module.__name__.rsplit('.', 1)[0]
+    return sys.modules[package_name]

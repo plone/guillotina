@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from plone.behavior.interfaces import IBehavior
-from plone.server.configure import service
+from plone.server import configure
 from plone.server.content import get_cached_factory
 from plone.server.interfaces import IResource
 from plone.server.json.interfaces import ISchemaSerializeToJson
@@ -9,8 +9,8 @@ from zope.component import getUtilitiesFor
 from zope.component import queryAdapter
 
 
-@service(context=IResource, method='PATCH', permission='plone.ModifyContent',
-         name='@behaviors')
+@configure.service(context=IResource, method='PATCH', permission='plone.ModifyContent',
+                   name='@behaviors')
 async def default_patch(context, request):
     """We add a behavior.
 
@@ -25,8 +25,8 @@ async def default_patch(context, request):
     return {}
 
 
-@service(context=IResource, method='DELETE', permission='plone.ModifyContent',
-         name='@behaviors')
+@configure.service(context=IResource, method='DELETE', permission='plone.ModifyContent',
+                   name='@behaviors')
 async def default_delete(context, request):
     """We add a behavior.
 
@@ -41,8 +41,8 @@ async def default_delete(context, request):
     return {}
 
 
-@service(context=IResource, method='GET', permission='plone.AccessContent',
-         name='@behaviors')
+@configure.service(context=IResource, method='GET', permission='plone.AccessContent',
+                   name='@behaviors')
 async def default_get(context, request):
     """We show the available schemas."""
     result = {}

@@ -12,11 +12,11 @@ creating API endpoints.
 A service can be as simple as a function in your application:
 
 ```python
-from plone.server.configure import service
+from plone.server import configure
 from plone.server.interfaces import ISite
 
-@service(context=ISite, name='@myservice', method='GET',
-         permission='plone.AccessContent')
+@configure.service(context=ISite, name='@myservice', method='GET',
+                   permission='plone.AccessContent')
 async def my_service(context, request):
     return {
         'foo': 'bar'
@@ -32,6 +32,20 @@ In this example, the service will apply to a GET request against a site,
 `/zodb/plone/@myservice`.
 
 
+**Scanning**
+If your service modules are not imported at run-time, you may need to provide an
+additional scan call to get your services noticed by `plone.server`.
+
+In your application `__init__.py` file, you can simply provide a `scan` call.
+
+```python
+from plone.server import configure
+
+def includeme(root):
+    configure.scan('my.package.services')
+```
+
+
 ## class based services
 
 For more complex services, you might want to use class based services.
@@ -39,13 +53,13 @@ For more complex services, you might want to use class based services.
 The example above, with the class based approach will look like:
 
 ```python
-from plone.server.configure import service
+from plone.server import configure
 from plone.server.interfaces import ISite
 from plone.server.api.service import Service
 
 
-@service(context=ISite, name='@myservice', method='GET',
-         permission='plone.AccessContent')
+@configure.service(context=ISite, name='@myservice', method='GET',
+                   permission='plone.AccessContent')
 class DefaultGET(Service):
     async def __call__(self):
       # self.context

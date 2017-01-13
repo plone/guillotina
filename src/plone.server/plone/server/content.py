@@ -9,15 +9,16 @@ from plone.behavior.interfaces import IBehavior
 from plone.behavior.interfaces import IBehaviorAssignable
 from plone.behavior.markers import applyMarkers
 from plone.server import BEHAVIOR_CACHE
+from plone.server import configure
 from plone.server import FACTORY_CACHE
 from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.browser import get_physical_path
+from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.exceptions import NoPermissionToAdd
 from plone.server.exceptions import NotAllowedContentType
-from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IConstrainTypes
 from plone.server.interfaces import IContainer
@@ -346,12 +347,18 @@ class Resource(Persistent):
         raise AttributeError(name)
 
 
-@implementer(IItem)
+@configure.contenttype(
+    portal_type="Item",
+    schema=IItem,
+    behaviors=["plone.server.behaviors.dublincore.IDublinCore"])
 class Item(Resource):
     pass
 
 
-@implementer(IContainer)
+@configure.contenttype(
+    portal_type="Folder",
+    schema=IContainer,
+    behaviors=["plone.server.behaviors.dublincore.IDublinCore"])
 class Folder(Resource):
 
     def __init__(self, id_=None):
@@ -419,7 +426,7 @@ class Folder(Resource):
             mem=id(self))
 
 
-@implementer(ISite)
+@configure.contenttype(portal_type="Site", schema=ISite)
 class Site(Folder):
 
     def install(self):

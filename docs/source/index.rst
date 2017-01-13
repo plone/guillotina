@@ -13,10 +13,12 @@ Contents:
    applications
    addons
    services
+   contenttypes
+   behavior
    interfaces
    migrations
-   behavior
    commands
+   applicationconfiguration
    design
 
 Indices and tables

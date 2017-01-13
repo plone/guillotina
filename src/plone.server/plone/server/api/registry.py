@@ -3,7 +3,7 @@ from plone.server.api.service import Service
 from plone.server.api.service import TraversableService
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
-from plone.server.configure import service
+from plone.server import configure
 from plone.server.interfaces import IRegistry
 from plone.server.interfaces import ISite
 from plone.server.json.exceptions import DeserializationError
@@ -23,8 +23,8 @@ _ = MessageFactory('plone')
 _marker = object()
 
 
-@service(context=ISite, method='GET', permission='plone.ReadConfiguration',
-         name='@registry')
+@configure.service(context=ISite, method='GET', permission='plone.ReadConfiguration',
+                   name='@registry')
 class Read(TraversableService):
     key = _marker
     value = None
@@ -58,8 +58,8 @@ class Read(TraversableService):
         }
 
 
-@service(context=ISite, method='POST', permission='plone.RegisterConfigurations',
-         name='@registry')
+@configure.service(context=ISite, method='POST', permission='plone.RegisterConfigurations',
+                   name='@registry')
 class Register(Service):
     """Register an Interface on the Registry."""
 
@@ -93,8 +93,8 @@ class Register(Service):
         return Response(response={}, status=201)
 
 
-@service(context=ISite, method='PATCH', permission='plone.WriteConfiguration',
-         name='@registry')
+@configure.service(context=ISite, method='PATCH', permission='plone.WriteConfiguration',
+                   name='@registry')
 class Write(TraversableService):
     key = _marker
     value = None

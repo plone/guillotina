@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-from plone.server.behaviors.properties import AnnotationProperty
+from plone.server import configure
 from plone.server.file import BasicFileField
 from plone.server.interfaces import IFormFieldProvider
-from plone.server.interfaces import IResource
-from zope.component import adapter
 from zope.interface import Interface
 from zope.interface import provider
 
@@ -18,3 +16,12 @@ class IAttachment(Interface):
 
 class IMarkerAttachment(Interface):
     """Marker interface for content with attachment."""
+
+
+configure.behavior(
+    title="Attachment",
+    provides=IAttachment,
+    marker=IMarkerAttachment,
+    factory="plone.behavior.AnnotationStorage",
+    for_="plone.server.interfaces.IResource"
+)()

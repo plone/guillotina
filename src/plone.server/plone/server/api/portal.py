@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
+from plone.server import configure
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
 from plone.server.content import create_content
 from plone.server.events import notify
+from plone.server.events import ObjectFinallyCreatedEvent
+from plone.server.interfaces import IApplication
+from plone.server.interfaces import IDatabase
+from plone.server.interfaces import ISite
 from plone.server.json.interfaces import IResourceSerializeToJson
 from plone.server.utils import get_authenticated_user_id
 from zope.component import getMultiAdapter
-# from zope.lifecycleevent import ObjectAddedEvent
-from plone.server.events import ObjectFinallyCreatedEvent
-from plone.server.interfaces import ISite
-from plone.server.configure import service
-from plone.server.interfaces import IDatabase
-from plone.server.interfaces import IApplication
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 
 
-@service(context=IDatabase, method='GET', permission='plone.GetPortals')
+@configure.service(context=IDatabase, method='GET', permission='plone.GetPortals')
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
@@ -25,18 +24,19 @@ class DefaultGET(Service):
         return serializer()
 
 
-@service(context=IDatabase, method='POST', permission='plone.AddPortal',
-         title="Create a new Portal",
-         description="Creates a new site on the database",
-         params={
-                "query": {},
-                "payload": {
-                    "@type": "string",
-                    "title": "string",
-                    "id": "string"
-                },
-                "traversal": []
-            })
+@configure.service(
+    context=IDatabase, method='POST', permission='plone.AddPortal',
+    title="Create a new Portal",
+    description="Creates a new site on the database",
+    params={
+        "query": {},
+        "payload": {
+            "@type": "string",
+            "title": "string",
+            "id": "string"
+        },
+        "traversal": []
+    })
 class DefaultPOST(Service):
     """Create a new Site for DB Mounting Points."""
 
@@ -120,7 +120,7 @@ class SharingPOST(Service):
     pass
 
 
-@service(context=ISite, method='DELETE', permission='plone.DeletePortals')
+@configure.service(context=ISite, method='DELETE', permission='plone.DeletePortals')
 class DefaultDELETE(Service):
     async def __call__(self):
         portal_id = self.context.id
@@ -128,8 +128,8 @@ class DefaultDELETE(Service):
         return {}
 
 
-@service(context=IDatabase, method='DELETE', permission='plone.UmountDatabase')
-@service(context=IApplication, method='PUT', permission='plone.MountDatabase')
+@configure.service(context=IDatabase, method='DELETE', permission='plone.UmountDatabase')
+@configure.service(context=IApplication, method='PUT', permission='plone.MountDatabase')
 class NotImplemented(Service):
     async def __call__(self):
         return ErrorResponse(
