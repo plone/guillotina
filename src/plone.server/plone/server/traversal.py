@@ -347,19 +347,6 @@ class TraversalRouter(AbstractRouter):
             # logger.info("Anonymous User")
             request.security.add(AnonymousParticipation(request))
 
-        permission = getUtility(IPermission, name='plone.AccessContent')
-
-        allowed = request.security.checkPermission(permission.id, resource)
-
-        if not allowed:
-            # Check if its a CORS call:
-            if IOPTIONS != method or not app_settings['cors']:
-                logger.warn("No access content {content} with {auths}".format(
-                    content=resource,
-                    auths=str([x.principal.id
-                               for x in request.security.participations])))
-                raise HTTPUnauthorized()
-
         # Site registry lookup
         try:
             view = queryMultiAdapter(
@@ -379,6 +366,21 @@ class TraversalRouter(AbstractRouter):
                         "Exception on view execution",
                         exc_info=e)
                     return None
+
+        permission = getUtility(IPermission, name='plone.AccessContent')
+
+        allowed = request.security.checkPermission(permission.id, resource)
+
+        if not allowed:
+            # Check if its a CORS call:
+            if IOPTIONS != method or not app_settings['cors']:
+                # Check if the view has permissions explicit
+                if view is None or not view.__allow_access__:
+                    logger.warn("No access content {content} with {auths}".format(
+                        content=resource,
+                        auths=str([x.principal.id
+                                   for x in request.security.participations])))
+                    raise HTTPUnauthorized()
 
         if view is None and method == IOPTIONS:
             view = DefaultOPTIONS(resource, request)

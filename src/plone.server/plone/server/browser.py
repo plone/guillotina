@@ -29,6 +29,13 @@ class View(object):
 
     __name__ = 'view'
 
+    # An attribute that marks that a view should not
+    # be unauthorized by AccessContent on the object
+    # Should always be False unless you provide auth
+    # by another mechanism on the view
+
+    __allow_access__ = False
+
     def __init__(self, context, request):
         self.context = context
         self.request = request
