@@ -50,7 +50,8 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
         if txn is not None:
             txn.abort()
         txn = request._txn = transaction.Transaction(self._synchs, self)
-        txn.user = user
+        if user is not None:
+            txn.user = user
         _new_transaction(txn, self._synchs)
         request._txn_time = time.time()
 
