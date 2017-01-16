@@ -13,6 +13,7 @@ from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
 from zope.proxy import ProxyBase
 from zope.security.interfaces import Unauthorized
+from plone.server.utils import get_authenticated_user_id
 
 import asyncio
 import inspect
@@ -44,10 +45,12 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
         if request is None:
             request = get_current_request()
 
+        user = get_authenticated_user_id(request)
         txn = getattr(request, '_txn', None)
         if txn is not None:
             txn.abort()
         txn = request._txn = transaction.Transaction(self._synchs, self)
+        txn.user = user
         _new_transaction(txn, self._synchs)
         request._txn_time = time.time()
 
