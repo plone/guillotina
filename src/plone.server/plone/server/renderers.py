@@ -16,6 +16,7 @@ from zope.component import queryAdapter
 from zope.interface import implementer
 # JSON Decoder
 from zope.securitypolicy.settings import PermissionSetting
+from zope.interface.interface import InterfaceClass
 
 import json
 
@@ -24,8 +25,12 @@ class PServerJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, complex):
             return [obj.real, obj.imag]
-        if isinstance(obj, datetime):
-                return obj.isoformat()
+        elif isinstance(obj, datetime):
+            return obj.isoformat()
+        elif isinstance(obj, type):
+            return obj.__module__ + '.' + obj.__name__
+        elif isinstance(obj, InterfaceClass):
+            return [x.__module__ + '.' + x.__name__ for x in obj.__iro__]  # noqa
         try:
             iterable = iter(obj)
         except TypeError:
