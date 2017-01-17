@@ -53,7 +53,6 @@ class CatalogReindex(Service):
          name='@async-catalog-reindex')
 async def async_catalog_reindex(context, request):
     util = queryUtility(IQueueUtility)
-    import pdb; pdb.set_trace()
     await util.add(CatalogReindex(context, request))
     return {}
 
