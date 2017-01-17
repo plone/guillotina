@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from plone.server.configure import service
+from plone.server.api.service import Service
 from plone.server.interfaces import ICatalogUtility
 from plone.server.interfaces import IResource
 from zope.component import queryUtility
 from plone.server.utils import get_content_path
+from plone.server.async import IQueueUtility
 
 
 @service(context=IResource, method='GET', permission='plone.SearchContent',
@@ -39,9 +41,20 @@ async def search_post(context, request):
 
 @service(context=IResource, method='POST', permission='plone.ReindexContent',
          name='@catalog-reindex')
-async def catalog_reindex(context, request):
-    search = queryUtility(ICatalogUtility)
-    await search.reindex_all_content(context)
+class CatalogReindex(Service):
+
+    async def __call__(self):
+        search = queryUtility(ICatalogUtility)
+        await search.reindex_all_content(self.context)
+        return {}
+
+
+@service(context=IResource, method='POST', permission='plone.ReindexContent',
+         name='@async-catalog-reindex')
+async def async_catalog_reindex(context, request):
+    util = queryUtility(IQueueUtility)
+    import pdb; pdb.set_trace()
+    await util.add(CatalogReindex(context, request))
     return {}
 
 

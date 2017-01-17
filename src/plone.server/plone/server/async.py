@@ -9,6 +9,7 @@ from plone.server.transactions import TransactionProxy
 from zope.i18nmessageid import MessageFactory
 from zope.interface import Interface
 from zope.security.interfaces import Unauthorized
+from plone.server.interfaces import SHARED_CONNECTION
 
 import asyncio
 import logging
@@ -46,6 +47,17 @@ class QueueUtility(object):
             try:
                 priority, view = await self._queue.get()
                 got_obj = True
+                if view.request.conn.transaction_manager is None:
+                    # Connection was closed
+                    # Open DB
+                    db = view.request.application[view.request._db_id]
+                    if SHARED_CONNECTION:
+                        view.request.conn = db.conn
+                    else:
+                        # Create a new conection
+                        view.request.conn = db.open()
+                    view.context = view.request.conn.get(view.context._p_oid)
+
                 txn = view.request.conn.transaction_manager.begin(view.request)
                 try:
                     view_result = await view()
@@ -71,9 +83,9 @@ class QueueUtility(object):
             except KeyboardInterrupt or MemoryError or SystemExit or asyncio.CancelledError:
                 self._exceptions = True
                 raise
-            except:  # noqa
+            except Exception as e:  # noqa
                 self._exceptions = True
-                logger.error('Worker call failed')
+                logger.error('Worker call failed', exc_info=e)
             finally:
                 if got_obj:
                     self._queue.task_done()
