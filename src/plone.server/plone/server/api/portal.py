@@ -5,12 +5,15 @@ from plone.server.browser import Response
 from plone.server.content import create_content
 from plone.server.events import notify
 from plone.server.json.interfaces import IResourceSerializeToJson
+from plone.server.utils import get_authenticated_user_id
 from zope.component import getMultiAdapter
-from zope.lifecycleevent import ObjectAddedEvent
+# from zope.lifecycleevent import ObjectAddedEvent
+from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.interfaces import ISite
 from plone.server.configure import service
 from plone.server.interfaces import IDatabase
 from plone.server.interfaces import IApplication
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
 
 
 @service(context=IDatabase, method='GET', permission='plone.GetPortals')
@@ -82,7 +85,16 @@ class DefaultPOST(Service):
 
         self.request._site_id = site.__name__
 
-        await notify(ObjectAddedEvent(site, self.context, site.__name__))
+        user = get_authenticated_user_id(self.request)
+
+        # Local Roles assign owner as the creator user
+        roleperm = IPrincipalRoleManager(site)
+        roleperm.assignRoleToPrincipal(
+            'plone.Owner',
+            user)
+
+        await notify(ObjectFinallyCreatedEvent(site))
+        # await notify(ObjectAddedEvent(site, self.context, site.__name__))
 
         resp = {
             '@type': 'Site',
