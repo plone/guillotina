@@ -8,6 +8,9 @@ Fixes:
 
 New features:
 
+- Catalog reindex as async operation
+  [ramonnb]
+
 - RelStorage Support (postgres)
   [ramonnb]
 
