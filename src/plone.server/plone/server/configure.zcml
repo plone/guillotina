@@ -37,7 +37,6 @@
   <include package=".auth" />
   <include package=".catalog" />
   <include package=".framing" />
-  <include package=".behaviors" />
 
   <include file="content.zcml" />
   <include file="basicfile.zcml" />

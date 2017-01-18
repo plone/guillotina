@@ -6,7 +6,7 @@ from plone.server import app_settings
 from plone.server import jose
 from plone.server.api.service import Service
 from plone.server.browser import Response
-from plone.server.configure import service
+from plone.server import configure
 from plone.server.interfaces import ISite
 from plone.server.interfaces import ITraversableView
 from zope.component import getUtility
@@ -21,8 +21,8 @@ import ujson
 logger = logging.getLogger(__name__)
 
 
-@service(context=ISite, method='GET', permission='plone.AccessContent',
-         name='@wstoken')
+@configure.service(context=ISite, method='GET', permission='plone.AccessContent',
+                   name='@wstoken')
 class WebsocketGetToken(Service):
     _websockets_ttl = 60
 
@@ -55,8 +55,8 @@ class WebsocketGetToken(Service):
         }
 
 
-@service(context=ISite, method='GET', permission='plone.AccessContent',
-         name='@ws')
+@configure.service(context=ISite, method='GET', permission='plone.AccessContent',
+                   name='@ws')
 class WebsocketsView(Service):
 
     async def __call__(self):

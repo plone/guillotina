@@ -4,10 +4,10 @@ from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from dateutil.tz import tzlocal
 from plone.server import app_settings
+from plone.server import configure
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
-from plone.server.configure import service
 from plone.server.content import create_content_in_container
 from plone.server.events import notify
 from plone.server.events import ObjectFinallyCreatedEvent
@@ -45,7 +45,7 @@ _zone = tzlocal()
 logger = logging.getLogger(__name__)
 
 
-@service(context=IResource, method='GET', permission='plone.ViewContent')
+@configure.service(context=IResource, method='GET', permission='plone.ViewContent')
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
@@ -56,7 +56,7 @@ class DefaultGET(Service):
         return result
 
 
-@service(context=IResource, method='POST', permission='plone.AddContent')
+@configure.service(context=IResource, method='POST', permission='plone.AddContent')
 class DefaultPOST(Service):
 
     async def __call__(self):
@@ -141,12 +141,12 @@ class DefaultPOST(Service):
         return Response(response=serializer(), headers=headers, status=201)
 
 
-@service(context=IResource, method='PUT', permission='plone.ModifyContent')
+@configure.service(context=IResource, method='PUT', permission='plone.ModifyContent')
 class DefaultPUT(Service):
     pass
 
 
-@service(context=IResource, method='PATCH', permission='plone.ModifyContent')
+@configure.service(context=IResource, method='PATCH', permission='plone.ModifyContent')
 class DefaultPATCH(Service):
     async def __call__(self):
         data = await self.request.json()
@@ -175,8 +175,8 @@ class DefaultPATCH(Service):
         return Response(response={}, status=204)
 
 
-@service(context=IResource, method='GET', permission='plone.SeePermissions',
-         name='@sharing')
+@configure.service(context=IResource, method='GET', permission='plone.SeePermissions',
+                   name='@sharing')
 async def sharing_get(context, request):
     roleperm = IRolePermissionMap(context)
     prinperm = IPrincipalPermissionMap(context)
@@ -202,8 +202,8 @@ async def sharing_get(context, request):
     return result
 
 
-@service(context=IResource, method='POST', permission='plone.ChangePermissions',
-         name='@sharing')
+@configure.service(context=IResource, method='POST', permission='plone.ChangePermissions',
+                   name='@sharing')
 async def sharing_post(context, request):
     data = await request.json()
     prinrole = IPrincipalRoleManager(context)
@@ -215,7 +215,7 @@ async def sharing_post(context, request):
     await notify(ObjectPermissionsModifiedEvent(context))
 
 
-@service(context=IResource, method='DELETE', permission='plone.DeleteContent')
+@configure.service(context=IResource, method='DELETE', permission='plone.DeleteContent')
 class DefaultDELETE(Service):
 
     async def __call__(self):
@@ -224,7 +224,7 @@ class DefaultDELETE(Service):
         await notify(ObjectFinallyDeletedEvent(self.context))
 
 
-@service(context=IResource, method='OPTIONS', permission='plone.AccessPreflight')
+@configure.service(context=IResource, method='OPTIONS', permission='plone.AccessPreflight')
 class DefaultOPTIONS(Service):
     """Preflight view for Cors support on DX content."""
 

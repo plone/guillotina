@@ -8,6 +8,15 @@ Fixes:
 
 New features:
 
+- Be able to define addons using decorators, not zcml
+  [vangheem]
+
+- Be able to define behaviors using decorators, not zcml
+  [vangheem]
+
+- Be able to define content types using decorators, not zcml
+  [vangheem]
+
 - Catalog reindex as async operation
   [ramonnb]
 

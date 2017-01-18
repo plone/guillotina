@@ -42,11 +42,14 @@ For example in case you want to have a class that stores the field on the conten
 ```python
 from plone.server.behaviors.properties import ContextProperty
 from plone.server.behaviors.intrance import AnnotationBehavior
-from zope.component import adapter
 from plone.server.interfaces import IResource
+from plone.server import configure
 
-@implementer(IMyLovedBehavior)
-@adapter(IResource)
+@configure.behavior(
+    title="Attachment",
+    provides=IMyLovedBehavior,
+    marker=IMarkerBehavior,
+    for_=IResource)
 class MyBehavior(AnnotationBehavior):
     """If attributes
     """
@@ -55,32 +58,38 @@ class MyBehavior(AnnotationBehavior):
 
 On this example text will be stored on the context object and text2 as a annotation.
 
-Once you have the schema, marker interface and the factory you can register on zcml:
-
-```xml
-      <plone:behavior
-          title="Attachment"
-          provides=".mybehavior.IMyLovedBehavior"
-          marker=".mybehavior.IMarkerBehavior"
-          factory=".mybehavior.MyBehavior"
-          for="plone.server.interfaces.IResource"
-          />
-
-```
-
 
 ## Static behaviors
 
 With behaviors you can define them as static for specific content types:
 
-```xml
-    <plone:contenttype
-          portal_type="Item"
-          schema=".content.IItem"
-          class=".content.Item"
-          behaviors=".behaviors.dublincore.IDublinCore"
-        />
+```python
+
+from plone.server import configure
+from plone.server.interfaces import IItem
+from plone.server.content import Item
+
+@configure.contenttype(
+    portal_type="MyItem",
+    schema=IItem,
+    behaviors=["plone.server.behaviors.dublincore.IDublinCore"])
+class MyItem(Item):
+    pass
 ```
+
+**Scanning**
+If your service modules are not imported at run-time, you may need to provide an
+additional scan call to get your services noticed by `plone.server`.
+
+In your application `__init__.py` file, you can simply provide a `scan` call.
+
+```python
+from plone.server import configure
+
+def includeme(root):
+    configure.scan('my.package.services')
+```
+
 
 ### Create and modify content with behaviors
 

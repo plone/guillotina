@@ -13,6 +13,11 @@ Create an addon installer class in an `install.py` file in your `plone.server` a
 ```python
 
 from plone.server.addons import Addon
+from plone.server import configure
+
+@configure.addon(
+    name="myaddon",
+    title="My addon")
 class MyAddon(Addon):
 
     @classmethod
@@ -26,19 +31,17 @@ class MyAddon(Addon):
         pass
 ```
 
-Then, in your `configure.zcml` file, register the addon::
+**Scanning**
+If your service modules are not imported at run-time, you may need to provide an
+additional scan call to get your services noticed by `plone.server`.
 
-```xml
-<configure xmlns="http://namespaces.zope.org/zope"
-         xmlns:plone="http://namespaces.plone.org/plone">
+In your application `__init__.py` file, you can simply provide a `scan` call.
 
-<include package="plone.server" file="meta.zcml" />
-<plone:addon
-    name="myaddon"
-    title="My addon"
-    handler="pserver.myaddon.install.MyAddon" />
+```python
+from plone.server import configure
 
-</configure>
+def includeme(root):
+    configure.scan('my.package.addon')
 ```
 
 
@@ -51,7 +54,12 @@ from:
 
 from plone.server.addons import Addon
 from plone.server.registry import ILayers
+
 LAYER = 'pserver.myaddon.interfaces.ILayer'
+
+@configure.addon(
+    name="myaddon",
+    title="My addon")
 class MyAddon(Addon):
 
     @classmethod

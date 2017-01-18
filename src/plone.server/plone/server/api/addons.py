@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from plone.server import app_settings
+from plone.server import configure
 from plone.server.browser import ErrorResponse
-from plone.server.configure import service
 from plone.server.interfaces import ISite
 from plone.server.registry import IAddons
 from zope.i18nmessageid import MessageFactory
@@ -10,8 +10,8 @@ from zope.i18nmessageid import MessageFactory
 _ = MessageFactory('plone')
 
 
-@service(context=ISite, name='@addons', method='POST',
-         permission='plone.ManageAddons')
+@configure.service(context=ISite, name='@addons', method='POST',
+                   permission='plone.ManageAddons')
 async def install(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -33,8 +33,8 @@ async def install(context, request):
     return await get_addons(context, request)()
 
 
-@service(context=ISite, name='@addons', method='DELETE',
-         permission='plone.ManageAddons')
+@configure.service(context=ISite, name='@addons', method='DELETE',
+                   permission='plone.ManageAddons')
 async def uninstall(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -56,8 +56,8 @@ async def uninstall(context, request):
     config.enabled -= {id_to_install}
 
 
-@service(context=ISite, name='@addons', method='GET',
-         permission='plone.ManageAddons')
+@configure.service(context=ISite, name='@addons', method='GET',
+                   permission='plone.ManageAddons')
 async def get_addons(context, request):
     result = {
         'available': [],

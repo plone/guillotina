@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from plone.server.api.service import TraversableService
-from plone.server.configure import service
+from plone.server import configure
 from plone.server.interfaces import IResourceFactory
 from plone.server.interfaces import ISite
 from plone.server.json.interfaces import IFactorySerializeToJson
@@ -9,8 +9,8 @@ from zope.component import getUtilitiesFor
 from zope.component import queryUtility
 
 
-@service(context=ISite, method='GET', permission='plone.AccessContent',
-         name='@types')
+@configure.service(context=ISite, method='GET', permission='plone.AccessContent',
+                   name='@types')
 class Read(TraversableService):
 
     def publishTraverse(self, traverse):

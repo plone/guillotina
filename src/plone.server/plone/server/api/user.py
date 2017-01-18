@@ -1,12 +1,12 @@
 # -*- encoding: utf-8 -*-
-from plone.server.configure import service
+from plone.server import configure
 from plone.server.interfaces import ISite
 from zope.authentication.interfaces import IAuthentication
 from zope.component import getUtility
 
 
-@service(context=ISite, method='GET', permission='plone.AccessContent',
-         name='@user')
+@configure.service(context=ISite, method='GET', permission='plone.AccessContent',
+                   name='@user')
 async def get_user_info(self):
     """Return information about the logged in user.
     """

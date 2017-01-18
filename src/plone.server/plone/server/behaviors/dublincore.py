@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from dateutil.tz import tzutc
 from plone.server import app_settings
+from plone.server import configure
 from plone.server.behaviors.properties import ContextProperty
 from plone.server.directives import index
 from plone.server.interfaces import IFormFieldProvider
@@ -44,7 +45,11 @@ class IDublinCore(Interface, IWriteZopeDublinCore):
     index('contributors', type='keyword')
 
 
-@adapter(IResource)
+@configure.behavior(
+    title="Dublin Core fields",
+    provides=IDublinCore,
+    marker=IMarkerDublinCore,
+    for_="plone.server.interfaces.IResource")
 class DublinCore(ZDCAnnotatableAdapter):
 
     creators = ContextProperty(u'creators', ())
