@@ -1,7 +1,11 @@
 1.0a10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+New features:
+
+- Be able to define adapters, subscribers, permissions, roles, grant
+  with decorators, not zcml
+  [vangheem]
 
 
 1.0a9 (2017-01-18)

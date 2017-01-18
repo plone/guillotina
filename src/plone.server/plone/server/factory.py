@@ -46,7 +46,6 @@ import asyncio
 import inspect
 import json
 import logging
-import sys
 import transaction
 import ZODB.FileStorage
 
@@ -290,10 +289,7 @@ def load_application(module, root, settings):
     if hasattr(module, 'app_settings') and app_settings != module.app_settings:
         update_app_settings(module.app_settings)
     # services
-    configure.load_services(app.config, module.__name__)
-    configure.load_contenttypes(app.config, module.__name__)
-    configure.load_behaviors(app.config, module.__name__)
-    configure.load_addons(app.config, module.__name__)
+    configure.load_all_configurations(app.config, module.__name__)
 
 
 def make_app(config_file=None, settings=None):
@@ -317,9 +313,11 @@ def make_app(config_file=None, settings=None):
         raise Exception('Neither configuration or settings')
 
     import plone.server
-    configure.scan('plone.server.api')
-    configure.scan('plone.server.content')
-    configure.scan('plone.server.behaviors')
+    configure.scan('..api')
+    configure.scan('..content')
+    configure.scan('..behaviors')
+    configure.scan('..languages')
+    configure.scan('..permissions')
     load_application(plone.server, root, settings)
 
     for ep in iter_entry_points('plone.server'):
@@ -337,6 +335,11 @@ def make_app(config_file=None, settings=None):
     except ConfigurationConflictError as e:
         logger.error(str(e._conflicts))
         raise e
+
+    # XXX we clear now to save some memory
+    # it's unclear to me if this is necesary or not but it seems to me that
+    # we don't need things registered in both components AND here.
+    configure.clear()
 
     # update *after* plugins loaded
     update_app_settings(settings)
