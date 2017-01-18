@@ -3,3 +3,15 @@ graft src/plone.example
 include *.rst
 include VERSION
 global-exclude *.pyc
+include *.json
+include *.nix
+include *.py
+include Dockerfile
+include LICENSE
+include buildout-pypy.cfg
+include buildout.cfg
+include zeo.cfg
+recursive-include docs *.md
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include static *.ico
