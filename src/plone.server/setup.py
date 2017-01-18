@@ -22,9 +22,10 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    url='https://pypi.python.org/pypi/plone.server',
+    url='https://github.com/plone/plone.server',
     license='GPL version 3',
     setup_requires=[
         'pytest-runner',

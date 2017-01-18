@@ -1,11 +1,21 @@
 Introduction
 ============
 
-This is the working project of the next generation plone server based on asyncio.
+.. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
+   :target: http://ploneserver.readthedocs.io/en/latest/
 
-* depends on python 3.5
+.. image:: https://travis-ci.org/plone/plone.server.svg?branch=master
+   :target: https://travis-ci.org/plone/plone.server
+
+.. image:: https://img.shields.io/pypi/v/plone.server.svg
+   :target: https://pypi.python.org/pypi/plone.server
 
 Please `read the detailed docs <http://ploneserver.readthedocs.io/en/latest/>`_
+
+
+This is the working project of the next generation plone server based on asyncio.
+
+* depends on python >= 3.5
 
 
 Getting started with development
