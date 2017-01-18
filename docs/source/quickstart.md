@@ -18,15 +18,24 @@ Install `plone.server`:
 ./bin/pip install plone.server
 ```
 
+Generate configuration file:
+
+```
+./bin/pcreate configuration
+```
+
 Finally, run the server:
 
 ```
 ./bin/pserver
 ```
 
+The server should now be running on http://0.0.0.0:8080
 
 Then, [use Postman](https://www.getpostman.com/), curl or whatever tool you
 prefer to interact with the REST API.
+
+Modify the configuration in config.json to customize server setttings.
 
 
 ## Creating default content
