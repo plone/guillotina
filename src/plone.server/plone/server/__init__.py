@@ -1,21 +1,22 @@
 # -*- encoding: utf-8 -*-
-# create logging
-import logging
-logger = logging.getLogger('plone.server')
-
-from zope.i18nmessageid import MessageFactory  # noqa
-_ = MessageFactory('plone')
 
 # load the patch before anything else.
 from plone.server import patch  # noqa
-# load defined migrations
-from plone.server.migrate import migrations  # noqa
 
 from plone.server import interfaces
 from plone.server import languages
 
+# load defined migrations
+from plone.server.migrate import migrations  # noqa
+from zope.i18nmessageid import MessageFactory
 
 import collections
+import logging
+
+# create logging
+logger = logging.getLogger('plone.server')
+
+_ = MessageFactory('plone')
 
 
 app_settings = {
