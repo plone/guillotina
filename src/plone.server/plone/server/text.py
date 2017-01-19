@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 """Module to define the text field."""
 from persistent import Persistent
+from plone.server import _
 from plone.server.interfaces import IRichText
 from plone.server.interfaces import IRichTextValue
 from plone.server.interfaces import ITransformer
@@ -12,14 +13,6 @@ from zope.schema import Object
 from zope.schema._bootstrapinterfaces import ConstraintNotSatisfied
 from zope.schema.interfaces import IFromUnicode
 from zope.schema.interfaces import WrongType
-
-import logging
-
-
-_ = MessageFactory('plone')
-
-
-LOG = logging.getLogger(__name__)
 
 
 class RawValueHolder(Persistent):

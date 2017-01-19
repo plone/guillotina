@@ -6,6 +6,8 @@ from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from plone.server import app_settings
+from plone.server import _
+from plone.server import logger
 from plone.server.api.content import DefaultOPTIONS
 from plone.server.auth.participation import AnonymousParticipation
 from plone.server.browser import ErrorResponse
@@ -26,7 +28,8 @@ from plone.server.interfaces import SUBREQUEST_METHODS
 from plone.server.interfaces import WRITING_VERBS
 from plone.server.registry import ACTIVE_LAYERS_KEY
 from plone.server.transactions import locked
-from plone.server.transactions import sync
+from plone.server.transactions import abort
+from plone.server.transactions import commit
 from plone.server.utils import apply_cors
 from plone.server.utils import import_class
 from zope.component import getUtility
@@ -42,16 +45,11 @@ from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
 
 import aiohttp
+import asyncio
 import json
 import logging
 import traceback
 import uuid
-
-
-_ = MessageFactory('plone')
-
-
-logger = logging.getLogger(__name__)
 
 
 async def do_traverse(request, parent, path):
@@ -150,6 +148,30 @@ async def traverse(request, parent, path):
     return await traverse(request, context, path[1:])
 
 
+def generate_unauthorized_response(e, request):
+    # We may need to check the roles of the users to show the real error
+    eid = uuid.uuid4().hex
+    message = _('Not authorized to render operation') + ' ' + eid
+    logger.error(
+        message,
+        exc_info=e)
+    return UnauthorizedResponse(message)
+
+
+def generate_error_response(e, request, error):
+    # We may need to check the roles of the users to show the real error
+    eid = uuid.uuid4().hex
+    message = _('Error on execution of view') + ' ' + eid
+    logger.error(
+        message,
+        exc_info=e)
+
+    return ErrorResponse(
+        error,
+        message
+    )
+
+
 class MatchInfo(AbstractMatchInfo):
     """Function that returns from traversal request on aiohttp."""
 
@@ -169,60 +191,39 @@ class MatchInfo(AbstractMatchInfo):
             txn = request.conn.transaction_manager.begin(request)
             try:
                 async with locked(self.resource):
+                    # We try to avoid collisions on the same instance of
+                    # plone.server
                     view_result = await self.view()
-                    if isinstance(view_result, ErrorResponse):
-                        if SHARED_CONNECTION is False:
-                            txn.abort()
-                        else:
-                            await sync(request)(txn.abort)
-                    elif isinstance(view_result, UnauthorizedResponse):
-                        if SHARED_CONNECTION is False:
-                            txn.abort()
-                        else:
-                            await sync(request)(txn.abort)
+                    if isinstance(view_result, ErrorResponse) or \
+                            isinstance(view_result, UnauthorizedResponse):
+                        # If we don't throw an exception and return an specific
+                        # ErrorReponse just abort
+                        await abort(txn, request)
                     else:
-                        if SHARED_CONNECTION is False:
-                            await txn.acommit()
-                        else:
-                            await sync(request)(txn.commit)
+                        await commit(txn, request)
+
             except Unauthorized as e:
-                eid = uuid.uuid4().hex
-                message = _('Not authorized to render operation') + ' ' + eid
-                logger.error(
-                    message,
-                    exc_info=e)
-                await sync(request)(txn.abort)
-                view_result = UnauthorizedResponse(message)
+                await abort(txn, request)
+                view_result = generate_unauthorized_response(e, request)
             except Exception as e:
-                eid = uuid.uuid4().hex
-                message = _('Error on execution of view') + ' ' + eid
-                logger.error(
-                    message,
-                    exc_info=e)
-                await sync(request)(txn.abort)
-                view_result = ErrorResponse(
-                    'ServiceError',
-                    message
-                )
+                await abort(txn, request)
+                view_result = generate_error_response(
+                    e, request, 'ServiceError')
         else:
             try:
                 view_result = await self.view()
             except Unauthorized as e:
-                eid = uuid.uuid4().hex
-                message = _('Not authorized to render operation') + ' ' + eid
-                logger.error(
-                    message,
-                    exc_info=e)
-                view_result = UnauthorizedResponse(message)
+                view_result = generate_unauthorized_response(e, request)
             except Exception as e:
-                eid = uuid.uuid4().hex
-                message = _('Error on execution of view') + ' ' + eid
-                logger.error(
-                    message,
-                    exc_info=e)
-                view_result = ErrorResponse(
-                    'ViewError',
-                    message)
+                view_result = generate_error_response(e, request, 'ViewError')
+
+        # If we want to close the connection after the request
+        if SHARED_CONNECTION is False and hasattr(request, 'conn'):
+            request.conn.close()
+
+        futures_to_wait = request._futures.values()
+        if futures_to_wait:
+            await asyncio.gather(futures_to_wait)
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
@@ -231,12 +232,8 @@ class MatchInfo(AbstractMatchInfo):
             # Always provide some response to work with
             view_result = Response({})
 
-        # If we want to close the connection after the request
-        if SHARED_CONNECTION is False and hasattr(request, 'conn'):
-            request.conn.close()
-
         # Apply cors if its needed
-        view_result.headers.update(await apply_cors(request))
+        view_result.headers.update(apply_cors(request))
 
         return await self.rendered(view_result)
 
@@ -298,6 +295,8 @@ class TraversalRouter(AbstractRouter):
         """Main function to resolve a request."""
         alsoProvides(request, IRequest)
         alsoProvides(request, IDefaultLayer)
+
+        request._futures = {}
 
         request.security = IInteraction(request)
 

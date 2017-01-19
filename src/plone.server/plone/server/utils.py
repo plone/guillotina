@@ -69,7 +69,7 @@ def get_authenticated_user_id(request):
         return user.id
 
 
-async def apply_cors(request):
+def apply_cors(request):
     """Second part of the cors function to validate."""
     from plone.server import app_settings
     headers = {}
@@ -77,7 +77,7 @@ async def apply_cors(request):
     if origin:
         if not any([fnmatch.fnmatchcase(origin, o)
                     for o in app_settings['cors']['allow_origin']]):
-            logger.info('Origin %s not allowed' % origin)
+            logger.error('Origin %s not allowed' % origin)
             raise HTTPUnauthorized()
         elif request.headers.get('Access-Control-Allow-Credentials', False):
             headers['Access-Control-Allow-Origin', origin]

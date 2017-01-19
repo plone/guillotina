@@ -5,11 +5,6 @@ from plone.server.interfaces import IApplication
 from plone.server.json.interfaces import IResourceSerializeToJson
 from zope.component import getMultiAdapter
 
-import logging
-
-
-logger = logging.getLogger(__name__)
-
 
 @configure.service(context=IApplication, method='GET', permission='plone.AccessContent')
 async def get(context, request):

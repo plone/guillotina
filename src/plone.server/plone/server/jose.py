@@ -17,12 +17,8 @@ from time import time
 import binascii
 import datetime
 import json
-import logging
 import six
 import zlib
-
-
-logger = logging.getLogger(__name__)
 
 
 __all__ = ['encrypt', 'decrypt', 'sign', 'verify']

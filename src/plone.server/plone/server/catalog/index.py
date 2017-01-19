@@ -6,11 +6,7 @@ from plone.server.transactions import RequestNotFound
 from plone.server.transactions import tm
 from zope.component import queryUtility
 
-import logging
 import transaction
-
-
-logger = logging.getLogger('plone.server')
 
 
 class CommitHook(object):

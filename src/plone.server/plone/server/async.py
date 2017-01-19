@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from dateutil.tz import tzlocal
+from plone.server import _
+from plone.server import logger
 from plone.server.browser import ErrorResponse
 from plone.server.browser import UnauthorizedResponse
 from plone.server.browser import View
@@ -15,11 +17,7 @@ import asyncio
 import logging
 
 
-_ = MessageFactory('plone')
-
-
 _zone = tzlocal()
-logger = logging.getLogger(__name__)
 
 
 class IAsyncUtility(Interface):

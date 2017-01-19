@@ -1,10 +1,7 @@
 from persistent.dict import PersistentDict
 from pkg_resources import parse_version
+from plone.server import logger
 
-import logging
-
-
-logger = logging.getLogger('plone.server')
 
 _migrations = []
 

@@ -4,7 +4,7 @@ Insane experimental library for running multiple concurrent transactions
 on a single ZODB connection. This should not be possible to do safely, but
 we'll see how far we get and learn more about ZODB while doing it...
 """
-from aiohttp.web import RequestHandler
+from aiohttp.web_server import RequestHandler
 from concurrent.futures import ThreadPoolExecutor
 from plone.server.interfaces import SHARED_CONNECTION
 from transaction._manager import _new_transaction
@@ -17,14 +17,10 @@ from plone.server.utils import get_authenticated_user_id
 
 import asyncio
 import inspect
-import logging
 import threading
 import time
 import transaction
 import ZODB.Connection
-
-
-logger = logging.getLogger(__name__)
 
 
 ASYNCIO_LOCKS = {}
@@ -338,6 +334,20 @@ def tm(request):
     assert getattr(request, 'conn', None) is not None, \
         'Request has no conn'
     return request.conn.transaction_manager
+
+
+async def commit(txn, request):
+    if SHARED_CONNECTION is False:
+        await txn.acommit()
+    else:
+        await sync(request)(txn.commit)
+
+
+async def abort(txn, request):
+    if SHARED_CONNECTION is False:
+        txn.abort()
+    else:
+        await sync(request)(txn.abort)
 
 
 def sync(request):

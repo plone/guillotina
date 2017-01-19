@@ -1,4 +1,5 @@
 from plone.server import app_settings
+from plone.server import logger
 from plone.server.commands import Command
 from plone.server.testing import PloneRequester
 from plone.server.testing import TESTING_SETTINGS
@@ -8,9 +9,6 @@ import asyncio
 import logging
 import threading
 import time
-
-
-logger = logging.getLogger('plone.server')
 
 
 def format_headers(headers):

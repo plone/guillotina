@@ -5,6 +5,7 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from dateutil.tz import tzlocal
 from plone.server import app_settings
 from plone.server import configure
+from plone.server import _
 from plone.server.api.service import Service
 from plone.server.browser import ErrorResponse
 from plone.server.browser import Response
@@ -27,22 +28,14 @@ from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
-from zope.i18nmessageid import MessageFactory
+
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
 from zope.securitypolicy.interfaces import IRolePermissionMap
 
-import logging
-
-
-_ = MessageFactory('plone')
-
 
 _zone = tzlocal()
-
-
-logger = logging.getLogger(__name__)
 
 
 @configure.service(context=IResource, method='GET', permission='plone.ViewContent')
