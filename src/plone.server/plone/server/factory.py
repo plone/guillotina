@@ -36,6 +36,7 @@ from zope.configuration.xmlconfig import include
 from zope.configuration.xmlconfig import registerCommonDirectives
 from zope.interface import alsoProvides
 from zope.interface import implementer
+from zope.securitypolicy.interfaces import IPrincipalPermissionManager
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
 import asyncio
@@ -173,6 +174,8 @@ class ApplicationToJson(object):
         return result
 
 
+@configure.adapter(for_=IDatabase, provides=IPrincipalPermissionManager, trusted=True)
+@configure.adapter(for_=IApplication, provides=IPrincipalPermissionManager, trusted=True)
 class RootSpecialPermissions(PrincipalPermissionManager):
     """No Role Map on Application and DB so permissions set to users.
 
@@ -346,6 +349,7 @@ def make_app(config_file=None, settings=None):
     import plone.server
     configure.scan('..api')
     configure.scan('..content')
+    configure.scan('..security')
     configure.scan('..behaviors')
     configure.scan('..languages')
     configure.scan('..permissions')

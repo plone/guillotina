@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from plone.server import configure
 from plone.server.content import iter_schemata
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import read_permission
@@ -30,6 +31,10 @@ from zope.securitypolicy.interfaces import IRolePermissionMap
 from zope.securitypolicy.interfaces import Unset
 from zope.securitypolicy.principalrole import principalRoleManager
 from zope.securitypolicy.zopepolicy import ZopeSecurityPolicy
+
+
+# load zcml from here...
+configure.include('zope.securitypolicy')
 
 
 globalRolesForPrincipal = principalRoleManager.getRolesForPrincipal
@@ -171,8 +176,9 @@ class DexterityPermissionChecker(object):
         return Proxy(obj, self)
 
 
-@adapter(IRequest)
-@implementer(IInteraction)
+@configure.adapter(
+    for_=IRequest,
+    provides=IInteraction)
 def get_current_interaction(request):
     interaction = getattr(request, 'security', None)
     if IInteraction.providedBy(interaction):

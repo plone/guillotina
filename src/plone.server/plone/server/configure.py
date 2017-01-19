@@ -11,10 +11,12 @@ from zope.component import zcml
 from zope.component.zcml import utility
 from zope.interface import classImplements
 from zope.interface import Interface
+from zope.configuration import xmlconfig
+
+import plone.behavior.metaconfigure
 import zope.security.zcml
 import zope.securitypolicy.metaconfigure
 
-import plone.behavior.metaconfigure
 
 _registered_configurations = []
 # stored as tuple of (type, configuration) so we get keep it in the order
@@ -191,6 +193,15 @@ def load_grant_all(_context, grant_all):
 register_configuration_handler('grant_all', load_grant_all)
 
 
+def load_include(_context, _include):
+    config = _include['config']
+    if 'package' in config:
+        config['package'] = resolve_or_get(
+            resolve_module_path(config['package']))
+    xmlconfig.include(_context, **config)
+register_configuration_handler('include', load_include)
+
+
 class _base_decorator(object):
     configuration_type = ''
 
@@ -294,6 +305,17 @@ def grant_all(principal=None, role=None):
             principal=principal,
             role=role),
         'grant_all')
+
+
+def include(package, file=None):
+    """
+    include is different from scan. Include is for including a regular zcml
+    include
+    """
+    register_configuration(
+        caller_module(),
+        dict(package=package, file=file),
+        'include')
 
 
 def scan(path):

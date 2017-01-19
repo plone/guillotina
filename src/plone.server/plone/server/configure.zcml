@@ -20,7 +20,6 @@
   <adapter factory=".browser.Absolute_URL_ObtainRequest" />
 
   <include file="meta.zcml" />
-  <include file="security.zcml" />
 
   <include package=".json" />
   <include package=".auth" />
