@@ -3,6 +3,7 @@ from aiohttp import web
 from pkg_resources import iter_entry_points
 from plone.server import app_settings
 from plone.server import configure
+from plone.server import logger
 from plone.server.async import IAsyncUtility
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
@@ -45,7 +46,6 @@ except ImportError:
 import asyncio
 import inspect
 import json
-import logging
 import transaction
 import ZODB.FileStorage
 
@@ -54,8 +54,6 @@ try:
     from Crypto.PublicKey import RSA
 except ImportError:
     RSA = None
-
-logger = logging.getLogger('plone.server')
 
 
 @implementer(IApplication)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from plone.server import logger
 from plone.server.factory import make_app
 from plone.server.testing import FakeRequest
 from plone.server.testing import TestParticipation
@@ -9,8 +10,6 @@ import logging
 import os
 import sys
 
-
-logger = logging.getLogger('plone.server')
 
 
 MISSING_SETTINGS = {

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from dateutil.parser import parse
+from plone.server import logger
 from plone.server.json.interfaces import IJSONToValue
 from zope.component import adapter
 from zope.component import ComponentLookupError
@@ -16,11 +17,6 @@ from zope.schema.interfaces import IList
 from zope.schema.interfaces import ISet
 from zope.schema.interfaces import ITuple
 from plone.server.interfaces import IJSONField
-
-import logging
-
-
-logger = logging.getLogger(__name__)
 
 
 def schema_compatible(value, schema_or_field):

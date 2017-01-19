@@ -3,6 +3,8 @@ from collections import MutableMapping
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path as osPath
+from plone.server import logger
+from plone.server import _
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IResourceFactory
@@ -13,21 +15,13 @@ from zope.component.zcml import utility
 from zope.configuration import fields as configuration_fields
 from zope.configuration.exceptions import ConfigurationError
 from zope.configuration.fields import Path
-from zope.i18nmessageid import MessageFactory
 from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
 
 import json
-import logging
 import os
-
-
-_ = MessageFactory('plone')
-
-
-logger = logging.getLogger(__name__)
 
 
 def rec_merge(d1, d2):

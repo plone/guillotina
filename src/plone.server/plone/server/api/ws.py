@@ -7,6 +7,7 @@ from plone.server import jose
 from plone.server.api.service import Service
 from plone.server.browser import Response
 from plone.server import configure
+from plone.server import logger
 from plone.server.interfaces import ISite
 from plone.server.interfaces import ITraversableView
 from zope.component import getUtility
@@ -16,9 +17,6 @@ from zope.security.interfaces import IPermission
 import aiohttp
 import logging
 import ujson
-
-
-logger = logging.getLogger(__name__)
 
 
 @configure.service(context=ISite, method='GET', permission='plone.AccessContent',

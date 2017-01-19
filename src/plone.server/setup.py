@@ -36,7 +36,7 @@ setup(
     packages=find_packages('./' if os.path.isdir('plone') else os.path.join('src', 'plone.server'), exclude=['ez_setup']),  # noqa
     namespace_packages=['plone'],
     install_requires=[
-        'aiohttp==1.0.5',
+        'aiohttp',
         'jsonschema',
         'python-dateutil',
         'BTrees',
