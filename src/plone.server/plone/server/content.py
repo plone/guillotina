@@ -15,6 +15,7 @@ from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
+from zope.securitypolicy.interfaces import IPrincipalPermissionManager
 from plone.server.browser import get_physical_path
 from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.exceptions import NoPermissionToAdd
@@ -469,6 +470,8 @@ class StaticDirectory(object):
                 self._items[x.name] = StaticFile(str(x.absolute()))
 
 
+@configure.adapter(for_=IStaticFile, provides=IPrincipalPermissionManager, trusted=True)
+@configure.adapter(for_=IStaticDirectory, provides=IPrincipalPermissionManager, trusted=True)
 class StaticFileSpecialPermissions(PrincipalPermissionManager):
     def __init__(self, db):
         super(StaticFileSpecialPermissions, self).__init__()
