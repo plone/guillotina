@@ -2,15 +2,8 @@
 
 # load the patch before anything else.
 from plone.server import patch  # noqa
-
-from plone.server import interfaces
-from plone.server import languages
-
-# load defined migrations
-from plone.server.migrate import migrations  # noqa
 from zope.i18nmessageid import MessageFactory
 
-import collections
 import logging
 
 # create logging
@@ -37,29 +30,6 @@ app_settings = {
         "plone.server.auth.validators.SaltedHashPasswordValidator",
         "plone.server.auth.validators.JWTValidator"
     ],
-    "default_layers": [
-        interfaces.IDefaultLayer
-    ],
-    "http_methods": {
-        "PUT": interfaces.IPUT,
-        "POST": interfaces.IPOST,
-        "PATCH": interfaces.IPATCH,
-        "DELETE": interfaces.IDELETE,
-        "GET": interfaces.IGET,
-        "OPTIONS": interfaces.IOPTIONS,
-        "HEAD": interfaces.IHEAD,
-        "CONNECT": interfaces.ICONNECT
-    },
-    "renderers": collections.OrderedDict({
-        "application/json": interfaces.IRendererFormatJson,
-        "text/html": interfaces.IRendererFormatHtml,
-        "*/*": interfaces.IRendererFormatRaw
-    }),
-    "languages": {
-        "en": languages.IEN,
-        "en-us": languages.IENUS,
-        "ca": languages.ICA
-    },
     "default_permission": 'zope.Public',
     "available_addons": {},
     "api_definition": {},

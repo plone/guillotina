@@ -3,6 +3,8 @@ from aiohttp import web
 from pkg_resources import iter_entry_points
 from plone.server import app_settings
 from plone.server import configure
+from plone.server import interfaces
+from plone.server import languages
 from plone.server import logger
 from plone.server.async import IAsyncUtility
 from plone.server.auth.users import ANONYMOUS_USER_ID
@@ -36,18 +38,20 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.securitypolicy.principalpermission import PrincipalPermissionManager
 
+import asyncio
+import collections
+import inspect
+import json
+import transaction
+import ZODB.FileStorage
+
+
 try:
     from relstorage.options import Options
     from relstorage.storage import RelStorage
     RELSTORAGE = True
 except ImportError:
     RELSTORAGE = False
-
-import asyncio
-import inspect
-import json
-import transaction
-import ZODB.FileStorage
 
 
 try:
@@ -290,7 +294,36 @@ def load_application(module, root, settings):
     configure.load_all_configurations(app.config, module.__name__)
 
 
+# XXX use this to delay imports for these settings
+_delayed_default_settings = {
+    "default_layers": [
+        interfaces.IDefaultLayer
+    ],
+    "http_methods": {
+        "PUT": interfaces.IPUT,
+        "POST": interfaces.IPOST,
+        "PATCH": interfaces.IPATCH,
+        "DELETE": interfaces.IDELETE,
+        "GET": interfaces.IGET,
+        "OPTIONS": interfaces.IOPTIONS,
+        "HEAD": interfaces.IHEAD,
+        "CONNECT": interfaces.ICONNECT
+    },
+    "renderers": collections.OrderedDict({
+        "application/json": interfaces.IRendererFormatJson,
+        "text/html": interfaces.IRendererFormatHtml,
+        "*/*": interfaces.IRendererFormatRaw
+    }),
+    "languages": {
+        "en": languages.IEN,
+        "en-us": languages.IENUS,
+        "ca": languages.ICA
+    }
+}
+
+
 def make_app(config_file=None, settings=None):
+    app_settings.update(_delayed_default_settings)
 
     # Initialize aiohttp app
     app = web.Application(router=TraversalRouter())
@@ -316,6 +349,7 @@ def make_app(config_file=None, settings=None):
     configure.scan('..behaviors')
     configure.scan('..languages')
     configure.scan('..permissions')
+    configure.scan('..migrate.migrations')
     load_application(plone.server, root, settings)
 
     for ep in iter_entry_points('plone.server'):

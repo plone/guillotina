@@ -4,16 +4,15 @@ Insane experimental library for running multiple concurrent transactions
 on a single ZODB connection. This should not be possible to do safely, but
 we'll see how far we get and learn more about ZODB while doing it...
 """
-from aiohttp.web_server import RequestHandler
 from concurrent.futures import ThreadPoolExecutor
 from plone.server.interfaces import SHARED_CONNECTION
+from plone.server.utils import get_authenticated_user_id
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
 from zope.interface import implementer
 from zope.proxy import ProxyBase
 from zope.security.interfaces import Unauthorized
-from plone.server.utils import get_authenticated_user_id
 
 import asyncio
 import inspect
@@ -21,6 +20,12 @@ import threading
 import time
 import transaction
 import ZODB.Connection
+
+
+try:
+    from aiohttp.web_server import RequestHandler
+except ImportError:
+    from aiohttp.web import RequestHandler
 
 
 ASYNCIO_LOCKS = {}
