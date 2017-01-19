@@ -3,7 +3,6 @@ from collections import MutableMapping
 from collections import OrderedDict
 from functools import reduce
 from pathlib import Path as osPath
-from plone.server import app_settings
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IResourceFactory
@@ -151,6 +150,7 @@ def register_service(_context, configuration, content, method, layer,
 
     # prevent circular import
     from plone.server.security import ViewPermissionChecker
+    from plone.server import app_settings
 
     defineChecker(factory, ViewPermissionChecker(required))
     logger.debug('Defining adapter for '  # noqa
@@ -171,6 +171,8 @@ def register_service(_context, configuration, content, method, layer,
 
 def api_directive(_context, file):  # noqa 'too complex' :)
     logger.warn('plone:api directive will be removed in 1.0.0 final')
+
+    from plone.server import app_settings
 
     if file:
         file = os.path.abspath(_context.path(file))
@@ -294,6 +296,7 @@ class IAddOn(Interface):
 
 def add_on(_context, name, title, handler):
     logger.warn('plone:addon directive will be removed in 1.0.0 final')
+    from plone.server import app_settings
     if name not in app_settings['available_addons']:
         app_settings['available_addons'][name] = {
             'title': title,

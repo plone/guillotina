@@ -1,16 +1,16 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
+from plone.server import configure
+from plone.server.interfaces import IBeforeJSONAssignedEvent
+from plone.server.interfaces import IFileFinishUploaded
 from plone.server.interfaces import INewUserAdded
 from plone.server.interfaces import IObjectFinallyCreatedEvent
 from plone.server.interfaces import IObjectFinallyDeletedEvent
 from plone.server.interfaces import IObjectFinallyModifiedEvent
 from plone.server.interfaces import IObjectFinallyVisitedEvent
-from plone.server.interfaces import IObjectPermissionsViewEvent
 from plone.server.interfaces import IObjectPermissionsModifiedEvent
-from plone.server.interfaces import IBeforeJSONAssignedEvent
-from plone.server.interfaces import IFileFinishUploaded
+from plone.server.interfaces import IObjectPermissionsViewEvent
 from zope.component._api import getSiteManager
-from zope.component._declaration import adapter
 from zope.component.interfaces import ComponentLookupError
 from zope.component.interfaces import IObjectEvent
 from zope.event import subscribers as syncsubscribers
@@ -100,7 +100,7 @@ async def dispatch(*event):
     return await sitemanager.adapters.asubscribers(event, None)
 
 
-@adapter(IObjectEvent)
+@configure.subscriber(for_=IObjectEvent)
 async def object_event_notify(event):
     """Dispatch ObjectEvents to interested adapters."""
     try:

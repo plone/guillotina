@@ -14,22 +14,26 @@ class TestConfigure(PloneFunctionalTestCase):
     """Functional testing of the API REST."""
 
     def test_register_service(self):
-        cur_count = len(configure.get_services('plone.server.tests'))
+        cur_count = len(configure.get_configurations('plone.server.tests', 'service'))
 
         class TestService(Service):
             async def __call__(self):
                 return {
                     "foo": "bar"
                 }
-        configure.register_service(TestService, TestService, dict(
+        configure.register_configuration(TestService, dict(
             context=ISite,
             name="@foobar",
             permission='plone.ViewContent'
-        ))
-        self.assertEqual(len(configure.get_services('plone.server.tests')), cur_count + 1)
+        ), 'service')
+
+        self.assertEqual(
+            len(configure.get_configurations('plone.server.tests', 'service')),
+            cur_count + 1)
 
         # now test it...
-        configure.load_services(self.layer.app.app.config, 'plone.server.tests')
+        configure.load_configuration(
+            self.layer.app.app.config, 'plone.server.tests', 'service')
         self.layer.app.app.config.execute_actions()
 
         resp = self.layer.requester('GET', '/plone/plone/@foobar')
@@ -38,7 +42,7 @@ class TestConfigure(PloneFunctionalTestCase):
 
     def test_register_contenttype(self):
         cur_count = len(
-            configure.get_configurations('plone.server.tests', 'contenttypes'))
+            configure.get_configurations('plone.server.tests', 'contenttype'))
 
         class IMyType(Interface):
             pass
@@ -51,13 +55,15 @@ class TestConfigure(PloneFunctionalTestCase):
             schema=IMyType,
             portal_type="MyType1",
             behaviors=["plone.server.behaviors.dublincore.IDublinCore"]
-        ), 'contenttypes')
+        ), 'contenttype')
+
         self.assertEqual(
-            len(configure.get_configurations('plone.server.tests', 'contenttypes')),
+            len(configure.get_configurations('plone.server.tests', 'contenttype')),
             cur_count + 1)
 
         # now test it...
-        configure.load_contenttypes(self.layer.app.app.config, 'plone.server.tests')
+        configure.load_configuration(
+            self.layer.app.app.config, 'plone.server.tests', 'contenttype')
         self.layer.app.app.config.execute_actions()
 
         resp = self.layer.requester('GET', '/plone/plone/@types')
@@ -65,7 +71,8 @@ class TestConfigure(PloneFunctionalTestCase):
         self.assertTrue(any("MyType1" in s['title'] for s in response))
 
     def test_register_behavior(self):
-        cur_count = len(configure.get_configurations('plone.server.tests', 'behaviors'))
+        cur_count = len(
+            configure.get_configurations('plone.server.tests', 'behavior'))
 
         from plone.server.interfaces import IFormFieldProvider
         from zope.interface import provider
@@ -83,7 +90,7 @@ class TestConfigure(PloneFunctionalTestCase):
         )()
 
         self.assertEqual(
-            len(configure.get_configurations('plone.server.tests', 'behaviors')),
+            len(configure.get_configurations('plone.server.tests', 'behavior')),
             cur_count + 1)
 
         class IMyType(Interface):
@@ -97,10 +104,11 @@ class TestConfigure(PloneFunctionalTestCase):
             schema=IMyType,
             portal_type="MyType2",
             behaviors=[IMyBehavior]
-        ), 'contenttypes')
+        ), 'contenttype')
 
         # now test it...
-        configure.load_contenttypes(self.layer.app.app.config, 'plone.server.tests')
+        configure.load_configuration(
+            self.layer.app.app.config, 'plone.server.tests', 'contenttype')
         self.layer.app.app.config.execute_actions()
 
         resp = self.layer.requester('GET', '/plone/plone/@types')
@@ -109,7 +117,8 @@ class TestConfigure(PloneFunctionalTestCase):
         self.assertTrue('foobar' in type_['definitions']['IMyBehavior']['properties'])
 
     def test_register_addon(self):
-        cur_count = len(configure.get_configurations('plone.server.tests', 'addons'))
+        cur_count = len(
+            configure.get_configurations('plone.server.tests', 'addon'))
 
         @configure.addon(
             name="myaddon",
@@ -127,11 +136,12 @@ class TestConfigure(PloneFunctionalTestCase):
                 pass
 
         self.assertEqual(
-            len(configure.get_configurations('plone.server.tests', 'addons')),
+            len(configure.get_configurations('plone.server.tests', 'addon')),
             cur_count + 1)
 
         # now test it...
-        configure.load_addons(self.layer.app.app.config, 'plone.server.tests')
+        configure.load_configuration(
+            self.layer.app.app.config, 'plone.server.tests', 'addon')
         self.layer.app.app.config.execute_actions()
 
         resp = self.layer.requester('GET', '/plone/plone/@addons')

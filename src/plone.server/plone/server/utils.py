@@ -180,3 +180,16 @@ def caller_package(level=2, caller_module=caller_module):
     # Go up one level to get package
     package_name = module.__name__.rsplit('.', 1)[0]
     return sys.modules[package_name]
+
+
+def resolve_module_path(path):
+    if path[0] == '.':
+        caller_mod = caller_module()
+        caller_path = dotted_name(caller_mod)
+        caller_path = '.'.join(caller_path.split('.')[:-path.count('..')])
+        path = caller_path + '.' + path.split('..')[-1].strip('.')
+    return path
+
+
+def dotted_name(ob):
+    return getattr(ob, '__module__', None) or getattr(ob, '__name__', '')

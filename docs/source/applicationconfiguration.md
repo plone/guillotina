@@ -9,9 +9,9 @@ to those decorators.
 
 ## service
 
-*`configure.service`*
+*`@configure.service`*
 
-* _context_: Content type interface this service is registered against. Example: ISite
+* _context_: Content type interface this service is registered against. Example: ISite: *required*
 * _method_: HTTP method this service works against. Default is `GET`
 * _permission_: Permission this service requires. Default is configure default_permission setting
 * _layer_: Layer this service is registered for. Default is `IDefaultLayer`
@@ -20,17 +20,17 @@ to those decorators.
 
 ## content type
 
-*`configure.contenttype`*
+*`@configure.contenttype`*
 
-* _portal_type_: Name of the content type
-* _schema_: Interface schema to use for type
+* _portal_type_: Name of the content type: *required*
+* _schema_: Interface schema to use for type: *required*
 * _add_permission_: Permission required to add content. Defaults to `plone.AddContent`
 * _allowed_types_: List of types allowed to be added inside this content assuming it is a Folder type. Defaults to allowing all types.
 
 
 ## behavior
 
-*`configure.behavior`*
+*`@configure.behavior`*
 
 * _title_: Name of behavior
 * _provides_: Interface this behavior provides
@@ -40,7 +40,62 @@ to those decorators.
 
 ## addon
 
-*`configure.addon`*
+*`@configure.addon`*
 
-* _name_
+* _name_: *required*
+* _title_: *required*
+
+
+## adapter
+
+*`@configure.adapter`*
+
+* _for__: Type or list of types this adapter adapts: *required*
+* _provides_: Interface this adapter provides: required
+* _name_: Your adapter can be named to be looked up by name
+* _factory_: To use without decorator syntax, this allows you to register adapter of class defined elsewhere
+
+
+## subscriber
+
+*`@configure.subscriber`*
+
+* _for__: Type or list of types this subscriber is for: *required*
+* _handler_: A callable object that handles event, this allows you to register subscriber handler defined elsewhere
+* _factory_: A factory used to create the subscriber instance
+* _provides_: Interface this adapter provides--must be used along with factory
+
+
+## permission
+
+*`configure.permission`*
+
+* _id_
 * _title_
+* _description_
+
+
+## role
+
+*`configure.role`*
+
+* _id_
+* _title_
+* _description_
+
+## grant
+
+*`configure.grant`*
+
+* _role_: ID of role
+* _principal_: ID of principal to grant to
+* _permission_: ID of permission to grant
+* _permissions_: List of permission IDs to grant to
+
+
+## grant_all
+
+*`configure.grant_all`*
+
+* _principal_: ID of principal
+* _role_: ID of role
