@@ -9,7 +9,7 @@ from plone.server.events import ObjectFinallyCreatedEvent
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDatabase
 from plone.server.interfaces import ISite
-from plone.server.json.interfaces import IResourceSerializeToJson
+from plone.server.interfaces import IResourceSerializeToJson
 from plone.server.utils import get_authenticated_user_id
 from zope.component import getMultiAdapter
 from zope.securitypolicy.interfaces import IPrincipalRoleManager

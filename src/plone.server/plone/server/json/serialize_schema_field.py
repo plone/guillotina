@@ -1,11 +1,9 @@
-from plone.server.interfaces import IRequest
+from plone.server import configure
 from plone.server.interfaces import IRichText
-from plone.server.json.interfaces import ISchemaFieldSerializeToJson
-from plone.server.json.interfaces import IValueToJson
-from zope.component import adapter
+from plone.server.interfaces import ISchemaFieldSerializeToJson
+from plone.server.interfaces import IValueToJson
 from zope.component import getMultiAdapter
 from zope.interface import implementedBy
-from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema import getFields
 from zope.schema.interfaces import IBool
@@ -23,8 +21,9 @@ from zope.schema.interfaces import ITextLine
 from zope.schema.interfaces import ITime
 
 
-@adapter(IField, Interface, IRequest)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IField, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultSchemaFieldSerializer(object):
 
     # Elements we won't write
@@ -102,8 +101,9 @@ class DefaultSchemaFieldSerializer(object):
         return None
 
 
-@adapter(IText, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IText, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -111,8 +111,9 @@ class DefaultTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'string'
 
 
-@adapter(ITextLine, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(ITextLine, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultTextLineSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -120,8 +121,9 @@ class DefaultTextLineSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'string'
 
 
-@adapter(IFloat, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IFloat, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultFloatSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -129,8 +131,9 @@ class DefaultFloatSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'number'
 
 
-@adapter(IInt, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IInt, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultIntSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -138,8 +141,9 @@ class DefaultIntSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'integer'
 
 
-@adapter(IBool, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IBool, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultBoolSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -147,8 +151,9 @@ class DefaultBoolSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'boolean'
 
 
-@adapter(ICollection, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(ICollection, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultCollectionSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -156,8 +161,9 @@ class DefaultCollectionSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'array'
 
 
-@adapter(IChoice, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IChoice, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultChoiceSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -165,8 +171,9 @@ class DefaultChoiceSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'array'
 
 
-@adapter(IObject, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IObject, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultObjectSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -174,8 +181,9 @@ class DefaultObjectSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'object'
 
 
-@adapter(IRichText, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IRichText, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultRichTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -183,8 +191,9 @@ class DefaultRichTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'string'
 
 
-@adapter(IDatetime, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IDatetime, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultDateTimeSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -192,8 +201,9 @@ class DefaultDateTimeSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'datetime'
 
 
-@adapter(IDate, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IDate, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultDateSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -201,8 +211,9 @@ class DefaultDateSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'date'
 
 
-@adapter(ITime, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(ITime, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultTimeSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
@@ -210,8 +221,9 @@ class DefaultTimeSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return 'time'
 
 
-@adapter(IDict, Interface, Interface)
-@implementer(ISchemaFieldSerializeToJson)
+@configure.adapter(
+    for_=(IDict, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
 class DefaultDictSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property

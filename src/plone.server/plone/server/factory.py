@@ -350,6 +350,7 @@ def make_app(config_file=None, settings=None):
     configure.scan('..api')
     configure.scan('..content')
     configure.scan('..security')
+    configure.scan('..json')
     configure.scan('..behaviors')
     configure.scan('..languages')
     configure.scan('..permissions')

@@ -21,7 +21,6 @@
 
   <include file="meta.zcml" />
 
-  <include package=".json" />
   <include package=".auth" />
   <include package=".catalog" />
   <include package=".framing" />

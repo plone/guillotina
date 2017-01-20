@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+from plone.server import configure
+from plone.server.interfaces import IResourceFieldDeserializer
 from plone.server.json.deserialize_value import schema_compatible
-from plone.server.json.interfaces import IResourceFieldDeserializer
-from zope.component import adapter
-from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema.interfaces import IField
 
 
-@implementer(IResourceFieldDeserializer)
-@adapter(IField, Interface, Interface)
+@configure.adapter(
+    for_=(IField, Interface, Interface),
+    provides=IResourceFieldDeserializer)
 class DefaultResourceFieldDeserializer(object):
 
     def __init__(self, field, context, request):

@@ -5,12 +5,11 @@ from datetime import time
 from datetime import timedelta
 from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
+from plone.server import configure
 from plone.server.file import BasicFile
-from plone.server.json.interfaces import IValueToJson
+from plone.server.interfaces import IValueToJson
 from plone.server.text import IRichTextValue
-from zope.component import adapter
 from zope.i18nmessageid.message import Message
-from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema.vocabulary import SimpleVocabulary
 
@@ -49,8 +48,9 @@ def encoding():
     return 'utf-8'
 
 
-@adapter(Interface)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=Interface,
+    provides=IValueToJson)
 def default_converter(value):
     if value is None:
         return value
@@ -63,8 +63,9 @@ def default_converter(value):
         ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
 
 
-@adapter(BasicFile)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=BasicFile,
+    provides=IValueToJson)
 def file_converter(value):
     return {
         'filename': value.filename,
@@ -73,50 +74,58 @@ def file_converter(value):
     }
 
 
-@adapter(SimpleVocabulary)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=SimpleVocabulary,
+    provides=IValueToJson)
 def vocabulary_converter(value):
     return [x.token for x in value]
 
 
-@adapter(str)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=str,
+    provides=IValueToJson)
 def string_converter(value):
     return str(value, )
 
 
-@adapter(list)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=list,
+    provides=IValueToJson)
 def list_converter(value):
     return list(map(json_compatible, value))
 
 
-@adapter(PersistentList)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=PersistentList,
+    provides=IValueToJson)
 def persistent_list_converter(value):
     return list_converter(value)
 
 
-@adapter(tuple)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=tuple,
+    provides=IValueToJson)
 def tuple_converter(value):
     return list(map(json_compatible, value))
 
 
-@adapter(frozenset)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=frozenset,
+    provides=IValueToJson)
 def frozenset_converter(value):
     return list(map(json_compatible, value))
 
 
-@adapter(set)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=set,
+    provides=IValueToJson)
 def set_converter(value):
     return list(map(json_compatible, value))
 
 
-@adapter(dict)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=dict,
+    provides=IValueToJson)
 def dict_converter(value):
     if value == {}:
         return {}
@@ -127,14 +136,16 @@ def dict_converter(value):
     return dict(zip(keys, values))
 
 
-@adapter(PersistentMapping)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=PersistentMapping,
+    provides=IValueToJson)
 def persistent_mapping_converter(value):
     return dict_converter(value)
 
 
-@adapter(datetime)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=datetime,
+    provides=IValueToJson)
 def python_datetime_converter(value):
     try:
         return json_compatible(value.isoformat())
@@ -142,26 +153,30 @@ def python_datetime_converter(value):
         return None
 
 
-@adapter(date)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=date,
+    provides=IValueToJson)
 def date_converter(value):
     return json_compatible(value.isoformat())
 
 
-@adapter(time)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=time,
+    provides=IValueToJson)
 def time_converter(value):
     return json_compatible(value.isoformat())
 
 
-@adapter(timedelta)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=timedelta,
+    provides=IValueToJson)
 def timedelta_converter(value):
     return json_compatible(value.total_seconds())
 
 
-@adapter(IRichTextValue)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=IRichTextValue,
+    provides=IValueToJson)
 def richtext_converter(value):
     return {
         u'data': json_compatible(value.raw),
@@ -170,8 +185,9 @@ def richtext_converter(value):
     }
 
 
-@adapter(Message)
-@implementer(IValueToJson)
+@configure.adapter(
+    for_=Message,
+    provides=IValueToJson)
 def i18n_message_converter(value):
     # TODO:
     # value = translate(value, context=getRequest())
@@ -179,7 +195,8 @@ def i18n_message_converter(value):
 
 
 if HAS_ZOPE_MISSING:
-    @adapter(Missing.Value.__class__)
-    @implementer(IValueToJson)
+    @configure.adapter(
+        for_=Missing.Value.__class__,
+        provides=IValueToJson)
     def missing_value_converter(value):
         return None

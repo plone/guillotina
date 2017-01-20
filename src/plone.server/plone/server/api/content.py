@@ -22,8 +22,8 @@ from plone.server.exceptions import PreconditionFailed
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.interfaces import IResource
 from plone.server.json.exceptions import DeserializationError
-from plone.server.json.interfaces import IResourceDeserializeFromJson
-from plone.server.json.interfaces import IResourceSerializeToJson
+from plone.server.interfaces import IResourceDeserializeFromJson
+from plone.server.interfaces import IResourceSerializeToJson
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
 from zope.component import getMultiAdapter
