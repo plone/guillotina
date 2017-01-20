@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 from plone.server import BEHAVIOR_CACHE
+from plone.server import configure
 from plone.server.content import get_cached_factory
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import read_permission
 from plone.server.interfaces import IAbsoluteURL
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IResource
-from plone.server.json.interfaces import IResourceFieldSerializer
-from plone.server.json.interfaces import IResourceSerializeToJson
-from plone.server.json.interfaces import IResourceSerializeToJsonSummary
+from plone.server.interfaces import IResourceFieldSerializer
+from plone.server.interfaces import IResourceSerializeToJson
+from plone.server.interfaces import IResourceSerializeToJsonSummary
 from plone.server.json.serialize_value import json_compatible
-from zope.component import adapter
 from zope.component import ComponentLookupError
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
-from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema import getFields
 from zope.security.interfaces import IInteraction
@@ -25,8 +24,9 @@ from zope.security.interfaces import IPermission
 MAX_ALLOWED = 200
 
 
-@implementer(IResourceSerializeToJson)
-@adapter(IResource, Interface)
+@configure.adapter(
+    for_=(IResource, Interface),
+    provides=IResourceSerializeToJson)
 class SerializeToJson(object):
 
     def __init__(self, context, request):
@@ -106,8 +106,9 @@ class SerializeToJson(object):
         return self.permission_cache[permission_name]
 
 
-@implementer(IResourceSerializeToJson)
-@adapter(IContainer, Interface)
+@configure.adapter(
+    for_=(IContainer, Interface),
+    provides=IResourceSerializeToJson)
 class SerializeFolderToJson(SerializeToJson):
 
     def __call__(self):
@@ -132,8 +133,9 @@ class SerializeFolderToJson(SerializeToJson):
         return result
 
 
-@implementer(IResourceSerializeToJsonSummary)
-@adapter(IResource, Interface)
+@configure.adapter(
+    for_=(IResource, Interface),
+    provides=IResourceSerializeToJsonSummary)
 class DefaultJSONSummarySerializer(object):
     """Default ISerializeToJsonSummary adapter.
 

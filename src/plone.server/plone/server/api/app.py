@@ -2,7 +2,7 @@
 from plone.server import app_settings
 from plone.server import configure
 from plone.server.interfaces import IApplication
-from plone.server.json.interfaces import IResourceSerializeToJson
+from plone.server.interfaces import IResourceSerializeToJson
 from zope.component import getMultiAdapter
 
 

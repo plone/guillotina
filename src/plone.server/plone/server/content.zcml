@@ -10,14 +10,14 @@
       for="plone.server.interfaces.IDatabase
            plone.server.interfaces.IRequest"
       factory="plone.server.factory.DatabaseToJson"
-      provides="plone.server.json.interfaces.IResourceSerializeToJson"
+      provides="plone.server.interfaces.IResourceSerializeToJson"
     />
 
   <adapter
       for="plone.server.interfaces.IApplication
            plone.server.interfaces.IRequest"
       factory="plone.server.factory.ApplicationToJson"
-      provides="plone.server.json.interfaces.IResourceSerializeToJson"
+      provides="plone.server.interfaces.IResourceSerializeToJson"
     />
 
 </configure>

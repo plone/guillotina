@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 from plone.server import BEHAVIOR_CACHE
+from plone.server import configure
 from plone.server.content import get_cached_factory
 from plone.server.directives import merged_tagged_value_dict
 from plone.server.directives import write_permission
 from plone.server.events import notify
 from plone.server.interfaces import IResource
+from plone.server.interfaces import IResourceDeserializeFromJson
+from plone.server.interfaces import IResourceFieldDeserializer
 from plone.server.json.exceptions import DeserializationError
-from plone.server.json.interfaces import IResourceDeserializeFromJson
-from plone.server.json.interfaces import IResourceFieldDeserializer
-from zope.component import adapter
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
-from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
 from zope.lifecycleevent import ObjectModifiedEvent
@@ -22,8 +21,9 @@ from zope.security.interfaces import IPermission
 from zope.security.interfaces import NoInteraction
 
 
-@implementer(IResourceDeserializeFromJson)
-@adapter(IResource, Interface)
+@configure.adapter(
+    for_=(IResource, Interface),
+    provides=IResourceDeserializeFromJson)
 class DeserializeFromJson(object):
     def __init__(self, context, request):
         self.context = context

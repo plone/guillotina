@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from dateutil.parser import parse
+from plone.server import configure
 from plone.server import logger
-from plone.server.json.interfaces import IJSONToValue
-from zope.component import adapter
+from plone.server.interfaces import IJSONField
+from plone.server.interfaces import IJSONToValue
 from zope.component import ComponentLookupError
 from zope.component import getMultiAdapter
-from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema._bootstrapinterfaces import IFromUnicode
 from zope.schema.interfaces import IBool
@@ -16,7 +16,6 @@ from zope.schema.interfaces import IFrozenSet
 from zope.schema.interfaces import IList
 from zope.schema.interfaces import ISet
 from zope.schema.interfaces import ITuple
-from plone.server.interfaces import IJSONField
 
 
 def schema_compatible(value, schema_or_field):
@@ -37,8 +36,9 @@ def schema_compatible(value, schema_or_field):
         return None
 
 
-@adapter(dict, Interface)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(dict, Interface),
+    provides=IJSONToValue)
 def schema_dict_converter(value, schema):
     if value == {}:
         return {}
@@ -50,8 +50,9 @@ def schema_dict_converter(value, schema):
     return dict(zip(keys, values))
 
 
-@adapter(dict, IJSONField)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(dict, IJSONField),
+    provides=IJSONToValue)
 def json_dict_converter(value, schemafield):
     if value == {}:
         return {}
@@ -59,51 +60,59 @@ def json_dict_converter(value, schemafield):
     return value
 
 
-@adapter(Interface, IField)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(Interface, IField),
+    provides=IJSONToValue)
 def default_converter(value, field):
     return value
 
 
-@adapter(Interface, IBool)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(Interface, IBool),
+    provides=IJSONToValue)
 def bool_converter(value, field):
     return bool(value)
 
 
-@adapter(Interface, IFromUnicode)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(Interface, IFromUnicode),
+    provides=IJSONToValue)
 def from_unicode_converter(value, field):
     return field.fromUnicode(value)
 
 
-@adapter(list, IList)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(list, IList),
+    provides=IJSONToValue)
 def list_converter(value, field):
     return [schema_compatible(item, field.value_type)
             for item in value]
 
 
-@adapter(list, ITuple)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(list, ITuple),
+    provides=IJSONToValue)
 def tuple_converter(value, field):
     return tuple(list_converter(value, field))
 
 
-@adapter(list, ISet)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(list, ISet),
+    provides=IJSONToValue)
 def set_converter(value, field):
     return set(list_converter(value, field))
 
 
-@adapter(list, IFrozenSet)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(list, IFrozenSet),
+    provides=IJSONToValue)
 def frozenset_converter(value, field):
     return frozenset(list_converter(value, field))
 
 
-@adapter(dict, IDict)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(dict, IDict),
+    provides=IJSONToValue)
 def dict_converter(value, field):
     if value == {}:
         return {}
@@ -116,7 +125,8 @@ def dict_converter(value, field):
     return dict(zip(keys, values))
 
 
-@adapter(str, IDatetime)
-@implementer(IJSONToValue)
+@configure.adapter(
+    for_=(str, IDatetime),
+    provides=IJSONToValue)
 def datetime_converter(value, field):
     return parse(value)

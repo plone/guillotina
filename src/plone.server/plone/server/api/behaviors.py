@@ -3,7 +3,7 @@ from plone.behavior.interfaces import IBehavior
 from plone.server import configure
 from plone.server.content import get_cached_factory
 from plone.server.interfaces import IResource
-from plone.server.json.interfaces import ISchemaSerializeToJson
+from plone.server.interfaces import ISchemaSerializeToJson
 from zope.component import getMultiAdapter
 from zope.component import getUtilitiesFor
 from zope.component import queryAdapter

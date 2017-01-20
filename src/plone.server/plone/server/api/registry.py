@@ -7,8 +7,8 @@ from plone.server import configure
 from plone.server.interfaces import IRegistry
 from plone.server.interfaces import ISite
 from plone.server.json.exceptions import DeserializationError
-from plone.server.json.interfaces import IJSONToValue
-from plone.server.json.interfaces import IValueToJson
+from plone.server.interfaces import IJSONToValue
+from plone.server.interfaces import IValueToJson
 from plone.server.utils import import_class
 from zope.component import getMultiAdapter
 from zope.dottedname.resolve import resolve

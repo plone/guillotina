@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
+from plone.server import configure
 from plone.server.interfaces import IRequest
-from plone.server.json.interfaces import IFactorySerializeToJson
-from plone.server.json.interfaces import ISchemaFieldSerializeToJson
-from plone.server.json.interfaces import ISchemaSerializeToJson
-from zope.component import adapter
+from plone.server.interfaces import IFactorySerializeToJson
+from plone.server.interfaces import ISchemaFieldSerializeToJson
+from plone.server.interfaces import ISchemaSerializeToJson
 from zope.component import getMultiAdapter
 from zope.component.interfaces import IFactory
-from zope.interface import implementer
 from zope.interface import Interface
 from zope.schema import getFieldsInOrder
 
 
-@implementer(IFactorySerializeToJson)
-@adapter(IFactory, IRequest)
+@configure.adapter(
+    for_=(IFactory, IRequest),
+    provides=IFactorySerializeToJson)
 class SerializeFactoryToJson(object):
 
     def __init__(self, factory, request):
@@ -58,8 +58,9 @@ class SerializeFactoryToJson(object):
         return result
 
 
-@adapter(Interface, Interface)
-@implementer(ISchemaSerializeToJson)
+@configure.adapter(
+    for_=(Interface, Interface),
+    provides=ISchemaSerializeToJson)
 class DefaultSchemaSerializer(object):
 
     def __init__(self, schema, request):

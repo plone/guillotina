@@ -3,7 +3,7 @@ from plone.server.api.service import TraversableService
 from plone.server import configure
 from plone.server.interfaces import IResourceFactory
 from plone.server.interfaces import ISite
-from plone.server.json.interfaces import IFactorySerializeToJson
+from plone.server.interfaces import IFactorySerializeToJson
 from zope.component import getMultiAdapter
 from zope.component import getUtilitiesFor
 from zope.component import queryUtility
