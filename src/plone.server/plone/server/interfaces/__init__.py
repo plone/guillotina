@@ -67,6 +67,7 @@ _ = MessageFactory('plone.server')
 DEFAULT_ADD_PERMISSION = 'plone.AddContent'
 DEFAULT_READ_PERMISSION = 'plone.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'plone.ManageContent'
+MIGRATION_DATA_REGISTRY_KEY = '_migrations_info'
 
 SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']

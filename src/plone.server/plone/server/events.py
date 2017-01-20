@@ -10,6 +10,7 @@ from plone.server.interfaces import IObjectFinallyModifiedEvent
 from plone.server.interfaces import IObjectFinallyVisitedEvent
 from plone.server.interfaces import IObjectPermissionsModifiedEvent
 from plone.server.interfaces import IObjectPermissionsViewEvent
+from plone.server.interfaces import IResource
 from zope.component._api import getSiteManager
 from zope.component.interfaces import ComponentLookupError
 from zope.component.interfaces import IObjectEvent
@@ -76,6 +77,7 @@ class BeforeJSONAssignedEvent(object):
         self.context = context
 
 
+@configure.subscriber(for_=(IResource, IObjectFinallyModifiedEvent))
 def modified_object(obj, event):
     """Set the modification date of an object."""
     now = datetime.now(tz=_zone)

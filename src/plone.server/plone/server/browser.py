@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from plone.server import configure
 from plone.server.interfaces import IAbsoluteURL
-from plone.server.interfaces import ISerializableException
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResource
+from plone.server.interfaces import ISerializableException
 from plone.server.interfaces import IView
 from plone.server.transactions import get_current_request
 from zope.component import adapter
@@ -48,8 +49,9 @@ class View(object):
         }
 
 
-@adapter(IResource, IRequest)
-@implementer(IAbsoluteURL)
+@configure.adapter(
+    for_=(IResource, IRequest),
+    provides=IAbsoluteURL)
 class Absolute_URL(object):
 
     def __init__(self, context, request):
@@ -81,8 +83,9 @@ class Absolute_URL(object):
                 self.request._db_id + path
 
 
-@adapter(IResource)
-@implementer(IAbsoluteURL)
+@configure.adapter(
+    for_=IResource,
+    provides=IAbsoluteURL)
 class Absolute_URL_ObtainRequest(Absolute_URL):
 
     def __init__(self, context):

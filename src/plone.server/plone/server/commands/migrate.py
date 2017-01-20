@@ -1,10 +1,11 @@
 from plone.server import app_settings
 from plone.server import migrate
 from plone.server.commands import Command
+from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDatabase
+from plone.server.interfaces import MIGRATION_DATA_REGISTRY_KEY
 from plone.server.testing import TESTING_SETTINGS
 from zope.component import getUtility
-from plone.server.interfaces import IApplication
 
 
 def traverse_to_path(app, path):
@@ -39,7 +40,7 @@ class MigrateCommand(Command):
             db, site = data
             registry = site['_registry']
             try:
-                installed_versions = registry['_migrations_info']
+                installed_versions = registry[MIGRATION_DATA_REGISTRY_KEY]
             except KeyError:
                 installed_versions = {}
             title = '{} Migrations'.format(site_path)
@@ -111,7 +112,7 @@ class MigrateCommand(Command):
                 for app in apps:
                     registry = site['_registry']
                     try:
-                        installed_versions = registry['_migrations_info']
+                        installed_versions = registry[MIGRATION_DATA_REGISTRY_KEY]
                     except KeyError:
                         installed_versions = {}
                     _migrations = migrate.get_migrations(

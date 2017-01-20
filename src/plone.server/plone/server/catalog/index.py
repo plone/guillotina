@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
+from plone.server import configure
 from plone.server.interfaces import ICatalogUtility
+from plone.server.interfaces import IObjectFinallyCreatedEvent
+from plone.server.interfaces import IObjectFinallyDeletedEvent
+from plone.server.interfaces import IObjectFinallyModifiedEvent
+from plone.server.interfaces import IResource
 from plone.server.interfaces import ISite
 from plone.server.transactions import get_current_request
 from plone.server.transactions import RequestNotFound
 from plone.server.transactions import tm
 from zope.component import queryUtility
+from zope.lifecycleevent.interfaces import IObjectAddedEvent
+from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
 import transaction
 
@@ -57,6 +64,7 @@ def get_hook():
     return hook
 
 
+@configure.subscriber(for_=(IResource, IObjectFinallyDeletedEvent))
 def remove_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
@@ -73,6 +81,8 @@ def remove_object(obj, event):
         del hook.index[uid]
 
 
+@configure.subscriber(for_=(IResource, IObjectFinallyCreatedEvent))
+@configure.subscriber(for_=(IResource, IObjectFinallyModifiedEvent))
 def add_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
@@ -89,12 +99,14 @@ def add_object(obj, event):
         hook.index[uid] = search.get_data(obj)
 
 
+@configure.subscriber(for_=(ISite, IObjectAddedEvent))
 async def initialize_catalog(site, event):
     search = queryUtility(ICatalogUtility)
     if search:
         await search.initialize_catalog(site)
 
 
+@configure.subscriber(for_=(ISite, IObjectRemovedEvent))
 async def remove_catalog(site, event):
     search = queryUtility(ICatalogUtility)
     if search:

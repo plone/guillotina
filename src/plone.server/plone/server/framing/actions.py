@@ -1,11 +1,9 @@
 from plone.server.interfaces import IRequest
 from plone.server.renderers import IFrameFormatsJson
-from zope.component import adapter
-from zope.interface import implementer
+from plone.server import configure
 
 
-@adapter(IRequest)
-@implementer(IFrameFormatsJson)
+@configure.adapter(for_=IRequest, provides=IFrameFormatsJson, name="actions")
 class Framing(object):
 
     def __init__(self, request):

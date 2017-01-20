@@ -1,15 +1,13 @@
+from plone.server import configure
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResourceSerializeToJson
 from plone.server.renderers import IFrameFormatsJson
-from zope.component import adapter
 from zope.component import getMultiAdapter
 from zope.component import queryUtility
 from zope.component.interfaces import IFactory
-from zope.interface import implementer
 
 
-@adapter(IRequest)
-@implementer(IFrameFormatsJson)
+@configure.adapter(for_=IRequest, provides=IFrameFormatsJson, name="schema")
 class Framing(object):
 
     def __init__(self, request):

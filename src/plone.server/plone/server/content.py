@@ -36,7 +36,6 @@ from plone.server.transactions import get_current_request
 from plone.server.transactions import synccontext
 from plone.server.utils import Lazy
 from zope.annotation.interfaces import IAttributeAnnotatable
-from zope.component import adapter
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
 from zope.component import queryUtility
@@ -210,8 +209,7 @@ def create_content_in_container(container, type_, id_, request=None, **kw):
     return obj
 
 
-@implementer(IBehaviorAssignable)
-@adapter(IResource)
+@configure.adapter(for_=IResource, provides=IBehaviorAssignable)
 class BehaviorAssignable(object):
     """Support plone.behavior behaviors stored on the CACHE
     """

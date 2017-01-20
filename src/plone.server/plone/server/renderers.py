@@ -2,6 +2,7 @@
 from aiohttp.helpers import sentinel
 from aiohttp.web import Response as aioResponse
 from datetime import datetime
+from plone.server import configure
 from plone.server.browser import Response
 from plone.server.interfaces import IFrameFormatsJson
 from plone.server.interfaces import IRendered
@@ -11,12 +12,9 @@ from plone.server.interfaces import IRendererFormatRaw
 from plone.server.interfaces import IRenderFormats
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
-from zope.component import adapter
 from zope.component import queryAdapter
-from zope.interface import implementer
-# JSON Decoder
-from zope.securitypolicy.settings import PermissionSetting
 from zope.interface.interface import InterfaceClass
+from zope.securitypolicy.settings import PermissionSetting
 
 import json
 
@@ -59,29 +57,25 @@ def json_response(data=sentinel, *, text=None, body=None, status=200,
         headers=headers, content_type=content_type)
 
 
-@adapter(IRequest)
-@implementer(IRenderFormats)
+@configure.adapter(for_=IRequest, provides=IRenderFormats)
 class RendererFormats(object):
     def __init__(self, request):
         self.request = request
 
 
-@adapter(IRequest)
-@implementer(IRendererFormatJson)
+@configure.adapter(for_=IRequest, provides=IRendererFormatJson)
 class RendererFormatJson(object):
     def __init__(self, request):
         self.request = request
 
 
-@adapter(IRequest)
-@implementer(IRendererFormatHtml)
+@configure.adapter(for_=IRequest, provides=IRendererFormatHtml)
 class RendererFormatHtml(object):
     def __init__(self, request):
         self.request = request
 
 
-@adapter(IRequest)
-@implementer(IRendererFormatRaw)
+@configure.adapter(for_=IRequest, provides=IRendererFormatRaw)
 class RendererFormatRaw(object):
     def __init__(self, request):
         self.request = request
@@ -89,8 +83,9 @@ class RendererFormatRaw(object):
 # Real objects
 
 
-@adapter(IRenderFormats, IView, IRequest)
-@implementer(IRendered)
+@configure.adapter(
+    for_=(IRenderFormats, IView, IRequest),
+    provides=IRendered)
 class Renderer(object):
 
     def __init__(self, renderformat, view, request):
@@ -99,8 +94,9 @@ class Renderer(object):
         self.renderformat = renderformat
 
 
-@adapter(IRendererFormatJson, IView, IRequest)
-@implementer(IRendered)
+@configure.adapter(
+    for_=(IRendererFormatJson, IView, IRequest),
+    provides=IRendered)
 class RendererJson(Renderer):
     async def __call__(self, value):
         headers = {}
@@ -127,16 +123,18 @@ class RendererJson(Renderer):
         return resp
 
 
-@adapter(IRendererFormatHtml, IView, IRequest)
-@implementer(IRendered)
+@configure.adapter(
+    for_=(IRendererFormatHtml, IView, IRequest),
+    provides=IRendered)
 class RendererHtml(Renderer):
     async def __call__(self, value):
         # Safe html transformation
         return value
 
 
-@adapter(IRendererFormatRaw, IView, IRequest)
-@implementer(IRendered)
+@configure.adapter(
+    for_=(IRendererFormatRaw, IView, IRequest),
+    provides=IRendered)
 class RendererRaw(Renderer):
 
     def guess_response(self, value):

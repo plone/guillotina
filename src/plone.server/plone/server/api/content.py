@@ -54,7 +54,7 @@ class DefaultPOST(Service):
 
     async def __call__(self):
         """To create a content."""
-        data = await self.request.json()
+        data = await self.get_data()
         type_ = data.get('@type', None)
         id_ = data.get('id', None)
         behaviors = data.get('@behaviors', None)
@@ -142,7 +142,7 @@ class DefaultPUT(Service):
 @configure.service(context=IResource, method='PATCH', permission='plone.ModifyContent')
 class DefaultPATCH(Service):
     async def __call__(self):
-        data = await self.request.json()
+        data = await self.get_data()
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
             self.context.add_behavior(behavior)

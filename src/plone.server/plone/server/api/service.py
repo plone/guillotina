@@ -9,7 +9,8 @@ from zope.interface import alsoProvides
 
 
 class Service(View):
-    pass
+    async def get_data(self):
+        return await self.request.json()
 
 
 class DownloadService(View):

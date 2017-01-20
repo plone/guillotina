@@ -1,7 +1,8 @@
-from plone.server.testing import PloneServerBaseTestCase
+from plone.server import app_settings
 from plone.server import migrate
 from plone.server.content import create_content
-from plone.server import app_settings
+from plone.server.interfaces import MIGRATION_DATA_REGISTRY_KEY
+from plone.server.testing import PloneServerBaseTestCase
 
 
 class TestMigrations(PloneServerBaseTestCase):
@@ -84,7 +85,7 @@ class TestMigrations(PloneServerBaseTestCase):
             migrate.get_migrations('foobar'))
         site = self.layer.app['plone']['plone']
         registry = site['_registry']
-        self.assertEquals(registry['_migrations_info']['foobar'], '2.1a1')
+        self.assertEquals(registry[MIGRATION_DATA_REGISTRY_KEY]['foobar'], '2.1a1')
 
     def test_should_only_get_migrations_for_activated_applications(self):
         self.assertEqual(len(migrate.get_migrations('foobar')), 8)

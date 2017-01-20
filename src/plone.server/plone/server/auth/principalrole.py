@@ -1,11 +1,15 @@
 """Mappings between principals and roles, stored in an object locally."""
-from zope.interface import implementer
+from plone.server import configure
+from plone.server.interfaces import IResource
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.securitypolicy.principalrole import AnnotationPrincipalRoleManager
 from zope.securitypolicy.securitymap import AnnotationSecurityMap
 
 
-@implementer(IPrincipalRoleManager)
+@configure.adapter(
+    for_=IResource,
+    provides=IPrincipalRoleManager,
+    trusted=True)
 class AnnotationPlonePrincipalRoleManager(AnnotationPrincipalRoleManager):
     """Mappings between principals and roles with global."""
 

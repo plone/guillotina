@@ -1,23 +1,24 @@
 # -*- encoding: utf-8 -*-
 from persistent import Persistent
+from plone.server import app_settings
+from plone.server import configure
+from plone.server.interfaces import ICloudFileField
 from plone.server.interfaces import IFile
 from plone.server.interfaces import IFileField
-from plone.server.interfaces import ICloudFileField
 from plone.server.interfaces import IFileManager
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IStorage
 from plone.server.interfaces import NotStorable
+from plone.server.utils import import_class
 from ZODB.blob import Blob
 from zope.component import adapter
+from zope.component import getMultiAdapter
 from zope.component import getUtility
+from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.schema import Object
 from zope.schema.fieldproperty import FieldProperty
-from plone.server.utils import import_class
-from plone.server import app_settings
-from zope.interface import alsoProvides
-from zope.component import getMultiAdapter
 
 import aiohttp
 import io
@@ -44,8 +45,9 @@ def get_contenttype(
     return default
 
 
-@adapter(IResource, IRequest, IFileField)
-@implementer(IFileManager)
+@configure.adapter(
+    for_=(IResource, IRequest, IFileField),
+    provides=IFileManager)
 class BasicFileManager(object):
 
     def __init__(self, context, request, field):
@@ -179,8 +181,9 @@ class CloudFileField(Object):
         super(CloudFileField, self).__init__(schema=self.schema, **kw)
 
 
-@adapter(IResource, IRequest, ICloudFileField)
-@implementer(IFileManager)
+@configure.adapter(
+    for_=(IResource, IRequest, ICloudFileField),
+    provides=IFileManager)
 class CloudFileManager(object):
 
     def __init__(self, context, request, field):
@@ -216,6 +219,7 @@ MAXCHUNKSIZE = 1 << 16
 
 
 @implementer(IStorage)
+@configure.utility(provides=IStorage, name="builtins.str")
 class StringStorable(object):
 
     def store(self, data, blob):
@@ -227,6 +231,7 @@ class StringStorable(object):
 
 
 @implementer(IStorage)
+@configure.utility(provides=IStorage, name="builtin.bytes")
 class BytesStorable(StringStorable):
 
     def store(self, data, blob):
@@ -237,6 +242,7 @@ class BytesStorable(StringStorable):
 
 
 @implementer(IStorage)
+@configure.utility(provides=IStorage, name="builtin.file")
 class FileDescriptorStorable(object):
 
     def store(self, data, blob):
