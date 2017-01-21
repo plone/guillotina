@@ -209,7 +209,7 @@ class MatchInfo(AbstractMatchInfo):
                 view_result = generate_unauthorized_response(e, request)
             except ConflictError as e:
                 view_result = generate_error_response(
-                    e, request, 'ServiceError', 409)
+                    e, request, 'ConflictDB', 409)
             except Exception as e:
                 await abort(txn, request)
                 view_result = generate_error_response(
