@@ -43,6 +43,7 @@ from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
+from ZODB.POSException import ConflictError
 
 import aiohttp
 import asyncio
@@ -158,7 +159,7 @@ def generate_unauthorized_response(e, request):
     return UnauthorizedResponse(message)
 
 
-def generate_error_response(e, request, error):
+def generate_error_response(e, request, error, status=400):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Error on execution of view') + ' ' + eid
@@ -168,7 +169,8 @@ def generate_error_response(e, request, error):
 
     return ErrorResponse(
         error,
-        message
+        message,
+        status
     )
 
 
@@ -205,6 +207,9 @@ class MatchInfo(AbstractMatchInfo):
             except Unauthorized as e:
                 await abort(txn, request)
                 view_result = generate_unauthorized_response(e, request)
+            except ConflictError as e:
+                view_result = generate_error_response(
+                    e, request, 'ServiceError', 409)
             except Exception as e:
                 await abort(txn, request)
                 view_result = generate_error_response(
