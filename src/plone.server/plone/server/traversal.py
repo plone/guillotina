@@ -32,6 +32,7 @@ from plone.server.transactions import abort
 from plone.server.transactions import commit
 from plone.server.utils import apply_cors
 from plone.server.utils import import_class
+from plone.server.utils import get_authenticated_user_id
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
@@ -153,9 +154,15 @@ def generate_unauthorized_response(e, request):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Not authorized to render operation') + ' ' + eid
+    user = get_authenticated_user_id(request)
+    extra = {
+        'r': request.url.human_repr(),
+        'u': user
+    }
     logger.error(
         message,
-        exc_info=e)
+        exc_info=e,
+        extra=extra)
     return UnauthorizedResponse(message)
 
 
@@ -163,9 +170,15 @@ def generate_error_response(e, request, error, status=400):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Error on execution of view') + ' ' + eid
+    user = get_authenticated_user_id(request)
+    extra = {
+        'r': request.url.human_repr(),
+        'u': user
+    }
     logger.error(
         message,
-        exc_info=e)
+        exc_info=e,
+        extra=extra)
 
     return ErrorResponse(
         error,
