@@ -144,6 +144,7 @@ class index(MetadataDictDirective):
     allowed_types = (
         'searchabletext',
         'text',
+        'textkeyword',
         'keyword',
         'int',
         'date',
