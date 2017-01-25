@@ -66,6 +66,15 @@ to those decorators.
 * _provides_: Interface this adapter provides--must be used along with factory
 
 
+## utility
+
+*`@configure.utility`*
+
+* _provides_: Interface this utility provides
+* _name_: Name of utility
+* _factory_: A factory used to create the subscriber instance
+
+
 ## permission
 
 *`configure.permission`*

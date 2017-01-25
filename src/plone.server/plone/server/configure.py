@@ -8,7 +8,6 @@ from plone.server.utils import dotted_name
 from plone.server.utils import resolve_module_path
 from plone.server.utils import resolve_or_get
 from zope.component import zcml
-from zope.component.zcml import utility
 from zope.interface import classImplements
 from zope.interface import Interface
 from zope.configuration import xmlconfig
@@ -107,7 +106,7 @@ def load_contenttype(_context, contenttype):
         add_permission=conf.get('add_permission') or DEFAULT_ADD_PERMISSION,
         allowed_types=conf.get('allowed_types', None)
     )
-    utility(
+    zcml.utility(
         _context,
         provides=IResourceFactory,
         component=factory,
@@ -154,6 +153,11 @@ def load_adapter(_context, adapter):
     klass = resolve_or_get(adapter['klass'])
     factory = conf.pop('factory', None) or klass
     _component_conf(conf)
+    if 'provides' in conf and isinstance(klass, type):
+        # not sure if this is what we want or not for sure but
+        # we are automatically applying the provides interface to
+        # registered class objects
+        classImplements(klass, conf['provides'])
     zcml.adapter(
         _context,
         factory=(factory,),
@@ -171,6 +175,16 @@ def load_subscriber(_context, subscriber):
         **conf
     )
 register_configuration_handler('subscriber', load_subscriber)
+
+
+def load_utility(_context, _utility):
+    conf = _utility['config']
+    conf['factory'] = resolve_or_get(conf.get('factory') or _utility['klass'])
+    zcml.utility(
+        _context,
+        **conf
+    )
+register_configuration_handler('utility', load_utility)
 
 
 def load_permission(_context, permission):
@@ -264,6 +278,10 @@ class adapter(_factory_decorator):
 
 class subscriber(_factory_decorator):
     configuration_type = 'subscriber'
+
+
+class utility(_factory_decorator):
+    configuration_type = 'utility'
 
 
 def permission(id, title, description=''):

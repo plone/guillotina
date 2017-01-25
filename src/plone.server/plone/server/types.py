@@ -1,12 +1,12 @@
+from plone.server import configure
 from plone.server.content import get_cached_factory
 from plone.server.interfaces import IConstrainTypes
-from zope.component import adapter
-from zope.interface import implementer
 from zope.interface import Interface
 
 
-@implementer(IConstrainTypes)
-@adapter(Interface)
+@configure.adapter(
+    for_=Interface,
+    provides=IConstrainTypes)
 class FTIConstrainAllowedTypes(object):
 
     def __init__(self, context: Interface):

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+from plone.server import configure
 from plone.server.auth import authenticate_request
 from plone.server.auth.groups import PloneGroup
 from plone.server.auth.users import AnonymousUser
 from plone.server.interfaces import IRequest
 from plone.server.transactions import get_current_request
-from zope.component import adapter
-from zope.interface import implementer
+from zope.authentication.interfaces import IAuthentication
 from zope.security.interfaces import IParticipation
 
 
@@ -17,8 +17,7 @@ class AnonymousParticipation(object):
         self.interaction = None
 
 
-@adapter(IRequest)
-@implementer(IParticipation)
+@configure.adapter(for_=IRequest, provides=IParticipation)
 class PloneParticipation(object):
     principal = None
 
@@ -40,6 +39,7 @@ class PloneParticipation(object):
         self.interaction = None
 
 
+@configure.utility(provides=IAuthentication)
 class ZopeAuthentication(object):
     """ Class used to get groups. """
 

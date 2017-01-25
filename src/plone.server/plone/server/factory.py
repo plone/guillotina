@@ -19,6 +19,8 @@ from plone.server.contentnegotiation import ContentNegotiatorUtility
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IContentNegotiation
 from plone.server.interfaces import IDatabase
+from plone.server.interfaces import IRequest
+from plone.server.interfaces import IResourceSerializeToJson
 from plone.server.transactions import RequestAwareDB
 from plone.server.transactions import RequestAwareTransactionManager
 from plone.server.traversal import TraversalRouter
@@ -137,6 +139,9 @@ class ApplicationRoot(object):
         self._dbs[key] = value
 
 
+@configure.adapter(
+    for_=(IDatabase, IRequest),
+    provides=IResourceSerializeToJson)
 class DatabaseToJson(object):
 
     def __init__(self, dbo, request):
@@ -148,6 +153,9 @@ class DatabaseToJson(object):
         }
 
 
+@configure.adapter(
+    for_=(IApplication, IRequest),
+    provides=IResourceSerializeToJson)
 class ApplicationToJson(object):
 
     def __init__(self, application, request):
@@ -347,6 +355,11 @@ def make_app(config_file=None, settings=None):
         raise Exception('Neither configuration or settings')
 
     import plone.server
+    configure.include("zope.component")
+    configure.include("zope.annotation")
+    configure.include("plone.server", "meta.zcml")  # bbb
+    configure.scan('..translation')
+    configure.scan('..renderers')
     configure.scan('..api')
     configure.scan('..content')
     configure.scan('..security')
@@ -355,6 +368,13 @@ def make_app(config_file=None, settings=None):
     configure.scan('..languages')
     configure.scan('..permissions')
     configure.scan('..migrate.migrations')
+    configure.scan('..auth.participation')
+    configure.scan('..auth.principalrole')
+    configure.scan('..catalog.index')
+    configure.scan('..catalog.catalog')
+    configure.scan('..framing')
+    configure.scan('..file')
+    configure.scan('..types')
     load_application(plone.server, root, settings)
 
     for ep in iter_entry_points('plone.server'):

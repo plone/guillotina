@@ -1,6 +1,7 @@
 from persistent.dict import PersistentDict
 from pkg_resources import parse_version
 from plone.server import logger
+from plone.server.interfaces import MIGRATION_DATA_REGISTRY_KEY
 
 
 _migrations = []
@@ -85,9 +86,9 @@ def run_site_migrations(site, migrations, db=None):
             raise
 
         registry = site['_registry']
-        if '_migrations_info' not in registry:
-            registry['_migrations_info'] = PersistentDict()
-        registry['_migrations_info'][migration.application] = migration.to_version_raw
+        if MIGRATION_DATA_REGISTRY_KEY not in registry:
+            registry[MIGRATION_DATA_REGISTRY_KEY] = PersistentDict()
+        registry[MIGRATION_DATA_REGISTRY_KEY][migration.application] = migration.to_version_raw
 
 
 def run_migrations(root, migrations):

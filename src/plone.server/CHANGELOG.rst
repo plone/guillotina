@@ -7,6 +7,9 @@ New features:
   with decorators, not zcml
   [vangheem]
 
+- No more zcml in core
+  [vangheem]
+
 
 1.0a9 (2017-01-18)
 ------------------
