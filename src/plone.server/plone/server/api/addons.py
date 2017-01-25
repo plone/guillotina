@@ -6,6 +6,8 @@ from plone.server.interfaces import ISite
 from plone.server.registry import IAddons
 from zope.i18nmessageid import MessageFactory
 
+import asyncio
+
 
 _ = MessageFactory('plone')
 
@@ -28,7 +30,10 @@ async def install(context, request):
             'Duplicate',
             _("Addon already installed"))
     handler = app_settings['available_addons'][id_to_install]['handler']
-    handler.install(request)
+    if asyncio.iscoroutinefunction(handler.install):
+        await handler.install(request)
+    else:
+        handler.install(request)
     config.enabled |= {id_to_install}
     return await get_addons(context, request)()
 
@@ -52,7 +57,10 @@ async def uninstall(context, request):
             _("Addon not installed"))
 
     handler = app_settings['available_addons'][id_to_install]['handler']
-    handler.uninstall(request)
+    if asyncio.iscoroutinefunction(handler.install):
+        await handler.uninstall(request)
+    else:
+        handler.uninstall(request)
     config.enabled -= {id_to_install}
 
 

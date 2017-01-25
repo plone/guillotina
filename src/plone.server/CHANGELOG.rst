@@ -3,6 +3,9 @@
 
 New features:
 
+- install, uninstall methods for addon class can now be async
+  [vangheem]
+
 - Be able to define adapters, subscribers, permissions, roles, grant
   with decorators, not zcml
   [vangheem]
