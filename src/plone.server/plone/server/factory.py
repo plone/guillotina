@@ -504,7 +504,7 @@ def make_app(config_file=None, settings=None):
                     conn.close()
                     db.close()
                 rs = RelStorage(adapter=adapter, options=options)
-                db = RequestAwareDB(rs, **config)
+                db = newt.db._db.NewtDB(RequestAwareDB(rs, **config))
                 dbo = Database(key, db)
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])
@@ -513,7 +513,7 @@ def make_app(config_file=None, settings=None):
                 transaction.commit()
                 db.close()
                 # Set request aware database for app
-                db = newt.db._db.NewtDB(RequestAwareDB(storage))
+                db = RequestAwareDB(storage)
                 dbo = Database(key, db)
             root[key] = dbo
 
