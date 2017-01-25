@@ -150,13 +150,21 @@ async def traverse(request, parent, path):
     return await traverse(request, context, path[1:])
 
 
+def _url(request):
+    try:
+        return request.url.human_repr()
+    except AttributeError:
+        # older version of aiohttp
+        return request.path
+
+
 def generate_unauthorized_response(e, request):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Not authorized to render operation') + ' ' + eid
     user = get_authenticated_user_id(request)
     extra = {
-        'r': request.url.human_repr(),
+        'r': _url(request),
         'u': user
     }
     logger.error(
@@ -172,7 +180,7 @@ def generate_error_response(e, request, error, status=400):
     message = _('Error on execution of view') + ' ' + eid
     user = get_authenticated_user_id(request)
     extra = {
-        'r': request.url.human_repr(),
+        'r': _url(request),
         'u': user
     }
     logger.error(
