@@ -56,6 +56,11 @@ try:
 except ImportError:
     RELSTORAGE = False
 
+try:
+    import newt.db
+    NEWT = True
+except ImportError:
+    NEWT = False
 
 try:
     from Crypto.PublicKey import RSA
@@ -478,6 +483,29 @@ def make_app(config_file=None, settings=None):
                 rs = RelStorage(adapter=adapter, options=options)
                 db = RequestAwareDB(rs, **config)
                 dbo = Database(key, db)
+            elif dbconfig['storage'] == 'NEWT' and NEWT:
+                options = Options(**dbconfig['options'])
+                if dbconfig['type'] == 'postgres':
+                    from relstorage.adapters.postgresql import PostgreSQLAdapter
+                    dsn = "dbname={dbname} user={username} host={host} password={password} port={port}".format(**dbconfig['dsn'])
+                    adapter = PostgreSQLAdapter(dsn=dsn, options=options)
+                rs = RelStorage(adapter=adapter, options=options)
+                db = DB(rs)
+                try:
+                    conn = db.open()
+                    rootobj = conn.root()
+                    if not IDatabase.providedBy(rootobj):
+                        alsoProvides(rootobj, IDatabase)
+                    transaction.commit()
+                except:
+                    pass
+                finally:
+                    rootobj = None
+                    conn.close()
+                    db.close()
+                rs = RelStorage(adapter=adapter, options=options)
+                db = RequestAwareDB(rs, **config)
+                dbo = Database(key, db)
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])
                 db = DB(storage)
@@ -485,7 +513,7 @@ def make_app(config_file=None, settings=None):
                 transaction.commit()
                 db.close()
                 # Set request aware database for app
-                db = RequestAwareDB(storage)
+                db = newt.db._db.NewtDB(RequestAwareDB(storage))
                 dbo = Database(key, db)
             root[key] = dbo
 
