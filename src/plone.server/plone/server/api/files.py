@@ -8,6 +8,7 @@ from plone.server.api.service import TraversableFieldService
 from plone.server.interfaces import IFileManager
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IStaticFile
+from plone.server.api.content import DefaultOPTIONS
 from zope.component import getMultiAdapter
 
 import aiohttp
@@ -96,9 +97,9 @@ class TusPatchFile(UploadFile):
 
 @configure.service(context=IResource, method='OPTIONS', permission='plone.AccessPreflight',
                    name='@tusupload')
-class TusOptionsFile(UploadFile):
+class TusOptionsFile(DefaultOPTIONS, UploadFile):
 
-    async def __call__(self):
+    async def render(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
         adapter = getMultiAdapter(

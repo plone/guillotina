@@ -124,6 +124,7 @@ class DefaultPOST(Service):
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 
         headers = {
+            'Access-Control-Expose-Headers': 'Location',
             'Location': absolute_url()
         }
 
@@ -283,4 +284,8 @@ class DefaultOPTIONS(Service):
         """Apply CORS on the OPTIONS view."""
         headers = await self.preflight()
         resp = await self.render()
+        if isinstance(resp, Response):
+            headers.update(resp.headers)
+            resp.headers = headers
+            return resp
         return Response(response=resp, headers=headers, status=200)

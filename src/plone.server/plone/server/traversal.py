@@ -210,10 +210,10 @@ class MatchInfo(AbstractMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
-            request._db_write_enabled = True
-            txn = request.conn.transaction_manager.begin(request)
             try:
                 async with locked(self.resource):
+                    request._db_write_enabled = True
+                    txn = request.conn.transaction_manager.begin(request)
                     # We try to avoid collisions on the same instance of
                     # plone.server
                     view_result = await self.view()
@@ -259,7 +259,9 @@ class MatchInfo(AbstractMatchInfo):
             view_result = Response({})
 
         # Apply cors if its needed
-        view_result.headers.update(apply_cors(request))
+        cors_headers = apply_cors(request)
+        cors_headers.update(view_result.headers)
+        view_result.headers = cors_headers
 
         return await self.rendered(view_result)
 
