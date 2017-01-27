@@ -31,6 +31,7 @@ from zope.component import queryMultiAdapter
 
 from zope.securitypolicy.interfaces import IPrincipalPermissionMap
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from zope.securitypolicy.interfaces import IRolePermissionManager
 from zope.securitypolicy.interfaces import IPrincipalRoleMap
 from zope.securitypolicy.interfaces import IRolePermissionMap
 
@@ -200,12 +201,20 @@ async def sharing_get(context, request):
                    name='@sharing')
 async def sharing_post(context, request):
     data = await request.json()
+    roleperm = IRolePermissionManager(context)
     prinrole = IPrincipalRoleManager(context)
-    if 'prinrole' not in data:
-        raise HTTPNotFound('prinrole missing')
-    for user, roles in data['prinrole'].items():
-        for role in roles:
-            prinrole.assignRoleToPrincipal(role, user)
+    if 'prinrole' not in data and 'roleperm' not in data:
+        raise AttributeError('prinrole or roleperm missing')
+
+    if 'prinrole' in data:
+        for user, roles in data['prinrole'].items():
+            for role in roles:
+                prinrole.assignRoleToPrincipal(role, user)
+
+    if 'roleperm' in data:
+        for role, perms in data['roleperm'].items():
+            for perm in perms:
+                roleperm.grantPermissionToRole(perm, role)
     await notify(ObjectPermissionsModifiedEvent(context))
 
 
