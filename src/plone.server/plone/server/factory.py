@@ -485,12 +485,9 @@ def make_app(config_file=None, settings=None):
                 dbo = Database(key, db)
             elif dbconfig['storage'] == 'NEWT' and NEWT:
                 options = Options(**dbconfig['options'])
-                if dbconfig['type'] == 'postgres':
-                    from relstorage.adapters.postgresql import PostgreSQLAdapter
-                    dsn = "dbname={dbname} user={username} host={host} password={password} port={port}".format(**dbconfig['dsn'])
-                    adapter = PostgreSQLAdapter(dsn=dsn, options=options)
-                rs = RelStorage(adapter=adapter, options=options)
-                db = DB(rs)
+                dsn = "dbname={dbname} user={username} host={host} password={password} port={port}".format(**dbconfig['dsn'])
+                adapter = newt.db.storage(dsn=dsn, **dbconfig['options'])
+                db = newt.db.DB(dsn, **dbconfig['options'])
                 try:
                     conn = db.open()
                     rootobj = conn.root()
@@ -503,8 +500,8 @@ def make_app(config_file=None, settings=None):
                     rootobj = None
                     conn.close()
                     db.close()
-                rs = RelStorage(adapter=adapter, options=options)
-                db = newt.db._db.NewtDB(RequestAwareDB(rs, **config))
+                adapter = newt.db.storage(dsn, **dbconfig['options'])
+                db = newt.db._db.NewtDB(RequestAwareDB(adapter, **config))
                 dbo = Database(key, db)
             elif dbconfig['storage'] == 'DEMO':
                 storage = DemoStorage(name=dbconfig['name'])
