@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
+from .configuration import IDatabaseConfigurationFactory  # noqa
 from .content import IApplication  # noqa
 from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa

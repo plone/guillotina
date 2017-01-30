@@ -179,7 +179,19 @@ register_configuration_handler('subscriber', load_subscriber)
 
 def load_utility(_context, _utility):
     conf = _utility['config']
-    conf['factory'] = resolve_or_get(conf.get('factory') or _utility['klass'])
+    if 'factory' in conf:
+        conf['factory'] = resolve_or_get(conf['factory'])
+    elif 'component' in conf:
+        conf['component'] = resolve_or_get(conf['component'])
+    else:
+        # use provided klass
+        klass = _utility['klass']
+        if isinstance(klass, type):
+            # is a class type, use factory setting
+            conf['factory'] = klass
+        else:
+            # not a factory
+            conf['component'] = klass
     zcml.utility(
         _context,
         **conf
