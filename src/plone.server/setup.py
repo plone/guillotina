@@ -47,7 +47,6 @@ setup(
         'six',
         'transaction',
         'ujson',
-        'ZEO',
         'ZODB',
         'zope.authentication',
         'zope.component',

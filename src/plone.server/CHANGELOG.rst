@@ -3,6 +3,10 @@
 
 New features:
 
+- be able provide your own database factories by providing named utilities for
+  the IDatabaseConfigurationFactory interface
+  [vangheem]
+
 - install, uninstall methods for addon class can now be async
   [vangheem]
 
