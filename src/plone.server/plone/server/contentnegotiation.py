@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from plone.server import app_settings
 from plone.server.interfaces import IContentNegotiation
-from plone.server.interfaces import IDownloadView
+from plone.server.interfaces import IDownloadView, IRendererFormatRaw
 from zope.component import getUtility
 from zope.interface import implementer
 
@@ -508,9 +508,7 @@ class ContentNegotiator(object):
                                             for v5 in vals5:
                                                 ap = AcceptParameters(v1, v2, v3, v4, v5)
                                                 unsorted.append((ap, wq))
-
-        sorted = self._sort_by_q(unsorted, 0.0)
-        return sorted
+        return self._sort_by_q(unsorted, 0.0)
 
     def _analyse_packaging(self, accept):
         if accept is None:
@@ -809,17 +807,20 @@ def content_type_negotiation(request, resource, view):
     if 'ACCEPT' in request.headers:
         accept = request.headers['ACCEPT']
 
-    if IDownloadView.providedBy(view) or accept is None:
-        # Its going to be binary
-        # No content negotiation right now
-        accept = app_settings['renderers']['*/*']
-        return accept
+    if IDownloadView.providedBy(view) or accept in (None, '*/*'):
+        # if download view, we want to render raw immediately
+        # or if no or */* accept header provided
+        return IRendererFormatRaw
 
     np = getUtility(IContentNegotiation, 'content_type')
     ap = np.negotiate(accept=accept)
     # We need to check for the accept
-    accept = app_settings['renderers'][str(ap.content_type)]
-    return accept
+    if str(ap.content_type) in app_settings['renderers']:
+        return app_settings['renderers'][str(ap.content_type)]
+    else:
+        log.info('Could not find content type {} renderer'.format(
+            str(ap.content_type)))
+        return IRendererFormatRaw
 
 
 def language_negotiation(request):

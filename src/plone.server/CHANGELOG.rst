@@ -3,6 +3,9 @@
 
 New features:
 
+- Fix issue where correct aiohttp response would not be generated always
+  [vangheem]
+
 - be able provide your own database factories by providing named utilities for
   the IDatabaseConfigurationFactory interface
   [vangheem]

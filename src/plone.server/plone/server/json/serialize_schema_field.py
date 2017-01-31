@@ -1,6 +1,10 @@
 from plone.server import configure
+from plone.server.interfaces import ICloudFileField
+from plone.server.interfaces import IFileField
+from plone.server.interfaces import IJSONField
 from plone.server.interfaces import IRichText
 from plone.server.interfaces import ISchemaFieldSerializeToJson
+from plone.server.interfaces import ISchemaSerializeToJson
 from plone.server.interfaces import IValueToJson
 from zope.component import getMultiAdapter
 from zope.interface import implementedBy
@@ -19,9 +23,6 @@ from zope.schema.interfaces import IObject
 from zope.schema.interfaces import IText
 from zope.schema.interfaces import ITextLine
 from zope.schema.interfaces import ITime
-from plone.server.interfaces import IJSONField
-from plone.server.interfaces import IFileField
-from plone.server.interfaces import ICloudFileField
 
 
 @configure.adapter(
@@ -101,7 +102,12 @@ class DefaultSchemaFieldSerializer(object):
                 result[attribute_name] = text
 
         if result['type'] == 'object':
-            result['properties'] = self.field.schema
+            if isinstance(self.field.schema, dict):
+                result['properties'] = self.field.schema
+            else:
+                schema_serializer = getMultiAdapter((self.field.schema, self.request),
+                                                    ISchemaSerializeToJson)
+                result['properties'] = schema_serializer()
         return result
 
     @property
@@ -148,6 +154,7 @@ class DefaultJSONFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return 'object'
+
 
 @configure.adapter(
     for_=(ITextLine, Interface, Interface),

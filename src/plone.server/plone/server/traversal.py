@@ -36,7 +36,6 @@ from plone.server.utils import get_authenticated_user_id
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
-from zope.i18nmessageid import MessageFactory
 from zope.interface import alsoProvides
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.interfaces import IInteraction
@@ -49,7 +48,6 @@ from ZODB.POSException import ConflictError
 import aiohttp
 import asyncio
 import json
-import logging
 import traceback
 import uuid
 

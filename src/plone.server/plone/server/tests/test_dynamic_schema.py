@@ -79,7 +79,6 @@ class FunctionalTestServer(PloneFunctionalTestCase):
             resp.json()['plone.server.behaviors.attachment.IAttachment']['file']['filename'],  # noqa
             'plone.png')
 
-
     def test_create_delete_dynamic_behavior(self):
         """Create and delete a content type."""
         resp = self.layer.requester(
