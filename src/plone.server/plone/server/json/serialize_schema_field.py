@@ -20,6 +20,8 @@ from zope.schema.interfaces import IText
 from zope.schema.interfaces import ITextLine
 from zope.schema.interfaces import ITime
 from plone.server.interfaces import IJSONField
+from plone.server.interfaces import IFileField
+from plone.server.interfaces import ICloudFileField
 
 
 @configure.adapter(
@@ -116,6 +118,26 @@ class DefaultTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return 'string'
+
+
+@configure.adapter(
+    for_=(IFileField, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
+class DefaultFileSchemaFieldSerializer(DefaultSchemaFieldSerializer):
+
+    @property
+    def field_type(self):
+        return 'object'
+
+
+@configure.adapter(
+    for_=(ICloudFileField, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
+class DefaultCloudFileSchemaFieldSerializer(DefaultSchemaFieldSerializer):
+
+    @property
+    def field_type(self):
+        return 'object'
 
 
 @configure.adapter(
