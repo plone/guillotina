@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from plone.server import configure
-from plone.server.interfaces import IRequest
 from plone.server.interfaces import IFactorySerializeToJson
+from plone.server.interfaces import IRequest
 from plone.server.interfaces import ISchemaFieldSerializeToJson
 from plone.server.interfaces import ISchemaSerializeToJson
 from zope.component import getMultiAdapter
@@ -46,7 +46,6 @@ class SerializeFactoryToJson(object):
 
         # Behavior serialization
         for schema in factory.behaviors or ():
-
             schema_serializer = getMultiAdapter(
                 (schema, self.request), ISchemaSerializeToJson)
 

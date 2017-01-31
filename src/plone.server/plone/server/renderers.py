@@ -160,8 +160,6 @@ class RendererRaw(Renderer):
 
     async def __call__(self, value):
         resp = value
-        if (hasattr(value, '__class__') and
-                issubclass(value.__class__, Response) and
-                'Content-Type' not in value.headers):
+        if isinstance(value, Response):
             resp = self.guess_response(value)
         return resp

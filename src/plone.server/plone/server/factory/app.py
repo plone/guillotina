@@ -78,11 +78,13 @@ _delayed_default_settings = {
         "HEAD": interfaces.IHEAD,
         "CONNECT": interfaces.ICONNECT
     },
-    "renderers": collections.OrderedDict({
-        "application/json": interfaces.IRendererFormatJson,
-        "text/html": interfaces.IRendererFormatHtml,
-        "*/*": interfaces.IRendererFormatRaw
-    }),
+    # pass in tuple to force ordering for default provided renderers here
+    # XXX ordering is *required* for some views to work as if no accept
+    # header is provided, it'll default to the first type provided
+    "renderers": collections.OrderedDict((
+        ("application/json", interfaces.IRendererFormatJson),
+        ("text/html", interfaces.IRendererFormatHtml)
+    )),
     "languages": {
         "en": languages.IEN,
         "en-us": languages.IENUS,
