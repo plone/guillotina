@@ -19,6 +19,7 @@ from zope.schema.interfaces import IObject
 from zope.schema.interfaces import IText
 from zope.schema.interfaces import ITextLine
 from zope.schema.interfaces import ITime
+from plone.server.interfaces import IJSONField
 
 
 @configure.adapter(
@@ -27,10 +28,10 @@ from zope.schema.interfaces import ITime
 class DefaultSchemaFieldSerializer(object):
 
     # Elements we won't write
-    filtered_attributes = ['order', 'unique', 'defaultFactory']
+    filtered_attributes = ['order', 'unique', 'defaultFactory', 'required']
 
     # Elements that are of the same type as the field itself
-    field_type_attributes = ('min', 'max', 'default', )
+    field_type_attributes = ('min', 'max', 'default', 'title')
 
     # Elements that are of the same type as the field itself, but are
     # otherwise not validated
@@ -40,7 +41,7 @@ class DefaultSchemaFieldSerializer(object):
     field_instance_attributes = ('key_type', 'value_type', )
 
     # Fields that are always written
-    forced_fields = frozenset(['default', 'missing_value'])
+    forced_fields = frozenset(['default', 'missing_value', 'title'])
 
     def __init__(self, field, schema, request):
         self.field = field
@@ -52,7 +53,6 @@ class DefaultSchemaFieldSerializer(object):
         result = {'type': self.field_type}
         for schema in implementedBy(self.field.__class__).flattened():
             self.field_attributes.update(getFields(schema))
-
         for attribute_name in sorted(self.field_attributes.keys()):
             attribute_field = self.field_attributes[attribute_name]
             if attribute_name in self.filtered_attributes:
@@ -71,6 +71,7 @@ class DefaultSchemaFieldSerializer(object):
                     element_name in self.non_validated_field_type_attributes:
                 attribute_field = self.field
 
+            text = None
             if isinstance(value, bytes):
                 text = value.decode('utf-8')
             elif isinstance(value, str):
@@ -83,16 +84,22 @@ class DefaultSchemaFieldSerializer(object):
             elif value is not None and (force or value != self.field.missing_value):
                 text = IValueToJson(value)
 
-                # handle i18n
-                # if isinstance(value, Message):
-                #     child.set(ns('domain', I18N_NAMESPACE), value.domain)
-                #     if not value.default:
-                #         child.set(ns('translate', I18N_NAMESPACE), '')
-                #     else:
-                #         child.set(ns('translate', I18N_NAMESPACE), child.text)
-                #         child.text = converter.toUnicode(value.default)
+            # handle i18n
+            # if isinstance(value, Message):
+            #     child.set(ns('domain', I18N_NAMESPACE), value.domain)
+            #     if not value.default:
+            #         child.set(ns('translate', I18N_NAMESPACE), '')
+            #     else:
+            #         child.set(ns('translate', I18N_NAMESPACE), child.text)
+            #         child.text = converter.toUnicode(value.default)
+
+            if text:
+                if attribute_name == 'value_type':
+                    attribute_name = 'items'
                 result[attribute_name] = text
 
+        if result['type'] == 'object':
+            result['properties'] = self.field.schema
         return result
 
     @property
@@ -110,6 +117,15 @@ class DefaultTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     def field_type(self):
         return 'string'
 
+
+@configure.adapter(
+    for_=(IJSONField, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
+class DefaultJSONFieldSerializer(DefaultSchemaFieldSerializer):
+
+    @property
+    def field_type(self):
+        return 'object'
 
 @configure.adapter(
     for_=(ITextLine, Interface, Interface),
