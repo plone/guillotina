@@ -7,7 +7,7 @@ from plone.server.interfaces import IObjectFinallyModifiedEvent
 from plone.server.interfaces import IResource
 from plone.server.interfaces import ISite
 from plone.server.transactions import get_current_request
-from plone.server.transactions import RequestNotFound
+from plone.server.exceptions import RequestNotFound
 from plone.server.transactions import tm
 from zope.component import queryUtility
 from zope.lifecycleevent.interfaces import IObjectAddedEvent

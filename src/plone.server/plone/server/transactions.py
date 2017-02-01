@@ -7,6 +7,7 @@ we'll see how far we get and learn more about ZODB while doing it...
 from concurrent.futures import ThreadPoolExecutor
 from plone.server.interfaces import SHARED_CONNECTION
 from plone.server.utils import get_authenticated_user_id
+from plone.server.exceptions import RequestNotFound
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
@@ -375,11 +376,6 @@ def sync(request):
         request.conn.executor, *args, **kwargs)
 
 
-class RequestNotFound(Exception):
-    """Lookup for the current request for request aware transactions failed
-    """
-
-
 def get_current_request():
     """Return the current request by heuristically looking it up from stack
     """
@@ -396,6 +392,15 @@ def get_current_request():
         #     return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
+
+
+try:
+    import plone.server.optimizations  # noqa
+except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
+    import pdb; pdb.set_trace()
+    pass
+else:
+    from plone.server.optimizations import get_current_request  # noqa
 
 
 def synccontext(context):

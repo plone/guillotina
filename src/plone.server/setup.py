@@ -1,9 +1,27 @@
 # -*- coding: utf-8 -*-
 from setuptools import find_packages
 from setuptools import setup
-
+from distutils.core import Extension
 import os
+import sys
+import platform
 
+
+py_impl = getattr(platform, 'python_implementation', lambda: None)
+pure_python = os.environ.get('PURE_PYTHON', False)
+is_pypy = py_impl() == 'PyPy'
+is_jython = 'java' in sys.platform
+
+if pure_python or is_pypy or is_jython:
+    ext_modules = []
+else:
+    ext_modules = [
+        Extension(
+            'plone.server.optimizations',
+            sources=[os.path.join(
+                'plone', 'server',
+                'optimizations.c')])
+    ]
 
 setup(
     name='plone.server',
@@ -35,6 +53,7 @@ setup(
     package_dir=None if os.path.isdir('plone') else {'': os.path.join('src', 'plone.server')},  # noqa
     packages=find_packages('./' if os.path.isdir('plone') else os.path.join('src', 'plone.server'), exclude=['ez_setup']),  # noqa
     namespace_packages=['plone'],
+    ext_modules=ext_modules,
     install_requires=[
         'aiohttp',
         'jsonschema',
