@@ -397,7 +397,6 @@ def get_current_request():
 try:
     import plone.server.optimizations  # noqa
 except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
-    import pdb; pdb.set_trace()
     pass
 else:
     from plone.server.optimizations import get_current_request  # noqa

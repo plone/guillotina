@@ -5,28 +5,35 @@ static PyObject *RequestNotFound, *RequestHandler;
 
 /* current_request frame obtainer */
 
+
 static PyObject*
 current_request()
 {
-	PyFrameObject *f = PyThreadState_GET()->frame;
+	  PyFrameObject *f = PyThreadState_GET()->frame;
     int found = 0;
     PyObject *request = NULL;
-    PyObject *self = NULL;
-
+    PyObject *self;
     while (found == 0 && f != NULL) {
-    	PyObject *locals = f->f_locals;
-    	self = PyObject_GetAttr(locals, PyUnicode_FromString("self"));
-    	if (PyObject_HasAttr(self, PyUnicode_FromString("request"))) {
-       		found = 1;
-       		request = PyObject_GetAttr(self, PyUnicode_FromString("request"));
-    	} else {
-    		if (PyObject_IsInstance(self, RequestHandler)) {
-    			request = PyDict_GetItem(locals, PyUnicode_FromString("request"));
-    		}
-    	}
-        Py_DECREF(locals);
-        Py_DECREF(self);
-        f = f->f_back;
+      if (PyFrame_FastToLocalsWithError(f) < 0)
+        return NULL;
+
+      if (PyDict_CheckExact(f->f_locals)) {
+        self = PyDict_GetItem(f->f_locals, PyUnicode_FromString("self"));
+
+        if (self != NULL) {
+
+          if (PyObject_HasAttr(self, PyUnicode_FromString("request"))) {
+            found = 1;
+            request = PyObject_GetAttr(self, PyUnicode_FromString("request"));
+          } 
+          if (PyObject_IsInstance(self, RequestHandler)) {
+            found = 1;
+            request = PyDict_GetItem(f->f_locals, PyUnicode_FromString("request"));
+          }
+        }
+
+      }
+      f = f->f_back;
     }
 
 
@@ -36,7 +43,6 @@ current_request()
         return NULL;
     }
 
-    Py_DECREF(f);
     Py_INCREF(request);
     return (PyObject*)request;
 }
