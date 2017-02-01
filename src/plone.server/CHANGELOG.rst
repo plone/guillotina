@@ -1,10 +1,12 @@
 1.0a10 (unreleased)
 -------------------
 
-New features:
+Fixes:
 
 - Fix issue where correct aiohttp response would not be generated always
   [vangheem]
+
+New features:
 
 - be able provide your own database factories by providing named utilities for
   the IDatabaseConfigurationFactory interface
@@ -13,7 +15,7 @@ New features:
 - install, uninstall methods for addon class can now be async
   [vangheem]
 
-- Support with newt
+- Support for newt.db
   [ramonnb]
 
 - Be able to define adapters, subscribers, permissions, roles, grant
