@@ -45,3 +45,8 @@ class PreconditionFailed(Exception):
         return "Precondition Failed {precondition} on {path}".format(
             precondition=self.precondition,
             path=self.container)
+
+
+class RequestNotFound(Exception):
+    """Lookup for the current request for request aware transactions failed
+    """

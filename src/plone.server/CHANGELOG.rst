@@ -1,7 +1,10 @@
 1.0a11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+New features:
+
+- Adding C optimization for get_current_request
+  [ramonnb]
 
 
 1.0a10 (2017-02-01)
