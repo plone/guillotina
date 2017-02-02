@@ -19,7 +19,7 @@ else:
         Extension(
             'plone.server.optimizations',
             sources=[os.path.join(
-                'plone', 'server',
+                'src', 'plone.server', 'plone', 'server',
                 'optimizations.c')])
     ]
 
