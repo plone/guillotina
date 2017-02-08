@@ -15,6 +15,7 @@ from plone.server.interfaces import IDatabaseConfigurationFactory
 from plone.server.interfaces.content import IContentNegotiation
 from plone.server.interfaces import IDatabase
 from plone.server.traversal import TraversalRouter
+from plone.server.exceptions import RequestNotFound
 from zope.component import getAllUtilitiesRegisteredFor
 from zope.component import getUtility
 from zope.component import provideUtility
@@ -217,4 +218,7 @@ async def close_utilities(app):
         asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
     for db in app.router._root:
         if IDatabase.providedBy(db[1]):
-            db[1]._db.close()
+            try:
+                db[1]._db.close()
+            except RequestNotFound:
+                pass

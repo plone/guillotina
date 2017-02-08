@@ -69,17 +69,11 @@ class QueueUtility(object):
                         await commit(txn, view.request)
                 except Unauthorized:
                     await abort(txn, view.request)
-                    view_result = UnauthorizedResponse(
-                        _('Not authorized to render operation'))
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",
                         exc_info=e)
                     await abort(txn, view.request)
-                    view_result = ErrorResponse(
-                        'ServiceError',
-                        _('Error on execution of operation')
-                    )
             except KeyboardInterrupt or MemoryError or SystemExit or asyncio.CancelledError:
                 self._exceptions = True
                 raise
@@ -87,6 +81,8 @@ class QueueUtility(object):
                 self._exceptions = True
                 logger.error('Worker call failed', exc_info=e)
             finally:
+                if SHARED_CONNECTION is False and hasattr(view.request, 'conn'):
+                    view.request.conn.close()
                 if got_obj:
                     self._queue.task_done()
 

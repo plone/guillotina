@@ -117,10 +117,12 @@ class MockView(View):
 
 class AsyncMockView(View):
 
-    def __init__(self, context, conn, func):
+    def __init__(self, context, conn, func, app):
         self.context = context
         self.request = make_mocked_request('POST', '/')
         self.request.conn = conn
+        self.request.application = app
+        self.request._db_id = 'plone'
         self.request._db_write_enabled = True
         self.func = func
 

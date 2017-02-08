@@ -15,7 +15,8 @@ class TestQueue(PloneQueueServerTestCase):
         async def printHi():
             var.append('hola')
 
-        v = AsyncMockView(self.layer.app['plone'], self.layer.app['plone'].conn, printHi)
+        context = self.layer.app['plone'].conn.root()
+        v = AsyncMockView(context, self.layer.app['plone'].conn, printHi, self.layer.app)
         loop = asyncio.get_event_loop()
         future = asyncio.run_coroutine_threadsafe(util.add(v), loop)
         future2 = asyncio.run_coroutine_threadsafe(util.add(v), loop)
