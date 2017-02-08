@@ -16,7 +16,7 @@ from zope.interface.exceptions import Invalid
 from zope.lifecycleevent import ObjectModifiedEvent
 from zope.schema import getFields
 from zope.schema.interfaces import ValidationError
-from zope.security import checkPermission
+from zope.security.interfaces import IInteraction
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import NoInteraction
 
@@ -144,7 +144,8 @@ class DeserializeFromJson(object):
             else:
                 try:
                     self.permission_cache[permission_name] = bool(
-                        checkPermission(permission.title, self.context))
+                        IInteraction(self.request).check_permission(
+                            permission.title, self.context))
                 except NoInteraction:
                     # not authenticated
                     return False

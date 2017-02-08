@@ -43,18 +43,30 @@ async def search_post(context, request):
                    name='@catalog-reindex')
 class CatalogReindex(Service):
 
+    def __init__(self, context, request, security=False):
+        super(CatalogReindex, self).__init__(context, request)
+        self._security_reindex = security
+
     async def __call__(self):
         search = queryUtility(ICatalogUtility)
-        await search.reindex_all_content(self.context)
+        await search.reindex_all_content(self.context, self._security_reindex)
         return {}
 
 
 @configure.service(context=IResource, method='POST', permission='plone.ReindexContent',
                    name='@async-catalog-reindex')
-async def async_catalog_reindex(context, request):
-    util = queryUtility(IQueueUtility)
-    await util.add(CatalogReindex(context, request))
-    return {}
+class AsyncCatalogReindex(Service):
+
+    def __init__(self, context, request, security=False):
+        super(AsyncCatalogReindex, self).__init__(context, request)
+        self._security_reindex = security
+
+    async def __call__(self):
+        util = queryUtility(IQueueUtility)
+        if util:
+            await util.add(CatalogReindex(
+                self.context, self.request, self._security_reindex))
+        return {}
 
 
 @configure.service(context=IResource, method='POST', permission='plone.ManageCatalog',

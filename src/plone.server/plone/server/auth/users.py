@@ -9,8 +9,9 @@ class RootUser(object):
         self.id = ROOT_USER_ID
         self.password = password
         self.groups = ['Managers']
-        self._roles = {}
-        self._properties = {}
+        self.roles = {}
+        self.properties = {}
+        self.permissions = {}
 
 
 class PloneUser(object):
@@ -20,11 +21,24 @@ class PloneUser(object):
         self.request = request
         self._groups = []
         self._roles = {}
+        self._permissions = {}
         self._properties = {}
 
     @property
     def groups(self):
         return self._groups
+
+    @property
+    def roles(self):
+        return self._roles
+
+    @property
+    def permissions(self):
+        return self._permissions
+
+    @property
+    def properties(self):
+        return self._properties
 
 
 class AnonymousUser(PloneUser):

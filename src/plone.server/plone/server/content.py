@@ -15,7 +15,7 @@ from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
-from zope.securitypolicy.interfaces import IPrincipalPermissionManager
+from plone.server.auth.security_code import PrincipalPermissionManager
 from plone.server.browser import get_physical_path
 from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.exceptions import NoPermissionToAdd
@@ -24,6 +24,8 @@ from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IConstrainTypes
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IItem
+from plone.server.interfaces import IPrincipalRoleManager
+from plone.server.interfaces import IPrincipalPermissionManager
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IResourceFactory
 from plone.server.interfaces import ISite
@@ -49,8 +51,7 @@ from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
 from zope.schema.interfaces import IContextAwareDefaultFactory
 from zope.security.interfaces import IPermission
-from zope.securitypolicy.interfaces import IPrincipalRoleManager
-from zope.securitypolicy.principalpermission import PrincipalPermissionManager
+from zope.security.interfaces import IInteraction
 
 import uuid
 
@@ -189,7 +190,7 @@ def create_content_in_container(container, type_, id_, request=None, **kw):
             request = get_current_request()
 
         if permission is not None and \
-                not request.security.checkPermission(permission.id, container):
+                not IInteraction(request).check_permission(permission.id, container):
             raise NoPermissionToAdd(str(container), type_)
 
     constrains = IConstrainTypes(container, None)
@@ -252,6 +253,7 @@ class Resource(Persistent):
     __name__ = None
     __parent__ = None
     __behaviors__ = frozenset({})
+    __acl__ = None
 
     portal_type = None
     uuid = None
@@ -270,6 +272,12 @@ class Resource(Persistent):
             type=self.portal_type,
             path=path,
             mem=id(self))
+
+    @property
+    def acl(self):
+        if self.__acl__ is None:
+            return dict({})
+        return self.__acl__
 
     def set_id(self, id_):
         if id_ is not None:
@@ -439,12 +447,12 @@ class Site(Folder):
             frozenset({'plone.server.interfaces.layer.IDefaultLayer'})
 
         roles = IPrincipalRoleManager(self)
-        roles.assignRoleToPrincipal(
+        roles.assign_role_to_principal(
             'plone.SiteAdmin',
             ROOT_USER_ID
         )
 
-        roles.assignRoleToPrincipal(
+        roles.assign_role_to_principal(
             'plone.Owner',
             ROOT_USER_ID
         )

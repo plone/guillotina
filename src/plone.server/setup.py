@@ -12,15 +12,19 @@ pure_python = os.environ.get('PURE_PYTHON', False)
 is_pypy = py_impl() == 'PyPy'
 is_jython = 'java' in sys.platform
 
+
 if pure_python or is_pypy or is_jython:
     ext_modules = []
 else:
+    optimization_path = os.path.join('plone', 'server', 'optimizations.c')
+    if os.path.exists('buildout.cfg'):
+        optimization_path = os.path.join(
+            'src', 'plone.server', 'plone',
+            'server', 'optimizations.c')
     ext_modules = [
         Extension(
             'plone.server.optimizations',
-            sources=[os.path.join(
-                'src', 'plone.server', 'plone', 'server',
-                'optimizations.c')])
+            sources=[optimization_path])
     ]
 
 setup(
@@ -67,7 +71,6 @@ setup(
         'transaction',
         'ujson',
         'ZODB',
-        'zope.authentication',
         'zope.component',
         'zope.configuration',
         'zope.dottedname',
@@ -81,7 +84,6 @@ setup(
         'zope.proxy',
         'zope.schema',
         'zope.security',
-        'zope.securitypolicy',
         'pyjwt',
         'requests'
     ],

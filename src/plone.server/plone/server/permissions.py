@@ -34,19 +34,19 @@ configure.permission('plone.ManageCatalog', 'Manage catalog')
 configure.permission('plone.GetAPIDefinition', 'Get the API definition')
 
 
-configure.role("plone.Anonymous", "Everybody", "All users have this role implicitly")
-configure.role("plone.Authenticated", "Authenticated user", "Role automatically assigned to authenticated users")  # noqa
-configure.role("plone.Member", "Site Member")
+configure.role("plone.Anonymous", "Everybody", "All users have this role implicitly", False)
+configure.role("plone.Authenticated", "Authenticated user", "Role automatically assigned to authenticated users", False)  # noqa
+configure.role("plone.Member", "Site Member", False)
 
-configure.role("plone.Reader", "Reader", "can read content")
-configure.role("plone.Editor", "Editor", "can edit content")
-configure.role("plone.Reviewer", "Reviewer", "can review content")
-configure.role("plone.Owner", "Content Manager", "can add/delete content")
+configure.role("plone.Reader", "Reader", "can read content", True)
+configure.role("plone.Editor", "Editor", "can edit content", True)
+configure.role("plone.Reviewer", "Reviewer", "can review content", True)
+configure.role("plone.Owner", "Content Manager", "can add/delete content", True)
 
-configure.role("plone.Manager", "Site Manager")
-configure.role("plone.SiteAdmin", "Site Administrator", "can set settings on site")
-configure.role("plone.SiteCreator", "Site DB Manager", "Can create sites and db connections")
-configure.role("plone.SiteDeleter", "Site Remover", "Can destroy a site")
+configure.role("plone.Manager", "Site Manager", False)
+configure.role("plone.SiteAdmin", "Site Administrator", "can set settings on site", False)
+configure.role("plone.SiteCreator", "Site DB Manager", "Can create sites and db connections", False)
+configure.role("plone.SiteDeleter", "Site Remover", "Can destroy a site", False)
 
 
 # Anonymous
@@ -61,6 +61,14 @@ configure.grant(
 configure.grant(
     permission="plone.AccessContent",
     role="plone.Reader")
+
+# Reviewer
+configure.grant(
+    permission="plone.ViewContent",
+    role="plone.Reviewer")
+configure.grant(
+    permission="plone.AccessContent",
+    role="plone.Reviewer")
 
 # Owner
 configure.grant(
@@ -81,13 +89,6 @@ configure.grant(
 configure.grant(
     permission="plone.ChangePermissions",
     role="plone.Owner")
-
-configure.grant(
-    permission="plone.SearchContent",
-    role="plone.Member")
-configure.grant(
-    permission="plone.RawSearchContent",
-    role="plone.SiteAdmin")
 
 configure.grant(
     permission="plone.SeePermissions",
@@ -129,8 +130,16 @@ configure.grant(
 configure.grant(
     permission="plone.ManageCatalog",
     role="plone.SiteAdmin")
+configure.grant(
+    permission="plone.RawSearchContent",
+    role="plone.SiteAdmin")
 
 # SiteDeleter
 configure.grant(
     permission="plone.DeletePortals",
     role="plone.SiteDeleter")
+
+# Member
+configure.grant(
+    permission="plone.SearchContent",
+    role="plone.Member")

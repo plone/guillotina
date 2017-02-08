@@ -41,7 +41,7 @@ For example in case you want to have a class that stores the field on the conten
 
 ```python
 from plone.server.behaviors.properties import ContextProperty
-from plone.server.behaviors.intrance import AnnotationBehavior
+from plone.server.behaviors.instance import AnnotationBehavior
 from plone.server.interfaces import IResource
 from plone.server import configure
 

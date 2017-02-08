@@ -4,12 +4,15 @@ from plone.server.interfaces import ICatalogUtility
 from plone.server.interfaces import IObjectFinallyCreatedEvent
 from plone.server.interfaces import IObjectFinallyDeletedEvent
 from plone.server.interfaces import IObjectFinallyModifiedEvent
+from plone.server.interfaces import IObjectPermissionsModifiedEvent
 from plone.server.interfaces import IResource
 from plone.server.interfaces import ISite
 from plone.server.transactions import get_current_request
 from plone.server.exceptions import RequestNotFound
 from plone.server.transactions import tm
 from zope.component import queryUtility
+from plone.server.utils import get_content_path
+from plone.server.api.search import AsyncCatalogReindex
 from zope.lifecycleevent.interfaces import IObjectAddedEvent
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
@@ -64,6 +67,13 @@ def get_hook():
     return hook
 
 
+@configure.subscriber(for_=(IResource, IObjectPermissionsModifiedEvent))
+async def security_changed(obj, event):
+    # We need to reindex the objects below
+    request = get_current_request()
+    await AsyncCatalogReindex(obj, request, security=True)()
+
+
 @configure.subscriber(for_=(IResource, IObjectFinallyDeletedEvent))
 def remove_object(obj, event):
     uid = getattr(obj, 'uuid', None)
@@ -73,10 +83,12 @@ def remove_object(obj, event):
     if portal_type is None or ISite.providedBy(obj):
         return
 
+    content_path = get_content_path(obj)
+
     hook = get_hook()
     if hook is None:
         return
-    hook.remove.append((uid, portal_type))
+    hook.remove.append((uid, portal_type, content_path))
     if uid in hook.index:
         del hook.index[uid]
 

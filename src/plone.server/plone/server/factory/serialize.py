@@ -5,6 +5,7 @@ from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResourceSerializeToJson
 from plone.server.interfaces import IStaticDirectory
 from plone.server.interfaces import IStaticFile
+from zope.security.interfaces import IInteraction
 
 
 @configure.adapter(
@@ -37,7 +38,7 @@ class ApplicationToJson(object):
             'static_directory': []
         }
 
-        allowed = self.request.security.checkPermission(
+        allowed = IInteraction(self.request).check_permission(
             'plone.GetDatabases', self.application)
 
         for x in self.application._dbs.keys():

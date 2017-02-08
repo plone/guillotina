@@ -126,12 +126,12 @@ class TestConfigure(PloneFunctionalTestCase):
         class MyAddon(Addon):
 
             @classmethod
-            def install(self, request):
+            def install(cls, site, request):
                 # install code
                 pass
 
             @classmethod
-            def uninstall(self, request):
+            def uninstall(cls, site, request):
                 # uninstall code
                 pass
 

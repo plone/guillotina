@@ -40,3 +40,7 @@ class ICatalogUtility(Interface):
 
 class ICatalogDataAdapter(Interface):
     pass
+
+
+class ISecurityInfo(Interface):
+    pass

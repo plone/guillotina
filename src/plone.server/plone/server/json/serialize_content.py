@@ -102,7 +102,7 @@ class SerializeToJson(object):
             else:
                 security = IInteraction(self.request)
                 self.permission_cache[permission_name] = bool(
-                    security.checkPermission(permission.title, self.context))
+                    security.check_permission(permission.title, self.context))
         return self.permission_cache[permission_name]
 
 
@@ -125,7 +125,7 @@ class SerializeFolderToJson(SerializeToJson):
                     (member, self.request), IResourceSerializeToJsonSummary)()
                 for ident, member in self.context.items()
                 if not ident.startswith('_') and
-                bool(security.checkPermission(
+                bool(security.check_permission(
                     'plone.AccessContent', self.context))
             ]
         result['length'] = length

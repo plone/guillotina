@@ -10,6 +10,7 @@ Contents:
    configuration
    production
    roles
+   security
    applications
    addons
    services

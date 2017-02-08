@@ -183,7 +183,7 @@ def caller_package(level=2, caller_module=caller_module):
 
 
 def resolve_module_path(path):
-    if path[0] == '.':
+    if type(path) is str and path[0] == '.':
         caller_mod = caller_module()
         caller_path = dotted_name(caller_mod)
         caller_path = '.'.join(caller_path.split('.')[:-path.count('..')])

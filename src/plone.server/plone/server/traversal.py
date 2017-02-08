@@ -394,7 +394,7 @@ class TraversalRouter(AbstractRouter):
 
         permission = getUtility(IPermission, name='plone.AccessContent')
 
-        allowed = request.security.checkPermission(permission.id, resource)
+        allowed = IInteraction(request).check_permission(permission.id, resource)
 
         if not allowed:
             # Check if its a CORS call:

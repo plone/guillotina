@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
+from .catalog import ISecurityInfo  # noqa
 from .configuration import IDatabaseConfigurationFactory  # noqa
 from .content import IApplication  # noqa
 from .content import IContainer  # noqa
@@ -45,6 +46,18 @@ from .renderers import IRendererFormatHtml  # noqa
 from .renderers import IRendererFormatJson  # noqa
 from .renderers import IRendererFormatRaw  # noqa
 from .renderers import IRenderFormats  # noqa
+from .security import IRole  # noqa
+from .security import IPrincipalRoleMap  # noqa
+from .security import IPrincipalRoleManager  # noqa
+from .security import IRolePermissionMap  # noqa
+from .security import IRolePermissionManager  # noqa
+from .security import IPrincipalPermissionMap  # noqa
+from .security import IPrincipalPermissionManager  # noqa
+from .security import Allow  # noqa
+from .security import Deny  # noqa
+from .security import Unset  # noqa
+from .security import AllowSingle  # noqa
+from .security import IGroups  # noqa
 from .text import IRichText  # noqa
 from .text import IRichTextValue  # noqa
 from .types import IConstrainTypes  # noqa
@@ -123,10 +136,10 @@ class IAbsoluteURL(Interface):
 
 class IAddOn(Interface):
 
-    def install(self, site):
+    def install(cls, site, request):
         pass
 
-    def uninstall(self):
+    def uninstall(cls, site, request):
         pass
 
 

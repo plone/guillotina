@@ -69,3 +69,19 @@ class DefaultGET(Service):
       }
 
 ```
+
+## special cases
+
+### I want that my service is accessible no matter the content
+
+you can define in the Service class the __allow_access__ = True
+
+
+```python
+@service(
+    context=IResource, name='@download',
+    method='GET', permission='plone.Public')
+class DefaultGET(DownloadService):
+
+    __allow_access__ = True
+```

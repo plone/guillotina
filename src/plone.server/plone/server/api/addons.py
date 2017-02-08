@@ -31,9 +31,9 @@ async def install(context, request):
             _("Addon already installed"))
     handler = app_settings['available_addons'][id_to_install]['handler']
     if asyncio.iscoroutinefunction(handler.install):
-        await handler.install(request)
+        await handler.install(context, request)
     else:
-        handler.install(request)
+        handler.install(context, request)
     config.enabled |= {id_to_install}
     return await get_addons(context, request)()
 
@@ -58,9 +58,9 @@ async def uninstall(context, request):
 
     handler = app_settings['available_addons'][id_to_install]['handler']
     if asyncio.iscoroutinefunction(handler.install):
-        await handler.uninstall(request)
+        await handler.uninstall(context, request)
     else:
-        handler.uninstall(request)
+        handler.uninstall(context, request)
     config.enabled -= {id_to_install}
 
 

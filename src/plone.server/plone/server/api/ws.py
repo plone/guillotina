@@ -13,9 +13,9 @@ from plone.server.interfaces import ITraversableView
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.security.interfaces import IPermission
+from zope.security.interfaces import IInteraction
 
 import aiohttp
-import logging
 import ujson
 
 
@@ -89,7 +89,7 @@ class WebsocketsView(Service):
                     permission = getUtility(
                         IPermission, name='plone.AccessContent')
 
-                    allowed = self.request.security.checkPermission(
+                    allowed = IInteraction(self.request).check_permission(
                         permission.id, obj)
                     if not allowed:
                         response = {

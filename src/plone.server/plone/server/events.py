@@ -16,7 +16,6 @@ from zope.component.interfaces import ComponentLookupError
 from zope.component.interfaces import IObjectEvent
 from zope.event import subscribers as syncsubscribers
 from zope.interface import implementer
-from zope.interface.interfaces import ObjectEvent
 
 
 _zone = tzlocal()
@@ -24,8 +23,23 @@ _zone = tzlocal()
 asyncsubscribers = []
 
 
+@implementer(IObjectEvent)
+class ObjectEvent(object):
+
+    def __init__(self, object):
+        self.object = object
+
+
+@implementer(IObjectEvent)
+class ObjectModifiedEvent(object):
+
+    def __init__(self, object, payload=None):
+        self.object = object
+        self.payload = payload
+
+
 @implementer(IObjectFinallyCreatedEvent)
-class ObjectFinallyCreatedEvent(ObjectEvent):
+class ObjectFinallyCreatedEvent(ObjectModifiedEvent):
     """An object has been created."""
 
 
@@ -35,7 +49,7 @@ class ObjectFinallyDeletedEvent(ObjectEvent):
 
 
 @implementer(IObjectFinallyModifiedEvent)
-class ObjectFinallyModifiedEvent(ObjectEvent):
+class ObjectFinallyModifiedEvent(ObjectModifiedEvent):
     """An object has been modified."""
 
 
@@ -50,7 +64,7 @@ class ObjectPermissionsViewEvent(ObjectEvent):
 
 
 @implementer(IObjectPermissionsModifiedEvent)
-class ObjectPermissionsModifiedEvent(ObjectEvent):
+class ObjectPermissionsModifiedEvent(ObjectModifiedEvent):
     """An object has been modified."""
 
 

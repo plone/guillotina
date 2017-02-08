@@ -12,6 +12,8 @@ from zope.i18nmessageid import MessageFactory
 from zope.interface import Interface
 from zope.security.interfaces import Unauthorized
 from plone.server.interfaces import SHARED_CONNECTION
+from plone.server.transactions import abort
+from plone.server.transactions import commit
 
 import asyncio
 import logging
@@ -60,20 +62,20 @@ class QueueUtility(object):
                 try:
                     view_result = await view()
                     if isinstance(view_result, ErrorResponse):
-                        await sync(view.request)(txn.abort)
+                        await abort(txn, view.request)
                     elif isinstance(view_result, UnauthorizedResponse):
-                        await sync(view.request)(txn.abort)
+                        await abort(txn, view.request)
                     else:
-                        await sync(view.request)(txn.commit)
+                        await commit(txn, view.request)
                 except Unauthorized:
-                    await sync(view.request)(txn.abort)
+                    await abort(txn, view.request)
                     view_result = UnauthorizedResponse(
                         _('Not authorized to render operation'))
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",
                         exc_info=e)
-                    await sync(view.request)(txn.abort)
+                    await abort(txn, view.request)
                     view_result = ErrorResponse(
                         'ServiceError',
                         _('Error on execution of operation')

@@ -9,9 +9,9 @@ class Addon(object):
     """
 
     @classmethod
-    def install(self, request):
+    def install(cls, site, request):
         pass
 
     @classmethod
-    def uninstall(request):
+    def uninstall(cls, site, request):
         pass

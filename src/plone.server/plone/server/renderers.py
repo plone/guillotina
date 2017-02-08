@@ -14,7 +14,7 @@ from plone.server.interfaces import IRequest
 from plone.server.interfaces import IView
 from zope.component import queryAdapter
 from zope.interface.interface import InterfaceClass
-from zope.securitypolicy.settings import PermissionSetting
+from plone.server.interfaces.security import PermissionSetting
 
 import json
 
@@ -38,6 +38,8 @@ class PServerJSONEncoder(json.JSONEncoder):
 
         if isinstance(obj, PermissionSetting):
             return obj.getName()
+        if callable(obj):
+            return obj.__module__ + '.' + obj.__name__
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
@@ -140,10 +142,10 @@ class RendererRaw(Renderer):
     def guess_response(self, value):
         resp = value.response
         if isinstance(resp, dict):
-            resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
+            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, list):
-            resp = aioResponse(body=bytes(json.dumps(resp), 'utf-8'))
+            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder ), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
             resp = aioResponse(body=bytes(resp, 'utf-8'))

@@ -26,14 +26,19 @@ from plone.server.interfaces import IResourceDeserializeFromJson
 from plone.server.interfaces import IResourceSerializeToJson
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
+from plone.server.auth import settingsForObject
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
+from plone.server.auth.role import local_roles
 
-from zope.securitypolicy.interfaces import IPrincipalPermissionMap
-from zope.securitypolicy.interfaces import IPrincipalRoleManager
-from zope.securitypolicy.interfaces import IRolePermissionManager
-from zope.securitypolicy.interfaces import IPrincipalRoleMap
-from zope.securitypolicy.interfaces import IRolePermissionMap
+from plone.server.interfaces import IPrincipalPermissionMap
+from plone.server.interfaces import IPrincipalRoleManager
+from plone.server.interfaces import IRolePermissionManager
+from plone.server.interfaces import IPrincipalPermissionManager
+from plone.server.interfaces import IPrincipalRoleMap
+from plone.server.interfaces import IRolePermissionMap
+
+from zope.security.interfaces import IInteraction
 
 
 _zone = tzlocal()
@@ -59,6 +64,10 @@ class DefaultPOST(Service):
         type_ = data.get('@type', None)
         id_ = data.get('id', None)
         behaviors = data.get('@behaviors', None)
+
+        if '__acl__' in data:
+            # we don't allow to change the permisions on this patch
+            del data['__acl__']
 
         if not type_:
             return ErrorResponse(
@@ -116,11 +125,11 @@ class DefaultPOST(Service):
 
         # Local Roles assign owner as the creator user
         roleperm = IPrincipalRoleManager(obj)
-        roleperm.assignRoleToPrincipal(
+        roleperm.assign_role_to_principal(
             'plone.Owner',
             user)
 
-        await notify(ObjectFinallyCreatedEvent(obj))
+        await notify(ObjectFinallyCreatedEvent(obj, data))
 
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 
@@ -165,7 +174,7 @@ class DefaultPATCH(Service):
                 str(e),
                 status=400)
 
-        await notify(ObjectFinallyModifiedEvent(self.context))
+        await notify(ObjectFinallyModifiedEvent(self.context, data))
 
         return Response(response={}, status=204)
 
@@ -180,42 +189,113 @@ async def sharing_get(context, request):
         'local': {},
         'inherit': []
     }
-    result['local']['role_permission'] = roleperm._byrow
-    result['local']['principal_permission'] = prinperm._byrow
-    result['local']['principal_role'] = prinrole._byrow
+    result['local']['roleperm'] = roleperm._bycol
+    result['local']['prinperm'] = prinperm._bycol
+    result['local']['prinrole'] = prinrole._bycol
     for obj in iter_parents(context):
         roleperm = IRolePermissionMap(obj)
         prinperm = IPrincipalPermissionMap(obj)
         prinrole = IPrincipalRoleMap(obj)
         result['inherit'].append({
             '@id': IAbsoluteURL(obj, request)(),
-            'role_permission': roleperm._byrow,
-            'principal_permission': prinperm._byrow,
-            'principal_role': prinrole._byrow,
+            'roleperm': roleperm._bycol,
+            'prinperm': prinperm._bycol,
+            'prinrole': prinrole._bycol,
         })
     await notify(ObjectPermissionsViewEvent(context))
     return result
 
 
+@configure.service(context=IResource, method='GET', permission='plone.SeePermissions',
+                   name='@all_permissions')
+async def all_permissions(context, request):
+    result = settingsForObject(context)
+    await notify(ObjectPermissionsViewEvent(context))
+    return result
+
+
+PermissionMap = {
+    'prinrole': {
+        'Allow': 'assign_role_to_principal',
+        'Deny': 'remove_role_from_principal',
+        'AllowSingle': 'assign_role_to_principal_no_inherit',
+        'Unset': 'unset_role_for_principal'
+    },
+    'roleperm': {
+        'Allow': 'grant_permission_to_role',
+        'Deny': 'deny_permission_to_role',
+        'AllowSingle': 'grant_permission_to_role_no_inherit',
+        'Unset': 'unset_permission_from_role'
+    },
+    'prinperm': {
+        'Allow': 'grant_permission_to_principal',
+        'Deny': 'deny_permission_to_principal',
+        'AllowSingle': 'grant_permission_to_principal_no_inherit',
+        'Unset': 'unset_permission_for_principal'
+    }
+}
+
+
 @configure.service(context=IResource, method='POST', permission='plone.ChangePermissions',
                    name='@sharing')
 async def sharing_post(context, request):
+    """Change permissions"""
+    lroles = local_roles()
     data = await request.json()
-    roleperm = IRolePermissionManager(context)
-    prinrole = IPrincipalRoleManager(context)
-    if 'prinrole' not in data and 'roleperm' not in data:
-        raise AttributeError('prinrole or roleperm missing')
+    if 'prinrole' not in data and \
+            'roleperm' not in data and \
+            'prinperm' not in data:
+        raise AttributeError('prinrole or roleperm or prinperm missing')
+
+    if 'type' not in data:
+        raise AttributeError('type missing')
+
+    setting = data['type']
 
     if 'prinrole' in data:
+        if setting not in PermissionMap['prinrole']:
+            raise AttributeError('Invalid Type')
+        manager = IPrincipalRoleManager(context)
+        operation = PermissionMap['prinrole'][setting]
+        func = getattr(manager, operation)
         for user, roles in data['prinrole'].items():
             for role in roles:
-                prinrole.assignRoleToPrincipal(role, user)
+                if role in lroles:
+                    func(role, user)
+                else:
+                    raise KeyError('No valid local role')
+
+    if 'prinperm' in data:
+        if setting not in PermissionMap['prinperm']:
+            raise AttributeError('Invalid Type')
+        manager = IPrincipalPermissionManager(context)
+        operation = PermissionMap['prinperm'][setting]
+        func = getattr(manager, operation)
+        for user, permissions in data['prinperm'].items():
+            for permision in permissions:
+                func(permision, user)
 
     if 'roleperm' in data:
-        for role, perms in data['roleperm'].items():
-            for perm in perms:
-                roleperm.grantPermissionToRole(perm, role)
-    await notify(ObjectPermissionsModifiedEvent(context))
+        if setting not in PermissionMap['roleperm']:
+            raise AttributeError('Invalid Type')
+        manager = IRolePermissionManager(context)
+        operation = PermissionMap['roleperm'][setting]
+        func = getattr(manager, operation)
+        for role, permissions in data['roleperm'].items():
+            for permission in permissions:
+                func(permission, role)
+
+    await notify(ObjectPermissionsModifiedEvent(context, data))
+
+
+@configure.service(
+    context=IResource, method='GET', permission='plone.AccessContent',
+    name='@canido')
+async def can_i_do(context, request):
+    if 'permission' not in request.GET:
+        raise TypeError('No permission param')
+    permission = request.GET['permission']
+    return IInteraction(request).check_permission(permission, context)
 
 
 @configure.service(context=IResource, method='DELETE', permission='plone.DeleteContent')

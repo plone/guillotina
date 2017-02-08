@@ -92,7 +92,7 @@ def RelStorageConfigurationFactory(key, dbconfig):
     options = Options(**dbconfig['options'])
     if dbconfig['type'] == 'postgres':
         from relstorage.adapters.postgresql import PostgreSQLAdapter
-        dsn = "dbname={dbname} user={username} host={host} password={password} port={port}".format(**dbconfig['dsn'])  # noqa
+        dsn = "dbname={dbname} user={user} host={host} password={password} port={port}".format(**dbconfig['dsn'])  # noqa
         adapter = PostgreSQLAdapter(dsn=dsn, options=options)
     rs = RelStorage(adapter=adapter, options=options)
     db = DB(rs)

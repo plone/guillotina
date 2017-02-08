@@ -143,7 +143,7 @@ def register_service(_context, configuration, content, method, layer,
         required[n] = permission
 
     # prevent circular import
-    from plone.server.security import ViewPermissionChecker
+    from plone.server.auth.checker import ViewPermissionChecker
     from plone.server import app_settings
 
     defineChecker(factory, ViewPermissionChecker(required))

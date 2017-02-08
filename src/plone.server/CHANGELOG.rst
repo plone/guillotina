@@ -1,7 +1,25 @@
 1.0a11 (unreleased)
 -------------------
 
+Breaking changes:
+
+- ACL is now in the object itself so the permission will not be maintained
+  [ramonnb]
+
 New features:
+
+- Adding the payload on the events that modifies the objects
+  [ramonnb]
+
+- Defining local and global roles so they can be used to define @sharing
+  On indexing security information we only get the AccessContent permission.
+  [ramonnb]
+
+- Install addons can have the context
+  [ramonnb]
+
+- Merging zope.securitypolicy
+  [ramonnb]
 
 - Adding C optimization for get_current_request
   [ramonnb]

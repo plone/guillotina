@@ -3,6 +3,7 @@ from plone.server import metaconfigure
 from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IDefaultLayer
 from plone.server.interfaces import IResourceFactory
+from plone.server.interfaces import IRole
 from plone.server.utils import caller_module
 from plone.server.utils import dotted_name
 from plone.server.utils import resolve_module_path
@@ -11,10 +12,11 @@ from zope.component import zcml
 from zope.interface import classImplements
 from zope.interface import Interface
 from zope.configuration import xmlconfig
+from zope.configuration.exceptions import ConfigurationError
 
+import logging
 import plone.behavior.metaconfigure
 import zope.security.zcml
-import zope.securitypolicy.metaconfigure
 
 
 _registered_configurations = []
@@ -22,6 +24,8 @@ _registered_configurations = []
 # it is registered even if you mix types of registrations
 
 _registered_configuration_handlers = {}
+
+logger = logging.getLogger('plone.server')
 
 
 def get_configurations(module_name, type_=None):
@@ -56,7 +60,11 @@ def load_configuration(_context, module_name, _type):
 
 def load_all_configurations(_context, module_name):
     for type_, configuration in get_configurations(module_name):
-        _registered_configuration_handlers[type_](_context, configuration)
+        try:
+            _registered_configuration_handlers[type_](_context, configuration)
+        except TypeError as e:
+            logger.error('Can not find %s module' % configuration)
+            raise
 
 
 def load_service(_context, service):
@@ -119,14 +127,18 @@ def load_behavior(_context, behavior):
     conf = behavior['config']
     klass = resolve_or_get(behavior['klass'])
     factory = conf.get('factory') or klass
+    real_factory = resolve_or_get(factory)
+    schema = resolve_or_get(conf['provides'])
+    classImplements(real_factory, schema)
+    
     plone.behavior.metaconfigure.behaviorDirective(
         _context,
         conf.get('title', ''),
-        resolve_or_get(conf['provides']),
+        schema,
         name=conf.get('name'),
         description=conf.get('description'),
         marker=resolve_or_get(conf.get('marker')),
-        factory=resolve_or_get(factory),
+        factory=real_factory,
         for_=resolve_or_get(conf.get('for_')),
         name_only=conf.get('name_only')
     )
@@ -205,17 +217,17 @@ register_configuration_handler('permission', load_permission)
 
 
 def load_role(_context, role):
-    zope.securitypolicy.metaconfigure.defineRole(_context, **role['config'])
+    defineRole_directive(_context, **role['config'])
 register_configuration_handler('role', load_role)
 
 
 def load_grant(_context, grant):
-    zope.securitypolicy.metaconfigure.grant(_context, **grant['config'])
+    grant_directive(_context, **grant['config'])
 register_configuration_handler('grant', load_grant)
 
 
 def load_grant_all(_context, grant_all):
-    zope.securitypolicy.metaconfigure.grantAll(_context, **grant_all['config'])
+    grantAll_directive(_context, **grant_all['config'])
 register_configuration_handler('grant_all', load_grant_all)
 
 
@@ -306,13 +318,14 @@ def permission(id, title, description=''):
         'permission')
 
 
-def role(id, title, description=''):
+def role(id, title, description='', local=True):
     register_configuration(
         caller_module(),
         dict(
             id=id,
             title=title,
-            description=description),
+            description=description,
+            local=local),
         'role')
 
 
@@ -335,6 +348,94 @@ def grant_all(principal=None, role=None):
             principal=principal,
             role=role),
         'grant_all')
+
+
+def grant_directive(
+        _context, principal=None, role=None, permission=None,
+        permissions=None):
+    from plone.server.auth import \
+        role_permission_manager as role_perm_mgr
+    from plone.server.auth import \
+        principal_permission_manager as principal_perm_mgr
+    from plone.server.auth import \
+        principal_role_manager as principal_role_mgr
+
+    nspecified = ((principal is not None)
+                  + (role is not None)
+                  + (permission is not None)
+                  + (permissions is not None))
+    permspecified = ((permission is not None)
+                     + (permissions is not None))
+
+    if nspecified != 2 or permspecified == 2:
+        raise ConfigurationError(
+            "Exactly two of the principal, role, and permission resp. "
+            "permissions attributes must be specified")
+
+    if permission:
+        permissions = [permission]
+
+    if principal and role:
+        _context.action(
+            discriminator=('grantRoleToPrincipal', role, principal),
+            callable=principal_role_mgr.assign_role_to_principal,
+            args=(role, principal),
+        )
+    elif principal and permissions:
+        for permission in permissions:
+            _context.action(
+                discriminator=('grantPermissionToPrincipal',
+                               permission,
+                               principal),
+                callable=principal_perm_mgr.grant_permission_to_principal,
+                args=(permission, principal),
+            )
+    elif role and permissions:
+        for permission in permissions:
+            _context.action(
+                discriminator=('grantPermissionToRole', permission, role),
+                callable=role_perm_mgr.grant_permission_to_role,
+                args=(permission, role),
+            )
+
+
+def grantAll_directive(_context, principal=None, role=None):
+    """Grant all permissions to a role or principal
+    """
+    from plone.server.auth import \
+        rolePermissionManager as role_perm_mgr
+    from plone.server.auth import \
+        principalPermissionManager as principal_perm_mgr
+    from plone.server.auth import \
+        principalRoleManager as principal_role_mgr
+    nspecified = ((principal is not None)
+                  + (role is not None))
+
+    if nspecified != 1:
+        raise ConfigurationError(
+            "Exactly one of the principal and role attributes "
+            "must be specified")
+
+    if principal:
+        _context.action(
+            discriminator=('grantAllPermissionsToPrincipal',
+                           principal),
+            callable=principal_perm_mgr.grantAllPermissionsToPrincipal,
+            args=(principal, ),
+        )
+    else:
+        _context.action(
+            discriminator=('grantAllPermissionsToRole', role),
+            callable=role_perm_mgr.grantAllPermissionsToRole,
+            args=(role, ),
+        )
+
+
+def defineRole_directive(_context, id, title, description='', local=True):
+    from plone.server.auth.role import Role
+
+    role = Role(id, title, description, local)
+    zcml.utility(_context, IRole, role, name=id)
 
 
 def include(package, file=None):

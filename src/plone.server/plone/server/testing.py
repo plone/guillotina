@@ -13,7 +13,7 @@ from plone.server.interfaces import IDefaultLayer
 from plone.server.interfaces import IRequest
 from plone.server.interfaces import IResource
 from plone.server.jsonfield import JSONField
-from plone.server.security import Interaction
+from plone.server.auth.policy import Interaction
 from zope.component import getUtility
 from zope.configuration.xmlconfig import include
 from zope.interface import implementer

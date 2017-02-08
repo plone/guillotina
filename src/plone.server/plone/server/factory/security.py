@@ -3,8 +3,8 @@ from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDatabase
-from zope.securitypolicy.interfaces import IPrincipalPermissionManager
-from zope.securitypolicy.principalpermission import PrincipalPermissionManager
+from plone.server.interfaces import IPrincipalPermissionManager
+from plone.server.auth.security_code import PrincipalPermissionManager
 
 
 @configure.adapter(for_=IDatabase, provides=IPrincipalPermissionManager, trusted=True)
@@ -16,12 +16,12 @@ class RootSpecialPermissions(PrincipalPermissionManager):
     """
     def __init__(self, db):
         super(RootSpecialPermissions, self).__init__()
-        self.grantPermissionToPrincipal('plone.AddPortal', ROOT_USER_ID)
-        self.grantPermissionToPrincipal('plone.GetPortals', ROOT_USER_ID)
-        self.grantPermissionToPrincipal('plone.DeletePortals', ROOT_USER_ID)
-        self.grantPermissionToPrincipal('plone.AccessContent', ROOT_USER_ID)
-        self.grantPermissionToPrincipal('plone.GetDatabases', ROOT_USER_ID)
-        self.grantPermissionToPrincipal('plone.GetAPIDefinition', ROOT_USER_ID)
+        self.grant_permission_to_principal('plone.AddPortal', ROOT_USER_ID)
+        self.grant_permission_to_principal('plone.GetPortals', ROOT_USER_ID)
+        self.grant_permission_to_principal('plone.DeletePortals', ROOT_USER_ID)
+        self.grant_permission_to_principal('plone.AccessContent', ROOT_USER_ID)
+        self.grant_permission_to_principal('plone.GetDatabases', ROOT_USER_ID)
+        self.grant_permission_to_principal('plone.GetAPIDefinition', ROOT_USER_ID)
         # Access anonymous - needs to be configurable
-        self.grantPermissionToPrincipal(
+        self.grant_permission_to_principal(
             'plone.AccessContent', ANONYMOUS_USER_ID)

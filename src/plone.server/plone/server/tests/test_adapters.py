@@ -23,7 +23,7 @@ from plone.server.json import serialize_schema_field, deserialize_content, deser
 from plone.server.json.serialize_content import DefaultJSONSummarySerializer
 from plone.server.json.serialize_content import SerializeFolderToJson
 from plone.server.json.serialize_content import SerializeToJson
-from plone.server.security import Interaction
+from plone.server.auth.policy import Interaction
 from plone.server.testing import PloneFunctionalTestCase
 from plone.server.text import RichText
 from zope import schema
@@ -31,7 +31,7 @@ from zope.component import getAdapter
 from zope.component import getMultiAdapter
 from zope.component import getUtility
 from zope.security.interfaces import IInteraction
-from zope.securitypolicy.interfaces import IPrincipalPermissionManager
+from plone.server.interfaces import IPrincipalPermissionManager
 
 
 class TestAdapters(PloneFunctionalTestCase):
