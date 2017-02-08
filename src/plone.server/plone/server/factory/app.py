@@ -13,6 +13,7 @@ from plone.server.factory.content import ApplicationRoot
 from plone.server.interfaces import IApplication
 from plone.server.interfaces import IDatabaseConfigurationFactory
 from plone.server.interfaces.content import IContentNegotiation
+from plone.server.interfaces import IDatabase
 from plone.server.traversal import TraversalRouter
 from zope.component import getAllUtilitiesRegisteredFor
 from zope.component import getUtility
@@ -214,3 +215,6 @@ def make_app(config_file=None, settings=None):
 async def close_utilities(app):
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
         asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
+    for db in app.router._root:
+        if IDatabase.providedBy(db[1]):
+            db[1]._db.close()

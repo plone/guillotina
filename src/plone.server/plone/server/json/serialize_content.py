@@ -117,7 +117,7 @@ class SerializeFolderToJson(SerializeToJson):
         security = IInteraction(self.request)
         length = len(self.context)
 
-        if length > MAX_ALLOWED:
+        if length > MAX_ALLOWED or length == 0:
             result['items'] = []
         else:
             result['items'] = [

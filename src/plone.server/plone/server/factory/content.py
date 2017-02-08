@@ -8,13 +8,14 @@ from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import provideUtility
 from zope.interface import implementer
+from concurrent.futures import ThreadPoolExecutor
 
 import asyncio
 
 
 @implementer(IApplication)
 class ApplicationRoot(object):
-
+    executor = ThreadPoolExecutor(max_workers=100)
     root_user = None
 
     def __init__(self, config_file):
@@ -27,7 +28,7 @@ class ApplicationRoot(object):
         factory = import_class(config['factory'])
         utility_object = factory(config['settings'])
         provideUtility(utility_object, interface)
-        task = asyncio.ensure_future(utility_object.initialize(app=self))
+        task = asyncio.ensure_future(utility_object.initialize(app=self.app))
         self.add_async_task(config['provides'], task, config)
 
     def add_async_task(self, ident, task, config):
