@@ -51,6 +51,7 @@ class ApplicationRoot(object):
         utility = getUtility(interface)
         gsm = getGlobalSiteManager()
         gsm.unregisterUtility(utility, provided=interface)
+        del self._async_utilities[config['provides']]
 
     def set_root_user(self, user):
         password = user['password']
