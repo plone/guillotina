@@ -252,6 +252,10 @@ async def sharing_post(context, request):
 
     setting = data['type']
 
+    # we need to check if we are changing any info
+
+    changed = False
+
     if 'prinrole' in data:
         if setting not in PermissionMap['prinrole']:
             raise AttributeError('Invalid Type')
@@ -261,6 +265,7 @@ async def sharing_post(context, request):
         for user, roles in data['prinrole'].items():
             for role in roles:
                 if role in lroles:
+                    changed = True
                     func(role, user)
                 else:
                     raise KeyError('No valid local role')
@@ -273,6 +278,7 @@ async def sharing_post(context, request):
         func = getattr(manager, operation)
         for user, permissions in data['prinperm'].items():
             for permision in permissions:
+                changed = True
                 func(permision, user)
 
     if 'roleperm' in data:
@@ -283,9 +289,11 @@ async def sharing_post(context, request):
         func = getattr(manager, operation)
         for role, permissions in data['roleperm'].items():
             for permission in permissions:
+                changed = True
                 func(permission, role)
 
-    await notify(ObjectPermissionsModifiedEvent(context, data))
+    if changed:
+        await notify(ObjectPermissionsModifiedEvent(context, data))
 
 
 @configure.service(
