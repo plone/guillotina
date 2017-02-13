@@ -33,7 +33,7 @@ class ObjectEvent(object):
 @implementer(IObjectEvent)
 class ObjectModifiedEvent(object):
 
-    def __init__(self, object, payload=None):
+    def __init__(self, object, payload={}):
         self.object = object
         self.payload = payload
 
