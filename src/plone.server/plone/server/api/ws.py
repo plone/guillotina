@@ -16,6 +16,7 @@ from zope.security.interfaces import IPermission
 from zope.security.interfaces import IInteraction
 
 import aiohttp
+import asyncio
 import ujson
 
 
@@ -125,7 +126,14 @@ class WebsocketsView(Service):
                     if isinstance(view_result, Response):
                         view_result = view_result.response
 
+                    # Return the value
                     ws.send_str(ujson.dumps(view_result))
+
+                    # Wait for possible value
+                    futures_to_wait = self.request._futures.values()
+                    if futures_to_wait:
+                        await asyncio.gather(futures_to_wait)
+                        self.request._futures = {}
                 else:
                     await ws.close()
             elif msg.tp == aiohttp.MsgType.error:

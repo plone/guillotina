@@ -8,6 +8,9 @@ Breaking changes:
 
 New features:
 
+- Executing pending tasks after requests has returned
+  [ramonnb]
+
 - Adding the payload on the events that modifies the objects
   [ramonnb]
 

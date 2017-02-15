@@ -2,6 +2,7 @@
 """Main routing traversal class."""
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
+from aiohttp.web_ws import WebSocketResponse
 from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
@@ -245,10 +246,6 @@ class MatchInfo(AbstractMatchInfo):
         if SHARED_CONNECTION is False and hasattr(request, 'conn'):
             request.conn.close()
 
-        futures_to_wait = request._futures.values()
-        if futures_to_wait:
-            await asyncio.gather(futures_to_wait)
-
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
             view_result = Response(view_result)
@@ -261,7 +258,17 @@ class MatchInfo(AbstractMatchInfo):
         cors_headers.update(view_result.headers)
         view_result.headers = cors_headers
 
-        return await self.rendered(view_result)
+        resp = await self.rendered(view_result)
+        if not resp.prepared:
+            await resp.prepare(request)
+        await resp.write_eof()
+        resp._body = None
+
+        futures_to_wait = request._futures.values()
+        if futures_to_wait:
+            await asyncio.gather(futures_to_wait)
+
+        return resp
 
     def get_info(self):
         return {
