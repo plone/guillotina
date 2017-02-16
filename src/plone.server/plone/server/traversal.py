@@ -263,6 +263,7 @@ class MatchInfo(AbstractMatchInfo):
             await resp.prepare(request)
         await resp.write_eof()
         resp._body = None
+        resp.force_close()
 
         futures_to_wait = request._futures.values()
         if futures_to_wait:
