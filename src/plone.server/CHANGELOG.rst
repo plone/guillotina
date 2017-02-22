@@ -1,6 +1,11 @@
 1.0a11 (unreleased)
 -------------------
 
+Fixes:
+
+- Handle NotADirectoryError error when attempting to load b/w compat zcml
+  [vangheem]
+
 Breaking changes:
 
 - ACL is now in the object itself so the permission will not be maintained

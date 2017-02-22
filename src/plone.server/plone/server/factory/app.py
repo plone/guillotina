@@ -49,7 +49,7 @@ def load_application(module, root, settings):
     # zcml
     try:
         include(app.config, 'configure.zcml', module)
-    except FileNotFoundError:
+    except (FileNotFoundError, NotADirectoryError):
         # addons do not need to have zcml
         pass
     # includeme function
