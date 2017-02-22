@@ -26,7 +26,7 @@ from plone.server.interfaces import IResourceDeserializeFromJson
 from plone.server.interfaces import IResourceSerializeToJson
 from plone.server.utils import get_authenticated_user_id
 from plone.server.utils import iter_parents
-from plone.server.auth import settingsForObject
+from plone.server.auth import settings_for_object
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from plone.server.auth.role import local_roles
@@ -209,7 +209,7 @@ async def sharing_get(context, request):
 @configure.service(context=IResource, method='GET', permission='plone.SeePermissions',
                    name='@all_permissions')
 async def all_permissions(context, request):
-    result = settingsForObject(context)
+    result = settings_for_object(context)
     await notify(ObjectPermissionsViewEvent(context))
     return result
 

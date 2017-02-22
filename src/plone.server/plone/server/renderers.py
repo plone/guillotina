@@ -96,13 +96,17 @@ class Renderer(object):
         self.renderformat = renderformat
 
 
+def _is_pserver_response(resp):
+    return hasattr(resp, '__class__') and issubclass(resp.__class__, Response)
+
+
 @configure.adapter(
     for_=(IRendererFormatJson, IView, IRequest),
     provides=IRendered)
 class RendererJson(Renderer):
     async def __call__(self, value):
         headers = {}
-        if hasattr(value, '__class__') and issubclass(value.__class__, Response):
+        if _is_pserver_response(value):
             json_value = value.response
             headers = value.headers
             status = value.status
@@ -131,6 +135,16 @@ class RendererJson(Renderer):
 class RendererHtml(Renderer):
     async def __call__(self, value):
         # Safe html transformation
+        if _is_pserver_response(value):
+            body = value.response
+            if not isinstance(body, str):
+                body = json.dumps(value.response)
+            value = aioResponse(
+                body=body.encode('utf8'), status=value.status,
+                headers=value.headers)
+        value.headers.update({
+            'content-type': 'text/html'
+        })
         return value
 
 
@@ -145,7 +159,7 @@ class RendererRaw(Renderer):
             resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, list):
-            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder ), 'utf-8'))
+            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
             resp = aioResponse(body=bytes(resp, 'utf-8'))
