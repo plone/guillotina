@@ -71,7 +71,7 @@ def get_principals_with_access_content(obj, request=None):
     return list(users.keys())
 
 
-def settingsForObject(ob):
+def settings_for_object(ob):
     """Analysis tool to show all of the grants to a process
     """
     result = []

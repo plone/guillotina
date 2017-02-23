@@ -130,7 +130,7 @@ def load_behavior(_context, behavior):
     real_factory = resolve_or_get(factory)
     schema = resolve_or_get(conf['provides'])
     classImplements(real_factory, schema)
-    
+
     plone.behavior.metaconfigure.behaviorDirective(
         _context,
         conf.get('title', ''),
@@ -402,12 +402,8 @@ def grant_directive(
 def grantAll_directive(_context, principal=None, role=None):
     """Grant all permissions to a role or principal
     """
-    from plone.server.auth import \
-        rolePermissionManager as role_perm_mgr
-    from plone.server.auth import \
-        principalPermissionManager as principal_perm_mgr
-    from plone.server.auth import \
-        principalRoleManager as principal_role_mgr
+    from plone.server.auth import role_permission_manager
+    from plone.server.auth import principal_permission_manager
     nspecified = ((principal is not None)
                   + (role is not None))
 
@@ -420,13 +416,13 @@ def grantAll_directive(_context, principal=None, role=None):
         _context.action(
             discriminator=('grantAllPermissionsToPrincipal',
                            principal),
-            callable=principal_perm_mgr.grantAllPermissionsToPrincipal,
+            callable=principal_permission_manager.grantAllPermissionsToPrincipal,
             args=(principal, ),
         )
     else:
         _context.action(
             discriminator=('grantAllPermissionsToRole', role),
-            callable=role_perm_mgr.grantAllPermissionsToRole,
+            callable=role_permission_manager.grantAllPermissionsToRole,
             args=(role, ),
         )
 

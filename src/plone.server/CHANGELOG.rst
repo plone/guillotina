@@ -1,7 +1,13 @@
 1.0a12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+Fixes:
+
+- HTML renderer can now handle html responses correctly
+  [vangheem]
+
+- Renamed settingsForObject to settings_for_object
+  [vangheem]
 
 
 1.0a11 (2017-02-22)

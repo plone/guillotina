@@ -58,8 +58,8 @@ get_principals_with_access_content(obj)
 
 
 # Code to get all the security info
-from plone.server.auth import settingsForObject
-settingsForObject(obj)
+from plone.server.auth import settings_for_object
+settings_for_object(obj)
 
 # Code to get the Interaction object ( security object )
 from zope.security.interfaces import IInteraction
