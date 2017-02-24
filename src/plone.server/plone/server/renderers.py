@@ -137,10 +137,13 @@ class RendererHtml(Renderer):
         # Safe html transformation
         if _is_pserver_response(value):
             body = value.response
-            if not isinstance(body, str):
-                body = json.dumps(value.response)
+            if not isinstance(body, bytes):
+                if not isinstance(body, str):
+                    body = json.dumps(value.response)
+                body = body.encode('utf8')
+
             value = aioResponse(
-                body=body.encode('utf8'), status=value.status,
+                body=body, status=value.status,
                 headers=value.headers)
         value.headers.update({
             'content-type': 'text/html'
