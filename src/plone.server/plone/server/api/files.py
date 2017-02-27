@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import StreamResponse
-from os.path import basename
 from plone.server import configure
 from plone.server.api.service import DownloadService
 from plone.server.api.service import TraversableDownloadService
@@ -19,13 +18,14 @@ import mimetypes
 @configure.service(context=IStaticFile, method='GET', permission='plone.AccessContent')
 class DefaultGET(DownloadService):
     async def __call__(self):
-        if hasattr(self.context, '_file_path'):
-            with open(self.context._file_path, 'rb') as f:
-                filename = basename(self.context._file_path)
+        if hasattr(self.context, 'file_path'):
+            filepath = str(self.context.file_path.absolute())
+            filename = self.context.file_path.name
+            with open(filepath, 'rb') as f:
                 resp = StreamResponse(headers=aiohttp.MultiDict({
                     'CONTENT-DISPOSITION': 'attachment; filename="%s"' % filename
                 }))
-                resp.content_type = mimetypes.guess_type(self.context._file_path)
+                resp.content_type = mimetypes.guess_type(filename)
                 data = f.read()
                 resp.content_length = len(data)
                 await resp.prepare(self.request)

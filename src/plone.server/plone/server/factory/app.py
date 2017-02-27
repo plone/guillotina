@@ -7,15 +7,16 @@ from plone.server import languages
 from plone.server import logger
 from plone.server.async import IAsyncUtility
 from plone.server.content import load_cached_schema
+from plone.server.content import StaticDirectory
 from plone.server.content import StaticFile
 from plone.server.contentnegotiation import ContentNegotiatorUtility
+from plone.server.exceptions import RequestNotFound
 from plone.server.factory.content import ApplicationRoot
 from plone.server.interfaces import IApplication
+from plone.server.interfaces import IDatabase
 from plone.server.interfaces import IDatabaseConfigurationFactory
 from plone.server.interfaces.content import IContentNegotiation
-from plone.server.interfaces import IDatabase
 from plone.server.traversal import TraversalRouter
-from plone.server.exceptions import RequestNotFound
 from zope.component import getAllUtilitiesRegisteredFor
 from zope.component import getUtility
 from zope.component import provideUtility
@@ -28,6 +29,7 @@ import asyncio
 import collections
 import inspect
 import json
+import pathlib
 
 
 try:
@@ -181,7 +183,11 @@ def make_app(config_file=None, settings=None):
 
     for static in app_settings['static']:
         for key, file_path in static.items():
-            root[key] = StaticFile(file_path)
+            path = pathlib.Path(file_path)
+            if path.is_dir():
+                root[key] = StaticDirectory(path)
+            else:
+                root[key] = StaticFile(path)
 
     root.set_root_user(app_settings['root_user'])
 

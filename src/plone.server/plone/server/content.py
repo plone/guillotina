@@ -13,9 +13,9 @@ from plone.server import configure
 from plone.server import FACTORY_CACHE
 from plone.server import PERMISSIONS_CACHE
 from plone.server import SCHEMA_CACHE
+from plone.server.auth.security_code import PrincipalPermissionManager
 from plone.server.auth.users import ANONYMOUS_USER_ID
 from plone.server.auth.users import ROOT_USER_ID
-from plone.server.auth.security_code import PrincipalPermissionManager
 from plone.server.browser import get_physical_path
 from plone.server.exceptions import ConflictIdOnContainer
 from plone.server.exceptions import NoPermissionToAdd
@@ -24,8 +24,8 @@ from plone.server.interfaces import DEFAULT_ADD_PERMISSION
 from plone.server.interfaces import IConstrainTypes
 from plone.server.interfaces import IContainer
 from plone.server.interfaces import IItem
-from plone.server.interfaces import IPrincipalRoleManager
 from plone.server.interfaces import IPrincipalPermissionManager
+from plone.server.interfaces import IPrincipalRoleManager
 from plone.server.interfaces import IResource
 from plone.server.interfaces import IResourceFactory
 from plone.server.interfaces import ISite
@@ -50,9 +50,10 @@ from zope.interface import noLongerProvides
 from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
 from zope.schema.interfaces import IContextAwareDefaultFactory
-from zope.security.interfaces import IPermission
 from zope.security.interfaces import IInteraction
+from zope.security.interfaces import IPermission
 
+import pathlib
 import uuid
 
 
@@ -460,20 +461,21 @@ class Site(Folder):
 
 @implementer(IStaticFile)
 class StaticFile(object):
-    def __init__(self, file_path):
-        self._file_path = file_path
+    def __init__(self, file_path: pathlib.Path):
+        self.file_path = file_path
 
 
 @implementer(IStaticDirectory)
-class StaticDirectory(object):
+class StaticDirectory(dict):
+    """
+    Using dict makes this a simple container so traversing works
+    """
 
-    _items = {}
-
-    def __init__(self, file_path):
-        self._file_path = file_path
+    def __init__(self, file_path: pathlib.Path):
+        self.file_path = file_path
         for x in file_path.iterdir():
             if not x.name.startswith('.') and '/' not in x.name:
-                self._items[x.name] = StaticFile(str(x.absolute()))
+                self[x.name] = StaticFile(x)
 
 
 @configure.adapter(for_=IStaticFile, provides=IPrincipalPermissionManager, trusted=True)
@@ -481,4 +483,4 @@ class StaticDirectory(object):
 class StaticFileSpecialPermissions(PrincipalPermissionManager):
     def __init__(self, db):
         super(StaticFileSpecialPermissions, self).__init__()
-        self.grantPermissionToPrincipal('plone.AccessContent', ANONYMOUS_USER_ID)
+        self.grant_permission_to_principal('plone.AccessContent', ANONYMOUS_USER_ID)

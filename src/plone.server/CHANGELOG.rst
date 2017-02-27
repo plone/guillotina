@@ -1,7 +1,10 @@
 1.0a13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+Fixes:
+
+- Fix static file configuration
+  [vangheem]
 
 
 1.0a12 (2017-02-27)
