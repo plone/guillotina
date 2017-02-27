@@ -145,9 +145,10 @@ class RendererHtml(Renderer):
             value = aioResponse(
                 body=body, status=value.status,
                 headers=value.headers)
-        value.headers.update({
-            'content-type': 'text/html'
-        })
+        if 'content-type' not in value.headers:
+            value.headers.update({
+                'content-type': 'text/html'
+            })
         return value
 
 
