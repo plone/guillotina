@@ -40,7 +40,7 @@ TESTING_SETTINGS = {
             }
         },
     ],
-    "address": TESTING_PORT,
+    "port": TESTING_PORT,
     "static": [
         {"favicon.ico": "static/favicon.ico"}
     ],

@@ -1,7 +1,9 @@
 1.0a14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Rename "address" option to "port" and add "host" option to bind something different
+  than the default 0.0.0.0
+  [vangheem]
 
 
 1.0a13 (2017-02-27)

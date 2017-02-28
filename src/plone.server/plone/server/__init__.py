@@ -14,7 +14,8 @@ _ = MessageFactory('plone')
 
 app_settings = {
     "databases": [],
-    "address": 8080,
+    "host": "127.0.0.1",
+    "port": 8080,
     "static": [],
     "utilities": [],
     "root_user": {

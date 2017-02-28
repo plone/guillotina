@@ -11,7 +11,6 @@ import os
 import sys
 
 
-
 MISSING_SETTINGS = {
     "databases": [{
         "zodb": {
@@ -19,7 +18,7 @@ MISSING_SETTINGS = {
             "path": "Data.fs"
         }
     }],
-    "address": 8080,
+    "port": 8080,
     "root_user": {
         "password": "root"
     }

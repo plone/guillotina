@@ -48,10 +48,17 @@ map 1-to-1 to ZODB setup:
 
 ```json
 {
-	"address": 8080
+	"port": 8080
 }
 ```
 
+## Server host
+
+```json
+{
+	"host": "0.0.0.0"
+}
+```
 
 ## Root user password
 
