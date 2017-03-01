@@ -1,6 +1,6 @@
 # Security
 
-`plone.server` implements robust ACL security.
+`guillotina` implements robust ACL security.
 
 An overview of our security features are:
 
@@ -19,80 +19,80 @@ By default request has participation of anonymous user plus the ones added by au
 Databases and static files has an specific permission system. They don't have roles by default
 and the permissions are specified to root user
 
- * plone.AddPortal
- * plone.GetPortals
- * plone.DeletePortals
- * plone.AccessContent
- * plone.GetDatabases
+ * guillotina.AddPortal
+ * guillotina.GetPortals
+ * guillotina.DeletePortals
+ * guillotina.AccessContent
+ * guillotina.GetDatabases
 
 Anonymous user has on DB/StaticFiles/StaticDirectories/Application object :
 
- * plone.AccessContent
+ * guillotina.AccessContent
 
-## Roles in plone.server Site objects
+## Roles in guillotina Site objects
 
 Defined at:
 
- * plone/plone.server/src/plone.server/plone/server/permissions.zcml
- * plone/plone.server/src/plone.server/plone/server/security.zcml
+ * guillotina/permissions.py
+ * guillotina/security.py
 
 ## Content Related
 
-### plone.Anonymous
+### guillotina.Anonymous
 
- * plone.AccessPreflight
+ * guillotina.AccessPreflight
 
-### plone.Member
+### guillotina.Member
 
- * plone.AccessContent
+ * guillotina.AccessContent
 
-### plone.Reader
+### guillotina.Reader
 
- * plone.AccessContent
- * plone.ViewContent
+ * guillotina.AccessContent
+ * guillotina.ViewContent
 
-### plone.Editor
+### guillotina.Editor
 
- * plone.AccessContent
- * plone.ViewContent
- * plone.ModifyContent
- * plone.ReindexContent
+ * guillotina.AccessContent
+ * guillotina.ViewContent
+ * guillotina.ModifyContent
+ * guillotina.ReindexContent
 
-### plone.Reviewer
+### guillotina.Reviewer
 
-### plone.Owner
+### guillotina.Owner
 
- * plone.AccessContent
- * plone.ViewContent
- * plone.ModifyContent
- * plone.DeleteContent
- * plone.AddContent
- * plone.ChangePermissions
- * plone.SeePermissions
- * plone.ReindexContent
+ * guillotina.AccessContent
+ * guillotina.ViewContent
+ * guillotina.ModifyContent
+ * guillotina.DeleteContent
+ * guillotina.AddContent
+ * guillotina.ChangePermissions
+ * guillotina.SeePermissions
+ * guillotina.ReindexContent
 
 ## Site/App Roles
 
-### plone.SiteAdmin
+### guillotina.SiteAdmin
 
- * plone.AccessContent
- * plone.ManageAddons
- * plone.RegisterConfigurations
- * plone.WriteConfiguration
- * plone.ReadConfiguration
- * plone.ManageCatalog
+ * guillotina.AccessContent
+ * guillotina.ManageAddons
+ * guillotina.RegisterConfigurations
+ * guillotina.WriteConfiguration
+ * guillotina.ReadConfiguration
+ * guillotina.ManageCatalog
 
-### plone.SiteDeleter
+### guillotina.SiteDeleter
 
- * plone.DeletePortal
+ * guillotina.DeletePortal
 
-## Default roles on Plone Site
+## Default roles on Guillotina Site
 
 They are stored in anontations using IRolePermissionMap.
 
-Created objects set the plone.Owner role to the user who created it.
+Created objects set the guillotina.Owner role to the user who created it.
 
-## Default groups on Plone Site
+## Default groups on Guillotina Site
 
 ### Managers
 
@@ -102,4 +102,4 @@ There is a `root` user who has permissions to all site:
 
 DB/APP permissions are defined on factory.py
 
-Plone permissions because belongs to Managers group auth/participation.py
+Guillotina permissions because belongs to Managers group auth/participation.py

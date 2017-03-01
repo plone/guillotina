@@ -33,7 +33,7 @@
         "password": "root"
     },
     "auth_token_validators": [
-        "plone.server.auth.validators.SaltedHashPasswordValidator"
+        "guillotina.auth.validators.SaltedHashPasswordValidator"
     ],
     "jwt": {
         "secret": "secret",

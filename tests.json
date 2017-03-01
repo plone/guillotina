@@ -494,7 +494,7 @@
 					"listen": "test",
 					"script": {
 						"type": "text/javascript",
-						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 10ms\"] = responseTime < 10;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Cors Max Age\"] = jsonData['plone.server.registry.ICors.max_age'] === '3660';\ntests[\"Cors Enabled\"] = jsonData['plone.server.registry.ICors.enabled'] === true;\ntests[\"Default Layer\"] = jsonData['plone.server.registry.ILayers.active_layers'].indexOf(\"plone.server.api.layer.IDefaultLayer\") > -1;\ntests[\"Extraction Pluggins\"] = jsonData['plone.server.registry.IAuthExtractionPlugins.active_plugins'].indexOf(\"plone.server.auth.oauth.PloneJWTExtraction\") > -1;"
+						"exec": "tests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Response time is less than 10ms\"] = responseTime < 10;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"Cors Max Age\"] = jsonData['guillotina.registry.ICors.max_age'] === '3660';\ntests[\"Cors Enabled\"] = jsonData['guillotina.registry.ICors.enabled'] === true;\ntests[\"Default Layer\"] = jsonData['guillotina.registry.ILayers.active_layers'].indexOf(\"guillotina.api.layer.IDefaultLayer\") > -1;\ntests[\"Extraction Pluggins\"] = jsonData['guillotina.registry.IAuthExtractionPlugins.active_plugins'].indexOf(\"guillotina.auth.oauth.PloneJWTExtraction\") > -1;"
 					}
 				}
 			],

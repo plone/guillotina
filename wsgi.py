@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from plone.server.factory import make_app
+from guillotina.factory import make_app
 
 import logging
 

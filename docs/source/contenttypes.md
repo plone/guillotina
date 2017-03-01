@@ -2,7 +2,7 @@
 
 Content types allow you to provide custom schemas and content to your services.
 
-OOTB, `plone.server` ships with simple `Folder` and `Item` content types. The
+OOTB, `guillotina` ships with simple `Folder` and `Item` content types. The
 `Folder` type allowing someone to add items inside of it. Both types only have
 simple dublin core fields.
 
@@ -15,9 +15,9 @@ fields you want your class to use.
 A simple type will look like this::
 
 ```python
-from plone.server import configure
-from plone.server.content import Folder
-from plone.server.interfaces import IItem
+from guillotina import configure
+from guillotina.content import Folder
+from guillotina.interfaces import IItem
 from zope import schema
 
 class IMySchema(IItem):
@@ -26,7 +26,7 @@ class IMySchema(IItem):
 @configure.contenttype(
     portal_type="MyType",
     schema=IMySchema,
-    behaviors=["plone.server.behaviors.dublincore.IDublinCore"])
+    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class MyType(Folder):
     pass
 ```
@@ -37,12 +37,12 @@ type.
 
 **Scanning**
 If your service modules are not imported at run-time, you may need to provide an
-additional scan call to get your services noticed by `plone.server`.
+additional scan call to get your services noticed by `guillotina`.
 
 In your application `__init__.py` file, you can simply provide a `scan` call.
 
 ```python
-from plone.server import configure
+from guillotina import configure
 
 def includeme(root):
     configure.scan('my.package.content')

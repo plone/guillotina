@@ -91,9 +91,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/ploneserver.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/guillotina.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/ploneserver.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/guillotina.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -110,8 +110,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/ploneserver"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/ploneserver"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/guillotina"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/guillotina"
 	@echo "# devhelp"
 
 .PHONY: epub

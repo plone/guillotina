@@ -1,6 +1,6 @@
 # Applications
 
-Applications are used to provide additional functionality to plone.server.
+Applications are used to provide additional functionality to guillotina.
 
 ## Community Addons
 
@@ -13,7 +13,7 @@ Some useful addons to use in your own development:
 
 ## Creating
 
-An application is a python package that implements an entry point to tell plone.server
+An application is a python package that implements an entry point to tell guillotina
 to load it.
 
 If you're not familiar with how to build python applications, please
@@ -25,7 +25,7 @@ In your setup.py file, include an entry point like this for your application:
 ```python
   setup(
     entry_points={
-      'plone.server': [
+      'guillotina': [
           'include = pserver.myaddon',
       ]
   })
@@ -36,7 +36,7 @@ In this example, `pserver.myaddon` is your package module.
 
 ## Initialization
 
-Creating the `plone.server` entry point only tells `plone.server` that your
+Creating the `guillotina` entry point only tells `guillotina` that your
 application is available to be used. Your `config.json` file will also need
 to provide the application name in the `applications` array for it to be initialized.
 
@@ -50,14 +50,14 @@ to provide the application name in the `applications` array for it to be initial
 
 ## Configuration
 
-Once you create a `plone.server` application, there are three primary ways for it
-to hook into `plone.server`.
+Once you create a `guillotina` application, there are three primary ways for it
+to hook into `guillotina`.
 
 
 ### Call includeme function
 
 Your application can provide an `includeme` function at the root of the module
-and `plone.server` will call it with the instance of the `root` object.
+and `guillotina` will call it with the instance of the `root` object.
 
 ```python
 
@@ -69,7 +69,7 @@ def includeme(root):
 ### Load app_settings
 
 If an `app_settings` dict is provided at the module root, it will automatically
-merge the global `plone.server` app_settings with the module's. This allows you
+merge the global `guillotina` app_settings with the module's. This allows you
 to provide custom configuration.
 
 

@@ -49,16 +49,16 @@ that are indexed for security plus the flat user/group information from each res
 ```python
 
 # Code to get the global roles that have access_content to an object
-from plone.server.auth import get_roles_with_access_content
+from guillotina.auth import get_roles_with_access_content
 get_roles_with_access_content(obj)
 
 # Code to get the user list that have access content to an object
-from plone.server.auth import get_principals_with_access_content
+from guillotina.auth import get_principals_with_access_content
 get_principals_with_access_content(obj)
 
 
 # Code to get all the security info
-from plone.server.auth import settings_for_object
+from guillotina.auth import settings_for_object
 settings_for_object(obj)
 
 # Code to get the Interaction object ( security object )
@@ -77,15 +77,15 @@ interaction.check_permission(permission, obj)
 
 ## Get all the endpoints and its security
 
-[GET] APPLICATION_URL/@apidefinition (you need plone.GetPortals permission)
+[GET] APPLICATION_URL/@apidefinition (you need guillotina.GetPortals permission)
 
 ## Get the security info for a resource (with inherited info)
 
-[GET] RESOURCE/@sharing (you need plone.SeePermissions permission)
+[GET] RESOURCE/@sharing (you need guillotina.SeePermissions permission)
 
 ## Modify the local roles/permission for a resource
 
-[POST] RESOURCE/@sharing (you need plone.ChangePermissions permission)
+[POST] RESOURCE/@sharing (you need guillotina.ChangePermissions permission)
 
 ```json
   {

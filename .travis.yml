@@ -14,7 +14,7 @@ install:
 - pip install coverage==4.0.3
 - sleep 15
 script:
-- bin/py.test -s --cov=plone.server -v --cov-report term-missing src
+- bin/py.test -s --cov=guillotina -v --cov-report term-missing src
 - bin/code-analysis
 after_success:
 - coveralls

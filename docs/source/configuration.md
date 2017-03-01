@@ -1,7 +1,7 @@
 # Configuration
 
-`plone.server` and it's addon define global configuration that is used throughout
-the `plone.server`. All of these settings are configurable by providing a
+`guillotina` and it's addon define global configuration that is used throughout
+the `guillotina`. All of these settings are configurable by providing a
 JSON configuration file to the start script.
 
 By default, the startup script looks for a `config.json` file. You can use a different
@@ -90,7 +90,7 @@ map 1-to-1 to ZODB setup:
 ```json
 {
 	"utilities": [{
-    "provides": "plone.server.interfaces.ICatalogUtility",
+    "provides": "guillotina.interfaces.ICatalogUtility",
     "factory": "pserver.elasticsearch.utility.ElasticSearchUtility",
     "settings": {}
   }]
