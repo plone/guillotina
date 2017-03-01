@@ -17,7 +17,6 @@ This is the working project of the next generation Guillotina server based on as
 
 * depends on python >= 3.5
 
-
 Getting started with development
 --------------------------------
 
