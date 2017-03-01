@@ -1,4 +1,0 @@
-graft plone
-include *.rst
-include VERSION
-global-exclude *.pyc
