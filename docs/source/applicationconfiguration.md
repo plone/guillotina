@@ -1,6 +1,6 @@
 # Application Configuration
 
-`plone.server` handles configuration application customizations and extension
+`guillotina` handles configuration application customizations and extension
 mostly with decorators in code.
 
 This page is meant to be a reference to the available decorators and options
@@ -24,7 +24,7 @@ to those decorators.
 
 * _portal_type_: Name of the content type: *required*
 * _schema_: Interface schema to use for type: *required*
-* _add_permission_: Permission required to add content. Defaults to `plone.AddContent`
+* _add_permission_: Permission required to add content. Defaults to `guillotina.AddContent`
 * _allowed_types_: List of types allowed to be added inside this content assuming it is a Folder type. Defaults to allowing all types.
 
 

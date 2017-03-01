@@ -7,7 +7,7 @@ Besides having static content type definition with its schema there is the conce
 If you want to have a shared behavior based on some fields and operations that needs to be shared across different content you can define them on a zope.schema interface:
 
 ```python
-    from plone.server.interfaces import IFormFieldProvider
+    from guillotina.interfaces import IFormFieldProvider
     from zope.interface import Interface
     from zope.interface import provider
     from zope.schema import Textline
@@ -40,10 +40,10 @@ Finally the instance class that implements the schema can be defined in case you
 For example in case you want to have a class that stores the field on the content and not on annotations:
 
 ```python
-from plone.server.behaviors.properties import ContextProperty
-from plone.server.behaviors.instance import AnnotationBehavior
-from plone.server.interfaces import IResource
-from plone.server import configure
+from guillotina.behaviors.properties import ContextProperty
+from guillotina.behaviors.instance import AnnotationBehavior
+from guillotina.interfaces import IResource
+from guillotina import configure
 
 @configure.behavior(
     title="Attachment",
@@ -65,26 +65,26 @@ With behaviors you can define them as static for specific content types:
 
 ```python
 
-from plone.server import configure
-from plone.server.interfaces import IItem
-from plone.server.content import Item
+from guillotina import configure
+from guillotina.interfaces import IItem
+from guillotina.content import Item
 
 @configure.contenttype(
     portal_type="MyItem",
     schema=IItem,
-    behaviors=["plone.server.behaviors.dublincore.IDublinCore"])
+    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class MyItem(Item):
     pass
 ```
 
 **Scanning**
 If your service modules are not imported at run-time, you may need to provide an
-additional scan call to get your services noticed by `plone.server`.
+additional scan call to get your services noticed by `guillotina`.
 
 In your application `__init__.py` file, you can simply provide a `scan` call.
 
 ```python
-from plone.server import configure
+from guillotina import configure
 
 def includeme(root):
     configure.scan('my.package.services')
@@ -101,7 +101,7 @@ CREATE an ITEM with the expires : POST on parent:
 ```json
     {
         "@type": "Item",
-        "plone.server.behaviors.dublincore.IDublinCore": {
+        "guillotina.behaviors.dublincore.IDublinCore": {
             "expires": "1/10/2017"
         }
     }
@@ -111,7 +111,7 @@ MODIFY an ITEM with the expires : PATCH on the object:
 
 ```json
     {
-        "plone.server.behaviors.dublincore.IDublinCore": {
+        "guillotina.behaviors.dublincore.IDublinCore": {
             "expires": "1/10/2017"
         }
     }
@@ -125,8 +125,8 @@ GET an ITEM : GET on the object:
 
 ```json
     {
-        "@id": "http://localhost:8080/zodb/plone/item1",
-        "plone.server.behaviors.dublincore.IDublinCore": {
+        "@id": "http://localhost:8080/zodb/guillotina/item1",
+        "guillotina.behaviors.dublincore.IDublinCore": {
             "expires": "2017-10-01T00:00:00.000000+00:00",
             "modified": "2016-12-02T14:14:49.859953+00:00",
         }
@@ -136,7 +136,7 @@ GET an ITEM : GET on the object:
 
 ## Dynamic Behaviors
 
-plone.server offers the option to have content that has dynamic behaviors applied to them.
+guillotina offers the option to have content that has dynamic behaviors applied to them.
 
 ### Which behaviors are available on a context
 
@@ -147,11 +147,11 @@ GET CONTENT_URI/@behaviors:
 ```json
 
     {
-        "available": ["plone.server.behaviors.attachment.IAttachment"],
-        "static": ["plone.server.behaviors.dublincore.IDublinCore"],
+        "available": ["guillotina.behaviors.attachment.IAttachment"],
+        "static": ["guillotina.behaviors.dublincore.IDublinCore"],
         "dynamic": [],
-        "plone.server.behaviors.attachment.IAttachment": { },
-        "plone.server.behaviors.dublincore.IDublinCore": { }
+        "guillotina.behaviors.attachment.IAttachment": { },
+        "guillotina.behaviors.dublincore.IDublinCore": { }
     }
 ```
 
@@ -166,7 +166,7 @@ MODIFY an ITEM with the expires : PATCH on the object:
 ```json
 
     {
-        "plone.server.behaviors.dublincore.IDublinCore": {
+        "guillotina.behaviors.dublincore.IDublinCore": {
             "expires": "1/10/2017"
         }
     }
@@ -176,7 +176,7 @@ MODIFY behaviors : PATCH on the object/@behaviors:
 
 ```json
     {
-        "behavior": "plone.server.behaviors.dublincore.IDublinCore"
+        "behavior": "guillotina.behaviors.dublincore.IDublinCore"
     }
 ```
 
@@ -188,6 +188,6 @@ DELETE behaviors : DELETE on the object/@behaviors:
 
 ```json
     {
-        "behavior": "plone.server.behaviors.dublincore.IDublinCore"
+        "behavior": "guillotina.behaviors.dublincore.IDublinCore"
     }
 ```

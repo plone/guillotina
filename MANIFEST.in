@@ -1,5 +1,4 @@
-graft src/plone.server
-graft src/plone.example
+graft guillotina
 include *.rst
 include VERSION
 global-exclude *.pyc

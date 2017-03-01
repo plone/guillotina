@@ -4,11 +4,11 @@ Introduction
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
    :target: http://ploneserver.readthedocs.io/en/latest/
 
-.. image:: https://travis-ci.org/plone/plone.server.svg?branch=master
-   :target: https://travis-ci.org/plone/plone.server
+.. image:: https://travis-ci.org/plone/guillotina.svg?branch=master
+   :target: https://travis-ci.org/plone/guillotina
 
-.. image:: https://img.shields.io/pypi/v/plone.server.svg
-   :target: https://pypi.python.org/pypi/plone.server
+.. image:: https://img.shields.io/pypi/v/guillotina.svg
+   :target: https://pypi.python.org/pypi/guillotina
 
 Please `read the detailed docs <http://ploneserver.readthedocs.io/en/latest/>`_
 
@@ -56,7 +56,7 @@ We're using py.test::
 
 and for test coverage::
 
-    ./bin/py.test --cov=plone.server src/
+    ./bin/py.test --cov=guillotina src/
 
 
 Default

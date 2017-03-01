@@ -1,6 +1,6 @@
 # Quickstart
 
-How to quickly get started using `plone.server`.
+How to quickly get started using `guillotina`.
 
 This tutorial will assume usage of virtualenv. You can use your own preferred
 tool for managing your python environment.
@@ -12,10 +12,10 @@ Setup the environment:
 virtualenv .
 ```
 
-Install `plone.server`:
+Install `guillotina`:
 
 ```
-./bin/pip install plone.server
+./bin/pip install guillotina
 ```
 
 Generate configuration file:
@@ -40,13 +40,13 @@ Modify the configuration in config.json to customize server setttings.
 
 ## Creating default content
 
-Once started, you will require to add at least a Plone site to start fiddling around:
+Once started, you will require to add at least a Guillotina site to start fiddling around:
 
 ```
   curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
     "@type": "Site",
-    "title": "Plone 1",
-    "id": "plone",
+    "title": "Guillotina 1",
+    "id": "guillotina",
     "description": "Description"
   }' "http://127.0.0.1:8080/zodb1/"
 ```
@@ -56,9 +56,9 @@ and give permissions to add content to it:
 ```
   curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
     "prinrole": {
-        "Anonymous User": ["plone.Member", "plone.Reader"]
+        "Anonymous User": ["guillotina.Member", "guillotina.Reader"]
     }
-  }' "http://127.0.0.1:8080/zodb1/plone/@sharing"
+  }' "http://127.0.0.1:8080/zodb1/guillotina/@sharing"
 ```
 
 and create actual content:
@@ -68,5 +68,5 @@ and create actual content:
     "@type": "Item",
     "title": "News",
     "id": "news"
-  }' "http://127.0.0.1:8080/zodb1/plone/"
+  }' "http://127.0.0.1:8080/zodb1/guillotina/"
 ```

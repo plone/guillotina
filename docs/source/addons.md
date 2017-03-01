@@ -1,19 +1,19 @@
 # Add-ons
 
-Addons are integrations that can be installed or uninstalled against a Plone site.
-`plone.server` applications can provide potentially many addons. If you have
+Addons are integrations that can be installed or uninstalled against a Guillotina site.
+`guillotina` applications can provide potentially many addons. If you have
 not read the section on applications, please read that before you come here. The
-only way to provide addons is to first implement a `plone.server` application.
+only way to provide addons is to first implement a `guillotina` application.
 
 
 ## Creating an add-on
 
-Create an addon installer class in an `install.py` file in your `plone.server` application:
+Create an addon installer class in an `install.py` file in your `guillotina` application:
 
 ```python
 
-from plone.server.addons import Addon
-from plone.server import configure
+from guillotina.addons import Addon
+from guillotina import configure
 
 @configure.addon(
     name="myaddon",
@@ -33,12 +33,12 @@ class MyAddon(Addon):
 
 **Scanning**
 If your service modules are not imported at run-time, you may need to provide an
-additional scan call to get your services noticed by `plone.server`.
+additional scan call to get your services noticed by `guillotina`.
 
 In your application `__init__.py` file, you can simply provide a `scan` call.
 
 ```python
-from plone.server import configure
+from guillotina import configure
 
 def includeme(root):
     configure.scan('my.package.addon')
@@ -52,8 +52,8 @@ from:
 
 ```python
 
-from plone.server.addons import Addon
-from plone.server.registry import ILayers
+from guillotina.addons import Addon
+from guillotina.registry import ILayers
 
 LAYER = 'pserver.myaddon.interfaces.ILayer'
 

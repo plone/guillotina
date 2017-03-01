@@ -1,6 +1,6 @@
 # Commands
 
-You can provide your own CLI commands for plone.server through a simple interface.
+You can provide your own CLI commands for guillotina through a simple interface.
 
 
 ## Available commands
@@ -9,19 +9,19 @@ You can provide your own CLI commands for plone.server through a simple interfac
 * pmigrate: run available migration steps
 * pcli: command line utility to run manually RUN API requests with
 * pshell: drop into a shell with root object to manually work with
-* pcreate: use cookiecutter to generate plone.server applications
+* pcreate: use cookiecutter to generate guillotina applications
 
 
 ## Creating commands
 
-plone.server provides a simple API to write your own CLI commands.
+guillotina provides a simple API to write your own CLI commands.
 
 
 Here is a minimalistic example:
 
 ```python
 
-from plone.server.commands import Command
+from guillotina.commands import Command
 class MyCommand(Command):
 
     def get_parser(self):

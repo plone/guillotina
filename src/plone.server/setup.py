@@ -19,16 +19,16 @@ else:
     optimization_path = os.path.join('plone', 'server', 'optimizations.c')
     if os.path.exists('buildout.cfg'):
         optimization_path = os.path.join(
-            'src', 'plone.server', 'plone',
+            'src', 'guillotina', 'plone',
             'server', 'optimizations.c')
     ext_modules = [
         Extension(
-            'plone.server.optimizations',
+            'guillotina.optimizations',
             sources=[optimization_path])
     ]
 
 setup(
-    name='plone.server',
+    name='guillotina',
     version=open('VERSION').read().strip(),
     description='asyncio transactional server to build REST API / Websocket with ZODB',  # noqa
     long_description=(open('README.rst').read() + '\n' +
@@ -47,15 +47,15 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    url='https://github.com/plone/plone.server',
+    url='https://github.com/plone/guillotina',
     license='GPL version 3',
     setup_requires=[
         'pytest-runner',
     ],
     zip_safe=True,
     include_package_data=True,
-    package_dir=None if os.path.isdir('plone') else {'': os.path.join('src', 'plone.server')},  # noqa
-    packages=find_packages('./' if os.path.isdir('plone') else os.path.join('src', 'plone.server'), exclude=['ez_setup']),  # noqa
+    package_dir=None if os.path.isdir('plone') else {'': os.path.join('src', 'guillotina')},  # noqa
+    packages=find_packages('./' if os.path.isdir('plone') else os.path.join('src', 'guillotina'), exclude=['ez_setup']),  # noqa
     namespace_packages=['plone'],
     ext_modules=ext_modules,
     install_requires=[
@@ -96,11 +96,11 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'pserver = plone.server.commands.server:ServerCommand',
-            'pcli = plone.server.commands.cli:CliCommand',
-            'pshell = plone.server.commands.shell:ShellCommand',
-            'pmigrate = plone.server.commands.migrate:MigrateCommand',
-            'pcreate = plone.server.commands.create:CreateCommand'
+            'pserver = guillotina.commands.server:ServerCommand',
+            'pcli = guillotina.commands.cli:CliCommand',
+            'pshell = guillotina.commands.shell:ShellCommand',
+            'pmigrate = guillotina.commands.migrate:MigrateCommand',
+            'pcreate = guillotina.commands.create:CreateCommand'
         ]
     }
 )

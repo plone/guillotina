@@ -18,6 +18,6 @@ Some configuration on nginx :
 ```
     location /api/ {
         proxy_set_header X-VirtualHost-Monster $scheme://$http_host/api/
-        proxy_pass http://api.plone.server.svc.cluster.local:80/;
+        proxy_pass http://api.guillotina.svc.cluster.local:80/;
     }
 ```

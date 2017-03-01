@@ -1,4 +1,4 @@
-Welcome to plone.server's documentation!
+Welcome to guillotina's documentation!
 ========================================
 
 Contents:

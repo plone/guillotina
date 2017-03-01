@@ -1,7 +1,9 @@
 1.0a14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Rename "address" option to "port" and add "host" option to bind something different
+  than the default 0.0.0.0
+  [vangheem]
 
 
 1.0a13 (2017-02-27)
@@ -128,12 +130,12 @@ New features:
 - Add new pmigrate command and migration framework
   [vangheem]
 
-- Provide base plone.server.commands.Command class to provide your own commands.
+- Provide base guillotina.commands.Command class to provide your own commands.
   Commands have been moved in code so you'll need to re-run buildout to get
   pserver to work after this update.
   [vangheem]
 
-- Automatically give authenticated users new `plone.Authenticated` role
+- Automatically give authenticated users new `guillotina.Authenticated` role
   [vangheem]
 
 - Handle error when deserializing content when not authenticated and checking
@@ -201,7 +203,7 @@ Breaking changes:
 - fix fallback cors check
   [vangheem]
 
-- Added zope.event async version on plone.server.events (notify and async handlers)
+- Added zope.event async version on guillotina.events (notify and async handlers)
   [ramonnb]
 
 - Improve code analysis, add configurations for it and remove all tabs.

@@ -1,6 +1,6 @@
 # Migrations
 
-plone.server provides an interface to run migrations for itself and the applications
+guillotina provides an interface to run migrations for itself and the applications
 it currently has activated.
 
 Migrations are run against applications. If applications define addons for sites,
@@ -10,7 +10,7 @@ addon in the migration step.
 
 ## Running migrations
 
-plone.server provides a command line utility to manage and run migrations
+guillotina provides a command line utility to manage and run migrations
 against your entire install or against a particular site.
 
 
@@ -36,17 +36,17 @@ databases.
 Advanced command usages example:
 
 ```
-./bin/pmigrate --site=/zodb/plone --app=pserver.elasticsearch --to-version=1.0.1 --dry-run
+./bin/pmigrate --site=/zodb/guillotina --app=guillotina_elasticsearch --to-version=1.0.1 --dry-run
 ```
 
 
 ## Defining migrations
 
-To define migrations in your own applications, `plone.server` provides a simple
+To define migrations in your own applications, `guillotina` provides a simple
 decorator::
 
 ```python
-from plone.server.migrations import migration
+from guillotina.migrations import migration
 @migration('my.app', to_version='1.0.1')
 def migrate_stub(site):
     # my migration code...

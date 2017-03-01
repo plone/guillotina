@@ -1,4 +1,4 @@
-{ image_name ? "plone.server",
+{ image_name ? "guillotina",
   image_tag ? "master", image_entrypoint ? "/bin/server"
 , supportedSystems ? [ "x86_64-linux" ]
 , pkgs ? import (builtins.fetchTarball

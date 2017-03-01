@@ -566,7 +566,7 @@ let self = rec {
 };
 
 in pythonPackages.buildPythonPackage rec {
-  name = "plone.server-${self.version}";
+  name = "guillotina-${self.version}";
   src = builtins.filterSource
     (path: type: baseNameOf path != ".git"
               && baseNameOf path != "result")
