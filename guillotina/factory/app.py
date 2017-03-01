@@ -121,7 +121,6 @@ def make_app(config_file=None, settings=None):
     import guillotina
     configure.include("zope.component")
     configure.include("zope.annotation")
-    configure.include("guillotina", "meta.zcml")  # bbb
     configure.scan('guillotina.translation')
     configure.scan('guillotina.renderers')
     configure.scan('guillotina.api')

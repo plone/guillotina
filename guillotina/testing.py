@@ -169,12 +169,13 @@ class GuillotinaServerBaseLayer(object):
 
     @classmethod
     def setUp(cls):
+        # load test configuration
+        from guillotina import test_package  # noqa
         # Aio HTTP app
         cls.aioapp = make_app(settings=TESTING_SETTINGS)
         # Guillotina App Object
         cls.app = getUtility(IApplication, name='root')
         cls.db = cls.app['guillotina']
-        include(cls.app.app.config, 'testing.zcml', sys.modules['guillotina'])
         cls.app.app.config.execute_actions()
         load_cached_schema()
 
