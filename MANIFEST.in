@@ -10,6 +10,8 @@ include LICENSE
 include buildout-pypy.cfg
 include buildout.cfg
 include zeo.cfg
+include docs/*
+include buildout-newt.cfg
 recursive-include docs *.md
 recursive-include docs *.py
 recursive-include docs *.rst
