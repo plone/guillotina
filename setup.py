@@ -68,7 +68,6 @@ setup(
         'zope.component',
         'zope.configuration',
         'zope.dottedname',
-        'zope.dublincore',
         'zope.event',
         'zope.i18n',
         'zope.i18nmessageid',
