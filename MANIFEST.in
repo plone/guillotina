@@ -12,8 +12,7 @@ include buildout.cfg
 include zeo.cfg
 include docs/*
 include buildout-newt.cfg
-include guillotina/optimizations.cpython-35m-darwin.so
-include guillotina/optimizations.cpython-36m-darwin.so
+include guillotina/*
 pip-selfcheck.json
 recursive-include docs *.md
 recursive-include docs *.py
