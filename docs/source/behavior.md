@@ -35,7 +35,7 @@ Once you define the schema you can define a specific marker interface that will 
 
 ```
 
-Finally the instance class that implements the schema can be defined in case you want to enable specific operations or you can use plone.behavior.AnnotationStorage as the default annotation storage.
+Finally the instance class that implements the schema can be defined in case you want to enable specific operations or you can use guillotina.behaviors.instance.AnnotationBehavior as the default annotation storage.
 
 For example in case you want to have a class that stores the field on the content and not on annotations:
 

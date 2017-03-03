@@ -22,6 +22,6 @@ configure.behavior(
     title="Attachment",
     provides=IAttachment,
     marker=IMarkerAttachment,
-    factory="plone.behavior.AnnotationStorage",
+    factory="guillotina.behaviors.instance.AnnotationBehavior",
     for_="guillotina.interfaces.IResource"
 )()
