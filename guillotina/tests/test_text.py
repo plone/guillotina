@@ -1,19 +1,20 @@
 # -*- encoding: utf-8 -*-
+from guillotina.db.orm.base import BaseObject
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ITransformer
 from guillotina.interfaces import TransformError
-from guillotina.testing import GuillotinaFunctionalTestCase
+from guillotina.schema.exceptions import ConstraintNotSatisfied
+from guillotina.schema.exceptions import WrongType
+from guillotina.schema.interfaces import IFromUnicode
 from guillotina.text import RichText
 from guillotina.text import RichTextValue
-from persistent import Persistent
-from persistent.interfaces import IPersistent
-from zope.component import adapter
-from zope.component import provideAdapter
+from guillotina.component import adapter
+from guillotina.component import provideAdapter
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
-from zope.schema._bootstrapinterfaces import ConstraintNotSatisfied
-from zope.schema._bootstrapinterfaces import WrongType
-from zope.schema.interfaces import IFromUnicode
+
+import pytest
 
 
 class IContent(Interface):
@@ -29,7 +30,7 @@ class IContent2(Interface):
 
 
 @implementer(IContent2)
-class Content(Persistent):
+class Content(BaseObject):
 
     def __init__(self, rich=None):
         self.rich = rich
@@ -48,77 +49,78 @@ class Transformer(object):
         return self.context.raw.upper()
 
 
-class FunctionalTestServer(GuillotinaFunctionalTestCase):
-    """Functional testing of the API REST."""
+def test_field():
+    field = IContent['rich']
+    assert field.default_mime_type == 'text/html'
+    assert field.output_mime_type == 'text/x-html-safe'
+    assert field.allowed_mime_types is None
+    assert field.max_length is None
 
-    def test_field(self):
-        field = IContent['rich']
-        self.assertEqual(field.default_mime_type, 'text/html')
-        self.assertEqual(field.output_mime_type, 'text/x-html-safe')
-        self.assertEqual(field.allowed_mime_types, None)
-        self.assertEqual(field.max_length, None)
 
-    def test_value(self):
-        field = IContent2['rich']
-        value = RichTextValue(
-            raw=u"Some plain text",
-            mimetype='text/plain',
-            outputmimetype=field.output_mime_type,
-            encoding='utf-8')
-        self.assertEqual(value.output, None)
-        provideAdapter(Transformer, name='text/x-uppercase')
-        self.assertEqual(value.output, 'SOME PLAIN TEXT')
-        self.assertEqual(value.encoding, 'utf-8')
-        self.assertEqual(value.raw_encoded, b'Some plain text')
-        value2 = RichTextValue(
-            raw=u"Some plain text",
-            mimetype='text/plain',
-            outputmimetype=field.output_mime_type,
-            encoding='utf-8')
-        self.assertTrue(value == value2)
-        self.assertFalse(value != value2)
-        self.assertFalse(value is None)
-        self.assertTrue(value is not None)
+def test_value():
+    field = IContent2['rich']
+    value = RichTextValue(
+        raw=u"Some plain text",
+        mimetype='text/plain',
+        outputmimetype=field.output_mime_type,
+        encoding='utf-8')
+    assert value.output is None
+    provideAdapter(Transformer, name='text/x-uppercase')
+    assert value.output == 'SOME PLAIN TEXT'
+    assert value.encoding == 'utf-8'
+    assert value.raw_encoded == b'Some plain text'
+    value2 = RichTextValue(
+        raw=u"Some plain text",
+        mimetype='text/plain',
+        outputmimetype=field.output_mime_type,
+        encoding='utf-8')
+    assert value == value2
+    assert value is not None
 
-    def test_unicode(self):
-        field = IContent2['rich']
-        self.assertTrue(IFromUnicode.providedBy(field))
-        value = field.from_string("A plain text string")
-        self.assertEqual(value.mimeType, 'text/plain')
-        self.assertEqual(value.outputMimeType, 'text/x-uppercase')
-        self.assertEqual(value.raw, 'A plain text string')
-        self.assertEqual(value.raw_encoded, b'A plain text string')
 
-    def test_validation(self):
-        field = IContent2['rich']
-        value = field.from_string("A plain text string")
-        field.allowed_mime_types = None
+def test_unicode():
+    field = IContent2['rich']
+    assert IFromUnicode.providedBy(field)
+    value = field.from_string("A plain text string")
+    assert value.mimeType == 'text/plain'
+    assert value.outputMimeType == 'text/x-uppercase'
+    assert value.raw == 'A plain text string'
+    assert value.raw_encoded == b'A plain text string'
+
+
+def test_validation():
+    field = IContent2['rich']
+    value = field.from_string("A plain text string")
+    field.allowed_mime_types = None
+    field.validate(value)
+    field.allowed_mime_types = ('text/html',)
+    with pytest.raises(WrongType):
         field.validate(value)
-        field.allowed_mime_types = ('text/html',)
-        self.assertRaises(WrongType, field.validate, value)
-        field.allowed_mime_types = ('text/plain', 'text/html',)
+    field.allowed_mime_types = ('text/plain', 'text/html',)
+    field.validate(value)
+    long_value = field.from_string('x' * (field.max_length + 1))
+    with pytest.raises(Invalid):
+        field.validate(long_value)
+    field.constraint = lambda value: False
+    with pytest.raises(ConstraintNotSatisfied):
         field.validate(value)
-        long_value = field.from_string('x' * (field.max_length + 1))
-        self.assertRaises(Invalid, field.validate, long_value)
-        field.constraint = lambda value: False
-        self.assertRaises(ConstraintNotSatisfied, field.validate, value)
 
-    def test_default_value(self):
-        default_field = RichText(
-            __name__='default_field',
-            title=u"Rich text",
-            default_mime_type='text/plain',
-            output_mime_type='text/x-uppercase',
-            allowed_mime_types=('text/plain', 'text/html',),
-            default=u"Default value")
-        self.assertEqual(default_field.default.__class__, RichTextValue)
-        self.assertEqual(default_field.default.raw, u'Default value')
-        self.assertEqual(
-            default_field.default.outputMimeType, 'text/x-uppercase')
-        self.assertEqual(default_field.default.mimeType, 'text/plain')
+def test_default_value():
+    default_field = RichText(
+        __name__='default_field',
+        title=u"Rich text",
+        default_mime_type='text/plain',
+        output_mime_type='text/x-uppercase',
+        allowed_mime_types=('text/plain', 'text/html',),
+        default=u"Default value")
+    assert default_field.default.__class__ == RichTextValue
+    assert default_field.default.raw == u'Default value'
+    assert default_field.default.outputMimeType == 'text/x-uppercase'
+    assert default_field.default.mimeType == 'text/plain'
 
-    def test_persistence(self):
-        field = IContent2['rich']
-        value = field.from_string("A plain text string")
-        self.assertFalse(IPersistent.providedBy(value))
-        self.assertTrue(IPersistent.providedBy(value._raw_holder))
+
+def test_persistence():
+    field = IContent2['rich']
+    value = field.from_string("A plain text string")
+    assert not IBaseObject.providedBy(value)
+    assert IBaseObject.providedBy(value._raw_holder)

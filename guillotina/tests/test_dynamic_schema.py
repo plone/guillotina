@@ -1,161 +1,143 @@
 # -*- coding: utf-8 -*-
-from guillotina.behaviors.attachment import IAttachment
-from guillotina.testing import GuillotinaFunctionalTestCase
-from guillotina.tests import TEST_RESOURCES_DIR
-from zope import schema
+from guillotina import configure
+from guillotina.content import Item
+from guillotina.content import load_cached_schema
+from guillotina.tests.conftest import SiteRequesterAsyncContextManager
 from zope.interface import Interface
 
 import json
-import os
+import pytest
 
 
-class FunctionalTestServer(GuillotinaFunctionalTestCase):
-    """Functional testing of the API REST."""
+class IFoobarType(Interface):
+    pass
 
-    def _get_site(self):
-        """
-        sometimes the site does not get updated data from zodb
-        this seems to make it
-        """
-        return self.layer.new_root()['guillotina']
 
-    def test_set_dynamic_behavior(self):
-        """Get the application root."""
-        resp = self.layer.requester(
+class FoobarType(Item):
+    pass
+
+
+class CustomTypeSiteRequesterAsyncContextManager(SiteRequesterAsyncContextManager):
+
+    async def __aenter__(self):
+        configure.register_configuration(FoobarType, dict(
+            schema=IFoobarType,
+            portal_type="Foobar",
+            behaviors=[]
+        ), 'contenttype')
+        requester = await super(CustomTypeSiteRequesterAsyncContextManager, self).__aenter__()
+        config = requester.root.app.config
+        # now test it...
+        configure.load_configuration(
+            config, 'guillotina.tests', 'contenttype')
+        config.execute_actions()
+        load_cached_schema()
+        return requester
+
+
+@pytest.fixture(scope='function')
+async def custom_type_site_requester(guillotina):
+    return CustomTypeSiteRequesterAsyncContextManager(guillotina)
+
+
+async def test_set_dynamic_behavior(custom_type_site_requester):
+    async with await custom_type_site_requester as requester:
+        response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
             data=json.dumps({
-                "@type": "Item",
+                "@type": "Foobar",
                 "title": "Item1",
                 "id": "item1"
             })
         )
-        self.assertTrue(resp.status_code == 201)
+        assert status == 201
 
         # We create the behavior
-        resp = self.layer.requester(
+        response, status = await requester(
             'PATCH',
             '/guillotina/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.attachment.IAttachment'
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
-        self.assertTrue(resp.status_code == 200)
+        assert status == 200
 
         # We check that the behavior is there
-        resp = self.layer.requester(
+        response, status = await requester(
             'GET',
             '/guillotina/guillotina/item1'
         )
+        assert 'guillotina.behaviors.dublincore.IDublinCore' in response
 
-        self.assertEqual(
-            resp.json()['__behaviors__'],
-            ['guillotina.behaviors.attachment.IAttachment'])
 
-        self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' in
-            resp.json())
-
-        # We upload a file
-        fi = open(os.path.join(TEST_RESOURCES_DIR, 'plone.png'), 'rb')
-        data = fi.read()
-        fi.close()
-        resp = self.layer.requester(
-            'PATCH',
-            '/guillotina/guillotina/item1/@upload/file',
-            data=data,
-            headers={
-                'X-UPLOAD-FILENAME': 'plone.png'
-            }
-        )
-
-        self.assertTrue(resp.status_code == 200)
-
-        resp = self.layer.requester(
-            'GET',
-            '/guillotina/guillotina/item1'
-        )
-        self.assertEqual(
-            resp.json()['guillotina.behaviors.attachment.IAttachment']['file']['filename'],  # noqa
-            'plone.png')
-
-    def test_create_delete_dynamic_behavior(self):
-        """Create and delete a content type."""
-        resp = self.layer.requester(
+async def test_create_delete_dynamic_behavior(custom_type_site_requester):
+    async with await custom_type_site_requester as requester:
+        response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
             data=json.dumps({
-                "@type": "Item",
+                "@type": "Foobar",
                 "title": "Item1",
                 "id": "item1"
             })
         )
-        self.assertTrue(resp.status_code == 201)
+        assert status == 201
 
         # We create the behavior
-        resp = self.layer.requester(
+        response, status = await requester(
             'PATCH',
             '/guillotina/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.attachment.IAttachment'
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
-        self.assertTrue(resp.status_code == 200)
+        assert status == 200
 
         # We check that the behavior is there
-        resp = self.layer.requester(
+        response, status = await requester(
             'GET',
             '/guillotina/guillotina/item1'
         )
 
-        self.assertEqual(
-            resp.json()['__behaviors__'],
-            ['guillotina.behaviors.attachment.IAttachment'])
+        assert 'guillotina.behaviors.dublincore.IDublinCore' in response
 
         # We delete the behavior
-        resp = self.layer.requester(
+        response, status = await requester(
             'DELETE',
             '/guillotina/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.attachment.IAttachment'
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
-        self.assertTrue(resp.status_code == 200)
+        assert status == 200
 
         # We check that the behavior is there
-        resp = self.layer.requester(
+        response, status = await requester(
             'GET',
             '/guillotina/guillotina/item1'
         )
 
-        self.assertEqual(
-            resp.json()['__behaviors__'],
-            [])
+        assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
 
-        self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' not in
-            resp.json())
 
-    def test_get_behaviors(self):
-        """Try to create a contenttype."""
-        resp = self.layer.requester(
+async def test_get_behaviors(custom_type_site_requester):
+    async with await custom_type_site_requester as requester:
+        response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
             data=json.dumps({
-                "@type": "Item",
+                "@type": "Foobar",
                 "title": "Item1",
                 "id": "item1"
             })
         )
-        self.assertTrue(resp.status_code == 201)
+        assert status == 201
 
-        resp = self.layer.requester(
+        response, status = await requester(
             'GET',
             '/guillotina/guillotina/item1/@behaviors'
         )
-
-        self.assertTrue(resp.status_code == 200)
-        self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' in resp.json()['available'])  # noqa
-        self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' in resp.json())
+        assert status == 200
+        assert 'guillotina.behaviors.dublincore.IDublinCore' in response['available']  # noqa
+        assert 'guillotina.behaviors.dublincore.IDublinCore' in response

@@ -26,14 +26,10 @@ setup(
     extras_require={
         'test': [
             'pytest',
-            'requests',
-            'zope.testing'
+            'requests'
         ]
     },
     classifiers=[],
     entry_points={
-        'guillotina': [
-            'include = {{cookiecutter.package_name}}',
-        ]
     }
 )

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from guillotina import BEHAVIOR_CACHE
 from guillotina.browser import View
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IDownloadView
 from guillotina.interfaces import ITraversableView
-from zope.component import queryUtility
-from zope.component.interfaces import IFactory
+from guillotina.component import queryUtility
+from guillotina.component.interfaces import IFactory
 from zope.interface import alsoProvides
 
 
@@ -28,7 +29,7 @@ class TraversableService(View):
 
 
 class TraversableFieldService(View):
-    def publishTraverse(self, traverse):
+    async def publish_traverse(self, traverse):
         if len(traverse) == 1:
             # we want have the field
             name = traverse[0]
@@ -58,6 +59,11 @@ class TraversableFieldService(View):
             self.field = field.bind(self.behavior)
         else:
             self.field = None
+
+        if (self.behavior is not None and
+                IAsyncBehavior.implementedBy(self.behavior.__class__)):
+            # providedBy not working here?
+            await self.behavior.load()
         return self
 
     def __init__(self, context, request):

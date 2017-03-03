@@ -1,6 +1,6 @@
+from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IInteraction
-from guillotina.transactions import get_current_request
-from guillotina.transactions import RequestNotFound
+from guillotina.utils import get_current_request
 
 
 class SecurityMap(object):

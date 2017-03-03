@@ -4,21 +4,23 @@ from guillotina import configure
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
-from guillotina.events import notify
+from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import NoInteraction
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.json.exceptions import DeserializationError
-from zope.component import queryMultiAdapter
-from zope.component import queryUtility
+from guillotina.schema import getFields
+from guillotina.schema.exceptions import ValidationError
+from guillotina.utils import apply_coroutine
+from guillotina.component import queryMultiAdapter
+from guillotina.component import queryUtility
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
-from zope.schema import getFields
-from zope.schema.interfaces import ValidationError
 
 
 @configure.adapter(
@@ -38,13 +40,16 @@ class DeserializeFromJson(object):
 
         factory = get_cached_factory(self.context.portal_type)
         main_schema = factory.schema
-        self.set_schema(
+        await self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)
 
         for behavior_schema in factory.behaviors or ():
             if behavior_schema.__identifier__ in data:
                 behavior = behavior_schema(self.context)
-                self.set_schema(
+                if IAsyncBehavior.implementedBy(behavior.__class__):
+                    # providedBy not working here?
+                    await behavior.load(create=True)
+                await self.set_schema(
                     behavior_schema, behavior, data, errors,
                     validate_all, True)
 
@@ -52,7 +57,10 @@ class DeserializeFromJson(object):
             dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
             if dynamic_behavior_obj.__identifier__ in data:
                 behavior = dynamic_behavior_obj(self.context)
-                self.set_schema(
+                if IAsyncBehavior.implementedBy(dynamic_behavior_obj.__class__):
+                    # providedBy not working here?
+                    await behavior.load(create=True)
+                await self.set_schema(
                     dynamic_behavior_obj, behavior, data, errors,
                     validate_all, True)
 
@@ -60,11 +68,12 @@ class DeserializeFromJson(object):
             raise DeserializationError(errors)
 
         if modified:
+            self.context._p_register()
             await notify(ObjectModifiedEvent(self.context, data))
 
         return self.context
 
-    def set_schema(
+    async def set_schema(
             self, schema, obj, data, errors,
             validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)

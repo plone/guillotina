@@ -13,9 +13,8 @@ from guillotina.utils import caller_module
 from guillotina.utils import dotted_name
 from guillotina.utils import resolve_module_path
 from guillotina.utils import resolve_or_get
-from zope.component import zcml
-from zope.configuration import xmlconfig
-from zope.configuration.exceptions import ConfigurationError
+from guillotina.configure import component
+from guillotina.exceptions import ConfigurationError
 from zope.interface import classImplements
 from zope.interface import Interface
 
@@ -38,7 +37,7 @@ def get_configurations(module_name, type_=None):
             continue
         config = registration['config']
         module = config.get('module', registration.get('klass'))
-        if dotted_name(resolve_or_get(module)).startswith(module_name):
+        if (dotted_name(resolve_or_get(module)) + '.').startswith(module_name + '.'):
             results.append((reg_type, registration))
     return results
 
@@ -94,7 +93,7 @@ def load_service(_context, service):
         layer.__identifier__,
         str(factory),
         name))
-    zcml.adapter(
+    component.adapter(
         _context,
         factory=(factory,),
         provides=app_settings['http_methods'][method],
@@ -134,7 +133,7 @@ def load_contenttype(_context, contenttype):
         add_permission=conf.get('add_permission') or DEFAULT_ADD_PERMISSION,
         allowed_types=conf.get('allowed_types', None)
     )
-    zcml.utility(
+    component.utility(
         _context,
         provides=IResourceFactory,
         component=factory,
@@ -185,7 +184,7 @@ def load_behavior(_context, behavior):
     )
     if not name_only:
         # behavior registration by provides interface identifier
-        zcml.utility(
+        component.utility(
             _context,
             provides=IBehavior,
             name=schema.__identifier__,
@@ -194,7 +193,7 @@ def load_behavior(_context, behavior):
 
     if name is not None:
         # for convinience we register with a given name
-        zcml.utility(
+        component.utility(
             _context,
             provides=IBehavior,
             name=name,
@@ -223,7 +222,7 @@ def load_behavior(_context, behavior):
 
     adapter_factory = BehaviorAdapterFactory(registration)
 
-    zcml.adapter(
+    component.adapter(
         _context,
         factory=(adapter_factory,),
         provides=schema,
@@ -257,7 +256,7 @@ def load_adapter(_context, adapter):
         # we are automatically applying the provides interface to
         # registered class objects
         classImplements(klass, conf['provides'])
-    zcml.adapter(
+    component.adapter(
         _context,
         factory=(factory,),
         **conf
@@ -269,7 +268,7 @@ def load_subscriber(_context, subscriber):
     conf = subscriber['config']
     conf['handler'] = resolve_or_get(conf.get('handler') or subscriber['klass'])
     _component_conf(conf)
-    zcml.subscriber(
+    component.subscriber(
         _context,
         **conf
     )
@@ -291,7 +290,7 @@ def load_utility(_context, _utility):
         else:
             # not a factory
             conf['component'] = klass
-    zcml.utility(
+    component.utility(
         _context,
         **conf
     )
@@ -300,8 +299,8 @@ register_configuration_handler('utility', load_utility)
 
 def load_permission(_context, permission_conf):
     permission = Permission(**permission_conf['config'])
-    zcml.utility(_context, IPermission, permission,
-                 name=permission_conf['config']['id'])
+    component.utility(_context, IPermission, permission,
+                      name=permission_conf['config']['id'])
 register_configuration_handler('permission', load_permission)
 
 
@@ -318,15 +317,6 @@ register_configuration_handler('grant', load_grant)
 def load_grant_all(_context, grant_all):
     grantAll_directive(_context, **grant_all['config'])
 register_configuration_handler('grant_all', load_grant_all)
-
-
-def load_include(_context, _include):
-    config = _include['config']
-    if 'package' in config:
-        config['package'] = resolve_or_get(
-            resolve_module_path(config['package']))
-    xmlconfig.include(_context, **config)
-register_configuration_handler('include', load_include)
 
 
 class _base_decorator(object):
@@ -523,18 +513,7 @@ def defineRole_directive(_context, id, title, description='', local=True):
     from guillotina.auth.role import Role
 
     role = Role(id, title, description, local)
-    zcml.utility(_context, IRole, role, name=id)
-
-
-def include(package, file=None):
-    """
-    include is different from scan. Include is for including a regular zcml
-    include
-    """
-    register_configuration(
-        caller_module(),
-        dict(package=package, file=file),
-        'include')
+    component.utility(_context, IRole, role, name=id)
 
 
 def scan(path):

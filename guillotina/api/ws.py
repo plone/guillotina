@@ -12,8 +12,8 @@ from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import ISite
 from guillotina.interfaces import ITraversableView
-from zope.component import getUtility
-from zope.component import queryMultiAdapter
+from guillotina.component import getUtility
+from guillotina.component import queryMultiAdapter
 
 import aiohttp
 import asyncio
@@ -112,7 +112,7 @@ class WebsocketsView(Service):
                             ws.send_str(ujson.dumps(response))
                         else:
                             try:
-                                view = view.publishTraverse(traverse_to)
+                                view = await view.publish_traverse(traverse_to)
                             except Exception as e:
                                 logger.error(
                                     "Exception on view execution",

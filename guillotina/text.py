@@ -1,21 +1,19 @@
 # -*- encoding: utf-8 -*-
-"""Module to define the text field."""
 from guillotina import _
+from guillotina.db.orm.base import BaseObject
 from guillotina.interfaces import IRichText
 from guillotina.interfaces import IRichTextValue
 from guillotina.interfaces import ITransformer
-from persistent import Persistent
-from zope.component import queryAdapter
-from zope.i18nmessageid import MessageFactory
+from guillotina.component import queryAdapter
 from zope.interface import implementer
 from zope.interface import Invalid
-from zope.schema import Object
-from zope.schema._bootstrapinterfaces import ConstraintNotSatisfied
-from zope.schema.interfaces import IFromUnicode
-from zope.schema.interfaces import WrongType
+from guillotina.schema import Object
+from guillotina.schema.exceptions import ConstraintNotSatisfied
+from guillotina.schema.interfaces import IFromUnicode
+from guillotina.schema.exceptions import WrongType
 
 
-class RawValueHolder(Persistent):
+class RawValueHolder(BaseObject):
     """Place the raw value in a separate persistent object.
 
     so that it does not get loaded when all we want is the output.

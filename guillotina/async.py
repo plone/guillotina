@@ -7,9 +7,7 @@ from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
 from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import SHARED_CONNECTION
-from guillotina.transactions import abort
-from guillotina.transactions import commit
-from guillotina.transactions import TransactionProxy
+from guillotina.transactions import get_transaction, get_tm
 from zope.interface import Interface
 
 import asyncio
@@ -30,8 +28,8 @@ class IQueueUtility(IAsyncUtility):
 
 class QueueUtility(object):
 
-    def __init__(self, settings):
-        self._queue = asyncio.PriorityQueue()
+    def __init__(self, settings, loop=None):
+        self._queue = asyncio.PriorityQueue(loop=loop)
         self._exceptions = False
         self._total_queued = 0
 
@@ -43,33 +41,26 @@ class QueueUtility(object):
             try:
                 priority, view = await self._queue.get()
                 got_obj = True
-                if view.request.conn.transaction_manager is None:
-                    # Connection was closed
-                    # Open DB
-                    db = view.request.application[view.request._db_id]
-                    if SHARED_CONNECTION:
-                        view.request.conn = db.conn
-                    else:
-                        # Create a new conection
-                        view.request.conn = db.open()
-                    view.context = view.request.conn.get(view.context._p_oid)
+                txn = get_transaction(view.request)
+                if txn is None:
+                    tm = get_tm(view.request)
+                    txn = tm.begin(view.request)
 
-                txn = view.request.conn.transaction_manager.begin(view.request)
                 try:
                     view_result = await view()
                     if isinstance(view_result, ErrorResponse):
-                        await abort(txn, view.request)
+                        await txn.commit()
                     elif isinstance(view_result, UnauthorizedResponse):
-                        await abort(txn, view.request)
+                        await txn.abort()
                     else:
-                        await commit(txn, view.request)
+                        await txn.commit()
                 except Unauthorized:
-                    await abort(txn, view.request)
+                    await txn.abort()
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",
                         exc_info=e)
-                    await abort(txn, view.request)
+                    await txn.abort()
             except KeyboardInterrupt or MemoryError or SystemExit or asyncio.CancelledError:
                 self._exceptions = True
                 raise
@@ -102,7 +93,9 @@ class QueueUtility(object):
 class QueueObject(View):
 
     def __init__(self, context, request):
-        super(QueueObject, self).__init__(context, TransactionProxy(request))
+        # not sure if we need proxy object here...
+        # super(QueueObject, self).__init__(context, TransactionProxy(request))
+        super(QueueObject, self).__init__(context, request)
         self.time = datetime.now(tz=_zone).timestamp()
 
     def __lt__(self, view):

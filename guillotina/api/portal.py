@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
+from guillotina.api import content
 from guillotina.api.service import Service
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.content import create_content
-from guillotina.events import notify
+from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import ISite
+from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
-from zope.component import getMultiAdapter
+from guillotina.component import getMultiAdapter
 
 
 @configure.service(context=IDatabase, method='GET', permission='guillotina.GetPortals')
@@ -21,7 +23,7 @@ class DefaultGET(Service):
         serializer = getMultiAdapter(
             (self.context, self.request),
             IResourceSerializeToJson)
-        return serializer()
+        return await serializer()
 
 
 @configure.service(
@@ -63,14 +65,16 @@ class DefaultPOST(Service):
         if 'description' not in data:
             data['description'] = ''
 
-        if data['id'] in self.context:
+        value = await apply_coroutine(self.context.__contains__, data['id'])
+
+        if value:
             # Already exist
             return ErrorResponse(
                 'NotAllowed',
                 'Duplicate id',
                 status=401)
 
-        site = create_content(
+        site = await create_content(
             'Site',
             id=data['id'],
             title=data['title'],
@@ -79,9 +83,8 @@ class DefaultPOST(Service):
         # Special case we don't want the parent pointer
         site.__name__ = data['id']
 
-        self.context[data['id']] = site
-
-        site.install()
+        await apply_coroutine(self.context.__setitem__, data['id'], site)
+        await site.install()
 
         self.request._site_id = site.__name__
 
@@ -120,11 +123,8 @@ class SharingPOST(Service):
 
 
 @configure.service(context=ISite, method='DELETE', permission='guillotina.DeletePortals')
-class DefaultDELETE(Service):
-    async def __call__(self):
-        portal_id = self.context.id
-        del self.request.conn.root()[portal_id]
-        return {}
+class DefaultDELETE(content.DefaultDELETE):
+    pass
 
 
 @configure.service(context=IDatabase, method='DELETE', permission='guillotina.UmountDatabase')

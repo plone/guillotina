@@ -5,20 +5,23 @@ from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
-from zope.component import ComponentLookupError
-from zope.component import getMultiAdapter
-from zope.component import queryMultiAdapter
-from zope.component import queryUtility
+from guillotina.schema import getFields
+from guillotina.component import ComponentLookupError
+from guillotina.component import getMultiAdapter
+from guillotina.component import queryMultiAdapter
+from guillotina.component import queryUtility
 from zope.interface import Interface
-from zope.schema import getFields
-from guillotina.interfaces import IInteraction
-from guillotina.interfaces import IPermission
+
+import asyncio
 
 
 MAX_ALLOWED = 200
@@ -34,12 +37,12 @@ class SerializeToJson(object):
         self.request = request
         self.permission_cache = {}
 
-    def __call__(self):
+    async def __call__(self):
         parent = self.context.__parent__
         if parent is not None:
             # We render the summary of the parent
             try:
-                parent_summary = getMultiAdapter(
+                parent_summary = await getMultiAdapter(
                     (parent, self.request), IResourceSerializeToJsonSummary)()
             except ComponentLookupError:
                 parent_summary = {}
@@ -50,28 +53,34 @@ class SerializeToJson(object):
             '@id': IAbsoluteURL(self.context, self.request)(),
             '@type': self.context.portal_type,
             'parent': parent_summary,
-            'created': json_compatible(self.context.creation_date),
-            'modified': json_compatible(self.context.modification_date),
+            'created': json_compatible(self.context.created),
+            'modified': json_compatible(self.context.modified),
             'UID': self.context.uuid,
         }
 
         factory = get_cached_factory(self.context.portal_type)
 
         main_schema = factory.schema
-        self.get_schema(main_schema, self.context, result, False)
+        await self.get_schema(main_schema, self.context, result, False)
 
         for behavior_schema in factory.behaviors or ():
             behavior = behavior_schema(self.context)
-            self.get_schema(behavior_schema, behavior, result, True)
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load()
+            await self.get_schema(behavior_schema, behavior, result, True)
 
         for dynamic_behavior in self.context.__behaviors__ or ():
             dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
             behavior = dynamic_behavior_obj(self.context)
-            self.get_schema(dynamic_behavior_obj, behavior, result, True)
+            if IAsyncBehavior.implementedBy(dynamic_behavior_obj.__class__):
+                # providedBy not working here?
+                await behavior.load()
+            await self.get_schema(dynamic_behavior_obj, behavior, result, True)
 
         return result
 
-    def get_schema(self, schema, context, result, behavior):
+    async def get_schema(self, schema, context, result, behavior):
         read_permissions = merged_tagged_value_dict(schema, read_permission.key)
         schema_serial = {}
         for name, field in getFields(schema).items():
@@ -81,7 +90,7 @@ class SerializeToJson(object):
             serializer = queryMultiAdapter(
                 (field, context, self.request),
                 IResourceFieldSerializer)
-            value = serializer()
+            value = await serializer()
             if not behavior:
                 result[name] = value
             else:
@@ -111,23 +120,39 @@ class SerializeToJson(object):
     provides=IResourceSerializeToJson)
 class SerializeFolderToJson(SerializeToJson):
 
-    def __call__(self):
-        result = super(SerializeFolderToJson, self).__call__()
+    async def __call__(self):
+        result = await super(SerializeFolderToJson, self).__call__()
 
         security = IInteraction(self.request)
-        length = len(self.context)
+        length = self.context.__len__()
+        if asyncio.iscoroutine(length):
+            length = await length
 
         if length > MAX_ALLOWED or length == 0:
             result['items'] = []
         else:
-            result['items'] = [
-                getMultiAdapter(
-                    (member, self.request), IResourceSerializeToJsonSummary)()
-                for ident, member in self.context.items()
-                if not ident.startswith('_') and
-                bool(security.check_permission(
-                    'guillotina.AccessContent', self.context))
-            ]
+            items = self.context.items()
+            # Needs to be a better way !
+            if hasattr(items, 'ag_await'):
+                result['items'] = []
+                async for ident, member in items:
+                    if not ident.startswith('_') and bool(
+                            security.check_permission(
+                            'guillotina.AccessContent', member)):
+                        result['items'].append(
+                            await getMultiAdapter(
+                                (member, self.request),
+                                IResourceSerializeToJsonSummary)()
+                        )
+            else:
+                result['items'] = [
+                    await getMultiAdapter(
+                        (member, self.request), IResourceSerializeToJsonSummary)()
+                    for ident, member in items
+                    if not ident.startswith('_') and
+                    bool(security.check_permission(
+                        'guillotina.AccessContent', member))
+                ]
         result['length'] = length
 
         return result
@@ -147,7 +172,7 @@ class DefaultJSONSummarySerializer(object):
         self.context = context
         self.request = request
 
-    def __call__(self):
+    async def __call__(self):
 
         summary = json_compatible({
             '@id': IAbsoluteURL(self.context)(),

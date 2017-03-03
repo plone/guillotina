@@ -1,6 +1,6 @@
-from datetime import datetime
-from dateutil.tz import tzlocal
-from guillotina import configure
+from guillotina.component.interfaces import IObjectEvent
+from guillotina.interfaces import IBeforeObjectAddedEvent
+from guillotina.interfaces import IBeforeObjectRemovedEvent
 from guillotina.interfaces import IFileFinishUploaded
 from guillotina.interfaces import INewUserAdded
 from guillotina.interfaces import IObjectAddedEvent
@@ -10,17 +10,7 @@ from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectPermissionsViewEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectVisitedEvent
-from guillotina.interfaces import IResource
-from zope.component._api import getSiteManager
-from zope.component.interfaces import ComponentLookupError
-from zope.component.interfaces import IObjectEvent
-from zope.event import subscribers as syncsubscribers
 from zope.interface import implementer
-
-
-_zone = tzlocal()
-
-asyncsubscribers = []
 
 
 @implementer(IObjectEvent)
@@ -55,6 +45,11 @@ class ObjectAddedEvent(ObjectMovedEvent):
         ObjectMovedEvent.__init__(self, object, None, None, new_parent, new_name, data=data)
 
 
+@implementer(IBeforeObjectAddedEvent)
+class BeforeObjectAddedEvent(ObjectAddedEvent):
+    pass
+
+
 @implementer(IObjectRemovedEvent)
 class ObjectRemovedEvent(ObjectMovedEvent):
     """An object has been removed from a container"""
@@ -65,6 +60,11 @@ class ObjectRemovedEvent(ObjectMovedEvent):
         if old_name is None:
             old_name = object.__name__
         ObjectMovedEvent.__init__(self, object, old_parent, old_name, None, None)
+
+
+@implementer(IBeforeObjectRemovedEvent)
+class BeforeObjectRemovedEvent(ObjectRemovedEvent):
+    pass
 
 
 @implementer(IObjectModifiedEvent)
@@ -101,42 +101,3 @@ class NewUserAdded(object):
 
     def __init__(self, user):
         self.user = user
-
-
-@configure.subscriber(for_=(IResource, IObjectModifiedEvent))
-def modified_object(obj, event):
-    """Set the modification date of an object."""
-    now = datetime.now(tz=_zone)
-    obj.modification_date = now
-
-
-async def notify(event):
-    """Notify all subscribers of ``event``."""
-    for subscriber in syncsubscribers:
-        subscriber(event)
-    for subscriber in asyncsubscribers:
-        await subscriber(event)
-
-
-async def dispatch(*event):
-    try:
-        sitemanager = getSiteManager()
-    except ComponentLookupError:
-        # Oh blast, no site manager. This should *never* happen!
-        return []
-
-    return await sitemanager.adapters.asubscribers(event, None)
-
-
-@configure.subscriber(for_=IObjectEvent)
-async def object_event_notify(event):
-    """Dispatch ObjectEvents to interested adapters."""
-    try:
-        sitemanager = getSiteManager()
-    except ComponentLookupError:
-        # Oh blast, no site manager. This should *never* happen!
-        return []
-
-    return await sitemanager.adapters.asubscribers((event.object, event), None)
-
-asyncsubscribers.append(dispatch)

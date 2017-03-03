@@ -1,4 +1,4 @@
-FROM python:3.5-slim
+FROM python:3.6-slim
 MAINTAINER Plone Community
 
 # Update packages
@@ -28,4 +28,4 @@ WORKDIR /app
 EXPOSE  8080
 
 # Configure and Run
-CMD ["/app/bin/pserver"]
+CMD ["/app/bin/guillotina"]

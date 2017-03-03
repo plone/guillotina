@@ -1,6 +1,15 @@
 1.0.0a1 (unreleased)
 --------------------
 
+- move zope.schema, zope.component, zope.configuration into guillotina
+  [vangheem]
+
+- move get_current_request to guillotina.utils
+  [vangheem]
+
+- create_content and create_content_in_container are not async functions
+  [vangheem]
+
 - remove zope.security, zope.location, zope.dublincore, plone.behavior,
   zope.dottedname, zope.lifecycleevent
   [vangheem]
@@ -109,7 +118,7 @@ New features:
 
 Fixes:
 
-- Use zope.schema getter and setter to set attributes
+- Use guillotina.schema getter and setter to set attributes
   [ramonnb]
 
 New features:

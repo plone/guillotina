@@ -5,7 +5,7 @@ from guillotina.async import IQueueUtility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.utils import get_content_path
-from zope.component import queryUtility
+from guillotina.component import queryUtility
 
 
 @configure.service(context=IResource, method='GET', permission='guillotina.SearchContent',

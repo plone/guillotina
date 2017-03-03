@@ -9,6 +9,6 @@ class Framing(object):
     def __init__(self, request):
         self.request = request
 
-    def __call__(self, json_value):
+    async def __call__(self, json_value):
         json_value['actions'] = []
         return json_value

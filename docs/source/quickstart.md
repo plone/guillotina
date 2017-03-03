@@ -27,7 +27,7 @@ Generate configuration file:
 Finally, run the server:
 
 ```
-./bin/pserver
+./bin/guillotina
 ```
 
 The server should now be running on http://0.0.0.0:8080

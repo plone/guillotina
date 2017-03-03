@@ -4,13 +4,13 @@ Besides having static content type definition with its schema there is the conce
 
 ## Definition of a behavior
 
-If you want to have a shared behavior based on some fields and operations that needs to be shared across different content you can define them on a zope.schema interface:
+If you want to have a shared behavior based on some fields and operations that needs to be shared across different content you can define them on a guillotina.schema interface:
 
 ```python
     from guillotina.interfaces import IFormFieldProvider
     from zope.interface import Interface
     from zope.interface import provider
-    from zope.schema import Textline
+    from guillotina.schema import Textline
 
     @provider(IFormFieldProvider)
     class IMyLovedBehavior(Interface):
@@ -155,7 +155,9 @@ GET CONTENT_URI/@behaviors:
     }
 ```
 
-This list of behaviors is based on the for statement on the zcml definition of the behavior. The list on static are the ones defined on the content type definition on the zcml. The list on dynamic are the ones that have been assigned.
+This list of behaviors is based on the for statement on the configure of the behavior.
+The list on static are the ones defined on the content type definition on the configure.
+The list on dynamic are the ones that have been assigned.
 
 ### Add a new behavior to a content
 

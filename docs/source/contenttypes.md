@@ -18,7 +18,7 @@ A simple type will look like this::
 from guillotina import configure
 from guillotina.content import Folder
 from guillotina.interfaces import IItem
-from zope import schema
+from guillotina import schema
 
 class IMySchema(IItem):
     foo = schema.Text()

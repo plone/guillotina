@@ -6,8 +6,8 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISerializableException
 from guillotina.interfaces import IView
-from guillotina.transactions import get_current_request
-from zope.component import adapter
+from guillotina.utils import get_current_request
+from guillotina.component import adapter
 from zope.interface import implementer
 
 
@@ -79,7 +79,7 @@ class Absolute_URL(object):
         elif virtualhost:
             return virtualhost + self.request._db_id + path
         else:
-            return self.request.scheme + '://' + self.request.host + '/' +\
+            return self.request.scheme + '://' + (self.request.host or 'localhost') + '/' +\
                 self.request._db_id + path
 
 

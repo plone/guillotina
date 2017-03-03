@@ -12,30 +12,11 @@ for simplification and longterm success of project, we'd like to pull whatever w
 Package removal/replacements...
 
 
-Easy to remove
---------------
-- zope.proxy
-
-
-
 difficult to remove
 -------------------
 
-- zope.configuration
 - zope.component
-- zope.event(z.component depends on)
-- ZODB
-- zope.schema
-- zope.annotation -> with db changes...
-- zodbpickle
-- ZConfig
-- zc.lockfile
-- transaction
-- BTrees
-- persistent
+- zope.configuration
+- zope.event
 
-
-?
--
-- zope.i18nmessageid
-- zope.i18n
+- zope.interface

@@ -3,7 +3,7 @@ from guillotina import configure
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import ISite
-from zope.component import getUtility
+from guillotina.component import getUtility
 
 
 @configure.service(context=ISite, method='GET', permission='guillotina.AccessContent',

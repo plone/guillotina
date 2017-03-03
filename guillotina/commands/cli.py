@@ -1,12 +1,10 @@
 from guillotina import app_settings
-from guillotina import logger
 from guillotina.commands import Command
 from guillotina.testing import GuillotinaRequester
 from guillotina.testing import TESTING_SETTINGS
 from pprint import pformat
 
 import asyncio
-import logging
 import threading
 import time
 

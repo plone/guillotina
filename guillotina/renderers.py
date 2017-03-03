@@ -13,7 +13,7 @@ from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
-from zope.component import queryAdapter
+from guillotina.component import queryAdapter
 from zope.interface.interface import InterfaceClass
 
 import json
@@ -96,7 +96,7 @@ class Renderer(object):
         self.renderformat = renderformat
 
 
-def _is_pserver_response(resp):
+def _is_guillotina_response(resp):
     return hasattr(resp, '__class__') and issubclass(resp.__class__, Response)
 
 
@@ -106,7 +106,7 @@ def _is_pserver_response(resp):
 class RendererJson(Renderer):
     async def __call__(self, value):
         headers = {}
-        if _is_pserver_response(value):
+        if _is_guillotina_response(value):
             json_value = value.response
             headers = value.headers
             status = value.status
@@ -118,7 +118,7 @@ class RendererJson(Renderer):
         frame = self.request.GET['frame'] if 'frame' in self.request.GET else ''
         if frame:
             framer = queryAdapter(self.request, IFrameFormatsJson, frame)
-            json_value = framer(json_value)
+            json_value = await framer(json_value)
         resp = json_response(json_value)
         resp.headers.update(headers)
         resp.headers.update(
@@ -135,7 +135,7 @@ class RendererJson(Renderer):
 class RendererHtml(Renderer):
     async def __call__(self, value):
         # Safe html transformation
-        if _is_pserver_response(value):
+        if _is_guillotina_response(value):
             body = value.response
             if not isinstance(body, bytes):
                 if not isinstance(body, str):

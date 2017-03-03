@@ -2,11 +2,10 @@
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.browser import ErrorResponse
+from guillotina.interfaces import IAddons
 from guillotina.interfaces import ISite
-from guillotina.registry import IAddons
-from zope.i18nmessageid import MessageFactory
-
-import asyncio
+from guillotina.utils import apply_coroutine
+from guillotina.i18n import MessageFactory
 
 
 _ = MessageFactory('guillotina')
@@ -30,10 +29,7 @@ async def install(context, request):
             'Duplicate',
             _("Addon already installed"))
     handler = app_settings['available_addons'][id_to_install]['handler']
-    if asyncio.iscoroutinefunction(handler.install):
-        await handler.install(context, request)
-    else:
-        handler.install(context, request)
+    await apply_coroutine(handler.install)
     config.enabled |= {id_to_install}
     return await get_addons(context, request)()
 
@@ -57,10 +53,7 @@ async def uninstall(context, request):
             _("Addon not installed"))
 
     handler = app_settings['available_addons'][id_to_install]['handler']
-    if asyncio.iscoroutinefunction(handler.install):
-        await handler.uninstall(context, request)
-    else:
-        handler.uninstall(context, request)
+    await apply_coroutine(handler.uninstall, context, request)
     config.enabled -= {id_to_install}
 
 
@@ -80,6 +73,6 @@ async def get_addons(context, request):
     registry = request.site_settings
     config = registry.for_interface(IAddons)
 
-    for installed in config.enabled:
+    for installed in config['enabled']:
         result['installed'].append(installed)
     return result

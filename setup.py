@@ -29,7 +29,7 @@ setup(
     description='asyncio transactional server to build REST API / Websocket with ZODB',  # noqa
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
-    keywords=['asyncio', 'ZODB', 'REST', 'Framework', 'transactional'],
+    keywords=['asyncio', 'REST', 'Framework', 'transactional'],
     author='Ramon & Asko & Nathan',
     author_email='ramon@plone.org',
     classifiers=[
@@ -39,12 +39,11 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     url='https://github.com/plone/guillotina',
-    license='GPL version 3',
+    license='BSD',
     setup_requires=[
         'pytest-runner',
     ],
@@ -56,39 +55,37 @@ setup(
         'aiohttp',
         'jsonschema',
         'python-dateutil',
-        'BTrees',
-        'persistent',
         'pycrypto',
         'setuptools',
         'six',
-        'transaction',
         'ujson',
-        'ZODB',
-        'zope.component',
-        'zope.configuration',
-        'zope.i18n',
-        'zope.i18nmessageid',
         'zope.interface',
-        'zope.proxy',
-        'zope.schema',
-        'zope.annotation',
+        'aiocache',
+        'aiomonitor',
+        'aioconsole',
         'pyjwt',
-        'requests'
+        'requests',
+        'asyncpg',
+        'cffi'
     ],
     extras_require={
         'test': [
             'pytest',
             'requests',
-            'zope.testing'
+            'docker',
+            'backoff',
+            'requests',
+            'psycopg2',
+            'pytest-asyncio',
+            'pytest-aiohttp'
         ]
     },
     entry_points={
         'console_scripts': [
-            'pserver = guillotina.commands.server:ServerCommand',
-            'pcli = guillotina.commands.cli:CliCommand',
-            'pshell = guillotina.commands.shell:ShellCommand',
-            'pmigrate = guillotina.commands.migrate:MigrateCommand',
-            'pcreate = guillotina.commands.create:CreateCommand'
+            'guillotina = guillotina.commands.server:ServerCommand',
+            'gcli = guillotina.commands.cli:CliCommand',
+            'gshell = guillotina.commands.shell:ShellCommand',
+            'gcreate = guillotina.commands.create:CreateCommand'
         ]
     }
 )

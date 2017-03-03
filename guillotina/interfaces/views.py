@@ -12,7 +12,7 @@ class IView(Interface):
 
 class ITraversableView(IView):
 
-    def publishTraverse(traverse_to):
+    async def publish_traverse(traverse_to):
         pass
 
 

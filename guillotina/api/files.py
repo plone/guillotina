@@ -8,7 +8,7 @@ from guillotina.api.service import TraversableFieldService
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticFile
-from zope.component import getMultiAdapter
+from guillotina.component import getMultiAdapter
 
 import aiohttp
 import mimetypes

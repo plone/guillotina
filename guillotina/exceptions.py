@@ -79,13 +79,17 @@ class NoInteraction(Exception):
     """
 
 
+class ConflictError(Exception):
+    pass
+
+
 # Helper class for __traceback_supplement__
 class TracebackSupplement(object):
 
     def __init__(self, obj):
         self.obj = obj
 
-    def getInfo(self):
+    def get_info(self):
         result = []
         try:
             cls = self.obj.__class__
@@ -106,3 +110,30 @@ class TracebackSupplement(object):
         except:  # noqa
             pass
         return "\n".join(result)
+
+
+class ConfigurationError(Exception):
+    """There was an error in a configuration
+    """
+
+
+class ComponentConfigurationError(ValueError, ConfigurationError):
+    pass
+
+
+class ConfigurationConflictError(ConfigurationError):
+
+    def __init__(self, conflicts):
+        self._conflicts = conflicts
+
+    def __str__(self):  # pragma NO COVER
+        r = ["Conflicting configuration actions"]
+        items = self._conflicts.items()
+        items.sort()
+        for discriminator, infos in items:
+            r.append("  For: %s" % (discriminator, ))
+            for info in infos:
+                for line in str(info).rstrip().split('\n'):
+                    r.append("    " + line)
+
+        return "\n".join(r)

@@ -4,9 +4,9 @@ from guillotina.content import get_cached_factory
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISchemaSerializeToJson
-from zope.component import getMultiAdapter
-from zope.component import getUtilitiesFor
-from zope.component import queryAdapter
+from guillotina.component import getMultiAdapter
+from guillotina.component import getUtilitiesFor
+from guillotina.component import queryAdapter
 
 
 @configure.service(context=IResource, method='PATCH', permission='guillotina.ModifyContent',
@@ -72,11 +72,11 @@ async def default_get(context, request):
                 schema_serializer = getMultiAdapter(
                     (utility.interface, request),
                     ISchemaSerializeToJson)
-                result[name] = schema_serializer()
+                result[name] = await schema_serializer()
         else:
             serialize = True
         if serialize:
             schema_serializer = getMultiAdapter(
                 (utility.interface, request), ISchemaSerializeToJson)
-            result[name] = schema_serializer()
+            result[name] = await schema_serializer()
     return result

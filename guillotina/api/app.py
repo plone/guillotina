@@ -3,7 +3,7 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceSerializeToJson
-from zope.component import getMultiAdapter
+from guillotina.component import getMultiAdapter
 
 
 @configure.service(context=IApplication, method='GET', permission='guillotina.AccessContent')
@@ -11,7 +11,7 @@ async def get(context, request):
     serializer = getMultiAdapter(
         (context, request),
         IResourceSerializeToJson)
-    return serializer()
+    return await serializer()
 
 
 @configure.service(context=IApplication, method='GET', permission='guillotina.GetPortals',
