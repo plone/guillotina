@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import StreamResponse
 from guillotina import configure
+from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
 from guillotina.api.service import TraversableDownloadService
 from guillotina.api.service import TraversableFieldService
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticFile
-from guillotina.api.content import DefaultOPTIONS
 from zope.component import getMultiAdapter
 
 import aiohttp

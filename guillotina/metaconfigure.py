@@ -2,13 +2,13 @@
 from collections import MutableMapping
 from collections import OrderedDict
 from functools import reduce
-from pathlib import Path as osPath
-from guillotina import logger
 from guillotina import _
+from guillotina import logger
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceFactory
 from guillotina.utils import import_class
+from pathlib import Path as osPath
 from zope.component import getUtility
 from zope.component.zcml import adapter
 from zope.component.zcml import utility

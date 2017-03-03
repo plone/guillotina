@@ -1,7 +1,7 @@
-from persistent.dict import PersistentDict
-from pkg_resources import parse_version
 from guillotina import logger
 from guillotina.interfaces import MIGRATION_DATA_REGISTRY_KEY
+from persistent.dict import PersistentDict
+from pkg_resources import parse_version
 
 
 _migrations = []

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.api.service import TraversableService
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
-from guillotina import configure
+from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import ISite
-from guillotina.json.exceptions import DeserializationError
-from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IValueToJson
+from guillotina.json.exceptions import DeserializationError
 from guillotina.utils import import_class
 from zope.component import getMultiAdapter
 from zope.dottedname.resolve import resolve

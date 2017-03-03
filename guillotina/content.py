@@ -4,10 +4,6 @@ from BTrees.OOBTree import OOBTree
 from copy import deepcopy
 from datetime import datetime
 from dateutil.tz import tzlocal
-from persistent import Persistent
-from plone.behavior.interfaces import IBehavior
-from plone.behavior.interfaces import IBehaviorAssignable
-from plone.behavior.markers import applyMarkers
 from guillotina import BEHAVIOR_CACHE
 from guillotina import configure
 from guillotina import FACTORY_CACHE
@@ -37,6 +33,10 @@ from guillotina.registry import Registry
 from guillotina.transactions import get_current_request
 from guillotina.transactions import synccontext
 from guillotina.utils import Lazy
+from persistent import Persistent
+from plone.behavior.interfaces import IBehavior
+from plone.behavior.interfaces import IBehaviorAssignable
+from plone.behavior.markers import applyMarkers
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtilitiesFor
 from zope.component import getUtility

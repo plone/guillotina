@@ -19,7 +19,8 @@ configure.permission('guillotina.AccessPreflight', 'Access Preflight View')
 
 configure.permission('guillotina.ReadConfiguration', 'Read a configuration')
 configure.permission('guillotina.WriteConfiguration', 'Write a configuration')
-configure.permission('guillotina.RegisterConfigurations', 'Register a new configuration on Registry')
+configure.permission('guillotina.RegisterConfigurations',
+                     'Register a new configuration on Registry')
 
 configure.permission('guillotina.ManageAddons', 'Manage addons on a site')
 
@@ -34,18 +35,23 @@ configure.permission('guillotina.ManageCatalog', 'Manage catalog')
 configure.permission('guillotina.GetAPIDefinition', 'Get the API definition')
 
 
-configure.role("guillotina.Anonymous", "Everybody", "All users have this role implicitly", False)
-configure.role("guillotina.Authenticated", "Authenticated user", "Role automatically assigned to authenticated users", False)  # noqa
+configure.role("guillotina.Anonymous", "Everybody",
+               "All users have this role implicitly", False)
+configure.role("guillotina.Authenticated", "Authenticated user",
+               "Role automatically assigned to authenticated users", False)
 configure.role("guillotina.Member", "Site Member", False)
 
 configure.role("guillotina.Reader", "Reader", "can read content", True)
 configure.role("guillotina.Editor", "Editor", "can edit content", True)
 configure.role("guillotina.Reviewer", "Reviewer", "can review content", True)
-configure.role("guillotina.Owner", "Content Manager", "can add/delete content", True)
+configure.role("guillotina.Owner", "Content Manager",
+               "can add/delete content", True)
 
 configure.role("guillotina.Manager", "Site Manager", False)
-configure.role("guillotina.SiteAdmin", "Site Administrator", "can set settings on site", False)
-configure.role("guillotina.SiteCreator", "Site DB Manager", "Can create sites and db connections", False)
+configure.role("guillotina.SiteAdmin", "Site Administrator",
+               "can set settings on site", False)
+configure.role("guillotina.SiteCreator", "Site DB Manager",
+               "Can create sites and db connections", False)
 configure.role("guillotina.SiteDeleter", "Site Remover", "Can destroy a site", False)
 
 
@@ -122,8 +128,8 @@ configure.grant(
     permission="guillotina.ReadConfiguration",
     role="guillotina.SiteAdmin")
 configure.grant(
-      permission="guillotina.WriteConfiguration",
-      role="guillotina.SiteAdmin")
+    permission="guillotina.WriteConfiguration",
+    role="guillotina.SiteAdmin")
 configure.grant(
     permission="guillotina.RegisterConfigurations",
     role="guillotina.SiteAdmin")

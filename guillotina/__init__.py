@@ -6,6 +6,7 @@ from zope.i18nmessageid import MessageFactory
 
 import logging
 
+
 # create logging
 logger = logging.getLogger('guillotina')
 

@@ -9,10 +9,10 @@ from guillotina.utils import dotted_name
 from guillotina.utils import resolve_module_path
 from guillotina.utils import resolve_or_get
 from zope.component import zcml
-from zope.interface import classImplements
-from zope.interface import Interface
 from zope.configuration import xmlconfig
 from zope.configuration.exceptions import ConfigurationError
+from zope.interface import classImplements
+from zope.interface import Interface
 
 import logging
 import plone.behavior.metaconfigure
@@ -360,12 +360,14 @@ def grant_directive(
     from guillotina.auth import \
         principal_role_manager as principal_role_mgr
 
-    nspecified = ((principal is not None)
-                  + (role is not None)
-                  + (permission is not None)
-                  + (permissions is not None))
-    permspecified = ((permission is not None)
-                     + (permissions is not None))
+    nspecified = (
+        (principal is not None) +
+        (role is not None) +
+        (permission is not None) +
+        (permissions is not None))
+    permspecified = (
+        (permission is not None) +
+        (permissions is not None))
 
     if nspecified != 2 or permspecified == 2:
         raise ConfigurationError(
@@ -404,8 +406,9 @@ def grantAll_directive(_context, principal=None, role=None):
     """
     from guillotina.auth import role_permission_manager
     from guillotina.auth import principal_permission_manager
-    nspecified = ((principal is not None)
-                  + (role is not None))
+    nspecified = (
+        (principal is not None) +
+        (role is not None))
 
     if nspecified != 1:
         raise ConfigurationError(

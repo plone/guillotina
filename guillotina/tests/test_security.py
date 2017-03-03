@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
-from guillotina.behaviors.attachment import IAttachment
-from guillotina.testing import GuillotinaFunctionalTestCase
-from guillotina.tests import TEST_RESOURCES_DIR
-from zope import schema
-from zope.interface import Interface
-from guillotina.interfaces import IRequest
-from zope.interface import alsoProvides
-from guillotina.browser import View
 from aiohttp.test_utils import make_mocked_request
-from guillotina.auth import get_roles_with_access_content
 from guillotina.auth import get_principals_with_access_content
+from guillotina.auth import get_roles_with_access_content
+from guillotina.browser import View
+from guillotina.interfaces import IRequest
+from guillotina.testing import GuillotinaFunctionalTestCase
+from zope.interface import alsoProvides
 
 import json
-import os
 
 
 class PrincipalsView(View):
@@ -72,9 +67,12 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
 
         response = json.loads(resp.text)
         self.assertTrue(len(response['inherit']) == 1)
-        self.assertTrue(response['inherit'][0]['prinrole']['root']['guillotina.SiteAdmin'] == 'Allow')
-        self.assertTrue(response['inherit'][0]['prinrole']['root']['guillotina.Owner'] == 'Allow')
-        self.assertTrue(response['inherit'][0]['prinperm']['user1']['guillotina.AccessContent'] == 'AllowSingle')
+        self.assertTrue(
+            response['inherit'][0]['prinrole']['root']['guillotina.SiteAdmin'] == 'Allow')
+        self.assertTrue(
+            response['inherit'][0]['prinrole']['root']['guillotina.Owner'] == 'Allow')
+        self.assertTrue(
+            response['inherit'][0]['prinperm']['user1']['guillotina.AccessContent'] == 'AllowSingle')  # noqa
 
         # Check the access users/roles
         testing_object = self._get_site()['testing']

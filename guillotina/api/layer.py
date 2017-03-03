@@ -1,5 +1,6 @@
-from guillotina.interfaces import IDefaultLayer  # noqa
 from guillotina import logger
+from guillotina.interfaces import IDefaultLayer  # noqa
+
 
 logger.warn('guillotina.api.layer.IDefaultLayer has been moved to '
             'guillotina.interfaces.IDefaultLayer. This import will '

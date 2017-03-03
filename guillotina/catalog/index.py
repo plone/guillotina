@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
+from guillotina.api.search import AsyncCatalogReindex
+from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IObjectFinallyCreatedEvent
 from guillotina.interfaces import IObjectFinallyDeletedEvent
@@ -8,11 +10,9 @@ from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISite
 from guillotina.transactions import get_current_request
-from guillotina.exceptions import RequestNotFound
 from guillotina.transactions import tm
-from zope.component import queryUtility
 from guillotina.utils import get_content_path
-from guillotina.api.search import AsyncCatalogReindex
+from zope.component import queryUtility
 from zope.lifecycleevent.interfaces import IObjectAddedEvent
 from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 

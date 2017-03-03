@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from persistent import Persistent
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.interfaces import ICloudFileField
@@ -11,6 +10,7 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import IStorage
 from guillotina.interfaces import NotStorable
 from guillotina.utils import import_class
+from persistent import Persistent
 from ZODB.blob import Blob
 from zope.component import adapter
 from zope.component import getMultiAdapter

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from guillotina.api.service import TraversableService
 from guillotina import configure
+from guillotina.api.service import TraversableService
+from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import ISite
-from guillotina.interfaces import IFactorySerializeToJson
 from zope.component import getMultiAdapter
 from zope.component import getUtilitiesFor
 from zope.component import queryUtility

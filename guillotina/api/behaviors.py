@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-from plone.behavior.interfaces import IBehavior
 from guillotina import configure
 from guillotina.content import get_cached_factory
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISchemaSerializeToJson
+from plone.behavior.interfaces import IBehavior
 from zope.component import getMultiAdapter
 from zope.component import getUtilitiesFor
 from zope.component import queryAdapter

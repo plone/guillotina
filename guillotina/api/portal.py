@@ -8,11 +8,11 @@ from guillotina.events import notify
 from guillotina.events import ObjectFinallyCreatedEvent
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces import ISite
 from guillotina.utils import get_authenticated_user_id
 from zope.component import getMultiAdapter
-from guillotina.interfaces import IPrincipalRoleManager
 
 
 @configure.service(context=IDatabase, method='GET', permission='guillotina.GetPortals')

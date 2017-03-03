@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-from guillotina.directives import index
-from guillotina.interfaces import IResource
 from guillotina.auth import get_principals_with_access_content
 from guillotina.auth import get_roles_with_access_content
-from guillotina.utils import get_content_path
-from guillotina.utils import get_content_depth
 from guillotina.auth import role_permission_manager
+from guillotina.directives import index
 from guillotina.interfaces import Allow
 from guillotina.interfaces import Deny
+from guillotina.interfaces import IResource
+from guillotina.utils import get_content_depth
+from guillotina.utils import get_content_path
 
 
 global_roles_for_permission = role_permission_manager.get_roles_for_permission

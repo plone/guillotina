@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from guillotina import configure
-from guillotina.interfaces import ISite
 from guillotina.interfaces import IGroups
+from guillotina.interfaces import ISite
 from zope.component import getUtility
 from zope.security.interfaces import IInteraction
 
@@ -31,4 +31,3 @@ async def get_user_info(context, request):
         }
 
     return result
-

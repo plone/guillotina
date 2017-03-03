@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 """Module to define the text field."""
-from persistent import Persistent
 from guillotina import _
 from guillotina.interfaces import IRichText
 from guillotina.interfaces import IRichTextValue
 from guillotina.interfaces import ITransformer
+from persistent import Persistent
 from zope.component import queryAdapter
 from zope.i18nmessageid import MessageFactory
 from zope.interface import implementer
