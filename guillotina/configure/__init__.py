@@ -1,4 +1,4 @@
-from guillotina.configure import meta
+from collections import OrderedDict
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IResourceFactory
@@ -15,9 +15,6 @@ from zope.interface import Interface
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
 from zope.security.checker import undefineChecker
-from collections import OrderedDict
-from guillotina.utils import import_class
-
 
 import logging
 import plone.behavior.metaconfigure
