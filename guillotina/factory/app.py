@@ -169,7 +169,14 @@ def make_app(config_file=None, settings=None):
         for key, dbconfig in database.items():
             factory = getUtility(
                 IDatabaseConfigurationFactory, name=dbconfig['storage'])
-            root[key] = factory(key, dbconfig)
+            if asyncio.iscoroutinefunction(factory):
+                future = asyncio.ensure_future(
+                factory(key, dbconfig, app), loop=app.loop)
+
+                app.loop.run_until_complete(future)
+                root[key] = future.result()
+            else:
+                root[key] = factory(key, dbconfig)
 
     for static in app_settings['static']:
         for key, file_path in static.items():

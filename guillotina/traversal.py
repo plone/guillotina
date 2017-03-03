@@ -119,28 +119,44 @@ async def traverse(request, parent, path):
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
-        context = parent[path[0]]
+        if hasattr(request, '_asyncdb') and request._asyncdb:
+            context = await parent.asyncget(path[0])
+        else:
+            context = parent[path[0]]
     except TypeError:
         return parent, path
     except KeyError:
         return parent, path
 
     if IDatabase.providedBy(context):
-        if SHARED_CONNECTION:
-            request.conn = context.conn
+        request._db_write_enabled = False
+        request._db_id = context.id
+        request._asyncdb = context.is_async()
+        if request._asyncdb:
+            # Create a transaction Manager
+            request._tm = tm = context.new_transaction_manager()
+            # Link the transaction with a connection
+            request.conn = await context.aopen(tm)
+            # Create a read transaction
+            await tm.begin(request, read=True)
+            # Get the root of the tree
+            context = await request.conn.root()
         else:
             # Create a new conection
             request.conn = context.open()
+            request.conn.transaction_manager.begin(request)
+            context = request.conn.root()
         # Check the transaction
-        request._db_write_enabled = False
-        request._db_id = context.id
-        context = request.conn.root()
 
     if ISite.providedBy(context):
         request._site_id = context.id
         request.site = context
-        request.site_settings = context['_registry']
-        layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
+        if hasattr(request, '_asyncdb') and request._asyncdb:
+            request.site_settings = await context.asyncget('registry')
+            layers = await request.site_settings.aget(ACTIVE_LAYERS_KEY, [])
+        else:
+            request.site_settings = context['_registry']
+            layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
 
@@ -210,7 +226,6 @@ class MatchInfo(AbstractMatchInfo):
             try:
                 async with locked(self.resource):
                     request._db_write_enabled = True
-                    txn = request.conn.transaction_manager.begin(request)
                     # We try to avoid collisions on the same instance of
                     # guillotina
                     view_result = await self.view()
@@ -218,18 +233,18 @@ class MatchInfo(AbstractMatchInfo):
                             isinstance(view_result, UnauthorizedResponse):
                         # If we don't throw an exception and return an specific
                         # ErrorReponse just abort
-                        await abort(txn, request)
+                        await abort(request)
                     else:
-                        await commit(txn, request)
+                        await commit(request)
 
             except Unauthorized as e:
-                await abort(txn, request)
+                await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except ConflictError as e:
                 view_result = generate_error_response(
                     e, request, 'ConflictDB', 409)
             except Exception as e:
-                await abort(txn, request)
+                await abort(request)
                 view_result = generate_error_response(
                     e, request, 'ServiceError')
         else:
@@ -265,7 +280,7 @@ class MatchInfo(AbstractMatchInfo):
 
         futures_to_wait = request._futures.values()
         if futures_to_wait:
-            await asyncio.gather(futures_to_wait)
+            await asyncio.gather(*list(futures_to_wait))
 
         return resp
 

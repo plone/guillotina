@@ -126,7 +126,7 @@ class SerializeFolderToJson(SerializeToJson):
                 for ident, member in self.context.items()
                 if not ident.startswith('_') and
                 bool(security.check_permission(
-                    'guillotina.AccessContent', self.context))
+                    'guillotina.AccessContent', member))
             ]
         result['length'] = length
 

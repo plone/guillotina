@@ -71,12 +71,25 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
 
     async def __aexit__(self, type_, value, traceback):
         request = get_current_request()
+        txn = self.get(request)
         if value is None:
-            await sync(request)(self.get(request).commit)
+            await commit(txn, request)
         else:
-            await sync(request)(self.get(request).abort)
+            await abort(txn, request)
 
-    # ITransactionManager
+    async def acommit(self, request=None):
+        if request is None:
+            request = get_current_request()
+        txn = self.get(request)
+
+        return await commit(txn, request)
+
+    async def aabort(self, request=None):
+        if request is None:
+            request = get_current_request()
+        txn = self.get(request)
+        return await abort(txn, request)
+
     def get(self, request=None):
         """Return the current request specific transaction
 
@@ -87,8 +100,7 @@ class RequestAwareTransactionManager(transaction.TransactionManager):
             request = get_current_request()
 
         if getattr(request, '_txn', None) is None:
-            request._txn = transaction.Transaction(self._synchs, self)
-            request._txn_time = time.time()
+            raise Exception('No valid transaction started')
         return request._txn
 
     # ITransactionManager
@@ -118,10 +130,11 @@ class RequestBoundTransactionManagerContextManager(object):
 
     async def __aexit__(self, type_, value, traceback):
         request = self.request
+        txn = self.get(request)
         if value is None:
-            await sync(request)(self.tm.get(request).commit)
+            await commit(txn, request)
         else:
-            await sync(request)(self.tm.get(request).abort)
+            await abort(txn, request)
 
 
 @implementer(ISavepointDataManager)
@@ -340,15 +353,21 @@ def tm(request):
     return request.conn.transaction_manager
 
 
-async def commit(txn, request):
-    if SHARED_CONNECTION is False:
+async def commit(request):
+    txn = request._txn
+    if asyncio.iscoroutinefunction(txn.commit):
+        await txn.commit()
+    elif SHARED_CONNECTION is False:
         await txn.acommit()
     else:
         await sync(request)(txn.commit)
 
 
-async def abort(txn, request):
-    if SHARED_CONNECTION is False:
+async def abort(request):
+    txn = request._txn
+    if asyncio.iscoroutinefunction(txn.abort):
+        await txn.abort()
+    elif SHARED_CONNECTION is False:
         txn.abort()
     else:
         await sync(request)(txn.abort)
