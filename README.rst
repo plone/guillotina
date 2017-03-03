@@ -4,8 +4,8 @@ Introduction
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
    :target: http://guillotina.readthedocs.io/en/latest/
 
-.. image:: https://travis-ci.org/guillotinaweb/guillotina.svg?branch=master
-   :target: https://travis-ci.org/guillotinaweb/guillotina
+.. image:: https://travis-ci.org/plone/guillotina.svg?branch=master
+   :target: https://travis-ci.org/plone/guillotina
 
 .. image:: https://img.shields.io/pypi/v/guillotina.svg
    :target: https://pypi.python.org/pypi/guillotina
