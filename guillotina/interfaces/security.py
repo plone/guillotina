@@ -17,14 +17,16 @@ In all cases, 'setting' values are one of the defined constants
 `Allow`, `Deny`, or `Unset`.
 """
 from zope.interface import Interface
-from zope.schema import TextLine, Text
+from zope.schema import Text
+from zope.schema import TextLine
+
+import copyreg
+
 
 # These are the "setting" values returned by several methods defined
 # in these interfaces.  The implementation may move to another
 # location in the future, so this should be the preferred module to
 # import these from.
-
-import copyreg
 
 
 class PermissionSetting(object):

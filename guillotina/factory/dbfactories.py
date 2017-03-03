@@ -14,7 +14,7 @@ import ZODB.FileStorage
 try:
     import ZEO.ClientStorage
     ZEOSERVER = True
-except:
+except ImportError:
     ZEOSERVER = False
 
 try:
@@ -42,7 +42,7 @@ def ZODBDatabaseConfigurationFactory(key, dbconfig):
             alsoProvides(rootobj, IDatabase)
         transaction.commit()
         rootobj = None
-    except:
+    except:  # noqa
         pass
     finally:
         db.close()
@@ -70,7 +70,7 @@ def ZEODatabaseConfigurationFactory(key, dbconfig):
         if not IDatabase.providedBy(rootobj):
             alsoProvides(rootobj, IDatabase)
         transaction.commit()
-    except:
+    except:  # noqa
         pass
     finally:
         rootobj = None
@@ -102,7 +102,7 @@ def RelStorageConfigurationFactory(key, dbconfig):
         if not IDatabase.providedBy(rootobj):
             alsoProvides(rootobj, IDatabase)
         transaction.commit()
-    except:
+    except:  # noqa
         pass
     finally:
         rootobj = None
@@ -128,7 +128,7 @@ def NewtConfigurationFactory(key, dbconfig):
         if not IDatabase.providedBy(rootobj):
             alsoProvides(rootobj, IDatabase)
         transaction.commit()
-    except:
+    except:  # noqa
         pass
     finally:
         rootobj = None

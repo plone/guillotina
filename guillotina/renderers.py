@@ -12,9 +12,9 @@ from guillotina.interfaces import IRendererFormatRaw
 from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IView
+from guillotina.interfaces.security import PermissionSetting
 from zope.component import queryAdapter
 from zope.interface.interface import InterfaceClass
-from guillotina.interfaces.security import PermissionSetting
 
 import json
 

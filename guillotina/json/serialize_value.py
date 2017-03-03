@@ -3,12 +3,12 @@ from datetime import date
 from datetime import datetime
 from datetime import time
 from datetime import timedelta
-from persistent.list import PersistentList
-from persistent.mapping import PersistentMapping
 from guillotina import configure
 from guillotina.files import BasicFile
 from guillotina.interfaces import IValueToJson
 from guillotina.text import IRichTextValue
+from persistent.list import PersistentList
+from persistent.mapping import PersistentMapping
 from zope.i18nmessageid.message import Message
 from zope.interface import Interface
 from zope.schema.vocabulary import SimpleVocabulary

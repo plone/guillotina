@@ -22,7 +22,8 @@ class DefaultFieldSerializer(object):
     def get_value(self, default=None):
         try:
             return self.field.get(self.context)
-        except:
+        except:  # noqa
+            # XXX handle exception?
             return getattr(self.context,
                            self.field.__name__,
                            default)

@@ -118,9 +118,9 @@ class BasicFile(Persistent):
         if 'size' in self.__dict__:
             del self.__dict__['size']
         # Search for a storable that is able to store the data
-        dottedName = '.'.join((data.__class__.__module__,
-                               data.__class__.__name__))
-        storable = getUtility(IStorage, name=dottedName)
+        dotted_name = '.'.join((data.__class__.__module__,
+                                data.__class__.__name__))
+        storable = getUtility(IStorage, name=dotted_name)
         storable.store(data, self._blob)
 
     def _get_data(self):

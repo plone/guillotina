@@ -77,7 +77,7 @@ def run_site_migrations(site, migrations, db=None):
         ))
         try:
             migration.func(site)
-        except:
+        except:  # noqa
             logger.info('Error running migration for "{}" to version "{}" on site "{}"'.format(
                 migration.application,
                 migration.to_version.public,

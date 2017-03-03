@@ -36,8 +36,7 @@ class CreateCommand(Command):
             tmpl_dir,
             no_input=arguments.no_input,
             overwrite_if_exists=arguments.overwrite,
-            output_dir=arguments.output
-            )
+            output_dir=arguments.output)
 
     def run(self, arguments, settings, app):
 

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from BTrees._OOBTree import OOBTree
 from BTrees.Length import Length
-from persistent import Persistent
 from guillotina.browser import get_physical_path
 from guillotina.interfaces import IRegistry
 from guillotina.utils import Lazy
+from persistent import Persistent
 from zope import schema
 from zope.i18nmessageid import MessageFactory
 from zope.interface import alsoProvides

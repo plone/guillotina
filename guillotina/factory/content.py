@@ -1,5 +1,6 @@
-from guillotina.auth.validators import hash_password
+from concurrent.futures import ThreadPoolExecutor
 from guillotina.auth.users import RootUser
+from guillotina.auth.validators import hash_password
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.transactions import RequestAwareTransactionManager
@@ -8,7 +9,6 @@ from zope.component import getGlobalSiteManager
 from zope.component import getUtility
 from zope.component import provideUtility
 from zope.interface import implementer
-from concurrent.futures import ThreadPoolExecutor
 
 import asyncio
 
