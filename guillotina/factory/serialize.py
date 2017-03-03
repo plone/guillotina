@@ -1,11 +1,11 @@
 from guillotina import configure
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-from zope.security.interfaces import IInteraction
 
 
 @configure.adapter(

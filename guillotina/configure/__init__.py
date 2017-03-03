@@ -1,8 +1,10 @@
 from collections import OrderedDict
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IDefaultLayer
+from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IRole
+from guillotina.security.permission import Permission
 from guillotina.utils import caller_module
 from guillotina.utils import dotted_name
 from guillotina.utils import resolve_module_path
@@ -12,13 +14,9 @@ from zope.configuration import xmlconfig
 from zope.configuration.exceptions import ConfigurationError
 from zope.interface import classImplements
 from zope.interface import Interface
-from zope.security.checker import defineChecker
-from zope.security.checker import getCheckerForInstancesOf
-from zope.security.checker import undefineChecker
 
 import logging
 import plone.behavior.metaconfigure
-import zope.security.zcml
 
 
 _registered_configurations = []
@@ -72,27 +70,20 @@ def load_all_configurations(_context, module_name):
 def load_service(_context, service):
     # prevent circular import
     from guillotina import app_settings
-    from guillotina.auth.checker import ViewPermissionChecker
+    from guillotina.security import protect_view
 
     service_conf = service['config']
     factory = resolve_or_get(service['klass'])
 
-    if getCheckerForInstancesOf(factory):
-        # in case already exist remove old checker
-        undefineChecker(factory)
-
     permission = service_conf.get(
         'permission', service_conf.get('default_permission', None))
 
-    required = {}
-    for n in ('__call__', 'publishTraverse'):
-        required[n] = permission
+    protect_view(factory, permission)
 
     method = service_conf.get('method', 'GET')
     layer = service_conf.get('layer', IDefaultLayer)
     name = service_conf.get('name', '')
     content = service_conf['context']
-    defineChecker(factory, ViewPermissionChecker(required))
     logger.debug('Defining adapter for '  # noqa
                  '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
         content.__identifier__,
@@ -237,8 +228,10 @@ def load_utility(_context, _utility):
 register_configuration_handler('utility', load_utility)
 
 
-def load_permission(_context, permission):
-    zope.security.zcml.permission(_context, **permission['config'])
+def load_permission(_context, permission_conf):
+    permission = Permission(**permission_conf['config'])
+    zcml.utility(_context, IPermission, permission,
+                 name=permission_conf['config']['id'])
 register_configuration_handler('permission', load_permission)
 
 

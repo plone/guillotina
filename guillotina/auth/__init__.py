@@ -1,16 +1,16 @@
 from . import groups  # noqa
 from . import role
 from guillotina import app_settings
-from guillotina.auth.security_code import principal_permission_manager
-from guillotina.auth.security_code import principal_role_manager
-from guillotina.auth.security_code import role_permission_manager
 from guillotina.auth.users import ROOT_USER_ID
+from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRolePermissionMap
+from guillotina.security.security_code import principal_permission_manager
+from guillotina.security.security_code import principal_role_manager
+from guillotina.security.security_code import role_permission_manager
 from guillotina.transactions import get_current_request
 from guillotina.utils import resolve_or_get
-from zope.security.interfaces import IInteraction
 
 
 async def authenticate_request(request):

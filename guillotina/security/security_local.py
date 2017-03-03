@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 from guillotina import configure
-from guillotina.auth.securitymap import GuillotinaSecurityMap
 from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
@@ -9,6 +8,7 @@ from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import Unset
+from guillotina.security.securitymap import GuillotinaSecurityMap
 
 
 @configure.adapter(

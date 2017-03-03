@@ -17,12 +17,10 @@ if pure_python or is_pypy or is_jython:
     ext_modules = []
 else:
     optimization_path = os.path.join('guillotina', 'optimizations.c')
-    if os.path.exists('buildout.cfg'):
-        optimization_path = os.path.join('guillotina', 'optimizations.c')
     ext_modules = [
         Extension(
             'guillotina.optimizations',
-            sources=[optimization_path])
+            sources=[optimization_path]),
     ]
 
 setup(
@@ -76,10 +74,8 @@ setup(
         'zope.i18nmessageid',
         'zope.interface',
         'zope.lifecycleevent',
-        'zope.location',
         'zope.proxy',
         'zope.schema',
-        'zope.security',
         'pyjwt',
         'requests'
     ],
@@ -87,7 +83,7 @@ setup(
         'test': [
             'pytest',
             'requests',
-            'zope.testing',
+            'zope.testing'
         ]
     },
     entry_points={

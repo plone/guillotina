@@ -1,10 +1,23 @@
+from guillotina.interfaces import IPrincipal
+from zope.interface import implementer
 
 
 ROOT_USER_ID = 'root'
 ANONYMOUS_USER_ID = 'Anonymous User'
 
 
-class RootUser(object):
+@implementer(IPrincipal)
+class BaseUser(object):
+    pass
+
+
+class SystemUser(BaseUser):
+    id = 'guillotina.SystemUser'
+    title = 'System'
+    description = ''
+
+
+class RootUser(BaseUser):
     def __init__(self, password):
         self.id = ROOT_USER_ID
         self.password = password
@@ -14,7 +27,7 @@ class RootUser(object):
         self.permissions = {}
 
 
-class GuillotinaUser(object):
+class GuillotinaUser(BaseUser):
 
     def __init__(self, request):
         self.id = 'guillotina'
@@ -41,7 +54,7 @@ class GuillotinaUser(object):
         return self._properties
 
 
-class AnonymousUser(GuillotinaUser):
+class AnonymousUser(BaseUser):
 
     def __init__(self, request):
         super(AnonymousUser, self).__init__(request)

@@ -15,3 +15,4 @@ eggs/
 .cache
 cov_html
 data
+lib

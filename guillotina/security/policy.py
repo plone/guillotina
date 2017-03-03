@@ -18,22 +18,21 @@ from guillotina import configure
 from guillotina.auth import principal_permission_manager
 from guillotina.auth import principal_role_manager
 from guillotina.auth import role_permission_manager
+from guillotina.auth.users import SystemUser
 from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IGroups
+from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IRolePermissionMap
+from guillotina.interfaces import ISecurityPolicy
+from guillotina.interfaces import Public
 from guillotina.interfaces import Unset
 from guillotina.transactions import get_current_request
 from zope.component import getUtility
-from zope.security.checker import CheckerPublic
-from zope.security.interfaces import IInteraction
-from zope.security.interfaces import ISecurityPolicy
-from zope.security.management import system_user
-from zope.security.proxy import removeSecurityProxy
 
 import zope.interface
 
@@ -106,11 +105,8 @@ class Interaction(object):
 
     def check_permission(self, permission, obj):
         # Always allow public attributes
-        if permission is CheckerPublic:
+        if permission is Public:
             return True
-
-        # Remove implicit security proxy (if used)
-        obj = removeSecurityProxy(obj)
 
         # Iterate through participations ('principals')
         # and check permissions they give
@@ -123,7 +119,7 @@ class Interaction(object):
                 continue
 
             # System user always has access
-            if principal is system_user:
+            if principal is SystemUser:
                 return True
 
             # Speed up by skipping seen principals
@@ -254,7 +250,7 @@ class Interaction(object):
                 return prinper
 
         # Find the permission recursivelly set to a user
-        parent = removeSecurityProxy(getattr(parent, '__parent__', None))
+        parent = getattr(parent, '__parent__', None)
         prinper = self.cached_principal_permission(
             parent, principal, groups, permission, 'p')
         cache_prin_per[permission] = prinper
@@ -295,7 +291,7 @@ class Interaction(object):
             return roles
 
         roles = self.cached_principal_roles(
-            removeSecurityProxy(getattr(parent, '__parent__', None)),
+            getattr(parent, '__parent__', None),
             principal,
             groups,
             'p')
@@ -344,7 +340,7 @@ class Interaction(object):
             return roles
 
         roles = self.cached_roles(
-            removeSecurityProxy(getattr(parent, '__parent__', None)),
+            getattr(parent, '__parent__', None),
             permission, 'p')
         roleper = IRolePermissionMap(parent, None)
         if roleper:
@@ -384,7 +380,7 @@ class Interaction(object):
             return principals
 
         principals = self.cached_principals(
-            removeSecurityProxy(getattr(parent, '__parent__', None)),
+            getattr(parent, '__parent__', None),
             roles,
             permission, 'p')
         prinperm = IPrincipalPermissionMap(parent, None)

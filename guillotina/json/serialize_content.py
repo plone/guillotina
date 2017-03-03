@@ -17,8 +17,8 @@ from zope.component import queryMultiAdapter
 from zope.component import queryUtility
 from zope.interface import Interface
 from zope.schema import getFields
-from zope.security.interfaces import IInteraction
-from zope.security.interfaces import IPermission
+from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IPermission
 
 
 MAX_ALLOWED = 200

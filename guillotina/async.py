@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from dateutil.tz import tzlocal
-from guillotina import _
 from guillotina import logger
 from guillotina.browser import ErrorResponse
 from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
+from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-from guillotina.transactions import sync
 from guillotina.transactions import TransactionProxy
-from zope.i18nmessageid import MessageFactory
 from zope.interface import Interface
-from zope.security.interfaces import Unauthorized
 
 import asyncio
-import logging
 
 
 _zone = tzlocal()
