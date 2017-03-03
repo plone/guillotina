@@ -95,12 +95,12 @@ def load_service(_context, service):
     defineChecker(factory, ViewPermissionChecker(required))
     logger.debug('Defining adapter for '  # noqa
                  '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
-        factory.__identifier__,
+        content.__identifier__,
         app_settings['http_methods'][method].__identifier__,
         layer.__identifier__,
         str(factory),
         name))
-    adapter(
+    zcml.adapter(
         _context,
         factory=(factory,),
         provides=app_settings['http_methods'][method],
@@ -157,7 +157,7 @@ def load_behavior(_context, behavior):
     schema = resolve_or_get(conf['provides'])
     classImplements(real_factory, schema)
 
-    plone.behavior.meta.behaviorDirective(
+    plone.behavior.metaconfigure.behaviorDirective(
         _context,
         conf.get('title', ''),
         schema,

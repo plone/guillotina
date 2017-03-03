@@ -4,8 +4,9 @@ from guillotina.content import Folder
 from guillotina.content import load_cached_schema
 from guillotina.content import NotAllowedContentType
 from guillotina.interfaces.types import IConstrainTypes
-from guillotina.metaconfigure import contenttype_directive
 from guillotina.testing import GuillotinaServerBaseTestCase
+import guillotina.testing
+from guillotina import configure
 
 
 class TestContent(GuillotinaServerBaseTestCase):
@@ -20,14 +21,14 @@ class TestContent(GuillotinaServerBaseTestCase):
         site.__name__ = 'guillotina'
         db['guillotina'] = site
 
-        contenttype_directive(
-            self.layer.app.app.config,
-            'TestType',
-            Folder,
-            None,
-            behaviors=None,
-            add_permission=None,
-            allowed_types=['Item'])
+        import guillotina.tests
+        configure.register_configuration(Folder, dict(
+            portal_type="TestType",
+            allowed_types=['Item'],
+            module=guillotina.tests  # for registration initialization
+        ), 'contenttype')
+        configure.load_configuration(
+            self.layer.app.app.config, 'guillotina.tests', 'contenttype')
         self.layer.app.app.config.execute_actions()
         load_cached_schema()
 
