@@ -2,11 +2,11 @@
 from datetime import date
 from datetime import datetime
 from datetime import time
-from guillotina.auth.policy import Interaction
 from guillotina.content import create_content_in_container
 from guillotina.factory import RootSpecialPermissions
 from guillotina.files import BasicFile
 from guillotina.interfaces import IFactorySerializeToJson
+from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IResource
@@ -27,6 +27,7 @@ from guillotina.json import serialize_schema_field
 from guillotina.json.serialize_content import DefaultJSONSummarySerializer
 from guillotina.json.serialize_content import SerializeFolderToJson
 from guillotina.json.serialize_content import SerializeToJson
+from guillotina.security.policy import Interaction
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.text import RichText
 from persistent.list import PersistentList
@@ -35,7 +36,6 @@ from zope import schema
 from zope.component import getAdapter
 from zope.component import getMultiAdapter
 from zope.component import getUtility
-from zope.security.interfaces import IInteraction
 
 
 class TestAdapters(GuillotinaFunctionalTestCase):

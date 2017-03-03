@@ -9,7 +9,6 @@ from guillotina import configure
 from guillotina import FACTORY_CACHE
 from guillotina import PERMISSIONS_CACHE
 from guillotina import SCHEMA_CACHE
-from guillotina.auth.security_code import PrincipalPermissionManager
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.browser import get_physical_path
@@ -19,7 +18,9 @@ from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
+from guillotina.interfaces import IPermission
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
@@ -30,6 +31,7 @@ from guillotina.interfaces import IStaticFile
 from guillotina.registry import IAddons
 from guillotina.registry import ILayers
 from guillotina.registry import Registry
+from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_current_request
 from guillotina.transactions import synccontext
 from guillotina.utils import Lazy
@@ -50,8 +52,6 @@ from zope.interface import noLongerProvides
 from zope.lifecycleevent import ObjectAddedEvent
 from zope.lifecycleevent import ObjectRemovedEvent
 from zope.schema.interfaces import IContextAwareDefaultFactory
-from zope.security.interfaces import IInteraction
-from zope.security.interfaces import IPermission
 
 import pathlib
 import uuid

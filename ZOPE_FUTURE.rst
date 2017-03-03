@@ -14,8 +14,7 @@ Package removal/replacements...
 
 Easy to remove
 --------------
-- zope.security
-- zope.location
+- zope.proxy
 - zope.lifecycleevent
 - zope.event
 - zope.dublincore

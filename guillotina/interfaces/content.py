@@ -1,9 +1,10 @@
 # NEED use this import because we have a "schema" attribute below
 from zope.component.interfaces import ISite as IZopeSite
 from zope.component.interfaces import IFactory
+from zope.interface import Attribute
 from zope.interface import Interface
 from zope.interface.common.mapping import IFullMapping
-from zope.location.interfaces import IContained
+from zope.schema import TextLine
 
 # NEED use this import because we have a "schema" attribute below
 import zope.schema
@@ -47,7 +48,35 @@ class IStaticDirectory(Interface):
     pass
 
 
-class IResource(IContained):
+class ILocation(Interface):
+    """Objects that can be located in a hierachy.
+
+    Given a parent and a name an object can be located within that parent. The
+    locatable object's `__name__` and `__parent__` attributes store this
+    information.
+
+    Located objects form a hierarchy that can be used to build file-system-like
+    structures. For example in Zope `ILocation` is used to build URLs and to
+    support security machinery.
+
+    To retrieve an object from its parent using its name, the `ISublocation`
+    interface provides the `sublocations` method to iterate over all objects
+    located within the parent. The object searched for can be found by reading
+    each sublocation's __name__ attribute.
+
+    """
+
+    __parent__ = Attribute("The parent in the location hierarchy.")
+
+    __name__ = TextLine(
+        title=u"The name within the parent",
+        description="The object can be looked up from the parent's "
+                    "sublocations using this name.",
+        required=False,
+        default=None)
+
+
+class IResource(ILocation):
 
     portal_type = zope.schema.TextLine()
 

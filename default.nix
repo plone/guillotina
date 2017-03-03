@@ -162,22 +162,6 @@ let self = rec {
     doCheck = false;
   };
 
-  zope_security = pythonPackages.buildPythonPackage {
-    name = "zope.security-4.0.3";
-    src = pkgs.fetchurl {
-      url = "https://pypi.python.org/packages/fa/48/d4d207f993359fdc8bbeda17f71f882de9d0a1974dfff423c0bda7f615f1/zope.security-4.0.3.tar.gz";
-      sha256 = "14zmf684amc0x32kq05yxnhfqd1cmyhafkw05gn81rn90zjv6ssy";
-    };
-    propagatedBuildInputs = [
-      zope_component
-      zope_i18nmessageid
-      zope_location
-      zope_proxy
-      zope_schema
-    ];
-    doCheck = false;
-  };
-
   zope_proxy = pythonPackages.buildPythonPackage {
     name = "zope.proxy-4.2.0";
     src = pkgs.fetchurl {
@@ -186,20 +170,6 @@ let self = rec {
     };
     propagatedBuildInputs = [
       zope_interface
-    ];
-    doCheck = false;  # cyclic dependency on zope.security
-  };
-
-  zope_location = pythonPackages.buildPythonPackage {
-    name = "zope.location-4.0.3";
-    src = pkgs.fetchurl {
-      url = "https://pypi.python.org/packages/38/8a/863ded50bb2c795299dd9168b924b03e38a90731dfbe5264e0418c257ae4/zope.location-4.0.3.tar.gz";
-      sha256 = "1nj9da4ksiyv3h8n2vpzwd0pb03mdsh7zy87hfpx72b6p2zcwg74";
-    };
-    propagatedBuildInputs = [
-      zope_interface
-      zope_proxy
-      zope_schema
     ];
     doCheck = false;
   };
@@ -493,22 +463,6 @@ let self = rec {
     propagatedBuildInputs = [
       zope_event
       zope_interface
-    ];
-    doCheck = false;
-  };
-
-  zope_securitypolicy = pythonPackages.buildPythonPackage {
-    name = "zope.securitypolicy-4.1.0";
-    src = pkgs.fetchurl {
-      url = "https://pypi.python.org/packages/90/e9/8d950f1b265835104e925671f4b57a236218f7e7fc507049043edb875449/zope.securitypolicy-4.1.0.tar.gz";
-      sha256 = "1jpg2kx7jkasw5g4shmj8s9khwn3jchw8m2wnn7a61k0bf620277";
-    };
-    propagatedBuildInputs = [
-      persistent
-      zope_annotation
-      zope_authentication
-      zope_configuration
-      zope_i18nmessageid
     ];
     doCheck = false;
   };

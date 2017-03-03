@@ -1,3 +1,8 @@
+from guillotina.interfaces import IForbidden
+from guillotina.interfaces import IForbiddenAttribute
+from guillotina.interfaces import IUnauthorized
+from zope.interface import implementer
+
 
 class NoPermissionToAdd(Exception):
 
@@ -50,3 +55,54 @@ class PreconditionFailed(Exception):
 class RequestNotFound(Exception):
     """Lookup for the current request for request aware transactions failed
     """
+
+
+@implementer(IUnauthorized)
+class Unauthorized(Exception):
+    """Some user wasn't allowed to access a resource"""
+
+
+@implementer(IForbidden)
+class Forbidden(Exception):
+    """A resource cannot be accessed under any circumstances
+    """
+
+
+@implementer(IForbiddenAttribute)
+class ForbiddenAttribute(Forbidden, AttributeError):
+    """An attribute is unavailable because it is forbidden (private)
+    """
+
+
+class NoInteraction(Exception):
+    """No interaction started
+    """
+
+
+# Helper class for __traceback_supplement__
+class TracebackSupplement(object):
+
+    def __init__(self, obj):
+        self.obj = obj
+
+    def getInfo(self):
+        result = []
+        try:
+            cls = self.obj.__class__
+            if hasattr(cls, "__module__"):
+                s = "%s.%s" % (cls.__module__, cls.__name__)
+            else:  # pragma NO COVER XXX
+                s = str(cls.__name__)
+            result.append("   - class: " + s)
+        except:  # noqa
+            pass
+        try:
+            cls = type(self.obj)
+            if hasattr(cls, "__module__"):
+                s = "%s.%s" % (cls.__module__, cls.__name__)
+            else:  # pragma NO COVER XXX
+                s = str(cls.__name__)
+            result.append("   - type: " + s)
+        except:  # noqa
+            pass
+        return "\n".join(result)

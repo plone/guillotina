@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
 from guillotina.auth.role import check_role
-from guillotina.auth.securitymap import SecurityMap
 from guillotina.interfaces import Allow
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import Unset
+from guillotina.security.permission import get_all_permissions
+from guillotina.security.securitymap import SecurityMap
 from zope.interface import implementer
-from zope.security.permission import allPermissions
 
 
 @implementer(IPrincipalRoleManager)
@@ -72,7 +72,7 @@ class PrincipalPermissionManager(SecurityMap):
     def grant_all_permissions_to_principal(self, principal_id):
         ''' See the interface IPrincipalPermissionManager '''
 
-        for permission_id in allPermissions(None):
+        for permission_id in get_all_permissions(None):
             self.grant_permission_to_principal(permission_id, principal_id, False)
 
     def deny_permission_to_principal(
@@ -124,7 +124,7 @@ class RolePermissionManager(SecurityMap):
         self.add_cell(permission_id, role_id, Allow)
 
     def grant_all_permissions_to_role(self, role_id):
-        for permission_id in allPermissions(None):
+        for permission_id in get_all_permissions(None):
             self.grant_permission_to_role(permission_id, role_id, False)
 
     def deny_permission_to_role(self, permission_id, role_id, check=True):

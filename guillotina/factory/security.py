@@ -1,10 +1,10 @@
 from guillotina import configure
-from guillotina.auth.security_code import PrincipalPermissionManager
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalPermissionManager
+from guillotina.security.security_code import PrincipalPermissionManager
 
 
 @configure.adapter(for_=IDatabase, provides=IPrincipalPermissionManager, trusted=True)

@@ -5,6 +5,9 @@ from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.events import notify
+from guillotina.exceptions import NoInteraction
+from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceFieldDeserializer
@@ -16,9 +19,6 @@ from zope.interface.exceptions import Invalid
 from zope.lifecycleevent import ObjectModifiedEvent
 from zope.schema import getFields
 from zope.schema.interfaces import ValidationError
-from zope.security.interfaces import IInteraction
-from zope.security.interfaces import IPermission
-from zope.security.interfaces import NoInteraction
 
 
 @configure.adapter(

@@ -62,7 +62,7 @@ from guillotina.auth import settings_for_object
 settings_for_object(obj)
 
 # Code to get the Interaction object ( security object )
-from zope.security.interfaces import IInteraction
+from guillotina.interfaces import IInteraction
 
 interaction = IInteraction(request)
 

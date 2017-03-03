@@ -16,12 +16,19 @@
 In all cases, 'setting' values are one of the defined constants
 `Allow`, `Deny`, or `Unset`.
 """
+from zope.i18nmessageid import MessageFactory
+from zope.interface import Attribute
 from zope.interface import Interface
 from zope.schema import Text
 from zope.schema import TextLine
 
 import copyreg
 
+
+_ = MessageFactory('guillotina')
+
+
+Public = 'guillotina.Public'  # constant to check for always allowed permission
 
 # These are the "setting" values returned by several methods defined
 # in these interfaces.  The implementation may move to another
@@ -53,10 +60,10 @@ class PermissionSetting(object):
         self.__name = name
         self.__description = description
 
-    def getDescription(self):
+    def get_description(self):
         return self.__description
 
-    def getName(self):
+    def get_name(self):
         return self.__name
 
     def __str__(self):
@@ -69,7 +76,7 @@ class PermissionSetting(object):
 # even when pickled and unpickled.
 copyreg.constructor(PermissionSetting)
 copyreg.pickle(PermissionSetting,
-               PermissionSetting.getName,
+               PermissionSetting.get_name,
                PermissionSetting)
 
 
@@ -302,4 +309,82 @@ class IGrantInfo(Interface):
 
         The role grants are an iterable of role, setting tuples, where
         setting is either Allow or Deny.
+        """
+
+
+class IInteraction(Interface):
+    """A representation of an interaction between some actors and the system.
+    """
+
+    participations = Attribute("""An iterable of participations.""")
+
+    def add(participation):
+        """Add a participation."""
+
+    def remove(participation):
+        """Remove a participation."""
+
+    def check_permission(permission, object):
+        """Return whether security context allows permission on object.
+
+        Arguments:
+        permission -- A permission name
+        object -- The object being accessed according to the permission
+        """
+
+
+class IPermission(Interface):
+    """A permission object."""
+
+    id = TextLine(
+        title=_("Id"),
+        description=_("Id as which this permission will be known and used."),
+        readonly=True,
+        required=True)
+
+    title = TextLine(
+        title=_("Title"),
+        description=_("Provides a title for the permission."),
+        required=True)
+
+    description = Text(
+        title=_("Description"),
+        description=_("Provides a description for the permission."),
+        required=False)
+
+
+class IPrincipal(Interface):
+    """Principals are security artifacts that execute actions in a security
+    environment.
+
+    The most common examples of principals include user and group objects.
+
+    It is likely that IPrincipal objects will have associated views
+    used to list principals in management interfaces. For example, a
+    system in which other meta-data are provided for principals might
+    extend IPrincipal and register a view for the extended interface
+    that displays the extended information. We'll probably want to
+    define a standard view name (e.g.  'inline_summary') for this
+    purpose.
+    """
+
+    id = TextLine(
+        title=_("Id"),
+        description=_("The unique identification of the principal."),
+        required=True,
+        readonly=True)
+
+
+class IParticipation(Interface):
+
+    interaction = Attribute("The interaction")
+    principal = Attribute("The authenticated principal")
+
+
+class ISecurityPolicy(Interface):
+
+    def __call__(participation=None):
+        """Creates a new interaction for a given request.
+
+        If participation is not None, it is added to the new interaction.
         """

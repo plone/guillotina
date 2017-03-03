@@ -22,6 +22,7 @@ from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
@@ -36,7 +37,6 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
-from zope.security.interfaces import IInteraction
 
 
 _zone = tzlocal()

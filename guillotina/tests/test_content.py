@@ -1,3 +1,4 @@
+from guillotina import configure
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.content import Folder
@@ -5,8 +6,6 @@ from guillotina.content import load_cached_schema
 from guillotina.content import NotAllowedContentType
 from guillotina.interfaces.types import IConstrainTypes
 from guillotina.testing import GuillotinaServerBaseTestCase
-import guillotina.testing
-from guillotina import configure
 
 
 class TestContent(GuillotinaServerBaseTestCase):

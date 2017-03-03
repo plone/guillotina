@@ -15,10 +15,14 @@ from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
+from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDefaultLayer
+from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IOPTIONS
+from guillotina.interfaces import IParticipation
+from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRendered
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ITranslated
@@ -27,6 +31,7 @@ from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
 from guillotina.registry import ACTIVE_LAYERS_KEY
+from guillotina.security import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.transactions import locked
@@ -38,12 +43,6 @@ from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
 from zope.interface import alsoProvides
-from zope.security.checker import getCheckerForInstancesOf
-from zope.security.interfaces import IInteraction
-from zope.security.interfaces import IParticipation
-from zope.security.interfaces import IPermission
-from zope.security.interfaces import Unauthorized
-from zope.security.proxy import ProxyFactory
 
 import aiohttp
 import asyncio
@@ -401,7 +400,8 @@ class TraversalRouter(AbstractRouter):
 
         permission = getUtility(IPermission, name='guillotina.AccessContent')
 
-        allowed = IInteraction(request).check_permission(permission.id, resource)
+        interaction = IInteraction(request)
+        allowed = interaction.check_permission(permission.id, resource)
 
         if not allowed:
             # Check if its a CORS call:
@@ -417,10 +417,15 @@ class TraversalRouter(AbstractRouter):
         if view is None and method == IOPTIONS:
             view = DefaultOPTIONS(resource, request)
 
-        checker = getCheckerForInstancesOf(view.__class__)
-        if checker is not None:
-            view = ProxyFactory(view, checker)
-        # We want to check for the content negotiation
+        if view:
+            ViewClass = view.__class__
+            view_permission = get_view_permission(ViewClass)
+            if not interaction.check_permission(view_permission, view):
+                logger.warn("No access for view {content} with {auths}".format(
+                    content=resource,
+                    auths=str([x.principal.id
+                               for x in request.security.participations])))
+                raise HTTPUnauthorized()
 
         renderer = content_type_negotiation(request, resource, view)
         renderer_object = renderer(request)
