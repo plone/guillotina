@@ -107,7 +107,7 @@ class DeserializeFromJson(object):
                 else:
                     try:
                         field.set(obj, value)
-                    except:
+                    except:  # noqa
                         setattr(obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):

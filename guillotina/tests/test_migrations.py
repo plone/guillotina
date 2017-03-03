@@ -85,7 +85,7 @@ class TestMigrations(GuillotinaServerBaseTestCase):
             migrate.get_migrations('foobar'))
         site = self.layer.app['guillotina']['guillotina']
         registry = site['_registry']
-        self.assertEquals(registry[MIGRATION_DATA_REGISTRY_KEY]['foobar'], '2.1a1')
+        self.assertEqual(registry[MIGRATION_DATA_REGISTRY_KEY]['foobar'], '2.1a1')
 
     def test_should_only_get_migrations_for_activated_applications(self):
         self.assertEqual(len(migrate.get_migrations('foobar')), 8)

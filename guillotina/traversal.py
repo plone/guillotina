@@ -2,12 +2,11 @@
 """Main routing traversal class."""
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
-from aiohttp.web_ws import WebSocketResponse
 from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from guillotina import app_settings
 from guillotina import _
+from guillotina import app_settings
 from guillotina import logger
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.participation import AnonymousParticipation
@@ -28,12 +27,13 @@ from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
 from guillotina.registry import ACTIVE_LAYERS_KEY
-from guillotina.transactions import locked
 from guillotina.transactions import abort
 from guillotina.transactions import commit
+from guillotina.transactions import locked
 from guillotina.utils import apply_cors
-from guillotina.utils import import_class
 from guillotina.utils import get_authenticated_user_id
+from guillotina.utils import import_class
+from ZODB.POSException import ConflictError
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
@@ -44,7 +44,6 @@ from zope.security.interfaces import IParticipation
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import Unauthorized
 from zope.security.proxy import ProxyFactory
-from ZODB.POSException import ConflictError
 
 import aiohttp
 import asyncio

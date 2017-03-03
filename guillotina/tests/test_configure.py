@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
-from guillotina.addons import Addon
-from zope.interface import Interface
 from guillotina import configure
+from guillotina.addons import Addon
 from guillotina.api.service import Service
+from guillotina.content import Item
 from guillotina.interfaces import ISite
 from guillotina.testing import GuillotinaFunctionalTestCase
-from guillotina.content import Item
+from zope.interface import Interface
 
 import json
 

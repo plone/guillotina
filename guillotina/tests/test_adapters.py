@@ -5,7 +5,7 @@ from datetime import time
 from guillotina.auth.policy import Interaction
 from guillotina.content import create_content_in_container
 from guillotina.factory import RootSpecialPermissions
-from guillotina.file import BasicFile
+from guillotina.files import BasicFile
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IPrincipalPermissionManager

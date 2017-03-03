@@ -1,7 +1,7 @@
-from guillotina.auth.users import GuillotinaUser
 from guillotina import configure
-from guillotina.transactions import get_current_request
+from guillotina.auth.users import GuillotinaUser
 from guillotina.interfaces import IGroups
+from guillotina.transactions import get_current_request
 
 
 class GuillotinaGroup(GuillotinaUser):

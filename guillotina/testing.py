@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from aiohttp.test_utils import make_mocked_request
+from guillotina.auth.policy import Interaction
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.auth.users import RootUser
 from guillotina.browser import View
@@ -13,18 +14,15 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.jsonfield import JSONField
-from guillotina.auth.policy import Interaction
 from zope.component import getUtility
-from zope.configuration.xmlconfig import include
 from zope.interface import implementer
 from zope.schema import List
 
 import asyncio
 import base64
-import json
 import guillotina.patch  # noqa
+import json
 import requests
-import sys
 import time
 import unittest
 

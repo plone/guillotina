@@ -2,9 +2,9 @@
 from guillotina import configure
 from guillotina.auth import authenticate_request
 from guillotina.auth.users import AnonymousUser
+from guillotina.interfaces import Allow
 from guillotina.interfaces import IRequest
 from zope.security.interfaces import IParticipation
-from guillotina.interfaces import Allow
 
 
 class AnonymousParticipation(object):

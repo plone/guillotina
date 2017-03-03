@@ -1,6 +1,6 @@
-from zope.security.interfaces import IInteraction
 from guillotina.transactions import get_current_request
 from guillotina.transactions import RequestNotFound
+from zope.security.interfaces import IInteraction
 
 
 class SecurityMap(object):

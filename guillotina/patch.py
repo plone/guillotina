@@ -74,7 +74,7 @@ async def acommit(self):
     try:
         self._commitResources()
         self.status = Status.COMMITTED
-    except:
+    except:  # noqa
         t = None
         v = None
         tb = None
@@ -114,7 +114,7 @@ async def _acallAfterCommitHooks(self, status=True):
         # true if the commit succeeded, or false if the commit aborted.
         try:
             await hook(status, *args, **kws)
-        except:
+        except:  # noqa
             # We need to catch the exceptions if we want all hooks
             # to be called
             self.log.error("Error in after commit hook exec in %s ",
@@ -125,7 +125,7 @@ async def _acallAfterCommitHooks(self, status=True):
     for rm in self._resources:
         try:
             rm.abort(self)
-        except:
+        except:  # noqa
             # XXX should we take further actions here ?
             self.log.error("Error in abort() on manager %s",
                            rm, exc_info=sys.exc_info())

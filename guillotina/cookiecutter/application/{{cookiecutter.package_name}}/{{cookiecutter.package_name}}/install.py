@@ -6,10 +6,10 @@ class ManageAddon(Addon):
 
     @classmethod
     def install(cls, site, request):
-        registry = request.site_settings
+        registry = request.site_settings  # noqa
         # install logic here...
 
     @classmethod
     def uninstall(cls, site, request):
-        registry = request.site_settings
+        registry = request.site_settings  # noqa
         # uninstall logic here...

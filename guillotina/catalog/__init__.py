@@ -32,6 +32,7 @@ def get_access_users(ob):
     users = get_principals_with_access_content(ob)
     return users
 
+
 @index.with_accessor(IResource, 'path', type='path')
 def get_path(ob):
     return get_content_path(ob)

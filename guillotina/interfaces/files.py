@@ -29,10 +29,10 @@ class IFileManager(Interface):
 
 class IFile(Interface):
 
-    metadata('extension', 'md5', 'contentType', 'filename')
+    metadata('extension', 'md5', 'content_type', 'filename')
 
-    index('contentType', type='text')
-    contentType = schema.BytesLine(
+    index('content_type', type='text')
+    content_type = schema.BytesLine(
         title=u'Content Type',
         description=u'The content type identifies the type of data.',
         default=b'',

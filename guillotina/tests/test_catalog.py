@@ -1,8 +1,9 @@
 # -*- encoding: utf-8 -*-
-from guillotina.testing import GuillotinaServerBaseTestCase
 from guillotina.catalog.utils import get_index_fields
-from guillotina.content import create_content_in_container, create_content
+from guillotina.content import create_content
+from guillotina.content import create_content_in_container
 from guillotina.interfaces import ICatalogDataAdapter
+from guillotina.testing import GuillotinaServerBaseTestCase
 
 
 class TestCatalog(GuillotinaServerBaseTestCase):

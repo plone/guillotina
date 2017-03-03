@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
-from guillotina.file import BasicFileField
+from guillotina.files import BasicFileField
 from guillotina.interfaces import IFormFieldProvider
 from zope.interface import Interface
 from zope.interface import provider

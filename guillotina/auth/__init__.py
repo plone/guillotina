@@ -1,7 +1,6 @@
 from guillotina import app_settings
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.utils import resolve_or_get
-from zope.security.proxy import removeSecurityProxy
 from zope.security.interfaces import IInteraction
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.interfaces import IPrincipalPermissionMap
@@ -9,7 +8,7 @@ from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.auth.security_code import principal_permission_manager
 from guillotina.auth.security_code import role_permission_manager
 from guillotina.auth.security_code import principal_role_manager
-from . import groups
+from . import groups  #noqa
 from . import role
 from guillotina.transactions import get_current_request
 
@@ -79,24 +78,24 @@ def settings_for_object(ob):
         data = {}
         result.append((getattr(ob, '__name__', '(no name)'), data))
 
-        principalPermissions = IPrincipalPermissionMap(ob, None)
-        if principalPermissions is not None:
-            settings = principalPermissions.get_principals_and_permissions()
+        principal_permissions = IPrincipalPermissionMap(ob, None)
+        if principal_permissions is not None:
+            settings = principal_permissions.get_principals_and_permissions()
             settings.sort()
             data['principalPermissions'] = [
                 {'principal': pr, 'permission': p, 'setting': s}
                 for (p, pr, s) in settings]
 
-        principalRoles = IPrincipalRoleMap(ob, None)
-        if principalRoles is not None:
-            settings = principalRoles.get_principals_and_roles()
+        principal_roles = IPrincipalRoleMap(ob, None)
+        if principal_roles is not None:
+            settings = principal_roles.get_principals_and_roles()
             data['principalRoles'] = [
                 {'principal': p, 'role': r, 'setting': s}
                 for (r, p, s) in settings]
 
-        rolePermissions = IRolePermissionMap(ob, None)
-        if rolePermissions is not None:
-            settings = rolePermissions.get_roles_and_permissions()
+        role_permissions = IRolePermissionMap(ob, None)
+        if role_permissions is not None:
+            settings = role_permissions.get_roles_and_permissions()
             data['rolePermissions'] = [
                 {'permission': p, 'role': r, 'setting': s}
                 for (p, r, s) in settings]

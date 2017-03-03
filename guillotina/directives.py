@@ -169,11 +169,11 @@ class index(MetadataDictDirective):
         }
 
     @classmethod
-    def with_accessor(kls, *args, **kwargs):
+    def with_accessor(cls, *args, **kwargs):
         """
         decorator to specify a different method to get the data
         """
         def _func(func):
             kwargs['accessor'] = func
-            kls.apply(*args, **kwargs)
+            cls.apply(*args, **kwargs)
         return _func

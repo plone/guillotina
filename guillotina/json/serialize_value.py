@@ -6,7 +6,7 @@ from datetime import timedelta
 from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
 from guillotina import configure
-from guillotina.file import BasicFile
+from guillotina.files import BasicFile
 from guillotina.interfaces import IValueToJson
 from guillotina.text import IRichTextValue
 from zope.i18nmessageid.message import Message
@@ -70,7 +70,7 @@ def file_converter(value):
     return {
         'filename': value.filename,
         'size': value.size,
-        'contenttype': value.contentType
+        'contenttype': value.content_type
     }
 
 

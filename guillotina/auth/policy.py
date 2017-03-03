@@ -14,25 +14,28 @@
 """Define Zope's default security policy
 """
 
-import zope.interface
-
-from zope.security.checker import CheckerPublic
-from zope.security.management import system_user
-from zope.security.interfaces import ISecurityPolicy
-from zope.security.interfaces import IInteraction
-from zope.security.proxy import removeSecurityProxy
+from guillotina import configure
 from guillotina.auth import principal_permission_manager
-from guillotina.auth import role_permission_manager
 from guillotina.auth import principal_role_manager
-from guillotina.interfaces import Allow, Deny, Unset, AllowSingle
-from guillotina.interfaces import IRolePermissionMap
+from guillotina.auth import role_permission_manager
+from guillotina.interfaces import Allow
+from guillotina.interfaces import AllowSingle
+from guillotina.interfaces import Deny
+from guillotina.interfaces import IGroups
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
-from guillotina.interfaces import IGroups
-from zope.component import getUtility
+from guillotina.interfaces import IRolePermissionMap
+from guillotina.interfaces import Unset
 from guillotina.transactions import get_current_request
-from guillotina import configure
+from zope.component import getUtility
+from zope.security.checker import CheckerPublic
+from zope.security.interfaces import IInteraction
+from zope.security.interfaces import ISecurityPolicy
+from zope.security.management import system_user
+from zope.security.proxy import removeSecurityProxy
+
+import zope.interface
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting

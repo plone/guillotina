@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
-from persistent import Persistent
-from persistent.interfaces import IPersistent
 from guillotina.interfaces import ITransformer
 from guillotina.interfaces import TransformError
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.text import RichText
 from guillotina.text import RichTextValue
+from persistent import Persistent
+from persistent.interfaces import IPersistent
 from zope.component import adapter
 from zope.component import provideAdapter
 from zope.interface import implementer

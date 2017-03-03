@@ -33,7 +33,7 @@ def get_contenttype(
     """Get the MIME content type of the given file and/or filename.
     """
 
-    file_type = getattr(file, 'contentType', None)
+    file_type = getattr(file, 'content_type', None)
     if file_type:
         return file_type
 
@@ -79,7 +79,7 @@ class BasicFileManager(object):
         resp = aiohttp.web.StreamResponse(headers=aiohttp.MultiDict({
             'CONTENT-DISPOSITION': 'attachment; filename="%s"' % file.filename
         }))
-        resp.content_type = file.contentType
+        resp.content_type = file.content_type
         resp.content_length = file.size
         await resp.prepare(self.request)
         resp.write(file.data)
@@ -92,13 +92,13 @@ class BasicFile(Persistent):
 
     filename = FieldProperty(IFile['filename'])
 
-    def __init__(self, data='', contentType='', filename=None):
+    def __init__(self, data='', content_type='', filename=None):
         if (
             filename is not None and
-            contentType in ('', 'application/octet-stream')
+            content_type in ('', 'application/octet-stream')
         ):
-            contentType = get_contenttype(filename=filename)
-        self.contentType = contentType
+            content_type = get_contenttype(filename=filename)
+        self.content_type = content_type
         self._blob = Blob()
         f = self._blob.open('w')
         f.write(b'')
