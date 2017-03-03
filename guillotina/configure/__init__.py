@@ -1,5 +1,4 @@
-from collections import OrderedDict
-from guillotina import metaconfigure
+from guillotina.configure import meta
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IResourceFactory
@@ -13,6 +12,12 @@ from zope.configuration import xmlconfig
 from zope.configuration.exceptions import ConfigurationError
 from zope.interface import classImplements
 from zope.interface import Interface
+from zope.security.checker import defineChecker
+from zope.security.checker import getCheckerForInstancesOf
+from zope.security.checker import undefineChecker
+from collections import OrderedDict
+from guillotina.utils import import_class
+
 
 import logging
 import plone.behavior.metaconfigure
@@ -68,31 +73,55 @@ def load_all_configurations(_context, module_name):
 
 
 def load_service(_context, service):
+    # prevent circular import
     from guillotina import app_settings
+    from guillotina.auth.checker import ViewPermissionChecker
 
     service_conf = service['config']
-    service_conf['factory'] = service['klass']
-    metaconfigure.register_service(
+    factory = resolve_or_get(service['klass'])
+
+    if getCheckerForInstancesOf(factory):
+        # in case already exist remove old checker
+        undefineChecker(factory)
+
+    permission = service_conf.get(
+        'permission', service_conf.get('default_permission', None))
+
+    required = {}
+    for n in ('__call__', 'publishTraverse'):
+        required[n] = permission
+
+    method = service_conf.get('method', 'GET')
+    layer = service_conf.get('layer', IDefaultLayer)
+    name = service_conf.get('name', '')
+    content = service_conf['context']
+    defineChecker(factory, ViewPermissionChecker(required))
+    logger.debug('Defining adapter for '  # noqa
+                 '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
+        factory.__identifier__,
+        app_settings['http_methods'][method].__identifier__,
+        layer.__identifier__,
+        str(factory),
+        name))
+    adapter(
         _context,
-        service_conf,
-        service_conf['context'],
-        service_conf.get('method', 'GET'),
-        service_conf.get('layer', IDefaultLayer),
-        service_conf.get('default_permission', app_settings['default_permission']),
-        service_conf.get('name', '')
+        factory=(factory,),
+        provides=app_settings['http_methods'][method],
+        for_=(content, layer),
+        name=name
     )
+
     api = app_settings['api_definition']
-    ct_name = service_conf['context'].__identifier__
+    ct_name = content.__identifier__
     if ct_name not in api:
         api[ct_name] = OrderedDict()
     ct_api = api[ct_name]
-    if service_conf.get('name', False):
+    if name:
         if 'endpoints' not in ct_api:
             ct_api['endpoints'] = OrderedDict()
-        ct_api['endpoints'][service_conf.get('name')] = \
-            OrderedDict(service_conf)
+        ct_api['endpoints'][name] = OrderedDict(service_conf)
     else:
-        ct_api[service_conf.get('method', 'GET')] = OrderedDict(service_conf)
+        ct_api[method] = OrderedDict(service_conf)
 register_configuration_handler('service', load_service)
 
 
@@ -131,7 +160,7 @@ def load_behavior(_context, behavior):
     schema = resolve_or_get(conf['provides'])
     classImplements(real_factory, schema)
 
-    plone.behavior.metaconfigure.behaviorDirective(
+    plone.behavior.meta.behaviorDirective(
         _context,
         conf.get('title', ''),
         schema,

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPUnauthorized
+from collections import MutableMapping
 from hashlib import sha256 as sha
 from zope.dottedname.resolve import resolve
 
@@ -193,3 +194,23 @@ def resolve_module_path(path):
 
 def dotted_name(ob):
     return getattr(ob, '__module__', None) or getattr(ob, '__name__', '')
+
+
+def rec_merge(d1, d2):
+    """
+    Update two dicts of dicts recursively,
+    if either mapping has leaves that are non-dicts,
+    the second's leaf overwrites the first's.
+    """
+    # in Python 2, use .iteritems()!
+    for k, v in d1.items():
+        if k in d2:
+            # this next check is the only difference!
+            if all(isinstance(e, MutableMapping) for e in (v, d2[k])):
+                d2[k] = rec_merge(v, d2[k])
+            if isinstance(v, list):
+                d2[k].extend(v)
+            # we could further check types and merge as appropriate here.
+    d3 = d1.copy()
+    d3.update(d2)
+    return d3

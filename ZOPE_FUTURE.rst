@@ -8,15 +8,40 @@ The component architecture, interfaces and security is amazing software; however
 for simplification and longterm success of project, we'd like to pull whatever we can out.
 
 
-Package candidates:
 
-- zope.component
-- zope.configuration
-- zope.interface
+Package removal/replacements...
+
+
+Easy to remove
+--------------
+- zope.security
+- zope.location
 - zope.lifecycleevent
-- zope.schema
 - zope.event
+- zope.dublincore
+- zope.dottedname
+- zope.datetime
+- plone.behavior
 
 
-Basically... anything where a user would be make imports for packages,
-we want those imports to be part of THIS package.
+
+difficult to remove
+-------------------
+
+- zope.configuration
+- zope.component
+- ZODB
+- zope.schema
+- zope.annotation -> with db changes...
+- zodbpickle
+- ZConfig
+- zc.lockfile
+- transaction
+- BTrees
+- persistent
+
+
+?
+-
+- zope.i18nmessageid
+- zope.i18n
