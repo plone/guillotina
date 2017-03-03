@@ -44,12 +44,12 @@ code_roles_for_principal = principal_role_manager.get_roles_for_principal
 code_principals_for_permission = principal_permission_manager.get_principals_for_permission
 
 SettingAsBoolean = {
-        Allow: True,
-        Deny: False,
-        Unset: None,
-        AllowSingle: 'o',
-        None: None
-    }
+    Allow: True,
+    Deny: False,
+    Unset: None,
+    AllowSingle: 'o',
+    None: None
+}
 
 
 def level_setting_as_boolean(level, value):

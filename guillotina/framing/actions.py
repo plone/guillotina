@@ -1,6 +1,6 @@
+from guillotina import configure
 from guillotina.interfaces import IRequest
 from guillotina.renderers import IFrameFormatsJson
-from guillotina import configure
 
 
 @configure.adapter(for_=IRequest, provides=IFrameFormatsJson, name="actions")

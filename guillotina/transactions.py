@@ -4,10 +4,9 @@ Insane experimental library for running multiple concurrent transactions
 on a single ZODB connection. This should not be possible to do safely, but
 we'll see how far we get and learn more about ZODB while doing it...
 """
-from concurrent.futures import ThreadPoolExecutor
+from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.utils import get_authenticated_user_id
-from guillotina.exceptions import RequestNotFound
 from transaction._manager import _new_transaction
 from transaction.interfaces import ISavepoint
 from transaction.interfaces import ISavepointDataManager
