@@ -171,7 +171,7 @@ def make_app(config_file=None, settings=None):
                 IDatabaseConfigurationFactory, name=dbconfig['storage'])
             if asyncio.iscoroutinefunction(factory):
                 future = asyncio.ensure_future(
-                factory(key, dbconfig, app), loop=app.loop)
+                    factory(key, dbconfig, app), loop=app.loop)
 
                 app.loop.run_until_complete(future)
                 root[key] = future.result()

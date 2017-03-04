@@ -163,6 +163,7 @@ def test_callback_transaction_data_manager_with_commit(root):
     view = View(root, request)
 
     # Test that callback is called after commit
+    tm.begin(request)
     txn = tm.get(request)
     txn.join(CallbackTransactionDataManager(setattr, view, 'value', True))
     assert getattr(view, 'value', None) is None
@@ -177,6 +178,7 @@ def test_callback_transaction_data_manager_with_abort(root):
     view = View(root, request)
 
     # Test that callback is not called after abort
+    tm.begin(request)
     txn = tm.get(request)
     txn.join(CallbackTransactionDataManager(setattr, view, 'value', True))
     assert getattr(view, 'value', None) is None

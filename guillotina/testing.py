@@ -263,25 +263,16 @@ class GuillotinaBaseLayer(GuillotinaServerBaseLayer):
         }))
         assert resp.status_code == 200
         cls.portal = cls.app['guillotina']['guillotina']
-        cls.active_connections = []
 
     @classmethod
     def testTearDown(cls):
         # Restore the copy of the DB
-        for conn in cls.active_connections:
-            conn.close()
         try:
             resp = cls.requester('DELETE', '/guillotina/guillotina/')
         except requests.exceptions.ConnectionError:
             pass
 
         assert resp.status_code == 200
-
-    @classmethod
-    def new_root(cls):
-        conn = cls.app._dbs['guillotina'].open()
-        cls.active_connections.append(conn)
-        return conn.root()
 
 
 @implementer(IRequest, IDefaultLayer)
@@ -303,11 +294,22 @@ class GuillotinaBaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.request = FakeRequest()
+        self._conns = []
 
     def login(self):
         self.request.security.add(TestParticipation(self.request))
         self.request.security.invalidate_cache()
         self.request._cache_groups = {}
+
+    def new_root(self):
+        conn = self.layer.app._dbs['guillotina'].open()
+        conn.transaction_manager.begin(self.request)
+        self._conns.append(conn)
+        return conn.root()
+
+    def tearDown(self):
+        for conn in self._conns:
+            conn.close()
 
 
 class GuillotinaServerBaseTestCase(GuillotinaBaseTestCase):

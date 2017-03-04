@@ -48,7 +48,7 @@ class TestAdapters(GuillotinaFunctionalTestCase):
         self.assertTrue(isinstance(adapter, Interaction))
 
     def test_RootSpecialPermissions_IDatabase(self):
-        root = self.layer.new_root()
+        root = self.new_root()
         adapter = getAdapter(root, interface=IPrincipalPermissionManager)
         self.assertTrue(isinstance(adapter, RootSpecialPermissions))
 
@@ -59,14 +59,14 @@ class TestAdapters(GuillotinaFunctionalTestCase):
 
 class TestSerializerContentAdapters(GuillotinaFunctionalTestCase):
     def test_SerializeFolderToJson(self):
-        root = self.layer.new_root()
+        root = self.new_root()
         site = root['guillotina']
         adapter = getMultiAdapter((site, self.request),
                                   interface=IResourceSerializeToJson)
         self.assertTrue(isinstance(adapter, SerializeFolderToJson))
 
     def test_SerializeToJson(self):
-        root = self.layer.new_root()
+        root = self.new_root()
         site = root['guillotina']
         self.login()
         obj = create_content_in_container(site, 'Item', 'foobar')
@@ -76,7 +76,7 @@ class TestSerializerContentAdapters(GuillotinaFunctionalTestCase):
         self.assertFalse(isinstance(adapter, SerializeFolderToJson))
 
     def test_DefaultJSONSummarySerializer(self):
-        root = self.layer.new_root()
+        root = self.new_root()
         site = root['guillotina']
         adapter = getMultiAdapter((site, self.request),
                                   interface=IResourceSerializeToJsonSummary)
@@ -103,7 +103,7 @@ class TestSerializerFieldAdapters(GuillotinaFunctionalTestCase):
             (schema.Dict(), serialize_schema_field.DefaultDictSchemaFieldSerializer),
             (schema.Datetime(), serialize_schema_field.DefaultDateTimeSchemaFieldSerializer),
         ]
-        root = self.layer.new_root()
+        root = self.new_root()
         site = root['guillotina']
         for field, klass in mapping:
             adapter = getMultiAdapter((field, site, self.request),
@@ -160,7 +160,7 @@ class TestSerializerSchemaAdapters(GuillotinaFunctionalTestCase):
             isinstance(adapter, serialize_schema.DefaultSchemaSerializer))
 
     def test_DefaultFieldSerializer(self):
-        root = self.layer.new_root()
+        root = self.new_root()
         site = root['guillotina']
         self.login()
         obj = create_content_in_container(site, 'Item', 'foobar')
@@ -172,7 +172,7 @@ class TestSerializerSchemaAdapters(GuillotinaFunctionalTestCase):
 
 class TestDerializeAdapters(GuillotinaFunctionalTestCase):
     def test_DeserializeFromJson(self):
-        root = self.layer.new_root()
+        root = self.new_root()
         site = root['guillotina']
         self.login()
         obj = create_content_in_container(site, 'Item', 'foobar')
@@ -182,7 +182,7 @@ class TestDerializeAdapters(GuillotinaFunctionalTestCase):
             isinstance(adapter, deserialize_content.DeserializeFromJson))
 
     def test_DefaultResourceFieldDeserializer(self):
-        root = self.layer.new_root()
+        root = self.new_root()
         site = root['guillotina']
         self.login()
         obj = create_content_in_container(site, 'Item', 'foobar')

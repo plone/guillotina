@@ -22,7 +22,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
         sometimes the site does not get updated data from zodb
         this seems to make it
         """
-        return self.layer.new_root()['guillotina']
+        return self.new_root()['guillotina']
 
     def test_get_root(self):
         """Get the application root."""
@@ -90,7 +90,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
             })
         )
         self.assertTrue(resp.status_code == 201)
-        root = self.layer.new_root()
+        root = self.new_root()
         obj = root['guillotina']['item1']
         self.assertEqual(obj.title, 'Item1')
 
@@ -195,7 +195,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
             })
         )
 
-        root = self.layer.new_root()
+        root = self.new_root()
         obj = root['guillotina']['item1']
         from guillotina.behaviors.dublincore import IDublinCore
         self.assertEqual(IDublinCore(obj).created.isoformat(), date_to_test)

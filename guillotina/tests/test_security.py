@@ -28,7 +28,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
         sometimes the site does not get updated data from zodb
         this seems to make it
         """
-        return self.layer.new_root()['guillotina']
+        return self.new_root()['guillotina']
 
     def test_get_guillotina(self):
         """Get the root guillotina site."""
