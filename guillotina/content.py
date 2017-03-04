@@ -13,6 +13,8 @@ from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.behaviors import applyMarkers
 from guillotina.browser import get_physical_path
+from guillotina.events import BeforeObjectAddedEvent
+from guillotina.events import notify
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -205,6 +207,7 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
         if obj.id in container:
             raise ConflictIdOnContainer(str(container), obj.id)
 
+    await notify(BeforeObjectAddedEvent(obj, container, id_))
     container[obj.id] = obj
     return obj
 

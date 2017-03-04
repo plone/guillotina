@@ -12,13 +12,14 @@ from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.content import create_content_in_container
+from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import notify
 from guillotina.events import ObjectAddedEvent
-from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectModifiedEvent
-from guillotina.events import ObjectVisitedEvent
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
+from guillotina.events import ObjectRemovedEvent
+from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
@@ -311,6 +312,7 @@ class DefaultDELETE(Service):
     async def __call__(self):
         content_id = self.context.id
         parent = self.context.__parent__
+        await notify(BeforeObjectRemovedEvent(self.context, parent, content_id))
         del parent[content_id]
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
