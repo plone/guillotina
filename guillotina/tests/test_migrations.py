@@ -2,24 +2,15 @@ from guillotina import app_settings
 from guillotina import migrate
 from guillotina.content import create_content
 from guillotina.interfaces import MIGRATION_DATA_REGISTRY_KEY
-from guillotina.testing import GuillotinaServerBaseTestCase
+from guillotina.testing import GuillotinaFunctionalTestCase
 
 
-class TestMigrations(GuillotinaServerBaseTestCase):
+class TestMigrations(GuillotinaFunctionalTestCase):
 
     def setUp(self):
         super(TestMigrations, self).setUp()
 
         self.login()
-        db = self.new_root()
-        site = create_content(
-            'Site',
-            id='guillotina',
-            title='Guillotina')
-        site.__name__ = 'guillotina'
-        db['guillotina'] = site
-        self.db = db
-        site.install()
 
         # we want to control migrations defined in these tests...
         while len(migrate._migrations) > 0:
@@ -81,11 +72,10 @@ class TestMigrations(GuillotinaServerBaseTestCase):
             ])
 
     def test_run_migrations(self):
-        import pdb; pdb.set_trace()
         migrate.run_migrations(
             self.layer.app,
             migrate.get_migrations('foobar'))
-        site = self.new_root()['guillotina']
+        site = self.layer.portal
         registry = site['_registry']
         self.assertEqual(registry[MIGRATION_DATA_REGISTRY_KEY]['foobar'], '2.1a1')
 

@@ -278,9 +278,12 @@ class GuillotinaBaseLayer(GuillotinaServerBaseLayer):
 @implementer(IRequest, IDefaultLayer)
 class FakeRequest(object):
 
-    def __init__(self):
+    _txn_dm = None
+
+    def __init__(self, conn=None):
         self.security = Interaction(self)
         self.headers = {}
+        self._txn_dm = conn
 
 
 class TestParticipation(object):
@@ -293,7 +296,7 @@ class TestParticipation(object):
 class GuillotinaBaseTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.request = FakeRequest()
+        self.request = FakeRequest(self.layer.db.conn)
         self._conns = []
 
     def login(self):
