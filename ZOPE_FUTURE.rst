@@ -15,9 +15,6 @@ Package removal/replacements...
 Easy to remove
 --------------
 - zope.proxy
-- zope.lifecycleevent
-- zope.event
-- zope.dottedname
 
 
 
@@ -26,6 +23,7 @@ difficult to remove
 
 - zope.configuration
 - zope.component
+- zope.event(z.component depends on)
 - ZODB
 - zope.schema
 - zope.annotation -> with db changes...

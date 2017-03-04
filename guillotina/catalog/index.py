@@ -3,18 +3,17 @@ from guillotina import configure
 from guillotina.api.search import AsyncCatalogReindex
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ICatalogUtility
-from guillotina.interfaces import IObjectFinallyCreatedEvent
-from guillotina.interfaces import IObjectFinallyDeletedEvent
-from guillotina.interfaces import IObjectFinallyModifiedEvent
+from guillotina.interfaces import IObjectAddedEvent
+from guillotina.interfaces import IObjectRemovedEvent
+from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
+from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISite
 from guillotina.transactions import get_current_request
 from guillotina.transactions import tm
 from guillotina.utils import get_content_path
 from zope.component import queryUtility
-from zope.lifecycleevent.interfaces import IObjectAddedEvent
-from zope.lifecycleevent.interfaces import IObjectRemovedEvent
 
 import transaction
 
@@ -74,7 +73,7 @@ async def security_changed(obj, event):
     await AsyncCatalogReindex(obj, request, security=True)()
 
 
-@configure.subscriber(for_=(IResource, IObjectFinallyDeletedEvent))
+@configure.subscriber(for_=(IResource, IObjectRemovedEvent))
 def remove_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
@@ -93,8 +92,8 @@ def remove_object(obj, event):
         del hook.index[uid]
 
 
-@configure.subscriber(for_=(IResource, IObjectFinallyCreatedEvent))
-@configure.subscriber(for_=(IResource, IObjectFinallyModifiedEvent))
+@configure.subscriber(for_=(IResource, IObjectAddedEvent))
+@configure.subscriber(for_=(IResource, IObjectModifiedEvent))
 def add_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:

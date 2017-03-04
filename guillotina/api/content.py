@@ -13,10 +13,10 @@ from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.content import create_content_in_container
 from guillotina.events import notify
-from guillotina.events import ObjectFinallyCreatedEvent
-from guillotina.events import ObjectFinallyDeletedEvent
-from guillotina.events import ObjectFinallyModifiedEvent
-from guillotina.events import ObjectFinallyVisitedEvent
+from guillotina.events import ObjectAddedEvent
+from guillotina.events import ObjectRemovedEvent
+from guillotina.events import ObjectModifiedEvent
+from guillotina.events import ObjectVisitedEvent
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.exceptions import ConflictIdOnContainer
@@ -49,7 +49,7 @@ class DefaultGET(Service):
             (self.context, self.request),
             IResourceSerializeToJson)
         result = serializer()
-        await notify(ObjectFinallyVisitedEvent(self.context))
+        await notify(ObjectVisitedEvent(self.context))
         return result
 
 
@@ -79,6 +79,7 @@ class DefaultPOST(Service):
             new_id = id_
 
         user = get_authenticated_user_id(self.request)
+
         # Create object
         try:
             obj = create_content_in_container(
@@ -127,7 +128,7 @@ class DefaultPOST(Service):
             'guillotina.Owner',
             user)
 
-        await notify(ObjectFinallyCreatedEvent(obj, data))
+        await notify(ObjectAddedEvent(obj, self.context, id_, data=data))
 
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 
@@ -172,7 +173,7 @@ class DefaultPATCH(Service):
                 str(e),
                 status=400)
 
-        await notify(ObjectFinallyModifiedEvent(self.context, data))
+        await notify(ObjectModifiedEvent(self.context, data))
 
         return Response(response={}, status=204)
 
@@ -309,8 +310,9 @@ class DefaultDELETE(Service):
 
     async def __call__(self):
         content_id = self.context.id
-        del self.context.__parent__[content_id]
-        await notify(ObjectFinallyDeletedEvent(self.context))
+        parent = self.context.__parent__
+        del parent[content_id]
+        await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 
 @configure.service(context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight')

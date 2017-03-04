@@ -5,7 +5,7 @@ from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.content import create_content
 from guillotina.events import notify
-from guillotina.events import ObjectFinallyCreatedEvent
+from guillotina.events import ObjectAddedEvent
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
@@ -93,8 +93,7 @@ class DefaultPOST(Service):
             'guillotina.Owner',
             user)
 
-        await notify(ObjectFinallyCreatedEvent(site))
-        # await notify(ObjectAddedEvent(site, self.context, site.__name__))
+        await notify(ObjectAddedEvent(site, self.context, site.__name__))
 
         resp = {
             '@type': 'Site',
