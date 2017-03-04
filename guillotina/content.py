@@ -40,7 +40,10 @@ from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_current_request
 from guillotina.transactions import synccontext
 from guillotina.utils import Lazy
-from persistent import Persistent
+try:
+    from guillotinadb.orm.base import BaseObject as Persistent
+except ImportError:
+    from persistent import Persistent
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
