@@ -11,11 +11,14 @@ from guillotina import PERMISSIONS_CACHE
 from guillotina import SCHEMA_CACHE
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
+from guillotina.behaviors import applyMarkers
 from guillotina.browser import get_physical_path
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
+from guillotina.interfaces import IBehavior
+from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
@@ -36,9 +39,6 @@ from guillotina.transactions import get_current_request
 from guillotina.transactions import synccontext
 from guillotina.utils import Lazy
 from persistent import Persistent
-from plone.behavior.interfaces import IBehavior
-from plone.behavior.interfaces import IBehaviorAssignable
-from plone.behavior.markers import applyMarkers
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
@@ -213,7 +213,7 @@ def create_content_in_container(container, type_, id_, request=None, **kw):
 
 @configure.adapter(for_=IResource, provides=IBehaviorAssignable)
 class BehaviorAssignable(object):
-    """Support plone.behavior behaviors stored on the CACHE
+    """Support guillotina.behaviors behaviors stored on the CACHE
     """
 
     def __init__(self, context):
@@ -223,7 +223,7 @@ class BehaviorAssignable(object):
         """We support all behaviors that accomplish the for_."""
         return True
 
-    def enumerateBehaviors(self):
+    def enumerate_behaviors(self):
         for behavior in SCHEMA_CACHE[self.context.portal_type]['behaviors']:
             yield behavior
         for behavior in self.context.__behaviors__:

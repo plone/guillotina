@@ -112,7 +112,7 @@ class IResourceFactory(IFactory):
     behaviors = zope.schema.List(
         title='Behaviors',
         description='A list of behaviors that are enabled for this type. '
-                    'See plone.behavior for more details.',
+                    'See guillotina.behaviors for more details.',
         value_type=zope.schema.DottedName(title='Behavior name')
     )
 
