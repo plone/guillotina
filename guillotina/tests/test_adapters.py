@@ -37,6 +37,8 @@ from zope.component import getAdapter
 from zope.component import getMultiAdapter
 from zope.component import getUtility
 
+import pytest
+
 
 class TestAdapters(GuillotinaFunctionalTestCase):
     """
@@ -65,11 +67,12 @@ class TestSerializerContentAdapters(GuillotinaFunctionalTestCase):
                                   interface=IResourceSerializeToJson)
         self.assertTrue(isinstance(adapter, SerializeFolderToJson))
 
-    def test_SerializeToJson(self):
+    @pytest.mark.asyncio
+    async def test_SerializeToJson(self):
         root = self.new_root()
         site = root['guillotina']
         self.login()
-        obj = create_content_in_container(site, 'Item', 'foobar')
+        obj = await create_content_in_container(site, 'Item', 'foobar')
         adapter = getMultiAdapter((obj, self.request),
                                   interface=IResourceSerializeToJson)
         self.assertTrue(isinstance(adapter, SerializeToJson))
@@ -159,11 +162,12 @@ class TestSerializerSchemaAdapters(GuillotinaFunctionalTestCase):
         self.assertTrue(
             isinstance(adapter, serialize_schema.DefaultSchemaSerializer))
 
-    def test_DefaultFieldSerializer(self):
+    @pytest.mark.asyncio
+    async def test_DefaultFieldSerializer(self):
         root = self.new_root()
         site = root['guillotina']
         self.login()
-        obj = create_content_in_container(site, 'Item', 'foobar')
+        obj = await create_content_in_container(site, 'Item', 'foobar')
         adapter = getMultiAdapter((schema.Text(), obj, self.request),
                                   interface=IResourceFieldSerializer)
         self.assertTrue(
@@ -171,21 +175,24 @@ class TestSerializerSchemaAdapters(GuillotinaFunctionalTestCase):
 
 
 class TestDerializeAdapters(GuillotinaFunctionalTestCase):
-    def test_DeserializeFromJson(self):
+
+    @pytest.mark.asyncio
+    async def test_DeserializeFromJson(self):
         root = self.new_root()
         site = root['guillotina']
         self.login()
-        obj = create_content_in_container(site, 'Item', 'foobar')
+        obj = await create_content_in_container(site, 'Item', 'foobar')
         adapter = getMultiAdapter((obj, self.request),
                                   interface=IResourceDeserializeFromJson)
         self.assertTrue(
             isinstance(adapter, deserialize_content.DeserializeFromJson))
 
-    def test_DefaultResourceFieldDeserializer(self):
+    @pytest.mark.asyncio
+    async def test_DefaultResourceFieldDeserializer(self):
         root = self.new_root()
         site = root['guillotina']
         self.login()
-        obj = create_content_in_container(site, 'Item', 'foobar')
+        obj = await create_content_in_container(site, 'Item', 'foobar')
         adapter = getMultiAdapter((schema.Text(), obj, self.request),
                                   interface=IResourceFieldDeserializer)
         self.assertTrue(

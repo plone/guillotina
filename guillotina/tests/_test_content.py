@@ -7,13 +7,16 @@ from guillotina.content import NotAllowedContentType
 from guillotina.interfaces.types import IConstrainTypes
 from guillotina.testing import GuillotinaServerBaseTestCase
 
+import pytest
+
 
 class TestContent(GuillotinaServerBaseTestCase):
 
-    def test_allowed_types(self):
+    @pytest.mark.asyncio
+    async def test_allowed_types(self):
         self.login()
         db = self.new_root()
-        site = create_content(
+        site = await create_content(
             'Site',
             id='guillotina',
             title='Guillotina')
@@ -31,12 +34,12 @@ class TestContent(GuillotinaServerBaseTestCase):
         self.layer.app.app.config.execute_actions()
         load_cached_schema()
 
-        obj = create_content_in_container(site, 'TestType', 'foobar')
+        obj = await create_content_in_container(site, 'TestType', 'foobar')
 
         constrains = IConstrainTypes(obj, None)
         self.assertEqual(constrains.get_allowed_types(), ['Item'])
         self.assertTrue(constrains.is_type_allowed('Item'))
 
         with self.assertRaises(NotAllowedContentType):
-            create_content_in_container(obj, 'TestType', 'foobar')
-        create_content_in_container(obj, 'Item', 'foobar')
+            await create_content_in_container(obj, 'TestType', 'foobar')
+        await create_content_in_container(obj, 'Item', 'foobar')

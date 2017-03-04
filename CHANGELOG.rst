@@ -1,6 +1,9 @@
 1.0.0a1 (unreleased)
 --------------------
 
+- create_content and create_content_in_container are not async functions
+  [vangheem]
+
 - remove zope.security, zope.location, zope.dublincore, plone.behavior,
   zope.dottedname, zope.lifecycleevent
   [vangheem]

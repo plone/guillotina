@@ -82,7 +82,7 @@ class DefaultPOST(Service):
 
         # Create object
         try:
-            obj = create_content_in_container(
+            obj = await create_content_in_container(
                 self.context, type_, new_id, id=new_id, creators=(user,),
                 contributors=(user,))
         except PreconditionFailed as e:

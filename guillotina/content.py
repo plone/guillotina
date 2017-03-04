@@ -151,7 +151,7 @@ def iter_schemata(obj):
         yield schema
 
 
-def create_content(type_, **kw):
+async def create_content(type_, **kw):
     """Utility to create a content.
 
     This method should not be used to add content, just internally.
@@ -169,7 +169,7 @@ def create_content(type_, **kw):
     return obj
 
 
-def create_content_in_container(container, type_, id_, request=None, **kw):
+async def create_content_in_container(container, type_, id_, request=None, **kw):
     """Utility to create a content.
 
     This method is the one to use to create content.

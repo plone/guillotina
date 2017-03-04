@@ -5,6 +5,8 @@ from guillotina.content import create_content_in_container
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.testing import GuillotinaServerBaseTestCase
 
+import pytest
+
 
 class TestCatalog(GuillotinaServerBaseTestCase):
     """Functional testing of the API REST."""
@@ -17,16 +19,17 @@ class TestCatalog(GuillotinaServerBaseTestCase):
         self.assertTrue('title' in fields)
         self.assertTrue('creation_date' in fields)
 
-    def test_get_index_data(self):
+    @pytest.mark.asyncio
+    async def test_get_index_data(self):
         self.login()
         db = self.new_root()
-        site = create_content(
+        site = await create_content(
             'Site',
             id='guillotina',
             title='Guillotina')
         site.__name__ = 'guillotina'
         db['guillotina'] = site
-        ob = create_content_in_container(site, 'Item', 'foobar')
+        ob = await create_content_in_container(site, 'Item', 'foobar')
 
         data = ICatalogDataAdapter(ob)
         fields = data()

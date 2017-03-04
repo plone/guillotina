@@ -70,7 +70,7 @@ class DefaultPOST(Service):
                 'Duplicate id',
                 status=401)
 
-        site = create_content(
+        site = await create_content(
             'Site',
             id=data['id'],
             title=data['title'],
