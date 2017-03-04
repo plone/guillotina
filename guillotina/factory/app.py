@@ -97,11 +97,14 @@ _delayed_default_settings = {
 }
 
 
-def make_app(config_file=None, settings=None):
+def make_app(config_file=None, settings=None, loop=None):
     app_settings.update(_delayed_default_settings)
 
+    if loop is None:
+        loop = asyncio.get_event_loop()
+
     # Initialize aiohttp app
-    app = web.Application(router=TraversalRouter())
+    app = web.Application(router=TraversalRouter(), loop=loop)
 
     # Create root Application
     root = ApplicationRoot(config_file)
