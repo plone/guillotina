@@ -18,8 +18,6 @@ Easy to remove
 - zope.lifecycleevent
 - zope.event
 - zope.dottedname
-- zope.datetime
-- plone.behavior
 
 
 

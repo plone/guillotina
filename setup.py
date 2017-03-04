@@ -58,7 +58,6 @@ setup(
         'python-dateutil',
         'BTrees',
         'persistent',
-        'plone.behavior',
         'pycrypto',
         'setuptools',
         'six',
@@ -75,6 +74,7 @@ setup(
         'zope.lifecycleevent',
         'zope.proxy',
         'zope.schema',
+        'zope.annotation',
         'pyjwt',
         'requests'
     ],

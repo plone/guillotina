@@ -1,5 +1,9 @@
 from collections import OrderedDict
+from guillotina.configure.behaviors import BehaviorAdapterFactory
+from guillotina.configure.behaviors import BehaviorRegistration
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
+from guillotina.interfaces import IBehavior
+from guillotina.interfaces import IBehaviorSchemaAwareFactory
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResourceFactory
@@ -16,7 +20,6 @@ from zope.interface import classImplements
 from zope.interface import Interface
 
 import logging
-import plone.behavior.metaconfigure
 
 
 _registered_configurations = []
@@ -148,16 +151,83 @@ def load_behavior(_context, behavior):
     schema = resolve_or_get(conf['provides'])
     classImplements(real_factory, schema)
 
-    plone.behavior.metaconfigure.behaviorDirective(
-        _context,
-        conf.get('title', ''),
-        schema,
-        name=conf.get('name'),
-        description=conf.get('description'),
-        marker=resolve_or_get(conf.get('marker')),
+    name = conf.get('name')
+    name_only = conf.get('name_only', False)
+    title = conf.get('title', '')
+    for_ = resolve_or_get(conf.get('for_'))
+    marker = resolve_or_get(conf.get('marker'))
+
+    if marker is None and real_factory is None:
+        marker = schema
+
+    if marker is not None and real_factory is None and marker is not schema:
+        raise ConfigurationError(
+            u"You cannot specify a different 'marker' and 'provides' if "
+            u"there is no adapter factory for the provided interface."
+        )
+    if name_only and name is None:
+        raise ConfigurationError(
+            u"If you decide to only register by 'name', a name must be given."
+        )
+
+    # Instantiate the real factory if it's the schema-aware type. We do
+    # this here so that the for_ interface may take this into account.
+    if factory is not None and IBehaviorSchemaAwareFactory.providedBy(factory):
+        factory = factory(schema)
+
+    registration = BehaviorRegistration(
+        title=conf.get('title', ''),
+        description=conf.get('description', ''),
+        interface=schema,
+        marker=marker,
         factory=real_factory,
-        for_=resolve_or_get(conf.get('for_')),
-        name_only=conf.get('name_only')
+        name=name,
+    )
+    if not name_only:
+        # behavior registration by provides interface identifier
+        zcml.utility(
+            _context,
+            provides=IBehavior,
+            name=schema.__identifier__,
+            component=registration
+        )
+
+    if name is not None:
+        # for convinience we register with a given name
+        zcml.utility(
+            _context,
+            provides=IBehavior,
+            name=name,
+            component=registration
+        )
+
+    if factory is None:
+        if for_ is not None:
+            logger.warn(
+                u"Specifying 'for' in behavior '{0}' if no 'factory' is given "
+                u"has no effect and is superfluous.".format(title)
+            )
+        # w/o factory we're done here
+        return
+
+    if for_ is None:
+        # Attempt to guess the factory's adapted interface and use it as
+        # the 'for_'.
+        # Fallback to '*' (=Interface).
+        adapts = getattr(factory, '__component_adapts__', None) or [Interface]
+        if len(adapts) != 1:
+            raise ConfigurationError(
+                u"The factory can not be declared as multi-adapter."
+            )
+        for_ = adapts[0]
+
+    adapter_factory = BehaviorAdapterFactory(registration)
+
+    zcml.adapter(
+        _context,
+        factory=(adapter_factory,),
+        provides=schema,
+        for_=(for_,)
     )
 register_configuration_handler('behavior', load_behavior)
 

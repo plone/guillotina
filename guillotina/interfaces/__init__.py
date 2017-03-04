@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from .behaviors import IBehavior  # noqa
+from .behaviors import IBehaviorAdapterFactory  # noqa
+from .behaviors import IBehaviorAssignable  # noqa
+from .behaviors import IBehaviorSchemaAwareFactory  # noqa
 from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
 from .catalog import ISecurityInfo  # noqa

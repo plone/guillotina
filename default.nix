@@ -213,19 +213,6 @@ let self = rec {
     doCheck = false;
   };
 
-  plone_behavior = pythonPackages.buildPythonPackage {
-    name = "plone.behavior-1.1.3";
-    src = pkgs.fetchurl {
-      url = "https://pypi.python.org/packages/fd/e9/0741b349ba31a3af3125f4d28b9089641f714cb97534026ed6ed7a0317b5/plone.behavior-1.1.3.tar.gz";
-      sha256 = "0wc4f1gpjpdqrw7rsmwik0z6kka7pqzzidrrm5zqqpqwj7q17q76";
-    };
-    propagatedBuildInputs = [
-      zope_configuration
-      zope_annotation
-    ];
-    doCheck = false;
-  };
-
   plone_jsonserializer = pythonPackages.buildPythonPackage {
     name = "plone.jsonserializer-0.9.1";
     src = pkgs.fetchurl {

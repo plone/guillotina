@@ -1,7 +1,7 @@
 1.0.0a1 (unreleased)
 --------------------
 
-- remove zope.security, zope.location, zope.dublincore
+- remove zope.security, zope.location, zope.dublincore, plone.behavior
   [vangheem]
 
 - rename to guillotina
