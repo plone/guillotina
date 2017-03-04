@@ -38,7 +38,7 @@ def get_configurations(module_name, type_=None):
             continue
         config = registration['config']
         module = config.get('module', registration.get('klass'))
-        if dotted_name(resolve_or_get(module)).startswith(module_name):
+        if (dotted_name(resolve_or_get(module)) + '.').startswith(module_name + '.'):
             results.append((reg_type, registration))
     return results
 
