@@ -1,16 +1,16 @@
 # NEED use this import because we have a "schema" attribute below
+from guillotina.interfaces.common import IMapping
 from zope.component.interfaces import ISite as IZopeSite
 from zope.component.interfaces import IFactory
 from zope.interface import Attribute
 from zope.interface import Interface
-from zope.interface.common.mapping import IFullMapping
 from zope.schema import TextLine
 
 # NEED use this import because we have a "schema" attribute below
 import zope.schema
 
 
-class IRegistry(IFullMapping):
+class IRegistry(IMapping):
 
     def for_interface(interface, check=True, omit=(), prefix=None):
         """Get an IRecordsProxy for the given interface. If `check` is True,
@@ -131,7 +131,7 @@ class IItem(IResource):
     pass
 
 
-class IContainer(IResource, IFullMapping):
+class IContainer(IResource, IMapping):
     pass
 
 
