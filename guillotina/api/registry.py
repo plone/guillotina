@@ -10,8 +10,8 @@ from guillotina.interfaces import ISite
 from guillotina.interfaces import IValueToJson
 from guillotina.json.exceptions import DeserializationError
 from guillotina.utils import import_class
+from guillotina.utils import resolve
 from zope.component import getMultiAdapter
-from zope.dottedname.resolve import resolve
 from zope.i18nmessageid import MessageFactory
 from zope.interface.interfaces import ComponentLookupError
 from zope.schema import getFields

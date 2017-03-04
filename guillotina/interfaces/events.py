@@ -3,25 +3,36 @@ from zope.interface import Interface
 from zope.interface import interfaces
 
 
-class IObjectFinallyCreatedEvent(interfaces.IObjectEvent):
-    """An object has been created.
-
-    The location will usually be ``None`` for this event."""
+class IObjectModifiedEvent(interfaces.IObjectEvent):
+    """An object has been modified"""
 
 
-class IObjectFinallyDeletedEvent(interfaces.IObjectEvent):
-    """An object has been deleted.
+class IObjectMovedEvent(interfaces.IObjectEvent):
+    """An object has been moved."""
 
-    The location will usually be ``None`` for this event."""
-
-
-class IObjectFinallyModifiedEvent(interfaces.IObjectEvent):
-    """An object has been modified.
-
-    The location will usually be ``None`` for this event."""
+    old_parent = Attribute("The old location parent for the object.")
+    old_name = Attribute("The old location name for the object.")
+    new_parent = Attribute("The new location parent for the object.")
+    new_name = Attribute("The new location name for the object.")
 
 
-class IObjectFinallyVisitedEvent(interfaces.IObjectEvent):
+class IObjectAddedEvent(IObjectMovedEvent):
+    """An object has been added to a container."""
+
+
+class IObjectRemovedEvent(IObjectMovedEvent):
+    """An object has been removed from a container."""
+
+
+class IBeforeObjectAddedEvent(IObjectMovedEvent):
+    """An object has been removed from a container."""
+
+
+class IBeforeObjectRemovedEvent(IObjectMovedEvent):
+    """An object has been removed from a container."""
+
+
+class IObjectVisitedEvent(interfaces.IObjectEvent):
     """An object has been visited."""
 
 

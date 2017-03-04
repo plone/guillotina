@@ -44,13 +44,10 @@ from zope.component import getUtilitiesFor
 from zope.component import getUtility
 from zope.component import queryUtility
 from zope.component.factory import Factory
-from zope.event import notify
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import noLongerProvides
-from zope.lifecycleevent import ObjectAddedEvent
-from zope.lifecycleevent import ObjectRemovedEvent
 from zope.schema.interfaces import IContextAwareDefaultFactory
 
 import pathlib
@@ -207,6 +204,7 @@ def create_content_in_container(container, type_, id_, request=None, **kw):
     if request is None or 'OVERWRITE' not in request.headers:
         if obj.id in container:
             raise ConflictIdOnContainer(str(container), obj.id)
+
     container[obj.id] = obj
     return obj
 
@@ -406,14 +404,12 @@ class Folder(Resource):
         self.__data[key] = value
         value.__parent__ = self
         l.change(1)
-        notify(ObjectAddedEvent(value, self, key))
 
     def __delitem__(self, key):
         l = self.__len
         item = self.__data[key]
         del self.__data[key]
         l.change(-1)
-        notify(ObjectRemovedEvent(item, self, item.__name__))
 
     has_key = __contains__
 

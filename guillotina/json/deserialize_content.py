@@ -5,6 +5,7 @@ from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.events import notify
+from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import NoInteraction
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -16,7 +17,6 @@ from zope.component import queryMultiAdapter
 from zope.component import queryUtility
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
-from zope.lifecycleevent import ObjectModifiedEvent
 from zope.schema import getFields
 from zope.schema.interfaces import ValidationError
 
@@ -60,7 +60,7 @@ class DeserializeFromJson(object):
             raise DeserializationError(errors)
 
         if modified:
-            await notify(ObjectModifiedEvent(self.context))
+            await notify(ObjectModifiedEvent(self.context, data))
 
         return self.context
 
