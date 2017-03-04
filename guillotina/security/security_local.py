@@ -13,8 +13,7 @@ from guillotina.security.securitymap import GuillotinaSecurityMap
 
 @configure.adapter(
     for_=IResource,
-    provides=IRolePermissionManager,
-    trusted=True)
+    provides=IRolePermissionManager)
 class GuillotinaRolePermissionManager(GuillotinaSecurityMap):
     """Provide adapter that manages role permission data in an object attribute
     """
@@ -45,8 +44,7 @@ class GuillotinaRolePermissionManager(GuillotinaSecurityMap):
 
 @configure.adapter(
     for_=IResource,
-    provides=IPrincipalPermissionManager,
-    trusted=True)
+    provides=IPrincipalPermissionManager)
 class GuillotinaPrincipalPermissionManager(GuillotinaSecurityMap):
     """Mappings between principals and permissions."""
 
@@ -81,8 +79,7 @@ class GuillotinaPrincipalPermissionManager(GuillotinaSecurityMap):
 
 @configure.adapter(
     for_=IResource,
-    provides=IPrincipalRoleManager,
-    trusted=True)
+    provides=IPrincipalRoleManager)
 class GuillotinaPrincipalRoleManager(GuillotinaSecurityMap):
     """Mappings between principals and roles with global."""
 

@@ -189,7 +189,8 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
             '/guillotina/guillotina/item1',
             data=json.dumps({
                 "guillotina.behaviors.dublincore.IDublinCore": {
-                    "created": date_to_test
+                    "created": date_to_test,
+                    "expires": date_to_test
                 }
             })
         )
@@ -198,6 +199,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
         obj = root['guillotina']['item1']
         from guillotina.behaviors.dublincore import IDublinCore
         self.assertEqual(IDublinCore(obj).created.isoformat(), date_to_test)
+        self.assertEqual(IDublinCore(obj).expires.isoformat(), date_to_test)
 
     def test_create_duplicate_id(self):
         """Try to create a contenttype."""

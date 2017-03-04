@@ -17,7 +17,6 @@ Easy to remove
 - zope.proxy
 - zope.lifecycleevent
 - zope.event
-- zope.dublincore
 - zope.dottedname
 - zope.datetime
 - plone.behavior

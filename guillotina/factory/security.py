@@ -7,8 +7,8 @@ from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.security.security_code import PrincipalPermissionManager
 
 
-@configure.adapter(for_=IDatabase, provides=IPrincipalPermissionManager, trusted=True)
-@configure.adapter(for_=IApplication, provides=IPrincipalPermissionManager, trusted=True)
+@configure.adapter(for_=IDatabase, provides=IPrincipalPermissionManager)
+@configure.adapter(for_=IApplication, provides=IPrincipalPermissionManager)
 class RootSpecialPermissions(PrincipalPermissionManager):
     """No Role Map on Application and DB so permissions set to users.
 

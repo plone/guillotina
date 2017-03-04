@@ -478,8 +478,8 @@ class StaticDirectory(dict):
                 self[x.name] = StaticFile(x)
 
 
-@configure.adapter(for_=IStaticFile, provides=IPrincipalPermissionManager, trusted=True)
-@configure.adapter(for_=IStaticDirectory, provides=IPrincipalPermissionManager, trusted=True)
+@configure.adapter(for_=IStaticFile, provides=IPrincipalPermissionManager)
+@configure.adapter(for_=IStaticDirectory, provides=IPrincipalPermissionManager)
 class StaticFileSpecialPermissions(PrincipalPermissionManager):
     def __init__(self, db):
         super(StaticFileSpecialPermissions, self).__init__()
