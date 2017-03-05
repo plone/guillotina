@@ -1,34 +1,19 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.test_utils import make_mocked_request
-from guillotina import configure
-from guillotina.browser import View
 from guillotina.content import Folder
-from guillotina.interfaces import IDatabase
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.transaction_manager import TransactionManager
+from guillotina.interfaces import IDatabase
+from zope.interface import implementer_only
 
 import asyncio
 
 
-@configure.contenttype(
-    portal_type="Database",
-    schema=IDatabase,
-    behaviors=[])
-class Database(Folder):
+@implementer_only(IDatabase, IBaseObject)
+class Root(Folder):
 
-    __name__ = 'Root'
-    portal_type = 'Database'
-
-
-class RootAddOperation(View):
-    async def __call__(self):
-        try:
-            # We have a transaction as conexgt
-            assert self.request._tm.get() == self.context
-            await self.context.get(0)
-        except KeyError:
-            root = Database()
-            root._p_oid = 0
-            self.context.register(root)
+    __name__ = None
+    portal_type = 'GuillotinaDBRoot'
 
 
 class GuillotinaDB(object):
@@ -56,8 +41,16 @@ class GuillotinaDB(object):
         request._db_write_enabled = True
         request._tm = TransactionManager(self.storage)
         t = await request._tm.begin(request=request)
-        operation = RootAddOperation(t, request)
-        await operation()
+        self.request = request
+
+        try:
+            assert request._tm.get() == t
+            await t.get(0)
+        except KeyError:
+            root = Root()
+            root._p_oid = 0
+            t.register(root)
+
         await request._tm.commit()
 
     async def open(self):

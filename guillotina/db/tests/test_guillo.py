@@ -36,3 +36,21 @@ async def test_get_content(site):
             'GET',
             '/guillotina/guillotina/hello')
         assert status == 200
+
+
+async def test_content_paths_are_correct(site):
+    async for requester in site:
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina',
+            data=json.dumps({
+                '@type': 'Item',
+                'id': 'hello',
+                'title': 'Hola'
+            }))
+        assert status == 201
+        response, status = await requester(
+            'GET',
+            '/guillotina/guillotina/hello')
+        assert status == 200
+        assert '/guillotina/guillotina/hello' in response['@id']

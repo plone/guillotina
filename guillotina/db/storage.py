@@ -216,11 +216,9 @@ class APgStorage(object):
 
     async def open(self):
         conn = await self._pool.acquire()
-        print("OPEN %d" % id(conn))
         return conn
 
     async def close(self, con):
-        print("CLOSE %d" % id(con))
         await self._pool.release(con)
 
     async def last_transaction(self, txn):

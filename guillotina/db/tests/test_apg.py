@@ -1,7 +1,7 @@
 import pytest
 from guillotina.db.storage import APgStorage
 from guillotina.db.transaction import Transaction
-from guillotina.db.db import Database
+from guillotina.db.db import Root
 from guillotina.db.interfaces import IWriter
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.db.reader import reader
@@ -41,7 +41,7 @@ async def test_read_something(postgres, guillotina_main):
     txn = Transaction(tm)
     await txn.tpc_begin(conn)
     lasttid = await aps.last_transaction(txn)
-    root = await aps.load(txn, 0)
+    await aps.load(txn, 0)
     await aps.abort(txn)
     await aps.close(txn._db_conn)
     await aps.remove()
@@ -57,8 +57,7 @@ async def test_apg_txn(postgres, guillotina_main):
         dsn=dsn, partition=partition_object, name='db')
     await aps.initialize()
     conn = await aps.open()
-    obj = Database()
-    obj.__name__ = 'Root'
+    obj = Root()
     writer = IWriter(obj)
     txn = Transaction(None)
     await aps.tpc_begin(txn, conn)
