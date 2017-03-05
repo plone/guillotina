@@ -9,7 +9,6 @@ from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.contentnegotiation import ContentNegotiatorUtility
-from guillotina.exceptions import RequestNotFound
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -226,4 +225,3 @@ async def close_utilities(app):
     for db in app.router._root:
         if IDatabase.providedBy(db[1]):
             await db[1]._db.finalize()
-

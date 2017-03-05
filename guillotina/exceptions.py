@@ -79,6 +79,10 @@ class NoInteraction(Exception):
     """
 
 
+class ConflictError(Exception):
+    pass
+
+
 # Helper class for __traceback_supplement__
 class TracebackSupplement(object):
 

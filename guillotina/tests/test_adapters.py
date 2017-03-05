@@ -4,7 +4,6 @@ from datetime import datetime
 from datetime import time
 from guillotina.content import create_content_in_container
 from guillotina.factory import RootSpecialPermissions
-from guillotina.files import BasicFile
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
@@ -116,10 +115,6 @@ class TestSerializerFieldAdapters(GuillotinaFunctionalTestCase):
 
 
 class TestSerializerValueAdapters(GuillotinaFunctionalTestCase):
-    def test_basic_file(self):
-        fi = BasicFile()
-        res = getAdapter(fi, interface=IValueToJson)
-        self.assertTrue('filename' in res)
 
     def test_vocabulary(self):
         from zope.schema.vocabulary import SimpleVocabulary

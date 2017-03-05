@@ -1,5 +1,4 @@
 # so we can scan guillotina.behaviors and load behavior configuration
-from . import attachment  # noqa
 from . import dublincore  # noqa
 from guillotina.interfaces import IBehaviorAssignable
 from zope.interface import alsoProvides

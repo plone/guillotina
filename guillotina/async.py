@@ -9,7 +9,6 @@ from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-from guillotina.transactions import TransactionProxy
 from zope.interface import Interface
 
 import asyncio
@@ -102,7 +101,9 @@ class QueueUtility(object):
 class QueueObject(View):
 
     def __init__(self, context, request):
-        super(QueueObject, self).__init__(context, TransactionProxy(request))
+        # not sure if we need proxy object here...
+        # super(QueueObject, self).__init__(context, TransactionProxy(request))
+        super(QueueObject, self).__init__(context, request)
         self.time = datetime.now(tz=_zone).timestamp()
 
     def __lt__(self, view):

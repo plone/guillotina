@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from collections import UserList
 from copy import deepcopy
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -35,10 +34,8 @@ from guillotina.interfaces import ISite
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.security.security_code import PrincipalPermissionManager
-from guillotina.transactions import get_current_request
-from guillotina.transactions import synccontext
 from guillotina.utils import apply_coroutine
-from guillotina.utils import Lazy
+from guillotina.utils import get_current_request
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
@@ -50,18 +47,9 @@ from zope.interface import Interface
 from zope.interface import noLongerProvides
 from zope.schema.interfaces import IContextAwareDefaultFactory
 
+import guillotinadb.orm.base
 import pathlib
 import uuid
-
-
-try:
-    from guillotinadb.orm.base import BaseObject as Persistent
-    GUILLOTINADB = True
-except ImportError:
-    from BTrees.Length import Length
-    from BTrees.OOBTree import OOBTree
-    from persistent import Persistent
-    GUILLOTINADB = False
 
 
 _zone = tzlocal()
@@ -258,7 +246,7 @@ def _default_from_schema(context, schema, fieldname):
 
 
 @implementer(IResource, IAttributeAnnotatable)
-class Resource(Persistent):
+class Resource(guillotinadb.orm.base.BaseObject):
 
     __name__ = None
     __parent__ = None
@@ -372,71 +360,11 @@ class Item(Resource):
     pass
 
 
-class SyncFolder(Resource):
-    def __init__(self, id_=None):
-        self._Folder__data = OOBTree()
-        self.__len = Length()
-        super(Folder, self).__init__()
-
-    @Lazy
-    def _Folder__len(self):
-        l = Length()
-        ol = len(self.__data)
-        if ol > 0:
-            l.change(ol)
-        self._p_changed = True
-        return l
-
-    def get(self, key, default=None):
-        return self.__data.get(key, default)
-
-    async def asyncget(self, key):
-        return await synccontext(self)(self.__data.__getitem__, key)
-
-    def items(self, key=None):
-        return self.__data.items(key)
-
-    def keys(self, key=None):
-        return self.__data.keys(key)
-
-    def values(self, key=None):
-        return self.__data.values(key)
-
-    def __contains__(self, key):
-        return key in self.__data
-
-    def __setitem__(self, key, value):
-        l = self.__len
-        self.__data[key] = value
-        value.__parent__ = self
-        l.change(1)
-
-    def __delitem__(self, key):
-        l = self.__len
-        item = self.__data[key]
-        del self.__data[key]
-        l.change(-1)
-
-    has_key = __contains__
-
-    def __iter__(self):
-        return iter(self.__data)
-
-    def __getitem__(self, key):
-        return self.__data[key]
-
-    def __len__(self):
-        return self.__len()
-
-    def __repr__(self):
-        path = '/'.join([name or 'n/a' for name in get_physical_path(self)])
-        return "< {type} at {path} by {mem} >".format(
-            type=self.portal_type,
-            path=path,
-            mem=id(self))
-
-
-class AsyncFolder(Resource):
+@configure.contenttype(
+    portal_type="Folder",
+    schema=IContainer,
+    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
+class Folder(Resource):
     async def __contains__(self, key):
         return await self._p_jar.contains(self._p_oid, key)
 
@@ -467,23 +395,6 @@ class AsyncFolder(Resource):
     async def items(self):
         async for key, value in self._p_jar.items(self._p_oid):
             yield key, value
-
-
-if GUILLOTINADB:
-    @configure.contenttype(
-        portal_type="Folder",
-        schema=IContainer,
-        behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
-    class Folder(AsyncFolder):
-        pass
-
-else:
-    @configure.contenttype(
-        portal_type="Folder",
-        schema=IContainer,
-        behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
-    class Folder(SyncFolder):
-        pass
 
 
 @configure.contenttype(portal_type="Site", schema=ISite)

@@ -3,7 +3,6 @@ from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
-from guillotina.transactions import RequestAwareTransactionManager
 from guillotina.utils import import_class
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
@@ -90,16 +89,17 @@ class ApplicationRoot(object):
         self._dbs[key] = value
 
     async def asyncget(self, key):
-         return self._dbs[key]
+        return self._dbs[key]
+
 
 @implementer(IDatabase)
 class Database(object):
-    def __init__(self, id, db, asyncdb=False):
+    def __init__(self, id, db, asyncdb=False, tm=None):
         self.id = id
         self._db = db
         self._conn = None
         self._asyncdb = asyncdb
-        self.tm_ = RequestAwareTransactionManager()
+        self.tm = tm
 
     def get_transaction_manager(self):
         return self.tm_
@@ -108,15 +108,13 @@ class Database(object):
         return self._asyncdb
 
     def open(self):
-        tm_ = RequestAwareTransactionManager()
-        return self._db.open(transaction_manager=tm_)
+        return self._db.open(transaction_manager=self.tm)
 
     def new_transaction_manager(self):
         return self._db.new_transaction_manager()
 
     async def aopen(self, tm):
-        connection = await self._db.open(tm)
-
+        await self._db.open(tm)
 
     def _open(self):
         self._conn = self._db.open(transaction_manager=self.tm_)

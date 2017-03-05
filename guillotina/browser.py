@@ -6,7 +6,7 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISerializableException
 from guillotina.interfaces import IView
-from guillotina.transactions import get_current_request
+from guillotina.utils import get_current_request
 from zope.component import adapter
 from zope.interface import implementer
 

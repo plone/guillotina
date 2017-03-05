@@ -15,7 +15,9 @@ from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
+from guillotina.exceptions import ConflictError
 from guillotina.exceptions import Unauthorized
+from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDefaultLayer
@@ -30,15 +32,12 @@ from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
-from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.security import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-from guillotina.transactions import locked
 from guillotina.utils import apply_cors
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import import_class
-from ZODB.POSException import ConflictError
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
@@ -222,18 +221,17 @@ class MatchInfo(AbstractMatchInfo):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             try:
-                async with locked(self.resource):
-                    request._db_write_enabled = True
-                    # We try to avoid collisions on the same instance of
-                    # guillotina
-                    view_result = await self.view()
-                    if isinstance(view_result, ErrorResponse) or \
-                            isinstance(view_result, UnauthorizedResponse):
-                        # If we don't throw an exception and return an specific
-                        # ErrorReponse just abort
-                        await abort(request)
-                    else:
-                        await commit(request)
+                request._db_write_enabled = True
+                # We try to avoid collisions on the same instance of
+                # guillotina
+                view_result = await self.view()
+                if isinstance(view_result, ErrorResponse) or \
+                        isinstance(view_result, UnauthorizedResponse):
+                    # If we don't throw an exception and return an specific
+                    # ErrorReponse just abort
+                    await abort(request)
+                else:
+                    await commit(request)
 
             except Unauthorized as e:
                 await abort(request)

@@ -1,13 +1,19 @@
 {
-	"databases": [
-		{
-		"zodb1": {
-			"storage": "ZODB",
-                        "path": "./data",
-			"configuration": {
-                "pool_size": 100,
-                "cache_size": 100
-           	}
+	"databases": [{
+		"db": {
+			"storage": "GDB",
+			"type": "postgres",
+       "dsn": {
+         "scheme": "postgres",
+         "dbname": "pserver",
+         "user": "pserver",
+         "host": "localhost",
+         "password": "test",
+         "port": 5432
+       },
+       "options": {
+         "read_only": false
+       }
 		}
 	}],
 	"host": "127.0.0.1",

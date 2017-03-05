@@ -4,7 +4,6 @@ from datetime import datetime
 from datetime import time
 from datetime import timedelta
 from guillotina import configure
-from guillotina.files import BasicFile
 from guillotina.interfaces import IValueToJson
 from guillotina.text import IRichTextValue
 from persistent.list import PersistentList
@@ -61,17 +60,6 @@ def default_converter(value):
     raise TypeError(
         'No converter for making'
         ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
-
-
-@configure.adapter(
-    for_=BasicFile,
-    provides=IValueToJson)
-def file_converter(value):
-    return {
-        'filename': value.filename,
-        'size': value.size,
-        'contenttype': value.content_type
-    }
 
 
 @configure.adapter(

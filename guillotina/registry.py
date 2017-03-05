@@ -2,17 +2,10 @@
 from guillotina.browser import get_physical_path
 from guillotina.content import Folder
 from guillotina.interfaces import IRegistry
+from guillotinadb.orm.interfaces import IBaseObject
 from zope.interface import alsoProvides
 from zope.interface import implementer_only
-from zope.interface import Interface
 from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
-
-
-try:
-    from guillotinadb.orm.interfaces import IBaseObject
-except ImportError:
-    class IBaseObject(Interface):
-        pass  # face interface to use instead that NOTHING should implement...
 
 
 class RecordsProxy(object):

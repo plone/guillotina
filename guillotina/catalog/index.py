@@ -1,21 +1,17 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.api.search import AsyncCatalogReindex
-from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
-from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISite
-from guillotina.transactions import get_current_request
+from guillotina.utils import get_current_request
 from guillotina.transactions import tm
 from guillotina.utils import get_content_path
 from zope.component import queryUtility
-
-import transaction
 
 
 class CommitHook(object):
@@ -51,10 +47,7 @@ def get_hook():
     if not search:
         return  # no search configured
 
-    try:
-        trns = tm(request).get()
-    except RequestNotFound:
-        trns = transaction.get()
+    trns = tm(request).get()
     hook = None
     for _hook in trns._after_commit:
         if isinstance(_hook[0], CommitHook):
@@ -62,7 +55,7 @@ def get_hook():
             break
     if hook is None:
         hook = CommitHook(site, request)
-        trns.addAfterCommitHook(hook)
+        trns.add_after_commit_hook(hook)
     return hook
 
 
