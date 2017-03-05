@@ -51,14 +51,14 @@ class RecordsProxy(object):
         key_name = self.__dict__['prefix'] + name
         if key_name not in records:
             return self.__dict__['schema'][name].missing_value
-        return records[key_name]
+        return records.__getattr__(key_name)
 
     def __setattr__(self, name, value):
         if name not in self.__dict__['schema']:
             super(RecordsProxy, self).__setattr__(name, value)
         else:
             prefixed_name = self.__dict__['prefix'] + name
-            self.__dict__['records'][prefixed_name] = value
+            self.__dict__['records'][prefixed_name].__setattr__(prefixed_name, value)
 
 
 @implementer_only(IRegistry, IBaseObject)
