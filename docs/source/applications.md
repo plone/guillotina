@@ -26,12 +26,12 @@ In your setup.py file, include an entry point like this for your application:
   setup(
     entry_points={
       'guillotina': [
-          'include = pserver.myaddon',
+          'include = guillotina_myaddon',
       ]
   })
 ```
 
-In this example, `pserver.myaddon` is your package module.
+In this example, `guillotina_myaddon` is your package module.
 
 
 ## Initialization
@@ -43,7 +43,7 @@ to provide the application name in the `applications` array for it to be initial
 
 ```json
 {
-  "applications": ["pserver.elasticsearch"]
+  "applications": ["guillotina_elasticsearch"]
 }
 ```
 

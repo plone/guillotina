@@ -96,7 +96,7 @@ class Renderer(object):
         self.renderformat = renderformat
 
 
-def _is_pserver_response(resp):
+def _is_guillotina_response(resp):
     return hasattr(resp, '__class__') and issubclass(resp.__class__, Response)
 
 
@@ -106,7 +106,7 @@ def _is_pserver_response(resp):
 class RendererJson(Renderer):
     async def __call__(self, value):
         headers = {}
-        if _is_pserver_response(value):
+        if _is_guillotina_response(value):
             json_value = value.response
             headers = value.headers
             status = value.status
@@ -135,7 +135,7 @@ class RendererJson(Renderer):
 class RendererHtml(Renderer):
     async def __call__(self, value):
         # Safe html transformation
-        if _is_pserver_response(value):
+        if _is_guillotina_response(value):
             body = value.response
             if not isinstance(body, bytes):
                 if not isinstance(body, str):

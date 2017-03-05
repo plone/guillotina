@@ -55,7 +55,7 @@ from:
 from guillotina.addons import Addon
 from guillotina.registry import ILayers
 
-LAYER = 'pserver.myaddon.interfaces.ILayer'
+LAYER = 'guillotina_myaddon.interfaces.ILayer'
 
 @configure.addon(
     name="myaddon",

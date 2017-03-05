@@ -84,11 +84,11 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'pserver = guillotina.commands.server:ServerCommand',
-            'pcli = guillotina.commands.cli:CliCommand',
-            'pshell = guillotina.commands.shell:ShellCommand',
-            'pmigrate = guillotina.commands.migrate:MigrateCommand',
-            'pcreate = guillotina.commands.create:CreateCommand'
+            'guillotina = guillotina.commands.server:ServerCommand',
+            'gcli = guillotina.commands.cli:CliCommand',
+            'gshell = guillotina.commands.shell:ShellCommand',
+            'gmigrate = guillotina.commands.migrate:MigrateCommand',
+            'gcreate = guillotina.commands.create:CreateCommand'
         ]
     }
 )

@@ -21,4 +21,4 @@ Running
 
 Most simple way to get running::
 
-  ./bin/pserver
+  ./bin/guillotina

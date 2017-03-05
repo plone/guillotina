@@ -1,7 +1,7 @@
 {
   "full_name": "",
   "email": "",
-  "package_name": "pserver_myproject",
+  "package_name": "guillotina_myproject",
   "project_short_description": "Guillotina server application python project",
   "open_source_license": [
     "MIT license",

@@ -5,11 +5,11 @@ You can provide your own CLI commands for guillotina through a simple interface.
 
 ## Available commands
 
-* pserver: run the http rest api server
-* pmigrate: run available migration steps
-* pcli: command line utility to run manually RUN API requests with
-* pshell: drop into a shell with root object to manually work with
-* pcreate: use cookiecutter to generate guillotina applications
+* guillotina: run the http rest api server
+* gmigrate: run available migration steps
+* gcli: command line utility to run manually RUN API requests with
+* gshell: drop into a shell with root object to manually work with
+* gcreate: use cookiecutter to generate guillotina applications
 
 
 ## Creating commands
