@@ -18,7 +18,7 @@ class DatabaseToJson(object):
         self.dbo = dbo
 
     async def __call__(self):
-        keys = apply_coroutine(self.dbo.keys)
+        keys = await apply_coroutine(self.dbo.keys)
         return {
             'sites': list(keys)
         }

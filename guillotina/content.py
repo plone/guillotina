@@ -490,7 +490,7 @@ class Site(Folder):
         # Creating and registering a local registry
         from guillotina.registry import Registry
         registry = Registry()
-        apply_coroutine(self.__setitem__, '_registry', registry)
+        await apply_coroutine(self.__setitem__, '_registry', registry)
 
         # Set default plugins
         registry.register_interface(ILayers)

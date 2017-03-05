@@ -7,8 +7,6 @@ from guillotina.interfaces import ISite
 from guillotina.utils import apply_coroutine
 from zope.i18nmessageid import MessageFactory
 
-import asyncio
-
 
 _ = MessageFactory('guillotina')
 
@@ -31,7 +29,7 @@ async def install(context, request):
             'Duplicate',
             _("Addon already installed"))
     handler = app_settings['available_addons'][id_to_install]['handler']
-    apply_coroutine(handler.install)
+    await apply_coroutine(handler.install)
     config.enabled |= {id_to_install}
     return await get_addons(context, request)()
 
@@ -55,7 +53,7 @@ async def uninstall(context, request):
             _("Addon not installed"))
 
     handler = app_settings['available_addons'][id_to_install]['handler']
-    apply_coroutine(handler.uninstall, context, request)
+    await apply_coroutine(handler.uninstall, context, request)
     config.enabled -= {id_to_install}
 
 

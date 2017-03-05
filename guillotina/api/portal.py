@@ -66,7 +66,7 @@ class DefaultPOST(Service):
         if 'description' not in data:
             data['description'] = ''
 
-        value = apply_coroutine(self.context.__contains__, data['id'])
+        value = await apply_coroutine(self.context.__contains__, data['id'])
         if value:
             # Already exist
             return ErrorResponse(
@@ -83,7 +83,7 @@ class DefaultPOST(Service):
         # Special case we don't want the parent pointer
         site.__name__ = data['id']
 
-        apply_coroutine(self.context.__setitem__, data['id'], site)
+        await apply_coroutine(self.context.__setitem__, data['id'], site)
         await site.install()
 
         self.request._site_id = site.__name__
