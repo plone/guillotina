@@ -1,6 +1,5 @@
 from guillotina import logger
 from guillotina.interfaces import MIGRATION_DATA_REGISTRY_KEY
-from persistent.dict import PersistentDict
 from pkg_resources import parse_version
 
 
@@ -87,7 +86,7 @@ def run_site_migrations(site, migrations, db=None):
 
         registry = site['_registry']
         if MIGRATION_DATA_REGISTRY_KEY not in registry:
-            registry[MIGRATION_DATA_REGISTRY_KEY] = PersistentDict()
+            registry[MIGRATION_DATA_REGISTRY_KEY] = {}
         registry[MIGRATION_DATA_REGISTRY_KEY][migration.application] = migration.to_version_raw
 
 

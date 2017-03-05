@@ -53,7 +53,6 @@ setup(
     packages=find_packages(),
     ext_modules=ext_modules,
     install_requires=[
-        'guillotinadb',
         'aiohttp',
         'jsonschema',
         'python-dateutil',
@@ -69,13 +68,21 @@ setup(
         'zope.schema',
         'zope.annotation',
         'pyjwt',
-        'requests'
+        'requests',
+        'asyncpg',
+        'cffi'
     ],
     extras_require={
         'test': [
             'pytest',
             'requests',
-            'zope.testing'
+            'zope.testing',
+            'docker',
+            'backoff',
+            'requests',
+            'psycopg2',
+            'pytest-asyncio',
+            'pytest-aiohttp'
         ]
     },
     entry_points={

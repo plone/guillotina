@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import date
 from datetime import datetime
-from datetime import time
 from guillotina.content import create_content_in_container
 from guillotina.factory import RootSpecialPermissions
 from guillotina.interfaces import IFactorySerializeToJson
@@ -29,8 +27,6 @@ from guillotina.json.serialize_content import SerializeToJson
 from guillotina.security.policy import Interaction
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.text import RichText
-from persistent.list import PersistentList
-from persistent.mapping import PersistentMapping
 from zope import schema
 from zope.component import getAdapter
 from zope.component import getMultiAdapter
@@ -123,23 +119,6 @@ class TestSerializerValueAdapters(GuillotinaFunctionalTestCase):
             (u"Bar", "id_bar")))
         res = getAdapter(vocab, interface=IValueToJson)
         self.assertEqual(type(res), list)
-
-    def test_simple(self):
-        values = [
-            'foobar',
-            ['foobar'],
-            PersistentList(['foobar']),
-            ('foobar',),
-            frozenset(['foobar']),
-            set(['foobar']),
-            {'foo': 'bar'},
-            PersistentMapping({'foo': 'bar'}),
-            datetime.utcnow(),
-            date.today(),
-            time()
-        ]
-        for value in values:
-            getAdapter(value, interface=IValueToJson)
 
 
 class TestSerializerSchemaAdapters(GuillotinaFunctionalTestCase):

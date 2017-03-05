@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
+from guillotina.db.orm.base import BaseObject
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ITransformer
 from guillotina.interfaces import TransformError
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.text import RichText
 from guillotina.text import RichTextValue
-from persistent import Persistent
-from persistent.interfaces import IPersistent
 from zope.component import adapter
 from zope.component import provideAdapter
 from zope.interface import implementer
@@ -29,7 +29,7 @@ class IContent2(Interface):
 
 
 @implementer(IContent2)
-class Content(Persistent):
+class Content(BaseObject):
 
     def __init__(self, rich=None):
         self.rich = rich
@@ -120,5 +120,5 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
     def test_persistence(self):
         field = IContent2['rich']
         value = field.from_string("A plain text string")
-        self.assertFalse(IPersistent.providedBy(value))
-        self.assertTrue(IPersistent.providedBy(value._raw_holder))
+        self.assertFalse(IBaseObject.providedBy(value))
+        self.assertTrue(IBaseObject.providedBy(value._raw_holder))

@@ -6,8 +6,6 @@ from datetime import timedelta
 from guillotina import configure
 from guillotina.interfaces import IValueToJson
 from guillotina.text import IRichTextValue
-from persistent.list import PersistentList
-from persistent.mapping import PersistentMapping
 from zope.i18nmessageid.message import Message
 from zope.interface import Interface
 from zope.schema.vocabulary import SimpleVocabulary
@@ -84,13 +82,6 @@ def list_converter(value):
 
 
 @configure.adapter(
-    for_=PersistentList,
-    provides=IValueToJson)
-def persistent_list_converter(value):
-    return list_converter(value)
-
-
-@configure.adapter(
     for_=tuple,
     provides=IValueToJson)
 def tuple_converter(value):
@@ -122,13 +113,6 @@ def dict_converter(value):
     keys = map(json_compatible, keys)
     values = map(json_compatible, values)
     return dict(zip(keys, values))
-
-
-@configure.adapter(
-    for_=PersistentMapping,
-    provides=IValueToJson)
-def persistent_mapping_converter(value):
-    return dict_converter(value)
 
 
 @configure.adapter(

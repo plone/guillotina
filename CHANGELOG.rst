@@ -1,9 +1,6 @@
 1.0.0a1 (unreleased)
 --------------------
 
-- Move to using guillotinadb by default, zodb support is optional by installing
-  guillotinadb[zodb].
-  [ramonnb]
 
 - move get_current_request to guillotina.utils
   [vangheem]

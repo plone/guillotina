@@ -47,7 +47,7 @@ from zope.interface import Interface
 from zope.interface import noLongerProvides
 from zope.schema.interfaces import IContextAwareDefaultFactory
 
-import guillotinadb.orm.base
+import guillotina.db.orm.base
 import pathlib
 import uuid
 
@@ -248,7 +248,7 @@ def _default_from_schema(context, schema, fieldname):
 
 
 @implementer(IResource, IAttributeAnnotatable)
-class Resource(guillotinadb.orm.base.BaseObject):
+class Resource(guillotina.db.orm.base.BaseObject):
 
     __name__ = None
     __parent__ = None

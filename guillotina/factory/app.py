@@ -121,6 +121,10 @@ def make_app(config_file=None, settings=None, loop=None):
         raise Exception('Neither configuration or settings')
 
     import guillotina
+    import guillotina.db.factory
+    import guillotina.db.partition
+    import guillotina.db.writer
+    import guillotina.db.db
     configure.include("zope.component")
     configure.include("zope.annotation")
     configure.scan('guillotina.translation')
