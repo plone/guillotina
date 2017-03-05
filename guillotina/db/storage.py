@@ -124,8 +124,7 @@ class APgStorage(object):
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
-        self._oid_lock = asyncio.Lock()
-        self._tid_lock = asyncio.Lock()
+        self._lock = asyncio.Lock()
         self.read_conn = None
 
     def isReadOnly(self):
@@ -229,7 +228,7 @@ class APgStorage(object):
         return 0 if value is None else value
 
     async def next_oid(self, txn):
-        async with self._oid_lock:
+        async with self._lock:
             return await self.stmt_next_oid.fetchval()
 
     async def load(self, txn, oid):
@@ -259,7 +258,7 @@ class APgStorage(object):
         txn._get_childs = await conn.prepare(GET_CHILDS)
 
     async def precommit(self, txn):
-        async with self._tid_lock:
+        async with self._lock:
             tid = await self.stmt_next_tid.fetchval()
         if tid is not None:
             txn._tid = tid
