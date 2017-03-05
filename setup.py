@@ -29,7 +29,7 @@ setup(
     description='asyncio transactional server to build REST API / Websocket with ZODB',  # noqa
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
-    keywords=['asyncio', 'ZODB', 'REST', 'Framework', 'transactional'],
+    keywords=['asyncio', 'REST', 'Framework', 'transactional'],
     author='Ramon & Asko & Nathan',
     author_email='ramon@plone.org',
     classifiers=[
@@ -44,7 +44,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     url='https://github.com/plone/guillotina',
-    license='GPL version 3',
+    license='BSD',
     setup_requires=[
         'pytest-runner',
     ],
