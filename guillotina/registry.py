@@ -58,7 +58,7 @@ class RecordsProxy(object):
             super(RecordsProxy, self).__setattr__(name, value)
         else:
             prefixed_name = self.__dict__['prefix'] + name
-            self.__dict__['records'][prefixed_name].__setattr__(prefixed_name, value)
+            self.__dict__['records'].__setattr__(prefixed_name, value)
 
 
 @implementer_only(IRegistry, IBaseObject)
