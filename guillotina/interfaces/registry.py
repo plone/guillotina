@@ -2,7 +2,6 @@
 from zope.interface import Interface
 from zope import schema
 from zope.i18nmessageid import MessageFactory
-from collections import UserDict
 
 _ = MessageFactory('guillotina')
 
@@ -11,7 +10,7 @@ class ILayers(Interface):
 
     active_layers = schema.FrozenSet(
         title=_('Active Layers'),
-        defaultFactory=UserDict,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         )
@@ -22,7 +21,7 @@ class IAddons(Interface):
 
     enabled = schema.FrozenSet(
         title=_('Installed addons'),
-        defaultFactory=UserDict,
+        defaultFactory=frozenset,
         value_type=schema.TextLine(
             title='Value'
         ),

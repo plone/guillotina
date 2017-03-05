@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 from guillotina.browser import get_physical_path
-from guillotina.interfaces import IRegistry
-
-from zope.interface import alsoProvides
-from guillotina import configure
-
-from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 from guillotina.content import Folder
+from guillotina.interfaces import IRegistry
+from zope.interface import alsoProvides
+from zope.interface import implementer_only
+from zope.interface import Interface
+from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
+
 import asyncio
+
+
+try:
+    from guillotinadb.orm.interfaces import IBaseObject
+except ImportError:
+    class IBaseObject(Interface):
+        pass  # face interface to use instead that NOTHING should implement...
 
 
 class RecordsProxy(object):
@@ -39,6 +46,14 @@ class RecordsProxy(object):
         if key_name not in records:
             return self.__dict__['schema'][name].missing_value
 
+        if IBaseObject.providedBy(self.__dict__['schema']):
+            try:
+                return self.__dict__['records'].__getattr__(key_name)
+            except AttributeError:
+                raise KeyError(key_name)
+        else:
+            return records[key_name]
+
         return records[key_name]
 
     async def __setattr__(self, name, value):
@@ -46,12 +61,17 @@ class RecordsProxy(object):
             super(RecordsProxy, self).__setattr__(name, value)
         else:
             prefixed_name = self.__dict__['prefix'] + name
-            coro = self.__dict__['records'].__setitem__(prefixed_name, value)
+            if IBaseObject.implementedBy(self.__dict__['schema']):
+                # to be able to storage large objects...
+                coro = self.__dict__['records'].__setitem__(prefixed_name, value)
+            else:
+                # in this case, store data as attr on object
+                coro = self.__dict__['records'].__setattr__(prefixed_name, value)
             if asyncio.iscoroutine(coro):
                 await coro
 
 
-@configure.contenttype(portal_type="Registry", schema=IRegistry)
+@implementer_only(IRegistry, IBaseObject)
 class Registry(Folder):
 
     __name__ = '_registry'
