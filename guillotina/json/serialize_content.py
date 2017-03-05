@@ -35,7 +35,7 @@ class SerializeToJson(object):
         self.request = request
         self.permission_cache = {}
 
-    def __call__(self):
+    async def __call__(self):
         parent = self.context.__parent__
         if parent is not None:
             # We render the summary of the parent
@@ -113,7 +113,7 @@ class SerializeToJson(object):
 class SerializeFolderToJson(SerializeToJson):
 
     async def __call__(self):
-        result = super(SerializeFolderToJson, self).__call__()
+        result = await super(SerializeFolderToJson, self).__call__()
 
         security = IInteraction(self.request)
         length = self.context.__len__()

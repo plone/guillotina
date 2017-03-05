@@ -199,12 +199,14 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
     obj.__parent__ = container
     for key, value in kw.items():
         setattr(obj, key, value)
+
     if request is None or 'OVERWRITE' not in request.headers:
-        if obj.id in container:
+        value = await apply_coroutine(container.__contains__, obj.id)
+        if value:
             raise ConflictIdOnContainer(str(container), obj.id)
 
     await notify(BeforeObjectAddedEvent(obj, container, id_))
-    container[obj.id] = obj
+    await apply_coroutine(container.__setitem__, obj.id, obj)
     return obj
 
 
