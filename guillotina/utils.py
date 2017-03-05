@@ -3,6 +3,7 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from hashlib import sha256 as sha
 
+import asyncio
 import fnmatch
 import importlib
 import logging
@@ -238,3 +239,10 @@ def rec_merge(d1, d2):
     d3 = d1.copy()
     d3.update(d2)
     return d3
+
+
+async def apply_coroutine(func, *args, **kwargs):
+    result = func(*args, **kwargs)
+    if asyncio.iscoroutine(result):
+        return await result
+    return result

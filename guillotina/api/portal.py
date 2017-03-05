@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import asyncio
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.browser import ErrorResponse
@@ -12,8 +11,11 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import ISite
+from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
 from zope.component import getMultiAdapter
+
+import asyncio
 
 
 @configure.service(context=IDatabase, method='GET', permission='guillotina.GetPortals')
@@ -64,9 +66,7 @@ class DefaultPOST(Service):
         if 'description' not in data:
             data['description'] = ''
 
-        value = self.context.__contains__(data['id'])
-        if asyncio.iscoroutine(value):
-            value = await value
+        value = apply_coroutine(self.context.__contains__, data['id'])
         if value:
             # Already exist
             return ErrorResponse(
@@ -83,10 +83,7 @@ class DefaultPOST(Service):
         # Special case we don't want the parent pointer
         site.__name__ = data['id']
 
-        value = self.context.__setitem__(data['id'], site)
-        if asyncio.iscoroutine(value):
-            value = await value
-
+        apply_coroutine(self.context.__setitem__, data['id'], site)
         await site.install()
 
         self.request._site_id = site.__name__

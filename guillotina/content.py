@@ -18,12 +18,14 @@ from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
+from guillotina.interfaces import IAddons
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
+from guillotina.interfaces import ILayers
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
@@ -32,20 +34,11 @@ from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import ISite
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-from guillotina.interfaces import IAddons
-from guillotina.interfaces import ILayers
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_current_request
 from guillotina.transactions import synccontext
+from guillotina.utils import apply_coroutine
 from guillotina.utils import Lazy
-try:
-    from guillotinadb.orm.base import BaseObject as Persistent
-    GUILLOTINADB = True
-except ImportError:
-    from BTrees.Length import Length
-    from BTrees.OOBTree import OOBTree
-    from persistent import Persistent
-    GUILLOTINADB = False
 from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
@@ -59,7 +52,16 @@ from zope.schema.interfaces import IContextAwareDefaultFactory
 
 import pathlib
 import uuid
-import asyncio
+
+
+try:
+    from guillotinadb.orm.base import BaseObject as Persistent
+    GUILLOTINADB = True
+except ImportError:
+    from BTrees.Length import Length
+    from BTrees.OOBTree import OOBTree
+    from persistent import Persistent
+    GUILLOTINADB = False
 
 
 _zone = tzlocal()
@@ -488,15 +490,13 @@ class Site(Folder):
         # Creating and registering a local registry
         from guillotina.registry import Registry
         registry = Registry()
-        op = self.__setitem__('_registry', registry)
-        if asyncio.iscoroutine(op):
-            await op
+        apply_coroutine(self.__setitem__, '_registry', registry)
 
         # Set default plugins
-        await registry.register_interface(ILayers)
-        await registry.register_interface(IAddons)
+        registry.register_interface(ILayers)
+        registry.register_interface(IAddons)
         layers = registry.for_interface(ILayers)
-        await layers.__setattr__(
+        layers.__setattr__(
             'active_layers',
             frozenset('guillotina.interfaces.layer.IDefaultLayer'))
 

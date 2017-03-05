@@ -363,7 +363,6 @@ class TraversalRouter(AbstractRouter):
                 'exception_type': getattr(type(_exc), '__name__', str(type(_exc))),  # noqa
                 'traceback': traceback.format_exc()
             }))
-        import pdb; pdb.set_trace()
 
         request.resource = resource
         request.tail = tail

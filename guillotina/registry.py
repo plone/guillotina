@@ -6,9 +6,6 @@ from zope.interface import alsoProvides
 from zope.interface import implementer_only
 from zope.interface import Interface
 from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
-from collections import UserDict
-
-import asyncio
 
 
 try:
@@ -38,6 +35,14 @@ class RecordsProxy(object):
             self.__dict__['prefix'] = iface.__identifier__ + '.'
         alsoProvides(self, iface)
 
+    async def async_get(self, name):
+        key_name = self.__dict__['prefix'] + name
+        return await self.__dict__['records'][key_name]
+
+    async def async_set(self, name, value):
+        prefixed_name = self.__dict__['prefix'] + name
+        await self.__dict__['records'].__setitem__(prefixed_name, value)
+
     def __getattr__(self, name):
         if name not in self.__dict__['schema']:
             raise AttributeError(name)
@@ -46,28 +51,14 @@ class RecordsProxy(object):
         key_name = self.__dict__['prefix'] + name
         if key_name not in records:
             return self.__dict__['schema'][name].missing_value
+        return records[key_name]
 
-        if IBaseObject.implementedBy(self.__dict__['schema']):
-            try:
-                return self.__dict__['records'].__getitem__(key_name)
-            except AttributeError:
-                raise KeyError(key_name)
-        else:
-            return records.__getattr__(key_name)
-
-    async def __setattr__(self, name, value):
+    def __setattr__(self, name, value):
         if name not in self.__dict__['schema']:
             super(RecordsProxy, self).__setattr__(name, value)
         else:
             prefixed_name = self.__dict__['prefix'] + name
-            if IBaseObject.implementedBy(self.__dict__['schema']):
-                # to be able to storage large objects...
-                coro = self.__dict__['records'].__setitem__(prefixed_name, value)
-            else:
-                # in this case, store data as attr on object
-                coro = self.__dict__['records'].__setattr__(prefixed_name, value)
-            if asyncio.iscoroutine(coro):
-                await coro
+            self.__dict__['records'][prefixed_name] = value
 
 
 @implementer_only(IRegistry, IBaseObject)
@@ -89,7 +80,7 @@ class Registry(Folder):
     def for_interface(self, iface, check=True, omit=(), prefix=None):
         return RecordsProxy(self, iface, prefix=prefix)
 
-    async def register_interface(self, iface, omit=(), prefix=None):
+    def register_interface(self, iface, omit=(), prefix=None):
         proxy = RecordsProxy(self, iface, prefix)
         for name in iface.names():
             if name in omit:
@@ -97,8 +88,8 @@ class Registry(Folder):
             field = iface[name]
             if field.defaultFactory is not None:
                 if IContextAwareDefaultFactory.providedBy(field.defaultFactory):  # noqa
-                    await proxy.__setattr__(name, field.defaultFactory(self))
+                    proxy.__setattr__(name, field.defaultFactory(self))
                 else:
-                    await proxy.__setattr__(name, field.defaultFactory())
+                    proxy.__setattr__(name, field.defaultFactory())
             elif field.default is not None:
-                await proxy.__setattr__(name, field.default)
+                proxy.__setattr__(name, field.default)

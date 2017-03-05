@@ -6,11 +6,9 @@
 /bin/
 /Data.fs*
 /develop-eggs/
-/extras/
 /parts/
 /result
 *.egg-info/
-eggs/
 .eggs
 .cache
 cov_html
