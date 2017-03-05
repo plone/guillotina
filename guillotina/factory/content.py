@@ -111,8 +111,12 @@ class Database(object):
         tm_ = RequestAwareTransactionManager()
         return self._db.open(transaction_manager=tm_)
 
+    def new_transaction_manager(self):
+        return self._db.new_transaction_manager()
+
     async def aopen(self, tm):
-        return await self._db.open(tm)
+        connection = await self._db.open(tm)
+
 
     def _open(self):
         self._conn = self._db.open(transaction_manager=self.tm_)

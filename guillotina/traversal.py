@@ -30,7 +30,7 @@ from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
-from guillotina.registry import ACTIVE_LAYERS_KEY
+from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.security import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
@@ -120,7 +120,7 @@ async def traverse(request, parent, path):
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
         if hasattr(request, '_asyncdb') and request._asyncdb:
-            context = await parent.asyncget(path[0])
+            context = await parent.get(path[0])
         else:
             context = parent[path[0]]
     except TypeError:
@@ -134,13 +134,11 @@ async def traverse(request, parent, path):
         request._asyncdb = context.is_async()
         if request._asyncdb:
             # Create a transaction Manager
-            request._tm = tm = context.new_transaction_manager()
-            # Link the transaction with a connection
-            request.conn = await context.aopen(tm)
-            # Create a read transaction
-            await tm.begin(request, read=True)
+            request._tm = context.new_transaction_manager()
+            # Start a transaction
+            await request._tm.begin(request=request)
             # Get the root of the tree
-            context = await request.conn.root()
+            context = await request._tm.root()
         else:
             # Create a new conection
             request.conn = context.open()
@@ -364,6 +362,7 @@ class TraversalRouter(AbstractRouter):
                 'exception_type': getattr(type(_exc), '__name__', str(type(_exc))),  # noqa
                 'traceback': traceback.format_exc()
             }))
+        import pdb; pdb.set_trace()
 
         request.resource = resource
         request.tail = tail

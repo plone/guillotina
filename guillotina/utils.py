@@ -49,7 +49,7 @@ def get_content_depth(content):
 
 def iter_parents(content):
     content = getattr(content, '__parent__', None)
-    while content:
+    while content is not None:
         yield content
         content = getattr(content, '__parent__', None)
 

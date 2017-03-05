@@ -52,6 +52,8 @@ from .json import ISchemaFieldSerializeToJson  # noqa
 from .json import ISchemaSerializeToJson  # noqa
 from .json import IValueToJson  # noqa
 from .layer import IDefaultLayer  # noqa
+from .registry import IAddons  # noqa
+from .registry import ILayers  # noqa
 from .renderers import IRendererFormatHtml  # noqa
 from .renderers import IRendererFormatJson  # noqa
 from .renderers import IRendererFormatRaw  # noqa
@@ -102,6 +104,9 @@ MIGRATION_DATA_REGISTRY_KEY = '_migrations_info'
 SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
+
+ACTIVE_LAYERS_KEY = 'guillotina.registry.ILayers.active_layers'
+ADDONS_KEY = 'guillotina.registry.IAddons.enabled'
 
 
 class IFormFieldProvider(Interface):

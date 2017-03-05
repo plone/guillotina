@@ -130,8 +130,9 @@ class AsyncMockView(View):
 
 class GuillotinaRequester(object):
 
-    def __init__(self, uri):
+    def __init__(self, uri=None, server=None):
         self.uri = uri
+        self.server = server
 
     def __call__(
             self,
@@ -157,7 +158,10 @@ class GuillotinaRequester(object):
         settings['data'] = data
         operation = getattr(requests, method.lower(), None)
         if operation:
-            resp = operation(self.uri + path, **settings)
+            if self.server is not None:
+                resp = operation(self.server.make_url(path), **settings)
+            else:
+                resp = operation(self.uri + path, **settings)
             return resp
         return None
 

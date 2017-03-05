@@ -128,6 +128,7 @@ def make_app(config_file=None, settings=None, loop=None):
     configure.scan('guillotina.renderers')
     configure.scan('guillotina.api')
     configure.scan('guillotina.content')
+    configure.scan('guillotina.registry')
     configure.scan('guillotina.auth')
     configure.scan('guillotina.json')
     configure.scan('guillotina.behaviors')
@@ -224,7 +225,5 @@ async def close_utilities(app):
         asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
     for db in app.router._root:
         if IDatabase.providedBy(db[1]):
-            try:
-                db[1]._db.close()
-            except RequestNotFound:
-                pass
+            await db[1]._db.finalize()
+

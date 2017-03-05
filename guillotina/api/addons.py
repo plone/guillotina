@@ -3,7 +3,7 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina.browser import ErrorResponse
 from guillotina.interfaces import ISite
-from guillotina.registry import IAddons
+from guillotina.interfaces import IAddons
 from zope.i18nmessageid import MessageFactory
 
 import asyncio

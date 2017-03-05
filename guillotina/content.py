@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from BTrees.Length import Length
-from BTrees.OOBTree import OOBTree
+from collections import UserList
 from copy import deepcopy
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -33,9 +32,8 @@ from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import ISite
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-from guillotina.registry import IAddons
-from guillotina.registry import ILayers
-from guillotina.registry import Registry
+from guillotina.interfaces import IAddons
+from guillotina.interfaces import ILayers
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_current_request
 from guillotina.transactions import synccontext
@@ -44,6 +42,8 @@ try:
     from guillotinadb.orm.base import BaseObject as Persistent
     GUILLOTINADB = True
 except ImportError:
+    from BTrees.Length import Length
+    from BTrees.OOBTree import OOBTree
     from persistent import Persistent
     GUILLOTINADB = False
 from zope.annotation.interfaces import IAttributeAnnotatable
@@ -59,6 +59,7 @@ from zope.schema.interfaces import IContextAwareDefaultFactory
 
 import pathlib
 import uuid
+import asyncio
 
 
 _zone = tzlocal()
@@ -435,16 +436,25 @@ class SyncFolder(Resource):
 
 class AsyncFolder(Resource):
     async def __contains__(self, key):
-        return self._p_jar.contains(self._p_oid, key)
+        return await self._p_jar.contains(self._p_oid, key)
 
     async def __setitem__(self, key, value):
-        return self._p_jar.contains(self._p_oid, key)
+        value.__parent__ = self
+        if self._p_jar is not None:
+            value._p_jar = self._p_jar
+            self._p_jar.register(value)
 
     async def __getitem__(self, key):
-        return self._p_jar.contains(self._p_oid, key)
+        return await self._p_jar.get_child(self._p_oid, key)
+
+    async def get(self, key):
+        return await self._p_jar.get_child(self._p_oid, key)
 
     async def __len__(self):
-        return self._p_jar.len(self._p_oid)
+        return await self._p_jar.len(self._p_oid)
+
+    async def keys(self):
+        return await self._p_jar.keys(self._p_oid)
 
 
 if GUILLOTINADB:
@@ -467,15 +477,21 @@ else:
 @configure.contenttype(portal_type="Site", schema=ISite)
 class Site(Folder):
 
-    def install(self):
+    async def install(self):
         # Creating and registering a local registry
-        self['_registry'] = registry = Registry()
+        from guillotina.registry import Registry
+        registry = Registry()
+        op = self.__setitem__('_registry', registry)
+        if asyncio.iscoroutine(op):
+            await op
 
         # Set default plugins
-        registry.register_interface(ILayers)
-        registry.register_interface(IAddons)
-        registry.for_interface(ILayers).active_layers =\
-            frozenset({'guillotina.interfaces.layer.IDefaultLayer'})
+        await registry.register_interface(ILayers)
+        await registry.register_interface(IAddons)
+        layers = registry.for_interface(ILayers)
+        await layers.__setattr__(
+            'active_layers',
+            UserList('guillotina.interfaces.layer.IDefaultLayer'))
 
         roles = IPrincipalRoleManager(self)
         roles.assign_role_to_principal(

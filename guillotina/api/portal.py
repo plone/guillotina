@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.browser import ErrorResponse
@@ -21,7 +22,7 @@ class DefaultGET(Service):
         serializer = getMultiAdapter(
             (self.context, self.request),
             IResourceSerializeToJson)
-        return serializer()
+        return await serializer()
 
 
 @configure.service(
@@ -63,7 +64,10 @@ class DefaultPOST(Service):
         if 'description' not in data:
             data['description'] = ''
 
-        if data['id'] in self.context:
+        value = self.context.__contains__(data['id'])
+        if asyncio.iscoroutine(value):
+            value = await value
+        if value:
             # Already exist
             return ErrorResponse(
                 'NotAllowed',
@@ -79,9 +83,11 @@ class DefaultPOST(Service):
         # Special case we don't want the parent pointer
         site.__name__ = data['id']
 
-        self.context[data['id']] = site
+        value = self.context.__setitem__(data['id'], site)
+        if asyncio.iscoroutine(value):
+            value = await value
 
-        site.install()
+        await site.install()
 
         self.request._site_id = site.__name__
 
