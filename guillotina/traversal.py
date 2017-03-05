@@ -246,7 +246,9 @@ class MatchInfo(AbstractMatchInfo):
         else:
             try:
                 view_result = await self.view()
+                await abort(request)
             except Unauthorized as e:
+                await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except Exception as e:
                 view_result = generate_error_response(e, request, 'ViewError')
