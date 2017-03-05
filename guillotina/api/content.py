@@ -49,7 +49,7 @@ class DefaultGET(Service):
         serializer = getMultiAdapter(
             (self.context, self.request),
             IResourceSerializeToJson)
-        result = serializer()
+        result = await serializer()
         await notify(ObjectVisitedEvent(self.context))
         return result
 
@@ -142,7 +142,8 @@ class DefaultPOST(Service):
             (obj, self.request),
             IResourceSerializeToJson
         )
-        return Response(response=serializer(), headers=headers, status=201)
+        response = await serializer()
+        return Response(response=response, headers=headers, status=201)
 
 
 @configure.service(context=IResource, method='PUT', permission='guillotina.ModifyContent')

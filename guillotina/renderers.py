@@ -118,7 +118,7 @@ class RendererJson(Renderer):
         frame = self.request.GET['frame'] if 'frame' in self.request.GET else ''
         if frame:
             framer = queryAdapter(self.request, IFrameFormatsJson, frame)
-            json_value = framer(json_value)
+            json_value = await framer(json_value)
         resp = json_response(json_value)
         resp.headers.update(headers)
         resp.headers.update(

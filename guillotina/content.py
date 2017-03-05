@@ -447,14 +447,21 @@ class AsyncFolder(Resource):
     async def __getitem__(self, key):
         return await self._p_jar.get_child(self._p_oid, key)
 
-    async def get(self, key):
-        return await self._p_jar.get_child(self._p_oid, key)
+    async def get(self, key, default=None):
+        try:
+            return await self._p_jar.get_child(self._p_oid, key)
+        except KeyError:
+            return default
 
     async def __len__(self):
         return await self._p_jar.len(self._p_oid)
 
     async def keys(self):
         return await self._p_jar.keys(self._p_oid)
+
+    async def items(self):
+        async for record in self._p_jar.items(self._p_oid):
+            yield record
 
 
 if GUILLOTINADB:
@@ -491,7 +498,7 @@ class Site(Folder):
         layers = registry.for_interface(ILayers)
         await layers.__setattr__(
             'active_layers',
-            UserList('guillotina.interfaces.layer.IDefaultLayer'))
+            frozenset('guillotina.interfaces.layer.IDefaultLayer'))
 
         roles = IPrincipalRoleManager(self)
         roles.assign_role_to_principal(

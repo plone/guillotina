@@ -150,8 +150,9 @@ async def traverse(request, parent, path):
         request._site_id = context.id
         request.site = context
         if hasattr(request, '_asyncdb') and request._asyncdb:
-            request.site_settings = await context.asyncget('registry')
-            layers = await request.site_settings.aget(ACTIVE_LAYERS_KEY, [])
+            request.site_settings = await context.__getitem__('_registry')
+            import pdb; pdb.set_trace()
+            layers = getattr(request.site_settings, ACTIVE_LAYERS_KEY, [])
         else:
             request.site_settings = context['_registry']
             layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])

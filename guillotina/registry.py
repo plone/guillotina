@@ -6,6 +6,7 @@ from zope.interface import alsoProvides
 from zope.interface import implementer_only
 from zope.interface import Interface
 from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
+from collections import UserDict
 
 import asyncio
 
@@ -46,15 +47,13 @@ class RecordsProxy(object):
         if key_name not in records:
             return self.__dict__['schema'][name].missing_value
 
-        if IBaseObject.providedBy(self.__dict__['schema']):
+        if IBaseObject.implementedBy(self.__dict__['schema']):
             try:
-                return self.__dict__['records'].__getattr__(key_name)
+                return self.__dict__['records'].__getitem__(key_name)
             except AttributeError:
                 raise KeyError(key_name)
         else:
-            return records[key_name]
-
-        return records[key_name]
+            return records.__getattr__(key_name)
 
     async def __setattr__(self, name, value):
         if name not in self.__dict__['schema']:
@@ -76,6 +75,9 @@ class Registry(Folder):
 
     __name__ = '_registry'
     portal_type = 'Registry'
+
+    def __init__(self, id='_registry'):
+        super(Registry, self).__init__(id)
 
     def __repr__(self):
         path = '/'.join([name or 'n/a' for name in get_physical_path(self)])
