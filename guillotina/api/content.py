@@ -34,6 +34,7 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
+from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
 from zope.component import getMultiAdapter
@@ -314,7 +315,10 @@ class DefaultDELETE(Service):
         content_id = self.context.id
         parent = self.context.__parent__
         await notify(BeforeObjectRemovedEvent(self.context, parent, content_id))
-        del parent[content_id]
+        if self.request._asyncdb:
+            self.context._p_jar.delete(self.context)
+        else:
+            del parent[content_id]
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 

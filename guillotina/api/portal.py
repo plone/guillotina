@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
+from guillotina.api import content
 from guillotina.api.service import Service
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
@@ -14,8 +15,6 @@ from guillotina.interfaces import ISite
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
 from zope.component import getMultiAdapter
-
-import asyncio
 
 
 @configure.service(context=IDatabase, method='GET', permission='guillotina.GetPortals')
@@ -123,11 +122,8 @@ class SharingPOST(Service):
 
 
 @configure.service(context=ISite, method='DELETE', permission='guillotina.DeletePortals')
-class DefaultDELETE(Service):
-    async def __call__(self):
-        portal_id = self.context.id
-        del self.request.conn.root()[portal_id]
-        return {}
+class DefaultDELETE(content.DefaultDELETE):
+    pass
 
 
 @configure.service(context=IDatabase, method='DELETE', permission='guillotina.UmountDatabase')

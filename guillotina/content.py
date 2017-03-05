@@ -449,6 +449,9 @@ class AsyncFolder(Resource):
     async def __getitem__(self, key):
         return await self._p_jar.get_child(self._p_oid, key)
 
+    async def __delitem__(self, key):
+        return await self._p_jar.delete(await self.__getitem__(key))
+
     async def get(self, key, default=None):
         try:
             return await self._p_jar.get_child(self._p_oid, key)
