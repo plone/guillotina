@@ -123,14 +123,28 @@ class SerializeFolderToJson(SerializeToJson):
         if length > MAX_ALLOWED or length == 0:
             result['items'] = []
         else:
-            result['items'] = [
-                getMultiAdapter(
-                    (member, self.request), IResourceSerializeToJsonSummary)()
-                for ident, member in self.context.items()
-                if not ident.startswith('_') and
-                bool(security.check_permission(
-                    'guillotina.AccessContent', member))
-            ]
+            items = self.context.items()
+            # Needs to be a better way ! 
+            if hasattr(items, 'ag_await'):
+                result['items'] = []
+                async for ident, member in items:
+                    if not ident.startswith('_') and bool(
+                            security.check_permission(
+                            'guillotina.AccessContent', member)):
+                        result['items'].append(
+                            getMultiAdapter(
+                                (member, self.request),
+                                IResourceSerializeToJsonSummary)()
+                        )
+            else:
+                result['items'] = [
+                    getMultiAdapter(
+                        (member, self.request), IResourceSerializeToJsonSummary)()
+                    for ident, member in items
+                    if not ident.startswith('_') and
+                    bool(security.check_permission(
+                        'guillotina.AccessContent', member))
+                ]
         result['length'] = length
 
         return result

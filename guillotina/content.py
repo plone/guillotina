@@ -462,8 +462,8 @@ class AsyncFolder(Resource):
         return await self._p_jar.keys(self._p_oid)
 
     async def items(self):
-        async for record in self._p_jar.items(self._p_oid):
-            yield record
+        async for key, value in self._p_jar.items(self._p_oid):
+            yield key, value
 
 
 if GUILLOTINADB:
