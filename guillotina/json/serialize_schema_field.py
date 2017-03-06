@@ -9,20 +9,20 @@ from guillotina.interfaces import IValueToJson
 from zope.component import getMultiAdapter
 from zope.interface import implementedBy
 from zope.interface import Interface
-from zope.schema import getFields
-from zope.schema.interfaces import IBool
-from zope.schema.interfaces import IChoice
-from zope.schema.interfaces import ICollection
-from zope.schema.interfaces import IDate
-from zope.schema.interfaces import IDatetime
-from zope.schema.interfaces import IDict
-from zope.schema.interfaces import IField
-from zope.schema.interfaces import IFloat
-from zope.schema.interfaces import IInt
-from zope.schema.interfaces import IObject
-from zope.schema.interfaces import IText
-from zope.schema.interfaces import ITextLine
-from zope.schema.interfaces import ITime
+from guillotina.schema import getFields
+from guillotina.schema.interfaces import IBool
+from guillotina.schema.interfaces import IChoice
+from guillotina.schema.interfaces import ICollection
+from guillotina.schema.interfaces import IDate
+from guillotina.schema.interfaces import IDatetime
+from guillotina.schema.interfaces import IDict
+from guillotina.schema.interfaces import IField
+from guillotina.schema.interfaces import IFloat
+from guillotina.schema.interfaces import IInt
+from guillotina.schema.interfaces import IObject
+from guillotina.schema.interfaces import IText
+from guillotina.schema.interfaces import ITextLine
+from guillotina.schema.interfaces import ITime
 
 
 @configure.adapter(

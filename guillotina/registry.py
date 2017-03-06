@@ -5,7 +5,7 @@ from guillotina.interfaces import IRegistry
 from guillotina.db.orm.interfaces import IBaseObject
 from zope.interface import alsoProvides
 from zope.interface import implementer_only
-from zope.schema._bootstrapinterfaces import IContextAwareDefaultFactory
+from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 
 
 class RecordsProxy(object):

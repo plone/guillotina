@@ -4,10 +4,10 @@ from zope.component.interfaces import ISite as IZopeSite
 from zope.component.interfaces import IFactory
 from zope.interface import Attribute
 from zope.interface import Interface
-from zope.schema import TextLine
+from guillotina.schema import TextLine
 
 # NEED use this import because we have a "schema" attribute below
-import zope.schema
+import guillotina.schema
 
 
 class IRegistry(IMapping):
@@ -78,16 +78,16 @@ class ILocation(Interface):
 
 class IResource(ILocation):
 
-    portal_type = zope.schema.TextLine()
+    portal_type = guillotina.schema.TextLine()
 
-    title = zope.schema.TextLine(
+    title = guillotina.schema.TextLine(
         title='Title',
         required=False,
         description=u'Title of the Resource',
         default=u''
     )
 
-    __behaviors__ = zope.schema.FrozenSet(
+    __behaviors__ = guillotina.schema.FrozenSet(
         title='Enabled behaviors',
         required=False,
         description=u'Dynamic behaviors for the content type',
@@ -97,26 +97,26 @@ class IResource(ILocation):
 
 class IResourceFactory(IFactory):
 
-    portal_type = zope.schema.TextLine(
+    portal_type = guillotina.schema.TextLine(
         title='Portal type name',
         description='The portal type this is an FTI for'
     )
 
-    schema = zope.schema.DottedName(
+    schema = guillotina.schema.DottedName(
         title='Schema interface',
         description='Dotted name to an interface describing the type. '
                     'This is not required if there is a model file or a '
                     'model source string containing an unnamed schema.'
     )
 
-    behaviors = zope.schema.List(
+    behaviors = guillotina.schema.List(
         title='Behaviors',
         description='A list of behaviors that are enabled for this type. '
                     'See guillotina.behaviors for more details.',
-        value_type=zope.schema.DottedName(title='Behavior name')
+        value_type=guillotina.schema.DottedName(title='Behavior name')
     )
 
-    add_permission = zope.schema.DottedName(
+    add_permission = guillotina.schema.DottedName(
         title='Add permission',
         description='A oermission name for the permission required to '
                     'construct this content',

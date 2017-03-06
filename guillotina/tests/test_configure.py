@@ -76,7 +76,7 @@ class TestConfigure(GuillotinaFunctionalTestCase):
 
         from guillotina.interfaces import IFormFieldProvider
         from zope.interface import provider
-        from zope import schema
+        from guillotina import schema
 
         @provider(IFormFieldProvider)
         class IMyBehavior(Interface):

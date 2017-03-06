@@ -16,7 +16,7 @@ from guillotina.jsonfield import JSONField
 from guillotina.security.policy import Interaction
 from zope.component import getUtility
 from zope.interface import implementer
-from zope.schema import List
+from guillotina.schema import List
 
 import asyncio
 import base64

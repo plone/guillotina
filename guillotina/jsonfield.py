@@ -3,9 +3,9 @@ from guillotina.interfaces import IJSONField
 from jsonschema import validate
 from jsonschema import ValidationError
 from zope.interface import implementer
-from zope.schema._bootstrapfields import Field
-from zope.schema.interfaces import WrongContainedType
-from zope.schema.interfaces import WrongType
+from guillotina.schema._bootstrapfields import Field
+from guillotina.schema.interfaces import WrongContainedType
+from guillotina.schema.interfaces import WrongType
 
 import json
 

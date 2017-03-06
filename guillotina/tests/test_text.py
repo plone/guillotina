@@ -11,9 +11,9 @@ from zope.component import provideAdapter
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
-from zope.schema._bootstrapinterfaces import ConstraintNotSatisfied
-from zope.schema._bootstrapinterfaces import WrongType
-from zope.schema.interfaces import IFromUnicode
+from guillotina.schema._bootstrapinterfaces import ConstraintNotSatisfied
+from guillotina.schema._bootstrapinterfaces import WrongType
+from guillotina.schema.interfaces import IFromUnicode
 
 
 class IContent(Interface):

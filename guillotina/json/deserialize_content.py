@@ -17,8 +17,8 @@ from zope.component import queryMultiAdapter
 from zope.component import queryUtility
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
-from zope.schema import getFields
-from zope.schema.interfaces import ValidationError
+from guillotina.schema import getFields
+from guillotina.schema.interfaces import ValidationError
 
 
 @configure.adapter(

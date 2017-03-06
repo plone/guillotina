@@ -20,7 +20,7 @@ difficult to remove
 - zope.component
 - zope.event(z.component depends on)
 - ZODB
-- zope.schema
+- guillotina.schema
 - zope.annotation -> with db changes...
 - zodbpickle
 - ZConfig

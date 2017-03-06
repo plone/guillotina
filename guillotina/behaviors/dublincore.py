@@ -7,7 +7,7 @@ from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index
 from guillotina.interfaces import IFormFieldProvider
-from zope import schema
+from guillotina import schema
 from zope.interface import Interface
 from zope.interface import provider
 

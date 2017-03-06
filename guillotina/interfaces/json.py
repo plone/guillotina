@@ -1,7 +1,7 @@
 from zope.i18nmessageid import MessageFactory
 from zope.interface import Attribute
 from zope.interface import Interface
-from zope.schema.interfaces import IField
+from guillotina.schema.interfaces import IField
 
 
 _ = MessageFactory('guillotina')
@@ -117,4 +117,4 @@ class IResourceFieldDeserializer(Interface):
 
 
 class IJSONToValue(Interface):
-    """Adapter to transform JSON value to zope.schema value."""
+    """Adapter to transform JSON value to guillotina.schema value."""

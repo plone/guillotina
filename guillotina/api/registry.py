@@ -14,7 +14,7 @@ from guillotina.utils import resolve
 from zope.component import getMultiAdapter
 from zope.i18nmessageid import MessageFactory
 from zope.interface.interfaces import ComponentLookupError
-from zope.schema import getFields
+from guillotina.schema import getFields
 
 
 _ = MessageFactory('guillotina')
@@ -83,7 +83,7 @@ class Register(Service):
         config = registry.for_interface(iObject)
 
         # Initialize values
-        # If its defined on the zope.schema default will not be overwritten
+        # If its defined on the guillotina.schema default will not be overwritten
         #  you will need to PATCH
         for key, field in getFields(iObject).items():
             if key in initial_values and not getattr(config, key, False):

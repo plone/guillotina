@@ -65,7 +65,6 @@ setup(
         'zope.i18n',
         'zope.i18nmessageid',
         'zope.interface',
-        'zope.schema',
         'zope.annotation',
         'pyjwt',
         'requests',

@@ -3,7 +3,7 @@ from guillotina import configure
 from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.json.serialize_value import json_compatible
 from zope.interface import Interface
-from zope.schema.interfaces import IField
+from guillotina.schema.interfaces import IField
 
 
 @configure.adapter(

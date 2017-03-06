@@ -45,7 +45,7 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import noLongerProvides
-from zope.schema.interfaces import IContextAwareDefaultFactory
+from guillotina.schema.interfaces import IContextAwareDefaultFactory
 
 import guillotina.db.orm.base
 import pathlib

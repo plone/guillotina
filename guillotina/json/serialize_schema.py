@@ -7,7 +7,7 @@ from guillotina.interfaces import ISchemaSerializeToJson
 from zope.component import getMultiAdapter
 from zope.component.interfaces import IFactory
 from zope.interface import Interface
-from zope.schema import getFieldsInOrder
+from guillotina.schema import getFieldsInOrder
 
 
 @configure.adapter(

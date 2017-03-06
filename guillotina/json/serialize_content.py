@@ -16,7 +16,7 @@ from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
 from zope.interface import Interface
-from zope.schema import getFields
+from guillotina.schema import getFields
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 import asyncio

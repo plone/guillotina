@@ -2,7 +2,7 @@
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.tests import TEST_RESOURCES_DIR
-from zope import schema
+from guillotina import schema
 from zope.interface import Interface
 
 import json

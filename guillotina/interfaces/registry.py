@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from zope.interface import Interface
-from zope import schema
+from guillotina import schema
 from zope.i18nmessageid import MessageFactory
 
 _ = MessageFactory('guillotina')

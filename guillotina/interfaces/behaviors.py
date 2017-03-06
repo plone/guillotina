@@ -1,4 +1,4 @@
-from zope import schema
+from guillotina import schema
 from zope.interface import Interface
 from zope.interface.interfaces import IInterface
 

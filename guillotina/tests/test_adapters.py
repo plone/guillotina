@@ -27,7 +27,7 @@ from guillotina.json.serialize_content import SerializeToJson
 from guillotina.security.policy import Interaction
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.text import RichText
-from zope import schema
+from guillotina import schema
 from zope.component import getAdapter
 from zope.component import getMultiAdapter
 from zope.component import getUtility
@@ -113,7 +113,7 @@ class TestSerializerFieldAdapters(GuillotinaFunctionalTestCase):
 class TestSerializerValueAdapters(GuillotinaFunctionalTestCase):
 
     def test_vocabulary(self):
-        from zope.schema.vocabulary import SimpleVocabulary
+        from guillotina.schema.vocabulary import SimpleVocabulary
         vocab = SimpleVocabulary.fromItems((
             (u"Foo", "id_foo"),
             (u"Bar", "id_bar")))

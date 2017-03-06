@@ -12,7 +12,7 @@ from guillotina.utils import import_class
 from zope.component import getMultiAdapter
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from zope.schema import Object
+from guillotina.schema import Object
 
 import io
 import mimetypes

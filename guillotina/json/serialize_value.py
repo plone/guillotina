@@ -8,7 +8,7 @@ from guillotina.interfaces import IValueToJson
 from guillotina.text import IRichTextValue
 from zope.i18nmessageid.message import Message
 from zope.interface import Interface
-from zope.schema.vocabulary import SimpleVocabulary
+from guillotina.schema.vocabulary import SimpleVocabulary
 
 
 try:

@@ -7,10 +7,10 @@ from guillotina.interfaces import ITransformer
 from zope.component import queryAdapter
 from zope.interface import implementer
 from zope.interface import Invalid
-from zope.schema import Object
-from zope.schema._bootstrapinterfaces import ConstraintNotSatisfied
-from zope.schema.interfaces import IFromUnicode
-from zope.schema.interfaces import WrongType
+from guillotina.schema import Object
+from guillotina.schema._bootstrapinterfaces import ConstraintNotSatisfied
+from guillotina.schema.interfaces import IFromUnicode
+from guillotina.schema.interfaces import WrongType
 
 
 class RawValueHolder(BaseObject):

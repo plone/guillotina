@@ -1,6 +1,8 @@
 1.0.0a1 (unreleased)
 --------------------
 
+- move zope.schema into guillotina
+  [vangheem]
 
 - move get_current_request to guillotina.utils
   [vangheem]
@@ -116,7 +118,7 @@ New features:
 
 Fixes:
 
-- Use zope.schema getter and setter to set attributes
+- Use guillotina.schema getter and setter to set attributes
   [ramonnb]
 
 New features:
