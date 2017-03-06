@@ -163,6 +163,7 @@ class APgStorage(object):
             CREATE INDEX IF NOT EXISTS object_of ON objects (of);
             CREATE INDEX IF NOT EXISTS object_part ON objects (part);
             CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);
+            CREATE INDEX IF NOT EXISTS object_id ON objects (id);
             """
 
         install_psql = """
@@ -285,6 +286,7 @@ class APgStorage(object):
         await txn._db_conn.execute(current)
 
     async def store(self, oid, old_serial, writer, obj, txn):
+        assert oid is not None
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
             self._log.warn("Too long object %d" % (obj.__class__, len(p)))

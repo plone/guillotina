@@ -2,6 +2,7 @@ from guillotina import configure
 from guillotina.db.db import GuillotinaDB
 from guillotina.db.storage import APgStorage
 from guillotina.factory.content import Database
+from guillotina.db.dummy import DummyStorage
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.utils import resolve_or_get
 
@@ -20,5 +21,15 @@ async def DatabaseConfigurationFactory(key, dbconfig, app):
     dbc = {}
     dbc['database_name'] = key
     db = GuillotinaDB(aps, **dbc)
+    await db.initialize()
+    return Database(key, db, asyncdb=True)
+
+
+@configure.utility(provides=IDatabaseConfigurationFactory, name="DUMMY")
+async def DatabaseConfigurationFactory(key, dbconfig, app):
+    dss = DummyStorage()
+    dbc = {}
+    dbc['database_name'] = key
+    db = GuillotinaDB(dss, **dbc)
     await db.initialize()
     return Database(key, db, asyncdb=True)

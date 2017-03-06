@@ -118,10 +118,7 @@ async def traverse(request, parent, path):
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
-        if hasattr(request, '_asyncdb') and request._asyncdb:
-            context = await parent.get(path[0])
-        else:
-            context = parent[path[0]]
+        context = await parent.get(path[0])
     except TypeError:
         return parent, path
     except KeyError:
@@ -130,30 +127,18 @@ async def traverse(request, parent, path):
     if IDatabase.providedBy(context):
         request._db_write_enabled = False
         request._db_id = context.id
-        request._asyncdb = context.is_async()
-        if request._asyncdb:
-            # Create a transaction Manager
-            request._tm = context.new_transaction_manager()
-            # Start a transaction
-            await request._tm.begin(request=request)
-            # Get the root of the tree
-            context = await request._tm.root()
-        else:
-            # Create a new conection
-            request.conn = context.open()
-            request.conn.transaction_manager.begin(request)
-            context = request.conn.root()
-        # Check the transaction
+        # Create a transaction Manager
+        request._tm = context.new_transaction_manager()
+        # Start a transaction
+        await request._tm.begin(request=request)
+        # Get the root of the tree
+        context = await request._tm.root()
 
     if ISite.providedBy(context):
         request._site_id = context.id
         request.site = context
-        if hasattr(request, '_asyncdb') and request._asyncdb:
-            request.site_settings = await context.__getitem__('_registry')
-            layers = getattr(request.site_settings, ACTIVE_LAYERS_KEY, [])
-        else:
-            request.site_settings = context['_registry']
-            layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
+        request.site_settings = await context.__getitem__('_registry')
+        layers = getattr(request.site_settings, ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
 

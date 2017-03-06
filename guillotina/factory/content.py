@@ -94,21 +94,14 @@ class ApplicationRoot(object):
 
 @implementer(IDatabase)
 class Database(object):
-    def __init__(self, id, db, asyncdb=False, tm=None):
+    def __init__(self, id, db, tm=None):
         self.id = id
         self._db = db
         self._conn = None
-        self._asyncdb = asyncdb
         self.tm = tm
 
     def get_transaction_manager(self):
         return self.tm_
-
-    def is_async(self):
-        return self._asyncdb
-
-    def open(self):
-        return self._db.open(transaction_manager=self.tm)
 
     def new_transaction_manager(self):
         return self._db.new_transaction_manager()
