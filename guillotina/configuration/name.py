@@ -11,11 +11,10 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Provide configuration object name resolution
-"""
+from types import ModuleType
 
 import os
-from types import ModuleType
+
 
 def resolve(name, package='zopeproducts', _silly=('__doc__',), _globals={}):
     name = name.strip()
@@ -68,6 +67,7 @@ def getNormalizedName(name, package):
     if repeat:
         name += "+"
     return name
+
 
 def path(file='', package='zopeproducts', _silly=('__doc__',), _globals={}):
     # XXX WTF? why not look for abspath before importing?

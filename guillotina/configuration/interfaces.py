@@ -13,13 +13,15 @@
 ##############################################################################
 """Zope Configuration (ZCML) interfaces
 """
-from zope.interface import Interface
+from guillotina.configuration._compat import u
 from guillotina.schema import BytesLine
 from guillotina.schema.interfaces import ValidationError
-from guillotina.configuration._compat import u
+from zope.interface import Interface
+
 
 class InvalidToken(ValidationError):
     """Invaid token in list."""
+
 
 class IConfigurationContext(Interface):
     """Configuration Context

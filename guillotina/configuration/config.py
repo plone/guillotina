@@ -42,7 +42,7 @@ zopens = 'http://namespaces.zope.org/zope'
 metans = 'http://namespaces.zope.org/meta'
 testns = 'http://namespaces.zope.org/test'
 
-_import_chickens = {}, {}, ("*",) # dead chickens needed by __import__
+_import_chickens = {}, {}, ("*",)  # dead chickens needed by __import__
 
 
 class ConfigurationContext(object):
@@ -160,7 +160,6 @@ class ConfigurationContext(object):
             # see not mname case above
             return mod
 
-
         try:
             obj = getattr(mod, oname)
             return obj
@@ -219,7 +218,7 @@ class ConfigurationContext(object):
         the file needs to be processed, it will be marked as
         processed, assuming that the caller will procces the file if
         it needs to be procssed.
-        """ #' <-- bow to font-lock
+        """
         path = self.path(filename)
         if path in self._seen_files:
             return False
@@ -246,7 +245,7 @@ class ConfigurationContext(object):
 
         if includepath is None:
             includepath = getattr(self, 'includepath', ())
-            
+
         action.update(
             dict(
                 discriminator=discriminator,
@@ -279,7 +278,6 @@ class ConfigurationContext(object):
 class ConfigurationAdapterRegistry(object):
     """Simple adapter registry that manages directives as adapters
     """
-
 
     def __init__(self):
         super(ConfigurationAdapterRegistry, self).__init__()
@@ -315,6 +313,7 @@ class ConfigurationAdapterRegistry(object):
             raise ConfigurationError(
                 "The directive %s cannot be used in this context" % (name, ))
         return f
+
 
 @implementer(IConfigurationContext)
 class ConfigurationMachine(ConfigurationAdapterRegistry, ConfigurationContext):
@@ -369,7 +368,7 @@ class ConfigurationMachine(ConfigurationAdapterRegistry, ConfigurationContext):
                 info = action['info']
                 try:
                     callable(*args, **kw)
-                except (KeyboardInterrupt, SystemExit): #pragma NO COVER
+                except (KeyboardInterrupt, SystemExit):  # pragma NO COVER
                     raise
                 except:
                     if testing:
@@ -379,23 +378,25 @@ class ConfigurationMachine(ConfigurationAdapterRegistry, ConfigurationContext):
                         reraise(ConfigurationExecutionError(t, v, info),
                                 None, tb)
                     finally:
-                       del t, v, tb
-                
+                        del t, v, tb
+
         finally:
             if clear:
                 del self.actions[:]
-        
+
+
 class ConfigurationExecutionError(ConfigurationError):
     """An error occurred during execution of a configuration action
     """
     def __init__(self, etype, evalue, info):
         self.etype, self.evalue, self.info = etype, evalue, info
 
-    def __str__(self): #pragma NO COVER
+    def __str__(self):  # pragma NO COVER
         return "%s: %s\n  in:\n  %s" % (self.etype, self.evalue, self.info)
 
 ##############################################################################
 # Stack items
+
 
 class IStackItem(Interface):
     """Configuration machine stack items
@@ -421,6 +422,7 @@ class IStackItem(Interface):
         """Finish processing a directive
         """
 
+
 @implementer(IStackItem)
 class SimpleStackItem(object):
     """Simple stack item
@@ -432,7 +434,7 @@ class SimpleStackItem(object):
     It also defers any computation until the end of the directive
     has been reached.
     """
-    #XXX why this *argdata hack instead of schema, data?
+    # XXX why this *argdata hack instead of schema, data?
     def __init__(self, context, handler, info, *argdata):
         newcontext = GroupingContextDecorator(context)
         newcontext.info = info
@@ -455,8 +457,9 @@ class SimpleStackItem(object):
             # we allow the handler to return nothing
             for action in actions:
                 if not isinstance(action, dict):
-                    action = expand_action(*action) # b/c
+                    action = expand_action(*action)  # b/c
                 context.action(**action)
+
 
 @implementer(IStackItem)
 class RootStackItem(object):
@@ -478,6 +481,7 @@ class RootStackItem(object):
 
     def finish(self):
         pass
+
 
 @implementer(IStackItem)
 class GroupingStackItem(RootStackItem):
@@ -517,6 +521,7 @@ class GroupingStackItem(RootStackItem):
                     action = expand_action(*action)
                 self.context.action(**action)
 
+
 def noop():
     pass
 
@@ -550,7 +555,7 @@ class ComplexStackItem(object):
         schema = self.meta.get(name)
         if schema is None:
             raise ConfigurationError("Invalid directive", name)
-        schema = schema[0] # strip off info
+        schema = schema[0]  # strip off info
         handler = getattr(self.handler, name)
         return SimpleStackItem(self.context, handler, info, schema, data)
 
@@ -562,10 +567,10 @@ class ComplexStackItem(object):
             actions = self.handler()
         except AttributeError as v:
             if v.args[0] == '__call__':
-                return # noncallable
+                return  # noncallable
             raise
         except TypeError:
-            return # non callable
+            return  # non callable
 
         if actions:
             # we allow the handler to return nothing
@@ -606,9 +611,11 @@ class GroupingContextDecorator(ConfigurationContext):
 ##############################################################################
 # Directive-definition
 
+
 class DirectiveSchema(GlobalInterface):
     """A field that contains a global variable value that must be a schema
     """
+
 
 class IDirectivesInfo(Interface):
     """Schema for the ``directives`` directive
@@ -640,35 +647,37 @@ class IDirectiveInfo(Interface):
     """
 
     name = TextLine(
-        title = u("Directive name"),
-        description = u("The name of the directive being defined"),
+        title=u("Directive name"),
+        description=u("The name of the directive being defined"),
         )
 
     schema = DirectiveSchema(
-        title = u("Directive handler"),
-        description = u("The dotted name of the directive handler"),
+        title=u("Directive handler"),
+        description=u("The dotted name of the directive handler"),
         )
+
 
 class IFullInfo(IDirectiveInfo):
     """Information that all top-level directives (not subdirectives) have
     """
 
     handler = GlobalObject(
-        title = u("Directive handler"),
-        description = u("The dotted name of the directive handler"),
+        title=u("Directive handler"),
+        description=u("The dotted name of the directive handler"),
         )
 
     usedIn = GlobalInterface(
-        title = u("The directive types the directive can be used in"),
-        description = u("The interface of the directives that can contain "
-                        "the directive"
-                       ),
-        default = IConfigurationContext,
+        title=u("The directive types the directive can be used in"),
+        description=u("The interface of the directives that can contain "
+                      "the directive"),
+        default=IConfigurationContext,
         )
+
 
 class IStandaloneDirectiveInfo(IDirectivesInfo, IFullInfo):
     """Info for full directives defined outside a directives directives
     """
+
 
 def defineSimpleDirective(context, name, schema, handler,
                           namespace='', usedIn=IConfigurationContext):
@@ -689,6 +698,7 @@ def defineSimpleDirective(context, name, schema, handler,
 
     context.register(usedIn, name, factory)
     context.document(name, schema, usedIn, handler, context.info)
+
 
 def defineGroupingDirective(context, name, schema, handler,
                             namespace='', usedIn=IConfigurationContext):
@@ -733,6 +743,7 @@ class ComplexDirectiveDefinition(GroupingContextDecorator, dict):
         self.document((self.namespace, self.name), self.schema, self.usedIn,
                       self.handler, self.info)
 
+
 def subdirective(context, name, schema):
     context.document((context.namespace, name), schema, context.usedIn,
                      getattr(context.handler, name, context.handler),
@@ -742,16 +753,18 @@ def subdirective(context, name, schema):
 ##############################################################################
 # Features
 
+
 class IProvidesDirectiveInfo(Interface):
     """Information for a <meta:provides> directive"""
 
     feature = TextLine(
-        title = u("Feature name"),
-        description = u("""The name of the feature being provided
+        title=u("Feature name"),
+        description=u("""The name of the feature being provided
 
         You can test available features with zcml:condition="have featurename".
         """),
         )
+
 
 def provides(context, feature):
     """Declare that a feature is provided in context.
@@ -821,6 +834,7 @@ def toargs(context, schema, data):
 ##############################################################################
 # Conflict resolution
 
+
 def expand_action(discriminator, callable=None, args=(), kw=None,
                   includepath=(), info=None, order=0, **extra):
     if kw is None:
@@ -838,6 +852,7 @@ def expand_action(discriminator, callable=None, args=(), kw=None,
             )
         )
     return action
+
 
 def resolveConflicts(actions):
     """Resolve conflicting actions
@@ -907,8 +922,7 @@ def resolveConflicts(actions):
         for _, _, action in rest:
             includepath = action['includepath']
             # Test whether path is a prefix of opath
-            if (includepath[:len(basepath)] != basepath # not a prefix
-                or includepath == basepath):
+            if (includepath[:len(basepath)] != basepath or includepath == basepath):
                 L = conflicts.setdefault(discriminator, [baseinfo])
                 L.append(action['info'])
 
@@ -924,7 +938,7 @@ class ConfigurationConflictError(ConfigurationError):
     def __init__(self, conflicts):
         self._conflicts = conflicts
 
-    def __str__(self): #pragma NO COVER
+    def __str__(self):  # pragma NO COVER
         r = ["Conflicting configuration actions"]
         items = self._conflicts.items()
         items.sort()
@@ -1034,4 +1048,3 @@ def _bootstrap(context):
             handler="guillotina.configuration.config.provides",
             schema="guillotina.configuration.config.IProvidesDirectiveInfo"
             )
-

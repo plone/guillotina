@@ -13,11 +13,9 @@
 ##############################################################################
 """Configuration-specific schema fields
 """
-import os
-import re
-import warnings
-
-from zope.interface import implementer
+from guillotina.configuration._compat import u
+from guillotina.configuration.exceptions import ConfigurationError
+from guillotina.configuration.interfaces import InvalidToken
 from guillotina.schema import Bool as schema_Bool
 from guillotina.schema import Field
 from guillotina.schema import InterfaceField
@@ -26,10 +24,12 @@ from guillotina.schema import Text
 from guillotina.schema import TextLine
 from guillotina.schema import ValidationError
 from guillotina.schema.interfaces import IFromUnicode
+from zope.interface import implementer
 
-from guillotina.configuration.exceptions import ConfigurationError
-from guillotina.configuration.interfaces import InvalidToken
-from guillotina.configuration._compat import u
+import os
+import re
+import warnings
+
 
 PYIDENTIFIER_REGEX = u('\\A[a-zA-Z_]+[a-zA-Z0-9_]*\\Z')
 pyidentifierPattern = re.compile(PYIDENTIFIER_REGEX)
@@ -155,8 +155,8 @@ class MessageID(Text):
         if not domain:
             domain = 'untranslated'
             warnings.warn(
-                "You did not specify an i18n translation domain for the "\
-                "'%s' field in %s" % (self.getName(), context.info.file )
+                "You did not specify an i18n translation domain for the "
+                "'%s' field in %s" % (self.getName(), context.info.file)
                 )
         v = super(MessageID, self).fromUnicode(u)
 

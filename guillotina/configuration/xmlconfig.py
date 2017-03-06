@@ -11,27 +11,10 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Support for the XML configuration file format
-
-Note, for a detailed description of the way that conflicting
-configuration actions are resolved, see the detailed example in
-test_includeOverrides in tests/test_xmlconfig.py
-"""
-__docformat__ = 'restructuredtext'
-
-import errno
 from glob import glob
-import logging
-import os
-import sys
-from xml.sax import make_parser
-from xml.sax.xmlreader import InputSource
-from xml.sax.handler import ContentHandler, feature_namespaces
-from xml.sax import SAXParseException
-
-from zope.interface import Interface
-from guillotina.schema import NativeStringLine
-
+from guillotina.configuration._compat import reraise
+from guillotina.configuration._compat import StringIO
+from guillotina.configuration._compat import u
 from guillotina.configuration.config import ConfigurationMachine
 from guillotina.configuration.config import defineGroupingDirective
 from guillotina.configuration.config import defineSimpleDirective
@@ -42,9 +25,21 @@ from guillotina.configuration.exceptions import ConfigurationError
 from guillotina.configuration.fields import GlobalObject
 from guillotina.configuration.zopeconfigure import IZopeConfigure
 from guillotina.configuration.zopeconfigure import ZopeConfigure
-from guillotina.configuration._compat import StringIO
-from guillotina.configuration._compat import reraise
-from guillotina.configuration._compat import u
+from guillotina.schema import NativeStringLine
+from xml.sax import make_parser
+from xml.sax import SAXParseException
+from xml.sax.handler import ContentHandler
+from xml.sax.handler import feature_namespaces
+from xml.sax.xmlreader import InputSource
+from zope.interface import Interface
+
+import errno
+import logging
+import os
+import sys
+
+
+__docformat__ = 'restructuredtext'
 
 logger = logging.getLogger("config")
 
@@ -67,6 +62,7 @@ class ZopeXMLConfigurationError(ConfigurationError):
         return "%s\n    %s: %s" % (
             repr(self.info), self.etype.__name__, self.evalue)
 
+
 class ZopeSAXParseException(ConfigurationError):
     """Sax Parser errors, reformatted in an emacs friendly way
     """
@@ -80,6 +76,7 @@ class ZopeSAXParseException(ConfigurationError):
             return 'File "%s", line %s.%s, %s' % s
         else:
             return str(v)
+
 
 class ParserInfo(object):
     """Information about a directive based on parser data
@@ -122,17 +119,17 @@ class ParserInfo(object):
             src = "  Could not read source."
         else:
             ecolumn = self.ecolumn
-            if lines[-1][ecolumn:ecolumn+2] == '</': #pragma NO COVER
+            if lines[-1][ecolumn:ecolumn+2] == '</':  # pragma NO COVER
                 # We're pointing to the start of an end tag. Try to find
                 # the end
                 l = lines[-1].find('>', ecolumn)
                 if l >= 0:
                     lines[-1] = lines[-1][:l+1]
-            else: #pragma NO COVER
+            else:  # pragma NO COVER
                 lines[-1] = lines[-1][:ecolumn+1]
 
             column = self.column
-            if lines[0][:column].strip(): #pragma NO COVER
+            if lines[0][:column].strip():  # pragma NO COVER
                 # Remove text before start if it's noy whitespace
                 lines[0] = lines[0][self.column:]
 
@@ -140,13 +137,13 @@ class ParserInfo(object):
             blank = u('')
             try:
                 src = blank.join([pad + l for l in lines])
-            except UnicodeDecodeError: #pragma NO COVER
+            except UnicodeDecodeError:  # pragma NO COVER
                 # XXX:
                 # I hope so most internation zcml will use UTF-8 as encoding
                 # otherwise this code must be made more clever
                 src = blank.join([pad + l.decode('utf-8') for l in lines])
                 # unicode won't be printable, at least on my console
-                src = src.encode('ascii','replace')
+                src = src.encode('ascii', 'replace')
 
         return "%s\n%s" % (repr(self), src)
 
@@ -202,7 +199,7 @@ class ConfigurationHandler(ContentHandler):
 
         try:
             self.context.begin(name, data, info)
-        except (KeyboardInterrupt, SystemExit): #pragma NO COVER
+        except (KeyboardInterrupt, SystemExit):  # pragma NO COVER
             raise
         except:
             if self.testing:
@@ -270,7 +267,7 @@ class ConfigurationHandler(ContentHandler):
 
         try:
             self.context.end()
-        except (KeyboardInterrupt, SystemExit): #pragma NO COVER
+        except (KeyboardInterrupt, SystemExit):  # pragma NO COVER
             raise
         except:
             if self.testing:
@@ -403,9 +400,10 @@ def include(_context, file=None, package=None, files=None):
             assert _context.stack[-1].context is context
             _context.stack.pop()
 
+
 def exclude(_context, file=None, package=None, files=None):
     """Exclude a zcml file
-    
+
     This directive should be used before any ZML that includes
     configuration you want to exclude.
     """
@@ -415,7 +413,6 @@ def exclude(_context, file=None, package=None, files=None):
             raise ValueError("Must specify only one of file or files")
     elif not file:
         file = 'configure.zcml'
-
 
     context = GroupingContextDecorator(_context)
     if package is not None:
@@ -435,6 +432,7 @@ def exclude(_context, file=None, package=None, files=None):
         # here the side effect is used to keep the given file from being
         # processed in the future
         context.processFile(path)
+
 
 def includeOverrides(_context, file=None, package=None, files=None):
     """Include zcml file containing overrides
@@ -465,6 +463,7 @@ def includeOverrides(_context, file=None, package=None, files=None):
 
     _context.actions[nactions:] = newactions
 
+
 def registerCommonDirectives(context):
     # We have to use the direct definition functions to define
     # a directive for all namespaces.
@@ -486,6 +485,7 @@ def registerCommonDirectives(context):
         handler=ZopeConfigure,
         )
 
+
 def file(name, package=None, context=None, execute=True):
     """Execute a zcml file
     """
@@ -500,6 +500,7 @@ def file(name, package=None, context=None, execute=True):
         context.execute_actions()
 
     return context
+
 
 def string(s, context=None, name="<string>", execute=True):
     """Execute a zcml string
@@ -523,10 +524,13 @@ def string(s, context=None, name="<string>", execute=True):
 
 
 _context = None
+
+
 def _clearContext():
     global _context
     _context = ConfigurationMachine()
     registerCommonDirectives(_context)
+
 
 def _getContext():
     global _context
@@ -534,12 +538,13 @@ def _getContext():
         _clearContext()
         try:
             from zope.testing.cleanup import addCleanUp
-        except ImportError: #pragma NO COVER
+        except ImportError:  # pragma NO COVER
             pass
-        else: #pragma NO COVER
+        else:  # pragma NO COVER
             addCleanUp(_clearContext)
             del addCleanUp
     return _context
+
 
 class XMLConfig(object):
     """Provide high-level handling of configuration files.
@@ -555,6 +560,7 @@ class XMLConfig(object):
     def __call__(self):
         self.context.execute_actions()
 
+
 def xmlconfig(file, testing=False):
     context = _getContext()
     processxmlfile(file, context, testing=testing)
@@ -569,4 +575,3 @@ def testxmlconfig(file):
     context = _getContext()
     processxmlfile(file, context, testing=True)
     context.execute_actions(testing=True)
-

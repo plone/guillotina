@@ -97,15 +97,16 @@ documentation, which is provided by the schema.
 lower-level Python API because it is registered for all namespaces,
 which isn't supported using the meta-configuration directives.)
 """
-__docformat__ = 'restructuredtext'
-import os
-
-from zope.interface import Interface
-from guillotina.schema import BytesLine
-
+from guillotina.configuration._compat import u
 from guillotina.configuration.config import GroupingContextDecorator
 from guillotina.configuration.fields import GlobalObject
-from guillotina.configuration._compat import u
+from guillotina.schema import BytesLine
+from zope.interface import Interface
+
+import os
+
+__docformat__ = 'restructuredtext'
+
 
 class IZopeConfigure(Interface):
     """The ``zope:configure`` Directive
@@ -117,7 +118,7 @@ class IZopeConfigure(Interface):
     information collected is used by subdirectives.
 
     It may seem that this directive can only be used once per file, but it can
-    be applied whereever it is convenient. 
+    be applied whereever it is convenient.
     """
 
     package = GlobalObject(
@@ -146,4 +147,3 @@ class ZopeConfigure(GroupingContextDecorator):
             # if we have a package, we want to also define basepath
             # so we don't acquire one
             self.basepath = os.path.dirname(self.package.__file__)
-
