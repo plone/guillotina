@@ -15,22 +15,19 @@ Package removal/replacements...
 difficult to remove
 -------------------
 
-- zope.proxy
-- zope.configuration
-- zope.component
-- zope.event(z.component depends on)
-- ZODB
-- guillotina.schema
 - zope.annotation -> with db changes...
-- zodbpickle
-- ZConfig
-- zc.lockfile
-- transaction
-- BTrees
-- persistent
-
-
-?
--
-- zope.i18nmessageid
+  - zope.schema
+  - zope.proxy
+- zope.configuration
+  - zope.i18nmessageid
+  - zope.interface
+  - zope.schema
+- zope.component
+  - zope.event
+  - zope.interface
+- zope.event
 - zope.i18n
+  - zope.schema
+  - zope.i18nmessageid
+  - zope.component
+  - pytz
