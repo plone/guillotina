@@ -16,7 +16,7 @@ difficult to remove
 -------------------
 
 - zope.annotation -> with db changes...
-  - guillotina.schema
+  - zope.schema
   - zope.proxy
   - zope.location
   - zope.interface
