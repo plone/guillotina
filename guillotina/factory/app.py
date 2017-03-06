@@ -5,10 +5,10 @@ from guillotina import interfaces
 from guillotina import languages
 from guillotina import logger
 from guillotina.async import IAsyncUtility
-from guillotina.configuration.config import ConfigurationConflictError
-from guillotina.configuration.config import ConfigurationMachine
-from guillotina.configuration.xmlconfig import include
-from guillotina.configuration.xmlconfig import registerCommonDirectives
+from zope.configuration.config import ConfigurationConflictError
+from zope.configuration.config import ConfigurationMachine
+from zope.configuration.xmlconfig import include
+from zope.configuration.xmlconfig import registerCommonDirectives
 from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile

@@ -315,10 +315,7 @@ class DefaultDELETE(Service):
         content_id = self.context.id
         parent = self.context.__parent__
         await notify(BeforeObjectRemovedEvent(self.context, parent, content_id))
-        if self.request._asyncdb:
-            self.context._p_jar.delete(self.context)
-        else:
-            del parent[content_id]
+        self.context._p_jar.delete(self.context)
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 

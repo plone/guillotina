@@ -22,14 +22,14 @@ async def DatabaseConfigurationFactory(key, dbconfig, app):
     dbc['database_name'] = key
     db = GuillotinaDB(aps, **dbc)
     await db.initialize()
-    return Database(key, db, asyncdb=True)
+    return Database(key, db)
 
 
 @configure.utility(provides=IDatabaseConfigurationFactory, name="DUMMY")
-async def DatabaseConfigurationFactory(key, dbconfig, app):
+async def DummyDatabaseConfigurationFactory(key, dbconfig, app):
     dss = DummyStorage()
     dbc = {}
     dbc['database_name'] = key
     db = GuillotinaDB(dss, **dbc)
     await db.initialize()
-    return Database(key, db, asyncdb=True)
+    return Database(key, db)

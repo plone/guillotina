@@ -1,7 +1,7 @@
 1.0.0a1 (unreleased)
 --------------------
 
-- move zope.schema, zope.configuration into guillotina
+- move zope.schema into guillotina
   [vangheem]
 
 - move get_current_request to guillotina.utils
