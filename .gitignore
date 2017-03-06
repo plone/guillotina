@@ -16,3 +16,7 @@ data
 lib
 eggs
 extras
+.coverage
+data*
+include/
+pip-selfcheck.json
