@@ -5,7 +5,7 @@ from guillotina.browser import ErrorResponse
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import ISite
 from guillotina.utils import apply_coroutine
-from zope.i18nmessageid import MessageFactory
+from guillotina.i18n import MessageFactory
 
 
 _ = MessageFactory('guillotina')

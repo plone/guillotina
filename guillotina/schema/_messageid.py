@@ -12,5 +12,5 @@
 #
 ##############################################################################
 
-from zope.i18nmessageid import MessageFactory
+from guillotina.i18n import MessageFactory
 _ = MessageFactory("guillotina")

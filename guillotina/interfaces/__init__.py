@@ -90,7 +90,7 @@ from .views import IPOST  # noqa
 from .views import IPUT  # noqa
 from .views import ITraversableView  # noqa
 from .views import IView  # noqa
-from zope.i18nmessageid.message import MessageFactory
+from guillotina.i18n import MessageFactory
 from zope.interface import Interface
 
 

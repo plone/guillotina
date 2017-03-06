@@ -4,11 +4,11 @@ from datetime import datetime
 from datetime import time
 from datetime import timedelta
 from guillotina import configure
+from guillotina.i18n import Message
 from guillotina.interfaces import IValueToJson
-from guillotina.text import IRichTextValue
-from zope.i18nmessageid.message import Message
-from zope.interface import Interface
 from guillotina.schema.vocabulary import SimpleVocabulary
+from guillotina.text import IRichTextValue
+from zope.interface import Interface
 
 
 try:

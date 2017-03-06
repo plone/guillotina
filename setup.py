@@ -62,8 +62,6 @@ setup(
         'ujson',
         'zope.component',
         'zope.configuration',
-        'zope.i18n',
-        'zope.i18nmessageid',
         'zope.interface',
         'zope.annotation',
         'pyjwt',

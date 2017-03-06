@@ -1,5 +1,5 @@
 from guillotina import schema
-from zope.i18nmessageid import MessageFactory
+from guillotina.i18n import MessageFactory
 from zope.interface import Interface
 from guillotina.schema.interfaces import IObject
 

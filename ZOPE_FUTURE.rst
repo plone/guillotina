@@ -18,6 +18,9 @@ difficult to remove
 - zope.annotation -> with db changes...
   - zope.schema
   - zope.proxy
+  - zope.location
+  - zope.interface
+  - zope.component
 - zope.configuration
   - zope.i18nmessageid
   - zope.interface
@@ -26,8 +29,3 @@ difficult to remove
   - zope.event
   - zope.interface
 - zope.event
-- zope.i18n
-  - zope.schema
-  - zope.i18nmessageid
-  - zope.component
-  - pytz

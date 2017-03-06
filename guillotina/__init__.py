@@ -2,7 +2,7 @@
 
 # load the patch before anything else.
 from guillotina import patch  # noqa
-from zope.i18nmessageid import MessageFactory
+from guillotina.i18n import MessageFactory
 
 import logging
 
