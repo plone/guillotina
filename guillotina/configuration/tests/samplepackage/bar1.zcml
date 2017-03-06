@@ -1,0 +1,7 @@
+<configure xmlns="http://namespaces.zope.org/test">
+
+  <include file="configure.zcml" />
+   
+  <foo x="blah" y="1" />
+
+</configure>

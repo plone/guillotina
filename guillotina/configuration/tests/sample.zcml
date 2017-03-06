@@ -1,0 +1,7 @@
+<configure xmlns='http://namespaces.zope.org/zope'>
+  <!-- zope.configure -->
+  <directives namespace="http://namespaces.zope.org/zope">
+    <directive name="hook" attributes="name implementation module"
+       handler="guillotina.configuration.metaconfigure.hook" />
+  </directives>
+</configure>

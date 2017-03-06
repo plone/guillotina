@@ -1,0 +1,78 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:meta="http://namespaces.zope.org/meta"
+    xmlns:test="http://sample.namespaces.zope.org/test"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    >
+
+  <meta:directive
+      name="register"
+      namespace="http://sample.namespaces.zope.org/test"
+      schema=".conditions.IRegister"
+      handler=".conditions.register"
+      >
+    This registers a directive which creates registrations we can test.
+  </meta:directive>
+
+  <test:register id="unqualified.registration" />
+
+  <meta:provides feature="testfeature" />
+  <meta:provides feature="anothertestfeature" />
+
+  <configure zcml:condition="have testfeature">
+    ZCML directives inside here should be included.
+
+    <configure>
+      <test:register id="nested.true.condition" />
+    </configure>
+
+    <!-- These registrations stand on the basis of their own
+         conditions: -->
+    <test:register
+        zcml:condition="have anothertestfeature"
+        id="true.condition.nested.in.true"
+        />
+
+    <test:register
+        zcml:condition="have undefinedfeature"
+        id="false.condition.nested.in.true"
+        />
+
+  </configure>
+
+  <test:register
+      zcml:condition="have testfeature"
+      id="direct.true.condition"
+      >
+    This registration should be included.
+  </test:register>
+
+  <configure zcml:condition="have undefinedfeature">
+    ZCML directives inside here should be ignored.
+
+    <configure>
+      <test:register id="nested.false.condition" />
+    </configure>
+
+    <!-- These registrations are ignored, since the container is
+         ignored: -->
+    <test:register
+        zcml:condition="have testfeature"
+        id="true.condition.nested.in.false"
+        />
+
+    <test:register
+        zcml:condition="have undefinedfeature"
+        id="false.condition.nested.in.false"
+        />
+
+  </configure>
+
+  <test:register
+      zcml:condition="have undefinedfeature"
+      id="direct.false.condition"
+      >
+    This registration should be ignored.
+  </test:register>
+
+</configure>

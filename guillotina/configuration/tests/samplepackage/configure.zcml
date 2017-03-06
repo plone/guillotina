@@ -1,0 +1,14 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+               xmlns:meta="http://namespaces.zope.org/meta"
+               xmlns:test="http://namespaces.zope.org/test"
+  >
+  <meta:directive 
+      namespace="http://namespaces.zope.org/test"
+      name="foo"
+      schema="guillotina.configuration.tests.samplepackage.foo.S1"
+      handler="guillotina.configuration.tests.samplepackage.foo.handler"
+      />
+
+  <test:foo x="blah" y="0" />
+
+</configure>

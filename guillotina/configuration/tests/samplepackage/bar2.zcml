@@ -1,0 +1,8 @@
+<configure xmlns="http://namespaces.zope.org/test">
+
+  <include file="bar21.zcml" />
+   
+  <foo x="blah" y="2" />
+  <foo x="blah" y="1" />
+
+</configure>

@@ -1,0 +1,66 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:meta="http://namespaces.zope.org/meta"
+           xmlns:schema="http://sample.namespaces.zope.org/schema"
+           >
+
+  <meta:groupingDirective
+      name="schema"
+      namespace="http://sample.namespaces.zope.org/schema"
+      schema=".nested.ISchemaInfo"
+      handler=".nested.Schema"
+      >
+
+      Define a schema
+
+      Use field directives (e.g. text and int directives) to define
+      the schema fields.
+
+  </meta:groupingDirective>
+
+
+  <meta:directive
+      name="text"
+      namespace="http://sample.namespaces.zope.org/schema"
+      usedIn=".nested.ISchema"
+      schema=".nested.ITextInfo"
+      handler=".nested.textField"
+      >
+      
+      Define a text field
+  </meta:directive>
+
+  <meta:directive
+      name="int"
+      namespace="http://sample.namespaces.zope.org/schema"
+      usedIn=".nested.ISchema"
+      schema=".nested.IIntInfo"
+      handler=".nested.intField"
+      >
+      
+      Define an integer field
+  </meta:directive>
+
+  <schema:schema name="I1" id="guillotina.configuration.tests.nested.I1">
+      Sample interface I1
+  
+      <schema:text name="a" min_length="1">
+          A
+
+          Blah blah
+      </schema:text>
+  
+      <schema:int name="b" min="1" max="10">
+          B
+
+          Not feeling very creative
+      </schema:int>
+  </schema:schema>
+
+  <schema:schema name="I2" id="guillotina.configuration.tests.nested.I2">
+      Sample interface I2
+  
+      <schema:text name="x">X</schema:text>
+      <schema:text name="y" min_length="1" />
+  </schema:schema>
+
+</configure>

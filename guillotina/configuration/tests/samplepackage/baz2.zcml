@@ -1,0 +1,7 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+               xmlns:test="http://namespaces.zope.org/test"
+  >
+
+  <test:foo x="foo" y="2" />
+
+</configure>

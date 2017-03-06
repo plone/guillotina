@@ -61,7 +61,7 @@ setup(
         'six',
         'ujson',
         'zope.component',
-        'zope.configuration',
+        'guillotina.configuration',
         'zope.interface',
         'zope.annotation',
         'pyjwt',

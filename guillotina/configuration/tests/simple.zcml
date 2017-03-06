@@ -1,0 +1,37 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:meta="http://namespaces.zope.org/meta"
+           xmlns:files="http://sample.namespaces.zope.org/files"
+           >
+
+  <meta:directive
+      name="register"
+      namespace="http://sample.namespaces.zope.org/files"
+      schema=".simple.IRegisterFile"
+      handler=".simple.registerFile"
+      >
+
+      Register a file with the file registry
+
+      Blah blah blah :)
+
+  </meta:directive>
+
+  <files:register 
+      path="simple.py"
+      title="How to create a simple directive"
+      >
+    Describes how to implement a simple directive
+  </files:register>
+
+  <files:register path="simple.zcml">
+    Shows the ZCML directives needed to register a simple directive.
+    
+    Also show some usage examples,
+  </files:register>
+
+  <files:register path="__init__.py" title="Make this a package" />
+ 
+
+</configure>
+
+  

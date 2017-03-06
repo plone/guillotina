@@ -1,0 +1,6 @@
+<configure>
+
+  <include file="bar1.zcml" />
+  <includeOverrides file="bar2.zcml" />
+   
+</configure>

@@ -1,5 +1,5 @@
 # XXX INFO
-# This package is pulled out of zope.schema to give guillotina more control
+# This package is pulled out of guillotina.schema to give guillotina more control
 # over our use of fields(async) and to also provide a nicer api and less dependencies
 # in order to work with guillotina
 

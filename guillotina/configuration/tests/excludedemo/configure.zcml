@@ -1,0 +1,6 @@
+<configure>
+
+<include package=".sub" />
+<include file="spam.zcml" />
+
+</configure>

@@ -16,16 +16,13 @@ difficult to remove
 -------------------
 
 - zope.annotation -> with db changes...
-  - zope.schema
+  - guillotina.schema
   - zope.proxy
   - zope.location
   - zope.interface
   - zope.component
-- zope.configuration
-  - zope.i18nmessageid
-  - zope.interface
-  - zope.schema
 - zope.component
   - zope.event
   - zope.interface
 - zope.event
+- zope.interface

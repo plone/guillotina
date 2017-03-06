@@ -14,8 +14,8 @@ from guillotina.utils import dotted_name
 from guillotina.utils import resolve_module_path
 from guillotina.utils import resolve_or_get
 from zope.component import zcml
-from zope.configuration import xmlconfig
-from zope.configuration.exceptions import ConfigurationError
+from guillotina.configuration import xmlconfig
+from guillotina.configuration.exceptions import ConfigurationError
 from zope.interface import classImplements
 from zope.interface import Interface
 
