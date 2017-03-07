@@ -7,7 +7,6 @@ class DummyStorage(object):
     """Storage to a relational database, based on invalidation polling"""
 
     _last_transaction = 0
-    _last_oid = 0
 
     # MAIN MEMORY DB OBJECT OID -> OBJ
     DB = {}
@@ -18,6 +17,13 @@ class DummyStorage(object):
 
     # PARENT_ID INDEX (OID -> LIST OID)
     PARENT_ID = {}
+
+    # OF_ID INDEX
+    # TUPLE (OF_OID + ID) -> OID
+    OF_ID = {}
+
+    # OF INDEX (OID -> LIST OID)
+    OF = {}
 
     def __init__(self, folder=None):
         self._folder = folder
@@ -118,7 +124,12 @@ class DummyStorage(object):
                 self.PARENT_ID[element['parent_id']].append(oid)
             else:
                 self.PARENT_ID[element['parent_id']] = [oid]
+            if element['of'] in self.OF:
+                self.OF[element['of']].append(oid)
+            else:
+                self.OF[element['of']] = [oid]
             self.PARENT_ID_ID[(element['parent_id'], element['id'])] = oid
+            self.OF_ID[(element['of'], element['id'])] = oid
 
         return transaction._tid
 
@@ -148,3 +159,14 @@ class DummyStorage(object):
         for record in self.PARENT_ID[oid]:
             obj = await self.load(txn, record)
             yield obj
+
+    async def get_annotation(self, txn, oid, id):
+        oid = self.OF_ID[(oid, id)]
+        return await self.load(txn, oid)
+
+    async def get_annotations_keys(self, txn, oid):
+        keys = []
+        for record in self.OF[oid]:
+            obj = await self.load(txn, record)
+            keys.append(obj['id'])
+        return keys

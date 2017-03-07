@@ -137,3 +137,7 @@ class IContainer(IResource, IMapping):
 
 class IContentNegotiation(Interface):
     pass
+
+
+class IAnnotations(Interface):
+    pass

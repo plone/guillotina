@@ -24,7 +24,7 @@ class Writer(object):
 
     @property
     def of(self):
-        return getattr(self._obj, '_p_belongs', None)
+        return getattr(self._obj, '__of__', None)
 
     @property
     def type(self):

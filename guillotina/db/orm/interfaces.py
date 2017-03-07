@@ -127,7 +127,3 @@ class IBaseObject(Interface):
     def __reduce__():
         """Reduce an object to contituent parts for serialization.
         """
-
-
-class IAnnotation(Interface):
-    pass

@@ -1,9 +1,14 @@
 
 from guillotina.db.orm.base import BaseObject
-from guillotina.db.orm.interfaces import IAnnotation
+from guillotina.interfaces import IAnnotations
 from guillotina.db.transaction import Transaction
+from zope.interface import implementer
+
+from guillotina.interfaces import IResource
+import pytest
 
 
+@implementer(IResource)
 class TestObject(BaseObject):
     pass
 
@@ -11,36 +16,44 @@ class TestObject(BaseObject):
 async def test_create_object(dummy_txn_root):
     async for root in dummy_txn_root:
         assert isinstance(root._p_jar, Transaction)
+        assert root._p_jar._tid is None
         ob1 = TestObject()
         assert ob1._p_jar is None
         assert ob1._p_serial is None
         assert ob1._p_oid is None
         assert ob1.__parent__ is None
+        assert ob1._p_belongs is None
+        assert ob1.__name__ is None
 
         await root.__setitem__('ob1', ob1)
 
+        assert ob1.__name__ == 'ob1'
         assert ob1._p_jar == root._p_jar
         assert ob1._p_oid is not None
+        assert ob1._p_belongs is None
         assert ob1.__parent__ is root
 
+        assert len(ob1._p_jar.added) == 1
 
-async def test_create_subobject(dummy_txn_root):
+
+async def test_create_annotation(dummy_txn_root):
     async for root in dummy_txn_root:
-        pass
-    ob1 = TestObject()
-    assert ob1._p_jar is None
-    assert ob1._p_serial is None
-    await root.__setitem__('ob1', ob1)
-    ob2 = TestObject()
-    ob1.attribute = ob2
-    assert ob2._p_belongs == ob1._p_oid
-    assert ob2._p_oid is not None
-    assert ob2._p_jar is not None
+        ob1 = TestObject()
+        await root.__setitem__('ob1', ob1)
+        annotations = IAnnotations(ob1)
+        with pytest.raises(KeyError):
+            await annotations.__setitem__('test', 'hola')
 
+        ob2 = TestObject()
+        assert ob2.__of__ is None
+        assert ob2._p_jar is None
+        assert ob2.__name__ is None
+        assert ob2.__parent__ is None
+        assert len(ob1.__annotations__) == 0
 
-def test_create_annotation(guillotina_main):
-    ob1 = TestObject()
-    assert ob1._p_jar is None
-    assert ob1._p_serial is None
-    annotation = IAnnotation(ob1)
-    annotation._p_belongs == ob1._p_oid
+        await annotations.__setitem__('test2', ob2)
+        assert ob2.__of__ is ob1._p_oid
+        assert ob2._p_jar is ob1._p_jar
+        assert ob2.__name__ == 'test2'
+        assert ob2.__parent__ is None
+        assert len(ob1.__annotations__) == 1

@@ -52,7 +52,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__flags', '__size',
-        '__belongs', '__parent', '__annotations', '__name')
+        '__of', '__parent', '__annotations', '__name')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -61,7 +61,7 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__serial', None)
         _OSA(inst, '_BaseObject__flags', CHANGED)  # start with changed...
         _OSA(inst, '_BaseObject__size', 0)
-        _OSA(inst, '_BaseObject__belongs', None)
+        _OSA(inst, '_BaseObject__of', None)
         _OSA(inst, '_BaseObject__parent', None)
         _OSA(inst, '_BaseObject__name', None)
         _OSA(inst, '_BaseObject__annotations', {})
@@ -92,17 +92,17 @@ class BaseObject(object):
 
     __parent__ = property(_get_parent, _set_parent, _del_parent)
 
-    def _get_belongs(self):
+    def _get_of(self):
         # should be set when attribute is set...
-        return _OGA(self, '_BaseObject__belongs')
+        return _OGA(self, '_BaseObject__of')
 
-    def _set_belongs(self, value):
-        _OSA(self, '_BaseObject__belongs', value)
+    def _set_of(self, value):
+        _OSA(self, '_BaseObject__of', value)
 
-    def _del_belongs(self):
-        _OSA(self, '_BaseObject__belongs', None)
+    def _del_of(self):
+        _OSA(self, '_BaseObject__of', None)
 
-    _p_belongs = property(_get_belongs, _set_belongs, _del_belongs)
+    __of__ = property(_get_of, _set_of, _del_of)
 
     # _p_jar:  romantic name of the global connection obj.
     def _get_jar(self):
@@ -133,8 +133,6 @@ class BaseObject(object):
         return _OGA(self, '_BaseObject__serial')
 
     def _set_serial(self, value):
-        if not isinstance(value, int):
-            raise ValueError('Invalid SERIAL type: %s' % value)
         _OSA(self, '_BaseObject__serial', value)
 
     def _del_serial(self):
@@ -220,15 +218,6 @@ class BaseObject(object):
                 _OSA(self, '_BaseObject__flags', after)
                 _OGA(self, '_p_register')()
 
-        if IBaseObject.providedBy(value):
-            # make sure to set the belongs value of the persistent object
-            oid = _OGA(self, '_BaseObject__oid')
-            if oid is not None:
-                _OSA(value, '_BaseObject__belongs', oid)
-                # also, register this now...
-                _OSA(value, '_BaseObject__jar', _OGA(self, '_BaseObject__jar'))
-                _OGA(value, '_p_register')()
-
     def _slotnames(self):
         """Returns all the slot names from the object"""
         slotnames = copyreg._slotnames(type(self))
@@ -296,38 +285,24 @@ class BaseObject(object):
         if jar is not None and _OGA(self, '_BaseObject__oid') is not None:
             jar.unregister(self)
 
-    async def _get_annotation(self, key):
-        annotations = _OGA(self, '_BaseObject__annotations')
-        if key in annotations:
-            return annotations[key]
-        # Its not loaded we need to look at the txn
-        jar = _OGA(self, '_BaseObject__jar')
-        if jar is None:
-            raise Exception('TODO')
-        oid = _OGA(self, '_BaseObject__oid')
-        if oid is None:
-            raise Exception('TODO')
-        return await jar.get_annotation(oid, key)
+    def _get_name(self):
+        return _OGA(self, '_BaseObject__name')
 
-    async def _set_annotation(self, key, value):
-        annotations = _OGA(self, '_BaseObject__annotations')
+    def _set_name(self, value):
+        return _OSA(self, '_BaseObject__name', value)
 
-        oid = _OGA(self, '_BaseObject__oid')
-        if oid is None:
-            raise Exception('TODO')
-        _OSA(value, '_BaseObject__belongs', oid)
+    def _del_name(self):
+        return _OSA(self, '_BaseObject__name', None)
 
-        annotations[key] = value
-        jar = _OGA(self, '_BaseObject__jar')
-        return await jar.register(value)
+    __name__ = property(_get_name, _set_name, _del_name)
 
-    async def _del_annotation(self, key):
-        annotations = _OGA(self, '_BaseObject__annotations')
-        if key not in annotations:
-            return
+    def _get_annotation(self):
+        return _OGA(self, '_BaseObject__annotations')
 
-        value = annotations[key]
+    def _set_annotation(self, value):
+        _OSA(self, '_BaseObject__annotations', value)
 
-        del annotations[key]
-        jar = _OGA(self, '_BaseObject__jar')
-        return await jar.unregister(value)
+    def _del_annotation(self):
+        return _OSA(self, '_BaseObject__annotations', None)
+
+    __annotations__ = property(_get_annotation, _set_annotation, _del_annotation)

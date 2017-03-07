@@ -372,6 +372,7 @@ class Folder(Resource):
 
     async def __setitem__(self, key, value):
         value.__parent__ = self
+        value.__name__ = key
         if self._p_jar is not None:
             value._p_jar = self._p_jar
             self._p_jar.register(value)

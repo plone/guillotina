@@ -27,6 +27,12 @@ GET_SONS_KEYS = """
     WHERE parent_id = $1::int
     """
 
+GET_ANNOTATIONS_KEYS = """
+    SELECT id
+    FROM objects
+    WHERE of = $1::int
+    """
+
 GET_CHILD = """
     SELECT zoid, tid, state_size, resource, of, type, state
     FROM objects
@@ -37,6 +43,12 @@ EXIST_CHILD = """
     SELECT zoid
     FROM objects
     WHERE parent_id = $1::int AND id = $2::text
+    """
+
+GET_ANNOTATION = """
+    SELECT zoid, tid, state_size, resource, of, type, state
+    FROM objects
+    WHERE of = $1::int AND id = $2::text
     """
 
 MAX_TID = """
@@ -246,6 +258,8 @@ class APgStorage(object):
         txn._exist_child = await conn.prepare(EXIST_CHILD)
         txn._num_childs = await conn.prepare(NUM_CHILDS)
         txn._get_childs = await conn.prepare(GET_CHILDS)
+        txn._get_annotation = await conn.prepare(GET_ANNOTATION)
+        txn._get_annotations_keys = await conn.prepare(GET_ANNOTATIONS_KEYS)
 
     async def precommit(self, txn):
         async with self._lock:
@@ -364,3 +378,11 @@ class APgStorage(object):
     async def items(self, txn, oid):
         async for record in txn._get_childs.cursor(oid):
             yield record
+
+    async def get_annotation(self, txn, oid, id):
+        result = await txn._get_annotation.fetchrow(oid, id)
+        return result
+
+    async def get_annotation_keys(self, txn, oid):
+        result = await txn._get_annotations_keys.fetch(oid)
+        return result

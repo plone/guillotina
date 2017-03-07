@@ -30,6 +30,7 @@ class Transaction(object):
 
     def __init__(self, manager, request=None):
         self._txn_time = None
+        self._tid = None
         self.status = Status.ACTIVE
 
         # Transaction Manager

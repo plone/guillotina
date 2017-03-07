@@ -7,6 +7,7 @@ from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
 from .catalog import ISecurityInfo  # noqa
 from .configuration import IDatabaseConfigurationFactory  # noqa
+from .content import IAnnotations  # noqa
 from .content import IApplication  # noqa
 from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa
