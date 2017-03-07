@@ -126,18 +126,22 @@ class GuillotinaDBRequester(object):
         self.root = getUtility(IApplication, name='root')
         self.db = self.root['guillotina']
 
-    async def __call__(
-            self,
-            method,
-            path,
-            params=None,
-            data=None,
-            authenticated=True,
-            auth_type='Basic',
-            headers={},
-            token=ADMIN_TOKEN,
-            accept='application/json'):
+    async def __call__(self, method, path, params=None, data=None, authenticated=True,
+                       auth_type='Basic', headers={}, token=ADMIN_TOKEN, accept='application/json'):
 
+        resp = await self.make_request(method, path, params, data, authenticated,
+                                       auth_type, headers, token, accept)
+        try:
+            value = await resp.json()
+            status = resp.status
+        except:
+            value = await resp.read()
+            status = resp.status
+        return value, status
+
+    async def make_request(self, method, path, params=None, data=None,
+                           authenticated=True, auth_type='Basic', headers={},
+                           token=ADMIN_TOKEN, accept='application/json'):
         settings = {}
         settings['headers'] = headers
         if accept is not None:
@@ -152,13 +156,7 @@ class GuillotinaDBRequester(object):
         async with aiohttp.ClientSession(loop=self.loop) as session:
             operation = getattr(session, method.lower(), None)
             async with operation(self.server.make_url(path), **settings) as resp:
-                try:
-                    value = await resp.json()
-                    status = resp.status
-                except:
-                    value = await resp.read()
-                    status = resp.status
-        return value, status
+                return resp
 
 
 # MEMORY DB TESTING FIXTURES
