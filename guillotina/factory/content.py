@@ -111,50 +111,38 @@ class Database(object):
     def new_transaction_manager(self):
         return self._db.new_transaction_manager()
 
-    async def aopen(self, tm):
-        await self._db.open(tm)
-
-    def _open(self):
-        self._conn = self._db.open()
-
-        @self._conn.onCloseCallback
-        def on_close():
-            self._conn = None
-
-    async def get_conn(self):
-        if self._conn is None:
-            self._conn = await self._db.open()
-        return self._conn
-
     @property
     def _p_jar(self):
-        return self._db.txn
+        return self._db.request._tm
+
+    async def get_root(self):
+        return await self._db.request._tm.root()
 
     async def __getitem__(self, key):
-        conn = await self.get_conn()
-        return conn[key]
+        root = await self.get_root()
+        return await root.__getitem__(key)
 
     async def keys(self):
-        conn = await self.get_conn()
-        root = await conn.root()
+        root = await self.get_root()
         return list(await root.keys())
 
-    def __setitem__(self, key, value):
+    async def __setitem__(self, key, value):
         """ This operation can only be done through HTTP request
 
         We can check if there is permission to delete a site
         XXX TODO
         """
-        self.conn.root()[key] = value
+        root = await self.get_root()
+        await root.__setitem__(key, value)
 
-    def __delitem__(self, key):
+    async def __delitem__(self, key):
         """ This operation can only be done throw HTTP request
 
         We can check if there is permission to delete a site
         XXX TODO
         """
-
-        del self.conn.root()[key]
+        root = await self.get_root()
+        await root.__delitem__(key)
 
     def __iter__(self):
         return iter(self.conn.root().items())

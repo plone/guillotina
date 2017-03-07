@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from aiohttp.test_utils import make_mocked_request
 from guillotina.content import load_cached_schema
 from guillotina.factory import make_app
-from guillotina.interfaces import IDefaultLayer
-from guillotina.interfaces import IRequest
+from guillotina.interfaces import IApplication
 from guillotina.testing import ADMIN_TOKEN
 from guillotina.testing import TESTING_SETTINGS
+from guillotina.tests.utils import get_mocked_request
 from time import sleep
-from zope.interface import alsoProvides
+from zope.component import getUtility
 
 import aiohttp
 import copy
@@ -124,6 +123,8 @@ class GuillotinaDBRequester(object):
     def __init__(self, server, loop):
         self.server = server
         self.loop = loop
+        self.root = getUtility(IApplication, name='root')
+        self.db = self.root['guillotina']
 
     async def __call__(
             self,
@@ -178,13 +179,7 @@ def dummy_request(dummy_guillotina):
     from zope.component import getUtility
     root = getUtility(IApplication, name='root')
     db = root['guillotina']
-    request = make_mocked_request('POST', '/')
-    request._db_id = 'guillotina'
-    request._tm = db.new_transaction_manager()
-    request._tm.request = request  # so get_current_request can find it...
-    alsoProvides(request, IRequest)
-    alsoProvides(request, IDefaultLayer)
-    return request
+    return get_mocked_request(db)
 
 
 @pytest.fixture(scope='function')

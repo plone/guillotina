@@ -68,6 +68,10 @@ class Registry(AnnotationData):
         except KeyError:
             return default
 
+    def __setitem__(self, name, value):
+        super(Registry, self).__setitem__(name, value)
+        self._p_register()
+
     def for_interface(self, iface, check=True, omit=(), prefix=None):
         return RecordsProxy(self, iface, prefix=prefix)
 

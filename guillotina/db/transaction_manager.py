@@ -18,6 +18,7 @@ class TransactionManager(object):
         self._txn = None
         # Pool of transactions
         self._pool = None
+        self._db_conn = None
         self.request = None
 
     async def root(self):

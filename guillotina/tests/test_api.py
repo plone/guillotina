@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+from guillotina import schema
+from guillotina.interfaces import IApplication
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.tests import TEST_RESOURCES_DIR
-from guillotina import schema
+from guillotina.tests import utils
+from zope.component import getUtility
 from zope.interface import Interface
 
 import json
@@ -63,15 +66,77 @@ async def test_get_registries(site_requester):
         assert 'guillotina.interfaces.registry.ILayers.active_layers' in response['value']
 
 
-async def test_get_registry(site_requester):
+async def test_get_registry_value(site_requester):
     """Check a value from registry."""
-    import pdb; pdb.set_trace()
     async for requester in site_requester:
-        import pdb; pdb.set_trace()
         response, status = await requester(
             'GET',
-            '/guillotina/guillotina/@registry/guillotina.registry.ILayers.active_layers')
-        assert response
+            '/guillotina/guillotina/@registry/guillotina.interfaces.registry.ILayers.active_layers')
+        assert response['value'] == ['guillotina.interfaces.layer.IDefaultLayer']
+
+
+async def test_create_contenttype(site_requester):
+    async for requester in site_requester:
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+        site = await root.__getitem__('guillotina')
+        obj = await site.__getitem__('item1')
+        assert obj.title == 'Item1'
+
+
+async def test_create_delete_contenttype(site_requester):
+    """Create and delete a content type."""
+    async for requester in site_requester:
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+        response, status = await requester('DELETE', '/guillotina/guillotina/item1')
+        assert status == 200
+
+
+async def test_register_registry(site_requester):
+    async for requester in site_requester:
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/@registry',
+            data=json.dumps({
+                "interface": "guillotina.tests.test_api.ITestingRegistry",
+                "initial_values": {
+                    "enabled": True
+                }
+            })
+        )
+        assert status == 201
+
+        response, status = await requester(
+            'PATCH',
+            '/guillotina/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.enabled',
+            data=json.dumps({
+                "value": False
+            })
+        )
+        assert status == 204
+        response, status = await requester(
+            'GET',
+            '/guillotina/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.enabled')
+        assert {'value': False} == response
 
 
 # class FunctionalTestServer(GuillotinaFunctionalTestCase):
@@ -83,66 +148,6 @@ async def test_get_registry(site_requester):
 #         this seems to make it
 #         """
 #         return self.new_root()['guillotina']
-#
-#
-#     def test_create_contenttype(self):
-#         """Try to create a contenttype."""
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/',
-#             data=json.dumps({
-#                 "@type": "Item",
-#                 "title": "Item1",
-#                 "id": "item1"
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 201)
-#         root = self.new_root()
-#         obj = root['guillotina']['item1']
-#         self.assertEqual(obj.title, 'Item1')
-#
-#     def test_create_delete_contenttype(self):
-#         """Create and delete a content type."""
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/',
-#             data=json.dumps({
-#                 "@type": "Item",
-#                 "title": "Item1",
-#                 "id": "item1"
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 201)
-#         resp = self.layer.requester('DELETE', '/guillotina/guillotina/item1')
-#         self.assertTrue(resp.status_code == 200)
-#
-#     def test_register_registry(self):
-#         """Try to create a contenttype."""
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/@registry',
-#             data=json.dumps({
-#                 "interface": "guillotina.tests.test_api.ITestingRegistry",
-#                 "initial_values": {
-#                     "enabled": True
-#                 }
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 201)
-#
-#         resp = self.layer.requester(
-#             'PATCH',
-#             '/guillotina/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.enabled',
-#             data=json.dumps({
-#                 "value": False
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 204)
-#         resp = self.layer.requester(
-#             'GET',
-#             '/guillotina/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.enabled')
-#         response = json.loads(resp.text)
-#         self.assertEqual({'value': False}, response)
 #
 #     # def test_file_upload(self):
 #     #     resp = self.layer.requester(

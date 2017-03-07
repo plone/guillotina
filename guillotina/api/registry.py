@@ -34,7 +34,7 @@ class Read(TraversableService):
         if len(traverse) == 1:
             # we want have the key of the registry
             self.key = traverse[0]
-            self.value = self.request.site_settings[self.key]
+            self.value = self.request.site_settings.get(self.key)
         return self
 
     async def __call__(self):
@@ -70,6 +70,7 @@ class Register(Service):
             return ErrorResponse(
                 'BadRequest',
                 _("Not in a site request"))
+
         data = await self.request.json()
         interface = data.get('interface', None)
         initial_values = data.get('initial_values', {})
@@ -87,9 +88,9 @@ class Register(Service):
         # If its defined on the guillotina.schema default will not be overwritten
         #  you will need to PATCH
         for key, field in getFields(iObject).items():
-            if key in initial_values and not getattr(config, key, False):
+            if key in initial_values and getattr(config, key, _marker) == _marker:
                 # We don't have a value
-                setattr(config, key, initial_values[key])
+                config[key] = initial_values[key]
 
         return Response(response={}, status=201)
 
@@ -104,7 +105,7 @@ class Write(TraversableService):
         if len(traverse) == 1 and traverse[0] in self.request.site_settings:
             # we want have the key of the registry
             self.key = traverse[0]
-            self.value = self.request.site_settings[self.key]
+            self.value = self.request.site_settings.get(self.key)
         return self
 
     async def __call__(self):
