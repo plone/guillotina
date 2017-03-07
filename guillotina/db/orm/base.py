@@ -3,7 +3,6 @@ from sys import intern
 from zope.interface import implementer
 
 import copyreg
-import gc
 
 
 GHOST = -1

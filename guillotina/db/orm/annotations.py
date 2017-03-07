@@ -1,9 +1,9 @@
-from guillotina.db.orm.base import BaseObject
 from collections import UserDict
-from zope.interface import implementer
 from guillotina import configure
-from guillotina.interfaces import IResource
+from guillotina.db.orm.base import BaseObject
 from guillotina.db.orm.interfaces import IAnnotations
+from guillotina.interfaces import IResource
+from zope.interface import implementer
 
 
 class Annotations(BaseObject, UserDict):
