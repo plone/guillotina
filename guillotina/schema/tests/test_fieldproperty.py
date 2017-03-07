@@ -42,7 +42,7 @@ class _Integration(object):
         return _Implementer()
 
     def test_basic(self):
-        from guillotina.schema.interfaces import ValidationError
+        from guillotina.schema.exceptions import ValidationError
         c = self._makeImplementer()
         self.assertEqual(c.title, 'say something')
         self.assertEqual(c.weight, None)

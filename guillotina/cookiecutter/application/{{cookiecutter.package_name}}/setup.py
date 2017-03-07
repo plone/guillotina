@@ -32,8 +32,5 @@ setup(
     },
     classifiers=[],
     entry_points={
-        'guillotina': [
-            'include = {{cookiecutter.package_name}}',
-        ]
     }
 )

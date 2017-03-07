@@ -2,20 +2,20 @@
 from dateutil.parser import parse
 from guillotina import configure
 from guillotina import logger
-from guillotina.interfaces import IJSONField
 from guillotina.interfaces import IJSONToValue
-from zope.component import ComponentLookupError
-from zope.component import getMultiAdapter
-from zope.interface import Interface
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IDatetime
 from guillotina.schema.interfaces import IDict
 from guillotina.schema.interfaces import IField
 from guillotina.schema.interfaces import IFrozenSet
+from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
+from zope.component import ComponentLookupError
+from zope.component import getMultiAdapter
+from zope.interface import Interface
 
 
 def schema_compatible(value, schema_or_field):

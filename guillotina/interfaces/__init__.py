@@ -41,7 +41,6 @@ from .files import IFileManager  # noqa
 from .files import IStorage  # noqa
 from .files import NotStorable  # noqa
 from .json import IFactorySerializeToJson  # noqa
-from .json import IJSONField  # noqa
 from .json import IJSONToValue  # noqa
 from .json import IResourceDeserializeFromJson  # noqa
 from .json import IResourceFieldDeserializer  # noqa

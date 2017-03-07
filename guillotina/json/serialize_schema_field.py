@@ -1,14 +1,10 @@
 from guillotina import configure
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
-from guillotina.interfaces import IJSONField
 from guillotina.interfaces import IRichText
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.interfaces import IValueToJson
-from zope.component import getMultiAdapter
-from zope.interface import implementedBy
-from zope.interface import Interface
 from guillotina.schema import getFields
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IChoice
@@ -19,10 +15,14 @@ from guillotina.schema.interfaces import IDict
 from guillotina.schema.interfaces import IField
 from guillotina.schema.interfaces import IFloat
 from guillotina.schema.interfaces import IInt
+from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IText
 from guillotina.schema.interfaces import ITextLine
 from guillotina.schema.interfaces import ITime
+from zope.component import getMultiAdapter
+from zope.interface import implementedBy
+from zope.interface import Interface
 
 
 @configure.adapter(

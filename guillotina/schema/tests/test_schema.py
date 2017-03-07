@@ -159,7 +159,7 @@ class Test_getValidationErrors(unittest.TestCase):
     def test_schema_with_field_errors(self):
         from zope.interface import Interface
         from guillotina.schema import Text
-        from guillotina.schema.interfaces import SchemaNotFullyImplemented
+        from guillotina.schema.exceptions import SchemaNotFullyImplemented
 
         class IWithRequired(Interface):
             must = Text(required=True)
@@ -233,7 +233,7 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
     def test_schema_with_missing_field(self):
         from zope.interface import Interface
         from guillotina.schema import Text
-        from guillotina.schema.interfaces import SchemaNotFullyImplemented
+        from guillotina.schema.exceptions import SchemaNotFullyImplemented
 
         class IWithRequired(Interface):
             must = Text(required=True)
@@ -246,7 +246,7 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
     def test_schema_with_invalid_field(self):
         from zope.interface import Interface
         from guillotina.schema import Int
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
 
         class IWithMinium(Interface):
             value = Int(required=True, min=0)

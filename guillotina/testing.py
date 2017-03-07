@@ -12,11 +12,11 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
-from guillotina.jsonfield import JSONField
+from guillotina.schema import JSONField
+from guillotina.schema import List
 from guillotina.security.policy import Interaction
 from zope.component import getUtility
 from zope.interface import implementer
-from guillotina.schema import List
 
 import asyncio
 import base64

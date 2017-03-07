@@ -11,18 +11,18 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from guillotina.schema._bootstrapinterfaces import ConstraintNotSatisfied
+from guillotina.schema.exceptions import ConstraintNotSatisfied
 from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
-from guillotina.schema._bootstrapinterfaces import NotAContainer
-from guillotina.schema._bootstrapinterfaces import NotAnIterator
-from guillotina.schema._bootstrapinterfaces import RequiredMissing
-from guillotina.schema._bootstrapinterfaces import StopValidation
-from guillotina.schema._bootstrapinterfaces import TooBig
-from guillotina.schema._bootstrapinterfaces import TooLong
-from guillotina.schema._bootstrapinterfaces import TooShort
-from guillotina.schema._bootstrapinterfaces import TooSmall
-from guillotina.schema._bootstrapinterfaces import WrongType
+from guillotina.schema.exceptions import NotAContainer
+from guillotina.schema.exceptions import NotAnIterator
+from guillotina.schema.exceptions import RequiredMissing
+from guillotina.schema.exceptions import StopValidation
+from guillotina.schema.exceptions import TooBig
+from guillotina.schema.exceptions import TooLong
+from guillotina.schema.exceptions import TooShort
+from guillotina.schema.exceptions import TooSmall
+from guillotina.schema.exceptions import WrongType
 from guillotina.schema._schema import getFields
 from zope.interface import Attribute
 from zope.interface import implementer

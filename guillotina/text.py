@@ -8,9 +8,9 @@ from zope.component import queryAdapter
 from zope.interface import implementer
 from zope.interface import Invalid
 from guillotina.schema import Object
-from guillotina.schema._bootstrapinterfaces import ConstraintNotSatisfied
+from guillotina.schema.exceptions import ConstraintNotSatisfied
 from guillotina.schema.interfaces import IFromUnicode
-from guillotina.schema.interfaces import WrongType
+from guillotina.schema.exceptions import WrongType
 
 
 class RawValueHolder(BaseObject):

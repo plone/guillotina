@@ -1,19 +1,8 @@
 from guillotina.i18n import MessageFactory
-from zope.interface import Attribute
 from zope.interface import Interface
-from guillotina.schema.interfaces import IField
 
 
 _ = MessageFactory('guillotina')
-
-
-class IJSONField(IField):
-    """A text field that stores A JSON."""
-
-    schema = Attribute(
-        "schema",
-        _("The JSON schema string serialization.")
-    )
 
 
 class IResourceSerializeToJson(Interface):

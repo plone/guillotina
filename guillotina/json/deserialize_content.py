@@ -18,7 +18,7 @@ from zope.component import queryUtility
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
 from guillotina.schema import getFields
-from guillotina.schema.interfaces import ValidationError
+from guillotina.schema.exceptions import ValidationError
 
 
 @configure.adapter(

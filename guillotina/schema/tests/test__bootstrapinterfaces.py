@@ -17,7 +17,7 @@ import unittest
 class ValidationErrorTests(unittest.TestCase):
 
     def _getTargetClass(self):
-        from guillotina.schema._bootstrapinterfaces import ValidationError
+        from guillotina.schema.exceptions import ValidationError
         return ValidationError
 
     def _makeOne(self, *args, **kw):
