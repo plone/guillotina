@@ -17,20 +17,8 @@ from guillotina.schema._bootstrapfields import Field
 from guillotina.schema._bootstrapfields import Int
 from guillotina.schema._bootstrapfields import Text
 from guillotina.schema._bootstrapfields import TextLine
-from guillotina.schema._bootstrapinterfaces import ConstraintNotSatisfied
 from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
-from guillotina.schema._bootstrapinterfaces import InvalidValue
-from guillotina.schema._bootstrapinterfaces import NotAContainer
-from guillotina.schema._bootstrapinterfaces import NotAnIterator
-from guillotina.schema._bootstrapinterfaces import RequiredMissing
-from guillotina.schema._bootstrapinterfaces import StopValidation
-from guillotina.schema._bootstrapinterfaces import TooBig
-from guillotina.schema._bootstrapinterfaces import TooLong
-from guillotina.schema._bootstrapinterfaces import TooShort
-from guillotina.schema._bootstrapinterfaces import TooSmall
-from guillotina.schema._bootstrapinterfaces import ValidationError
-from guillotina.schema._bootstrapinterfaces import WrongType
 from guillotina.schema._messageid import _
 from zope.interface import Attribute
 from zope.interface import Interface
@@ -40,41 +28,7 @@ from zope.interface.common.mapping import IEnumerableMapping
 __docformat__ = "reStructuredText"
 
 # pep 8 friendlyness
-StopValidation, ValidationError, IFromUnicode, RequiredMissing, WrongType
-ConstraintNotSatisfied, NotAContainer, NotAnIterator
-TooSmall, TooBig, TooLong, TooShort, InvalidValue, IContextAwareDefaultFactory
-
-
-class WrongContainedType(ValidationError):
-    __doc__ = _("""Wrong contained type""")
-
-
-class NotUnique(ValidationError):
-    __doc__ = _("""One or more entries of sequence are not unique.""")
-
-
-class SchemaNotFullyImplemented(ValidationError):
-    __doc__ = _("""Schema not fully implemented""")
-
-
-class SchemaNotProvided(ValidationError):
-    __doc__ = _("""Schema not provided""")
-
-
-class InvalidURI(ValidationError):
-    __doc__ = _("""The specified URI is not valid.""")
-
-
-class InvalidId(ValidationError):
-    __doc__ = _("""The specified id is not valid.""")
-
-
-class InvalidDottedName(ValidationError):
-    __doc__ = _("""The specified dotted name is not valid.""")
-
-
-class Unbound(Exception):
-    __doc__ = _("""The field is not bound.""")
+IFromUnicode, IContextAwareDefaultFactory
 
 
 class IField(Interface):
@@ -748,3 +702,12 @@ class IFieldUpdatedEvent(IFieldEvent):
     old_value = Attribute("The value of the field before modification")
 
     new_value = Attribute("The value of the field after modification")
+
+
+class IJSONField(IField):
+    """A text field that stores A JSON."""
+
+    schema = Attribute(
+        "schema",
+        _("The JSON schema string serialization.")
+    )

@@ -79,7 +79,7 @@ def getSchemaValidationErrors(schema, object):
         except AttributeError as error:
             # property for the given name is not implemented
             errors.append((
-                name, guillotina.schema.interfaces.SchemaNotFullyImplemented(error)))
+                name, guillotina.schema.exceptions.SchemaNotFullyImplemented(error)))
         else:
             try:
                 attribute.bind(object).validate(value)

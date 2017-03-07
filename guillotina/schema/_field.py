@@ -26,7 +26,7 @@ from guillotina.schema._bootstrapfields import Password
 from guillotina.schema._bootstrapfields import Text
 from guillotina.schema._bootstrapfields import TextLine
 from guillotina.schema.fieldproperty import FieldProperty
-from guillotina.schema.interfaces import ConstraintNotSatisfied
+from guillotina.schema.exceptions import ConstraintNotSatisfied
 from guillotina.schema.interfaces import IASCII
 from guillotina.schema.interfaces import IASCIILine
 from guillotina.schema.interfaces import IBaseVocabulary
@@ -48,12 +48,13 @@ from guillotina.schema.interfaces import IFrozenSet
 from guillotina.schema.interfaces import IId
 from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IInterfaceField
+from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IMinMaxLen
-from guillotina.schema.interfaces import InvalidDottedName
-from guillotina.schema.interfaces import InvalidId
-from guillotina.schema.interfaces import InvalidURI
-from guillotina.schema.interfaces import InvalidValue
+from guillotina.schema.exceptions import InvalidDottedName
+from guillotina.schema.exceptions import InvalidId
+from guillotina.schema.exceptions import InvalidURI
+from guillotina.schema.exceptions import InvalidValue
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IPassword
 from guillotina.schema.interfaces import ISet
@@ -65,12 +66,12 @@ from guillotina.schema.interfaces import ITime
 from guillotina.schema.interfaces import ITimedelta
 from guillotina.schema.interfaces import ITuple
 from guillotina.schema.interfaces import IURI
-from guillotina.schema.interfaces import NotUnique
-from guillotina.schema.interfaces import SchemaNotFullyImplemented
-from guillotina.schema.interfaces import SchemaNotProvided
-from guillotina.schema.interfaces import ValidationError
-from guillotina.schema.interfaces import WrongContainedType
-from guillotina.schema.interfaces import WrongType
+from guillotina.schema.exceptions import NotUnique
+from guillotina.schema.exceptions import SchemaNotFullyImplemented
+from guillotina.schema.exceptions import SchemaNotProvided
+from guillotina.schema.exceptions import ValidationError
+from guillotina.schema.exceptions import WrongContainedType
+from guillotina.schema.exceptions import WrongType
 from guillotina.schema.utils import make_binary
 from guillotina.schema.vocabulary import getVocabularyRegistry
 from guillotina.schema.vocabulary import SimpleVocabulary
@@ -83,6 +84,8 @@ from zope.interface.interfaces import IInterface
 from zope.interface.interfaces import IMethod
 
 import decimal
+import json
+import jsonschema
 import re
 import threading
 
@@ -681,3 +684,25 @@ class Dict(MinMaxLen, Iterable):
         if clone.value_type is not None:
             clone.value_type = clone.value_type.bind(object)
         return clone
+
+
+@implementer(IJSONField)
+class JSONField(Field):
+
+    def __init__(self, schema, **kw):
+        if not isinstance(schema, str):
+            raise WrongType
+
+        try:
+            self.schema = json.loads(schema)
+        except ValueError:
+            raise WrongType
+        super(JSONField, self).__init__(**kw)
+
+    def _validate(self, value):
+        super(JSONField, self)._validate(value)
+
+        try:
+            jsonschema.validate(value, self.schema)
+        except jsonschema.ValidationError as e:
+            raise WrongContainedType(e.message, self.__name__)

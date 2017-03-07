@@ -271,7 +271,7 @@ class FieldTests(unittest.TestCase):
         self.assertEqual(field.validate(missing), None)  # doesn't raise
 
     def test_validate_missing_and_required(self):
-        from guillotina.schema._bootstrapinterfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         missing = object()
 
         def _fail(value):
@@ -282,7 +282,7 @@ class FieldTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, missing)
 
     def test_validate_wrong_type(self):
-        from guillotina.schema._bootstrapinterfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
 
         def _fail(value):
             return False
@@ -291,7 +291,7 @@ class FieldTests(unittest.TestCase):
         self.assertRaises(WrongType, field.validate, 1)
 
     def test_validate_constraint_fails(self):
-        from guillotina.schema._bootstrapinterfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
 
         def _fail(value):
             return False
@@ -300,7 +300,7 @@ class FieldTests(unittest.TestCase):
         self.assertRaises(ConstraintNotSatisfied, field.validate, 1)
 
     def test_validate_constraint_raises_StopValidation(self):
-        from guillotina.schema._bootstrapinterfaces import StopValidation
+        from guillotina.schema.exceptions import StopValidation
 
         def _fail(value):
             raise StopValidation
@@ -383,12 +383,12 @@ class ContainerTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test__validate_not_collection_not_iterable(self):
-        from guillotina.schema._bootstrapinterfaces import NotAContainer
+        from guillotina.schema.exceptions import NotAContainer
         cont = self._makeOne()
         self.assertRaises(NotAContainer, cont._validate, object())
 
@@ -423,7 +423,7 @@ class IterableTests(ContainerTests):
         return Iterable
 
     def test__validate_collection_but_not_iterable(self):
-        from guillotina.schema._bootstrapinterfaces import NotAnIterator
+        from guillotina.schema.exceptions import NotAnIterator
         itr = self._makeOne()
 
         class Dummy(object):
@@ -454,12 +454,12 @@ class OrderableTests(unittest.TestCase):
 
     def test_ctor_default_too_small(self):
         # This test exercises _validate, too
-        from guillotina.schema._bootstrapinterfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         self.assertRaises(TooSmall, self._makeOne, min=0, default=-1)
 
     def test_ctor_default_too_large(self):
         # This test exercises _validate, too
-        from guillotina.schema._bootstrapinterfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         self.assertRaises(TooBig, self._makeOne, max=10, default=11)
 
 
@@ -483,12 +483,12 @@ class MinMaxLenTests(unittest.TestCase):
         self.assertEqual(mml.max_length, None)
 
     def test_validate_too_short(self):
-        from guillotina.schema._bootstrapinterfaces import TooShort
+        from guillotina.schema.exceptions import TooShort
         mml = self._makeOne(min_length=1)
         self.assertRaises(TooShort, mml._validate, ())
 
     def test_validate_too_long(self):
-        from guillotina.schema._bootstrapinterfaces import TooLong
+        from guillotina.schema.exceptions import TooLong
         mml = self._makeOne(max_length=2)
         self.assertRaises(TooLong, mml._validate, (0, 1, 2))
 
@@ -507,7 +507,7 @@ class TextTests(unittest.TestCase):
         self.assertEqual(txt._type, str)
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, b'')
         self.assertRaises(WrongType, field.validate, 1)
@@ -520,7 +520,7 @@ class TextTests(unittest.TestCase):
         self.assertRaises(WrongType, field.validate, object())
 
     def test_validate_w_invalid_default(self):
-        from guillotina.schema.interfaces import ValidationError
+        from guillotina.schema.exceptions import ValidationError
         self.assertRaises(ValidationError, self._makeOne, default=b'')
 
     def test_validate_not_required(self):
@@ -531,7 +531,7 @@ class TextTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate('')
         field.validate('abc')
@@ -539,7 +539,7 @@ class TextTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_fromUnicode_miss(self):
-        from guillotina.schema._bootstrapinterfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         deadbeef = b'DEADBEEF'
         txt = self._makeOne()
         self.assertRaises(WrongType, txt.fromUnicode, deadbeef)
@@ -570,7 +570,7 @@ class TextLineTests(unittest.TestCase):
         verifyObject(ITextLine, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, b'')
         self.assertRaises(WrongType, field.validate, 1)
@@ -589,7 +589,7 @@ class TextLineTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate('')
         field.validate('abc')
@@ -633,14 +633,14 @@ class PasswordTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate('')
         field.validate('abc')
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_unchanged_not_already_set(self):
-        from guillotina.schema._bootstrapinterfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         klass = self._getTargetClass()
         inst = DummyInst()
         pw = self._makeOne(__name__='password').bind(inst)
@@ -722,7 +722,7 @@ class IntTests(unittest.TestCase):
         field.validate(-1)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(10)
         field.validate(0)
@@ -730,7 +730,7 @@ class IntTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min(self):
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         field = self._makeOne(min=10)
         field.validate(10)
         field.validate(20)
@@ -738,7 +738,7 @@ class IntTests(unittest.TestCase):
         self.assertRaises(TooSmall, field.validate, -10)
 
     def test_validate_max(self):
-        from guillotina.schema.interfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         field = self._makeOne(max=10)
         field.validate(5)
         field.validate(9)
@@ -747,8 +747,8 @@ class IntTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, 20)
 
     def test_validate_min_and_max(self):
-        from guillotina.schema.interfaces import TooBig
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooBig
+        from guillotina.schema.exceptions import TooSmall
         field = self._makeOne(min=0, max=10)
         field.validate(0)
         field.validate(5)

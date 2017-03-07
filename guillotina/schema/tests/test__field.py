@@ -34,7 +34,7 @@ class BytesTests(unittest.TestCase):
         verifyObject(IBytes, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, 1)
@@ -47,7 +47,7 @@ class BytesTests(unittest.TestCase):
         self.assertRaises(WrongType, field.validate, object())
 
     def test_validate_w_invalid_default(self):
-        from guillotina.schema.interfaces import ValidationError
+        from guillotina.schema.exceptions import ValidationError
         self.assertRaises(ValidationError, self._makeOne, default='')
 
     def test_validate_not_required(self):
@@ -58,7 +58,7 @@ class BytesTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(b'')
         field.validate(b'abc')
@@ -95,7 +95,7 @@ class ASCIITests(unittest.TestCase):
         verifyObject(IASCII, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         from guillotina.schema.utils import non_native_string
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, non_native_string(''))
@@ -113,7 +113,7 @@ class ASCIITests(unittest.TestCase):
         asc._validate('')  # no error
 
     def test__validate_non_empty_miss(self):
-        from guillotina.schema.interfaces import InvalidValue
+        from guillotina.schema.exceptions import InvalidValue
         asc = self._makeOne()
         self.assertRaises(InvalidValue, asc._validate, chr(129))
 
@@ -143,7 +143,7 @@ class BytesLineTests(unittest.TestCase):
         verifyObject(IBytesLine, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, 1)
@@ -163,7 +163,7 @@ class BytesLineTests(unittest.TestCase):
         field.validate(b'\xab\xde')
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(b'')
         field.validate(b'abc')
@@ -199,7 +199,7 @@ class ASCIILineTests(unittest.TestCase):
         verifyObject(IASCIILine, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         from guillotina.schema.utils import non_native_string
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, non_native_string(''))
@@ -213,7 +213,7 @@ class ASCIILineTests(unittest.TestCase):
         self.assertRaises(WrongType, field.validate, object())
 
     def test_validate_not_required(self):
-        from guillotina.schema.interfaces import InvalidValue
+        from guillotina.schema.exceptions import InvalidValue
         field = self._makeOne(required=False)
         field.validate(None)
         field.validate('')
@@ -221,8 +221,8 @@ class ASCIILineTests(unittest.TestCase):
         self.assertRaises(InvalidValue, field.validate, '\xab\xde')
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import InvalidValue
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import InvalidValue
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate('')
         field.validate('abc')
@@ -266,7 +266,7 @@ class FloatTests(unittest.TestCase):
         field.validate(1000.0003)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(10.0)
         field.validate(0.93)
@@ -274,7 +274,7 @@ class FloatTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min(self):
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         field = self._makeOne(min=10.5)
         field.validate(10.6)
         field.validate(20.2)
@@ -282,7 +282,7 @@ class FloatTests(unittest.TestCase):
         self.assertRaises(TooSmall, field.validate, 10.4)
 
     def test_validate_max(self):
-        from guillotina.schema.interfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         field = self._makeOne(max=10.5)
         field.validate(5.3)
         field.validate(-9.1)
@@ -290,8 +290,8 @@ class FloatTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, 20.7)
 
     def test_validate_min_and_max(self):
-        from guillotina.schema.interfaces import TooBig
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooBig
+        from guillotina.schema.exceptions import TooSmall
         field = self._makeOne(min=-0.6, max=10.1)
         field.validate(0.0)
         field.validate(-0.03)
@@ -343,7 +343,7 @@ class DecimalTests(unittest.TestCase):
 
     def test_validate_required(self):
         import decimal
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(decimal.Decimal("10.0"))
         field.validate(decimal.Decimal("0.93"))
@@ -352,7 +352,7 @@ class DecimalTests(unittest.TestCase):
 
     def test_validate_min(self):
         import decimal
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         field = self._makeOne(min=decimal.Decimal("10.5"))
         field.validate(decimal.Decimal("10.6"))
         field.validate(decimal.Decimal("20.2"))
@@ -361,7 +361,7 @@ class DecimalTests(unittest.TestCase):
 
     def test_validate_max(self):
         import decimal
-        from guillotina.schema.interfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         field = self._makeOne(max=decimal.Decimal("10.5"))
         field.validate(decimal.Decimal("5.3"))
         field.validate(decimal.Decimal("-9.1"))
@@ -370,8 +370,8 @@ class DecimalTests(unittest.TestCase):
 
     def test_validate_min_and_max(self):
         import decimal
-        from guillotina.schema.interfaces import TooBig
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooBig
+        from guillotina.schema.exceptions import TooSmall
         field = self._makeOne(min=decimal.Decimal("-0.6"),
                               max=decimal.Decimal("10.1"))
         field.validate(decimal.Decimal("0.0"))
@@ -417,7 +417,7 @@ class DatetimeTests(unittest.TestCase):
 
     def test_validate_wrong_types(self):
         from datetime import date
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, b'')
@@ -438,13 +438,13 @@ class DatetimeTests(unittest.TestCase):
         field.validate(datetime.now())  # doesn't raise
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne(required=True)
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_w_min(self):
         from datetime import datetime
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         d1 = datetime(2000, 10, 1)
         d2 = datetime(2000, 10, 2)
         field = self._makeOne(min=d1)
@@ -454,7 +454,7 @@ class DatetimeTests(unittest.TestCase):
 
     def test_validate_w_max(self):
         from datetime import datetime
-        from guillotina.schema.interfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         d1 = datetime(2000, 10, 1)
         d2 = datetime(2000, 10, 2)
         d3 = datetime(2000, 10, 3)
@@ -465,8 +465,8 @@ class DatetimeTests(unittest.TestCase):
 
     def test_validate_w_min_and_max(self):
         from datetime import datetime
-        from guillotina.schema.interfaces import TooBig
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooBig
+        from guillotina.schema.exceptions import TooSmall
         d1 = datetime(2000, 10, 1)
         d2 = datetime(2000, 10, 2)
         d3 = datetime(2000, 10, 3)
@@ -501,7 +501,7 @@ class DateTests(unittest.TestCase):
 
     def test_validate_wrong_types(self):
         from datetime import datetime
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, b'')
@@ -523,7 +523,7 @@ class DateTests(unittest.TestCase):
 
     def test_validate_required(self):
         from datetime import datetime
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(datetime.now().date())
         self.assertRaises(RequiredMissing, field.validate, None)
@@ -531,7 +531,7 @@ class DateTests(unittest.TestCase):
     def test_validate_w_min(self):
         from datetime import date
         from datetime import datetime
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         d1 = date(2000, 10, 1)
         d2 = date(2000, 10, 2)
         field = self._makeOne(min=d1)
@@ -542,7 +542,7 @@ class DateTests(unittest.TestCase):
 
     def test_validate_w_max(self):
         from datetime import date
-        from guillotina.schema.interfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         d1 = date(2000, 10, 1)
         d2 = date(2000, 10, 2)
         d3 = date(2000, 10, 3)
@@ -553,8 +553,8 @@ class DateTests(unittest.TestCase):
 
     def test_validate_w_min_and_max(self):
         from datetime import date
-        from guillotina.schema.interfaces import TooBig
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooBig
+        from guillotina.schema.exceptions import TooSmall
         d1 = date(2000, 10, 1)
         d2 = date(2000, 10, 2)
         d3 = date(2000, 10, 3)
@@ -595,14 +595,14 @@ class TimedeltaTests(unittest.TestCase):
 
     def test_validate_required(self):
         from datetime import timedelta
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(timedelta(minutes=15))
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min(self):
         from datetime import timedelta
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         t1 = timedelta(hours=2)
         t2 = timedelta(hours=3)
         field = self._makeOne(min=t1)
@@ -612,7 +612,7 @@ class TimedeltaTests(unittest.TestCase):
 
     def test_validate_max(self):
         from datetime import timedelta
-        from guillotina.schema.interfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         t1 = timedelta(minutes=1)
         t2 = timedelta(minutes=2)
         t3 = timedelta(minutes=3)
@@ -623,8 +623,8 @@ class TimedeltaTests(unittest.TestCase):
 
     def test_validate_min_and_max(self):
         from datetime import timedelta
-        from guillotina.schema.interfaces import TooBig
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooBig
+        from guillotina.schema.exceptions import TooSmall
         t1 = timedelta(days=1)
         t2 = timedelta(days=2)
         t3 = timedelta(days=3)
@@ -665,14 +665,14 @@ class TimeTests(unittest.TestCase):
 
     def test_validate_required(self):
         from datetime import time
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(time(12, 15, 37))
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min(self):
         from datetime import time
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooSmall
         t1 = time(12, 15, 37)
         t2 = time(12, 25, 18)
         t3 = time(12, 42, 43)
@@ -683,7 +683,7 @@ class TimeTests(unittest.TestCase):
 
     def test_validate_max(self):
         from datetime import time
-        from guillotina.schema.interfaces import TooBig
+        from guillotina.schema.exceptions import TooBig
         t1 = time(12, 15, 37)
         t2 = time(12, 25, 18)
         t3 = time(12, 42, 43)
@@ -694,8 +694,8 @@ class TimeTests(unittest.TestCase):
 
     def test_validate_min_and_max(self):
         from datetime import time
-        from guillotina.schema.interfaces import TooBig
-        from guillotina.schema.interfaces import TooSmall
+        from guillotina.schema.exceptions import TooBig
+        from guillotina.schema.exceptions import TooSmall
         t1 = time(12, 15, 37)
         t2 = time(12, 25, 18)
         t3 = time(12, 42, 43)
@@ -773,7 +773,7 @@ class ChoiceTests(unittest.TestCase):
         self.assertTrue(choose.vocabularyName is None)
 
     def test_bind_w_preconstructed_vocabulary(self):
-        from guillotina.schema.interfaces import ValidationError
+        from guillotina.schema.exceptions import ValidationError
         from guillotina.schema.vocabulary import setVocabularyRegistry
         v = _makeSampleVocabulary()
         setVocabularyRegistry(_makeDummyRegistry(v))
@@ -847,7 +847,7 @@ class ChoiceTests(unittest.TestCase):
         self.assertRaises(ValueError, source.bind, instance)
 
     def test_fromUnicode_miss(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
         flt = self._makeOne(values=('foo', 'bar', 'baz'))
         self.assertRaises(ConstraintNotSatisfied, flt.fromUnicode, '')
         self.assertRaises(ConstraintNotSatisfied, flt.fromUnicode, 'abc')
@@ -860,14 +860,14 @@ class ChoiceTests(unittest.TestCase):
         self.assertEqual(flt.fromUnicode('baz'), 'baz')
 
     def test__validate_int(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
         choice = self._makeOne(values=[1, 3])
         choice._validate(1)  # doesn't raise
         choice._validate(3)  # doesn't raise
         self.assertRaises(ConstraintNotSatisfied, choice._validate, 4)
 
     def test__validate_string(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
         choice = self._makeOne(values=['a', 'c'])
         choice._validate('a')  # doesn't raise
         choice._validate('c')  # doesn't raise
@@ -875,7 +875,7 @@ class ChoiceTests(unittest.TestCase):
         self.assertRaises(ConstraintNotSatisfied, choice._validate, 'd')
 
     def test__validate_tuple(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
         choice = self._makeOne(values=[(1, 2), (5, 6)])
         choice._validate((1, 2))  # doesn't raise
         choice._validate((5, 6))  # doesn't raise
@@ -883,7 +883,7 @@ class ChoiceTests(unittest.TestCase):
         self.assertRaises(ConstraintNotSatisfied, choice._validate, ())
 
     def test__validate_mixed(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
         choice = self._makeOne(values=[1, 'b', (0.2,)])
         choice._validate(1)  # doesn't raise
         choice._validate('b')  # doesn't raise
@@ -896,7 +896,7 @@ class ChoiceTests(unittest.TestCase):
         self.assertRaises(ValueError, choose._validate, 42)
 
     def test__validate_w_named_vocabulary(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
         from guillotina.schema.vocabulary import setVocabularyRegistry
         v = _makeSampleVocabulary()
         setVocabularyRegistry(_makeDummyRegistry(v))
@@ -920,7 +920,7 @@ class ChoiceTests(unittest.TestCase):
     def test__validate_source_is_ICSB_bound(self):
         from zope.interface import implementer
         from guillotina.schema.interfaces import IContextSourceBinder
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
         from guillotina.schema.tests.test_vocabulary import _makeSampleVocabulary
 
         @implementer(IContextSourceBinder)
@@ -959,7 +959,7 @@ class URITests(unittest.TestCase):
         verifyObject(IURI, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         from guillotina.schema.utils import non_native_string
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, non_native_string(''))
@@ -978,14 +978,14 @@ class URITests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate('http://example.com/')
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_not_a_uri(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
-        from guillotina.schema.interfaces import InvalidURI
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import InvalidURI
         field = self._makeOne()
         self.assertRaises(InvalidURI, field.validate, '')
         self.assertRaises(InvalidURI, field.validate, 'abc')
@@ -999,8 +999,8 @@ class URITests(unittest.TestCase):
                          'http://example.com/')
 
     def test_fromUnicode_invalid(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
-        from guillotina.schema.interfaces import InvalidURI
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import InvalidURI
         field = self._makeOne()
         self.assertRaises(InvalidURI, field.fromUnicode, '')
         self.assertRaises(InvalidURI, field.fromUnicode, 'abc')
@@ -1047,7 +1047,7 @@ class DottedNameTests(unittest.TestCase):
         self.assertEqual(dotted.max_dots, 2)
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         from guillotina.schema.utils import non_native_string
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, non_native_string(''))
@@ -1067,21 +1067,21 @@ class DottedNameTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate('name')
         field.validate('dotted.name')
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_w_min_dots(self):
-        from guillotina.schema.interfaces import InvalidDottedName
+        from guillotina.schema.exceptions import InvalidDottedName
         field = self._makeOne(min_dots=1)
         self.assertRaises(InvalidDottedName, field.validate, 'name')
         field.validate('dotted.name')
         field.validate('moar.dotted.name')
 
     def test_validate_w_max_dots(self):
-        from guillotina.schema.interfaces import InvalidDottedName
+        from guillotina.schema.exceptions import InvalidDottedName
         field = self._makeOne(max_dots=1)
         field.validate('name')
         field.validate('dotted.name')
@@ -1089,8 +1089,8 @@ class DottedNameTests(unittest.TestCase):
                           field.validate, 'moar.dotted.name')
 
     def test_validate_not_a_dotted_name(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
-        from guillotina.schema.interfaces import InvalidDottedName
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import InvalidDottedName
         field = self._makeOne()
         self.assertRaises(InvalidDottedName, field.validate, '')
         self.assertRaises(InvalidDottedName, field.validate, '\xab\xde')
@@ -1102,8 +1102,8 @@ class DottedNameTests(unittest.TestCase):
         self.assertEqual(field.fromUnicode('dotted.name'), 'dotted.name')
 
     def test_fromUnicode_invalid(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
-        from guillotina.schema.interfaces import InvalidDottedName
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import InvalidDottedName
         field = self._makeOne()
         self.assertRaises(InvalidDottedName, field.fromUnicode, '')
         self.assertRaises(ConstraintNotSatisfied,
@@ -1130,7 +1130,7 @@ class IdTests(unittest.TestCase):
         verifyObject(IId, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         from guillotina.schema.utils import non_native_string
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, non_native_string(''))
@@ -1150,15 +1150,15 @@ class IdTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate('http://example.com/')
         field.validate('dotted.name')
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_not_a_uri(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
-        from guillotina.schema.interfaces import InvalidId
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import InvalidId
         field = self._makeOne()
         self.assertRaises(InvalidId, field.validate, '')
         self.assertRaises(InvalidId, field.validate, 'abc')
@@ -1176,8 +1176,8 @@ class IdTests(unittest.TestCase):
         self.assertEqual(field.fromUnicode('dotted.name'), 'dotted.name')
 
     def test_fromUnicode_invalid(self):
-        from guillotina.schema.interfaces import ConstraintNotSatisfied
-        from guillotina.schema.interfaces import InvalidId
+        from guillotina.schema.exceptions import ConstraintNotSatisfied
+        from guillotina.schema.exceptions import InvalidId
         field = self._makeOne()
         self.assertRaises(InvalidId, field.fromUnicode, '')
         self.assertRaises(InvalidId, field.fromUnicode, 'abc')
@@ -1206,7 +1206,7 @@ class InterfaceFieldTests(unittest.TestCase):
 
     def test_validate_wrong_types(self):
         from datetime import date
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, b'')
@@ -1232,7 +1232,7 @@ class InterfaceFieldTests(unittest.TestCase):
 
     def test_validate_required(self):
         from zope.interface import Interface
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
 
         class DummyInterface(Interface):
             pass
@@ -1288,14 +1288,14 @@ class AbstractCollectionTests(unittest.TestCase):
         self.assertEqual(bound.unique, True)
 
     def test__validate_wrong_contained_type(self):
-        from guillotina.schema.interfaces import WrongContainedType
+        from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Text
         text = Text()
         absc = self._makeOne(text)
         self.assertRaises(WrongContainedType, absc.validate, [1])
 
     def test__validate_miss_uniqueness(self):
-        from guillotina.schema.interfaces import NotUnique
+        from guillotina.schema.exceptions import NotUnique
         from guillotina.schema._bootstrapfields import Text
         text = Text()
         absc = self._makeOne(text, True)
@@ -1322,7 +1322,7 @@ class TupleTests(unittest.TestCase):
         verifyObject(ITuple, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, '')
@@ -1342,7 +1342,7 @@ class TupleTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(())
         field.validate((1, 2))
@@ -1350,7 +1350,7 @@ class TupleTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min_length(self):
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=2)
         field.validate((1, 2))
         field.validate((1, 2, 3))
@@ -1358,7 +1358,7 @@ class TupleTests(unittest.TestCase):
         self.assertRaises(TooShort, field.validate, (1,))
 
     def test_validate_max_length(self):
-        from guillotina.schema.interfaces import TooLong
+        from guillotina.schema.exceptions import TooLong
         field = self._makeOne(max_length=2)
         field.validate(())
         field.validate((1, 2))
@@ -1366,8 +1366,8 @@ class TupleTests(unittest.TestCase):
         self.assertRaises(TooLong, field.validate, (1, 2, 3))
 
     def test_validate_min_length_and_max_length(self):
-        from guillotina.schema.interfaces import TooLong
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooLong
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=1, max_length=2)
         field.validate((1, ))
         field.validate((1, 2))
@@ -1395,7 +1395,7 @@ class ListTests(unittest.TestCase):
         verifyObject(IList, self._makeOne())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, '')
@@ -1415,7 +1415,7 @@ class ListTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate([])
         field.validate([1, 2])
@@ -1423,7 +1423,7 @@ class ListTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min_length(self):
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=2)
         field.validate([1, 2])
         field.validate([1, 2, 3])
@@ -1431,7 +1431,7 @@ class ListTests(unittest.TestCase):
         self.assertRaises(TooShort, field.validate, [1, ])
 
     def test_validate_max_length(self):
-        from guillotina.schema.interfaces import TooLong
+        from guillotina.schema.exceptions import TooLong
         field = self._makeOne(max_length=2)
         field.validate([])
         field.validate([1])
@@ -1440,8 +1440,8 @@ class ListTests(unittest.TestCase):
         self.assertRaises(TooLong, field.validate, [1, 2, 3])
 
     def test_validate_min_length_and_max_length(self):
-        from guillotina.schema.interfaces import TooLong
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooLong
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=1, max_length=2)
         field.validate([1])
         field.validate([1, 2])
@@ -1474,7 +1474,7 @@ class SetTests(unittest.TestCase):
         self.assertTrue(self._makeOne().unique)
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, '')
@@ -1494,7 +1494,7 @@ class SetTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(set())
         field.validate(set((1, 2)))
@@ -1505,7 +1505,7 @@ class SetTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min_length(self):
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=2)
         field.validate(set((1, 2)))
         field.validate(set((1, 2, 3)))
@@ -1513,7 +1513,7 @@ class SetTests(unittest.TestCase):
         self.assertRaises(TooShort, field.validate, set((1,)))
 
     def test_validate_max_length(self):
-        from guillotina.schema.interfaces import TooLong
+        from guillotina.schema.exceptions import TooLong
         field = self._makeOne(max_length=2)
         field.validate(set())
         field.validate(set((1,)))
@@ -1522,8 +1522,8 @@ class SetTests(unittest.TestCase):
         self.assertRaises(TooLong, field.validate, set((1, 2, 3)))
 
     def test_validate_min_length_and_max_length(self):
-        from guillotina.schema.interfaces import TooLong
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooLong
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=1, max_length=2)
         field.validate(set((1,)))
         field.validate(set((1, 2)))
@@ -1556,7 +1556,7 @@ class FrozenSetTests(unittest.TestCase):
         self.assertTrue(self._makeOne().unique)
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, '')
@@ -1576,7 +1576,7 @@ class FrozenSetTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate(frozenset())
         field.validate(frozenset((1, 2)))
@@ -1584,7 +1584,7 @@ class FrozenSetTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min_length(self):
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=2)
         field.validate(frozenset((1, 2)))
         field.validate(frozenset((1, 2, 3)))
@@ -1592,7 +1592,7 @@ class FrozenSetTests(unittest.TestCase):
         self.assertRaises(TooShort, field.validate, frozenset((1,)))
 
     def test_validate_max_length(self):
-        from guillotina.schema.interfaces import TooLong
+        from guillotina.schema.exceptions import TooLong
         field = self._makeOne(max_length=2)
         field.validate(frozenset())
         field.validate(frozenset((1,)))
@@ -1601,8 +1601,8 @@ class FrozenSetTests(unittest.TestCase):
         self.assertRaises(TooLong, field.validate, frozenset((1, 2, 3)))
 
     def test_validate_min_length_and_max_length(self):
-        from guillotina.schema.interfaces import TooLong
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooLong
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=1, max_length=2)
         field.validate(frozenset((1,)))
         field.validate(frozenset((1, 2)))
@@ -1635,7 +1635,7 @@ class ObjectTests(unittest.TestCase):
         return InterfaceClass('ISchema', (Interface,), kw)
 
     def _getErrors(self, f, *args, **kw):
-        from guillotina.schema.interfaces import WrongContainedType
+        from guillotina.schema.exceptions import WrongContainedType
         try:
             f(*args, **kw)
         except WrongContainedType as e:
@@ -1703,7 +1703,7 @@ class ObjectTests(unittest.TestCase):
         verifyObject(IObject, self._makeOne())
 
     def test_ctor_w_bad_schema(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         self.assertRaises(WrongType, self._makeOne, object())
 
     def test_validate_not_required(self):
@@ -1712,7 +1712,7 @@ class ObjectTests(unittest.TestCase):
         objf.validate(None)  # doesn't raise
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne(required=True)
         self.assertRaises(RequiredMissing, field.validate, None)
 
@@ -1722,7 +1722,7 @@ class ObjectTests(unittest.TestCase):
         objf.validate(object())  # doesn't raise
 
     def test__validate_w_value_not_providing_schema(self):
-        from guillotina.schema.interfaces import SchemaNotProvided
+        from guillotina.schema.exceptions import SchemaNotProvided
         from guillotina.schema._bootstrapfields import Text
         schema = self._makeSchema(foo=Text(), bar=Text())
         objf = self._makeOne(schema)
@@ -1730,8 +1730,8 @@ class ObjectTests(unittest.TestCase):
 
     def test__validate_w_value_providing_schema_but_missing_fields(self):
         from zope.interface import implementer
-        from guillotina.schema.interfaces import SchemaNotFullyImplemented
-        from guillotina.schema.interfaces import WrongContainedType
+        from guillotina.schema.exceptions import SchemaNotFullyImplemented
+        from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Text
         schema = self._makeSchema(foo=Text(), bar=Text())
 
@@ -1758,9 +1758,9 @@ class ObjectTests(unittest.TestCase):
 
     def test__validate_w_value_providing_schema_but_invalid_fields(self):
         from zope.interface import implementer
-        from guillotina.schema.interfaces import WrongContainedType
-        from guillotina.schema.interfaces import RequiredMissing
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongContainedType
+        from guillotina.schema.exceptions import RequiredMissing
+        from guillotina.schema.exceptions import WrongType
         from guillotina.schema._bootstrapfields import Text
         schema = self._makeSchema(foo=Text(), bar=Text())
 
@@ -1810,7 +1810,7 @@ class ObjectTests(unittest.TestCase):
         field.validate(unit)  # doesn't raise
 
     def test_validate_w_cycles_object_not_valid(self):
-        from guillotina.schema.interfaces import WrongContainedType
+        from guillotina.schema.exceptions import WrongContainedType
         IUnit, Person, Unit = self._makeCycles()
         field = self._makeOne(schema=IUnit)
         person1 = Person(None)
@@ -1822,7 +1822,7 @@ class ObjectTests(unittest.TestCase):
         self.assertRaises(WrongContainedType, field.validate, unit)
 
     def test_validate_w_cycles_collection_not_valid(self):
-        from guillotina.schema.interfaces import WrongContainedType
+        from guillotina.schema.exceptions import WrongContainedType
         IUnit, Person, Unit = self._makeCycles()
         field = self._makeOne(schema=IUnit)
         person1 = Person(None)
@@ -1925,7 +1925,7 @@ class DictTests(unittest.TestCase):
         self.assertRaises(ValueError, self._makeOne, value_type=object())
 
     def test_validate_wrong_types(self):
-        from guillotina.schema.interfaces import WrongType
+        from guillotina.schema.exceptions import WrongType
         field = self._makeOne()
         self.assertRaises(WrongType, field.validate, '')
         self.assertRaises(WrongType, field.validate, '')
@@ -1945,7 +1945,7 @@ class DictTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from guillotina.schema.interfaces import RequiredMissing
+        from guillotina.schema.exceptions import RequiredMissing
         field = self._makeOne()
         field.validate({})
         field.validate({1: 'b', 2: 'd'})
@@ -1953,7 +1953,7 @@ class DictTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_invalid_key_type(self):
-        from guillotina.schema.interfaces import WrongContainedType
+        from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Int
         field = self._makeOne(key_type=Int())
         field.validate({})
@@ -1962,7 +1962,7 @@ class DictTests(unittest.TestCase):
         self.assertRaises(WrongContainedType, field.validate, {'a': 1})
 
     def test_validate_invalid_value_type(self):
-        from guillotina.schema.interfaces import WrongContainedType
+        from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Int
         field = self._makeOne(value_type=Int())
         field.validate({})
@@ -1971,14 +1971,14 @@ class DictTests(unittest.TestCase):
         self.assertRaises(WrongContainedType, field.validate, {1: 'a'})
 
     def test_validate_min_length(self):
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=1)
         field.validate({1: 'a'})
         field.validate({1: 'a', 2: 'b'})
         self.assertRaises(TooShort, field.validate, {})
 
     def test_validate_max_length(self):
-        from guillotina.schema.interfaces import TooLong
+        from guillotina.schema.exceptions import TooLong
         field = self._makeOne(max_length=1)
         field.validate({})
         field.validate({1: 'a'})
@@ -1986,8 +1986,8 @@ class DictTests(unittest.TestCase):
         self.assertRaises(TooLong, field.validate, {1: 'a', 2: 'b', 3: 'c'})
 
     def test_validate_min_length_and_max_length(self):
-        from guillotina.schema.interfaces import TooLong
-        from guillotina.schema.interfaces import TooShort
+        from guillotina.schema.exceptions import TooLong
+        from guillotina.schema.exceptions import TooShort
         field = self._makeOne(min_length=1, max_length=2)
         field.validate({1: 'a'})
         field.validate({1: 'a', 2: 'b'})

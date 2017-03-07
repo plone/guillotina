@@ -58,7 +58,7 @@ from guillotina.schema._schema import getFieldsInOrder
 from guillotina.schema._schema import getSchemaValidationErrors
 from guillotina.schema._schema import getValidationErrors
 from guillotina.schema.accessors import accessors
-from guillotina.schema.interfaces import ValidationError
+from guillotina.schema.exceptions import ValidationError
 
 
 # pep 8 friendlyness
