@@ -2,6 +2,7 @@
 from guillotina.annotations import AnnotationData
 from guillotina.interfaces import IAnnotations
 from zope.interface import alsoProvides
+from zope.interface.declarations import Provides
 
 
 class AnnotationBehavior(object):
@@ -16,7 +17,7 @@ class AnnotationBehavior(object):
         self.__dict__['schema'] = [x for x in self.__implemented__][0]
         self.__dict__['prefix'] = self.__dict__['schema'].__identifier__ + '.'
         self.__dict__['annotations'] = IAnnotations(context)
-        alsoProvides(self, self.__dict__['schema'])
+        self.__dict__['__provides__'] = Provides(self.__dict__['schema'])
 
     async def __getattr__(self, name):
         if name not in self.__dict__['schema']:
