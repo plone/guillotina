@@ -94,18 +94,8 @@ class BaseObject(object):
     __parent__ = property(_get_parent, _set_parent, _del_parent)
 
     def _get_belongs(self):
-        val = _OGA(self, '_BaseObject__belongs')
-        if val is not None:
-            return val
-        # attempt to detect oid...
-        for referrer in gc.get_referrers(self):
-            if not isinstance(referrer, dict) or len(referrer) == 0:
-                continue
-            obj = [v for v in referrer.values()][0]
-            if hasattr(obj, '_p_oid'):
-                oid = obj._p_oid
-                _OSA(self, '_BaseObject__belongs', oid)
-                return oid
+        # should be set when attribute is set...
+        return _OGA(self, '_BaseObject__belongs')
 
     def _set_belongs(self, value):
         _OSA(self, '_BaseObject__belongs', value)
@@ -231,6 +221,15 @@ class BaseObject(object):
                 _OSA(self, '_BaseObject__flags', after)
                 _OGA(self, '_p_register')()
 
+        if IBaseObject.providedBy(value):
+            # make sure to set the belongs value of the persistent object
+            oid = _OGA(self, '_BaseObject__oid')
+            if oid is not None:
+                _OSA(value, '_BaseObject__belongs', oid)
+                # also, register this now...
+                _OSA(value, '_BaseObject__jar', _OGA(self, '_BaseObject__jar'))
+                _OGA(value, '_p_register')()
+
     def _slotnames(self):
         """Returns all the slot names from the object"""
         slotnames = copyreg._slotnames(type(self))
@@ -290,7 +289,7 @@ class BaseObject(object):
 
     def _p_register(self):
         jar = _OGA(self, '_BaseObject__jar')
-        if jar is not None and _OGA(self, '_BaseObject__oid') is not None:
+        if jar is not None:
             jar.register(self)
 
     def _p_unregister(self):

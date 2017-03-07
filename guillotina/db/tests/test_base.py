@@ -33,8 +33,9 @@ async def test_create_subobject(dummy_txn_root):
     await root.__setitem__('ob1', ob1)
     ob2 = TestObject()
     ob1.attribute = ob2
-    ob2._p_belongs = ob1._p_oid
     assert ob2._p_belongs == ob1._p_oid
+    assert ob2._p_oid is not None
+    assert ob2._p_jar is not None
 
 
 def test_create_annotation(guillotina_main):
