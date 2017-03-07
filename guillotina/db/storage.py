@@ -75,8 +75,6 @@ INSERT_TEMP = """
 
 NEXT_TID = "SELECT nextval('tid_seq');"
 
-NEXT_OID = "SELECT nextval('zoid_seq');"
-
 NUM_CHILDS = "SELECT count(*) FROM objects WHERE parent_id = $1::int"
 
 GET_CHILDS = """
@@ -167,9 +165,6 @@ class APgStorage(object):
             CREATE INDEX IF NOT EXISTS object_id ON objects (id);
             """
 
-        install_psql = """
-            CREATE LANGUAGE plpgsql"""
-
         func = """
         CREATE OR REPLACE FUNCTION create_partition_and_insert() RETURNS trigger AS
               $BODY$
@@ -205,7 +200,6 @@ class APgStorage(object):
                 await conn.execute(tid)
 
         self.read_conn = await self.open()
-        self.stmt_next_oid = await self.read_conn.prepare(NEXT_OID)
         self.stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
 
     async def remove(self):
@@ -226,10 +220,6 @@ class APgStorage(object):
     async def last_transaction(self, txn):
         value = await txn._max_tid.fetchval()
         return 0 if value is None else value
-
-    async def next_oid(self, txn):
-        async with self._lock:
-            return await self.stmt_next_oid.fetchval()
 
     async def load(self, txn, oid):
         int_oid = oid

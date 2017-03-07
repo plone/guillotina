@@ -52,11 +52,6 @@ class DummyStorage(object):
             self._last_transaction += 1
             return self._last_transaction
 
-    async def next_oid(self, txn):
-        async with self._lock:
-            self._last_oid += 1
-            return self._last_oid
-
     async def load(self, txn, oid):
         objects = self.DB[oid]
         if objects is None:

@@ -125,7 +125,9 @@ class Transaction(object):
         oid = obj._p_oid
         if oid is None:
             self.added.append(obj)
-            obj._p_oid = None or uuid.uuid4().hex
+            if new_oid is None:
+                new_oid = uuid.uuid4().hex
+            obj._p_oid = new_oid
         else:
             self.modified[oid] = obj
 
@@ -213,7 +215,9 @@ class Transaction(object):
                 raise Exception('Invalid reference to txn')
 
             # There is no oid
-            oid = await self._manager._storage.next_oid(self)
+            oid = obj._p_oid
+            if oid is None:
+                oid = uuid.uuid4().hex
             s, l = await self._manager._storage.store(
                 oid, None, IWriter(obj), obj, self)
             obj._p_serial = s
