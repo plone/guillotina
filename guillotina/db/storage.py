@@ -111,7 +111,7 @@ DELETE_FROM_OBJECTS = """
 
 class BaseStorage(object):
 
-    _cache = None
+    _cache = {}
     _read_only = False
 
     def __init__(self, read_only=False):

@@ -26,14 +26,9 @@ class DummyStorage(BaseStorage):
     # OF INDEX (OID -> LIST OID)
     OF = {}
 
-    def __init__(self, folder=None):
-        self._folder = folder
+    def __init__(self, read_only=False):
+        super(DummyStorage, self).__init__(read_only)
         self._lock = asyncio.Lock()
-        self.read_conn = None
-        self._cache = {}
-
-    def isReadOnly(self):
-        return self._read_only
 
     async def finalize(self):
         pass
