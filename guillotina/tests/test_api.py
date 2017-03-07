@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from guillotina.behaviors.attachment import IAttachment
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.tests import TEST_RESOURCES_DIR
 from guillotina import schema
@@ -137,39 +136,39 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
         response = json.loads(resp.text)
         self.assertEqual({'value': False}, response)
 
-    def test_file_upload(self):
-        resp = self.layer.requester(
-            'POST',
-            '/guillotina/guillotina/',
-            data=json.dumps({
-                "@type": "File",
-                "title": "File1",
-                "id": "file1"
-            })
-        )
-        self.assertTrue(resp.status_code == 201)
-        site = self._get_site()
-        self.assertTrue('file1' in site)
-        fi = open(os.path.join(TEST_RESOURCES_DIR, 'plone.png'), 'rb')
-        data = fi.read()
-        fi.close()
-        resp = self.layer.requester(
-            'PATCH',
-            '/guillotina/guillotina/file1/@upload/file',
-            data=data)
-        site = self._get_site()
-        behavior = IAttachment(site['file1'])
-        self.assertEqual(behavior.file.data, data)
+    # def test_file_upload(self):
+    #     resp = self.layer.requester(
+    #         'POST',
+    #         '/guillotina/guillotina/',
+    #         data=json.dumps({
+    #             "@type": "File",
+    #             "title": "File1",
+    #             "id": "file1"
+    #         })
+    #     )
+    #     self.assertTrue(resp.status_code == 201)
+    #     site = self._get_site()
+    #     self.assertTrue('file1' in site)
+    #     fi = open(os.path.join(TEST_RESOURCES_DIR, 'plone.png'), 'rb')
+    #     data = fi.read()
+    #     fi.close()
+    #     resp = self.layer.requester(
+    #         'PATCH',
+    #         '/guillotina/guillotina/file1/@upload/file',
+    #         data=data)
+    #     site = self._get_site()
+    #     behavior = IAttachment(site['file1'])
+    #     self.assertEqual(behavior.file.data, data)
 
-    def test_file_download(self):
-        # first, get a file on...
-        self.test_file_upload()
-        resp = self.layer.requester(
-            'GET',
-            '/guillotina/guillotina/file1/@download/file')
-        site = self._get_site()
-        behavior = IAttachment(site['file1'])
-        self.assertEqual(behavior.file.data, resp.content)
+    # def test_file_download(self):
+    #     # first, get a file on...
+    #     self.test_file_upload()
+    #     resp = self.layer.requester(
+    #         'GET',
+    #         '/guillotina/guillotina/file1/@download/file')
+    #     site = self._get_site()
+    #     behavior = IAttachment(site['file1'])
+    #     self.assertEqual(behavior.file.data, resp.content)
 
     def test_create_contenttype_with_date(self):
         """Try to create a contenttype."""

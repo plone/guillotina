@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-from guillotina.behaviors.attachment import IAttachment
 from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.tests import TEST_RESOURCES_DIR
-from guillotina import schema
-from zope.interface import Interface
 
 import json
 import os
@@ -37,7 +34,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
             'PATCH',
             '/guillotina/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.attachment.IAttachment'
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
         self.assertTrue(resp.status_code == 200)
@@ -50,10 +47,10 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
 
         self.assertEqual(
             resp.json()['__behaviors__'],
-            ['guillotina.behaviors.attachment.IAttachment'])
+            ['guillotina.behaviors.dublincore.IDublinCore'])
 
         self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' in
+            'guillotina.behaviors.dublincore.IDublinCore' in
             resp.json())
 
         # We upload a file
@@ -76,7 +73,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
             '/guillotina/guillotina/item1'
         )
         self.assertEqual(
-            resp.json()['guillotina.behaviors.attachment.IAttachment']['file']['filename'],  # noqa
+            resp.json()['guillotina.behaviors.dublincore.IDublinCore']['file']['filename'],  # noqa
             'plone.png')
 
     def test_create_delete_dynamic_behavior(self):
@@ -97,7 +94,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
             'PATCH',
             '/guillotina/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.attachment.IAttachment'
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
         self.assertTrue(resp.status_code == 200)
@@ -110,14 +107,14 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
 
         self.assertEqual(
             resp.json()['__behaviors__'],
-            ['guillotina.behaviors.attachment.IAttachment'])
+            ['guillotina.behaviors.dublincore.IDublinCore'])
 
         # We delete the behavior
         resp = self.layer.requester(
             'DELETE',
             '/guillotina/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.attachment.IAttachment'
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
         self.assertTrue(resp.status_code == 200)
@@ -133,7 +130,7 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
             [])
 
         self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' not in
+            'guillotina.behaviors.dublincore.IDublinCore' not in
             resp.json())
 
     def test_get_behaviors(self):
@@ -156,6 +153,6 @@ class FunctionalTestServer(GuillotinaFunctionalTestCase):
 
         self.assertTrue(resp.status_code == 200)
         self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' in resp.json()['available'])  # noqa
+            'guillotina.behaviors.dublincore.IDublinCore' in resp.json()['available'])  # noqa
         self.assertTrue(
-            'guillotina.behaviors.attachment.IAttachment' in resp.json())
+            'guillotina.behaviors.dublincore.IDublinCore' in resp.json())
