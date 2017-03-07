@@ -17,6 +17,7 @@ class TransactionManager(object):
         self._txn = None
         # Pool of transactions
         self._pool = None
+        self.request = None
 
     async def root(self):
         return await self._txn.get(0)
@@ -28,7 +29,9 @@ class TransactionManager(object):
         self._db_conn = await self._storage.open()
 
         if request is None:
-            request = get_current_request()
+            if self.request is None:
+                self.request = get_current_request()
+            request = self.request
 
         user = get_authenticated_user_id(request)
         if self._txn is not None:
@@ -37,7 +40,7 @@ class TransactionManager(object):
             # Save the actual transaction and start a new one
             self._pool.put(self._txn)
 
-        self._txn = txn = Transaction(self)
+        self._txn = txn = Transaction(self, request=request)
 
         # CACHE!!
 

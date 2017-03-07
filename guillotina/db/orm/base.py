@@ -10,6 +10,7 @@ GHOST = -1
 ROOT = 0
 FULL = 1
 CHANGED = 1
+UPTODATE = 2
 
 # Bitwise flags
 _CHANGED = 0x0001
@@ -59,7 +60,7 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__jar', None)
         _OSA(inst, '_BaseObject__oid', None)
         _OSA(inst, '_BaseObject__serial', None)
-        _OSA(inst, '_BaseObject__flags', None)
+        _OSA(inst, '_BaseObject__flags', CHANGED)  # start with changed...
         _OSA(inst, '_BaseObject__size', 0)
         _OSA(inst, '_BaseObject__belongs', None)
         _OSA(inst, '_BaseObject__parent', None)
@@ -68,9 +69,9 @@ class BaseObject(object):
         return inst
 
     def __repr__(self):
-        return "<BaseObject %d>" % id(self)
+        return "<%s %d>" % (self.__class__.__name__, id(self))
 
-    async def _get_parent(self):
+    def _get_parent(self):
         parent = _OGA(self, '_BaseObject__parent')
         if parent is None:
             return None
@@ -82,7 +83,7 @@ class BaseObject(object):
         oid = _OGA(self, '_BaseObject__oid')
         if oid is None:
             raise Exception('No OID')
-        await jar.get_parent(oid)
+        # await jar.get_parent(oid)
 
     def _set_parent(self, value):
         _OSA(self, '_BaseObject__parent', value)
@@ -91,6 +92,28 @@ class BaseObject(object):
         _OSA(self, '_BaseObject__parent', None)
 
     __parent__ = property(_get_parent, _set_parent, _del_parent)
+
+    def _get_belongs(self):
+        val = _OGA(self, '_BaseObject__belongs')
+        if val is not None:
+            return val
+        # attempt to detect oid...
+        for referrer in gc.get_referrers(self):
+            if not isinstance(referrer, dict) or len(referrer) == 0:
+                continue
+            obj = [v for v in referrer.values()][0]
+            if hasattr(obj, '_p_oid'):
+                oid = obj._p_oid
+                _OSA(self, '_BaseObject__belongs', oid)
+                return oid
+
+    def _set_belongs(self, value):
+        _OSA(self, '_BaseObject__belongs', value)
+
+    def _del_belongs(self):
+        _OSA(self, '_BaseObject__belongs', None)
+
+    _p_belongs = property(_get_belongs, _set_belongs, _del_belongs)
 
     # _p_jar:  romantic name of the global connection obj.
     def _get_jar(self):

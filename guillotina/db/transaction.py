@@ -28,7 +28,7 @@ class Status:
 
 class Transaction(object):
 
-    def __init__(self, manager):
+    def __init__(self, manager, request=None):
         self._txn_time = None
         self.status = Status.ACTIVE
 
@@ -52,6 +52,7 @@ class Transaction(object):
         self._db_conn = None
         # Transaction on DB
         self._db_txn = None
+        self.request = request
 
     def get_before_commit_hooks(self):
         """ See ITransaction.
@@ -110,8 +111,9 @@ class Transaction(object):
         await self._manager._storage.tpc_begin(self, conn)
 
     def check_read_only(self):
-        request = get_current_request()
-        if hasattr(request, '_db_write_enabled') and not request._db_write_enabled:
+        if self.request is None:
+            self.request = get_current_request()
+        if hasattr(self.request, '_db_write_enabled') and not self.request._db_write_enabled:
             raise Unauthorized('Adding content not permited')
 
     # REGISTER OBJECTS

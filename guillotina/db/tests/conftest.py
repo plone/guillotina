@@ -175,8 +175,8 @@ def dummy_request(dummy_guillotina):
     db = root['guillotina']
     request = make_mocked_request('POST', '/')
     request._tm = db.new_transaction_manager()
-    yield request
-
+    request._tm.request = request  # so get_current_request can find it...
+    return request
 
 
 @pytest.fixture(scope='function')
