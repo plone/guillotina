@@ -12,11 +12,13 @@
 # Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
 # THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
 # WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE.
+
+
 #
 ##############################################################################
 from guillotina.schema._bootstrapinterfaces import NO_VALUE
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
 from guillotina.schema._field import ASCII
 from guillotina.schema._field import ASCIILine
 from guillotina.schema._field import Bool
@@ -36,6 +38,7 @@ from guillotina.schema._field import Id
 from guillotina.schema._field import Int
 from guillotina.schema._field import InterfaceField
 from guillotina.schema._field import Iterable
+from guillotina.schema._field import JSONField
 from guillotina.schema._field import List
 from guillotina.schema._field import MinMaxLen
 from guillotina.schema._field import NativeString
@@ -67,7 +70,7 @@ Decimal, Dict, DottedName, Field, Float, FrozenSet, Id, Int, InterfaceField
 Iterable, List, MinMaxLen, NativeString, NativeStringLine, Object, Orderable
 Password, Set, SourceText, Text, TextLine, Time, Timedelta, Tuple, URI
 getFields, getFieldsInOrder, getFieldNames, getFieldNamesInOrder,
-getValidationErrors, getSchemaValidationErrors
+getValidationErrors, getSchemaValidationErrors, JSONField
 accessors
 ValidationError
 NO_VALUE
