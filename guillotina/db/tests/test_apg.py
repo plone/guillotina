@@ -73,5 +73,6 @@ async def test_apg_txn(postgres, guillotina_main):
     await aps.abort(txn)
     await aps.close(txn._db_conn)
     obj2 = reader(result)
-    await aps.remove()
+    # XXX causing it to hang here?
+    # await aps.remove()
     assert obj.__name__ == obj2.__name__

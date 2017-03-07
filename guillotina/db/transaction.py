@@ -118,14 +118,14 @@ class Transaction(object):
 
     # REGISTER OBJECTS
 
-    def register(self, obj):
+    def register(self, obj, new_oid=None):
         """We are adding a new object on the DB"""
         self.check_read_only()
 
         oid = obj._p_oid
         if oid is None:
             self.added.append(obj)
-            obj._p_oid = uuid.uuid4().hex
+            obj._p_oid = None or uuid.uuid4().hex
         else:
             self.modified[oid] = obj
 

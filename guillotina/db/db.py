@@ -51,8 +51,7 @@ class GuillotinaDB(object):
             await t.get(0)
         except KeyError:
             root = Root()
-            root._p_oid = 0
-            t.register(root)
+            t.register(root, new_oid=0)
 
         await request._tm.commit()
 
