@@ -37,7 +37,7 @@ class Transaction(object):
         self._manager = manager
 
         # List of objects added
-        self.added = []
+        self.added = {}
         self.modified = {}
         self.deleted = {}
 
@@ -124,13 +124,14 @@ class Transaction(object):
         self.check_read_only()
 
         oid = obj._p_oid
-        if oid is None:
-            self.added.append(obj)
+        if oid is not None:
+            if oid not in self.modified and oid not in self.added:
+                self.modified[oid] = obj
+        else:
             if new_oid is None:
                 new_oid = uuid.uuid4().hex
             obj._p_oid = new_oid
-        else:
-            self.modified[oid] = obj
+            self.added[new_oid] = obj
 
     def delete(self, obj):
         self.check_read_only()
@@ -210,15 +211,11 @@ class Transaction(object):
     async def real_commit(self):
         """Commit changes to an object"""
         await self._manager._storage.precommit(self)
-        for obj in self.added:
+        for oid, obj in self.added.items():
             # Added objects
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
 
-            # There is no oid
-            oid = obj._p_oid
-            if oid is None:
-                oid = uuid.uuid4().hex
             s, l = await self._manager._storage.store(
                 oid, None, IWriter(obj), obj, self)
             obj._p_serial = s
@@ -232,7 +229,6 @@ class Transaction(object):
 
             # There is no serial
             serial = getattr(obj, "_p_serial", 0)
-
             s, l = await self._manager._storage.store(
                 oid, serial, IWriter(obj), obj, self)
             obj._p_serial = s
@@ -256,7 +252,7 @@ class Transaction(object):
         self.tpc_cleanup()
 
     def tpc_cleanup(self):
-        self.added = []
+        self.added = {}
         self.modified = {}
         self.deleted = {}
         self._db_txn = None
@@ -296,4 +292,4 @@ class Transaction(object):
         return obj
 
     async def get_annotation_keys(self, oid):
-        return await self._manager._storage.get_annotation_keys(self, oid)
+        return [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]

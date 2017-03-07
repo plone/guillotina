@@ -2,12 +2,11 @@ from guillotina import configure
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IResource
 from guillotina.db.reader import reader
-from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.orm.base import BaseObject
 from collections import UserDict
 
 
-class AnnotationData(UserDict, BaseObject):
+class AnnotationData(BaseObject, UserDict):
     """
     store data on basic dictionary object but also inherit from base object
     """
@@ -28,9 +27,8 @@ class AnnotationsAdapter(object):
         element = annotations.get(key, default)
         if element is None:
             # Get from DB
-            raw_obj = await self.obj._p_jar.get_annotation(self.obj, key)
-            if raw_obj:
-                obj = reader(raw_obj)
+            obj = await self.obj._p_jar.get_annotation(self.obj, key)
+            if obj:
                 annotations[key] = obj
         return annotations[key]
 
@@ -44,9 +42,10 @@ class AnnotationsAdapter(object):
         await self.set(key, value)
 
     async def set(self, key, value):
-        annotations = self.obj.__annotations__
-        if not IBaseObject.providedBy(value):
+        if not isinstance(value, BaseObject):
             raise KeyError('Not a valid object as annotation')
+        annotations = self.obj.__annotations__
+        value.id = key  # make sure id is set...
         annotations[key] = value
         value.__of__ = self.obj._p_oid
         value.__name__ = key

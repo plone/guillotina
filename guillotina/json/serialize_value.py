@@ -32,10 +32,7 @@ def json_compatible(value):
     Because of that the `json_compatible` helper method should always be
     used for converting values that may be None.
     """
-    try:
-        return IValueToJson(value, None)
-    except:
-        import pdb; pdb.set_trace()
+    return IValueToJson(value, None)
 
 
 def encoding():
@@ -161,4 +158,3 @@ def i18n_message_converter(value):
     # TODO:
     # value = translate(value, context=getRequest())
     return value
-

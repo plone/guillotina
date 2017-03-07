@@ -4,17 +4,18 @@ from guillotina.api.service import Service
 from guillotina.api.service import TraversableService
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
+from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import ISite
 from guillotina.interfaces import IValueToJson
 from guillotina.json.exceptions import DeserializationError
+from guillotina.schema import getFields
+from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import resolve
 from zope.component import getMultiAdapter
-from guillotina.i18n import MessageFactory
 from zope.interface.interfaces import ComponentLookupError
-from guillotina.schema import getFields
 
 
 _ = MessageFactory('guillotina')
@@ -42,12 +43,12 @@ class Read(TraversableService):
             self.value = self.request.site_settings
         if IRegistry.providedBy(self.value):
             result = {}
-            for x in self.value:
+            for key in self.value.keys():
                 try:
-                    value = IValueToJson(self.value[x])
+                    value = IValueToJson(self.value[key])
                 except ComponentLookupError:
-                    value = self.value[x]
-                result[x] = value
+                    value = self.value[key]
+                result[key] = value
         else:
             try:
                 result = IValueToJson(self.value)

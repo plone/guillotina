@@ -18,6 +18,7 @@ from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
+from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
@@ -33,6 +34,8 @@ from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import ISite
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
+from guillotina.registry import REGISTRY_DATA_KEY
+from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_current_request
@@ -44,7 +47,6 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import noLongerProvides
-from guillotina.schema.interfaces import IContextAwareDefaultFactory
 
 import guillotina.db.orm.base
 import pathlib
@@ -407,16 +409,15 @@ class Site(Folder):
     async def install(self):
         # Creating and registering a local registry
         from guillotina.registry import Registry
+        annotations_container = IAnnotations(self)
         registry = Registry()
-        await apply_coroutine(self.__setitem__, '_registry', registry)
+        await annotations_container.__setitem__(REGISTRY_DATA_KEY, registry)
 
         # Set default plugins
         registry.register_interface(ILayers)
         registry.register_interface(IAddons)
         layers = registry.for_interface(ILayers)
-        layers.__setattr__(
-            'active_layers',
-            frozenset('guillotina.interfaces.layer.IDefaultLayer'))
+        layers['active_layers'] = frozenset({'guillotina.interfaces.layer.IDefaultLayer'})
 
         roles = IPrincipalRoleManager(self)
         roles.assign_role_to_principal(

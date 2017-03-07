@@ -18,6 +18,7 @@ from guillotina.contentnegotiation import language_negotiation
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
+from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDefaultLayer
@@ -32,6 +33,7 @@ from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
+from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
@@ -137,8 +139,9 @@ async def traverse(request, parent, path):
     if ISite.providedBy(context):
         request._site_id = context.id
         request.site = context
-        request.site_settings = await context.__getitem__('_registry')
-        layers = getattr(request.site_settings, ACTIVE_LAYERS_KEY, [])
+        annotations_container = IAnnotations(request.site)
+        request.site_settings = await annotations_container.__getitem__(REGISTRY_DATA_KEY)
+        layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
 
