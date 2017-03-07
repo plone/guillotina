@@ -231,23 +231,23 @@ class Transaction(object):
 
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
-        ok, conflict_object = await self._manager._storage.tpc_vote(self)
+        ok = await self._manager._storage.tpc_vote(self)
         if ok is False:
-            obj = reader(conflict_object)
-            obj._p_jar = self
-            raise ConflictError(self, obj)
+            # obj = reader(conflict_object)
+            # obj._p_jar = self
+            raise ConflictError(self, None)
 
     async def tpc_finish(self):
         """Indicate confirmation that the transaction is done.
         """
         await self._manager._storage.tpc_finish(self)
         # Set on cache
-        for obj in self.addded:
-            self._cache.set(obj._p_oid, obj, obj.__cache__)
-        for key, obj in self.modified.items():
-            self._cache.set(obj._p_oid, obj, obj.__cache__)
-        for key, obj in self.deleted.items():
-            self._cache.set(obj._p_oid, obj, obj.__cache__)
+        # for key, obj in self.added.items():
+        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
+        # for key, obj in self.modified.items():
+        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
+        # for key, obj in self.deleted.items():
+        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
         self.tpc_cleanup()
 
     def tpc_cleanup(self):

@@ -139,6 +139,77 @@ async def test_register_registry(site_requester):
         assert {'value': False} == response
 
 
+async def test_create_contenttype_with_date(site_requester):
+    async for requester in site_requester:
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        assert status == 201
+        date_to_test = "2016-11-30T14:39:07.394273+01:00"
+        response, status = await requester(
+            'PATCH',
+            '/guillotina/guillotina/item1',
+            data=json.dumps({
+                "guillotina.behaviors.dublincore.IDublinCore": {
+                    "created": date_to_test,
+                    "expires": date_to_test
+                }
+            })
+        )
+
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+        site = await root.__getitem__('guillotina')
+        obj = await site.__getitem__('item1')
+        import pdb; pdb.set_trace()
+        from guillotina.behaviors.dublincore import IDublinCore
+        assert IDublinCore(obj).created.isoformat() == date_to_test
+        assert IDublinCore(obj).expires.isoformat() == date_to_test
+
+
+async def test_create_duplicate_id(site_requester):
+    async for requester in site_requester:
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        assert status == 201
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        assert status == 409
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            }),
+            headers={
+                "OVERWRITE": "TRUE"
+            }
+        )
+        assert status == 201
+
+
 # class FunctionalTestServer(GuillotinaFunctionalTestCase):
 #     """Functional testing of the API REST."""
 #
@@ -183,71 +254,9 @@ async def test_register_registry(site_requester):
 #     #     behavior = IAttachment(site['file1'])
 #     #     self.assertEqual(behavior.file.data, resp.content)
 #
-#     def test_create_contenttype_with_date(self):
-#         """Try to create a contenttype."""
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/',
-#             data=json.dumps({
-#                 "@type": "Item",
-#                 "title": "Item1",
-#                 "id": "item1",
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 201)
-#         date_to_test = "2016-11-30T14:39:07.394273+01:00"
-#         resp = self.layer.requester(
-#             'PATCH',
-#             '/guillotina/guillotina/item1',
-#             data=json.dumps({
-#                 "guillotina.behaviors.dublincore.IDublinCore": {
-#                     "created": date_to_test,
-#                     "expires": date_to_test
-#                 }
-#             })
-#         )
+
 #
-#         root = self.new_root()
-#         obj = root['guillotina']['item1']
-#         from guillotina.behaviors.dublincore import IDublinCore
-#         self.assertEqual(IDublinCore(obj).created.isoformat(), date_to_test)
-#         self.assertEqual(IDublinCore(obj).expires.isoformat(), date_to_test)
-#
-#     def test_create_duplicate_id(self):
-#         """Try to create a contenttype."""
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/',
-#             data=json.dumps({
-#                 "@type": "Item",
-#                 "title": "Item1",
-#                 "id": "item1",
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 201)
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/',
-#             data=json.dumps({
-#                 "@type": "Item",
-#                 "title": "Item1",
-#                 "id": "item1",
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 409)
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/',
-#             data=json.dumps({
-#                 "@type": "Item",
-#                 "title": "Item1",
-#                 "id": "item1",
-#             }),
-#             headers={
-#                 "OVERWRITE": "TRUE"
-#             }
-#         )
-#         self.assertTrue(resp.status_code == 201)
+
 #
 #     def test_create_nested_object(self):
 #         resp = self.layer.requester(

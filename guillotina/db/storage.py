@@ -132,7 +132,7 @@ class APgStorage(BaseStorage):
     _pool_size = None
 
     _pool = None
-    
+
     _ltid = None
     _conn = None
     _lock = None
@@ -140,7 +140,7 @@ class APgStorage(BaseStorage):
     _blobhelper = None
     _large_record_size = 1 << 24
 
-    def __init__(self, dsn=None, partition=None ,read_only=False, name=None, pool_size=10):
+    def __init__(self, dsn=None, partition=None, read_only=False, name=None, pool_size=10):
         super(APgStorage, self).__init__(read_only)
         self._dsn = dsn
         self._pool_size = pool_size
@@ -148,7 +148,6 @@ class APgStorage(BaseStorage):
         self._read_only = read_only
         self.__name__ = name
         self._lock = asyncio.Lock()
-        self._cache = None
         self.read_conn = None
 
     async def finalize(self):

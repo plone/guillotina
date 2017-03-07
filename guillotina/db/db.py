@@ -34,7 +34,8 @@ class GuillotinaDB(object):
 
         self.remote_cache = remote_cache
         self.storage = storage
-        self.storage.use_cache(remote_cache)
+        if remote_cache is not None:
+            self.storage.use_cache(remote_cache)
         self.database_name = database_name
 
     async def initialize(self):
