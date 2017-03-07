@@ -12,11 +12,12 @@ import json
 from guillotina.factory import make_app
 from guillotina.content import load_cached_schema
 from guillotina.testing import ADMIN_TOKEN
+import copy
 
 
 IMAGE = 'postgres:9.6'
 CONTAINERS_FOR_TESTING_LABEL = 'testingaiopg'
-DOCKER_PG_SETTINGS = TESTING_SETTINGS.copy()
+DOCKER_PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
 DOCKER_PG_SETTINGS['applications'] = []
 DOCKER_PG_SETTINGS['databases'][0]['guillotina']['storage'] = 'GDB'
 
@@ -31,7 +32,7 @@ DOCKER_PG_SETTINGS['databases'][0]['guillotina']['dsn'] = {
     'port': 5432
 }
 
-DUMMY_SETTINGS = TESTING_SETTINGS.copy()
+DUMMY_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
 DUMMY_SETTINGS['applications'] = []
 DUMMY_SETTINGS['databases'][0]['guillotina']['storage'] = 'DUMMY'
 

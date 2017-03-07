@@ -16,11 +16,13 @@ import pickle
 class Writer(object):
 
     part = 0
-    json = None
     resource = False
 
     def __init__(self, obj):
         self._obj = obj
+
+    async def get_json(self):
+        return None
 
     @property
     def of(self):
@@ -81,8 +83,7 @@ class ResourceWriter(Writer):
         else:
             return dotted_name(self._obj)
 
-    @property
-    def json(self):
+    async def get_json(self):
         adapter = queryAdapter(self._obj, ICatalogDataAdapter)
         if adapter is not None:
-            return adapter()
+            return await adapter()

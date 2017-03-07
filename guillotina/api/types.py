@@ -29,11 +29,11 @@ class Read(TraversableService):
                     (x, self.request),
                     IFactorySerializeToJson)
 
-                result.append(serializer())
+                result.append(await serializer())
         else:
             serializer = getMultiAdapter(
                 (self.value, self.request),
                 IFactorySerializeToJson)
 
-            result = serializer()
+            result = await serializer()
         return result

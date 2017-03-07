@@ -4,6 +4,7 @@ from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.json.serialize_value import json_compatible
 from zope.interface import Interface
 from guillotina.schema.interfaces import IField
+from guillotina.utils import apply_coroutine
 
 
 @configure.adapter(
@@ -16,14 +17,18 @@ class DefaultFieldSerializer(object):
         self.request = request
         self.field = field
 
-    def __call__(self):
-        return json_compatible(self.get_value())
+    async def __call__(self):
+        return json_compatible(await self.get_value())
 
-    def get_value(self, default=None):
+    async def get_value(self, default=None):
         try:
-            return self.field.get(self.context)
+            return await apply_coroutine(
+                self.field.get,
+                self.context)
         except:  # noqa
             # XXX handle exception?
-            return getattr(self.context,
-                           self.field.__name__,
-                           default)
+            return await apply_coroutine(
+                getattr,
+                self.context,
+                self.field.__name__,
+                default)

@@ -27,7 +27,7 @@ class AnnotationBehavior(object):
         try:
             annotations = await annotations_container.__getitem__(self.__annotations_data_key)
         except KeyError:
-            raise AttributeError(name)
+            return self.__dict__['schema'][name].missing_value
 
         if key_name not in annotations:
             return self.__dict__['schema'][name].missing_value
@@ -36,7 +36,10 @@ class AnnotationBehavior(object):
 
     async def __setattr__(self, name, value):
         if name not in self.__dict__['schema'] or \
-                name in self.__local__properties__:
+                name in self.__local__properties__ or \
+                name.startswith('__') or \
+                name.startswith('_v_') or \
+                name.startswith('_p_'):
             super(AnnotationBehavior, self).__setattr__(name, value)
         else:
             prefixed_name = self.__dict__['prefix'] + name

@@ -12,12 +12,6 @@ from zope.interface import Interface
 
 
 try:
-    import Missing
-    HAS_ZOPE_MISSING = True
-except ImportError:
-    HAS_ZOPE_MISSING = False
-
-try:
     unicode
 except NameError:
     unicode = str
@@ -38,7 +32,10 @@ def json_compatible(value):
     Because of that the `json_compatible` helper method should always be
     used for converting values that may be None.
     """
-    return IValueToJson(value, None)
+    try:
+        return IValueToJson(value, None)
+    except:
+        import pdb; pdb.set_trace()
 
 
 def encoding():
@@ -165,10 +162,3 @@ def i18n_message_converter(value):
     # value = translate(value, context=getRequest())
     return value
 
-
-if HAS_ZOPE_MISSING:
-    @configure.adapter(
-        for_=Missing.Value.__class__,
-        provides=IValueToJson)
-    def missing_value_converter(value):
-        return None

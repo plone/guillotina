@@ -32,7 +32,7 @@ class TestCatalog(GuillotinaServerBaseTestCase):
         ob = await create_content_in_container(site, 'Item', 'foobar')
 
         data = ICatalogDataAdapter(ob)
-        fields = data()
+        fields = await data()
         self.assertTrue('portal_type' in fields)
         self.assertTrue('uuid' in fields)
         self.assertTrue('path' in fields)

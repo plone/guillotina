@@ -161,7 +161,7 @@ class Transaction(object):
 
         return obj
 
-    async def get_all(self, oid):
+    async def get_all_object(self, oid):
         """Getting a oid from the db"""
 
         obj = self.modified.get(oid, None)
@@ -172,7 +172,7 @@ class Transaction(object):
         obj._p_jar = self
         return obj
 
-    async def get_annotation(self, oid, annotation_id):
+    async def get_object_with_annotations(self, oid, annotation_id):
         """Getting a oid from the db"""
 
         obj = self.modified.get(oid, None)
@@ -266,9 +266,10 @@ class Transaction(object):
     async def keys(self, oid):
         return await self._manager._storage.keys(self, oid)
 
-    async def get_child(self, oid, key):
-        result = await self._manager._storage.get_child(self, oid, key)
+    async def get_child(self, container, key):
+        result = await self._manager._storage.get_child(self, container._p_oid, key)
         obj = reader(result)
+        obj.__parent__ = container
         obj._p_jar = self
         return obj
 
@@ -278,8 +279,21 @@ class Transaction(object):
     async def len(self, oid):
         return await self._manager._storage.len(self, oid)
 
-    async def items(self, oid):
-        async for record in self._manager._storage.items(self, oid):
+    async def items(self, container):
+        async for record in self._manager._storage.items(self, container._p_oid):
             obj = reader(record)
+            obj.__parent__ = container
             obj._p_jar = self
             yield obj.id, obj
+
+    async def get_annotation(self, base_obj, id):
+        result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+        if result is None:
+            raise KeyError(id)
+        obj = reader(result)
+        obj.__of__ = base_obj._p_oid
+        obj._p_jar = self
+        return obj
+
+    async def get_annotation_keys(self, oid):
+        return await self._manager._storage.get_annotation_keys(self, oid)

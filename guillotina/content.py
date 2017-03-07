@@ -81,7 +81,6 @@ class ResourceFactory(Factory):
         now = datetime.now(tz=_zone)
         obj.creation_date = now
         obj.modification_date = now
-        obj.uuid = uuid.uuid4().hex
         if id is None:
             obj.id = obj.uuid
         else:
@@ -255,10 +254,13 @@ class Resource(guillotina.db.orm.base.BaseObject):
     __acl__ = None
 
     portal_type = None
-    uuid = None
     creation_date = None
     modification_date = None
     title = None
+
+    @property
+    def uuid(self):
+        return self._p_oid
 
     def __init__(self, id=None):
         if id is not None:
@@ -377,14 +379,14 @@ class Folder(Resource):
             self._p_jar.register(value)
 
     async def __getitem__(self, key):
-        return await self._p_jar.get_child(self._p_oid, key)
+        return await self._p_jar.get_child(self, key)
 
     async def __delitem__(self, key):
         return await self._p_jar.delete(await self.__getitem__(key))
 
     async def get(self, key, default=None):
         try:
-            return await self._p_jar.get_child(self._p_oid, key)
+            return await self._p_jar.get_child(self, key)
         except KeyError:
             return default
 
@@ -395,7 +397,7 @@ class Folder(Resource):
         return await self._p_jar.keys(self._p_oid)
 
     async def items(self):
-        async for key, value in self._p_jar.items(self._p_oid):
+        async for key, value in self._p_jar.items(self):
             yield key, value
 
 

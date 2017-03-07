@@ -24,7 +24,7 @@ async def test_create_object(dummy_txn_root):
         assert ob1._p_serial is None
         assert ob1._p_oid is None
         assert ob1.__parent__ is None
-        assert ob1._p_belongs is None
+        assert ob1.__of__ is None
         assert ob1.__name__ is None
 
         await root.__setitem__('ob1', ob1)
@@ -32,7 +32,7 @@ async def test_create_object(dummy_txn_root):
         assert ob1.__name__ == 'ob1'
         assert ob1._p_jar == root._p_jar
         assert ob1._p_oid is not None
-        assert ob1._p_belongs is None
+        assert ob1.__of__ is None
         assert ob1.__parent__ is root
 
         assert len(ob1._p_jar.added) == 1

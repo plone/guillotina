@@ -107,9 +107,9 @@ class DeserializeFromJson(object):
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
                     try:
-                        apply_coroutine(field.set, obj, value)
+                        await apply_coroutine(field.set, obj, value)
                     except:  # noqa
-                        apply_coroutine(setattr, obj, name, value)
+                        await apply_coroutine(setattr, obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):
                     errors.append({

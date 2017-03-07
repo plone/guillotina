@@ -4,6 +4,7 @@ from guillotina.content import Folder
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IDatabase
+from guillotina.db import ROOT_ID
 from zope.interface import implementer_only
 
 import asyncio
@@ -17,6 +18,8 @@ class Root(Folder):
 
     def __repr__(self):
         return "<Database %d>" % id(self)
+
+
 
 
 class GuillotinaDB(object):
@@ -51,7 +54,7 @@ class GuillotinaDB(object):
             await t.get(0)
         except KeyError:
             root = Root()
-            t.register(root, new_oid=0)
+            t.register(root, new_oid=ROOT_ID)
 
         await request._tm.commit()
 

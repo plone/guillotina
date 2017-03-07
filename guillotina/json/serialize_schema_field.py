@@ -52,7 +52,7 @@ class DefaultSchemaFieldSerializer(object):
         self.request = request
         self.field_attributes = {}
 
-    def __call__(self):
+    async def __call__(self):
         result = {'type': self.field_type}
         for schema in implementedBy(self.field.__class__).flattened():
             self.field_attributes.update(getFields(schema))
@@ -83,7 +83,7 @@ class DefaultSchemaFieldSerializer(object):
                 serializer = getMultiAdapter(
                     (value, self.field, self.request),
                     ISchemaFieldSerializeToJson)
-                text = serializer()
+                text = await serializer()
             elif value is not None and (force or value != self.field.missing_value):
                 text = IValueToJson(value)
 
@@ -107,7 +107,7 @@ class DefaultSchemaFieldSerializer(object):
             else:
                 schema_serializer = getMultiAdapter((self.field.schema, self.request),
                                                     ISchemaSerializeToJson)
-                result['properties'] = schema_serializer()
+                result['properties'] = await schema_serializer()
         return result
 
     @property

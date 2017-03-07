@@ -28,7 +28,7 @@ class AnnotationsAdapter(object):
         element = annotations.get(key, default)
         if element is None:
             # Get from DB
-            raw_obj = await self.obj._p_jar.get_annotation(self.obj._p_oid, key)
+            raw_obj = await self.obj._p_jar.get_annotation(self.obj, key)
             if raw_obj:
                 obj = reader(raw_obj)
                 annotations[key] = obj

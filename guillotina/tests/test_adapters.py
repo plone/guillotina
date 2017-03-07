@@ -145,7 +145,7 @@ class TestSerializerSchemaAdapters(GuillotinaFunctionalTestCase):
         adapter = getMultiAdapter((schema.Text(), obj, self.request),
                                   interface=IResourceFieldSerializer)
         self.assertTrue(
-            isinstance(adapter, serialize_content_field.DefaultFieldSerializer))
+            isinstance(await adapter, serialize_content_field.DefaultFieldSerializer))
 
 
 class TestDerializeAdapters(GuillotinaFunctionalTestCase):

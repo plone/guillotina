@@ -18,37 +18,37 @@ GET_LAST_TID = """
 GET_OID = """
     SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
     FROM objects
-    WHERE zoid = $1::int
+    WHERE zoid = $1::varchar(32)
     """
 
 GET_SONS_KEYS = """
     SELECT id
     FROM objects
-    WHERE parent_id = $1::int
+    WHERE parent_id = $1::varchar(32)
     """
 
 GET_ANNOTATIONS_KEYS = """
     SELECT id
     FROM objects
-    WHERE of = $1::int
+    WHERE of = $1::varchar(32)
     """
 
 GET_CHILD = """
-    SELECT zoid, tid, state_size, resource, of, type, state
+    SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE parent_id = $1::int AND id = $2::text
+    WHERE parent_id = $1::varchar(32) AND id = $2::text
     """
 
 EXIST_CHILD = """
     SELECT zoid
     FROM objects
-    WHERE parent_id = $1::int AND id = $2::text
+    WHERE parent_id = $1::varchar(32) AND id = $2::text
     """
 
 GET_ANNOTATION = """
-    SELECT zoid, tid, state_size, resource, of, type, state
+    SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE of = $1::int AND id = $2::text
+    WHERE of = $1::varchar(32) AND id = $2::text
     """
 
 MAX_TID = """
@@ -81,22 +81,22 @@ MOVE_FROM_TEMP = """
 INSERT_TEMP = """
     INSERT INTO current_objects
     (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
-    VALUES ($1::int, $2::int, $3::int, $4::int, $5::boolean, $6::int, $7::int,
-    $8::int, $9::text, $10::text, $11::json, $12::bytea)
+    VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
+    $8::varchar(32), $9::text, $10::text, $11::json, $12::bytea)
     """
 
 NEXT_TID = "SELECT nextval('tid_seq');"
 
-NUM_CHILDS = "SELECT count(*) FROM objects WHERE parent_id = $1::int"
+NUM_CHILDS = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
 
 GET_CHILDS = """
-    SELECT zoid, tid, state_size, resource, of, type, state
+    SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE parent_id = $1::int
+    WHERE parent_id = $1::VARCHAR(32)
     """
 
 DELETE_TMP = '''
-    INSERT INTO delete_objects (zoid, tid) VALUES ($1::int, $2::int)
+    INSERT INTO delete_objects (zoid, tid) VALUES ($1::varchar(32), $2::int)
 '''
 
 DELETE_FROM_OBJECTS = """
@@ -157,14 +157,14 @@ class APgStorage(object):
         # Check DB
         stmt = """
             CREATE TABLE IF NOT EXISTS objects (
-                zoid        BIGINT NOT NULL PRIMARY KEY,
+                zoid        VARCHAR(32) NOT NULL PRIMARY KEY,
                 tid         BIGINT NOT NULL,
                 state_size  BIGINT NOT NULL,
                 part        BIGINT NOT NULL,
                 resource    BOOLEAN NOT NULL,
-                of          BIGINT,
+                of          VARCHAR(32),
                 otid        BIGINT,
-                parent_id   BIGINT,
+                parent_id   VARCHAR(32),
                 id          TEXT,
                 type        TEXT NOT NULL,
                 json        JSONB,
@@ -268,14 +268,14 @@ class APgStorage(object):
             txn._tid = tid
         current = """
             CREATE TEMPORARY TABLE IF NOT EXISTS current_objects (
-                zoid        BIGINT NOT NULL PRIMARY KEY,
+                zoid        VARCHAR(32) NOT NULL PRIMARY KEY,
                 tid         BIGINT NOT NULL,
                 state_size  BIGINT NOT NULL,
                 part        BIGINT NOT NULL,
                 resource    BOOLEAN NOT NULL,
-                of          BIGINT,
+                of          VARCHAR(32),
                 otid        BIGINT,
-                parent_id   BIGINT,
+                parent_id   VARCHAR(32),
                 id          TEXT,
                 type        TEXT NOT NULL,
                 json        JSONB,
@@ -284,7 +284,7 @@ class APgStorage(object):
             CREATE INDEX IF NOT EXISTS current_object_tid ON current_objects (tid);
             CREATE INDEX IF NOT EXISTS current_object_oid ON current_objects (zoid);
             CREATE TEMPORARY TABLE IF NOT EXISTS delete_objects (
-                zoid        BIGINT NOT NULL PRIMARY KEY,
+                zoid        VARCHAR(32) NOT NULL PRIMARY KEY,
                 tid         BIGINT NOT NULL
             ) ON COMMIT DELETE ROWS;
             """
@@ -295,7 +295,7 @@ class APgStorage(object):
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
             self._log.warn("Too long object %d" % (obj.__class__, len(p)))
-        json_dict = writer.json
+        json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
         if part is None:

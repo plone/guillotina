@@ -40,7 +40,7 @@ class SerializeToJson(object):
         if parent is not None:
             # We render the summary of the parent
             try:
-                parent_summary = getMultiAdapter(
+                parent_summary = await getMultiAdapter(
                     (parent, self.request), IResourceSerializeToJsonSummary)()
             except ComponentLookupError:
                 parent_summary = {}
@@ -79,10 +79,10 @@ class SerializeToJson(object):
 
             if not self.check_permission(read_permissions.get(name)):
                 continue
-            serializer = await queryMultiAdapter(
+            serializer = queryMultiAdapter(
                 (field, context, self.request),
                 IResourceFieldSerializer)
-            value = serializer()
+            value = await serializer()
             if not behavior:
                 result[name] = value
             else:
@@ -164,7 +164,7 @@ class DefaultJSONSummarySerializer(object):
         self.context = context
         self.request = request
 
-    def __call__(self):
+    async def __call__(self):
 
         summary = json_compatible({
             '@id': IAbsoluteURL(self.context)(),

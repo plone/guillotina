@@ -28,7 +28,7 @@ class IMarkerDublinCore(Interface):
 @provider(IFormFieldProvider)
 class IDublinCore(Interface):
     index('creators', type='keyword')
-    index('subject', type='keyword')
+    index('subjects', type='keyword')
     index('contributors', type='keyword')
 
     title = schema.TextLine(
