@@ -15,7 +15,7 @@ Please `read the detailed docs <http://guillotina.readthedocs.io/en/latest/>`_
 
 This is the working project of the next generation Guillotina server based on asyncio.
 
-* depends on python >= 3.5
+* depends on python >= 3.6
 
 Getting started with development
 --------------------------------
