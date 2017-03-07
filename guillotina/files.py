@@ -40,7 +40,8 @@ def get_contenttype(
 
 @implementer(ICloudFileField)
 class CloudFileField(Object):
-    """A cloud file hosted file.
+    """
+    A cloud file hosted file.
 
     Its configured on config.json with :
 

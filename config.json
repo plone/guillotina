@@ -5,8 +5,8 @@
 			"type": "postgres",
        "dsn": {
          "scheme": "postgres",
-         "dbname": "pserver",
-         "user": "pserver",
+         "dbname": "guillotina",
+         "user": "guillotina",
          "host": "localhost",
          "password": "test",
          "port": 5432
