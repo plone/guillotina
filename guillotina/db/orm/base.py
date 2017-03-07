@@ -52,7 +52,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__flags', '__size',
-        '__of', '__parent', '__annotations', '__name')
+        '__of', '__parent', '__annotations', '__name', '__cache')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -65,6 +65,7 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__parent', None)
         _OSA(inst, '_BaseObject__name', None)
         _OSA(inst, '_BaseObject__annotations', {})
+        _OSA(inst, '_BaseObject__cache', -1)
         return inst
 
     def __repr__(self):
@@ -306,3 +307,19 @@ class BaseObject(object):
         return _OSA(self, '_BaseObject__annotations', None)
 
     __annotations__ = property(_get_annotation, _set_annotation, _del_annotation)
+
+    # CACHE
+    # -1 : No cache
+    # 0 : Allways
+    # X : ttl
+
+    def _get_cache(self):
+        return _OGA(self, '_BaseObject__cache')
+
+    def _set_cache(self, value):
+        _OSA(self, '_BaseObject__cache', value)
+
+    def _del_cache(self):
+        return _OSA(self, '_BaseObject__cache', None)
+
+    __cache__ = property(_get_cache, _set_cache, _del_cache)

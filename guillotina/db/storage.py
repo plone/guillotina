@@ -3,7 +3,6 @@ import asyncpg
 import logging
 import ujson
 
-
 class ReadOnlyError(Exception):
     pass
 
@@ -110,7 +109,22 @@ DELETE_FROM_OBJECTS = """
     """
 
 
-class APgStorage(object):
+class BaseStorage(object):
+
+    _cache = None
+    _read_only = False
+
+    def __init__(self, read_only=False):
+        self._read_only = read_only
+
+    def use_cache(self, value):
+        self._cache = value
+
+    def isReadOnly(self):
+        return self._read_only
+
+
+class APgStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
     _dsn = None
@@ -118,9 +132,7 @@ class APgStorage(object):
     _pool_size = None
 
     _pool = None
-    _read_only = False
-
-    _cache = None
+    
     _ltid = None
     _conn = None
     _lock = None
@@ -128,18 +140,16 @@ class APgStorage(object):
     _blobhelper = None
     _large_record_size = 1 << 24
 
-    def __init__(self, dsn=None, partition=None, read_only=False, name=None, pool_size=10):
+    def __init__(self, dsn=None, partition=None ,read_only=False, name=None, pool_size=10):
+        super(APgStorage, self).__init__(read_only)
         self._dsn = dsn
         self._pool_size = pool_size
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
         self._lock = asyncio.Lock()
-        self._cache = {}
+        self._cache = None
         self.read_conn = None
-
-    def isReadOnly(self):
-        return self._read_only
 
     async def finalize(self):
         await self._pool.release(self.read_conn)
@@ -329,12 +339,12 @@ class APgStorage(object):
         # Check if there is any commit bigger than the one we already have
         # For each object going to be written we need to check if it has
         # a new TID
-        r = await transaction._db_conn.execute(
+        r = await transaction._db_conn.fetch(
             """
             SELECT ob.zoid, ob.tid FROM objects ob JOIN current_objects co
             USING (zoid) WHERE ob.tid > co.otid AND co.tid = $1""",
             transaction._tid)
-        if int(r.split()[1]) == 0:
+        if len(r) == 0:
             return True
         else:
             return False

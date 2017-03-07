@@ -8,11 +8,11 @@ import sys
 import time
 import uuid
 
+HARD_CACHE = {}
 
-def reraise(tp, value, tb=None):  # pragma NO COVER
-    if value.__traceback__ is not tb:
-        raise value.with_traceback(tb)
-    raise value
+
+class ConflictError(Exception):
+    pass
 
 
 logger = logging.getLogger(__name__)
@@ -40,6 +40,12 @@ class Transaction(object):
         self.added = {}
         self.modified = {}
         self.deleted = {}
+
+        # Cache for the transaction
+        self._cache = manager._storage._cache
+
+        # OIDS to invalidate
+        self._to_invalidate = []
 
         # List of (hook, args, kws) tuples added by addBeforeCommitHook().
         self._before_commit = []
@@ -107,9 +113,9 @@ class Transaction(object):
 
         conn is a real db that will be got by db.open()
         """
-        self._cache = self._manager._storage._cache.copy()
         self._txn_time = time.time()
         await self._manager._storage.tpc_begin(self, conn)
+        self._cache = self._manager._storage._cache.copy()
 
     def check_read_only(self):
         if self.request is None:
@@ -141,11 +147,14 @@ class Transaction(object):
                 del self.modified[oid]
             self.deleted[oid] = obj
 
+    async def clean_cache(self):
+        HARD_CACHE.clean()
+        await self._cache.clear()
+
     # GET AN OBJECT
 
     async def get(self, oid):
         """Getting a oid from the db"""
-
         obj = self.modified.get(oid, None)
         if obj is not None:
             return obj
@@ -154,39 +163,17 @@ class Transaction(object):
         if obj is not None:
             return obj
 
+        obj = HARD_CACHE.get(oid, None)
+        if obj is not None:
+            return obj
+
         result = await self._manager._storage.load(self, oid)
         obj = reader(result)
         obj._p_jar = self
 
-        self._cache[oid] = obj
+        if obj.__cache__ == 0:
+            HARD_CACHE[oid] = obj
 
-        return obj
-
-    async def get_all_object(self, oid):
-        """Getting a oid from the db"""
-
-        obj = self.modified.get(oid, None)
-        if obj is not None:
-            return obj
-        result = await self._manager._storage.load_all(self, oid)
-        obj = reader(result)
-        obj._p_jar = self
-        return obj
-
-    async def get_object_with_annotations(self, oid, annotation_id):
-        """Getting a oid from the db"""
-
-        obj = self.modified.get(oid, None)
-        if obj is None:
-            obj = self._cache.get(oid, None)
-        if obj is not None and \
-                annotation_id in obj.__annotations__:
-            # Its loaded
-            return obj.__annotations__[annotation_id]
-        result = await self._manager._storage.get_annotation(
-            self, oid, annotation_id)
-        obj = reader(result)
-        obj._p_jar = self
         return obj
 
     async def commit(self):
@@ -222,6 +209,7 @@ class Transaction(object):
             obj._p_oid = oid
             if obj._p_jar is None:
                 obj._p_jar = self
+            self._to_invalidate.append(oid)
         for oid, obj in self.modified.items():
             # Modified objects
             if obj._p_jar is not self and obj._p_jar is not None:
@@ -234,27 +222,39 @@ class Transaction(object):
             obj._p_serial = s
             if obj._p_jar is None:
                 obj._p_jar = self
+            self._to_invalidate.append(oid)
         for oid, obj in self.deleted.items():
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
             await self._manager._storage.delete(self, oid)
+            self._to_invalidate.append(oid)
 
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
-        s = await self._manager._storage.tpc_vote(self)
-        if s is False:
-            raise Exception('Conflict Error')
+        ok, conflict_object = await self._manager._storage.tpc_vote(self)
+        if ok is False:
+            obj = reader(conflict_object)
+            obj._p_jar = self
+            raise ConflictError(self, obj)
 
     async def tpc_finish(self):
         """Indicate confirmation that the transaction is done.
         """
         await self._manager._storage.tpc_finish(self)
+        # Set on cache
+        for obj in self.addded:
+            self._cache.set(obj._p_oid, obj, obj.__cache__)
+        for key, obj in self.modified.items():
+            self._cache.set(obj._p_oid, obj, obj.__cache__)
+        for key, obj in self.deleted.items():
+            self._cache.set(obj._p_oid, obj, obj.__cache__)
         self.tpc_cleanup()
 
     def tpc_cleanup(self):
         self.added = {}
         self.modified = {}
         self.deleted = {}
+        self._to_invalidate = []
         self._db_txn = None
 
     # Inspection

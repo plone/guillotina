@@ -239,11 +239,8 @@ class MatchInfo(AbstractMatchInfo):
                 await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except Exception as e:
+                await abort(request)
                 view_result = generate_error_response(e, request, 'ViewError')
-
-        # If we want to close the connection after the request
-        if SHARED_CONNECTION is False and hasattr(request, 'conn'):
-            request.conn.close()
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
@@ -318,6 +315,7 @@ class TraversalRouter(AbstractRouter):
             logger.error(
                 "Exception on resolve execution",
                 exc_info=e)
+            await abort(request)
             raise e
         if result is not None:
             return result

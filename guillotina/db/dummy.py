@@ -1,9 +1,10 @@
 from guillotina.db import ROOT_ID
 
 import asyncio
+from guillotina.db.storage import BaseStorage
 
 
-class DummyStorage(object):
+class DummyStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
     _last_transaction = 0

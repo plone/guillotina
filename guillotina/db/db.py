@@ -14,6 +14,7 @@ import asyncio
 class Root(Folder):
 
     __name__ = None
+    __cache__ = 0
     portal_type = 'GuillotinaDBRoot'
 
     def __repr__(self):
@@ -26,20 +27,15 @@ class GuillotinaDB(object):
 
     def __init__(self,
                  storage,
-                 cache_size=400,
-                 cache_size_bytes=0,
+                 remote_cache=None,
                  database_name='unnamed'):
         """Create an object database.
         """
 
-        self.opened = None
-        # Allocate lock.
-        self._lock = asyncio.Lock()
-        self._cache_size = cache_size
-        self._cache_size_bytes = cache_size_bytes
+        self.remote_cache = remote_cache
         self.storage = storage
+        self.storage.use_cache(remote_cache)
         self.database_name = database_name
-        self._conn = None
 
     async def initialize(self):
         # Make sure we have a root:
