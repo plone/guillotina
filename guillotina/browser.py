@@ -79,7 +79,7 @@ class Absolute_URL(object):
         elif virtualhost:
             return virtualhost + self.request._db_id + path
         else:
-            return self.request.scheme + '://' + self.request.host + '/' +\
+            return self.request.scheme + '://' + (self.request.host or 'localhost') + '/' +\
                 self.request._db_id + path
 
 

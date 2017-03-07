@@ -1,4 +1,3 @@
-from zope.annotation.interfaces import IAnnotations
 
 
 class ContextProperty(object):
@@ -23,31 +22,6 @@ class ContextProperty(object):
         else:
             raise AttributeError('{field} not found on {context}'.format(
                 field=self.__name__, context=str(inst.context)))
-
-
-class AnnotationProperty(object):
-
-    def __init__(self, attribute, default):
-        self.__name__ = attribute
-        self.default = default
-
-    def __get__(self, inst, klass):
-        if inst is None:
-            return self
-
-        annotations = IAnnotations(inst.context)
-        key = inst.__class__.__module__ + '.' + inst.__class__.__name__ \
-            + '.' + self.__name__
-        if key not in annotations:
-            return self.default
-        else:
-            return annotations[key]
-
-    def __set__(self, inst, value):
-        key = inst.__class__.__module__ + '.' + inst.__class__.__name__ \
-            + '.' + self.__name__
-        annotations = IAnnotations(inst.context)
-        annotations[key] = value
 
 
 class FunctionProperty(object):

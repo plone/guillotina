@@ -59,27 +59,27 @@ class SerializeToJson(object):
         factory = get_cached_factory(self.context.portal_type)
 
         main_schema = factory.schema
-        self.get_schema(main_schema, self.context, result, False)
+        await self.get_schema(main_schema, self.context, result, False)
 
         for behavior_schema in factory.behaviors or ():
             behavior = behavior_schema(self.context)
-            self.get_schema(behavior_schema, behavior, result, True)
+            await self.get_schema(behavior_schema, behavior, result, True)
 
         for dynamic_behavior in self.context.__behaviors__ or ():
             dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
             behavior = dynamic_behavior_obj(self.context)
-            self.get_schema(dynamic_behavior_obj, behavior, result, True)
+            await self.get_schema(dynamic_behavior_obj, behavior, result, True)
 
         return result
 
-    def get_schema(self, schema, context, result, behavior):
+    async def get_schema(self, schema, context, result, behavior):
         read_permissions = merged_tagged_value_dict(schema, read_permission.key)
         schema_serial = {}
         for name, field in getFields(schema).items():
 
             if not self.check_permission(read_permissions.get(name)):
                 continue
-            serializer = queryMultiAdapter(
+            serializer = await queryMultiAdapter(
                 (field, context, self.request),
                 IResourceFieldSerializer)
             value = serializer()
@@ -124,7 +124,7 @@ class SerializeFolderToJson(SerializeToJson):
             result['items'] = []
         else:
             items = self.context.items()
-            # Needs to be a better way ! 
+            # Needs to be a better way !
             if hasattr(items, 'ag_await'):
                 result['items'] = []
                 async for ident, member in items:
@@ -132,13 +132,13 @@ class SerializeFolderToJson(SerializeToJson):
                             security.check_permission(
                             'guillotina.AccessContent', member)):
                         result['items'].append(
-                            getMultiAdapter(
+                            await getMultiAdapter(
                                 (member, self.request),
                                 IResourceSerializeToJsonSummary)()
                         )
             else:
                 result['items'] = [
-                    getMultiAdapter(
+                    await getMultiAdapter(
                         (member, self.request), IResourceSerializeToJsonSummary)()
                     for ident, member in items
                     if not ident.startswith('_') and

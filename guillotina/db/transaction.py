@@ -182,7 +182,7 @@ class Transaction(object):
                 annotation_id in obj.__annotations__:
             # Its loaded
             return obj.__annotations__[annotation_id]
-        result = await self._manager._storage.load_annotation(
+        result = await self._manager._storage.get_annotation(
             self, oid, annotation_id)
         obj = reader(result)
         obj._p_jar = self

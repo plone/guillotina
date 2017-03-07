@@ -67,6 +67,12 @@ class ApplicationRoot(object):
     def __getitem__(self, key):
         return self._dbs[key]
 
+    async def get(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            pass
+
     def __delitem__(self, key):
         """ This operation can only be done throw HTTP request
 

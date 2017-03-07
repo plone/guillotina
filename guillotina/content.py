@@ -36,7 +36,6 @@ from guillotina.interfaces import IStaticFile
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_current_request
-from zope.annotation.interfaces import IAttributeAnnotatable
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
 from zope.component import queryUtility
@@ -247,7 +246,7 @@ def _default_from_schema(context, schema, fieldname):
     return _marker
 
 
-@implementer(IResource, IAttributeAnnotatable)
+@implementer(IResource)
 class Resource(guillotina.db.orm.base.BaseObject):
 
     __name__ = None

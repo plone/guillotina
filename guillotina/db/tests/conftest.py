@@ -174,6 +174,7 @@ def dummy_request(dummy_guillotina):
     root = getUtility(IApplication, name='root')
     db = root['guillotina']
     request = make_mocked_request('POST', '/')
+    request._db_id = 'guillotina'
     request._tm = db.new_transaction_manager()
     request._tm.request = request  # so get_current_request can find it...
     return request

@@ -1,8 +1,10 @@
-
+from zope.component import getMultiAdapter
 from guillotina.db.orm.base import BaseObject
-from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IAnnotations, IResourceSerializeToJson
 from guillotina.db.transaction import Transaction
 from zope.interface import implementer
+from guillotina.behaviors.dublincore import IDublinCore
+from guillotina.content import Item
 
 from guillotina.interfaces import IResource
 import pytest
@@ -57,3 +59,13 @@ async def test_create_annotation(dummy_txn_root):
         assert ob2.__name__ == 'test2'
         assert ob2.__parent__ is None
         assert len(ob1.__annotations__) == 1
+
+
+async def test_use_behavior_annotation(dummy_txn_root):
+    async for root in dummy_txn_root:
+        ob1 = Item()
+        await root.__setitem__('ob1', ob1)
+        dublin = IDublinCore(ob1)
+        await dublin.__setattr__('publisher', 'foobar')
+        value = await dublin.__getattr__('publisher')
+        assert value == 'foobar'

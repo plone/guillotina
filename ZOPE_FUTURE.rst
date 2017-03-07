@@ -15,14 +15,9 @@ Package removal/replacements...
 difficult to remove
 -------------------
 
-- zope.annotation -> with db changes...
-  - zope.schema
-  - zope.proxy
-  - zope.location
-  - zope.interface
-  - zope.component
 - zope.component
   - zope.event
   - zope.interface
+- zope.configuration
 - zope.event
 - zope.interface

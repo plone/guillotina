@@ -13,12 +13,13 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.json.exceptions import DeserializationError
+from guillotina.schema import getFields
+from guillotina.schema.exceptions import ValidationError
+from guillotina.utils import apply_coroutine
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
-from guillotina.schema import getFields
-from guillotina.schema.exceptions import ValidationError
 
 
 @configure.adapter(
@@ -38,13 +39,13 @@ class DeserializeFromJson(object):
 
         factory = get_cached_factory(self.context.portal_type)
         main_schema = factory.schema
-        self.set_schema(
+        await self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)
 
         for behavior_schema in factory.behaviors or ():
             if behavior_schema.__identifier__ in data:
                 behavior = behavior_schema(self.context)
-                self.set_schema(
+                await self.set_schema(
                     behavior_schema, behavior, data, errors,
                     validate_all, True)
 
@@ -52,7 +53,7 @@ class DeserializeFromJson(object):
             dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
             if dynamic_behavior_obj.__identifier__ in data:
                 behavior = dynamic_behavior_obj(self.context)
-                self.set_schema(
+                await self.set_schema(
                     dynamic_behavior_obj, behavior, data, errors,
                     validate_all, True)
 
@@ -64,7 +65,7 @@ class DeserializeFromJson(object):
 
         return self.context
 
-    def set_schema(
+    async def set_schema(
             self, schema, obj, data, errors,
             validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
@@ -106,9 +107,9 @@ class DeserializeFromJson(object):
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
                     try:
-                        field.set(obj, value)
+                        apply_coroutine(field.set, obj, value)
                     except:  # noqa
-                        setattr(obj, name, value)
+                        apply_coroutine(setattr, obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):
                     errors.append({

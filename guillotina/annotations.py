@@ -3,6 +3,14 @@ from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IResource
 from guillotina.db.reader import reader
 from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.db.orm.base import BaseObject
+from collections import UserDict
+
+
+class AnnotationData(UserDict, BaseObject):
+    """
+    store data on basic dictionary object but also inherit from base object
+    """
 
 
 @configure.adapter(

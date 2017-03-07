@@ -126,7 +126,6 @@ def make_app(config_file=None, settings=None, loop=None):
     import guillotina.db.writer
     import guillotina.db.db
     configure.include("zope.component")
-    configure.include("zope.annotation")
     configure.scan('guillotina.translation')
     configure.scan('guillotina.renderers')
     configure.scan('guillotina.api')

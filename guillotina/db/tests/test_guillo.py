@@ -54,3 +54,16 @@ async def test_content_paths_are_correct(site):
             '/guillotina/guillotina/hello')
         assert status == 200
         assert '/guillotina/guillotina/hello' in response['@id']
+#
+#
+# async def test_serialize_behavior_annotation(dummy_txn_root, dummy_request, guillotina_main):
+#     async for root in dummy_txn_root:
+#         ob1 = Item()
+#         await root.__setitem__('ob1', ob1)
+#         dublin = IDublinCore(ob1)
+#         await dublin.__setattr__('publisher', 'foobar')
+#         serializer = getMultiAdapter(
+#             (ob1, dummy_request),
+#             IResourceSerializeToJson)
+#         data = await serializer()
+#         assert data['IDublinCore-publisher'] == 'foobar'
