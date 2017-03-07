@@ -125,6 +125,7 @@ class APgStorage(object):
         self._read_only = read_only
         self.__name__ = name
         self._lock = asyncio.Lock()
+        self._cache = {}
         self.read_conn = None
 
     def isReadOnly(self):

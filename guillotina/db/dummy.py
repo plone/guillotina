@@ -23,6 +23,7 @@ class DummyStorage(object):
         self._folder = folder
         self._lock = asyncio.Lock()
         self.read_conn = None
+        self._cache = {}
 
     def isReadOnly(self):
         return self._read_only

@@ -7,9 +7,9 @@ import gc
 
 
 GHOST = -1
-UPTODATE = 0
+ROOT = 0
+FULL = 1
 CHANGED = 1
-STICKY = 2
 
 # Bitwise flags
 _CHANGED = 0x0001
@@ -32,13 +32,27 @@ SPECIAL_NAMES = ('__class__',
 _SPECIAL_NAMES = set(SPECIAL_NAMES)
 
 
+"""
+A Base object can be connected to :
+
++ Tree object : It has a __parent and a __name
+
++ Annotation object :
+    + It belongs to a tree object, its id is the key on the __annotation meta dictionary
+    + The pointer to the tree object is __belongs
+
+"""
+
+
 @implementer(IBaseObject)
 class BaseObject(object):
     """ Pure Python implmentation of Persistent base class
     """
 
     # This slots are NOT going to be on the serialization on the DB
-    __slots__ = ('__jar', '__oid', '__serial', '__flags', '__size', '__belongs')
+    __slots__ = (
+        '__jar', '__oid', '__serial', '__flags', '__size',
+        '__belongs', '__parent', '__annotations', '__name')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -48,7 +62,35 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__flags', None)
         _OSA(inst, '_BaseObject__size', 0)
         _OSA(inst, '_BaseObject__belongs', None)
+        _OSA(inst, '_BaseObject__parent', None)
+        _OSA(inst, '_BaseObject__name', None)
+        _OSA(inst, '_BaseObject__annotations', {})
         return inst
+
+    def __repr__(self):
+        return "<BaseObject %d>" % id(self)
+
+    async def _get_parent(self):
+        parent = _OGA(self, '_BaseObject__parent')
+        if parent is None:
+            return None
+        if not isinstance(parent, int):
+            return parent
+        jar = _OGA(self, '_BaseObject__jar')
+        if jar is None:
+            raise Exception('No JAR and has a parent, impossible')
+        oid = _OGA(self, '_BaseObject__oid')
+        if oid is None:
+            raise Exception('No OID')
+        await jar.get_parent(oid)
+
+    def _set_parent(self, value):
+        _OSA(self, '_BaseObject__parent', value)
+
+    def _del_parent(self):
+        _OSA(self, '_BaseObject__parent', None)
+
+    __parent__ = property(_get_parent, _set_parent, _del_parent)
 
     # _p_jar:  romantic name of the global connection obj.
     def _get_jar(self):
@@ -73,13 +115,6 @@ class BaseObject(object):
         _OSA(self, '_BaseObject__oid', None)
 
     _p_oid = property(_get_oid, _set_oid, _del_oid)
-
-    @property
-    def _p_belongs(self):
-        result = gc.get_referents(self)
-        if len(result) > 0:
-            return result[0]
-        return None
 
     # _p_serial:  serial number.
     def _get_serial(self):
@@ -117,7 +152,11 @@ class BaseObject(object):
             _OSA(self, '_BaseObject__flags', flags)
 
     def _del_changed(self):
-        self._p_invalidate()
+        before = _OGA(self, '_BaseObject__flags')
+        after = before | _CHANGED
+        if before == after:
+            self._p_unregister()
+        _OSA(self, '_BaseObject__flags', UPTODATE)
 
     _p_changed = property(_get_changed, _set_changed, _del_changed)
 
@@ -134,8 +173,6 @@ class BaseObject(object):
             result = CHANGED
         else:
             result = UPTODATE
-        if flags & _STICKY:
-            return STICKY
         return result
 
     _p_state = property(_get_state)
@@ -232,3 +269,44 @@ class BaseObject(object):
         jar = _OGA(self, '_BaseObject__jar')
         if jar is not None and _OGA(self, '_BaseObject__oid') is not None:
             jar.register(self)
+
+    def _p_unregister(self):
+        jar = _OGA(self, '_BaseObject__jar')
+        if jar is not None and _OGA(self, '_BaseObject__oid') is not None:
+            jar.unregister(self)
+
+    async def _get_annotation(self, key):
+        annotations = _OGA(self, '_BaseObject__annotations')
+        if key in annotations:
+            return annotations[key]
+        # Its not loaded we need to look at the txn
+        jar = _OGA(self, '_BaseObject__jar')
+        if jar is None:
+            raise Exception('TODO')
+        oid = _OGA(self, '_BaseObject__oid')
+        if oid is None:
+            raise Exception('TODO')
+        return await jar.get_annotation(oid, key)
+
+    async def _set_annotation(self, key, value):
+        annotations = _OGA(self, '_BaseObject__annotations')
+
+        oid = _OGA(self, '_BaseObject__oid')
+        if oid is None:
+            raise Exception('TODO')
+        _OSA(value, '_BaseObject__belongs', oid)
+
+        annotations[key] = value
+        jar = _OGA(self, '_BaseObject__jar')
+        return await jar.register(value)
+
+    async def _del_annotation(self, key):
+        annotations = _OGA(self, '_BaseObject__annotations')
+        if key not in annotations:
+            return
+
+        value = annotations[key]
+
+        del annotations[key]
+        jar = _OGA(self, '_BaseObject__jar')
+        return await jar.unregister(value)

@@ -15,6 +15,9 @@ class Root(Folder):
     __name__ = None
     portal_type = 'GuillotinaDBRoot'
 
+    def __repr__(self):
+        return "<Database %d>" % id(self)
+
 
 class GuillotinaDB(object):
 

@@ -6,6 +6,7 @@ from guillotina.utils import get_current_request
 import logging
 import sys
 import time
+import uuid
 
 
 def reraise(tp, value, tb=None):  # pragma NO COVER
@@ -104,6 +105,7 @@ class Transaction(object):
 
         conn is a real db that will be got by db.open()
         """
+        self._cache = self._manager._storage._cache.copy()
         self._txn_time = time.time()
         await self._manager._storage.tpc_begin(self, conn)
 
@@ -121,6 +123,7 @@ class Transaction(object):
         oid = obj._p_oid
         if oid is None:
             self.added.append(obj)
+            obj._p_oid = uuid.uuid4().hex
         else:
             self.modified[oid] = obj
 
@@ -141,8 +144,41 @@ class Transaction(object):
         if obj is not None:
             return obj
 
-        result = await self._manager._storage.load(self, oid)
+        obj = self._cache.get(oid, None)
+        if obj is not None:
+            return obj
 
+        result = await self._manager._storage.load(self, oid)
+        obj = reader(result)
+        obj._p_jar = self
+
+        self._cache[oid] = obj
+
+        return obj
+
+    async def get_all(self, oid):
+        """Getting a oid from the db"""
+
+        obj = self.modified.get(oid, None)
+        if obj is not None:
+            return obj
+        result = await self._manager._storage.load_all(self, oid)
+        obj = reader(result)
+        obj._p_jar = self
+        return obj
+
+    async def get_annotation(self, oid, annotation_id):
+        """Getting a oid from the db"""
+
+        obj = self.modified.get(oid, None)
+        if obj is None:
+            obj = self._cache.get(oid, None)
+        if obj is not None and \
+                annotation_id in obj.__annotations__:
+            # Its loaded
+            return obj.__annotations__[annotation_id]
+        result = await self._manager._storage.load_annotation(
+            self, oid, annotation_id)
         obj = reader(result)
         obj._p_jar = self
         return obj

@@ -7,6 +7,7 @@ from guillotina.testing import TESTING_SETTINGS
 from time import sleep
 import pytest
 import aiohttp
+from aiohttp.test_utils import make_mocked_request
 import json
 from guillotina.factory import make_app
 from guillotina.content import load_cached_schema
@@ -167,17 +168,23 @@ def dummy_guillotina(loop):
 
 
 @pytest.fixture(scope='function')
-async def dummy_root(dummy_guillotina):
+def dummy_request(dummy_guillotina):
     from guillotina.interfaces import IApplication
     from zope.component import getUtility
     root = getUtility(IApplication, name='root')
     db = root['guillotina']
-    import pdb; pdb.set_trace()
-    real_db = await db.open()
-    import pdb; pdb.set_trace()
-    db = await dummy_guillotina['guillotina'].open()
-    yield db
-    await db.close()
+    request = make_mocked_request('POST', '/')
+    request._tm = db.new_transaction_manager()
+    yield request
+
+
+
+@pytest.fixture(scope='function')
+async def dummy_txn_root(dummy_request):
+    txn = await dummy_request._tm.begin(request=dummy_request)
+    context = await dummy_request._tm.root()
+    yield context
+    await txn.abort()
 
 # POSTGRES WITH DOCKER TESTING FIXTURES
 
