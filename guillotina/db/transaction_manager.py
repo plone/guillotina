@@ -1,8 +1,8 @@
+from guillotina.db import ROOT_ID
 from guillotina.db.transaction import Transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 from queue import LifoQueue
-from guillotina.db import ROOT_ID
 
 
 class TransactionManager(object):

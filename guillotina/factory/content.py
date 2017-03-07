@@ -100,14 +100,13 @@ class ApplicationRoot(object):
 
 @implementer(IDatabase)
 class Database(object):
-    def __init__(self, id, db, tm=None):
+    def __init__(self, id, db):
         self.id = id
         self._db = db
         self._conn = None
-        self.tm = tm
 
     def get_transaction_manager(self):
-        return self.tm_
+        return self.tm
 
     def new_transaction_manager(self):
         return self._db.new_transaction_manager()
@@ -116,30 +115,29 @@ class Database(object):
         await self._db.open(tm)
 
     def _open(self):
-        self._conn = self._db.open(transaction_manager=self.tm_)
+        self._conn = self._db.open()
 
         @self._conn.onCloseCallback
         def on_close():
             self._conn = None
 
-    @property
-    def conn(self):
+    async def get_conn(self):
         if self._conn is None:
-            self._open()
+            self._conn = await self._db.open()
         return self._conn
 
     @property
     def _p_jar(self):
-        if self._conn is None:
-            self._open()
-        return self._conn
+        return self._db.txn
 
-    def __getitem__(self, key):
-        # is there any request active ? -> conn there
-        return self.conn.root()[key]
+    async def __getitem__(self, key):
+        conn = await self.get_conn()
+        return conn[key]
 
-    def keys(self):
-        return list(self.conn.root().keys())
+    async def keys(self):
+        conn = await self.get_conn()
+        root = await conn.root()
+        return list(await root.keys())
 
     def __setitem__(self, key, value):
         """ This operation can only be done through HTTP request

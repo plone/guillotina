@@ -1,6 +1,6 @@
+from guillotina.db import ROOT_ID
+
 import asyncio
-import asyncpg
-import logging
 
 
 class DummyStorage(object):
@@ -45,10 +45,13 @@ class DummyStorage(object):
         pass
 
     async def open(self):
-        return None
+        return self
 
     async def close(self, con):
         pass
+
+    async def root(self):
+        return await self.load(None, ROOT_ID)
 
     async def last_transaction(self, txn):
         return self._last_transaction

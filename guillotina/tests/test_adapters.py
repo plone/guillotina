@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-from guillotina.content import create_content_in_container
+from guillotina import schema
+from guillotina.content import Item
+from guillotina.content import Site
 from guillotina.factory import RootSpecialPermissions
+from guillotina.interfaces import IApplication
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
@@ -25,149 +27,113 @@ from guillotina.json.serialize_content import DefaultJSONSummarySerializer
 from guillotina.json.serialize_content import SerializeFolderToJson
 from guillotina.json.serialize_content import SerializeToJson
 from guillotina.security.policy import Interaction
-from guillotina.testing import GuillotinaFunctionalTestCase
 from guillotina.text import RichText
-from guillotina import schema
 from zope.component import getAdapter
 from zope.component import getMultiAdapter
 from zope.component import getUtility
 
-import pytest
+
+def test_get_current_interaction(dummy_request):
+    adapter = getAdapter(dummy_request, interface=IInteraction)
+    assert isinstance(adapter, Interaction)
 
 
-class TestAdapters(GuillotinaFunctionalTestCase):
-    """
-    mostly to test adapter registrations
-    """
-
-    def test_get_current_interaction(self):
-        adapter = getAdapter(self.request, interface=IInteraction)
-        self.assertTrue(isinstance(adapter, Interaction))
-
-    def test_RootSpecialPermissions_IDatabase(self):
-        root = self.new_root()
+async def test_RootSpecialPermissions_IDatabase(dummy_txn_root):
+    async for root in dummy_txn_root:
         adapter = getAdapter(root, interface=IPrincipalPermissionManager)
-        self.assertTrue(isinstance(adapter, RootSpecialPermissions))
-
-    def test_RootSpecialPermissions_IApplication(self):
-        adapter = getAdapter(self.layer.app, interface=IPrincipalPermissionManager)
-        self.assertTrue(isinstance(adapter, RootSpecialPermissions))
+        assert isinstance(adapter, RootSpecialPermissions)
 
 
-class TestSerializerContentAdapters(GuillotinaFunctionalTestCase):
-    def test_SerializeFolderToJson(self):
-        root = self.new_root()
-        site = root['guillotina']
-        adapter = getMultiAdapter((site, self.request),
-                                  interface=IResourceSerializeToJson)
-        self.assertTrue(isinstance(adapter, SerializeFolderToJson))
-
-    @pytest.mark.asyncio
-    async def test_SerializeToJson(self):
-        root = self.new_root()
-        site = root['guillotina']
-        self.login()
-        obj = await create_content_in_container(site, 'Item', 'foobar')
-        adapter = getMultiAdapter((obj, self.request),
-                                  interface=IResourceSerializeToJson)
-        self.assertTrue(isinstance(adapter, SerializeToJson))
-        self.assertFalse(isinstance(adapter, SerializeFolderToJson))
-
-    def test_DefaultJSONSummarySerializer(self):
-        root = self.new_root()
-        site = root['guillotina']
-        adapter = getMultiAdapter((site, self.request),
-                                  interface=IResourceSerializeToJsonSummary)
-        self.assertTrue(isinstance(adapter, DefaultJSONSummarySerializer))
+async def test_RootSpecialPermissions_IApplication(dummy_guillotina):
+    root = getUtility(IApplication, name='root')
+    adapter = getAdapter(root, interface=IPrincipalPermissionManager)
+    assert isinstance(adapter, RootSpecialPermissions)
 
 
-class TestSerializerFieldAdapters(GuillotinaFunctionalTestCase):
-    def test_all(self):
-        mapping = [
-            (schema.Object(schema=IResource), serialize_schema_field.DefaultSchemaFieldSerializer),
-            (schema.Text(), serialize_schema_field.DefaultTextSchemaFieldSerializer),
-            (schema.TextLine(), serialize_schema_field.DefaultTextLineSchemaFieldSerializer),
-            (schema.Float(), serialize_schema_field.DefaultFloatSchemaFieldSerializer),
-            (schema.Int(), serialize_schema_field.DefaultIntSchemaFieldSerializer),
-            (schema.Bool(), serialize_schema_field.DefaultBoolSchemaFieldSerializer),
-            (schema.List(), serialize_schema_field.DefaultCollectionSchemaFieldSerializer),
-            (schema.Choice(values=('one', 'two')),
-                serialize_schema_field.DefaultChoiceSchemaFieldSerializer),
-            (schema.Object(schema=IResource),
-                serialize_schema_field.DefaultObjectSchemaFieldSerializer),
-            (RichText(), serialize_schema_field.DefaultRichTextSchemaFieldSerializer),
-            (schema.Date(), serialize_schema_field.DefaultDateSchemaFieldSerializer),
-            (schema.Time(), serialize_schema_field.DefaultTimeSchemaFieldSerializer),
-            (schema.Dict(), serialize_schema_field.DefaultDictSchemaFieldSerializer),
-            (schema.Datetime(), serialize_schema_field.DefaultDateTimeSchemaFieldSerializer),
-        ]
-        root = self.new_root()
-        site = root['guillotina']
-        for field, klass in mapping:
-            adapter = getMultiAdapter((field, site, self.request),
-                                      interface=ISchemaFieldSerializeToJson)
-            self.assertTrue(
-                isinstance(adapter, klass))
+async def test_SerializeFolderToJson(dummy_request):
+    adapter = getMultiAdapter((Site(), dummy_request),
+                              interface=IResourceSerializeToJson)
+    assert isinstance(adapter, SerializeFolderToJson)
 
 
-class TestSerializerValueAdapters(GuillotinaFunctionalTestCase):
-
-    def test_vocabulary(self):
-        from guillotina.schema.vocabulary import SimpleVocabulary
-        vocab = SimpleVocabulary.fromItems((
-            (u"Foo", "id_foo"),
-            (u"Bar", "id_bar")))
-        res = getAdapter(vocab, interface=IValueToJson)
-        self.assertEqual(type(res), list)
+async def test_SerializeToJson(dummy_request):
+    obj = Item()
+    adapter = getMultiAdapter((obj, dummy_request),
+                              interface=IResourceSerializeToJson)
+    assert isinstance(adapter, SerializeToJson)
 
 
-class TestSerializerSchemaAdapters(GuillotinaFunctionalTestCase):
-    def test_SerializeFactoryToJson(self):
-        factory = getUtility(IResourceFactory, name='Item')
-        adapter = getMultiAdapter((factory, self.request),
-                                  interface=IFactorySerializeToJson)
-        self.assertTrue(
-            isinstance(adapter, serialize_schema.SerializeFactoryToJson))
-
-    def test_DefaultSchemaSerializer(self):
-        adapter = getMultiAdapter(
-            (IItem, self.request),
-            ISchemaSerializeToJson)
-        self.assertTrue(
-            isinstance(adapter, serialize_schema.DefaultSchemaSerializer))
-
-    @pytest.mark.asyncio
-    async def test_DefaultFieldSerializer(self):
-        root = self.new_root()
-        site = root['guillotina']
-        self.login()
-        obj = await create_content_in_container(site, 'Item', 'foobar')
-        adapter = getMultiAdapter((schema.Text(), obj, self.request),
-                                  interface=IResourceFieldSerializer)
-        self.assertTrue(
-            isinstance(await adapter, serialize_content_field.DefaultFieldSerializer))
+def test_DefaultJSONSummarySerializer(dummy_request):
+    adapter = getMultiAdapter((Site(), dummy_request),
+                              interface=IResourceSerializeToJsonSummary)
+    assert isinstance(adapter, DefaultJSONSummarySerializer)
 
 
-class TestDerializeAdapters(GuillotinaFunctionalTestCase):
+def test_all(dummy_request):
+    mapping = [
+        (schema.Object(schema=IResource), serialize_schema_field.DefaultSchemaFieldSerializer),
+        (schema.Text(), serialize_schema_field.DefaultTextSchemaFieldSerializer),
+        (schema.TextLine(), serialize_schema_field.DefaultTextLineSchemaFieldSerializer),
+        (schema.Float(), serialize_schema_field.DefaultFloatSchemaFieldSerializer),
+        (schema.Int(), serialize_schema_field.DefaultIntSchemaFieldSerializer),
+        (schema.Bool(), serialize_schema_field.DefaultBoolSchemaFieldSerializer),
+        (schema.List(), serialize_schema_field.DefaultCollectionSchemaFieldSerializer),
+        (schema.Choice(values=('one', 'two')),
+            serialize_schema_field.DefaultChoiceSchemaFieldSerializer),
+        (schema.Object(schema=IResource),
+            serialize_schema_field.DefaultObjectSchemaFieldSerializer),
+        (RichText(), serialize_schema_field.DefaultRichTextSchemaFieldSerializer),
+        (schema.Date(), serialize_schema_field.DefaultDateSchemaFieldSerializer),
+        (schema.Time(), serialize_schema_field.DefaultTimeSchemaFieldSerializer),
+        (schema.Dict(), serialize_schema_field.DefaultDictSchemaFieldSerializer),
+        (schema.Datetime(), serialize_schema_field.DefaultDateTimeSchemaFieldSerializer),
+    ]
+    site = Site()
+    for field, klass in mapping:
+        adapter = getMultiAdapter((field, site, dummy_request),
+                                  interface=ISchemaFieldSerializeToJson)
+        assert isinstance(adapter, klass)
 
-    @pytest.mark.asyncio
-    async def test_DeserializeFromJson(self):
-        root = self.new_root()
-        site = root['guillotina']
-        self.login()
-        obj = await create_content_in_container(site, 'Item', 'foobar')
-        adapter = getMultiAdapter((obj, self.request),
-                                  interface=IResourceDeserializeFromJson)
-        self.assertTrue(
-            isinstance(adapter, deserialize_content.DeserializeFromJson))
 
-    @pytest.mark.asyncio
-    async def test_DefaultResourceFieldDeserializer(self):
-        root = self.new_root()
-        site = root['guillotina']
-        self.login()
-        obj = await create_content_in_container(site, 'Item', 'foobar')
-        adapter = getMultiAdapter((schema.Text(), obj, self.request),
-                                  interface=IResourceFieldDeserializer)
-        self.assertTrue(
-            isinstance(adapter, deserialize_content_fields.DefaultResourceFieldDeserializer))
+def test_vocabulary():
+    from guillotina.schema.vocabulary import SimpleVocabulary
+    vocab = SimpleVocabulary.fromItems((
+        (u"Foo", "id_foo"),
+        (u"Bar", "id_bar")))
+    res = getAdapter(vocab, interface=IValueToJson)
+    assert type(res) == list
+
+
+def test_SerializeFactoryToJson(dummy_request):
+    factory = getUtility(IResourceFactory, name='Item')
+    adapter = getMultiAdapter((factory, dummy_request),
+                              interface=IFactorySerializeToJson)
+    assert isinstance(adapter, serialize_schema.SerializeFactoryToJson)
+
+
+def test_DefaultSchemaSerializer(dummy_request):
+    adapter = getMultiAdapter(
+        (IItem, dummy_request),
+        ISchemaSerializeToJson)
+    assert isinstance(adapter, serialize_schema.DefaultSchemaSerializer)
+
+
+def test_DefaultFieldSerializer(dummy_request):
+    obj = Item()
+    adapter = getMultiAdapter((schema.Text(), obj, dummy_request),
+                              interface=IResourceFieldSerializer)
+    assert isinstance(adapter, serialize_content_field.DefaultFieldSerializer)
+
+
+def test_DeserializeFromJson(dummy_request):
+    obj = Item()
+    adapter = getMultiAdapter((obj, dummy_request),
+                              interface=IResourceDeserializeFromJson)
+    assert isinstance(adapter, deserialize_content.DeserializeFromJson)
+
+
+def test_DefaultResourceFieldDeserializer(dummy_request):
+    obj = Item()
+    adapter = getMultiAdapter((schema.Text(), obj, dummy_request),
+                              interface=IResourceFieldDeserializer)
+    assert isinstance(adapter, deserialize_content_fields.DefaultResourceFieldDeserializer)

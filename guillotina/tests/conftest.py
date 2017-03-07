@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
-import docker
-import os
-import psycopg2
-
+from aiohttp.test_utils import make_mocked_request
+from guillotina.content import load_cached_schema
+from guillotina.factory import make_app
+from guillotina.interfaces import IDefaultLayer
+from guillotina.interfaces import IRequest
+from guillotina.testing import ADMIN_TOKEN
 from guillotina.testing import TESTING_SETTINGS
 from time import sleep
-import pytest
+from zope.interface import alsoProvides
+
 import aiohttp
-from aiohttp.test_utils import make_mocked_request
-import json
-from guillotina.factory import make_app
-from guillotina.content import load_cached_schema
-from guillotina.testing import ADMIN_TOKEN
 import copy
+import docker
+import json
+import os
+import psycopg2
+import pytest
 
 
 IMAGE = 'postgres:9.6'
@@ -90,7 +93,7 @@ def postgres():
 
         if host != '':
             try:
-                conn = psycopg2.connect("dbname=guillotina user=guillotina password=test host=%s port=5432" % host)
+                conn = psycopg2.connect("dbname=guillotina user=guillotina password=test host=%s port=5432" % host)  # noqa
                 cur = conn.cursor()
                 cur.execute("SELECT 1;")
                 cur.fetchone()
@@ -162,6 +165,7 @@ class GuillotinaDBRequester(object):
 
 @pytest.fixture(scope='function')
 def dummy_guillotina(loop):
+    from guillotina import test_package  # noqa
     aioapp = make_app(settings=DUMMY_SETTINGS, loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
@@ -178,6 +182,8 @@ def dummy_request(dummy_guillotina):
     request._db_id = 'guillotina'
     request._tm = db.new_transaction_manager()
     request._tm.request = request  # so get_current_request can find it...
+    alsoProvides(request, IRequest)
+    alsoProvides(request, IDefaultLayer)
     return request
 
 
@@ -193,6 +199,7 @@ async def dummy_txn_root(dummy_request):
 
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
+    from guillotina import test_package  # noqa
     aioapp = make_app(settings=DOCKER_PG_SETTINGS, loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
@@ -208,7 +215,7 @@ async def guillotina(test_server, postgres, guillotina_main, loop):
 
 @pytest.fixture(scope='function')
 @pytest.yield_fixture
-async def site(guillotina):
+async def site_requester(guillotina):
     requester = await guillotina
     resp, status = await requester('POST', '/guillotina', data=json.dumps({
         "@type": "Site",

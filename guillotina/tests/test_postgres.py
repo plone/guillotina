@@ -1,11 +1,12 @@
-import pytest
-from guillotina.db.storage import APgStorage
-from guillotina.db.transaction import Transaction
+from guillotina.db import ROOT_ID
 from guillotina.db.db import Root
 from guillotina.db.interfaces import IWriter
-from guillotina.db.transaction_manager import TransactionManager
 from guillotina.db.reader import reader
-from guillotina.db import ROOT_ID
+from guillotina.db.storage import APgStorage
+from guillotina.db.transaction import Transaction
+from guillotina.db.transaction_manager import TransactionManager
+
+import pytest
 
 
 @pytest.mark.asyncio
@@ -50,7 +51,7 @@ async def test_read_something(postgres, guillotina_main):
 
 
 @pytest.mark.asyncio
-async def test_apg_txn(postgres, guillotina_main):
+async def test_pg_txn(postgres, guillotina_main):
     """Test a low level transaction"""
     dsn = "postgres://guillotina:test@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
