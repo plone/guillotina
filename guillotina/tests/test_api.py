@@ -167,7 +167,6 @@ async def test_create_contenttype_with_date(site_requester):
         root = await utils.get_root(request)
         site = await root.__getitem__('guillotina')
         obj = await site.__getitem__('item1')
-        import pdb; pdb.set_trace()
         from guillotina.behaviors.dublincore import IDublinCore
         assert IDublinCore(obj).created.isoformat() == date_to_test
         assert IDublinCore(obj).expires.isoformat() == date_to_test
@@ -210,75 +209,30 @@ async def test_create_duplicate_id(site_requester):
         assert status == 201
 
 
-# class FunctionalTestServer(GuillotinaFunctionalTestCase):
-#     """Functional testing of the API REST."""
-#
-#     def _get_site(self):
-#         """
-#         sometimes the site does not get updated data from zodb
-#         this seems to make it
-#         """
-#         return self.new_root()['guillotina']
-#
-#     # def test_file_upload(self):
-#     #     resp = self.layer.requester(
-#     #         'POST',
-#     #         '/guillotina/guillotina/',
-#     #         data=json.dumps({
-#     #             "@type": "File",
-#     #             "title": "File1",
-#     #             "id": "file1"
-#     #         })
-#     #     )
-#     #     self.assertTrue(resp.status_code == 201)
-#     #     site = self._get_site()
-#     #     self.assertTrue('file1' in site)
-#     #     fi = open(os.path.join(TEST_RESOURCES_DIR, 'plone.png'), 'rb')
-#     #     data = fi.read()
-#     #     fi.close()
-#     #     resp = self.layer.requester(
-#     #         'PATCH',
-#     #         '/guillotina/guillotina/file1/@upload/file',
-#     #         data=data)
-#     #     site = self._get_site()
-#     #     behavior = IAttachment(site['file1'])
-#     #     self.assertEqual(behavior.file.data, data)
-#
-#     # def test_file_download(self):
-#     #     # first, get a file on...
-#     #     self.test_file_upload()
-#     #     resp = self.layer.requester(
-#     #         'GET',
-#     #         '/guillotina/guillotina/file1/@download/file')
-#     #     site = self._get_site()
-#     #     behavior = IAttachment(site['file1'])
-#     #     self.assertEqual(behavior.file.data, resp.content)
-#
+async def test_create_nested_object(site_requester):
+    async for requester in site_requester:
+        response, status = await requester(
+            'POST',
+            '/guillotina/guillotina/',
+            data=json.dumps({
+                '@type': 'Example',
+                'title': 'Item1',
+                'id': 'item1',
+                'categories': [{
+                    'label': 'term1',
+                    'number': 1.0
+                }, {
+                    'label': 'term2',
+                    'number': 2.0
+                }]
+            })
+        )
+        assert status == 201
 
-#
 
-#
-#     def test_create_nested_object(self):
-#         resp = self.layer.requester(
-#             'POST',
-#             '/guillotina/guillotina/',
-#             data=json.dumps({
-#                 '@type': 'Example',
-#                 'title': 'Item1',
-#                 'id': 'item1',
-#                 'categories': [{
-#                     'label': 'term1',
-#                     'number': 1.0
-#                 }, {
-#                     'label': 'term2',
-#                     'number': 2.0
-#                 }]
-#             })
-#         )
-#         self.assertTrue(resp.status_code == 201)
-#
-#     def test_get_addons(self):
-#         resp = self.layer.requester(
-#             'GET', '/guillotina/guillotina/@addons'
-#         )
-#         self.assertEqual(resp.status_code, 200)
+async def test_get_addons(site_requester):
+    async for requester in site_requester:
+        response, status = await requester(
+            'GET', '/guillotina/guillotina/@addons'
+        )
+        assert status == 200
