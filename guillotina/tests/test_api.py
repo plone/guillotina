@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 from guillotina import schema
-from guillotina.interfaces import IApplication
-from guillotina.testing import GuillotinaFunctionalTestCase
-from guillotina.tests import TEST_RESOURCES_DIR
 from guillotina.tests import utils
-from zope.component import getUtility
 from zope.interface import Interface
 
 import json
-import os
 
 
 class ITestingRegistry(Interface):

@@ -4,146 +4,138 @@ from guillotina.addons import Addon
 from guillotina.api.service import Service
 from guillotina.content import Item
 from guillotina.interfaces import ISite
-from guillotina.testing import GuillotinaFunctionalTestCase
 from zope.interface import Interface
 
-import json
+
+async def test_register_service(site_requester):
+    cur_count = len(configure.get_configurations('guillotina.tests', 'service'))
+
+    class TestService(Service):
+        async def __call__(self):
+            return {
+                "foo": "bar"
+            }
+    configure.register_configuration(TestService, dict(
+        context=ISite,
+        name="@foobar",
+        permission='guillotina.ViewContent'
+    ), 'service')
+
+    assert len(configure.get_configurations('guillotina.tests', 'service')) == cur_count + 1  # noqa
+
+    async for requester in site_requester:
+        config = requester.root.app.config
+        configure.load_configuration(
+            config, 'guillotina.tests', 'service')
+        config.execute_actions()
+
+        response, status = await requester('GET', '/guillotina/guillotina/@foobar')
+        assert response['foo'] == 'bar'
 
 
-class TestConfigure(GuillotinaFunctionalTestCase):
-    """Functional testing of the API REST."""
+async def test_register_contenttype(site_requester):
+    cur_count = len(
+        configure.get_configurations('guillotina.tests', 'contenttype'))
 
-    def test_register_service(self):
-        cur_count = len(configure.get_configurations('guillotina.tests', 'service'))
+    class IMyType(Interface):
+        pass
 
-        class TestService(Service):
-            async def __call__(self):
-                return {
-                    "foo": "bar"
-                }
-        configure.register_configuration(TestService, dict(
-            context=ISite,
-            name="@foobar",
-            permission='guillotina.ViewContent'
-        ), 'service')
+    class MyType(Item):
+        pass
 
-        self.assertEqual(
-            len(configure.get_configurations('guillotina.tests', 'service')),
-            cur_count + 1)
+    configure.register_configuration(MyType, dict(
+        context=ISite,
+        schema=IMyType,
+        portal_type="MyType1",
+        behaviors=["guillotina.behaviors.dublincore.IDublinCore"]
+    ), 'contenttype')
 
+    assert len(configure.get_configurations('guillotina.tests', 'contenttype')) == cur_count + 1  # noqa
+
+    async for requester in site_requester:
+        config = requester.root.app.config
         # now test it...
         configure.load_configuration(
-            self.layer.app.app.config, 'guillotina.tests', 'service')
-        self.layer.app.app.config.execute_actions()
+            config, 'guillotina.tests', 'contenttype')
+        config.execute_actions()
 
-        resp = self.layer.requester('GET', '/guillotina/guillotina/@foobar')
-        response = json.loads(resp.text)
-        self.assertEqual(response['foo'], 'bar')
+        response, status = await requester('GET', '/guillotina/guillotina/@types')
+        assert any("MyType1" in s['title'] for s in response)
 
-    def test_register_contenttype(self):
-        cur_count = len(
-            configure.get_configurations('guillotina.tests', 'contenttype'))
 
-        class IMyType(Interface):
-            pass
+async def test_register_behavior(site_requester):
+    cur_count = len(
+        configure.get_configurations('guillotina.tests', 'behavior'))
 
-        class MyType(Item):
-            pass
+    from guillotina.interfaces import IFormFieldProvider
+    from zope.interface import provider
+    from guillotina import schema
 
-        configure.register_configuration(MyType, dict(
-            context=ISite,
-            schema=IMyType,
-            portal_type="MyType1",
-            behaviors=["guillotina.behaviors.dublincore.IDublinCore"]
-        ), 'contenttype')
+    @provider(IFormFieldProvider)
+    class IMyBehavior(Interface):
+        foobar = schema.Text()
 
-        self.assertEqual(
-            len(configure.get_configurations('guillotina.tests', 'contenttype')),
-            cur_count + 1)
+    configure.behavior(
+        title="MyBehavior",
+        provides=IMyBehavior,
+        factory="guillotina.behaviors.instance.AnnotationBehavior",
+        for_="guillotina.interfaces.IResource"
+    )()
 
+    assert len(configure.get_configurations('guillotina.tests', 'behavior')) == cur_count + 1
+
+    class IMyType(Interface):
+        pass
+
+    class MyType(Item):
+        pass
+
+    configure.register_configuration(MyType, dict(
+        context=ISite,
+        schema=IMyType,
+        portal_type="MyType2",
+        behaviors=[IMyBehavior]
+    ), 'contenttype')
+
+    async for requester in site_requester:
+        config = requester.root.app.config
         # now test it...
         configure.load_configuration(
-            self.layer.app.app.config, 'guillotina.tests', 'contenttype')
-        self.layer.app.app.config.execute_actions()
+            config, 'guillotina.tests', 'contenttype')
+        config.execute_actions()
 
-        resp = self.layer.requester('GET', '/guillotina/guillotina/@types')
-        response = json.loads(resp.text)
-        self.assertTrue(any("MyType1" in s['title'] for s in response))
-
-    def test_register_behavior(self):
-        cur_count = len(
-            configure.get_configurations('guillotina.tests', 'behavior'))
-
-        from guillotina.interfaces import IFormFieldProvider
-        from zope.interface import provider
-        from guillotina import schema
-
-        @provider(IFormFieldProvider)
-        class IMyBehavior(Interface):
-            foobar = schema.Text()
-
-        configure.behavior(
-            title="MyBehavior",
-            provides=IMyBehavior,
-            factory="guillotina.behavior.AnnotationStorage",
-            for_="guillotina.interfaces.IResource"
-        )()
-
-        self.assertEqual(
-            len(configure.get_configurations('guillotina.tests', 'behavior')),
-            cur_count + 1)
-
-        class IMyType(Interface):
-            pass
-
-        class MyType(Item):
-            pass
-
-        configure.register_configuration(MyType, dict(
-            context=ISite,
-            schema=IMyType,
-            portal_type="MyType2",
-            behaviors=[IMyBehavior]
-        ), 'contenttype')
-
-        # now test it...
-        configure.load_configuration(
-            self.layer.app.app.config, 'guillotina.tests', 'contenttype')
-        self.layer.app.app.config.execute_actions()
-
-        resp = self.layer.requester('GET', '/guillotina/guillotina/@types')
-        response = json.loads(resp.text)
+        response, status = await requester('GET', '/guillotina/guillotina/@types')
         type_ = [s for s in response if s['title'] == 'MyType2'][0]
-        self.assertTrue('foobar' in type_['definitions']['IMyBehavior']['properties'])
+        assert 'foobar' in type_['definitions']['IMyBehavior']['properties']
 
-    def test_register_addon(self):
-        cur_count = len(
-            configure.get_configurations('guillotina.tests', 'addon'))
 
-        @configure.addon(
-            name="myaddon",
-            title="My addon")
-        class MyAddon(Addon):
+async def test_register_addon(site_requester):
+    cur_count = len(
+        configure.get_configurations('guillotina.tests', 'addon'))
 
-            @classmethod
-            def install(cls, site, request):
-                # install code
-                pass
+    @configure.addon(
+        name="myaddon",
+        title="My addon")
+    class MyAddon(Addon):
 
-            @classmethod
-            def uninstall(cls, site, request):
-                # uninstall code
-                pass
+        @classmethod
+        def install(cls, site, request):
+            # install code
+            pass
 
-        self.assertEqual(
-            len(configure.get_configurations('guillotina.tests', 'addon')),
-            cur_count + 1)
+        @classmethod
+        def uninstall(cls, site, request):
+            # uninstall code
+            pass
 
+    assert len(configure.get_configurations('guillotina.tests', 'addon')) == cur_count + 1
+
+    async for requester in site_requester:
         # now test it...
+        config = requester.root.app.config
         configure.load_configuration(
-            self.layer.app.app.config, 'guillotina.tests', 'addon')
-        self.layer.app.app.config.execute_actions()
+            config, 'guillotina.tests', 'addon')
+        config.execute_actions()
 
-        resp = self.layer.requester('GET', '/guillotina/guillotina/@addons')
-        response = json.loads(resp.text)
-        self.assertTrue('myaddon' in [a['id'] for a in response['available']])
+        response, status = await requester('GET', '/guillotina/guillotina/@addons')
+        assert 'myaddon' in [a['id'] for a in response['available']]
