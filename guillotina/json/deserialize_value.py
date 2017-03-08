@@ -2,24 +2,24 @@
 from dateutil.parser import parse
 from guillotina import configure
 from guillotina import logger
-from guillotina.interfaces import IJSONField
 from guillotina.interfaces import IJSONToValue
+from guillotina.schema._bootstrapinterfaces import IFromUnicode
+from guillotina.schema.interfaces import IBool
+from guillotina.schema.interfaces import IDatetime
+from guillotina.schema.interfaces import IDict
+from guillotina.schema.interfaces import IField
+from guillotina.schema.interfaces import IFrozenSet
+from guillotina.schema.interfaces import IJSONField
+from guillotina.schema.interfaces import IList
+from guillotina.schema.interfaces import ISet
+from guillotina.schema.interfaces import ITuple
 from zope.component import ComponentLookupError
 from zope.component import getMultiAdapter
 from zope.interface import Interface
-from zope.schema._bootstrapinterfaces import IFromUnicode
-from zope.schema.interfaces import IBool
-from zope.schema.interfaces import IDatetime
-from zope.schema.interfaces import IDict
-from zope.schema.interfaces import IField
-from zope.schema.interfaces import IFrozenSet
-from zope.schema.interfaces import IList
-from zope.schema.interfaces import ISet
-from zope.schema.interfaces import ITuple
 
 
 def schema_compatible(value, schema_or_field):
-    """The schema_compatible function converts any value to zope.schema
+    """The schema_compatible function converts any value to guillotina.schema
     compatible data when possible, raising a TypeError for unsupported values.
     This is done by using the ISchemaCompatible converters.
     """

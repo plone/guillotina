@@ -1,15 +1,24 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
+from guillotina.exceptions import RequestNotFound
 from hashlib import sha256 as sha
 
+import asyncio
 import fnmatch
 import importlib
+import inspect
 import logging
 import random
 import string
 import sys
 import time
+
+
+try:
+    from aiohttp.web_server import RequestHandler
+except ImportError:
+    from aiohttp.web import RequestHandler
 
 
 try:
@@ -49,7 +58,7 @@ def get_content_depth(content):
 
 def iter_parents(content):
     content = getattr(content, '__parent__', None)
-    while content:
+    while content is not None:
         yield content
         content = getattr(content, '__parent__', None)
 
@@ -238,3 +247,36 @@ def rec_merge(d1, d2):
     d3 = d1.copy()
     d3.update(d2)
     return d3
+
+
+async def apply_coroutine(func, *args, **kwargs):
+    result = func(*args, **kwargs)
+    if asyncio.iscoroutine(result):
+        return await result
+    return result
+
+
+def get_current_request():
+    """Return the current request by heuristically looking it up from stack
+    """
+    frame = inspect.currentframe()
+    while frame is not None:
+        request = getattr(frame.f_locals.get('self'), 'request', None)
+        if request is not None:
+            return request
+        elif isinstance(frame.f_locals.get('self'), RequestHandler):
+            return frame.f_locals['request']
+        # if isinstance(frame.f_locals.get('self'), RequestHandler):
+        #     return frame.f_locals.get('self').request
+        # elif IView.providedBy(frame.f_locals.get('self')):
+        #     return frame.f_locals['request']
+        frame = frame.f_back
+    raise RequestNotFound(RequestNotFound.__doc__)
+
+
+try:
+    import guillotina.optimizations  # noqa
+except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
+    pass
+else:
+    from guillotina.optimizations import get_current_request  # noqa

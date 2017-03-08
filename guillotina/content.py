@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from BTrees.Length import Length
-from BTrees.OOBTree import OOBTree
 from copy import deepcopy
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -13,16 +11,21 @@ from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.behaviors import applyMarkers
 from guillotina.browser import get_physical_path
+from guillotina.events import BeforeObjectAddedEvent
+from guillotina.events import notify
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
+from guillotina.interfaces import IAddons
+from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
+from guillotina.interfaces import ILayers
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
@@ -31,15 +34,11 @@ from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import ISite
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-from guillotina.registry import IAddons
-from guillotina.registry import ILayers
-from guillotina.registry import Registry
+from guillotina.registry import REGISTRY_DATA_KEY
+from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
-from guillotina.transactions import get_current_request
-from guillotina.transactions import synccontext
-from guillotina.utils import Lazy
-from persistent import Persistent
-from zope.annotation.interfaces import IAttributeAnnotatable
+from guillotina.utils import apply_coroutine
+from guillotina.utils import get_current_request
 from zope.component import getUtilitiesFor
 from zope.component import getUtility
 from zope.component import queryUtility
@@ -48,10 +47,9 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import noLongerProvides
-from zope.schema.interfaces import IContextAwareDefaultFactory
 
+import guillotina.db.orm.base
 import pathlib
-import uuid
 
 
 _zone = tzlocal()
@@ -82,9 +80,8 @@ class ResourceFactory(Factory):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.portal_type = self.portal_type
         now = datetime.now(tz=_zone)
-        obj.creation_date = now
-        obj.modification_date = now
-        obj.uuid = uuid.uuid4().hex
+        obj.created = now
+        obj.modified = now
         if id is None:
             obj.id = obj.uuid
         else:
@@ -151,7 +148,7 @@ def iter_schemata(obj):
         yield schema
 
 
-def create_content(type_, **kw):
+async def create_content(type_, **kw):
     """Utility to create a content.
 
     This method should not be used to add content, just internally.
@@ -169,7 +166,7 @@ def create_content(type_, **kw):
     return obj
 
 
-def create_content_in_container(container, type_, id_, request=None, **kw):
+async def create_content_in_container(container, type_, id_, request=None, **kw):
     """Utility to create a content.
 
     This method is the one to use to create content.
@@ -201,11 +198,14 @@ def create_content_in_container(container, type_, id_, request=None, **kw):
     obj.__parent__ = container
     for key, value in kw.items():
         setattr(obj, key, value)
+
     if request is None or 'OVERWRITE' not in request.headers:
-        if obj.id in container:
+        value = await apply_coroutine(container.__contains__, obj.id)
+        if value:
             raise ConflictIdOnContainer(str(container), obj.id)
 
-    container[obj.id] = obj
+    await notify(BeforeObjectAddedEvent(obj, container, id_))
+    await apply_coroutine(container.__setitem__, obj.id, obj)
     return obj
 
 
@@ -246,8 +246,8 @@ def _default_from_schema(context, schema, fieldname):
     return _marker
 
 
-@implementer(IResource, IAttributeAnnotatable)
-class Resource(Persistent):
+@implementer(IResource)
+class Resource(guillotina.db.orm.base.BaseObject):
 
     __name__ = None
     __parent__ = None
@@ -255,10 +255,13 @@ class Resource(Persistent):
     __acl__ = None
 
     portal_type = None
-    uuid = None
-    creation_date = None
-    modification_date = None
+    created = None
+    modified = None
     title = None
+
+    @property
+    def uuid(self):
+        return self._p_oid
 
     def __init__(self, id=None):
         if id is not None:
@@ -311,6 +314,7 @@ class Resource(Persistent):
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
                 alsoProvides(self, behavior_registration.marker)
+                self._p_register()  # make sure we resave this obj
 
     def remove_behavior(self, iface):
         """We need to apply the marker interface.
@@ -327,6 +331,7 @@ class Resource(Persistent):
             noLongerProvides(self, behavior_registration.marker)
         if iface in self.__behaviors__:
             self.__behaviors__ -= {name}
+        self._p_register()  # make sure we resave this obj
 
     def __getattr__(self, name):
         # python basics:  __getattr__ is only invoked if the attribute wasn't
@@ -366,82 +371,54 @@ class Item(Resource):
     schema=IContainer,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class Folder(Resource):
+    async def __contains__(self, key):
+        return await self._p_jar.contains(self._p_oid, key)
 
-    def __init__(self, id_=None):
-        self._Folder__data = OOBTree()
-        self.__len = Length()
-        super(Folder, self).__init__()
-
-    def __contains__(self, key):
-        return key in self.__data
-
-    @Lazy
-    def _Folder__len(self):
-        l = Length()
-        ol = len(self.__data)
-        if ol > 0:
-            l.change(ol)
-        self._p_changed = True
-        return l
-
-    def __len__(self):
-        return self.__len()
-
-    def __iter__(self):
-        return iter(self.__data)
-
-    def __getitem__(self, key):
-        return self.__data[key]
-
-    def get(self, key, default=None):
-        return self.__data.get(key, default)
-
-    async def asyncget(self, key):
-        return await synccontext(self)(self.__data.__getitem__, key)
-
-    def __setitem__(self, key, value):
-        l = self.__len
-        self.__data[key] = value
+    async def __setitem__(self, key, value):
         value.__parent__ = self
-        l.change(1)
+        value.__name__ = key
+        if self._p_jar is not None:
+            value._p_jar = self._p_jar
+            self._p_jar.register(value)
 
-    def __delitem__(self, key):
-        l = self.__len
-        item = self.__data[key]
-        del self.__data[key]
-        l.change(-1)
+    async def __getitem__(self, key):
+        return await self._p_jar.get_child(self, key)
 
-    has_key = __contains__
+    async def __delitem__(self, key):
+        return await self._p_jar.delete(await self.__getitem__(key))
 
-    def items(self, key=None):
-        return self.__data.items(key)
+    async def get(self, key, default=None):
+        try:
+            return await self._p_jar.get_child(self, key)
+        except KeyError:
+            return default
 
-    def keys(self, key=None):
-        return self.__data.keys(key)
+    async def __len__(self):
+        return await self._p_jar.len(self._p_oid)
 
-    def values(self, key=None):
-        return self.__data.values(key)
+    async def keys(self):
+        return await self._p_jar.keys(self._p_oid)
 
-    def __repr__(self):
-        path = '/'.join([name or 'n/a' for name in get_physical_path(self)])
-        return "< {type} at {path} by {mem} >".format(
-            type=self.portal_type,
-            path=path,
-            mem=id(self))
+    async def items(self):
+        async for key, value in self._p_jar.items(self):
+            yield key, value
 
 
 @configure.contenttype(portal_type="Site", schema=ISite)
 class Site(Folder):
 
-    def install(self):
+    async def install(self):
         # Creating and registering a local registry
-        self['_registry'] = registry = Registry()
+        from guillotina.registry import Registry
+        annotations_container = IAnnotations(self)
+        registry = Registry()
+        await annotations_container.__setitem__(REGISTRY_DATA_KEY, registry)
 
         # Set default plugins
         registry.register_interface(ILayers)
         registry.register_interface(IAddons)
-        registry.for_interface(ILayers).active_layers =\
-            frozenset({'guillotina.interfaces.layer.IDefaultLayer'})
+        layers = registry.for_interface(ILayers)
+        layers['active_layers'] = frozenset({'guillotina.interfaces.layer.IDefaultLayer'})
 
         roles = IPrincipalRoleManager(self)
         roles.assign_role_to_principal(

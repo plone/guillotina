@@ -4,13 +4,13 @@ Besides having static content type definition with its schema there is the conce
 
 ## Definition of a behavior
 
-If you want to have a shared behavior based on some fields and operations that needs to be shared across different content you can define them on a zope.schema interface:
+If you want to have a shared behavior based on some fields and operations that needs to be shared across different content you can define them on a guillotina.schema interface:
 
 ```python
     from guillotina.interfaces import IFormFieldProvider
     from zope.interface import Interface
     from zope.interface import provider
-    from zope.schema import Textline
+    from guillotina.schema import Textline
 
     @provider(IFormFieldProvider)
     class IMyLovedBehavior(Interface):

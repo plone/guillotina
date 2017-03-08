@@ -7,7 +7,7 @@ from guillotina.interfaces import ISchemaSerializeToJson
 from zope.component import getMultiAdapter
 from zope.component.interfaces import IFactory
 from zope.interface import Interface
-from zope.schema import getFieldsInOrder
+from guillotina.schema import getFieldsInOrder
 
 
 @configure.adapter(
@@ -19,7 +19,7 @@ class SerializeFactoryToJson(object):
         self.factory = factory
         self.request = request
 
-    def __call__(self):
+    async def __call__(self):
         factory = self.factory
         result = {
             'title': factory.portal_type,
@@ -37,7 +37,7 @@ class SerializeFactoryToJson(object):
             serializer = getMultiAdapter(
                 (field, factory.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            result['properties'][name] = serializer()
+            result['properties'][name] = await serializer()
 
             invariants = []
             for i in factory.schema.queryTaggedValue('invariants', []):
@@ -49,7 +49,7 @@ class SerializeFactoryToJson(object):
             schema_serializer = getMultiAdapter(
                 (schema, self.request), ISchemaSerializeToJson)
 
-            serialization = schema_serializer()
+            serialization = await schema_serializer()
             result['properties'][schema_serializer.name] = \
                 {'$ref': '#/definitions/' + schema_serializer.name},
             result['definitions'][schema_serializer.name] = serialization
@@ -72,12 +72,12 @@ class DefaultSchemaSerializer(object):
             'invariants': []
         }
 
-    def __call__(self):
+    async def __call__(self):
         for name, field in getFieldsInOrder(self.schema):
             serializer = getMultiAdapter(
                 (field, self.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            self.schema_json['properties'][name] = serializer()
+            self.schema_json['properties'][name] = await serializer()
             if field.required:
                 self.schema_json['required'].append(name)
         self.schema_json['invariants'] = self.invariants

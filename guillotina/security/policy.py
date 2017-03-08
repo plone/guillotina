@@ -31,7 +31,7 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import Public
 from guillotina.interfaces import Unset
-from guillotina.transactions import get_current_request
+from guillotina.utils import get_current_request
 from zope.component import getUtility
 
 import zope.interface

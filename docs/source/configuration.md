@@ -5,7 +5,7 @@ the `guillotina`. All of these settings are configurable by providing a
 JSON configuration file to the start script.
 
 By default, the startup script looks for a `config.json` file. You can use a different
-file by using the `-c` option for the script script like this `./bin/pserver -c myconfig.json`.
+file by using the `-c` option for the script script like this `./bin/guillotina -c myconfig.json`.
 
 
 ## Databases

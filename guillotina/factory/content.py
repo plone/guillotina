@@ -3,7 +3,6 @@ from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
-from guillotina.transactions import RequestAwareTransactionManager
 from guillotina.utils import import_class
 from zope.component import getGlobalSiteManager
 from zope.component import getUtility
@@ -23,12 +22,12 @@ class ApplicationRoot(object):
         self._config_file = config_file
         self._async_utilities = {}
 
-    def add_async_utility(self, config):
+    def add_async_utility(self, config, loop=None):
         interface = import_class(config['provides'])
         factory = import_class(config['factory'])
-        utility_object = factory(config['settings'])
+        utility_object = factory(config['settings'], loop=loop)
         provideUtility(utility_object, interface)
-        task = asyncio.ensure_future(utility_object.initialize(app=self.app))
+        task = asyncio.ensure_future(utility_object.initialize(app=self.app), loop=loop)
         self.add_async_task(config['provides'], task, config)
 
     def add_async_task(self, ident, task, config):
@@ -68,6 +67,12 @@ class ApplicationRoot(object):
     def __getitem__(self, key):
         return self._dbs[key]
 
+    async def get(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            pass
+
     def __delitem__(self, key):
         """ This operation can only be done throw HTTP request
 
@@ -89,6 +94,9 @@ class ApplicationRoot(object):
 
         self._dbs[key] = value
 
+    async def asyncget(self, key):
+        return self._dbs[key]
+
 
 @implementer(IDatabase)
 class Database(object):
@@ -96,57 +104,45 @@ class Database(object):
         self.id = id
         self._db = db
         self._conn = None
-        self.tm_ = RequestAwareTransactionManager()
 
     def get_transaction_manager(self):
-        return self.tm_
+        return self.tm
 
-    def open(self):
-        tm_ = RequestAwareTransactionManager()
-        return self._db.open(transaction_manager=tm_)
-
-    def _open(self):
-        self._conn = self._db.open(transaction_manager=self.tm_)
-
-        @self._conn.onCloseCallback
-        def on_close():
-            self._conn = None
-
-    @property
-    def conn(self):
-        if self._conn is None:
-            self._open()
-        return self._conn
+    def new_transaction_manager(self):
+        return self._db.new_transaction_manager()
 
     @property
     def _p_jar(self):
-        if self._conn is None:
-            self._open()
-        return self._conn
+        return self._db.request._tm
 
-    def __getitem__(self, key):
-        # is there any request active ? -> conn there
-        return self.conn.root()[key]
+    async def get_root(self):
+        return await self._db.request._tm.root()
 
-    def keys(self):
-        return list(self.conn.root().keys())
+    async def __getitem__(self, key):
+        root = await self.get_root()
+        return await root.__getitem__(key)
 
-    def __setitem__(self, key, value):
+    async def keys(self):
+        root = await self.get_root()
+        return list(await root.keys())
+
+    async def __setitem__(self, key, value):
         """ This operation can only be done through HTTP request
 
         We can check if there is permission to delete a site
         XXX TODO
         """
-        self.conn.root()[key] = value
+        root = await self.get_root()
+        await root.__setitem__(key, value)
 
-    def __delitem__(self, key):
+    async def __delitem__(self, key):
         """ This operation can only be done throw HTTP request
 
         We can check if there is permission to delete a site
         XXX TODO
         """
-
-        del self.conn.root()[key]
+        root = await self.get_root()
+        await root.__delitem__(key)
 
     def __iter__(self):
         return iter(self.conn.root().items())

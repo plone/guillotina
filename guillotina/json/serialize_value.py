@@ -4,21 +4,12 @@ from datetime import datetime
 from datetime import time
 from datetime import timedelta
 from guillotina import configure
-from guillotina.files import BasicFile
+from guillotina.i18n import Message
 from guillotina.interfaces import IValueToJson
+from guillotina.schema.vocabulary import SimpleVocabulary
 from guillotina.text import IRichTextValue
-from persistent.list import PersistentList
-from persistent.mapping import PersistentMapping
-from zope.i18nmessageid.message import Message
 from zope.interface import Interface
-from zope.schema.vocabulary import SimpleVocabulary
 
-
-try:
-    import Missing
-    HAS_ZOPE_MISSING = True
-except ImportError:
-    HAS_ZOPE_MISSING = False
 
 try:
     unicode
@@ -64,17 +55,6 @@ def default_converter(value):
 
 
 @configure.adapter(
-    for_=BasicFile,
-    provides=IValueToJson)
-def file_converter(value):
-    return {
-        'filename': value.filename,
-        'size': value.size,
-        'contenttype': value.content_type
-    }
-
-
-@configure.adapter(
     for_=SimpleVocabulary,
     provides=IValueToJson)
 def vocabulary_converter(value):
@@ -93,13 +73,6 @@ def string_converter(value):
     provides=IValueToJson)
 def list_converter(value):
     return list(map(json_compatible, value))
-
-
-@configure.adapter(
-    for_=PersistentList,
-    provides=IValueToJson)
-def persistent_list_converter(value):
-    return list_converter(value)
 
 
 @configure.adapter(
@@ -134,13 +107,6 @@ def dict_converter(value):
     keys = map(json_compatible, keys)
     values = map(json_compatible, values)
     return dict(zip(keys, values))
-
-
-@configure.adapter(
-    for_=PersistentMapping,
-    provides=IValueToJson)
-def persistent_mapping_converter(value):
-    return dict_converter(value)
 
 
 @configure.adapter(
@@ -192,11 +158,3 @@ def i18n_message_converter(value):
     # TODO:
     # value = translate(value, context=getRequest())
     return value
-
-
-if HAS_ZOPE_MISSING:
-    @configure.adapter(
-        for_=Missing.Value.__class__,
-        provides=IValueToJson)
-    def missing_value_converter(value):
-        return None

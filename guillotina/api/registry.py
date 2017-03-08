@@ -4,17 +4,18 @@ from guillotina.api.service import Service
 from guillotina.api.service import TraversableService
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
+from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import ISite
 from guillotina.interfaces import IValueToJson
 from guillotina.json.exceptions import DeserializationError
+from guillotina.schema import getFields
+from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import resolve
 from zope.component import getMultiAdapter
-from zope.i18nmessageid import MessageFactory
 from zope.interface.interfaces import ComponentLookupError
-from zope.schema import getFields
 
 
 _ = MessageFactory('guillotina')
@@ -29,11 +30,13 @@ class Read(TraversableService):
     key = _marker
     value = None
 
-    def publishTraverse(self, traverse):
+    async def publish_traverse(self, traverse):
         if len(traverse) == 1:
             # we want have the key of the registry
             self.key = traverse[0]
-            self.value = self.request.site_settings[self.key]
+            self.value = self.request.site_settings.get(self.key, _marker)
+            if self.value is _marker:
+                raise KeyError(self.key)
         return self
 
     async def __call__(self):
@@ -42,16 +45,16 @@ class Read(TraversableService):
             self.value = self.request.site_settings
         if IRegistry.providedBy(self.value):
             result = {}
-            for x in self.value:
+            for key in self.value.keys():
                 try:
-                    value = IValueToJson(self.value[x])
-                except ComponentLookupError:
-                    value = self.value[x]
-                result[x] = value
+                    value = IValueToJson(self.value[key])
+                except (ComponentLookupError, TypeError):
+                    value = self.value[key]
+                result[key] = value
         else:
             try:
                 result = IValueToJson(self.value)
-            except ComponentLookupError:
+            except (ComponentLookupError, TypeError):
                 result = self.value
         return {
             'value': result
@@ -69,6 +72,7 @@ class Register(Service):
             return ErrorResponse(
                 'BadRequest',
                 _("Not in a site request"))
+
         data = await self.request.json()
         interface = data.get('interface', None)
         initial_values = data.get('initial_values', {})
@@ -83,12 +87,12 @@ class Register(Service):
         config = registry.for_interface(iObject)
 
         # Initialize values
-        # If its defined on the zope.schema default will not be overwritten
+        # If its defined on the guillotina.schema default will not be overwritten
         #  you will need to PATCH
         for key, field in getFields(iObject).items():
-            if key in initial_values and not getattr(config, key, False):
+            if key in initial_values and getattr(config, key, _marker) == _marker:
                 # We don't have a value
-                setattr(config, key, initial_values[key])
+                config[key] = initial_values[key]
 
         return Response(response={}, status=201)
 
@@ -99,11 +103,11 @@ class Write(TraversableService):
     key = _marker
     value = None
 
-    def publishTraverse(self, traverse):
+    async def publish_traverse(self, traverse):
         if len(traverse) == 1 and traverse[0] in self.request.site_settings:
             # we want have the key of the registry
             self.key = traverse[0]
-            self.value = self.request.site_settings[self.key]
+            self.value = self.request.site_settings.get(self.key)
         return self
 
     async def __call__(self):

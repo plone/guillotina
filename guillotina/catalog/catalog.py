@@ -15,6 +15,7 @@ from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.json.serialize_value import json_compatible
+from guillotina.utils import apply_coroutine
 from zope.component import queryAdapter
 from zope.interface import implementer
 
@@ -71,11 +72,11 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    def get_data(self, content):
+    async def get_data(self, content):
         data = {}
         adapter = queryAdapter(content, ICatalogDataAdapter)
         if adapter:
-            data.update(adapter())
+            data.update(await adapter())
         return data
 
 
@@ -103,21 +104,22 @@ class DefaultCatalogDataAdapter(object):
     def __init__(self, content):
         self.content = content
 
-    def get_data(self, ob, iface, field_name):
+    async def get_data(self, ob, iface, field_name):
         try:
             field = iface[field_name]
             real_field = field.bind(ob)
             try:
-                value = real_field.get(ob)
+                value = await apply_coroutine(real_field.get, ob)
                 return json_compatible(value)
             except AttributeError:
                 pass
         except KeyError:
             pass
 
-        return json_compatible(getattr(ob, field_name, None))
+        value = await apply_coroutine(getattr, ob, field_name, None)
+        return json_compatible(value)
 
-    def __call__(self):
+    async def __call__(self):
         # For each type
         values = {}
 
@@ -126,12 +128,12 @@ class DefaultCatalogDataAdapter(object):
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
                 try:
                     if 'accessor' in index_data:
-                        values[index_name] = index_data['accessor'](behavior)
+                        values[index_name] = await apply_coroutine(index_data['accessor'], behavior)
                     else:
-                        values[index_name] = self.get_data(behavior, schema, index_name)
+                        values[index_name] = await self.get_data(behavior, schema, index_name)
                 except NoIndexField:
                     pass
             for metadata_name in merged_tagged_value_list(schema, metadata.key):
-                values[metadata_name] = self.get_data(behavior, schema, metadata_name)
+                values[metadata_name] = await self.get_data(behavior, schema, metadata_name)
 
         return values

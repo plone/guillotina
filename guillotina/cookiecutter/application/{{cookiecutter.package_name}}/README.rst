@@ -4,7 +4,7 @@
 Dependencies
 ------------
 
-Python >= 3.5
+Python >= 3.6
 
 
 Installation
@@ -21,4 +21,4 @@ Running
 
 Most simple way to get running::
 
-  ./bin/pserver
+  ./bin/guillotina

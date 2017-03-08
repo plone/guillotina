@@ -1,28 +1,28 @@
 from guillotina import configure
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
-from guillotina.interfaces import IJSONField
 from guillotina.interfaces import IRichText
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.interfaces import IValueToJson
+from guillotina.schema import getFields
+from guillotina.schema.interfaces import IBool
+from guillotina.schema.interfaces import IChoice
+from guillotina.schema.interfaces import ICollection
+from guillotina.schema.interfaces import IDate
+from guillotina.schema.interfaces import IDatetime
+from guillotina.schema.interfaces import IDict
+from guillotina.schema.interfaces import IField
+from guillotina.schema.interfaces import IFloat
+from guillotina.schema.interfaces import IInt
+from guillotina.schema.interfaces import IJSONField
+from guillotina.schema.interfaces import IObject
+from guillotina.schema.interfaces import IText
+from guillotina.schema.interfaces import ITextLine
+from guillotina.schema.interfaces import ITime
 from zope.component import getMultiAdapter
 from zope.interface import implementedBy
 from zope.interface import Interface
-from zope.schema import getFields
-from zope.schema.interfaces import IBool
-from zope.schema.interfaces import IChoice
-from zope.schema.interfaces import ICollection
-from zope.schema.interfaces import IDate
-from zope.schema.interfaces import IDatetime
-from zope.schema.interfaces import IDict
-from zope.schema.interfaces import IField
-from zope.schema.interfaces import IFloat
-from zope.schema.interfaces import IInt
-from zope.schema.interfaces import IObject
-from zope.schema.interfaces import IText
-from zope.schema.interfaces import ITextLine
-from zope.schema.interfaces import ITime
 
 
 @configure.adapter(
@@ -52,7 +52,7 @@ class DefaultSchemaFieldSerializer(object):
         self.request = request
         self.field_attributes = {}
 
-    def __call__(self):
+    async def __call__(self):
         result = {'type': self.field_type}
         for schema in implementedBy(self.field.__class__).flattened():
             self.field_attributes.update(getFields(schema))
@@ -83,7 +83,7 @@ class DefaultSchemaFieldSerializer(object):
                 serializer = getMultiAdapter(
                     (value, self.field, self.request),
                     ISchemaFieldSerializeToJson)
-                text = serializer()
+                text = await serializer()
             elif value is not None and (force or value != self.field.missing_value):
                 text = IValueToJson(value)
 
@@ -107,7 +107,7 @@ class DefaultSchemaFieldSerializer(object):
             else:
                 schema_serializer = getMultiAdapter((self.field.schema, self.request),
                                                     ISchemaSerializeToJson)
-                result['properties'] = schema_serializer()
+                result['properties'] = await schema_serializer()
         return result
 
     @property

@@ -9,7 +9,7 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
-from guillotina.transactions import get_current_request
+from guillotina.utils import get_current_request
 from guillotina.utils import resolve_or_get
 
 

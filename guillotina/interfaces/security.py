@@ -16,11 +16,11 @@
 In all cases, 'setting' values are one of the defined constants
 `Allow`, `Deny`, or `Unset`.
 """
-from zope.i18nmessageid import MessageFactory
+from guillotina.i18n import MessageFactory
 from zope.interface import Attribute
 from zope.interface import Interface
-from zope.schema import Text
-from zope.schema import TextLine
+from guillotina.schema import Text
+from guillotina.schema import TextLine
 
 import copyreg
 

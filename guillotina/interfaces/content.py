@@ -1,16 +1,16 @@
 # NEED use this import because we have a "schema" attribute below
+from guillotina.interfaces.common import IMapping
 from zope.component.interfaces import ISite as IZopeSite
 from zope.component.interfaces import IFactory
 from zope.interface import Attribute
 from zope.interface import Interface
-from zope.interface.common.mapping import IFullMapping
-from zope.schema import TextLine
+from guillotina.schema import TextLine
 
 # NEED use this import because we have a "schema" attribute below
-import zope.schema
+import guillotina.schema
 
 
-class IRegistry(IFullMapping):
+class IRegistry(IMapping):
 
     def for_interface(interface, check=True, omit=(), prefix=None):
         """Get an IRecordsProxy for the given interface. If `check` is True,
@@ -28,11 +28,20 @@ class IRegistry(IFullMapping):
         """
 
 
-class IApplication(Interface):
+class ITraversable(Interface):
+    """
+    A content object that contains content that can be traversed to
+    """
+
+    def get(name):
+        pass
+
+
+class IApplication(ITraversable):
     pass
 
 
-class IDatabase(Interface):
+class IDatabase(ITraversable):
     def get_transaction_manager():
         pass
 
@@ -78,16 +87,16 @@ class ILocation(Interface):
 
 class IResource(ILocation):
 
-    portal_type = zope.schema.TextLine()
+    portal_type = guillotina.schema.TextLine()
 
-    title = zope.schema.TextLine(
+    title = guillotina.schema.TextLine(
         title='Title',
         required=False,
         description=u'Title of the Resource',
         default=u''
     )
 
-    __behaviors__ = zope.schema.FrozenSet(
+    __behaviors__ = guillotina.schema.FrozenSet(
         title='Enabled behaviors',
         required=False,
         description=u'Dynamic behaviors for the content type',
@@ -97,33 +106,33 @@ class IResource(ILocation):
 
 class IResourceFactory(IFactory):
 
-    portal_type = zope.schema.TextLine(
+    portal_type = guillotina.schema.TextLine(
         title='Portal type name',
         description='The portal type this is an FTI for'
     )
 
-    schema = zope.schema.DottedName(
+    schema = guillotina.schema.DottedName(
         title='Schema interface',
         description='Dotted name to an interface describing the type. '
                     'This is not required if there is a model file or a '
                     'model source string containing an unnamed schema.'
     )
 
-    behaviors = zope.schema.List(
+    behaviors = guillotina.schema.List(
         title='Behaviors',
         description='A list of behaviors that are enabled for this type. '
                     'See guillotina.behaviors for more details.',
-        value_type=zope.schema.DottedName(title='Behavior name')
+        value_type=guillotina.schema.DottedName(title='Behavior name')
     )
 
-    add_permission = zope.schema.DottedName(
+    add_permission = guillotina.schema.DottedName(
         title='Add permission',
         description='A oermission name for the permission required to '
                     'construct this content',
     )
 
 
-class ISite(IResource, IZopeSite):
+class ISite(IResource, IZopeSite, ITraversable):
     pass
 
 
@@ -131,9 +140,13 @@ class IItem(IResource):
     pass
 
 
-class IContainer(IResource, IFullMapping):
+class IContainer(IResource, IMapping, ITraversable):
     pass
 
 
 class IContentNegotiation(Interface):
+    pass
+
+
+class IAnnotations(Interface):
     pass

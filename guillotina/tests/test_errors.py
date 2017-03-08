@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
-from guillotina.testing import GuillotinaFunctionalTestCase
 
-import json
+async def test_non_existing_site(site_requester):
+    async with await site_requester as requester:
+        response, status = await requester('GET', '/guillotina/non')
+        assert status == 404
 
 
-class FunctionalTestServer(GuillotinaFunctionalTestCase):
-    """Functional testing of the API REST."""
+async def test_non_existing_registry(site_requester):
+    async with await site_requester as requester:
+        response, status = await requester('GET', '/guillotina/guillotina/@registry/non')
+        assert status == 404
 
-    def test_non_existing_site(self):
-        resp = self.layer.requester('GET', '/guillotina/non')
-        self.assertTrue(resp.status_code == 404)
 
-    def test_non_existing_registry(self):
-        resp = self.layer.requester('GET', '/guillotina/guillotina/@registry/non')
-        self.assertTrue(resp.status_code == 404)
-
-    def test_non_existing_type(self):
-        resp = self.layer.requester('GET', '/guillotina/guillotina/@types/non')
-        self.assertTrue(resp.status_code == 400)
-        self.assertTrue(json.loads(resp.text)['error']['type'] == 'ViewError')
+async def test_non_existing_type(site_requester):
+    async with await site_requester as requester:
+        response, status = await requester('GET', '/guillotina/guillotina/@types/non')
+        assert status == 400
+        assert response['error']['type'] == 'ViewError'

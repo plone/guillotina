@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from guillotina import logger
 from guillotina.factory import make_app
-from guillotina.testing import FakeRequest
-from guillotina.testing import TestParticipation
+from guillotina.tests.utils import FakeRequest
+from guillotina.tests.utils import TestParticipation
 
 import argparse
 import json

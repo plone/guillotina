@@ -15,7 +15,10 @@ from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
+from guillotina.exceptions import ConflictError
 from guillotina.exceptions import Unauthorized
+from guillotina.interfaces import ACTIVE_LAYERS_KEY
+from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDefaultLayer
@@ -26,19 +29,18 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRendered
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ITranslated
+from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
-from guillotina.registry import ACTIVE_LAYERS_KEY
+from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-from guillotina.transactions import locked
 from guillotina.utils import apply_cors
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import import_class
-from ZODB.POSException import ConflictError
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
 from zope.component.interfaces import ISite
@@ -116,30 +118,31 @@ async def traverse(request, parent, path):
 
     assert request is not None  # could be used for permissions, etc
 
+    if not ITraversable.providedBy(parent):
+        # not a traversable context
+        return parent, path
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
-        context = parent[path[0]]
-    except TypeError:
-        return parent, path
-    except KeyError:
+        context = await parent.get(path[0])
+    except (TypeError, KeyError, AttributeError):
         return parent, path
 
     if IDatabase.providedBy(context):
-        if SHARED_CONNECTION:
-            request.conn = context.conn
-        else:
-            # Create a new conection
-            request.conn = context.open()
-        # Check the transaction
         request._db_write_enabled = False
         request._db_id = context.id
-        context = request.conn.root()
+        # Create a transaction Manager
+        request._tm = context.new_transaction_manager()
+        # Start a transaction
+        await request._tm.begin(request=request)
+        # Get the root of the tree
+        context = await request._tm.root()
 
     if ISite.providedBy(context):
         request._site_id = context.id
         request.site = context
-        request.site_settings = context['_registry']
+        annotations_container = IAnnotations(request.site)
+        request.site_settings = await annotations_container.__getitem__(REGISTRY_DATA_KEY)
         layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
@@ -208,41 +211,38 @@ class MatchInfo(AbstractMatchInfo):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             try:
-                async with locked(self.resource):
-                    request._db_write_enabled = True
-                    txn = request.conn.transaction_manager.begin(request)
-                    # We try to avoid collisions on the same instance of
-                    # guillotina
-                    view_result = await self.view()
-                    if isinstance(view_result, ErrorResponse) or \
-                            isinstance(view_result, UnauthorizedResponse):
-                        # If we don't throw an exception and return an specific
-                        # ErrorReponse just abort
-                        await abort(txn, request)
-                    else:
-                        await commit(txn, request)
+                request._db_write_enabled = True
+                # We try to avoid collisions on the same instance of
+                # guillotina
+                view_result = await self.view()
+                if isinstance(view_result, ErrorResponse) or \
+                        isinstance(view_result, UnauthorizedResponse):
+                    # If we don't throw an exception and return an specific
+                    # ErrorReponse just abort
+                    await abort(request)
+                else:
+                    await commit(request)
 
             except Unauthorized as e:
-                await abort(txn, request)
+                await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except ConflictError as e:
                 view_result = generate_error_response(
                     e, request, 'ConflictDB', 409)
             except Exception as e:
-                await abort(txn, request)
+                await abort(request)
                 view_result = generate_error_response(
                     e, request, 'ServiceError')
         else:
             try:
                 view_result = await self.view()
+                await abort(request)
             except Unauthorized as e:
+                await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except Exception as e:
+                await abort(request)
                 view_result = generate_error_response(e, request, 'ViewError')
-
-        # If we want to close the connection after the request
-        if SHARED_CONNECTION is False and hasattr(request, 'conn'):
-            request.conn.close()
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
@@ -265,7 +265,7 @@ class MatchInfo(AbstractMatchInfo):
 
         futures_to_wait = request._futures.values()
         if futures_to_wait:
-            await asyncio.gather(futures_to_wait)
+            await asyncio.gather(*list(futures_to_wait))
 
         return resp
 
@@ -317,6 +317,7 @@ class TraversalRouter(AbstractRouter):
             logger.error(
                 "Exception on resolve execution",
                 exc_info=e)
+            await abort(request)
             raise e
         if result is not None:
             return result
@@ -391,7 +392,7 @@ class TraversalRouter(AbstractRouter):
                 return None
             else:
                 try:
-                    view = view.publishTraverse(traverse_to)
+                    view = await view.publish_traverse(traverse_to)
                 except Exception as e:
                     logger.error(
                         "Exception on view execution",

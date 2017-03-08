@@ -17,7 +17,6 @@ Contents:
    contenttypes
    behavior
    interfaces
-   migrations
    commands
    applicationconfiguration
    design

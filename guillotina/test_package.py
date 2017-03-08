@@ -12,8 +12,7 @@ configure.register_configuration(Item, dict(
     schema=IItem,
     portal_type="File",
     behaviors=[
-        "guillotina.behaviors.dublincore.IDublinCore",
-        "guillotina.behaviors.attachment.IAttachment"
+        "guillotina.behaviors.dublincore.IDublinCore"
     ]
 ), 'contenttype')
 
@@ -22,7 +21,6 @@ configure.register_configuration(Example, dict(
     schema=IExample,
     portal_type="Example",
     behaviors=[
-        "guillotina.behaviors.dublincore.IDublinCore",
-        "guillotina.behaviors.attachment.IAttachment"
+        "guillotina.behaviors.dublincore.IDublinCore"
     ]
 ), 'contenttype')

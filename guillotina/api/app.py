@@ -11,7 +11,7 @@ async def get(context, request):
     serializer = getMultiAdapter(
         (context, request),
         IResourceSerializeToJson)
-    return serializer()
+    return await serializer()
 
 
 @configure.service(context=IApplication, method='GET', permission='guillotina.GetPortals',

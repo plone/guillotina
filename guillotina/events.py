@@ -1,6 +1,8 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
 from guillotina import configure
+from guillotina.interfaces import IBeforeObjectAddedEvent
+from guillotina.interfaces import IBeforeObjectRemovedEvent
 from guillotina.interfaces import IFileFinishUploaded
 from guillotina.interfaces import INewUserAdded
 from guillotina.interfaces import IObjectAddedEvent
@@ -55,6 +57,11 @@ class ObjectAddedEvent(ObjectMovedEvent):
         ObjectMovedEvent.__init__(self, object, None, None, new_parent, new_name, data=data)
 
 
+@implementer(IBeforeObjectAddedEvent)
+class BeforeObjectAddedEvent(ObjectAddedEvent):
+    pass
+
+
 @implementer(IObjectRemovedEvent)
 class ObjectRemovedEvent(ObjectMovedEvent):
     """An object has been removed from a container"""
@@ -65,6 +72,11 @@ class ObjectRemovedEvent(ObjectMovedEvent):
         if old_name is None:
             old_name = object.__name__
         ObjectMovedEvent.__init__(self, object, old_parent, old_name, None, None)
+
+
+@implementer(IBeforeObjectRemovedEvent)
+class BeforeObjectRemovedEvent(ObjectRemovedEvent):
+    pass
 
 
 @implementer(IObjectModifiedEvent)
@@ -107,7 +119,7 @@ class NewUserAdded(object):
 def modified_object(obj, event):
     """Set the modification date of an object."""
     now = datetime.now(tz=_zone)
-    obj.modification_date = now
+    obj.modified = now
 
 
 async def notify(event):

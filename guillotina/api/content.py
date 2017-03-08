@@ -12,13 +12,14 @@ from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.content import create_content_in_container
+from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import notify
 from guillotina.events import ObjectAddedEvent
-from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectModifiedEvent
-from guillotina.events import ObjectVisitedEvent
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
+from guillotina.events import ObjectRemovedEvent
+from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
@@ -33,6 +34,7 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
+from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
 from zope.component import getMultiAdapter
@@ -48,7 +50,7 @@ class DefaultGET(Service):
         serializer = getMultiAdapter(
             (self.context, self.request),
             IResourceSerializeToJson)
-        result = serializer()
+        result = await serializer()
         await notify(ObjectVisitedEvent(self.context))
         return result
 
@@ -82,7 +84,7 @@ class DefaultPOST(Service):
 
         # Create object
         try:
-            obj = create_content_in_container(
+            obj = await create_content_in_container(
                 self.context, type_, new_id, id=new_id, creators=(user,),
                 contributors=(user,))
         except PreconditionFailed as e:
@@ -141,7 +143,8 @@ class DefaultPOST(Service):
             (obj, self.request),
             IResourceSerializeToJson
         )
-        return Response(response=serializer(), headers=headers, status=201)
+        response = await serializer()
+        return Response(response=response, headers=headers, status=201)
 
 
 @configure.service(context=IResource, method='PUT', permission='guillotina.ModifyContent')
@@ -192,15 +195,16 @@ async def sharing_get(context, request):
     result['local']['prinperm'] = prinperm._bycol
     result['local']['prinrole'] = prinrole._bycol
     for obj in iter_parents(context):
-        roleperm = IRolePermissionMap(obj)
-        prinperm = IPrincipalPermissionMap(obj)
-        prinrole = IPrincipalRoleMap(obj)
-        result['inherit'].append({
-            '@id': IAbsoluteURL(obj, request)(),
-            'roleperm': roleperm._bycol,
-            'prinperm': prinperm._bycol,
-            'prinrole': prinrole._bycol,
-        })
+        roleperm = IRolePermissionMap(obj, None)
+        if roleperm is not None:
+            prinperm = IPrincipalPermissionMap(obj)
+            prinrole = IPrincipalRoleMap(obj)
+            result['inherit'].append({
+                '@id': IAbsoluteURL(obj, request)(),
+                'roleperm': roleperm._bycol,
+                'prinperm': prinperm._bycol,
+                'prinrole': prinrole._bycol,
+            })
     await notify(ObjectPermissionsViewEvent(context))
     return result
 
@@ -292,6 +296,7 @@ async def sharing_post(context, request):
                 func(permission, role)
 
     if changed:
+        context._p_register()  # make sure data is saved
         await notify(ObjectPermissionsModifiedEvent(context, data))
 
 
@@ -311,7 +316,8 @@ class DefaultDELETE(Service):
     async def __call__(self):
         content_id = self.context.id
         parent = self.context.__parent__
-        del parent[content_id]
+        await notify(BeforeObjectRemovedEvent(self.context, parent, content_id))
+        self.context._p_jar.delete(self.context)
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 

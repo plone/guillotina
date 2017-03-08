@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .behaviors import IAsyncBehavior  # noqa
 from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
 from .behaviors import IBehaviorAssignable  # noqa
@@ -7,6 +8,7 @@ from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
 from .catalog import ISecurityInfo  # noqa
 from .configuration import IDatabaseConfigurationFactory  # noqa
+from .content import IAnnotations  # noqa
 from .content import IApplication  # noqa
 from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa
@@ -19,6 +21,7 @@ from .content import IResourceFactory  # noqa
 from .content import ISite  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
+from .content import ITraversable  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
 from .events import IFileFinishUploaded  # noqa
@@ -41,7 +44,6 @@ from .files import IFileManager  # noqa
 from .files import IStorage  # noqa
 from .files import NotStorable  # noqa
 from .json import IFactorySerializeToJson  # noqa
-from .json import IJSONField  # noqa
 from .json import IJSONToValue  # noqa
 from .json import IResourceDeserializeFromJson  # noqa
 from .json import IResourceFieldDeserializer  # noqa
@@ -52,6 +54,8 @@ from .json import ISchemaFieldSerializeToJson  # noqa
 from .json import ISchemaSerializeToJson  # noqa
 from .json import IValueToJson  # noqa
 from .layer import IDefaultLayer  # noqa
+from .registry import IAddons  # noqa
+from .registry import ILayers  # noqa
 from .renderers import IRendererFormatHtml  # noqa
 from .renderers import IRendererFormatJson  # noqa
 from .renderers import IRendererFormatRaw  # noqa
@@ -88,7 +92,7 @@ from .views import IPOST  # noqa
 from .views import IPUT  # noqa
 from .views import ITraversableView  # noqa
 from .views import IView  # noqa
-from zope.i18nmessageid.message import MessageFactory
+from guillotina.i18n import MessageFactory
 from zope.interface import Interface
 
 
@@ -97,11 +101,13 @@ _ = MessageFactory('guillotina')
 DEFAULT_ADD_PERMISSION = 'guillotina.AddContent'
 DEFAULT_READ_PERMISSION = 'guillotina.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'guillotina.ManageContent'
-MIGRATION_DATA_REGISTRY_KEY = '_migrations_info'
 
 SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
+
+ACTIVE_LAYERS_KEY = 'guillotina.registry.ILayers.active_layers'
+ADDONS_KEY = 'guillotina.registry.IAddons.enabled'
 
 
 class IFormFieldProvider(Interface):

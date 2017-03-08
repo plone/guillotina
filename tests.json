@@ -122,7 +122,7 @@
 						{
 							"name": "SERVER",
 							"key": "SERVER",
-							"value": "Python/3.5 aiohttp/0.21.6",
+							"value": "Python/3.6 aiohttp/0.21.6",
 							"description": "A name for the server"
 						}
 					],
@@ -263,7 +263,7 @@
 						{
 							"name": "SERVER",
 							"key": "SERVER",
-							"value": "Python/3.5 aiohttp/0.21.6",
+							"value": "Python/3.6 aiohttp/0.21.6",
 							"description": "A name for the server"
 						}
 					],
