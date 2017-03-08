@@ -3,6 +3,7 @@ from guillotina.db.db import Root
 from guillotina.db.interfaces import IWriter
 from guillotina.db.reader import reader
 from guillotina.db.storage import APgStorage
+from guillotina.db.dummy import DummyStorage
 from guillotina.db.transaction import Transaction
 from guillotina.db.transaction_manager import TransactionManager
 
@@ -61,7 +62,8 @@ async def test_pg_txn(postgres, guillotina_main):
     conn = await aps.open()
     obj = Root()
     writer = IWriter(obj)
-    txn = Transaction(None)
+    tm = TransactionManager(DummyStorage())
+    txn = Transaction(tm)
     await aps.tpc_begin(txn, conn)
     await aps.precommit(txn)
     await aps.store(ROOT_ID, 0, writer, obj, txn)
@@ -69,7 +71,8 @@ async def test_pg_txn(postgres, guillotina_main):
     await aps.tpc_finish(txn)
     await aps.close(conn)
 
-    txn = Transaction(None)
+    tm = TransactionManager(DummyStorage())
+    txn = Transaction(tm)
     await aps.tpc_begin(txn, conn)
     result = await aps.load(txn, ROOT_ID)
     await aps.abort(txn)
