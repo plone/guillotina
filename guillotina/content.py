@@ -331,6 +331,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             noLongerProvides(self, behavior_registration.marker)
         if iface in self.__behaviors__:
             self.__behaviors__ -= {name}
+        self._p_register()  # make sure we resave this obj
 
     def __getattr__(self, name):
         # python basics:  __getattr__ is only invoked if the attribute wasn't

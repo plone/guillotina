@@ -72,11 +72,11 @@ async def default_get(context, request):
                 schema_serializer = getMultiAdapter(
                     (utility.interface, request),
                     ISchemaSerializeToJson)
-                result[name] = schema_serializer()
+                result[name] = await schema_serializer()
         else:
             serialize = True
         if serialize:
             schema_serializer = getMultiAdapter(
                 (utility.interface, request), ISchemaSerializeToJson)
-            result[name] = schema_serializer()
+            result[name] = await schema_serializer()
     return result
