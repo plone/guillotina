@@ -63,6 +63,7 @@ setup(
         'zope.configuration',
         'zope.interface',
         'aiocache',
+        'aiomonitor',
         'pyjwt',
         'requests',
         'asyncpg',
