@@ -68,6 +68,7 @@ class DeserializeFromJson(object):
             raise DeserializationError(errors)
 
         if modified:
+            self.context._p_register()
             await notify(ObjectModifiedEvent(self.context, data))
 
         return self.context

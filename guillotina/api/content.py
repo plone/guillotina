@@ -195,15 +195,16 @@ async def sharing_get(context, request):
     result['local']['prinperm'] = prinperm._bycol
     result['local']['prinrole'] = prinrole._bycol
     for obj in iter_parents(context):
-        roleperm = IRolePermissionMap(obj)
-        prinperm = IPrincipalPermissionMap(obj)
-        prinrole = IPrincipalRoleMap(obj)
-        result['inherit'].append({
-            '@id': IAbsoluteURL(obj, request)(),
-            'roleperm': roleperm._bycol,
-            'prinperm': prinperm._bycol,
-            'prinrole': prinrole._bycol,
-        })
+        roleperm = IRolePermissionMap(obj, None)
+        if roleperm is not None:
+            prinperm = IPrincipalPermissionMap(obj)
+            prinrole = IPrincipalRoleMap(obj)
+            result['inherit'].append({
+                '@id': IAbsoluteURL(obj, request)(),
+                'roleperm': roleperm._bycol,
+                'prinperm': prinperm._bycol,
+                'prinrole': prinrole._bycol,
+            })
     await notify(ObjectPermissionsViewEvent(context))
     return result
 
@@ -295,6 +296,7 @@ async def sharing_post(context, request):
                 func(permission, role)
 
     if changed:
+        context._p_register()  # make sure data is saved
         await notify(ObjectPermissionsModifiedEvent(context, data))
 
 

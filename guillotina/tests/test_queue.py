@@ -1,11 +1,22 @@
 from guillotina.async import IQueueUtility
+from guillotina.interfaces import IApplication
 from guillotina.testing import AsyncMockView
-from zope.component import getUtility
 from guillotina.tests import utils
+from zope.component import getUtility
 
 
-async def test_add_sync_utility(guillotina):
+QUEUE_UTILITY_CONFIG = {
+    "provides": "guillotina.async.IQueueUtility",
+    "factory": "guillotina.async.QueueUtility",
+    "settings": {}
+}
+
+
+async def test_add_sync_utility(guillotina, loop):
     requester = await guillotina
+
+    app = getUtility(IApplication, name='root')
+    app.add_async_utility(QUEUE_UTILITY_CONFIG, loop)
 
     util = getUtility(IQueueUtility)
     var = []
@@ -22,3 +33,5 @@ async def test_add_sync_utility(guillotina):
     await util._queue.join()
     assert 'hola' in var
     assert len(var) == 2
+
+    app.del_async_utility(QUEUE_UTILITY_CONFIG)

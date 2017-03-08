@@ -43,13 +43,6 @@ DUMMY_SETTINGS['databases'][0]['guillotina']['partition'] = \
 DUMMY_SETTINGS['databases'][0]['guillotina']['dsn'] = {}
 
 
-QUEUE_UTILITY_CONFIG = {
-    "provides": "guillotina.async.IQueueUtility",
-    "factory": "guillotina.async.QueueUtility",
-    "settings": {}
-}
-
-
 @pytest.fixture(scope='session')
 def postgres():
     docker_client = docker.from_env(version='1.23')
@@ -174,8 +167,6 @@ class GuillotinaDBRequester(object):
 def dummy_guillotina(loop):
     from guillotina import test_package  # noqa
     aioapp = make_app(settings=DUMMY_SETTINGS, loop=loop)
-    app = getUtility(IApplication, name='root')
-    app.add_async_utility(QUEUE_UTILITY_CONFIG, loop)
     aioapp.config.execute_actions()
     load_cached_schema()
     return aioapp
@@ -216,11 +207,9 @@ async def dummy_txn_root(dummy_request):
 def guillotina_main(loop):
     from guillotina import test_package  # noqa
     aioapp = make_app(settings=DOCKER_PG_SETTINGS, loop=loop)
-    app = getUtility(IApplication, name='root')
-    app.add_async_utility(QUEUE_UTILITY_CONFIG, loop)
     aioapp.config.execute_actions()
     load_cached_schema()
-    return aioapp
+    yield aioapp
 
 
 @pytest.fixture(scope='function')
