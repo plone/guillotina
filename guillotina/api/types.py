@@ -13,7 +13,7 @@ from zope.component import queryUtility
                    name='@types')
 class Read(TraversableService):
 
-    def publishTraverse(self, traverse):
+    async def publish_traverse(self, traverse):
         if len(traverse) == 1:
             # we want have the key of the registry
             self.value = queryUtility(IResourceFactory, name=traverse[0])

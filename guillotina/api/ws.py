@@ -112,7 +112,7 @@ class WebsocketsView(Service):
                             ws.send_str(ujson.dumps(response))
                         else:
                             try:
-                                view = view.publishTraverse(traverse_to)
+                                view = await view.publish_traverse(traverse_to)
                             except Exception as e:
                                 logger.error(
                                     "Exception on view execution",

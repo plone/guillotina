@@ -29,6 +29,7 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRendered
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ITranslated
+from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
@@ -117,13 +118,14 @@ async def traverse(request, parent, path):
 
     assert request is not None  # could be used for permissions, etc
 
+    if not ITraversable.providedBy(parent):
+        # not a traversable context
+        return parent, path
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
         context = await parent.get(path[0])
-    except TypeError:
-        return parent, path
-    except KeyError:
+    except (TypeError, KeyError, AttributeError):
         return parent, path
 
     if IDatabase.providedBy(context):
@@ -390,7 +392,7 @@ class TraversalRouter(AbstractRouter):
                 return None
             else:
                 try:
-                    view = view.publishTraverse(traverse_to)
+                    view = await view.publish_traverse(traverse_to)
                 except Exception as e:
                     logger.error(
                         "Exception on view execution",

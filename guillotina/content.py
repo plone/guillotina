@@ -50,7 +50,6 @@ from zope.interface import noLongerProvides
 
 import guillotina.db.orm.base
 import pathlib
-import uuid
 
 
 _zone = tzlocal()
@@ -297,7 +296,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         for behavior in self.__behaviors__:
             yield BEHAVIOR_CACHE[behavior]
 
-    async def add_behavior(self, iface):
+    def add_behavior(self, iface):
         """We need to apply the marker interface.
 
         value: Interface to add
@@ -315,6 +314,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
                 alsoProvides(self, behavior_registration.marker)
+                self._p_register()  # make sure we resave this obj
 
     def remove_behavior(self, iface):
         """We need to apply the marker interface.

@@ -28,11 +28,20 @@ class IRegistry(IMapping):
         """
 
 
-class IApplication(Interface):
+class ITraversable(Interface):
+    """
+    A content object that contains content that can be traversed to
+    """
+
+    def get(name):
+        pass
+
+
+class IApplication(ITraversable):
     pass
 
 
-class IDatabase(Interface):
+class IDatabase(ITraversable):
     def get_transaction_manager():
         pass
 
@@ -123,7 +132,7 @@ class IResourceFactory(IFactory):
     )
 
 
-class ISite(IResource, IZopeSite):
+class ISite(IResource, IZopeSite, ITraversable):
     pass
 
 
@@ -131,7 +140,7 @@ class IItem(IResource):
     pass
 
 
-class IContainer(IResource, IMapping):
+class IContainer(IResource, IMapping, ITraversable):
     pass
 
 

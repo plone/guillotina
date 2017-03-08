@@ -30,7 +30,7 @@ class Read(TraversableService):
     key = _marker
     value = None
 
-    def publishTraverse(self, traverse):
+    async def publish_traverse(self, traverse):
         if len(traverse) == 1:
             # we want have the key of the registry
             self.key = traverse[0]
@@ -101,7 +101,7 @@ class Write(TraversableService):
     key = _marker
     value = None
 
-    def publishTraverse(self, traverse):
+    async def publish_traverse(self, traverse):
         if len(traverse) == 1 and traverse[0] in self.request.site_settings:
             # we want have the key of the registry
             self.key = traverse[0]
