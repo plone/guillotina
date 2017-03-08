@@ -181,12 +181,24 @@ def dummy_request(dummy_guillotina):
     return get_mocked_request(db)
 
 
+class RootAsyncContextManager(object):
+    def __init__(self, request):
+        self.request = request
+        self.root = None
+        self.txn = None
+
+    async def __aenter__(self):
+        self.txn = await dummy_request._tm.begin(request=dummy_request)
+        self.root = await dummy_request._tm.root()
+        return self.root
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.txn.abort()
+
+
 @pytest.fixture(scope='function')
 async def dummy_txn_root(dummy_request):
-    txn = await dummy_request._tm.begin(request=dummy_request)
-    context = await dummy_request._tm.root()
-    yield context
-    await txn.abort()
+    return RootAsyncContextManager(dummy_request)
 
 # POSTGRES WITH DOCKER TESTING FIXTURES
 
@@ -207,7 +219,7 @@ async def guillotina(test_server, postgres, guillotina_main, loop):
     return requester
 
 
-class SiteRequesterAsyncContextManager:
+class SiteRequesterAsyncContextManager(object):
     def __init__(self, guillotina):
         self.guillotina = guillotina
         self.requester = None

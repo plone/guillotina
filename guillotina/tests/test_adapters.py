@@ -39,7 +39,7 @@ def test_get_current_interaction(dummy_request):
 
 
 async def test_RootSpecialPermissions_IDatabase(dummy_txn_root):
-    async for root in dummy_txn_root:
+    async with await dummy_txn_root as root:
         adapter = getAdapter(root, interface=IPrincipalPermissionManager)
         assert isinstance(adapter, RootSpecialPermissions)
 
