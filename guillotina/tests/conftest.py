@@ -188,8 +188,8 @@ class RootAsyncContextManager(object):
         self.txn = None
 
     async def __aenter__(self):
-        self.txn = await dummy_request._tm.begin(request=dummy_request)
-        self.root = await dummy_request._tm.root()
+        self.txn = await self.request._tm.begin(request=dummy_request)
+        self.root = await self.request._tm.root()
         return self.root
 
     async def __aexit__(self, exc_type, exc, tb):

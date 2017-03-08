@@ -65,6 +65,6 @@ async def test_use_behavior_annotation(dummy_txn_root):
         ob1 = Item()
         await root.__setitem__('ob1', ob1)
         dublin = IDublinCore(ob1)
-        await dublin.__setattr__('publisher', 'foobar')
-        value = await dublin.__getattr__('publisher')
-        assert value == 'foobar'
+        await dublin.load()
+        dublin.publisher = 'foobar'
+        assert dublin.publisher == 'foobar'
