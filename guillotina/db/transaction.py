@@ -163,8 +163,10 @@ class Transaction(object):
         if obj is not None:
             return obj
 
-        obj = HARD_CACHE.get(oid, None)
-        if obj is not None:
+        result = HARD_CACHE.get(oid, None)
+        if result is not None:
+            obj = reader(result)
+            obj._p_jar = self
             return obj
 
         result = await self._manager._storage.load(self, oid)
@@ -172,7 +174,7 @@ class Transaction(object):
         obj._p_jar = self
 
         if obj.__cache__ == 0:
-            HARD_CACHE[oid] = obj
+            HARD_CACHE[oid] = result
 
         return obj
 

@@ -2,7 +2,6 @@ from aiohttp import web
 from guillotina.commands import Command
 import asyncio
 import aiomonitor
-import aiohttp_debugtoolbar
 
 
 class ServerCommand(Command):

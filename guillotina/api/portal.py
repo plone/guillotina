@@ -66,6 +66,7 @@ class DefaultPOST(Service):
             data['description'] = ''
 
         value = await apply_coroutine(self.context.__contains__, data['id'])
+
         if value:
             # Already exist
             return ErrorResponse(
