@@ -34,7 +34,9 @@ class Read(TraversableService):
         if len(traverse) == 1:
             # we want have the key of the registry
             self.key = traverse[0]
-            self.value = self.request.site_settings.get(self.key)
+            self.value = self.request.site_settings.get(self.key, _marker)
+            if self.value is _marker:
+                raise KeyError(self.key)
         return self
 
     async def __call__(self):
@@ -46,13 +48,13 @@ class Read(TraversableService):
             for key in self.value.keys():
                 try:
                     value = IValueToJson(self.value[key])
-                except ComponentLookupError:
+                except (ComponentLookupError, TypeError):
                     value = self.value[key]
                 result[key] = value
         else:
             try:
                 result = IValueToJson(self.value)
-            except ComponentLookupError:
+            except (ComponentLookupError, TypeError):
                 result = self.value
         return {
             'value': result
