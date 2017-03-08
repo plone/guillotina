@@ -1,13 +1,23 @@
 from guillotina.db import ROOT_ID
 from guillotina.db.db import Root
+from guillotina.db.dummy import DummyStorage
 from guillotina.db.interfaces import IWriter
 from guillotina.db.reader import reader
 from guillotina.db.storage import APgStorage
-from guillotina.db.dummy import DummyStorage
 from guillotina.db.transaction import Transaction
 from guillotina.db.transaction_manager import TransactionManager
 
 import pytest
+
+
+async def cleanup(aps):
+    conn = await aps.open()
+    txn = conn.transaction()
+    await txn.start()
+    await conn.execute("""DROP TABLE IF EXISTS objects;""")
+    await conn.execute("""ALTER SEQUENCE zoid_seq RESTART WITH 1;""")
+    txn.commit()
+    aps._pool.release(conn)
 
 
 @pytest.mark.asyncio
@@ -26,8 +36,9 @@ async def test_read_nothing(postgres):
     with pytest.raises(KeyError):
         await aps.load(txn, ROOT_ID)
     await aps.abort(txn)
-    await aps.close(txn._db_conn)
     await aps.remove()
+    await aps.close(txn._db_conn)
+    await cleanup(aps)
     assert lasttid == 0
 
 
@@ -46,8 +57,9 @@ async def test_read_something(postgres, guillotina_main):
     lasttid = await aps.last_transaction(txn)
     await aps.load(txn, ROOT_ID)
     await aps.abort(txn)
-    await aps.close(txn._db_conn)
     await aps.remove()
+    await aps.close(txn._db_conn)
+    await cleanup(aps)
     assert lasttid == 1
 
 
@@ -78,6 +90,5 @@ async def test_pg_txn(postgres, guillotina_main):
     await aps.abort(txn)
     await aps.close(txn._db_conn)
     obj2 = reader(result)
-    # XXX causing it to hang here?
-    # await aps.remove()
     assert obj.__name__ == obj2.__name__
+    await cleanup(aps)
