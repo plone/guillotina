@@ -128,21 +128,16 @@ class GuillotinaDBRequester(object):
 
     async def __call__(self, method, path, params=None, data=None, authenticated=True,
                        auth_type='Basic', headers={}, token=ADMIN_TOKEN, accept='application/json'):
-
-        resp = await self.make_request(method, path, params, data, authenticated,
-                                       auth_type, headers, token, accept)
-        try:
-            value = await resp.json()
-            status = resp.status
-        except:
-            value = await resp.read()
-            status = resp.status
+        value, status, headers = await self.make_request(
+            method, path, params, data, authenticated,
+            auth_type, headers, token, accept)
         return value, status
 
     async def make_request(self, method, path, params=None, data=None,
                            authenticated=True, auth_type='Basic', headers={},
                            token=ADMIN_TOKEN, accept='application/json'):
         settings = {}
+        headers = headers.copy()
         settings['headers'] = headers
         if accept is not None:
             settings['headers']['ACCEPT'] = accept
@@ -156,7 +151,13 @@ class GuillotinaDBRequester(object):
         async with aiohttp.ClientSession(loop=self.loop) as session:
             operation = getattr(session, method.lower(), None)
             async with operation(self.server.make_url(path), **settings) as resp:
-                return resp
+                try:
+                    value = await resp.json()
+                    status = resp.status
+                except:
+                    value = await resp.read()
+                    status = resp.status
+                return value, status, resp.headers
 
 
 # MEMORY DB TESTING FIXTURES
@@ -206,18 +207,28 @@ async def guillotina(test_server, postgres, guillotina_main, loop):
     return requester
 
 
+class SiteRequesterAsyncContextManager:
+    def __init__(self, guillotina):
+        self.guillotina = guillotina
+        self.requester = None
+
+    async def __aenter__(self):
+        requester = await self.guillotina
+        resp, status = await requester('POST', '/guillotina', data=json.dumps({
+            "@type": "Site",
+            "title": "Guillotina Site",
+            "id": "guillotina",
+            "description": "Description Guillotina Site"
+            }))
+        assert status == 200
+        self.requester = requester
+        return requester
+
+    async def __aexit__(self, exc_type, exc, tb):
+        resp, status = await self.requester('DELETE', '/guillotina/guillotina')
+        assert status == 200
+
+
 @pytest.fixture(scope='function')
-@pytest.yield_fixture
 async def site_requester(guillotina):
-    requester = await guillotina
-    resp, status = await requester('POST', '/guillotina', data=json.dumps({
-        "@type": "Site",
-        "title": "Guillotina Site",
-        "id": "guillotina",
-        "description": "Description Guillotina Site"
-        }))
-    assert resp['id'] == 'guillotina'
-    assert status == 200
-    yield requester
-    resp, status = await requester('DELETE', '/guillotina/guillotina')
-    assert status == 200
+    return SiteRequesterAsyncContextManager(guillotina)

@@ -7,7 +7,7 @@ import jwt
 
 
 async def test_jwt_auth(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         from guillotina.auth.users import ROOT_USER_ID
         jwt_token = jwt.encode({
             'exp': datetime.utcnow() + timedelta(seconds=60),

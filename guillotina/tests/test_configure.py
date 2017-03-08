@@ -23,7 +23,7 @@ async def test_register_service(site_requester):
 
     assert len(configure.get_configurations('guillotina.tests', 'service')) == cur_count + 1  # noqa
 
-    async for requester in site_requester:
+    async with await site_requester as requester:
         config = requester.root.app.config
         configure.load_configuration(
             config, 'guillotina.tests', 'service')
@@ -52,7 +52,7 @@ async def test_register_contenttype(site_requester):
 
     assert len(configure.get_configurations('guillotina.tests', 'contenttype')) == cur_count + 1  # noqa
 
-    async for requester in site_requester:
+    async with await site_requester as requester:
         config = requester.root.app.config
         # now test it...
         configure.load_configuration(
@@ -97,7 +97,7 @@ async def test_register_behavior(site_requester):
         behaviors=[IMyBehavior]
     ), 'contenttype')
 
-    async for requester in site_requester:
+    async with await site_requester as requester:
         config = requester.root.app.config
         # now test it...
         configure.load_configuration(
@@ -130,7 +130,7 @@ async def test_register_addon(site_requester):
 
     assert len(configure.get_configurations('guillotina.tests', 'addon')) == cur_count + 1
 
-    async for requester in site_requester:
+    async with await site_requester as requester:
         # now test it...
         config = requester.root.app.config
         configure.load_configuration(

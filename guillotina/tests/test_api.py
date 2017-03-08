@@ -12,7 +12,7 @@ class ITestingRegistry(Interface):
 
 
 async def test_get_root(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester('GET', '/')
         assert response['static_file'] == ['favicon.ico']
         assert response['databases'] == ['guillotina']
@@ -21,21 +21,21 @@ async def test_get_root(site_requester):
 
 async def test_get_database(site_requester):
     """Get the database object."""
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester('GET', '/guillotina')
         len(response['sites']) == 1
 
 
 async def test_get_guillotina(site_requester):
     """Get the root guillotina site."""
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester('GET', '/guillotina/guillotina')
         assert len(response['items']) == 0
 
 
 async def test_get_contenttypes(site_requester):
     """Check list of content types."""
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester('GET', '/guillotina/guillotina/@types')
         assert status == 200
         assert len(response) > 1
@@ -45,7 +45,7 @@ async def test_get_contenttypes(site_requester):
 
 async def test_get_contenttype(site_requester):
     """Get a content type definition."""
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester('GET', '/guillotina/guillotina/@types/Item')
         assert status == 200
         assert len(response['definitions']) == 1
@@ -54,7 +54,7 @@ async def test_get_contenttype(site_requester):
 
 async def test_get_registries(site_requester):
     """Get the list of registries."""
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester('GET', '/guillotina/guillotina/@registry')
         assert status == 200
         assert len(response['value']) == 2
@@ -63,7 +63,7 @@ async def test_get_registries(site_requester):
 
 async def test_get_registry_value(site_requester):
     """Check a value from registry."""
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'GET',
             '/guillotina/guillotina/@registry/guillotina.interfaces.registry.ILayers.active_layers')
@@ -71,7 +71,7 @@ async def test_get_registry_value(site_requester):
 
 
 async def test_create_contenttype(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
@@ -91,7 +91,7 @@ async def test_create_contenttype(site_requester):
 
 async def test_create_delete_contenttype(site_requester):
     """Create and delete a content type."""
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
@@ -107,7 +107,7 @@ async def test_create_delete_contenttype(site_requester):
 
 
 async def test_register_registry(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'POST',
             '/guillotina/guillotina/@registry',
@@ -135,7 +135,7 @@ async def test_register_registry(site_requester):
 
 
 async def test_create_contenttype_with_date(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
@@ -168,7 +168,7 @@ async def test_create_contenttype_with_date(site_requester):
 
 
 async def test_create_duplicate_id(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
@@ -205,7 +205,7 @@ async def test_create_duplicate_id(site_requester):
 
 
 async def test_create_nested_object(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'POST',
             '/guillotina/guillotina/',
@@ -226,7 +226,7 @@ async def test_create_nested_object(site_requester):
 
 
 async def test_get_addons(site_requester):
-    async for requester in site_requester:
+    async with await site_requester as requester:
         response, status = await requester(
             'GET', '/guillotina/guillotina/@addons'
         )
