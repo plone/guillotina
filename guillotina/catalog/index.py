@@ -3,14 +3,14 @@ from guillotina import configure
 from guillotina.api.search import AsyncCatalogReindex
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
+from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISite
-from guillotina.utils import get_current_request
-from guillotina.transactions import tm
+from guillotina.transactions import get_transaction
 from guillotina.utils import get_content_path
+from guillotina.utils import get_current_request
 from zope.component import queryUtility
 
 
@@ -47,7 +47,7 @@ def get_hook():
     if not search:
         return  # no search configured
 
-    trns = tm(request).get()
+    trns = get_transaction(request).get()
     hook = None
     for _hook in trns._after_commit:
         if isinstance(_hook[0], CommitHook):

@@ -357,11 +357,17 @@ class APgStorage(BaseStorage):
             DELETE_FROM_OBJECTS,
             transaction._tid
         )
-        await transaction._db_txn.commit()
+        if transaction._db_txn is not None:
+            await transaction._db_txn.commit()
+        else:
+            log.warn('Do not have db transaction to commit')
         return transaction._tid
 
     async def abort(self, transaction):
-        await transaction._db_txn.rollback()
+        if transaction._db_txn is not None:
+            await transaction._db_txn.rollback()
+        else:
+            log.warn('Do not have db transaction to rollback')
 
     # Introspection
 

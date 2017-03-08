@@ -1,13 +1,11 @@
 # -*- encoding: utf-8 -*-
 from aiohttp.test_utils import make_mocked_request
 from guillotina.content import Folder
+from guillotina.db import ROOT_ID
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IDatabase
-from guillotina.db import ROOT_ID
 from zope.interface import implementer_only
-
-import asyncio
 
 
 @implementer_only(IDatabase, IBaseObject)
@@ -19,8 +17,6 @@ class Root(Folder):
 
     def __repr__(self):
         return "<Database %d>" % id(self)
-
-
 
 
 class GuillotinaDB(object):

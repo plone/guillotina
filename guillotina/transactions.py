@@ -18,7 +18,7 @@ async def abort(request):
         logger.warn('Could not locate transaction manager to abort', exc_info=True)
 
 
-def tm(request):
+def get_tm(request):
     """Return shared transaction manager (from request)
 
     This is used together with "with" syntax for wrapping mutating
@@ -28,11 +28,15 @@ def tm(request):
 
     Example::
 
-        with tm(request) as txn:  # begin transaction txn
+        with get_tm(request) as txn:  # begin transaction txn
 
             # do something
 
         # transaction txn commits or raises ConflictError
 
     """
+    return request._tm
+
+
+def get_transaction(request):
     return request._tm.get()

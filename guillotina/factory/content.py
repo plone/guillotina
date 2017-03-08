@@ -22,12 +22,12 @@ class ApplicationRoot(object):
         self._config_file = config_file
         self._async_utilities = {}
 
-    def add_async_utility(self, config):
+    def add_async_utility(self, config, loop=None):
         interface = import_class(config['provides'])
         factory = import_class(config['factory'])
-        utility_object = factory(config['settings'])
+        utility_object = factory(config['settings'], loop=loop)
         provideUtility(utility_object, interface)
-        task = asyncio.ensure_future(utility_object.initialize(app=self.app))
+        task = asyncio.ensure_future(utility_object.initialize(app=self.app), loop=loop)
         self.add_async_task(config['provides'], task, config)
 
     def add_async_task(self, ident, task, config):
