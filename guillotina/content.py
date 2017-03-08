@@ -81,8 +81,8 @@ class ResourceFactory(Factory):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.portal_type = self.portal_type
         now = datetime.now(tz=_zone)
-        obj.creation_date = now
-        obj.modification_date = now
+        obj.created = now
+        obj.modified = now
         if id is None:
             obj.id = obj.uuid
         else:
@@ -256,8 +256,8 @@ class Resource(guillotina.db.orm.base.BaseObject):
     __acl__ = None
 
     portal_type = None
-    creation_date = None
-    modification_date = None
+    created = None
+    modified = None
     title = None
 
     @property
@@ -297,7 +297,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         for behavior in self.__behaviors__:
             yield BEHAVIOR_CACHE[behavior]
 
-    def add_behavior(self, iface):
+    async def add_behavior(self, iface):
         """We need to apply the marker interface.
 
         value: Interface to add

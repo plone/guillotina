@@ -73,6 +73,6 @@ async def get_addons(context, request):
     registry = request.site_settings
     config = registry.for_interface(IAddons)
 
-    for installed in config.enabled:
+    for installed in config['enabled']:
         result['installed'].append(installed)
     return result

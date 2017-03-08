@@ -17,7 +17,7 @@ class TestCatalog(GuillotinaServerBaseTestCase):
         self.assertTrue('uuid' in fields)
         self.assertTrue('path' in fields)
         self.assertTrue('title' in fields)
-        self.assertTrue('creation_date' in fields)
+        self.assertTrue('created' in fields)
 
     @pytest.mark.asyncio
     async def test_get_index_data(self):

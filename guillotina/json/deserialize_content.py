@@ -7,6 +7,7 @@ from guillotina.directives import write_permission
 from guillotina.events import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import NoInteraction
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
@@ -45,6 +46,9 @@ class DeserializeFromJson(object):
         for behavior_schema in factory.behaviors or ():
             if behavior_schema.__identifier__ in data:
                 behavior = behavior_schema(self.context)
+                if IAsyncBehavior.implementedBy(behavior.__class__):
+                    # providedBy not working here?
+                    await behavior.load(create=True)
                 await self.set_schema(
                     behavior_schema, behavior, data, errors,
                     validate_all, True)
@@ -53,6 +57,9 @@ class DeserializeFromJson(object):
             dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
             if dynamic_behavior_obj.__identifier__ in data:
                 behavior = dynamic_behavior_obj(self.context)
+                if IAsyncBehavior.implementedBy(dynamic_behavior_obj.__class__):
+                    # providedBy not working here?
+                    await behavior.load(create=True)
                 await self.set_schema(
                     dynamic_behavior_obj, behavior, data, errors,
                     validate_all, True)
@@ -107,9 +114,9 @@ class DeserializeFromJson(object):
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
                     try:
-                        await apply_coroutine(field.set, obj, value)
+                        field.set(obj, value)
                     except:  # noqa
-                        await apply_coroutine(setattr, obj, name, value)
+                        setattr(obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):
                     errors.append({

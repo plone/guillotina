@@ -3,11 +3,11 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from dateutil.tz import tzutc
 from guillotina import configure
+from guillotina import schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index
 from guillotina.interfaces import IFormFieldProvider
-from guillotina import schema
 from zope.interface import Interface
 from zope.interface import provider
 
@@ -86,8 +86,8 @@ class DublinCore(AnnotationBehavior):
 
     creators = ContextProperty(u'creators', ())
     contributors = ContextProperty(u'contributors', ())
-    created = ContextProperty(u'creation_date', None)
-    modified = ContextProperty(u'modification_date', None)
+    created = ContextProperty(u'created', None)
+    modified = ContextProperty(u'modified', None)
 
     # all properties but these 4 are not annotated
     __local__properties__ = ('creators', 'contributors', 'created', 'modified')

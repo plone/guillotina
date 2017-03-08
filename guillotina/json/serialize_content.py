@@ -5,20 +5,22 @@ from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
+from guillotina.schema import getFields
 from zope.component import ComponentLookupError
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
 from zope.component import queryUtility
 from zope.interface import Interface
-from guillotina.schema import getFields
-from guillotina.interfaces import IInteraction
-from guillotina.interfaces import IPermission
+
 import asyncio
 
 
@@ -51,8 +53,8 @@ class SerializeToJson(object):
             '@id': IAbsoluteURL(self.context, self.request)(),
             '@type': self.context.portal_type,
             'parent': parent_summary,
-            'created': json_compatible(self.context.creation_date),
-            'modified': json_compatible(self.context.modification_date),
+            'created': json_compatible(self.context.created),
+            'modified': json_compatible(self.context.modified),
             'UID': self.context.uuid,
         }
 
@@ -63,11 +65,17 @@ class SerializeToJson(object):
 
         for behavior_schema in factory.behaviors or ():
             behavior = behavior_schema(self.context)
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load()
             await self.get_schema(behavior_schema, behavior, result, True)
 
         for dynamic_behavior in self.context.__behaviors__ or ():
             dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
             behavior = dynamic_behavior_obj(self.context)
+            if IAsyncBehavior.implementedBy(dynamic_behavior_obj.__class__):
+                # providedBy not working here?
+                await behavior.load()
             await self.get_schema(dynamic_behavior_obj, behavior, result, True)
 
         return result

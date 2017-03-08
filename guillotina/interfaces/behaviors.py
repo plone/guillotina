@@ -104,3 +104,13 @@ class IBehaviorAdapterFactory(Interface):
         IBehaviorAssignable(context).supports(self.behavior.interface) returns
         True.
         """
+
+
+class IAsyncBehavior(Interface):
+    """
+    A behavior that needs to load initial data asynchronously.
+    In order for data api to work correctly, `await behavior.load()` will
+    need to be called first.
+    """
+    def load(create=False):
+        pass

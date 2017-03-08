@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .behaviors import IAsyncBehavior  # noqa
 from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
 from .behaviors import IBehaviorAssignable  # noqa

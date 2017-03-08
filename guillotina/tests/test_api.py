@@ -163,8 +163,10 @@ async def test_create_contenttype_with_date(site_requester):
         site = await root.__getitem__('guillotina')
         obj = await site.__getitem__('item1')
         from guillotina.behaviors.dublincore import IDublinCore
-        assert IDublinCore(obj).created.isoformat() == date_to_test
-        assert IDublinCore(obj).expires.isoformat() == date_to_test
+        behavior = IDublinCore(obj)
+        await behavior.load()
+        assert behavior.created.isoformat() == date_to_test
+        assert behavior.expires.isoformat() == date_to_test
 
 
 async def test_create_duplicate_id(site_requester):

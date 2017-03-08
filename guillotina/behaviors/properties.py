@@ -19,6 +19,7 @@ class ContextProperty(object):
     def __set__(self, inst, value):
         if hasattr(inst.context, self.__name__):
             setattr(inst.context, self.__name__, value)
+            inst.context._p_register()
         else:
             raise AttributeError('{field} not found on {context}'.format(
                 field=self.__name__, context=str(inst.context)))
