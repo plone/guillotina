@@ -322,6 +322,7 @@ class TraversalRouter(AbstractRouter):
         if result is not None:
             return result
         else:
+            await abort(request)
             raise HTTPNotFound()
 
     async def real_resolve(self, request):
