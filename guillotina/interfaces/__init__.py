@@ -101,7 +101,6 @@ _ = MessageFactory('guillotina')
 DEFAULT_ADD_PERMISSION = 'guillotina.AddContent'
 DEFAULT_READ_PERMISSION = 'guillotina.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'guillotina.ManageContent'
-MIGRATION_DATA_REGISTRY_KEY = '_migrations_info'
 
 SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']

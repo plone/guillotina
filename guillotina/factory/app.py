@@ -136,7 +136,6 @@ def make_app(config_file=None, settings=None, loop=None):
     configure.scan('guillotina.behaviors')
     configure.scan('guillotina.languages')
     configure.scan('guillotina.permissions')
-    configure.scan('guillotina.migrate.migrations')
     configure.scan('guillotina.security.security_local')
     configure.scan('guillotina.security.policy')
     configure.scan('guillotina.auth.participation')
