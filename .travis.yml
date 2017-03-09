@@ -1,9 +1,16 @@
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
 language: python
 python:
 - 3.6-dev
 sudo: required
 services:
   - postgresql
+addons:
+  postgresql: "9.6"
 cache:
   directories:
   - eggs

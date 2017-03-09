@@ -23,7 +23,7 @@ async def cleanup(aps):
 # XXX comment out buggy test
 async def test_read_nothing(postgres):
     """Low level test checks that root is not there"""
-    dsn = "postgres://guillotina:postgres@localhost:5432/guillotina"
+    dsn = "postgres://postgres:@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
     aps = APgStorage(
         dsn=dsn, partition=partition_object, name='db')
@@ -45,7 +45,7 @@ async def test_read_nothing(postgres):
 # XXX comment out buggy test
 async def _test_read_something(postgres, guillotina_main):
     """Low level test checks that root is there"""
-    dsn = "postgres://guillotina:postgres@localhost:5432/guillotina"
+    dsn = "postgres://postgres:@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
     aps = APgStorage(
         dsn=dsn, partition=partition_object, name='db')
@@ -66,7 +66,7 @@ async def _test_read_something(postgres, guillotina_main):
 # XXX comment out buggy test
 async def _test_pg_txn(postgres, guillotina_main):
     """Test a low level transaction"""
-    dsn = "postgres://guillotina:postgres@localhost:5432/guillotina"
+    dsn = "postgres://postgres:@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
     aps = APgStorage(
         dsn=dsn, partition=partition_object, name='db')
