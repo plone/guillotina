@@ -83,35 +83,6 @@ class ConflictError(Exception):
     pass
 
 
-# Helper class for __traceback_supplement__
-class TracebackSupplement(object):
-
-    def __init__(self, obj):
-        self.obj = obj
-
-    def get_info(self):
-        result = []
-        try:
-            cls = self.obj.__class__
-            if hasattr(cls, "__module__"):
-                s = "%s.%s" % (cls.__module__, cls.__name__)
-            else:  # pragma NO COVER XXX
-                s = str(cls.__name__)
-            result.append("   - class: " + s)
-        except:  # noqa
-            pass
-        try:
-            cls = type(self.obj)
-            if hasattr(cls, "__module__"):
-                s = "%s.%s" % (cls.__module__, cls.__name__)
-            else:  # pragma NO COVER XXX
-                s = str(cls.__name__)
-            result.append("   - type: " + s)
-        except:  # noqa
-            pass
-        return "\n".join(result)
-
-
 class ConfigurationError(Exception):
     """There was an error in a configuration
     """

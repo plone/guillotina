@@ -1,12 +1,8 @@
 # -*- encoding: utf-8 -*-
 from guillotina.catalog.utils import get_index_fields
 from guillotina.content import create_content
-from guillotina.content import create_content_in_container
 from guillotina.interfaces import ICatalogDataAdapter
-from guillotina.interfaces import IApplication
-from guillotina.component import getUtility
-import asyncio
-from unittest import TestCase
+
 import pytest
 
 

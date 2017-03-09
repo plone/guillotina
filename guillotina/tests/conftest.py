@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import asyncio
 from guillotina.component import getUtility
 from guillotina.content import load_cached_schema
 from guillotina.factory import make_app
@@ -10,9 +9,9 @@ from guillotina.tests.utils import get_mocked_request
 from time import sleep
 
 import aiohttp
+import asyncio
 import copy
 import docker
-import guillotina as guillotina_module
 import json
 import os
 import psycopg2
