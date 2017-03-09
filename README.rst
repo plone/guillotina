@@ -69,6 +69,9 @@ and for test coverage::
 
     ./bin/py.test --cov=guillotina guillotina/
 
+With file watcher...
+
+    ./bin/ptw guillotina --runner=./bin/py.test
 
 Default
 -------
