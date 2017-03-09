@@ -1,30 +1,33 @@
+# we want to make sure it is run on trusty where sudo is provided for postgres
 matrix:
   include:
     - os: linux
       dist: trusty
       sudo: required
 language: python
-python:
-- 3.6-dev
+python: 3.6-dev
 sudo: required
+
 services:
   - postgresql
+# make sure we're on the latest version of postgresql
 addons:
   postgresql: "9.6"
-cache:
-  directories:
-  - eggs
 before_script:
   - psql -c 'create database guillotina;' -U postgres
+
+cache:
+  directories:
+    - eggs
 install:
-- python bootstrap-buildout.py
-- bin/buildout -t 3
-- pip install flake8
-- pip install coverage==4.0.3
-- sleep 15
+  - python bootstrap-buildout.py
+  - bin/buildout -t 3
+  - pip install flake8
+  - pip install coverage==4.0.3
+  - sleep 15
 script:
-- bin/py.test -s --cov=guillotina -v --cov-report term-missing guillotina
-- bin/code-analysis
+  - bin/py.test -s --cov=guillotina -v --cov-report term-missing guillotina
+  - bin/code-analysis
 after_success:
-- coveralls
-- cat .coverage
+  - coveralls
+  - cat .coverage
