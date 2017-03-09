@@ -15,7 +15,9 @@ async def abort(request):
     try:
         await request._tm.abort()
     except AttributeError:
-        logger.warn('Could not locate transaction manager to abort', exc_info=True)
+        # not part of transaction, ignore
+        pass
+        # logger.warn('Could not locate transaction manager to abort', exc_info=True)
 
 
 def get_tm(request):

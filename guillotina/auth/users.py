@@ -54,7 +54,7 @@ class GuillotinaUser(BaseUser):
         return self._properties
 
 
-class AnonymousUser(BaseUser):
+class AnonymousUser(GuillotinaUser):
 
     def __init__(self, request):
         super(AnonymousUser, self).__init__(request)

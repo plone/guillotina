@@ -27,7 +27,13 @@ Please `read the detailed docs <http://guillotina.readthedocs.io/en/latest/>`_
 
 This is the working project of the next generation Guillotina server based on asyncio.
 
-* depends on python >= 3.6
+
+Dependencies
+------------
+
+* python >= 3.6
+* postgresql >= 9.6
+
 
 Getting started with development
 --------------------------------
@@ -40,22 +46,31 @@ We use buildout of course::
 
 The buildout installs the app itself, code analysis tools, and a test runner.
 
-Run the zeo
------------
+Run postgresql
+--------------
 
-To run the zeo on a different terminal::
+If you don't have a postgresql server to play with, you can run one easily
+with docker.
 
-  ./bin/runzeo -C zeo.cfg
+In the termainl::
+
+  make run-postgres
 
 
 Run the server
 --------------
 
-* By default it mounts a zeo server and a ZODB so you need the ZEO server running.
-
 To run the server::
 
     ./bin/guillotina
+
+
+Then...
+
+    curl http://localhost:8080
+
+
+Or, better yet, use postman to start playing with API.
 
 
 Run tests
