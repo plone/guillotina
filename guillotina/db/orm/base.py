@@ -141,36 +141,6 @@ class BaseObject(object):
 
     _p_serial = property(_get_serial, _set_serial, _del_serial)
 
-    # _p_changed:  the object has changed.
-    def _get_changed(self):
-        if _OGA(self, '_BaseObject__jar') is None:
-            return False
-        flags = _OGA(self, '_BaseObject__flags')
-        if flags is None:  # ghost
-            return None
-        return bool(flags & _CHANGED)
-
-    def _set_changed(self, value):
-        if value:
-            before = _OGA(self, '_BaseObject__flags')
-            after = before | _CHANGED
-            if before != after:
-                self._p_register()
-            _OSA(self, '_BaseObject__flags', after)
-        else:
-            flags = _OGA(self, '_BaseObject__flags')
-            flags &= ~_CHANGED
-            _OSA(self, '_BaseObject__flags', flags)
-
-    def _del_changed(self):
-        before = _OGA(self, '_BaseObject__flags')
-        after = before | _CHANGED
-        if before == after:
-            self._p_unregister()
-        _OSA(self, '_BaseObject__flags', UPTODATE)
-
-    _p_changed = property(_get_changed, _set_changed, _del_changed)
-
     # _p_state
     def _get_state(self):
         # Note the use of OGA and caching to avoid recursive calls to __getattribute__:

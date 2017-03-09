@@ -43,7 +43,7 @@ Run the server
 
 To run the server::
 
-    ./bin/server
+    ./bin/guillotina
 
 
 Run tests
@@ -55,7 +55,7 @@ We're using py.test::
 
 and for test coverage::
 
-    ./bin/py.test --cov=guillotina src/
+    ./bin/py.test --cov=guillotina guillotina/
 
 
 Default
