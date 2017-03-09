@@ -94,7 +94,7 @@ def run_docker_postgresql():
 
         if host != '':
             try:
-                conn = psycopg2.connect("dbname=guillotina user=guillotina password= host=%s port=5432" % host)  # noqa
+                conn = psycopg2.connect("dbname=guillotina user=postgres host=%s port=5432" % host)  # noqa
                 cur = conn.cursor()
                 cur.execute("SELECT 1;")
                 cur.fetchone()
