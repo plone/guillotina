@@ -17,20 +17,22 @@ import psycopg2
 import pytest
 
 
+IS_TRAVIS = 'TRAVIS' in os.environ
+
 IMAGE = 'postgres:9.6'
 CONTAINERS_FOR_TESTING_LABEL = 'testingaiopg'
-DOCKER_PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
-DOCKER_PG_SETTINGS['applications'] = []
-DOCKER_PG_SETTINGS['databases'][0]['guillotina']['storage'] = 'GDB'
+PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
+PG_SETTINGS['applications'] = []
+PG_SETTINGS['databases'][0]['guillotina']['storage'] = 'GDB'
 
-DOCKER_PG_SETTINGS['databases'][0]['guillotina']['partition'] = \
+PG_SETTINGS['databases'][0]['guillotina']['partition'] = \
     'guillotina.interfaces.IResource'
-DOCKER_PG_SETTINGS['databases'][0]['guillotina']['dsn'] = {
+PG_SETTINGS['databases'][0]['guillotina']['dsn'] = {
     'scheme': 'postgres',
     'dbname': 'guillotina',
-    'user': 'guillotina',
+    'user': 'postgres',
     'host': 'localhost',
-    'password': 'test',
+    'password': '',
     'port': 5432
 }
 
@@ -43,8 +45,7 @@ DUMMY_SETTINGS['databases'][0]['guillotina']['partition'] = \
 DUMMY_SETTINGS['databases'][0]['guillotina']['dsn'] = {}
 
 
-@pytest.fixture(scope='session')
-def postgres():
+def run_docker_postgresql():
     docker_client = docker.from_env(version='1.23')
 
     # Clean up possible other docker containers
@@ -66,9 +67,9 @@ def postgres():
         cap_add=['IPC_LOCK'],
         mem_limit='1g',
         environment={
-            'POSTGRES_PASSWORD': 'test',
+            'POSTGRES_PASSWORD': '',
             'POSTGRES_DB': 'guillotina',
-            'POSTGRES_USER': 'guillotina'
+            'POSTGRES_USER': 'postgres'
         },
         privileged=True
     )
@@ -93,7 +94,7 @@ def postgres():
 
         if host != '':
             try:
-                conn = psycopg2.connect("dbname=guillotina user=guillotina password=test host=%s port=5432" % host)  # noqa
+                conn = psycopg2.connect("dbname=guillotina user=guillotina password= host=%s port=5432" % host)  # noqa
                 cur = conn.cursor()
                 cur.execute("SELECT 1;")
                 cur.fetchone()
@@ -103,20 +104,32 @@ def postgres():
             except: # noqa
                 conn = None
                 cur = None
+    return host
 
-    DOCKER_PG_SETTINGS['databases'][0]['guillotina']['dsn']['host'] = host
+
+@pytest.fixture(scope='session')
+def postgres():
+    """
+    detect travis, use travis's postgres; otherwise, use docker
+    """
+    if not IS_TRAVIS:
+        host = run_docker_postgresql()
+    else:
+        host = 'localhost'
+
+    PG_SETTINGS['databases'][0]['guillotina']['dsn']['host'] = host
 
     yield host  # provide the fixture value
-    print("teardown postgres")
 
-    docker_client = docker.from_env(version='1.23')
-    # Clean up possible other docker containers
-    test_containers = docker_client.containers.list(
-        all=True,
-        filters={'label': CONTAINERS_FOR_TESTING_LABEL})
-    for test_container in test_containers:
-        test_container.kill()
-        test_container.remove(v=True, force=True)
+    if not IS_TRAVIS:
+        docker_client = docker.from_env(version='1.23')
+        # Clean up possible other docker containers
+        test_containers = docker_client.containers.list(
+            all=True,
+            filters={'label': CONTAINERS_FOR_TESTING_LABEL})
+        for test_container in test_containers:
+            test_container.kill()
+            test_container.remove(v=True, force=True)
 
 
 class GuillotinaDBRequester(object):
@@ -207,7 +220,7 @@ async def dummy_txn_root(dummy_request):
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
     from guillotina import test_package  # noqa
-    aioapp = make_app(settings=DOCKER_PG_SETTINGS, loop=loop)
+    aioapp = make_app(settings=PG_SETTINGS, loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
