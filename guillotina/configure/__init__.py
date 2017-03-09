@@ -72,7 +72,7 @@ def load_all_configurations(_context, module_name):
 def load_service(_context, service):
     # prevent circular import
     from guillotina import app_settings
-    from guillotina.security import protect_view
+    from guillotina.security.utils import protect_view
 
     service_conf = service['config']
     factory = resolve_or_get(service['klass'])
@@ -432,12 +432,9 @@ def grant_all(principal=None, role=None):
 def grant_directive(
         _context, principal=None, role=None, permission=None,
         permissions=None):
-    from guillotina.auth import \
-        role_permission_manager as role_perm_mgr
-    from guillotina.auth import \
-        principal_permission_manager as principal_perm_mgr
-    from guillotina.auth import \
-        principal_role_manager as principal_role_mgr
+    from guillotina.security.security_code import role_permission_manager as role_perm_mgr
+    from guillotina.security.security_code import principal_permission_manager as principal_perm_mgr
+    from guillotina.security.security_code import principal_role_manager as principal_role_mgr
 
     nspecified = (
         (principal is not None) +
@@ -483,8 +480,8 @@ def grant_directive(
 def grantAll_directive(_context, principal=None, role=None):
     """Grant all permissions to a role or principal
     """
-    from guillotina.auth import role_permission_manager
-    from guillotina.auth import principal_permission_manager
+    from guillotina.security.security_code import role_permission_manager
+    from guillotina.security.security_code import principal_permission_manager
     nspecified = (
         (principal is not None) +
         (role is not None))

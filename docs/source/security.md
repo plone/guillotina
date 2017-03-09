@@ -49,16 +49,16 @@ that are indexed for security plus the flat user/group information from each res
 ```python
 
 # Code to get the global roles that have access_content to an object
-from guillotina.auth import get_roles_with_access_content
+from guillotina.security.utils import get_roles_with_access_content
 get_roles_with_access_content(obj)
 
 # Code to get the user list that have access content to an object
-from guillotina.auth import get_principals_with_access_content
+from guillotina.security.utils import get_principals_with_access_content
 get_principals_with_access_content(obj)
 
 
 # Code to get all the security info
-from guillotina.auth import settings_for_object
+from guillotina.security.utils import settings_for_object
 settings_for_object(obj)
 
 # Code to get the Interaction object ( security object )

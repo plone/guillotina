@@ -10,7 +10,7 @@ import pytest
 
 
 @implementer(IResource)
-class TestObject(BaseObject):
+class ObjectTest(BaseObject):
     pass
 
 
@@ -18,7 +18,7 @@ async def test_create_object(dummy_txn_root):
     async with await dummy_txn_root as root:
         assert isinstance(root._p_jar, Transaction)
         assert root._p_jar._tid is None
-        ob1 = TestObject()
+        ob1 = ObjectTest()
         assert ob1._p_jar is None
         assert ob1._p_serial is None
         assert ob1._p_oid is None
@@ -39,13 +39,13 @@ async def test_create_object(dummy_txn_root):
 
 async def test_create_annotation(dummy_txn_root):
     async with await dummy_txn_root as root:
-        ob1 = TestObject()
+        ob1 = ObjectTest()
         await root.__setitem__('ob1', ob1)
         annotations = IAnnotations(ob1)
         with pytest.raises(KeyError):
             await annotations.__setitem__('test', 'hola')
 
-        ob2 = TestObject()
+        ob2 = ObjectTest()
         assert ob2.__of__ is None
         assert ob2._p_jar is None
         assert ob2.__name__ is None

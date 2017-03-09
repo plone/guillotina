@@ -37,7 +37,7 @@ from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
 from guillotina.registry import REGISTRY_DATA_KEY
-from guillotina.security import get_view_permission
+from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import apply_cors

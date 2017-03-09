@@ -7,7 +7,6 @@ from guillotina import _
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.auth import settings_for_object
 from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
@@ -36,7 +35,7 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
-from guillotina.utils import apply_coroutine
+from guillotina.security.utils import settings_for_object
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
 

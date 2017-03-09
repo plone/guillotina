@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from guillotina.testing import ADMIN_TOKEN
-from guillotina.testing import TESTING_PORT
 
 import aiohttp
 import json
@@ -11,7 +10,7 @@ async def test_hello(site_requester, loop):
         session = aiohttp.ClientSession()
         async with session.ws_connect(
                 'ws://localhost:{port}/guillotina/guillotina/@ws'.format(
-                    port=TESTING_PORT),
+                    port=requester.server.port),
                 headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
             # we should check version
             sending = {

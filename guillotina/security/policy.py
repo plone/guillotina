@@ -15,9 +15,6 @@
 """
 
 from guillotina import configure
-from guillotina.auth import principal_permission_manager
-from guillotina.auth import principal_role_manager
-from guillotina.auth import role_permission_manager
 from guillotina.auth.users import SystemUser
 from guillotina.component import getUtility
 from guillotina.interfaces import Allow
@@ -32,6 +29,9 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import Public
 from guillotina.interfaces import Unset
+from guillotina.security.security_code import principal_permission_manager
+from guillotina.security.security_code import principal_role_manager
+from guillotina.security.security_code import role_permission_manager
 from guillotina.utils import get_current_request
 
 import zope.interface
