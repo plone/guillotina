@@ -11,8 +11,16 @@ Introduction
    :target: https://coveralls.io/github/plone/guillotina?branch=master
    :alt: Test Coverage
 
+.. image:: https://img.shields.io/pypi/pyversions/guillotina.svg
+   :target: https://pypi.python.org/pypi/guillotina/
+   :alt: Python Versions
+
 .. image:: https://img.shields.io/pypi/v/guillotina.svg
    :target: https://pypi.python.org/pypi/guillotina
+
+.. image:: https://img.shields.io/pypi/l/guillotina.svg
+   :target: https://pypi.python.org/pypi/guillotina/
+   :alt: License
 
 Please `read the detailed docs <http://guillotina.readthedocs.io/en/latest/>`_
 
