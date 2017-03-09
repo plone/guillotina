@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 from aiohttp.test_utils import make_mocked_request
 from guillotina.auth.users import ROOT_USER_ID
-from guillotina.auth.users import RootUser
 from guillotina.browser import View
 from guillotina.content import Resource
 from guillotina.directives import index
 from guillotina.directives import metadata
-from guillotina.interfaces import IDefaultLayer
-from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.schema import JSONField
 from guillotina.schema import List
-from guillotina.security.policy import Interaction
 from zope.interface import implementer
 
 import base64
@@ -153,21 +149,3 @@ class GuillotinaRequester(object):
                 resp = operation(self.uri + path, **settings)
             return resp
         return None
-
-
-@implementer(IRequest, IDefaultLayer)
-class FakeRequest(object):
-
-    _txn_dm = None
-
-    def __init__(self, conn=None):
-        self.security = Interaction(self)
-        self.headers = {}
-        self._txn_dm = conn
-
-
-class TestParticipation(object):
-
-    def __init__(self, request):
-        self.principal = RootUser('foobar')
-        self.interaction = None

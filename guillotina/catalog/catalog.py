@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
-from guillotina.catalog import NoIndexField
 from guillotina.component import queryAdapter
 from guillotina.content import iter_schemata_for_type
 from guillotina.directives import index
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
 from guillotina.directives import metadata
+from guillotina.exceptions import NoIndexField
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
@@ -104,19 +104,19 @@ class DefaultCatalogDataAdapter(object):
     def __init__(self, content):
         self.content = content
 
-    async def get_data(self, ob, iface, field_name):
+    def get_data(self, ob, iface, field_name):
         try:
             field = iface[field_name]
             real_field = field.bind(ob)
             try:
-                value = await apply_coroutine(real_field.get, ob)
+                value = real_field.get(ob)
                 return json_compatible(value)
             except AttributeError:
                 pass
         except KeyError:
             pass
 
-        value = await apply_coroutine(getattr, ob, field_name, None)
+        value = getattr(ob, field_name, None)
         return json_compatible(value)
 
     async def __call__(self):
@@ -130,10 +130,10 @@ class DefaultCatalogDataAdapter(object):
                     if 'accessor' in index_data:
                         values[index_name] = await apply_coroutine(index_data['accessor'], behavior)
                     else:
-                        values[index_name] = await self.get_data(behavior, schema, index_name)
+                        values[index_name] = self.get_data(behavior, schema, index_name)
                 except NoIndexField:
                     pass
             for metadata_name in merged_tagged_value_list(schema, metadata.key):
-                values[metadata_name] = await self.get_data(behavior, schema, metadata_name)
+                values[metadata_name] = self.get_data(behavior, schema, metadata_name)
 
         return values

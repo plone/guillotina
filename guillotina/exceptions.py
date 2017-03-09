@@ -137,3 +137,7 @@ class ConfigurationConflictError(ConfigurationError):
                     r.append("    " + line)
 
         return "\n".join(r)
+
+
+class NoIndexField(Exception):
+    pass

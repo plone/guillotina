@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 from guillotina.component import getUtility
 from guillotina.content import load_cached_schema
 from guillotina.factory import make_app
@@ -11,6 +12,7 @@ from time import sleep
 import aiohttp
 import copy
 import docker
+import guillotina as guillotina_module
 import json
 import os
 import psycopg2
@@ -186,13 +188,31 @@ def dummy_guillotina(loop):
     return aioapp
 
 
+class DummyRequestAsyncContextManager(object):
+    def __init__(self, dummy_request, loop):
+        self.request = dummy_request
+        self.loop = loop
+
+    async def __aenter__(self):
+        task = asyncio.Task.current_task(loop=self.loop)
+        if task is not None:
+            task.request = self.request
+        return self.request
+
+    async def __aexit__(self, exc_type, exc, tb):
+        task = asyncio.Task.current_task(loop=self.loop)
+        del task.request
+
+
 @pytest.fixture(scope='function')
-def dummy_request(dummy_guillotina):
+def dummy_request(dummy_guillotina, monkeypatch):
     from guillotina.interfaces import IApplication
     from guillotina.component import getUtility
     root = getUtility(IApplication, name='root')
     db = root['guillotina']
-    return get_mocked_request(db)
+
+    request = get_mocked_request(db)
+    return request
 
 
 class RootAsyncContextManager(object):

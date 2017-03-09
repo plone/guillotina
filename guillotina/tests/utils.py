@@ -10,6 +10,7 @@ from zope.interface import implementer
 def get_mocked_request(db):
     request = make_mocked_request('POST', '/')
     request._db_id = db.id
+    request._db = db
     request._tm = db.new_transaction_manager()
     request._tm.request = request  # so get_current_request can find it...
     alsoProvides(request, IRequest)
