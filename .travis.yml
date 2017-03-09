@@ -26,4 +26,3 @@ script:
   - bin/code-analysis
 after_success:
   - coveralls
-  - cat .coverage
