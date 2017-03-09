@@ -73,15 +73,13 @@ class IField(Interface):
         title=_("Title"),
         description=_("A short summary or label"),
         default="",
-        required=False,
-        )
+        required=False)
 
     description = Text(
         title=_("Description"),
         description=_("A description of the field"),
         default="",
-        required=False,
-        )
+        required=False)
 
     required = Bool(
         title=_("Required"),
@@ -97,14 +95,12 @@ class IField(Interface):
     default = Field(
         title=_("Default Value"),
         description=_("""The field default value may be None or a legal
-                        field value""")
-        )
+                        field value"""))
 
     missing_value = Field(
         title=_("Missing Value"),
         description=_("""If input for this Field is missing, and that's ok,
-                          then this is the value to use""")
-        )
+                          then this is the value to use"""))
 
     order = Int(
         title=_("Field Order"),
@@ -117,8 +113,7 @@ class IField(Interface):
         (Fields in separate threads could have the same order.)
         """),
         required=True,
-        readonly=True,
-        )
+        readonly=True)
 
     def constraint(value):
         """Check a customized constraint on the value.
@@ -196,14 +191,12 @@ class IMinMax(IOrderable):
     min = Field(
         title=_("Start of the range"),
         required=False,
-        default=None
-        )
+        default=None)
 
     max = Field(
         title=_("End of the range (including the value itself)"),
         required=False,
-        default=None
-        )
+        default=None)
 
 
 class IMinMaxLen(ILen):
@@ -244,8 +237,7 @@ class IBool(IField):
     default = Bool(
         title=_("Default Value"),
         description=_("""The field default value may be None or a legal
-                        field value""")
-        )
+                        field value"""))
 
 
 class IBytes(IMinMaxLen, IIterable, IField):
@@ -299,20 +291,17 @@ class IInt(IMinMax, IField):
     min = Int(
         title=_("Start of the range"),
         required=False,
-        default=None
-        )
+        default=None)
 
     max = Int(
         title=_("End of the range (including the value itself)"),
         required=False,
-        default=None
-        )
+        default=None)
 
     default = Int(
         title=_("Default Value"),
         description=_("""The field default value may be None or a legal
-                        field value""")
-        )
+                        field value"""))
 
 
 class IFloat(IMinMax, IField):
@@ -375,14 +364,12 @@ class IDottedName(INativeStringLine):
         title=_("Minimum number of dots"),
         required=True,
         min=0,
-        default=0
-        )
+        default=0)
 
     max_dots = Int(
         title=_("Maximum number of dots (should not be less than min_dots)"),
         required=False,
-        default=None
-        )
+        default=None)
 
 
 class IChoice(IField):
@@ -395,15 +382,13 @@ class IChoice(IField):
         description=_("The ISource, IContextSourceBinder or IBaseVocabulary "
                       "object that provides values for this field."),
         required=False,
-        default=None
-        )
+        default=None)
 
     vocabularyName = TextLine(
         title=_("Vocabulary name"),
         description=_("Vocabulary name to lookup in the vocabulary registry"),
         required=False,
-        default=None
-        )
+        default=None)
 
 # Collections:
 
@@ -479,8 +464,7 @@ class IObject(IField):
 
     schema = Attribute(
         "schema",
-        _("The Interface that defines the Fields comprising the Object.")
-    )
+        _("The Interface that defines the Fields comprising the Object."))
 
 
 class IBeforeObjectAssignedEvent(Interface):
@@ -510,14 +494,12 @@ class IDict(IMinMaxLen, IIterable, IContainer):
 
     key_type = Attribute(
         "key_type",
-        _("Field keys must conform to the given type, expressed via a Field.")
-    )
+        _("Field keys must conform to the given type, expressed via a Field."))
 
     value_type = Attribute(
         "value_type",
         _("Field values must conform to the given type, expressed "
-          "via a Field.")
-    )
+          "via a Field."))
 
 
 class ITerm(Interface):

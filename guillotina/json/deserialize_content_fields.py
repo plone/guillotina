@@ -2,8 +2,8 @@
 from guillotina import configure
 from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.json.deserialize_value import schema_compatible
-from zope.interface import Interface
 from guillotina.schema.interfaces import IField
+from zope.interface import Interface
 
 
 @configure.adapter(

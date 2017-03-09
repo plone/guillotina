@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Test of the Vocabulary and related support APIs.
-"""
+# flake8: noqa
 import unittest
 
 

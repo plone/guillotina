@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Test adapter declaration helpers
-"""
+# flake8: noqa
 import unittest
 
 class Test_dispatch(unittest.TestCase):

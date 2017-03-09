@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Hooks for getting and setting a site in the thread global namespace.
-"""
+# flake8: noqa
 __docformat__ = 'restructuredtext'
 
 import contextlib

@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Global components support
-"""
+# flake8: noqa
 from zope.interface import implementer
 from zope.interface.adapter import AdapterRegistry
 from zope.interface.registry import Components

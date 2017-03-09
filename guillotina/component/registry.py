@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Basic components support
-"""
+# flake8: noqa
 # BBB, import component-related from zope.interface
 from zope.interface.registry import Components
 from zope.interface.registry import _getUtilityProvided

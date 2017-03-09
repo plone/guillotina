@@ -1,12 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
-from guillotina.utils import import_class
 from guillotina.component import getGlobalSiteManager
 from guillotina.component import getUtility
 from guillotina.component import provideUtility
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IDatabase
+from guillotina.utils import import_class
 from zope.interface import implementer
 
 import asyncio

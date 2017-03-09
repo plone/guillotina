@@ -2,10 +2,10 @@
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.browser import ErrorResponse
+from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import ISite
 from guillotina.utils import apply_coroutine
-from guillotina.i18n import MessageFactory
 
 
 _ = MessageFactory('guillotina')

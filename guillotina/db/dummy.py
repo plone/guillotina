@@ -1,7 +1,7 @@
 from guillotina.db import ROOT_ID
+from guillotina.db.storage import BaseStorage
 
 import asyncio
-from guillotina.db.storage import BaseStorage
 
 
 class DummyStorage(BaseStorage):

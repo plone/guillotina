@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Zope 3 Component Architecture
-"""
+# flake8: noqa
 from zope.interface import Interface
 from zope.interface import implementedBy
 from zope.interface import moduleProvides

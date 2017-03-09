@@ -11,9 +11,10 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from guillotina.schema.exceptions import ConstraintNotSatisfied
 from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
+from guillotina.schema._schema import getFields
+from guillotina.schema.exceptions import ConstraintNotSatisfied
 from guillotina.schema.exceptions import NotAContainer
 from guillotina.schema.exceptions import NotAnIterator
 from guillotina.schema.exceptions import RequiredMissing
@@ -23,7 +24,6 @@ from guillotina.schema.exceptions import TooLong
 from guillotina.schema.exceptions import TooShort
 from guillotina.schema.exceptions import TooSmall
 from guillotina.schema.exceptions import WrongType
-from guillotina.schema._schema import getFields
 from zope.interface import Attribute
 from zope.interface import implementer
 from zope.interface import providedBy
@@ -55,16 +55,16 @@ class DefaultProperty(ValidatedProperty):
 
     def __get__(self, inst, owner):
         name, check = self._info
-        defaultFactory = inst.__dict__.get('defaultFactory')
+        default_factory = inst.__dict__.get('defaultFactory')
         # If there is no default factory, simply return the default.
-        if defaultFactory is None:
+        if default_factory is None:
             return inst.__dict__[name]
         # Get the default value by calling the factory. Some factories might
         # require a context to produce a value.
-        if IContextAwareDefaultFactory.providedBy(defaultFactory):
-            value = defaultFactory(inst.context)
+        if IContextAwareDefaultFactory.providedBy(default_factory):
+            value = default_factory(inst.context)
         else:
-            value = defaultFactory()
+            value = default_factory()
         # Check that the created value is valid.
         if check is not None:
             check(inst, value)

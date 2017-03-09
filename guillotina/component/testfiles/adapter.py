@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Sample adapter class for testing
-"""
+# flake8: noqa
 
 from zope.interface import Interface
 from zope.interface import implementer

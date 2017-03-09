@@ -1,9 +1,9 @@
 from code import interact
 from guillotina import app_settings
 from guillotina.commands import Command
+from guillotina.component import getUtility
 from guillotina.interfaces import IApplication
 from guillotina.testing import TESTING_SETTINGS
-from guillotina.component import getUtility
 
 
 class ShellCommand(Command):

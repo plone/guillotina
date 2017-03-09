@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
 from guillotina import configure
+from guillotina.component import getUtility
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import ISite
-from guillotina.component import getUtility
 
 
 @configure.service(context=ISite, method='GET', permission='guillotina.AccessContent',

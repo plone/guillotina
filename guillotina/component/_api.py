@@ -11,6 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+# flake8: noqa
 from guillotina.component._compat import _BLANK
 from guillotina.component._declaration import adapter  # noqa
 from guillotina.component.hookable import hookable

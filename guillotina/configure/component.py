@@ -86,8 +86,7 @@ def adapter(_context, factory, provides=None, for_=None, permission=None,
     _context.action(
         discriminator=('adapter', for_, provides, name),
         callable=handler,
-        args=('registerAdapter', factory, for_, provides, name, _context.info),
-        )
+        args=('registerAdapter', factory, for_, provides, name, _context.info))
     _context.action(
         discriminator=None,
         callable=provideInterface,
@@ -190,8 +189,7 @@ def interface(_context, interface, type=None, name=''):
     _context.action(
         discriminator=None,
         callable=provideInterface,
-        args=(name, interface, type)
-        )
+        args=(name, interface, type))
 
 
 def view(_context, factory, type, name, for_,
@@ -235,8 +233,7 @@ def view(_context, factory, type, name, for_,
     _context.action(
         discriminator=None,
         callable=provideInterface,
-        args=('', provides)
-        )
+        args=('', provides))
 
     if for_ is not None:
         for iface in for_:
@@ -255,8 +252,7 @@ def resource(_context, factory, type, name,
     if ((allowed_attributes or allowed_interface) and (not permission)):
         raise ComponentConfigurationError(
             "Must use name attribute with allowed_interface or "
-            "allowed_attributes"
-            )
+            "allowed_attributes")
 
     _context.action(
         discriminator=('resource', name, type, provides),

@@ -2,9 +2,9 @@
 from guillotina import configure
 from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.json.serialize_value import json_compatible
-from zope.interface import Interface
 from guillotina.schema.interfaces import IField
 from guillotina.utils import apply_coroutine
+from zope.interface import Interface
 
 
 @configure.adapter(

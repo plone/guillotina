@@ -2,10 +2,10 @@
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.async import IQueueUtility
+from guillotina.component import queryUtility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.utils import get_content_path
-from guillotina.component import queryUtility
 
 
 @configure.service(context=IResource, method='GET', permission='guillotina.SearchContent',

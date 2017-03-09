@@ -1,6 +1,6 @@
 from guillotina import configure
-from guillotina.interfaces import IResource
 from guillotina.db.interfaces import IPartition
+from guillotina.interfaces import IResource
 
 
 @configure.adapter(

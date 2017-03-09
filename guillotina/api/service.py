@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from guillotina import BEHAVIOR_CACHE
 from guillotina.browser import View
+from guillotina.component import queryUtility
+from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IDownloadView
 from guillotina.interfaces import ITraversableView
-from guillotina.component import queryUtility
-from guillotina.component.interfaces import IFactory
 from zope.interface import alsoProvides
 
 

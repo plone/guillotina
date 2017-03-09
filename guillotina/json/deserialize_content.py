@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from guillotina import BEHAVIOR_CACHE
 from guillotina import configure
+from guillotina.component import queryMultiAdapter
+from guillotina.component import queryUtility
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
@@ -16,9 +18,6 @@ from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
 from guillotina.schema.exceptions import ValidationError
-from guillotina.utils import apply_coroutine
-from guillotina.component import queryMultiAdapter
-from guillotina.component import queryUtility
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
 

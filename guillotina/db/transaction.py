@@ -8,6 +8,7 @@ import sys
 import time
 import uuid
 
+
 HARD_CACHE = {}
 
 
@@ -98,7 +99,7 @@ class Transaction(object):
             # true if the commit succeeded, or false if the commit aborted.
             try:
                 hook(status, *args, **kws)
-            except:
+            except:  # noqa
                 # We need to catch the exceptions if we want all hooks
                 # to be called
                 logger.error("Error in after commit hook exec in %s ",
@@ -272,7 +273,7 @@ class Transaction(object):
         return obj
 
     async def contains(self, oid, key):
-        return await self._manager._storage.has_key(self, oid, key)
+        return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     async def len(self, oid):
         return await self._manager._storage.len(self, oid)

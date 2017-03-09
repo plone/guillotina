@@ -11,6 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+# flake8: noqa
 from guillotina.schema import Choice
 from guillotina.schema import interfaces
 from zope.interface import implementer

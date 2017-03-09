@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from guillotina import app_settings
 from guillotina import configure
+from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.component import getMultiAdapter
 
 
 @configure.service(context=IApplication, method='GET', permission='guillotina.AccessContent')

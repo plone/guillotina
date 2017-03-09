@@ -3,6 +3,7 @@ import asyncpg
 import logging
 import ujson
 
+
 class ReadOnlyError(Exception):
     pass
 
@@ -197,9 +198,11 @@ class APgStorage(BaseStorage):
                   partition := 'objects_' || partition_id;
                   IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname=partition) THEN
                     RAISE NOTICE 'A partition has been created %',partition;
-                    EXECUTE 'CREATE TABLE ' || partition || ' (check (part = ''' || NEW.part || ''')) INHERITS (objects);';
+                    EXECUTE 'CREATE TABLE ' || partition ||
+                        ' (check (part = ''' || NEW.part || ''')) INHERITS (objects);';
                   END IF;
-                  EXECUTE 'INSERT INTO ' || partition || ' SELECT(objects ' || quote_literal(NEW) || ').* RETURNING patent_id;';
+                  EXECUTE 'INSERT INTO ' || partition ||
+                    ' SELECT(objects ' || quote_literal(NEW) || ').* RETURNING patent_id;';
                   RETURN NULL;
                 END;
               $BODY$
@@ -310,7 +313,7 @@ class APgStorage(BaseStorage):
         if part is None:
             part = 0
         # (zoid, tid, state_size, part, main, parent_id, type, json, state)
-        o = await txn._db_conn.execute(
+        output = await txn._db_conn.execute(  # noqa
             INSERT_TEMP,         # Insert on temp table
             oid,                 # The OID of the object
             txn._tid,            # Our TID

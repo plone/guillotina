@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Field equality tests
-"""
+# flake8: noqa
 import unittest
 
 

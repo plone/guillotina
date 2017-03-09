@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from guillotina.component import getUtility
 from guillotina.content import load_cached_schema
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
@@ -6,7 +7,6 @@ from guillotina.testing import ADMIN_TOKEN
 from guillotina.testing import TESTING_SETTINGS
 from guillotina.tests.utils import get_mocked_request
 from time import sleep
-from guillotina.component import getUtility
 
 import aiohttp
 import copy
@@ -154,7 +154,7 @@ class GuillotinaDBRequester(object):
                 try:
                     value = await resp.json()
                     status = resp.status
-                except:
+                except:  # noqa
                     value = await resp.read()
                     status = resp.status
                 return value, status, resp.headers
@@ -234,7 +234,7 @@ class SiteRequesterAsyncContextManager(object):
             "title": "Guillotina Site",
             "id": "guillotina",
             "description": "Description Guillotina Site"
-            }))
+        }))
         assert status == 200
         self.requester = requester
         return requester

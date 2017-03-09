@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Pure-Python hookable tests
-"""
+# flake8: noqa
 import unittest
 
 

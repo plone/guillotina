@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Examples supporting Sphinx doctest snippets.
-"""
+# flake8: noqa
 import sys
 
 from zope.interface import Interface

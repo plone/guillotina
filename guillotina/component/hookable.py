@@ -11,8 +11,8 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-""" This module supplies a pure-Python version of zope.hookable.hookable.
-"""
+# flake8: noqa
+
 class hookable(object):
     __slots__ = ('__original', '__implementation')
 

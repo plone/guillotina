@@ -1,11 +1,11 @@
 from guillotina import configure
+from guillotina.component import queryAdapter
 from guillotina.db.interfaces import IPartition
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IResource
 from guillotina.utils import dotted_name
-from guillotina.component import queryAdapter
 
 import pickle
 

@@ -15,6 +15,7 @@ from datetime import date
 from datetime import datetime
 from datetime import time
 from datetime import timedelta
+from guillotina.event import sync_notify
 from guillotina.schema._bootstrapfields import Bool
 from guillotina.schema._bootstrapfields import Container  # API import for __init__
 from guillotina.schema._bootstrapfields import Field
@@ -25,8 +26,18 @@ from guillotina.schema._bootstrapfields import Orderable
 from guillotina.schema._bootstrapfields import Password
 from guillotina.schema._bootstrapfields import Text
 from guillotina.schema._bootstrapfields import TextLine
-from guillotina.schema.fieldproperty import FieldProperty
 from guillotina.schema.exceptions import ConstraintNotSatisfied
+from guillotina.schema.exceptions import InvalidDottedName
+from guillotina.schema.exceptions import InvalidId
+from guillotina.schema.exceptions import InvalidURI
+from guillotina.schema.exceptions import InvalidValue
+from guillotina.schema.exceptions import NotUnique
+from guillotina.schema.exceptions import SchemaNotFullyImplemented
+from guillotina.schema.exceptions import SchemaNotProvided
+from guillotina.schema.exceptions import ValidationError
+from guillotina.schema.exceptions import WrongContainedType
+from guillotina.schema.exceptions import WrongType
+from guillotina.schema.fieldproperty import FieldProperty
 from guillotina.schema.interfaces import IASCII
 from guillotina.schema.interfaces import IASCIILine
 from guillotina.schema.interfaces import IBaseVocabulary
@@ -51,10 +62,6 @@ from guillotina.schema.interfaces import IInterfaceField
 from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IMinMaxLen
-from guillotina.schema.exceptions import InvalidDottedName
-from guillotina.schema.exceptions import InvalidId
-from guillotina.schema.exceptions import InvalidURI
-from guillotina.schema.exceptions import InvalidValue
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IPassword
 from guillotina.schema.interfaces import ISet
@@ -66,17 +73,10 @@ from guillotina.schema.interfaces import ITime
 from guillotina.schema.interfaces import ITimedelta
 from guillotina.schema.interfaces import ITuple
 from guillotina.schema.interfaces import IURI
-from guillotina.schema.exceptions import NotUnique
-from guillotina.schema.exceptions import SchemaNotFullyImplemented
-from guillotina.schema.exceptions import SchemaNotProvided
-from guillotina.schema.exceptions import ValidationError
-from guillotina.schema.exceptions import WrongContainedType
-from guillotina.schema.exceptions import WrongType
 from guillotina.schema.utils import make_binary
 from guillotina.schema.vocabulary import getVocabularyRegistry
 from guillotina.schema.vocabulary import SimpleVocabulary
 from guillotina.schema.vocabulary import VocabularyRegistryError
-from guillotina.event import sync_notify
 from zope.interface import classImplements
 from zope.interface import implementer
 from zope.interface import Interface
@@ -246,8 +246,8 @@ class Choice(Field):
     def __init__(self, values=None, vocabulary=None, source=None, **kw):
         """Initialize object."""
         if vocabulary is not None:
-            if (not isinstance(vocabulary, str)
-                    and not IBaseVocabulary.providedBy(vocabulary)):
+            if (not isinstance(vocabulary, str) and
+                    not IBaseVocabulary.providedBy(vocabulary)):
                 raise ValueError('vocabulary must be a string or implement '
                                  'IBaseVocabulary')
             if source is not None:
@@ -272,8 +272,8 @@ class Choice(Field):
         elif isinstance(vocabulary, str):
             self.vocabularyName = vocabulary
         else:
-            if (not ISource.providedBy(vocabulary)
-                    and not IContextSourceBinder.providedBy(vocabulary)):
+            if (not ISource.providedBy(vocabulary) and
+                    not IContextSourceBinder.providedBy(vocabulary)):
                 raise ValueError('Invalid vocabulary')
             self.vocabulary = vocabulary
         # Before a default value is checked, it is validated. However, a
@@ -456,13 +456,6 @@ def _validate_sequence(value_type, value, errors=None):
 
     The only valid value in the sequence is the second item. The others
     generated errors.
-
-    We can use the optional errors argument to collect additional errors
-    for a new sequence:
-
-       >>> errors = _validate_sequence(field, (2, 'baz'), errors)
-       >>> errors # XXX assumes Python2 reprs
-       [WrongType('foo', <type 'unicode'>, ''), WrongType(1, <type 'unicode'>, ''), WrongType(2, <type 'unicode'>, '')]
 
     """
     if errors is None:

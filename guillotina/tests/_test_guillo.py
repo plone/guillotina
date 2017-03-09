@@ -1,5 +1,8 @@
 # -*- encoding: utf-8 -*-
+# flake8: noqa
+
 import json
+
 
 async def test_get_the_root(guillotina):
     requester = await guillotina

@@ -2,6 +2,8 @@
 from dateutil.parser import parse
 from guillotina import configure
 from guillotina import logger
+from guillotina.component import ComponentLookupError
+from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IJSONToValue
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
 from guillotina.schema.interfaces import IBool
@@ -13,8 +15,6 @@ from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
-from guillotina.component import ComponentLookupError
-from guillotina.component import getMultiAdapter
 from zope.interface import Interface
 
 

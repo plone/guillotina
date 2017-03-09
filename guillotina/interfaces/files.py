@@ -1,8 +1,8 @@
+from guillotina import schema
 from guillotina.directives import index
 from guillotina.directives import metadata
-from guillotina import schema
-from zope.interface import Interface
 from guillotina.schema.interfaces import IObject
+from zope.interface import Interface
 
 
 class IFileManager(Interface):

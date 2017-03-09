@@ -11,8 +11,8 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Tests for z.c.interface
-"""
+# flake8: noqa
+
 import unittest
 
 
@@ -298,7 +298,7 @@ class Test_getInterfaceAllDocs(unittest.TestCase):
             def baz(self):
                 """BAZ"""
         self.assertEqual(self._callFUT(Foo),
-                         'guillotina.component.tests.test_interface.foo\n' + 
+                         'guillotina.component.tests.test_interface.foo\n' +
                          'docstring')
 
     def test_w_interface_no_members(self):
@@ -306,7 +306,7 @@ class Test_getInterfaceAllDocs(unittest.TestCase):
         class IFoo(Interface):
             """DOCSTRING"""
         self.assertEqual(self._callFUT(IFoo),
-                         'guillotina.component.tests.test_interface.ifoo\n' + 
+                         'guillotina.component.tests.test_interface.ifoo\n' +
                          'docstring')
 
     def test_w_interface_w_members(self):
@@ -319,7 +319,7 @@ class Test_getInterfaceAllDocs(unittest.TestCase):
                 """BAZ"""
         self.assertEqual(self._callFUT(IFoo),
                          'guillotina.component.tests.test_interface.ifoo\n' +
-                         'docstring\n' + 
+                         'docstring\n' +
                          'do bar\n' +
                          'baz')
 
@@ -394,4 +394,3 @@ def test_suite():
         unittest.makeSuite(Test_nameToInterface),
         unittest.makeSuite(Test_interfaceToName),
     ))
-

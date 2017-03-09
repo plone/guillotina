@@ -1,8 +1,8 @@
 from guillotina.async import IQueueUtility
+from guillotina.component import getUtility
 from guillotina.interfaces import IApplication
 from guillotina.testing import AsyncMockView
 from guillotina.tests import utils
-from guillotina.component import getUtility
 
 
 QUEUE_UTILITY_CONFIG = {

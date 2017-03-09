@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
 from guillotina import app_settings
+from guillotina.component import getUtility
 from guillotina.interfaces import IContentNegotiation
 from guillotina.interfaces import IDownloadView
 from guillotina.interfaces import IRendererFormatRaw
-from guillotina.component import getUtility
 from zope.interface import implementer
 
 import logging

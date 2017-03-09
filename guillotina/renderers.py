@@ -4,6 +4,7 @@ from aiohttp.web import Response as aioResponse
 from datetime import datetime
 from guillotina import configure
 from guillotina.browser import Response
+from guillotina.component import queryAdapter
 from guillotina.interfaces import IFrameFormatsJson
 from guillotina.interfaces import IRendered
 from guillotina.interfaces import IRendererFormatHtml
@@ -13,7 +14,6 @@ from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
-from guillotina.component import queryAdapter
 from zope.interface.interface import InterfaceClass
 
 import json

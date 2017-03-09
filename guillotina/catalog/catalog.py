@@ -5,6 +5,7 @@ from guillotina.auth import get_roles_with_access_content
 from guillotina.auth import principal_permission_manager
 from guillotina.auth import role_permission_manager
 from guillotina.catalog import NoIndexField
+from guillotina.component import queryAdapter
 from guillotina.content import iter_schemata_for_type
 from guillotina.directives import index
 from guillotina.directives import merged_tagged_value_dict
@@ -16,7 +17,6 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.json.serialize_value import json_compatible
 from guillotina.utils import apply_coroutine
-from guillotina.component import queryAdapter
 from zope.interface import implementer
 
 

@@ -11,9 +11,11 @@ from guillotina.auth import settings_for_object
 from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
+from guillotina.component import getMultiAdapter
+from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
-from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.event import notify
+from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
 from guillotina.events import ObjectModifiedEvent
 from guillotina.events import ObjectPermissionsModifiedEvent
@@ -37,8 +39,6 @@ from guillotina.json.exceptions import DeserializationError
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
-from guillotina.component import getMultiAdapter
-from guillotina.component import queryMultiAdapter
 
 
 _zone = tzlocal()

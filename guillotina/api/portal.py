@@ -4,6 +4,7 @@ from guillotina.api import content
 from guillotina.api.service import Service
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
+from guillotina.component import getMultiAdapter
 from guillotina.content import create_content
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
@@ -14,7 +15,6 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import ISite
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
-from guillotina.component import getMultiAdapter
 
 
 @configure.service(context=IDatabase, method='GET', permission='guillotina.GetPortals')

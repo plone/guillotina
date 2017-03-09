@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Test Interface accessor methods.
-"""
+# flake8: noqa
 import unittest
 
 

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
+from guillotina.component import getMultiAdapter
+from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
-from guillotina.component import getMultiAdapter
-from guillotina.component.interfaces import IFactory
-from zope.interface import Interface
 from guillotina.schema import getFieldsInOrder
+from zope.interface import Interface
 
 
 @configure.adapter(

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from guillotina import schema
+from guillotina.component import getAdapter
+from guillotina.component import getMultiAdapter
+from guillotina.component import getUtility
 from guillotina.content import Item
 from guillotina.content import Site
 from guillotina.factory import RootSpecialPermissions
@@ -28,9 +31,6 @@ from guillotina.json.serialize_content import SerializeFolderToJson
 from guillotina.json.serialize_content import SerializeToJson
 from guillotina.security.policy import Interaction
 from guillotina.text import RichText
-from guillotina.component import getAdapter
-from guillotina.component import getMultiAdapter
-from guillotina.component import getUtility
 
 
 def test_get_current_interaction(dummy_request):

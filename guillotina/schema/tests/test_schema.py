@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Schema field tests
-"""
+# flake8: noqa
 import unittest
 
 

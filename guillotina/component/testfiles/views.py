@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Views test.
-"""
+# flake8: noqa
 
 from zope.interface import Interface
 from zope.interface import implementer

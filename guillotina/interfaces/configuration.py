@@ -1,5 +1,5 @@
-from zope.interface import Interface
 from guillotina.schema import BytesLine
+from zope.interface import Interface
 
 
 class IDatabaseConfigurationFactory(Interface):
@@ -22,8 +22,7 @@ class IConfigurationContext(Interface):
           file being executed. If the configuration file was not
           included by package, then this is None.
           """,
-        required=False,
-        )
+        required=False)
 
     def action(discriminator, callable, args=(), kw={}, order=0,
                includepath=None, info=None):

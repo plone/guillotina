@@ -1,10 +1,10 @@
 from guillotina import configure
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.renderers import IFrameFormatsJson
 from guillotina.component import getMultiAdapter
 from guillotina.component import queryUtility
 from guillotina.component.interfaces import IFactory
+from guillotina.interfaces import IRequest
+from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.renderers import IFrameFormatsJson
 
 
 @configure.adapter(for_=IRequest, provides=IFrameFormatsJson, name="schema")

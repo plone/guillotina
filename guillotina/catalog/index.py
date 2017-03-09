@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.api.search import AsyncCatalogReindex
+from guillotina.component import queryUtility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectModifiedEvent
@@ -11,7 +12,6 @@ from guillotina.interfaces import ISite
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
-from guillotina.component import queryUtility
 
 
 class CommitHook(object):

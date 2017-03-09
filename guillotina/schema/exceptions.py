@@ -17,11 +17,6 @@ class ValidationError(zope.interface.Invalid):
     def doc(self):
         return self.__class__.__doc__
 
-    def __cmp__(self, other):
-        if not hasattr(other, 'args'):
-            return -1
-        return cmp(self.args, other.args)
-
     def __eq__(self, other):
         if not hasattr(other, 'args'):
             return False

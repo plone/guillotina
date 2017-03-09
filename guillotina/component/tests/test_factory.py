@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Tests for z.c.factory
-"""
+# flake8: noqa
 import unittest
 
 

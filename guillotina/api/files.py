@@ -5,10 +5,10 @@ from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
 from guillotina.api.service import TraversableDownloadService
 from guillotina.api.service import TraversableFieldService
+from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticFile
-from guillotina.component import getMultiAdapter
 
 import aiohttp
 import mimetypes

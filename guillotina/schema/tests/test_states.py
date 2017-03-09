@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Tests of the states example.
-"""
+# flake8: noqa
 import unittest
 
 

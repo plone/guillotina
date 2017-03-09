@@ -1,10 +1,10 @@
 # NEED use this import because we have a "schema" attribute below
-from guillotina.interfaces.common import IMapping
 from guillotina.component.interfaces import ISite as IZopeSite
 from guillotina.component.interfaces import IFactory
+from guillotina.interfaces.common import IMapping
+from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
-from guillotina.schema import TextLine
 
 # NEED use this import because we have a "schema" attribute below
 import guillotina.schema

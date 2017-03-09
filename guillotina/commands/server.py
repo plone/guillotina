@@ -1,7 +1,8 @@
 from aiohttp import web
 from guillotina.commands import Command
-import asyncio
+
 import aiomonitor
+import asyncio
 
 
 class ServerCommand(Command):

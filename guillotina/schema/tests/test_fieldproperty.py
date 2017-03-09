@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Field Properties tests
-"""
+# flake8: noqa
 
 import unittest
 

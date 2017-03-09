@@ -1,6 +1,8 @@
 from collections import OrderedDict
+from guillotina.configure import component
 from guillotina.configure.behaviors import BehaviorAdapterFactory
 from guillotina.configure.behaviors import BehaviorRegistration
+from guillotina.exceptions import ConfigurationError
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorSchemaAwareFactory
@@ -13,8 +15,6 @@ from guillotina.utils import caller_module
 from guillotina.utils import dotted_name
 from guillotina.utils import resolve_module_path
 from guillotina.utils import resolve_or_get
-from guillotina.configure import component
-from guillotina.exceptions import ConfigurationError
 from zope.interface import classImplements
 from zope.interface import Interface
 

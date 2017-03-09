@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Factory object
-"""
+# flake8: noqa
 from zope.interface import implementer
 from zope.interface import implementedBy
 from zope.interface.declarations import Implements

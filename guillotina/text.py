@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
 from guillotina import _
+from guillotina.component import queryAdapter
 from guillotina.db.orm.base import BaseObject
 from guillotina.interfaces import IRichText
 from guillotina.interfaces import IRichTextValue
 from guillotina.interfaces import ITransformer
-from guillotina.component import queryAdapter
-from zope.interface import implementer
-from zope.interface import Invalid
 from guillotina.schema import Object
 from guillotina.schema.exceptions import ConstraintNotSatisfied
-from guillotina.schema.interfaces import IFromUnicode
 from guillotina.schema.exceptions import WrongType
+from guillotina.schema.interfaces import IFromUnicode
+from zope.interface import implementer
+from zope.interface import Invalid
 
 
 class RawValueHolder(BaseObject):

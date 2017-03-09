@@ -12,13 +12,9 @@
 # Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
 # THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
 # WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-
-
-#
 ##############################################################################
+
 from guillotina.schema._bootstrapinterfaces import NO_VALUE
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE.
 from guillotina.schema._field import ASCII
 from guillotina.schema._field import ASCIILine
 from guillotina.schema._field import Bool

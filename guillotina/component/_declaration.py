@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Adapter declarations
-"""
+# flake8: noqa
 import sys
 
 from guillotina.component._compat import CLASS_TYPES, _BLANK

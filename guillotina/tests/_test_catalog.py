@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+# flake8: noqa
 from guillotina.catalog.utils import get_index_fields
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container

@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.component import getMultiAdapter
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
 from guillotina.interfaces import IRichText
@@ -20,7 +21,6 @@ from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IText
 from guillotina.schema.interfaces import ITextLine
 from guillotina.schema.interfaces import ITime
-from guillotina.component import getMultiAdapter
 from zope.interface import implementedBy
 from zope.interface import Interface
 

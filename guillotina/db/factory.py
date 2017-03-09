@@ -1,8 +1,8 @@
 from guillotina import configure
 from guillotina.db.db import GuillotinaDB
+from guillotina.db.dummy import DummyStorage
 from guillotina.db.storage import APgStorage
 from guillotina.factory.content import Database
-from guillotina.db.dummy import DummyStorage
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.utils import resolve_or_get
 

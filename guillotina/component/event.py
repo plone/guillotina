@@ -11,11 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Component Architecture-specific event dispatching
-
-Based on subscription adapters / handlers.
-"""
-
+# flake8: noqa
 from guillotina.component._api import subscribers as component_subscribers
 from guillotina.component._api import getSiteManager
 from guillotina.component.interfaces import ComponentLookupError

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.api.service import TraversableService
-from guillotina.interfaces import IFactorySerializeToJson
-from guillotina.interfaces import IResourceFactory
-from guillotina.interfaces import ISite
 from guillotina.component import getMultiAdapter
 from guillotina.component import getUtilitiesFor
 from guillotina.component import queryUtility
+from guillotina.interfaces import IFactorySerializeToJson
+from guillotina.interfaces import IResourceFactory
+from guillotina.interfaces import ISite
 
 
 @configure.service(context=ISite, method='GET', permission='guillotina.AccessContent',

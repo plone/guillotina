@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from guillotina.component import adapter
+from guillotina.component import provideAdapter
 from guillotina.db.orm.base import BaseObject
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ITransformer
@@ -8,8 +10,6 @@ from guillotina.schema.exceptions import WrongType
 from guillotina.schema.interfaces import IFromUnicode
 from guillotina.text import RichText
 from guillotina.text import RichTextValue
-from guillotina.component import adapter
-from guillotina.component import provideAdapter
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
@@ -104,6 +104,7 @@ def test_validation():
     field.constraint = lambda value: False
     with pytest.raises(ConstraintNotSatisfied):
         field.validate(value)
+
 
 def test_default_value():
     default_field = RichText(

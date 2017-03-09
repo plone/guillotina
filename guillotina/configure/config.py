@@ -108,17 +108,14 @@ class ConfigurationContext(object):
         if includepath is None:
             includepath = getattr(self, 'includepath', ())
 
-        action.update(
-            dict(
-                discriminator=discriminator,
-                callable=callable,
-                args=args,
-                kw=kw,
-                includepath=includepath,
-                info=info,
-                order=order,
-                )
-            )
+        action.update(dict(
+            discriminator=discriminator,
+            callable=callable,
+            args=args,
+            kw=kw,
+            includepath=includepath,
+            info=info,
+            order=order))
 
         self.actions.append(action)
 
@@ -212,7 +209,7 @@ class ConfigurationMachine(ConfigurationAdapterRegistry, ConfigurationContext):
                     callable(*args, **kw)
                 except (KeyboardInterrupt, SystemExit):  # pragma NO COVER
                     raise
-                except:
+                except:  # noqa
                     if testing:
                         raise
                     t, v, tb = sys.exc_info()
@@ -525,9 +522,7 @@ def expand_action(discriminator, callable=None, args=(), kw=None,
             kw=kw,
             includepath=includepath,
             info=info,
-            order=order,
-            )
-        )
+            order=order))
     return action
 
 
@@ -571,7 +566,7 @@ def resolve_conflicts(actions):
             output.append(ainfo)
             continue
 
-        L = unique.setdefault(discriminator, [])
+        L = unique.setdefault(discriminator, [])  # noqa
         L.append(ainfo)
 
     # Check for conflicts
@@ -599,9 +594,8 @@ def resolve_conflicts(actions):
         for _, _, action in rest:
             includepath = action['includepath']
             # Test whether path is a prefix of opath
-            if (includepath[:len(basepath)] != basepath  # not a prefix
-                    or includepath == basepath):
-                L = conflicts.setdefault(discriminator, [baseinfo])
+            if (includepath[:len(basepath)] != basepath or includepath == basepath):
+                L = conflicts.setdefault(discriminator, [baseinfo])  # noqa
                 L.append(action['info'])
 
     if conflicts:

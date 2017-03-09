@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ############################################################################
-"""Component and Component Architecture Interfaces
-"""
+# flake8: noqa
 from zope.interface import Attribute
 from zope.interface import Interface
 from zope.interface import implements

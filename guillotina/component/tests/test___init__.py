@@ -11,7 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-
+# flake8: noqa
 import unittest
 
 class Test_package(unittest.TestCase):

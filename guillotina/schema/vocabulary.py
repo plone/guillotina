@@ -48,7 +48,7 @@ class SimpleTerm(object):
             else str(token.decode('ascii', 'ignore'))
         self.title = title
         if title is not None:
-            directlyProvides(self, ITitledTokenizedTerm)
+            directlyProvides(self, ITitledTokenizedTerm)  # noqa
 
 
 @implementer(IVocabularyTokenized)
@@ -84,7 +84,7 @@ class SimpleVocabulary(object):
             self.by_value[term.value] = term
             self.by_token[term.token] = term
         if interfaces:
-            directlyProvides(self, *interfaces)
+            directlyProvides(self, *interfaces)  # noqa
 
     @classmethod
     def fromItems(cls, items, *interfaces):
@@ -200,7 +200,7 @@ class TreeVocabulary(object):
         self._populateIndexes(terms)
 
         if interfaces:
-            directlyProvides(self, *interfaces)
+            directlyProvides(self, *interfaces)  # noqa
 
     def __contains__(self, value):
         """ See guillotina.schema.interfaces.IBaseVocabulary

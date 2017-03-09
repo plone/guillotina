@@ -4,6 +4,7 @@ from guillotina.api.service import Service
 from guillotina.api.service import TraversableService
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
+from guillotina.component import getMultiAdapter
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
@@ -11,10 +12,8 @@ from guillotina.interfaces import ISite
 from guillotina.interfaces import IValueToJson
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
-from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import resolve
-from guillotina.component import getMultiAdapter
 from zope.interface.interfaces import ComponentLookupError
 
 

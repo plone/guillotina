@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from guillotina import app_settings
 from guillotina import configure
+from guillotina.component import getMultiAdapter
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IFileManager
@@ -8,11 +9,10 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStorage
 from guillotina.interfaces import NotStorable
+from guillotina.schema import Object
 from guillotina.utils import import_class
-from guillotina.component import getMultiAdapter
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from guillotina.schema import Object
 
 import io
 import mimetypes

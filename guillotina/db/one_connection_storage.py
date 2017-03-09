@@ -1,3 +1,5 @@
+# flake8: noqa
+# module unused
 import asyncio
 import asyncpg
 import logging

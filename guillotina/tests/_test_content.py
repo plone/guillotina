@@ -1,3 +1,4 @@
+# flake8: noqa
 from guillotina import configure
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container

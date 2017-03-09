@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Placeless Test Setup
-"""
+# flake8: noqa
 
 # HACK to make sure basicmost event subscriber is installed
 import guillotina.component.event

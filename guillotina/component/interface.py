@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Interface utility functions
-"""
+# flake8: noqa
 from zope.interface import alsoProvides
 from zope.interface.interfaces import IInterface
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 async def test_non_existing_site(site_requester):
     async with await site_requester as requester:
         response, status = await requester('GET', '/guillotina/non')

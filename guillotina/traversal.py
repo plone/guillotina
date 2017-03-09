@@ -13,6 +13,9 @@ from guillotina.auth.participation import AnonymousParticipation
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
+from guillotina.component import getUtility
+from guillotina.component import queryMultiAdapter
+from guillotina.component.interfaces import ISite
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
 from guillotina.exceptions import ConflictError
@@ -31,7 +34,6 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
-from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.interfaces import WRITING_VERBS
 from guillotina.registry import REGISTRY_DATA_KEY
@@ -41,9 +43,6 @@ from guillotina.transactions import commit
 from guillotina.utils import apply_cors
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import import_class
-from guillotina.component import getUtility
-from guillotina.component import queryMultiAdapter
-from guillotina.component.interfaces import ISite
 from zope.interface import alsoProvides
 
 import aiohttp
