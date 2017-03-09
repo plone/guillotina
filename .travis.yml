@@ -3,13 +3,12 @@ python:
 - 3.6-dev
 sudo: required
 services:
-  - docker
   - postgresql
 cache:
   directories:
   - eggs
 before_script:
-  - psql -c 'create database travis_ci_test;' -U guillotina
+  - psql -c 'create database guillotina;' -U postgres
 install:
 - python bootstrap-buildout.py
 - bin/buildout -t 3
