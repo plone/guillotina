@@ -35,36 +35,6 @@ class IBaseObject(Interface):
         Once assigned an OID, an object cannot be re-assigned another.
         """)
 
-    _p_changed = Attribute(
-        """The persistent state of the object.
-
-        This is one of:
-
-        None -- The object is a ghost.
-
-        false but not None -- The object is saved (or has never been saved).
-
-        true -- The object has been modified since it was last saved.
-
-        The object state may be changed by assigning or deleting this
-        attribute; however, assigning None is ignored if the object is
-        not in the saved state, and may be ignored even if the object is
-        in the saved state.
-
-        At and after ZODB 3.6, setting _p_changed to a true value for a ghost
-        object activates the object; prior to 3.6, setting _p_changed to a
-        true value on a ghost object was ignored.
-
-        Note that an object can transition to the changed state only if
-        it has a data manager.  When such a state change occurs, the
-        'register' method of the data manager must be called, passing the
-        persistent object.
-
-        Deleting this attribute forces invalidation independent of
-        existing state, although it is an error if the sticky state is
-        current.
-        """)
-
     _p_serial = Attribute(
         """The object serial number.
 
