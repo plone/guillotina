@@ -8,8 +8,8 @@ cache:
   directories:
   - eggs
 install:
-- pip install zc.buildout
-- buildout -t 3
+- python bootstrap-buildout.py
+- bin/buildout -t 3
 - pip install flake8
 - pip install coverage==4.0.3
 - sleep 15

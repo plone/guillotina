@@ -69,7 +69,8 @@ def postgres():
             'POSTGRES_PASSWORD': 'test',
             'POSTGRES_DB': 'guillotina',
             'POSTGRES_USER': 'guillotina'
-        }
+        },
+        privileged=True
     )
     ident = container.id
     count = 1
