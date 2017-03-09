@@ -84,8 +84,8 @@ async def test_create_contenttype(site_requester):
         assert status == 201
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        site = await root.__getitem__('guillotina')
-        obj = await site.__getitem__('item1')
+        site = await root.async_get('guillotina')
+        obj = await site.async_get('item1')
         assert obj.title == 'Item1'
 
 
@@ -160,8 +160,8 @@ async def test_create_contenttype_with_date(site_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        site = await root.__getitem__('guillotina')
-        obj = await site.__getitem__('item1')
+        site = await root.async_get('guillotina')
+        obj = await site.async_get('item1')
         from guillotina.behaviors.dublincore import IDublinCore
         behavior = IDublinCore(obj)
         await behavior.load()

@@ -200,12 +200,12 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
         setattr(obj, key, value)
 
     if request is None or 'OVERWRITE' not in request.headers:
-        value = await apply_coroutine(container.__contains__, obj.id)
+        value = await container.async_contains(obj.id)
         if value:
             raise ConflictIdOnContainer(str(container), obj.id)
 
     await notify(BeforeObjectAddedEvent(obj, container, id_))
-    await apply_coroutine(container.__setitem__, obj.id, obj)
+    await container.async_set(obj.id, obj)
     return obj
 
 
@@ -371,35 +371,32 @@ class Item(Resource):
     schema=IContainer,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class Folder(Resource):
-    async def __contains__(self, key):
+    async def async_contains(self, key):
         return await self._p_jar.contains(self._p_oid, key)
 
-    async def __setitem__(self, key, value):
+    async def async_set(self, key, value):
         value.__parent__ = self
         value.__name__ = key
         if self._p_jar is not None:
             value._p_jar = self._p_jar
             self._p_jar.register(value)
 
-    async def __getitem__(self, key):
-        return await self._p_jar.get_child(self, key)
-
-    async def __delitem__(self, key):
-        return await self._p_jar.delete(await self.__getitem__(key))
-
-    async def get(self, key, default=None):
+    async def async_get(self, key, default=None):
         try:
             return await self._p_jar.get_child(self, key)
         except KeyError:
             return default
 
-    async def __len__(self):
+    async def async_del(self, key):
+        return await self._p_jar.delete(await self.async_get(key))
+
+    async def async_len(self):
         return await self._p_jar.len(self._p_oid)
 
-    async def keys(self):
+    async def async_keys(self):
         return await self._p_jar.keys(self._p_oid)
 
-    async def items(self):
+    async def async_items(self):
         async for key, value in self._p_jar.items(self):
             yield key, value
 
@@ -412,7 +409,7 @@ class Site(Folder):
         from guillotina.registry import Registry
         annotations_container = IAnnotations(self)
         registry = Registry()
-        await annotations_container.__setitem__(REGISTRY_DATA_KEY, registry)
+        await annotations_container.async_set(REGISTRY_DATA_KEY, registry)
 
         # Set default plugins
         registry.register_interface(ILayers)

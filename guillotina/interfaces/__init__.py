@@ -10,6 +10,7 @@ from .catalog import ISecurityInfo  # noqa
 from .configuration import IDatabaseConfigurationFactory  # noqa
 from .content import IAnnotations  # noqa
 from .content import IApplication  # noqa
+from .content import IAsyncContainer  # noqa
 from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa
 from .content import IDatabase  # noqa

@@ -23,6 +23,7 @@ from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IInteraction
@@ -123,7 +124,10 @@ async def traverse(request, parent, path):
     try:
         if path[0].startswith('_'):
             raise HTTPUnauthorized()
-        context = await parent.get(path[0])
+        if IAsyncContainer.providedBy(parent):
+            context = await parent.async_get(path[0])
+        else:
+            context = parent[path[0]]
     except (TypeError, KeyError, AttributeError):
         return parent, path
 
@@ -141,7 +145,7 @@ async def traverse(request, parent, path):
         request._site_id = context.id
         request.site = context
         annotations_container = IAnnotations(request.site)
-        request.site_settings = await annotations_container.__getitem__(REGISTRY_DATA_KEY)
+        request.site_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
         layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))

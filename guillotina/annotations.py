@@ -22,7 +22,7 @@ class AnnotationsAdapter(object):
     def __init__(self, obj):
         self.obj = obj
 
-    async def get(self, key, default=None):
+    async def async_get(self, key, default=None):
         annotations = self.obj.__annotations__
         element = annotations.get(key, default)
         if element is None:
@@ -32,16 +32,10 @@ class AnnotationsAdapter(object):
                 annotations[key] = obj
         return annotations[key]
 
-    async def __getitem__(self, key):
-        return await self.get(key)
-
-    async def keys(self):
+    async def async_keys(self):
         return await self.obj._p_jar.get_annotation_keys(self.obj._p_oid)
 
-    async def __setitem__(self, key, value):
-        await self.set(key, value)
-
-    async def set(self, key, value):
+    async def async_set(self, key, value):
         if not isinstance(value, BaseObject):
             raise KeyError('Not a valid object as annotation')
         annotations = self.obj.__annotations__
@@ -53,5 +47,5 @@ class AnnotationsAdapter(object):
         value._p_jar = self.obj._p_jar
         value._p_jar.register(value)
 
-    async def __delitem__(self, key):
+    async def async_del(self, key):
         raise NotImplemented()

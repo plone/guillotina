@@ -6,7 +6,6 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-from guillotina.utils import apply_coroutine
 
 
 @configure.adapter(
@@ -18,7 +17,7 @@ class DatabaseToJson(object):
         self.dbo = dbo
 
     async def __call__(self):
-        keys = await apply_coroutine(self.dbo.keys)
+        keys = await self.dbo.async_keys()
         return {
             'sites': list(keys)
         }

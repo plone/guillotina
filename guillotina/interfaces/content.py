@@ -10,6 +10,48 @@ from zope.interface import Interface
 import guillotina.schema
 
 
+class IAsyncContainer(Interface):
+    """
+    object that supports getting and setting sub-objects
+    asynchronously
+    """
+
+    async def async_get(name):
+        """
+        asynchronously get subobject
+        """
+
+    async def async_set(name, value):
+        """
+        asynchronously get subobject
+        """
+
+    async def async_keys():
+        """
+        asynchronously get keys for sub objects
+        """
+
+    async def async_del(name):
+        """
+        asynchronously delete sub object
+        """
+
+    async def async_items():
+        """
+        asynchronously get items
+        """
+
+    async def async_len():
+        """
+        asynchronously get len
+        """
+
+    async def async_contains(name):
+        """
+        asynchronously check if contains
+        """
+
+
 class IRegistry(IMapping):
 
     def for_interface(interface, check=True, omit=(), prefix=None):
@@ -41,7 +83,7 @@ class IApplication(ITraversable):
     pass
 
 
-class IDatabase(ITraversable):
+class IDatabase(ITraversable, IAsyncContainer):
     def get_transaction_manager():
         pass
 
@@ -132,7 +174,7 @@ class IResourceFactory(IFactory):
     )
 
 
-class ISite(IResource, IZopeSite, ITraversable):
+class ISite(IResource, IZopeSite, ITraversable, IAsyncContainer):
     pass
 
 
@@ -140,7 +182,7 @@ class IItem(IResource):
     pass
 
 
-class IContainer(IResource, IMapping, ITraversable):
+class IContainer(IResource, IAsyncContainer, ITraversable):
     pass
 
 

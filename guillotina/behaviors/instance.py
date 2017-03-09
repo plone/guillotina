@@ -27,11 +27,11 @@ class AnnotationBehavior(object):
         annotations_container = IAnnotations(self.__dict__['context'])
         annotations = {}
         try:
-            annotations = await annotations_container.__getitem__(self.__annotations_data_key)
+            annotations = await annotations_container.async_get(self.__annotations_data_key)
         except KeyError:
             if create:
                 annotations = AnnotationData()
-                await annotations_container.__setitem__(self.__annotations_data_key, annotations)
+                await annotations_container.async_set(self.__annotations_data_key, annotations)
         self.__dict__['data'] = annotations
 
     def __getattr__(self, name):

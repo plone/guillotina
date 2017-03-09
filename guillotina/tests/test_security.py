@@ -58,8 +58,8 @@ async def test_set_local_guillotina(site_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        site = await root.__getitem__('guillotina')
-        testing_object = await site.__getitem__('testing')
+        site = await root.async_get('guillotina')
+        testing_object = await site.async_get('testing')
 
         # Check the access users/roles
         principals = get_principals_with_access_content(testing_object, request)
@@ -82,8 +82,8 @@ async def test_set_local_guillotina(site_requester):
         )
 
         # need to retreive objs again from db since they changed
-        site = await root.__getitem__('guillotina')
-        testing_object = await site.__getitem__('testing')
+        site = await root.async_get('guillotina')
+        testing_object = await site.async_get('testing')
         principals = get_principals_with_access_content(testing_object, request)
         assert len(principals) == 2
         assert 'user1' in principals
@@ -102,7 +102,7 @@ async def test_set_local_guillotina(site_requester):
             })
         )
         # need to retreive objs again from db since they changed
-        site = await root.__getitem__('guillotina')
-        testing_object = await site.__getitem__('testing')
+        site = await root.async_get('guillotina')
+        testing_object = await site.async_get('testing')
         principals = get_principals_with_access_content(testing_object, request)
         assert principals == ['root']

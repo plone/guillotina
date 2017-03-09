@@ -26,7 +26,7 @@ async def test_create_object(dummy_txn_root):
         assert ob1.__of__ is None
         assert ob1.__name__ is None
 
-        await root.__setitem__('ob1', ob1)
+        await root.async_set('ob1', ob1)
 
         assert ob1.__name__ == 'ob1'
         assert ob1._p_jar == root._p_jar
@@ -40,10 +40,10 @@ async def test_create_object(dummy_txn_root):
 async def test_create_annotation(dummy_txn_root):
     async with await dummy_txn_root as root:
         ob1 = ObjectTest()
-        await root.__setitem__('ob1', ob1)
+        await root.async_set('ob1', ob1)
         annotations = IAnnotations(ob1)
         with pytest.raises(KeyError):
-            await annotations.__setitem__('test', 'hola')
+            await annotations.async_set('test', 'hola')
 
         ob2 = ObjectTest()
         assert ob2.__of__ is None
@@ -52,7 +52,7 @@ async def test_create_annotation(dummy_txn_root):
         assert ob2.__parent__ is None
         assert len(ob1.__annotations__) == 0
 
-        await annotations.__setitem__('test2', ob2)
+        await annotations.async_set('test2', ob2)
         assert ob2.__of__ is ob1._p_oid
         assert ob2._p_jar is ob1._p_jar
         assert ob2.__name__ == 'test2'
@@ -63,7 +63,7 @@ async def test_create_annotation(dummy_txn_root):
 async def test_use_behavior_annotation(dummy_txn_root):
     async with await dummy_txn_root as root:
         ob1 = Item()
-        await root.__setitem__('ob1', ob1)
+        await root.async_set('ob1', ob1)
         dublin = IDublinCore(ob1)
         await dublin.load()
         dublin.publisher = 'foobar'

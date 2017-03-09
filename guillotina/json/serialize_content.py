@@ -21,8 +21,6 @@ from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import getFields
 from zope.interface import Interface
 
-import asyncio
-
 
 MAX_ALLOWED = 200
 
@@ -124,9 +122,7 @@ class SerializeFolderToJson(SerializeToJson):
         result = await super(SerializeFolderToJson, self).__call__()
 
         security = IInteraction(self.request)
-        length = self.context.__len__()
-        if asyncio.iscoroutine(length):
-            length = await length
+        length = await self.context.async_len()
 
         if length > MAX_ALLOWED or length == 0:
             result['items'] = []

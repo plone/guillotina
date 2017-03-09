@@ -118,38 +118,42 @@ class Database(object):
     async def get_root(self):
         return await self._db.request._tm.root()
 
-    async def __getitem__(self, key):
+    async def async_get(self, key):
         root = await self.get_root()
-        return await root.__getitem__(key)
+        return await root.async_get(key)
 
-    async def keys(self):
+    async def async_keys(self):
         root = await self.get_root()
-        return list(await root.keys())
+        return root._p_jar.keys(root._p_oid)
 
-    async def __setitem__(self, key, value):
+    async def async_set(self, key, value):
         """ This operation can only be done through HTTP request
 
-        We can check if there is permission to delete a site
+        We can check if there is permission to delete a site?
         XXX TODO
         """
         root = await self.get_root()
-        await root.__setitem__(key, value)
+        await root.async_set(key, value)
 
-    async def __delitem__(self, key):
+    async def async_del(self, key):
         """ This operation can only be done throw HTTP request
 
         We can check if there is permission to delete a site
         XXX TODO
         """
         root = await self.get_root()
-        await root.__delitem__(key)
+        await root._p_jar.delete(await root.async_get(key))
 
-    def __iter__(self):
-        return iter(self.conn.root().items())
+    async def async_items(self):
+        root = await self.conn.root()
+        async for key, value in root._p_jar.items(root):
+            yield key, value
 
-    def __contains__(self, key):
+    async def async_contains(self, key):
         # is there any request active ? -> conn there
-        return key in self.conn.root()
+        root = await self.conn.root()
+        return root._p_jar.contains(root._p_oid, key)
 
-    def __len__(self):
-        return len(self.conn.root())
+    async def async_len(self):
+        root = await self.conn.root()
+        return root._p_jar.len(root._p_oid)

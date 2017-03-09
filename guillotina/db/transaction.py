@@ -263,7 +263,10 @@ class Transaction(object):
     # Inspection
 
     async def keys(self, oid):
-        return await self._manager._storage.keys(self, oid)
+        keys = []
+        for record in await self._manager._storage.keys(self, oid):
+            keys.append(record['id'])
+        return keys
 
     async def get_child(self, container, key):
         result = await self._manager._storage.get_child(self, container._p_oid, key)
