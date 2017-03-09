@@ -7,7 +7,7 @@ import asyncio
 class DummyStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
-    _last_transaction = 0
+    _last_transaction = 1
 
     # MAIN MEMORY DB OBJECT OID -> OBJ
     DB = {}

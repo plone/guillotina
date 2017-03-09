@@ -116,7 +116,7 @@ class Transaction(object):
         """
         self._txn_time = time.time()
         await self._manager._storage.tpc_begin(self, conn)
-        self._cache = self._manager._storage._cache.copy()
+        self._cache = self._manager._storage._cache
 
     def check_read_only(self):
         if self.request is None:

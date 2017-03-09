@@ -63,7 +63,7 @@ def get_hook():
 async def security_changed(obj, event):
     # We need to reindex the objects below
     request = get_current_request()
-    await AsyncCatalogReindex(obj, request, security=True)()
+    request._futures.update({obj.id: AsyncCatalogReindex(obj, request, security=True)()})
 
 
 @configure.subscriber(for_=(IResource, IObjectRemovedEvent))
