@@ -20,3 +20,4 @@ extras
 data*
 include/
 pip-selfcheck.json
+.coveralls.yml
