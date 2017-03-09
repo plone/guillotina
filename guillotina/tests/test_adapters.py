@@ -5,7 +5,8 @@ from guillotina.component import getMultiAdapter
 from guillotina.component import getUtility
 from guillotina.content import Item
 from guillotina.content import Site
-from guillotina.factory import RootSpecialPermissions
+from guillotina.factory.security import ApplicationSpecialPermissions
+from guillotina.factory.security import DatabaseSpecialPermissions
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IInteraction
@@ -38,16 +39,16 @@ def test_get_current_interaction(dummy_request):
     assert isinstance(adapter, Interaction)
 
 
-async def test_RootSpecialPermissions_IDatabase(dummy_txn_root):
+async def test_DatabaseSpecialPermissions_IDatabase(dummy_txn_root):
     async with await dummy_txn_root as root:
         adapter = getAdapter(root, interface=IPrincipalPermissionManager)
-        assert isinstance(adapter, RootSpecialPermissions)
+        assert isinstance(adapter, DatabaseSpecialPermissions)
 
 
 async def test_RootSpecialPermissions_IApplication(dummy_guillotina):
     root = getUtility(IApplication, name='root')
     adapter = getAdapter(root, interface=IPrincipalPermissionManager)
-    assert isinstance(adapter, RootSpecialPermissions)
+    assert isinstance(adapter, ApplicationSpecialPermissions)
 
 
 async def test_SerializeFolderToJson(dummy_request):

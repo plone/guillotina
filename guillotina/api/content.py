@@ -255,7 +255,6 @@ async def sharing_post(context, request):
     setting = data['type']
 
     # we need to check if we are changing any info
-
     changed = False
 
     if 'prinrole' in data:

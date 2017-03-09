@@ -13,6 +13,14 @@ async def test_get_guillotina(site_requester):
         assert response['local']['prinrole']['root']['guillotina.Owner'] == 'Allow'
 
 
+async def test_database_root_has_none_parent(site_requester):
+    async with await site_requester as requester:
+        # important for security checks to not inherit...
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+        assert root.__parent__ is None
+
+
 async def test_set_local_guillotina(site_requester):
     async with await site_requester as requester:
         response, status = await requester(
@@ -45,6 +53,7 @@ async def test_set_local_guillotina(site_requester):
         assert len(response['inherit']) == 1
         assert response['inherit'][0]['prinrole']['root']['guillotina.SiteAdmin'] == 'Allow'
         assert response['inherit'][0]['prinrole']['root']['guillotina.Owner'] == 'Allow'
+        assert 'Anonymous User' not in response['inherit'][0]['prinrole']
         assert response['inherit'][0]['prinperm']['user1']['guillotina.AccessContent'] == 'AllowSingle'  # noqa
 
         request = utils.get_mocked_request(requester.db)
@@ -72,6 +81,8 @@ async def test_set_local_guillotina(site_requester):
             })
         )
 
+        # need to retreive objs again from db since they changed
+        site = await root.__getitem__('guillotina')
         testing_object = await site.__getitem__('testing')
         principals = get_principals_with_access_content(testing_object, request)
         assert len(principals) == 2
@@ -90,6 +101,8 @@ async def test_set_local_guillotina(site_requester):
                 }
             })
         )
+        # need to retreive objs again from db since they changed
+        site = await root.__getitem__('guillotina')
         testing_object = await site.__getitem__('testing')
         principals = get_principals_with_access_content(testing_object, request)
         assert principals == ['root']

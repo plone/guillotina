@@ -39,7 +39,6 @@ class ApplicationToJson(object):
             'static_file': [],
             'static_directory': []
         }
-
         allowed = IInteraction(self.request).check_permission(
             'guillotina.GetDatabases', self.application)
 
