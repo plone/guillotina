@@ -134,7 +134,7 @@ def make_app(config_file=None, settings=None, loop=None):
     configure.scan('guillotina.framing')
     configure.scan('guillotina.files')
     configure.scan('guillotina.annotations')
-    configure.scan('guillotina.types')
+    configure.scan('guillotina.constraintypes')
     configure.scan('guillotina.subscribers')
     load_application(guillotina, root, settings)
 

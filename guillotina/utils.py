@@ -61,7 +61,7 @@ def get_content_depth(content: IResource) -> int:
     return depth
 
 
-def iter_parents(content: IResource) -> Iterator[IResource]:
+def iter_parents(content: IResource) -> types.GeneratorType:
     content = getattr(content, '__parent__', None)
     while content is not None:
         yield content
@@ -131,7 +131,7 @@ def strings_differ(string1: str, string2: str) -> bool:
     return invalid_bits != 0
 
 
-def resolve(name: str, module: str=None) -> types.ClassType:
+def resolve(name: str, module: str=None) -> type:
     name = name.split('.')
     if not name[0]:
         if module is None:
@@ -156,7 +156,7 @@ def resolve(name: str, module: str=None) -> types.ClassType:
     return found
 
 
-def resolve_or_get(potential_dotted_name: str) -> types.ClassType:
+def resolve_or_get(potential_dotted_name: str) -> type:
     if isinstance(potential_dotted_name, str):
         return resolve(potential_dotted_name)
     return potential_dotted_name

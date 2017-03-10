@@ -5,6 +5,7 @@ How to quickly get started using `guillotina`.
 This tutorial will assume usage of virtualenv. You can use your own preferred
 tool for managing your python environment.
 
+*This tutorial assumes you have postgresql running*
 
 Setup the environment:
 
@@ -36,6 +37,18 @@ Then, [use Postman](https://www.getpostman.com/), curl or whatever tool you
 prefer to interact with the REST API.
 
 Modify the configuration in config.json to customize server setttings.
+
+
+### Postgresql installation instructions
+
+If you do not have a postgresql database server installed, you can use docker
+to get one running quickly.
+
+Example docker run command:
+
+```
+docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres -p 127.0.0.1:5432:5432 postgres:9.6
+```
 
 
 ## Creating default content
