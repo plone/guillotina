@@ -6,9 +6,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   quickstart
-   configuration
-   production
    roles
    security
    applications
@@ -20,3 +17,4 @@ Contents:
    commands
    applicationconfiguration
    design
+   persistence

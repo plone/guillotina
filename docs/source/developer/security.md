@@ -89,16 +89,16 @@ interaction.check_permission(permission, obj)
 
 ```json
   {
-  	"type": "Allow",
-  	"prinrole": {
-  		"principal_id": ["role1", "role2"]
-  	},
-  	"prinperm": {
-  		"principal_id": ["perm1", "perm2"]
-  	},
-  	"roleperm": {
-  		"role1": ["perm1", "perm2"]
-  	}
+    "type": "Allow",
+    "prinrole": {
+      "principal_id": ["role1", "role2"]
+    },
+    "prinperm": {
+      "principal_id": ["perm1", "perm2"]
+    },
+    "roleperm": {
+      "role1": ["perm1", "perm2"]
+    }
   }
 ```
 

@@ -6,6 +6,7 @@ Contents:
 .. toctree::
    :maxdepth: 1
 
+   quickstart
    rest/index
    installation/index
    developer/index

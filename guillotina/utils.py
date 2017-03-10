@@ -2,9 +2,10 @@
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina.exceptions import RequestNotFound
-from hashlib import sha256 as sha
-from guillotina.interfaces import IRequest, IResource,
 from guillotina.interfaces import IPrincipal
+from guillotina.interfaces import IRequest
+from guillotina.interfaces import IResource
+from hashlib import sha256 as sha
 
 import asyncio
 import fnmatch

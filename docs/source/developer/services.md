@@ -16,11 +16,11 @@ from guillotina import configure
 from guillotina.interfaces import ISite
 
 @configure.service(context=ISite, name='@myservice', method='GET',
-                   permission='guillotina.AccessContent')
+									 permission='guillotina.AccessContent')
 async def my_service(context, request):
-    return {
-        'foo': 'bar'
-    }
+		return {
+				'foo': 'bar'
+		}
 ```
 
 The most simple way to define a service is to use the decorator method shown here.
@@ -42,7 +42,7 @@ In your application `__init__.py` file, you can simply provide a `scan` call.
 from guillotina import configure
 
 def includeme(root):
-    configure.scan('my.package.services')
+		configure.scan('my.package.services')
 ```
 
 
@@ -59,14 +59,14 @@ from guillotina.api.service import Service
 
 
 @configure.service(context=ISite, name='@myservice', method='GET',
-                   permission='guillotina.AccessContent')
+									 permission='guillotina.AccessContent')
 class DefaultGET(Service):
-    async def __call__(self):
-      # self.context
-      # self.request
-      return {
-          'foo': 'bar'
-      }
+		async def __call__(self):
+			# self.context
+			# self.request
+			return {
+					'foo': 'bar'
+			}
 
 ```
 
@@ -79,9 +79,9 @@ you can define in the Service class the __allow_access__ = True
 
 ```python
 @service(
-    context=IResource, name='@download',
-    method='GET', permission='guillotina.Public')
+		context=IResource, name='@download',
+		method='GET', permission='guillotina.Public')
 class DefaultGET(DownloadService):
 
-    __allow_access__ = True
+		__allow_access__ = True
 ```

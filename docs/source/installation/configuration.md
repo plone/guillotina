@@ -17,10 +17,10 @@ map 1-to-1 to database setup:
 
 ```json
 {
-	"databases": [{
+  "databases": [{
     "db": {
-			"storage": "postgresql",
-			"type": "postgres",
+      "storage": "postgresql",
+      "type": "postgres",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -32,8 +32,8 @@ map 1-to-1 to database setup:
       "options": {
         "read_only": false
       }
-		}
-	}]
+    }
+  }]
 }
 ```
 
@@ -52,7 +52,7 @@ map 1-to-1 to database setup:
 
 ```json
 {
-	"port": 8080
+  "port": 8080
 }
 ```
 
@@ -60,7 +60,7 @@ map 1-to-1 to database setup:
 
 ```json
 {
-	"host": "0.0.0.0"
+  "host": "0.0.0.0"
 }
 ```
 
@@ -68,9 +68,9 @@ map 1-to-1 to database setup:
 
 ```json
 {
-	"root_user": {
-		"password": "root"
-	}
+  "root_user": {
+    "password": "root"
+  }
 }
 ```
 
@@ -78,14 +78,14 @@ map 1-to-1 to database setup:
 
 ```json
 {
-	"cors": {
-		"allow_origin": ["*"],
-		"allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
-		"allow_headers": ["*"],
-		"expose_headers": ["*"],
-		"allow_credentials": true,
-		"max_age": 3660
-	}
+  "cors": {
+    "allow_origin": ["*"],
+    "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+    "allow_headers": ["*"],
+    "expose_headers": ["*"],
+    "allow_credentials": true,
+    "max_age": 3660
+  }
 }
 ```
 
@@ -93,7 +93,7 @@ map 1-to-1 to database setup:
 
 ```json
 {
-	"utilities": [{
+  "utilities": [{
     "provides": "guillotina.interfaces.ICatalogUtility",
     "factory": "pserver.elasticsearch.utility.ElasticSearchUtility",
     "settings": {}
