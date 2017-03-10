@@ -14,6 +14,7 @@ include docs/*
 include guillotina/documentation/meta/*
 include buildout-newt.cfg
 include guillotina/*
+include guillotina/documentation/meta/*
 pip-selfcheck.json
 recursive-include docs *.md
 recursive-include docs *.py

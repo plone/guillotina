@@ -47,6 +47,7 @@ setup(
     ],
     zip_safe=True,
     include_package_data=True,
+    package_data={'': ['*.txt', '*.rst', 'guillotina/documentation/meta/*.json']},
     packages=find_packages(),
     ext_modules=ext_modules,
     install_requires=[

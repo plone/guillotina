@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-import pkg_resources
-import os
+from docutils import nodes
+from guillotina.documentation import DIR
+from sphinx import addnodes
 from sphinx.directives import CodeBlock
 from sphinxcontrib.httpexample import utils
 from sphinxcontrib.httpexample.directives import HTTPExample
-from docutils import nodes
-from sphinx import addnodes
+
 import json
-from guillotina.documentation import DIR
+import os
+import pkg_resources
 import tempfile
 
 
@@ -23,7 +24,6 @@ method_sort_order = [
 def service_filename_sort_key(filename):
     name = filename.split('.')[0]
     parts = name.split('-')
-    type_name = parts[0]
     if len(parts) == 2:
         # no @ service on it...
         return '0-{}'.format(method_sort_order.index(parts[1]))
