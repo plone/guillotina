@@ -29,7 +29,7 @@ async def test_register_service(site_requester):
             config, 'guillotina.tests', 'service')
         config.execute_actions()
 
-        response, status = await requester('GET', '/guillotina/guillotina/@foobar')
+        response, status = await requester('GET', '/db/guillotina/@foobar')
         assert response['foo'] == 'bar'
 
 
@@ -59,7 +59,7 @@ async def test_register_contenttype(site_requester):
             config, 'guillotina.tests', 'contenttype')
         config.execute_actions()
 
-        response, status = await requester('GET', '/guillotina/guillotina/@types')
+        response, status = await requester('GET', '/db/guillotina/@types')
         assert any("MyType1" in s['title'] for s in response)
 
 
@@ -104,7 +104,7 @@ async def test_register_behavior(site_requester):
             config, 'guillotina.tests', 'contenttype')
         config.execute_actions()
 
-        response, status = await requester('GET', '/guillotina/guillotina/@types')
+        response, status = await requester('GET', '/db/guillotina/@types')
         type_ = [s for s in response if s['title'] == 'MyType2'][0]
         assert 'foobar' in type_['definitions']['IMyBehavior']['properties']
 
@@ -137,5 +137,5 @@ async def test_register_addon(site_requester):
             config, 'guillotina.tests', 'addon')
         config.execute_actions()
 
-        response, status = await requester('GET', '/guillotina/guillotina/@addons')
+        response, status = await requester('GET', '/db/guillotina/@addons')
         assert 'myaddon' in [a['id'] for a in response['available']]

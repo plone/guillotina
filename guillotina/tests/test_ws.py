@@ -9,7 +9,7 @@ async def test_hello(site_requester, loop):
     async with await site_requester as requester:  # noqa
         session = aiohttp.ClientSession()
         async with session.ws_connect(
-                'ws://localhost:{port}/guillotina/guillotina/@ws'.format(
+                'ws://localhost:{port}/db/guillotina/@ws'.format(
                     port=requester.server.port),
                 headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
             # we should check version

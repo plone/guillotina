@@ -118,7 +118,7 @@ def postgres():
     else:
         host = 'localhost'
 
-    PG_SETTINGS['databases'][0]['guillotina']['dsn']['host'] = host
+    PG_SETTINGS['databases'][0]['db']['dsn']['host'] = host
 
     yield host  # provide the fixture value
 
@@ -139,7 +139,7 @@ class GuillotinaDBRequester(object):
         self.server = server
         self.loop = loop
         self.root = getUtility(IApplication, name='root')
-        self.db = self.root['guillotina']
+        self.db = self.root['db']
 
     async def __call__(self, method, path, params=None, data=None, authenticated=True,
                        auth_type='Basic', headers={}, token=ADMIN_TOKEN, accept='application/json'):
@@ -208,7 +208,7 @@ def dummy_request(dummy_guillotina, monkeypatch):
     from guillotina.interfaces import IApplication
     from guillotina.component import getUtility
     root = getUtility(IApplication, name='root')
-    db = root['guillotina']
+    db = root['db']
 
     request = get_mocked_request(db)
     return request
@@ -262,7 +262,7 @@ class SiteRequesterAsyncContextManager(object):
 
     async def __aenter__(self):
         requester = await self.get_requester()
-        resp, status = await requester('POST', '/guillotina', data=json.dumps({
+        resp, status = await requester('POST', '/db', data=json.dumps({
             "@type": "Site",
             "title": "Guillotina Site",
             "id": "guillotina",
@@ -273,7 +273,7 @@ class SiteRequesterAsyncContextManager(object):
         return requester
 
     async def __aexit__(self, exc_type, exc, tb):
-        resp, status = await self.requester('DELETE', '/guillotina/guillotina')
+        resp, status = await self.requester('DELETE', '/db/guillotina')
         assert status == 200
 
 

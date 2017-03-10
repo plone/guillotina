@@ -15,7 +15,7 @@ async def test_jwt_auth(site_requester):
         }, app_settings['jwt']['secret']).decode('utf-8')
 
         response, status = await requester(
-            'GET', '/guillotina/guillotina/@addons',
+            'GET', '/db/guillotina/@addons',
             token=jwt_token,
             auth_type='Bearer'
         )
