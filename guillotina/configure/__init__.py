@@ -12,7 +12,7 @@ from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IRole
 from guillotina.security.permission import Permission
 from guillotina.utils import caller_module
-from guillotina.utils import dotted_name
+from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_module_path
 from guillotina.utils import resolve_or_get
 from zope.interface import classImplements
@@ -37,7 +37,7 @@ def get_configurations(module_name, type_=None):
             continue
         config = registration['config']
         module = config.get('module', registration.get('klass'))
-        if (dotted_name(resolve_or_get(module)) + '.').startswith(module_name + '.'):
+        if (get_module_dotted_name(resolve_or_get(module)) + '.').startswith(module_name + '.'):
             results.append((reg_type, registration))
     return results
 

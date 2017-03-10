@@ -219,14 +219,22 @@ def caller_package(level=2, caller_module=caller_module):
 def resolve_module_path(path):
     if type(path) is str and path[0] == '.':
         caller_mod = caller_module()
-        caller_path = dotted_name(caller_mod)
+        caller_path = get_module_dotted_name(caller_mod)
         caller_path = '.'.join(caller_path.split('.')[:-path.count('..')])
         path = caller_path + '.' + path.split('..')[-1].strip('.')
     return path
 
 
-def dotted_name(ob):
-    return getattr(ob, '__module__', None) or getattr(ob, '__name__', '')
+def get_module_dotted_name(ob):
+    return getattr(ob, '__module__', None) or getattr(ob, '__name__', None)
+
+
+def get_class_dotted_name(ob):
+    if inspect.isclass(ob):
+        class_name = ob.__name__
+    else:
+        class_name = ob.__class__.__name__
+    return ob.__module__ + '.' + class_name
 
 
 def rec_merge(d1, d2):

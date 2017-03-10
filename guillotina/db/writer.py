@@ -5,7 +5,7 @@ from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IResource
-from guillotina.utils import dotted_name
+from guillotina.utils import get_class_dotted_name
 
 import pickle
 
@@ -30,7 +30,7 @@ class Writer(object):
 
     @property
     def type(self):
-        return dotted_name(self._obj)
+        return get_class_dotted_name(self._obj)
 
     @property
     def old_serial(self):
@@ -81,7 +81,7 @@ class ResourceWriter(Writer):
         if self._obj is not None and hasattr(self._obj, 'portal_type'):
             return self._obj.portal_type
         else:
-            return dotted_name(self._obj)
+            return get_class_dotted_name(self._obj)
 
     async def get_json(self):
         adapter = queryAdapter(self._obj, ICatalogDataAdapter)
