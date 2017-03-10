@@ -1,5 +1,6 @@
 import os
 
-
-DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'meta')
+_this = os.path.dirname(os.path.realpath(__file__))
+DIR = os.path.join(
+    os.sep.join(_this.split(os.sep)[:-2]), 'docs/service-info')
 URL = 'http://localhost:8080'
