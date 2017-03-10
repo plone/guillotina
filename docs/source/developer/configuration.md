@@ -10,24 +10,28 @@ file by using the `-c` option for the script script like this `./bin/guillotina 
 
 ## Databases
 
+Guillotina uses postgresql OOTB.
+
 To configure available databases, use the `databases` option. Configuration options
-map 1-to-1 to ZODB setup:
+map 1-to-1 to database setup:
 
 ```json
 {
 	"databases": [{
-    "zodb1": {
-			"storage": "ZODB",
-			"path": "Data.fs"
-		},
-		"zodb2": {
-			"storage": "ZEO",
-			"address": "127.0.0.1",
-      "port": 8090,
-			"configuration": {
-                "pool_size": 100,
-                "cache_size": 100
-           	}
+    "db": {
+			"storage": "postgresql",
+			"type": "postgres",
+      "dsn": {
+        "scheme": "postgres",
+        "dbname": "guillotina",
+        "user": "postgres",
+        "host": "localhost",
+        "password": "",
+        "port": 5432
+      },
+      "options": {
+        "read_only": false
+      }
 		}
 	}]
 }

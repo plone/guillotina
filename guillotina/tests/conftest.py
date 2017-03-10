@@ -24,7 +24,7 @@ IMAGE = 'postgres:9.6'
 CONTAINERS_FOR_TESTING_LABEL = 'testingaiopg'
 PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
 PG_SETTINGS['applications'] = []
-PG_SETTINGS['databases'][0]['guillotina']['storage'] = 'GDB'
+PG_SETTINGS['databases'][0]['guillotina']['storage'] = 'postgresql'
 
 PG_SETTINGS['databases'][0]['guillotina']['partition'] = \
     'guillotina.interfaces.IResource'

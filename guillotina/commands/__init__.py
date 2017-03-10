@@ -13,9 +13,20 @@ import sys
 
 MISSING_SETTINGS = {
     "databases": [{
-        "zodb": {
-            "storage": "ZODB",
-            "path": "Data.fs"
+        "db": {
+            "storage": "postgresql",
+            "type": "postgres",
+            "dsn": {
+                "scheme": "postgres",
+                "dbname": "guillotina",
+                "user": "guillotina",
+                "host": "localhost",
+                "password": "test",
+                "port": 5432
+            },
+            "options": {
+                "read_only": False
+            }
         }
     }],
     "port": 8080,

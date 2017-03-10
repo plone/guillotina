@@ -41,7 +41,7 @@ class RawValueHolder(BaseObject):
 class RichTextValue(object):
     """The actual value.
 
-    Note that this is not a persistent object, to avoid a separate ZODB object
+    Note that this is not a persistent object, to avoid a separate database object
     being loaded.
     """
 

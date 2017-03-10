@@ -26,7 +26,7 @@ else:
 setup(
     name='guillotina',
     version=open('VERSION').read().strip(),
-    description='asyncio transactional server to build REST API / Websocket with ZODB',  # noqa
+    description='asyncio REST API Resource database',  # noqa
     long_description=(open('README.rst').read() + '\n' +
                       open('CHANGELOG.rst').read()),
     keywords=['asyncio', 'REST', 'Framework', 'transactional'],
@@ -34,8 +34,6 @@ setup(
     author_email='ramon@plone.org',
     classifiers=[
         'License :: OSI Approved :: BSD License',
-        'Framework :: ZODB',
-        'Framework :: Zope3',
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP',

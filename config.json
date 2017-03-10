@@ -1,19 +1,19 @@
 {
 	"databases": [{
 		"db": {
-			"storage": "GDB",
+			"storage": "postgresql",
 			"type": "postgres",
-       "dsn": {
-         "scheme": "postgres",
-         "dbname": "guillotina",
-         "user": "postgres",
-         "host": "localhost",
-         "password": "",
-         "port": 5432
-       },
-       "options": {
-         "read_only": false
-       }
+      "dsn": {
+        "scheme": "postgres",
+        "dbname": "guillotina",
+        "user": "postgres",
+        "host": "localhost",
+        "password": "",
+        "port": 5432
+      },
+      "options": {
+        "read_only": false
+      }
 		}
 	}],
 	"host": "127.0.0.1",

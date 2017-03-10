@@ -53,7 +53,7 @@ class IBehavior(Interface):
 
     marker = schema.Object(
         title=u'Marker interface for objects sporting this behavior',
-        description=u'Markers are persisted in the ZODB. '
+        description=u'Markers are persisted in the database. '
                     u'Required when a factory is given, because the factory '
                     u'is an adapter adapting the the marker and providing the '
                     u'"interface" of this behavior.',

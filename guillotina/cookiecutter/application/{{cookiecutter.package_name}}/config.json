@@ -2,7 +2,7 @@
 	"applications": ["{{cookiecutter.package_name}}"],
 	"databases": [{
 		"db": {
-			"storage": "GDB",
+			"storage": "postgresql",
 			"type": "postgres",
        "dsn": {
          "scheme": "postgres",

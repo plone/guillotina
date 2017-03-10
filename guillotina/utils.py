@@ -3,6 +3,8 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina.exceptions import RequestNotFound
 from hashlib import sha256 as sha
+from guillotina.interfaces import IRequest, IResource,
+from guillotina.interfaces import IPrincipal
 
 import asyncio
 import fnmatch
@@ -13,6 +15,7 @@ import random
 import string
 import sys
 import time
+import types
 
 
 try:
@@ -28,15 +31,16 @@ except NotImplementedError:
     using_sys_random = False
 
 
+RANDOM_SECRET = random.randint(0, 1000000)
 logger = logging.getLogger('guillotina')
 
 
-def import_class(import_string):
+def import_class(import_string: str) -> types.ModuleType:
     t = import_string.rsplit('.', 1)
     return getattr(importlib.import_module(t[0]), t[1], None)
 
 
-def get_content_path(content):
+def get_content_path(content: IResource) -> str:
     """ No site id
     """
     parts = []
@@ -49,21 +53,21 @@ def get_content_path(content):
     return '/' + '/'.join(reversed(parts))
 
 
-def get_content_depth(content):
+def get_content_depth(content: IResource) -> int:
     depth = 0
     for parent in iter_parents(content):
         depth += 1
     return depth
 
 
-def iter_parents(content):
+def iter_parents(content: IResource) -> Iterator[IResource]:
     content = getattr(content, '__parent__', None)
     while content is not None:
         yield content
         content = getattr(content, '__parent__', None)
 
 
-def get_authenticated_user(request):
+def get_authenticated_user(request: IRequest) -> IPrincipal:
     if (hasattr(request, 'security') and
             hasattr(request.security, 'participations') and
             len(request.security.participations) > 0):
@@ -72,13 +76,13 @@ def get_authenticated_user(request):
         return None
 
 
-def get_authenticated_user_id(request):
+def get_authenticated_user_id(request: IRequest) -> str:
     user = get_authenticated_user(request)
     if user:
         return user.id
 
 
-def apply_cors(request):
+def apply_cors(request: IRequest) -> dict:
     """Second part of the cors function to validate."""
     from guillotina import app_settings
     headers = {}
@@ -105,7 +109,7 @@ def apply_cors(request):
     return headers
 
 
-def strings_differ(string1, string2):
+def strings_differ(string1: str, string2: str) -> bool:
     """Check whether two strings differ while avoiding timing attacks.
 
     This function returns True if the given strings differ and False
@@ -126,26 +130,7 @@ def strings_differ(string1, string2):
     return invalid_bits != 0
 
 
-class Lazy(object):
-    """Lazy Attributes."""
-
-    def __init__(self, func, name=None):
-        if name is None:
-            name = func.__name__
-        self.data = (func, name)
-
-    def __get__(self, inst, class_):
-        if inst is None:
-            return self
-
-        func, name = self.data
-        value = func(inst)
-        inst.__dict__[name] = value
-
-        return value
-
-
-def resolve(name, module=None):
+def resolve(name: str, module: str=None) -> types.ClassType:
     name = name.split('.')
     if not name[0]:
         if module is None:
@@ -170,16 +155,14 @@ def resolve(name, module=None):
     return found
 
 
-def resolve_or_get(potential_dotted_name):
+def resolve_or_get(potential_dotted_name: str) -> types.ClassType:
     if isinstance(potential_dotted_name, str):
         return resolve(potential_dotted_name)
     return potential_dotted_name
 
 
-RANDOM_SECRET = random.randint(0, 1000000)
-
-
-def get_random_string(length=30, allowed_chars=string.ascii_letters + string.digits):
+def get_random_string(length: int=30,
+                      allowed_chars: str=string.ascii_letters + string.digits) -> str:
     """
     Heavily inspired by Plone/Django
     Returns a securely generated random string.
@@ -191,7 +174,7 @@ def get_random_string(length=30, allowed_chars=string.ascii_letters + string.dig
     return ''.join([random.choice(allowed_chars) for i in range(length)])
 
 
-def caller_module(level=2, sys=sys):
+def caller_module(level: int=2, sys: types.ModuleType=sys) -> types.ModuleType:
     """
     Pulled out of pyramid
     """
@@ -201,7 +184,7 @@ def caller_module(level=2, sys=sys):
     return module
 
 
-def caller_package(level=2, caller_module=caller_module):
+def caller_package(level=2, caller_module=caller_module) -> types.ModuleType:
     """
     Pulled out of pyramid
     """
@@ -216,7 +199,7 @@ def caller_package(level=2, caller_module=caller_module):
     return sys.modules[package_name]
 
 
-def resolve_module_path(path):
+def resolve_module_path(path: str) -> str:
     if type(path) is str and path[0] == '.':
         caller_mod = caller_module()
         caller_path = get_module_dotted_name(caller_mod)
@@ -225,11 +208,11 @@ def resolve_module_path(path):
     return path
 
 
-def get_module_dotted_name(ob):
+def get_module_dotted_name(ob) -> str:
     return getattr(ob, '__module__', None) or getattr(ob, '__name__', None)
 
 
-def get_class_dotted_name(ob):
+def get_class_dotted_name(ob) -> str:
     if inspect.isclass(ob):
         class_name = ob.__name__
     else:
@@ -237,7 +220,7 @@ def get_class_dotted_name(ob):
     return ob.__module__ + '.' + class_name
 
 
-def rec_merge(d1, d2):
+def rec_merge(d1: dict, d2: dict) -> dict:
     """
     Update two dicts of dicts recursively,
     if either mapping has leaves that are non-dicts,
@@ -257,15 +240,20 @@ def rec_merge(d1, d2):
     return d3
 
 
-async def apply_coroutine(func, *args, **kwargs):
+async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
+    """
+    Call a function with the supplied arguments.
+    If the result is a coroutine, await it.
+    """
     result = func(*args, **kwargs)
     if asyncio.iscoroutine(result):
         return await result
     return result
 
 
-def get_current_request():
-    """Return the current request by heuristically looking it up from stack
+def get_current_request() -> IRequest:
+    """
+    Return the current request by heuristically looking it up from stack
     """
     frame = inspect.currentframe()
     while frame is not None:

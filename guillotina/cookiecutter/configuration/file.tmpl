@@ -1,8 +1,19 @@
 {
 	"databases": [{
-		"zodb": {
-			"storage": "ZODB",
-			"path": "Data.fs"
+		"db": {
+			"storage": "postgresql",
+			"type": "postgres",
+       "dsn": {
+         "scheme": "postgres",
+         "dbname": "guillotina",
+         "user": "guillotina",
+         "host": "localhost",
+         "password": "test",
+         "port": 5432
+       },
+       "options": {
+         "read_only": false
+       }
 		}
 	}],
 	"host": "127.0.0.1",

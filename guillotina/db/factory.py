@@ -7,7 +7,7 @@ from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.utils import resolve_or_get
 
 
-@configure.utility(provides=IDatabaseConfigurationFactory, name="GDB")
+@configure.utility(provides=IDatabaseConfigurationFactory, name="postgresql")
 async def DatabaseConfigurationFactory(key, dbconfig, app):
     config = dbconfig.get('configuration', {})
     dsn = "{scheme}://{user}:{password}@{host}:{port}/{dbname}".format(**dbconfig['dsn'])  # noqa

@@ -8,7 +8,7 @@ This section is meant to explain and defend the design of `guillotina`.
 
 
 One of the main driving factors behind the development of `guillotina` is to
-streamline the development of custom CMS-like web applications.
+streamline the development of custom web applications.
 
 Some of the technologies we support in order to be a great web application development
 platform are:
@@ -18,14 +18,6 @@ platform are:
 - Web sockets
 - Configuration is done with JSON
 - URL to object-tree data model
-
-
-## CMS
-
-`guillotina` is a API-only, CMS framework. It is for building CMS-like applications.
-
-It uses the ZODB, a database well suited for CMS.
-
 
 ## Speed
 
@@ -65,8 +57,6 @@ I've talked some about it but these are the basic technologies `guillotina`
 is built with:
 
 - aiohttp
-- ZODB
-- ZCA
 
 
 ## Security
@@ -81,13 +71,5 @@ Stylistically, currently the project isn't extremely coherent right now so I'll 
 to what we'd like to work toward stylistically long term::
 
 - JSON configuration
-- No ZCML
 - Pyramid-like idioms and syntax where it makes sense
 - Functions + decorators over classes
-
-## ZODB
-
-`guillotina` uses the [ZODB](http://www.zodb.org/en/latest/) as its database engine.
-
-The ZODB database server maps very nicely onto a CMS application where content
-is stored in a tree data structure.

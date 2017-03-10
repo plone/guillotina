@@ -1,25 +1,15 @@
 Welcome to guillotina's documentation!
-========================================
+======================================
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   quickstart
-   configuration
-   production
-   roles
-   security
-   applications
-   addons
-   services
-   contenttypes
-   behavior
-   interfaces
-   commands
-   applicationconfiguration
-   design
+   rest/index
+   installation/index
+   developer/index
+
 
 Indices and tables
 ==================
