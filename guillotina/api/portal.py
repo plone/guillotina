@@ -13,7 +13,6 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import ISite
-from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
 
 
@@ -30,7 +29,7 @@ class DefaultGET(Service):
     context=IDatabase, method='POST', permission='guillotina.AddPortal',
     title="Create a new Portal",
     description="Creates a new site on the database",
-    params={
+    payload={
         "query": {},
         "payload": {
             "@type": "string",

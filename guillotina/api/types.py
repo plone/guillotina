@@ -9,8 +9,10 @@ from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import ISite
 
 
-@configure.service(context=ISite, method='GET', permission='guillotina.AccessContent',
-                   name='@types')
+@configure.service(
+    context=ISite, method='GET', permission='guillotina.AccessContent',
+    name='@types',
+    description='Read information on available types')
 class Read(TraversableService):
 
     async def publish_traverse(self, traverse):

@@ -6,6 +6,7 @@ from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from hashlib import sha256 as sha
+from zope.interface.interfaces import IInterface
 
 import asyncio
 import fnmatch
@@ -230,7 +231,7 @@ def get_module_dotted_name(ob) -> str:
 
 
 def get_class_dotted_name(ob) -> str:
-    if inspect.isclass(ob):
+    if inspect.isclass(ob) or IInterface.providedBy(ob):
         class_name = ob.__name__
     else:
         class_name = ob.__class__.__name__

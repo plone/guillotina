@@ -21,9 +21,9 @@ TESTING_PORT = 55001
 TESTING_SETTINGS = {
     "databases": [
         {
-            "guillotina": {
-                "storage": "DEMO",
-                "name": "zodbdemo"
+            "db": {
+                "storage": "DUMMY",
+                "name": "guillotina"
             }
         },
     ],

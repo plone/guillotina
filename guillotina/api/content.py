@@ -43,7 +43,9 @@ from guillotina.utils import iter_parents
 _zone = tzlocal()
 
 
-@configure.service(context=IResource, method='GET', permission='guillotina.ViewContent')
+@configure.service(
+    context=IResource, method='GET', permission='guillotina.ViewContent',
+    description="Retrieves serialization of resource")
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
@@ -54,7 +56,9 @@ class DefaultGET(Service):
         return result
 
 
-@configure.service(context=IResource, method='POST', permission='guillotina.AddContent')
+@configure.service(
+    context=IResource, method='POST', permission='guillotina.AddContent',
+    description='Add new resouce inside this container resource')
 class DefaultPOST(Service):
 
     async def __call__(self):
@@ -146,12 +150,15 @@ class DefaultPOST(Service):
         return Response(response=response, headers=headers, status=201)
 
 
-@configure.service(context=IResource, method='PUT', permission='guillotina.ModifyContent')
+@configure.service(
+    context=IResource, method='PUT', permission='guillotina.ModifyContent')
 class DefaultPUT(Service):
     pass
 
 
-@configure.service(context=IResource, method='PATCH', permission='guillotina.ModifyContent')
+@configure.service(
+    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
+    description='Modify the content of this resource')
 class DefaultPATCH(Service):
     async def __call__(self):
         data = await self.get_data()
@@ -180,8 +187,10 @@ class DefaultPATCH(Service):
         return Response(response={}, status=204)
 
 
-@configure.service(context=IResource, method='GET', permission='guillotina.SeePermissions',
-                   name='@sharing')
+@configure.service(
+    context=IResource, method='GET', permission='guillotina.SeePermissions',
+    name='@sharing',
+    description='Get sharing settings for this resource')
 async def sharing_get(context, request):
     roleperm = IRolePermissionMap(context)
     prinperm = IPrincipalPermissionMap(context)
@@ -208,8 +217,10 @@ async def sharing_get(context, request):
     return result
 
 
-@configure.service(context=IResource, method='GET', permission='guillotina.SeePermissions',
-                   name='@all_permissions')
+@configure.service(
+    context=IResource, method='GET', permission='guillotina.SeePermissions',
+    name='@all_permissions',
+    description='See all permission settings for this resource')
 async def all_permissions(context, request):
     result = settings_for_object(context)
     await notify(ObjectPermissionsViewEvent(context))
@@ -308,7 +319,9 @@ async def can_i_do(context, request):
     return IInteraction(request).check_permission(permission, context)
 
 
-@configure.service(context=IResource, method='DELETE', permission='guillotina.DeleteContent')
+@configure.service(
+    context=IResource, method='DELETE', permission='guillotina.DeleteContent',
+    description='Delete resource')
 class DefaultDELETE(Service):
 
     async def __call__(self):
@@ -319,7 +332,9 @@ class DefaultDELETE(Service):
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 
-@configure.service(context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight')
+@configure.service(
+    context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight',
+    description='Get CORS information for resource')
 class DefaultOPTIONS(Service):
     """Preflight view for Cors support on DX content."""
 

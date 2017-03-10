@@ -23,8 +23,10 @@ _ = MessageFactory('guillotina')
 _marker = object()
 
 
-@configure.service(context=ISite, method='GET', permission='guillotina.ReadConfiguration',
-                   name='@registry')
+@configure.service(
+    context=ISite, method='GET', permission='guillotina.ReadConfiguration',
+    name='@registry',
+    description='Read site registry settings')
 class Read(TraversableService):
     key = _marker
     value = None

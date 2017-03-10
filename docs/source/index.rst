@@ -1,20 +1,16 @@
-Welcome to guillotina's documentation!
+Welcome to Guillotina's documentation!
 ======================================
+
+(Rest Resource Application Server)
+
 
 Contents:
 
 .. toctree::
    :maxdepth: 1
 
+   about
    quickstart
    rest/index
    installation/index
    developer/index
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

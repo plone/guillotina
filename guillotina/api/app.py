@@ -6,7 +6,10 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceSerializeToJson
 
 
-@configure.service(context=IApplication, method='GET', permission='guillotina.AccessContent')
+@configure.service(
+    context=IApplication, method='GET', permission='guillotina.AccessContent',
+    title="Get application data",
+    description="Retrieves serialization of application")
 async def get(context, request):
     serializer = getMultiAdapter(
         (context, request),
@@ -14,7 +17,10 @@ async def get(context, request):
     return await serializer()
 
 
-@configure.service(context=IApplication, method='GET', permission='guillotina.GetPortals',
-                   name='@apidefinition')
+@configure.service(
+    context=IApplication, method='GET', permission='guillotina.GetPortals',
+    name='@apidefinition',
+    title="Get API Definition",
+    description="Retrieves information on API configuration")
 async def get_api_definition(context, request):
     return app_settings['api_definition']

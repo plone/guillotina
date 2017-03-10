@@ -1,0 +1,4 @@
+Database
+========
+
+.. http:service:: database

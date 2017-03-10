@@ -1,0 +1,4 @@
+Folder
+======
+
+.. http:service:: folder

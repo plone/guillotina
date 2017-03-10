@@ -24,11 +24,11 @@ IMAGE = 'postgres:9.6'
 CONTAINERS_FOR_TESTING_LABEL = 'testingaiopg'
 PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
 PG_SETTINGS['applications'] = []
-PG_SETTINGS['databases'][0]['guillotina']['storage'] = 'postgresql'
+PG_SETTINGS['databases'][0]['db']['storage'] = 'postgresql'
 
-PG_SETTINGS['databases'][0]['guillotina']['partition'] = \
+PG_SETTINGS['databases'][0]['db']['partition'] = \
     'guillotina.interfaces.IResource'
-PG_SETTINGS['databases'][0]['guillotina']['dsn'] = {
+PG_SETTINGS['databases'][0]['db']['dsn'] = {
     'scheme': 'postgres',
     'dbname': 'guillotina',
     'user': 'postgres',
@@ -39,11 +39,11 @@ PG_SETTINGS['databases'][0]['guillotina']['dsn'] = {
 
 DUMMY_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
 DUMMY_SETTINGS['applications'] = []
-DUMMY_SETTINGS['databases'][0]['guillotina']['storage'] = 'DUMMY'
+DUMMY_SETTINGS['databases'][0]['db']['storage'] = 'DUMMY'
 
-DUMMY_SETTINGS['databases'][0]['guillotina']['partition'] = \
+DUMMY_SETTINGS['databases'][0]['db']['partition'] = \
     'guillotina.interfaces.IResource'
-DUMMY_SETTINGS['databases'][0]['guillotina']['dsn'] = {}
+DUMMY_SETTINGS['databases'][0]['db']['dsn'] = {}
 
 
 def run_docker_postgresql():

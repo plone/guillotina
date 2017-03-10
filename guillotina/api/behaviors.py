@@ -41,8 +41,10 @@ async def default_delete(context, request):
     return {}
 
 
-@configure.service(context=IResource, method='GET', permission='guillotina.AccessContent',
-                   name='@behaviors')
+@configure.service(
+    context=IResource, method='GET', permission='guillotina.AccessContent',
+    name='@behaviors',
+    description='Get information on behaviors for this resource')
 async def default_get(context, request):
     """We show the available schemas."""
     result = {}

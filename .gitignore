@@ -21,3 +21,4 @@ data*
 include/
 pip-selfcheck.json
 .coveralls.yml
+docs/build

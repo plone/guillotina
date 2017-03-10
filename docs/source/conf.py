@@ -30,11 +30,12 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-import guillotina
-import guillotina.utils
 extensions = [
     'sphinx.ext.coverage',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinxcontrib.httpdomain',
+    'sphinxcontrib.httpexample',
+    'guillotina.documentation.sphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
