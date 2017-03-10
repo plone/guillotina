@@ -50,7 +50,7 @@ current_request()
 
 static PyMethodDef OptimizationsMethods[] =
 {
-     {"get_current_request", current_request, METH_VARARGS, "Get the request"},
+     {"get_current_request", current_request, METH_VARARGS, "Return the current request by heuristically looking it up from stack"},
      {NULL, NULL, 0, NULL}
 };
 

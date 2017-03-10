@@ -11,10 +11,10 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IRole
 from guillotina.security.permission import Permission
-from guillotina.utils import caller_module
+from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_module_path
-from guillotina.utils import resolve_or_get
+from guillotina.utils import resolve_dotted_name
 from zope.interface import classImplements
 from zope.interface import Interface
 
@@ -37,7 +37,7 @@ def get_configurations(module_name, type_=None):
             continue
         config = registration['config']
         module = config.get('module', registration.get('klass'))
-        if (get_module_dotted_name(resolve_or_get(module)) + '.').startswith(module_name + '.'):
+        if (get_module_dotted_name(resolve_dotted_name(module)) + '.').startswith(module_name + '.'):
             results.append((reg_type, registration))
     return results
 
@@ -75,7 +75,7 @@ def load_service(_context, service):
     from guillotina.security.utils import protect_view
 
     service_conf = service['config']
-    factory = resolve_or_get(service['klass'])
+    factory = resolve_dotted_name(service['klass'])
 
     permission = service_conf.get(
         'permission', service_conf.get('default_permission', None))
@@ -128,8 +128,8 @@ def load_contenttype(_context, contenttype):
         title='',
         description='',
         portal_type=conf['portal_type'],
-        schema=resolve_or_get(conf.get('schema', Interface)),
-        behaviors=[resolve_or_get(b) for b in conf.get('behaviors', []) or ()],
+        schema=resolve_dotted_name(conf.get('schema', Interface)),
+        behaviors=[resolve_dotted_name(b) for b in conf.get('behaviors', []) or ()],
         add_permission=conf.get('add_permission') or DEFAULT_ADD_PERMISSION,
         allowed_types=conf.get('allowed_types', None)
     )
@@ -144,17 +144,17 @@ register_configuration_handler('contenttype', load_contenttype)
 
 def load_behavior(_context, behavior):
     conf = behavior['config']
-    klass = resolve_or_get(behavior['klass'])
+    klass = resolve_dotted_name(behavior['klass'])
     factory = conf.get('factory') or klass
-    real_factory = resolve_or_get(factory)
-    schema = resolve_or_get(conf['provides'])
+    real_factory = resolve_dotted_name(factory)
+    schema = resolve_dotted_name(conf['provides'])
     classImplements(real_factory, schema)
 
     name = conf.get('name')
     name_only = conf.get('name_only', False)
     title = conf.get('title', '')
-    for_ = resolve_or_get(conf.get('for_'))
-    marker = resolve_or_get(conf.get('marker'))
+    for_ = resolve_dotted_name(conf.get('for_'))
+    marker = resolve_dotted_name(conf.get('marker'))
 
     if marker is None and real_factory is None:
         marker = schema
@@ -248,7 +248,7 @@ def _component_conf(conf):
 
 def load_adapter(_context, adapter):
     conf = adapter['config']
-    klass = resolve_or_get(adapter['klass'])
+    klass = resolve_dotted_name(adapter['klass'])
     factory = conf.pop('factory', None) or klass
     _component_conf(conf)
     if 'provides' in conf and isinstance(klass, type):
@@ -266,7 +266,7 @@ register_configuration_handler('adapter', load_adapter)
 
 def load_subscriber(_context, subscriber):
     conf = subscriber['config']
-    conf['handler'] = resolve_or_get(conf.get('handler') or subscriber['klass'])
+    conf['handler'] = resolve_dotted_name(conf.get('handler') or subscriber['klass'])
     _component_conf(conf)
     component.subscriber(
         _context,
@@ -278,9 +278,9 @@ register_configuration_handler('subscriber', load_subscriber)
 def load_utility(_context, _utility):
     conf = _utility['config']
     if 'factory' in conf:
-        conf['factory'] = resolve_or_get(conf['factory'])
+        conf['factory'] = resolve_dotted_name(conf['factory'])
     elif 'component' in conf:
-        conf['component'] = resolve_or_get(conf['component'])
+        conf['component'] = resolve_dotted_name(conf['component'])
     else:
         # use provided klass
         klass = _utility['klass']
@@ -340,7 +340,7 @@ class _factory_decorator(_base_decorator):
             if 'factory' not in self.config:
                 raise Exception('Must provide factory configuration when defining '
                                 'without a class')
-            klass = caller_module()
+            klass = get_caller_module()
         return super(_factory_decorator, self).__call__(klass)
 
 
@@ -389,7 +389,7 @@ class utility(_factory_decorator):
 
 def permission(id, title, description=''):
     register_configuration(
-        caller_module(),
+        get_caller_module(),
         dict(
             id=id,
             title=title,
@@ -399,7 +399,7 @@ def permission(id, title, description=''):
 
 def role(id, title, description='', local=True):
     register_configuration(
-        caller_module(),
+        get_caller_module(),
         dict(
             id=id,
             title=title,
@@ -411,7 +411,7 @@ def role(id, title, description='', local=True):
 def grant(principal=None, role=None, permission=None,
           permissions=None):
     register_configuration(
-        caller_module(),
+        get_caller_module(),
         dict(
             principal=principal,
             role=role,
@@ -422,7 +422,7 @@ def grant(principal=None, role=None, permission=None,
 
 def grant_all(principal=None, role=None):
     register_configuration(
-        caller_module(),
+        get_caller_module(),
         dict(
             principal=principal,
             role=role),

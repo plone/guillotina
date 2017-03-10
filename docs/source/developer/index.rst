@@ -4,7 +4,7 @@ Developer documentation
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    roles
    security
@@ -18,3 +18,4 @@ Contents:
    applicationconfiguration
    design
    persistence
+   api/index

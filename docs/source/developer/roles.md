@@ -1,4 +1,4 @@
-# Security
+# Roles
 
 `guillotina` implements robust ACL security.
 

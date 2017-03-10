@@ -41,12 +41,12 @@ from guillotina.interfaces import IStaticFile
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
-from guillotina.utils import apply_coroutine
 from guillotina.utils import get_current_request
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import noLongerProvides
+import typing
 
 import guillotina.db.orm.base
 import pathlib
@@ -248,6 +248,9 @@ def _default_from_schema(context, schema, fieldname):
 
 @implementer(IResource)
 class Resource(guillotina.db.orm.base.BaseObject):
+    """
+    Base resource object class
+    """
 
     __name__ = None
     __parent__ = None
@@ -261,14 +264,19 @@ class Resource(guillotina.db.orm.base.BaseObject):
 
     @property
     def uuid(self):
+        """
+        The unique id of the content object
+        """
         return self._p_oid
 
-    def __init__(self, id=None):
+    def __init__(self, id: str=None):
         if id is not None:
             self.__name__ = id
         super(Resource, self).__init__()
 
     def __repr__(self):
+        """
+        """
         path = '/'.join(get_physical_path(self))
         return "< {type} at {path} by {mem} >".format(
             type=self.portal_type,
@@ -276,7 +284,10 @@ class Resource(guillotina.db.orm.base.BaseObject):
             mem=id(self))
 
     @property
-    def acl(self):
+    def acl(self) -> dict:
+        """
+        Access control list stores security information on the object
+        """
         if self.__acl__ is None:
             return dict({})
         return self.__acl__
@@ -296,7 +307,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         for behavior in self.__behaviors__:
             yield BEHAVIOR_CACHE[behavior]
 
-    def add_behavior(self, iface):
+    def add_behavior(self, iface: Interface) -> None:
         """We need to apply the marker interface.
 
         value: Interface to add
@@ -316,7 +327,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
                 alsoProvides(self, behavior_registration.marker)
                 self._p_register()  # make sure we resave this obj
 
-    def remove_behavior(self, iface):
+    def remove_behavior(self, iface: Interface) -> None:
         """We need to apply the marker interface.
 
         value: Interface to add
@@ -363,7 +374,9 @@ class Resource(guillotina.db.orm.base.BaseObject):
     schema=IItem,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class Item(Resource):
-    pass
+    """
+    Basic item content type. Inherits from Resource
+    """
 
 
 @configure.contenttype(
@@ -371,38 +384,66 @@ class Item(Resource):
     schema=IContainer,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class Folder(Resource):
-    async def async_contains(self, key):
+    """
+    Basic folder content type. Inherits from Resource but provides interface
+    to work with contained objects asynchronously.
+    """
+
+    async def async_contains(self, key: str) -> bool:
+        """
+        Asynchronously check if key exists inside this folder
+        """
         return await self._p_jar.contains(self._p_oid, key)
 
-    async def async_set(self, key, value):
+    async def async_set(self, key: str, value: IResource) -> None:
+        """
+        Asynchronously set an object in this folder
+        """
         value.__parent__ = self
         value.__name__ = key
         if self._p_jar is not None:
             value._p_jar = self._p_jar
             self._p_jar.register(value)
 
-    async def async_get(self, key, default=None):
+    async def async_get(self, key: str, default=None) -> IResource:
+        """
+        Asynchronously get an object inside this folder
+        """
         try:
             return await self._p_jar.get_child(self, key)
         except KeyError:
             return default
 
-    async def async_del(self, key):
+    async def async_del(self, key: str) -> None:
+        """
+        Asynchronously delete object in the folder
+        """
         return await self._p_jar.delete(await self.async_get(key))
 
-    async def async_len(self):
+    async def async_len(self) -> int:
+        """
+        Asynchronously calculate the len of the folder
+        """
         return await self._p_jar.len(self._p_oid)
 
-    async def async_keys(self):
+    async def async_keys(self) -> typing.List[str]:
+        """
+        Asynchronously get the sub object keys in this folder
+        """
         return await self._p_jar.keys(self._p_oid)
 
-    async def async_items(self):
+    async def async_items(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
+        """
+        Asynchronously iterate through contents of folder
+        """
         async for key, value in self._p_jar.items(self):
             yield key, value
 
 
 @configure.contenttype(portal_type="Site", schema=ISite)
 class Site(Folder):
+    """
+    """
 
     async def install(self):
         # Creating and registering a local registry

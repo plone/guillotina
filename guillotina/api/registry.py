@@ -13,7 +13,7 @@ from guillotina.interfaces import IValueToJson
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
 from guillotina.utils import import_class
-from guillotina.utils import resolve
+from guillotina.utils import resolve_dotted_name
 from zope.interface.interfaces import ComponentLookupError
 
 
@@ -122,7 +122,7 @@ class Write(TraversableService):
 
         assert '.' in self.key, 'Registry key must be dotted.iface.name.fieldname'  # noqa
         iface, name = self.key.rsplit('.', 1)
-        iface = resolve(iface)
+        iface = resolve_dotted_name(iface)
         field = iface[name]
 
         try:

@@ -20,7 +20,7 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
 from guillotina.traversal import TraversalRouter
-from guillotina.utils import resolve_or_get
+from guillotina.utils import resolve_dotted_name
 
 import asyncio
 import collections
@@ -139,7 +139,7 @@ def make_app(config_file=None, settings=None, loop=None):
     load_application(guillotina, root, settings)
 
     for module_name in settings.get('applications', []):
-        load_application(resolve_or_get(module_name), root, settings)
+        load_application(resolve_dotted_name(module_name), root, settings)
     try:
         app.config.execute_actions()
     except ConfigurationConflictError as e:

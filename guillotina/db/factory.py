@@ -4,7 +4,7 @@ from guillotina.db.dummy import DummyStorage
 from guillotina.db.storage import APgStorage
 from guillotina.factory.content import Database
 from guillotina.interfaces import IDatabaseConfigurationFactory
-from guillotina.utils import resolve_or_get
+from guillotina.utils import resolve_dotted_name
 
 
 @configure.utility(provides=IDatabaseConfigurationFactory, name="postgresql")
@@ -13,7 +13,7 @@ async def DatabaseConfigurationFactory(key, dbconfig, app):
     dsn = "{scheme}://{user}:{password}@{host}:{port}/{dbname}".format(**dbconfig['dsn'])  # noqa
     partition_object = None
     if 'partition' in dbconfig:
-        partition_object = resolve_or_get(dbconfig['partition'])
+        partition_object = resolve_dotted_name(dbconfig['partition'])
     pool_size = config.get('pool_size', 100)
     aps = APgStorage(dsn=dsn, partition=partition_object, name=key, pool_size=pool_size)
     if app is not None:

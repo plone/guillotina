@@ -17,6 +17,7 @@ import string
 import sys
 import time
 import types
+import typing
 
 
 try:
@@ -37,12 +38,16 @@ logger = logging.getLogger('guillotina')
 
 
 def import_class(import_string: str) -> types.ModuleType:
+    """
+    Import class from string
+    """
     t = import_string.rsplit('.', 1)
     return getattr(importlib.import_module(t[0]), t[1], None)
 
 
 def get_content_path(content: IResource) -> str:
-    """ No site id
+    """
+    Generate full path of resource object
     """
     parts = []
     parent = getattr(content, '__parent__', None)
@@ -55,13 +60,19 @@ def get_content_path(content: IResource) -> str:
 
 
 def get_content_depth(content: IResource) -> int:
+    """
+    Calculate the depth of a resource object
+    """
     depth = 0
     for parent in iter_parents(content):
         depth += 1
     return depth
 
 
-def iter_parents(content: IResource) -> types.GeneratorType:
+def iter_parents(content: IResource) -> typing.Iterator[IResource]:
+    """
+    Iterate through all the parents of a content object
+    """
     content = getattr(content, '__parent__', None)
     while content is not None:
         yield content
@@ -69,6 +80,9 @@ def iter_parents(content: IResource) -> types.GeneratorType:
 
 
 def get_authenticated_user(request: IRequest) -> IPrincipal:
+    """
+    Get the currently authenticated user
+    """
     if (hasattr(request, 'security') and
             hasattr(request.security, 'participations') and
             len(request.security.participations) > 0):
@@ -78,6 +92,9 @@ def get_authenticated_user(request: IRequest) -> IPrincipal:
 
 
 def get_authenticated_user_id(request: IRequest) -> str:
+    """
+    Get the currently authenticated user id
+    """
     user = get_authenticated_user(request)
     if user:
         return user.id
@@ -131,7 +148,25 @@ def strings_differ(string1: str, string2: str) -> bool:
     return invalid_bits != 0
 
 
-def resolve(name: str, module: str=None) -> type:
+def get_random_string(length: int=30,
+                      allowed_chars: str=string.ascii_letters + string.digits) -> str:
+    """
+    Heavily inspired by Plone/Django
+    Returns a securely generated random string.
+    """
+    if not using_sys_random:
+        # do our best to get secure random without sysrandom
+        seed_value = "%s%s%s" % (random.getstate(), time.time(), RANDOM_SECRET)
+        random.seed(sha(seed_value).digest())
+    return ''.join([random.choice(allowed_chars) for i in range(length)])
+
+
+def resolve_dotted_name(name: str, module: str=None) -> type:
+    """
+    import the provided dotted name
+    """
+    if not isinstance(name, str):
+        return name  # already an object
     name = name.split('.')
     if not name[0]:
         if module is None:
@@ -156,26 +191,7 @@ def resolve(name: str, module: str=None) -> type:
     return found
 
 
-def resolve_or_get(potential_dotted_name: str) -> type:
-    if isinstance(potential_dotted_name, str):
-        return resolve(potential_dotted_name)
-    return potential_dotted_name
-
-
-def get_random_string(length: int=30,
-                      allowed_chars: str=string.ascii_letters + string.digits) -> str:
-    """
-    Heavily inspired by Plone/Django
-    Returns a securely generated random string.
-    """
-    if not using_sys_random:
-        # do our best to get secure random without sysrandom
-        seed_value = "%s%s%s" % (random.getstate(), time.time(), RANDOM_SECRET)
-        random.seed(sha(seed_value).digest())
-    return ''.join([random.choice(allowed_chars) for i in range(length)])
-
-
-def caller_module(level: int=2, sys: types.ModuleType=sys) -> types.ModuleType:
+def get_caller_module(level: int=2, sys: types.ModuleType=sys) -> types.ModuleType:
     """
     Pulled out of pyramid
     """
@@ -185,12 +201,12 @@ def caller_module(level: int=2, sys: types.ModuleType=sys) -> types.ModuleType:
     return module
 
 
-def caller_package(level=2, caller_module=caller_module) -> types.ModuleType:
+def get_caller_package(level=2, get_caller_module=get_caller_module) -> types.ModuleType:
     """
     Pulled out of pyramid
     """
-    # caller_module in arglist for tests
-    module = caller_module(level + 1)
+    # get_caller_module in arglist for tests
+    module = get_caller_module(level + 1)
     f = getattr(module, '__file__', '')
     if (('__init__.py' in f) or ('__init__$py' in f)):  # empty at >>>
         # Module is a package
@@ -202,7 +218,7 @@ def caller_package(level=2, caller_module=caller_module) -> types.ModuleType:
 
 def resolve_module_path(path: str) -> str:
     if type(path) is str and path[0] == '.':
-        caller_mod = caller_module()
+        caller_mod = get_caller_module()
         caller_path = get_module_dotted_name(caller_mod)
         caller_path = '.'.join(caller_path.split('.')[:-path.count('..')])
         path = caller_path + '.' + path.split('..')[-1].strip('.')
@@ -221,7 +237,7 @@ def get_class_dotted_name(ob) -> str:
     return ob.__module__ + '.' + class_name
 
 
-def rec_merge(d1: dict, d2: dict) -> dict:
+def merge_dicts(d1: dict, d2: dict) -> dict:
     """
     Update two dicts of dicts recursively,
     if either mapping has leaves that are non-dicts,
@@ -232,7 +248,7 @@ def rec_merge(d1: dict, d2: dict) -> dict:
         if k in d2:
             # this next check is the only difference!
             if all(isinstance(e, MutableMapping) for e in (v, d2[k])):
-                d2[k] = rec_merge(v, d2[k])
+                d2[k] = merge_dicts(v, d2[k])
             if isinstance(v, list):
                 d2[k].extend(v)
             # we could further check types and merge as appropriate here.
