@@ -11,6 +11,7 @@ include buildout-pypy.cfg
 include buildout.cfg
 include zeo.cfg
 include docs/*
+include guillotina/documentation/meta/*
 include buildout-newt.cfg
 include guillotina/*
 pip-selfcheck.json
