@@ -1,4 +1,6 @@
 Folder
 ======
 
-.. http:service:: folder
+.. http:service::
+   :type: folder
+   :directory: ../../rest-dumps

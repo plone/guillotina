@@ -1,4 +1,6 @@
 Application
 ===========
 
-.. http:service:: application
+.. http:service::
+   :type: application
+   :directory: ../../rest-dumps

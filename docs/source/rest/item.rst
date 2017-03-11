@@ -1,4 +1,6 @@
 Item
 ====
 
-.. http:service:: item
+.. http:service::
+   :type: item
+   :directory: ../../rest-dumps

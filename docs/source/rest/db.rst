@@ -1,4 +1,6 @@
 Database
 ========
 
-.. http:service:: database
+.. http:service::
+   :type: database
+   :directory: ../../rest-dumps

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from docutils import nodes
-from guillotina.documentation import DIR
+from docutils.parsers.rst import directives
 from sphinx import addnodes
 from sphinx.directives import CodeBlock
-from sphinxcontrib.httpexample import utils
+from sphinxcontrib.httpexample import utils as httpex_utils
 from sphinxcontrib.httpexample.directives import HTTPExample
 
 import json
@@ -40,9 +40,16 @@ class HTTPService(CodeBlock):
     blocks for services
     """
 
-    required_arguments = 1
-    option_spec = utils.merge_dicts(CodeBlock.option_spec, {
+    required_arguments = 0
+    option_spec = httpex_utils.merge_dicts(CodeBlock.option_spec, {
+        'type': directives.unchanged,
+        'directory': directives.unchanged
     })
+
+    def __init__(self, *args, **kwargs):
+        super(HTTPService, self).__init__(*args, **kwargs)
+        cwd = os.path.dirname(self.state.document.current_source)
+        self.dir = os.path.normpath(os.path.join(cwd, self.options['directory']))
 
     def get_json_from_file(self, filename):
         fi = open(filename, 'r')
@@ -58,7 +65,7 @@ class HTTPService(CodeBlock):
         return filename
 
     def process_service(self, filename):
-        data = self.get_json_from_file(os.path.join(DIR, filename))
+        data = self.get_json_from_file(os.path.join(self.dir, filename))
         request_filename = self.write_tmp(data['request'])
         response_filename = self.write_tmp(data['response'])
 
@@ -103,9 +110,9 @@ class HTTPService(CodeBlock):
         return container
 
     def run(self):
-        type_name = self.arguments[0]
+        type_name = self.options['type']
         files = []
-        for filename in os.listdir(DIR):
+        for filename in os.listdir(self.dir):
             if filename.startswith(type_name + '-'):
                 files.append(filename)
         files.sort(key=service_filename_sort_key)
