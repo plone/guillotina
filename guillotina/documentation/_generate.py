@@ -23,8 +23,16 @@ IGNORED_HEADERS = (
 
 DEFAULT_HEADERS = {
     'Host': 'localhost:8080',
-    'Content-Type': 'application/json',
     'Accept': 'application/json'
+}
+
+
+BASE_PATHS = {
+    '/': 'guillotina.interfaces.content.IApplication',
+    '/db': 'guillotina.interfaces.content.IDatabase',
+    '/db/site': 'guillotina.interfaces.content.ISite',
+    '/db/site/folder': 'guillotina.interfaces.content.IContainer',
+    '/db/site/folder/item': 'guillotina.interfaces.content.IItem'
 }
 
 
@@ -70,9 +78,6 @@ def api(path, method='get', file_type_name=None, **kwargs):
     kwargs['headers'] = DEFAULT_HEADERS.copy()
     kwargs['headers'].update(kwargs.get('headers', {}))
 
-    if not kwargs.get('data'):
-        del kwargs['headers']['Content-Type']
-
     response = getattr(requests, method)(URL + path, **kwargs)
 
     service = get_service_def(path, method.upper())
@@ -108,15 +113,6 @@ def api(path, method='get', file_type_name=None, **kwargs):
     fi = open(filepath, 'w')
     fi.write(json.dumps(data, indent=4, sort_keys=True))
     fi.close()
-
-
-BASE_PATHS = {
-    '/': 'guillotina.interfaces.content.IApplication',
-    '/db': 'guillotina.interfaces.content.IDatabase',
-    '/db/site': 'guillotina.interfaces.content.ISite',
-    '/db/site/folder': 'guillotina.interfaces.content.IContainer',
-    '/db/site/folder/item': 'guillotina.interfaces.content.IItem'
-}
 
 
 def get_type_services(iface):
@@ -160,41 +156,79 @@ def get_service_def(path, method=None, type_name=None):
                 return service
 
 
+class APIExplorer(object):
+    def __init__(self, base_path='', type_name=None):
+        self.base_path = base_path
+        self.type_name = type_name
+
+    def get(self, name=''):
+        api(os.path.join(self.base_path, name),
+            file_type_name=self.type_name)
+        return self
+
+    def post(self, jsond, name=''):
+        api(os.path.join(self.base_path, name),
+            'post', json=jsond, file_type_name=self.type_name)
+        return self
+
+    def patch(self, jsond, name=''):
+        api(os.path.join(self.base_path, name),
+            'patch', json=jsond, file_type_name=self.type_name)
+        return self
+
+    def delete(self, name=''):
+        api(os.path.join(self.base_path, name),
+            'delete', file_type_name=self.type_name)
+        return self
+
+    def options(self, name=''):
+        api(os.path.join(self.base_path, name),
+            'options', file_type_name=self.type_name)
+        return self
+
+
 if __name__ == '__main__':
     aioapp = make_app(settings=TESTING_SETTINGS)
     aioapp.config.execute_actions()
     load_cached_schema()
-    api('/')
-    api('/@apidefinition')
-    api('/db')
-    api('/db', 'post', data=json.dumps({
+
+    # application root
+    APIExplorer('/').get().get('@apidefinition')
+
+    # db root
+    APIExplorer('/db').get().post(jsond={
         '@type': 'Site',
         'id': 'site',
         'title': 'Site'
-    }))
-    api('/db/site')
-    api('/db/site/@addons')
-    api('/db/site/@registry')
-    api('/db/site/@types')
+    })
 
-    api('/db/site', 'post', data=json.dumps({
-        '@type': 'Folder',
-        'id': 'folder',
-        'title': 'My Folder'
-    }))
-    api('/db/site/folder', file_type_name='folder')
+    # site root
+    site_explorer = APIExplorer('/db/site')
+    site_explorer.get().options().get('@addons').get('@registry')\
+        .get('@types').post(jsond={
+            '@type': 'Folder',
+            'id': 'folder',
+            'title': 'My Folder'
+        })
 
-    api('/db/site/folder', 'post', file_type_name='folder', data=json.dumps({
-        '@type': 'Item',
-        'id': 'item',
-        'title': 'My Item'
-    }))
-    api('/db/site/folder/item', file_type_name='item')
-    api('/db/site/folder/item', 'options', file_type_name='item')
-    api('/db/site/folder/item', 'patch', file_type_name='item', data=json.dumps({
-        'title': 'My Item Updated'
-    }))
-    api('/db/site/folder/item/@sharing', file_type_name='item')
-    api('/db/site/folder/item/@all_permissions', file_type_name='item')
-    api('/db/site/folder/item/@behaviors', file_type_name='item')
-    api('/db/site/folder/item', 'delete', file_type_name='item')
+    # folder
+    folder_explorer = APIExplorer('/db/site/folder', type_name='folder')
+    folder_explorer.get().options().get('@sharing').get('@all_permissions')\
+        .get('@behaviors').patch(jsond={
+            'title': 'My Folder Updated'
+        }).post(jsond={
+            '@type': 'Item',
+            'id': 'item',
+            'title': 'My Item'
+        })
+
+    # item
+    item_explorer = APIExplorer('/db/site/folder/item', type_name='item')
+    item_explorer.get().options().get('@sharing').get('@all_permissions')\
+        .get('@behaviors').patch(jsond={
+            'title': 'My Item Updated'
+        }).delete()
+
+    # clean up...
+    folder_explorer.delete()
+    site_explorer.delete()

@@ -10,14 +10,14 @@
             "Host": "localhost:8080"
         },
         "json": {
-            "title": "My Item Updated"
+            "title": "My Folder Updated"
         }
     },
-    "path": "/db/site/folder/item/",
-    "request": "PATCH /db/site/folder/item/ HTTP/1.1\nAccept: application/json\nHost: localhost:8080\nContent-Length: 28\nContent-Type: application/json\nAuthorization: Basic cm9vdDpyb290\n\n{\n    \"title\": \"My Item Updated\"\n}",
+    "path": "/db/site/folder/",
+    "request": "PATCH /db/site/folder/ HTTP/1.1\nAccept: application/json\nHost: localhost:8080\nContent-Length: 30\nContent-Type: application/json\nAuthorization: Basic cm9vdDpyb290\n\n{\n    \"title\": \"My Folder Updated\"\n}",
     "response": "HTTP/1.1 204 No Content\nContent-Length: 2\nContent-Type: application/json\nServer: Python/3.6 aiohttp/1.3.3\n\n",
     "service": {
-        "context": "guillotina.interfaces.content.IItem",
+        "context": "guillotina.interfaces.content.IContainer",
         "description": "Modify the content of this resource",
         "method": "PATCH",
         "name": null,
