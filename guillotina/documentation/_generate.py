@@ -73,6 +73,8 @@ def dump_response(resp):
 
 
 def api(path, method='get', file_type_name=None, **kwargs):
+    if path != '/':
+        path = path.rstrip('/')
     print('Getting {} {}'.format(method, path))
     kwargs['auth'] = ('root', 'root')
     kwargs['headers'] = DEFAULT_HEADERS.copy()
@@ -166,12 +168,12 @@ class APIExplorer(object):
             file_type_name=self.type_name)
         return self
 
-    def post(self, jsond, name=''):
+    def post(self, name='', jsond=None):
         api(os.path.join(self.base_path, name),
             'post', json=jsond, file_type_name=self.type_name)
         return self
 
-    def patch(self, jsond, name=''):
+    def patch(self, name='', jsond=''):
         api(os.path.join(self.base_path, name),
             'patch', json=jsond, file_type_name=self.type_name)
         return self
@@ -204,7 +206,7 @@ if __name__ == '__main__':
 
     # site root
     site_explorer = APIExplorer('/db/site')
-    site_explorer.get().options().get('@addons').get('@registry')\
+    site_explorer.get().get('@addons').get('@registry')\
         .get('@types').post(jsond={
             '@type': 'Folder',
             'id': 'folder',
@@ -213,7 +215,7 @@ if __name__ == '__main__':
 
     # folder
     folder_explorer = APIExplorer('/db/site/folder', type_name='folder')
-    folder_explorer.get().options().get('@sharing').get('@all_permissions')\
+    folder_explorer.get().get('@sharing').get('@all_permissions')\
         .get('@behaviors').patch(jsond={
             'title': 'My Folder Updated'
         }).post(jsond={
@@ -224,7 +226,7 @@ if __name__ == '__main__':
 
     # item
     item_explorer = APIExplorer('/db/site/folder/item', type_name='item')
-    item_explorer.get().options().get('@sharing').get('@all_permissions')\
+    item_explorer.get().get('@sharing').get('@all_permissions')\
         .get('@behaviors').patch(jsond={
             'title': 'My Item Updated'
         }).delete()
