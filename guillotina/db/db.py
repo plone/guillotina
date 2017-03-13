@@ -27,7 +27,7 @@ class GuillotinaDB(object):
                  database_name='unnamed'):
         """Create an object database.
         """
-
+        self._tm = None
         self.remote_cache = remote_cache
         self.storage = storage
         if remote_cache is not None:
@@ -63,4 +63,6 @@ class GuillotinaDB(object):
         await self.storage.finalize()
 
     def new_transaction_manager(self):
-        return TransactionManager(self.storage)
+        tm = TransactionManager(self.storage)
+        self._tm = tm
+        return tm

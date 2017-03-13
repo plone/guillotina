@@ -8,15 +8,16 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 
 
-def get_mocked_request(db):
+def get_mocked_request(db=None):
     request = make_mocked_request('POST', '/')
-    request._db_id = db.id
     request.interaction = None
-    request._db = db
-    request._tm = db.new_transaction_manager()
-    request._tm.request = request  # so get_current_request can find it...
     alsoProvides(request, IRequest)
     alsoProvides(request, IDefaultLayer)
+    if db is not None:
+        request._db_id = db.id
+        request._db = db
+        request._tm = db.new_transaction_manager()
+        request._tm.request = request  # so get_current_request can find it...
     return request
 
 

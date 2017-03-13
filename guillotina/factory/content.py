@@ -106,17 +106,21 @@ class Database(object):
         self._conn = None
 
     def get_transaction_manager(self):
-        return self.tm
+        if self._db.request is not None and hasattr(self._db.request, '_tm'):
+            return self._db.request._tm
+        if self._db._tm is None:
+            self._db.new_transaction_manager()
+        return self._db._tm
 
     def new_transaction_manager(self):
         return self._db.new_transaction_manager()
 
     @property
     def _p_jar(self):
-        return self._db.request._tm
+        return self.get_transaction_manager()
 
     async def get_root(self):
-        return await self._db.request._tm.root()
+        return await self._p_jar.root()
 
     async def async_get(self, key):
         root = await self.get_root()
@@ -145,15 +149,15 @@ class Database(object):
         await root._p_jar.delete(await root.async_get(key))
 
     async def async_items(self):
-        root = await self.conn.root()
+        root = await self.get_root()
         async for key, value in root._p_jar.items(root):
             yield key, value
 
     async def async_contains(self, key):
         # is there any request active ? -> conn there
-        root = await self.conn.root()
+        root = await self.get_root()
         return root._p_jar.contains(root._p_oid, key)
 
     async def async_len(self):
-        root = await self.conn.root()
+        root = await self.get_root()
         return root._p_jar.len(root._p_oid)

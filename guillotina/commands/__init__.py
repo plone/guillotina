@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from guillotina import logger
 from guillotina.factory import make_app
-from guillotina.tests.utils import FakeRequest
-from guillotina.tests.utils import TestParticipation
+from guillotina.tests.utils import get_mocked_request
+from guillotina.tests.utils import login
 
 import argparse
+import asyncio
 import json
 import logging
 import os
@@ -41,10 +42,8 @@ class Command(object):
     description = ''
 
     def __init__(self):
-        self.request = FakeRequest()
-        self.request.security.add(TestParticipation(self.request))
-        self.request.security.invalidate_cache()
-        self.request._cache_groups = {}
+        self.request = get_mocked_request()
+        login(self.request)
 
         parser = self.get_parser()
         arguments = parser.parse_args()
@@ -72,7 +71,13 @@ class Command(object):
                 level=logging.DEBUG)
             ch.setLevel(logging.DEBUG)
 
-        self.run(arguments, settings, app)
+        if asyncio.iscoroutinefunction(self.run):
+            loop = asyncio.get_event_loop()
+            # Blocking call which returns when finished
+            loop.run_until_complete(self.run(arguments, settings, app))
+            loop.close()
+        else:
+            self.run(arguments, settings, app)
 
     def make_app(self, settings):
         return make_app(settings=settings)
