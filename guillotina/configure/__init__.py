@@ -110,7 +110,9 @@ def load_service(_context, service):
     if name:
         if 'endpoints' not in ct_api:
             ct_api['endpoints'] = OrderedDict()
-        ct_api['endpoints'][name] = OrderedDict(service_conf)
+        if name not in ct_api['endpoints']:
+            ct_api['endpoints'][name] = OrderedDict()
+        ct_api['endpoints'][name][method] = OrderedDict(service_conf)
     else:
         ct_api[method] = OrderedDict(service_conf)
 register_configuration_handler('service', load_service)

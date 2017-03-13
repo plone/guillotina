@@ -11,8 +11,17 @@ from guillotina.utils import apply_coroutine
 _ = MessageFactory('guillotina')
 
 
-@configure.service(context=ISite, name='@addons', method='POST',
-                   permission='guillotina.ManageAddons')
+@configure.service(
+    context=ISite, name='@addons', method='POST',
+    permission='guillotina.ManageAddons',
+    description='Install addon to site',
+    options={
+        'id': {
+            'label': 'id of addon to install',
+            'type': 'string',
+            'required': True
+        }
+    })
 async def install(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -34,8 +43,17 @@ async def install(context, request):
     return await get_addons(context, request)()
 
 
-@configure.service(context=ISite, name='@addons', method='DELETE',
-                   permission='guillotina.ManageAddons')
+@configure.service(
+    context=ISite, name='@addons', method='DELETE',
+    permission='guillotina.ManageAddons',
+    description='Uninstall an addon from site',
+    options={
+        'id': {
+            'label': 'id of addon to install',
+            'type': 'string',
+            'required': True
+        }
+    })
 async def uninstall(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -57,8 +75,10 @@ async def uninstall(context, request):
     config.enabled -= {id_to_install}
 
 
-@configure.service(context=ISite, name='@addons', method='GET',
-                   permission='guillotina.ManageAddons')
+@configure.service(
+    context=ISite, name='@addons', method='GET',
+    permission='guillotina.ManageAddons',
+    description='List available addons')
 async def get_addons(context, request):
     result = {
         'available': [],

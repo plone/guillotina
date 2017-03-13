@@ -29,8 +29,8 @@ def service_filename_sort_key(filename):
         return '0-{}'.format(method_sort_order.index(parts[1]))
     else:
         return '1-{}-{}'.format(
-            method_sort_order.index(parts[1]),
-            parts[2])
+            parts[2],
+            method_sort_order.index(parts[1]))
 
 
 class HTTPService(CodeBlock):
@@ -66,8 +66,8 @@ class HTTPService(CodeBlock):
 
     def process_service(self, filename):
         data = self.get_json_from_file(os.path.join(self.dir, filename))
-        request_filename = self.write_tmp(data['request'])
-        response_filename = self.write_tmp(data['response'])
+        request_filename = self.write_tmp(data['request'] or '')
+        response_filename = self.write_tmp(data['response'] or '')
 
         example = HTTPExample(
             'http:example',
@@ -87,13 +87,14 @@ class HTTPService(CodeBlock):
         method = data['method'].upper()
         service = data['service']
         name = service.get('name') or ''
+        path_scheme = data.get('path_scheme') or name
         description = service.get('description') or ''
         permission = service.get('permission') or ''
 
         container = nodes.container('')
         container.append(nodes.header())
         container.append(addnodes.desc_name(method + ' ', method + ' '))
-        container.append(addnodes.desc_name(name, name))
+        container.append(addnodes.desc_name(path_scheme, path_scheme))
 
         inner_container = nodes.definition('')
         container.append(inner_container)

@@ -62,8 +62,22 @@ class Read(TraversableService):
         }
 
 
-@configure.service(context=ISite, method='POST', permission='guillotina.RegisterConfigurations',
-                   name='@registry')
+@configure.service(
+    context=ISite, method='POST', permission='guillotina.RegisterConfigurations',
+    name='@registry',
+    description='Register a new interface to for registry settings',
+    options={
+        'interface': {
+            'label': 'dotted name of interface to install',
+            'type': 'string',
+            'required': True
+        },
+        'initial_values': {
+            'label': 'Initial value settings',
+            'type': 'object',
+            'required': False
+        }
+    })
 class Register(Service):
     """Register an Interface on the Registry."""
 
@@ -98,8 +112,17 @@ class Register(Service):
         return Response(response={}, status=201)
 
 
-@configure.service(context=ISite, method='PATCH', permission='guillotina.WriteConfiguration',
-                   name='@registry')
+@configure.service(
+    context=ISite, method='PATCH', permission='guillotina.WriteConfiguration',
+    name='@registry',
+    description='Update registry setting',
+    options={
+        'value': {
+            'type': 'string',
+            'label': 'The value to set on the registry setting',
+            'required': True
+        }
+    })
 class Write(TraversableService):
     key = _marker
     value = None

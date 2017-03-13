@@ -1,4 +1,5 @@
 from guillotina import app_settings
+from guillotina import configure
 from guillotina.content import load_cached_schema
 from guillotina.documentation import DIR
 from guillotina.documentation import URL
@@ -6,6 +7,8 @@ from guillotina.factory import make_app
 from guillotina.testing import TESTING_SETTINGS
 from guillotina.utils import get_class_dotted_name
 from guillotina.utils import resolve_dotted_name
+from guillotina.addons import Addon
+from guillotina.documentation import testmodule
 
 import json
 import os
@@ -18,7 +21,8 @@ IGNORED_HEADERS = (
     'User-Agent',
     'Date',
     'Access-Control-Allow-Credentials',
-    'Access-Control-Expose-Headers'
+    'Access-Control-Expose-Headers',
+    'Content-Length'
 )
 
 DEFAULT_HEADERS = {
@@ -75,6 +79,12 @@ def dump_response(resp):
 def api(path, method='get', file_type_name=None, **kwargs):
     if path != '/':
         path = path.rstrip('/')
+
+    service = get_service_def(path, method.upper())
+    # path scheme used for things like traversing to registry value...
+    name = service.get('name')
+    path_scheme = kwargs.pop('path_scheme', name)
+
     print('Getting {} {}'.format(method, path))
     kwargs['auth'] = ('root', 'root')
     kwargs['headers'] = DEFAULT_HEADERS.copy()
@@ -82,11 +92,11 @@ def api(path, method='get', file_type_name=None, **kwargs):
 
     response = getattr(requests, method)(URL + path, **kwargs)
 
-    service = get_service_def(path, method.upper())
     iface = resolve_dotted_name(get_service_type_name(path)[-1])
     dotted = get_class_dotted_name(iface)
     data = {
         'path': path,
+        'path_scheme': path_scheme,
         'method': method,
         'options': kwargs,
         'request': dump_request(response.request),
@@ -108,7 +118,14 @@ def api(path, method='get', file_type_name=None, **kwargs):
 
     filepath = '{}/{}-{}'.format(DIR, file_type_name, method.lower())
 
-    if service.get('name'):
+    if path_scheme != name:
+        # use special name here...
+        name, _, rest = path_scheme.partition('/')
+        filepath += '-{}:{}'.format(
+            name.replace('@', ''),
+            ''.join([l for l in rest.split(':')[0] if l not in '[]():-'])
+        )
+    elif service.get('name'):
         filepath += '-' + service.get('name').replace('@', '')
 
     filepath += '.json'
@@ -128,6 +145,7 @@ def get_service_type_name(path):
     base_path, _, subpath = path.partition('@')
     if base_path != '/':
         base_path = base_path.rstrip('/')
+    subpath = subpath.split('/')[0]  # could be traversing it...
     return base_path, subpath, BASE_PATHS[base_path]
 
 
@@ -139,7 +157,7 @@ def get_service_def(path, method=None, type_name=None):
         services = get_type_services(path_type_name)
     try:
         if '@' in path:
-            return services['endpoints']['@' + subpath]
+            return services['endpoints']['@' + subpath][method.upper()]
         else:
             return services[method]
     except (KeyError, TypeError):
@@ -163,36 +181,65 @@ class APIExplorer(object):
         self.base_path = base_path
         self.type_name = type_name
 
-    def get(self, name=''):
+    def get(self, name='', **kwargs):
         api(os.path.join(self.base_path, name),
-            file_type_name=self.type_name)
+            file_type_name=self.type_name, **kwargs)
         return self
 
-    def post(self, name='', jsond=None):
+    def post(self, name='', jsond=None, **kwargs):
         api(os.path.join(self.base_path, name),
-            'post', json=jsond, file_type_name=self.type_name)
+            'post', json=jsond, file_type_name=self.type_name, **kwargs)
         return self
 
-    def patch(self, name='', jsond=''):
+    def patch(self, name='', jsond=None, **kwargs):
         api(os.path.join(self.base_path, name),
-            'patch', json=jsond, file_type_name=self.type_name)
+            'patch', json=jsond, file_type_name=self.type_name, **kwargs)
         return self
 
-    def delete(self, name=''):
+    def delete(self, name='', jsond=None, **kwargs):
         api(os.path.join(self.base_path, name),
-            'delete', file_type_name=self.type_name)
+            'delete', file_type_name=self.type_name, json=jsond, **kwargs)
         return self
 
-    def options(self, name=''):
+    def options(self, name='', **kwargs):
         api(os.path.join(self.base_path, name),
-            'options', file_type_name=self.type_name)
+            'options', file_type_name=self.type_name, **kwargs)
         return self
+
+    def resource_api_basics(self):
+        return self.get().get('@sharing').get('@all_permissions')\
+            .get('@behaviors')
+
+
+def setup_app():
+    settings = TESTING_SETTINGS.copy()
+    settings['applications'] = ['guillotina.documentation']
+    aioapp = make_app(settings=settings)
+
+    @configure.addon(
+        name="myaddon",
+        title="My addon")
+    class MyAddon(Addon):
+
+        @classmethod
+        def install(cls, site, request):
+            # install code
+            pass
+
+        @classmethod
+        def uninstall(cls, site, request):
+            # uninstall code
+            pass
+
+    config = aioapp.config
+    configure.load_configuration(
+        config, 'guillotina.documentation', 'addon')
+    aioapp.config.execute_actions()
+    load_cached_schema()
 
 
 if __name__ == '__main__':
-    aioapp = make_app(settings=TESTING_SETTINGS)
-    aioapp.config.execute_actions()
-    load_cached_schema()
+    setup_app()
 
     # application root
     APIExplorer('/').get().get('@apidefinition')
@@ -206,17 +253,35 @@ if __name__ == '__main__':
 
     # site root
     site_explorer = APIExplorer('/db/site')
-    site_explorer.get().get('@addons').get('@registry')\
-        .get('@types').post(jsond={
-            '@type': 'Folder',
-            'id': 'folder',
-            'title': 'My Folder'
-        })
+    site_explorer.get().get('@types').post(jsond={
+        '@type': 'Folder',
+        'id': 'folder',
+        'title': 'My Folder'
+    })
+    site_explorer.post('@addons', jsond={
+        'id': 'myaddon'
+    }).get('@addons').delete('@addons', jsond={
+        'id': 'myaddon'
+    })
+    site_explorer.get('@registry').post(
+        '@registry',
+        jsond={
+            'interface': get_class_dotted_name(testmodule.ISchema),
+            'initial_values': {
+                'foo': 'bar'
+            }
+        }
+    ).patch('@registry/guillotina.documentation.testmodule.ISchema.foo',
+            jsond={
+                'value': 'New foobar value'
+            },
+            path_scheme='@registry/[dotted-name:string]').get(
+        '@registry/guillotina.documentation.testmodule.ISchema.foo',
+        path_scheme='@registry/[dotted-name:string]')
 
     # folder
     folder_explorer = APIExplorer('/db/site/folder', type_name='folder')
-    folder_explorer.get().get('@sharing').get('@all_permissions')\
-        .get('@behaviors').patch(jsond={
+    folder_explorer.resource_api_basics().patch(jsond={
             'title': 'My Folder Updated'
         }).post(jsond={
             '@type': 'Item',
@@ -226,8 +291,7 @@ if __name__ == '__main__':
 
     # item
     item_explorer = APIExplorer('/db/site/folder/item', type_name='item')
-    item_explorer.get().get('@sharing').get('@all_permissions')\
-        .get('@behaviors').patch(jsond={
+    item_explorer.resource_api_basics().patch(jsond={
             'title': 'My Item Updated'
         }).delete()
 

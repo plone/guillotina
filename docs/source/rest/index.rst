@@ -8,5 +8,6 @@ Contents:
 
    application
    db
+   site
    folder
    item
