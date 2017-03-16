@@ -127,6 +127,8 @@ async def traverse(request, parent, path):
             raise HTTPUnauthorized()
         if IAsyncContainer.providedBy(parent):
             context = await parent.async_get(path[0])
+            if context is None:
+                return parent, path
         else:
             context = parent[path[0]]
     except (TypeError, KeyError, AttributeError):

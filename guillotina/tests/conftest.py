@@ -23,7 +23,6 @@ IS_TRAVIS = 'TRAVIS' in os.environ
 IMAGE = 'postgres:9.6'
 CONTAINERS_FOR_TESTING_LABEL = 'testingaiopg'
 PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
-PG_SETTINGS['applications'] = []
 PG_SETTINGS['databases'][0]['db']['storage'] = 'postgresql'
 
 PG_SETTINGS['databases'][0]['db']['partition'] = \
@@ -38,7 +37,6 @@ PG_SETTINGS['databases'][0]['db']['dsn'] = {
 }
 
 DUMMY_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
-DUMMY_SETTINGS['applications'] = []
 DUMMY_SETTINGS['databases'][0]['db']['storage'] = 'DUMMY'
 
 DUMMY_SETTINGS['databases'][0]['db']['partition'] = \

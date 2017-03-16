@@ -270,6 +270,8 @@ class Transaction(object):
 
     async def get_child(self, container, key):
         result = await self._manager._storage.get_child(self, container._p_oid, key)
+        if result is None:
+            return None
         obj = reader(result)
         obj.__parent__ = container
         obj._p_jar = self

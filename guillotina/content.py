@@ -410,9 +410,12 @@ class Folder(Resource):
         Asynchronously get an object inside this folder
         """
         try:
-            return await self._p_jar.get_child(self, key)
+            val = await self._p_jar.get_child(self, key)
+            if val is not None:
+                return val
         except KeyError:
-            return default
+            pass
+        return default
 
     async def async_del(self, key: str) -> None:
         """
