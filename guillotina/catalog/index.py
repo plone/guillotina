@@ -47,7 +47,7 @@ def get_hook():
     if not search:
         return  # no search configured
 
-    trns = get_transaction(request).get()
+    trns = get_transaction(request)
     hook = None
     for _hook in trns._after_commit:
         if isinstance(_hook[0], CommitHook):

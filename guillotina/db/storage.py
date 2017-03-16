@@ -174,7 +174,7 @@ class APgStorage(BaseStorage):
                 resource    BOOLEAN NOT NULL,
                 of          VARCHAR(32),
                 otid        BIGINT,
-                parent_id   VARCHAR(32),
+                parent_id   VARCHAR(32) REFERENCES objects ON DELETE CASCADE,
                 id          TEXT,
                 type        TEXT NOT NULL,
                 json        JSONB,
