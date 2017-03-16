@@ -48,6 +48,7 @@ from zope.interface import alsoProvides
 
 import aiohttp
 import asyncio
+import asyncpg
 import json
 import traceback
 import uuid
@@ -137,7 +138,10 @@ async def traverse(request, parent, path):
         # Create a transaction Manager
         request._tm = context.new_transaction_manager()
         # Start a transaction
-        await request._tm.begin(request=request)
+        try:
+            await request._tm.begin(request=request)
+        except asyncpg.exceptions.UndefinedTableError:
+            pass
         # Get the root of the tree
         context = await request._tm.root()
 

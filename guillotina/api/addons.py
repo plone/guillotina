@@ -33,13 +33,13 @@ async def install(context, request):
     registry = request.site_settings
     config = registry.for_interface(IAddons)
 
-    if id_to_install in config.enabled:
+    if id_to_install in config['enabled']:
         return ErrorResponse(
             'Duplicate',
             _("Addon already installed"))
     handler = app_settings['available_addons'][id_to_install]['handler']
-    await apply_coroutine(handler.install)
-    config.enabled |= {id_to_install}
+    await apply_coroutine(handler.install, context, request)
+    config['enabled'] |= {id_to_install}
     return await get_addons(context, request)()
 
 
@@ -65,14 +65,14 @@ async def uninstall(context, request):
     registry = request.site_settings
     config = registry.for_interface(IAddons)
 
-    if id_to_install not in config.enabled:
+    if id_to_install not in config['enabled']:
         return ErrorResponse(
             'Duplicate',
             _("Addon not installed"))
 
     handler = app_settings['available_addons'][id_to_install]['handler']
     await apply_coroutine(handler.uninstall, context, request)
-    config.enabled -= {id_to_install}
+    config['enabled'] -= {id_to_install}
 
 
 @configure.service(
