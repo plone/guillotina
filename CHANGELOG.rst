@@ -1,4 +1,4 @@
-1.0.0a1 (unreleased)
+1.0.0a1 (2017-03-17)
 --------------------
 
 - move zope.schema, zope.component, zope.configuration into guillotina
