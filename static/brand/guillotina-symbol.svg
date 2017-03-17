@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Guillotina</title>
+    <desc>REST Resource Database</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="guillotina-symbol" fill="#FF4400">
+            <polygon id="Fill-1" points="280 209.4933 280 280.0003 120 280.0003 120 252.3643 100 257.7243 100 300.0003 300 300.0003 300 204.1343"></polygon>
+            <path d="M100,100.0002 L100,237.0192 L300,183.5582 L300,100.0002 L100,100.0002 Z M120,120.0002 L280,120.0002 L280,168.2112 L120,211.0832 L120,120.0002 Z" id="Fill-2"></path>
+            <circle id="Oval" cx="250" cy="250" r="12"></circle>
+            <circle id="Oval" cx="210" cy="250" r="12"></circle>
+        </g>
+    </g>
+</svg>
