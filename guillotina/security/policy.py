@@ -356,7 +356,9 @@ class Interaction(object):
                 elif setting is Deny and role in roles:
                     del roles[role]
 
-        cache_roles[permission] = roles
+        if level != 'o':
+            # Only cache on non 1rst level queries needs new way
+            cache_roles[permission] = roles
         return roles
 
     def cached_principals(self, parent, roles, permission, level):
@@ -408,7 +410,9 @@ class Interaction(object):
                     elif setting is Deny and principal in principals:
                         del principals[principal]
 
-        cache_principals[permission] = principals
+        if level != 'o':
+            # Only cache on non 1rst level queries needs new way
+            cache_principals[permission] = principals
         return principals
 
     def _global_roles_for(self, principal):
