@@ -1,7 +1,8 @@
 1.0.0a2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Provide support for utilizing `middlewares` option for aiohttp server
+  [vangheem]
 
 
 1.0.0a1 (2017-03-17)

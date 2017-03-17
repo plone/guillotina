@@ -20,37 +20,25 @@ If you're not familiar with how to build python applications, please
 [read documentation on building packages](https://python-packaging.readthedocs.io/en/latest/)
 before you continue on.
 
-In your setup.py file, include an entry point like this for your application:
-
-```python
-  setup(
-    entry_points={
-      'guillotina': [
-          'include = guillotina_myaddon',
-      ]
-  })
-```
-
 In this example, `guillotina_myaddon` is your package module.
 
 
 ## Initialization
 
-Creating the `guillotina` entry point only tells `guillotina` that your
-application is available to be used. Your `config.json` file will also need
-to provide the application name in the `applications` array for it to be initialized.
+Your `config.json` file will need to provide the application name in the
+`applications` array for it to be initialized.
 
 
 ```json
 {
-  "applications": ["guillotina_elasticsearch"]
+  "applications": ["guillotina_myaddon"]
 }
 ```
 
 
 ## Configuration
 
-Once you create a `guillotina` application, there are three primary ways for it
+Once you create a `guillotina` application, there are two primary ways for it
 to hook into `guillotina`.
 
 
