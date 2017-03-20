@@ -95,7 +95,21 @@ map 1-to-1 to database setup:
 {
   "utilities": [{
     "provides": "guillotina.interfaces.ICatalogUtility",
-    "factory": "pserver.elasticsearch.utility.ElasticSearchUtility",
+    "factory": "guillotina_elasticsearch.utility.ElasticSearchUtility",
     "settings": {}
   }]
 }
+```
+
+## Middleware
+
+`guillotina` is built on aiohttp which provides support for middleware.
+You can provide an array of dotted names to middle ware to use for your application.
+
+```json
+{
+  "middlewares": [
+    "guillotina_myaddon.Middleware"
+  ]
+}
+```

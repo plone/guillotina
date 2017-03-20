@@ -94,8 +94,19 @@ def make_app(config_file=None, settings=None, loop=None):
     if loop is None:
         loop = asyncio.get_event_loop()
 
+    if config_file is not None:
+        with open(config_file, 'r') as config:
+            settings = json.load(config)
+    elif settings is None:
+        raise Exception('Neither configuration or settings')
+
+    middlewares = [resolve_dotted_name(m) for m in settings.get('middlewares', [])]
     # Initialize aiohttp app
-    app = web.Application(router=TraversalRouter(), loop=loop)
+    app = web.Application(
+        router=TraversalRouter(),
+        loop=loop,
+        middlewares=middlewares
+        )
 
     # Create root Application
     root = ApplicationRoot(config_file)
@@ -104,12 +115,6 @@ def make_app(config_file=None, settings=None, loop=None):
 
     # Initialize global (threadlocal) ZCA configuration
     app.config = ConfigurationMachine()
-
-    if config_file is not None:
-        with open(config_file, 'r') as config:
-            settings = json.load(config)
-    elif settings is None:
-        raise Exception('Neither configuration or settings')
 
     import guillotina
     import guillotina.db.factory
