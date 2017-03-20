@@ -22,3 +22,5 @@ include/
 pip-selfcheck.json
 .coveralls.yml
 docs/build
+*.so
+build/

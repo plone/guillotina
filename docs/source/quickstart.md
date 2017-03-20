@@ -22,7 +22,7 @@ Install `guillotina`:
 Generate configuration file:
 
 ```
-./bin/pcreate configuration
+./bin/gcreate configuration
 ```
 
 Finally, run the server:
@@ -61,7 +61,7 @@ Once started, you will require to add at least a Guillotina site to start fiddli
     "title": "Guillotina 1",
     "id": "guillotina",
     "description": "Description"
-  }' "http://127.0.0.1:8080/zodb1/"
+  }' "http://127.0.0.1:8080/db/"
 ```
 
 and give permissions to add content to it:
@@ -71,7 +71,7 @@ and give permissions to add content to it:
     "prinrole": {
         "Anonymous User": ["guillotina.Member", "guillotina.Reader"]
     }
-  }' "http://127.0.0.1:8080/zodb1/guillotina/@sharing"
+  }' "http://127.0.0.1:8080/db/guillotina/@sharing"
 ```
 
 and create actual content:
@@ -81,5 +81,5 @@ and create actual content:
     "@type": "Item",
     "title": "News",
     "id": "news"
-  }' "http://127.0.0.1:8080/zodb1/guillotina/"
+  }' "http://127.0.0.1:8080/db/guillotina/"
 ```
