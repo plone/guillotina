@@ -1,14 +1,14 @@
 from guillotina import app_settings
 from guillotina import configure
+from guillotina.addons import Addon
 from guillotina.content import load_cached_schema
 from guillotina.documentation import DIR
+from guillotina.documentation import testmodule
 from guillotina.documentation import URL
 from guillotina.factory import make_app
 from guillotina.testing import TESTING_SETTINGS
 from guillotina.utils import get_class_dotted_name
 from guillotina.utils import resolve_dotted_name
-from guillotina.addons import Addon
-from guillotina.documentation import testmodule
 
 import json
 import os
@@ -53,7 +53,7 @@ def format_body(body):
     try:
         body = json.loads(body)
         return json.dumps(body, indent=4, sort_keys=True)
-    except:
+    except Exception:
         return body
 
 
@@ -281,19 +281,15 @@ if __name__ == '__main__':
 
     # folder
     folder_explorer = APIExplorer('/db/site/folder', type_name='folder')
-    folder_explorer.resource_api_basics().patch(jsond={
-            'title': 'My Folder Updated'
-        }).post(jsond={
-            '@type': 'Item',
-            'id': 'item',
-            'title': 'My Item'
-        })
+    folder_explorer.resource_api_basics().\
+        patch(jsond={'title': 'My Folder Updated'}).\
+        post(jsond={'@type': 'Item', 'id': 'item', 'title': 'My Item'})
 
     # item
     item_explorer = APIExplorer('/db/site/folder/item', type_name='item')
-    item_explorer.resource_api_basics().patch(jsond={
-            'title': 'My Item Updated'
-        }).delete()
+    item_explorer.resource_api_basics().\
+        patch(jsond={'title': 'My Item Updated'}).\
+        delete()
 
     # clean up...
     folder_explorer.delete()
