@@ -1,6 +1,10 @@
 1.0.0a2 (unreleased)
 --------------------
 
+- Fix `gshell` command to work with aysncio loop so you can run `await` statements
+  with the shell. Compatibility done with aioconsole.
+  [vangheem]
+
 - Provide support for utilizing `middlewares` option for aiohttp server
   [vangheem]
 
