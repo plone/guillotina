@@ -76,6 +76,15 @@ Example
 
 site = await root['db'].async_get('site')
 
+
+Commit changes
+--------------
+
+If you need to commit changes to db...
+
+
+await tm.commit()
+
 '''
 
     def get_loop(self):

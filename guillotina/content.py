@@ -421,7 +421,7 @@ class Folder(Resource):
         """
         Asynchronously delete object in the folder
         """
-        return await self._p_jar.delete(await self.async_get(key))
+        return self._p_jar.delete(await self.async_get(key))
 
     async def async_len(self) -> int:
         """
