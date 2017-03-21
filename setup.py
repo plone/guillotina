@@ -60,7 +60,6 @@ setup(
         'ujson',
         'zope.interface',
         'aiocache',
-        'aiomonitor',
         'aioconsole',
         'pyjwt',
         'requests',
