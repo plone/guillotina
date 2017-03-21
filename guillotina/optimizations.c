@@ -1,7 +1,7 @@
 #include <Python.h>
 #include <frameobject.h>
 
-static PyObject *RequestNotFound, *RequestHandler;
+static PyObject *RequestNotFound, *RequestHandler, *Request;
 
 /* current_request frame obtainer */
 
@@ -9,27 +9,32 @@ static PyObject *RequestNotFound, *RequestHandler;
 static PyObject*
 current_request()
 {
-	  PyFrameObject *f = PyThreadState_GET()->frame;
+    PyFrameObject *f = PyThreadState_GET()->frame;
     int found = 0;
     PyObject *request = NULL;
     PyObject *self;
     while (found == 0 && f != NULL) {
-      if (PyFrame_FastToLocalsWithError(f) < 0)
+      if (PyFrame_FastToLocalsWithError(f) < 0){
         return NULL;
+      }
 
       if (PyDict_CheckExact(f->f_locals)) {
+
         self = PyDict_GetItem(f->f_locals, PyUnicode_FromString("self"));
-
         if (self != NULL) {
-
           if (PyObject_HasAttr(self, PyUnicode_FromString("request"))) {
-            found = 1;
             request = PyObject_GetAttr(self, PyUnicode_FromString("request"));
+            if(request != NULL && PyObject_IsInstance(request, Request)){
+              found = 1;
+              break;
+            }
           }
-          if (PyObject_IsInstance(self, RequestHandler)) {
-            found = 1;
-            request = PyDict_GetItem(f->f_locals, PyUnicode_FromString("request"));
-          }
+        }
+
+        request = PyDict_GetItem(f->f_locals, PyUnicode_FromString("request"));
+        if (request != NULL && PyObject_IsInstance(request, Request)) {
+          found = 1;
+          break;
         }
 
       }
@@ -61,16 +66,16 @@ PyInit_optimizations(void)
 
     PyObject* m;
 
-	static struct PyModuleDef moduledef = {
+  static struct PyModuleDef moduledef = {
          PyModuleDef_HEAD_INIT,
          "optimizations",
          "Optimizations guillotina server", -1, OptimizationsMethods, };
     PyObject* ob = PyModule_Create(&moduledef);
 
-	if (ob == NULL)
-	{
-	    return NULL;
-	}
+  if (ob == NULL)
+  {
+      return NULL;
+  }
 
     if ((m = PyImport_ImportModule("guillotina.exceptions")) == NULL)
     {
@@ -94,5 +99,15 @@ PyInit_optimizations(void)
     }
     Py_DECREF(m);
 
-	return ob;
+    if ((m = PyImport_ImportModule("aiohttp.web")) == NULL)
+    {
+      return NULL;
+    }
+    if ((Request = PyObject_GetAttrString(m, "Request")) == NULL)
+    {
+      return NULL;
+    }
+    Py_DECREF(m);
+
+  return ob;
 }

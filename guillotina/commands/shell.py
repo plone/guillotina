@@ -3,8 +3,8 @@ from guillotina.commands import Command
 from guillotina.component import getUtility
 from guillotina.interfaces import IApplication
 from guillotina.testing import TESTING_SETTINGS
+
 import aioconsole
-import argparse
 import asyncio
 
 

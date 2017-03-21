@@ -1,6 +1,10 @@
 1.0.0a2 (unreleased)
 --------------------
 
+- Fix get_current_request to correctly look for python None object when finding
+  the request object
+  [vangheem]
+
 - Fix `gshell` command to work with aysncio loop so you can run `await` statements
   with the shell. Compatibility done with aioconsole.
   [vangheem]
