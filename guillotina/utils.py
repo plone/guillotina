@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina.exceptions import RequestNotFound
@@ -24,7 +25,7 @@ import typing
 try:
     from aiohttp.web_server import RequestHandler
 except ImportError:
-    from aiohttp.web import RequestHandler
+    from aiohttp.web import RequestHandler  # noqa
 
 
 try:
@@ -278,12 +279,8 @@ def get_current_request() -> IRequest:
         request = getattr(frame.f_locals.get('self'), 'request', None)
         if request is not None:
             return request
-        elif isinstance(frame.f_locals.get('self'), RequestHandler):
+        elif isinstance(frame.f_locals.get('request'), Request):
             return frame.f_locals['request']
-        # if isinstance(frame.f_locals.get('self'), RequestHandler):
-        #     return frame.f_locals.get('self').request
-        # elif IView.providedBy(frame.f_locals.get('self')):
-        #     return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
 
