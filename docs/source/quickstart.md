@@ -70,7 +70,8 @@ and give permissions to add content to it:
   curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
     "prinrole": {
         "Anonymous User": ["guillotina.Member", "guillotina.Reader"]
-    }
+    },
+    "type": "Allow"
   }' "http://127.0.0.1:8080/db/guillotina/@sharing"
 ```
 
