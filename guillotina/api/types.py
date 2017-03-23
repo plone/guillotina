@@ -6,11 +6,11 @@ from guillotina.component import getUtilitiesFor
 from guillotina.component import queryUtility
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IResourceFactory
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 
 
 @configure.service(
-    context=ISite, method='GET', permission='guillotina.AccessContent',
+    context=IContainer, method='GET', permission='guillotina.AccessContent',
     name='@types',
     description='Read information on available types')
 class Read(TraversableService):

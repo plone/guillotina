@@ -20,7 +20,7 @@ from guillotina.events import ObjectModifiedEvent
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
-from guillotina.events import ObjectVisitedEvent
+from guillotina.events import ObjectVIContainerdEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
@@ -52,7 +52,7 @@ class DefaultGET(Service):
             (self.context, self.request),
             IResourceSerializeToJson)
         result = await serializer()
-        await notify(ObjectVisitedEvent(self.context))
+        await notify(ObjectVIContainerdEvent(self.context))
         return result
 
 

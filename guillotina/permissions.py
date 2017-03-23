@@ -22,7 +22,7 @@ configure.permission('guillotina.WriteConfiguration', 'Write a configuration')
 configure.permission('guillotina.RegisterConfigurations',
                      'Register a new configuration on Registry')
 
-configure.permission('guillotina.ManageAddons', 'Manage addons on a site')
+configure.permission('guillotina.ManageAddons', 'Manage addons on a container')
 
 configure.permission('guillotina.SeePermissions', 'See permissions')
 configure.permission('guillotina.ChangePermissions', 'Change permissions')
@@ -39,7 +39,7 @@ configure.role("guillotina.Anonymous", "Everybody",
                "All users have this role implicitly", False)
 configure.role("guillotina.Authenticated", "Authenticated user",
                "Role automatically assigned to authenticated users", False)
-configure.role("guillotina.Member", "Site Member", False)
+configure.role("guillotina.Member", "Container Member", False)
 
 configure.role("guillotina.Reader", "Reader", "can read content", True)
 configure.role("guillotina.Editor", "Editor", "can edit content", True)
@@ -47,12 +47,12 @@ configure.role("guillotina.Reviewer", "Reviewer", "can review content", True)
 configure.role("guillotina.Owner", "Content Manager",
                "can add/delete content", True)
 
-configure.role("guillotina.Manager", "Site Manager", False)
-configure.role("guillotina.SiteAdmin", "Site Administrator",
-               "can set settings on site", False)
-configure.role("guillotina.SiteCreator", "Site DB Manager",
-               "Can create sites and db connections", False)
-configure.role("guillotina.SiteDeleter", "Site Remover", "Can destroy a site", False)
+configure.role("guillotina.Manager", "Container Manager", False)
+configure.role("guillotina.ContainerAdmin", "Container Administrator",
+               "can set settings on container", False)
+configure.role("guillotina.ContainerCreator", "Container DB Manager",
+               "Can create containers and db connections", False)
+configure.role("guillotina.ContainerDeleter", "Container Remover", "Can destroy a container", False)
 
 
 # Anonymous
@@ -117,33 +117,33 @@ configure.grant(
     permission="guillotina.ReindexContent",
     role="guillotina.Editor")
 
-# SiteAdmin
+# ContainerAdmin
 configure.grant(
     permission="guillotina.AccessContent",
-    role="guillotina.SiteAdmin")
+    role="guillotina.ContainerAdmin")
 configure.grant(
     permission="guillotina.ManageAddons",
-    role="guillotina.SiteAdmin")
+    role="guillotina.ContainerAdmin")
 configure.grant(
     permission="guillotina.ReadConfiguration",
-    role="guillotina.SiteAdmin")
+    role="guillotina.ContainerAdmin")
 configure.grant(
     permission="guillotina.WriteConfiguration",
-    role="guillotina.SiteAdmin")
+    role="guillotina.ContainerAdmin")
 configure.grant(
     permission="guillotina.RegisterConfigurations",
-    role="guillotina.SiteAdmin")
+    role="guillotina.ContainerAdmin")
 configure.grant(
     permission="guillotina.ManageCatalog",
-    role="guillotina.SiteAdmin")
+    role="guillotina.ContainerAdmin")
 configure.grant(
     permission="guillotina.RawSearchContent",
-    role="guillotina.SiteAdmin")
+    role="guillotina.ContainerAdmin")
 
-# SiteDeleter
+# ContainerDeleter
 configure.grant(
     permission="guillotina.DeletePortals",
-    role="guillotina.SiteDeleter")
+    role="guillotina.ContainerDeleter")
 
 # Member
 configure.grant(

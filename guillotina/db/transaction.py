@@ -98,7 +98,7 @@ class Transaction(object):
             # The first argument passed to the hook is a Boolean value,
             # true if the commit succeeded, or false if the commit aborted.
             try:
-                hook(status, *args, **kws)
+                await hook(status, *args, **kws)
             except:  # noqa
                 # We need to catch the exceptions if we want all hooks
                 # to be called

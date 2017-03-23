@@ -1,5 +1,5 @@
 # NEED use this import because we have a "schema" attribute below
-from guillotina.component.interfaces import ISite as IZopeSite
+from guillotina.component.interfaces import ISite as IComponentSite
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces.common import IMapping
 from guillotina.schema import TextLine
@@ -174,15 +174,19 @@ class IResourceFactory(IFactory):
     )
 
 
-class ISite(IResource, IZopeSite, ITraversable, IAsyncContainer):
+class IFolder(IResource, IAsyncContainer, ITraversable):
     pass
+
+
+class IContainer(IResource, IAsyncContainer, ITraversable, IComponentSite):
+    '''
+    Formally known as ISite.
+    This is a base container to hold content.
+    A database can hold multiple containers
+    '''
 
 
 class IItem(IResource):
-    pass
-
-
-class IContainer(IResource, IAsyncContainer, ITraversable):
     pass
 
 

@@ -18,39 +18,39 @@ class TestContent:
     async def test_not_allowed_to_create_content(self, dummy_request):
         self.request = dummy_request
 
-        site = await create_content(
-            'Site',
+        container = await create_content(
+            'Container',
             id='guillotina',
             title='Guillotina')
-        site.__name__ = 'guillotina'
+        container.__name__ = 'guillotina'
 
         with pytest.raises(NoPermissionToAdd):
             # not logged in, can't create
-            await create_content_in_container(site, 'Item', id_='foobar')
+            await create_content_in_container(container, 'Item', id_='foobar')
 
     async def test_allowed_to_create_content(self, dummy_request):
         self.request = dummy_request
         utils.login(self.request)
 
-        site = await create_content(
-            'Site',
+        container = await create_content(
+            'Container',
             id='guillotina',
             title='Guillotina')
-        site.__name__ = 'guillotina'
-        utils._p_register(site)
+        container.__name__ = 'guillotina'
+        utils._p_register(container)
 
-        await create_content_in_container(site, 'Item', id_='foobar')
+        await create_content_in_container(container, 'Item', id_='foobar')
 
     async def test_allowed_types(self, dummy_request):
         self.request = dummy_request
         utils.login(self.request)
 
-        site = await create_content(
-            'Site',
+        container = await create_content(
+            'Container',
             id='guillotina',
             title='Guillotina')
-        site.__name__ = 'guillotina'
-        utils._p_register(site)
+        container.__name__ = 'guillotina'
+        utils._p_register(container)
 
         import guillotina.tests
         configure.register_configuration(Folder, dict(
@@ -65,7 +65,7 @@ class TestContent:
         root.app.config.execute_actions()
         load_cached_schema()
 
-        obj = await create_content_in_container(site, 'TestType', 'foobar')
+        obj = await create_content_in_container(container, 'TestType', 'foobar')
 
         constrains = IConstrainTypes(obj, None)
         assert constrains.get_allowed_types() == ['Item']

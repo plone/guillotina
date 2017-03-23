@@ -96,7 +96,7 @@ class RichTextValue(object):
         as a base.
 
         If a transformer cannot be found for the specified context, a
-        transformer with the site as a context is used instead.
+        transformer with the container as a context is used instead.
         """
         if self.mimeType == self.outputMimeType:
             return self.raw_encoded

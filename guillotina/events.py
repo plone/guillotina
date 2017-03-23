@@ -9,7 +9,7 @@ from guillotina.interfaces import IObjectMovedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectPermissionsViewEvent
 from guillotina.interfaces import IObjectRemovedEvent
-from guillotina.interfaces import IObjectVisitedEvent
+from guillotina.interfaces import IObjectVIContainerdEvent
 from zope.interface import implementer
 
 
@@ -75,8 +75,8 @@ class ObjectModifiedEvent(object):
         self.payload = payload
 
 
-@implementer(IObjectVisitedEvent)
-class ObjectVisitedEvent(ObjectEvent):
+@implementer(IObjectVIContainerdEvent)
+class ObjectVIContainerdEvent(ObjectEvent):
     """An object has been modified."""
 
 

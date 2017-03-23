@@ -12,7 +12,7 @@ from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import ITraversableView
 
 import aiohttp
@@ -20,7 +20,7 @@ import asyncio
 import ujson
 
 
-@configure.service(context=ISite, method='GET', permission='guillotina.AccessContent',
+@configure.service(context=IContainer, method='GET', permission='guillotina.AccessContent',
                    name='@wstoken')
 class WebsocketGetToken(Service):
     _websockets_ttl = 60
@@ -54,7 +54,7 @@ class WebsocketGetToken(Service):
         }
 
 
-@configure.service(context=ISite, method='GET', permission='guillotina.AccessContent',
+@configure.service(context=IContainer, method='GET', permission='guillotina.AccessContent',
                    name='@ws')
 class WebsocketsView(Service):
 
@@ -75,7 +75,7 @@ class WebsocketsView(Service):
                     from guillotina.traversal import do_traverse
 
                     obj, tail = await do_traverse(
-                        self.request, self.request.site, path)
+                        self.request, self.request.container, path)
 
                     traverse_to = None
 

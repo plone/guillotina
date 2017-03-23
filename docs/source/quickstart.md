@@ -53,11 +53,11 @@ docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres -p 127.0.0.1:5432
 
 ## Creating default content
 
-Once started, you will require to add at least a Guillotina site to start fiddling around:
+Once started, you will require to add at least a Guillotina container to start fiddling around:
 
 ```
   curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
-    "@type": "Site",
+    "@type": "Container",
     "title": "Guillotina 1",
     "id": "guillotina",
     "description": "Description"

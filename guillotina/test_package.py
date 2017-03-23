@@ -2,13 +2,13 @@
 from guillotina import configure
 from guillotina.content import Item
 from guillotina.interfaces import IItem
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from guillotina.testing import Example
 from guillotina.testing import IExample
 
 
 configure.register_configuration(Item, dict(
-    context=ISite,
+    context=IContainer,
     schema=IItem,
     portal_type="File",
     behaviors=[
@@ -17,7 +17,7 @@ configure.register_configuration(Item, dict(
 ), 'contenttype')
 
 configure.register_configuration(Example, dict(
-    context=ISite,
+    context=IContainer,
     schema=IExample,
     portal_type="Example",
     behaviors=[

@@ -15,7 +15,6 @@ from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
 from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
-from guillotina.component.interfaces import ISite
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
 from guillotina.exceptions import ConflictError
@@ -24,6 +23,7 @@ from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IInteraction
@@ -61,14 +61,14 @@ async def do_traverse(request, parent, path):
 
     assert request is not None  # could be used for permissions, etc
 
-    if ISite.providedBy(parent) and \
+    if IContainer.providedBy(parent) and \
        path[0] != request._db_id:
-        # Tried to access a site outsite the request
+        # Tried to access a container outside the request
         raise HTTPUnauthorized()
 
     if IApplication.providedBy(parent) and \
-       path[0] != request._site_id:
-        # Tried to access a site outsite the request
+       path[0] != request._container_id:
+        # Tried to access a container outside the request
         raise HTTPUnauthorized()
 
     try:
@@ -86,7 +86,7 @@ async def do_traverse(request, parent, path):
 
 
 async def subrequest(
-        orig_request, path, relative_to_site=True,
+        orig_request, path, relative_to_container=True,
         headers={}, body=None, params=None, method='GET'):
     """Subrequest, initial implementation doing a real request."""
     session = aiohttp.ClientSession()
@@ -147,12 +147,12 @@ async def traverse(request, parent, path):
         # Get the root of the tree
         context = await request._tm.root()
 
-    if ISite.providedBy(context):
-        request._site_id = context.id
-        request.site = context
-        annotations_container = IAnnotations(request.site)
-        request.site_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
-        layers = request.site_settings.get(ACTIVE_LAYERS_KEY, [])
+    if IContainer.providedBy(context):
+        request._container_id = context.id
+        request.container = context
+        annotations_container = IAnnotations(request.container)
+        request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
+        layers = request.container_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             alsoProvides(request, import_class(layer))
 
@@ -389,7 +389,7 @@ class TraversalRouter(AbstractRouter):
             # logger.info("Anonymous User")
             request.security.add(AnonymousParticipation(request))
 
-        # Site registry lookup
+        # container registry lookup
         try:
             view = queryMultiAdapter(
                 (resource, request), method, name=view_name)

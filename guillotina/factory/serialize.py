@@ -19,7 +19,7 @@ class DatabaseToJson(object):
     async def __call__(self):
         keys = await self.dbo.async_keys()
         return {
-            'sites': list(keys)
+            'containers': list(keys)
         }
 
 

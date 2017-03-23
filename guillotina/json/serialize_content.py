@@ -10,7 +10,7 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IContainer
+from guillotina.interfaces import IFolder
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
@@ -114,7 +114,7 @@ class SerializeToJson(object):
 
 
 @configure.adapter(
-    for_=(IContainer, Interface),
+    for_=(IFolder, Interface),
     provides=IResourceSerializeToJson)
 class SerializeFolderToJson(SerializeToJson):
 

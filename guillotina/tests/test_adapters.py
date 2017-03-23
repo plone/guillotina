@@ -3,8 +3,8 @@ from guillotina import schema
 from guillotina.component import getAdapter
 from guillotina.component import getMultiAdapter
 from guillotina.component import getUtility
+from guillotina.content import Container
 from guillotina.content import Item
-from guillotina.content import Site
 from guillotina.factory.security import ApplicationSpecialPermissions
 from guillotina.factory.security import DatabaseSpecialPermissions
 from guillotina.interfaces import IApplication
@@ -52,7 +52,7 @@ async def test_RootSpecialPermissions_IApplication(dummy_guillotina):
 
 
 async def test_SerializeFolderToJson(dummy_request):
-    adapter = getMultiAdapter((Site(), dummy_request),
+    adapter = getMultiAdapter((Container(), dummy_request),
                               interface=IResourceSerializeToJson)
     assert isinstance(adapter, SerializeFolderToJson)
 
@@ -65,7 +65,7 @@ async def test_SerializeToJson(dummy_request):
 
 
 def test_DefaultJSONSummarySerializer(dummy_request):
-    adapter = getMultiAdapter((Site(), dummy_request),
+    adapter = getMultiAdapter((Container(), dummy_request),
                               interface=IResourceSerializeToJsonSummary)
     assert isinstance(adapter, DefaultJSONSummarySerializer)
 
@@ -89,9 +89,9 @@ def test_all(dummy_request):
         (schema.Dict(), serialize_schema_field.DefaultDictSchemaFieldSerializer),
         (schema.Datetime(), serialize_schema_field.DefaultDateTimeSchemaFieldSerializer),
     ]
-    site = Site()
+    container = Container()
     for field, klass in mapping:
-        adapter = getMultiAdapter((field, site, dummy_request),
+        adapter = getMultiAdapter((field, container, dummy_request),
                                   interface=ISchemaFieldSerializeToJson)
         assert isinstance(adapter, klass)
 

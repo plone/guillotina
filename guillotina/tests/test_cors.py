@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-async def test_get_root(site_requester):
-    async with await site_requester as requester:
+async def test_get_root(container_requester):
+    async with await container_requester as requester:
         value, status, headers = await requester.make_request(
             'OPTIONS', '/db/guillotina', headers={
                 'Origin': 'http://localhost',

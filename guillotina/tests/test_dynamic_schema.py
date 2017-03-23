@@ -2,7 +2,7 @@
 from guillotina import configure
 from guillotina.content import Item
 from guillotina.content import load_cached_schema
-from guillotina.tests.conftest import SiteRequesterAsyncContextManager
+from guillotina.tests.conftest import ContainerRequesterAsyncContextManager
 from zope.interface import Interface
 
 import json
@@ -17,7 +17,7 @@ class FoobarType(Item):
     pass
 
 
-class CustomTypeSiteRequesterAsyncContextManager(SiteRequesterAsyncContextManager):
+class CustomTypeContainerRequesterAsyncContextManager(ContainerRequesterAsyncContextManager):
 
     async def __aenter__(self):
         configure.register_configuration(FoobarType, dict(
@@ -25,7 +25,7 @@ class CustomTypeSiteRequesterAsyncContextManager(SiteRequesterAsyncContextManage
             portal_type="Foobar",
             behaviors=[]
         ), 'contenttype')
-        requester = await super(CustomTypeSiteRequesterAsyncContextManager, self).__aenter__()
+        requester = await super(CustomTypeContainerRequesterAsyncContextManager, self).__aenter__()
         config = requester.root.app.config
         # now test it...
         configure.load_configuration(
@@ -36,12 +36,12 @@ class CustomTypeSiteRequesterAsyncContextManager(SiteRequesterAsyncContextManage
 
 
 @pytest.fixture(scope='function')
-async def custom_type_site_requester(guillotina):
-    return CustomTypeSiteRequesterAsyncContextManager(guillotina)
+async def custom_type_container_requester(guillotina):
+    return CustomTypeContainerRequesterAsyncContextManager(guillotina)
 
 
-async def test_set_dynamic_behavior(custom_type_site_requester):
-    async with await custom_type_site_requester as requester:
+async def test_set_dynamic_behavior(custom_type_container_requester):
+    async with await custom_type_container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -71,8 +71,8 @@ async def test_set_dynamic_behavior(custom_type_site_requester):
         assert 'guillotina.behaviors.dublincore.IDublinCore' in response
 
 
-async def test_create_delete_dynamic_behavior(custom_type_site_requester):
-    async with await custom_type_site_requester as requester:
+async def test_create_delete_dynamic_behavior(custom_type_container_requester):
+    async with await custom_type_container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -121,8 +121,8 @@ async def test_create_delete_dynamic_behavior(custom_type_site_requester):
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
 
 
-async def test_get_behaviors(custom_type_site_requester):
-    async with await custom_type_site_requester as requester:
+async def test_get_behaviors(custom_type_container_requester):
+    async with await custom_type_container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',

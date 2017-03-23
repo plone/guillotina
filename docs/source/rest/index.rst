@@ -8,6 +8,6 @@ Contents:
 
    application
    db
-   site
+   container
    folder
    item

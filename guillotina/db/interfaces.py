@@ -1,4 +1,3 @@
-from guillotina.interfaces import IContainer
 from zope.interface import Interface
 
 
@@ -8,7 +7,3 @@ class IPartition(Interface):
 
 class IWriter(Interface):
     """Serializes the object for DB storage"""
-
-
-class IContainer(IContainer):
-    pass
