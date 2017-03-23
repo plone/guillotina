@@ -46,6 +46,13 @@ app_settings = {
     "jwt": {
         "secret": "foobar",
         "algorithm": "HS256"
+    },
+    'commands': {
+        '': 'guillotina.commands.server.ServerCommand',
+        'serve': 'guillotina.commands.server.ServerCommand',
+        'cli': 'guillotina.commands.cli.CliCommand',
+        'create': 'guillotina.commands.create.CreateCommand',
+        'shell': 'guillotina.commands.shell.ShellCommand'
     }
 }
 

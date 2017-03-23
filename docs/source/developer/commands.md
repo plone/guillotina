@@ -5,11 +5,22 @@ You can provide your own CLI commands for guillotina through a simple interface.
 
 ## Available commands
 
-* guillotina: run the http rest api server
-* gmigrate: run available migration steps
-* gcli: command line utility to run manually RUN API requests with
-* gshell: drop into a shell with root object to manually work with
-* gcreate: use cookiecutter to generate guillotina applications
+* serve: run the http rest api server(this is default command if none given)
+* cli: command line utility to run manually RUN API requests with
+* shell: drop into a shell with root object to manually work with
+* create: use cookiecutter to generate guillotina applications
+
+
+## Running commands
+
+Guillotina provides two binaries to run commands through, `bin/guillotina` and
+a shortcut, `bin/g`.
+
+To run a command, it's just a positional argument on the running command::
+
+```
+bin/g shell
+```
 
 
 ## Creating commands
@@ -34,13 +45,13 @@ class MyCommand(Command):
 
 ```
 
-Then, in your setup.py file, include an entry point like this for your command:
+Then, just add your command to your application's app_settings in the `__init__.py`:
 
 ```python
-  setup(
-    entry_points={
-      'console_scripts': [
-            'mycommand = my.package.commands:MyCommand'
-      ]
-  })
+
+app_settings = {
+    "commands": {
+        "mycommand": "my.package.commands.MyCommand"
+    }
+}
 ```

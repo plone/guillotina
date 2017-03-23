@@ -1,6 +1,11 @@
 1.0.0a2 (unreleased)
 --------------------
 
+- Change guillotina commands to be sub-commands of main `bin/guillotina`
+  command runner so developer do not need to register separate scripts
+  for each command. Fixes #27
+  [vangheem]
+
 - Change Site portal type to Container
   [vangheem]
 

@@ -80,10 +80,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'guillotina = guillotina.commands.server:ServerCommand',
-            'gcli = guillotina.commands.cli:CliCommand',
-            'gshell = guillotina.commands.shell:ShellCommand',
-            'gcreate = guillotina.commands.create:CreateCommand'
+            'guillotina = guillotina.commands:command_runner',
+            'g = guillotina.commands:command_runner'
         ]
     }
 )
