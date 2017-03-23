@@ -234,8 +234,8 @@ async def test_get_addons(container_requester):
         )
         assert status == 200
 
-async def test_get_logged_user_info(site_requester):
-    async with await site_requester as requester:
+async def test_get_logged_user_info(container_requester):
+    async with await container_requester as requester:
         response, status = await requester(
             'GET', '/db/guillotina/@user'
         )
