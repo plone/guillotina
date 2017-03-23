@@ -3,11 +3,11 @@ from guillotina import configure
 from guillotina.addons import Addon
 from guillotina.api.service import Service
 from guillotina.content import Item
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from zope.interface import Interface
 
 
-async def test_register_service(site_requester):
+async def test_register_service(container_requester):
     cur_count = len(configure.get_configurations('guillotina.tests', 'service'))
 
     class TestService(Service):
@@ -16,14 +16,14 @@ async def test_register_service(site_requester):
                 "foo": "bar"
             }
     configure.register_configuration(TestService, dict(
-        context=ISite,
+        context=IContainer,
         name="@foobar",
         permission='guillotina.ViewContent'
     ), 'service')
 
     assert len(configure.get_configurations('guillotina.tests', 'service')) == cur_count + 1  # noqa
 
-    async with await site_requester as requester:
+    async with await container_requester as requester:
         config = requester.root.app.config
         configure.load_configuration(
             config, 'guillotina.tests', 'service')
@@ -33,7 +33,7 @@ async def test_register_service(site_requester):
         assert response['foo'] == 'bar'
 
 
-async def test_register_contenttype(site_requester):
+async def test_register_contenttype(container_requester):
     cur_count = len(
         configure.get_configurations('guillotina.tests', 'contenttype'))
 
@@ -44,7 +44,7 @@ async def test_register_contenttype(site_requester):
         pass
 
     configure.register_configuration(MyType, dict(
-        context=ISite,
+        context=IContainer,
         schema=IMyType,
         portal_type="MyType1",
         behaviors=["guillotina.behaviors.dublincore.IDublinCore"]
@@ -52,7 +52,7 @@ async def test_register_contenttype(site_requester):
 
     assert len(configure.get_configurations('guillotina.tests', 'contenttype')) == cur_count + 1  # noqa
 
-    async with await site_requester as requester:
+    async with await container_requester as requester:
         config = requester.root.app.config
         # now test it...
         configure.load_configuration(
@@ -63,7 +63,7 @@ async def test_register_contenttype(site_requester):
         assert any("MyType1" in s['title'] for s in response)
 
 
-async def test_register_behavior(site_requester):
+async def test_register_behavior(container_requester):
     cur_count = len(
         configure.get_configurations('guillotina.tests', 'behavior'))
 
@@ -91,13 +91,13 @@ async def test_register_behavior(site_requester):
         pass
 
     configure.register_configuration(MyType, dict(
-        context=ISite,
+        context=IContainer,
         schema=IMyType,
         portal_type="MyType2",
         behaviors=[IMyBehavior]
     ), 'contenttype')
 
-    async with await site_requester as requester:
+    async with await container_requester as requester:
         config = requester.root.app.config
         # now test it...
         configure.load_configuration(
@@ -109,7 +109,7 @@ async def test_register_behavior(site_requester):
         assert 'foobar' in type_['definitions']['IMyBehavior']['properties']
 
 
-async def test_register_addon(site_requester):
+async def test_register_addon(container_requester):
     cur_count = len(
         configure.get_configurations('guillotina.tests', 'addon'))
 
@@ -119,18 +119,18 @@ async def test_register_addon(site_requester):
     class MyAddon(Addon):
 
         @classmethod
-        def install(cls, site, request):
+        def install(cls, container, request):
             # install code
             pass
 
         @classmethod
-        def uninstall(cls, site, request):
+        def uninstall(cls, container, request):
             # uninstall code
             pass
 
     assert len(configure.get_configurations('guillotina.tests', 'addon')) == cur_count + 1
 
-    async with await site_requester as requester:
+    async with await container_requester as requester:
         # now test it...
         config = requester.root.app.config
         configure.load_configuration(

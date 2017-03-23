@@ -39,7 +39,7 @@ class DefaultSearchUtility(object):
     async def get_by_type(self, doc_type, query={}):
         pass
 
-    async def get_by_path(self, site, path, depth=-1, query={}, doc_type=None):
+    async def get_by_path(self, container, path, depth=-1, query={}, doc_type=None):
         pass
 
     async def get_folder_contents(self, obj):
@@ -57,17 +57,17 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    async def reindex_all_content(self):
+    async def reindex_all_content(self, container):
         """ For all Dexterity Content add a queue task that reindex the object
         """
         pass
 
-    async def initialize_catalog(self):
+    async def initialize_catalog(self, container):
         """ Creates an index
         """
         pass
 
-    async def remove_catalog(self):
+    async def remove_catalog(self, container):
         """ Deletes an index
         """
         pass

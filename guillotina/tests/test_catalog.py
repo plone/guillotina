@@ -21,11 +21,11 @@ class TestCatalog:
     async def test_get_index_data(self, dummy_request):
         self.request = dummy_request
 
-        site = await create_content(
-            'Site',
+        container = await create_content(
+            'Container',
             id='guillotina',
             title='Guillotina')
-        site.__name__ = 'guillotina'
+        container.__name__ = 'guillotina'
 
         ob = await create_content('Item', id='foobar')
 

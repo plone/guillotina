@@ -4,7 +4,7 @@ from guillotina import configure
 from guillotina.browser import ErrorResponse
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IAddons
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from guillotina.utils import apply_coroutine
 
 
@@ -12,9 +12,9 @@ _ = MessageFactory('guillotina')
 
 
 @configure.service(
-    context=ISite, name='@addons', method='POST',
+    context=IContainer, name='@addons', method='POST',
     permission='guillotina.ManageAddons',
-    description='Install addon to site',
+    description='Install addon to container',
     options={
         'id': {
             'label': 'id of addon to install',
@@ -30,7 +30,7 @@ async def install(context, request):
             'RequiredParam',
             _("Property 'id' is required to be valid"))
 
-    registry = request.site_settings
+    registry = request.container_settings
     config = registry.for_interface(IAddons)
 
     if id_to_install in config['enabled']:
@@ -44,9 +44,9 @@ async def install(context, request):
 
 
 @configure.service(
-    context=ISite, name='@addons', method='DELETE',
+    context=IContainer, name='@addons', method='DELETE',
     permission='guillotina.ManageAddons',
-    description='Uninstall an addon from site',
+    description='Uninstall an addon from container',
     options={
         'id': {
             'label': 'id of addon to install',
@@ -62,7 +62,7 @@ async def uninstall(context, request):
             'RequiredParam',
             _("Property 'id' is required to be valid"))
 
-    registry = request.site_settings
+    registry = request.container_settings
     config = registry.for_interface(IAddons)
 
     if id_to_install not in config['enabled']:
@@ -76,7 +76,7 @@ async def uninstall(context, request):
 
 
 @configure.service(
-    context=ISite, name='@addons', method='GET',
+    context=IContainer, name='@addons', method='GET',
     permission='guillotina.ManageAddons',
     description='List available addons')
 async def get_addons(context, request):
@@ -90,7 +90,7 @@ async def get_addons(context, request):
             'title': addon['title']
         })
 
-    registry = request.site_settings
+    registry = request.container_settings
     config = registry.for_interface(IAddons)
 
     for installed in config['enabled']:

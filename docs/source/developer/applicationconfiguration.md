@@ -11,7 +11,7 @@ to those decorators.
 
 *`@configure.service`*
 
-* _context_: Content type interface this service is registered against. Example: ISite: *required*
+* _context_: Content type interface this service is registered against. Example: IContainer: *required*
 * _method_: HTTP method this service works against. Default is `GET`
 * _permission_: Permission this service requires. Default is configure default_permission setting
 * _layer_: Layer this service is registered for. Default is `IDefaultLayer`

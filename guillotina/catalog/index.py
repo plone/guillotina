@@ -8,7 +8,7 @@ from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
@@ -16,10 +16,10 @@ from guillotina.utils import get_current_request
 
 class CommitHook(object):
 
-    def __init__(self, site, request):
+    def __init__(self, container, request):
         self.remove = []
         self.index = {}
-        self.site = site
+        self.container = container
         self.request = request
 
     async def __call__(self, trns):
@@ -28,8 +28,8 @@ class CommitHook(object):
         # Commits are run in sync thread so there is no asyncloop
         search = queryUtility(ICatalogUtility)
         if search:
-            await search.remove(self.site, self.remove)
-            await search.index(self.site, self.index)
+            await search.remove(self.container, self.remove)
+            await search.index(self.container, self.index)
 
         self.index = {}
         self.remove = []
@@ -39,7 +39,7 @@ def get_hook():
 
     request = get_current_request()
     try:
-        site = request.site
+        container = request.container
         search = queryUtility(ICatalogUtility)
     except (AttributeError, KeyError):
         return
@@ -54,7 +54,7 @@ def get_hook():
             hook = _hook[0]
             break
     if hook is None:
-        hook = CommitHook(site, request)
+        hook = CommitHook(container, request)
         trns.add_after_commit_hook(hook)
     return hook
 
@@ -72,7 +72,7 @@ def remove_object(obj, event):
     if uid is None:
         return
     portal_type = getattr(obj, 'portal_type', None)
-    if portal_type is None or ISite.providedBy(obj):
+    if portal_type is None or IContainer.providedBy(obj):
         return
 
     content_path = get_content_path(obj)
@@ -92,7 +92,7 @@ def add_object(obj, event):
     if uid is None:
         return
     portal_type = getattr(obj, 'portal_type', None)
-    if portal_type is None or ISite.providedBy(obj):
+    if portal_type is None or IContainer.providedBy(obj):
         return
 
     hook = get_hook()
@@ -103,15 +103,15 @@ def add_object(obj, event):
         hook.index[uid] = search.get_data(obj)
 
 
-@configure.subscriber(for_=(ISite, IObjectAddedEvent))
-async def initialize_catalog(site, event):
+@configure.subscriber(for_=(IContainer, IObjectAddedEvent))
+async def initialize_catalog(container, event):
     search = queryUtility(ICatalogUtility)
     if search:
-        await search.initialize_catalog(site)
+        await search.initialize_catalog(container)
 
 
-@configure.subscriber(for_=(ISite, IObjectRemovedEvent))
-async def remove_catalog(site, event):
+@configure.subscriber(for_=(IContainer, IObjectRemovedEvent))
+async def remove_catalog(container, event):
     search = queryUtility(ICatalogUtility)
     if search:
-        await search.remove_catalog(site)
+        await search.remove_catalog(container)

@@ -27,6 +27,7 @@ from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IFolder
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
 from guillotina.interfaces import ILayers
@@ -35,7 +36,6 @@ from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
-from guillotina.interfaces import ISite
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.registry import REGISTRY_DATA_KEY
@@ -46,10 +46,10 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import noLongerProvides
-import typing
 
 import guillotina.db.orm.base
 import pathlib
+import typing
 
 
 _zone = tzlocal()
@@ -381,7 +381,7 @@ class Item(Resource):
 
 @configure.contenttype(
     portal_type="Folder",
-    schema=IContainer,
+    schema=IFolder,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class Folder(Resource):
     """
@@ -443,8 +443,8 @@ class Folder(Resource):
             yield key, value
 
 
-@configure.contenttype(portal_type="Site", schema=ISite)
-class Site(Folder):
+@configure.contenttype(portal_type="Container", schema=IContainer)
+class Container(Folder):
     """
     """
 
@@ -463,7 +463,7 @@ class Site(Folder):
 
         roles = IPrincipalRoleManager(self)
         roles.assign_role_to_principal(
-            'guillotina.SiteAdmin',
+            'guillotina.ContainerAdmin',
             ROOT_USER_ID
         )
 

@@ -76,7 +76,7 @@ class ApplicationRoot(object):
     def __delitem__(self, key):
         """ This operation can only be done throw HTTP request
 
-        We can check if there is permission to delete a site
+        We can check if there is permission to delete a db
         XXX TODO
         """
 
@@ -88,7 +88,7 @@ class ApplicationRoot(object):
     def __setitem__(self, key, value):
         """ This operation can only be done throw HTTP request
 
-        We can check if there is permission to delete a site
+        We can check if there is permission to delete a db
         XXX TODO
         """
 
@@ -133,7 +133,7 @@ class Database(object):
     async def async_set(self, key, value):
         """ This operation can only be done through HTTP request
 
-        We can check if there is permission to delete a site?
+        We can check if there is permission to delete a container?
         XXX TODO
         """
         root = await self.get_root()
@@ -142,7 +142,7 @@ class Database(object):
     async def async_del(self, key):
         """ This operation can only be done throw HTTP request
 
-        We can check if there is permission to delete a site
+        We can check if there is permission to delete a container
         XXX TODO
         """
         root = await self.get_root()

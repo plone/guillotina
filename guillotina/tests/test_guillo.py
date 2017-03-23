@@ -15,17 +15,17 @@ async def test_get_the_root(guillotina):
 async def test_get_db(guillotina):
     requester = await guillotina
     response, status = await requester('GET', '/db')
-    assert response['sites'] == []
+    assert response['containers'] == []
 
 
-async def test_get_site(site_requester):
-    async with await site_requester as requester:
+async def test_get_container(container_requester):
+    async with await container_requester as requester:
         response, status = await requester('GET', '/db/guillotina')
-        assert response['@type'] == 'Site'
+        assert response['@type'] == 'Container'
 
 
-async def test_get_content(site_requester):
-    async with await site_requester as requester:
+async def test_get_content(container_requester):
+    async with await container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina',
@@ -41,8 +41,8 @@ async def test_get_content(site_requester):
         assert status == 200
 
 
-async def test_content_paths_are_correct(site_requester):
-    async with await site_requester as requester:
+async def test_content_paths_are_correct(container_requester):
+    async with await container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina',

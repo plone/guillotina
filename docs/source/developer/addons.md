@@ -1,6 +1,6 @@
 # Add-ons
 
-Addons are integrations that can be installed or uninstalled against a Guillotina site.
+Addons are integrations that can be installed or uninstalled against a Guillotina container.
 `guillotina` applications can provide potentially many addons. If you have
 not read the section on applications, please read that before you come here. The
 only way to provide addons is to first implement a `guillotina` application.
@@ -64,14 +64,14 @@ class MyAddon(Addon):
 
     @classmethod
     def install(self, request):
-      registry = request.site_settings
+      registry = request.container_settings
       registry.for_interface(ILayers).active_layers |= {
           LAYER
       }
 
     @classmethod
     def uninstall(self, request):
-      registry = request.site_settings
+      registry = request.container_settings
       registry.for_interface(ILayers).active_layers -= {
         LAYER
       }

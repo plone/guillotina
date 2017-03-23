@@ -12,5 +12,5 @@
   .. autoclass:: Folder
      :members: async_contains, async_set, async_get, async_del, async_len, async_keys, async_items
 
-  .. autoclass:: Site
+  .. autoclass:: Container
      :members: install

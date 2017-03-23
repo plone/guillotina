@@ -3,11 +3,11 @@ from guillotina import configure
 from guillotina.component import getUtility
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInteraction
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 
 
 @configure.service(
-    context=ISite, method='GET', permission='guillotina.AccessContent',
+    context=IContainer, method='GET', permission='guillotina.AccessContent',
     name='@user',
     description='Get information on the currently logged in user')
 async def get_user_info(context, request):

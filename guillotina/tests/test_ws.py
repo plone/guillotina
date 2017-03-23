@@ -5,8 +5,8 @@ import aiohttp
 import json
 
 
-async def test_hello(site_requester, loop):
-    async with await site_requester as requester:  # noqa
+async def test_hello(container_requester, loop):
+    async with await container_requester as requester:  # noqa
         session = aiohttp.ClientSession()
         async with session.ws_connect(
                 'ws://localhost:{port}/db/guillotina/@ws'.format(

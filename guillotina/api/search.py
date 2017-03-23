@@ -20,7 +20,7 @@ async def search_get(context, request):
         }
 
     return await search.get_by_path(
-        site=request.site,
+        container=request.container,
         path=get_content_path(context),
         query=q)
 

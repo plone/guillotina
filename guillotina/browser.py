@@ -58,9 +58,9 @@ class Absolute_URL(object):
         self.context = context
         self.request = request
 
-    def __call__(self, relative=False, site_url=False):
-        if site_url:
-            # we want the url relative to site so remove the site
+    def __call__(self, relative=False, container_url=False):
+        if container_url:
+            # we want the url relative to container so remove the container
             path = [x for x in get_physical_path(self.context)]
             path.pop(1)
             path = '/'.join(path)
@@ -72,7 +72,7 @@ class Absolute_URL(object):
         else:
             virtualhost = None
 
-        if site_url:
+        if container_url:
             return path
         elif relative:
             return '/' + self.request._db_id + path

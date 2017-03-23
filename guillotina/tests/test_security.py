@@ -6,23 +6,23 @@ from guillotina.tests import utils
 import json
 
 
-async def test_get_guillotina(site_requester):
-    async with await site_requester as requester:
+async def test_get_guillotina(container_requester):
+    async with await container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@sharing')
-        assert response['local']['prinrole']['root']['guillotina.SiteAdmin'] == 'Allow'
+        assert response['local']['prinrole']['root']['guillotina.ContainerAdmin'] == 'Allow'
         assert response['local']['prinrole']['root']['guillotina.Owner'] == 'Allow'
 
 
-async def test_database_root_has_none_parent(site_requester):
-    async with await site_requester as requester:
+async def test_database_root_has_none_parent(container_requester):
+    async with await container_requester as requester:
         # important for security checks to not inherit...
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
         assert root.__parent__ is None
 
 
-async def test_set_local_guillotina(site_requester):
-    async with await site_requester as requester:
+async def test_set_local_guillotina(container_requester):
+    async with await container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/@sharing',
@@ -51,23 +51,23 @@ async def test_set_local_guillotina(site_requester):
             'GET', '/db/guillotina/testing/@sharing')
 
         assert len(response['inherit']) == 1
-        assert response['inherit'][0]['prinrole']['root']['guillotina.SiteAdmin'] == 'Allow'
+        assert response['inherit'][0]['prinrole']['root']['guillotina.ContainerAdmin'] == 'Allow'
         assert response['inherit'][0]['prinrole']['root']['guillotina.Owner'] == 'Allow'
         assert 'Anonymous User' not in response['inherit'][0]['prinrole']
         assert response['inherit'][0]['prinperm']['user1']['guillotina.AccessContent'] == 'AllowSingle'  # noqa
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        site = await root.async_get('guillotina')
-        testing_object = await site.async_get('testing')
+        container = await root.async_get('guillotina')
+        testing_object = await container.async_get('testing')
 
         # Check the access users/roles
         principals = get_principals_with_access_content(testing_object, request)
         assert principals == ['root']
         roles = get_roles_with_access_content(testing_object, request)
-        assert roles == ['guillotina.SiteAdmin']
+        assert roles == ['guillotina.ContainerAdmin']
 
-        # Now we add the user1 with inherit on the site
+        # Now we add the user1 with inherit on the container
         response, status = await requester(
             'POST',
             '/db/guillotina/@sharing',
@@ -82,8 +82,8 @@ async def test_set_local_guillotina(site_requester):
         )
 
         # need to retreive objs again from db since they changed
-        site = await root.async_get('guillotina')
-        testing_object = await site.async_get('testing')
+        container = await root.async_get('guillotina')
+        testing_object = await container.async_get('testing')
         principals = get_principals_with_access_content(testing_object, request)
         assert len(principals) == 2
         assert 'user1' in principals
@@ -102,7 +102,7 @@ async def test_set_local_guillotina(site_requester):
             })
         )
         # need to retreive objs again from db since they changed
-        site = await root.async_get('guillotina')
-        testing_object = await site.async_get('testing')
+        container = await root.async_get('guillotina')
+        testing_object = await container.async_get('testing')
         principals = get_principals_with_access_content(testing_object, request)
         assert principals == ['root']

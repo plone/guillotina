@@ -74,7 +74,7 @@ Available local variables:
 Example
 -------
 
-site = await root['db'].async_get('site')
+container = await root['db'].async_get('container')
 
 
 Commit changes

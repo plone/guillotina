@@ -14,12 +14,13 @@ from .content import IAsyncContainer  # noqa
 from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa
 from .content import IDatabase  # noqa
+from .content import IFolder  # noqa
 from .content import IItem  # noqa
 from .content import ILocation  # noqa
 from .content import IRegistry  # noqa
 from .content import IResource  # noqa
 from .content import IResourceFactory  # noqa
-from .content import ISite  # noqa
+from .content import IContainer  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
@@ -33,7 +34,7 @@ from .events import IObjectMovedEvent  # noqa
 from .events import IObjectPermissionsModifiedEvent  # noqa
 from .events import IObjectPermissionsViewEvent  # noqa
 from .events import IObjectRemovedEvent  # noqa
-from .events import IObjectVisitedEvent  # noqa
+from .events import IObjectVIContainerdEvent  # noqa
 from .exceptions import IForbidden  # noqa
 from .exceptions import IForbiddenAttribute  # noqa
 from .exceptions import ISerializableException  # noqa
@@ -159,10 +160,10 @@ class IAbsoluteURL(Interface):
 
 class IAddOn(Interface):
 
-    def install(cls, site, request):
+    def install(cls, container, request):
         pass
 
-    def uninstall(cls, site, request):
+    def uninstall(cls, container, request):
         pass
 
 

@@ -250,7 +250,7 @@ async def guillotina(test_server, postgres, guillotina_main, loop):
     return requester
 
 
-class SiteRequesterAsyncContextManager(object):
+class ContainerRequesterAsyncContextManager(object):
     def __init__(self, guillotina):
         self.guillotina = guillotina
         self.requester = None
@@ -261,10 +261,10 @@ class SiteRequesterAsyncContextManager(object):
     async def __aenter__(self):
         requester = await self.get_requester()
         resp, status = await requester('POST', '/db', data=json.dumps({
-            "@type": "Site",
-            "title": "Guillotina Site",
+            "@type": "Container",
+            "title": "Guillotina Container",
             "id": "guillotina",
-            "description": "Description Guillotina Site"
+            "description": "Description Guillotina Container"
         }))
         assert status == 200
         self.requester = requester
@@ -276,5 +276,5 @@ class SiteRequesterAsyncContextManager(object):
 
 
 @pytest.fixture(scope='function')
-async def site_requester(guillotina):
-    return SiteRequesterAsyncContextManager(guillotina)
+async def container_requester(guillotina):
+    return ContainerRequesterAsyncContextManager(guillotina)

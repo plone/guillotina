@@ -29,7 +29,7 @@ Anonymous user has on DB/StaticFiles/StaticDirectories/Application object :
 
  * guillotina.AccessContent
 
-## Roles in guillotina Site objects
+## Roles in guillotina container objects
 
 Defined at:
 
@@ -71,9 +71,9 @@ Defined at:
  * guillotina.SeePermissions
  * guillotina.ReindexContent
 
-## Site/App Roles
+## Container/App Roles
 
-### guillotina.SiteAdmin
+### guillotina.ContainerAdmin
 
  * guillotina.AccessContent
  * guillotina.ManageAddons
@@ -82,23 +82,23 @@ Defined at:
  * guillotina.ReadConfiguration
  * guillotina.ManageCatalog
 
-### guillotina.SiteDeleter
+### guillotina.ContainerDeleter
 
  * guillotina.DeletePortal
 
-## Default roles on Guillotina Site
+## Default roles on Guillotina Container
 
-They are stored in anontations using IRolePermissionMap.
+They are stored in annotations using IRolePermissionMap.
 
 Created objects set the guillotina.Owner role to the user who created it.
 
-## Default groups on Guillotina Site
+## Default groups on Guillotina Container
 
 ### Managers
 
 #### RootParticipation
 
-There is a `root` user who has permissions to all site:
+There is a `root` user who has permissions to all containers:
 
 DB/APP permissions are defined on factory.py
 

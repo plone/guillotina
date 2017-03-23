@@ -13,9 +13,9 @@ A service can be as simple as a function in your application:
 
 ```python
 from guillotina import configure
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 
-@configure.service(context=ISite, name='@myservice', method='GET',
+@configure.service(context=IContainer, name='@myservice', method='GET',
 									 permission='guillotina.AccessContent')
 async def my_service(context, request):
 		return {
@@ -28,7 +28,7 @@ The most simple way to define a service is to use the decorator method shown her
 As long as your application imports the module where your service is defined,
 your service will be loaded for you.
 
-In this example, the service will apply to a GET request against a site,
+In this example, the service will apply to a GET request against a container,
 `/zodb/guillotina/@myservice`.
 
 
@@ -54,11 +54,11 @@ The example above, with the class based approach will look like:
 
 ```python
 from guillotina import configure
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from guillotina.api.service import Service
 
 
-@configure.service(context=ISite, name='@myservice', method='GET',
+@configure.service(context=IContainer, name='@myservice', method='GET',
 									 permission='guillotina.AccessContent')
 class DefaultGET(Service):
 		async def __call__(self):

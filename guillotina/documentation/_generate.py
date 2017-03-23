@@ -34,9 +34,9 @@ DEFAULT_HEADERS = {
 BASE_PATHS = {
     '/': 'guillotina.interfaces.content.IApplication',
     '/db': 'guillotina.interfaces.content.IDatabase',
-    '/db/site': 'guillotina.interfaces.content.ISite',
-    '/db/site/folder': 'guillotina.interfaces.content.IContainer',
-    '/db/site/folder/item': 'guillotina.interfaces.content.IItem'
+    '/db/container': 'guillotina.interfaces.content.IContainer',
+    '/db/container/folder': 'guillotina.interfaces.content.IFolder',
+    '/db/container/folder/item': 'guillotina.interfaces.content.IItem'
 }
 
 
@@ -222,12 +222,12 @@ def setup_app():
     class MyAddon(Addon):
 
         @classmethod
-        def install(cls, site, request):
+        def install(cls, container, request):
             # install code
             pass
 
         @classmethod
-        def uninstall(cls, site, request):
+        def uninstall(cls, container, request):
             # uninstall code
             pass
 
@@ -246,24 +246,24 @@ if __name__ == '__main__':
 
     # db root
     APIExplorer('/db').get().post(jsond={
-        '@type': 'Site',
-        'id': 'site',
-        'title': 'Site'
+        '@type': 'Container',
+        'id': 'container',
+        'title': 'Container'
     })
 
-    # site root
-    site_explorer = APIExplorer('/db/site')
-    site_explorer.get().get('@types').post(jsond={
+    # container root
+    container_explorer = APIExplorer('/db/container')
+    container_explorer.get().get('@types').post(jsond={
         '@type': 'Folder',
         'id': 'folder',
         'title': 'My Folder'
     })
-    site_explorer.post('@addons', jsond={
+    container_explorer.post('@addons', jsond={
         'id': 'myaddon'
     }).get('@addons').delete('@addons', jsond={
         'id': 'myaddon'
     })
-    site_explorer.get('@registry').post(
+    container_explorer.get('@registry').post(
         '@registry',
         jsond={
             'interface': get_class_dotted_name(testmodule.ISchema),
@@ -280,17 +280,17 @@ if __name__ == '__main__':
         path_scheme='@registry/[dotted-name:string]')
 
     # folder
-    folder_explorer = APIExplorer('/db/site/folder', type_name='folder')
+    folder_explorer = APIExplorer('/db/container/folder', type_name='folder')
     folder_explorer.resource_api_basics().\
         patch(jsond={'title': 'My Folder Updated'}).\
         post(jsond={'@type': 'Item', 'id': 'item', 'title': 'My Item'})
 
     # item
-    item_explorer = APIExplorer('/db/site/folder/item', type_name='item')
+    item_explorer = APIExplorer('/db/container/folder/item', type_name='item')
     item_explorer.resource_api_basics().\
         patch(jsond={'title': 'My Item Updated'}).\
         delete()
 
     # clean up...
     folder_explorer.delete()
-    site_explorer.delete()
+    container_explorer.delete()

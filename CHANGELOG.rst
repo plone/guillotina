@@ -1,6 +1,9 @@
 1.0.0a2 (unreleased)
 --------------------
 
+- Change Site portal type to Container
+  [vangheem]
+
 - Fix get_current_request to correctly look for python None object when finding
   the request object
   [vangheem]

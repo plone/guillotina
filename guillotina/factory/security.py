@@ -11,7 +11,7 @@ from guillotina.security.security_code import PrincipalPermissionManager
 class DatabaseSpecialPermissions(PrincipalPermissionManager):
     """No Role Map on Application and DB so permissions set to users.
 
-    It will not affect Guillotina sites as they don't have parent pointers to DB/APP
+    It will not affect Guillotina containers as they don't have parent pointers to DB/APP
     """
     def __init__(self, db):
         super(DatabaseSpecialPermissions, self).__init__()
@@ -27,7 +27,7 @@ class DatabaseSpecialPermissions(PrincipalPermissionManager):
 class ApplicationSpecialPermissions(DatabaseSpecialPermissions):
     """No Role Map on Application and DB so permissions set to users.
 
-    It will not affect Guillotina sites as they don't have parent pointers to DB/APP
+    It will not affect Guillotina containers as they don't have parent pointers to DB/APP
     """
     def __init__(self, app):
         super(ApplicationSpecialPermissions, self).__init__(app)

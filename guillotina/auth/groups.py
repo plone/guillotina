@@ -11,8 +11,8 @@ class GuillotinaGroup(GuillotinaUser):
 
         if ident == 'Managers':
             # Special Case its a Root Manager user
-            self._roles['guillotina.SiteAdmin'] = 1
-            self._roles['guillotina.SiteDeleter'] = 1
+            self._roles['guillotina.ContainerAdmin'] = 1
+            self._roles['guillotina.ContainerDeleter'] = 1
             self._roles['guillotina.Owner'] = 1
             self._roles['guillotina.Member'] = 1
 

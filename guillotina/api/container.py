@@ -12,7 +12,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from guillotina.utils import get_authenticated_user_id
 
 
@@ -28,7 +28,7 @@ class DefaultGET(Service):
 @configure.service(
     context=IDatabase, method='POST', permission='guillotina.AddPortal',
     title="Create a new Portal",
-    description="Creates a new site on the database",
+    description="Creates a new container on the database",
     payload={
         "query": {},
         "payload": {
@@ -39,11 +39,11 @@ class DefaultGET(Service):
         "traversal": []
     })
 class DefaultPOST(Service):
-    """Create a new Site for DB Mounting Points."""
+    """Create a new Container for DB Mounting Points."""
 
     async def __call__(self):
         data = await self.request.json()
-        if '@type' not in data and data['@type'] != 'Site':
+        if '@type' not in data and data['@type'] != 'Container':
             return ErrorResponse(
                 'NotAllowed',
                 'can not create this type %s' % data['@type'],
@@ -73,32 +73,32 @@ class DefaultPOST(Service):
                 'Duplicate id',
                 status=401)
 
-        site = await create_content(
-            'Site',
+        container = await create_content(
+            'Container',
             id=data['id'],
             title=data['title'],
             description=data['description'])
 
         # Special case we don't want the parent pointer
-        site.__name__ = data['id']
+        container.__name__ = data['id']
 
-        await self.context.async_set(data['id'], site)
-        await site.install()
+        await self.context.async_set(data['id'], container)
+        await container.install()
 
-        self.request._site_id = site.__name__
+        self.request._container_id = container.__name__
 
         user = get_authenticated_user_id(self.request)
 
         # Local Roles assign owner as the creator user
-        roleperm = IPrincipalRoleManager(site)
+        roleperm = IPrincipalRoleManager(container)
         roleperm.assign_role_to_principal(
             'guillotina.Owner',
             user)
 
-        await notify(ObjectAddedEvent(site, self.context, site.__name__))
+        await notify(ObjectAddedEvent(container, self.context, container.__name__))
 
         resp = {
-            '@type': 'Site',
+            '@type': 'Container',
             'id': data['id'],
             'title': data['title']
         }
@@ -121,7 +121,7 @@ class SharingPOST(Service):
     pass
 
 
-@configure.service(context=ISite, method='DELETE', permission='guillotina.DeletePortals')
+@configure.service(context=IContainer, method='DELETE', permission='guillotina.DeletePortals')
 class DefaultDELETE(content.DefaultDELETE):
     pass
 

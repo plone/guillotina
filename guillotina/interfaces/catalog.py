@@ -3,36 +3,36 @@ from zope.interface import Interface
 
 
 class ICatalogUtility(Interface):
-    def get_by_uuid(site, uid):
+    def get_by_uuid(container, uid):
         pass
 
-    def get_object_by_uuid(site, uid):
+    def get_object_by_uuid(container, uid):
         pass
 
-    def get_by_type(site, type_id):
+    def get_by_type(container, type_id):
         pass
 
-    def get_by_path(site, path):
+    def get_by_path(container, path):
         pass
 
-    def get_folder_contents(site, obj):
+    def get_folder_contents(container, obj):
         pass
 
-    def reindex_all_content(site):
+    def reindex_all_content(container):
         pass
 
-    def initialize_catalog(site):
+    def initialize_catalog(container):
         pass
 
-    def remove_catalog(site):
+    def remove_catalog(container):
         pass
 
-    def search(site, q: str):
+    def search(container, q: str):
         """
         String search query
         """
 
-    def query(site, q: dict):
+    def query(container, q: dict):
         """
         Raw query
         """

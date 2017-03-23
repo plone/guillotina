@@ -8,7 +8,7 @@ from guillotina.component import getMultiAdapter
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
-from guillotina.interfaces import ISite
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IValueToJson
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
@@ -24,9 +24,9 @@ _marker = object()
 
 
 @configure.service(
-    context=ISite, method='GET', permission='guillotina.ReadConfiguration',
+    context=IContainer, method='GET', permission='guillotina.ReadConfiguration',
     name='@registry',
-    description='Read site registry settings')
+    description='Read container registry settings')
 class Read(TraversableService):
     key = _marker
     value = None
@@ -35,7 +35,7 @@ class Read(TraversableService):
         if len(traverse) == 1:
             # we want have the key of the registry
             self.key = traverse[0]
-            self.value = self.request.site_settings.get(self.key, _marker)
+            self.value = self.request.container_settings.get(self.key, _marker)
             if self.value is _marker:
                 raise KeyError(self.key)
         return self
@@ -43,7 +43,7 @@ class Read(TraversableService):
     async def __call__(self):
         if self.key is _marker:
             # Root of registry
-            self.value = self.request.site_settings
+            self.value = self.request.container_settings
         if IRegistry.providedBy(self.value):
             result = {}
             for key in self.value.keys():
@@ -63,7 +63,7 @@ class Read(TraversableService):
 
 
 @configure.service(
-    context=ISite, method='POST', permission='guillotina.RegisterConfigurations',
+    context=IContainer, method='POST', permission='guillotina.RegisterConfigurations',
     name='@registry',
     description='Register a new interface to for registry settings',
     options={
@@ -83,10 +83,10 @@ class Register(Service):
 
     async def __call__(self):
         """ data input : { 'interface': 'INTERFACE' }"""
-        if not hasattr(self.request, 'site_settings'):
+        if not hasattr(self.request, 'container_settings'):
             return ErrorResponse(
                 'BadRequest',
-                _("Not in a site request"))
+                _("Not in a container request"))
 
         data = await self.request.json()
         interface = data.get('interface', None)
@@ -96,7 +96,7 @@ class Register(Service):
                 'InvalidRequest',
                 'Non existent Interface')
 
-        registry = self.request.site_settings
+        registry = self.request.container_settings
         iObject = import_class(interface)
         registry.register_interface(iObject)
         config = registry.for_interface(iObject)
@@ -113,7 +113,7 @@ class Register(Service):
 
 
 @configure.service(
-    context=ISite, method='PATCH', permission='guillotina.WriteConfiguration',
+    context=IContainer, method='PATCH', permission='guillotina.WriteConfiguration',
     name='@registry',
     description='Update registry setting',
     options={
@@ -128,10 +128,10 @@ class Write(TraversableService):
     value = None
 
     async def publish_traverse(self, traverse):
-        if len(traverse) == 1 and traverse[0] in self.request.site_settings:
+        if len(traverse) == 1 and traverse[0] in self.request.container_settings:
             # we want have the key of the registry
             self.key = traverse[0]
-            self.value = self.request.site_settings.get(self.key)
+            self.value = self.request.container_settings.get(self.key)
         return self
 
     async def __call__(self):
@@ -159,7 +159,7 @@ class Write(TraversableService):
                 status=501)
 
         try:
-            self.request.site_settings[self.key] = new_value
+            self.request.container_settings[self.key] = new_value
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',
