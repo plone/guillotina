@@ -1,26 +1,72 @@
-*.pyc
-*.pyo
-/.idea/
-/.installed.cfg
-/.mr.developer.cfg
-/bin/
-/Data.fs*
+# Git Ignore this patterns:
+*.py[co]
+
+# Packages
+*.egg
+*.egg-info
+
+# dirs
+/build/
+dist
+sdist
+/docs/build
+/eggs/
 /develop-eggs/
-/parts/
-/result
-*.egg-info/
-.eggs
+/buildout-cache/
+/.eggs
 .cache
-cov_html
-data
-lib
-eggs
-extras
-.coverage
-data*
-include/
-pip-selfcheck.json
-.coveralls.yml
-docs/build
+/parts/
+/bin/
+/lib/
+/lib64/
+/include/
+/extras/
+/data
+/var/
+/Data.fs*
+/result
+/.installed.cfg
 *.so
-build/
+
+# Installer logs
+/pip-log.txt
+/pip-selfcheck.json
+/.plone.versioncheck.cache
+/.plone.versioncheck.tracked.json
+/pyvenv.cfg
+
+# Unit test / coverage reports
+/.coverage
+/.tox
+cov_html
+.coverage
+.coveralls.yml
+
+#Translations
+*.mo
+
+#Mr Developer
+/.mr.developer.cfg
+
+# Codeintel
+.codeintel
+/etc/
+/include/
+/lib/
+/local/
+
+/.idea/
+/.Python
+
+# files
+*.log
+*.swp
+
+# excludes
+!.coveragerc
+!.editorconfig
+!.gitattributes
+!.gitignore
+!.gitkeep
+!.travis.yml
+!/src/*
