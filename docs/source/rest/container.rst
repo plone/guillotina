@@ -1,6 +1,6 @@
-Site
-====
+Container
+=========
 
 .. http:service::
-   :type: site
+   :type: container
    :directory: ../../rest-dumps
