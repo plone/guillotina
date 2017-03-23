@@ -22,7 +22,7 @@ Install `guillotina`:
 Generate configuration file:
 
 ```
-./bin/gcreate configuration
+./bin/guillotina create configuration
 ```
 
 Finally, run the server:

@@ -14,6 +14,8 @@ class CreateCommand(Command):
 
     def get_parser(self):
         parser = super(CreateCommand, self).get_parser()
+        parser.add_argument('command',
+                            help='`create` position command argument')
         parser.add_argument('template',
                             help='Template to use to generate project',
                             choices=set(['application', 'configuration']))
