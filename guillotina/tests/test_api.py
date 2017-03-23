@@ -233,3 +233,16 @@ async def test_get_addons(site_requester):
             'GET', '/db/guillotina/@addons'
         )
         assert status == 200
+
+async def test_get_logged_user_info(site_requester):
+    async with await site_requester as requester:
+        response, status = await requester(
+            'GET', '/db/guillotina/@user'
+        )
+        assert status == 200
+        from guillotina.auth.users import ROOT_USER_ID
+        try:
+            info = response[ROOT_USER_ID]
+            assert 'Managers' in info['groups']
+        except KeyError:
+            raise AssertionError("Code should not come here! as User `%s` should be in response" % ROOT_USER_ID)
