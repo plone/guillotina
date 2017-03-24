@@ -21,12 +21,12 @@ from guillotina import configure
 class MyAddon(Addon):
 
     @classmethod
-    def install(self, request):
+    def install(cls, container, request):
         # install code
         pass
 
     @classmethod
-    def uninstall(self, request):
+    def uninstall(cls, container, request):
         # uninstall code
         pass
 ```
@@ -53,6 +53,7 @@ from:
 ```python
 
 from guillotina.addons import Addon
+from guillotina import configure
 from guillotina.registry import ILayers
 
 LAYER = 'guillotina_myaddon.interfaces.ILayer'
@@ -63,14 +64,14 @@ LAYER = 'guillotina_myaddon.interfaces.ILayer'
 class MyAddon(Addon):
 
     @classmethod
-    def install(self, request):
+    def install(cls, container, request):
       registry = request.container_settings
       registry.for_interface(ILayers).active_layers |= {
           LAYER
       }
 
     @classmethod
-    def uninstall(self, request):
+    def uninstall(cls, container, request):
       registry = request.container_settings
       registry.for_interface(ILayers).active_layers -= {
         LAYER
