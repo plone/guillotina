@@ -1,4 +1,4 @@
-1.0.0a2 (unreleased)
+1.0.0a2 (2017-03-23)
 --------------------
 
 - Change guillotina commands to be sub-commands of main `bin/guillotina`
