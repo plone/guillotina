@@ -56,23 +56,19 @@ setup(
         'python-dateutil',
         'pycrypto',
         'setuptools',
-        'six',
         'ujson',
         'zope.interface',
         'aiocache',
         'aioconsole',
         'pyjwt',
-        'requests',
         'asyncpg',
         'cffi'
     ],
     extras_require={
         'test': [
             'pytest',
-            'requests',
             'docker',
             'backoff',
-            'requests',
             'psycopg2',
             'pytest-asyncio',
             'pytest-aiohttp'

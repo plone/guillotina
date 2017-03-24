@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- Remove the dependencies six and requests
+  [vangheem]
+
 - Rename `portal_type` to `type_name` as "portal" does not make sense anymore
   [vangheem]
 

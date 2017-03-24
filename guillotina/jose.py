@@ -17,8 +17,8 @@ from time import time
 import binascii
 import datetime
 import json
-import six
 import zlib
+import struct
 
 
 __all__ = ['encrypt', 'decrypt', 'sign', 'verify']
@@ -69,7 +69,7 @@ def serialize_compact(jwt):
     :returns: A string, representing the compact serialization of a
               :class:`~jose.JWE` or :class:`~jose.JWS`.
     """
-    return six.b('.').join(jwt)
+    return b'.'.join(jwt)
 
 
 def deserialize_compact(jwt):
@@ -79,7 +79,7 @@ def deserialize_compact(jwt):
     :rtype: :class:`~jose.JWT`.
     :raises: :class:`~jose.Error` if the JWT is malformed
     """
-    parts = jwt.split(six.b('.'))
+    parts = jwt.split(b'.')
 
     # http://tools.ietf.org/html/
     # draft-ietf-jose-json-web-encryption-23#section-9
@@ -93,7 +93,7 @@ def deserialize_compact(jwt):
     return token_type(*parts)
 
 
-def encrypt(claims, jwk, adata=six.b(''), add_header=None, alg='RSA-OAEP',
+def encrypt(claims, jwk, adata=b'', add_header=None, alg='RSA-OAEP',
             enc='A128CBC-HS256', rng=get_random_bytes, compression=None):
     """ Encrypts the given claims and produces a :class:`~jose.JWE`
 
@@ -166,7 +166,7 @@ def encrypt(claims, jwk, adata=six.b(''), add_header=None, alg='RSA-OAEP',
     return JWE(*map(b64encode_url, jwe_components))
 
 
-def decrypt(jwe, jwk, adata=six.b(''), validate_claims=True,
+def decrypt(jwe, jwk, adata=b'', validate_claims=True,
             expiry_seconds=None):
     """ Decrypts a deserialized :class:`~jose.JWE`
 
@@ -302,7 +302,7 @@ def b64decode_url(istr):
         symbols. Compensate by padding to the nearest 4 bytes.
     """
     try:
-        return urlsafe_b64decode(istr + six.b('=') * (4 - (len(istr) % 4)))
+        return urlsafe_b64decode(istr + b'=' * (4 - (len(istr) % 4)))
     except (TypeError, binascii.Error) as e:
         raise Error('Unable to decode base64: %s' % (e))
 
@@ -311,7 +311,7 @@ def b64encode_url(istr):
     """ JWT Tokens may be truncated without the usual trailing padding '='
         symbols. Compensate by padding to the nearest 4 bytes.
     """
-    return urlsafe_b64encode(istr).rstrip(six.b('='))
+    return urlsafe_b64encode(istr).rstrip(b'=')
 
 
 def json_encode(x):
@@ -336,19 +336,11 @@ def auth_tag(hmac):
 
 def pad_pkcs7(s):
     sz = AES.block_size - (len(s) % AES.block_size)
-    return s + (six.int2byte(sz) * sz)
-
-
-if six.PY2:
-    def _ord(x):
-        return ord(x)
-else:
-    def _ord(x):
-        return x
+    return s + (struct.Struct(">B").pack(sz) * sz)
 
 
 def unpad_pkcs7(s):
-    return s[:-_ord(s[-1])]
+    return s[:-s[-1]]
 
 
 def encrypt_oaep(plaintext, jwk):
@@ -405,7 +397,7 @@ def const_compare(stra, strb):
 
     res = 0
     for a, b in zip(stra, strb):
-        res |= _ord(a) ^ _ord(b)
+        res |= a ^ b
     return res == 0
 
 
@@ -533,27 +525,27 @@ def _validate(claims, validate_claims, expiry_seconds):
         _check_not_before(now, not_before)
 
 
-def _jwe_hash_str(ciphertext, iv, adata=six.b(''), version=_TEMP_VER):
+def _jwe_hash_str(ciphertext, iv, adata=b'', version=_TEMP_VER):
     # http://tools.ietf.org/html/
     # draft-ietf-jose-json-web-algorithms-24#section-5.2.2.1
     # Both tokens without version and with version 1 should be ignored in
     # the future as they use incorrect hashing. The version parameter
     # should also be removed.
     if not version:
-        return six.b('.').join(
-            (adata, iv, ciphertext, six.b(str(len(adata))))
+        return b'.'.join(
+            (adata, iv, ciphertext, str(len(adata)).encode('latin-1'))
         )
     elif version == 1:
-        return six.b('.').join(
+        return b'.'.join(
             (adata, iv, ciphertext, pack("!Q", len(adata) * 8))
         )
-    return six.b('').join(
+    return b''.join(
         (adata, iv, ciphertext, pack("!Q", len(adata) * 8))
     )
 
 
 def _jws_hash_str(header, claims):
-    return six.b('.').join((header, claims))
+    return b'.'.join((header, claims))
 
 
 def cli_decrypt(jwt, key):
