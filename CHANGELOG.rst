@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- Add auto reload support with the aiohttp_autoreload library
+  [vangheem]
+
 - Upgrade to aiohttp 2
   [vangheem]
 
