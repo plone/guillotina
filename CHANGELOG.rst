@@ -1,8 +1,8 @@
 1.0.0a3 (unreleased)
 --------------------
 
-- Nothing changed yet.
-
+- Fix automatically creating id when none provided for content creation
+  [vangheem]
 
 1.0.0a2 (2017-03-23)
 --------------------
