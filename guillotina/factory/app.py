@@ -105,8 +105,7 @@ def make_app(config_file=None, settings=None, loop=None):
     app = web.Application(
         router=TraversalRouter(),
         loop=loop,
-        middlewares=middlewares
-        )
+        middlewares=middlewares)
 
     # Create root Application
     root = ApplicationRoot(config_file)
