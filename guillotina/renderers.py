@@ -174,7 +174,7 @@ class RendererRaw(Renderer):
             resp.headers['Content-Type'] = 'application/json'
 
         resp.headers.update(value.headers)
-        if not resp.started:
+        if not resp.prepared:
             resp.set_status(value.status)
         return resp
 
