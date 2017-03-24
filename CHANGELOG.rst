@@ -1,4 +1,4 @@
-1.0.0a3 (unreleased)
+1.0.0a3 (2017-03-23)
 --------------------
 
 - Fix automatically creating id when none provided for content creation
