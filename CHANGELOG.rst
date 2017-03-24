@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- Upgrade to aiohttp 2
+  [vangheem]
+
 - Remove the dependencies six and requests
   [vangheem]
 
