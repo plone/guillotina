@@ -49,14 +49,14 @@ class SerializeToJson(object):
 
         result = {
             '@id': IAbsoluteURL(self.context, self.request)(),
-            '@type': self.context.portal_type,
+            '@type': self.context.type_name,
             'parent': parent_summary,
             'created': json_compatible(self.context.created),
             'modified': json_compatible(self.context.modified),
             'UID': self.context.uuid,
         }
 
-        factory = get_cached_factory(self.context.portal_type)
+        factory = get_cached_factory(self.context.type_name)
 
         main_schema = factory.schema
         await self.get_schema(main_schema, self.context, result, False)
@@ -160,6 +160,6 @@ class DefaultJSONSummarySerializer(object):
 
         summary = json_compatible({
             '@id': IAbsoluteURL(self.context)(),
-            '@type': self.context.portal_type
+            '@type': self.context.type_name
         })
         return summary

@@ -78,8 +78,8 @@ class ResourceWriter(Writer):
 
     @property
     def type(self):
-        if self._obj is not None and hasattr(self._obj, 'portal_type'):
-            return self._obj.portal_type
+        if self._obj is not None and hasattr(self._obj, 'type_name'):
+            return self._obj.type_name
         else:
             return get_class_dotted_name(self._obj)
 

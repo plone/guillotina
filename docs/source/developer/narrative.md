@@ -65,7 +65,7 @@ class IToDo(Interface):
 
 
 @configure.contenttype(
-    portal_type="ToDo",
+    type_name="ToDo",
     schema=IToDo)
 class ToDo(Item):
     """

@@ -129,7 +129,7 @@ class ILocation(Interface):
 
 class IResource(ILocation):
 
-    portal_type = guillotina.schema.TextLine()
+    type_name = guillotina.schema.TextLine()
 
     title = guillotina.schema.TextLine(
         title='Title',
@@ -148,7 +148,7 @@ class IResource(ILocation):
 
 class IResourceFactory(IFactory):
 
-    portal_type = guillotina.schema.TextLine(
+    type_name = guillotina.schema.TextLine(
         title='Portal type name',
         description='The portal type this is an FTI for'
     )

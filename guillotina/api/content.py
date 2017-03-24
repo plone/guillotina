@@ -115,7 +115,7 @@ class DefaultPOST(Service):
         if deserializer is None:
             return ErrorResponse(
                 'DeserializationError',
-                'Cannot deserialize type {}'.format(obj.portal_type),
+                'Cannot deserialize type {}'.format(obj.type_name),
                 status=501)
 
         try:
@@ -171,7 +171,7 @@ class DefaultPATCH(Service):
         if deserializer is None:
             return ErrorResponse(
                 'DeserializationError',
-                'Cannot deserialize type {}'.format(self.context.portal_type),
+                'Cannot deserialize type {}'.format(self.context.type_name),
                 status=501)
 
         try:

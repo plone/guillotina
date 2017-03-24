@@ -48,7 +48,7 @@ async def default_delete(context, request):
 async def default_get(context, request):
     """We show the available schemas."""
     result = {}
-    factory = get_cached_factory(context.portal_type)
+    factory = get_cached_factory(context.type_name)
     result['static'] = []
     for schema in factory.behaviors or ():
         result['static'].append(schema.__identifier__)

@@ -12,7 +12,7 @@ global_roles_for_permission = role_permission_manager.get_roles_for_permission
 
 
 index.apply(IResource, 'uuid', type='keyword')
-index.apply(IResource, 'portal_type', type='keyword')
+index.apply(IResource, 'type_name', type='keyword')
 index.apply(IResource, 'title')
 index.apply(IResource, 'modified', type='date')
 index.apply(IResource, 'created', type='date')

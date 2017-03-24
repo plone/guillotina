@@ -59,19 +59,19 @@ _marker = object()
 
 @implementer(IResourceFactory)
 class ResourceFactory(Factory):
-    portal_type = None
+    type_name = None
     schema = None
     behaviors = None
     add_permission = None
 
     def __init__(self, klass, title='', description='',
-                 portal_type='', schema=None, behaviors=None,
+                 type_name='', schema=None, behaviors=None,
                  add_permission=DEFAULT_ADD_PERMISSION,
                  allowed_types=None):
         super(ResourceFactory, self).__init__(
             klass, title, description,
             tuple(filter(bool, [schema] + list(behaviors) or list())))
-        self.portal_type = portal_type
+        self.type_name = type_name
         self.schema = schema or Interface
         self.behaviors = behaviors or ()
         self.add_permission = add_permission
@@ -79,7 +79,7 @@ class ResourceFactory(Factory):
 
     def __call__(self, id, *args, **kw):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
-        obj.portal_type = self.portal_type
+        obj.type_name = self.type_name
         now = datetime.now(tz=_zone)
         obj.created = now
         obj.modified = now
@@ -95,18 +95,18 @@ class ResourceFactory(Factory):
 
     def getInterfaces(self):
         spec = super(ResourceFactory, self).getInterfaces()
-        spec.__name__ = self.portal_type
+        spec.__name__ = self.type_name
         return spec
 
     def __repr__(self):
         return '<{0:s} for {1:s}>'.format(self.__class__.__name__,
-                                          self.portal_type)
+                                          self.type_name)
 
 
 def load_cached_schema():
     for x in getUtilitiesFor(IResourceFactory):
         factory = x[1]
-        if factory.portal_type not in SCHEMA_CACHE:
+        if factory.type_name not in SCHEMA_CACHE:
             behaviors_registrations = []
             for iface in factory.behaviors or ():
                 if Interface.providedBy(iface):
@@ -114,7 +114,7 @@ def load_cached_schema():
                 else:
                     name = iface
                 behaviors_registrations.append(getUtility(IBehavior, name=name))
-            SCHEMA_CACHE[factory.portal_type] = {
+            SCHEMA_CACHE[factory.type_name] = {
                 'behaviors': behaviors_registrations,
                 'schema': factory.schema
             }
@@ -127,17 +127,17 @@ def load_cached_schema():
             BEHAVIOR_CACHE[name] = utility.interface
 
 
-def get_cached_factory(portal_type):
-    if portal_type in FACTORY_CACHE:
-        factory = FACTORY_CACHE[portal_type]
+def get_cached_factory(type_name):
+    if type_name in FACTORY_CACHE:
+        factory = FACTORY_CACHE[type_name]
     else:
-        factory = getUtility(IResourceFactory, portal_type)
-        FACTORY_CACHE[portal_type] = factory
+        factory = getUtility(IResourceFactory, type_name)
+        FACTORY_CACHE[type_name] = factory
     return factory
 
 
-def iter_schemata_for_type(portal_type):
-    factory = get_cached_factory(portal_type)
+def iter_schemata_for_type(type_name):
+    factory = get_cached_factory(type_name)
     if factory.schema is not None:
         yield factory.schema
     for schema in factory.behaviors or ():
@@ -145,8 +145,8 @@ def iter_schemata_for_type(portal_type):
 
 
 def iter_schemata(obj):
-    portal_type = IResource(obj).portal_type
-    for schema in iter_schemata_for_type(portal_type):
+    type_name = IResource(obj).type_name
+    for schema in iter_schemata_for_type(type_name):
         yield schema
     for schema in obj.__behaviors_schemas__:
         yield schema
@@ -227,7 +227,7 @@ class BehaviorAssignable(object):
         return True
 
     def enumerate_behaviors(self):
-        for behavior in SCHEMA_CACHE[self.context.portal_type]['behaviors']:
+        for behavior in SCHEMA_CACHE[self.context.type_name]['behaviors']:
             yield behavior
         for behavior in self.context.__behaviors__:
             yield BEHAVIOR_CACHE[behavior]
@@ -262,7 +262,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
     __behaviors__ = frozenset({})
     __acl__ = None
 
-    portal_type = None
+    type_name = None
     created = None
     modified = None
     title = None
@@ -284,7 +284,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         """
         path = '/'.join(get_physical_path(self))
         return "< {type} at {path} by {mem} >".format(
-            type=self.portal_type,
+            type=self.type_name,
             path=path,
             mem=id(self))
 
@@ -366,7 +366,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         # a default
         value = _default_from_schema(
             self,
-            SCHEMA_CACHE.get(self.portal_type).get('schema'),
+            SCHEMA_CACHE.get(self.type_name).get('schema'),
             name
         )
         if value is not _marker:
@@ -375,7 +375,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
 
 
 @configure.contenttype(
-    portal_type="Item",
+    type_name="Item",
     schema=IItem,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class Item(Resource):
@@ -385,7 +385,7 @@ class Item(Resource):
 
 
 @configure.contenttype(
-    portal_type="Folder",
+    type_name="Folder",
     schema=IFolder,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class Folder(Resource):
@@ -448,7 +448,7 @@ class Folder(Resource):
             yield key, value
 
 
-@configure.contenttype(portal_type="Container", schema=IContainer)
+@configure.contenttype(type_name="Container", schema=IContainer)
 class Container(Folder):
     """
     """
