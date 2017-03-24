@@ -1,8 +1,8 @@
 # this is for testing.py, do not import into other modules
 from guillotina import configure
 from guillotina.content import Item
-from guillotina.interfaces import IItem
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IItem
 from guillotina.testing import Example
 from guillotina.testing import IExample
 

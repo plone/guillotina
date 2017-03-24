@@ -17,8 +17,8 @@ from time import time
 import binascii
 import datetime
 import json
-import zlib
 import struct
+import zlib
 
 
 __all__ = ['encrypt', 'decrypt', 'sign', 'verify']

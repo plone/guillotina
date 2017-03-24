@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from guillotina.addons import Addon
 from guillotina import configure
+from guillotina.addons import Addon
 
 
 @configure.addon(

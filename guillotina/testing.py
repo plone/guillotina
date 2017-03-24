@@ -9,8 +9,8 @@ from guillotina.interfaces import IResource
 from guillotina.schema import JSONField
 from guillotina.schema import List
 from zope.interface import implementer
-import aiohttp
 
+import aiohttp
 import base64
 import guillotina.patch  # noqa
 import json

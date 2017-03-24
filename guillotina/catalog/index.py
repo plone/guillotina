@@ -3,12 +3,12 @@ from guillotina import configure
 from guillotina.api.search import AsyncCatalogReindex
 from guillotina.component import queryUtility
 from guillotina.interfaces import ICatalogUtility
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
-from guillotina.interfaces import IContainer
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request

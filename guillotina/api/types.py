@@ -4,9 +4,9 @@ from guillotina.api.service import TraversableService
 from guillotina.component import getMultiAdapter
 from guillotina.component import getUtilitiesFor
 from guillotina.component import queryUtility
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IResourceFactory
-from guillotina.interfaces import IContainer
 
 
 @configure.service(

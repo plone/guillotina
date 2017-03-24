@@ -9,10 +9,10 @@ from guillotina.content import create_content
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import IContainer
 from guillotina.utils import get_authenticated_user_id
 
 
