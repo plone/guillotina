@@ -13,7 +13,7 @@ class Root(Folder):
 
     __name__ = None
     __cache__ = 0
-    portal_type = 'GuillotinaDBRoot'
+    type_name = 'GuillotinaDBRoot'
 
     def __repr__(self):
         return "<Database %d>" % id(self)

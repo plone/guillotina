@@ -10,7 +10,7 @@ from guillotina.testing import IExample
 configure.register_configuration(Item, dict(
     context=IContainer,
     schema=IItem,
-    portal_type="File",
+    type_name="File",
     behaviors=[
         "guillotina.behaviors.dublincore.IDublinCore"
     ]
@@ -19,7 +19,7 @@ configure.register_configuration(Item, dict(
 configure.register_configuration(Example, dict(
     context=IContainer,
     schema=IExample,
-    portal_type="Example",
+    type_name="Example",
     behaviors=[
         "guillotina.behaviors.dublincore.IDublinCore"
     ]

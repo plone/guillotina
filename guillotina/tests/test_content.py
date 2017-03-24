@@ -54,7 +54,7 @@ class TestContent:
 
         import guillotina.tests
         configure.register_configuration(Folder, dict(
-            portal_type="TestType",
+            type_name="TestType",
             allowed_types=['Item'],
             module=guillotina.tests  # for registration initialization
         ), 'contenttype')

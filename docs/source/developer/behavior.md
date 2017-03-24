@@ -70,7 +70,7 @@ from guillotina.interfaces import IItem
 from guillotina.content import Item
 
 @configure.contenttype(
-    portal_type="MyItem",
+    type_name="MyItem",
     schema=IItem,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class MyItem(Item):

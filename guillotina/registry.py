@@ -54,12 +54,12 @@ class RecordsProxy(object):
 class Registry(AnnotationData):
 
     __name__ = '_registry'
-    portal_type = 'Registry'
+    type_name = 'Registry'
 
     def __repr__(self):
         path = '/'.join([name or 'n/a' for name in get_physical_path(self)])
         return "<Registry at {path} by {mem} >".format(
-            type=self.portal_type,
+            type=self.type_name,
             path=path,
             mem=id(self))
 

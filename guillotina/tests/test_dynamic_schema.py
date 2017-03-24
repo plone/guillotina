@@ -22,7 +22,7 @@ class CustomTypeContainerRequesterAsyncContextManager(ContainerRequesterAsyncCon
     async def __aenter__(self):
         configure.register_configuration(FoobarType, dict(
             schema=IFoobarType,
-            portal_type="Foobar",
+            type_name="Foobar",
             behaviors=[]
         ), 'contenttype')
         requester = await super(CustomTypeContainerRequesterAsyncContextManager, self).__aenter__()

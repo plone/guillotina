@@ -46,7 +46,7 @@ async def test_register_contenttype(container_requester):
     configure.register_configuration(MyType, dict(
         context=IContainer,
         schema=IMyType,
-        portal_type="MyType1",
+        type_name="MyType1",
         behaviors=["guillotina.behaviors.dublincore.IDublinCore"]
     ), 'contenttype')
 
@@ -93,7 +93,7 @@ async def test_register_behavior(container_requester):
     configure.register_configuration(MyType, dict(
         context=IContainer,
         schema=IMyType,
-        portal_type="MyType2",
+        type_name="MyType2",
         behaviors=[IMyBehavior]
     ), 'contenttype')
 

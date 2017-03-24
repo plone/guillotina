@@ -37,7 +37,7 @@ class DeserializeFromJson(object):
         modified = False
         errors = []
 
-        factory = get_cached_factory(self.context.portal_type)
+        factory = get_cached_factory(self.context.type_name)
         main_schema = factory.schema
         await self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)

@@ -1,7 +1,8 @@
 1.0.0a4 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Rename `portal_type` to `type_name` as "portal" does not make sense anymore
+  [vangheem]
 
 
 1.0.0a3 (2017-03-23)

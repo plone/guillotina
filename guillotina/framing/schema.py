@@ -16,7 +16,7 @@ class Framing(object):
     async def __call__(self, json_value):
         if self.request.resource:
             fti = queryUtility(
-                IFactory, name=self.request.resource.portal_type)
+                IFactory, name=self.request.resource.type_name)
             schema_summary = getMultiAdapter(
                 (fti, self.request), IResourceSerializeToJson)
             json_value['schema'] = await schema_summary()

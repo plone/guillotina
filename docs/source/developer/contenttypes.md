@@ -24,7 +24,7 @@ class IMySchema(IItem):
     foo = schema.Text()
 
 @configure.contenttype(
-    portal_type="MyType",
+    type_name="MyType",
     schema=IMySchema,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
 class MyType(Folder):

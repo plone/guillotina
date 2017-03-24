@@ -92,7 +92,7 @@ class DefaultSecurityInfoAdapter(object):
         return {
             'access_users': get_principals_with_access_content(self.content),
             'access_roles': get_roles_with_access_content(self.content),
-            'portal_type': self.content.portal_type
+            'type_name': self.content.type_name
         }
 
 
@@ -123,7 +123,7 @@ class DefaultCatalogDataAdapter(object):
         # For each type
         values = {}
 
-        for schema in iter_schemata_for_type(self.content.portal_type):
+        for schema in iter_schemata_for_type(self.content.type_name):
             behavior = schema(self.content)
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
                 try:

@@ -22,7 +22,7 @@ to those decorators.
 
 *`@configure.contenttype`*
 
-* _portal_type_: Name of the content type: *required*
+* _type_name_: Name of the content type: *required*
 * _schema_: Interface schema to use for type: *required*
 * _add_permission_: Permission required to add content. Defaults to `guillotina.AddContent`
 * _allowed_types_: List of types allowed to be added inside this content assuming it is a Folder type. Defaults to allowing all types.

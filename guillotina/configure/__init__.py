@@ -130,7 +130,7 @@ def load_contenttype(_context, contenttype):
         klass,
         title='',
         description='',
-        portal_type=conf['portal_type'],
+        type_name=conf['type_name'],
         schema=resolve_dotted_name(conf.get('schema', Interface)),
         behaviors=[resolve_dotted_name(b) for b in conf.get('behaviors', []) or ()],
         add_permission=conf.get('add_permission') or DEFAULT_ADD_PERMISSION,
@@ -140,7 +140,7 @@ def load_contenttype(_context, contenttype):
         _context,
         provides=IResourceFactory,
         component=factory,
-        name=conf['portal_type'],
+        name=conf['type_name'],
     )
 register_configuration_handler('contenttype', load_contenttype)
 

@@ -33,7 +33,7 @@ class TraversableFieldService(View):
         if len(traverse) == 1:
             # we want have the field
             name = traverse[0]
-            fti = queryUtility(IFactory, name=self.context.portal_type)
+            fti = queryUtility(IFactory, name=self.context.type_name)
             schema = fti.schema
             field = None
             self.behavior = None

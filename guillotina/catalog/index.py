@@ -71,8 +71,8 @@ def remove_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
-    portal_type = getattr(obj, 'portal_type', None)
-    if portal_type is None or IContainer.providedBy(obj):
+    type_name = getattr(obj, 'type_name', None)
+    if type_name is None or IContainer.providedBy(obj):
         return
 
     content_path = get_content_path(obj)
@@ -80,7 +80,7 @@ def remove_object(obj, event):
     hook = get_hook()
     if hook is None:
         return
-    hook.remove.append((uid, portal_type, content_path))
+    hook.remove.append((uid, type_name, content_path))
     if uid in hook.index:
         del hook.index[uid]
 
@@ -91,8 +91,8 @@ def add_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
-    portal_type = getattr(obj, 'portal_type', None)
-    if portal_type is None or IContainer.providedBy(obj):
+    type_name = getattr(obj, 'type_name', None)
+    if type_name is None or IContainer.providedBy(obj):
         return
 
     hook = get_hook()

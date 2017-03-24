@@ -22,7 +22,7 @@ class SerializeFactoryToJson(object):
     async def __call__(self):
         factory = self.factory
         result = {
-            'title': factory.portal_type,
+            'title': factory.type_name,
             '$schema': 'http://json-schema.org/draft-04/schema#',
             'type': 'object',
             'required': [],

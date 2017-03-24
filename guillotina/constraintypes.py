@@ -20,8 +20,8 @@ class FTIConstrainAllowedTypes(object):
         return type_id in allowed
 
     def get_allowed_types(self) -> list:
-        pt = getattr(self.context, 'portal_type', None)
-        if pt:
-            factory = get_cached_factory(pt)
+        tn = getattr(self.context, 'type_name', None)
+        if tn:
+            factory = get_cached_factory(tn)
             return factory.allowed_types
         return None
