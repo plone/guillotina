@@ -25,4 +25,5 @@ script:
   - bin/py.test -s --cov=guillotina -v --cov-report term-missing guillotina
   - bin/code-analysis
 after_success:
+  - pip install coveralls
   - coveralls
