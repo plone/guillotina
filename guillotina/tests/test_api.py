@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from guillotina import configure
 from guillotina import schema
+from guillotina.addons import Addon
 from guillotina.tests import utils
 from zope.interface import Interface
 
@@ -9,6 +11,19 @@ import json
 class ITestingRegistry(Interface):
     enabled = schema.Bool(
         title="Example attribute")
+
+
+@configure.addon(
+    name="testaddon",
+    title="Test addon")
+class TestAddon(Addon):
+    @classmethod
+    def install(cls, container, request):
+        pass
+
+    @classmethod
+    def uninstall(cls, container, request):
+        pass
 
 
 async def test_get_root(container_requester):
@@ -234,6 +249,43 @@ async def test_get_addons(container_requester):
         )
         assert status == 200
 
+
+async def test_install_addons(container_requester):
+    id_ = 'testaddon'
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+        assert status == 200
+        assert id_ in response['installed']
+
+
+async def test_uninstall_addons(container_requester):
+    id_ = 'testaddon'
+    async with await container_requester as requester:
+        await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+
+        response, status = await requester(
+            'DELETE',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+        assert status == 200
+        assert response is None
+
+
 async def test_get_logged_user_info(container_requester):
     async with await container_requester as requester:
         response, status = await requester(
@@ -245,4 +297,5 @@ async def test_get_logged_user_info(container_requester):
             info = response[ROOT_USER_ID]
             assert 'Managers' in info['groups']
         except KeyError:
-            raise AssertionError("Code should not come here! as User `%s` should be in response" % ROOT_USER_ID)
+            raise AssertionError("Code should not come here! as User `%s` "
+                                 "should be in response" % ROOT_USER_ID)
