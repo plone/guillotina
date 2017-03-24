@@ -50,6 +50,7 @@ from zope.interface import noLongerProvides
 import guillotina.db.orm.base
 import pathlib
 import typing
+import uuid
 
 
 _zone = tzlocal()
@@ -83,7 +84,10 @@ class ResourceFactory(Factory):
         obj.created = now
         obj.modified = now
         if id is None:
-            obj.id = obj.uuid
+            if obj._p_oid is None:
+                # uuid uses _p_oid...
+                obj._p_oid = uuid.uuid4().hex
+            obj.id = obj._p_oid
         else:
             obj.id = id
         applyMarkers(obj, None)
@@ -196,6 +200,7 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
     # We create the object with at least the ID
     obj = factory(id=id_)
     obj.__parent__ = container
+    obj.__name__ = obj.id
     for key, value in kw.items():
         setattr(obj, key, value)
 

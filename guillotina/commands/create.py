@@ -16,14 +16,14 @@ class CreateCommand(Command):
         parser = super(CreateCommand, self).get_parser()
         parser.add_argument('command',
                             help='`create` position command argument')
-        parser.add_argument('template',
+        parser.add_argument('--template', required=True,
                             help='Template to use to generate project',
                             choices=set(['application', 'configuration']))
         parser.add_argument('-w', '--overwrite', action='store_true',
                             dest='overwrite', help='Overwrite')
         parser.add_argument('-n', '--no-input', action='store_true',
                             dest='no_input', help='No input')
-        parser.add_argument('-o', '--output',
+        parser.add_argument('-o', '--output', default='./',
                             dest='output', help='Output directory')
         return parser
 

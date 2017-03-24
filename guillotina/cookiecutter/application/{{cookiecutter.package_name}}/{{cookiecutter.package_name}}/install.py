@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from guillotina.addons import Addon
+from guillotina import configure
 
 
+@configure.addon(
+    name="{{cookiecutter.package_name}}",
+    title="{{cookiecutter.project_short_description}}")
 class ManageAddon(Addon):
 
     @classmethod

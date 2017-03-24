@@ -5,11 +5,11 @@
 			"storage": "postgresql",
 			"type": "postgres",
        "dsn": {
-         "scheme": "postgres",
+				 "scheme": "postgres",
          "dbname": "guillotina",
-         "user": "guillotina",
+         "user": "postgres",
          "host": "localhost",
-         "password": "test",
+         "password": "",
          "port": 5432
        },
        "options": {
