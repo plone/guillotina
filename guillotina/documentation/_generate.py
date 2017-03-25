@@ -1,3 +1,6 @@
+# this script requries the `requests` library to be installed in the environment
+# which is no long a dependency of guillotina since it isn't used anywhere
+# else.
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.addons import Addon

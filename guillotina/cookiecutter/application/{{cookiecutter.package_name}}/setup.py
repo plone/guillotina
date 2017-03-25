@@ -25,8 +25,7 @@ setup(
     ],
     extras_require={
         'test': [
-            'pytest',
-            'requests'
+            'pytest'
         ]
     },
     classifiers=[],

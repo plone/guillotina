@@ -6,9 +6,9 @@ from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import getMultiAdapter
 from guillotina.i18n import MessageFactory
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IValueToJson
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields

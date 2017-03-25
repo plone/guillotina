@@ -1,6 +1,15 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- Add auto reload support with the aiohttp_autoreload library
+  [vangheem]
+
+- Upgrade to aiohttp 2
+  [vangheem]
+
+- Remove the dependencies six and requests
+  [vangheem]
+
 - Rename `portal_type` to `type_name` as "portal" does not make sense anymore
   [vangheem]
 

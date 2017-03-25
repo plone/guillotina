@@ -135,8 +135,7 @@ class SerializeFolderToJson(SerializeToJson):
                     result['items'].append(
                         await getMultiAdapter(
                             (member, self.request),
-                            IResourceSerializeToJsonSummary)()
-                        )
+                            IResourceSerializeToJsonSummary)())
         result['length'] = length
 
         return result

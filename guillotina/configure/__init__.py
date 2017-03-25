@@ -13,8 +13,8 @@ from guillotina.interfaces import IRole
 from guillotina.security.permission import Permission
 from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
-from guillotina.utils import resolve_module_path
 from guillotina.utils import resolve_dotted_name
+from guillotina.utils import resolve_module_path
 from zope.interface import classImplements
 from zope.interface import Interface
 

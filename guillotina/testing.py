@@ -10,10 +10,10 @@ from guillotina.schema import JSONField
 from guillotina.schema import List
 from zope.interface import implementer
 
+import aiohttp
 import base64
 import guillotina.patch  # noqa
 import json
-import requests
 
 
 TESTING_PORT = 55001
@@ -119,7 +119,7 @@ class GuillotinaRequester(object):
         self.uri = uri
         self.server = server
 
-    def __call__(
+    async def __call__(
             self,
             method,
             path,
@@ -141,11 +141,12 @@ class GuillotinaRequester(object):
 
         settings['params'] = params
         settings['data'] = data
-        operation = getattr(requests, method.lower(), None)
+        session = aiohttp.ClientSession()
+        operation = getattr(session, method.lower(), None)
         if operation:
             if self.server is not None:
-                resp = operation(self.server.make_url(path), **settings)
+                resp = await operation(self.server.make_url(path), **settings)
             else:
-                resp = operation(self.uri + path, **settings)
+                resp = await operation(self.uri + path, **settings)
             return resp
         return None

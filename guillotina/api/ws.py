@@ -10,9 +10,9 @@ from guillotina.api.service import Service
 from guillotina.browser import Response
 from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import ITraversableView
 
 import aiohttp
@@ -63,7 +63,7 @@ class WebsocketsView(Service):
         await ws.prepare(self.request)
 
         async for msg in ws:
-            if msg.tp == aiohttp.MsgType.text:
+            if msg.tp == aiohttp.WSMsgType.text:
                 message = ujson.loads(msg.data)
                 if message['op'] == 'close':
                     await ws.close()
@@ -136,7 +136,7 @@ class WebsocketsView(Service):
                         self.request._futures = {}
                 else:
                     await ws.close()
-            elif msg.tp == aiohttp.MsgType.error:
+            elif msg.tp == aiohttp.WSMsgType.error:
                 logger.debug('ws connection closed with exception {0:s}'
                              .format(ws.exception()))
 

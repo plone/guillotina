@@ -1,11 +1,12 @@
 from aiohttp.test_utils import make_mocked_request
-import uuid
 from guillotina.auth.users import RootUser
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.security.policy import Interaction
 from zope.interface import alsoProvides
 from zope.interface import implementer
+
+import uuid
 
 
 def get_mocked_request(db=None):

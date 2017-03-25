@@ -27,7 +27,7 @@ class CliCommand(Command):
                             help='Request body')
         return parser
 
-    def run(self, arguments, settings, app):
+    async def run(self, arguments, settings, app):
         app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
 
         loop = app.loop
@@ -47,7 +47,7 @@ class CliCommand(Command):
         req_body = arguments.body or ''
 
         requester = GuillotinaRequester('http://localhost:5777')
-        resp = requester(
+        resp = await requester(
             arguments.method, arguments.path,
             data=req_body or None)
 

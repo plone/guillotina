@@ -51,28 +51,24 @@ setup(
     packages=find_packages(),
     ext_modules=ext_modules,
     install_requires=[
-        'aiohttp',
+        'aiohttp>=2.0.0<3.0.0',
         'jsonschema',
         'python-dateutil',
         'pycrypto',
         'setuptools',
-        'six',
         'ujson',
         'zope.interface',
         'aiocache',
         'aioconsole',
         'pyjwt',
-        'requests',
         'asyncpg',
         'cffi'
     ],
     extras_require={
         'test': [
             'pytest',
-            'requests',
             'docker',
             'backoff',
-            'requests',
             'psycopg2',
             'pytest-asyncio',
             'pytest-aiohttp'

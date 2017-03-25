@@ -27,13 +27,13 @@ from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.interfaces import ISecurityPolicy
+from guillotina.interfaces import IView
 from guillotina.interfaces import Public
 from guillotina.interfaces import Unset
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.utils import get_current_request
-from guillotina.interfaces import IView
 
 import zope.interface
 
