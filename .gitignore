@@ -2,7 +2,6 @@
 *.py[co]
 
 # Packages
-*.egg
 *.egg-info
 
 # dirs
@@ -20,6 +19,7 @@ sdist
 /lib/
 /lib64/
 /include/
+/share/
 /extras/
 /data
 /var/
@@ -39,7 +39,6 @@ sdist
 /.coverage
 /.tox
 cov_html
-.coverage
 .coveralls.yml
 
 #Translations
@@ -51,8 +50,6 @@ cov_html
 # Codeintel
 .codeintel
 /etc/
-/include/
-/lib/
 /local/
 
 /.idea/
