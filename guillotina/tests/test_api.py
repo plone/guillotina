@@ -29,9 +29,9 @@ class TestAddon(Addon):
 async def test_get_root(container_requester):
     async with await container_requester as requester:
         response, status = await requester('GET', '/')
-        assert response['static_file'] == ['favicon.ico']
+        assert response['static_directory'] == ['static']
         assert response['databases'] == ['db']
-        assert response['static_directory'] == []
+        assert response['static_file'] == ['favicon.ico']
 
 
 async def test_get_database(container_requester):

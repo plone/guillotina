@@ -30,7 +30,8 @@ TESTING_SETTINGS = {
     ],
     "port": TESTING_PORT,
     "static": [
-        {"static": os.path.dirname(os.path.realpath(__file__))}
+        {"static": os.path.dirname(os.path.realpath(__file__))},
+        {'favicon.ico': 'static/favicon.ico'}
     ],
     "creator": {
         "admin": "admin",
