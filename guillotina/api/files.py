@@ -8,29 +8,47 @@ from guillotina.api.service import TraversableFieldService
 from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
+from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
+from guillotina import app_settings
 
 import mimetypes
 
 
 # Static File
 @configure.service(context=IStaticFile, method='GET', permission='guillotina.AccessContent')
-class DefaultGET(DownloadService):
+class FileGET(DownloadService):
+    async def serve_file(self, fi):
+        filepath = str(fi.file_path.absolute())
+        filename = fi.file_path.name
+        with open(filepath, 'rb') as f:
+            resp = StreamResponse()
+            resp.content_type, _ = mimetypes.guess_type(filename)
+
+            disposition = 'filename="{}"'.format(filename)
+            if 'text' not in resp.content_type:
+                disposition = 'attachment; ' + disposition
+
+            resp.headers['CONTENT-DISPOSITION'] = disposition
+
+            data = f.read()
+            resp.content_length = len(data)
+            await resp.prepare(self.request)
+
+            resp.write(data)
+            return resp
+
     async def __call__(self):
         if hasattr(self.context, 'file_path'):
-            filepath = str(self.context.file_path.absolute())
-            filename = self.context.file_path.name
-            with open(filepath, 'rb') as f:
-                resp = StreamResponse(headers={
-                    'CONTENT-DISPOSITION': 'attachment; filename="%s"' % filename
-                })
-                resp.content_type = mimetypes.guess_type(filename)
-                data = f.read()
-                resp.content_length = len(data)
-                await resp.prepare(self.request)
+            return await self.serve_file(self.context)
 
-                resp.write(data)
-                return resp
+
+@configure.service(context=IStaticDirectory, method='GET', permission='guillotina.AccessContent')
+class DirectoryGET(FileGET):
+    async def __call__(self):
+        for possible_default_file in app_settings['default_static_filenames']:
+            if possible_default_file in self.context:
+                return await self.serve_file(self.context[possible_default_file])
 
 
 # Field File

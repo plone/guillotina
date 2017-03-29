@@ -33,6 +33,7 @@ TESTING_SETTINGS = {
         {"static": os.path.dirname(os.path.realpath(__file__))},
         {'favicon.ico': 'static/favicon.ico'}
     ],
+    "default_static_filenames": ['teststatic.txt'],
     "creator": {
         "admin": "admin",
         "password": "admin"

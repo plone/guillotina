@@ -18,6 +18,7 @@ app_settings = {
     "host": "127.0.0.1",
     "port": 8080,
     "static": [],
+    "default_static_filenames": ['index.html', 'index.htm'],
     "utilities": [],
     "root_user": {
         "password": ""

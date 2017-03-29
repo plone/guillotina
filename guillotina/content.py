@@ -48,6 +48,7 @@ from zope.interface import Interface
 from zope.interface import noLongerProvides
 
 import guillotina.db.orm.base
+import os
 import pathlib
 import typing
 import uuid
@@ -492,9 +493,21 @@ class StaticDirectory(dict):
 
     def __init__(self, file_path: pathlib.Path):
         self.file_path = file_path
-        for x in file_path.iterdir():
-            if not x.name.startswith('.') and '/' not in x.name:
-                self[x.name] = StaticFile(x)
+
+    def __getitem__(self, filename):
+        path = pathlib.Path(os.path.join(self.file_path.absolute(), filename))
+        if not path.exists():
+            raise KeyError(filename)
+        if path.is_dir():
+            return StaticDirectory(path)
+        else:
+            return StaticFile(path)
+
+    def __contains__(self, filename):
+        try:
+            return self[filename] is not None
+        except:
+            return False
 
 
 @configure.adapter(for_=IStaticFile, provides=IPrincipalPermissionManager)

@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- Static directories will now serve default index.html files
+  [vangheem]
+
 - Fix static directory support
   [vangheem]
 
