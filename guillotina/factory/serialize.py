@@ -41,11 +41,11 @@ class ApplicationToJson(object):
         allowed = IInteraction(self.request).check_permission(
             'guillotina.GetDatabases', self.application)
 
-        for x in self.application._dbs.keys():
-            if IDatabase.providedBy(self.application._dbs[x]) and allowed:
+        for x in self.application._items.keys():
+            if IDatabase.providedBy(self.application._items[x]) and allowed:
                 result['databases'].append(x)
-            if IStaticFile.providedBy(self.application._dbs[x]):
+            if IStaticFile.providedBy(self.application._items[x]):
                 result['static_file'].append(x)
-            if IStaticDirectory.providedBy(self.application._dbs[x]):
+            if IStaticDirectory.providedBy(self.application._items[x]):
                 result['static_directory'].append(x)
         return result

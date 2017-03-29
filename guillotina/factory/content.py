@@ -18,7 +18,7 @@ class ApplicationRoot(object):
     root_user = None
 
     def __init__(self, config_file):
-        self._dbs = {}
+        self._items = {}
         self._config_file = config_file
         self._async_utilities = {}
 
@@ -59,13 +59,13 @@ class ApplicationRoot(object):
         self.root_user = RootUser(password)
 
     def __contains__(self, key):
-        return True if key in self._dbs else False
+        return True if key in self._items else False
 
     def __len__(self):
-        return len(self._dbs)
+        return len(self._items)
 
     def __getitem__(self, key):
-        return self._dbs[key]
+        return self._items[key]
 
     async def get(self, key):
         try:
@@ -80,10 +80,10 @@ class ApplicationRoot(object):
         XXX TODO
         """
 
-        del self._dbs[key]
+        del self._items[key]
 
     def __iter__(self):
-        return iter(self._dbs.items())
+        return iter(self._items.items())
 
     def __setitem__(self, key, value):
         """ This operation can only be done throw HTTP request
@@ -92,10 +92,10 @@ class ApplicationRoot(object):
         XXX TODO
         """
 
-        self._dbs[key] = value
+        self._items[key] = value
 
     async def asyncget(self, key):
-        return self._dbs[key]
+        return self._items[key]
 
 
 @implementer(IDatabase)

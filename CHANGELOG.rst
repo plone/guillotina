@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- Fix static directory support
+  [vangheem]
+
 - Add auto reload support with the aiohttp_autoreload library
   [vangheem]
 
