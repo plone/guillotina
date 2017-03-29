@@ -31,6 +31,7 @@ TESTING_SETTINGS = {
     "port": TESTING_PORT,
     "static": [
         {"static": os.path.dirname(os.path.realpath(__file__))},
+        {"module_static": 'guillotina:'},
         {'favicon.ico': 'static/favicon.ico'}
     ],
     "default_static_filenames": ['teststatic.txt'],

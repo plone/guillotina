@@ -42,10 +42,13 @@ map 1-to-1 to database setup:
 ```json
 {
   "static": [
-    {"favicon.ico": "static/favicon.ico"}
+    {"favicon.ico": "static/favicon.ico"},
+    {"static_files": "module_name:static"}
   ]
 }
 ```
+
+These files will then be available on urls `/favicon.ico` and `/static_files`.
 
 
 ## Server port

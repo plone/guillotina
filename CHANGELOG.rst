@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- You can now reference modules in your static file configuration: `mymodule:static`
+  [vangheem]
+
 - Static directories will now serve default index.html files
   [vangheem]
 

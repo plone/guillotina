@@ -19,3 +19,17 @@ async def test_render_static_default_directory_file(container_requester):
         response, status = await requester('GET', '/static/tests')
         assert status == 200
         assert response.decode('utf8').strip() == 'foobar'
+
+
+async def test_render_module_static_file(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester('GET', '/module_static/tests/teststatic.txt')
+        assert status == 200
+        assert response.decode('utf8').strip() == 'foobar'
+
+
+async def test_render_module_static_default_directory_file(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester('GET', '/module_static/tests')
+        assert status == 200
+        assert response.decode('utf8').strip() == 'foobar'
