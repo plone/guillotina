@@ -58,7 +58,7 @@ class DefaultGET(Service):
 
 @configure.service(
     context=IResource, method='POST', permission='guillotina.AddContent',
-    description='Add new resouce inside this container resource')
+    summary='Add new resouce inside this container resource')
 class DefaultPOST(Service):
 
     async def __call__(self):
