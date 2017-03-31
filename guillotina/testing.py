@@ -32,7 +32,7 @@ TESTING_SETTINGS = {
     "static": [
         {"static": os.path.dirname(os.path.realpath(__file__))},
         {"module_static": 'guillotina:'},
-        {'favicon.ico': 'static/favicon.ico'}
+        {'favicon.ico': os.path.join(os.path.dirname(os.path.realpath(__file__)), '__init__.py')}
     ],
     "default_static_filenames": ['teststatic.txt'],
     "creator": {

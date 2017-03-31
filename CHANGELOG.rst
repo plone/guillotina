@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- rename `subjects` to `tags` for IDublinCore behavior
+  [vangheem]
+
 - rename permissions:
     `guillotina.AddPortal` -> `guillotina.AddContainer`
     `guillotina.DeletePortals` -> `guillotina.DeleteContainers`

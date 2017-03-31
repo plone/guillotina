@@ -74,7 +74,7 @@ async def test_set_local_guillotina(container_requester):
                 'prinperm': [{
                     'principal': 'user1',
                     'permission': 'guillotina.AccessContent',
-                    'settings': 'Allow'
+                    'setting': 'Allow'
                 }]
             })
         )

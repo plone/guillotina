@@ -139,8 +139,10 @@ class DefaultDELETE(content.DefaultDELETE):
     pass
 
 
-@configure.service(context=IDatabase, method='DELETE', permission='guillotina.UmountDatabase')
-@configure.service(context=IApplication, method='PUT', permission='guillotina.MountDatabase')
+@configure.service(
+    context=IDatabase, method='DELETE', permission='guillotina.UmountDatabase', ignore=True)
+@configure.service(
+    context=IApplication, method='PUT', permission='guillotina.MountDatabase', ignore=True)
 class NotImplemented(Service):
     async def __call__(self):
         return ErrorResponse(

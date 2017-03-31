@@ -8,8 +8,24 @@ from guillotina.interfaces import IResource
 from guillotina.utils import get_content_path
 
 
-@configure.service(context=IResource, method='GET', permission='guillotina.SearchContent',
-                   name='@search')
+@configure.service(
+    context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
+    summary='Make search request',
+    parameters=[{
+        "name": "q",
+        "in": "query",
+        "required": True,
+        "type": "string"
+    }],
+    responses={
+        "200": {
+            "description": "Search results",
+            "type": "object",
+            "schema": {
+                "$ref": "#/definitions/SearchResults"
+            }
+        }
+    })
 async def search_get(context, request):
     q = request.GET.get('q')
     search = queryUtility(ICatalogUtility)
@@ -25,8 +41,24 @@ async def search_get(context, request):
         query=q)
 
 
-@configure.service(context=IResource, method='POST', permission='guillotina.RawSearchContent',
-                   name='@search')
+@configure.service(
+    context=IResource, method='POST',
+    permission='guillotina.RawSearchContent', name='@search',
+    summary='Make a complex search query',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "type": "object"
+    }],
+    responses={
+        "200": {
+            "description": "Search results",
+            "type": "object",
+            "schema": {
+                "$ref": "#/definitions/SearchResults"
+            }
+        }
+    })
 async def search_post(context, request):
     q = await request.json()
     search = queryUtility(ICatalogUtility)
@@ -39,8 +71,15 @@ async def search_post(context, request):
     return await search.query(context, q)
 
 
-@configure.service(context=IResource, method='POST', permission='guillotina.ReindexContent',
-                   name='@catalog-reindex')
+@configure.service(
+    context=IResource, method='POST',
+    permission='guillotina.ReindexContent', name='@catalog-reindex',
+    summary='Reindex entire container content',
+    responses={
+        "200": {
+            "description": "Successfully reindexed content"
+        }
+    })
 class CatalogReindex(Service):
 
     def __init__(self, context, request, security=False):
@@ -53,8 +92,15 @@ class CatalogReindex(Service):
         return {}
 
 
-@configure.service(context=IResource, method='POST', permission='guillotina.ReindexContent',
-                   name='@async-catalog-reindex')
+@configure.service(
+    context=IResource, method='POST',
+    permission='guillotina.ReindexContent', name='@async-catalog-reindex',
+    summary='Asynchronously reindex entire container content',
+    responses={
+        "200": {
+            "description": "Successfully initiated reindexing"
+        }
+    })
 class AsyncCatalogReindex(Service):
 
     def __init__(self, context, request, security=False):
@@ -69,16 +115,30 @@ class AsyncCatalogReindex(Service):
         return {}
 
 
-@configure.service(context=IResource, method='POST', permission='guillotina.ManageCatalog',
-                   name='@catalog')
+@configure.service(
+    context=IResource, method='POST',
+    permission='guillotina.ManageCatalog', name='@catalog',
+    summary='Initialize catalog',
+    responses={
+        "200": {
+            "description": "Successfully initialized catalog"
+        }
+    })
 async def catalog_post(context, request):
     search = queryUtility(ICatalogUtility)
     await search.initialize_catalog(context)
     return {}
 
 
-@configure.service(context=IResource, method='DELETE', permission='guillotina.ManageCatalog',
-                   name='@catalog')
+@configure.service(
+    context=IResource, method='DELETE',
+    permission='guillotina.ManageCatalog', name='@catalog',
+    summary='Delete search catalog',
+    responses={
+        "200": {
+            "description": "Successfully deleted catalog"
+        }
+    })
 async def catalog_delete(context, request):
     search = queryUtility(ICatalogUtility)
     await search.remove_catalog(context)

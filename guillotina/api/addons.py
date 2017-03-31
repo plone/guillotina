@@ -12,8 +12,8 @@ _ = MessageFactory('guillotina')
 
 
 @configure.service(
-    context=IContainer, name='@addons', method='POST',
-    permission='guillotina.ManageAddons',
+    context=IContainer, method='POST',
+    permission='guillotina.ManageAddons', name='@addons',
     summary='Install addon to container',
     parameters=[{
         "name": "body",
@@ -44,8 +44,8 @@ async def install(context, request):
 
 
 @configure.service(
-    context=IContainer, name='@addons', method='DELETE',
-    permission='guillotina.ManageAddons',
+    context=IContainer, method='DELETE',
+    permission='guillotina.ManageAddons', name='@addons',
     summary='Uninstall an addon from container',
     parameters=[{
         "name": "body",
@@ -76,8 +76,8 @@ async def uninstall(context, request):
 
 
 @configure.service(
-    context=IContainer, name='@addons', method='GET',
-    permission='guillotina.ManageAddons',
+    context=IContainer, method='GET',
+    permission='guillotina.ManageAddons', name='@addons',
     summary='List available addons',
     responses={
         "200": {

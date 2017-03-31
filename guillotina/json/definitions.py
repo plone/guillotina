@@ -170,7 +170,7 @@ configure.json_schema_definition('Resource', {
         "items": {
             "type": "object",
             "schema": {
-                "$ref": "#/definitions/Application"
+                "$ref": "#/definitions/BaseResource"
             }
         },
         "length": {
@@ -316,6 +316,37 @@ configure.json_schema_definition('Permissions', {
                     "$ref": "#/definitions/RolePermission"
                 },
             },
+            "required": False
+        }
+    }
+})
+
+
+configure.json_schema_definition('SearchResults', {
+    "type": "object",
+    "title": "Search result",
+    "properties": {
+
+    }
+})
+
+
+configure.json_schema_definition('SearchResults', {
+    "type": "object",
+    "title": "Search results",
+    "properties": {
+        "member": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "schema": {
+                    "$ref": "#/definitions/SearchResults"
+                }
+            },
+            "required": True
+        },
+        "items_count": {
+            "type": "integer",
             "required": False
         }
     }

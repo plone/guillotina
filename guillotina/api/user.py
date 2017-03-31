@@ -7,9 +7,15 @@ from guillotina.interfaces import IInteraction
 
 
 @configure.service(
-    context=IContainer, method='GET', permission='guillotina.AccessContent',
-    name='@user',
-    description='Get information on the currently logged in user')
+    context=IContainer, method='GET',
+    permission='guillotina.AccessContent', name='@user',
+    summary='Get information on the currently logged in user',
+    responses={
+        "200": {
+            "description": "Get information on the user",
+            "type": "object"
+        }
+    })
 async def get_user_info(context, request):
     """Return information about the logged in user.
     """

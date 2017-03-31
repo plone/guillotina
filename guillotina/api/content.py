@@ -14,6 +14,7 @@ from guillotina.browser import Response
 from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
+from guillotina.content import get_all_behavior_interfaces
 from guillotina.event import notify
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
@@ -36,24 +37,40 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
+from guillotina.json.utils import convert_interface_to_schema
 from guillotina.utils import get_authenticated_user_id
+from guillotina.utils import get_class_dotted_name
 from guillotina.utils import iter_parents
 
 
 _zone = tzlocal()
 
 
-@configure.service(
-    context=IResource, method='GET', permission='guillotina.ViewContent',
-    summary="Retrieves serialization of resource",
-    responses={
+def get_content_json_schema_responses(content):
+    properties = {}
+    for iface in get_all_behavior_interfaces(content):
+        properties[get_class_dotted_name(iface)] = {
+            "type": "object",
+            "properties": convert_interface_to_schema(iface)
+        }
+
+    return {
         "200": {
             "description": "Resource data",
             "schema": {
-                "$ref": "#/definitions/Resource"
+                "allOf": [
+                    {"$ref": "#/definitions/Resource"},
+                    {"properties": properties}
+                ]
             }
         }
-    })
+    }
+
+
+@configure.service(
+    context=IResource, method='GET', permission='guillotina.ViewContent',
+    summary="Retrieves serialization of resource",
+    responses=get_content_json_schema_responses)
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
@@ -220,8 +237,8 @@ class DefaultPATCH(Service):
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SeePermissions',
-    name='@sharing',
+    context=IResource, method='GET',
+    permission='guillotina.SeePermissions', name='@sharing',
     summary='Get sharing settings for this resource',
     responses={
         "200": {
@@ -258,8 +275,8 @@ async def sharing_get(context, request):
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SeePermissions',
-    name='@all_permissions',
+    context=IResource, method='GET',
+    permission='guillotina.SeePermissions', name='@all_permissions',
     summary='See all permission settings for this resource',
     responses={
         "200": {
@@ -304,8 +321,8 @@ PermissionMap = {
 
 
 @configure.service(
-    context=IResource, method='POST', permission='guillotina.ChangePermissions',
-    name='@sharing',
+    context=IResource, method='POST',
+    permission='guillotina.ChangePermissions', name='@sharing',
     summary='Change permissions for a resource',
     parameters=[{
         "name": "body",
@@ -371,8 +388,8 @@ async def sharing_post(context, request):
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.AccessContent',
-    name='@canido',
+    context=IResource, method='GET',
+    permission='guillotina.AccessContent', name='@canido',
     parameters=[{
         "name": "permission",
         "in": "query",

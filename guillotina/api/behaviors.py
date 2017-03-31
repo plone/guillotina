@@ -11,8 +11,8 @@ from guillotina.browser import Response
 
 
 @configure.service(
-    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
-    name='@behaviors',
+    context=IResource, method='PATCH',
+    permission='guillotina.ModifyContent', name='@behaviors',
     summary="Add behavior to resource",
     parameters=[{
         "name": "body",
@@ -39,8 +39,8 @@ async def default_patch(context, request):
 
 
 @configure.service(
-    context=IResource, method='DELETE', permission='guillotina.ModifyContent',
-    name='@behaviors',
+    context=IResource, method='DELETE',
+    permission='guillotina.ModifyContent', name='@behaviors',
     summary="Remove behavior from resource",
     parameters=[{
         "name": "body",
@@ -67,8 +67,8 @@ async def default_delete(context, request):
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.AccessContent',
-    name='@behaviors',
+    context=IResource, method='GET',
+    permission='guillotina.AccessContent', name='@behaviors',
     summary='Get information on behaviors for this resource',
     responses={
         "200": {

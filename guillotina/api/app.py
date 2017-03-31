@@ -26,8 +26,8 @@ async def get(context, request):
 
 
 @configure.service(
-    context=IApplication, method='GET', permission='guillotina.GetContainers',
-    name='@apidefinition',
+    context=IApplication, method='GET',
+    permission='guillotina.GetContainers', name='@apidefinition',
     summary="Get API Definition",
     description="Retrieves information on API configuration")
 async def get_api_definition(context, request):

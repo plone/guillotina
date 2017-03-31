@@ -24,8 +24,8 @@ _marker = object()
 
 
 @configure.service(
-    context=IContainer, method='GET', permission='guillotina.ReadConfiguration',
-    name='@registry',
+    context=IContainer, method='GET',
+    permission='guillotina.ReadConfiguration', name='@registry',
     summary='Read container registry settings',
     responses={
         "200": {
@@ -74,8 +74,8 @@ class Read(TraversableService):
 
 
 @configure.service(
-    context=IContainer, method='POST', permission='guillotina.RegisterConfigurations',
-    name='@registry',
+    context=IContainer, method='POST',
+    permission='guillotina.RegisterConfigurations', name='@registry',
     summary='Register a new interface to for registry settings',
     parameters=[{
         "name": "body",
@@ -132,8 +132,8 @@ class Register(Service):
 
 
 @configure.service(
-    context=IContainer, method='PATCH', permission='guillotina.WriteConfiguration',
-    name='@registry',
+    context=IContainer, method='PATCH',
+    permission='guillotina.WriteConfiguration', name='@registry',
     summary='Update registry setting',
     parameters={
         "name": "body",

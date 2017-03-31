@@ -20,8 +20,22 @@ import asyncio
 import ujson
 
 
-@configure.service(context=IContainer, method='GET', permission='guillotina.AccessContent',
-                   name='@wstoken')
+@configure.service(
+    context=IContainer, method='GET',
+    permission='guillotina.AccessContent', name='@wstoken',
+    summary='Return a web socket token',
+    responses={
+        "200": {
+            "description": "The new token",
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "required": True
+                }
+            }
+        }
+    })
 class WebsocketGetToken(Service):
     _websockets_ttl = 60
 
@@ -54,8 +68,10 @@ class WebsocketGetToken(Service):
         }
 
 
-@configure.service(context=IContainer, method='GET', permission='guillotina.AccessContent',
-                   name='@ws')
+@configure.service(
+    context=IContainer, method='GET',
+    permission='guillotina.AccessContent', name='@ws',
+    summary='Make a web socket connection')
 class WebsocketsView(Service):
 
     async def __call__(self):
