@@ -16,7 +16,9 @@ from guillotina.interfaces import IResourceFactory
     responses={
         "200": {
             "description": "Result results on types",
-            "type": "object"
+            "schema": {
+                "properties": {}
+            }
         }
     })
 class Read(TraversableService):

@@ -37,7 +37,7 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
-from guillotina.json.utils import convert_interface_to_schema
+from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_class_dotted_name
 from guillotina.utils import iter_parents
@@ -47,24 +47,32 @@ _zone = tzlocal()
 
 
 def get_content_json_schema_responses(content):
-    properties = {}
-    for iface in get_all_behavior_interfaces(content):
-        properties[get_class_dotted_name(iface)] = {
-            "type": "object",
-            "properties": convert_interface_to_schema(iface)
-        }
-
     return {
         "200": {
             "description": "Resource data",
             "schema": {
                 "allOf": [
-                    {"$ref": "#/definitions/Resource"},
-                    {"properties": properties}
+                    {"$ref": "#/definitions/ResourceFolder"},
+                    {"properties": convert_interfaces_to_schema(
+                        get_all_behavior_interfaces(content))}
                 ]
             }
         }
     }
+
+
+def patch_content_json_schema_parameters(content):
+    return [{
+        "name": "body",
+        "in": "body",
+        "schema": {
+            "allOf": [
+                {"$ref": "#/definitions/WritableResource"},
+                {"properties": convert_interfaces_to_schema(
+                    get_all_behavior_interfaces(content))}
+            ]
+        }
+    }]
 
 
 @configure.service(
@@ -88,14 +96,14 @@ class DefaultGET(Service):
         "name": "body",
         "in": "body",
         "schema": {
-            "$ref": "#/definitions/Resource"
+            "$ref": "#/definitions/AddableResource"
         }
     }],
     responses={
         "200": {
             "description": "Resource data",
             "schema": {
-                "$ref": "#/definitions/Resource"
+                "$ref": "#/definitions/ResourceFolder"
             }
         }
     })
@@ -193,13 +201,7 @@ class DefaultPOST(Service):
 @configure.service(
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
     summary='Modify the content of this resource',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/Resource"
-        }
-    }],
+    parameters=patch_content_json_schema_parameters,
     responses={
         "200": {
             "description": "Resource data",
@@ -281,14 +283,8 @@ async def sharing_get(context, request):
     responses={
         "200": {
             "description": "All the permissions defined on this resource",
-            "items": {
-                "type": "object",
-                "additionalProperties": {
-                    "type": "object",
-                    "schema": {
-                        "$ref": "#/definitions/Permissions"
-                    }
-                }
+            "schema": {
+                "$ref": "#/definitions/AllPermissions"
             }
         }
     })

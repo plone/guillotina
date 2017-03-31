@@ -48,7 +48,9 @@ async def search_get(context, request):
     parameters=[{
         "name": "body",
         "in": "body",
-        "type": "object"
+        "schema": {
+            "properties": {}
+        }
     }],
     responses={
         "200": {

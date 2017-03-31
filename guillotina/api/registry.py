@@ -31,9 +31,11 @@ _marker = object()
         "200": {
             "description": "Successuflly registered interface",
             "type": "object",
-            "properties": {
-                "value": {
-                    "type": "any"
+            "schema": {
+                "properties": {
+                    "value": {
+                        "type": "object"
+                    }
                 }
             }
         }
@@ -81,14 +83,16 @@ class Read(TraversableService):
         "name": "body",
         "in": "body",
         "type": "object",
-        "properties": {
-            "interface": {
-                "type": "string",
-                "required": True
-            },
-            "initial_values": {
-                "type": "object",
-                "required": False
+        "schema": {
+            "properties": {
+                "interface": {
+                    "type": "string",
+                    "required": True
+                },
+                "initial_values": {
+                    "type": "object",
+                    "required": False
+                }
             }
         }
     }],
@@ -139,10 +143,12 @@ class Register(Service):
         "name": "body",
         "in": "body",
         "type": "object",
-        "properties": {
-            "value": {
-                "type": "any",
-                'required': True
+        "schema": {
+            "properties": {
+                "value": {
+                    "type": "any",
+                    'required': True
+                }
             }
         }
     },

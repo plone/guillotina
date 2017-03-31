@@ -13,7 +13,9 @@ from guillotina.interfaces import IInteraction
     responses={
         "200": {
             "description": "Get information on the user",
-            "type": "object"
+            "schema": {
+                "properties": {}
+            }
         }
     })
 async def get_user_info(context, request):

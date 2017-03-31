@@ -71,3 +71,13 @@ def convert_interface_to_schema(iface):
         if props is not None:
             properties[name] = props
     return properties
+
+
+def convert_interfaces_to_schema(interfaces):
+    properties = {}
+    for iface in interfaces:
+        properties[get_class_dotted_name(iface)] = {
+            "type": "object",
+            "properties": convert_interface_to_schema(iface)
+        }
+    return properties

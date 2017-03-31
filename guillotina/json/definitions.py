@@ -125,58 +125,82 @@ configure.json_schema_definition('BaseResource', {
 })
 
 
-configure.json_schema_definition('Resource', {
+configure.json_schema_definition('WritableResource', {
     "type": "object",
-    "title": "Resource data",
+    "title": "Writable resource data",
     "properties": {
-        "@id": {
-            "type": "string",
-            "required": True
-        },
-        "@type": {
-            "type": "string",
-            "required": True
-        },
         "title": {
             "type": "string",
             "required": True
-        },
-        "parent": {
-            "type": "object",
-            "schema": {
-                "properties": {
-                    "@id": {
-                        "type": "string"
-                    },
-                    "@type": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": False
-        },
-        "created": {
-            "type": "string"
-        },
-        "modified": {
-            "type": "string"
-        },
-        "__behaviors__": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
-        },
-        "items": {
-            "type": "object",
-            "schema": {
-                "$ref": "#/definitions/BaseResource"
-            }
-        },
-        "length": {
-            "type": "integer"
         }
     }
+})
+
+
+configure.json_schema_definition('AddableResource', {
+    "type": "object",
+    "title": "Writable resource data",
+    "allOf": [
+        {"$ref": "#/definitions/BaseResource"},
+        {"$ref": "#/definitions/WritableResource"}
+    ]
+})
+
+
+configure.json_schema_definition('Resource', {
+    "type": "object",
+    "title": "Resource data",
+    "allOf": [
+        {"$ref": "#/definitions/WritableResource"},
+        {
+            "properties": {
+                "@id": {
+                    "type": "string",
+                    "required": True
+                },
+                "@type": {
+                    "type": "string",
+                    "required": True
+                },
+                "parent": {
+                    "type": "object",
+                    "schema": {
+                        "properties": {
+                            "@id": {
+                                "type": "string"
+                            },
+                            "@type": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": False
+                }
+            }
+        }
+    ]
+})
+
+
+configure.json_schema_definition('ResourceFolder', {
+    "type": "object",
+    "title": "Resource folder data",
+    "allOf": [
+        {"$ref": "#/definitions/Resource"},
+        {
+            "properties": {
+                "items": {
+                    "type": "object",
+                    "schema": {
+                        "$ref": "#/definitions/Resource"
+                    }
+                },
+                "length": {
+                    "type": "integer"
+                }
+            }
+        }
+    ]
 })
 
 
@@ -317,6 +341,19 @@ configure.json_schema_definition('Permissions', {
                 },
             },
             "required": False
+        }
+    }
+})
+
+configure.json_schema_definition('AllPermissions', {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "schema": {
+            "type": "object",
+            "schema": {
+                "$ref": "#/definitions/Permissions"
+            }
         }
     }
 })

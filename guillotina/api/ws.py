@@ -27,11 +27,12 @@ import ujson
     responses={
         "200": {
             "description": "The new token",
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string",
-                    "required": True
+            "schema": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "required": True
+                    }
                 }
             }
         }
