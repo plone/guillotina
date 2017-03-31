@@ -23,6 +23,7 @@ from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
@@ -213,6 +214,29 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
     await notify(BeforeObjectAddedEvent(obj, container, id_))
     await container.async_set(obj.id, obj)
     return obj
+
+
+def get_all_behavior_interfaces(content) -> list:
+    factory = get_cached_factory(content.type_name)
+    behaviors = []
+    for behavior_schema in factory.behaviors or ():
+        behaviors.append(behavior_schema)
+
+    for dynamic_behavior in content.__behaviors__ or ():
+        dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
+        behaviors.append(dynamic_behavior_obj)
+    return behaviors
+
+
+async def get_all_behaviors(content, create=False) -> list:
+    behaviors = []
+    for behavior_schema in get_all_behavior_interfaces(content):
+        behavior = behavior_schema(content)
+        if IAsyncBehavior.implementedBy(behavior.__class__):
+            # providedBy not working here?
+            await behavior.load(create=create)
+        behaviors.append((behavior_schema, behavior))
+    return behaviors
 
 
 @configure.adapter(for_=IResource, provides=IBehaviorAssignable)

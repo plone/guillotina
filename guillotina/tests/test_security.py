@@ -27,12 +27,11 @@ async def test_set_local_guillotina(container_requester):
             'POST',
             '/db/guillotina/@sharing',
             data=json.dumps({
-                'type': 'AllowSingle',
-                'prinperm': {
-                    'user1': [
-                        'guillotina.AccessContent'
-                    ]
-                }
+                'prinperm': [{
+                    'principal': 'user1',
+                    'permission': 'guillotina.AccessContent',
+                    'setting': 'AllowSingle'
+                }]
             })
         )
         assert status == 200
@@ -72,12 +71,11 @@ async def test_set_local_guillotina(container_requester):
             'POST',
             '/db/guillotina/@sharing',
             data=json.dumps({
-                'type': 'Allow',
-                'prinperm': {
-                    'user1': [
-                        'guillotina.AccessContent'
-                    ]
-                }
+                'prinperm': [{
+                    'principal': 'user1',
+                    'permission': 'guillotina.AccessContent',
+                    'setting': 'Allow'
+                }]
             })
         )
 
@@ -93,12 +91,11 @@ async def test_set_local_guillotina(container_requester):
             'POST',
             '/db/guillotina/testing/@sharing',
             data=json.dumps({
-                'type': 'Deny',
-                'prinperm': {
-                    'user1': [
-                        'guillotina.AccessContent'
-                    ]
-                }
+                'prinperm': [{
+                    'principal': 'user1',
+                    'permission': 'guillotina.AccessContent',
+                    'setting': 'Deny'
+                }]
             })
         )
         # need to retreive objs again from db since they changed

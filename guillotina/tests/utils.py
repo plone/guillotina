@@ -31,7 +31,8 @@ def login(request):
 
 async def get_root(request):
     await request._tm.begin(request=request)
-    return await request._tm.root()
+    root = await request._tm.root()
+    return root
 
 
 @implementer(IRequest, IDefaultLayer)

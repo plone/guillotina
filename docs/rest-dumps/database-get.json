@@ -20,7 +20,7 @@
         "method": "GET",
         "name": null,
         "payload": null,
-        "permission": "guillotina.GetPortals",
+        "permission": "guillotina.GetContainers",
         "query_params": null,
         "title": null
     }

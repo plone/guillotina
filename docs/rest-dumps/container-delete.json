@@ -21,7 +21,7 @@
         "method": "DELETE",
         "name": null,
         "payload": null,
-        "permission": "guillotina.DeletePortals",
+        "permission": "guillotina.DeleteContainers",
         "query_params": null,
         "title": null
     }

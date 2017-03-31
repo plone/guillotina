@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-from guillotina import BEHAVIOR_CACHE
 from guillotina import configure
 from guillotina.component import queryMultiAdapter
 from guillotina.component import queryUtility
+from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import NoInteraction
-from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
@@ -42,26 +41,10 @@ class DeserializeFromJson(object):
         await self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)
 
-        for behavior_schema in factory.behaviors or ():
-            if behavior_schema.__identifier__ in data:
-                behavior = behavior_schema(self.context)
-                if IAsyncBehavior.implementedBy(behavior.__class__):
-                    # providedBy not working here?
-                    await behavior.load(create=True)
-                await self.set_schema(
-                    behavior_schema, behavior, data, errors,
-                    validate_all, True)
-
-        for dynamic_behavior in self.context.__behaviors__ or ():
-            dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
-            if dynamic_behavior_obj.__identifier__ in data:
-                behavior = dynamic_behavior_obj(self.context)
-                if IAsyncBehavior.implementedBy(dynamic_behavior_obj.__class__):
-                    # providedBy not working here?
-                    await behavior.load(create=True)
-                await self.set_schema(
-                    dynamic_behavior_obj, behavior, data, errors,
-                    validate_all, True)
+        for behavior_schema, behavior in await get_all_behaviors(self.context, True):
+            await self.set_schema(
+                behavior_schema, behavior, data, errors,
+                validate_all, True)
 
         if errors:
             raise DeserializationError(errors)
@@ -82,8 +65,11 @@ class DeserializeFromJson(object):
                 continue
 
             if behavior:
-                data_value = data[schema.__identifier__][name] if name in data[schema.__identifier__] else None  # noqa
-                found = True if name in data[schema.__identifier__] else False
+                found = False
+                if schema.__identifier__ in data:
+                    sdata = data[schema.__identifier__]
+                    data_value = sdata[name] if name in sdata else None
+                    found = True if name in sdata else False
             else:
                 data_value = data[name] if name in data else None
                 found = True if name in data else False

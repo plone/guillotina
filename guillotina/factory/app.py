@@ -26,6 +26,7 @@ import asyncio
 import collections
 import inspect
 import json
+import os
 import pathlib
 
 
@@ -181,7 +182,17 @@ def make_app(config_file=None, settings=None, loop=None):
 
     for static in app_settings['static']:
         for key, file_path in static.items():
+            if ':' in file_path:
+                # referencing a module
+                dotted_mod_name, _, rel_path = file_path.partition(':')
+                module = resolve_dotted_name(dotted_mod_name)
+                if module is None:
+                    raise Exception('Invalid module for static directory {}'.format(file_path))
+                file_path = os.path.join(
+                    os.path.dirname(os.path.realpath(module.__file__)), rel_path)
             path = pathlib.Path(file_path)
+            if not path.exists():
+                raise Exception('Invalid static directory {}'.format(file_path))
             if path.is_dir():
                 root[key] = StaticDirectory(path)
             else:

@@ -19,9 +19,9 @@ By default request has participation of anonymous user plus the ones added by au
 Databases and static files has an specific permission system. They don't have roles by default
 and the permissions are specified to root user
 
- * guillotina.AddPortal
- * guillotina.GetPortals
- * guillotina.DeletePortals
+ * guillotina.AddContainer
+ * guillotina.GetContainers
+ * guillotina.DeleteContainers
  * guillotina.AccessContent
  * guillotina.GetDatabases
 

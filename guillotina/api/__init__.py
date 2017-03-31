@@ -10,3 +10,4 @@ from . import search  # noqa
 from . import types  # noqa
 from . import user  # noqa
 from . import ws  # noqa
+from guillotina.json import definitions  # noqa

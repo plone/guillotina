@@ -28,7 +28,7 @@ class IMarkerDublinCore(Interface):
 @provider(IFormFieldProvider)
 class IDublinCore(Interface):
     index('creators', type='keyword')
-    index('subjects', type='keyword')
+    index('tags', type='keyword')
     index('contributors', type='keyword')
 
     title = schema.TextLine(
@@ -62,9 +62,9 @@ class IDublinCore(Interface):
         description=u"The unqualified Dublin Core 'Creator' element values",
         value_type=schema.TextLine())
 
-    subjects = schema.Tuple(
-        title=u'Subjects',
-        description=u"The unqualified Dublin Core 'Subject' element values",
+    tags = schema.Tuple(
+        title=u'Tags',
+        description=u"The unqualified Dublin Core 'Tags' element values",
         value_type=schema.TextLine())
 
     publisher = schema.Text(

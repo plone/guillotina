@@ -24,9 +24,22 @@ _marker = object()
 
 
 @configure.service(
-    context=IContainer, method='GET', permission='guillotina.ReadConfiguration',
-    name='@registry',
-    description='Read container registry settings')
+    context=IContainer, method='GET',
+    permission='guillotina.ReadConfiguration', name='@registry',
+    summary='Read container registry settings',
+    responses={
+        "200": {
+            "description": "Successuflly registered interface",
+            "type": "object",
+            "schema": {
+                "properties": {
+                    "value": {
+                        "type": "object"
+                    }
+                }
+            }
+        }
+    })
 class Read(TraversableService):
     key = _marker
     value = None
@@ -63,19 +76,29 @@ class Read(TraversableService):
 
 
 @configure.service(
-    context=IContainer, method='POST', permission='guillotina.RegisterConfigurations',
-    name='@registry',
-    description='Register a new interface to for registry settings',
-    options={
-        'interface': {
-            'label': 'dotted name of interface to install',
-            'type': 'string',
-            'required': True
-        },
-        'initial_values': {
-            'label': 'Initial value settings',
-            'type': 'object',
-            'required': False
+    context=IContainer, method='POST',
+    permission='guillotina.RegisterConfigurations', name='@registry',
+    summary='Register a new interface to for registry settings',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "type": "object",
+        "schema": {
+            "properties": {
+                "interface": {
+                    "type": "string",
+                    "required": True
+                },
+                "initial_values": {
+                    "type": "object",
+                    "required": False
+                }
+            }
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Successuflly registered interface"
         }
     })
 class Register(Service):
@@ -113,14 +136,25 @@ class Register(Service):
 
 
 @configure.service(
-    context=IContainer, method='PATCH', permission='guillotina.WriteConfiguration',
-    name='@registry',
-    description='Update registry setting',
-    options={
-        'value': {
-            'type': 'string',
-            'label': 'The value to set on the registry setting',
-            'required': True
+    context=IContainer, method='PATCH',
+    permission='guillotina.WriteConfiguration', name='@registry',
+    summary='Update registry setting',
+    parameters={
+        "name": "body",
+        "in": "body",
+        "type": "object",
+        "schema": {
+            "properties": {
+                "value": {
+                    "type": "any",
+                    'required': True
+                }
+            }
+        }
+    },
+    responses={
+        "200": {
+            "description": "Successuflly wrote configuration"
         }
     })
 class Write(TraversableService):

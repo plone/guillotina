@@ -1,6 +1,18 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- rename `subjects` to `tags` for IDublinCore behavior
+  [vangheem]
+
+- rename permissions:
+    `guillotina.AddPortal` -> `guillotina.AddContainer`
+    `guillotina.DeletePortals` -> `guillotina.DeleteContainers`
+    `guillotina.GetPortals` -> `guillotina.GetContainers`
+  [vangheem]
+
+- You can now reference modules in your static file configuration: `mymodule:static`
+  [vangheem]
+
 - Static directories will now serve default index.html files
   [vangheem]
 

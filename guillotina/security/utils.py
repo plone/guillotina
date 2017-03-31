@@ -58,48 +58,48 @@ def settings_for_object(ob):
     result = []
     while ob is not None:
         data = {}
-        result.append((getattr(ob, '__name__', '(no name)'), data))
+        result.append({getattr(ob, '__name__', None) or '(no name)': data})
 
         principal_permissions = IPrincipalPermissionMap(ob, None)
         if principal_permissions is not None:
             settings = principal_permissions.get_principals_and_permissions()
             settings.sort()
-            data['principalPermissions'] = [
+            data['prinperm'] = [
                 {'principal': pr, 'permission': p, 'setting': s}
                 for (p, pr, s) in settings]
 
         principal_roles = IPrincipalRoleMap(ob, None)
         if principal_roles is not None:
             settings = principal_roles.get_principals_and_roles()
-            data['principalRoles'] = [
+            data['prinrole'] = [
                 {'principal': p, 'role': r, 'setting': s}
                 for (r, p, s) in settings]
 
         role_permissions = IRolePermissionMap(ob, None)
         if role_permissions is not None:
             settings = role_permissions.get_roles_and_permissions()
-            data['rolePermissions'] = [
+            data['roleperm'] = [
                 {'permission': p, 'role': r, 'setting': s}
                 for (p, r, s) in settings]
 
         ob = getattr(ob, '__parent__', None)
 
     data = {}
-    result.append(('code settings', data))
+    result.append({'system': data})
 
     settings = principal_permission_manager.get_principals_and_permissions()
     settings.sort()
-    data['principalPermissions'] = [
+    data['prinperm'] = [
         {'principal': pr, 'permission': p, 'setting': s}
         for (p, pr, s) in settings]
 
     settings = principal_role_manager.get_principals_and_roles()
-    data['principalRoles'] = [
+    data['prinrole'] = [
         {'principal': p, 'role': r, 'setting': s}
         for (r, p, s) in settings]
 
     settings = role_permission_manager.get_roles_and_permissions()
-    data['rolePermissions'] = [
+    data['roleperm'] = [
         {'permission': p, 'role': r, 'setting': s}
         for (p, r, s) in settings]
 
