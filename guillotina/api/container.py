@@ -16,7 +16,24 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.utils import get_authenticated_user_id
 
 
-@configure.service(context=IDatabase, method='GET', permission='guillotina.GetPortals')
+@configure.service(
+    context=IDatabase, method='GET', permission='guillotina.GetContainers',
+    summary='Get list of containers',
+    responses={
+        "200": {
+            "description": "Get a list of containers",
+            "schema": {
+                "properties": {
+                    "containers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    })
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
@@ -26,17 +43,23 @@ class DefaultGET(Service):
 
 
 @configure.service(
-    context=IDatabase, method='POST', permission='guillotina.AddPortal',
-    title="Create a new Portal",
+    context=IDatabase, method='POST', permission='guillotina.AddContainer',
+    summary="Create a new Container",
     description="Creates a new container on the database",
-    payload={
-        "query": {},
-        "payload": {
-            "@type": "string",
-            "title": "string",
-            "id": "string"
-        },
-        "traversal": []
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "schema": {
+            "$ref": "#/definitions/BaseResource"
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Container result",
+            "schema": {
+                "$ref": "#/definitions/BaseResource"
+            }
+        }
     })
 class DefaultPOST(Service):
     """Create a new Container for DB Mounting Points."""
@@ -109,19 +132,9 @@ class DefaultPOST(Service):
         return Response(response=resp, headers=headers)
 
 
-class DefaultPUT(Service):
-    pass
-
-
-class DefaultPATCH(Service):
-    pass
-
-
-class SharingPOST(Service):
-    pass
-
-
-@configure.service(context=IContainer, method='DELETE', permission='guillotina.DeletePortals')
+@configure.service(
+    context=IContainer, method='DELETE', permission='guillotina.DeleteContainers',
+    summary='Delete container')
 class DefaultDELETE(content.DefaultDELETE):
     pass
 

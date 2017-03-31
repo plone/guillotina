@@ -10,47 +10,6 @@ from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.browser import Response
 
 
-configure.json_schema_definition('Behavior', {
-    "type": "object",
-    "title": "Behavior",
-    "properties": {
-        "behavior": {
-            "type": "string",
-            "title": "Dotted name to interface",
-            "required": True
-        }
-    }
-})
-
-configure.json_schema_definition('BehaviorsResponse', {
-    "type": "object",
-    "title": "Behavior data on a resource",
-    "properties": {
-        "static": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "title": "Dotted name to interface",
-            }
-        },
-        "dynamic": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "title": "Dotted name to interface",
-            }
-        },
-        "available": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "title": "Dotted name to interface",
-            }
-        }
-    }
-})
-
-
 @configure.service(
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
     name='@behaviors',
@@ -113,7 +72,7 @@ async def default_delete(context, request):
     summary='Get information on behaviors for this resource',
     responses={
         "200": {
-            "description": "Successfully removed behavior",
+            "description": "A listing of behaviors for content",
             "schema": {
                 "$ref": "#/definitions/BehaviorsResponse"
             }
