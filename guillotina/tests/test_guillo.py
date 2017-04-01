@@ -7,9 +7,9 @@ import json
 async def test_get_the_root(guillotina):
     requester = await guillotina
     response, status = await requester('GET', '/')
-    assert response['static_file'] == ['favicon.ico']
+    assert response['static_directory'] == ['static', 'module_static']
     assert response['databases'] == ['db']
-    assert response['static_directory'] == []
+    assert response['static_file'] == ['favicon.ico']
 
 
 async def test_get_db(guillotina):

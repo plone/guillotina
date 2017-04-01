@@ -7,9 +7,9 @@ configure.permission('guillotina.DeleteContent', 'Delete content')
 configure.permission('guillotina.AddContent', 'Add content')
 configure.permission('guillotina.ViewContent', 'View content')
 
-configure.permission('guillotina.AddPortal', 'Add a portal/DB')
-configure.permission('guillotina.GetPortals', 'Get a portal/DB')
-configure.permission('guillotina.DeletePortals', 'Delete a portal')
+configure.permission('guillotina.AddContainer', 'Add a portal/DB')
+configure.permission('guillotina.GetContainers', 'Get a portal/DB')
+configure.permission('guillotina.DeleteContainers', 'Delete a portal')
 
 configure.permission('guillotina.MountDatabase', 'Mount a Database')
 configure.permission('guillotina.GetDatabases', 'Get Databases')
@@ -142,7 +142,7 @@ configure.grant(
 
 # ContainerDeleter
 configure.grant(
-    permission="guillotina.DeletePortals",
+    permission="guillotina.DeleteContainers",
     role="guillotina.ContainerDeleter")
 
 # Member

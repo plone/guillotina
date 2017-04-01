@@ -18,6 +18,7 @@ app_settings = {
     "host": "127.0.0.1",
     "port": 8080,
     "static": [],
+    "default_static_filenames": ['index.html', 'index.htm'],
     "utilities": [],
     "root_user": {
         "password": ""
@@ -53,7 +54,8 @@ app_settings = {
         'cli': 'guillotina.commands.cli.CliCommand',
         'create': 'guillotina.commands.create.CreateCommand',
         'shell': 'guillotina.commands.shell.ShellCommand'
-    }
+    },
+    "json_schema_definitions": {}  # json schemas available to reference in docs
 }
 
 SCHEMA_CACHE = {}

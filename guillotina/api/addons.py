@@ -12,16 +12,16 @@ _ = MessageFactory('guillotina')
 
 
 @configure.service(
-    context=IContainer, name='@addons', method='POST',
-    permission='guillotina.ManageAddons',
-    description='Install addon to container',
-    options={
-        'id': {
-            'label': 'id of addon to install',
-            'type': 'string',
-            'required': True
+    context=IContainer, method='POST',
+    permission='guillotina.ManageAddons', name='@addons',
+    summary='Install addon to container',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "schema": {
+            "$ref": "#/definitions/Addon"
         }
-    })
+    }])
 async def install(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -44,16 +44,16 @@ async def install(context, request):
 
 
 @configure.service(
-    context=IContainer, name='@addons', method='DELETE',
-    permission='guillotina.ManageAddons',
-    description='Uninstall an addon from container',
-    options={
-        'id': {
-            'label': 'id of addon to install',
-            'type': 'string',
-            'required': True
+    context=IContainer, method='DELETE',
+    permission='guillotina.ManageAddons', name='@addons',
+    summary='Uninstall an addon from container',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "schema": {
+            "$ref": "#/definitions/Addon"
         }
-    })
+    }])
 async def uninstall(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -76,9 +76,17 @@ async def uninstall(context, request):
 
 
 @configure.service(
-    context=IContainer, name='@addons', method='GET',
-    permission='guillotina.ManageAddons',
-    description='List available addons')
+    context=IContainer, method='GET',
+    permission='guillotina.ManageAddons', name='@addons',
+    summary='List available addons',
+    responses={
+        "200": {
+            "description": "Get list of available and installed addons",
+            "schema": {
+                "$ref": "#/definitions/AddonResponse"
+            }
+        }
+    })
 async def get_addons(context, request):
     result = {
         'available': [],

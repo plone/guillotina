@@ -14,6 +14,7 @@ import aiohttp
 import base64
 import guillotina.patch  # noqa
 import json
+import os
 
 
 TESTING_PORT = 55001
@@ -29,8 +30,11 @@ TESTING_SETTINGS = {
     ],
     "port": TESTING_PORT,
     "static": [
-        {"favicon.ico": "static/favicon.ico"}
+        {"static": os.path.dirname(os.path.realpath(__file__))},
+        {"module_static": 'guillotina:'},
+        {'favicon.ico': os.path.join(os.path.dirname(os.path.realpath(__file__)), '__init__.py')}
     ],
+    "default_static_filenames": ['teststatic.txt'],
     "creator": {
         "admin": "admin",
         "password": "admin"

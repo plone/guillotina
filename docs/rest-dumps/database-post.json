@@ -33,7 +33,7 @@
             "query": {},
             "traversal": []
         },
-        "permission": "guillotina.AddPortal",
+        "permission": "guillotina.AddContainer",
         "query_params": null,
         "title": "Create a new Portal"
     }

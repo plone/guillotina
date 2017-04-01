@@ -77,7 +77,7 @@ interaction.check_permission(permission, obj)
 
 ## Get all the endpoints and its security
 
-[GET] APPLICATION_URL/@apidefinition (you need guillotina.GetPortals permission)
+[GET] APPLICATION_URL/@apidefinition (you need guillotina.GetContainers permission)
 
 ## Get the security info for a resource (with inherited info)
 

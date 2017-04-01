@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-from guillotina import BEHAVIOR_CACHE
 from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
 from guillotina.component import queryUtility
+from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
 from guillotina.interfaces import IAbsoluteURL
-from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -61,20 +60,8 @@ class SerializeToJson(object):
         main_schema = factory.schema
         await self.get_schema(main_schema, self.context, result, False)
 
-        for behavior_schema in factory.behaviors or ():
-            behavior = behavior_schema(self.context)
-            if IAsyncBehavior.implementedBy(behavior.__class__):
-                # providedBy not working here?
-                await behavior.load()
+        for behavior_schema, behavior in await get_all_behaviors(self.context):
             await self.get_schema(behavior_schema, behavior, result, True)
-
-        for dynamic_behavior in self.context.__behaviors__ or ():
-            dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
-            behavior = dynamic_behavior_obj(self.context)
-            if IAsyncBehavior.implementedBy(dynamic_behavior_obj.__class__):
-                # providedBy not working here?
-                await behavior.load()
-            await self.get_schema(dynamic_behavior_obj, behavior, result, True)
 
         return result
 

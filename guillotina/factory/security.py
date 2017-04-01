@@ -15,9 +15,9 @@ class DatabaseSpecialPermissions(PrincipalPermissionManager):
     """
     def __init__(self, db):
         super(DatabaseSpecialPermissions, self).__init__()
-        self.grant_permission_to_principal('guillotina.AddPortal', ROOT_USER_ID)
-        self.grant_permission_to_principal('guillotina.GetPortals', ROOT_USER_ID)
-        self.grant_permission_to_principal('guillotina.DeletePortals', ROOT_USER_ID)
+        self.grant_permission_to_principal('guillotina.AddContainer', ROOT_USER_ID)
+        self.grant_permission_to_principal('guillotina.GetContainers', ROOT_USER_ID)
+        self.grant_permission_to_principal('guillotina.DeleteContainers', ROOT_USER_ID)
         self.grant_permission_to_principal('guillotina.AccessContent', ROOT_USER_ID)
         self.grant_permission_to_principal('guillotina.GetDatabases', ROOT_USER_ID)
         self.grant_permission_to_principal('guillotina.GetAPIDefinition', ROOT_USER_ID)

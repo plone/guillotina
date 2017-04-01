@@ -10,9 +10,17 @@ from guillotina.interfaces import IResourceFactory
 
 
 @configure.service(
-    context=IContainer, method='GET', permission='guillotina.AccessContent',
-    name='@types',
-    description='Read information on available types')
+    context=IContainer, method='GET',
+    permission='guillotina.AccessContent', name='@types',
+    summary='Read information on available types',
+    responses={
+        "200": {
+            "description": "Result results on types",
+            "schema": {
+                "properties": {}
+            }
+        }
+    })
 class Read(TraversableService):
 
     async def publish_traverse(self, traverse):

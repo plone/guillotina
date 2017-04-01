@@ -322,6 +322,13 @@ def load_grant_all(_context, grant_all):
 register_configuration_handler('grant_all', load_grant_all)
 
 
+def load_json_schema_definition(_context, json_schema):
+    from guillotina import app_settings
+    config = json_schema['config']
+    app_settings['json_schema_definitions'][config['name']] = config['schema']
+register_configuration_handler('json_schema_definition', load_json_schema_definition)
+
+
 class _base_decorator(object):
     configuration_type = ''
 
@@ -430,6 +437,13 @@ def grant_all(principal=None, role=None):
             principal=principal,
             role=role),
         'grant_all')
+
+
+def json_schema_definition(name, schema):
+    register_configuration(
+        get_caller_module(),
+        dict(name=name, schema=schema),
+        'json_schema_definition')
 
 
 def grant_directive(

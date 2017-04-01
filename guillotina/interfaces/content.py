@@ -95,7 +95,7 @@ class IStaticFile(Interface):
     pass
 
 
-class IStaticDirectory(Interface):
+class IStaticDirectory(ITraversable):
     pass
 
 

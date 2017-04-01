@@ -6,6 +6,7 @@ from dateutil.tz import tzlocal
 from guillotina import _
 from guillotina import app_settings
 from guillotina import configure
+from guillotina import security
 from guillotina.api.service import Service
 from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
@@ -13,6 +14,7 @@ from guillotina.browser import Response
 from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
+from guillotina.content import get_all_behavior_interfaces
 from guillotina.event import notify
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
@@ -35,17 +37,48 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
-from guillotina.security.utils import settings_for_object
+from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.utils import get_authenticated_user_id
+from guillotina.utils import get_class_dotted_name
 from guillotina.utils import iter_parents
 
 
 _zone = tzlocal()
 
 
+def get_content_json_schema_responses(content):
+    return {
+        "200": {
+            "description": "Resource data",
+            "schema": {
+                "allOf": [
+                    {"$ref": "#/definitions/ResourceFolder"},
+                    {"properties": convert_interfaces_to_schema(
+                        get_all_behavior_interfaces(content))}
+                ]
+            }
+        }
+    }
+
+
+def patch_content_json_schema_parameters(content):
+    return [{
+        "name": "body",
+        "in": "body",
+        "schema": {
+            "allOf": [
+                {"$ref": "#/definitions/WritableResource"},
+                {"properties": convert_interfaces_to_schema(
+                    get_all_behavior_interfaces(content))}
+            ]
+        }
+    }]
+
+
 @configure.service(
     context=IResource, method='GET', permission='guillotina.ViewContent',
-    description="Retrieves serialization of resource")
+    summary="Retrieves serialization of resource",
+    responses=get_content_json_schema_responses)
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
@@ -58,7 +91,22 @@ class DefaultGET(Service):
 
 @configure.service(
     context=IResource, method='POST', permission='guillotina.AddContent',
-    description='Add new resouce inside this container resource')
+    summary='Add new resouce inside this container resource',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "schema": {
+            "$ref": "#/definitions/AddableResource"
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Resource data",
+            "schema": {
+                "$ref": "#/definitions/ResourceFolder"
+            }
+        }
+    })
 class DefaultPOST(Service):
 
     async def __call__(self):
@@ -151,14 +199,17 @@ class DefaultPOST(Service):
 
 
 @configure.service(
-    context=IResource, method='PUT', permission='guillotina.ModifyContent')
-class DefaultPUT(Service):
-    pass
-
-
-@configure.service(
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
-    description='Modify the content of this resource')
+    summary='Modify the content of this resource',
+    parameters=patch_content_json_schema_parameters,
+    responses={
+        "200": {
+            "description": "Resource data",
+            "schema": {
+                "$ref": "#/definitions/Resource"
+            }
+        }
+    })
 class DefaultPATCH(Service):
     async def __call__(self):
         data = await self.get_data()
@@ -188,9 +239,17 @@ class DefaultPATCH(Service):
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SeePermissions',
-    name='@sharing',
-    description='Get sharing settings for this resource')
+    context=IResource, method='GET',
+    permission='guillotina.SeePermissions', name='@sharing',
+    summary='Get sharing settings for this resource',
+    responses={
+        "200": {
+            "description": "All the sharing defined on this resource",
+            "schema": {
+                "$ref": "#/definitions/ResourceACL"
+            }
+        }
+    })
 async def sharing_get(context, request):
     roleperm = IRolePermissionMap(context)
     prinperm = IPrincipalPermissionMap(context)
@@ -218,11 +277,19 @@ async def sharing_get(context, request):
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SeePermissions',
-    name='@all_permissions',
-    description='See all permission settings for this resource')
+    context=IResource, method='GET',
+    permission='guillotina.SeePermissions', name='@all_permissions',
+    summary='See all permission settings for this resource',
+    responses={
+        "200": {
+            "description": "All the permissions defined on this resource",
+            "schema": {
+                "$ref": "#/definitions/AllPermissions"
+            }
+        }
+    })
 async def all_permissions(context, request):
-    result = settings_for_object(context)
+    result = security.utils.settings_for_object(context)
     await notify(ObjectPermissionsViewEvent(context))
     return result
 
@@ -249,8 +316,23 @@ PermissionMap = {
 }
 
 
-@configure.service(context=IResource, method='POST', permission='guillotina.ChangePermissions',
-                   name='@sharing')
+@configure.service(
+    context=IResource, method='POST',
+    permission='guillotina.ChangePermissions', name='@sharing',
+    summary='Change permissions for a resource',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "type": "object",
+        "schema": {
+            "$ref": "#/definitions/Permissions"
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Successuflly changed permission"
+        }
+    })
 async def sharing_post(context, request):
     """Change permissions"""
     lroles = local_roles()
@@ -260,49 +342,41 @@ async def sharing_post(context, request):
             'prinperm' not in data:
         raise AttributeError('prinrole or roleperm or prinperm missing')
 
-    if 'type' not in data:
-        raise AttributeError('type missing')
-
-    setting = data['type']
-
     # we need to check if we are changing any info
     changed = False
 
-    if 'prinrole' in data:
+    for prinrole in data.get('prinrole') or []:
+        setting = prinrole.get('setting')
         if setting not in PermissionMap['prinrole']:
-            raise AttributeError('Invalid Type')
+            raise AttributeError('Invalid Type {}'.format(setting))
         manager = IPrincipalRoleManager(context)
         operation = PermissionMap['prinrole'][setting]
         func = getattr(manager, operation)
-        for user, roles in data['prinrole'].items():
-            for role in roles:
-                if role in lroles:
-                    changed = True
-                    func(role, user)
-                else:
-                    raise KeyError('No valid local role')
+        if prinrole['role'] in lroles:
+            changed = True
+            func(prinrole['role'], prinrole['principal'])
+        else:
+            raise KeyError('No valid local role')
 
-    if 'prinperm' in data:
+    for prinperm in data.get('prinperm') or []:
+        setting = prinperm['setting']
         if setting not in PermissionMap['prinperm']:
             raise AttributeError('Invalid Type')
         manager = IPrincipalPermissionManager(context)
         operation = PermissionMap['prinperm'][setting]
         func = getattr(manager, operation)
-        for user, permissions in data['prinperm'].items():
-            for permision in permissions:
-                changed = True
-                func(permision, user)
+        changed = True
+        func(prinperm['permission'], prinperm['principal'])
 
-    if 'roleperm' in data:
+    for roleperm in data.get('roleperm') or []:
+        setting = roleperm['setting']
         if setting not in PermissionMap['roleperm']:
             raise AttributeError('Invalid Type')
         manager = IRolePermissionManager(context)
         operation = PermissionMap['roleperm'][setting]
         func = getattr(manager, operation)
-        for role, permissions in data['roleperm'].items():
-            for permission in permissions:
-                changed = True
-                func(permission, role)
+        changed = True
+        func(roleperm['permission'], roleperm['role'])
 
     if changed:
         context._p_register()  # make sure data is saved
@@ -310,8 +384,19 @@ async def sharing_post(context, request):
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.AccessContent',
-    name='@canido')
+    context=IResource, method='GET',
+    permission='guillotina.AccessContent', name='@canido',
+    parameters=[{
+        "name": "permission",
+        "in": "query",
+        "required": True,
+        "type": "string"
+    }],
+    responses={
+        "200": {
+            "description": "Successuflly changed permission"
+        }
+    })
 async def can_i_do(context, request):
     if 'permission' not in request.GET:
         raise TypeError('No permission param')
@@ -321,7 +406,12 @@ async def can_i_do(context, request):
 
 @configure.service(
     context=IResource, method='DELETE', permission='guillotina.DeleteContent',
-    description='Delete resource')
+    summary='Delete resource',
+    responses={
+        "200": {
+            "description": "Successuflly deleted resource"
+        }
+    })
 class DefaultDELETE(Service):
 
     async def __call__(self):
@@ -334,7 +424,7 @@ class DefaultDELETE(Service):
 
 @configure.service(
     context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight',
-    description='Get CORS information for resource')
+    summary='Get CORS information for resource')
 class DefaultOPTIONS(Service):
     """Preflight view for Cors support on DX content."""
 
