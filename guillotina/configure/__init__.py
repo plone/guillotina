@@ -84,7 +84,9 @@ def load_service(_context, service):
     protect_view(factory, permission)
 
     method = service_conf.get('method', 'GET')
-    layer = service_conf.get('layer', IDefaultLayer)
+    default_layer = resolve_dotted_name(
+        app_settings.get('default_layer', IDefaultLayer))
+    layer = service_conf.get('layer', default_layer)
     name = service_conf.get('name', '')
     content = service_conf['context']
     logger.debug('Defining adapter for '  # noqa

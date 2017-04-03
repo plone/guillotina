@@ -1,7 +1,8 @@
 1.0.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix use of default layer in app_settings
+  [vangheem]
 
 
 1.0.0a4 (2017-04-03)
