@@ -1,4 +1,4 @@
-1.0.0a4 (unreleased)
+1.0.0a4 (2017-04-03)
 --------------------
 
 - json schema support in service definitions
