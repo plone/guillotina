@@ -215,7 +215,7 @@ def make_app(config_file=None, settings=None, loop=None):
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
         # In case there is Utilties that are registered
         ident = asyncio.ensure_future(utility.initialize(app=app), loop=app.loop)
-        root.add_async_utility(ident, {})
+        root.add_async_task(utility, ident, {})
 
     app.on_cleanup.append(close_utilities)
 
