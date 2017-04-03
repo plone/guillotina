@@ -1,6 +1,9 @@
 1.0.0a4 (unreleased)
 --------------------
 
+- json schema support in service definitions
+  [vangheem]
+
 - rename `subjects` to `tags` for IDublinCore behavior
   [vangheem]
 
