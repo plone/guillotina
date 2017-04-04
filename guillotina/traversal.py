@@ -230,7 +230,7 @@ class MatchInfo(AbstractMatchInfo):
                     # ErrorReponse just abort
                     await abort(request)
                 else:
-                    await commit(request)
+                    await commit(request, warn=False)
 
             except Unauthorized as e:
                 await abort(request)

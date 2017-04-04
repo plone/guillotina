@@ -4,11 +4,12 @@ import logging
 logger = logging.getLogger('guillotina')
 
 
-async def commit(request):
+async def commit(request, warn=True):
     try:
-        await request._tm.commit()
+        await get_tm(request).commit()
     except AttributeError as e:
-        logger.warn('Could not locate transaction manager to commit', exc_info=True)
+        if warn:
+            logger.warn('Could not locate transaction manager to commit', exc_info=True)
 
 
 async def abort(request):
