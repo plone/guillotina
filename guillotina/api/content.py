@@ -39,7 +39,6 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_class_dotted_name
 from guillotina.utils import iter_parents
 
 
