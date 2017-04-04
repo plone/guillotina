@@ -1,4 +1,4 @@
-1.0.0a5 (unreleased)
+1.0.0a5 (2017-04-04)
 --------------------
 
 - Be able to override base configuration in addon applications
