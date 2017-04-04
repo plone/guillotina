@@ -61,9 +61,7 @@ def load_application(module, root, settings):
 
 # XXX use this to delay imports for these settings
 _delayed_default_settings = {
-    "default_layers": [
-        interfaces.IDefaultLayer
-    ],
+    "default_layer": interfaces.IDefaultLayer,
     "http_methods": {
         "PUT": interfaces.IPUT,
         "POST": interfaces.IPOST,
