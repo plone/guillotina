@@ -45,8 +45,7 @@ def _rolledUpFactory(factories):
     return factory
 
 
-def adapter(_context, factory, provides=None, for_=None, permission=None,
-            name='', trusted=False, locate=False):
+def adapter(_context, factory, provides=None, for_=None, name=''):
 
     if for_ is None:
         if len(factory) == 1:
@@ -86,7 +85,7 @@ def adapter(_context, factory, provides=None, for_=None, permission=None,
     _context.action(
         discriminator=('adapter', for_, provides, name),
         callable=handler,
-        args=('registerAdapter', factory, for_, provides, name, _context.info))
+        args=('registerAdapter', factory, for_, provides, name))
     _context.action(
         discriminator=None,
         callable=provideInterface,
@@ -103,8 +102,7 @@ def adapter(_context, factory, provides=None, for_=None, permission=None,
 _handler = handler
 
 
-def subscriber(_context, for_=None, factory=None, handler=None, provides=None,
-               permission=None, trusted=False, locate=False):
+def subscriber(_context, for_=None, factory=None, handler=None, provides=None):
     if factory is None:
         if handler is None:
             raise TypeError("No factory or handler provided")
@@ -131,12 +129,12 @@ def subscriber(_context, for_=None, factory=None, handler=None, provides=None,
         _context.action(
             discriminator=None,
             callable=_handler,
-            args=('registerHandler', handler, for_, _BLANK, _context.info))
+            args=('registerHandler', handler, for_, _BLANK))
     else:
         _context.action(
             discriminator=None,
             callable=_handler,
-            args=('registerSubscriptionAdapter', factory, for_, provides, _BLANK, _context.info))
+            args=('registerSubscriptionAdapter', factory, for_, provides, _BLANK))
 
     if provides is not None:
         _context.action(
@@ -153,8 +151,7 @@ def subscriber(_context, for_=None, factory=None, handler=None, provides=None,
                 args=('', iface))
 
 
-def utility(_context, provides=None, component=None, factory=None,
-            permission=None, name=''):
+def utility(_context, provides=None, component=None, factory=None, name=''):
     if factory and component:
         raise TypeError("Can't specify factory and component.")
 
@@ -177,7 +174,7 @@ def utility(_context, provides=None, component=None, factory=None,
     _context.action(
         discriminator=('utility', provides, name),
         callable=handler,
-        args=('registerUtility', component, provides, name, _context.info),
+        args=('registerUtility', component, provides, name),
         kw=dict(factory=factory))
     _context.action(
         discriminator=None,
@@ -192,16 +189,7 @@ def interface(_context, interface, type=None, name=''):
         args=(name, interface, type))
 
 
-def view(_context, factory, type, name, for_,
-         permission=None,
-         allowed_interface=None,
-         allowed_attributes=None,
-         provides=Interface):
-
-    if ((allowed_attributes or allowed_interface) and (not permission)):
-        raise ComponentConfigurationError(
-            "'permission' required with 'allowed_interface' or "
-            "'allowed_attributes'")
+def view(_context, factory, type, name, for_, provides=Interface):
 
     if not for_:
         raise ComponentConfigurationError("No for interfaces specified")
@@ -228,7 +216,7 @@ def view(_context, factory, type, name, for_,
     _context.action(
         discriminator=('view', for_, name, provides),
         callable=handler,
-        args=('registerAdapter', factory, for_, provides, name, _context.info))
+        args=('registerAdapter', factory, for_, provides, name))
 
     _context.action(
         discriminator=None,
@@ -244,20 +232,12 @@ def view(_context, factory, type, name, for_,
                     args=('', iface))
 
 
-def resource(_context, factory, type, name,
-             permission=None,
-             allowed_interface=None, allowed_attributes=None,
-             provides=Interface):
-
-    if ((allowed_attributes or allowed_interface) and (not permission)):
-        raise ComponentConfigurationError(
-            "Must use name attribute with allowed_interface or "
-            "allowed_attributes")
+def resource(_context, factory, type, name, provides=Interface):
 
     _context.action(
         discriminator=('resource', name, type, provides),
         callable=handler,
-        args=('registerAdapter', factory, (type,), provides, name, _context.info))
+        args=('registerAdapter', factory, (type,), provides, name))
     _context.action(
         discriminator=None,
         callable=provideInterface,
