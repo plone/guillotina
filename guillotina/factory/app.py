@@ -140,14 +140,14 @@ def make_app(config_file=None, settings=None, loop=None):
     configure.scan('guillotina.constraintypes')
     configure.scan('guillotina.subscribers')
     load_application(guillotina, root, settings)
+    app.config.execute_actions()
+    app.config.commit()
 
     for module_name in settings.get('applications', []):
+        app.config.begin(module_name)
         load_application(resolve_dotted_name(module_name), root, settings)
-    try:
         app.config.execute_actions()
-    except ConfigurationConflictError as e:
-        logger.error(str(e._conflicts))
-        raise e
+        app.config.commit()
 
     # XXX we clear now to save some memory
     # it's unclear to me if this is necesary or not but it seems to me that

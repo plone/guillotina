@@ -185,7 +185,6 @@ class Test_adapter(unittest.TestCase):
         self.assertEqual(action['args'][2], (Interface,))
         self.assertEqual(action['args'][3], IFoo)
         self.assertEqual(action['args'][4], 'test')
-        self.assertEqual(action['args'][5], 'TESTING')
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
@@ -224,7 +223,7 @@ class Test_adapter(unittest.TestCase):
                          ('adapter', (Interface,), IFoo, ''))
         self.assertEqual(action['args'],
                          ('registerAdapter', _Factory, (Interface,), IFoo,
-                          '', 'TESTING'))
+                          ''))
 
 
 class Test_subscriber(unittest.TestCase):
@@ -307,7 +306,6 @@ class Test_subscriber(unittest.TestCase):
         self.assertEqual(action['args'][1], _handler)
         self.assertEqual(action['args'][2], (Interface,))
         self.assertEqual(action['args'][3], '')
-        self.assertEqual(action['args'][4], 'TESTING')
         # Register the required interface(s)
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
@@ -341,7 +339,6 @@ class Test_subscriber(unittest.TestCase):
         self.assertEqual(action['args'][2], (Interface,))
         self.assertEqual(action['args'][3], IFoo)
         self.assertEqual(action['args'][4], '')
-        self.assertEqual(action['args'][5], 'TESTING')
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
@@ -405,7 +402,6 @@ class Test_utility(unittest.TestCase):
         self.assertEqual(action['args'][1], None)
         self.assertEqual(action['args'][2], IFoo)
         self.assertEqual(action['args'][3], '')
-        self.assertEqual(action['args'][4], 'TESTING')
         self.assertEqual(action['kw'], {'factory': Foo})
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
@@ -438,7 +434,6 @@ class Test_utility(unittest.TestCase):
         self.assertEqual(action['args'][1], None)
         self.assertEqual(action['args'][2], IFoo)
         self.assertEqual(action['args'][3], '')
-        self.assertEqual(action['args'][4], 'TESTING')
         self.assertEqual(action['kw'], {'factory': Foo})
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
@@ -469,7 +464,6 @@ class Test_utility(unittest.TestCase):
         self.assertEqual(action['args'][1], _COMPONENT)
         self.assertEqual(action['args'][2], IFoo)
         self.assertEqual(action['args'][3], 'test')
-        self.assertEqual(action['args'][4], 'TESTING')
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
@@ -520,7 +514,6 @@ class Test_utility(unittest.TestCase):
         self.assertEqual(action['args'][1], _COMPONENT)
         self.assertEqual(action['args'][2], IFoo)
         self.assertEqual(action['args'][3], '')
-        self.assertEqual(action['args'][4], 'TESTING')
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
@@ -576,56 +569,6 @@ class Test_view(unittest.TestCase):
     def _callFUT(self, *args, **kw):
         from guillotina.configure.component import view
         return view(*args, **kw)
-
-    def test_w_allowed_interface_wo_permission(self):
-        from zope.interface import Interface
-        from guillotina.configure.component import ComponentConfigurationError
-
-        class IViewType(Interface):
-            pass
-
-        class IView(Interface):
-            def foo():
-                pass
-
-            def bar():
-                pass
-
-        class _View(object):
-            def __init__(self, context):
-                self.context = context
-
-            def foo():
-                pass
-
-            def bar():
-                pass
-        _cfg_ctx = _makeConfigContext()
-        self.assertRaises(ComponentConfigurationError,
-                          self._callFUT, _cfg_ctx, (_View,), IViewType, '',
-                          for_=(Interface, Interface), allowed_interface=IView)
-
-    def test_w_allowed_attributes_wo_permission(self):
-        from zope.interface import Interface
-        from guillotina.configure.component import ComponentConfigurationError
-
-        class IViewType(Interface):
-            pass
-
-        class _View(object):
-            def __init__(self, context):
-                self.context = context
-
-            def foo():
-                pass
-
-            def bar():
-                pass
-        _cfg_ctx = _makeConfigContext()
-        self.assertRaises(ComponentConfigurationError,
-                          self._callFUT, _cfg_ctx, (_View,), IViewType, '',
-                          for_=(Interface, Interface),
-                          allowed_attributes=('foo', 'bar'))
 
     def test_w_factory_as_empty(self):
         from zope.interface import Interface
@@ -695,7 +638,6 @@ class Test_view(unittest.TestCase):
         self.assertEqual(action['args'][2], (Interface, IViewType))
         self.assertEqual(action['args'][3], Interface)
         self.assertEqual(action['args'][4], 'test')
-        self.assertEqual(action['args'][5], 'TESTING')
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
@@ -751,116 +693,10 @@ class Test_view(unittest.TestCase):
         self.assertEqual(action['args'][2], (Interface, IViewType))
         self.assertEqual(action['args'][3], Interface)
         self.assertEqual(action['args'][4], '')
-        self.assertEqual(action['args'][5], 'TESTING')
-
-
-class Test_resource(unittest.TestCase):
-
-    def _callFUT(self, *args, **kw):
-        from guillotina.configure.component import resource
-        return resource(*args, **kw)
-
-    def test_w_allowed_interface_wo_permission(self):
-        from zope.interface import Interface
-        from guillotina.configure.component import ComponentConfigurationError
-
-        class IResourceType(Interface):
-            pass
-
-        class IView(Interface):
-            def foo():
-                pass
-
-            def bar():
-                pass
-
-        class _Resource(object):
-            def __init__(self, context):
-                self.context = context
-
-            def foo():
-                pass
-
-            def bar():
-                pass
-
-        _cfg_ctx = _makeConfigContext()
-        self.assertRaises(ComponentConfigurationError,
-                          self._callFUT,
-                          _cfg_ctx, (_Resource,), IResourceType, '',
-                          allowed_interface=IView)
-
-    def test_w_allowed_attributes_wo_permission(self):
-        from zope.interface import Interface
-        from guillotina.configure.component import ComponentConfigurationError
-
-        class IResourceType(Interface):
-            pass
-
-        class _Resource(object):
-            def __init__(self, context):
-                self.context = context
-
-            def foo():
-                pass
-
-            def bar():
-                pass
-        _cfg_ctx = _makeConfigContext()
-        self.assertRaises(ComponentConfigurationError,
-                          self._callFUT,
-                          _cfg_ctx, (_Resource,), IResourceType, '',
-                          allowed_attributes=('foo', 'bar'))
-
-    def test_wo_permission_w_name(self):
-        from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
-        from guillotina.configure.component import handler
-
-        class IResourceType(Interface):
-            pass
-
-        class _Resource(object):
-            def __init__(self, context):
-                self.context = context
-
-            def foo():
-                pass
-
-            def bar():
-                pass
-        _cfg_ctx = _makeConfigContext()
-        self._callFUT(_cfg_ctx, _Resource, IResourceType, 'test')
-        self.assertEqual(len(_cfg_ctx._actions), 3)
-        self.assertEqual(_cfg_ctx._actions[0][0], ())
-        # Register the resource
-        action = _cfg_ctx._actions[0][1]
-        self.assertEqual(action['callable'], handler)
-        self.assertEqual(action['discriminator'],
-                         ('resource', 'test', IResourceType, Interface))
-        self.assertEqual(action['args'][0], 'registerAdapter')
-        self.assertEqual(action['args'][1], _Resource)
-        self.assertEqual(action['args'][2], (IResourceType,))
-        self.assertEqual(action['args'][3], Interface)
-        self.assertEqual(action['args'][4], 'test')
-        self.assertEqual(action['args'][5], 'TESTING')
-        # Register the 'type' interface
-        self.assertEqual(_cfg_ctx._actions[1][0], ())
-        action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
-        self.assertEqual(action['discriminator'], None)
-        self.assertEqual(action['args'], ('', IResourceType))
-        # Register the required interface(s)
-        self.assertEqual(_cfg_ctx._actions[2][0], ())
-        action = _cfg_ctx._actions[2][1]
-        self.assertEqual(action['callable'], provideInterface)
-        self.assertEqual(action['discriminator'], None)
-        self.assertEqual(action['args'], ('', Interface))
 
 
 def _makeConfigContext():
     class _Context(object):
-        info = 'TESTING'
 
         def __init__(self):
             self._actions = []
@@ -878,6 +714,44 @@ def test_suite():
         unittest.makeSuite(Test_subscriber),
         unittest.makeSuite(Test_utility),
         unittest.makeSuite(Test_interface),
-        unittest.makeSuite(Test_view),
-        unittest.makeSuite(Test_resource),
+        unittest.makeSuite(Test_view)
     ))
+
+
+def test_configuration_machine_allows_overriding():
+    from guillotina.configure.config import ConfigurationMachine
+    from guillotina.configure import component
+    from guillotina.component import adapter, named, getAdapter
+    from zope.interface import implementer, Interface
+
+    class IFoo(Interface):
+        pass
+
+    @implementer(IFoo)
+    class Foo(object):
+        pass
+
+    class IBar(Interface):
+        pass
+
+    cm = ConfigurationMachine()
+
+    @adapter(IFoo)
+    @implementer(IBar)
+    @named('bar')
+    class _Factory(object):
+        def __init__(self, context):
+            self.context = context
+
+    class _FactoryOverride(_Factory):
+        pass
+
+    component.adapter(cm, (_Factory,))
+    cm.execute_actions()
+    cm.commit()
+
+    component.adapter(cm, (_FactoryOverride,))
+    cm.execute_actions()
+
+    adapter = getAdapter(Foo(), name='bar')
+    assert isinstance(adapter, _FactoryOverride)

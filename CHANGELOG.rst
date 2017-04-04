@@ -1,6 +1,9 @@
 1.0.0a5 (unreleased)
 --------------------
 
+- Be able to override base configuration in addon applications
+  [vangheem]
+
 - Fix use of default layer in app_settings
   [vangheem]
 
