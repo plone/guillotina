@@ -42,6 +42,7 @@ from guillotina.interfaces import IStaticFile
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
+from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 from zope.interface import alsoProvides
 from zope.interface import implementer
@@ -419,11 +420,20 @@ class Folder(Resource):
     to work with contained objects asynchronously.
     """
 
+    def _get_transaction(self):
+        try:
+            trns = get_transaction()
+        except AttributeError:
+            trns = None
+        if trns is None:
+            return self._p_jar
+        return trns
+
     async def async_contains(self, key: str) -> bool:
         """
         Asynchronously check if key exists inside this folder
         """
-        return await self._p_jar.contains(self._p_oid, key)
+        return await self._get_transaction().contains(self._p_oid, key)
 
     async def async_set(self, key: str, value: IResource) -> None:
         """
@@ -431,16 +441,17 @@ class Folder(Resource):
         """
         value.__parent__ = self
         value.__name__ = key
-        if self._p_jar is not None:
-            value._p_jar = self._p_jar
-            self._p_jar.register(value)
+        trns = self._get_transaction()
+        if trns is not None:
+            value._p_jar = trns
+            trns.register(value)
 
     async def async_get(self, key: str, default=None) -> IResource:
         """
         Asynchronously get an object inside this folder
         """
         try:
-            val = await self._p_jar.get_child(self, key)
+            val = await self._get_transaction().get_child(self, key)
             if val is not None:
                 return val
         except KeyError:
@@ -451,25 +462,25 @@ class Folder(Resource):
         """
         Asynchronously delete object in the folder
         """
-        return self._p_jar.delete(await self.async_get(key))
+        return self._get_transaction().delete(await self.async_get(key))
 
     async def async_len(self) -> int:
         """
         Asynchronously calculate the len of the folder
         """
-        return await self._p_jar.len(self._p_oid)
+        return await self._get_transaction().len(self._p_oid)
 
     async def async_keys(self) -> typing.List[str]:
         """
         Asynchronously get the sub object keys in this folder
         """
-        return await self._p_jar.keys(self._p_oid)
+        return await self._get_transaction().keys(self._p_oid)
 
     async def async_items(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
         """
         Asynchronously iterate through contents of folder
         """
-        async for key, value in self._p_jar.items(self):
+        async for key, value in self._get_transaction().items(self):
             yield key, value
 
 

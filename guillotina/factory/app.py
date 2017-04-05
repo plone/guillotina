@@ -3,7 +3,6 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina import interfaces
 from guillotina import languages
-from guillotina import logger
 from guillotina.async import IAsyncUtility
 from guillotina.component import getAllUtilitiesRegisteredFor
 from guillotina.component import getUtility
@@ -13,7 +12,6 @@ from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.contentnegotiation import ContentNegotiatorUtility
-from guillotina.exceptions import ConfigurationConflictError
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
