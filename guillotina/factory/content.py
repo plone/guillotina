@@ -113,7 +113,10 @@ class Database(object):
         return self._db._tm
 
     def new_transaction_manager(self):
-        return self._db.new_transaction_manager()
+        tm = self._db.new_transaction_manager()
+        if self._db.request is not None:
+            self._db.request._tm = tm
+        return tm
 
     @property
     def _p_jar(self):

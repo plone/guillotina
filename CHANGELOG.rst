@@ -1,7 +1,9 @@
 1.0.0a6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix container objects not having current transaction when new objects are
+  registered for them
+  [vangheem]
 
 
 1.0.0a5 (2017-04-04)

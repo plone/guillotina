@@ -34,6 +34,7 @@ class TransactionManager(object):
             if self.request is None:
                 self.request = get_current_request()
             request = self.request
+        request._tm = self  # register it here with request...
 
         user = get_authenticated_user_id(request)
         if self._txn is not None:
