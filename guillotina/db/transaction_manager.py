@@ -42,8 +42,10 @@ class TransactionManager(object):
                 self._pool = LifoQueue()
             # Save the actual transaction and start a new one
             self._pool.put(self._txn)
-
-        self._txn = txn = Transaction(self, request=request)
+            self._txn.init()  # reset existing transaction
+            txn = self._txn
+        else:
+            self._txn = txn = Transaction(self, request=request)
 
         # CACHE!!
 

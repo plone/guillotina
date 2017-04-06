@@ -30,6 +30,11 @@ class Status:
 class Transaction(object):
 
     def __init__(self, manager, request=None):
+        # so we can reuse the same transaction object
+        self.init(manager, request)
+
+    def init(self, manager, request=None):
+        # so you can re-initialize a transaction object
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE

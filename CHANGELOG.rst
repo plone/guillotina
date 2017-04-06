@@ -1,6 +1,10 @@
 1.0.0a6 (unreleased)
 --------------------
 
+- Reuse transaction objects when doing `tm.begin()` so old objects that reference
+  old transaction object will still work and not be orphaned.
+  [vangheem]
+
 - Fix container objects not having current transaction when new objects are
   registered for them
   [vangheem]
