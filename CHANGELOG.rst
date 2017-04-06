@@ -1,4 +1,4 @@
-1.0.0a6 (unreleased)
+1.0.0a6 (2017-04-06)
 --------------------
 
 - Fix container objects not having current transaction when new objects are
