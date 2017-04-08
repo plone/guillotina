@@ -10,6 +10,10 @@ from guillotina.utils import import_class
 from zope.interface import implementer
 
 import asyncio
+import logging
+
+
+logger = logging.getLogger('guillotina')
 
 
 @implementer(IApplication)
@@ -25,7 +29,11 @@ class ApplicationRoot(object):
     def add_async_utility(self, config, loop=None):
         interface = import_class(config['provides'])
         factory = import_class(config['factory'])
-        utility_object = factory(config['settings'], loop=loop)
+        try:
+            utility_object = factory(config['settings'], loop=loop)
+        except Exception:
+            logger.error('Error initializing utility {}'.format(repr(factory)))
+            raise
         provideUtility(utility_object, interface)
         task = asyncio.ensure_future(utility_object.initialize(app=self.app), loop=loop)
         self.add_async_task(config['provides'], task, config)

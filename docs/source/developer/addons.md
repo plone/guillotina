@@ -54,7 +54,7 @@ from:
 
 from guillotina.addons import Addon
 from guillotina import configure
-from guillotina.registry import ILayers
+from guillotina.interfaces import ILayers
 
 LAYER = 'guillotina_myaddon.interfaces.ILayer'
 
