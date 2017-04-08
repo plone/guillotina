@@ -32,7 +32,7 @@ class IBeforeObjectRemovedEvent(IObjectMovedEvent):
     """An object has been removed from a container."""
 
 
-class IObjectVIContainerdEvent(interfaces.IObjectEvent):
+class IObjectVisitedEvent(interfaces.IObjectEvent):
     """An object has been vIContainerd."""
 
 
