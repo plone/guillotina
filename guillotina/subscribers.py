@@ -16,7 +16,7 @@ _zone = tzlocal()
 def modified_object(obj, event):
     """Set the modification date of an object."""
     now = datetime.now(tz=_zone)
-    obj.modified = now
+    obj.modification_date = now
 
 
 @configure.subscriber(for_=IObjectEvent)

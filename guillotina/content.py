@@ -84,8 +84,8 @@ class ResourceFactory(Factory):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.type_name = self.type_name
         now = datetime.now(tz=_zone)
-        obj.created = now
-        obj.modified = now
+        obj.creation_date = now
+        obj.modification_date = now
         if id is None:
             if obj._p_oid is None:
                 # uuid uses _p_oid...
@@ -289,8 +289,8 @@ class Resource(guillotina.db.orm.base.BaseObject):
     __acl__ = None
 
     type_name = None
-    created = None
-    modified = None
+    creation_date = None
+    modification_date = None
     title = None
 
     @property

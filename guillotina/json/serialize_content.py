@@ -50,8 +50,8 @@ class SerializeToJson(object):
             '@id': IAbsoluteURL(self.context, self.request)(),
             '@type': self.context.type_name,
             'parent': parent_summary,
-            'created': json_compatible(self.context.created),
-            'modified': json_compatible(self.context.modified),
+            'creation_date': json_compatible(self.context.creation_date),
+            'modification_date': json_compatible(self.context.modification_date),
             'UID': self.context.uuid,
         }
 
