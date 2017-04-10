@@ -5,16 +5,15 @@ from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.testing import ADMIN_TOKEN
 from guillotina.testing import TESTING_SETTINGS
+from guillotina.tests.utils import cleanup_postgres_docker
 from guillotina.tests.utils import get_mocked_request
-from time import sleep
+from guillotina.tests.utils import run_docker_postgresql
 
 import aiohttp
 import asyncio
 import copy
-import docker
 import json
 import os
-import psycopg2
 import pytest
 
 
@@ -44,68 +43,6 @@ DUMMY_SETTINGS['databases'][0]['db']['partition'] = \
 DUMMY_SETTINGS['databases'][0]['db']['dsn'] = {}
 
 
-def run_docker_postgresql():
-    docker_client = docker.from_env(version='1.23')
-
-    # Clean up possible other docker containers
-    test_containers = docker_client.containers.list(
-        all=True,
-        filters={'label': CONTAINERS_FOR_TESTING_LABEL})
-    for test_container in test_containers:
-        test_container.stop()
-        test_container.remove(v=True, force=True)
-
-    # Create a new one
-    container = docker_client.containers.run(
-        image=IMAGE,
-        labels=[CONTAINERS_FOR_TESTING_LABEL],
-        detach=True,
-        ports={
-            '5432/tcp': 5432
-        },
-        cap_add=['IPC_LOCK'],
-        mem_limit='1g',
-        environment={
-            'POSTGRES_PASSWORD': '',
-            'POSTGRES_DB': 'guillotina',
-            'POSTGRES_USER': 'postgres'
-        },
-        privileged=True
-    )
-    ident = container.id
-    count = 1
-
-    container_obj = docker_client.containers.get(ident)
-
-    opened = False
-    host = ''
-
-    while count < 30 and not opened:
-        count += 1
-        container_obj = docker_client.containers.get(ident)
-        print(container_obj.status)
-        sleep(2)
-        if container_obj.attrs['NetworkSettings']['IPAddress'] != '':
-            if os.environ.get('TESTING', '') == 'jenkins':
-                host = container_obj.attrs['NetworkSettings']['IPAddress']
-            else:
-                host = 'localhost'
-
-        if host != '':
-            try:
-                conn = psycopg2.connect("dbname=guillotina user=postgres host=%s port=5432" % host)  # noqa
-                cur = conn.cursor()
-                cur.execute("SELECT 1;")
-                cur.fetchone()
-                cur.close()
-                conn.close()
-                opened = True
-            except: # noqa
-                conn = None
-                cur = None
-    return host
-
-
 @pytest.fixture(scope='session')
 def postgres():
     """
@@ -121,14 +58,7 @@ def postgres():
     yield host  # provide the fixture value
 
     if not IS_TRAVIS:
-        docker_client = docker.from_env(version='1.23')
-        # Clean up possible other docker containers
-        test_containers = docker_client.containers.list(
-            all=True,
-            filters={'label': CONTAINERS_FOR_TESTING_LABEL})
-        for test_container in test_containers:
-            test_container.kill()
-            test_container.remove(v=True, force=True)
+        cleanup_postgres_docker()
 
 
 class GuillotinaDBRequester(object):
