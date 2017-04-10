@@ -72,11 +72,11 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    async def get_data(self, content):
+    def get_data(self, content):
         data = {}
         adapter = queryAdapter(content, ICatalogDataAdapter)
         if adapter:
-            data.update(await adapter())
+            data.update(adapter())
         return data
 
 
@@ -119,7 +119,7 @@ class DefaultCatalogDataAdapter(object):
         value = getattr(ob, field_name, None)
         return json_compatible(value)
 
-    async def __call__(self):
+    def __call__(self):
         # For each type
         values = {}
 
@@ -128,7 +128,7 @@ class DefaultCatalogDataAdapter(object):
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
                 try:
                     if 'accessor' in index_data:
-                        values[index_name] = await apply_coroutine(index_data['accessor'], behavior)
+                        values[index_name] = index_data['accessor'](behavior)
                     else:
                         values[index_name] = self.get_data(behavior, schema, index_name)
                 except NoIndexField:

@@ -86,4 +86,4 @@ class ResourceWriter(Writer):
     async def get_json(self):
         adapter = queryAdapter(self._obj, ICatalogDataAdapter)
         if adapter is not None:
-            return await adapter()
+            return adapter()
