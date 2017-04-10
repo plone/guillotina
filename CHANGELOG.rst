@@ -1,7 +1,8 @@
 1.0.0a7 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- rename modified to modification_date and created to creation_date
+  [vangheem]
 
 
 1.0.0a6 (2017-04-06)

@@ -167,8 +167,8 @@ async def test_create_contenttype_with_date(container_requester):
             '/db/guillotina/item1',
             data=json.dumps({
                 "guillotina.behaviors.dublincore.IDublinCore": {
-                    "created": date_to_test,
-                    "expires": date_to_test
+                    "creation_date": date_to_test,
+                    "expiration_date": date_to_test
                 }
             })
         )
@@ -180,8 +180,8 @@ async def test_create_contenttype_with_date(container_requester):
         from guillotina.behaviors.dublincore import IDublinCore
         behavior = IDublinCore(obj)
         await behavior.load()
-        assert behavior.created.isoformat() == date_to_test
-        assert behavior.expires.isoformat() == date_to_test
+        assert behavior.creation_date.isoformat() == date_to_test
+        assert behavior.expiration_date.isoformat() == date_to_test
 
 
 async def test_create_duplicate_id(container_requester):

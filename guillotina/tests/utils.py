@@ -121,7 +121,10 @@ def run_docker_postgresql(label='testingaiopg'):
 
     while count < 30 and not opened:
         count += 1
-        container_obj = docker_client.containers.get(ident)
+        try:
+            container_obj = docker_client.containers.get(ident)
+        except docker.errors.NotFound:
+            continue
         print(container_obj.status)
         sleep(2)
         if container_obj.attrs['NetworkSettings']['IPAddress'] != '':
