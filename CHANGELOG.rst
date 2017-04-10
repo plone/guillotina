@@ -1,6 +1,10 @@
 1.0.0a7 (unreleased)
 --------------------
 
+- be able to configure __allow_access__ with service function by using
+  the `allow_access` configuration option
+  [vangheem]
+
 - rename modified to modification_date and created to creation_date
   [vangheem]
 
