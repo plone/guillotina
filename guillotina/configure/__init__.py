@@ -367,6 +367,8 @@ class service(_base_decorator):
             from guillotina.api.service import Service
 
             class _View(self.config.get('base', Service)):
+                __allow_access__ = self.config.get('allow_access', False)
+
                 async def __call__(self):
                     return await func(self.context, self.request)
 
