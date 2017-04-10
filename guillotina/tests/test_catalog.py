@@ -30,7 +30,7 @@ class TestCatalog:
         ob = await create_content('Item', id='foobar')
 
         data = ICatalogDataAdapter(ob)
-        fields = await data()
+        fields = data()
         assert 'type_name' in fields
         assert 'uuid' in fields
         assert 'path' in fields
