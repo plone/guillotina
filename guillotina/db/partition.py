@@ -12,7 +12,7 @@ class PartitionDataAdapter(object):
         self.content = content
 
     def __call__(self):
-        if hasattr(self.content, 'parent_datasource'):
-            return self.content.parent_datasource
+        if hasattr(self.content, 'partition_id'):
+            return self.content.partition_id
         else:
             return None

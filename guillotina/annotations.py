@@ -1,7 +1,6 @@
 from collections import UserDict
 from guillotina import configure
 from guillotina.db.orm.base import BaseObject
-from guillotina.db.reader import reader
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IResource
 
