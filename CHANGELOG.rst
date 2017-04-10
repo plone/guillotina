@@ -1,4 +1,4 @@
-1.0.0a7 (unreleased)
+1.0.0a7 (2017-04-10)
 --------------------
 
 - be able to configure __allow_access__ with service function by using
