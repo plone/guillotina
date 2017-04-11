@@ -1,4 +1,4 @@
-1.0.0a8 (unreleased)
+1.0.0a8 (2017-04-11)
 --------------------
 
 - Fix annotation data not getting indexed properly. Getting index data needs
