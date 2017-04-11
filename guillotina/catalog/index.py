@@ -87,7 +87,7 @@ def remove_object(obj, event):
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent))
 @configure.subscriber(for_=(IResource, IObjectModifiedEvent))
-def add_object(obj, event):
+async def add_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
@@ -100,7 +100,7 @@ def add_object(obj, event):
         return
     search = queryUtility(ICatalogUtility)
     if search:
-        hook.index[uid] = search.get_data(obj)
+        hook.index[uid] = await search.get_data(obj)
 
 
 @configure.subscriber(for_=(IContainer, IObjectAddedEvent))

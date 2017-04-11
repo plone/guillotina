@@ -7,6 +7,7 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
 from guillotina.directives import metadata
 from guillotina.exceptions import NoIndexField
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
@@ -16,7 +17,6 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
-from guillotina.utils import apply_coroutine
 from zope.interface import implementer
 
 
@@ -72,11 +72,11 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    def get_data(self, content):
+    async def get_data(self, content):
         data = {}
         adapter = queryAdapter(content, ICatalogDataAdapter)
         if adapter:
-            data.update(adapter())
+            data.update(await adapter())
         return data
 
 
@@ -119,12 +119,15 @@ class DefaultCatalogDataAdapter(object):
         value = getattr(ob, field_name, None)
         return json_compatible(value)
 
-    def __call__(self):
+    async def __call__(self):
         # For each type
         values = {}
 
         for schema in iter_schemata_for_type(self.content.type_name):
             behavior = schema(self.content)
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load(create=False)
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
                 try:
                     if 'accessor' in index_data:

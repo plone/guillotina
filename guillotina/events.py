@@ -33,8 +33,7 @@ class ObjectMovedEvent(ObjectEvent):
         self.data = data
 
 
-@implementer(IObjectAddedEvent)
-class ObjectAddedEvent(ObjectMovedEvent):
+class BaseAddedEvent(ObjectMovedEvent):
     """An object has been added to a container"""
 
     def __init__(self, object, new_parent=None, new_name=None, data=None):
@@ -45,13 +44,17 @@ class ObjectAddedEvent(ObjectMovedEvent):
         ObjectMovedEvent.__init__(self, object, None, None, new_parent, new_name, data=data)
 
 
+@implementer(IObjectAddedEvent)
+class ObjectAddedEvent(BaseAddedEvent):
+    """An object has been added to a container"""
+
+
 @implementer(IBeforeObjectAddedEvent)
-class BeforeObjectAddedEvent(ObjectAddedEvent):
+class BeforeObjectAddedEvent(BaseAddedEvent):
     pass
 
 
-@implementer(IObjectRemovedEvent)
-class ObjectRemovedEvent(ObjectMovedEvent):
+class BaseObjectRemovedEvent(ObjectMovedEvent):
     """An object has been removed from a container"""
 
     def __init__(self, object, old_parent=None, old_name=None, data=None):
@@ -62,8 +65,13 @@ class ObjectRemovedEvent(ObjectMovedEvent):
         ObjectMovedEvent.__init__(self, object, old_parent, old_name, None, None)
 
 
+@implementer(IObjectRemovedEvent)
+class ObjectRemovedEvent(BaseObjectRemovedEvent):
+    """An object has been removed from a container"""
+
+
 @implementer(IBeforeObjectRemovedEvent)
-class BeforeObjectRemovedEvent(ObjectRemovedEvent):
+class BeforeObjectRemovedEvent(BaseObjectRemovedEvent):
     pass
 
 

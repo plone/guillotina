@@ -26,10 +26,16 @@ class AnnotationsAdapter(object):
         element = annotations.get(key, default)
         if element is None:
             # Get from DB
-            obj = await self.obj._p_jar.get_annotation(self.obj, key)
-            if obj:
-                annotations[key] = obj
-        return annotations[key]
+            if self.obj._p_jar is not None:
+                try:
+                    obj = await self.obj._p_jar.get_annotation(self.obj, key)
+                except KeyError:
+                    obj = None
+                if obj:
+                    annotations[key] = obj
+        if key in annotations:
+            return annotations[key]
+        return default
 
     async def async_keys(self):
         return await self.obj._p_jar.get_annotation_keys(self.obj._p_oid)
