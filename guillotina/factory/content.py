@@ -139,7 +139,7 @@ class Database(object):
 
     async def async_keys(self):
         root = await self.get_root()
-        return root._p_jar.keys(root._p_oid)
+        return await root._p_jar.keys(root._p_oid)
 
     async def async_set(self, key, value):
         """ This operation can only be done through HTTP request

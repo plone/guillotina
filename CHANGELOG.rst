@@ -1,7 +1,8 @@
 1.0.0a9 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- async_keys on database type did not await
+  [vangheem]
 
 
 1.0.0a8 (2017-04-11)
