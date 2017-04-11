@@ -37,6 +37,13 @@ async def get_root(request):
     return root
 
 
+async def get_container(requester):
+    request = get_mocked_request(requester.db)
+    root = await get_root(request)
+    container = await root.async_get('guillotina')
+    return container
+
+
 @implementer(IRequest, IDefaultLayer)
 class FakeRequest(object):
 
