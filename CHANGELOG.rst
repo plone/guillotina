@@ -1,7 +1,9 @@
 1.0.0a8 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix annotation data not getting indexed properly. Getting index data needs
+  to be async.
+  [vangheem]
 
 
 1.0.0a7 (2017-04-10)
@@ -9,7 +11,6 @@
 
 - be able to configure __allow_access__ with service function by using
   the `allow_access` configuration option
-  [vangheem]
 
 - rename modified to modification_date and created to creation_date
   [vangheem]

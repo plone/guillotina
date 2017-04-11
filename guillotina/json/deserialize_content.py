@@ -32,8 +32,6 @@ class DeserializeFromJson(object):
         self.permission_cache = {}
 
     async def __call__(self, data, validate_all=False):
-
-        modified = False
         errors = []
 
         factory = get_cached_factory(self.context.type_name)
@@ -49,9 +47,8 @@ class DeserializeFromJson(object):
         if errors:
             raise DeserializationError(errors)
 
-        if modified:
-            self.context._p_register()
-            await notify(ObjectModifiedEvent(self.context, data))
+        self.context._p_register()
+        await notify(ObjectModifiedEvent(self.context, data))
 
         return self.context
 

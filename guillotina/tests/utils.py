@@ -7,7 +7,6 @@ from time import sleep
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
-import docker
 import os
 import uuid
 
@@ -84,6 +83,7 @@ POSTGRESQL_IMAGE = 'postgres:9.6'
 
 
 def run_docker_postgresql(label='testingaiopg'):
+    import docker
     docker_client = docker.from_env(version='1.23')
 
     # Clean up possible other docker containers
@@ -149,6 +149,7 @@ def run_docker_postgresql(label='testingaiopg'):
 
 
 def cleanup_postgres_docker(label='testingaiopg'):
+    import docker
     docker_client = docker.from_env(version='1.23')
     # Clean up possible other docker containers
     test_containers = docker_client.containers.list(
