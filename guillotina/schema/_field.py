@@ -679,10 +679,16 @@ class Dict(MinMaxLen, Iterable):
         return clone
 
 
+DEFAULT_JSON_SCHMEA = json.dumps({
+    'type': 'object',
+    'properties': {}
+})
+
+
 @implementer(IJSONField)
 class JSONField(Field):
 
-    def __init__(self, schema, **kw):
+    def __init__(self, schema=DEFAULT_JSON_SCHMEA, **kw):
         if not isinstance(schema, str):
             raise WrongType
 
