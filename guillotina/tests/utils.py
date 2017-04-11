@@ -119,14 +119,14 @@ def run_docker_postgresql(label='testingaiopg'):
     opened = False
     host = ''
 
+    print('starting postgresql')
     while count < 30 and not opened:
         count += 1
         try:
             container_obj = docker_client.containers.get(ident)
         except docker.errors.NotFound:
             continue
-        print(container_obj.status)
-        sleep(2)
+        sleep(1)
         if container_obj.attrs['NetworkSettings']['IPAddress'] != '':
             if os.environ.get('TESTING', '') == 'jenkins':
                 host = container_obj.attrs['NetworkSettings']['IPAddress']
@@ -145,6 +145,7 @@ def run_docker_postgresql(label='testingaiopg'):
             except: # noqa
                 conn = None
                 cur = None
+    print('postgresql started')
     return host
 
 

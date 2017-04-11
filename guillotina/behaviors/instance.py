@@ -57,6 +57,8 @@ class AnnotationBehavior(object):
             prefixed_name = self.__dict__['prefix'] + name
             data = self.__dict__['data']
             data[prefixed_name] = value
+            if isinstance(data, AnnotationData):
+                data._p_register()
 
 
 class ContextBehavior(object):
