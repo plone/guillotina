@@ -116,3 +116,16 @@ You can provide an array of dotted names to middle ware to use for your applicat
   ]
 }
 ```
+
+
+## aiohttp settings
+
+You can pass in aiohttp_settings to configure the aiohttp server.
+
+
+```json
+{
+  "aiohttp_settings": {
+    "client_max_size": 20971520
+  }
+}

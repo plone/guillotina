@@ -1,6 +1,10 @@
 1.0.0a9 (unreleased)
 --------------------
 
+- Be able to provide `aiohttp_settings` in config.json to configure parts of
+  aiohttp application
+  [vangheem]
+
 - async_keys on database type did not await
   [vangheem]
 
