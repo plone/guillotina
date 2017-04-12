@@ -1,4 +1,4 @@
-1.0.0a9 (unreleased)
+1.0.0a9 (2017-04-12)
 --------------------
 
 - Be able to provide `aiohttp_settings` in config.json to configure parts of
