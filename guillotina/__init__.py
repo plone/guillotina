@@ -56,7 +56,7 @@ app_settings = {
         'create': 'guillotina.commands.create.CreateCommand',
         'shell': 'guillotina.commands.shell.ShellCommand'
     },
-    "json_schema_definitions": {}  # json schemas available to reference in docs
+    "json_schema_definitions": {},  # json schemas available to reference in docs
 }
 
 SCHEMA_CACHE = {}

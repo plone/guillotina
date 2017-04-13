@@ -24,6 +24,7 @@ import asyncio
 import collections
 import inspect
 import json
+import logging.config
 import os
 import pathlib
 
@@ -155,6 +156,9 @@ def make_app(config_file=None, settings=None, loop=None):
 
     # update *after* plugins loaded
     update_app_settings(settings)
+
+    if 'logging' in app_settings:
+        logging.config.dictConfig(app_settings['logging'])
 
     content_type = ContentNegotiatorUtility(
         'content_type', app_settings['renderers'].keys())
