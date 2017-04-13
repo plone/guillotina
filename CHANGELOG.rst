@@ -1,7 +1,8 @@
 1.0.0a10 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Provide ability to configure logging with json config
+  [vangheem]
 
 
 1.0.0a9 (2017-04-12)

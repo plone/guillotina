@@ -65,7 +65,6 @@ class Command(object):
         settings = get_settings(self.arguments.configuration)
         app = self.make_app(settings)
 
-        self.setup_logging()
         self.run_command(app, settings)
 
     def parse_arguments(self):
@@ -84,18 +83,6 @@ class Command(object):
     def setup_fake_request(self):
         self.request = get_mocked_request()
         login(self.request)
-
-    def setup_logging(self):
-        logging.basicConfig(stream=sys.stdout)
-        logger.setLevel(logging.INFO)
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.INFO)
-        if self.arguments.debug:
-            logger.setLevel(logging.DEBUG)
-            logging.basicConfig(
-                stream=sys.stdout,
-                level=logging.DEBUG)
-            ch.setLevel(logging.DEBUG)
 
     def get_loop(self):
         return asyncio.get_event_loop()
