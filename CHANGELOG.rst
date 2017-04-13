@@ -1,4 +1,4 @@
-1.0.0a10 (unreleased)
+1.0.0a10 (2017-04-13)
 ---------------------
 
 - Provide ability to configure logging with json config
