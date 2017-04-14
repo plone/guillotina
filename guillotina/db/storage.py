@@ -239,7 +239,10 @@ class APgStorage(BaseStorage):
         return conn
 
     async def close(self, con):
-        await self._pool.release(con)
+        try:
+            await self._pool.release(con)
+        except asyncio.CancelledError:
+            pass
 
     async def last_transaction(self, txn):
         value = await txn._max_tid.fetchval()

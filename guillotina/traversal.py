@@ -245,13 +245,12 @@ class MatchInfo(AbstractMatchInfo):
         else:
             try:
                 view_result = await self.view()
-                await abort(request)
             except Unauthorized as e:
-                await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except Exception as e:
-                await abort(request)
                 view_result = generate_error_response(e, request, 'ViewError')
+            finally:
+                await abort(request)
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
