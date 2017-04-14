@@ -1,7 +1,8 @@
 1.0.0a11 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix case where abort would cause asyncio CancelledError to occur
+  [vangheem]
 
 
 1.0.0a10 (2017-04-13)
