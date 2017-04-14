@@ -69,9 +69,9 @@
   [vangheem]
 
 - rename permissions:
-    `guillotina.AddPortal` -> `guillotina.AddContainer`
-    `guillotina.DeletePortals` -> `guillotina.DeleteContainers`
-    `guillotina.GetPortals` -> `guillotina.GetContainers`
+  `guillotina.AddPortal` -> `guillotina.AddContainer`
+  `guillotina.DeletePortals` -> `guillotina.DeleteContainers`
+  `guillotina.GetPortals` -> `guillotina.GetContainers`
   [vangheem]
 
 - You can now reference modules in your static file configuration: `mymodule:static`
