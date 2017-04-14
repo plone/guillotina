@@ -541,7 +541,7 @@ class StaticDirectory(dict):
     def __contains__(self, filename):
         try:
             return self[filename] is not None
-        except:
+        except KeyError:
             return False
 
 
