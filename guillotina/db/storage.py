@@ -7,13 +7,9 @@ import ujson
 class ReadOnlyError(Exception):
     pass
 
-log = logging.getLogger("psaiopg")
 
-GET_LAST_TID = """
-    SELECT zoid, tid
-    FROM objects
-    WHERE tid > $1::int
-    """
+log = logging.getLogger("guillotina.storage")
+
 
 GET_OID = """
     SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
@@ -141,7 +137,8 @@ class APgStorage(BaseStorage):
     _blobhelper = None
     _large_record_size = 1 << 24
 
-    def __init__(self, dsn=None, partition=None, read_only=False, name=None, pool_size=10):
+    def __init__(self, dsn=None, partition=None, read_only=False, name=None,
+                 pool_size=10):
         super(APgStorage, self).__init__(read_only)
         self._dsn = dsn
         self._pool_size = pool_size
@@ -149,10 +146,10 @@ class APgStorage(BaseStorage):
         self._read_only = read_only
         self.__name__ = name
         self._lock = asyncio.Lock()
-        self.read_conn = None
+        self._read_conn = None
 
     async def finalize(self):
-        await self._pool.release(self.read_conn)
+        await self._pool.release(self._read_conn)
         await self._pool.close()
 
     async def initialize(self, loop=None):
@@ -223,8 +220,8 @@ class APgStorage(BaseStorage):
                 await conn.execute(zoid)
                 await conn.execute(tid)
 
-        self.read_conn = await self.open()
-        self.stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
+        self._read_conn = await self.open()
+        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
 
     async def remove(self):
         """Reset the tables"""
@@ -244,13 +241,25 @@ class APgStorage(BaseStorage):
         except asyncio.CancelledError:
             pass
 
+    async def get_prepared_statement(self, txn, name, statement):
+        '''
+        lazy load prepared statements so we don't do unncessary
+        calls to pg...
+        '''
+        name = '_smt_' + name
+        if not hasattr(txn, name):
+            setattr(txn, name, await txn._db_conn.prepare(statement))
+        return getattr(txn, name)
+
     async def last_transaction(self, txn):
-        value = await txn._max_tid.fetchval()
+        smt = await self.get_prepared_statement(txn, 'max_tid', MAX_TID)
+        value = await smt.fetchval()
         return 0 if value is None else value
 
     async def load(self, txn, oid):
         int_oid = oid
-        objects = await txn._get_oid.fetchrow(int_oid)
+        smt = await self.get_prepared_statement(txn, 'get_oid', GET_OID)
+        objects = await smt.fetchrow(int_oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -264,21 +273,9 @@ class APgStorage(BaseStorage):
         txn._db_txn = conn.transaction()
         await txn._db_txn.start()
 
-        # Prepare DB
-        txn._get_from_tid = await conn.prepare(GET_LAST_TID)
-        txn._max_tid = await conn.prepare(MAX_TID)
-        txn._get_oid = await conn.prepare(GET_OID)
-        txn._get_sons_keys = await conn.prepare(GET_SONS_KEYS)
-        txn._get_child = await conn.prepare(GET_CHILD)
-        txn._exist_child = await conn.prepare(EXIST_CHILD)
-        txn._num_childs = await conn.prepare(NUM_CHILDS)
-        txn._get_childs = await conn.prepare(GET_CHILDS)
-        txn._get_annotation = await conn.prepare(GET_ANNOTATION)
-        txn._get_annotations_keys = await conn.prepare(GET_ANNOTATIONS_KEYS)
-
     async def precommit(self, txn):
         async with self._lock:
-            tid = await self.stmt_next_tid.fetchval()
+            tid = await self._stmt_next_tid.fetchval()
         if tid is not None:
             txn._tid = tid
         current = """
@@ -378,32 +375,40 @@ class APgStorage(BaseStorage):
     # Introspection
 
     async def keys(self, txn, oid):
-        result = await txn._get_sons_keys.fetch(oid)
+        smt = await self.get_prepared_statement(txn, 'get_sons_keys', GET_SONS_KEYS)
+        result = await smt.fetch(oid)
         return result
 
     async def get_child(self, txn, parent_id, id):
-        result = await txn._get_child.fetchrow(parent_id, id)
+        smt = await self.get_prepared_statement(txn, 'get_child', GET_CHILD)
+        result = await smt.fetchrow(parent_id, id)
         return result
 
     async def has_key(self, txn, parent_id, id):
-        result = await txn._exist_child.fetchrow(parent_id, id)
+        smt = await self.get_prepared_statement(txn, 'exist_child', EXIST_CHILD)
+        result = await smt.fetchrow(parent_id, id)
         if result is None:
             return False
         else:
             return True
 
     async def len(self, txn, oid):
-        result = await txn._num_childs.fetchval(oid)
+        smt = await self.get_prepared_statement(txn, 'num_childs', NUM_CHILDS)
+        result = await smt.fetchval(oid)
         return result
 
     async def items(self, txn, oid):
-        async for record in txn._get_childs.cursor(oid):
+        smt = await self.get_prepared_statement(txn, 'get_childs', GET_CHILDS)
+        async for record in smt.cursor(oid):
             yield record
 
     async def get_annotation(self, txn, oid, id):
-        result = await txn._get_annotation.fetchrow(oid, id)
+        smt = await self.get_prepared_statement(txn, 'get_annotation', GET_ANNOTATION)
+        result = await smt.fetchrow(oid, id)
         return result
 
     async def get_annotation_keys(self, txn, oid):
-        result = await txn._get_annotations_keys.fetch(oid)
+        smt = await self.get_prepared_statement(
+            txn, 'get_annotations_keys', GET_ANNOTATIONS_KEYS)
+        result = await smt.fetch(oid)
         return result

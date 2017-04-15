@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import StreamResponse
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
@@ -10,7 +11,6 @@ from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-from guillotina import app_settings
 
 import mimetypes
 

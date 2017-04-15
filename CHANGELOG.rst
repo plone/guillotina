@@ -1,6 +1,13 @@
 1.0.0a11 (unreleased)
 ---------------------
 
+- Fix memory leak in get_current_request C implementation
+  [vangheem]
+
+- use asyncio.shield in commit and abort handlers to make sure they finish
+  even if task is cancelled
+  [vangheem]
+
 - Fix case where abort would cause asyncio CancelledError to occur
   [vangheem]
 

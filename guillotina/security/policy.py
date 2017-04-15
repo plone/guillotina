@@ -66,10 +66,16 @@ class CacheEntry:
     for_=IRequest,
     provides=IInteraction)
 def get_current_interaction(request):
+    """
+    Cache IInteraction on the request object because the request object
+    is where we start adding principals
+    """
     interaction = getattr(request, 'security', None)
     if IInteraction.providedBy(interaction):
         return interaction
-    return Interaction(request)
+    interaction = Interaction(request)
+    request.security = interaction
+    return interaction
 
 
 @zope.interface.implementer(IInteraction)
@@ -199,6 +205,7 @@ class Interaction(object):
             self, parent, principal, groups, permission, level):
         # Compute the permission, if any, for the principal.
         cache = self.cache(parent)
+
         try:
             cache_prin = cache.prin
         except AttributeError:

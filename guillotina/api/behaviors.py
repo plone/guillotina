@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from guillotina import configure
+from guillotina.browser import Response
 from guillotina.component import getMultiAdapter
 from guillotina.component import getUtilitiesFor
 from guillotina.component import queryAdapter
@@ -7,7 +8,6 @@ from guillotina.content import get_cached_factory
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISchemaSerializeToJson
-from guillotina.browser import Response
 
 
 @configure.service(

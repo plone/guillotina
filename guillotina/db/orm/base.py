@@ -5,16 +5,6 @@ from zope.interface import implementer
 import copyreg
 
 
-GHOST = -1
-ROOT = 0
-FULL = 1
-CHANGED = 1
-UPTODATE = 2
-
-# Bitwise flags
-_CHANGED = 0x0001
-_STICKY = 0x0002
-
 _OGA = object.__getattribute__
 _OSA = object.__setattr__
 
@@ -51,16 +41,14 @@ class BaseObject(object):
 
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
-        '__jar', '__oid', '__serial', '__flags', '__size',
-        '__of', '__parent', '__annotations', '__name', '__cache')
+        '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
+        '__name', '__cache')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
         _OSA(inst, '_BaseObject__jar', None)
         _OSA(inst, '_BaseObject__oid', None)
         _OSA(inst, '_BaseObject__serial', None)
-        _OSA(inst, '_BaseObject__flags', CHANGED)  # start with changed...
-        _OSA(inst, '_BaseObject__size', 0)
         _OSA(inst, '_BaseObject__of', None)
         _OSA(inst, '_BaseObject__parent', None)
         _OSA(inst, '_BaseObject__name', None)
@@ -72,18 +60,7 @@ class BaseObject(object):
         return "<%s %d>" % (self.__class__.__name__, id(self))
 
     def _get_parent(self):
-        parent = _OGA(self, '_BaseObject__parent')
-        if parent is None:
-            return None
-        if not isinstance(parent, int):
-            return parent
-        jar = _OGA(self, '_BaseObject__jar')
-        if jar is None:
-            raise Exception('No JAR and has a parent, impossible')
-        oid = _OGA(self, '_BaseObject__oid')
-        if oid is None:
-            raise Exception('No OID')
-        # await jar.get_parent(oid)
+        return _OGA(self, '_BaseObject__parent')
 
     def _set_parent(self, value):
         _OSA(self, '_BaseObject__parent', value)
@@ -141,39 +118,6 @@ class BaseObject(object):
 
     _p_serial = property(_get_serial, _set_serial, _del_serial)
 
-    # _p_state
-    def _get_state(self):
-        # Note the use of OGA and caching to avoid recursive calls to __getattribute__:
-        # __getattribute__ calls _p_accessed calls cache.mru() calls _p_state
-        if _OGA(self, '_BaseObject__jar') is None:
-            return UPTODATE
-        flags = _OGA(self, '_BaseObject__flags')
-        if flags is None:
-            return GHOST
-        if flags & _CHANGED:
-            result = CHANGED
-        else:
-            result = UPTODATE
-        return result
-
-    _p_state = property(_get_state)
-
-    # The '_p_status' property is not (yet) part of the API:  for now,
-    # it exists to simplify debugging and testing assertions.
-    def _get_status(self):
-        if _OGA(self, '_BaseObject__jar') is None:
-            return 'unsaved'
-        flags = _OGA(self, '_BaseObject__flags')
-        if flags is None:
-            return 'ghost'
-        if flags & _STICKY:
-            return 'sticky'
-        if flags & _CHANGED:
-            return 'changed'
-        return 'saved'
-
-    _p_status = property(_get_status)
-
     def __setattr__(self, name, value):
         special_name = (name in _SPECIAL_NAMES or
                         name.startswith('_p_'))
@@ -183,11 +127,7 @@ class BaseObject(object):
                 _OGA(self, '_BaseObject__oid') is not None and
                 not special_name and
                 not volatile):
-            before = _OGA(self, '_BaseObject__flags')
-            after = before | _CHANGED
-            if before != after:
-                _OSA(self, '_BaseObject__flags', after)
-                _OGA(self, '_p_register')()
+            _OGA(self, '_p_register')()
 
     def _slotnames(self):
         """Returns all the slot names from the object"""

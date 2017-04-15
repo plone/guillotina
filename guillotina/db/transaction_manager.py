@@ -1,3 +1,4 @@
+from asyncio import shield
 from guillotina.db import ROOT_ID
 from guillotina.db.transaction import Transaction
 from guillotina.utils import get_authenticated_user_id
@@ -54,6 +55,9 @@ class TransactionManager(object):
         return txn
 
     async def commit(self):
+        return await shield(self._commit())
+
+    async def _commit(self):
         """ Commit the last transaction
         """
         txn = self.get()
@@ -67,6 +71,9 @@ class TransactionManager(object):
             self._db_conn = self._txn._db_conn
 
     async def abort(self):
+        return await shield(self._abort())
+
+    async def _abort(self):
         """ Abort the last transaction
         """
         txn = self.get()

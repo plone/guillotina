@@ -44,19 +44,6 @@ class IBaseObject(Interface):
         This is an 8-byte string (not Unicode).
         """)
 
-    _p_mtime = Attribute(
-        """The object's modification time (read-only).
-
-        This is a float, representing seconds since the epoch (as returned
-        by time.time).
-        """)
-
-    _p_state = Attribute(
-        """The object's persistence state token.
-
-        Must be one of GHOST, UPTODATE, CHANGED, or STICKY.
-        """)
-
     _p_estimated_size = Attribute(
         """An estimate of the object's size in bytes.
 

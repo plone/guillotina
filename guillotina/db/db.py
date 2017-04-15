@@ -25,20 +25,29 @@ class GuillotinaDB(object):
                  storage,
                  remote_cache=None,
                  database_name='unnamed'):
-        """Create an object database.
+        """
+        Create an object database.
+
+        Database object is persistent through the application
         """
         self._tm = None
-        self.remote_cache = remote_cache
-        self.storage = storage
+        self._remote_cache = remote_cache
+        self._storage = storage
         if remote_cache is not None:
-            self.storage.use_cache(remote_cache)
-        self.database_name = database_name
+            self._storage.use_cache(remote_cache)
+        self._database_name = database_name
+
+    @property
+    def storage(self):
+        return self._storage
 
     async def initialize(self):
-        # Make sure we have a root:
+        """
+        create root object if necessary
+        """
         request = make_mocked_request('POST', '/')
         request._db_write_enabled = True
-        request._tm = TransactionManager(self.storage)
+        request._tm = TransactionManager(self._storage)
         t = await request._tm.begin(request=request)
         self.request = request
 
@@ -54,15 +63,18 @@ class GuillotinaDB(object):
     async def open(self):
         """Return a database Connection for use by application code.
         """
-        return await self.storage.open()
+        return await self._storage.open()
 
     async def close(self, conn):
-        await self.storage.close(conn)
+        await self._storage.close(conn)
 
     async def finalize(self):
-        await self.storage.finalize()
+        await self._storage.finalize()
 
     def new_transaction_manager(self):
-        tm = TransactionManager(self.storage)
+        """
+        New transaction manager for every request
+        """
+        tm = TransactionManager(self._storage)
         self._tm = tm
         return tm

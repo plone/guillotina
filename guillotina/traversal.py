@@ -340,7 +340,7 @@ class TraversalRouter(AbstractRouter):
 
         request._futures = {}
 
-        request.security = IInteraction(request)
+        security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
 
@@ -384,9 +384,9 @@ class TraversalRouter(AbstractRouter):
             resource = translator.translate()
 
         # Add anonymous participation
-        if len(request.security.participations) == 0:
+        if len(security.participations) == 0:
             # logger.info("Anonymous User")
-            request.security.add(AnonymousParticipation(request))
+            security.add(AnonymousParticipation(request))
 
         # container registry lookup
         try:
@@ -410,10 +410,7 @@ class TraversalRouter(AbstractRouter):
 
         permission = getUtility(IPermission, name='guillotina.AccessContent')
 
-        interaction = IInteraction(request)
-        allowed = interaction.check_permission(permission.id, resource)
-
-        if not allowed:
+        if not security.check_permission(permission.id, resource):
             # Check if its a CORS call:
             if IOPTIONS != method or not app_settings['cors']:
                 # Check if the view has permissions explicit
@@ -421,7 +418,7 @@ class TraversalRouter(AbstractRouter):
                     logger.warn("No access content {content} with {auths}".format(
                         content=resource,
                         auths=str([x.principal.id
-                                   for x in request.security.participations])))
+                                   for x in security.participations])))
                     raise HTTPUnauthorized()
 
         if view is None and method == IOPTIONS:
@@ -430,11 +427,11 @@ class TraversalRouter(AbstractRouter):
         if view:
             ViewClass = view.__class__
             view_permission = get_view_permission(ViewClass)
-            if not interaction.check_permission(view_permission, view):
+            if not security.check_permission(view_permission, view):
                 logger.warn("No access for view {content} with {auths}".format(
                     content=resource,
                     auths=str([x.principal.id
-                               for x in request.security.participations])))
+                               for x in security.participations])))
                 raise HTTPUnauthorized()
 
         renderer = content_type_negotiation(request, resource, view)

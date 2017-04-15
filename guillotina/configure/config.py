@@ -435,7 +435,7 @@ def resolve_conflicts(actions):
 
         for _, _, action in rest:
             if action['order'] <= base_order:
-                L = conflicts.setdefault(discriminator, [base_module_name, base_order])
+                L = conflicts.setdefault(discriminator, [base_module_name, base_order])  # noqa
                 L.append((action['module_name'], action['order']))
 
     if conflicts:

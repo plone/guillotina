@@ -1,7 +1,9 @@
 from guillotina import utils
 from guillotina.interfaces import IResource
+from guillotina.tests.utils import get_mocked_request
+from guillotina.tests.utils import get_root
+
 import json
-from guillotina.tests.utils import get_mocked_request, get_root
 
 
 def test_module_resolve_path():
