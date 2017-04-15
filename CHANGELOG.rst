@@ -1,4 +1,4 @@
-1.0.0a11 (unreleased)
+1.0.0a11 (2017-04-15)
 ---------------------
 
 - Fix memory leak in get_current_request C implementation
