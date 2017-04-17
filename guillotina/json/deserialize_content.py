@@ -55,6 +55,7 @@ class DeserializeFromJson(object):
             self, schema, obj, data, errors,
             validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
+
         for name, field in getFields(schema).items():
 
             if field.readonly:

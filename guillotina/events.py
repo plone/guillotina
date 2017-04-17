@@ -4,6 +4,7 @@ from guillotina.interfaces import IBeforeObjectRemovedEvent
 from guillotina.interfaces import IFileFinishUploaded
 from guillotina.interfaces import INewUserAdded
 from guillotina.interfaces import IObjectAddedEvent
+from guillotina.interfaces import IObjectLoadedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectMovedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
@@ -81,6 +82,11 @@ class ObjectModifiedEvent(object):
     def __init__(self, object, payload={}):
         self.object = object
         self.payload = payload
+
+
+@implementer(IObjectLoadedEvent)
+class ObjectLoadedEvent(ObjectEvent):
+    """An object has been modified."""
 
 
 @implementer(IObjectVisitedEvent)
