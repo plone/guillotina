@@ -14,6 +14,7 @@ from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
+from guillotina.utils import apply_coroutine
 from zope.interface.interface import InterfaceClass
 
 import json
@@ -118,7 +119,7 @@ class RendererJson(Renderer):
         frame = self.request.GET['frame'] if 'frame' in self.request.GET else ''
         if frame:
             framer = queryAdapter(self.request, IFrameFormatsJson, frame)
-            json_value = await framer(json_value)
+            json_value = await apply_coroutine(framer, json_value)
         resp = json_response(json_value)
         resp.headers.update(headers)
         resp.headers.update(
