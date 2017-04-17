@@ -486,6 +486,11 @@ class Folder(Resource):
             await notify(ObjectLoadedEvent(value))
             yield key, value
 
+    async def async_values(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
+        async for key, value in self._get_transaction().items(self):
+            await notify(ObjectLoadedEvent(value))
+            yield value
+
 
 @configure.contenttype(type_name="Container", schema=IContainer)
 class Container(Folder):
