@@ -221,7 +221,7 @@ def make_app(config_file=None, settings=None, loop=None):
     app.on_cleanup.append(close_utilities)
 
     for util in app_settings['utilities']:
-        root.add_async_utility(util)
+        root.add_async_utility(util, loop=app.loop)
 
     # Load cached Schemas
     load_cached_schema()
