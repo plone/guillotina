@@ -17,6 +17,7 @@ from guillotina.component import queryUtility
 from guillotina.component.factory import Factory
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
+from guillotina.events import ObjectLoadedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -453,6 +454,7 @@ class Folder(Resource):
         try:
             val = await self._get_transaction().get_child(self, key)
             if val is not None:
+                await notify(ObjectLoadedEvent(val))
                 return val
         except KeyError:
             pass
@@ -481,6 +483,7 @@ class Folder(Resource):
         Asynchronously iterate through contents of folder
         """
         async for key, value in self._get_transaction().items(self):
+            await notify(ObjectLoadedEvent(value))
             yield key, value
 
 

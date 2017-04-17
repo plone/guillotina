@@ -21,6 +21,15 @@ class AnnotationsAdapter(object):
     def __init__(self, obj):
         self.obj = obj
 
+    def get(self, key, default=None):
+        """
+        non-async variant
+        """
+        annotations = self.obj.__annotations__
+        if key in annotations:
+            return annotations[key]
+        return default
+
     async def async_get(self, key, default=None):
         annotations = self.obj.__annotations__
         element = annotations.get(key, default)

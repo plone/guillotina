@@ -7,6 +7,9 @@ from zope.interface import implementer
 from zope.interface.declarations import Provides
 
 
+_default = object()
+
+
 @implementer(IAsyncBehavior)
 class AnnotationBehavior(object):
     """A factory that knows how to store data in a separate object."""
@@ -23,8 +26,20 @@ class AnnotationBehavior(object):
         self.__dict__['context'] = context
         self.__dict__['__provides__'] = Provides(self.__dict__['schema'])
 
+        # see if annotations are preloaded...
+        annotations_container = IAnnotations(self.__dict__['context'])
+        data = annotations_container.get(self.__annotations_data_key, _default)
+        if data is not _default:
+            self.__dict__['data'] = data
+
     async def load(self, create=False):
         annotations_container = IAnnotations(self.__dict__['context'])
+        data = annotations_container.get(self.__annotations_data_key, _default)
+        if data is not _default:
+            # data is already preloaded, we do not need to get from db again...
+            self.__dict__['data'] = data
+            return
+
         annotations = await annotations_container.async_get(self.__annotations_data_key)
         if annotations is None:
             if create:
@@ -38,6 +53,13 @@ class AnnotationBehavior(object):
         if name not in self.__dict__['schema']:
             return super(AnnotationBehavior, self).__getattr__(name)
 
+        if name in self.__local__properties__:
+            val = getattr(self.context, name, _default)
+            if val is _default:
+                return self.__dict__['schema'][name].missing_value
+            else:
+                return val
+
         key_name = self.__dict__['prefix'] + name
         data = self.__dict__['data']
 
@@ -47,8 +69,10 @@ class AnnotationBehavior(object):
         return data[key_name]
 
     def __setattr__(self, name, value):
-        if name not in self.__dict__['schema'] or \
-                name in self.__local__properties__ or \
+        if name in self.__local__properties__:
+            setattr(self.context, name, value)
+            self.context._p_register()
+        elif name not in self.__dict__['schema'] or \
                 name.startswith('__') or \
                 name.startswith('_v_') or \
                 name.startswith('_p_'):

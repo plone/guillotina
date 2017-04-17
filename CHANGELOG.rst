@@ -1,7 +1,16 @@
 1.0.0a12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix annotation behaviors that use __local__properties__ not storing data
+  properly on content object
+  [vangheem]
+
+- Do not re-load behavior data if it's already been loaded from db
+  [vangheem]
+
+- Provide new IObjectLoadedEvent to do things with object when it's loaded
+  from the database
+  [vangheem]
 
 
 1.0.0a11 (2017-04-15)
