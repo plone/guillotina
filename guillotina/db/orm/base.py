@@ -42,7 +42,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
-        '__name', '__cache')
+        '__name', '__cache', '__new_marker')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -54,6 +54,7 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__name', None)
         _OSA(inst, '_BaseObject__annotations', {})
         _OSA(inst, '_BaseObject__cache', -1)
+        _OSA(inst, '_BaseObject__new_marker', False)
         return inst
 
     def __repr__(self):
@@ -105,6 +106,19 @@ class BaseObject(object):
         _OSA(self, '_BaseObject__oid', None)
 
     _p_oid = property(_get_oid, _set_oid, _del_oid)
+
+    # _p_new_marker:  marks an object as being newly created.
+    # this is useful for the transaction manager to know about it.
+    def _get_new_marker(self):
+        return _OGA(self, '_BaseObject__new_marker')
+
+    def _set_new_marker(self, value):
+        _OSA(self, '_BaseObject__new_marker', value)
+
+    def _del_new_marker(self):
+        _OSA(self, '_BaseObject__new_marker', None)
+
+    _p_new_marker = property(_get_new_marker, _set_new_marker, _del_new_marker)
 
     # _p_serial:  serial number.
     def _get_serial(self):

@@ -6,7 +6,6 @@ from guillotina.browser import ErrorResponse
 from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
 from guillotina.exceptions import Unauthorized
-from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
 from zope.interface import Interface
@@ -69,8 +68,6 @@ class QueueUtility(object):
                 self._exceptions = True
                 logger.error('Worker call failed', exc_info=e)
             finally:
-                if SHARED_CONNECTION is False and hasattr(view.request, 'conn'):
-                    view.request.conn.close()
                 if got_obj:
                     self._queue.task_done()
 

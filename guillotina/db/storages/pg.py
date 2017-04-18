@@ -1,11 +1,11 @@
+from guillotina.db.storages.base import BaseStorage
+from guillotina.db.storages.utils import get_table_definition
+from guillotina.exceptions import ReadOnlyError
+
 import asyncio
 import asyncpg
 import logging
 import ujson
-
-
-class ReadOnlyError(Exception):
-    pass
 
 
 log = logging.getLogger("guillotina.storage")
@@ -41,6 +41,14 @@ EXIST_CHILD = """
     WHERE parent_id = $1::varchar(32) AND id = $2::text
     """
 
+
+HAS_OBJECT = """
+    SELECT zoid
+    FROM objects
+    WHERE zoid = $1::varchar(32)
+    """
+
+
 GET_ANNOTATION = """
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
@@ -51,16 +59,14 @@ MAX_TID = """
     SELECT max(tid) FROM objects
     """
 
-MOVE_FROM_TEMP = """
-    WITH moved_rows AS (
-        DELETE FROM current_objects
-        WHERE
-            "tid" = $1::int
-        RETURNING *
-    )
+
+INSERT = """
     INSERT INTO objects
-    SELECT * FROM moved_rows
-    ON CONFLICT (zoid) DO UPDATE SET
+    (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
+    VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
+            $8::varchar(32), $9::text, $10::text, $11::json, $12::bytea)
+    ON CONFLICT (zoid)
+    DO UPDATE SET
         tid = EXCLUDED.tid,
         state_size = EXCLUDED.state_size,
         part = EXCLUDED.part,
@@ -74,13 +80,6 @@ MOVE_FROM_TEMP = """
         state = EXCLUDED.state;
     """
 
-INSERT_TEMP = """
-    INSERT INTO current_objects
-    (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
-    VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
-    $8::varchar(32), $9::text, $10::text, $11::json, $12::bytea)
-    """
-
 NEXT_TID = "SELECT nextval('tid_seq');"
 
 NUM_CHILDS = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
@@ -91,37 +90,38 @@ GET_CHILDS = """
     WHERE parent_id = $1::VARCHAR(32)
     """
 
-DELETE_TMP = '''
-    INSERT INTO delete_objects (zoid, tid) VALUES ($1::varchar(32), $2::int)
-'''
 
 DELETE_FROM_OBJECTS = """
-    WITH deleted_rows AS (
-        DELETE FROM delete_objects
-        WHERE
-            "tid" = $1::int
-        RETURNING *
-    )
-    DELETE FROM objects WHERE zoid = (SELECT zoid FROM deleted_rows);
-    """
+    DELETE FROM objects WHERE zoid = $1::varchar(32);
+"""
 
 
-class BaseStorage(object):
-
-    _cache = {}
-    _read_only = False
-
-    def __init__(self, read_only=False):
-        self._read_only = read_only
-
-    def use_cache(self, value):
-        self._cache = value
-
-    def isReadOnly(self):
-        return self._read_only
+INSERT_BLOB_CHUNK = """
+    INSERT INTO blobs
+    (bid, zoid, chunk_index, data)
+    VALUES ($1::VARCHAR(32), $2::VARCHAR(32), $3::INT, $4::BYTEA)
+"""
 
 
-class APgStorage(BaseStorage):
+READ_BLOB_CHUNKS = """
+    SELECT * from blobs
+    WHERE bid = $1::VARCHAR(32)
+    ORDER BY chunk_index
+"""
+
+READ_BLOB_CHUNK = """
+    SELECT * from blobs
+    WHERE bid = $1::VARCHAR(32)
+    AND chunk_index = $2::int
+"""
+
+
+DELETE_BLOB = """
+    DELETE FROM blobs WHERE bid = $1::VARCHAR(32);
+"""
+
+
+class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
     _dsn = None
@@ -137,9 +137,43 @@ class APgStorage(BaseStorage):
     _blobhelper = None
     _large_record_size = 1 << 24
 
+    _object_schema = {
+        'zoid': 'VARCHAR(32) NOT NULL PRIMARY KEY',
+        'tid': 'BIGINT NOT NULL',
+        'state_size': 'BIGINT NOT NULL',
+        'part': 'BIGINT NOT NULL',
+        'resource': 'BOOLEAN NOT NULL',
+        'of': 'VARCHAR(32) REFERENCES objects ON DELETE CASCADE',
+        'otid': 'BIGINT',
+        'parent_id': 'VARCHAR(32) REFERENCES objects ON DELETE CASCADE',  # parent oid
+        'id': 'TEXT',
+        'type': 'TEXT NOT NULL',
+        'json': 'JSONB',
+        'state': 'BYTEA'
+    }
+
+    _blob_schema = {
+        'bid': 'VARCHAR(32) NOT NULL',
+        'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects ON DELETE CASCADE',
+        'chunk_index': 'INT NOT NULL',
+        'data': 'BYTEA'
+    }
+
+    _initialize_statements = [
+        'CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);',
+        'CREATE INDEX IF NOT EXISTS object_of ON objects (of);',
+        'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
+        'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
+        'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
+        'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
+        'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
+        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
+        'CREATE SEQUENCE IF NOT EXISTS tid_seq;'
+    ]
+
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=10):
-        super(APgStorage, self).__init__(read_only)
+        super(PostgresqlStorage, self).__init__(read_only)
         self._dsn = dsn
         self._pool_size = pool_size
         self._partition_class = partition
@@ -162,74 +196,27 @@ class APgStorage(BaseStorage):
             loop=loop)
 
         # Check DB
-        stmt = """
-            CREATE TABLE IF NOT EXISTS objects (
-                zoid        VARCHAR(32) NOT NULL PRIMARY KEY,
-                tid         BIGINT NOT NULL,
-                state_size  BIGINT NOT NULL,
-                part        BIGINT NOT NULL,
-                resource    BOOLEAN NOT NULL,
-                of          VARCHAR(32),
-                otid        BIGINT,
-                parent_id   VARCHAR(32) REFERENCES objects ON DELETE CASCADE,
-                id          TEXT,
-                type        TEXT NOT NULL,
-                json        JSONB,
-                state       BYTEA
-            ) ;
-            CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);
-            CREATE INDEX IF NOT EXISTS object_of ON objects (of);
-            CREATE INDEX IF NOT EXISTS object_part ON objects (part);
-            CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);
-            CREATE INDEX IF NOT EXISTS object_id ON objects (id);
-            """
+        statements = [
+            get_table_definition('objects', self._object_schema),
+            get_table_definition('blobs', self._blob_schema,
+                                 primary_keys=('bid', 'zoid', 'chunk_index'))
+        ]
+        statements.extend(self._initialize_statements)
 
-        func = """
-        CREATE OR REPLACE FUNCTION create_partition_and_insert() RETURNS trigger AS
-              $BODY$
-                DECLARE
-                  partition_id TEXT;
-                  partition TEXT;
-                BEGIN
-                  partition_id := to_char(NEW.part);
-                  partition := 'objects_' || partition_id;
-                  IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname=partition) THEN
-                    RAISE NOTICE 'A partition has been created %',partition;
-                    EXECUTE 'CREATE TABLE ' || partition ||
-                        ' (check (part = ''' || NEW.part || ''')) INHERITS (objects);';
-                  END IF;
-                  EXECUTE 'INSERT INTO ' || partition ||
-                    ' SELECT(objects ' || quote_literal(NEW) || ').* RETURNING patent_id;';
-                  RETURN NULL;
-                END;
-              $BODY$
-            LANGUAGE plpgsql VOLATILE
-            COST 100;
-            """
-
-        zoid = """
-            CREATE SEQUENCE IF NOT EXISTS zoid_seq;
-            """
-        tid = """
-            CREATE SEQUENCE IF NOT EXISTS tid_seq;
-            """
         async with self._pool.acquire() as conn:
-            async with conn.transaction():
-                await conn.execute(stmt)
-                await conn.execute(func)
-                await conn.execute(zoid)
-                await conn.execute(tid)
+            for statement in statements:
+                async with conn.transaction():
+                    # some pg compat dbs do not support grouped statements
+                    await conn.execute(statement)
 
         self._read_conn = await self.open()
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
 
     async def remove(self):
         """Reset the tables"""
-        stmt = """DROP TABLE IF EXISTS objects;"""
-        stmt1 = """ALTER SEQUENCE zoid_seq RESTART WITH 1;"""
         async with self._pool.acquire() as conn:
-            await conn.execute(stmt)
-            await conn.execute(stmt1)
+            await conn.execute("DROP TABLE IF EXISTS blobs;")
+            await conn.execute("DROP TABLE IF EXISTS objects;")
 
     async def open(self):
         conn = await self._pool.acquire()
@@ -272,35 +259,14 @@ class APgStorage(BaseStorage):
         txn._db_conn = conn
         txn._db_txn = conn.transaction()
         await txn._db_txn.start()
-
-    async def precommit(self, txn):
         async with self._lock:
             tid = await self._stmt_next_tid.fetchval()
         if tid is not None:
             txn._tid = tid
-        current = """
-            CREATE TEMPORARY TABLE IF NOT EXISTS current_objects (
-                zoid        VARCHAR(32) NOT NULL PRIMARY KEY,
-                tid         BIGINT NOT NULL,
-                state_size  BIGINT NOT NULL,
-                part        BIGINT NOT NULL,
-                resource    BOOLEAN NOT NULL,
-                of          VARCHAR(32),
-                otid        BIGINT,
-                parent_id   VARCHAR(32),
-                id          TEXT,
-                type        TEXT NOT NULL,
-                json        JSONB,
-                state       BYTEA
-            )  ON COMMIT DELETE ROWS;
-            CREATE INDEX IF NOT EXISTS current_object_tid ON current_objects (tid);
-            CREATE INDEX IF NOT EXISTS current_object_oid ON current_objects (zoid);
-            CREATE TEMPORARY TABLE IF NOT EXISTS delete_objects (
-                zoid        VARCHAR(32) NOT NULL PRIMARY KEY,
-                tid         BIGINT NOT NULL
-            ) ON COMMIT DELETE ROWS;
-            """
-        await txn._db_conn.execute(current)
+
+    async def precommit(self, txn):
+        # no need to do anything here...
+        pass
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -314,7 +280,7 @@ class APgStorage(BaseStorage):
             part = 0
         # (zoid, tid, state_size, part, main, parent_id, type, json, state)
         output = await txn._db_conn.execute(  # noqa
-            INSERT_TEMP,         # Insert on temp table
+            INSERT,         # Insert on temp table
             oid,                 # The OID of the object
             txn._tid,            # Our TID
             len(p),              # Len of the object
@@ -332,34 +298,23 @@ class APgStorage(BaseStorage):
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
-        await txn._db_conn.execute(
-            DELETE_TMP,         # delete on temp table
-            oid,
-            txn._tid)
+        await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
 
     async def tpc_vote(self, transaction):
         # Check if there is any commit bigger than the one we already have
-        # For each object going to be written we need to check if it has
-        # a new TID
-        r = await transaction._db_conn.fetch(
-            """
-            SELECT ob.zoid, ob.tid FROM objects ob JOIN current_objects co
-            USING (zoid) WHERE ob.tid > co.otid AND co.tid = $1""",
+        conflicts = await transaction._db_conn.fetch(
+            "SELECT zoid, tid FROM objects ob WHERE tid > $1",
             transaction._tid)
-        if len(r) == 0:
-            return True
-        else:
-            return False
+
+        # need to check see if we conflict on same resources...
+        for conflict in conflicts:
+            # both writing to same object...
+            if conflict['zoid'] in transaction.modified:
+                return False
+
+        return True
 
     async def tpc_finish(self, transaction):
-        await transaction._db_conn.execute(
-            MOVE_FROM_TEMP,
-            transaction._tid
-        )
-        await transaction._db_conn.execute(
-            DELETE_FROM_OBJECTS,
-            transaction._tid
-        )
         if transaction._db_txn is not None:
             await transaction._db_txn.commit()
         else:
@@ -379,14 +334,14 @@ class APgStorage(BaseStorage):
         result = await smt.fetch(oid)
         return result
 
-    async def get_child(self, txn, parent_id, id):
+    async def get_child(self, txn, parent_oid, id):
         smt = await self.get_prepared_statement(txn, 'get_child', GET_CHILD)
-        result = await smt.fetchrow(parent_id, id)
+        result = await smt.fetchrow(parent_oid, id)
         return result
 
-    async def has_key(self, txn, parent_id, id):
+    async def has_key(self, txn, parent_oid, id):
         smt = await self.get_prepared_statement(txn, 'exist_child', EXIST_CHILD)
-        result = await smt.fetchrow(parent_id, id)
+        result = await smt.fetchrow(parent_oid, id)
         if result is None:
             return False
         else:
@@ -412,3 +367,27 @@ class APgStorage(BaseStorage):
             txn, 'get_annotations_keys', GET_ANNOTATIONS_KEYS)
         result = await smt.fetch(oid)
         return result
+
+    async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
+        smt = await self.get_prepared_statement(txn, 'has_ob', HAS_OBJECT)
+        result = await smt.fetchrow(oid)
+        if result is None:
+            # check if we have a referenced ob, could be new and not in db yet.
+            # if so, create a stub for it here...
+            await txn._db_conn.execute('''INSERT INTO objects
+                (zoid, tid, state_size, part, resource, type)
+                VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
+        return await txn._db_conn.execute(
+            INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
+
+    async def read_blob_chunk(self, txn, bid, chunk=0):
+        smt = await self.get_prepared_statement(txn, 'read_blob_chunk', READ_BLOB_CHUNK)
+        return await smt.fetchrow(bid, chunk)
+
+    async def read_blob_chunks(self, txn, bid):
+        smt = await self.get_prepared_statement(txn, 'read_blob_chunks', READ_BLOB_CHUNKS)
+        async for record in smt.cursor(bid):
+            yield record
+
+    async def del_blob(self, txn, bid):
+        await txn._db_conn.execute(DELETE_BLOB, bid)

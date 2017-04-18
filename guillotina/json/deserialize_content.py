@@ -6,8 +6,6 @@ from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
-from guillotina.event import notify
-from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import NoInteraction
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -17,8 +15,14 @@ from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
 from guillotina.schema.exceptions import ValidationError
+from guillotina.utils import apply_coroutine
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
+
+import logging
+
+
+logger = logging.getLogger('guillotina')
 
 
 @configure.adapter(
@@ -97,8 +101,10 @@ class DeserializeFromJson(object):
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
                     try:
-                        field.set(obj, value)
-                    except:  # noqa
+                        await apply_coroutine(field.set, obj, value)
+                    except:  # noqa XXX bad idea?
+                        logger.warn(
+                            'Error setting data on field, falling back to setattr', exc_info=True)
                         setattr(obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):

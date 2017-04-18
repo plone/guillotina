@@ -104,7 +104,6 @@ DEFAULT_ADD_PERMISSION = 'guillotina.AddContent'
 DEFAULT_READ_PERMISSION = 'guillotina.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'guillotina.ManageContent'
 
-SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 

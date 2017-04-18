@@ -969,7 +969,7 @@ class Test_getFactoryInterfaces(unittest.TestCase):
         class IFoo(Interface):
             pass
         class _Factory(object):
-            def getInterfaces(self):
+            def get_interfaces(self):
                 return [IFoo]
         class Context(object):
             def __conform__(self, iface):
@@ -1007,7 +1007,7 @@ class Test_getFactoriesFor(unittest.TestCase):
             pass
         @implementer(IFoo, IBar)
         class _Factory(object):
-            def getInterfaces(self):
+            def get_interfaces(self):
                 return providedBy(self)
         _factory = _Factory()
         class Context(object):
@@ -1029,7 +1029,7 @@ class Test_getFactoriesFor(unittest.TestCase):
         class IBar(Interface):
             pass
         class _Factory(object):
-            def getInterfaces(self):
+            def get_interfaces(self):
                 return [IFoo, IBar]
         _factory = _Factory()
         class Context(object):

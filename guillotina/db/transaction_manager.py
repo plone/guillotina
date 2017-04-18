@@ -1,6 +1,7 @@
 from asyncio import shield
 from guillotina.db import ROOT_ID
 from guillotina.db.transaction import Transaction
+from guillotina.exceptions import RequestNotFound
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 from queue import LifoQueue
@@ -33,11 +34,17 @@ class TransactionManager(object):
 
         if request is None:
             if self.request is None:
-                self.request = get_current_request()
+                try:
+                    self.request = get_current_request()
+                except RequestNotFound:
+                    pass
             request = self.request
-        request._tm = self  # register it here with request...
 
-        user = get_authenticated_user_id(request)
+        user = None
+        if request is not None:
+            request._tm = self  # register it here with request...
+            user = get_authenticated_user_id(request)
+
         if self._txn is not None:
             if self._pool is None:
                 self._pool = LifoQueue()

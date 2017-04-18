@@ -6,6 +6,7 @@ from guillotina.component import getUtility
 from guillotina.component import provideUtility
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from zope.interface import implementer
 
@@ -157,7 +158,7 @@ class Database(object):
         XXX TODO
         """
         root = await self.get_root()
-        await root._p_jar.delete(await root.async_get(key))
+        await apply_coroutine(root._p_jar.delete, await root.async_get(key))
 
     async def async_items(self):
         root = await self.get_root()
@@ -167,8 +168,8 @@ class Database(object):
     async def async_contains(self, key):
         # is there any request active ? -> conn there
         root = await self.get_root()
-        return root._p_jar.contains(root._p_oid, key)
+        return await apply_coroutine(root._p_jar.contains, root._p_oid, key)
 
     async def async_len(self):
         root = await self.get_root()
-        return root._p_jar.len(root._p_oid)
+        return await apply_coroutine(root._p_jar.len, root._p_oid)

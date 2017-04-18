@@ -111,7 +111,7 @@ VOTE = """
     USING (zoid) WHERE ob.tid > co.otid AND co.tid = $1::int"""
 
 
-class APgStorage(object):
+class PostgresqlStorage(object):
     """Storage to a relational database, based on invalidation polling"""
 
     _dsn = None
@@ -141,7 +141,8 @@ class APgStorage(object):
         self._lock = asyncio.Lock()
         self.manage_conn = None
 
-    def isReadOnly(self):
+    @property
+    def read_only(self):
         return self._read_only
 
     async def finalize(self):

@@ -396,7 +396,7 @@ class IFactory(Interface):
         """Return an instance of the objects we're a factory for."""
 
 
-    def getInterfaces():
+    def get_interfaces():
         """Get the interfaces implemented by the factory
 
         Return the interface(s), as an instance of Implements, that objects

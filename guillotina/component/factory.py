@@ -35,7 +35,7 @@ class Factory(object):
     def __call__(self, *args, **kw):
         return self._callable(*args, **kw)
 
-    def getInterfaces(self):
+    def get_interfaces(self):
         if self._interfaces is not None:
             spec = Implements(*self._interfaces)
             spec.__name__ = getattr(self._callable, '__name__', '[callable]')

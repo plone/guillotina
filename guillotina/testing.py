@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from aiohttp.test_utils import make_mocked_request
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.browser import View
 from guillotina.content import Resource
@@ -91,19 +90,6 @@ class IExample(IResource):
 @implementer(IExample)
 class Example(Resource):
     pass
-
-
-class MockView(View):
-
-    def __init__(self, context, conn, func):
-        self.context = context
-        self.request = make_mocked_request('POST', '/')
-        self.request.conn = conn
-        self.request._db_write_enabled = True
-        self.func = func
-
-    def __call__(self, *args, **kw):
-        self.func(*args, **kw)
 
 
 class AsyncMockView(View):

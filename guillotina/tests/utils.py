@@ -7,6 +7,7 @@ from time import sleep
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
+import json
 import os
 import uuid
 
@@ -17,6 +18,7 @@ def get_mocked_request(db=None):
     alsoProvides(request, IRequest)
     alsoProvides(request, IDefaultLayer)
     if db is not None:
+        db._db.request = request
         request._db_id = db.id
         request._db = db
         request._tm = db.new_transaction_manager()
@@ -166,3 +168,28 @@ def cleanup_postgres_docker(label='testingaiopg'):
     for test_container in test_containers:
         test_container.kill()
         test_container.remove(v=True, force=True)
+
+
+class ContainerRequesterAsyncContextManager(object):
+    def __init__(self, guillotina):
+        self.guillotina = guillotina
+        self.requester = None
+
+    async def get_requester(self):
+        return await self.guillotina
+
+    async def __aenter__(self):
+        requester = await self.get_requester()
+        resp, status = await requester('POST', '/db', data=json.dumps({
+            "@type": "Container",
+            "title": "Guillotina Container",
+            "id": "guillotina",
+            "description": "Description Guillotina Container"
+        }))
+        assert status == 200
+        self.requester = requester
+        return requester
+
+    async def __aexit__(self, exc_type, exc, tb):
+        resp, status = await self.requester('DELETE', '/db/guillotina')
+        assert status == 200
