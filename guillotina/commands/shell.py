@@ -14,10 +14,6 @@ class Console(aioconsole.code.AsynchronousConsole):
         We are now running in loop so we can do async stuff with guillotina
         app and database...
         """
-        root = self.locals['root']
-        tm = root['db'].get_transaction_manager()
-        await tm.begin()
-        self.locals['tm'] = tm
         return await super().interact(banner, stop, handle_sigint)
 
 
@@ -83,6 +79,9 @@ Commit changes
 If you need to commit changes to db...
 
 
+tm = root['db'].get_transaction_manager()
+await tm.begin()
+// do changes...
 await tm.commit()
 
 '''
