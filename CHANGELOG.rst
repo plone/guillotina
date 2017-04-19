@@ -1,6 +1,9 @@
 1.0.0a12 (unreleased)
 ---------------------
 
+- Be able to query storage for total number of objects
+  [vangheem]
+
 - Provide basic async blob support interface
   [vangheem]
 

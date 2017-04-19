@@ -44,12 +44,6 @@ class IBaseObject(Interface):
         This is an 8-byte string (not Unicode).
         """)
 
-    _p_estimated_size = Attribute(
-        """An estimate of the object's size in bytes.
-
-        May be set by the data manager.
-        """)
-
     # Attribute access protocol
     def __getattribute__(name):
         """ Handle activating ghosts before returning an attribute value.
