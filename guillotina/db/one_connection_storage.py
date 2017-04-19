@@ -318,7 +318,6 @@ class PostgresqlStorage(object):
                 json,                # JSON catalog
                 p                    # Pickle state
             )
-        obj._p_estimated_size = len(p)
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):

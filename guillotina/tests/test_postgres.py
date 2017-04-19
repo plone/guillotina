@@ -226,3 +226,26 @@ async def test_should_raise_conflict_error(postgres, dummy_request):
 
     await aps.remove()
     await cleanup(aps)
+
+
+async def test_count_total_objects(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm1 = TransactionManager(aps)
+
+    # create object first, commit it...
+    await tm1.begin()
+    txn = tm1._txn
+
+    ob = create_ob()
+    txn.register(ob)
+
+    await tm1.commit()
+    await tm1.begin()
+    txn1 = tm1._txn
+
+    assert await txn1.get_total_number_of_objects() == 1
+    assert await txn1.get_total_number_of_resources() == 1
+
+    await tm1.abort()

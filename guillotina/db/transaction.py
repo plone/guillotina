@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from guillotina.db.interfaces import IWriter
 from guillotina.db.reader import reader
 from guillotina.exceptions import ConflictError
@@ -36,7 +37,9 @@ class Transaction(object):
         self._manager = manager
 
         # List of objects added
-        self.added = {}
+        # needs to be ordered because content inserted after other might
+        # reference each other
+        self.added = OrderedDict()
         self.modified = {}
         self.deleted = {}
 
@@ -322,3 +325,9 @@ class Transaction(object):
 
     async def read_blob_chunks(self, bid):
         return await self._manager._storage.read_blob_chunks(self, bid)
+
+    async def get_total_number_of_objects(self):
+        return await self._manager._storage.get_total_number_of_objects(self)
+
+    async def get_total_number_of_resources(self):
+        return await self._manager._storage.get_total_number_of_resources(self)

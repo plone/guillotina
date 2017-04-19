@@ -82,7 +82,15 @@ INSERT = """
 
 NEXT_TID = "SELECT nextval('tid_seq');"
 
+
 NUM_CHILDS = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
+
+
+NUM_ROWS = "SELECT count(*) FROM objects"
+
+
+NUM_RESOURCES = "SELECT count(*) FROM objects WHERE resource is TRUE"
+
 
 GET_CHILDS = """
     SELECT zoid, tid, state_size, resource, type, state, id
@@ -270,6 +278,9 @@ class PostgresqlStorage(BaseStorage):
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
+
+        smt = await self.get_prepared_statement(txn, 'insert', INSERT)
+
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
             self._log.warn("Too long object %d" % (obj.__class__, len(p)))
@@ -279,18 +290,17 @@ class PostgresqlStorage(BaseStorage):
         if part is None:
             part = 0
         # (zoid, tid, state_size, part, main, parent_id, type, json, state)
-        output = await txn._db_conn.execute(  # noqa
-            INSERT,         # Insert on temp table
+        await smt.fetchval(
             oid,                 # The OID of the object
             txn._tid,            # Our TID
             len(p),              # Len of the object
             part,                # Partition indicator
-            writer.resource,    # Is a resource ?
-            writer.of,                # It belogs to a main
+            writer.resource,     # Is a resource ?
+            writer.of,           # It belogs to a main
             old_serial,          # Old serial
-            writer.parent_id,           # Parent OID
-            writer.id,                  # Traversal ID
-            writer.type,               # Guillotina type
+            writer.parent_id,    # Parent OID
+            writer.id,           # Traversal ID
+            writer.type,         # Guillotina type
             json,                # JSON catalog
             p                    # Pickle state
         )
@@ -391,3 +401,13 @@ class PostgresqlStorage(BaseStorage):
 
     async def del_blob(self, txn, bid):
         await txn._db_conn.execute(DELETE_BLOB, bid)
+
+    async def get_total_number_of_objects(self, txn):
+        smt = await self.get_prepared_statement(txn, 'num_rows', NUM_ROWS)
+        result = await smt.fetchval()
+        return result
+
+    async def get_total_number_of_resources(self, txn):
+        smt = await self.get_prepared_statement(txn, 'num_resources', NUM_RESOURCES)
+        result = await smt.fetchval()
+        return result
