@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 from guillotina.component import getUtility
 from guillotina.content import load_cached_schema
+from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.testing import ADMIN_TOKEN
 from guillotina.testing import TESTING_SETTINGS
 from guillotina.tests.utils import cleanup_postgres_docker
+from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import run_docker_postgresql
 
 import aiohttp
 import asyncio
 import copy
-import json
 import os
 import pytest
 
@@ -103,9 +104,6 @@ class GuillotinaDBRequester(object):
                 return value, status, resp.headers
 
 
-# MEMORY DB TESTING FIXTURES
-
-
 @pytest.fixture(scope='function')
 def dummy_guillotina(loop):
     from guillotina import test_package  # noqa
@@ -133,6 +131,7 @@ class DummyRequestAsyncContextManager(object):
 
 @pytest.fixture(scope='function')
 def dummy_request(dummy_guillotina, monkeypatch):
+    HARD_CACHE.clear()
     from guillotina.interfaces import IApplication
     from guillotina.component import getUtility
     root = getUtility(IApplication, name='root')
@@ -159,13 +158,13 @@ class RootAsyncContextManager(object):
 
 @pytest.fixture(scope='function')
 async def dummy_txn_root(dummy_request):
+    HARD_CACHE.clear()
     return RootAsyncContextManager(dummy_request)
-
-# POSTGRES WITH DOCKER TESTING FIXTURES
 
 
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
+    HARD_CACHE.clear()
     from guillotina import test_package  # noqa
     aioapp = make_app(settings=PG_SETTINGS, loop=loop)
     aioapp.config.execute_actions()
@@ -175,34 +174,10 @@ def guillotina_main(loop):
 
 @pytest.fixture(scope='function')
 async def guillotina(test_server, postgres, guillotina_main, loop):
+    HARD_CACHE.clear()
     server = await test_server(guillotina_main)
     requester = GuillotinaDBRequester(server=server, loop=loop)
     return requester
-
-
-class ContainerRequesterAsyncContextManager(object):
-    def __init__(self, guillotina):
-        self.guillotina = guillotina
-        self.requester = None
-
-    async def get_requester(self):
-        return await self.guillotina
-
-    async def __aenter__(self):
-        requester = await self.get_requester()
-        resp, status = await requester('POST', '/db', data=json.dumps({
-            "@type": "Container",
-            "title": "Guillotina Container",
-            "id": "guillotina",
-            "description": "Description Guillotina Container"
-        }))
-        assert status == 200
-        self.requester = requester
-        return requester
-
-    async def __aexit__(self, exc_type, exc, tb):
-        resp, status = await self.requester('DELETE', '/db/guillotina')
-        assert status == 200
 
 
 @pytest.fixture(scope='function')

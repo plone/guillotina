@@ -53,7 +53,7 @@ class GuillotinaDB(object):
 
         try:
             assert request._tm.get() == t
-            await t.get(0)
+            await t.get(ROOT_ID)
         except KeyError:
             root = Root()
             t.register(root, new_oid=ROOT_ID)

@@ -1,5 +1,5 @@
 from guillotina.db import ROOT_ID
-from guillotina.db.storage import BaseStorage
+from guillotina.db.storages.base import BaseStorage
 
 import asyncio
 

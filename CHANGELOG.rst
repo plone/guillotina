@@ -1,6 +1,9 @@
 1.0.0a12 (unreleased)
 ---------------------
 
+- Provide basic async blob support interface
+  [vangheem]
+
 - Fix annotation behaviors that use __local__properties__ not storing data
   properly on content object
   [vangheem]

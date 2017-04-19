@@ -4,7 +4,7 @@ from guillotina.interfaces import IBehaviorAssignable
 from zope.interface import alsoProvides
 
 
-def applyMarkers(obj, event):
+def apply_markers(obj, event):
     """Event handler to apply markers for all behaviors enabled
     for the given type.
     """

@@ -9,7 +9,7 @@ from guillotina import PERMISSIONS_CACHE
 from guillotina import SCHEMA_CACHE
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
-from guillotina.behaviors import applyMarkers
+from guillotina.behaviors import apply_markers
 from guillotina.browser import get_physical_path
 from guillotina.component import getUtilitiesFor
 from guillotina.component import getUtility
@@ -94,11 +94,11 @@ class ResourceFactory(Factory):
             obj.id = obj._p_oid
         else:
             obj.id = id
-        applyMarkers(obj, None)
+        apply_markers(obj, None)
         return obj
 
-    def getInterfaces(self):
-        spec = super(ResourceFactory, self).getInterfaces()
+    def get_interfaces(self):
+        spec = super(ResourceFactory, self).get_interfaces()
         spec.__name__ = self.type_name
         return spec
 
@@ -171,6 +171,7 @@ async def create_content(type_, **kw):
     obj = factory(id=id_)
     for key, value in kw.items():
         setattr(obj, key, value)
+    obj._p_new_marker = True
     return obj
 
 
@@ -209,9 +210,10 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
         setattr(obj, key, value)
 
     if request is None or 'OVERWRITE' not in request.headers:
-        value = await container.async_contains(obj.id)
-        if value:
+        if await container.async_contains(obj.id):
             raise ConflictIdOnContainer(str(container), obj.id)
+
+    obj._p_new_marker = True
 
     await notify(BeforeObjectAddedEvent(obj, container, id_))
     await container.async_set(obj.id, obj)

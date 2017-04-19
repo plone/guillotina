@@ -1,5 +1,7 @@
 from guillotina.db.interfaces import IWriter
 from guillotina.db.reader import reader
+from guillotina.exceptions import ConflictError
+from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import Unauthorized
 from guillotina.utils import get_current_request
 
@@ -10,10 +12,6 @@ import uuid
 
 
 HARD_CACHE = {}
-
-
-class ConflictError(Exception):
-    pass
 
 
 logger = logging.getLogger(__name__)
@@ -120,7 +118,10 @@ class Transaction(object):
 
     def check_read_only(self):
         if self.request is None:
-            self.request = get_current_request()
+            try:
+                self.request = get_current_request()
+            except RequestNotFound:
+                return False
         if hasattr(self.request, '_db_write_enabled') and not self.request._db_write_enabled:
             raise Unauthorized('Adding content not permited')
 
@@ -130,15 +131,24 @@ class Transaction(object):
         """We are adding a new object on the DB"""
         self.check_read_only()
 
+        if obj._p_jar is None:
+            obj._p_jar = self
+
         oid = obj._p_oid
-        if oid is not None:
-            if oid not in self.modified and oid not in self.added:
-                self.modified[oid] = obj
-        else:
-            if new_oid is None:
+        new = False
+        if oid is None:
+            if new_oid is not None:
+                new = True
+            else:
                 new_oid = uuid.uuid4().hex
-            obj._p_oid = new_oid
-            self.added[new_oid] = obj
+            oid = new_oid
+
+        obj._p_oid = oid
+        if new or obj._p_new_marker:
+            self.added[oid] = obj
+            obj._p_new_marker = False
+        elif oid not in self.modified:
+            self.modified[oid] = obj
 
     def delete(self, obj):
         self.check_read_only()
@@ -146,10 +156,12 @@ class Transaction(object):
         if oid is not None:
             if oid in self.modified:
                 del self.modified[oid]
+            elif oid in self.added:
+                del self.added[oid]
             self.deleted[oid] = obj
 
     async def clean_cache(self):
-        HARD_CACHE.clean()
+        HARD_CACHE.clear()
         await self._cache.clear()
 
     # GET AN OBJECT
@@ -198,34 +210,31 @@ class Transaction(object):
             await hook(*args, **kws)
         self._before_commit = []
 
+    async def _store_object(self, obj, oid, added=False):
+        # Modified objects
+        if obj._p_jar is not self and obj._p_jar is not None:
+            raise Exception('Invalid reference to txn')
+
+        # There is no serial
+        if added:
+            serial = None
+        else:
+            serial = getattr(obj, "_p_serial", 0)
+        s, l = await self._manager._storage.store(
+            oid, serial, IWriter(obj), obj, self)
+        obj._p_serial = s
+        obj._p_oid = oid
+        if obj._p_jar is None:
+            obj._p_jar = self
+        self._to_invalidate.append(oid)
+
     async def real_commit(self):
         """Commit changes to an object"""
         await self._manager._storage.precommit(self)
         for oid, obj in self.added.items():
-            # Added objects
-            if obj._p_jar is not self and obj._p_jar is not None:
-                raise Exception('Invalid reference to txn')
-
-            s, l = await self._manager._storage.store(
-                oid, None, IWriter(obj), obj, self)
-            obj._p_serial = s
-            obj._p_oid = oid
-            if obj._p_jar is None:
-                obj._p_jar = self
-            self._to_invalidate.append(oid)
+            await self._store_object(obj, oid, True)
         for oid, obj in self.modified.items():
-            # Modified objects
-            if obj._p_jar is not self and obj._p_jar is not None:
-                raise Exception('Invalid reference to txn')
-
-            # There is no serial
-            serial = getattr(obj, "_p_serial", 0)
-            s, l = await self._manager._storage.store(
-                oid, serial, IWriter(obj), obj, self)
-            obj._p_serial = s
-            if obj._p_jar is None:
-                obj._p_jar = self
-            self._to_invalidate.append(oid)
+            await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
@@ -301,3 +310,15 @@ class Transaction(object):
 
     async def get_annotation_keys(self, oid):
         return [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]
+
+    async def del_blob(self, bid):
+        return await self._manager._storage.del_blob(self, bid)
+
+    async def write_blob_chunk(self, bid, oid, chunk_index, data):
+        return await self._manager._storage.write_blob_chunk(self, bid, oid, chunk_index, data)
+
+    async def read_blob_chunk(self, bid, chunk=0):
+        return await self._manager._storage.read_blob_chunk(self, bid, chunk)
+
+    async def read_blob_chunks(self, bid):
+        return await self._manager._storage.read_blob_chunks(self, bid)

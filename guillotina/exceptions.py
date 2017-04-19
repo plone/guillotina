@@ -112,3 +112,11 @@ class ConfigurationConflictError(ConfigurationError):
 
 class NoIndexField(Exception):
     pass
+
+
+class ReadOnlyError(Exception):
+    pass
+
+
+class BlobChunkNotFound(Exception):
+    pass

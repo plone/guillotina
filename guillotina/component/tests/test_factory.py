@@ -72,7 +72,7 @@ class FactoryTests(unittest.TestCase):
         factory(foo='bar')
         self.assertEqual(_called, [((), {'foo': 'bar'})])
 
-    def test_getInterfaces_explicit(self):
+    def test_get_interfaces_explicit(self):
         from zope.interface import Interface
         from zope.interface import implementer
         class IFoo(Interface):
@@ -85,11 +85,11 @@ class FactoryTests(unittest.TestCase):
         def _callable():
             pass
         factory = self._makeOne(_callable, interfaces=(IFoo, IBar))
-        spec = factory.getInterfaces()
+        spec = factory.get_interfaces()
         self.assertEqual(spec.__name__, '_callable')
         self.assertEqual(list(spec), [IFoo, IBar])
 
-    def test_getInterfaces_implicit(self):
+    def test_get_interfaces_implicit(self):
         from zope.interface import Interface
         from zope.interface import implementer
         class IBaz(Interface):
@@ -98,7 +98,7 @@ class FactoryTests(unittest.TestCase):
         def _callable():
             pass
         factory = self._makeOne(_callable)
-        spec = factory.getInterfaces()
+        spec = factory.get_interfaces()
         self.assertEqual(list(spec), [IBaz])
 
 def _test_callable(*args, **kw):

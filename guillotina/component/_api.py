@@ -187,7 +187,7 @@ def getFactoryInterfaces(name, context=None):
 
     Result might be a single interface. XXX
     """
-    return getUtility(IFactory, name, context).getInterfaces()
+    return getUtility(IFactory, name, context).get_interfaces()
 
 
 def getFactoriesFor(interface, context=None):
@@ -195,7 +195,7 @@ def getFactoriesFor(interface, context=None):
     """
     utils = getSiteManager(context)
     for (name, factory) in utils.getUtilitiesFor(IFactory):
-        interfaces = factory.getInterfaces()
+        interfaces = factory.get_interfaces()
         try:
             if interfaces.isOrExtends(interface):
                 yield name, factory
