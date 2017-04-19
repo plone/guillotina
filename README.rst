@@ -52,7 +52,7 @@ Run postgresql
 If you don't have a postgresql server to play with, you can run one easily
 with docker.
 
-In the termainl::
+In the terminal::
 
   make run-postgres
 
