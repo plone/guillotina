@@ -1,6 +1,9 @@
 1.0.0a12 (unreleased)
 ---------------------
 
+- Provide conflict resolution across transactions
+  [vangheem]
+
 - Be able to query storage for total number of objects
   [vangheem]
 

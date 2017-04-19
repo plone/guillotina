@@ -17,7 +17,7 @@ GET_OID = """
     WHERE zoid = $1::varchar(32)
     """
 
-GET_SONS_KEYS = """
+GET_CHILDREN_KEYS = """
     SELECT id
     FROM objects
     WHERE parent_id = $1::varchar(32)
@@ -80,10 +80,32 @@ INSERT = """
         state = EXCLUDED.state;
     """
 
+
+# not used right now but here in case we want to try specifically doing updates
+# instead of insert + on conflict
+UPDATE = """
+    UPDATE objects
+    SET (
+        tid = $2::int,
+        state_size = $3::int,
+        part = $4::int,
+        resource = $5::boolean,
+        of = $6::varchar(32),
+        otid = $7::int,
+        parent_id = $8::varchar(32),
+        id = $9::text,
+        type = $10::text,
+        json = $11::json,
+        state = $12::bytea)
+    WHERE zoid = $1::varchar(32)
+    """
+
+
 NEXT_TID = "SELECT nextval('tid_seq');"
+CURRENT_TID = "SELECT last_value from tid_seq"
 
 
-NUM_CHILDS = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
+NUM_CHILDREN = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
 
 
 NUM_ROWS = "SELECT count(*) FROM objects"
@@ -92,7 +114,7 @@ NUM_ROWS = "SELECT count(*) FROM objects"
 NUM_RESOURCES = "SELECT count(*) FROM objects WHERE resource is TRUE"
 
 
-GET_CHILDS = """
+GET_CHILDREN = """
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
     WHERE parent_id = $1::VARCHAR(32)
@@ -129,20 +151,16 @@ DELETE_BLOB = """
 """
 
 
+TXN_CONFLICTS = "SELECT zoid, tid FROM objects ob WHERE tid > $1"
+
+
 class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
     _dsn = None
     _partition_class = None
     _pool_size = None
-
     _pool = None
-
-    _ltid = None
-    _conn = None
-    _lock = None
-
-    _blobhelper = None
     _large_record_size = 1 << 24
 
     _object_schema = {
@@ -187,7 +205,6 @@ class PostgresqlStorage(BaseStorage):
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
-        self._lock = asyncio.Lock()
         self._read_conn = None
 
     async def finalize(self):
@@ -219,6 +236,7 @@ class PostgresqlStorage(BaseStorage):
 
         self._read_conn = await self.open()
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
+        self._stmt_current_tid = await self._read_conn.prepare(CURRENT_TID)
 
     async def remove(self):
         """Reset the tables"""
@@ -259,19 +277,6 @@ class PostgresqlStorage(BaseStorage):
             raise KeyError(oid)
         return objects
 
-    async def tpc_begin(self, txn, conn):
-        # Add the new tid
-        if self._read_only:
-            raise ReadOnlyError()
-
-        txn._db_conn = conn
-        txn._db_txn = conn.transaction()
-        await txn._db_txn.start()
-        async with self._lock:
-            tid = await self._stmt_next_tid.fetchval()
-        if tid is not None:
-            txn._tid = tid
-
     async def precommit(self, txn):
         # no need to do anything here...
         pass
@@ -310,17 +315,32 @@ class PostgresqlStorage(BaseStorage):
     async def delete(self, txn, oid):
         await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
 
-    async def tpc_vote(self, transaction):
-        # Check if there is any commit bigger than the one we already have
-        conflicts = await transaction._db_conn.fetch(
-            "SELECT zoid, tid FROM objects ob WHERE tid > $1",
-            transaction._tid)
+    async def tpc_begin(self, txn, conn):
+        # Add the new tid
+        if self._read_only:
+            raise ReadOnlyError()
 
-        # need to check see if we conflict on same resources...
-        for conflict in conflicts:
-            # both writing to same object...
-            if conflict['zoid'] in transaction.modified:
-                return False
+        txn._db_conn = conn
+        txn._db_txn = conn.transaction(readonly=self._read_only)
+        await txn._db_txn.start()
+        tid = await self._stmt_next_tid.fetchval()
+        if tid is not None:
+            txn._tid = tid
+
+    async def tpc_vote(self, transaction):
+        current_tid = await self._stmt_current_tid.fetchval()
+        if current_tid > transaction._tid:
+            # potential conflict error, get changes
+            # Check if there is any commit bigger than the one we already have
+            conflicts = await self._read_conn.fetch(TXN_CONFLICTS, transaction._tid)
+            for conflict in conflicts:
+                # both writing to same object...
+                if conflict['zoid'] in transaction.modified:
+                    return False
+            if len(conflicts) > 0:
+                log.info('Resolved conflict between transaction ids: {}, {}'.format(
+                    transaction._tid, current_tid
+                ))
 
         return True
 
@@ -340,7 +360,7 @@ class PostgresqlStorage(BaseStorage):
     # Introspection
 
     async def keys(self, txn, oid):
-        smt = await self.get_prepared_statement(txn, 'get_sons_keys', GET_SONS_KEYS)
+        smt = await self.get_prepared_statement(txn, 'get_sons_keys', GET_CHILDREN_KEYS)
         result = await smt.fetch(oid)
         return result
 
@@ -358,12 +378,12 @@ class PostgresqlStorage(BaseStorage):
             return True
 
     async def len(self, txn, oid):
-        smt = await self.get_prepared_statement(txn, 'num_childs', NUM_CHILDS)
+        smt = await self.get_prepared_statement(txn, 'num_childs', NUM_CHILDREN)
         result = await smt.fetchval(oid)
         return result
 
     async def items(self, txn, oid):
-        smt = await self.get_prepared_statement(txn, 'get_childs', GET_CHILDS)
+        smt = await self.get_prepared_statement(txn, 'get_childs', GET_CHILDREN)
         async for record in smt.cursor(oid):
             yield record
 

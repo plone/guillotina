@@ -248,9 +248,8 @@ class Transaction(object):
         """Verify that a data manager can commit the transaction."""
         ok = await self._manager._storage.tpc_vote(self)
         if ok is False:
-            # obj = reader(conflict_object)
-            # obj._p_jar = self
-            raise ConflictError(self, None)
+            await self.abort()
+            raise ConflictError(self)
 
     async def tpc_finish(self):
         """Indicate confirmation that the transaction is done.
