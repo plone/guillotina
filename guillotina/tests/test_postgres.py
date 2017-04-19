@@ -222,6 +222,7 @@ async def test_should_raise_conflict_error(postgres, dummy_request):
     # XXX this should raise exception. We need to figure out conflict resolution here...
     # with pytest.raises(ConflictError):
     #     await tm1.commit()
+    await tm1.abort()
 
     await aps.remove()
     await cleanup(aps)
