@@ -1,4 +1,4 @@
-1.0.0a12 (unreleased)
+1.0.0a12 (2017-04-24)
 ---------------------
 
 - Provide conflict resolution across transactions
