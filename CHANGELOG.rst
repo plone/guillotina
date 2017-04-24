@@ -1,6 +1,10 @@
 1.0.0a13 (unreleased)
 ---------------------
 
+- root ThreadPoolExecutor was removed in previous release. Some packages use this
+  feature
+  [vangheem]
+
 - Rename PServerJSONEncoder to GuillotinaJSONEncoder
   [vangheem]
 
