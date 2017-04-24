@@ -1,10 +1,9 @@
-from concurrent.futures import ThreadPoolExecutor
-from guillotina.db import ROOT_ID
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
 from guillotina.component import getGlobalSiteManager
 from guillotina.component import getUtility
 from guillotina.component import provideUtility
+from guillotina.db import ROOT_ID
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.utils import apply_coroutine
@@ -20,7 +19,6 @@ logger = logging.getLogger('guillotina')
 
 @implementer(IApplication)
 class ApplicationRoot(object):
-    executor = ThreadPoolExecutor(max_workers=100)
     root_user = None
 
     def __init__(self, config_file):
