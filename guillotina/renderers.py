@@ -20,7 +20,7 @@ from zope.interface.interface import InterfaceClass
 import json
 
 
-class PServerJSONEncoder(json.JSONEncoder):
+class GuillotinaJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, complex):
             return [obj.real, obj.imag]
@@ -45,6 +45,10 @@ class PServerJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+# b/w compat import
+PServerJSONEncoder = GuillotinaJSONEncoder
+
+
 def json_response(data=sentinel, *, text=None, body=None, status=200,
                   reason=None, headers=None, content_type='application/json',
                   dumps=json.dumps):
@@ -54,7 +58,7 @@ def json_response(data=sentinel, *, text=None, body=None, status=200,
                 "only one of data, text, or body should be specified"
             )
         else:
-            text = dumps(data, cls=PServerJSONEncoder)
+            text = dumps(data, cls=GuillotinaJSONEncoder)
     return aioResponse(
         text=text, body=body, status=status, reason=reason,
         headers=headers, content_type=content_type)
@@ -161,10 +165,10 @@ class RendererRaw(Renderer):
     def guess_response(self, value):
         resp = value.response
         if isinstance(resp, dict):
-            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder), 'utf-8'))
+            resp = aioResponse(body=bytes(json.dumps(resp, cls=GuillotinaJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, list):
-            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder), 'utf-8'))
+            resp = aioResponse(body=bytes(json.dumps(resp, cls=GuillotinaJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
             resp = aioResponse(body=bytes(resp, 'utf-8'))
