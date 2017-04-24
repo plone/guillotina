@@ -1,4 +1,4 @@
-1.0.0a13 (unreleased)
+1.0.0a13 (2017-04-24)
 ---------------------
 
 - root ThreadPoolExecutor was removed in previous release. Some packages use this
