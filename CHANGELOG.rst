@@ -1,7 +1,8 @@
 1.0.0a13 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Rename PServerJSONEncoder to GuillotinaJSONEncoder
+  [vangheem]
 
 
 1.0.0a12 (2017-04-24)
