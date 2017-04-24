@@ -35,7 +35,7 @@ class DeserializeFromJson(object):
 
         self.permission_cache = {}
 
-    async def __call__(self, data, validate_all=False):
+    async def __call__(self, data, validate_all=False, ignore_errors=False):
         errors = []
 
         factory = get_cached_factory(self.context.type_name)
@@ -48,7 +48,7 @@ class DeserializeFromJson(object):
                 behavior_schema, behavior, data, errors,
                 validate_all, True)
 
-        if errors:
+        if errors and not ignore_errors:
             raise DeserializationError(errors)
 
         self.context._p_register()

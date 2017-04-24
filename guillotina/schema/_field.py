@@ -693,7 +693,7 @@ class JSONField(Field):
             raise WrongType
 
         try:
-            self.schema = json.loads(schema)
+            self.json_schema = json.loads(schema)
         except ValueError:
             raise WrongType
         super(JSONField, self).__init__(**kw)
@@ -702,6 +702,6 @@ class JSONField(Field):
         super(JSONField, self)._validate(value)
 
         try:
-            jsonschema.validate(value, self.schema)
+            jsonschema.validate(value, self.json_schema)
         except jsonschema.ValidationError as e:
             raise WrongContainedType(e.message, self.__name__)

@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from guillotina.db import ROOT_ID
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
 from guillotina.component import getGlobalSiteManager
@@ -129,10 +130,10 @@ class Database(object):
 
     @property
     def _p_jar(self):
-        return self.get_transaction_manager()
+        return self.get_transaction_manager()._txn
 
     async def get_root(self):
-        return await self._p_jar.root()
+        return await self._p_jar.get(ROOT_ID)
 
     async def async_get(self, key):
         root = await self.get_root()

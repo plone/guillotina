@@ -2,6 +2,8 @@
 from guillotina.interfaces.exceptions import ISerializableException
 from zope.interface import implementer
 
+import json
+
 
 @implementer(ISerializableException)
 class DeserializationError(Exception):
@@ -13,7 +15,9 @@ class DeserializationError(Exception):
         self.errors = errors
 
     def __str__(self):
-        return self.msg
+        return '{} ({})'.format(
+            self.msg,
+            json.dumps(self.json_data()))
 
     def json_data(self):
         errors = []
