@@ -219,10 +219,47 @@ async def test_should_raise_conflict_error(postgres, dummy_request):
 
     # commit 2 before 1
     await tm2.commit()
-    # XXX this should raise exception. We need to figure out conflict resolution here...
-    # with pytest.raises(ConflictError):
-    #     await tm1.commit()
-    await tm1.abort()
+    with pytest.raises(ConflictError):
+        await tm1.commit()
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+async def test_should_resolve_conflict_error(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm1 = TransactionManager(aps)
+    tm2 = TransactionManager(aps)
+
+    # create object first, commit it...
+    await tm1.begin()
+    txn = tm1._txn
+
+    ob1 = create_ob()
+    ob2 = create_ob()
+    txn.register(ob1)
+    txn.register(ob2)
+
+    await tm1.commit()
+
+    # 1 started before 2
+    await tm1.begin()
+    await tm2.begin()
+    txn1 = tm1._txn
+    txn2 = tm2._txn
+
+    ob1 = await txn1.get(ob1._p_oid)
+    ob2 = await txn2.get(ob2._p_oid)
+
+    txn1.register(ob1)
+    txn2.register(ob2)
+
+    # commit 2 before 1
+    await tm2.commit()
+    # XXX should not raise conflict error
+    await tm1.commit()
 
     await aps.remove()
     await cleanup(aps)

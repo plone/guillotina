@@ -2,7 +2,6 @@
 	"databases": [{
 		"db": {
 			"storage": "postgresql",
-			"type": "postgres",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",

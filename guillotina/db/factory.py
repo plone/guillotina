@@ -10,7 +10,11 @@ from guillotina.utils import resolve_dotted_name
 @configure.utility(provides=IDatabaseConfigurationFactory, name="postgresql")
 async def DatabaseConfigurationFactory(key, dbconfig, app):
     config = dbconfig.get('configuration', {})
-    dsn = "{scheme}://{user}:{password}@{host}:{port}/{dbname}".format(**dbconfig['dsn'])  # noqa
+    if isinstance(dbconfig['dsn'], str):
+        dsn = dbconfig['dsn']
+    else:
+        dsn = "{scheme}://{user}:{password}@{host}:{port}/{dbname}".format(
+            **dbconfig['dsn'])
     partition_object = None
     if 'partition' in dbconfig:
         partition_object = resolve_dotted_name(dbconfig['partition'])
