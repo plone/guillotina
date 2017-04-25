@@ -196,3 +196,7 @@ class IContentNegotiation(Interface):
 
 class IAnnotations(Interface):
     pass
+
+
+class IAnnotationData(Interface):
+    pass

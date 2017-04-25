@@ -8,6 +8,7 @@ from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
 from .catalog import ISecurityInfo  # noqa
 from .configuration import IDatabaseConfigurationFactory  # noqa
+from .content import IAnnotationData  # noqa
 from .content import IAnnotations  # noqa
 from .content import IApplication  # noqa
 from .content import IAsyncContainer  # noqa

@@ -17,7 +17,7 @@ class AnnotationBehavior(object):
     __local__properties__ = []
 
     # each annotation is stored
-    __annotations_data_key = 'default'
+    __annotations_data_key__ = 'default'
 
     def __init__(self, context):
         self.__dict__['schema'] = [x for x in self.__implemented__][0]
@@ -28,23 +28,23 @@ class AnnotationBehavior(object):
 
         # see if annotations are preloaded...
         annotations_container = IAnnotations(self.__dict__['context'])
-        data = annotations_container.get(self.__annotations_data_key, _default)
+        data = annotations_container.get(self.__annotations_data_key__, _default)
         if data is not _default:
             self.__dict__['data'] = data
 
     async def load(self, create=False):
         annotations_container = IAnnotations(self.__dict__['context'])
-        data = annotations_container.get(self.__annotations_data_key, _default)
+        data = annotations_container.get(self.__annotations_data_key__, _default)
         if data is not _default:
             # data is already preloaded, we do not need to get from db again...
             self.__dict__['data'] = data
             return
 
-        annotations = await annotations_container.async_get(self.__annotations_data_key)
+        annotations = await annotations_container.async_get(self.__annotations_data_key__)
         if annotations is None:
             if create:
                 annotations = AnnotationData()
-                await annotations_container.async_set(self.__annotations_data_key, annotations)
+                await annotations_container.async_set(self.__annotations_data_key__, annotations)
             else:
                 annotations = {}  # fallback, assumed only for reading here...
         self.__dict__['data'] = annotations
