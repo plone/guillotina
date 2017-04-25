@@ -1,4 +1,4 @@
-1.0.0a14 (unreleased)
+1.0.0a14 (2017-04-25)
 ---------------------
 
 - Fix issue where annotations would get duplicated
