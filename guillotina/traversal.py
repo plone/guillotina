@@ -89,24 +89,24 @@ async def subrequest(
         orig_request, path, relative_to_container=True,
         headers={}, body=None, params=None, method='GET'):
     """Subrequest, initial implementation doing a real request."""
-    session = aiohttp.ClientSession()
-    method = method.lower()
-    if method not in SUBREQUEST_METHODS:
-        raise AttributeError('No valid method ' + method)
-    caller = getattr(session, method)
+    async with aiohttp.ClientSession() as session:
+        method = method.lower()
+        if method not in SUBREQUEST_METHODS:
+            raise AttributeError('No valid method ' + method)
+        caller = getattr(session, method)
 
-    for head in orig_request.headers:
-        if head not in headers:
-            headers[head] = orig_request.headers[head]
+        for head in orig_request.headers:
+            if head not in headers:
+                headers[head] = orig_request.headers[head]
 
-    params = {
-        'headers': headers,
-        'params': params
-    }
-    if method in ['put', 'patch']:
-        params['data'] = body
+        params = {
+            'headers': headers,
+            'params': params
+        }
+        if method in ['put', 'patch']:
+            params['data'] = body
 
-    return caller(path, **params)
+        return caller(path, **params)
 
 
 async def traverse(request, parent, path):
