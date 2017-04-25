@@ -1,6 +1,12 @@
 1.0.0a14 (unreleased)
 ---------------------
 
+- Fix issue where annotations would get duplicated
+  [vangheem]
+
+- rename __annotations_data_key to __annotations_data_key__ in Annotation behavior
+  [vangheem]
+
 - Prevent aiohttp sessions from not closing by using context managers everywhere
   [vangheem]
 
