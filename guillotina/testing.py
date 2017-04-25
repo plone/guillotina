@@ -131,12 +131,12 @@ class GuillotinaRequester(object):
 
         settings['params'] = params
         settings['data'] = data
-        session = aiohttp.ClientSession()
-        operation = getattr(session, method.lower(), None)
-        if operation:
-            if self.server is not None:
-                resp = await operation(self.server.make_url(path), **settings)
-            else:
-                resp = await operation(self.uri + path, **settings)
-            return resp
+        async with aiohttp.ClientSession() as session:
+            operation = getattr(session, method.lower(), None)
+            if operation:
+                if self.server is not None:
+                    resp = await operation(self.server.make_url(path), **settings)
+                else:
+                    resp = await operation(self.uri + path, **settings)
+                return resp
         return None

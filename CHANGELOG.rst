@@ -1,7 +1,8 @@
 1.0.0a14 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Prevent aiohttp sessions from not closing by using context managers everywhere
+  [vangheem]
 
 
 1.0.0a13 (2017-04-24)
