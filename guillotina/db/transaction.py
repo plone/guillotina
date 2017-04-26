@@ -1,10 +1,18 @@
 from collections import OrderedDict
+from guillotina.component import getMultiAdapter
+from guillotina.component import queryMultiAdapter
+from guillotina.db.interfaces import IConflictResolver
+from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from guillotina.db.reader import reader
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import Unauthorized
+from guillotina.exceptions import UnresolvableConflict
 from guillotina.utils import get_current_request
+from zope.interface import implementer
 
 import logging
 import sys
@@ -26,6 +34,7 @@ class Status:
     ABORTED = "Aborted"
 
 
+@implementer(ITransaction)
 class Transaction(object):
 
     def __init__(self, manager, request=None):
@@ -62,6 +71,13 @@ class Transaction(object):
         # Transaction on DB
         self._db_txn = None
         self.request = request
+        self._strategy = getMultiAdapter(
+            (manager._storage, self), ITransactionStrategy,
+            name=manager._storage._transaction_strategy)
+
+    @property
+    def strategy(self):
+        return self._strategy
 
     def get_before_commit_hooks(self):
         """ See ITransaction.
@@ -116,7 +132,8 @@ class Transaction(object):
         conn is a real db that will be got by db.open()
         """
         self._txn_time = time.time()
-        await self._manager._storage.tpc_begin(self, conn)
+        self._db_conn = conn
+        await self._strategy.tpc_begin()
         self._cache = self._manager._storage._cache
 
     def check_read_only(self):
@@ -127,6 +144,9 @@ class Transaction(object):
                 return False
         if hasattr(self.request, '_db_write_enabled') and not self.request._db_write_enabled:
             raise Unauthorized('Adding content not permited')
+        # Add the new tid
+        if self._manager._storage._read_only:
+            raise ReadOnlyError()
 
     # REGISTER OBJECTS
 
@@ -147,9 +167,9 @@ class Transaction(object):
             oid = new_oid
 
         obj._p_oid = oid
-        if new or obj._p_new_marker:
+        if new or obj.__new_marker__:
             self.added[oid] = obj
-            obj._p_new_marker = False
+            obj.__new_marker__ = False
         elif oid not in self.modified:
             self.modified[oid] = obj
 
@@ -229,11 +249,10 @@ class Transaction(object):
         obj._p_oid = oid
         if obj._p_jar is None:
             obj._p_jar = self
-        self._to_invalidate.append(oid)
+        self._to_invalidate.append(obj)
 
     async def real_commit(self):
         """Commit changes to an object"""
-        await self._manager._storage.precommit(self)
         for oid, obj in self.added.items():
             await self._store_object(obj, oid, True)
         for oid, obj in self.modified.items():
@@ -242,19 +261,36 @@ class Transaction(object):
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
             await self._manager._storage.delete(self, oid)
-            self._to_invalidate.append(oid)
+            self._to_invalidate.append(obj)
 
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
-        ok = await self._manager._storage.tpc_vote(self)
+        ok = await self._strategy.tpc_vote()
         if ok is False:
             await self.abort()
             raise ConflictError(self)
 
+    async def resolve_conflict(self, conflict):
+        if conflict['zoid'] not in self.modified:
+            raise Exception('Attempting to resolve conflict on object that is '
+                            'not registered with this transaction')
+
+        this_ob = self.modified[conflict['zoid']]
+        conflicted_ob = reader(conflict)
+        resolver = queryMultiAdapter((this_ob, conflicted_ob), IConflictResolver)
+        if resolver is not None:
+            resolved_ob = await resolver.resolve()
+            if resolved_ob is not None:
+                resolved_ob._p_oid = this_ob._p_oid
+                resolved_ob._p_jar = self
+                self.modified[this_ob._p_oid] = resolved_ob
+                return resolved_ob
+        raise UnresolvableConflict(this_ob, conflicted_ob)
+
     async def tpc_finish(self):
         """Indicate confirmation that the transaction is done.
         """
-        await self._manager._storage.tpc_finish(self)
+        await self._strategy.tpc_finish()
         # Set on cache
         # for key, obj in self.added.items():
         #     self._cache.set(obj._p_oid, obj, obj.__cache__)
@@ -268,6 +304,9 @@ class Transaction(object):
         self.added = {}
         self.modified = {}
         self.deleted = {}
+        for obj in self._to_invalidate:
+            obj.__changes__.clear()
+            # would also invalidate cache here when it's all said and done...
         self._to_invalidate = []
         self._db_txn = None
 

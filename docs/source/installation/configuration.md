@@ -20,7 +20,6 @@ map 1-to-1 to database setup:
   "databases": [{
     "db": {
       "storage": "postgresql",
-      "type": "postgres",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -29,9 +28,7 @@ map 1-to-1 to database setup:
         "password": "",
         "port": 5432
       },
-      "options": {
-        "read_only": false
-      }
+      "read_only": false
     }
   }]
 }
@@ -129,3 +126,56 @@ You can pass in aiohttp_settings to configure the aiohttp server.
     "client_max_size": 20971520
   }
 }
+```
+
+## transaction strategy
+
+Guillotina provides a few different modes to operate in to customize the level
+of performance vs consistency. The setting used for this is `transaction_strategy`
+which defaults to `merge`.
+
+Available options:
+
+- `none`:
+  No transactions, no conflict resolution. Fastest but most dangerous mode.
+  Use for importing data or if you need high performance and do not have multiple writers.
+- `simple`:
+  Detect concurrent transactions and error if another transaction id is committed
+  to the db ahead of the current transaction id. This is the safest mode to operate
+  in but you might see conflict errors.
+- `resolve`:
+  Same as simple; however, it allows commits when conflicting transactions
+  are writing to different objects.
+- `merge`:
+  Same as resolve; however, it attempts to resolve conflicted object writes.
+  Costs in performance when resolving conflicts and potentially dangerous if
+  there is custom code that does not register resolution change detection.
+- `lock`:
+  As safe as the `simple` mode with potential performance impact since every
+  object is locked when a known write will be applied to it.
+  While it is locked, no other writers can access the object.
+
+
+Example configuration:
+
+```json
+{
+  "databases": [{
+		"db": {
+			"storage": "postgresql",
+			"transaction_strategy": "none",
+      "dsn": {
+        "scheme": "postgres",
+        "dbname": "guillotina",
+        "user": "postgres",
+        "host": "localhost",
+        "password": "",
+        "port": 5432
+      }
+		}
+	}]
+}
+```
+
+
+Warning: not all storages are compatible with all transaction strategies.

@@ -1,4 +1,6 @@
 from aiohttp.test_utils import make_mocked_request
+from guillotina.behaviors import apply_markers
+from guillotina.content import Item
 from guillotina.auth.users import RootUser
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
@@ -194,3 +196,12 @@ class ContainerRequesterAsyncContextManager(object):
     async def __aexit__(self, exc_type, exc, tb):
         resp, status = await self.requester('DELETE', '/db/guillotina')
         assert status == 200
+
+
+def create_content(factory=Item, type_name='Item', id='foobar'):
+    obj = factory()
+    obj.type_name = type_name
+    obj._p_oid = uuid.uuid4().hex
+    obj.__name__ = obj.id = id
+    apply_markers(obj, None)
+    return obj

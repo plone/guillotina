@@ -216,7 +216,7 @@ class MatchInfo(AbstractMatchInfo):
         self._apps = []
         self._frozen = False
 
-    async def handler(self, request):
+    async def handler(self, request, retries=0):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             try:
@@ -236,6 +236,9 @@ class MatchInfo(AbstractMatchInfo):
                 await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except ConflictError as e:
+                if app_settings.get('conflict_retry_attempts', 3) < retries:
+                    request._retry_attempt = retries + 1
+                    return await self.handlers(request, retries + 1)
                 view_result = generate_error_response(
                     e, request, 'ConflictDB', 409)
             except Exception as e:

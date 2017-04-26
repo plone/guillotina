@@ -16,6 +16,7 @@ _ = MessageFactory('guillotina')
 app_settings = {
     "aiohttp_settings": {},
     "databases": [],
+    "conflict_retry_attempts": 3,
     "host": "127.0.0.1",
     "port": 8080,
     "static": [],

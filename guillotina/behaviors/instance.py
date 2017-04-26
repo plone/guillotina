@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from guillotina.annotations import AnnotationData
+from guillotina.db import resolution
+from guillotina.db.interfaces import IConflictResolvableStrategy
+from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from zope.interface import alsoProvides
@@ -70,11 +73,19 @@ class AnnotationBehavior(object):
                 name.startswith('_p_')):
             super(AnnotationBehavior, self).__setattr__(name, value)
         else:
-            prefixed_name = self.__dict__['prefix'] + name
+            key = self.__dict__['prefix'] + name
             data = self.__dict__['data']
-            data[prefixed_name] = value
-            if isinstance(data, AnnotationData):
+            if key in data:
+                original_value = data[key]
+            else:
+                original_value = resolution.MISSING_VALUE
+            data[key] = value
+            if IAnnotationData.providedBy(data):
                 data._p_register()
+                if IConflictResolvableStrategy.providedBy(data._p_jar.strategy):
+                    field = self.__dict__['schema'][name]
+                    resolution.record_object_change(
+                        data, field=field, key=key, value=original_value)
 
 
 class ContextBehavior(object):

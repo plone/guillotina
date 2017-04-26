@@ -17,9 +17,8 @@ class ObjectTest(BaseObject):
 async def test_create_object(dummy_txn_root):
     async with await dummy_txn_root as root:
         assert isinstance(root._p_jar, Transaction)
-        assert root._p_jar._tid is None
         ob1 = ObjectTest()
-        ob1._p_new_marker = True
+        ob1.__new_marker__ = True
         assert ob1._p_jar is None
         assert ob1._p_serial is None
         assert ob1._p_oid is None

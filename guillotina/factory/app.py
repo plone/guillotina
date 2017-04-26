@@ -139,6 +139,7 @@ def make_app(config_file=None, settings=None, loop=None):
     configure.scan('guillotina.annotations')
     configure.scan('guillotina.constraintypes')
     configure.scan('guillotina.subscribers')
+    configure.scan('guillotina.db.strategies')
     load_application(guillotina, root, settings)
     app.config.execute_actions()
     app.config.commit()

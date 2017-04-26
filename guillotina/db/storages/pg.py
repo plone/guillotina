@@ -1,6 +1,8 @@
+from asyncio import shield
+from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
-from guillotina.exceptions import ReadOnlyError
+from zope.interface import implementer
 
 import asyncio
 import asyncpg
@@ -101,8 +103,11 @@ UPDATE = """
     """
 
 
-NEXT_TID = "SELECT nextval('tid_seq');"
-CURRENT_TID = "SELECT last_value from tid_seq"
+NEXT_TID = """UPDATE transaction
+SET tid = tid + 1
+WHERE id = 1
+RETURNING tid;"""
+CURRENT_TID = "SELECT tid from transaction"
 
 
 NUM_CHILDREN = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
@@ -151,9 +156,14 @@ DELETE_BLOB = """
 """
 
 
-TXN_CONFLICTS = "SELECT zoid, tid FROM objects ob WHERE tid > $1"
+TXN_CONFLICTS = """
+    SELECT zoid, tid, state_size, resource, type, state, id
+    FROM objects
+    WHERE tid > $1
+    """
 
 
+@implementer(IStorage)
 class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
@@ -178,6 +188,15 @@ class PostgresqlStorage(BaseStorage):
         'state': 'BYTEA'
     }
 
+    # will be a one-row table to hold current transaction id
+    # why:
+    #   - 1: you can lock it, you can not lock a sequence
+    #   - 2: compat with cockroach db
+    _transaction_schema = {
+        'id': 'INT NOT NULL PRIMARY KEY',
+        'tid': 'BIGINT'
+    }
+
     _blob_schema = {
         'bid': 'VARCHAR(32) NOT NULL',
         'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects ON DELETE CASCADE',
@@ -194,21 +213,25 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
-        'CREATE SEQUENCE IF NOT EXISTS tid_seq;'
+        'CREATE INDEX IF NOT EXISTS transaction_tid ON transaction (tid);',
+        'INSERT INTO transaction (id, tid) VALUES (1, 1) ON CONFLICT (id) DO NOTHING'
     ]
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
-                 pool_size=10):
-        super(PostgresqlStorage, self).__init__(read_only)
+                 pool_size=10, transaction_strategy='resolve', **options):
+        super(PostgresqlStorage, self).__init__(
+            read_only, transaction_strategy=transaction_strategy)
         self._dsn = dsn
         self._pool_size = pool_size
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
-        self._read_conn = None
+        self._trns_conn = None
+        self._lock = asyncio.Lock()
+        self._options = options
 
     async def finalize(self):
-        await self._pool.release(self._read_conn)
+        await self._pool.release(self._trns_conn)
         await self._pool.close()
 
     async def initialize(self, loop=None):
@@ -223,6 +246,7 @@ class PostgresqlStorage(BaseStorage):
         # Check DB
         statements = [
             get_table_definition('objects', self._object_schema),
+            get_table_definition('transaction', self._transaction_schema),
             get_table_definition('blobs', self._blob_schema,
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
         ]
@@ -230,13 +254,25 @@ class PostgresqlStorage(BaseStorage):
 
         async with self._pool.acquire() as conn:
             for statement in statements:
-                async with conn.transaction():
-                    # some pg compat dbs do not support grouped statements
-                    await conn.execute(statement)
+                await conn.execute(statement)
 
-        self._read_conn = await self.open()
-        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
-        self._stmt_current_tid = await self._read_conn.prepare(CURRENT_TID)
+        # shared read connection on all transactions
+        self._trns_conn = await self.open()
+        await self.initialize_tid_statements()
+
+        # migrate old tid scheme over
+        try:
+            old_tid = await self._trns_conn.fetchval('SELECT last_value from tid_seq')
+            current_tid = await self.get_current_tid(None)
+            if old_tid > current_tid:
+                await self._trns_conn.fetchval('UPDATE transaction SET tid = $1::int', old_tid)
+        except asyncpg.exceptions.UndefinedTableError:
+            # no need to upgrade
+            pass
+
+    async def initialize_tid_statements(self):
+        self._stmt_next_tid = await self._trns_conn.prepare(NEXT_TID)
+        self._stmt_current_tid = await self._trns_conn.prepare(CURRENT_TID)
 
     async def remove(self):
         """Reset the tables"""
@@ -250,11 +286,11 @@ class PostgresqlStorage(BaseStorage):
 
     async def close(self, con):
         try:
-            await self._pool.release(con)
+            await shield(self._pool.release(con))
         except asyncio.CancelledError:
             pass
 
-    async def get_prepared_statement(self, txn, name, statement):
+    async def _get_prepared_statement(self, txn, name, statement):
         '''
         lazy load prepared statements so we don't do unncessary
         calls to pg...
@@ -265,26 +301,22 @@ class PostgresqlStorage(BaseStorage):
         return getattr(txn, name)
 
     async def last_transaction(self, txn):
-        smt = await self.get_prepared_statement(txn, 'max_tid', MAX_TID)
+        smt = await self._get_prepared_statement(txn, 'max_tid', MAX_TID)
         value = await smt.fetchval()
         return 0 if value is None else value
 
     async def load(self, txn, oid):
         int_oid = oid
-        smt = await self.get_prepared_statement(txn, 'get_oid', GET_OID)
+        smt = await self._get_prepared_statement(txn, 'get_oid', GET_OID)
         objects = await smt.fetchrow(int_oid)
         if objects is None:
             raise KeyError(oid)
         return objects
 
-    async def precommit(self, txn):
-        # no need to do anything here...
-        pass
-
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
-        smt = await self.get_prepared_statement(txn, 'insert', INSERT)
+        smt = await self._get_prepared_statement(txn, 'insert', INSERT)
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
@@ -315,36 +347,22 @@ class PostgresqlStorage(BaseStorage):
     async def delete(self, txn, oid):
         await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
 
-    async def tpc_begin(self, txn, conn):
-        # Add the new tid
-        if self._read_only:
-            raise ReadOnlyError()
+    async def get_next_tid(self, txn):
+        async with self._lock:
+            return await self._stmt_next_tid.fetchval()
 
-        txn._db_conn = conn
-        txn._db_txn = conn.transaction(readonly=self._read_only)
+    async def start_transaction(self, txn):
+        txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
         await txn._db_txn.start()
-        tid = await self._stmt_next_tid.fetchval()
-        if tid is not None:
-            txn._tid = tid
 
-    async def tpc_vote(self, transaction):
-        current_tid = await self._stmt_current_tid.fetchval()
-        if current_tid > transaction._tid:
-            # potential conflict error, get changes
-            # Check if there is any commit bigger than the one we already have
-            conflicts = await self._read_conn.fetch(TXN_CONFLICTS, transaction._tid)
-            for conflict in conflicts:
-                # both writing to same object...
-                if conflict['zoid'] in transaction.modified:
-                    return False
-            if len(conflicts) > 0:
-                log.info('Resolved conflict between transaction ids: {}, {}'.format(
-                    transaction._tid, current_tid
-                ))
+    async def get_current_tid(self, txn):
+        async with self._lock:
+            return await self._stmt_current_tid.fetchval()
 
-        return True
+    async def get_conflicts(self, txn):
+        return await self._trns_conn.fetch(TXN_CONFLICTS, txn._tid)
 
-    async def tpc_finish(self, transaction):
+    async def commit(self, transaction):
         if transaction._db_txn is not None:
             await transaction._db_txn.commit()
         else:
@@ -360,17 +378,17 @@ class PostgresqlStorage(BaseStorage):
     # Introspection
 
     async def keys(self, txn, oid):
-        smt = await self.get_prepared_statement(txn, 'get_sons_keys', GET_CHILDREN_KEYS)
+        smt = await self._get_prepared_statement(txn, 'get_sons_keys', GET_CHILDREN_KEYS)
         result = await smt.fetch(oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
-        smt = await self.get_prepared_statement(txn, 'get_child', GET_CHILD)
+        smt = await self._get_prepared_statement(txn, 'get_child', GET_CHILD)
         result = await smt.fetchrow(parent_oid, id)
         return result
 
     async def has_key(self, txn, parent_oid, id):
-        smt = await self.get_prepared_statement(txn, 'exist_child', EXIST_CHILD)
+        smt = await self._get_prepared_statement(txn, 'exist_child', EXIST_CHILD)
         result = await smt.fetchrow(parent_oid, id)
         if result is None:
             return False
@@ -378,28 +396,28 @@ class PostgresqlStorage(BaseStorage):
             return True
 
     async def len(self, txn, oid):
-        smt = await self.get_prepared_statement(txn, 'num_childs', NUM_CHILDREN)
+        smt = await self._get_prepared_statement(txn, 'num_childs', NUM_CHILDREN)
         result = await smt.fetchval(oid)
         return result
 
     async def items(self, txn, oid):
-        smt = await self.get_prepared_statement(txn, 'get_childs', GET_CHILDREN)
+        smt = await self._get_prepared_statement(txn, 'get_childs', GET_CHILDREN)
         async for record in smt.cursor(oid):
             yield record
 
     async def get_annotation(self, txn, oid, id):
-        smt = await self.get_prepared_statement(txn, 'get_annotation', GET_ANNOTATION)
+        smt = await self._get_prepared_statement(txn, 'get_annotation', GET_ANNOTATION)
         result = await smt.fetchrow(oid, id)
         return result
 
     async def get_annotation_keys(self, txn, oid):
-        smt = await self.get_prepared_statement(
+        smt = await self._get_prepared_statement(
             txn, 'get_annotations_keys', GET_ANNOTATIONS_KEYS)
         result = await smt.fetch(oid)
         return result
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
-        smt = await self.get_prepared_statement(txn, 'has_ob', HAS_OBJECT)
+        smt = await self._get_prepared_statement(txn, 'has_ob', HAS_OBJECT)
         result = await smt.fetchrow(oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
@@ -411,11 +429,11 @@ class PostgresqlStorage(BaseStorage):
             INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
-        smt = await self.get_prepared_statement(txn, 'read_blob_chunk', READ_BLOB_CHUNK)
+        smt = await self._get_prepared_statement(txn, 'read_blob_chunk', READ_BLOB_CHUNK)
         return await smt.fetchrow(bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
-        smt = await self.get_prepared_statement(txn, 'read_blob_chunks', READ_BLOB_CHUNKS)
+        smt = await self._get_prepared_statement(txn, 'read_blob_chunks', READ_BLOB_CHUNKS)
         async for record in smt.cursor(bid):
             yield record
 
@@ -423,11 +441,11 @@ class PostgresqlStorage(BaseStorage):
         await txn._db_conn.execute(DELETE_BLOB, bid)
 
     async def get_total_number_of_objects(self, txn):
-        smt = await self.get_prepared_statement(txn, 'num_rows', NUM_ROWS)
+        smt = await self._get_prepared_statement(txn, 'num_rows', NUM_ROWS)
         result = await smt.fetchval()
         return result
 
     async def get_total_number_of_resources(self, txn):
-        smt = await self.get_prepared_statement(txn, 'num_resources', NUM_RESOURCES)
+        smt = await self._get_prepared_statement(txn, 'num_resources', NUM_RESOURCES)
         result = await smt.fetchval()
         return result
