@@ -1,9 +1,12 @@
 from collections import OrderedDict
+from guillotina.component import queryMultiAdapter
+from guillotina.db.interfaces import IConflictResolver
 from guillotina.db.interfaces import IWriter
 from guillotina.db.reader import reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import Unauthorized
+from guillotina.exceptions import UnresolvableConflict
 from guillotina.utils import get_current_request
 
 import logging
@@ -147,9 +150,9 @@ class Transaction(object):
             oid = new_oid
 
         obj._p_oid = oid
-        if new or obj._p_new_marker:
+        if new or obj.__new_marker__:
             self.added[oid] = obj
-            obj._p_new_marker = False
+            obj.__new_marker__ = False
         elif oid not in self.modified:
             self.modified[oid] = obj
 
@@ -229,7 +232,7 @@ class Transaction(object):
         obj._p_oid = oid
         if obj._p_jar is None:
             obj._p_jar = self
-        self._to_invalidate.append(oid)
+        self._to_invalidate.append(obj)
 
     async def real_commit(self):
         """Commit changes to an object"""
@@ -242,7 +245,7 @@ class Transaction(object):
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
             await self._manager._storage.delete(self, oid)
-            self._to_invalidate.append(oid)
+            self._to_invalidate.append(obj)
 
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
@@ -250,6 +253,23 @@ class Transaction(object):
         if ok is False:
             await self.abort()
             raise ConflictError(self)
+
+    async def resolve_conflict(self, conflict):
+        if conflict['zoid'] not in self.modified:
+            raise Exception('Attempting to resolve conflict on object that is '
+                            'not registered with this transaction')
+
+        this_ob = self.modified[conflict['zoid']]
+        conflicted_ob = reader(conflict)
+        resolver = queryMultiAdapter((this_ob, conflicted_ob), IConflictResolver)
+        if resolver is not None:
+            resolved_ob = await resolver.resolve()
+            if resolved_ob is not None:
+                resolved_ob._p_oid = this_ob._p_oid
+                resolved_ob._p_jar = self
+                self.modified[this_ob._p_oid] = resolved_ob
+                return resolved_ob
+        raise UnresolvableConflict(this_ob, conflicted_ob)
 
     async def tpc_finish(self):
         """Indicate confirmation that the transaction is done.
@@ -268,6 +288,9 @@ class Transaction(object):
         self.added = {}
         self.modified = {}
         self.deleted = {}
+        for obj in self._to_invalidate:
+            obj.__changes__.clear()
+            # would also invalidate cache here when it's all said and done...
         self._to_invalidate = []
         self._db_txn = None
 

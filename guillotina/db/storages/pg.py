@@ -1,6 +1,7 @@
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ReadOnlyError
+from guillotina.exceptions import UnresolvableConflict
 
 import asyncio
 import asyncpg
@@ -151,7 +152,11 @@ DELETE_BLOB = """
 """
 
 
-TXN_CONFLICTS = "SELECT zoid, tid FROM objects ob WHERE tid > $1"
+TXN_CONFLICTS = """
+    SELECT zoid, tid, state_size, resource, type, state, id
+    FROM objects
+    WHERE tid > $1
+    """
 
 
 class PostgresqlStorage(BaseStorage):
@@ -336,7 +341,10 @@ class PostgresqlStorage(BaseStorage):
             for conflict in conflicts:
                 # both writing to same object...
                 if conflict['zoid'] in transaction.modified:
-                    return False
+                    try:
+                        await transaction.resolve_conflict(conflict)
+                    except UnresolvableConflict:
+                        return False
             if len(conflicts) > 0:
                 log.info('Resolved conflict between transaction ids: {}, {}'.format(
                     transaction._tid, current_tid

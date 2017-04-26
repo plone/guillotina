@@ -1,7 +1,8 @@
 1.0.0a15 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Provide more robust conflict resolution on fields of content and annotations
+  [vangheem]
 
 
 1.0.0a14 (2017-04-25)

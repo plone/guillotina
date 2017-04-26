@@ -6,6 +6,11 @@ from guillotina.schema.interfaces import IField
 from guillotina.utils import apply_coroutine
 from zope.interface import Interface
 
+import logging
+
+
+logger = logging.getLogger('guillotina')
+
 
 @configure.adapter(
     for_=(IField, Interface, Interface),
@@ -22,13 +27,9 @@ class DefaultFieldSerializer(object):
 
     async def get_value(self, default=None):
         try:
-            return await apply_coroutine(
-                self.field.get,
-                self.context)
-        except:  # noqa
-            # XXX handle exception?
-            return await apply_coroutine(
-                getattr,
-                self.context,
-                self.field.__name__,
-                default)
+            return await apply_coroutine(self.field.get, self.context)
+        except Exception:
+            logger.warn('Could not find value for schema field({}), falling back to getattr'.format(
+                self.field.__name__
+            ))
+            return getattr(self.context, self.field.__name__, default)
