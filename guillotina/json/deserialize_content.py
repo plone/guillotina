@@ -4,6 +4,7 @@ from guillotina.component import queryMultiAdapter
 from guillotina.component import queryUtility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
+from guillotina.db import resolution
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.exceptions import NoInteraction
@@ -12,6 +13,7 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceFieldDeserializer
+from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
 from guillotina.schema.exceptions import ValidationError
@@ -23,6 +25,7 @@ import logging
 
 
 logger = logging.getLogger('guillotina')
+_missing = object()
 
 
 @configure.adapter(
@@ -100,12 +103,20 @@ class DeserializeFromJson(object):
                     errors.append({
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
+                    # record object changes for potential future conflict resolution
+                    field_serializer = queryMultiAdapter(
+                        (field, self.context, self.request),
+                        IResourceFieldSerializer)
+                    original_value = await field_serializer.get_value(
+                        default=resolution.MISSING_VALUE)
                     try:
                         await apply_coroutine(field.set, obj, value)
-                    except:  # noqa XXX bad idea?
+                    except Exception:
                         logger.warn(
                             'Error setting data on field, falling back to setattr', exc_info=True)
                         setattr(obj, name, value)
+                    # alright, changes written, now save record of last one
+                    resolution.record_object_change(self.context, field, original_value)
             else:
                 if f.required and not hasattr(obj, name):
                     errors.append({

@@ -7,3 +7,10 @@ class IPartition(Interface):
 
 class IWriter(Interface):
     """Serializes the object for DB storage"""
+
+
+class IConflictResolver(Interface):
+    """resolve conflicts between 2 objects"""
+
+    def resolve(self):
+        pass
