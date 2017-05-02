@@ -1,17 +1,11 @@
 {
 	"databases": [{
 		"db": {
-			"storage": "postgresql",
-			"transaction_strategy": "merge",
-      "dsn": {
-        "scheme": "postgres",
-        "dbname": "guillotina",
-        "user": "postgres",
-        "host": "localhost",
-        "password": "",
-        "port": 5432
-      },
-      "read_only": false
+			"storage": "cockroach",
+      "dsn": "postgresql://root@localhost:26257/guillotina?sslmode=disable",
+      "options": {
+        "read_only": false
+      }
 		}
 	}],
 	"host": "127.0.0.1",

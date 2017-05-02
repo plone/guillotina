@@ -20,8 +20,6 @@ class DefaultResourceFieldDeserializer(object):
         # if not isinstance(value, str) and not isinstance(value, bytes):
         #     return value
         schema = self.field
-        if hasattr(self.field, 'schema'):
-            schema = self.field.schema
         value = schema_compatible(value, schema)
         self.field.validate(value)
         return value

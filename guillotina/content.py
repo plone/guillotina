@@ -171,7 +171,7 @@ async def create_content(type_, **kw):
     obj = factory(id=id_)
     for key, value in kw.items():
         setattr(obj, key, value)
-    obj._p_new_marker = True
+    obj.__new_marker__ = True
     return obj
 
 
@@ -213,7 +213,7 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
         if await container.async_contains(obj.id):
             raise ConflictIdOnContainer(str(container), obj.id)
 
-    obj._p_new_marker = True
+    obj.__new_marker__ = True
 
     await notify(BeforeObjectAddedEvent(obj, container, id_))
     await container.async_set(obj.id, obj)

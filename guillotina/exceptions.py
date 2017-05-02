@@ -120,3 +120,12 @@ class ReadOnlyError(Exception):
 
 class BlobChunkNotFound(Exception):
     pass
+
+
+class UnresolvableConflict(Exception):
+    def __init__(self, ours, other):
+        self.ours = ours
+        self.other = other
+        super().__init__('Could not resolve conflict between {} and {}'.format(
+            repr(ours), repr(other)
+        ))

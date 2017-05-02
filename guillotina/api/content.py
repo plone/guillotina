@@ -180,7 +180,7 @@ class DefaultPOST(Service):
             'guillotina.Owner',
             user)
 
-        await notify(ObjectAddedEvent(obj, self.context, obj.id, data=data))
+        await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
 
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 

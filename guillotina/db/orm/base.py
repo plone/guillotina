@@ -42,7 +42,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
-        '__name', '__cache', '__new_marker')
+        '__name', '__cache', '__new_marker', '__changes')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -55,6 +55,7 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__annotations', {})
         _OSA(inst, '_BaseObject__cache', -1)
         _OSA(inst, '_BaseObject__new_marker', False)
+        _OSA(inst, '_BaseObject__changes', {})
         return inst
 
     def __repr__(self):
@@ -106,19 +107,6 @@ class BaseObject(object):
         _OSA(self, '_BaseObject__oid', None)
 
     _p_oid = property(_get_oid, _set_oid, _del_oid)
-
-    # _p_new_marker:  marks an object as being newly created.
-    # this is useful for the transaction manager to know about it.
-    def _get_new_marker(self):
-        return _OGA(self, '_BaseObject__new_marker')
-
-    def _set_new_marker(self, value):
-        _OSA(self, '_BaseObject__new_marker', value)
-
-    def _del_new_marker(self):
-        _OSA(self, '_BaseObject__new_marker', None)
-
-    _p_new_marker = property(_get_new_marker, _set_new_marker, _del_new_marker)
 
     # _p_serial:  serial number.
     def _get_serial(self):
@@ -247,3 +235,28 @@ class BaseObject(object):
         return _OSA(self, '_BaseObject__cache', None)
 
     __cache__ = property(_get_cache, _set_cache, _del_cache)
+
+    # __changes__:  Identifier of the object.
+    def _get_changes(self):
+        return _OGA(self, '_BaseObject__changes')
+
+    def _set_changes(self, value):
+        _OSA(self, '_BaseObject__changes', value)
+
+    def _del_changes(self):
+        _OSA(self, '_BaseObject__changes', {})
+
+    __changes__ = property(_get_changes, _set_changes, _del_changes)
+
+    # __new_marker__:  marks an object as being newly created.
+    # this is useful for the transaction manager to know about it.
+    def _get_new_marker(self):
+        return _OGA(self, '_BaseObject__new_marker')
+
+    def _set_new_marker(self, value):
+        _OSA(self, '_BaseObject__new_marker', value)
+
+    def _del_new_marker(self):
+        _OSA(self, '_BaseObject__new_marker', False)
+
+    __new_marker__ = property(_get_new_marker, _set_new_marker, _del_new_marker)
