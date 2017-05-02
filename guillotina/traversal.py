@@ -154,7 +154,10 @@ async def traverse(request, parent, path):
         request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
         layers = request.container_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
-            alsoProvides(request, import_class(layer))
+            try:
+                alsoProvides(request, import_class(layer))
+            except ModuleNotFoundError:
+                logger.error('Can not apply layer ' + layer)
 
     return await traverse(request, context, path[1:])
 
