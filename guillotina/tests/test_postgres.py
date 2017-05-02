@@ -1,12 +1,13 @@
+from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.content import Folder
+from guillotina.db.resolution import record_object_change
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
-from guillotina.db.resolution import record_object_change
-from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
 
+import asyncio
 import pytest
 
 
@@ -464,6 +465,33 @@ async def test_count_total_objects(postgres, dummy_request):
     assert await txn1.get_total_number_of_resources() == 1
 
     await tm1.abort()
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+async def _test_using_gather_with_queries(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+
+    # create object first, commit it...
+    await tm.begin()
+
+    ob1 = create_content()
+    tm._txn.register(ob1)
+
+    await tm.commit()
+
+    await tm.begin()
+
+    async def get_ob():
+        await tm._txn.get(ob1._p_oid)
+
+    asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
+
+    await tm.abort()
 
     await aps.remove()
     await cleanup(aps)
