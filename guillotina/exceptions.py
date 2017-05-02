@@ -57,6 +57,10 @@ class RequestNotFound(Exception):
     """
 
 
+class TaskNotFound(Exception):
+    pass
+
+
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""

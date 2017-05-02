@@ -1,4 +1,5 @@
 from aiohttp import web
+from aiohttp import web_request
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import interfaces
@@ -86,6 +87,18 @@ _delayed_default_settings = {
 }
 
 
+class GuillotinaAiohttpApplication(web.Application):
+
+    def _make_request(self, message, payload, protocol, writer, task,
+                      _cls=web_request.Request):
+        request = _cls(
+            message, payload, protocol, writer, protocol._time_service, task,
+            secure_proxy_ssl_header=self._secure_proxy_ssl_header,
+            client_max_size=self._client_max_size)
+        task._request = request
+        return request
+
+
 def make_app(config_file=None, settings=None, loop=None):
     app_settings.update(_delayed_default_settings)
 
@@ -100,7 +113,7 @@ def make_app(config_file=None, settings=None, loop=None):
 
     middlewares = [resolve_dotted_name(m) for m in settings.get('middlewares', [])]
     # Initialize aiohttp app
-    app = web.Application(
+    app = GuillotinaAiohttpApplication(
         router=TraversalRouter(),
         loop=loop,
         middlewares=middlewares,

@@ -3,6 +3,7 @@ from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina.exceptions import RequestNotFound
+from guillotina.exceptions import TaskNotFound
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
@@ -270,10 +271,29 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     return result
 
 
+def set_current_request(request):
+    try:
+        task = asyncio.Task.current_task()
+    except RuntimeError:
+        raise TaskNotFound('Could not set request because no loop active')
+    if task is None:
+        raise TaskNotFound('Could not find active request')
+    task._request = request
+
+
 def get_current_request() -> IRequest:
     """
-    Return the current request by heuristically looking it up from stack
+    Find the current request:
+    1. check the current task
+    2. heuristically look it up from stack
     """
+    try:
+        task = asyncio.Task.current_task()
+    except RuntimeError:
+        # not running an event loop at all.
+        task = None
+    if task is not None and hasattr(task, '_request'):
+        return task._request
     frame = inspect.currentframe()
     while frame is not None:
         request = getattr(frame.f_locals.get('self'), 'request', None)
