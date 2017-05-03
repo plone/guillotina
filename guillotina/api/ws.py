@@ -60,7 +60,7 @@ class WebsocketGetToken(Service):
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'basic' or schema.lower() == 'bearer':
-                token = encoded_token.encode('ascii')
+                token = encoded_token
 
         # Create ws token
         new_token = self.generate_websocket_token(token)
@@ -149,7 +149,7 @@ class WebsocketsView(Service):
                     # Wait for possible value
                     futures_to_wait = self.request._futures.values()
                     if futures_to_wait:
-                        await asyncio.gather(futures_to_wait)
+                        await asyncio.gather(*list(futures_to_wait))
                         self.request._futures = {}
                 else:
                     await ws.close()

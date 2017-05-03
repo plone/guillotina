@@ -290,14 +290,23 @@ class PostgresqlStorage(BaseStorage):
         except asyncio.CancelledError:
             pass
 
-    async def _get_prepared_statement(self, txn, name, statement):
+    async def _get_prepared_statement(self, txn, name, statement, retries=0):
         '''
         lazy load prepared statements so we don't do unncessary
         calls to pg...
         '''
         name = '_smt_' + name
         if not hasattr(txn, name):
-            setattr(txn, name, await txn._db_conn.prepare(statement))
+            # setattr(txn, name, await txn._db_conn.prepare(statement))
+            try:
+                setattr(txn, name, await txn._db_conn.prepare(statement))
+            except asyncpg.exceptions.InterfaceError as exc:
+                if retries < 5:
+                    asyncio.sleep(0.01 * retries)
+                    return await self._get_prepared_statement(
+                        txn, name, statement, retries + 1)
+                else:
+                    raise
         return getattr(txn, name)
 
     async def last_transaction(self, txn):
