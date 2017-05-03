@@ -1,7 +1,7 @@
 1.0.0a15 (unreleased)
 ---------------------
 
-- Remove get_current_request optimizations until memory leaks can be solved
+- Fix another memory leak in get_current_request and add test for it
   [vangheem]
 
 - Provide more robust conflict resolution on fields of content and annotations

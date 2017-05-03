@@ -3,7 +3,9 @@ from guillotina.interfaces import IResource
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import get_root
 
+import gc
 import json
+import resource
 
 
 def test_module_resolve_path():
@@ -43,3 +45,23 @@ async def test_get_content_path(container_requester):
         obj = await container.async_get('item1')
         assert utils.get_content_path(container) == '/guillotina'
         assert utils.get_content_path(obj) == '/guillotina/item1'
+
+
+class TestGetCurrentRequest:
+    async def test_gcr_memory(self):
+        self.request = get_mocked_request()
+
+        count = 0
+        current = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0
+        while True:
+            count += 1
+            utils.get_current_request()
+
+            if count % 1000000 == 0:
+                break
+
+            if count % 100000 == 0:
+                gc.collect()
+                new = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0
+                if new - current > 10:  # memory leak, this shouldn't happen
+                    assert new == current
