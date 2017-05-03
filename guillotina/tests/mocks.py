@@ -9,7 +9,7 @@ class MockDBTransaction:
 
     def __init__(self, storage, trns):
         self._storage = storage
-        self._transaciont = trns
+        self._transacion = trns
 
 
 @implementer(IStorage)
@@ -18,8 +18,10 @@ class MockStorage:
     _cache = {}
     _read_only = False
     _transaction_strategy = 'merge'
+    _options = {}
 
-    def __init__(self):
+    def __init__(self, transaction_strategy='merge'):
+        self._transaction_strategy = transaction_strategy
         self._transaction = None
 
     async def get_annotation(self, trns, oid, id):
@@ -36,5 +38,7 @@ class MockStorage:
 class MockTransactionManager:
     _storage = None
 
-    def __init__(self):
-        self._storage = MockStorage()
+    def __init__(self, storage=None):
+        if storage is None:
+            storage = MockStorage()
+        self._storage = storage

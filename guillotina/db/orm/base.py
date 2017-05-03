@@ -42,7 +42,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
-        '__name', '__cache', '__new_marker', '__changes')
+        '__name', '__cache', '__new_marker', '__changes', '__locked')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -56,6 +56,7 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__cache', -1)
         _OSA(inst, '_BaseObject__new_marker', False)
         _OSA(inst, '_BaseObject__changes', {})
+        _OSA(inst, '_BaseObject__locked', False)
         return inst
 
     def __repr__(self):
@@ -260,3 +261,16 @@ class BaseObject(object):
         _OSA(self, '_BaseObject__new_marker', False)
 
     __new_marker__ = property(_get_new_marker, _set_new_marker, _del_new_marker)
+
+    # __locked__:  marks an object as being locked for writing
+    # and that after the transaction commits, it should unlock
+    def _get_locked(self):
+        return _OGA(self, '_BaseObject__locked')
+
+    def _set_locked(self, value):
+        _OSA(self, '_BaseObject__locked', value)
+
+    def _del_locked(self):
+        _OSA(self, '_BaseObject__locked', False)
+
+    __locked__ = property(_get_locked, _set_locked, _del_locked)

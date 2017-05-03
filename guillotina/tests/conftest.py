@@ -6,10 +6,12 @@ from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.testing import ADMIN_TOKEN
 from guillotina.testing import TESTING_SETTINGS
-from guillotina.tests.utils import cleanup_postgres_docker
+from guillotina.tests.docker_containers.etcd import cleanup_etcd_docker
+from guillotina.tests.docker_containers.etcd import run_docker_etcd
+from guillotina.tests.docker_containers.postgres import cleanup_postgres_docker
+from guillotina.tests.docker_containers.postgres import run_docker_postgresql
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import run_docker_postgresql
 
 import aiohttp
 import asyncio
@@ -60,6 +62,18 @@ def postgres():
 
     if not IS_TRAVIS:
         cleanup_postgres_docker()
+
+
+@pytest.fixture(scope='session')
+def etcd():
+    """
+    detect travis, use travis's postgres; otherwise, use docker
+    """
+    host = run_docker_etcd()
+
+    yield host  # provide the fixture value
+
+    cleanup_etcd_docker()
 
 
 class GuillotinaDBRequester(object):

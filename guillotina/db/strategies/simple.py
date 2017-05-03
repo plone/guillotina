@@ -12,9 +12,6 @@ class SimpleStrategy(BaseStrategy):
     '''
     Do not attempt to resolve conflicts but detect for them
     '''
-    def __init__(self, storage, transaction):
-        self._storage = storage
-        self._transaction = transaction
 
     async def tpc_begin(self):
         await self._storage.start_transaction(self._transaction)
@@ -26,6 +23,7 @@ class SimpleStrategy(BaseStrategy):
     async def tpc_vote(self):
         if not self.writable_transaction:
             return True
+
         current_tid = await self._storage.get_current_tid(self._transaction)
         if current_tid > self._transaction._tid:
             return False
