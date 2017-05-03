@@ -470,7 +470,7 @@ async def test_count_total_objects(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def _test_using_gather_with_queries(postgres, dummy_request):
+async def test_using_gather_with_queries(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps()
