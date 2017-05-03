@@ -24,6 +24,7 @@ current_request()
       if (PyFrame_FastToLocalsWithError(f) < 0){
         return NULL;
       }
+      Py_INCREF(f->f_locals);
 
       if (PyDict_CheckExact(f->f_locals)) {
 
@@ -34,6 +35,7 @@ current_request()
           if(request != NULL && PyObject_IsInstance(request, Request)){
             // PyObject_GetAttr does not require Py_INCREF
             found = 1;
+            Py_DECCREF(f->f_locals);
             break;
           }
         }
@@ -44,10 +46,12 @@ current_request()
           // it is expected that you use Py_INCREF
           Py_INCREF(request);
           found = 1;
+          Py_DECCREF(f->f_locals);
           break;
         }
 
       }
+      Py_DECCREF(f->f_locals);
       f = f->f_back;
     }
 
