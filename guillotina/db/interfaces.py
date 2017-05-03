@@ -125,3 +125,11 @@ class ITransactionStrategy(Interface):
 
 class IConflictResolvableStrategy(ITransactionStrategy):
     pass
+
+
+class ILockingStrategy(ITransactionStrategy):
+    async def lock(obj):
+        pass
+
+    async def unlock(obj):
+        pass

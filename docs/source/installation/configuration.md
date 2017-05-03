@@ -134,28 +134,6 @@ Guillotina provides a few different modes to operate in to customize the level
 of performance vs consistency. The setting used for this is `transaction_strategy`
 which defaults to `merge`.
 
-Available options:
-
-- `none`:
-  No transactions, no conflict resolution. Fastest but most dangerous mode.
-  Use for importing data or if you need high performance and do not have multiple writers.
-- `simple`:
-  Detect concurrent transactions and error if another transaction id is committed
-  to the db ahead of the current transaction id. This is the safest mode to operate
-  in but you might see conflict errors.
-- `resolve`:
-  Same as simple; however, it allows commits when conflicting transactions
-  are writing to different objects.
-- `merge`:
-  Same as resolve; however, it attempts to resolve conflicted object writes.
-  Costs in performance when resolving conflicts and potentially dangerous if
-  there is custom code that does not register resolution change detection.
-- `lock`:
-  As safe as the `simple` mode with potential performance impact since every
-  object is locked when a known write will be applied to it.
-  While it is locked, no other writers can access the object.
-
-
 Example configuration:
 
 ```json
@@ -163,7 +141,7 @@ Example configuration:
   "databases": [{
 		"db": {
 			"storage": "postgresql",
-			"transaction_strategy": "none",
+			"transaction_strategy": "simple",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -177,5 +155,62 @@ Example configuration:
 }
 ```
 
+Available options:
+
+- `none`:
+  No transactions, no conflict resolution. Fastest but most dangerous mode.
+  Use for importing data or if you need high performance and do not have multiple writers.
+- `simple`:
+  Detect concurrent transactions and error if another transaction id is committed
+  to the db ahead of the current transaction id. This is the safest mode to operate
+  in but you might see conflict errors.
+- `resolve`:
+  Same as simple; however, it allows commits when conflicting transactions
+  are writing to different objects.
+- `merge`(default):
+  Same as resolve; however, it attempts to resolve conflicted object writes.
+  Costs in performance when resolving conflicts and potentially dangerous if
+  there is custom code that does not register resolution change detection.
+- `lock`:
+  As safe as the `simple` mode with potential performance impact since every
+  object is locked when a known write will be applied to it.
+  While it is locked, no other writers can access the object.
+  Requires etcd installation
+
 
 Warning: not all storages are compatible with all transaction strategies.
+
+
+## lock transaction strategy
+
+Requires installation and configuration of etcd to lock content for writes.
+
+```json
+{
+  "databases": [{
+		"db": {
+			"storage": "postgresql",
+			"transaction_strategy": "lock",
+      "dsn": {
+        "scheme": "postgres",
+        "dbname": "guillotina",
+        "user": "postgres",
+        "host": "localhost",
+        "password": "",
+        "port": 5432
+      },
+      "etcd": {
+				"host": "127.0.0.1",
+	      "port": 2379,
+	      "protocol": "http",
+	      "read_timeout": 2,
+	      "allow_redirect": true,
+	      "allow_reconnect": false,
+				"base_key": "guillotina-",
+				"read_timeout": 3,
+				"acquire_timeout": 10
+			}
+		}
+	}]
+}
+```

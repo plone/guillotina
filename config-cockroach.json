@@ -2,10 +2,22 @@
 	"databases": [{
 		"db": {
 			"storage": "cockroach",
-      "dsn": "postgresql://root@localhost:26257/guillotina?sslmode=disable",
-      "options": {
-        "read_only": false
-      }
+			"transaction_strategy": "none",
+      "dsn": "postgresql://root@127.0.0.1:26257/guillotina?sslmode=disable",
+      "read_only": false,
+			"etcd": {
+				"host": "127.0.0.1",
+	      "port": 2379,
+	      "protocol": "http",
+	      "read_timeout": 2,
+	      "allow_redirect": true,
+	      "allow_reconnect": false,
+				"base_key": "guillotina-",
+				"read_timeout": 3,
+				"acquire_timeout": 3
+			},
+			"lock_ttl": 3,
+			"pool_size": 100
 		}
 	}],
 	"host": "127.0.0.1",
