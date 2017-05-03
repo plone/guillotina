@@ -53,7 +53,7 @@ class PreconditionFailed(Exception):
 
 
 class RequestNotFound(Exception):
-    """Lookup for the current request for request aware transactions failed
+    """Lookup for the current request failed
     """
 
 
