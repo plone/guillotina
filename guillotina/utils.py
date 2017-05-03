@@ -286,9 +286,9 @@ def get_current_request() -> IRequest:
     raise RequestNotFound(RequestNotFound.__doc__)
 
 
-# try:
-#     import guillotina.optimizations  # noqa
-# except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
-#     pass
-# else:
-#     from guillotina.optimizations import get_current_request  # noqa
+try:
+    import guillotina.optimizations  # noqa
+except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
+    pass
+else:
+    from guillotina.optimizations import get_current_request  # noqa
