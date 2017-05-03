@@ -1,9 +1,12 @@
 from guillotina import utils
+from guillotina.exceptions import RequestNotFound
+import asyncio
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import get_root
+from guillotina.tests.utils import get_root, get_mocked_request
 
 import json
+import pytest
 
 
 def test_module_resolve_path():
@@ -43,3 +46,27 @@ async def test_get_content_path(container_requester):
         obj = await container.async_get('item1')
         assert utils.get_content_path(container) == '/guillotina'
         assert utils.get_content_path(obj) == '/guillotina/item1'
+
+
+async def test_get_current_request():
+    task = asyncio.Task.current_task()
+    req = get_mocked_request()
+    task._request = req
+    assert utils.get_current_request() == req
+
+
+async def test_get_current_request_fails_when_no_request_set():
+    with pytest.raises(RequestNotFound):
+        utils.get_current_request()
+
+
+async def test_task_propagates_to_gather_coroutine_for_request():
+    task = asyncio.Task.current_task()
+    req = get_mocked_request()
+    task._request = req
+
+    async def do_something():
+        return utils.get_current_request()
+
+    for result in await asyncio.gather(do_something(), do_something()):
+        assert result is req

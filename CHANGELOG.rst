@@ -1,7 +1,8 @@
 1.0.0a15 (unreleased)
 ---------------------
 
-- Remove get_current_request optimizations until memory leaks can be solved
+- Change get_current_request to not use c-code and instead use current task
+  to store the request object on it.
   [vangheem]
 
 - Provide more robust conflict resolution on fields of content and annotations
