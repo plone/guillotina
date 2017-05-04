@@ -15,6 +15,7 @@ class GuillotinaGroup(GuillotinaUser):
             self._roles['guillotina.ContainerDeleter'] = 1
             self._roles['guillotina.Owner'] = 1
             self._roles['guillotina.Member'] = 1
+            self._roles['guillotina.Manager'] = 1
 
 
 @configure.utility(provides=IGroups)
