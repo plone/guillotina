@@ -1,4 +1,4 @@
-1.0.0a15 (unreleased)
+1.0.0a15 (2017-05-04)
 ---------------------
 
 - Make sure to lock access to queries on the pg database per connection. This
