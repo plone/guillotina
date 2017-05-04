@@ -6,7 +6,7 @@ from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
-
+import concurrent
 import asyncio
 import pytest
 
@@ -548,11 +548,11 @@ async def test_exhausting_pool_size(postgres, dummy_request):
     # maintain a bunch of web socket connections? Right now at least, web socket api
     # holds open even a connection to the database. At the very least, that will
     # need to be changed to start/stop connections on each time data is pushed to it.
-    # await tm2.begin()
+    with pytest.raises(concurrent.futures._base.TimeoutError) as excinfo:
+        await tm2.begin()
     print('1st transaction begun')
 
     await tm1.abort()
-    await tm2.abort()
 
     await aps.remove()
     await cleanup(aps)

@@ -162,6 +162,8 @@ TXN_CONFLICTS = """
     WHERE tid > $1
     """
 
+TIMEOUT_TO_ACQUIRE = 20
+
 
 @implementer(IStorage)
 class PostgresqlStorage(BaseStorage):
@@ -281,7 +283,7 @@ class PostgresqlStorage(BaseStorage):
             await conn.execute("DROP TABLE IF EXISTS objects;")
 
     async def open(self):
-        conn = await self._pool.acquire()
+        conn = await self._pool.acquire(timeout=TIMEOUT_TO_ACQUIRE)
         return conn
 
     async def close(self, con):
