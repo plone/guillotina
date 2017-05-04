@@ -1,4 +1,4 @@
-1.0.0a16 (unreleased)
+1.0.0a16 (2017-05-04)
 ---------------------
 
 - Be careful with locks on transaction to prevent deadlocks
