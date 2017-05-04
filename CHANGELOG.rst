@@ -1,6 +1,10 @@
 1.0.0a15 (unreleased)
 ---------------------
 
+- add creators/contributors as context properties for the IDublinCore behavior
+  instead of trying to get the data from the annotation
+  [vangheem]
+
 - utils.get_content_path should be based from root of container, not root of database
   [vangheem]
 
