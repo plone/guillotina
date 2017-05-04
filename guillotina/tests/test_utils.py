@@ -43,8 +43,8 @@ async def test_get_content_path(container_requester):
         root = await get_root(request)
         container = await root.async_get('guillotina')
         obj = await container.async_get('item1')
-        assert utils.get_content_path(container) == '/guillotina'
-        assert utils.get_content_path(obj) == '/guillotina/item1'
+        assert utils.get_content_path(container) == '/'
+        assert utils.get_content_path(obj) == '/item1'
 
 
 class TestGetCurrentRequest:

@@ -3,6 +3,7 @@ from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina.exceptions import RequestNotFound
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
@@ -54,7 +55,7 @@ def get_content_path(content: IResource) -> str:
     parts = []
     parent = getattr(content, '__parent__', None)
     while content is not None and content.__name__ is not None and\
-            parent is not None:
+            parent is not None and not IContainer.providedBy(content):
         parts.append(content.__name__)
         content = parent
         parent = getattr(content, '__parent__', None)
