@@ -1,6 +1,9 @@
 1.0.0a15 (unreleased)
 ---------------------
 
+- utils.get_content_path should be based from root of container, not root of database
+  [vangheem]
+
 - Fix another memory leak in get_current_request and add test for it
   [vangheem]
 
