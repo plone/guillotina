@@ -84,8 +84,8 @@ class IDublinCore(Interface):
     for_="guillotina.interfaces.IResource")
 class DublinCore(AnnotationBehavior):
 
-    creators = ContextProperty('creators', None)
-    contributors = ContextProperty('contributors', None)
+    creators = ContextProperty('creators', ())
+    contributors = ContextProperty('contributors', ())
     creation_date = ContextProperty('creation_date', None)
     modification_date = ContextProperty('modification_date', None)
 
