@@ -1,7 +1,8 @@
 1.0.0a16 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Be careful with locks on transaction to prevent deadlocks
+  [vangheem]
 
 
 1.0.0a15 (2017-05-04)
