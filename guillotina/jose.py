@@ -546,29 +546,3 @@ def _jwe_hash_str(ciphertext, iv, adata=b'', version=_TEMP_VER):
 
 def _jws_hash_str(header, claims):
     return b'.'.join((header, claims))
-
-
-def cli_decrypt(jwt, key):
-    print(decrypt(deserialize_compact(jwt), {'k': key}, validate_claims=False))
-
-
-def _cli():
-    import inspect
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    subparsers = parser.add_subparsers(dest='subparser_name')
-
-    commands = {
-        'decrypt': cli_decrypt,
-    }
-    for k, fn in commands.items():
-        p = subparsers.add_parser(k)
-        for arg in inspect.getargspec(fn).args:
-            p.add_argument(arg)
-
-    args = parser.parse_args()
-    handler = commands[args.subparser_name]
-    handler_args = [getattr(args, k) for k in inspect.getargspec(
-        handler).args]
-    handler(*handler_args)

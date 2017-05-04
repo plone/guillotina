@@ -218,7 +218,8 @@ class PostgresqlStorage(BaseStorage):
     ]
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
-                 pool_size=10, transaction_strategy='resolve', **options):
+                 pool_size=10, transaction_strategy='resolve',
+                 conn_acquire_timeout=20, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy)
         self._dsn = dsn
@@ -228,6 +229,7 @@ class PostgresqlStorage(BaseStorage):
         self.__name__ = name
         self._trns_conn = None
         self._lock = asyncio.Lock()
+        self._conn_acquire_timeout = conn_acquire_timeout
         self._options = options
 
     async def finalize(self):
@@ -281,7 +283,7 @@ class PostgresqlStorage(BaseStorage):
             await conn.execute("DROP TABLE IF EXISTS objects;")
 
     async def open(self):
-        conn = await self._pool.acquire()
+        conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
         return conn
 
     async def close(self, con):
@@ -290,14 +292,15 @@ class PostgresqlStorage(BaseStorage):
         except asyncio.CancelledError:
             pass
 
-    async def _get_prepared_statement(self, txn, name, statement):
+    async def _get_prepared_statement(self, txn, name, statement, retries=0):
         '''
         lazy load prepared statements so we don't do unncessary
         calls to pg...
         '''
         name = '_smt_' + name
         if not hasattr(txn, name):
-            setattr(txn, name, await txn._db_conn.prepare(statement))
+            async with txn._lock:
+                setattr(txn, name, await txn._db_conn.prepare(statement))
         return getattr(txn, name)
 
     async def last_transaction(self, txn):
@@ -308,7 +311,8 @@ class PostgresqlStorage(BaseStorage):
     async def load(self, txn, oid):
         int_oid = oid
         smt = await self._get_prepared_statement(txn, 'get_oid', GET_OID)
-        objects = await smt.fetchrow(int_oid)
+        async with txn._lock:
+            objects = await smt.fetchrow(int_oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -327,51 +331,61 @@ class PostgresqlStorage(BaseStorage):
         if part is None:
             part = 0
         # (zoid, tid, state_size, part, main, parent_id, type, json, state)
-        await smt.fetchval(
-            oid,                 # The OID of the object
-            txn._tid,            # Our TID
-            len(p),              # Len of the object
-            part,                # Partition indicator
-            writer.resource,     # Is a resource ?
-            writer.of,           # It belogs to a main
-            old_serial,          # Old serial
-            writer.parent_id,    # Parent OID
-            writer.id,           # Traversal ID
-            writer.type,         # Guillotina type
-            json,                # JSON catalog
-            p                    # Pickle state
-        )
+        async with txn._lock:
+            await smt.fetchval(
+                oid,                 # The OID of the object
+                txn._tid,            # Our TID
+                len(p),              # Len of the object
+                part,                # Partition indicator
+                writer.resource,     # Is a resource ?
+                writer.of,           # It belogs to a main
+                old_serial,          # Old serial
+                writer.parent_id,    # Parent OID
+                writer.id,           # Traversal ID
+                writer.type,         # Guillotina type
+                json,                # JSON catalog
+                p                    # Pickle state
+            )
         obj._p_estimated_size = len(p)
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
-        await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
+        async with txn._lock:
+            await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
 
     async def get_next_tid(self, txn):
         async with self._lock:
+            # we do not use transaction lock here but a storage lock because
+            # a storage object has a shard conn for reads
             return await self._stmt_next_tid.fetchval()
 
     async def start_transaction(self, txn):
-        txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
-        await txn._db_txn.start()
+        async with txn._lock:
+            txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
+            await txn._db_txn.start()
 
     async def get_current_tid(self, txn):
         async with self._lock:
+            # again, use storage lock here instead of trns lock
             return await self._stmt_current_tid.fetchval()
 
     async def get_conflicts(self, txn):
-        return await self._trns_conn.fetch(TXN_CONFLICTS, txn._tid)
+        async with self._lock:
+            # use storage lock instead of transaction lock
+            return await self._trns_conn.fetch(TXN_CONFLICTS, txn._tid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
-            await transaction._db_txn.commit()
+            async with transaction._lock:
+                await transaction._db_txn.commit()
         else:
             log.warn('Do not have db transaction to commit')
         return transaction._tid
 
     async def abort(self, transaction):
         if transaction._db_txn is not None:
-            await transaction._db_txn.rollback()
+            async with transaction._lock:
+                await transaction._db_txn.rollback()
         else:
             log.warn('Do not have db transaction to rollback')
 
@@ -379,17 +393,20 @@ class PostgresqlStorage(BaseStorage):
 
     async def keys(self, txn, oid):
         smt = await self._get_prepared_statement(txn, 'get_sons_keys', GET_CHILDREN_KEYS)
-        result = await smt.fetch(oid)
+        async with txn._lock:
+            result = await smt.fetch(oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
         smt = await self._get_prepared_statement(txn, 'get_child', GET_CHILD)
-        result = await smt.fetchrow(parent_oid, id)
+        async with txn._lock:
+            result = await smt.fetchrow(parent_oid, id)
         return result
 
     async def has_key(self, txn, parent_oid, id):
         smt = await self._get_prepared_statement(txn, 'exist_child', EXIST_CHILD)
-        result = await smt.fetchrow(parent_oid, id)
+        async with txn._lock:
+            result = await smt.fetchrow(parent_oid, id)
         if result is None:
             return False
         else:
@@ -397,55 +414,67 @@ class PostgresqlStorage(BaseStorage):
 
     async def len(self, txn, oid):
         smt = await self._get_prepared_statement(txn, 'num_childs', NUM_CHILDREN)
-        result = await smt.fetchval(oid)
+        async with txn._lock:
+            result = await smt.fetchval(oid)
         return result
 
     async def items(self, txn, oid):
         smt = await self._get_prepared_statement(txn, 'get_childs', GET_CHILDREN)
-        async for record in smt.cursor(oid):
-            yield record
+        async with txn._lock:
+            async for record in smt.cursor(oid):
+                yield record
 
     async def get_annotation(self, txn, oid, id):
         smt = await self._get_prepared_statement(txn, 'get_annotation', GET_ANNOTATION)
-        result = await smt.fetchrow(oid, id)
+        async with txn._lock:
+            result = await smt.fetchrow(oid, id)
         return result
 
     async def get_annotation_keys(self, txn, oid):
         smt = await self._get_prepared_statement(
             txn, 'get_annotations_keys', GET_ANNOTATIONS_KEYS)
-        result = await smt.fetch(oid)
+        async with txn._lock:
+            result = await smt.fetch(oid)
         return result
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         smt = await self._get_prepared_statement(txn, 'has_ob', HAS_OBJECT)
-        result = await smt.fetchrow(oid)
+        async with txn._lock:
+            result = await smt.fetchrow(oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
-            await txn._db_conn.execute('''INSERT INTO objects
-                (zoid, tid, state_size, part, resource, type)
-                VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
-        return await txn._db_conn.execute(
-            INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
+            async with txn._lock:
+                await txn._db_conn.execute('''INSERT INTO objects
+                    (zoid, tid, state_size, part, resource, type)
+                    VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
+        async with txn._lock:
+            return await txn._db_conn.execute(
+                INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         smt = await self._get_prepared_statement(txn, 'read_blob_chunk', READ_BLOB_CHUNK)
-        return await smt.fetchrow(bid, chunk)
+        async with txn._lock:
+            return await smt.fetchrow(bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
         smt = await self._get_prepared_statement(txn, 'read_blob_chunks', READ_BLOB_CHUNKS)
-        async for record in smt.cursor(bid):
-            yield record
+        async with txn._lock:
+            async for record in smt.cursor(bid):
+                yield record
 
     async def del_blob(self, txn, bid):
-        await txn._db_conn.execute(DELETE_BLOB, bid)
+        async with txn._lock:
+            await txn._db_conn.execute(DELETE_BLOB, bid)
 
     async def get_total_number_of_objects(self, txn):
         smt = await self._get_prepared_statement(txn, 'num_rows', NUM_ROWS)
-        result = await smt.fetchval()
+        async with txn._lock:
+            result = await smt.fetchval()
         return result
 
     async def get_total_number_of_resources(self, txn):
         smt = await self._get_prepared_statement(txn, 'num_resources', NUM_RESOURCES)
-        result = await smt.fetchval()
+        async with txn._lock:
+            result = await smt.fetchval()
         return result

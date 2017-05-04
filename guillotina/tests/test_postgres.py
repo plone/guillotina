@@ -1,12 +1,13 @@
+from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.content import Folder
+from guillotina.db.resolution import record_object_change
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
-from guillotina.db.resolution import record_object_change
-from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
-
+import concurrent
+import asyncio
 import pytest
 
 
@@ -21,12 +22,13 @@ async def cleanup(aps):
     await aps._pool.release(conn)
 
 
-async def get_aps(strategy='merge'):
+async def get_aps(strategy='merge', pool_size=5):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
     aps = PostgresqlStorage(
         dsn=dsn, partition=partition_object, name='db',
-        transaction_strategy=strategy)
+        transaction_strategy=strategy, pool_size=pool_size,
+        conn_acquire_timeout=0.1)
     await aps.initialize()
     return aps
 
@@ -462,6 +464,84 @@ async def test_count_total_objects(postgres, dummy_request):
 
     assert await txn1.get_total_number_of_objects() == 1
     assert await txn1.get_total_number_of_resources() == 1
+
+    await tm1.abort()
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+async def test_using_gather_with_queries_before_prepare(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+
+    # create object first, commit it...
+    await tm.begin()
+
+    ob1 = create_content()
+    tm._txn.register(ob1)
+
+    await tm.commit()
+
+    await tm.begin()
+
+    async def get_ob():
+        await tm._txn.get(ob1._p_oid)
+
+    # before we introduced locking on the connection, this would error
+    await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
+
+    await tm.abort()
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+async def test_using_gather_with_queries_after_prepare(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+
+    # create object first, commit it...
+    await tm.begin()
+
+    ob1 = create_content()
+    tm._txn.register(ob1)
+
+    await tm.commit()
+
+    await tm.begin()
+
+    async def get_ob():
+        await tm._txn.get(ob1._p_oid)
+
+    # one initial call should load prepared statement
+    await tm._txn.get(ob1._p_oid)
+
+    # before we introduction locking on the connection, this would error
+    await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
+
+    await tm.abort()
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+async def test_exhausting_pool_size(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    # base aps uses 1 connection from the pool for starting transactions
+    aps = await get_aps(pool_size=2)
+    tm1 = TransactionManager(aps)
+    await tm1.begin()
+
+    tm2 = TransactionManager(aps)
+    with pytest.raises(concurrent.futures._base.TimeoutError):
+        # should throw an error because we've run out of connections in pool
+        await tm2.begin()
 
     await tm1.abort()
 

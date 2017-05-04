@@ -1,6 +1,11 @@
 1.0.0a15 (unreleased)
 ---------------------
 
+- Make sure to lock access to queries on the pg database per connection. This
+  fixes asyncpg errors when you attempted to do actions async actions on
+  one transaction. Where it was easiest to have problem was asyncio.gather
+  [vangheem]
+
 - add creators/contributors as context properties for the IDublinCore behavior
   instead of trying to get the data from the annotation
   [vangheem]
