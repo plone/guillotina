@@ -350,8 +350,7 @@ class PostgresqlStorage(BaseStorage):
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
-        async with txn._lock:
-            await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
+        await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
 
     async def get_next_tid(self, txn):
         async with self._lock:
@@ -360,9 +359,8 @@ class PostgresqlStorage(BaseStorage):
             return await self._stmt_next_tid.fetchval()
 
     async def start_transaction(self, txn):
-        async with txn._lock:
-            txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
-            await txn._db_txn.start()
+        txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
+        await txn._db_txn.start()
 
     async def get_current_tid(self, txn):
         async with self._lock:
@@ -393,20 +391,17 @@ class PostgresqlStorage(BaseStorage):
 
     async def keys(self, txn, oid):
         smt = await self._get_prepared_statement(txn, 'get_sons_keys', GET_CHILDREN_KEYS)
-        async with txn._lock:
-            result = await smt.fetch(oid)
+        result = await smt.fetch(oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
         smt = await self._get_prepared_statement(txn, 'get_child', GET_CHILD)
-        async with txn._lock:
-            result = await smt.fetchrow(parent_oid, id)
+        result = await smt.fetchrow(parent_oid, id)
         return result
 
     async def has_key(self, txn, parent_oid, id):
         smt = await self._get_prepared_statement(txn, 'exist_child', EXIST_CHILD)
-        async with txn._lock:
-            result = await smt.fetchrow(parent_oid, id)
+        result = await smt.fetchrow(parent_oid, id)
         if result is None:
             return False
         else:
@@ -414,67 +409,55 @@ class PostgresqlStorage(BaseStorage):
 
     async def len(self, txn, oid):
         smt = await self._get_prepared_statement(txn, 'num_childs', NUM_CHILDREN)
-        async with txn._lock:
-            result = await smt.fetchval(oid)
+        result = await smt.fetchval(oid)
         return result
 
     async def items(self, txn, oid):
         smt = await self._get_prepared_statement(txn, 'get_childs', GET_CHILDREN)
-        async with txn._lock:
-            async for record in smt.cursor(oid):
-                yield record
+        async for record in smt.cursor(oid):
+            yield record
 
     async def get_annotation(self, txn, oid, id):
         smt = await self._get_prepared_statement(txn, 'get_annotation', GET_ANNOTATION)
-        async with txn._lock:
-            result = await smt.fetchrow(oid, id)
+        result = await smt.fetchrow(oid, id)
         return result
 
     async def get_annotation_keys(self, txn, oid):
         smt = await self._get_prepared_statement(
             txn, 'get_annotations_keys', GET_ANNOTATIONS_KEYS)
-        async with txn._lock:
-            result = await smt.fetch(oid)
+        result = await smt.fetch(oid)
         return result
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         smt = await self._get_prepared_statement(txn, 'has_ob', HAS_OBJECT)
-        async with txn._lock:
-            result = await smt.fetchrow(oid)
+        result = await smt.fetchrow(oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
-            async with txn._lock:
-                await txn._db_conn.execute('''INSERT INTO objects
-                    (zoid, tid, state_size, part, resource, type)
-                    VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
-        async with txn._lock:
-            return await txn._db_conn.execute(
-                INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
+            await txn._db_conn.execute('''INSERT INTO objects
+                (zoid, tid, state_size, part, resource, type)
+                VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
+        return await txn._db_conn.execute(
+            INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         smt = await self._get_prepared_statement(txn, 'read_blob_chunk', READ_BLOB_CHUNK)
-        async with txn._lock:
-            return await smt.fetchrow(bid, chunk)
+        return await smt.fetchrow(bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
         smt = await self._get_prepared_statement(txn, 'read_blob_chunks', READ_BLOB_CHUNKS)
-        async with txn._lock:
-            async for record in smt.cursor(bid):
-                yield record
+        async for record in smt.cursor(bid):
+            yield record
 
     async def del_blob(self, txn, bid):
-        async with txn._lock:
-            await txn._db_conn.execute(DELETE_BLOB, bid)
+        await txn._db_conn.execute(DELETE_BLOB, bid)
 
     async def get_total_number_of_objects(self, txn):
         smt = await self._get_prepared_statement(txn, 'num_rows', NUM_ROWS)
-        async with txn._lock:
-            result = await smt.fetchval()
+        result = await smt.fetchval()
         return result
 
     async def get_total_number_of_resources(self, txn):
         smt = await self._get_prepared_statement(txn, 'num_resources', NUM_RESOURCES)
-        async with txn._lock:
-            result = await smt.fetchval()
+        result = await smt.fetchval()
         return result
