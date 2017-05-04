@@ -27,7 +27,8 @@ async def get_aps(strategy='merge', pool_size=5):
     partition_object = "guillotina.db.interfaces.IPartition"
     aps = PostgresqlStorage(
         dsn=dsn, partition=partition_object, name='db',
-        transaction_strategy=strategy, pool_size=pool_size)
+        transaction_strategy=strategy, pool_size=pool_size,
+        conn_acquire_timeout=0.1)
     await aps.initialize()
     return aps
 
@@ -489,9 +490,8 @@ async def test_using_gather_with_queries_before_prepare(postgres, dummy_request)
     async def get_ob():
         await tm._txn.get(ob1._p_oid)
 
-    # XXX this errors right now with trying to prepare:
-    # asyncpg.exceptions._base.InterfaceError: cannot perform operation: another operation is in progress
-    asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
+    # before we introduced locking on the connection, this would error
+    await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
 
     await tm.abort()
 
@@ -521,9 +521,8 @@ async def test_using_gather_with_queries_after_prepare(postgres, dummy_request):
     # one initial call should load prepared statement
     await tm._txn.get(ob1._p_oid)
 
-    # XXX this errors right now trying to run the query:
-    # asyncpg.exceptions._base.InterfaceError: cannot perform operation: another operation is in progress
-    asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
+    # before we introduction locking on the connection, this would error
+    await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
 
     await tm.abort()
 
@@ -536,21 +535,13 @@ async def test_exhausting_pool_size(postgres, dummy_request):
 
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(pool_size=2)
-    print('storage created')
     tm1 = TransactionManager(aps)
-    print('1st transaction created')
     await tm1.begin()
-    print('1st transaction begun')
+
     tm2 = TransactionManager(aps)
-    print('2st transaction created')
-    # XXX hangs here if you uncomment the next line because it can not allocate
-    # new transaction. Maybe this is fine; however, what happens if we try and
-    # maintain a bunch of web socket connections? Right now at least, web socket api
-    # holds open even a connection to the database. At the very least, that will
-    # need to be changed to start/stop connections on each time data is pushed to it.
-    with pytest.raises(concurrent.futures._base.TimeoutError) as excinfo:
+    with pytest.raises(concurrent.futures._base.TimeoutError):
+        # should throw an error because we've run out of connections in pool
         await tm2.begin()
-    print('1st transaction begun')
 
     await tm1.abort()
 

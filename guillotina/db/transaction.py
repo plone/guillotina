@@ -14,6 +14,7 @@ from guillotina.exceptions import UnresolvableConflict
 from guillotina.utils import get_current_request
 from zope.interface import implementer
 
+import asyncio
 import logging
 import sys
 import time
@@ -70,6 +71,12 @@ class Transaction(object):
         self._db_conn = None
         # Transaction on DB
         self._db_txn = None
+        # Lock on the transaction
+        # some databases need to lock during queries
+        # this provides a lock for each transaction
+        # which would correspond with one connection
+        self._lock = asyncio.Lock()
+
         self.request = request
         self._strategy = getMultiAdapter(
             (manager._storage, self), ITransactionStrategy,
