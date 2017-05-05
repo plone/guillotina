@@ -449,8 +449,9 @@ class PostgresqlStorage(BaseStorage):
                 await txn._db_conn.execute('''INSERT INTO objects
                     (zoid, tid, state_size, part, resource, type)
                     VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
-        return await txn._db_conn.execute(
-            INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
+        async with txn._lock:
+            return await txn._db_conn.execute(
+                INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         smt = await self._get_prepared_statement(txn, 'read_blob_chunk', READ_BLOB_CHUNK)
