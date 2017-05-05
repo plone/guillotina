@@ -1,7 +1,8 @@
 1.0.0a17 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Implement locks on pg connections for everything except cursors
+  [vangheem]
 
 
 1.0.0a16 (2017-05-04)
