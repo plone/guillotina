@@ -55,7 +55,8 @@ app_settings = {
         'serve': 'guillotina.commands.server.ServerCommand',
         'cli': 'guillotina.commands.cli.CliCommand',
         'create': 'guillotina.commands.create.CreateCommand',
-        'shell': 'guillotina.commands.shell.ShellCommand'
+        'shell': 'guillotina.commands.shell.ShellCommand',
+        'testdata': 'guillotina.commands.testdata.TestDataCommand'
     },
     "json_schema_definitions": {},  # json schemas available to reference in docs
 }
