@@ -164,11 +164,6 @@ async def test_resolve_annotaion_conflict(dummy_guillotina):
 
 async def test_retry_request_on_conflict(container_requester):
 
-    class FasterPatchService(DefaultPATCH):
-        async def __call__(self):
-            await asyncio.sleep(0.1)
-            return await super().__call__()
-
     class SlowPatchService(DefaultPATCH):
         async def __call__(self):
             await asyncio.sleep(0.5)
@@ -177,12 +172,6 @@ async def test_retry_request_on_conflict(container_requester):
     configure.register_configuration(SlowPatchService, dict(
         context=IResource,
         name="@slowpatch",
-        method='PATCH',
-        permission='guillotina.ModifyContent'
-    ), 'service')
-    configure.register_configuration(FasterPatchService, dict(
-        context=IResource,
-        name="@fastpatch",
         method='PATCH',
         permission='guillotina.ModifyContent'
     ), 'service')
@@ -198,13 +187,19 @@ async def test_retry_request_on_conflict(container_requester):
             'title': 'foobar',
             '@type': 'Item'
         }))
+
+        async def delayed_patch():
+            # ensure the slow patch was started before the regular one
+            await asyncio.sleep(0.1)
+            await requester.make_request('PATCH', '/db/guillotina/foobar', data=json.dumps({
+                'title': 'fastvalue'
+            }))
+
         results = await asyncio.gather(
             requester.make_request('PATCH', '/db/guillotina/foobar/@slowpatch', data=json.dumps({
                 'title': 'slowvalue'
             })),
-            requester.make_request('PATCH', '/db/guillotina/foobar/@fastpatch', data=json.dumps({
-                'title': 'fastvalue'
-            }))
+            delayed_patch()
         )
         assert results[0][2]['X-Retry-Transaction-Count'] == '1'
 
