@@ -1,7 +1,8 @@
 1.0.0a18 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Make sure to be able to handle int, float responses as well
+  [vangheem]
 
 
 1.0.0a17 (2017-05-05)
