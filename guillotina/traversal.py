@@ -240,6 +240,7 @@ class MatchInfo(AbstractMatchInfo):
                 view_result = generate_unauthorized_response(e, request)
             except ConflictError as e:
                 # request should already have been aborted
+                logger.info('DB Conflict detected, retrying request({})'.format(retries + 1))
                 if app_settings.get('conflict_retry_attempts', 3) > retries:
                     request._retry_attempt = retries + 1
                     return await self.handler(request, retries + 1)
