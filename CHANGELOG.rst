@@ -1,4 +1,4 @@
-1.0.0a18 (unreleased)
+1.0.0a18 (2017-05-08)
 ---------------------
 
 - Make sure to be able to handle int, float responses as well
