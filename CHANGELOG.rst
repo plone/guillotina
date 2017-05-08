@@ -1,7 +1,8 @@
 1.0.0a110 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Fix conflict error retries and make tests for it
+  [vangheem]
 
 
 1.0.0a19 (2017-05-08)
