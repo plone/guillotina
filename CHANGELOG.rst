@@ -1,4 +1,4 @@
-1.0.0a19 (unreleased)
+1.0.0a19 (2017-05-08)
 ---------------------
 
 - Fix conflict error retries and make tests for it
