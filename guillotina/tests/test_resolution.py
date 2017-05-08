@@ -1,5 +1,6 @@
-from guillotina.annotations import AnnotationData
 from guillotina import configure
+from guillotina.annotations import AnnotationData
+from guillotina.api.content import DefaultPATCH
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import queryMultiAdapter
 from guillotina.db.interfaces import IWriter
@@ -12,9 +13,10 @@ from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import get_mocked_request
-from guillotina.api.content import DefaultPATCH
 
-import pytest, asyncio, json
+import asyncio
+import json
+import pytest
 
 
 def test_record_change_adds_to_object():

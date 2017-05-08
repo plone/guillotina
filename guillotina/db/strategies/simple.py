@@ -1,7 +1,7 @@
 from guillotina import configure
-from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionStrategy
 
 
 @configure.adapter(

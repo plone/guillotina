@@ -6,8 +6,9 @@ from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
-import concurrent
+
 import asyncio
+import concurrent
 import pytest
 
 

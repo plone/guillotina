@@ -1,5 +1,6 @@
-from guillotina.interfaces import IResourceFieldSerializer, IResourceFieldDeserializer
 from guillotina.component import queryMultiAdapter
+from guillotina.interfaces import IResourceFieldDeserializer
+from guillotina.interfaces import IResourceFieldSerializer
 
 
 async def test_serialize_cloud_file(dummy_request):
