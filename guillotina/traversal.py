@@ -239,9 +239,10 @@ class MatchInfo(AbstractMatchInfo):
                 await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except ConflictError as e:
-                if app_settings.get('conflict_retry_attempts', 3) < retries:
+                # request should already have been aborted
+                if app_settings.get('conflict_retry_attempts', 3) > retries:
                     request._retry_attempt = retries + 1
-                    return await self.handlers(request, retries + 1)
+                    return await self.handler(request, retries + 1)
                 view_result = generate_error_response(
                     e, request, 'ConflictDB', 409)
             except Exception as e:
@@ -269,6 +270,8 @@ class MatchInfo(AbstractMatchInfo):
         cors_headers = apply_cors(request)
         cors_headers.update(view_result.headers)
         view_result.headers = cors_headers
+        if retries > 0:
+            view_result.headers['X-Retry-Transaction-Count'] = str(retries)
 
         resp = await self.rendered(view_result)
         if not resp.prepared:

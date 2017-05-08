@@ -1,4 +1,5 @@
 from guillotina.annotations import AnnotationData
+from guillotina import configure
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import queryMultiAdapter
 from guillotina.db.interfaces import IWriter
@@ -11,8 +12,9 @@ from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import get_mocked_request
+from guillotina.api.content import DefaultPATCH
 
-import pytest
+import pytest, asyncio, json
 
 
 def test_record_change_adds_to_object():
@@ -158,3 +160,53 @@ async def test_resolve_annotaion_conflict(dummy_guillotina):
 
     assert new_obj['title'] == 'foobar-other'
     assert new_obj['description'] == 'foobar-desc'
+
+
+async def test_retry_request_on_conflict(container_requester):
+
+    class FasterPatchService(DefaultPATCH):
+        async def __call__(self):
+            await asyncio.sleep(0.1)
+            return await super().__call__()
+
+    class SlowPatchService(DefaultPATCH):
+        async def __call__(self):
+            await asyncio.sleep(0.5)
+            return await super().__call__()
+
+    configure.register_configuration(SlowPatchService, dict(
+        context=IResource,
+        name="@slowpatch",
+        method='PATCH',
+        permission='guillotina.ModifyContent'
+    ), 'service')
+    configure.register_configuration(FasterPatchService, dict(
+        context=IResource,
+        name="@fastpatch",
+        method='PATCH',
+        permission='guillotina.ModifyContent'
+    ), 'service')
+
+    async with await container_requester as requester:
+        config = requester.root.app.config
+        configure.load_configuration(
+            config, 'guillotina.tests', 'service')
+        config.execute_actions()
+
+        response, status = await requester('POST', '/db/guillotina', data=json.dumps({
+            'id': 'foobar',
+            'title': 'foobar',
+            '@type': 'Item'
+        }))
+        results = await asyncio.gather(
+            requester.make_request('PATCH', '/db/guillotina/foobar/@slowpatch', data=json.dumps({
+                'title': 'slowvalue'
+            })),
+            requester.make_request('PATCH', '/db/guillotina/foobar/@fastpatch', data=json.dumps({
+                'title': 'fastvalue'
+            }))
+        )
+        assert results[0][2]['X-Retry-Transaction-Count'] == '1'
+
+        response, status = await requester('GET', '/db/guillotina/foobar')
+        assert response['title'] == 'slowvalue'
