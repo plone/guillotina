@@ -1,7 +1,17 @@
 1.0.0a110 (unreleased)
 ----------------------
 
+- Tie every request to one transaction instead of trying to juggle pool of
+  transactions in transaction manager.
+  [vangheem]
+
 - Fix conflict error retries and make tests for it
+  [vangheem]
+
+- Only issue transaction id for write operations
+  [vangheem]
+
+- Use sequence for transaction id for postgresql and serial for cockroachdb
   [vangheem]
 
 

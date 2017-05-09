@@ -77,6 +77,8 @@ class Transaction(object):
         # which would correspond with one connection
         self._lock = asyncio.Lock()
 
+        # do we *not* follow naming standards of using "_request" here so
+        # get_current_request can magically find us here...
         self.request = request
         self._strategy = getMultiAdapter(
             (manager._storage, self), ITransactionStrategy,
@@ -274,7 +276,7 @@ class Transaction(object):
         """Verify that a data manager can commit the transaction."""
         ok = await self._strategy.tpc_vote()
         if ok is False:
-            await self.abort()
+            await self._manager.abort(request=self.request, txn=self)
             raise ConflictError(self)
 
     async def resolve_conflict(self, conflict):
@@ -298,13 +300,6 @@ class Transaction(object):
         """Indicate confirmation that the transaction is done.
         """
         await self._strategy.tpc_finish()
-        # Set on cache
-        # for key, obj in self.added.items():
-        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
-        # for key, obj in self.modified.items():
-        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
-        # for key, obj in self.deleted.items():
-        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
         self.tpc_cleanup()
 
     def tpc_cleanup(self):

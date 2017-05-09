@@ -17,13 +17,14 @@ import uuid
 def get_mocked_request(db=None):
     request = make_mocked_request('POST', '/')
     request.interaction = None
+    request._db_write_enabled = True
     alsoProvides(request, IRequest)
     alsoProvides(request, IDefaultLayer)
     if db is not None:
         db._db.request = request
         request._db_id = db.id
         request._db = db
-        request._tm = db.new_transaction_manager()
+        request._tm = db.get_transaction_manager()
         request._tm.request = request  # so get_current_request can find it...
     return request
 
@@ -36,8 +37,9 @@ def login(request):
 
 
 async def get_root(request):
-    await request._tm.begin(request=request)
-    root = await request._tm.root()
+    txn = await request._tm.begin(request=request)
+    root = await request._tm.get_root(txn=txn)
+    request._tm.abort(txn=txn)
     return root
 
 

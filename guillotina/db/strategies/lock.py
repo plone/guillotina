@@ -2,12 +2,13 @@ from guillotina import configure
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
+from guillotina.db.strategies.base import BaseStrategy
 
 
 @configure.adapter(
     for_=(IStorage, ITransaction),
     provides=ITransactionStrategy, name="lock")
-class LockStrategy:
+class LockStrategy(BaseStrategy):
     '''
     XXX not implemented
 

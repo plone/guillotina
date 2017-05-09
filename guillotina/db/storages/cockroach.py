@@ -21,6 +21,10 @@ INSERT = """
     """
 
 
+NEXT_TID = """SELECT unique_rowid()"""
+MAX_TID = "SELECT COALESCE(MAX(tid), 0) from objects;"
+
+
 class CockroachStorage(pg.PostgresqlStorage):
     '''
     Differences that we use from postgresql:
@@ -31,6 +35,8 @@ class CockroachStorage(pg.PostgresqlStorage):
             - potential solutions
                 - utility to recursively delete?
                 - complex delete from query that does the sub queries to delete?
+        - no sequence support
+            - use serial construct of unique_rowid() instead
     '''
 
     _object_schema = pg.PostgresqlStorage._object_schema.copy()
@@ -44,6 +50,21 @@ class CockroachStorage(pg.PostgresqlStorage):
     _blob_schema.update({
         'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects',
     })
+
+    _initialize_statements = [
+        'CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);',
+        'CREATE INDEX IF NOT EXISTS object_of ON objects (of);',
+        'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
+        'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
+        'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
+        'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
+        'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
+        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);'
+    ]
+
+    async def initialize_tid_statements(self):
+        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
+        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
