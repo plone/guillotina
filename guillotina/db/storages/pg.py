@@ -100,7 +100,7 @@ UPDATE = """
 
 
 NEXT_TID = "SELECT nextval('tid_sequence');"
-MAX_TID = "SELECT COALESCE(MAX(tid), 0) from objects;"
+MAX_TID = "SELECT last_value FROM tid_sequence;"
 
 
 NUM_CHILDREN = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
@@ -256,8 +256,8 @@ class PostgresqlStorage(BaseStorage):
             old_tid = await self._read_conn.fetchval('SELECT max(tid) from transaction')
             current_tid = await self.get_current_tid(None)
             if old_tid > current_tid:
-                await self._read_conn.fetchval(
-                    'ALTER SEQUENCE tid_sequence RESTART WITH $1::int', old_tid + 1)
+                await self._read_conn.execute(
+                    'ALTER SEQUENCE tid_sequence RESTART WITH ' + str(old_tid + 1))
         except asyncpg.exceptions.UndefinedTableError:
             # no need to upgrade
             pass
