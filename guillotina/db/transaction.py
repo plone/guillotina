@@ -77,7 +77,7 @@ class Transaction(object):
         # which would correspond with one connection
         self._lock = asyncio.Lock()
 
-        # do we *not* follow naming standards of using "_request" here so
+        # we *not* follow naming standards of using "_request" here so
         # get_current_request can magically find us here...
         self.request = request
         self._strategy = getMultiAdapter(

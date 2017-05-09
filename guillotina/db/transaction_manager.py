@@ -21,9 +21,9 @@ class TransactionManager(object):
     def __init__(self, storage):
         # Guillotine Storage
         self._storage = storage
-        # Last transaction created
+        # Pointer to last transaction created
         self._last_txn = None
-        # Pool of transactions
+        # Pointer to last db connection opened
         self._last_db_conn = None
 
     async def get_root(self, txn=None):
@@ -45,6 +45,8 @@ class TransactionManager(object):
 
         user = None
 
+        # XXX do we want to auto clean up here? This will break tests
+        # that are starting multiple transactions
         # if hasattr(request, '_txn'):
         #     # already has txn registered, close connection on it...
         #     await self._close_txn(request._txn)

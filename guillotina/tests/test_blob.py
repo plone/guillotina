@@ -12,7 +12,7 @@ async def test_create_blob(postgres, guillotina_main):
     request = get_mocked_request(db)
     login(request)
 
-    await request._tm.begin(request=request)
+    txn = await request._tm.begin(request=request)
 
     container = await create_content_in_container(
         db, 'Container', 'container', request=request,
@@ -21,15 +21,15 @@ async def test_create_blob(postgres, guillotina_main):
     blob = Blob(container)
     container.blob = blob
 
-    await request._tm.commit(request)
-    await request._tm.begin(request=request)
+    await request._tm.commit(txn=txn)
+    txn = await request._tm.begin(request=request)
 
     container = await db.async_get('container')
     assert blob.bid == container.blob.bid
     assert blob.resource_zoid == container._p_oid
     await db.async_del('container')
 
-    await request._tm.commit(request)
+    await request._tm.commit(txn=txn)
 
 
 async def test_write_blob_data(postgres, guillotina_main):
@@ -38,7 +38,7 @@ async def test_write_blob_data(postgres, guillotina_main):
     request = get_mocked_request(db)
     login(request)
 
-    await request._tm.begin(request=request)
+    txn = await request._tm.begin(request=request)
 
     container = await create_content_in_container(
         db, 'Container', 'container', request=request,
@@ -50,8 +50,8 @@ async def test_write_blob_data(postgres, guillotina_main):
     blobfi = blob.open('w')
     await blobfi.async_write(b'foobar')
 
-    await request._tm.commit(request)
-    await request._tm.begin(request=request)
+    await request._tm.commit(txn=txn)
+    txn = await request._tm.begin(request=request)
 
     container = await db.async_get('container')
     assert await container.blob.open().async_read() == b'foobar'
@@ -60,7 +60,7 @@ async def test_write_blob_data(postgres, guillotina_main):
 
     await db.async_del('container')
 
-    await request._tm.commit(request)
+    await request._tm.commit(txn=txn)
 
 
 async def test_write_large_blob_data(postgres, guillotina_main):
@@ -69,7 +69,7 @@ async def test_write_large_blob_data(postgres, guillotina_main):
     request = get_mocked_request(db)
     login(request)
 
-    await request._tm.begin(request=request)
+    txn = await request._tm.begin(request=request)
 
     container = await create_content_in_container(
         db, 'Container', 'container', request=request,
@@ -83,8 +83,8 @@ async def test_write_large_blob_data(postgres, guillotina_main):
     blobfi = blob.open('w')
     await blobfi.async_write(b'foobar' * multiplier)
 
-    await request._tm.commit(request)
-    await request._tm.begin(request=request)
+    await request._tm.commit(txn=txn)
+    txn = await request._tm.begin(request=request)
 
     container = await db.async_get('container')
     assert await container.blob.open().async_read() == (b'foobar' * multiplier)
@@ -93,4 +93,4 @@ async def test_write_large_blob_data(postgres, guillotina_main):
 
     await db.async_del('container')
 
-    await request._tm.commit(request)
+    await request._tm.commit(txn=txn)

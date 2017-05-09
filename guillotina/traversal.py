@@ -136,7 +136,7 @@ async def traverse(request, parent, path):
     if IDatabase.providedBy(context):
         request._db_write_enabled = request.method in WRITING_VERBS
         request._db_id = context.id
-        # Create a transaction Manager
+        # Add a transaction Manager to request
         tm = request._tm = context.get_transaction_manager()
         # Start a transaction
         txn = await tm.begin(request=request)
