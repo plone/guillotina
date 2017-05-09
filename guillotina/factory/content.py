@@ -116,21 +116,11 @@ class Database(object):
         self._conn = None
 
     def get_transaction_manager(self):
-        if self._db.request is not None and hasattr(self._db.request, '_tm'):
-            return self._db.request._tm
-        if self._db._tm is None:
-            self._db.new_transaction_manager()
-        return self._db._tm
-
-    def new_transaction_manager(self):
-        tm = self._db.new_transaction_manager()
-        if self._db.request is not None:
-            self._db.request._tm = tm
-        return tm
+        return self._db.get_transaction_manager()
 
     @property
     def _p_jar(self):
-        return self.get_transaction_manager()._txn
+        return self.get_transaction_manager()._last_txn
 
     async def get_root(self):
         return await self._p_jar.get(ROOT_ID)

@@ -18,12 +18,12 @@ async def cleanup(aps):
     await txn.start()
     await conn.execute("DROP TABLE IF EXISTS objects;")
     await conn.execute("DROP TABLE IF EXISTS blobs;")
-    await conn.execute("UPDATE transaction SET tid = 1")
+    await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn.commit()
     await aps._pool.release(conn)
 
 
-async def get_aps(strategy='merge', pool_size=5):
+async def get_aps(strategy='merge', pool_size=15):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
     aps = PostgresqlStorage(
@@ -40,26 +40,21 @@ async def test_read_obs(postgres, dummy_request):
 
     aps = await get_aps()
     tm = TransactionManager(aps)
-    await tm.begin()
-    txn = tm._txn
+    txn = await tm.begin()
 
     ob = create_content()
     txn.register(ob)
 
     assert len(txn.modified) == 1
 
-    await tm.commit()
+    await tm.commit(txn=txn)
 
-    await tm.begin()
-    txn = tm._txn
-
-    lasttid = await aps.last_transaction(txn)
-    assert lasttid is not None
+    txn = await tm.begin()
 
     ob2 = await txn.get(ob._p_oid)
 
     assert ob2._p_oid == ob._p_oid
-    await tm.commit()
+    await tm.commit(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -70,8 +65,7 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
 
     aps = await get_aps()
     tm = TransactionManager(aps)
-    await tm.begin()
-    txn = tm._txn
+    txn = await tm.begin()
 
     folder = create_content(Folder, 'Folder')
     txn.register(folder)
@@ -80,9 +74,8 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
 
     assert len(txn.modified) == 2
 
-    await tm.commit()
-    await tm.begin()
-    txn = tm._txn
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
 
     ob2 = await txn.get(ob._p_oid)
     folder2 = await txn.get(folder._p_oid)
@@ -94,16 +87,15 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
     txn.delete(folder2)
     assert len(txn.deleted) == 1
 
-    await tm.commit()
-    await tm.begin()
-    txn = tm._txn
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
 
     with pytest.raises(KeyError):
         await txn.get(ob._p_oid)
     with pytest.raises(KeyError):
         await txn.get(folder._p_oid)
 
-    await tm.abort()
+    await tm.abort(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -114,17 +106,15 @@ async def test_create_blob(postgres, dummy_request):
 
     aps = await get_aps()
     tm = TransactionManager(aps)
-    await tm.begin()
-    txn = tm._txn
+    txn = await tm.begin()
 
     ob = create_content()
     txn.register(ob)
 
     await txn.write_blob_chunk('X' * 32, ob._p_oid, 0, b'foobar')
 
-    await tm.commit()
-    await tm.begin()
-    txn = tm._txn
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
 
     blob_record = await txn.read_blob_chunk('X' * 32, 0)
     assert blob_record['data'] == b'foobar'
@@ -134,7 +124,7 @@ async def test_create_blob(postgres, dummy_request):
     assert ob2.type_name == 'Item'
     assert ob2.id == 'foobar'
 
-    await tm.abort()
+    await tm.abort(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -145,31 +135,28 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
 
     aps = await get_aps()
     tm = TransactionManager(aps)
-    await tm.begin()
-    txn = tm._txn
+    txn = await tm.begin()
 
     ob = create_content()
     txn.register(ob)
 
     await txn.write_blob_chunk('X' * 32, ob._p_oid, 0, b'foobar')
 
-    await tm.commit()
-    await tm.begin()
-    txn = tm._txn
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
 
     ob = await txn.get(ob._p_oid)
     txn.delete(ob)
 
-    await tm.commit()
-    await tm.begin()
-    txn = tm._txn
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
 
     assert await txn.read_blob_chunk('X' * 32, 0) is None
 
     with pytest.raises(KeyError):
         await txn.get(ob._p_oid)
 
-    await tm.abort()
+    await tm.abort(txn=txn)
     await aps.remove()
     await cleanup(aps)
 
@@ -178,24 +165,20 @@ async def test_should_raise_conflict_error(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps()
-    tm1 = TransactionManager(aps)
-    tm2 = TransactionManager(aps)
+    tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm1.begin()
-    txn = tm1._txn
+    txn = await tm.begin()
 
     ob = create_content()
     ob.title = 'foobar'
     txn.register(ob)
 
-    await tm1.commit()
+    await tm.commit(txn=txn)
 
     # 1 started before 2
-    await tm1.begin()
-    await tm2.begin()
-    txn1 = tm1._txn
-    txn2 = tm2._txn
+    txn1 = await tm.begin()
+    txn2 = await tm.begin()
 
     ob1 = await txn1.get(ob._p_oid)
     ob2 = await txn2.get(ob._p_oid)
@@ -207,9 +190,10 @@ async def test_should_raise_conflict_error(postgres, dummy_request):
     txn2.register(ob2)
 
     # commit 2 before 1
-    await tm2.commit()
+    await tm.commit(txn=txn2)
     with pytest.raises(ConflictError):
-        await tm1.commit()
+        await tm.commit(txn=txn1)
+    await tm.abort(txn=txn1)
 
     await aps.remove()
     await cleanup(aps)
@@ -219,25 +203,21 @@ async def test_should_not_raise_conflict_error_when_editing_diff_data(postgres, 
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps()
-    tm1 = TransactionManager(aps)
-    tm2 = TransactionManager(aps)
+    tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm1.begin()
-    txn = tm1._txn
+    txn = await tm.begin()
 
     ob = create_content()
     ob.title = 'foobar'
     ob.description = 'foobar'
     txn.register(ob)
 
-    await tm1.commit()
+    await tm.commit(txn=txn)
 
     # 1 started before 2
-    await tm1.begin()
-    await tm2.begin()
-    txn1 = tm1._txn
-    txn2 = tm2._txn
+    txn1 = await tm.begin()
+    txn2 = await tm.begin()
 
     ob1 = await txn1.get(ob._p_oid)
     ob2 = await txn2.get(ob._p_oid)
@@ -250,16 +230,16 @@ async def test_should_not_raise_conflict_error_when_editing_diff_data(postgres, 
     txn2.register(ob2)
 
     # commit 2 before 1
-    await tm2.commit()
-    await tm1.commit()
+    await tm.commit(txn=txn2)
+    await tm.commit(txn=txn1)
 
     # and new object should have data from each
-    await tm1.begin()
-    ob1 = await txn1.get(ob._p_oid)
+    txn = await tm.begin()
+    ob1 = await txn.get(ob._p_oid)
     assert ob1.title == 'foobar1'
     assert ob2.description == 'foobar2'
 
-    await tm1.commit()
+    await tm.commit(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -269,25 +249,21 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps('resolve')
-    tm1 = TransactionManager(aps)
-    tm2 = TransactionManager(aps)
+    tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm1.begin()
-    txn = tm1._txn
+    txn = await tm.begin()
 
     ob = create_content()
     ob.title = 'foobar'
     ob.description = 'foobar'
     txn.register(ob)
 
-    await tm1.commit()
+    await tm.commit(txn=txn)
 
     # 1 started before 2
-    await tm1.begin()
-    await tm2.begin()
-    txn1 = tm1._txn
-    txn2 = tm2._txn
+    txn1 = await tm.begin()
+    txn2 = await tm.begin()
 
     ob1 = await txn1.get(ob._p_oid)
     ob2 = await txn2.get(ob._p_oid)
@@ -300,9 +276,9 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     txn2.register(ob2)
 
     # commit 2 before 1
-    await tm2.commit()
+    await tm.commit(txn=txn2)
     with pytest.raises(ConflictError):
-        await tm1.commit()
+        await tm.commit(txn=txn1)
 
     await aps.remove()
     await cleanup(aps)
@@ -313,8 +289,7 @@ async def test_should_reset_changes_after_commit(postgres, dummy_request):
 
     aps = await get_aps()
     tm = TransactionManager(aps)
-    await tm.begin()
-    txn = tm._txn
+    txn = await tm.begin()
 
     ob = create_content()
     ob.title = 'foobar'
@@ -323,7 +298,7 @@ async def test_should_reset_changes_after_commit(postgres, dummy_request):
 
     assert len(txn.modified) == 1
     assert len(ob.__changes__) == 1
-    await tm.commit()
+    await tm.commit(txn=txn)
     assert len(ob.__changes__) == 0
 
     await aps.remove()
@@ -334,25 +309,21 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps()
-    tm1 = TransactionManager(aps)
-    tm2 = TransactionManager(aps)
+    tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm1.begin()
-    txn = tm1._txn
+    txn = await tm.begin()
 
     ob1 = create_content()
     ob2 = create_content()
     txn.register(ob1)
     txn.register(ob2)
 
-    await tm1.commit()
+    await tm.commit(txn=txn)
 
     # 1 started before 2
-    await tm1.begin()
-    await tm2.begin()
-    txn1 = tm1._txn
-    txn2 = tm2._txn
+    txn1 = await tm.begin()
+    txn2 = await tm.begin()
 
     ob1 = await txn1.get(ob1._p_oid)
     ob2 = await txn2.get(ob2._p_oid)
@@ -361,9 +332,9 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
     txn2.register(ob2)
 
     # commit 2 before 1
-    await tm2.commit()
+    await tm.commit(txn=txn2)
     # XXX should not raise conflict error
-    await tm1.commit()
+    await tm.commit(txn=txn1)
 
     await aps.remove()
     await cleanup(aps)
@@ -373,25 +344,21 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps('simple')
-    tm1 = TransactionManager(aps)
-    tm2 = TransactionManager(aps)
+    tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm1.begin()
-    txn = tm1._txn
+    txn = await tm.begin()
 
     ob1 = create_content()
     ob2 = create_content()
     txn.register(ob1)
     txn.register(ob2)
 
-    await tm1.commit()
+    await tm.commit(txn=txn)
 
     # 1 started before 2
-    await tm1.begin()
-    await tm2.begin()
-    txn1 = tm1._txn
-    txn2 = tm2._txn
+    txn1 = await tm.begin()
+    txn2 = await tm.begin()
 
     ob1 = await txn1.get(ob1._p_oid)
     ob2 = await txn2.get(ob2._p_oid)
@@ -400,10 +367,10 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
     txn2.register(ob2)
 
     # commit 2 before 1
-    await tm2.commit()
+    await tm.commit(txn=txn2)
     # XXX should not raise conflict error
     with pytest.raises(ConflictError):
-        await tm1.commit()
+        await tm.commit(txn=txn1)
 
     await aps.remove()
     await cleanup(aps)
@@ -413,34 +380,33 @@ async def test_none_strat_allows_trans_commits(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps('none')
-    tm1 = TransactionManager(aps)
-    tm2 = TransactionManager(aps)
+    tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm1.begin()
+    txn = await tm.begin()
 
     ob1 = create_content()
-    tm1._txn.register(ob1)
+    txn.register(ob1)
 
-    await tm1.commit()
+    await tm.commit(txn=txn)
 
-    await tm1.begin()
-    await tm2.begin()
-    ob1 = await tm1._txn.get(ob1._p_oid)
-    ob2 = await tm2._txn.get(ob1._p_oid)
+    txn1 = await tm.begin()
+    txn2 = await tm.begin()
+    ob1 = await txn1.get(ob1._p_oid)
+    ob2 = await txn2.get(ob1._p_oid)
     ob1.title = 'foobar1'
     ob2.title = 'foobar2'
-    tm1._txn.register(ob1)
-    tm2._txn.register(ob2)
+    txn1.register(ob1)
+    txn2.register(ob2)
 
-    await tm2.commit()
-    await tm1.commit()
+    await tm.commit(txn=txn2)
+    await tm.commit(txn=txn1)
 
-    await tm1.begin()
-    ob1 = await tm1._txn.get(ob1._p_oid)
+    txn = await tm.begin()
+    ob1 = await txn.get(ob1._p_oid)
     assert ob1.title == 'foobar1'
 
-    await tm1.abort()
+    await tm.abort(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -450,23 +416,21 @@ async def test_count_total_objects(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps()
-    tm1 = TransactionManager(aps)
+    tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm1.begin()
-    txn = tm1._txn
+    txn = await tm.begin()
 
     ob = create_content()
     txn.register(ob)
 
-    await tm1.commit()
-    await tm1.begin()
-    txn1 = tm1._txn
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
 
-    assert await txn1.get_total_number_of_objects() == 1
-    assert await txn1.get_total_number_of_resources() == 1
+    assert await txn.get_total_number_of_objects() == 1
+    assert await txn.get_total_number_of_resources() == 1
 
-    await tm1.abort()
+    await tm.abort(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -479,22 +443,22 @@ async def test_using_gather_with_queries_before_prepare(postgres, dummy_request)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm.begin()
+    txn = await tm.begin()
 
     ob1 = create_content()
-    tm._txn.register(ob1)
+    txn.register(ob1)
 
-    await tm.commit()
+    await tm.commit(txn=txn)
 
-    await tm.begin()
+    txn = await tm.begin()
 
     async def get_ob():
-        await tm._txn.get(ob1._p_oid)
+        await txn.get(ob1._p_oid)
 
     # before we introduced locking on the connection, this would error
     await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
 
-    await tm.abort()
+    await tm.abort(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -507,25 +471,25 @@ async def test_using_gather_with_queries_after_prepare(postgres, dummy_request):
     tm = TransactionManager(aps)
 
     # create object first, commit it...
-    await tm.begin()
+    txn = await tm.begin()
 
     ob1 = create_content()
-    tm._txn.register(ob1)
+    txn.register(ob1)
 
-    await tm.commit()
+    await tm.commit(txn=txn)
 
-    await tm.begin()
+    txn = await tm.begin()
 
     async def get_ob():
-        await tm._txn.get(ob1._p_oid)
+        await txn.get(ob1._p_oid)
 
     # one initial call should load prepared statement
-    await tm._txn.get(ob1._p_oid)
+    await txn.get(ob1._p_oid)
 
     # before we introduction locking on the connection, this would error
     await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
 
-    await tm.abort()
+    await tm.abort(txn=txn)
 
     await aps.remove()
     await cleanup(aps)
@@ -536,15 +500,14 @@ async def test_exhausting_pool_size(postgres, dummy_request):
 
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(pool_size=2)
-    tm1 = TransactionManager(aps)
-    await tm1.begin()
+    tm = TransactionManager(aps)
+    txn = await tm.begin()
 
-    tm2 = TransactionManager(aps)
     with pytest.raises(concurrent.futures._base.TimeoutError):
         # should throw an error because we've run out of connections in pool
-        await tm2.begin()
+        await tm.begin()
 
-    await tm1.abort()
+    await tm.abort(txn=txn)
 
     await aps.remove()
     await cleanup(aps)

@@ -38,7 +38,7 @@ class Status:
 @implementer(ITransaction)
 class Transaction(object):
 
-    def __init__(self, manager, request=None):
+    def __init__(self, manager, request=None, loop=None):
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE
@@ -75,8 +75,10 @@ class Transaction(object):
         # some databases need to lock during queries
         # this provides a lock for each transaction
         # which would correspond with one connection
-        self._lock = asyncio.Lock()
+        self._lock = asyncio.Lock(loop=loop)
 
+        # we *not* follow naming standards of using "_request" here so
+        # get_current_request can magically find us here...
         self.request = request
         self._strategy = getMultiAdapter(
             (manager._storage, self), ITransactionStrategy,
@@ -274,7 +276,7 @@ class Transaction(object):
         """Verify that a data manager can commit the transaction."""
         ok = await self._strategy.tpc_vote()
         if ok is False:
-            await self.abort()
+            await self._manager.abort(request=self.request, txn=self)
             raise ConflictError(self)
 
     async def resolve_conflict(self, conflict):
@@ -298,13 +300,6 @@ class Transaction(object):
         """Indicate confirmation that the transaction is done.
         """
         await self._strategy.tpc_finish()
-        # Set on cache
-        # for key, obj in self.added.items():
-        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
-        # for key, obj in self.modified.items():
-        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
-        # for key, obj in self.deleted.items():
-        #     self._cache.set(obj._p_oid, obj, obj.__cache__)
         self.tpc_cleanup()
 
     def tpc_cleanup(self):

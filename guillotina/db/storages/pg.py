@@ -57,10 +57,6 @@ GET_ANNOTATION = """
     WHERE of = $1::varchar(32) AND id = $2::text
     """
 
-MAX_TID = """
-    SELECT max(tid) FROM objects
-    """
-
 
 INSERT = """
     INSERT INTO objects
@@ -103,11 +99,8 @@ UPDATE = """
     """
 
 
-NEXT_TID = """UPDATE transaction
-SET tid = tid + 1
-WHERE id = 1
-RETURNING tid;"""
-CURRENT_TID = "SELECT tid from transaction"
+NEXT_TID = "SELECT nextval('tid_sequence');"
+MAX_TID = "SELECT last_value FROM tid_sequence;"
 
 
 NUM_CHILDREN = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
@@ -157,6 +150,13 @@ DELETE_BLOB = """
 
 
 TXN_CONFLICTS = """
+    SELECT zoid, tid, state_size, resource, type, id
+    FROM objects
+    WHERE tid > $1
+    """
+
+
+TXN_CONFLICTS_FULL = """
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
     WHERE tid > $1
@@ -188,15 +188,6 @@ class PostgresqlStorage(BaseStorage):
         'state': 'BYTEA'
     }
 
-    # will be a one-row table to hold current transaction id
-    # why:
-    #   - 1: you can lock it, you can not lock a sequence
-    #   - 2: compat with cockroach db
-    _transaction_schema = {
-        'id': 'INT NOT NULL PRIMARY KEY',
-        'tid': 'BIGINT'
-    }
-
     _blob_schema = {
         'bid': 'VARCHAR(32) NOT NULL',
         'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects ON DELETE CASCADE',
@@ -213,12 +204,11 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
-        'CREATE INDEX IF NOT EXISTS transaction_tid ON transaction (tid);',
-        'INSERT INTO transaction (id, tid) VALUES (1, 1) ON CONFLICT (id) DO NOTHING'
+        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
     ]
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
-                 pool_size=10, transaction_strategy='resolve',
+                 pool_size=12, transaction_strategy='resolve',
                  conn_acquire_timeout=20, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy)
@@ -227,13 +217,13 @@ class PostgresqlStorage(BaseStorage):
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
-        self._trns_conn = None
+        self._read_conn = None
         self._lock = asyncio.Lock()
         self._conn_acquire_timeout = conn_acquire_timeout
         self._options = options
 
     async def finalize(self):
-        await self._pool.release(self._trns_conn)
+        await self._pool.release(self._read_conn)
         await self._pool.close()
 
     async def initialize(self, loop=None):
@@ -248,7 +238,6 @@ class PostgresqlStorage(BaseStorage):
         # Check DB
         statements = [
             get_table_definition('objects', self._object_schema),
-            get_table_definition('transaction', self._transaction_schema),
             get_table_definition('blobs', self._blob_schema,
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
         ]
@@ -259,22 +248,23 @@ class PostgresqlStorage(BaseStorage):
                 await conn.execute(statement)
 
         # shared read connection on all transactions
-        self._trns_conn = await self.open()
+        self._read_conn = await self.open()
         await self.initialize_tid_statements()
 
-        # migrate old tid scheme over
+        # migrate old transaction table scheme over
         try:
-            old_tid = await self._trns_conn.fetchval('SELECT last_value from tid_seq')
+            old_tid = await self._read_conn.fetchval('SELECT max(tid) from transaction')
             current_tid = await self.get_current_tid(None)
             if old_tid > current_tid:
-                await self._trns_conn.fetchval('UPDATE transaction SET tid = $1::int', old_tid)
+                await self._read_conn.execute(
+                    'ALTER SEQUENCE tid_sequence RESTART WITH ' + str(old_tid + 1))
         except asyncpg.exceptions.UndefinedTableError:
             # no need to upgrade
             pass
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self._trns_conn.prepare(NEXT_TID)
-        self._stmt_current_tid = await self._trns_conn.prepare(CURRENT_TID)
+        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
+        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
 
     async def remove(self):
         """Reset the tables"""
@@ -302,12 +292,6 @@ class PostgresqlStorage(BaseStorage):
             async with txn._lock:
                 setattr(txn, name, await txn._db_conn.prepare(statement))
         return getattr(txn, name)
-
-    async def last_transaction(self, txn):
-        smt = await self._get_prepared_statement(txn, 'max_tid', MAX_TID)
-        async with txn._lock:
-            value = await smt.fetchval()
-        return 0 if value is None else value
 
     async def load(self, txn, oid):
         int_oid = oid
@@ -360,19 +344,22 @@ class PostgresqlStorage(BaseStorage):
             # a storage object has a shard conn for reads
             return await self._stmt_next_tid.fetchval()
 
+    async def get_current_tid(self, txn):
+        async with self._lock:
+            # again, use storage lock here instead of trns lock
+            return await self._stmt_max_tid.fetchval()
+
     async def start_transaction(self, txn):
         txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
         await txn._db_txn.start()
 
-    async def get_current_tid(self, txn):
-        async with self._lock:
-            # again, use storage lock here instead of trns lock
-            return await self._stmt_current_tid.fetchval()
-
-    async def get_conflicts(self, txn):
+    async def get_conflicts(self, txn, full=False):
         async with self._lock:
             # use storage lock instead of transaction lock
-            return await self._trns_conn.fetch(TXN_CONFLICTS, txn._tid)
+            if full:
+                return await self._read_conn.fetch(TXN_CONFLICTS_FULL, txn._tid)
+            else:
+                return await self._read_conn.fetch(TXN_CONFLICTS, txn._tid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
@@ -386,8 +373,9 @@ class PostgresqlStorage(BaseStorage):
         if transaction._db_txn is not None:
             async with transaction._lock:
                 await transaction._db_txn.rollback()
-        else:
-            log.warn('Do not have db transaction to rollback')
+        # reads don't need transaction necessarily so don't log
+        # else:
+        #     log.warn('Do not have db transaction to rollback')
 
     # Introspection
 

@@ -61,7 +61,8 @@ class QueueUtility(object):
                         "Exception on writing execution",
                         exc_info=e)
                     await txn.abort()
-            except KeyboardInterrupt or MemoryError or SystemExit or asyncio.CancelledError:
+            except (KeyboardInterrupt, MemoryError, SystemExit,
+                    asyncio.CancelledError, GeneratorExit, RuntimeError):
                 self._exceptions = True
                 raise
             except Exception as e:  # noqa

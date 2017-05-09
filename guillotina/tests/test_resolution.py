@@ -38,7 +38,7 @@ def test_record_again_does_not_overwrite_but_keeps_original():
 
 async def test_serializer_adds_to_changes(dummy_guillotina):
     ob = create_content()
-    trns = Transaction(mocks.MockManager())
+    trns = Transaction(mocks.MockTransactionManager())
     ob._p_jar = trns
     ob.title = 'foobar'
     deserializer = queryMultiAdapter((ob, get_mocked_request()),
@@ -54,7 +54,7 @@ async def test_serializer_adds_to_changes(dummy_guillotina):
 
 async def test_cannot_resolve_conflict(dummy_guillotina):
     # dummy_guillotina setups up adapters/utilities for us
-    trns = Transaction(mocks.MockManager())
+    trns = Transaction(mocks.MockTransactionManager())
     ob = create_content()
     writer = IWriter(ob)
 
@@ -82,7 +82,7 @@ async def test_cannot_resolve_conflict(dummy_guillotina):
 
 async def test_resolve_conflict(dummy_guillotina):
     # dummy_guillotina setups up adapters/utilities for us
-    trns = Transaction(mocks.MockManager())
+    trns = Transaction(mocks.MockTransactionManager())
     ob = create_content()
     writer = IWriter(ob)
 
@@ -109,7 +109,7 @@ async def test_resolve_conflict(dummy_guillotina):
 
 async def test_cannot_resolve_annotation_conflict(dummy_guillotina):
     # dummy_guillotina setups up adapters/utilities for us
-    trns = Transaction(mocks.MockManager())
+    trns = Transaction(mocks.MockTransactionManager())
     ob = AnnotationData()
 
     writer = IWriter(ob)
@@ -138,7 +138,7 @@ async def test_cannot_resolve_annotation_conflict(dummy_guillotina):
 
 async def test_resolve_annotaion_conflict(dummy_guillotina):
     # dummy_guillotina setups up adapters/utilities for us
-    trns = Transaction(mocks.MockManager())
+    trns = Transaction(mocks.MockTransactionManager())
     ob = AnnotationData()
     writer = IWriter(ob)
 

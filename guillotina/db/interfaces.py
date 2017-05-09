@@ -52,7 +52,7 @@ class IStorage(Interface):
     async def get_current_tid(txn):
         pass
 
-    async def get_conflicts(txn):
+    async def get_conflicts(txn, full=False):
         pass
 
     async def commit(txn):
@@ -108,13 +108,19 @@ class IPostgresStorage(IStorage):
 class ITransactionStrategy(Interface):
 
     async def tpc_begin():
-        pass
+        '''
+        Begin transaction, should set ._tid on transaction if supports transactions
+        '''
 
     async def tpc_vote():
-        pass
+        '''
+        Returns true if no conflicts, false if conflicts
+        '''
 
     async def tpc_finish():
-        pass
+        '''
+        Finish the transaction, committing transaction
+        '''
 
 
 class IConflictResolvableStrategy(ITransactionStrategy):

@@ -22,11 +22,12 @@ class InteractiveEventLoop(asyncio.SelectorEventLoop):
 
     console_class = Console
 
-    def __init__(self, banner=''):
+    def __init__(self, banner='', request=None):
         self.banner = banner
         self.console = None
         self.console_task = None
         self.console_server = None
+        self.request = request
         super().__init__(selector=None)
 
     def setup(self, app):
@@ -39,7 +40,8 @@ class InteractiveEventLoop(asyncio.SelectorEventLoop):
         _locals = {
             'app': app,
             'root': root,
-            'app_settings': app_settings
+            'app_settings': app_settings,
+            'request': self.request
         }
         self.console = self.console_class(None, locals=_locals, loop=self)
         coro = self.console.interact(self.banner, stop=True, handle_sigint=True)
@@ -63,7 +65,7 @@ Available local variables:
     - app
     - root
     - app_settings
-    - tm
+    - request
     - asyncio
     - loop
 
@@ -80,15 +82,15 @@ If you need to commit changes to db...
 
 
 tm = root['db'].get_transaction_manager()
-await tm.begin()
+txn = await tm.begin()
 // do changes...
-await tm.commit()
+await tm.commit(txn=txn)
 
 '''
 
     def get_loop(self):
         if self.loop is None:
-            self.loop = InteractiveEventLoop(self.banner)
+            self.loop = InteractiveEventLoop(self.banner, self.request)
             asyncio.set_event_loop(self.loop)
         return self.loop
 

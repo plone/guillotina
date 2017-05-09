@@ -21,8 +21,10 @@ class ResolveStrategy(SimpleStrategy):
     '''
 
     async def tpc_vote(self):
+        if not self.writable_transaction:
+            return True
         current_tid = await self._storage.get_current_tid(self._transaction)
-        if current_tid > self._transaction._tid:
+        if current_tid >= self._transaction._tid:
             # potential conflict error, get changes
             # Check if there is any commit bigger than the one we already have
             conflicts = await self._storage.get_conflicts(self._transaction)
@@ -48,11 +50,13 @@ class MergeStrategy(SimpleStrategy):
     '''
 
     async def tpc_vote(self):
+        if not self.writable_transaction:
+            return True
         current_tid = await self._storage.get_current_tid(self._transaction)
-        if current_tid > self._transaction._tid:
+        if current_tid >= self._transaction._tid:
             # potential conflict error, get changes
             # Check if there is any commit bigger than the one we already have
-            conflicts = await self._storage.get_conflicts(self._transaction)
+            conflicts = await self._storage.get_conflicts(self._transaction, full=True)
             for conflict in conflicts:
                 # both writing to same object...
                 if conflict['zoid'] in self._transaction.modified:

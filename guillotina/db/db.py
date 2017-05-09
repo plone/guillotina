@@ -36,6 +36,7 @@ class GuillotinaDB(object):
         if remote_cache is not None:
             self._storage.use_cache(remote_cache)
         self._database_name = database_name
+        self._tm = None
 
     @property
     def storage(self):
@@ -47,18 +48,19 @@ class GuillotinaDB(object):
         """
         request = make_mocked_request('POST', '/')
         request._db_write_enabled = True
-        request._tm = TransactionManager(self._storage)
-        t = await request._tm.begin(request=request)
+        tm = request._tm = self.get_transaction_manager()
+        txn = await tm.begin(request=request)
+        # for get_current_request magic
         self.request = request
 
         try:
-            assert request._tm.get() == t
-            await t.get(ROOT_ID)
+            assert tm.get(request=request) == txn
+            await txn.get(ROOT_ID)
         except KeyError:
             root = Root()
-            t.register(root, new_oid=ROOT_ID)
+            txn.register(root, new_oid=ROOT_ID)
 
-        await request._tm.commit()
+        await tm.commit(txn=txn)
 
     async def open(self):
         """Return a database Connection for use by application code.
@@ -71,10 +73,10 @@ class GuillotinaDB(object):
     async def finalize(self):
         await self._storage.finalize()
 
-    def new_transaction_manager(self):
+    def get_transaction_manager(self):
         """
         New transaction manager for every request
         """
-        tm = TransactionManager(self._storage)
-        self._tm = tm
-        return tm
+        if self._tm is None:
+            self._tm = TransactionManager(self._storage)
+        return self._tm
