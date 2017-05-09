@@ -38,7 +38,7 @@ class Status:
 @implementer(ITransaction)
 class Transaction(object):
 
-    def __init__(self, manager, request=None):
+    def __init__(self, manager, request=None, loop=None):
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE
@@ -75,7 +75,7 @@ class Transaction(object):
         # some databases need to lock during queries
         # this provides a lock for each transaction
         # which would correspond with one connection
-        self._lock = asyncio.Lock()
+        self._lock = asyncio.Lock(loop=loop)
 
         # we *not* follow naming standards of using "_request" here so
         # get_current_request can magically find us here...
