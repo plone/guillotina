@@ -1,4 +1,4 @@
-1.0.0a21 (unreleased)
+1.0.0a21 (2017-05-09)
 ---------------------
 
 - Reuse transaction object if same request object is provided. This helps when
