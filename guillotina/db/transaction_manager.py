@@ -1,5 +1,6 @@
 from asyncio import shield
 from guillotina.db import ROOT_ID
+from guillotina.db.transaction import Status
 from guillotina.db.transaction import Transaction
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RequestNotFound
@@ -45,13 +46,23 @@ class TransactionManager(object):
 
         user = None
 
-        # XXX do we want to auto clean up here? This will break tests
-        # that are starting multiple transactions
-        # if hasattr(request, '_txn'):
-        #     # already has txn registered, close connection on it...
+        txn = None
+        # already has txn registered, as long as connection is closed, it
+        # is safe
+        if (getattr(request, '_txn', None) is not None and
+                request._txn._db_conn is None and
+                request._txn.status in (Status.ABORTED, Status.COMMITTED)):
+            # re-use txn if possible
+            txn = request._txn
+            txn.status = Status.ACTIVE
+        # XXX do we want to auto clean up here? Or throw an error?
+        # This will break tests that are starting multiple transactions
+        # else:
         #     await self._close_txn(request._txn)
+        else:
+            txn = Transaction(self, request=request)
 
-        self._last_txn = txn = Transaction(self, request=request)
+        self._last_txn = txn
 
         if request is not None:
             # register tm and txn with request
@@ -90,8 +101,9 @@ class TransactionManager(object):
             await self._close_txn(txn)
 
     async def _close_txn(self, txn):
-        if txn is not None:
+        if txn is not None and txn._db_conn is not None:
             await self._storage.close(txn._db_conn)
+            txn._db_conn = None
         if txn == self._last_txn:
             self._last_txn = None
             self._last_db_conn = None

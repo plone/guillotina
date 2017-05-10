@@ -184,16 +184,15 @@ class ContainerRequesterAsyncContextManager(object):
         return await self.guillotina
 
     async def __aenter__(self):
-        requester = await self.get_requester()
-        resp, status = await requester('POST', '/db', data=json.dumps({
+        self.requester = await self.get_requester()
+        resp, status = await self.requester('POST', '/db', data=json.dumps({
             "@type": "Container",
             "title": "Guillotina Container",
             "id": "guillotina",
             "description": "Description Guillotina Container"
         }))
         assert status == 200
-        self.requester = requester
-        return requester
+        return self.requester
 
     async def __aexit__(self, exc_type, exc, tb):
         resp, status = await self.requester('DELETE', '/db/guillotina')
