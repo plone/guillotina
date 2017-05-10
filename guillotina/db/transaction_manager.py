@@ -45,11 +45,18 @@ class TransactionManager(object):
 
         user = None
 
-        # XXX do we want to auto clean up here? This will break tests
-        # that are starting multiple transactions
-        # if hasattr(request, '_txn'):
-        #     # already has txn registered, close connection on it...
-        #     await self._close_txn(request._txn)
+        txn = None
+        if hasattr(request, '_txn'):
+            # already has txn registered, close connection on it...
+            if getattr(request, '_db_conn', None) is None:
+                # re-use txn if possible
+                txn = request._txn
+            # XXX do we want to auto clean up here? This will break tests
+            # that are starting multiple transactions
+            # else:
+            #     await self._close_txn(request._txn)
+        else:
+            txn = Transaction(self, request=request)
 
         self._last_txn = txn = Transaction(self, request=request)
 
@@ -92,6 +99,7 @@ class TransactionManager(object):
     async def _close_txn(self, txn):
         if txn is not None:
             await self._storage.close(txn._db_conn)
+            txn._db_conn = None
         if txn == self._last_txn:
             self._last_txn = None
             self._last_db_conn = None

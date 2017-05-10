@@ -1,7 +1,9 @@
 1.0.0a21 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Reuse transaction object if same request object is provided. This helps when
+  working with the same persistent objects across one request object.
+  [vangheem]
 
 
 1.0.0a20 (2017-05-09)
