@@ -133,3 +133,15 @@ class ILockingStrategy(ITransactionStrategy):
 
     async def unlock(obj):
         pass
+
+
+class IStorageCache(Interface):
+
+    async def clear():
+        pass
+
+    async def get(key, default=None):
+        pass
+
+    async def set(ob, value):
+        pass

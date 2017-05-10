@@ -2,6 +2,7 @@ from collections import OrderedDict
 from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
 from guillotina.db.interfaces import IConflictResolver
+from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
@@ -53,9 +54,6 @@ class Transaction(object):
         self.modified = {}
         self.deleted = {}
 
-        # Cache for the transaction
-        self._cache = manager._storage._cache
-
         # OIDS to invalidate
         self._to_invalidate = []
 
@@ -83,6 +81,7 @@ class Transaction(object):
         self._strategy = getMultiAdapter(
             (manager._storage, self), ITransactionStrategy,
             name=manager._storage._transaction_strategy)
+        self._cache = manager._storage._cache
 
     @property
     def strategy(self):
@@ -143,7 +142,6 @@ class Transaction(object):
         self._txn_time = time.time()
         self._db_conn = conn
         await self._strategy.tpc_begin()
-        self._cache = self._manager._storage._cache
 
     def check_read_only(self):
         if self.request is None:
@@ -200,15 +198,15 @@ class Transaction(object):
 
     async def get(self, oid):
         """Getting a oid from the db"""
+
         obj = self.modified.get(oid, None)
         if obj is not None:
             return obj
 
-        obj = self._cache.get(oid, None)
-        if obj is not None:
-            return obj
-
         result = HARD_CACHE.get(oid, None)
+        if result is None:
+            result = await self._cache.get(oid, None)
+
         if result is not None:
             obj = reader(result)
             obj._p_jar = self
@@ -220,6 +218,8 @@ class Transaction(object):
 
         if obj.__cache__ == 0:
             HARD_CACHE[oid] = result
+        else:
+            await self._cache.set(oid, result)
 
         return obj
 
@@ -321,9 +321,13 @@ class Transaction(object):
         return keys
 
     async def get_child(self, container, key):
-        result = await self._manager._storage.get_child(self, container._p_oid, key)
+        result = await self._cache.get_child(container._p_oid, key)
         if result is None:
-            return None
+            result = await self._manager._storage.get_child(self, container._p_oid, key)
+            if result is None:
+                return None
+            await self._cache.set_child(container._p_oid, key, result)
+
         obj = reader(result)
         obj.__parent__ = container
         obj._p_jar = self
@@ -333,7 +337,11 @@ class Transaction(object):
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     async def len(self, oid):
-        return await self._manager._storage.len(self, oid)
+        result = await self._cache.get_len(oid)
+        if result is None:
+            result = await self._manager._storage.len(self, oid)
+            await self._cache.set_len(oid, result)
+        return result
 
     async def items(self, container):
         async for record in self._manager._storage.items(self, container._p_oid):
@@ -343,9 +351,12 @@ class Transaction(object):
             yield obj.id, obj
 
     async def get_annotation(self, base_obj, id):
-        result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+        result = await self._cache.get_child(base_obj._p_oid, id, prefix='annotation')
         if result is None:
-            raise KeyError(id)
+            result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+            if result is None:
+                raise KeyError(id)
+            await self._cache.set_child(base_obj._p_oid, id, result, prefix='annotation')
         obj = reader(result)
         obj.__of__ = base_obj._p_oid
         obj._p_jar = self

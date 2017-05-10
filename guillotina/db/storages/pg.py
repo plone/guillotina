@@ -209,9 +209,10 @@ class PostgresqlStorage(BaseStorage):
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=12, transaction_strategy='resolve',
-                 conn_acquire_timeout=20, **options):
+                 conn_acquire_timeout=20, cache_strategy='dummy', **options):
         super(PostgresqlStorage, self).__init__(
-            read_only, transaction_strategy=transaction_strategy)
+            read_only, transaction_strategy=transaction_strategy,
+            cache_strategy=cache_strategy)
         self._dsn = dsn
         self._pool_size = pool_size
         self._partition_class = partition
@@ -332,6 +333,12 @@ class PostgresqlStorage(BaseStorage):
                 p                    # Pickle state
             )
         obj._p_estimated_size = len(p)
+        await self._cache.set(obj, {
+            'state': p,
+            'zoid': oid,
+            'tid': txn._tid,
+            'id': writer.id
+        })
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
