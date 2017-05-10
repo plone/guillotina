@@ -1,4 +1,4 @@
-1.0.0a20 (unreleased)
+1.0.0a20 (2017-05-09)
 ---------------------
 
 - Tie every request to one transaction instead of trying to juggle pool of
