@@ -161,7 +161,7 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_should_raise_conflict_error(postgres, dummy_request):
+async def test_should_raise_conflict_error_and_editing_same_data(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     aps = await get_aps()
@@ -193,7 +193,6 @@ async def test_should_raise_conflict_error(postgres, dummy_request):
     await tm.commit(txn=txn2)
     with pytest.raises(ConflictError):
         await tm.commit(txn=txn1)
-    await tm.abort(txn=txn1)
 
     await aps.remove()
     await cleanup(aps)
