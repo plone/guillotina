@@ -1,7 +1,8 @@
 1.0.0a22 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Update storage caching interfaces to make them easier to use
+  [vangheem]
 
 
 1.0.0a21 (2017-05-09)
