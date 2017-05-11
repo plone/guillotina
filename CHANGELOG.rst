@@ -1,7 +1,8 @@
 1.0.0a23 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix get_container test utility
+  [vangheem]
 
 
 1.0.0a22 (2017-05-11)
