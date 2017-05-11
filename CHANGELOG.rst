@@ -1,4 +1,4 @@
-1.0.0a23 (unreleased)
+1.0.0a23 (2017-05-11)
 ---------------------
 
 - Fix get_container test utility
