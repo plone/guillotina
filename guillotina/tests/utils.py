@@ -49,7 +49,9 @@ async def get_container(requester=None, request=None):
     if request is None:
         request = get_mocked_request(requester.db)
     root = await get_root(request)
+    txn = await request._tm.begin(request=request)
     container = await root.async_get('guillotina')
+    await request._tm.abort(txn=txn)
     return container
 
 
