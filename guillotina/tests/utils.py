@@ -17,6 +17,7 @@ import uuid
 def get_mocked_request(db=None):
     request = make_mocked_request('POST', '/')
     request._futures = {}
+    request._txn = None
     request.interaction = None
     request._db_write_enabled = True
     alsoProvides(request, IRequest)
@@ -40,7 +41,7 @@ def login(request):
 async def get_root(request):
     txn = await request._tm.begin(request=request)
     root = await request._tm.get_root(txn=txn)
-    request._tm.abort(txn=txn)
+    await request._tm.abort(txn=txn)
     return root
 
 
