@@ -1,4 +1,4 @@
-1.0.0a22 (unreleased)
+1.0.0a22 (2017-05-11)
 ---------------------
 
 - Fix QueueUtility to properly get transaction object before working on view
