@@ -18,10 +18,12 @@ class MockStorage:
     _cache = {}
     _read_only = False
     _transaction_strategy = 'merge'
+    _cache_strategy = 'dummy'
     _options = {}
 
-    def __init__(self, transaction_strategy='merge'):
+    def __init__(self, transaction_strategy='merge', cache_strategy='dummy'):
         self._transaction_strategy = transaction_strategy
+        self._cache_strategy = cache_strategy
         self._transaction = None
 
     async def get_annotation(self, trns, oid, id):
