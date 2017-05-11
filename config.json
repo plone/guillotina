@@ -2,7 +2,7 @@
 	"databases": [{
 		"db": {
 			"storage": "postgresql",
-			"transaction_strategy": "none",
+			"transaction_strategy": "merge",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
