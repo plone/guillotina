@@ -10,6 +10,8 @@ import argparse
 import asyncio
 import json
 import os
+import signal
+import sys
 
 
 MISSING_SETTINGS = {
@@ -82,7 +84,11 @@ class Command(object):
     def get_loop(self):
         return asyncio.get_event_loop()
 
+    def signal_handler(self, signal, frame):
+        sys.exit(0)
+
     def make_app(self, settings):
+        signal.signal(signal.SIGINT, self.signal_handler)
         return make_app(settings=settings, loop=self.get_loop())
 
     def get_parser(self):
