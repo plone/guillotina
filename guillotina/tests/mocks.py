@@ -12,6 +12,11 @@ class MockDBTransaction:
         self._transacion = trns
 
 
+class MockTransaction:
+    def __init__(self):
+        self._tid = 1
+
+
 @implementer(IStorage)
 class MockStorage:
 
