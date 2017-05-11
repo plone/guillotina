@@ -1,6 +1,7 @@
 from aiohttp import web
 from guillotina.commands import Command
 
+import cProfile
 
 try:
     import aiomonitor
@@ -26,11 +27,23 @@ class ServerCommand(Command):
         parser.add_argument('-r', '--reload', action='store_true',
                             dest='reload', help='Auto reload on code changes',
                             default=False)
+        parser.add_argument('-p', '--profile', action='store_true',
+                            dest='profile', help='Profile execution',
+                            default=False)
         return parser
 
     def _run(self, arguments, settings, app):
         port = settings.get('address', settings.get('port'))
-        web.run_app(app, host=settings.get('host', '0.0.0.0'), port=port)
+        if arguments.profile:
+            cProfile.runctx("web.run_app(app, host=settings.get('host', '0.0.0.0'), port=port)", {
+                'web': web
+            }, {
+                'port': port,
+                'settings': settings,
+                'app': app
+            })
+        else:
+            web.run_app(app, host=settings.get('host', '0.0.0.0'), port=port)
 
     def run(self, arguments, settings, app):
         if arguments.monitor:
