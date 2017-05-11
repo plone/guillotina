@@ -7,16 +7,10 @@ from guillotina.db.interfaces import IStorageCache
 @configure.adapter(for_=IStorage, provides=IStorageCache, name="dummy")
 class DummyCache(BaseCache):
 
-    async def get(self, name, default=None):
-        return default
+    async def get(self, **kwargs):
+        return None
 
-    async def get_child(self, container, id):
-        pass
-
-    async def set_child(self, container, id, value):
-        pass
-
-    async def set(self, ob, value):
+    async def set(self, value, **kwargs):
         pass
 
     async def clear(self):

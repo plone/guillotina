@@ -5,8 +5,9 @@ class BaseCache:
     def __init__(self, storage):
         self._storage = storage
 
-    async def get(self, name, default=None):
+    async def get(self, oid=None, container=None, id=None, variant=None):
         '''
+        Use params to build cache key
         MUST return dictionary-like object with these keys:
             - state: the pickle value
             - zoid: object unique id in the database
@@ -15,13 +16,10 @@ class BaseCache:
         '''
         raise NotImplemented()
 
-    async def get_child(self, container, id):
-        raise NotImplemented()
-
-    async def set_child(self, container, id, value):
-        raise NotImplemented()
-
-    async def set(self, ob, value):
+    async def set(self, value, oid=None, container=None, id=None, variant=None):
+        '''
+        Use params to build cache key
+        '''
         raise NotImplemented()
 
     async def clear(self):

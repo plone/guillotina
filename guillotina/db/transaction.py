@@ -195,7 +195,6 @@ class Transaction(object):
         await self._cache.clear()
 
     # GET AN OBJECT
-
     async def get(self, oid):
         """Getting a oid from the db"""
 
@@ -205,7 +204,7 @@ class Transaction(object):
 
         result = HARD_CACHE.get(oid, None)
         if result is None:
-            result = await self._cache.get(oid, None)
+            result = await self._cache.get(oid=oid)
 
         if result is not None:
             obj = reader(result)
@@ -219,7 +218,7 @@ class Transaction(object):
         if obj.__cache__ == 0:
             HARD_CACHE[oid] = result
         else:
-            await self._cache.set(oid, result)
+            await self._cache.set(result, oid=oid)
 
         return obj
 
@@ -315,18 +314,21 @@ class Transaction(object):
     # Inspection
 
     async def keys(self, oid):
-        keys = []
-        for record in await self._manager._storage.keys(self, oid):
-            keys.append(record['id'])
+        keys = await self._cache.get(oid=oid, variant='keys')
+        if keys is None:
+            keys = []
+            for record in await self._manager._storage.keys(self, oid):
+                keys.append(record['id'])
+            await self._cache.set(keys, oid=oid, variant='keys')
         return keys
 
     async def get_child(self, container, key):
-        result = await self._cache.get_child(container._p_oid, key)
+        result = await self._cache.get(container=container, id=key)
         if result is None:
             result = await self._manager._storage.get_child(self, container._p_oid, key)
             if result is None:
                 return None
-            await self._cache.set_child(container._p_oid, key, result)
+            await self._cache.set_child(result, container=container, id=key)
 
         obj = reader(result)
         obj.__parent__ = container
@@ -337,33 +339,35 @@ class Transaction(object):
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     async def len(self, oid):
-        result = await self._cache.get_len(oid)
+        result = await self._cache.get(oid=oid, variant='len')
         if result is None:
             result = await self._manager._storage.len(self, oid)
-            await self._cache.set_len(oid, result)
+            await self._cache.set(result, oid=oid, variant='len')
         return result
 
     async def items(self, container):
-        async for record in self._manager._storage.items(self, container._p_oid):
-            obj = reader(record)
-            obj.__parent__ = container
-            obj._p_jar = self
-            yield obj.id, obj
+        # XXX not using cursor because we can't cache with cursor results...
+        keys = await self.keys(container._p_oid)
+        for key in keys:
+            yield key, await self.get_child(container, key)
 
     async def get_annotation(self, base_obj, id):
-        result = await self._cache.get_child(base_obj._p_oid, id, prefix='annotation')
+        result = await self._cache.get(container=base_obj, id=id, variant='annotation')
         if result is None:
             result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
             if result is None:
                 raise KeyError(id)
-            await self._cache.set_child(base_obj._p_oid, id, result, prefix='annotation')
+            await self._cache.set(result, container=base_obj, id=id, variant='annotation')
         obj = reader(result)
         obj.__of__ = base_obj._p_oid
         obj._p_jar = self
         return obj
 
     async def get_annotation_keys(self, oid):
-        return [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]
+        result = await self._cache.get(oid=oid, variant='annotation-keys')
+        if result is None:
+            result = [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]
+            await self._cache.set(result, oid=oid, variant='annotation-keys')
 
     async def del_blob(self, bid):
         return await self._manager._storage.del_blob(self, bid)
