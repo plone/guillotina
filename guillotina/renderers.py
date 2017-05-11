@@ -164,7 +164,7 @@ class RendererRaw(Renderer):
 
     def guess_response(self, value):
         resp = value.response
-        if type(resp) in (dict, list, int, float):
+        if type(resp) in (dict, list, int, float, bool):
             resp = aioResponse(body=bytes(json.dumps(resp, cls=GuillotinaJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
