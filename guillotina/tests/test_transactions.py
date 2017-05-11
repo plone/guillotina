@@ -1,5 +1,5 @@
-from guillotina.tests import mocks
 from guillotina.db.transaction import Transaction
+from guillotina.tests import mocks
 
 
 async def test_no_tid_created_for_reads(dummy_request, loop):
