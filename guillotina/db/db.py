@@ -12,7 +12,7 @@ from zope.interface import implementer_only
 class Root(Folder):
 
     __name__ = None
-    __cache__ = 0
+    __immutable_cache__ = True
     type_name = 'GuillotinaDBRoot'
 
     def __repr__(self):

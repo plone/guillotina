@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
+from guillotina.db.interfaces import IConflictResolvableStrategy
 from guillotina.db.interfaces import IConflictResolver
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
@@ -55,7 +56,7 @@ class Transaction(object):
         self.deleted = {}
 
         # OIDS to invalidate
-        self._to_invalidate = []
+        self._objects_to_invalidate = []
 
         # List of (hook, args, kws) tuples added by addBeforeCommitHook().
         self._before_commit = []
@@ -81,11 +82,17 @@ class Transaction(object):
         self._strategy = getMultiAdapter(
             (manager._storage, self), ITransactionStrategy,
             name=manager._storage._transaction_strategy)
-        self._cache = manager._storage._cache
+        self._cache = getMultiAdapter(
+            (manager._storage, self), IStorageCache,
+            name=manager._storage._cache_strategy)
 
     @property
     def strategy(self):
         return self._strategy
+
+    @property
+    def objects_needing_invalidation(self):
+        return self._objects_to_invalidate
 
     def get_before_commit_hooks(self):
         """ See ITransaction.
@@ -215,7 +222,8 @@ class Transaction(object):
         obj = reader(result)
         obj._p_jar = self
 
-        if obj.__cache__ == 0:
+        if obj.__immutable_cache__:
+            # ttl of zero means we want to provide a hard cache here
             HARD_CACHE[oid] = result
         else:
             await self._cache.set(result, oid=oid)
@@ -234,6 +242,7 @@ class Transaction(object):
     async def abort(self):
         self.status = Status.ABORTED
         await self._manager._storage.abort(self)
+        await self._cache.close(invalidate=False)
         self.tpc_cleanup()
 
     async def _call_before_commit_hooks(self):
@@ -257,7 +266,7 @@ class Transaction(object):
         obj._p_oid = oid
         if obj._p_jar is None:
             obj._p_jar = self
-        self._to_invalidate.append(obj)
+        self._objects_to_invalidate.append(obj)
 
     async def real_commit(self):
         """Commit changes to an object"""
@@ -269,7 +278,7 @@ class Transaction(object):
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
             await self._manager._storage.delete(self, oid)
-            self._to_invalidate.append(obj)
+            self._objects_to_invalidate.append(obj)
 
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
@@ -299,16 +308,18 @@ class Transaction(object):
         """Indicate confirmation that the transaction is done.
         """
         await self._strategy.tpc_finish()
+        await self._cache.close()
         self.tpc_cleanup()
 
     def tpc_cleanup(self):
         self.added = {}
         self.modified = {}
         self.deleted = {}
-        for obj in self._to_invalidate:
-            obj.__changes__.clear()
-            # would also invalidate cache here when it's all said and done...
-        self._to_invalidate = []
+        if IConflictResolvableStrategy.providedBy(self._strategy):
+            # we only mess with __changes__ if using IConflictResolvableStrategy
+            for obj in self._objects_to_invalidate:
+                obj.__changes__.clear()
+        self._objects_to_invalidate = []
         self._db_txn = None
 
     # Inspection
@@ -328,7 +339,7 @@ class Transaction(object):
             result = await self._manager._storage.get_child(self, container._p_oid, key)
             if result is None:
                 return None
-            await self._cache.set_child(result, container=container, id=key)
+            await self._cache.set(result, container=container, id=key)
 
         obj = reader(result)
         obj.__parent__ = container

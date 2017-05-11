@@ -42,7 +42,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
-        '__name', '__cache', '__new_marker', '__changes', '__locked')
+        '__name', '__immutable_cache', '__new_marker', '__changes', '__locked')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -53,7 +53,7 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__parent', None)
         _OSA(inst, '_BaseObject__name', None)
         _OSA(inst, '_BaseObject__annotations', {})
-        _OSA(inst, '_BaseObject__cache', -1)
+        _OSA(inst, '_BaseObject__immutable_cache', False)
         _OSA(inst, '_BaseObject__new_marker', False)
         _OSA(inst, '_BaseObject__changes', {})
         _OSA(inst, '_BaseObject__locked', False)
@@ -221,21 +221,19 @@ class BaseObject(object):
 
     __annotations__ = property(_get_annotation, _set_annotation, _del_annotation)
 
-    # CACHE
-    # -1 : No cache
-    # 0 : Allways
-    # X : ttl
+    # Immutable cache
+    # if we want to cache something in memory forever, think root db object here
 
     def _get_cache(self):
-        return _OGA(self, '_BaseObject__cache')
+        return _OGA(self, '_BaseObject__immutable_cache')
 
     def _set_cache(self, value):
-        _OSA(self, '_BaseObject__cache', value)
+        _OSA(self, '_BaseObject__immutable_cache', value)
 
     def _del_cache(self):
-        return _OSA(self, '_BaseObject__cache', None)
+        return _OSA(self, '_BaseObject__immutable_cache', False)
 
-    __cache__ = property(_get_cache, _set_cache, _del_cache)
+    __immutable_cache__ = property(_get_cache, _set_cache, _del_cache)
 
     # __changes__:  Identifier of the object.
     def _get_changes(self):

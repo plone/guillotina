@@ -140,8 +140,17 @@ class IStorageCache(Interface):
     async def clear():
         pass
 
-    async def get(key, default=None):
+    async def get(oid=None, container=None, id=None, variant=None):
         pass
 
-    async def set(ob, value):
+    async def set(value, oid=None, container=None, id=None, variant=None):
+        pass
+
+    async def delete(key):
+        pass
+
+    async def delete_all(keys):
+        pass
+
+    async def close():
         pass
