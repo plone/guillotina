@@ -333,12 +333,6 @@ class PostgresqlStorage(BaseStorage):
                 p                    # Pickle state
             )
         obj._p_estimated_size = len(p)
-        await self._cache.set(obj, {
-            'state': p,
-            'zoid': oid,
-            'tid': txn._tid,
-            'id': writer.id
-        })
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
