@@ -12,7 +12,7 @@ from zope.interface import implementer_only
 class Root(Folder):
 
     __name__ = None
-    __cache__ = 0
+    __immutable_cache__ = True
     type_name = 'GuillotinaDBRoot'
 
     def __repr__(self):
@@ -23,7 +23,6 @@ class GuillotinaDB(object):
 
     def __init__(self,
                  storage,
-                 remote_cache=None,
                  database_name='unnamed'):
         """
         Create an object database.
@@ -31,10 +30,7 @@ class GuillotinaDB(object):
         Database object is persistent through the application
         """
         self._tm = None
-        self._remote_cache = remote_cache
         self._storage = storage
-        if remote_cache is not None:
-            self._storage.use_cache(remote_cache)
         self._database_name = database_name
         self._tm = None
 

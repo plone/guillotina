@@ -219,7 +219,6 @@ class MatchInfo(AbstractMatchInfo):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             try:
-                request._db_write_enabled = True
                 # We try to avoid collisions on the same instance of
                 # guillotina
                 view_result = await self.view()

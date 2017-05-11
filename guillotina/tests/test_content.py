@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import getUtility
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
@@ -9,7 +10,6 @@ from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import IApplication
 from guillotina.interfaces.types import IConstrainTypes
 from guillotina.tests import utils
-from guillotina.behaviors.dublincore import IDublinCore
 
 import pytest
 

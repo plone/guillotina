@@ -99,9 +99,11 @@ async def test_create_contenttype(container_requester):
         assert status == 201
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
+        txn = await request._tm.begin(request)
         container = await root.async_get('guillotina')
         obj = await container.async_get('item1')
         assert obj.title == 'Item1'
+        await request._tm.abort(txn=txn)
 
 
 async def test_create_delete_contenttype(container_requester):
@@ -175,6 +177,7 @@ async def test_create_contenttype_with_date(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
+        txn = await request._tm.begin(request)
         container = await root.async_get('guillotina')
         obj = await container.async_get('item1')
         from guillotina.behaviors.dublincore import IDublinCore
@@ -182,6 +185,7 @@ async def test_create_contenttype_with_date(container_requester):
         await behavior.load()
         assert behavior.creation_date.isoformat() == date_to_test
         assert behavior.expiration_date.isoformat() == date_to_test
+        await request._tm.abort(txn=txn)
 
 
 async def test_create_duplicate_id(container_requester):

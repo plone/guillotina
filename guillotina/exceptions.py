@@ -129,3 +129,10 @@ class UnresolvableConflict(Exception):
         super().__init__('Could not resolve conflict between {} and {}'.format(
             repr(ours), repr(other)
         ))
+
+
+class ResourceLockedTimeout(Exception):
+    '''
+    The resource you are trying to lock for writing is already locked by
+    another process and the wait time for the lock has expired
+    '''

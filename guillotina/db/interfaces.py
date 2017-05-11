@@ -125,3 +125,32 @@ class ITransactionStrategy(Interface):
 
 class IConflictResolvableStrategy(ITransactionStrategy):
     pass
+
+
+class ILockingStrategy(ITransactionStrategy):
+    async def lock(obj):
+        pass
+
+    async def unlock(obj):
+        pass
+
+
+class IStorageCache(Interface):
+
+    async def clear():
+        pass
+
+    async def get(oid=None, container=None, id=None, variant=None):
+        pass
+
+    async def set(value, oid=None, container=None, id=None, variant=None):
+        pass
+
+    async def delete(key):
+        pass
+
+    async def delete_all(keys):
+        pass
+
+    async def close():
+        pass

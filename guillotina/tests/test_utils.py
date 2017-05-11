@@ -41,10 +41,34 @@ async def test_get_content_path(container_requester):
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
+        txn = await request._tm.begin(request)
         container = await root.async_get('guillotina')
         obj = await container.async_get('item1')
         assert utils.get_content_path(container) == '/'
         assert utils.get_content_path(obj) == '/item1'
+        await request._tm.abort(txn=txn)
+
+
+async def test_get_content_depth(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+        request = get_mocked_request(requester.db)
+        root = await get_root(request)
+        txn = await request._tm.begin(request)
+        container = await root.async_get('guillotina')
+        obj = await container.async_get('item1')
+        assert utils.get_content_depth(container) == 1
+        assert utils.get_content_depth(obj) == 2
+        await request._tm.abort(txn=txn)
 
 
 class TestGetCurrentRequest:

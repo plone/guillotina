@@ -70,8 +70,6 @@ class TransactionManager(object):
             request._txn = txn
             user = get_authenticated_user_id(request)
 
-        # CACHE!!
-
         if user is not None:
             txn.user = user
         await txn.tpc_begin(db_conn)

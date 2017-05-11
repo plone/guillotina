@@ -1,7 +1,9 @@
 from collections import OrderedDict
 from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
+from guillotina.db.interfaces import IConflictResolvableStrategy
 from guillotina.db.interfaces import IConflictResolver
+from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
@@ -53,11 +55,8 @@ class Transaction(object):
         self.modified = {}
         self.deleted = {}
 
-        # Cache for the transaction
-        self._cache = manager._storage._cache
-
         # OIDS to invalidate
-        self._to_invalidate = []
+        self._objects_to_invalidate = []
 
         # List of (hook, args, kws) tuples added by addBeforeCommitHook().
         self._before_commit = []
@@ -83,10 +82,17 @@ class Transaction(object):
         self._strategy = getMultiAdapter(
             (manager._storage, self), ITransactionStrategy,
             name=manager._storage._transaction_strategy)
+        self._cache = getMultiAdapter(
+            (manager._storage, self), IStorageCache,
+            name=manager._storage._cache_strategy)
 
     @property
     def strategy(self):
         return self._strategy
+
+    @property
+    def objects_needing_invalidation(self):
+        return self._objects_to_invalidate
 
     def get_before_commit_hooks(self):
         """ See ITransaction.
@@ -143,7 +149,6 @@ class Transaction(object):
         self._txn_time = time.time()
         self._db_conn = conn
         await self._strategy.tpc_begin()
-        self._cache = self._manager._storage._cache
 
     def check_read_only(self):
         if self.request is None:
@@ -197,18 +202,17 @@ class Transaction(object):
         await self._cache.clear()
 
     # GET AN OBJECT
-
     async def get(self, oid):
         """Getting a oid from the db"""
+
         obj = self.modified.get(oid, None)
         if obj is not None:
             return obj
 
-        obj = self._cache.get(oid, None)
-        if obj is not None:
-            return obj
-
         result = HARD_CACHE.get(oid, None)
+        if result is None:
+            result = await self._cache.get(oid=oid)
+
         if result is not None:
             obj = reader(result)
             obj._p_jar = self
@@ -218,8 +222,11 @@ class Transaction(object):
         obj = reader(result)
         obj._p_jar = self
 
-        if obj.__cache__ == 0:
+        if obj.__immutable_cache__:
+            # ttl of zero means we want to provide a hard cache here
             HARD_CACHE[oid] = result
+        else:
+            await self._cache.set(result, oid=oid)
 
         return obj
 
@@ -235,6 +242,7 @@ class Transaction(object):
     async def abort(self):
         self.status = Status.ABORTED
         await self._manager._storage.abort(self)
+        await self._cache.close(invalidate=False)
         self.tpc_cleanup()
 
     async def _call_before_commit_hooks(self):
@@ -258,7 +266,7 @@ class Transaction(object):
         obj._p_oid = oid
         if obj._p_jar is None:
             obj._p_jar = self
-        self._to_invalidate.append(obj)
+        self._objects_to_invalidate.append(obj)
 
     async def real_commit(self):
         """Commit changes to an object"""
@@ -270,7 +278,7 @@ class Transaction(object):
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
             await self._manager._storage.delete(self, oid)
-            self._to_invalidate.append(obj)
+            self._objects_to_invalidate.append(obj)
 
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
@@ -300,30 +308,39 @@ class Transaction(object):
         """Indicate confirmation that the transaction is done.
         """
         await self._strategy.tpc_finish()
+        await self._cache.close()
         self.tpc_cleanup()
 
     def tpc_cleanup(self):
         self.added = {}
         self.modified = {}
         self.deleted = {}
-        for obj in self._to_invalidate:
-            obj.__changes__.clear()
-            # would also invalidate cache here when it's all said and done...
-        self._to_invalidate = []
+        if IConflictResolvableStrategy.providedBy(self._strategy):
+            # we only mess with __changes__ if using IConflictResolvableStrategy
+            for obj in self._objects_to_invalidate:
+                obj.__changes__.clear()
+        self._objects_to_invalidate = []
         self._db_txn = None
 
     # Inspection
 
     async def keys(self, oid):
-        keys = []
-        for record in await self._manager._storage.keys(self, oid):
-            keys.append(record['id'])
+        keys = await self._cache.get(oid=oid, variant='keys')
+        if keys is None:
+            keys = []
+            for record in await self._manager._storage.keys(self, oid):
+                keys.append(record['id'])
+            await self._cache.set(keys, oid=oid, variant='keys')
         return keys
 
     async def get_child(self, container, key):
-        result = await self._manager._storage.get_child(self, container._p_oid, key)
+        result = await self._cache.get(container=container, id=key)
         if result is None:
-            return None
+            result = await self._manager._storage.get_child(self, container._p_oid, key)
+            if result is None:
+                return None
+            await self._cache.set(result, container=container, id=key)
+
         obj = reader(result)
         obj.__parent__ = container
         obj._p_jar = self
@@ -333,26 +350,35 @@ class Transaction(object):
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     async def len(self, oid):
-        return await self._manager._storage.len(self, oid)
+        result = await self._cache.get(oid=oid, variant='len')
+        if result is None:
+            result = await self._manager._storage.len(self, oid)
+            await self._cache.set(result, oid=oid, variant='len')
+        return result
 
     async def items(self, container):
-        async for record in self._manager._storage.items(self, container._p_oid):
-            obj = reader(record)
-            obj.__parent__ = container
-            obj._p_jar = self
-            yield obj.id, obj
+        # XXX not using cursor because we can't cache with cursor results...
+        keys = await self.keys(container._p_oid)
+        for key in keys:
+            yield key, await self.get_child(container, key)
 
     async def get_annotation(self, base_obj, id):
-        result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+        result = await self._cache.get(container=base_obj, id=id, variant='annotation')
         if result is None:
-            raise KeyError(id)
+            result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+            if result is None:
+                raise KeyError(id)
+            await self._cache.set(result, container=base_obj, id=id, variant='annotation')
         obj = reader(result)
         obj.__of__ = base_obj._p_oid
         obj._p_jar = self
         return obj
 
     async def get_annotation_keys(self, oid):
-        return [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]
+        result = await self._cache.get(oid=oid, variant='annotation-keys')
+        if result is None:
+            result = [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]
+            await self._cache.set(result, oid=oid, variant='annotation-keys')
 
     async def del_blob(self, bid):
         return await self._manager._storage.del_blob(self, bid)
