@@ -1,6 +1,9 @@
 1.0.0a22 (unreleased)
 ---------------------
 
+- Fix QueueUtility to properly get transaction object before working on view
+  [vangheem]
+
 - Update storage caching interfaces to make them easier to use
   [vangheem]
 
