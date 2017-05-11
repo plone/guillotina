@@ -15,6 +15,7 @@ from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
+from guillotina.db.utils import lock_object
 from guillotina.event import notify
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
@@ -211,6 +212,7 @@ class DefaultPOST(Service):
     })
 class DefaultPATCH(Service):
     async def __call__(self):
+        await lock_object(self.context)
         data = await self.get_data()
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
@@ -334,6 +336,7 @@ PermissionMap = {
     })
 async def sharing_post(context, request):
     """Change permissions"""
+    await lock_object(context)
     lroles = local_roles()
     data = await request.json()
     if 'prinrole' not in data and \

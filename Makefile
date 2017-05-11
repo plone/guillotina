@@ -8,7 +8,6 @@ run-postgres:
 run-etcd:
 	docker run --rm -p 2379:2379 \
     --name etcd-v3.2.0-rc.0 \
-    --volume=/tmp/etcd-data:/etcd-data \
     quay.io/coreos/etcd:v3.2.0-rc.0 \
     /usr/local/bin/etcd \
     --name my-etcd-1 \
