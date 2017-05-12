@@ -1,7 +1,8 @@
 1.0.0a24 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Get latest tid on database with MAX(tid) instead of checking sequence
+  [vangheem]
 
 
 1.0.0a23 (2017-05-11)
