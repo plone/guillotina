@@ -100,7 +100,7 @@ UPDATE = """
 
 
 NEXT_TID = "SELECT nextval('tid_sequence');"
-MAX_TID = "SELECT last_value FROM tid_sequence;"
+MAX_TID = "SELECT MAX(tid) FROM objects;"
 
 
 NUM_CHILDREN = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
@@ -348,7 +348,11 @@ class PostgresqlStorage(BaseStorage):
     async def get_current_tid(self, txn):
         async with self._lock:
             # again, use storage lock here instead of trns lock
-            return await self._stmt_max_tid.fetchval()
+            result = await self._stmt_max_tid.fetchval()
+            if result is None:
+                # very first transaction won't have a value here...
+                return 0
+            return result
 
     async def start_transaction(self, txn):
         txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
