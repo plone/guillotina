@@ -2,7 +2,8 @@
 ---------------------
 
 - Enforce transaction ids match when updating objects and throw a ConflictError
-  when there is a mismatch.
+  when there is a mismatch. This can happen in cases where there is stale cache
+  being pulled.
   [vangheem]
 
 - Remove use of `merge` transaction strategy. Better to just abort and retry

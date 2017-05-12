@@ -358,10 +358,9 @@ class PostgresqlStorage(BaseStorage):
                 if statement_name == 'update':
                     # raise tid conflict error
                     raise TIDConflictError(
-                        'Mismatch of tid of object being updated. '
-                        'This is likely caused by a cache invalidation raise '
-                        'condition and should be an edge case. '
-                        'This should resolve on request retry.')
+                        'Mismatch of tid of object being updated. This is likely '
+                        'caused by a cache invalidation race condition and should '
+                        'be an edge case. This should resolve on request retry.')
                 else:
                     self._log.error('Incorrect response count from database update. '
                                     'This should not happen. tid: {}'.format(txn._tid))

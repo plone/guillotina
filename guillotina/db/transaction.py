@@ -8,6 +8,7 @@ from guillotina.db.reader import reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RequestNotFound
+from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.utils import get_current_request
 from zope.interface import implementer
@@ -231,8 +232,10 @@ class Transaction(object):
         self.status = Status.COMMITTING
         try:
             await self.real_commit()
-        except ConflictError:
-            await self._cache.close(invalidate=False)
+        except ConflictError as ex:
+            # in the case of TIDConflictError, we should make sure to try
+            # and invalidate again to make sure we aren't caching the ob
+            await self._cache.close(invalidate=isinstance(ex, TIDConflictError))
             await self._manager.abort(request=self.request, txn=self)
             raise
         # vote will do conflict resolution if there are conflicting writes
