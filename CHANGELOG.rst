@@ -1,7 +1,13 @@
 1.0.0a24 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Enforce transaction ids match when updating objects and throw a ConflictError
+  when there is a mismatch.
+  [vangheem]
+
+- Remove use of `merge` transaction strategy. Better to just abort and retry
+  instead of costly merge resolution issues
+  [vangheem]
 
 
 1.0.0a23 (2017-05-11)

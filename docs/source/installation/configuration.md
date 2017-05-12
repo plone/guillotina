@@ -132,7 +132,7 @@ You can pass in aiohttp_settings to configure the aiohttp server.
 
 Guillotina provides a few different modes to operate in to customize the level
 of performance vs consistency. The setting used for this is `transaction_strategy`
-which defaults to `merge`.
+which defaults to `resolve`.
 
 Example configuration:
 
@@ -167,10 +167,6 @@ Available options:
 - `resolve`:
   Same as simple; however, it allows commits when conflicting transactions
   are writing to different objects.
-- `merge`(default):
-  Same as resolve; however, it attempts to resolve conflicted object writes.
-  Costs in performance when resolving conflicts and potentially dangerous if
-  there is custom code that does not register resolution change detection.
 - `lock`:
   As safe as the `simple` mode with potential performance impact since every
   object is locked when a known write will be applied to it.

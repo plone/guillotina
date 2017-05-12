@@ -9,13 +9,6 @@ class IWriter(Interface):
     """Serializes the object for DB storage"""
 
 
-class IConflictResolver(Interface):
-    """resolve conflicts between 2 objects"""
-
-    def resolve(self):
-        pass
-
-
 class ITransaction(Interface):
     pass
 
@@ -121,10 +114,6 @@ class ITransactionStrategy(Interface):
         '''
         Finish the transaction, committing transaction
         '''
-
-
-class IConflictResolvableStrategy(ITransactionStrategy):
-    pass
 
 
 class ILockingStrategy(ITransactionStrategy):

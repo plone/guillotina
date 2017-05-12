@@ -1,6 +1,5 @@
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.content import Folder
-from guillotina.db.resolution import record_object_change
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
@@ -23,7 +22,7 @@ async def cleanup(aps):
     await aps._pool.release(conn)
 
 
-async def get_aps(strategy='merge', pool_size=15):
+async def get_aps(strategy='resolve', pool_size=15):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
     aps = PostgresqlStorage(
@@ -160,90 +159,6 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await aps.remove()
     await cleanup(aps)
 
-
-async def test_should_raise_conflict_error_and_editing_same_data(postgres, dummy_request):
-    request = dummy_request  # noqa so magically get_current_request can find
-
-    aps = await get_aps()
-    tm = TransactionManager(aps)
-
-    # create object first, commit it...
-    txn = await tm.begin()
-
-    ob = create_content()
-    ob.title = 'foobar'
-    txn.register(ob)
-
-    await tm.commit(txn=txn)
-
-    # 1 started before 2
-    txn1 = await tm.begin()
-    txn2 = await tm.begin()
-
-    ob1 = await txn1.get(ob._p_oid)
-    ob2 = await txn2.get(ob._p_oid)
-    ob1.title = 'foobar1'
-    record_object_change(ob1, IResource['title'], 'foobar')
-    ob2.title = 'foobar2'
-
-    txn1.register(ob1)
-    txn2.register(ob2)
-
-    # commit 2 before 1
-    await tm.commit(txn=txn2)
-    with pytest.raises(ConflictError):
-        await tm.commit(txn=txn1)
-
-    await aps.remove()
-    await cleanup(aps)
-
-
-async def test_should_not_raise_conflict_error_when_editing_diff_data(postgres, dummy_request):
-    request = dummy_request  # noqa so magically get_current_request can find
-
-    aps = await get_aps()
-    tm = TransactionManager(aps)
-
-    # create object first, commit it...
-    txn = await tm.begin()
-
-    ob = create_content()
-    ob.title = 'foobar'
-    ob.description = 'foobar'
-    txn.register(ob)
-
-    await tm.commit(txn=txn)
-
-    # 1 started before 2
-    txn1 = await tm.begin()
-    txn2 = await tm.begin()
-
-    ob1 = await txn1.get(ob._p_oid)
-    ob2 = await txn2.get(ob._p_oid)
-    ob1.title = 'foobar1'
-    record_object_change(ob1, IResource['title'], 'foobar')
-    ob2.description = 'foobar2'
-    record_object_change(ob2, IDublinCore['description'], 'foobar')
-
-    txn1.register(ob1)
-    txn2.register(ob2)
-
-    # commit 2 before 1
-    await tm.commit(txn=txn2)
-    await tm.commit(txn=txn1)
-
-    # and new object should have data from each
-    txn = await tm.begin()
-    ob1 = await txn.get(ob._p_oid)
-    assert ob1.title == 'foobar1'
-    assert ob2.description == 'foobar2'
-
-    await tm.commit(txn=txn)
-
-    await aps.remove()
-    await cleanup(aps)
-
-
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
         postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
@@ -268,9 +183,7 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     ob1 = await txn1.get(ob._p_oid)
     ob2 = await txn2.get(ob._p_oid)
     ob1.title = 'foobar1'
-    record_object_change(ob1, IResource['title'], 'foobar')
     ob2.description = 'foobar2'
-    record_object_change(ob2, IDublinCore['description'], 'foobar')
 
     txn1.register(ob1)
     txn2.register(ob2)
@@ -279,27 +192,6 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     await tm.commit(txn=txn2)
     with pytest.raises(ConflictError):
         await tm.commit(txn=txn1)
-
-    await aps.remove()
-    await cleanup(aps)
-
-
-async def test_should_reset_changes_after_commit(postgres, dummy_request):
-    request = dummy_request  # noqa so magically get_current_request can find
-
-    aps = await get_aps()
-    tm = TransactionManager(aps)
-    txn = await tm.begin()
-
-    ob = create_content()
-    ob.title = 'foobar'
-    record_object_change(ob, IResource['title'], 'foobar')
-    txn.register(ob)
-
-    assert len(txn.modified) == 1
-    assert len(ob.__changes__) == 1
-    await tm.commit(txn=txn)
-    assert len(ob.__changes__) == 0
 
     await aps.remove()
     await cleanup(aps)
@@ -508,6 +400,31 @@ async def test_exhausting_pool_size(postgres, dummy_request):
         await tm.begin()
 
     await tm.abort(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+async def test_mismatched_tid_causes_conflict_error(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    # base aps uses 1 connection from the pool for starting transactions
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+    txn = await tm.begin()
+
+    ob1 = create_content()
+    txn.register(ob1)
+    await tm.commit(txn=txn)
+
+    txn = await tm.begin()
+    ob1 = await txn.get(ob1._p_oid)
+    # modify p_serial, try committing, should raise conflict error
+    ob1._p_serial = 3242432
+    txn.register(ob1)
+
+    with pytest.raises(ConflictError):
+        await tm.commit(txn=txn)
 
     await aps.remove()
     await cleanup(aps)

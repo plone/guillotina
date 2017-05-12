@@ -111,7 +111,7 @@ class DummyStorage(BaseStorage):
                 if self.DB[oid]['tid'] > tobj['tid']:
                     return self.DB[oid]['tid']
 
-        return True
+        return 0
 
     async def commit(self, transaction):
         for oid, element in transaction._db_txn.items():

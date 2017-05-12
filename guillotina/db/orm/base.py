@@ -235,18 +235,6 @@ class BaseObject(object):
 
     __immutable_cache__ = property(_get_cache, _set_cache, _del_cache)
 
-    # __changes__:  Identifier of the object.
-    def _get_changes(self):
-        return _OGA(self, '_BaseObject__changes')
-
-    def _set_changes(self, value):
-        _OSA(self, '_BaseObject__changes', value)
-
-    def _del_changes(self):
-        _OSA(self, '_BaseObject__changes', {})
-
-    __changes__ = property(_get_changes, _set_changes, _del_changes)
-
     # __new_marker__:  marks an object as being newly created.
     # this is useful for the transaction manager to know about it.
     def _get_new_marker(self):
