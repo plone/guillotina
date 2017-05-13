@@ -302,8 +302,8 @@ class PostgresqlStorage(BaseStorage):
 
     async def load(self, txn, oid):
         int_oid = oid
-        smt = await txn._db_conn.prepare(GET_OID)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_OID)
             objects = await smt.fetchrow(int_oid)
         if objects is None:
             raise KeyError(oid)
@@ -328,8 +328,8 @@ class PostgresqlStorage(BaseStorage):
             statement_sql = UPDATE
             update = True
 
-        smt = await txn._db_conn.prepare(statement_sql)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(statement_sql)
             try:
                 result = await smt.fetch(
                     oid,                 # The OID of the object
@@ -431,20 +431,20 @@ class PostgresqlStorage(BaseStorage):
     # Introspection
 
     async def keys(self, txn, oid):
-        smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS)
             result = await smt.fetch(oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
-        smt = await txn._db_conn.prepare(GET_CHILD)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_CHILD)
             result = await smt.fetchrow(parent_oid, id)
         return result
 
     async def has_key(self, txn, parent_oid, id):
-        smt = await txn._db_conn.prepare(EXIST_CHILD)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(EXIST_CHILD)
             result = await smt.fetchrow(parent_oid, id)
         if result is None:
             return False
@@ -452,33 +452,34 @@ class PostgresqlStorage(BaseStorage):
             return True
 
     async def len(self, txn, oid):
-        smt = await txn._db_conn.prepare(NUM_CHILDREN)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(NUM_CHILDREN)
             result = await smt.fetchval(oid)
         return result
 
     async def items(self, txn, oid):
-        smt = await txn._db_conn.prepare(GET_CHILDREN)
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_CHILDREN)
         async for record in smt.cursor(oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
     async def get_annotation(self, txn, oid, id):
-        smt = await txn._db_conn.prepare(GET_ANNOTATION)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_ANNOTATION)
             result = await smt.fetchrow(oid, id)
         return result
 
     async def get_annotation_keys(self, txn, oid):
-        smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS)
             result = await smt.fetch(oid)
         return result
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
-        smt = await txn._db_conn.prepare(HAS_OBJECT)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(HAS_OBJECT)
             result = await smt.fetchrow(oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
@@ -492,12 +493,13 @@ class PostgresqlStorage(BaseStorage):
                 INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
-        smt = await txn._db_conn.prepare(READ_BLOB_CHUNK)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNK)
             return await smt.fetchrow(bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
-        smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS)
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS)
         async for record in smt.cursor(bid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
@@ -508,13 +510,13 @@ class PostgresqlStorage(BaseStorage):
             await txn._db_conn.execute(DELETE_BLOB, bid)
 
     async def get_total_number_of_objects(self, txn):
-        smt = await txn._db_conn.prepare(NUM_ROWS)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(NUM_ROWS)
             result = await smt.fetchval()
         return result
 
     async def get_total_number_of_resources(self, txn):
-        smt = await txn._db_conn.prepare(NUM_RESOURCES)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(NUM_RESOURCES)
             result = await smt.fetchval()
         return result
