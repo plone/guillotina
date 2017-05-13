@@ -1,4 +1,17 @@
-1.0.0a24 (unreleased)
+1.0.0a26 (unreleased)
+---------------------
+
+- Nothing changed yet.
+
+
+1.0.0a25 (2017-05-15)
+---------------------
+
+- Handle connection is closed error when starting transaction
+  [vangheem]
+
+
+1.0.0a24 (2017-05-13)
 ---------------------
 
 - Fix transaction conflict retry handle
