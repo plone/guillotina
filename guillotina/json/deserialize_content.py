@@ -4,8 +4,6 @@ from guillotina.component import queryMultiAdapter
 from guillotina.component import queryUtility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
-from guillotina.db import resolution
-from guillotina.db.interfaces import IConflictResolvableStrategy
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.exceptions import NoInteraction
@@ -14,7 +12,6 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceFieldDeserializer
-from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
 from guillotina.schema.exceptions import ValidationError
@@ -105,21 +102,12 @@ class DeserializeFromJson(object):
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
                     # record object changes for potential future conflict resolution
-                    if IConflictResolvableStrategy.providedBy(self.context._p_jar.strategy):
-                        field_serializer = queryMultiAdapter(
-                            (field, self.context, self.request),
-                            IResourceFieldSerializer)
-                        original_value = await field_serializer.get_value(
-                            default=resolution.MISSING_VALUE)
                     try:
                         await apply_coroutine(field.set, obj, value)
                     except Exception:
                         logger.warn(
                             'Error setting data on field, falling back to setattr', exc_info=True)
                         setattr(obj, name, value)
-                    # alright, changes written, now save record of last one
-                    if IConflictResolvableStrategy.providedBy(self.context._p_jar.strategy):
-                        resolution.record_object_change(self.context, field, original_value)
             else:
                 if f.required and not hasattr(obj, name):
                     errors.append({

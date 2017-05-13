@@ -13,7 +13,12 @@ class Root(Folder):
 
     __name__ = None
     __immutable_cache__ = True
+    __db_id__ = None
     type_name = 'GuillotinaDBRoot'
+
+    def __init__(self, db_id):
+        super().__init__()
+        self.__db_id__ = db_id
 
     def __repr__(self):
         return "<Database %d>" % id(self)
@@ -51,9 +56,12 @@ class GuillotinaDB(object):
 
         try:
             assert tm.get(request=request) == txn
-            await txn.get(ROOT_ID)
+            root = await txn.get(ROOT_ID)
+            if root.__db_id__ is None:
+                root.__db_id__ = self._database_name
+                txn.register(root)
         except KeyError:
-            root = Root()
+            root = Root(self._database_name)
             txn.register(root, new_oid=ROOT_ID)
 
         await tm.commit(txn=txn)

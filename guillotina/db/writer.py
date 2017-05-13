@@ -1,6 +1,6 @@
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import queryAdapter
-from guillotina.db.interfaces import IPartition
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
@@ -15,7 +15,6 @@ import pickle
     provides=IWriter)
 class Writer(object):
 
-    part = 0
     resource = False
 
     def __init__(self, obj):
@@ -38,17 +37,10 @@ class Writer(object):
 
     @property
     def part(self):
-        of = self.of
-        if of is not None:
-            writer = Writer(of)
-            return writer.part
-        return None
+        return getattr(self._obj, '__partition_id__', 0)
 
     def serialize(self):
-        if self._obj is not None:
-            return pickle.dumps(self._obj, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            return None
+        return pickle.dumps(self._obj, protocol=pickle.HIGHEST_PROTOCOL)
 
     @property
     def parent_id(self):
@@ -69,21 +61,15 @@ class ResourceWriter(Writer):
     resource = True
 
     @property
-    def part(self):
-        if self._obj is not None:
-            adapter = queryAdapter(self._obj, IPartition)
-            if adapter is not None:
-                return adapter()
-        return None
-
-    @property
     def type(self):
-        if self._obj is not None and hasattr(self._obj, 'type_name'):
+        if hasattr(self._obj, 'type_name'):
             return self._obj.type_name
         else:
             return get_class_dotted_name(self._obj)
 
     async def get_json(self):
+        if not app_settings.get('store_json', True):
+            return {}
         adapter = queryAdapter(self._obj, ICatalogDataAdapter)
         if adapter is not None:
             return await adapter()

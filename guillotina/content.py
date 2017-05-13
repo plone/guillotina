@@ -424,13 +424,9 @@ class Folder(Resource):
     """
 
     def _get_transaction(self):
-        try:
-            trns = get_transaction()
-        except AttributeError:
-            trns = None
-        if trns is None:
+        if self._p_jar is not None:
             return self._p_jar
-        return trns
+        return get_transaction()
 
     async def async_contains(self, key: str) -> bool:
         """

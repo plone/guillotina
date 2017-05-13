@@ -84,7 +84,7 @@ class EtcdError:
         try:
             msg = "{} : {}".format(message, cause)
             exc = cls.error_exceptions[errorCode]
-        except:
+        except Exception:
             msg = "Unable to decode server response"
             exc = EtcdException
         raise exc(msg)

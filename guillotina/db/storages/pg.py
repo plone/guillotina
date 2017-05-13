@@ -2,6 +2,7 @@ from asyncio import shield
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
+from guillotina.exceptions import TIDConflictError
 from zope.interface import implementer
 
 import asyncio
@@ -13,6 +14,8 @@ import ujson
 log = logging.getLogger("guillotina.storage")
 
 
+# we can not use FOR UPDATE or FOR SHARE unfortunately because
+# it can cause deadlocks on the database--we need to resolve them ourselves
 GET_OID = """
     SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
     FROM objects
@@ -58,45 +61,58 @@ GET_ANNOTATION = """
     """
 
 
-INSERT = """
-    INSERT INTO objects
-    (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
-    VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
-            $8::varchar(32), $9::text, $10::text, $11::json, $12::bytea)
-    ON CONFLICT (zoid)
-    DO UPDATE SET
-        tid = EXCLUDED.tid,
-        state_size = EXCLUDED.state_size,
-        part = EXCLUDED.part,
-        resource = EXCLUDED.resource,
-        of = EXCLUDED.of,
-        otid = EXCLUDED.otid,
-        parent_id = EXCLUDED.parent_id,
-        id = EXCLUDED.id,
-        type = EXCLUDED.type,
-        json = EXCLUDED.json,
-        state = EXCLUDED.state;
-    """
+def _wrap_return_count(txt):
+    return """WITH rows AS (
+{}
+    RETURNING 1
+)
+SELECT count(*) FROM rows""".format(txt)
 
 
-# not used right now but here in case we want to try specifically doing updates
-# instead of insert + on conflict
-UPDATE = """
-    UPDATE objects
-    SET (
-        tid = $2::int,
-        state_size = $3::int,
-        part = $4::int,
-        resource = $5::boolean,
-        of = $6::varchar(32),
-        otid = $7::int,
-        parent_id = $8::varchar(32),
-        id = $9::text,
-        type = $10::text,
-        json = $11::json,
-        state = $12::bytea)
-    WHERE zoid = $1::varchar(32)
-    """
+# upsert without checking matching tids on updated object
+NAIVE_UPSERT = """
+INSERT INTO objects
+(zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
+VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
+        $8::varchar(32), $9::text, $10::text, $11::json, $12::bytea)
+ON CONFLICT (zoid)
+DO UPDATE SET
+    tid = EXCLUDED.tid,
+    state_size = EXCLUDED.state_size,
+    part = EXCLUDED.part,
+    resource = EXCLUDED.resource,
+    of = EXCLUDED.of,
+    otid = EXCLUDED.otid,
+    parent_id = EXCLUDED.parent_id,
+    id = EXCLUDED.id,
+    type = EXCLUDED.type,
+    json = EXCLUDED.json,
+    state = EXCLUDED.state"""
+UPSERT = _wrap_return_count(NAIVE_UPSERT + """
+    WHERE
+        tid = EXCLUDED.otid""")
+NAIVE_UPSERT = _wrap_return_count(NAIVE_UPSERT)
+
+
+# update without checking matching tids on updated object
+NAIVE_UPDATE = """
+UPDATE objects
+SET
+    tid = $2::int,
+    state_size = $3::int,
+    part = $4::int,
+    resource = $5::boolean,
+    of = $6::varchar(32),
+    otid = $7::int,
+    parent_id = $8::varchar(32),
+    id = $9::text,
+    type = $10::text,
+    json = $11::json,
+    state = $12::bytea
+WHERE
+    zoid = $1::varchar(32)"""
+UPDATE = _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int""")
+NAIVE_UPDATE = _wrap_return_count(NAIVE_UPDATE)
 
 
 NEXT_TID = "SELECT nextval('tid_sequence');"
@@ -306,8 +322,6 @@ class PostgresqlStorage(BaseStorage):
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
-        smt = await self._get_prepared_statement(txn, 'insert', INSERT)
-
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
             self._log.warn("Too long object %d" % (obj.__class__, len(p)))
@@ -316,24 +330,47 @@ class PostgresqlStorage(BaseStorage):
         part = writer.part
         if part is None:
             part = 0
-        # (zoid, tid, state_size, part, main, parent_id, type, json, state)
+
+        statement_name = 'naive_upsert'
+        statement_sql = NAIVE_UPSERT
+        if not obj.__new_marker__ and obj._p_serial is not None:
+            # we should be confident this is an object update
+            statement_name = 'update'
+            statement_sql = UPDATE
+
+        smt = await self._get_prepared_statement(txn, statement_name, statement_sql)
         async with txn._lock:
-            await smt.fetchval(
-                oid,                 # The OID of the object
-                txn._tid,            # Our TID
-                len(p),              # Len of the object
-                part,                # Partition indicator
-                writer.resource,     # Is a resource ?
-                writer.of,           # It belogs to a main
-                old_serial,          # Old serial
-                writer.parent_id,    # Parent OID
-                writer.id,           # Traversal ID
-                writer.type,         # Guillotina type
-                json,                # JSON catalog
-                p                    # Pickle state
-            )
+            try:
+                result = await smt.fetch(
+                    oid,                 # The OID of the object
+                    txn._tid,            # Our TID
+                    len(p),              # Len of the object
+                    part,                # Partition indicator
+                    writer.resource,     # Is a resource ?
+                    writer.of,           # It belogs to a main
+                    old_serial,          # Old serial
+                    writer.parent_id,    # Parent OID
+                    writer.id,           # Traversal ID
+                    writer.type,         # Guillotina type
+                    json,                # JSON catalog
+                    p                    # Pickle state)
+                )
+            except asyncpg.exceptions.ForeignKeyViolationError:
+                txn.deleted[obj._p_oid] = obj
+                raise TIDConflictError(
+                    'Bad value inserting into database that could be caused '
+                    'by a bad cache value. This should resolve on request retry.')
+            if len(result) != 1 or result[0]['count'] != 1:
+                if statement_name == 'update':
+                    # raise tid conflict error
+                    raise TIDConflictError(
+                        'Mismatch of tid of object being updated. This is likely '
+                        'caused by a cache invalidation race condition and should '
+                        'be an edge case. This should resolve on request retry.')
+                else:
+                    self._log.error('Incorrect response count from database update. '
+                                    'This should not happen. tid: {}'.format(txn._tid))
         obj._p_estimated_size = len(p)
-        return txn._tid, len(p)
 
     async def delete(self, txn, oid):
         async with txn._lock:
@@ -373,7 +410,11 @@ class PostgresqlStorage(BaseStorage):
     async def abort(self, transaction):
         if transaction._db_txn is not None:
             async with transaction._lock:
-                await transaction._db_txn.rollback()
+                try:
+                    await transaction._db_txn.rollback()
+                except asyncpg.exceptions._base.InterfaceError:
+                    # we're okay with this error here...
+                    pass
         # reads don't need transaction necessarily so don't log
         # else:
         #     log.warn('Do not have db transaction to rollback')

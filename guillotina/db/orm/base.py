@@ -42,7 +42,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
-        '__name', '__immutable_cache', '__new_marker', '__changes', '__locked')
+        '__name', '__immutable_cache', '__new_marker', '__locked')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -55,7 +55,6 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__annotations', {})
         _OSA(inst, '_BaseObject__immutable_cache', False)
         _OSA(inst, '_BaseObject__new_marker', False)
-        _OSA(inst, '_BaseObject__changes', {})
         _OSA(inst, '_BaseObject__locked', False)
         return inst
 
@@ -234,18 +233,6 @@ class BaseObject(object):
         return _OSA(self, '_BaseObject__immutable_cache', False)
 
     __immutable_cache__ = property(_get_cache, _set_cache, _del_cache)
-
-    # __changes__:  Identifier of the object.
-    def _get_changes(self):
-        return _OGA(self, '_BaseObject__changes')
-
-    def _set_changes(self, value):
-        _OSA(self, '_BaseObject__changes', value)
-
-    def _del_changes(self):
-        _OSA(self, '_BaseObject__changes', {})
-
-    __changes__ = property(_get_changes, _set_changes, _del_changes)
 
     # __new_marker__:  marks an object as being newly created.
     # this is useful for the transaction manager to know about it.
