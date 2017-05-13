@@ -1,4 +1,4 @@
-1.0.0a24 (unreleased)
+1.0.0a24 (2017-05-13)
 ---------------------
 
 - Fix transaction conflict retry handle
