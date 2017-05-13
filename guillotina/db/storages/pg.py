@@ -389,11 +389,7 @@ class PostgresqlStorage(BaseStorage):
 
     async def start_transaction(self, txn):
         txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
-        try:
-            await txn._db_txn.start()
-        except:
-            import pdb; pdb.set_trace()
-            raise
+        await txn._db_txn.start()
 
     async def get_conflicts(self, txn, full=False):
         async with self._lock:
