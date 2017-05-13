@@ -1,6 +1,12 @@
 1.0.0a24 (unreleased)
 ---------------------
 
+- Fix transaction conflict retry handle
+  [vangheem]
+
+- fix scenario where prepared statements would get cached with wrong db connection
+  [vangheem]
+
 - Enforce transaction ids match when updating objects and throw a ConflictError
   when there is a mismatch. This can happen in cases where there is stale cache
   being pulled.
