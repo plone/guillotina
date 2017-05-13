@@ -233,10 +233,13 @@ class Transaction(object):
         try:
             await self.real_commit()
         except (ConflictError, TIDConflictError) as ex:
+            # this exception should bubble up
             # in the case of TIDConflictError, we should make sure to try
             # and invalidate again to make sure we aren't caching the ob
+            self.status = Status.ABORTED
+            await self._manager._storage.abort(self)
             await self._cache.close(invalidate=isinstance(ex, TIDConflictError))
-            await self._manager.abort(request=self.request, txn=self)
+            self.tpc_cleanup()
             raise
         # vote will do conflict resolution if there are conflicting writes
         await self.tpc_vote()

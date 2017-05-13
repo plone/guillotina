@@ -2,6 +2,7 @@ from asyncio import shield
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
+from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from zope.interface import implementer
 
@@ -299,21 +300,10 @@ class PostgresqlStorage(BaseStorage):
         except asyncio.CancelledError:
             pass
 
-    async def _get_prepared_statement(self, txn, name, statement, retries=0):
-        '''
-        lazy load prepared statements so we don't do unncessary
-        calls to pg...
-        '''
-        name = '_smt_' + name
-        if not hasattr(txn, name):
-            async with txn._lock:
-                setattr(txn, name, await txn._db_conn.prepare(statement))
-        return getattr(txn, name)
-
     async def load(self, txn, oid):
         int_oid = oid
-        smt = await self._get_prepared_statement(txn, 'get_oid', GET_OID)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_OID)
             objects = await smt.fetchrow(int_oid)
         if objects is None:
             raise KeyError(oid)
@@ -331,15 +321,15 @@ class PostgresqlStorage(BaseStorage):
         if part is None:
             part = 0
 
-        statement_name = 'naive_upsert'
+        update = False
         statement_sql = NAIVE_UPSERT
         if not obj.__new_marker__ and obj._p_serial is not None:
             # we should be confident this is an object update
-            statement_name = 'update'
             statement_sql = UPDATE
+            update = True
 
-        smt = await self._get_prepared_statement(txn, statement_name, statement_sql)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(statement_sql)
             try:
                 result = await smt.fetch(
                     oid,                 # The OID of the object
@@ -360,8 +350,13 @@ class PostgresqlStorage(BaseStorage):
                 raise TIDConflictError(
                     'Bad value inserting into database that could be caused '
                     'by a bad cache value. This should resolve on request retry.')
+            except asyncpg.exceptions._base.InterfaceError as ex:
+                if 'another operation is in progress' in ex.args[0]:
+                    raise ConflictError(
+                        'asyncpg error, another operation in progress.')
+                raise
             if len(result) != 1 or result[0]['count'] != 1:
-                if statement_name == 'update':
+                if update:
                     # raise tid conflict error
                     raise TIDConflictError(
                         'Mismatch of tid of object being updated. This is likely '
@@ -387,9 +382,23 @@ class PostgresqlStorage(BaseStorage):
             # again, use storage lock here instead of trns lock
             return await self._stmt_max_tid.fetchval()
 
-    async def start_transaction(self, txn):
-        txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
-        await txn._db_txn.start()
+    async def start_transaction(self, txn, retries=0):
+        error = None
+        async with txn._lock:
+            txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
+            try:
+                await txn._db_txn.start()
+                return
+            except asyncpg.exceptions._base.InterfaceError as ex:
+                error = ex
+
+        if error is not None:
+            if retries > 2:
+                raise error
+            if 'manually started transaction' in error.args[0]:
+                await self.close(txn._db_conn)
+                txn._db_conn = await self.open()
+                return await self.start_transaction(txn, retries + 1)
 
     async def get_conflicts(self, txn, full=False):
         async with self._lock:
@@ -422,20 +431,20 @@ class PostgresqlStorage(BaseStorage):
     # Introspection
 
     async def keys(self, txn, oid):
-        smt = await self._get_prepared_statement(txn, 'get_sons_keys', GET_CHILDREN_KEYS)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS)
             result = await smt.fetch(oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
-        smt = await self._get_prepared_statement(txn, 'get_child', GET_CHILD)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_CHILD)
             result = await smt.fetchrow(parent_oid, id)
         return result
 
     async def has_key(self, txn, parent_oid, id):
-        smt = await self._get_prepared_statement(txn, 'exist_child', EXIST_CHILD)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(EXIST_CHILD)
             result = await smt.fetchrow(parent_oid, id)
         if result is None:
             return False
@@ -443,34 +452,34 @@ class PostgresqlStorage(BaseStorage):
             return True
 
     async def len(self, txn, oid):
-        smt = await self._get_prepared_statement(txn, 'num_childs', NUM_CHILDREN)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(NUM_CHILDREN)
             result = await smt.fetchval(oid)
         return result
 
     async def items(self, txn, oid):
-        smt = await self._get_prepared_statement(txn, 'get_childs', GET_CHILDREN)
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_CHILDREN)
         async for record in smt.cursor(oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
     async def get_annotation(self, txn, oid, id):
-        smt = await self._get_prepared_statement(txn, 'get_annotation', GET_ANNOTATION)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_ANNOTATION)
             result = await smt.fetchrow(oid, id)
         return result
 
     async def get_annotation_keys(self, txn, oid):
-        smt = await self._get_prepared_statement(
-            txn, 'get_annotations_keys', GET_ANNOTATIONS_KEYS)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS)
             result = await smt.fetch(oid)
         return result
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
-        smt = await self._get_prepared_statement(txn, 'has_ob', HAS_OBJECT)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(HAS_OBJECT)
             result = await smt.fetchrow(oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
@@ -484,12 +493,13 @@ class PostgresqlStorage(BaseStorage):
                 INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
-        smt = await self._get_prepared_statement(txn, 'read_blob_chunk', READ_BLOB_CHUNK)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNK)
             return await smt.fetchrow(bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
-        smt = await self._get_prepared_statement(txn, 'read_blob_chunks', READ_BLOB_CHUNKS)
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS)
         async for record in smt.cursor(bid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
@@ -500,13 +510,13 @@ class PostgresqlStorage(BaseStorage):
             await txn._db_conn.execute(DELETE_BLOB, bid)
 
     async def get_total_number_of_objects(self, txn):
-        smt = await self._get_prepared_statement(txn, 'num_rows', NUM_ROWS)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(NUM_ROWS)
             result = await smt.fetchval()
         return result
 
     async def get_total_number_of_resources(self, txn):
-        smt = await self._get_prepared_statement(txn, 'num_resources', NUM_RESOURCES)
         async with txn._lock:
+            smt = await txn._db_conn.prepare(NUM_RESOURCES)
             result = await smt.fetchval()
         return result

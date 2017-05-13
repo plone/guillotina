@@ -12,6 +12,8 @@ from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.contentnegotiation import ContentNegotiatorUtility
+from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -20,10 +22,12 @@ from guillotina.interfaces.content import IContentNegotiation
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
 
+import aiohttp
 import asyncio
 import collections
 import inspect
 import json
+import logging
 import logging.config
 import os
 import pathlib
@@ -33,6 +37,9 @@ try:
     from Crypto.PublicKey import RSA
 except ImportError:
     RSA = None
+
+
+logger = logging.getLogger('guillotina')
 
 
 def update_app_settings(settings):
@@ -86,6 +93,25 @@ _delayed_default_settings = {
 }
 
 
+class GuillotinaAIOHTTPApplication(web.Application):
+    async def _handle(self, request, retries=0):
+        try:
+            return await super()._handle(request)
+        except (ConflictError, TIDConflictError) as e:
+            if app_settings.get('conflict_retry_attempts', 3) > retries:
+                logger.warn(
+                    'DB Conflict detected, retrying request, tid: {}, retries: {})'.format(
+                        getattr(getattr(request, '_txn', None), '_tid', 'not issued'),
+                        retries + 1))
+                request._retry_attempt = retries + 1
+                return await self._handle(request, retries + 1)
+            logger.error(
+                'Exhausted retry attempts for conflict error on tid: {}'.format(
+                    getattr(getattr(request, '_txn', None), '_tid', 'not issued')
+                ))
+            return aiohttp.web_exceptions.HTTPConflict()
+
+
 def make_app(config_file=None, settings=None, loop=None):
     app_settings.update(_delayed_default_settings)
 
@@ -100,7 +126,7 @@ def make_app(config_file=None, settings=None, loop=None):
 
     middlewares = [resolve_dotted_name(m) for m in settings.get('middlewares', [])]
     # Initialize aiohttp app
-    app = web.Application(
+    app = GuillotinaAIOHTTPApplication(
         router=TraversalRouter(),
         loop=loop,
         middlewares=middlewares,
