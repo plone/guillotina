@@ -20,17 +20,19 @@ class DatabaseSpecialPermissions(PrincipalPermissionManager):
 
     def __init__(self, db):
         super(DatabaseSpecialPermissions, self).__init__()
-        if db.__db_id__ in self.__cached__db_maps:
+        db_id = getattr(db, '__db_id__', None)
+        if db_id in self.__cached__db_maps:
             # an optimization since granting this is costly and it happens
             # on every single lookup.
             self._byrow = self.__cached__db_maps[db.__db_id__]['byrow']
             self._bycol = self.__cached__db_maps[db.__db_id__]['bycol']
         else:
             self._grants()
-            self.__cached__db_maps[db.__db_id__] = {
-                'byrow': self._byrow,
-                'bycol': self._bycol
-            }
+            if db_id:
+                self.__cached__db_maps[db.__db_id__] = {
+                    'byrow': self._byrow,
+                    'bycol': self._bycol
+                }
 
     def _grants(self):
         self.grant_permission_to_principal('guillotina.AddContainer', ROOT_USER_ID)

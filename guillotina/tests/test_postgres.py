@@ -159,6 +159,7 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await aps.remove()
     await cleanup(aps)
 
+
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
         postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find

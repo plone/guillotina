@@ -1,3 +1,4 @@
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import queryAdapter
 from guillotina.db.interfaces import IWriter
@@ -5,7 +6,6 @@ from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IResource
 from guillotina.utils import get_class_dotted_name
-from guillotina import app_settings
 
 import pickle
 
