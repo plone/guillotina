@@ -22,6 +22,7 @@ app_settings = {
     "static": [],
     "default_static_filenames": ['index.html', 'index.htm'],
     "utilities": [],
+    "store_json": True,
     "root_user": {
         "password": ""
     },

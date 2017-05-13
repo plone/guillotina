@@ -32,7 +32,7 @@ current_request()
         if (self != NULL &&
             PyObject_HasAttr(self, PyUnicode_FromString("request"))) {
           request = PyObject_GetAttr(self, PyUnicode_FromString("request"));
-          if(request != NULL && PyObject_IsInstance(request, Request)){
+          if(request != NULL){
             // PyObject_GetAttr does not require Py_INCREF
             found = 1;
             Py_DECCREF(f->f_locals);
@@ -41,7 +41,7 @@ current_request()
         }
 
         request = PyDict_GetItem(f->f_locals, PyUnicode_FromString("request"));
-        if (request != NULL && PyObject_IsInstance(request, Request)) {
+        if (request != NULL) {
           // If we return the value from a PyDict_GetItem
           // it is expected that you use Py_INCREF
           Py_INCREF(request);

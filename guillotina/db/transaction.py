@@ -232,7 +232,7 @@ class Transaction(object):
         self.status = Status.COMMITTING
         try:
             await self.real_commit()
-        except ConflictError as ex:
+        except (ConflictError, TIDConflictError) as ex:
             # in the case of TIDConflictError, we should make sure to try
             # and invalidate again to make sure we aren't caching the ob
             await self._cache.close(invalidate=isinstance(ex, TIDConflictError))

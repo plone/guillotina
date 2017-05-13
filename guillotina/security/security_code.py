@@ -159,5 +159,6 @@ class RolePermissionManager(SecurityMap):
         '''See interface IRolePermissionMap'''
         return self.get_all_cells()
 
+
 # Permissions are our rows, and roles are our columns
 role_permission_manager = RolePermissionManager()

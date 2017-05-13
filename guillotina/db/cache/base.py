@@ -48,22 +48,34 @@ class BaseCache:
     async def delete_all(self, keys):
         raise NotImplemented()
 
-    def get_cache_keys(self, ob):
-        keys = [self.get_key(oid=ob._p_oid)]
+    def get_cache_keys(self, ob, type_='modified'):
+        keys = []
 
         if ob.__of__:
             # like an annotiation, invalidate diff
-            keys.extend([
+            keys = [
+                self.get_key(oid=ob._p_oid),
                 self.get_key(oid=ob.__of__, id=ob.__name__, variant='annotation'),
                 self.get_key(oid=ob.__of__, variant='annotation-keys')
-            ])
+            ]
         else:
-            keys.extend([
-                self.get_key(container=ob.__parent__, variant='len'),
-                self.get_key(container=ob.__parent__, variant='keys'),
-                self.get_key(container=ob.__parent__, id=ob.id),
-                self.get_key(container=ob, variant='annotation-keys')
-            ])
+            if type_ == 'modified':
+                keys = [
+                    self.get_key(oid=ob._p_oid),
+                    self.get_key(container=ob.__parent__, id=ob.id)
+                ]
+            elif type_ == 'added':
+                keys = [
+                    self.get_key(container=ob.__parent__, variant='len'),
+                    self.get_key(container=ob.__parent__, variant='keys')
+                ]
+            elif type_ == 'deleted':
+                keys = [
+                    self.get_key(oid=ob._p_oid),
+                    self.get_key(container=ob.__parent__, id=ob.id),
+                    self.get_key(container=ob.__parent__, variant='len'),
+                    self.get_key(container=ob.__parent__, variant='keys')
+                ]
         return keys
 
     async def close(self, invalidate=True):

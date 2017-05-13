@@ -42,7 +42,7 @@ class BaseObject(object):
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
         '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
-        '__name', '__immutable_cache', '__new_marker', '__changes', '__locked')
+        '__name', '__immutable_cache', '__new_marker', '__locked')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
@@ -55,7 +55,6 @@ class BaseObject(object):
         _OSA(inst, '_BaseObject__annotations', {})
         _OSA(inst, '_BaseObject__immutable_cache', False)
         _OSA(inst, '_BaseObject__new_marker', False)
-        _OSA(inst, '_BaseObject__changes', {})
         _OSA(inst, '_BaseObject__locked', False)
         return inst
 

@@ -340,20 +340,26 @@ class PostgresqlStorage(BaseStorage):
 
         smt = await self._get_prepared_statement(txn, statement_name, statement_sql)
         async with txn._lock:
-            result = await smt.fetch(
-                oid,                 # The OID of the object
-                txn._tid,            # Our TID
-                len(p),              # Len of the object
-                part,                # Partition indicator
-                writer.resource,     # Is a resource ?
-                writer.of,           # It belogs to a main
-                old_serial,          # Old serial
-                writer.parent_id,    # Parent OID
-                writer.id,           # Traversal ID
-                writer.type,         # Guillotina type
-                json,                # JSON catalog
-                p                    # Pickle state)
-            )
+            try:
+                result = await smt.fetch(
+                    oid,                 # The OID of the object
+                    txn._tid,            # Our TID
+                    len(p),              # Len of the object
+                    part,                # Partition indicator
+                    writer.resource,     # Is a resource ?
+                    writer.of,           # It belogs to a main
+                    old_serial,          # Old serial
+                    writer.parent_id,    # Parent OID
+                    writer.id,           # Traversal ID
+                    writer.type,         # Guillotina type
+                    json,                # JSON catalog
+                    p                    # Pickle state)
+                )
+            except asyncpg.exceptions.ForeignKeyViolationError:
+                txn.deleted[obj._p_oid] = obj
+                raise TIDConflictError(
+                    'Bad value inserting into database that could be caused '
+                    'by a bad cache value. This should resolve on request retry.')
             if len(result) != 1 or result[0]['count'] != 1:
                 if statement_name == 'update':
                     # raise tid conflict error
@@ -383,7 +389,11 @@ class PostgresqlStorage(BaseStorage):
 
     async def start_transaction(self, txn):
         txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
-        await txn._db_txn.start()
+        try:
+            await txn._db_txn.start()
+        except:
+            import pdb; pdb.set_trace()
+            raise
 
     async def get_conflicts(self, txn, full=False):
         async with self._lock:
@@ -404,7 +414,11 @@ class PostgresqlStorage(BaseStorage):
     async def abort(self, transaction):
         if transaction._db_txn is not None:
             async with transaction._lock:
-                await transaction._db_txn.rollback()
+                try:
+                    await transaction._db_txn.rollback()
+                except asyncpg.exceptions._base.InterfaceError:
+                    # we're okay with this error here...
+                    pass
         # reads don't need transaction necessarily so don't log
         # else:
         #     log.warn('Do not have db transaction to rollback')
