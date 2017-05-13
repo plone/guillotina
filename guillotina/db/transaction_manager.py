@@ -4,6 +4,7 @@ from guillotina.db.transaction import Status
 from guillotina.db.transaction import Transaction
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RequestNotFound
+from guillotina.exceptions import TIDConflictError
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 
@@ -87,7 +88,7 @@ class TransactionManager(object):
         if txn is not None:
             try:
                 await txn.commit()
-            except ConflictError:
+            except (ConflictError, TIDConflictError):
                 # we're okay with ConflictError being handled...
                 raise
             except Exception:

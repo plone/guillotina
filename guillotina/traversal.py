@@ -18,6 +18,7 @@ from guillotina.component import queryMultiAdapter
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
@@ -215,7 +216,7 @@ class MatchInfo(AbstractMatchInfo):
         self._apps = []
         self._frozen = False
 
-    async def handler(self, request, retries=0):
+    async def handler(self, request):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             try:
@@ -233,14 +234,9 @@ class MatchInfo(AbstractMatchInfo):
             except Unauthorized as e:
                 await abort(request)
                 view_result = generate_unauthorized_response(e, request)
-            except ConflictError as e:
-                # request should already have been aborted
-                logger.info('DB Conflict detected, retrying request({})'.format(retries + 1))
-                if app_settings.get('conflict_retry_attempts', 3) > retries:
-                    request._retry_attempt = retries + 1
-                    return await self.handler(request, retries + 1)
-                view_result = generate_error_response(
-                    e, request, 'ConflictDB', 409)
+            except (ConflictError, TIDConflictError) as e:
+                # bubble this error up
+                raise
             except Exception as e:
                 await abort(request)
                 view_result = generate_error_response(
@@ -266,8 +262,9 @@ class MatchInfo(AbstractMatchInfo):
         cors_headers = apply_cors(request)
         cors_headers.update(view_result.headers)
         view_result.headers = cors_headers
-        if retries > 0:
-            view_result.headers['X-Retry-Transaction-Count'] = str(retries)
+        retry_attempts = getattr(request, '_retry_attempt', 0)
+        if retry_attempts > 0:
+            view_result.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
 
         resp = await self.rendered(view_result)
         if not resp.prepared:
