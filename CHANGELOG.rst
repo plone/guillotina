@@ -1,4 +1,4 @@
-1.0.0a25 (unreleased)
+1.0.0a25 (2017-05-15)
 ---------------------
 
 - Handle connection is closed error when starting transaction
