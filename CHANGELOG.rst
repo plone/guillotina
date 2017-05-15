@@ -1,7 +1,8 @@
 1.0.0a25 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Handle connection is closed error when starting transaction
+  [vangheem]
 
 
 1.0.0a24 (2017-05-13)

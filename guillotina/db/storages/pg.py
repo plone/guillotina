@@ -395,7 +395,8 @@ class PostgresqlStorage(BaseStorage):
         if error is not None:
             if retries > 2:
                 raise error
-            if 'manually started transaction' in error.args[0]:
+            if ('manually started transaction' in error.args[0] or
+                    'connection is closed' in error.args[0]):
                 await self.close(txn._db_conn)
                 txn._db_conn = await self.open()
                 return await self.start_transaction(txn, retries + 1)
