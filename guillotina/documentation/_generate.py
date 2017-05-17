@@ -10,7 +10,7 @@ from guillotina.documentation import testmodule
 from guillotina.documentation import URL
 from guillotina.factory import make_app
 from guillotina.testing import TESTING_SETTINGS
-from guillotina.utils import get_class_dotted_name
+from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 
 import json
@@ -96,7 +96,7 @@ def api(path, method='get', file_type_name=None, **kwargs):
     response = getattr(requests, method)(URL + path, **kwargs)
 
     iface = resolve_dotted_name(get_service_type_name(path)[-1])
-    dotted = get_class_dotted_name(iface)
+    dotted = get_dotted_name(iface)
     data = {
         'path': path,
         'path_scheme': path_scheme,
@@ -111,7 +111,7 @@ def api(path, method='get', file_type_name=None, **kwargs):
             'payload': service.get('payload'),
             'query_params': service.get('query_params'),
             'method': service.get('method', 'GET'),
-            'context': get_class_dotted_name(iface),
+            'context': get_dotted_name(iface),
             'permission': service.get('permission')
         }
     }
@@ -172,7 +172,7 @@ def get_service_def(path, method=None, type_name=None):
         service = None
         for other_iface in iface.__bases__:
             try:
-                service = get_service_def(path, method, get_class_dotted_name(other_iface))
+                service = get_service_def(path, method, get_dotted_name(other_iface))
             except (KeyError, TypeError):
                 pass
             if service is not None:
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     container_explorer.get('@registry').post(
         '@registry',
         jsond={
-            'interface': get_class_dotted_name(testmodule.ISchema),
+            'interface': get_dotted_name(testmodule.ISchema),
             'initial_values': {
                 'foo': 'bar'
             }

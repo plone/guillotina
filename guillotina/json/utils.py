@@ -1,5 +1,5 @@
 from guillotina import schema
-from guillotina.utils import get_class_dotted_name
+from guillotina.utils import get_dotted_name
 
 import logging
 
@@ -48,7 +48,7 @@ def convert_field_to_schema(field):
         })
     else:
         logger.warn('Could not convert field {} of {} into json schema'.format(
-            field.__name__, get_class_dotted_name(field.interface)
+            field.__name__, get_dotted_name(field.interface)
         ))
         return
     for prop_name, schema_name in _prop_mappings.items():
@@ -66,7 +66,7 @@ def convert_interface_to_schema(iface):
             props = convert_field_to_schema(field)
         except Exception:
             logger.warn('Error converting {} of {} into json schema'.format(
-                name, get_class_dotted_name(iface)
+                name, get_dotted_name(iface)
             ))
         if props is not None:
             properties[name] = props
@@ -76,7 +76,7 @@ def convert_interface_to_schema(iface):
 def convert_interfaces_to_schema(interfaces):
     properties = {}
     for iface in interfaces:
-        properties[get_class_dotted_name(iface)] = {
+        properties[get_dotted_name(iface)] = {
             "type": "object",
             "properties": convert_interface_to_schema(iface)
         }

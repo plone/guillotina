@@ -232,12 +232,16 @@ def get_module_dotted_name(ob) -> str:
     return getattr(ob, '__module__', None) or getattr(ob, '__name__', None)
 
 
-def get_class_dotted_name(ob) -> str:
-    if inspect.isclass(ob) or IInterface.providedBy(ob):
-        class_name = ob.__name__
+def get_dotted_name(ob) -> str:
+    if inspect.isclass(ob) or IInterface.providedBy(ob) or isinstance(ob, types.FunctionType):
+        name = ob.__name__
     else:
-        class_name = ob.__class__.__name__
-    return ob.__module__ + '.' + class_name
+        name = ob.__class__.__name__
+    return ob.__module__ + '.' + name
+
+
+# get_class_dotted_name is deprecated
+get_class_dotted_name = get_dotted_name
 
 
 def merge_dicts(d1: dict, d2: dict) -> dict:

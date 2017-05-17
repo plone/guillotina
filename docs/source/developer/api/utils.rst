@@ -18,7 +18,7 @@
   .. autofunction:: get_caller_package
   .. autofunction:: resolve_module_path
   .. autofunction:: get_module_dotted_name
-  .. autofunction:: get_class_dotted_name
+  .. autofunction:: get_dotted_name
   .. autofunction:: import_class
 
   .. autofunction:: merge_dicts
