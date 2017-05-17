@@ -51,7 +51,6 @@ def update_app_settings(settings):
 
 
 def load_application(module, root, settings):
-    app = root.app
     # includeme function
     if hasattr(module, 'includeme'):
         args = [root]
@@ -62,7 +61,7 @@ def load_application(module, root, settings):
     if hasattr(module, 'app_settings') and app_settings != module.app_settings:
         update_app_settings(module.app_settings)
     # services
-    configure.load_all_configurations(app.config, module.__name__)
+    configure.load_all_configurations(root.config, module.__name__)
 
 
 # XXX use this to delay imports for these settings
@@ -112,7 +111,15 @@ class GuillotinaAIOHTTPApplication(web.Application):
             return aiohttp.web_exceptions.HTTPConflict()
 
 
-def make_app(config_file=None, settings=None, loop=None):
+def make_aiohttp_application(settings, middlewares=[], loop=None):
+    return GuillotinaAIOHTTPApplication(
+        router=TraversalRouter(),
+        loop=loop,
+        middlewares=middlewares,
+        **settings.get('aiohttp_settings', {}))
+
+
+def make_app(config_file=None, settings=None, loop=None, server_app=None):
     app_settings.update(_delayed_default_settings)
 
     if loop is None:
@@ -126,19 +133,17 @@ def make_app(config_file=None, settings=None, loop=None):
 
     middlewares = [resolve_dotted_name(m) for m in settings.get('middlewares', [])]
     # Initialize aiohttp app
-    app = GuillotinaAIOHTTPApplication(
-        router=TraversalRouter(),
-        loop=loop,
-        middlewares=middlewares,
-        **settings.get('aiohttp_settings', {}))
+    if server_app is None:
+        server_app = make_aiohttp_application(settings, middlewares, loop)
 
     # Create root Application
     root = ApplicationRoot(config_file)
-    root.app = app
+    root.app = server_app
+    server_app.root = root
     provideUtility(root, IApplication, 'root')
 
     # Initialize global (threadlocal) ZCA configuration
-    app.config = ConfigurationMachine()
+    config = root.config = server_app.config = ConfigurationMachine()
 
     import guillotina
     import guillotina.db.factory
@@ -167,14 +172,14 @@ def make_app(config_file=None, settings=None, loop=None):
     configure.scan('guillotina.db.strategies')
     configure.scan('guillotina.db.cache')
     load_application(guillotina, root, settings)
-    app.config.execute_actions()
-    app.config.commit()
+    config.execute_actions()
+    config.commit()
 
     for module_name in settings.get('applications', []):
-        app.config.begin(module_name)
+        config.begin(module_name)
         load_application(resolve_dotted_name(module_name), root, settings)
-        app.config.execute_actions()
-        app.config.commit()
+        config.execute_actions()
+        config.commit()
 
     # XXX we clear now to save some memory
     # it's unclear to me if this is necesary or not but it seems to me that
@@ -201,9 +206,9 @@ def make_app(config_file=None, settings=None, loop=None):
                 IDatabaseConfigurationFactory, name=dbconfig['storage'])
             if asyncio.iscoroutinefunction(factory):
                 future = asyncio.ensure_future(
-                    factory(key, dbconfig, app), loop=app.loop)
+                    factory(key, dbconfig, server_app), loop=loop)
 
-                app.loop.run_until_complete(future)
+                loop.run_until_complete(future)
                 root[key] = future.result()
             else:
                 root[key] = factory(key, dbconfig)
@@ -238,22 +243,22 @@ def make_app(config_file=None, settings=None, loop=None):
         }
 
     # Set router root
-    app.router.set_root(root)
+    server_app.router.set_root(root)
 
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
         # In case there is Utilties that are registered
-        ident = asyncio.ensure_future(utility.initialize(app=app), loop=app.loop)
+        ident = asyncio.ensure_future(utility.initialize(app=server_app), loop=loop)
         root.add_async_task(utility, ident, {})
 
-    app.on_cleanup.append(close_utilities)
+    server_app.on_cleanup.append(close_utilities)
 
     for util in app_settings['utilities']:
-        root.add_async_utility(util, loop=app.loop)
+        root.add_async_utility(util, loop=loop)
 
     # Load cached Schemas
     load_cached_schema()
 
-    return app
+    return server_app
 
 
 async def close_utilities(app):
