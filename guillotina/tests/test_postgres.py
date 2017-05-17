@@ -1,9 +1,7 @@
-from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.content import Folder
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
-from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
 
 import asyncio
@@ -20,6 +18,7 @@ async def cleanup(aps):
     await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn.commit()
     await aps._pool.release(conn)
+    await aps.create()
 
 
 async def get_aps(strategy='resolve', pool_size=15):
