@@ -1,6 +1,10 @@
 1.0.0a26 (unreleased)
 ---------------------
 
+- Only initialize database if needed instead of running initialize statements
+  on every app startup
+  [vangheem]
+
 - rename get_class_dotted_name to get_dotted_name
   [vangheem]
 
