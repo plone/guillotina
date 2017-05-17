@@ -1,4 +1,4 @@
-1.0.0a26 (unreleased)
+1.0.0a26 (2017-05-17)
 ---------------------
 
 - Only initialize database if needed instead of running initialize statements
