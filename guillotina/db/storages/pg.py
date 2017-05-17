@@ -244,15 +244,7 @@ class PostgresqlStorage(BaseStorage):
         await self._pool.release(self._read_conn)
         await self._pool.close()
 
-    async def initialize(self, loop=None):
-        if loop is None:
-            loop = asyncio.get_event_loop()
-        self._pool = await asyncpg.create_pool(
-            dsn=self._dsn,
-            max_size=self._pool_size,
-            min_size=2,
-            loop=loop)
-
+    async def create(self):
         # Check DB
         statements = [
             get_table_definition('objects', self._object_schema),
@@ -265,8 +257,6 @@ class PostgresqlStorage(BaseStorage):
             for statement in statements:
                 await conn.execute(statement)
 
-        # shared read connection on all transactions
-        self._read_conn = await self.open()
         await self.initialize_tid_statements()
 
         # migrate old transaction table scheme over
@@ -279,6 +269,23 @@ class PostgresqlStorage(BaseStorage):
         except asyncpg.exceptions.UndefinedTableError:
             # no need to upgrade
             pass
+
+    async def initialize(self, loop=None):
+        if loop is None:
+            loop = asyncio.get_event_loop()
+        self._pool = await asyncpg.create_pool(
+            dsn=self._dsn,
+            max_size=self._pool_size,
+            min_size=2,
+            loop=loop)
+
+        # shared read connection on all transactions
+        self._read_conn = await self.open()
+        try:
+            await self.initialize_tid_statements()
+        except asyncpg.exceptions.UndefinedTableError:
+            await self.create()
+            await self.initialize_tid_statements()
 
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
