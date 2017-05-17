@@ -20,11 +20,11 @@ class FooBar(object):
 
 
 def test_dotted_name():
-    assert utils.get_class_dotted_name(FooBar()) == 'guillotina.tests.test_utils.FooBar'
-    assert utils.get_class_dotted_name(FooBar) == 'guillotina.tests.test_utils.FooBar'
+    assert utils.get_dotted_name(FooBar()) == 'guillotina.tests.test_utils.FooBar'
+    assert utils.get_dotted_name(FooBar) == 'guillotina.tests.test_utils.FooBar'
     assert utils.get_module_dotted_name(FooBar()) == 'guillotina.tests.test_utils'
     assert utils.get_module_dotted_name(FooBar) == 'guillotina.tests.test_utils'
-    assert utils.get_class_dotted_name(IResource) == 'guillotina.interfaces.content.IResource'
+    assert utils.get_dotted_name(IResource) == 'guillotina.interfaces.content.IResource'
 
 
 async def test_get_content_path(container_requester):

@@ -1,8 +1,8 @@
 1.0.0a26 (unreleased)
 ---------------------
 
-- Nothing changed yet.
-
+- rename get_class_dotted_name to get_dotted_name
+  [vangheem]
 
 1.0.0a25 (2017-05-15)
 ---------------------

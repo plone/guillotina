@@ -5,7 +5,7 @@ from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IResource
-from guillotina.utils import get_class_dotted_name
+from guillotina.utils import get_dotted_name
 
 import pickle
 
@@ -29,7 +29,7 @@ class Writer(object):
 
     @property
     def type(self):
-        return get_class_dotted_name(self._obj)
+        return get_dotted_name(self._obj)
 
     @property
     def old_serial(self):
@@ -65,7 +65,7 @@ class ResourceWriter(Writer):
         if hasattr(self._obj, 'type_name'):
             return self._obj.type_name
         else:
-            return get_class_dotted_name(self._obj)
+            return get_dotted_name(self._obj)
 
     async def get_json(self):
         if not app_settings.get('store_json', True):
