@@ -1,7 +1,9 @@
 1.0.0a28 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- managed_transaction context manager can now adopt modified objects from
+  outer transaction
+  [vangheem]
 
 
 1.0.0a27 (2017-05-17)

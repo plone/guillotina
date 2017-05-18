@@ -28,8 +28,10 @@ class CommitHook(object):
         # Commits are run in sync thread so there is no asyncloop
         search = queryUtility(ICatalogUtility)
         if search:
-            await search.remove(self.container, self.remove)
-            await search.index(self.container, self.index)
+            if len(self.remove) > 0:
+                await search.remove(self.container, self.remove)
+            if len(self.index) > 0:
+                await search.index(self.container, self.index)
 
         self.index = {}
         self.remove = []

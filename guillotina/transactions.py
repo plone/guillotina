@@ -61,7 +61,8 @@ def get_transaction(request=None):
 
 
 class managed_transaction:
-    def __init__(self, request=None, tm=None, write=False, abort_when_done=False):
+    def __init__(self, request=None, tm=None, write=False, abort_when_done=False,
+                 adopt_parent_txn=False):
         self.request = _safe_get_request(request)
         if tm is None:
             tm = request._tm
@@ -69,6 +70,8 @@ class managed_transaction:
         self.write = write
         self.abort_when_done = abort_when_done
         self.previous_txn = self.txn = self.previous_write_setting = None
+        self.adopt_parent_txn = adopt_parent_txn
+        self.adopted = []
 
     async def __aenter__(self):
         if self.request is not None:
@@ -78,11 +81,46 @@ class managed_transaction:
                 self.request._db_write_enabled = True
         self.txn = await self.tm.begin(request=self.request)
 
+    def adopt_objects(self, obs, txn):
+        for oid, ob in obs.items():
+            self.adopted.append(ob)
+            ob._p_jar = txn
+
     async def __aexit__(self, exc_type, exc, tb):
+        if self.adopt_parent_txn:
+            # take on parent's modified, added, deleted objects if necessary
+            # before we commit or abort this transaction.
+            # this is necessary because inside this block, the outer transaction
+            # could have been attached to an object that changed.
+            # we're ready to commit and we want to potentially commit everything
+            # where, we we're adopted those objects with this transaction
+            if self.previous_txn != self.txn:
+                # try adopting currently registered objects
+                self.txn.modified = self.previous_txn.modified
+                self.txn.deleted = self.previous_txn.deleted
+                self.txn.added = self.previous_txn.added
+
+                self.adopt_objects(self.txn.modified, self.txn)
+                self.adopt_objects(self.txn.deleted, self.txn)
+                self.adopt_objects(self.txn.added, self.txn)
+
         if self.abort_when_done:
             await self.tm.abort(txn=self.txn)
         else:
             await self.tm.commit(txn=self.txn)
+
+        if self.adopt_parent_txn:
+            # restore transaction ownership of item from adoption done above
+            if self.previous_txn != self.txn:
+                # we adopted previously detetected transaction so now
+                # we need to clear changed objects and restore ownership
+                self.previous_txn.modified = {}
+                self.previous_txn.deleted = {}
+                self.previous_txn.added = {}
+
+                for ob in self.adopted:
+                    ob._p_jar = self.previous_txn
+
         if self.request is not None:
             if self.previous_txn is not None:
                 # we do not want to overwrite _txn if is it None since we can
