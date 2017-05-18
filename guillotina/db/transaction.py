@@ -159,8 +159,6 @@ class Transaction(object):
         if self._manager._storage._read_only:
             raise ReadOnlyError()
 
-    # REGISTER OBJECTS
-
     def register(self, obj, new_oid=None):
         """We are adding a new object on the DB"""
         self.check_read_only()
