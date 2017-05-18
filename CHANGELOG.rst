@@ -1,4 +1,4 @@
-1.0.0a28 (unreleased)
+1.0.0a28 (2017-05-18)
 ---------------------
 
 - managed_transaction context manager can now adopt modified objects from
