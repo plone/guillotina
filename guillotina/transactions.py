@@ -84,5 +84,10 @@ class managed_transaction:
         else:
             await self.tm.commit(txn=self.txn)
         if self.request is not None:
-            self.request._txn = self.previous_txn
+            if self.previous_txn is not None:
+                # we do not want to overwrite _txn if is it None since we can
+                # reuse transaction objects and we don't want to screw up
+                # stale objects that reference dangling transactions with no
+                # db connection
+                self.request._txn = self.previous_txn
             self.request._db_write_enabled = self.previous_write_setting
