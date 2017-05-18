@@ -58,3 +58,36 @@ def get_tm(request=None):
 def get_transaction(request=None):
     req = _safe_get_request(request)
     return req._tm.get(req)
+
+
+class managed_transaction:
+    def __init__(self, request=None, tm=None, write=False, abort_when_done=False):
+        self.request = _safe_get_request(request)
+        if tm is None:
+            tm = request._tm
+        self.tm = tm
+        self.write = write
+        self.abort_when_done = abort_when_done
+        self.previous_txn = self.txn = self.previous_write_setting = None
+
+    async def __aenter__(self):
+        if self.request is not None:
+            self.previous_txn = self.request._txn
+            self.previous_write_setting = getattr(self.request, '_db_write_enabled', False)
+            if self.write:
+                self.request._db_write_enabled = True
+        self.txn = await self.tm.begin(request=self.request)
+
+    async def __aexit__(self, exc_type, exc, tb):
+        if self.abort_when_done:
+            await self.tm.abort(txn=self.txn)
+        else:
+            await self.tm.commit(txn=self.txn)
+        if self.request is not None:
+            if self.previous_txn is not None:
+                # we do not want to overwrite _txn if is it None since we can
+                # reuse transaction objects and we don't want to screw up
+                # stale objects that reference dangling transactions with no
+                # db connection
+                self.request._txn = self.previous_txn
+            self.request._db_write_enabled = self.previous_write_setting

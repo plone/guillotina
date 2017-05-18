@@ -3,6 +3,7 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
 from guillotina.tests import utils
+from guillotina.transactions import managed_transaction
 from zope.interface import Interface
 
 import json
@@ -99,11 +100,10 @@ async def test_create_contenttype(container_requester):
         assert status == 201
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        txn = await request._tm.begin(request)
-        container = await root.async_get('guillotina')
-        obj = await container.async_get('item1')
-        assert obj.title == 'Item1'
-        await request._tm.abort(txn=txn)
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('item1')
+            assert obj.title == 'Item1'
 
 
 async def test_create_delete_contenttype(container_requester):
@@ -177,15 +177,14 @@ async def test_create_contenttype_with_date(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        txn = await request._tm.begin(request)
-        container = await root.async_get('guillotina')
-        obj = await container.async_get('item1')
-        from guillotina.behaviors.dublincore import IDublinCore
-        behavior = IDublinCore(obj)
-        await behavior.load()
-        assert behavior.creation_date.isoformat() == date_to_test
-        assert behavior.expiration_date.isoformat() == date_to_test
-        await request._tm.abort(txn=txn)
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('item1')
+            from guillotina.behaviors.dublincore import IDublinCore
+            behavior = IDublinCore(obj)
+            await behavior.load()
+            assert behavior.creation_date.isoformat() == date_to_test
+            assert behavior.expiration_date.isoformat() == date_to_test
 
 
 async def test_create_duplicate_id(container_requester):

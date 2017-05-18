@@ -1,7 +1,8 @@
 1.0.0a27 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- add new `guillotina.transactions.managed_transaction` context manager
+  [vangheem]
 
 
 1.0.0a26 (2017-05-17)
