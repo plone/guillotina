@@ -9,6 +9,7 @@ from guillotina.tests.docker_containers.postgres import cleanup_postgres_docker 
 from guillotina.tests.docker_containers.postgres import run_docker_postgresql  # noqa b/w
 from zope.interface import alsoProvides
 from zope.interface import implementer
+from guillotina.transactions import managed_transaction
 
 import json
 import uuid
@@ -39,20 +40,18 @@ def login(request):
 
 
 async def get_root(request):
-    txn = await request._tm.begin(request=request)
-    root = await request._tm.get_root(txn=txn)
-    await request._tm.abort(txn=txn)
-    return root
+    async with managed_transaction(request=request) as mtxn:
+        root = await request._tm.get_root(txn=mtxn.txn)
+        return root
 
 
 async def get_container(requester=None, request=None):
     if request is None:
         request = get_mocked_request(requester.db)
     root = await get_root(request)
-    txn = await request._tm.begin(request=request)
-    container = await root.async_get('guillotina')
-    await request._tm.abort(txn=txn)
-    return container
+    async with managed_transaction(request=request):
+        container = await root.async_get('guillotina')
+        return container
 
 
 @implementer(IRequest, IDefaultLayer)

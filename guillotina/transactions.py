@@ -60,7 +60,6 @@ def get_transaction(request=None):
     return req._tm.get(req)
 
 
-
 class managed_transaction:
     def __init__(self, request=None, tm=None, write=False, abort_when_done=False):
         self.request = _safe_get_request(request)
