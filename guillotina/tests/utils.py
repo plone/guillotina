@@ -40,9 +40,8 @@ def login(request):
 
 
 async def get_root(request):
-    async with managed_transaction(request=request) as mtxn:
-        root = await request._tm.get_root(txn=mtxn.txn)
-        return root
+    async with managed_transaction(request=request):
+        return await request._tm.get_root(request=request)
 
 
 async def get_container(requester=None, request=None):
