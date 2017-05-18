@@ -1,4 +1,4 @@
-1.0.0a27 (unreleased)
+1.0.0a27 (2017-05-17)
 ---------------------
 
 - add new `guillotina.transactions.managed_transaction` context manager
