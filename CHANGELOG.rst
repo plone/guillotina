@@ -1,7 +1,11 @@
-1.0.0a29 (unreleased)
----------------------
+1.1.0a1 (unreleased)
+--------------------
 
-- Nothing changed yet.
+- simplify docker testing infrastructure
+  [vangheem]
+
+- Fix cockroachdb integration
+  [vangheem]
 
 
 1.0.0a28 (2017-05-18)

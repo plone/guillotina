@@ -88,6 +88,12 @@ With file watcher...
 
     ./bin/ptw guillotina --runner=./bin/py.test
 
+
+To run tests with cockroach db:
+
+   export USE_COCKROACH=true
+   ./bin/pytest guillotina
+
 Default
 -------
 

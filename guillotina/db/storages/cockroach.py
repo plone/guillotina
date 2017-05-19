@@ -1,24 +1,49 @@
 from guillotina.db.storages import pg
+from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
+import asyncpg
 
 
-INSERT = """
-    INSERT INTO objects
-    (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
-    VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
-            $8::varchar(32), $9::text, $10::text, $11::bytea)
-    ON CONFLICT (zoid)
-    DO UPDATE SET
-        tid = EXCLUDED.tid,
-        state_size = EXCLUDED.state_size,
-        part = EXCLUDED.part,
-        resource = EXCLUDED.resource,
-        of = EXCLUDED.of,
-        otid = EXCLUDED.otid,
-        parent_id = EXCLUDED.parent_id,
-        id = EXCLUDED.id,
-        type = EXCLUDED.type,
-        state = EXCLUDED.state;
-    """
+# upsert without checking matching tids on updated object
+NAIVE_UPSERT = """
+INSERT INTO objects
+(zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
+VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
+        $8::varchar(32), $9::text, $10::text, $11::bytea)
+ON CONFLICT (zoid)
+DO UPDATE SET
+    tid = EXCLUDED.tid,
+    state_size = EXCLUDED.state_size,
+    part = EXCLUDED.part,
+    resource = EXCLUDED.resource,
+    of = EXCLUDED.of,
+    otid = EXCLUDED.otid,
+    parent_id = EXCLUDED.parent_id,
+    id = EXCLUDED.id,
+    type = EXCLUDED.type,
+    state = EXCLUDED.state"""
+UPSERT = NAIVE_UPSERT + """
+    WHERE
+        tid = EXCLUDED.otid"""
+
+
+# update without checking matching tids on updated object
+NAIVE_UPDATE = """
+UPDATE objects
+SET
+    tid = $2::int,
+    state_size = $3::int,
+    part = $4::int,
+    resource = $5::boolean,
+    of = $6::varchar(32),
+    otid = $7::int,
+    parent_id = $8::varchar(32),
+    id = $9::text,
+    type = $10::text,
+    state = $11::bytea
+WHERE
+    zoid = $1::varchar(32)"""
+UPDATE = NAIVE_UPDATE + """ AND tid = $7::int"""
 
 
 NEXT_TID = """SELECT unique_rowid()"""
@@ -69,27 +94,42 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
-        smt = await self._get_prepared_statement(txn, 'insert', INSERT)
-
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
             self._log.warn("Too long object %d" % (obj.__class__, len(p)))
         part = writer.part
         if part is None:
             part = 0
-        # (zoid, tid, state_size, part, main, parent_id, type, json, state)
-        await smt.fetchval(
-            oid,                 # The OID of the object
-            txn._tid,            # Our TID
-            len(p),              # Len of the object
-            part,                # Partition indicator
-            writer.resource,     # Is a resource ?
-            writer.of,           # It belogs to a main
-            old_serial,          # Old serial
-            writer.parent_id,    # Parent OID
-            writer.id,           # Traversal ID
-            writer.type,         # Guillotina type
-            p                    # Pickle state
-        )
+
+        statement_sql = NAIVE_UPSERT
+        if not obj.__new_marker__ and obj._p_serial is not None:
+            # we should be confident this is an object update
+            statement_sql = UPDATE
+
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(statement_sql)
+            try:
+                await smt.fetch(
+                    oid,                 # The OID of the object
+                    txn._tid,            # Our TID
+                    len(p),              # Len of the object
+                    part,                # Partition indicator
+                    writer.resource,     # Is a resource ?
+                    writer.of,           # It belogs to a main
+                    old_serial,          # Old serial
+                    writer.parent_id,    # Parent OID
+                    writer.id,           # Traversal ID
+                    writer.type,         # Guillotina type
+                    p                    # Pickle state)
+                )
+            except asyncpg.exceptions.ForeignKeyViolationError:
+                txn.deleted[obj._p_oid] = obj
+                raise TIDConflictError(
+                    'Bad value inserting into database that could be caused '
+                    'by a bad cache value. This should resolve on request retry.')
+            except asyncpg.exceptions._base.InterfaceError as ex:
+                if 'another operation is in progress' in ex.args[0]:
+                    raise ConflictError(
+                        'asyncpg error, another operation in progress.')
+                raise
         obj._p_estimated_size = len(p)
-        return txn._tid, len(p)
