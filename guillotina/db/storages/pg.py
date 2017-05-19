@@ -246,7 +246,6 @@ class PostgresqlStorage(BaseStorage):
 
     async def create(self):
         # Check DB
-        print('sldfk')
         log.info('Creating initial database objects')
         statements = [
             get_table_definition('objects', self._object_schema),

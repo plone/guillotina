@@ -50,6 +50,15 @@ RETURNING tid, otid"""
 NEXT_TID = """SELECT unique_rowid()"""
 MAX_TID = "SELECT MAX(tid) from objects;"
 
+DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32);"""
+UPDATE_REFERENCED_DELETED_OBJECTS = """
+UPDATE objects
+SET
+    parent_id = NULL
+WHERE
+    parent_id = $1::varchar(32)
+"""
+
 
 class CockroachStorage(pg.PostgresqlStorage):
     '''
@@ -152,3 +161,11 @@ class CockroachStorage(pg.PostgresqlStorage):
                     'caused by a cache invalidation race condition and should '
                     'be an edge case. This should resolve on request retry.')
         obj._p_estimated_size = len(p)
+
+    async def delete(self, txn, oid):
+        # XXX no cascade support!
+        # need to move things around and recursively delete here...
+        async with txn._lock:
+            await txn._db_conn.execute(UPDATE_REFERENCED_DELETED_OBJECTS, oid)
+            await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
+            await txn._db_conn.execute(pg.DELETE_FROM_OBJECTS, oid)

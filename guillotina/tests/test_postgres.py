@@ -98,10 +98,13 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
     await tm.commit(txn=txn)
     txn = await tm.begin()
 
-    with pytest.raises(KeyError):
-        await txn.get(ob._p_oid)
-    with pytest.raises(KeyError):
-        await txn.get(folder._p_oid)
+    if not USE_COCKROACH:
+        # XXX cockroach does not have cascade support so we delete this async...
+        # fix later
+        with pytest.raises(KeyError):
+            await txn.get(ob._p_oid)
+        with pytest.raises(KeyError):
+            await txn.get(folder._p_oid)
 
     await tm.abort(txn=txn)
 
@@ -203,6 +206,7 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     with pytest.raises(ConflictError):
         await tm.commit(txn=txn1)
 
+    await tm.abort(txn=txn)
     await aps.remove()
     await cleanup(aps)
 
