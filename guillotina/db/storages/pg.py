@@ -253,9 +253,9 @@ class PostgresqlStorage(BaseStorage):
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
         ]
         statements.extend(self._initialize_statements)
-        async with self._pool.acquire() as conn:
-            for statement in statements:
-                await conn.execute(statement)
+
+        for statement in statements:
+            await self._read_conn.execute(statement)
 
         await self.initialize_tid_statements()
         # migrate old transaction table scheme over
@@ -307,10 +307,9 @@ class PostgresqlStorage(BaseStorage):
             pass
 
     async def load(self, txn, oid):
-        int_oid = oid
         async with txn._lock:
             smt = await txn._db_conn.prepare(GET_OID)
-            objects = await smt.fetchrow(int_oid)
+            objects = await smt.fetchrow(oid)
         if objects is None:
             raise KeyError(oid)
         return objects

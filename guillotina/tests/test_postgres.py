@@ -25,17 +25,17 @@ async def cleanup(aps):
     await txn.commit()
     await aps._pool.release(conn)
     await aps.create()
+    await aps.finalize()
 
 
 async def get_aps(strategy='resolve', pool_size=15):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
-    partition_object = "guillotina.db.interfaces.IPartition"
     klass = PostgresqlStorage
     if USE_COCKROACH:
         klass = CockroachStorage
         dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
     aps = klass(
-        dsn=dsn, partition=partition_object, name='db',
+        dsn=dsn, name='db',
         transaction_strategy=strategy, pool_size=pool_size,
         conn_acquire_timeout=0.1)
     await aps.initialize()

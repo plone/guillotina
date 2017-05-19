@@ -80,6 +80,7 @@ class managed_transaction:
             if self.write:
                 self.request._db_write_enabled = True
         self.txn = await self.tm.begin(request=self.request)
+        return self.txn
 
     def adopt_objects(self, obs, txn):
         for oid, ob in obs.items():
