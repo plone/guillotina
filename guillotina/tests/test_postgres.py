@@ -1,4 +1,5 @@
 from guillotina.content import Folder
+from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
@@ -6,7 +7,11 @@ from guillotina.tests.utils import create_content
 
 import asyncio
 import concurrent
+import os
 import pytest
+
+
+USE_COCKROACH = 'USE_COCKROACH' in os.environ
 
 
 async def cleanup(aps):
@@ -15,7 +20,8 @@ async def cleanup(aps):
     await txn.start()
     await conn.execute("DROP TABLE IF EXISTS objects;")
     await conn.execute("DROP TABLE IF EXISTS blobs;")
-    await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
+    if not USE_COCKROACH:
+        await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn.commit()
     await aps._pool.release(conn)
     await aps.create()
@@ -24,7 +30,11 @@ async def cleanup(aps):
 async def get_aps(strategy='resolve', pool_size=15):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
     partition_object = "guillotina.db.interfaces.IPartition"
-    aps = PostgresqlStorage(
+    klass = PostgresqlStorage
+    if USE_COCKROACH:
+        klass = CockroachStorage
+        dsn = "postgres://root:@localhost:5432/guillotina?sslmode=disable"
+    aps = klass(
         dsn=dsn, partition=partition_object, name='db',
         transaction_strategy=strategy, pool_size=pool_size,
         conn_acquire_timeout=0.1)
@@ -425,6 +435,5 @@ async def test_mismatched_tid_causes_conflict_error(postgres, dummy_request):
 
     with pytest.raises(ConflictError):
         await tm.commit(txn=txn)
-
     await aps.remove()
     await cleanup(aps)

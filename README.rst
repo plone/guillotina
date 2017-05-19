@@ -91,8 +91,7 @@ With file watcher...
 
 To run tests with cockroach db:
 
-   export USE_COCKROACH=true
-   ./bin/pytest guillotina
+   USE_COCKROACH=true ./bin/pytest guillotina
 
 Default
 -------

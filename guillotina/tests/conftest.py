@@ -15,6 +15,7 @@ import asyncio
 import copy
 import os
 import pytest
+import sys
 
 
 IS_TRAVIS = 'TRAVIS' in os.environ
@@ -52,6 +53,8 @@ def postgres():
     """
     detect travis, use travis's postgres; otherwise, use docker
     """
+    sys._db_tests = True
+
     if USE_COCKROACH:
         host = containers.cockroach_image.run()
     else:

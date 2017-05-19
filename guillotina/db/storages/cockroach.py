@@ -1,7 +1,7 @@
 from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
-import asyncpg
+import asyncpg, sys
 
 
 # upsert without checking matching tids on updated object
@@ -28,7 +28,7 @@ UPSERT = NAIVE_UPSERT + """
 
 
 # update without checking matching tids on updated object
-NAIVE_UPDATE = """
+UPDATE = """
 UPDATE objects
 SET
     tid = $2::int,
@@ -42,12 +42,13 @@ SET
     type = $10::text,
     state = $11::bytea
 WHERE
-    zoid = $1::varchar(32)"""
-UPDATE = NAIVE_UPDATE + """ AND tid = $7::int"""
+    zoid = $1::varchar(32)
+    AND tid = $7::int
+RETURNING tid, otid"""
 
 
 NEXT_TID = """SELECT unique_rowid()"""
-MAX_TID = "SELECT COALESCE(MAX(tid), 0) from objects;"
+MAX_TID = "SELECT MAX(tid) from objects;"
 
 
 class CockroachStorage(pg.PostgresqlStorage):
@@ -87,9 +88,16 @@ class CockroachStorage(pg.PostgresqlStorage):
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);'
     ]
 
+    _max_tid = 0
+
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
         self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
+        if hasattr(sys, '_db_tests'):
+            self.get_current_tid = self._test_get_current_tid
+
+    async def _test_get_current_tid(self, txn):
+        return self._max_tid
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -101,15 +109,20 @@ class CockroachStorage(pg.PostgresqlStorage):
         if part is None:
             part = 0
 
+        update = False
         statement_sql = NAIVE_UPSERT
         if not obj.__new_marker__ and obj._p_serial is not None:
             # we should be confident this is an object update
             statement_sql = UPDATE
+            update = True
+
+        if hasattr(sys, '_db_tests') and txn._tid > self._max_tid:
+            self._max_tid = txn._tid
 
         async with txn._lock:
             smt = await txn._db_conn.prepare(statement_sql)
             try:
-                await smt.fetch(
+                result = await smt.fetch(
                     oid,                 # The OID of the object
                     txn._tid,            # Our TID
                     len(p),              # Len of the object
@@ -132,4 +145,10 @@ class CockroachStorage(pg.PostgresqlStorage):
                     raise ConflictError(
                         'asyncpg error, another operation in progress.')
                 raise
+            if update and len(result) != 1:
+                # raise tid conflict error
+                raise TIDConflictError(
+                    'Mismatch of tid of object being updated. This is likely '
+                    'caused by a cache invalidation race condition and should '
+                    'be an edge case. This should resolve on request retry.')
         obj._p_estimated_size = len(p)

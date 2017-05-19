@@ -39,7 +39,7 @@ class BaseImage:
             labels=[self.label],
             detach=True,
             ports={
-                f'{self.from_port}/tcp': self.to_port
+                f'{self.to_port}/tcp': self.from_port
             },
             **self.image_options
         )
