@@ -145,8 +145,8 @@ class WebsocketsView(Service):
             self.request._futures = {}
 
     async def __call__(self):
-        tm = get_tm()
-        await tm.abort()
+        tm = get_tm(self.request)
+        await tm.abort(self.request)
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
 
@@ -156,14 +156,16 @@ class WebsocketsView(Service):
                 if message['op'] == 'close':
                     await ws.close()
                 elif message['op'] == 'GET':
-                    await tm.begin()
+                    txn = await tm.begin(request=self.request)
                     try:
                         await self.handle_ws_request(ws, message)
-                        await tm.commit()
                     except Exception:
-                        await tm.abort()
                         await ws.close()
                         raise
+                    finally:
+                        # only currently support GET requests which are *never*
+                        # supposed to be commits
+                        await tm.abort(txn=txn)
                 else:
                     await ws.close()
             elif msg.tp == aiohttp.WSMsgType.error:

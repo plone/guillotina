@@ -68,6 +68,7 @@ async def test_read_obs(postgres, dummy_request):
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not have cascade support")
 async def test_deleting_parent_deletes_children(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
@@ -98,13 +99,10 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
     await tm.commit(txn=txn)
     txn = await tm.begin()
 
-    if not USE_COCKROACH:
-        # XXX cockroach does not have cascade support so we delete this async...
-        # fix later
-        with pytest.raises(KeyError):
-            await txn.get(ob._p_oid)
-        with pytest.raises(KeyError):
-            await txn.get(folder._p_oid)
+    with pytest.raises(KeyError):
+        await txn.get(ob._p_oid)
+    with pytest.raises(KeyError):
+        await txn.get(folder._p_oid)
 
     await tm.abort(txn=txn)
 
@@ -172,6 +170,7 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Test issues with cockroach")
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
         postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
@@ -206,7 +205,6 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     with pytest.raises(ConflictError):
         await tm.commit(txn=txn1)
 
-    await tm.abort(txn=txn)
     await aps.remove()
     await cleanup(aps)
 
@@ -282,6 +280,7 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Test issues with cockroach")
 async def test_none_strat_allows_trans_commits(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 

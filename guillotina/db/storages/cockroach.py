@@ -1,7 +1,9 @@
 from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
-import asyncpg, sys
+
+import asyncpg
+import sys
 
 
 # upsert without checking matching tids on updated object
@@ -72,18 +74,21 @@ class CockroachStorage(pg.PostgresqlStorage):
                 - complex delete from query that does the sub queries to delete?
         - no sequence support
             - use serial construct of unique_rowid() instead
+        - no referencial integrity support!
+            - because we can't do ON DELETE support of any kind
+            - so we need to manually clean it up
     '''
 
     _object_schema = pg.PostgresqlStorage._object_schema.copy()
     del _object_schema['json']  # no json db support
     _object_schema.update({
-        'of': 'VARCHAR(32) REFERENCES objects',
-        'parent_id': 'VARCHAR(32) REFERENCES objects',  # parent oid
+        'of': 'VARCHAR(32)',
+        'parent_id': 'VARCHAR(32)'
     })
 
     _blob_schema = pg.PostgresqlStorage._blob_schema.copy()
     _blob_schema.update({
-        'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects',
+        'zoid': 'VARCHAR(32) NOT NULL',
     })
 
     _initialize_statements = [
