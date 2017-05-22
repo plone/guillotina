@@ -33,7 +33,7 @@ async def get_aps(strategy='resolve', pool_size=15):
     klass = PostgresqlStorage
     if USE_COCKROACH:
         klass = CockroachStorage
-        dsn = "postgres://root:@localhost:5432/guillotina?sslmode=disable"
+        dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
     aps = klass(
         dsn=dsn, partition=partition_object, name='db',
         transaction_strategy=strategy, pool_size=pool_size,

@@ -6,8 +6,7 @@ import psycopg2
 class CockroachDB(BaseImage):
     label = 'cockroach'
     image = 'cockroachdb/cockroach:v1.0'
-    to_port = 26257
-    from_port = 5432
+    to_port = from_port = 26257
     image_options = BaseImage.image_options.copy()
     image_options.update(dict(
         command=' '.join([
@@ -18,7 +17,7 @@ class CockroachDB(BaseImage):
     def check(self, host):
         conn = cur = None
         try:
-            conn = psycopg2.connect("dbname=guillotina user=root host=%s port=5432" % host)  # noqa
+            conn = psycopg2.connect("dbname=guillotina user=root host=%s port=26257" % host)  # noqa
             conn.set_session(autocommit=True)
             cur = conn.cursor()
             cur.execute('SHOW DATABASES;')

@@ -37,7 +37,8 @@ PG_SETTINGS['databases'][0]['db']['dsn'] = {
 if USE_COCKROACH:
     PG_SETTINGS['databases'][0]['db']['storage'] = 'cockroach'
     PG_SETTINGS['databases'][0]['db']['dsn'].update({
-        'user': 'root'
+        'user': 'root',
+        'port': 26257
     })
 
 DUMMY_SETTINGS = copy.deepcopy(TESTING_SETTINGS)

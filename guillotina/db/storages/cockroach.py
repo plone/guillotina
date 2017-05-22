@@ -75,8 +75,11 @@ class CockroachStorage(pg.PostgresqlStorage):
         - no sequence support
             - use serial construct of unique_rowid() instead
         - no referencial integrity support!
-            - because we can't do ON DELETE support of any kind
-            - so we need to manually clean it up
+            - because we can't do ON DELETE support of any kind, we would get
+              errors after we run deletes unless we walk the whole sub tree
+              first, which is costly
+            - so we need to manually clean it up in a task that runs periodically,
+              our own db vacuum task.
     '''
 
     _object_schema = pg.PostgresqlStorage._object_schema.copy()
