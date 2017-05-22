@@ -246,19 +246,18 @@ class PostgresqlStorage(BaseStorage):
 
     async def create(self):
         # Check DB
+        log.info('Creating initial database objects')
         statements = [
             get_table_definition('objects', self._object_schema),
             get_table_definition('blobs', self._blob_schema,
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
         ]
         statements.extend(self._initialize_statements)
-
         async with self._pool.acquire() as conn:
             for statement in statements:
                 await conn.execute(statement)
 
         await self.initialize_tid_statements()
-
         # migrate old transaction table scheme over
         try:
             old_tid = await self._read_conn.fetchval('SELECT max(tid) from transaction')

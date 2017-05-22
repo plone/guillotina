@@ -6,10 +6,7 @@ from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.testing import ADMIN_TOKEN
 from guillotina.testing import TESTING_SETTINGS
-from guillotina.tests.docker_containers.etcd import cleanup_etcd_docker
-from guillotina.tests.docker_containers.etcd import run_docker_etcd
-from guillotina.tests.docker_containers.postgres import cleanup_postgres_docker
-from guillotina.tests.docker_containers.postgres import run_docker_postgresql
+from guillotina.tests import docker_containers as containers
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 
@@ -18,12 +15,12 @@ import asyncio
 import copy
 import os
 import pytest
+import sys
 
 
 IS_TRAVIS = 'TRAVIS' in os.environ
+USE_COCKROACH = 'USE_COCKROACH' in os.environ
 
-IMAGE = 'postgres:9.6'
-CONTAINERS_FOR_TESTING_LABEL = 'testingaiopg'
 PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
 PG_SETTINGS['databases'][0]['db']['storage'] = 'postgresql'
 
@@ -37,6 +34,12 @@ PG_SETTINGS['databases'][0]['db']['dsn'] = {
     'password': '',
     'port': 5432
 }
+if USE_COCKROACH:
+    PG_SETTINGS['databases'][0]['db']['storage'] = 'cockroach'
+    PG_SETTINGS['databases'][0]['db']['dsn'].update({
+        'user': 'root',
+        'port': 26257
+    })
 
 DUMMY_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
 DUMMY_SETTINGS['databases'][0]['db']['storage'] = 'DUMMY'
@@ -51,29 +54,33 @@ def postgres():
     """
     detect travis, use travis's postgres; otherwise, use docker
     """
-    if not IS_TRAVIS:
-        host = run_docker_postgresql()
+    sys._db_tests = True
+
+    if USE_COCKROACH:
+        host = containers.cockroach_image.run()
     else:
-        host = 'localhost'
+        if not IS_TRAVIS:
+            host = containers.postgres_image.run()
+        else:
+            host = 'localhost'
 
     PG_SETTINGS['databases'][0]['db']['dsn']['host'] = host
 
     yield host  # provide the fixture value
 
-    if not IS_TRAVIS:
-        cleanup_postgres_docker()
+    if USE_COCKROACH:
+        containers.cockroach_image.stop()
+    elif not IS_TRAVIS:
+        containers.postgres_image.stop()
 
 
 @pytest.fixture(scope='session')
 def etcd():
-    """
-    detect travis, use travis's postgres; otherwise, use docker
-    """
-    host = run_docker_etcd()
+    host = containers.etcd_image.run()
 
     yield host  # provide the fixture value
 
-    cleanup_etcd_docker()
+    containers.etcd_image.stop()
 
 
 class GuillotinaDBRequester(object):

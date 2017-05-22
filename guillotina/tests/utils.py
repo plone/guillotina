@@ -5,8 +5,6 @@ from guillotina.content import Item
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.security.policy import Interaction
-from guillotina.tests.docker_containers.postgres import cleanup_postgres_docker  # noqa b/w
-from guillotina.tests.docker_containers.postgres import run_docker_postgresql  # noqa b/w
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from guillotina.transactions import managed_transaction

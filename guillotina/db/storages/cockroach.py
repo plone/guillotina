@@ -1,28 +1,65 @@
 from guillotina.db.storages import pg
+from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
+
+import asyncpg
+import sys
 
 
-INSERT = """
-    INSERT INTO objects
-    (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
-    VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
-            $8::varchar(32), $9::text, $10::text, $11::bytea)
-    ON CONFLICT (zoid)
-    DO UPDATE SET
-        tid = EXCLUDED.tid,
-        state_size = EXCLUDED.state_size,
-        part = EXCLUDED.part,
-        resource = EXCLUDED.resource,
-        of = EXCLUDED.of,
-        otid = EXCLUDED.otid,
-        parent_id = EXCLUDED.parent_id,
-        id = EXCLUDED.id,
-        type = EXCLUDED.type,
-        state = EXCLUDED.state;
-    """
+# upsert without checking matching tids on updated object
+NAIVE_UPSERT = """
+INSERT INTO objects
+(zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
+VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
+        $8::varchar(32), $9::text, $10::text, $11::bytea)
+ON CONFLICT (zoid)
+DO UPDATE SET
+    tid = EXCLUDED.tid,
+    state_size = EXCLUDED.state_size,
+    part = EXCLUDED.part,
+    resource = EXCLUDED.resource,
+    of = EXCLUDED.of,
+    otid = EXCLUDED.otid,
+    parent_id = EXCLUDED.parent_id,
+    id = EXCLUDED.id,
+    type = EXCLUDED.type,
+    state = EXCLUDED.state"""
+UPSERT = NAIVE_UPSERT + """
+    WHERE
+        tid = EXCLUDED.otid"""
+
+
+# update without checking matching tids on updated object
+UPDATE = """
+UPDATE objects
+SET
+    tid = $2::int,
+    state_size = $3::int,
+    part = $4::int,
+    resource = $5::boolean,
+    of = $6::varchar(32),
+    otid = $7::int,
+    parent_id = $8::varchar(32),
+    id = $9::text,
+    type = $10::text,
+    state = $11::bytea
+WHERE
+    zoid = $1::varchar(32)
+    AND tid = $7::int
+RETURNING tid, otid"""
 
 
 NEXT_TID = """SELECT unique_rowid()"""
-MAX_TID = "SELECT COALESCE(MAX(tid), 0) from objects;"
+MAX_TID = "SELECT MAX(tid) from objects;"
+
+DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32);"""
+UPDATE_REFERENCED_DELETED_OBJECTS = """
+UPDATE objects
+SET
+    parent_id = NULL
+WHERE
+    parent_id = $1::varchar(32)
+"""
 
 
 class CockroachStorage(pg.PostgresqlStorage):
@@ -37,18 +74,24 @@ class CockroachStorage(pg.PostgresqlStorage):
                 - complex delete from query that does the sub queries to delete?
         - no sequence support
             - use serial construct of unique_rowid() instead
+        - no referencial integrity support!
+            - because we can't do ON DELETE support of any kind, we would get
+              errors after we run deletes unless we walk the whole sub tree
+              first, which is costly
+            - so we need to manually clean it up in a task that runs periodically,
+              our own db vacuum task.
     '''
 
     _object_schema = pg.PostgresqlStorage._object_schema.copy()
     del _object_schema['json']  # no json db support
     _object_schema.update({
-        'of': 'VARCHAR(32) REFERENCES objects',
-        'parent_id': 'VARCHAR(32) REFERENCES objects',  # parent oid
+        'of': 'VARCHAR(32)',
+        'parent_id': 'VARCHAR(32)'
     })
 
     _blob_schema = pg.PostgresqlStorage._blob_schema.copy()
     _blob_schema.update({
-        'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects',
+        'zoid': 'VARCHAR(32) NOT NULL',
     })
 
     _initialize_statements = [
@@ -62,14 +105,19 @@ class CockroachStorage(pg.PostgresqlStorage):
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);'
     ]
 
+    _max_tid = 0
+
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
         self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
+        if hasattr(sys, '_db_tests'):
+            self.get_current_tid = self._test_get_current_tid
+
+    async def _test_get_current_tid(self, txn):
+        return self._max_tid
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
-
-        smt = await self._get_prepared_statement(txn, 'insert', INSERT)
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
@@ -77,19 +125,50 @@ class CockroachStorage(pg.PostgresqlStorage):
         part = writer.part
         if part is None:
             part = 0
-        # (zoid, tid, state_size, part, main, parent_id, type, json, state)
-        await smt.fetchval(
-            oid,                 # The OID of the object
-            txn._tid,            # Our TID
-            len(p),              # Len of the object
-            part,                # Partition indicator
-            writer.resource,     # Is a resource ?
-            writer.of,           # It belogs to a main
-            old_serial,          # Old serial
-            writer.parent_id,    # Parent OID
-            writer.id,           # Traversal ID
-            writer.type,         # Guillotina type
-            p                    # Pickle state
-        )
+
+        update = False
+        statement_sql = NAIVE_UPSERT
+        if not obj.__new_marker__ and obj._p_serial is not None:
+            # we should be confident this is an object update
+            statement_sql = UPDATE
+            update = True
+
+        if hasattr(sys, '_db_tests') and txn._tid > self._max_tid:
+            self._max_tid = txn._tid
+
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(statement_sql)
+            try:
+                result = await smt.fetch(
+                    oid,                 # The OID of the object
+                    txn._tid,            # Our TID
+                    len(p),              # Len of the object
+                    part,                # Partition indicator
+                    writer.resource,     # Is a resource ?
+                    writer.of,           # It belogs to a main
+                    old_serial,          # Old serial
+                    writer.parent_id,    # Parent OID
+                    writer.id,           # Traversal ID
+                    writer.type,         # Guillotina type
+                    p                    # Pickle state)
+                )
+            except asyncpg.exceptions._base.InterfaceError as ex:
+                if 'another operation is in progress' in ex.args[0]:
+                    raise ConflictError(
+                        'asyncpg error, another operation in progress.')
+                raise
+            if update and len(result) != 1:
+                # raise tid conflict error
+                raise TIDConflictError(
+                    'Mismatch of tid of object being updated. This is likely '
+                    'caused by a cache invalidation race condition and should '
+                    'be an edge case. This should resolve on request retry.')
         obj._p_estimated_size = len(p)
-        return txn._tid, len(p)
+
+    async def delete(self, txn, oid):
+        # XXX no cascade support!
+        # need to move things around and recursively delete here...
+        async with txn._lock:
+            await txn._db_conn.execute(UPDATE_REFERENCED_DELETED_OBJECTS, oid)
+            await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
+            await txn._db_conn.execute(pg.DELETE_FROM_OBJECTS, oid)

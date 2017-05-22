@@ -20,3 +20,12 @@ run-etcd:
     --initial-cluster-token my-etcd-token \
     --initial-cluster-state new \
     --auto-compaction-retention 1
+
+
+run-cockroachdb:
+	docker pull cockroachdb/cockroach:v1.0
+	docker run -p 127.0.0.1:26257:26257 -p 127.0.0.1:9080:8080 --rm cockroachdb/cockroach:v1.0 start --insecure
+
+
+create-cockroachdb:
+	./bin/py _cockroachdb-createdb.py
