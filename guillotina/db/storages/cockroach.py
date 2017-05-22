@@ -149,11 +149,6 @@ class CockroachStorage(pg.PostgresqlStorage):
                     writer.type,         # Guillotina type
                     p                    # Pickle state)
                 )
-            except asyncpg.exceptions.ForeignKeyViolationError:
-                txn.deleted[obj._p_oid] = obj
-                raise TIDConflictError(
-                    'Bad value inserting into database that could be caused '
-                    'by a bad cache value. This should resolve on request retry.')
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
                     raise ConflictError(
