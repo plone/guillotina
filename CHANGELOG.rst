@@ -1,7 +1,10 @@
 1.1.0a1 (unreleased)
 --------------------
 
-- simplify docker testing infrastructure
+- Include cockroachdb in our CI testing
+  [vangheem]
+
+- Simplify docker testing infrastructure
   [vangheem]
 
 - Fix cockroachdb integration
