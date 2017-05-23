@@ -98,7 +98,7 @@ class GuillotinaAIOHTTPApplication(web.Application):
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
             if app_settings.get('conflict_retry_attempts', 3) > retries:
-                logger.warn(
+                logger.warning(
                     'DB Conflict detected, retrying request, tid: {}, retries: {})'.format(
                         getattr(getattr(request, '_txn', None), '_tid', 'not issued'),
                         retries + 1))
@@ -111,10 +111,9 @@ class GuillotinaAIOHTTPApplication(web.Application):
             return aiohttp.web_exceptions.HTTPConflict()
 
 
-def make_aiohttp_application(settings, middlewares=[], loop=None):
+def make_aiohttp_application(settings, middlewares=[]):
     return GuillotinaAIOHTTPApplication(
         router=TraversalRouter(),
-        loop=loop,
         middlewares=middlewares,
         **settings.get('aiohttp_settings', {}))
 
@@ -134,7 +133,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     middlewares = [resolve_dotted_name(m) for m in settings.get('middlewares', [])]
     # Initialize aiohttp app
     if server_app is None:
-        server_app = make_aiohttp_application(settings, middlewares, loop)
+        server_app = make_aiohttp_application(settings, middlewares)
 
     # Create root Application
     root = ApplicationRoot(config_file)

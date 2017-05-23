@@ -46,16 +46,17 @@ class ServerCommand(Command):
         port = arguments.port or settings.get('address', settings.get('port'))
         host = arguments.host or settings.get('host', '0.0.0.0')
         if arguments.profile:
-            cProfile.runctx("web.run_app(app, host=host, port=port)", {
+            cProfile.runctx("web.run_app(app, host=host, port=port, loop=loop)", {
                 'web': web
             }, {
                 'port': port,
                 'host': host,
                 'settings': settings,
-                'app': app
+                'app': app,
+                'loop': self.get_loop()
             }, filename=arguments.profile_output)
         else:
-            web.run_app(app, host=host, port=port)
+            web.run_app(app, host=host, port=port, loop=self.get_loop())
 
     def run(self, arguments, settings, app):
         if arguments.monitor:

@@ -400,9 +400,9 @@ async def sharing_post(context, request):
         }
     })
 async def can_i_do(context, request):
-    if 'permission' not in request.GET:
+    if 'permission' not in request.query:
         raise TypeError('No permission param')
-    permission = request.GET['permission']
+    permission = request.query['permission']
     return IInteraction(request).check_permission(permission, context)
 
 

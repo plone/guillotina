@@ -110,7 +110,7 @@ class CockroachVacuum:
             except concurrent.futures.CancelledError:
                 pass  # task was cancelled, probably because we're shutting down
             except Exception:
-                logger.warn(f'Error vacuuming oid {oid}', exc_info=True)
+                logger.warning(f'Error vacuuming oid {oid}', exc_info=True)
             finally:
                 self._active = False
                 self._queue.task_done()
@@ -201,6 +201,16 @@ class CockroachStorage(pg.PostgresqlStorage):
     _max_tid = 0
     _vacuum = _vacuum_task = None
 
+    def __init__(self, *args, **kwargs):
+        transaction_strategy = kwargs.get('transaction_strategy', 'cockroach-txnless')
+        if transaction_strategy not in ('none', 'cockroach', 'cockroach-txnless'):
+            logger.warning(f'Unsupported transaction strategy specified for '
+                           f'cockroachdb({transaction_strategy}). Forcing to '
+                           f'no strategy')
+            transaction_strategy = 'cockroach'
+        kwargs['transaction_strategy'] = transaction_strategy
+        super().__init__(*args, **kwargs)
+
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
         self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
@@ -219,8 +229,8 @@ class CockroachStorage(pg.PostgresqlStorage):
             if self._vacuum._closed:
                 # if it's closed, we know this is expected
                 return
-            logger.warn('Vacuum cockroach task closed. This should not happen. '
-                        'No database vacuuming will be done here anymore.')
+            logger.warning('Vacuum cockroach task closed. This should not happen. '
+                           'No database vacuuming will be done here anymore.')
 
         self._vacuum_task.add_done_callback(vacuum_done)
 
@@ -234,7 +244,7 @@ class CockroachStorage(pg.PostgresqlStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            self._log.warn("Too long object %d" % (obj.__class__, len(p)))
+            self._log.warning("Too long object %d" % (obj.__class__, len(p)))
         part = writer.part
         if part is None:
             part = 0
@@ -283,3 +293,15 @@ class CockroachStorage(pg.PostgresqlStorage):
         async with txn._lock:
             await txn._db_conn.execute(pg.DELETE_FROM_OBJECTS, oid)
             await self._vacuum.add_to_queue(oid)
+
+    async def commit(self, transaction):
+        if transaction._db_txn is not None:
+            async with transaction._lock:
+                try:
+                    await transaction._db_txn.commit()
+                except asyncpg.exceptions.SerializationError as ex:
+                    if 'restart transaction' in ex.args[0]:
+                        raise ConflictError('Cockroach asked to restart the transaction')
+        else:
+            logger.warning('Do not have db transaction to commit')
+        return transaction._tid

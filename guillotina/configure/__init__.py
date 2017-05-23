@@ -207,7 +207,7 @@ def load_behavior(_context, behavior):
 
     if factory is None:
         if for_ is not None:
-            logger.warn(
+            logger.warning(
                 u"Specifying 'for' in behavior '{0}' if no 'factory' is given "
                 u"has no effect and is superfluous.".format(title)
             )

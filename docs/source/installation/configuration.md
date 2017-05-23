@@ -172,6 +172,13 @@ Available options:
   object is locked when a known write will be applied to it.
   While it is locked, no other writers can access the object.
   Requires etcd installation
+- `cockroach`:
+  Use cockroach's transaction support. This has a performance impact as transactions
+  in cockroach are expensive. This does not do *any* voting because it relies
+  on cockroach's strict transactions which lock tables during transactions.
+- `cockroach-txnless`:
+  Do not use cockroach's transaction support but manually check concurrent
+  transactions for conflicts with voting.
 
 
 Warning: not all storages are compatible with all transaction strategies.

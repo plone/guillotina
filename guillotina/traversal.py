@@ -417,7 +417,7 @@ class TraversalRouter(AbstractRouter):
             if IOPTIONS != method or not app_settings['cors']:
                 # Check if the view has permissions explicit
                 if view is None or not view.__allow_access__:
-                    logger.warn("No access content {content} with {auths}".format(
+                    logger.warning("No access content {content} with {auths}".format(
                         content=resource,
                         auths=str([x.principal.id
                                    for x in security.participations])))
@@ -430,7 +430,7 @@ class TraversalRouter(AbstractRouter):
             ViewClass = view.__class__
             view_permission = get_view_permission(ViewClass)
             if not security.check_permission(view_permission, view):
-                logger.warn("No access for view {content} with {auths}".format(
+                logger.warning("No access for view {content} with {auths}".format(
                     content=resource,
                     auths=str([x.principal.id
                                for x in security.participations])))

@@ -22,7 +22,7 @@ async def commit(request=None, warn=True):
         await get_tm(request).commit(request)
     except AttributeError as e:
         if warn:
-            logger.warn('Could not locate transaction manager to commit', exc_info=True)
+            logger.warning('Could not locate transaction manager to commit', exc_info=True)
 
 
 async def abort(request=None):
@@ -32,7 +32,7 @@ async def abort(request=None):
     except AttributeError:
         # not part of transaction, ignore
         pass
-        # logger.warn('Could not locate transaction manager to abort', exc_info=True)
+        # logger.warning('Could not locate transaction manager to abort', exc_info=True)
 
 
 def get_tm(request=None):

@@ -170,7 +170,6 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Test issues with cockroach")
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
         postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
@@ -244,6 +243,7 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not support simple strategy")
 async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
@@ -280,7 +280,6 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Test issues with cockroach")
 async def test_none_strat_allows_trans_commits(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 

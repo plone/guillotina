@@ -328,7 +328,7 @@ class PostgresqlStorage(BaseStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            self._log.warn("Too long object %d" % (obj.__class__, len(p)))
+            self._log.warning("Too long object %d" % (obj.__class__, len(p)))
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
@@ -429,7 +429,7 @@ class PostgresqlStorage(BaseStorage):
             async with transaction._lock:
                 await transaction._db_txn.commit()
         else:
-            log.warn('Do not have db transaction to commit')
+            log.warning('Do not have db transaction to commit')
         return transaction._tid
 
     async def abort(self, transaction):
@@ -442,7 +442,7 @@ class PostgresqlStorage(BaseStorage):
                     pass
         # reads don't need transaction necessarily so don't log
         # else:
-        #     log.warn('Do not have db transaction to rollback')
+        #     log.warning('Do not have db transaction to rollback')
 
     # Introspection
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):

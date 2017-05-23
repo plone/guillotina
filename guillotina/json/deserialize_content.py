@@ -105,8 +105,9 @@ class DeserializeFromJson(object):
                     try:
                         await apply_coroutine(field.set, obj, value)
                     except Exception:
-                        logger.warn(
-                            'Error setting data on field, falling back to setattr', exc_info=True)
+                        logger.warning(
+                            'Error setting data on field, falling back to setattr',
+                            exc_info=True)
                         setattr(obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):
