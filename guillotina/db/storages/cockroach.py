@@ -279,8 +279,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         obj._p_estimated_size = len(p)
 
     async def delete(self, txn, oid):
-        # XXX no cascade support!
-        # need to move things around and recursively delete here...
+        # no cascade support, so we push to vacuum
         async with txn._lock:
             await txn._db_conn.execute(pg.DELETE_FROM_OBJECTS, oid)
             await self._vacuum.add_to_queue(oid)

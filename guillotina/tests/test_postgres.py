@@ -131,7 +131,7 @@ async def test_create_blob(postgres, dummy_request):
     # also get data from ob that started as a stub...
     ob2 = await txn.get(ob._p_oid)
     assert ob2.type_name == 'Item'
-    assert ob2.id == 'foobar'
+    assert 'foobar' in ob2.id
 
     await tm.abort(txn=txn)
 
