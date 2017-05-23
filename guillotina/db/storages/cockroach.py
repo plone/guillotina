@@ -302,6 +302,7 @@ class CockroachStorage(pg.PostgresqlStorage):
                 except asyncpg.exceptions.SerializationError as ex:
                     if 'restart transaction' in ex.args[0]:
                         raise ConflictError('Cockroach asked to restart the transaction')
-        else:
+        elif self._transaction_strategy not in ('none', 'cockroach-txnless'):
             logger.warning('Do not have db transaction to commit')
+
         return transaction._tid

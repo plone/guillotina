@@ -428,7 +428,7 @@ class PostgresqlStorage(BaseStorage):
         if transaction._db_txn is not None:
             async with transaction._lock:
                 await transaction._db_txn.commit()
-        else:
+        elif self.transaction_strategy not in ('none',):
             log.warning('Do not have db transaction to commit')
         return transaction._tid
 
