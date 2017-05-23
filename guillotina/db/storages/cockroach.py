@@ -66,6 +66,26 @@ WHERE
     )
 RETURNING 1
 '''
+DELETE_BY_PARENT_OID = '''DELETE FROM objects
+WHERE parent_id = $1::varchar(32);'''
+GET_OIDS_BY_PARENT = '''SELECT zoid FROM objects
+WHERE parent_id = $1::varchar(32);'''
+BATCHED_GET_CHILDREN_OIDS = """SELECT zoid FROM objects
+WHERE parent_id = $1::varchar(32)
+ORDER BY zoid
+LIMIT $2::int
+OFFSET $3::int"""
+
+
+async def iterate_children(conn, parent_oid, page_size=1000):
+    smt = await conn.prepare(BATCHED_GET_CHILDREN_OIDS)
+    page = 1
+    results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
+    while len(results) > 0:
+        for record in results:
+            yield record['zoid']
+        page += 1
+        results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
 
 
 class CockroachVacuum:
@@ -98,31 +118,32 @@ class CockroachVacuum:
     async def add_to_queue(self, oid):
         await self._queue.put(oid)
 
+    async def vacuum_children(self, conn, parent_oid):
+        async for child_oid in iterate_children(conn, parent_oid):
+            await self.vacuum_children(conn, child_oid)
+        await conn.execute(DELETE_BY_PARENT_OID, parent_oid)
+
     async def vacuum(self, oid):
         '''
         Options for vacuuming...
         1. Recursively go through objects, deleting children as you find them,
            checking if they have their own children and so on...
-           - possibly much more ram usage
+           - possibly more ram usage
            - more application logic
-           - probably should use a cursor, which requires a transaction. cursors
-             are also long running and potentially error prone if you keep it
-             open too long(say if you're nested very deep--many cursors open)
+           - need to batch children
         2. Delete initial children, then delete objects that are dangling(parent_id missing)
            - less error prone
-           - self-correctly(will correct deletes that went wrong before)
+           - self-correcting(will correct deletes that went wrong before)
            - more overhead on cockroach
 
-        We're choosing #2
+        We're choosing #1 for now....
+
+        Long term, might need a combination of both
         '''
         conn = await self._storage.open()
         try:
-            # delete initial set that is no longer needed
             await conn.execute(DELETE_FROM_BLOBS, oid)
-            await conn.execute(DELETE_CHILDREN, oid)
-            val = 1
-            while val is not None:
-                val = await conn.fetchval(DELETE_DANGLING)
+            await self.vacuum_children(conn, oid)
         finally:
             await self._storage.close(conn)
 

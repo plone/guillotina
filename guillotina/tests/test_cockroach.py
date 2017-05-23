@@ -6,8 +6,8 @@ import os
 import pytest
 
 
-pytest.mark.skipif('USE_COCKROACH' not in os.environ,
-                   reason="These tests are only for cockroach")
+pytestmark = pytest.mark.skipif('USE_COCKROACH' not in os.environ,
+                                reason="These tests are only for cockroach")
 
 
 async def test_creates_vacuum_task(cockroach_storage):

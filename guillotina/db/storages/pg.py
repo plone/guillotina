@@ -179,6 +179,15 @@ TXN_CONFLICTS_FULL = """
     WHERE tid > $1
     """
 
+BATCHED_GET_CHILDREN_KEYS = """
+    SELECT id
+    FROM objects
+    WHERE parent_id = $1::varchar(32)
+    ORDER BY zoid
+    LIMIT $2::int
+    OFFSET $3::int
+    """
+
 
 @implementer(IStorage)
 class PostgresqlStorage(BaseStorage):
@@ -436,6 +445,13 @@ class PostgresqlStorage(BaseStorage):
         #     log.warn('Do not have db transaction to rollback')
 
     # Introspection
+    async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
+        conn = txn._db_conn
+        smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS)
+        keys = []
+        for record in await smt.fetch(oid, page_size, (page - 1) * page_size):
+            keys.append(record['id'])
+        return keys
 
     async def keys(self, txn, oid):
         async with txn._lock:

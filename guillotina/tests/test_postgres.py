@@ -440,3 +440,32 @@ async def test_mismatched_tid_causes_conflict_error(postgres, dummy_request):
         await tm.commit(txn=txn)
     await aps.remove()
     await cleanup(aps)
+
+
+async def test_iterate_keys(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    # base aps uses 1 connection from the pool for starting transactions
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+    txn = await tm.begin()
+
+    parent = create_content()
+    txn.register(parent)
+    original_keys = []
+    for _ in range(50):
+        item = create_content()
+        original_keys.append(item.id)
+        item.__parent__ = parent
+        txn.register(item)
+
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
+
+    keys = []
+    async for key in txn.iterate_keys(parent._p_oid, 2):
+        keys.append(key)
+
+    assert len(keys) == 50
+    assert len(set(keys) - set(original_keys)) == 0
+    await tm.abort(txn=txn)
