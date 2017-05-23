@@ -5,9 +5,9 @@ from guillotina.content import Item
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.security.policy import Interaction
+from guillotina.transactions import managed_transaction
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from guillotina.transactions import managed_transaction
 
 import json
 import uuid

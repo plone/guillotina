@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from guillotina.component import getUtility
 from guillotina.content import load_cached_schema
+from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
@@ -9,7 +10,6 @@ from guillotina.testing import TESTING_SETTINGS
 from guillotina.tests import docker_containers as containers
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
-from guillotina.db.storages.cockroach import CockroachStorage
 
 import aiohttp
 import asyncio

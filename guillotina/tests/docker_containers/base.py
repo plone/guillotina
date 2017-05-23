@@ -1,7 +1,7 @@
 from time import sleep
 
-import os
 import docker
+import os
 
 
 COCKROACH_IMAGE = 'cockroachdb/cockroach:v1.0'
