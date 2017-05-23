@@ -1,6 +1,12 @@
 1.1.0a1 (unreleased)
 --------------------
 
+- Provide async task for cockroach to cleanup children since there is no cascade support
+  [vangheem]
+
+- Fix cockroachdb transaction support as it behaves differently than postgresql
+  [vangheem]
+
 - Include cockroachdb in our CI testing
   [vangheem]
 
