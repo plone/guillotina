@@ -25,17 +25,17 @@ async def cleanup(aps):
     await txn.commit()
     await aps._pool.release(conn)
     await aps.create()
+    await aps.finalize()
 
 
 async def get_aps(strategy='resolve', pool_size=15):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
-    partition_object = "guillotina.db.interfaces.IPartition"
     klass = PostgresqlStorage
     if USE_COCKROACH:
         klass = CockroachStorage
         dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
     aps = klass(
-        dsn=dsn, partition=partition_object, name='db',
+        dsn=dsn, name='db',
         transaction_strategy=strategy, pool_size=pool_size,
         conn_acquire_timeout=0.1)
     await aps.initialize()
@@ -131,7 +131,7 @@ async def test_create_blob(postgres, dummy_request):
     # also get data from ob that started as a stub...
     ob2 = await txn.get(ob._p_oid)
     assert ob2.type_name == 'Item'
-    assert ob2.id == 'foobar'
+    assert 'foobar' in ob2.id
 
     await tm.abort(txn=txn)
 
@@ -170,7 +170,6 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Test issues with cockroach")
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
         postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
@@ -244,6 +243,7 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not support simple strategy")
 async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
@@ -280,7 +280,6 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Test issues with cockroach")
 async def test_none_strat_allows_trans_commits(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
@@ -440,3 +439,32 @@ async def test_mismatched_tid_causes_conflict_error(postgres, dummy_request):
         await tm.commit(txn=txn)
     await aps.remove()
     await cleanup(aps)
+
+
+async def test_iterate_keys(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    # base aps uses 1 connection from the pool for starting transactions
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+    txn = await tm.begin()
+
+    parent = create_content()
+    txn.register(parent)
+    original_keys = []
+    for _ in range(50):
+        item = create_content()
+        original_keys.append(item.id)
+        item.__parent__ = parent
+        txn.register(item)
+
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
+
+    keys = []
+    async for key in txn.iterate_keys(parent._p_oid, 2):
+        keys.append(key)
+
+    assert len(keys) == 50
+    assert len(set(keys) - set(original_keys)) == 0
+    await tm.abort(txn=txn)

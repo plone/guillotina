@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from guillotina.component import getUtility
 from guillotina.content import load_cached_schema
+from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
@@ -204,3 +205,29 @@ async def guillotina(test_server, postgres, guillotina_main, loop):
 @pytest.fixture(scope='function')
 async def container_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina)
+
+
+class CockroachStorageAsyncContextManager(object):
+    def __init__(self, request, loop):
+        self.loop = loop
+        self.request = request
+        self.storage = None
+
+    async def __aenter__(self):
+        dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
+        self.storage = CockroachStorage(
+            dsn=dsn, name='db', pool_size=20,
+            conn_acquire_timeout=0.1)
+        await self.storage.initialize(self.loop)
+        return self.storage
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.storage._read_conn.execute("DROP TABLE IF EXISTS objects;")
+        await self.storage._read_conn.execute("DROP TABLE IF EXISTS blobs;")
+        await self.storage.create()
+        await self.storage.finalize()
+
+
+@pytest.fixture(scope='function')
+async def cockroach_storage(postgres, dummy_request, loop):
+    return CockroachStorageAsyncContextManager(dummy_request, loop)

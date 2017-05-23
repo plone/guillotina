@@ -179,6 +179,15 @@ TXN_CONFLICTS_FULL = """
     WHERE tid > $1
     """
 
+BATCHED_GET_CHILDREN_KEYS = """
+    SELECT id
+    FROM objects
+    WHERE parent_id = $1::varchar(32)
+    ORDER BY zoid
+    LIMIT $2::int
+    OFFSET $3::int
+    """
+
 
 @implementer(IStorage)
 class PostgresqlStorage(BaseStorage):
@@ -253,9 +262,9 @@ class PostgresqlStorage(BaseStorage):
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
         ]
         statements.extend(self._initialize_statements)
-        async with self._pool.acquire() as conn:
-            for statement in statements:
-                await conn.execute(statement)
+
+        for statement in statements:
+            await self._read_conn.execute(statement)
 
         await self.initialize_tid_statements()
         # migrate old transaction table scheme over
@@ -307,10 +316,9 @@ class PostgresqlStorage(BaseStorage):
             pass
 
     async def load(self, txn, oid):
-        int_oid = oid
         async with txn._lock:
             smt = await txn._db_conn.prepare(GET_OID)
-            objects = await smt.fetchrow(int_oid)
+            objects = await smt.fetchrow(oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -320,7 +328,7 @@ class PostgresqlStorage(BaseStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            self._log.warn("Too long object %d" % (obj.__class__, len(p)))
+            self._log.warning("Too long object %d" % (obj.__class__, len(p)))
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
@@ -420,8 +428,8 @@ class PostgresqlStorage(BaseStorage):
         if transaction._db_txn is not None:
             async with transaction._lock:
                 await transaction._db_txn.commit()
-        else:
-            log.warn('Do not have db transaction to commit')
+        elif self.transaction_strategy not in ('none',):
+            log.warning('Do not have db transaction to commit')
         return transaction._tid
 
     async def abort(self, transaction):
@@ -434,9 +442,16 @@ class PostgresqlStorage(BaseStorage):
                     pass
         # reads don't need transaction necessarily so don't log
         # else:
-        #     log.warn('Do not have db transaction to rollback')
+        #     log.warning('Do not have db transaction to rollback')
 
     # Introspection
+    async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
+        conn = txn._db_conn
+        smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS)
+        keys = []
+        for record in await smt.fetch(oid, page_size, (page - 1) * page_size):
+            keys.append(record['id'])
+        return keys
 
     async def keys(self, txn, oid):
         async with txn._lock:

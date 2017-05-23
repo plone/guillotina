@@ -120,7 +120,7 @@ class RendererJson(Renderer):
             return value
         # Framing of options
         frame = self.request.get('frame')
-        frame = self.request.GET['frame'] if 'frame' in self.request.GET else ''
+        frame = self.request.query['frame'] if 'frame' in self.request.query else ''
         if frame:
             framer = queryAdapter(self.request, IFrameFormatsJson, frame)
             json_value = await apply_coroutine(framer, json_value)

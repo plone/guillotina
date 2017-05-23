@@ -2,9 +2,14 @@ from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 
+import asyncio
 import asyncpg
+import concurrent
+import logging
 import sys
 
+
+logger = logging.getLogger('guillotina')
 
 # upsert without checking matching tids on updated object
 NAIVE_UPSERT = """
@@ -53,13 +58,101 @@ NEXT_TID = """SELECT unique_rowid()"""
 MAX_TID = "SELECT MAX(tid) from objects;"
 
 DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32);"""
-UPDATE_REFERENCED_DELETED_OBJECTS = """
-UPDATE objects
-SET
-    parent_id = NULL
+DELETE_CHILDREN = """DELETE FROM objects where parent_id = $1::varchar(32);"""
+DELETE_DANGLING = '''DELETE FROM objects
 WHERE
-    parent_id = $1::varchar(32)
-"""
+    parent_id IS NOT NULL and parent_id NOT IN (
+        SELECT zoid FROM objects
+    )
+RETURNING 1
+'''
+DELETE_BY_PARENT_OID = '''DELETE FROM objects
+WHERE parent_id = $1::varchar(32);'''
+GET_OIDS_BY_PARENT = '''SELECT zoid FROM objects
+WHERE parent_id = $1::varchar(32);'''
+BATCHED_GET_CHILDREN_OIDS = """SELECT zoid FROM objects
+WHERE parent_id = $1::varchar(32)
+ORDER BY zoid
+LIMIT $2::int
+OFFSET $3::int"""
+
+
+async def iterate_children(conn, parent_oid, page_size=1000):
+    smt = await conn.prepare(BATCHED_GET_CHILDREN_OIDS)
+    page = 1
+    results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
+    while len(results) > 0:
+        for record in results:
+            yield record['zoid']
+        page += 1
+        results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
+
+
+class CockroachVacuum:
+
+    def __init__(self, storage, loop):
+        self._storage = storage
+        self._loop = loop
+        self._queue = asyncio.Queue(loop=loop)
+        self._active = False
+        self._closed = False
+
+    @property
+    def active(self):
+        return self._active
+
+    async def initialize(self):
+        while not self._closed:
+            oid = await self._queue.get()
+            try:
+                self._active = True
+                await self.vacuum(oid)
+            except concurrent.futures.CancelledError:
+                pass  # task was cancelled, probably because we're shutting down
+            except Exception:
+                logger.warning(f'Error vacuuming oid {oid}', exc_info=True)
+            finally:
+                self._active = False
+                self._queue.task_done()
+
+    async def add_to_queue(self, oid):
+        await self._queue.put(oid)
+
+    async def vacuum_children(self, conn, parent_oid):
+        async for child_oid in iterate_children(conn, parent_oid):
+            await self.vacuum_children(conn, child_oid)
+        await conn.execute(DELETE_BY_PARENT_OID, parent_oid)
+
+    async def vacuum(self, oid):
+        '''
+        Options for vacuuming...
+        1. Recursively go through objects, deleting children as you find them,
+           checking if they have their own children and so on...
+           - possibly more ram usage
+           - more application logic
+           - need to batch children
+        2. Delete initial children, then delete objects that are dangling(parent_id missing)
+           - less error prone
+           - self-correcting(will correct deletes that went wrong before)
+           - more overhead on cockroach
+
+        We're choosing #1 for now....
+
+        Long term, might need a combination of both
+        '''
+        conn = await self._storage.open()
+        try:
+            await conn.execute(DELETE_FROM_BLOBS, oid)
+            await self.vacuum_children(conn, oid)
+        finally:
+            await self._storage.close(conn)
+
+    async def finalize(self):
+        self._closed = True
+        await self._queue.join()
+        while self._active:
+            # give it a chance to finish...
+            await asyncio.sleep(0.1)
 
 
 class CockroachStorage(pg.PostgresqlStorage):
@@ -106,6 +199,17 @@ class CockroachStorage(pg.PostgresqlStorage):
     ]
 
     _max_tid = 0
+    _vacuum = _vacuum_task = None
+
+    def __init__(self, *args, **kwargs):
+        transaction_strategy = kwargs.get('transaction_strategy', 'cockroach-txnless')
+        if transaction_strategy not in ('none', 'cockroach', 'cockroach-txnless'):
+            logger.warning(f'Unsupported transaction strategy specified for '
+                           f'cockroachdb({transaction_strategy}). Forcing to '
+                           f'no strategy')
+            transaction_strategy = 'cockroach'
+        kwargs['transaction_strategy'] = transaction_strategy
+        super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
@@ -116,12 +220,31 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def _test_get_current_tid(self, txn):
         return self._max_tid
 
+    async def initialize(self, loop=None):
+        await super().initialize(loop=loop)
+        self._vacuum = CockroachVacuum(self, loop)
+        self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
+
+        def vacuum_done(task):
+            if self._vacuum._closed:
+                # if it's closed, we know this is expected
+                return
+            logger.warning('Vacuum cockroach task closed. This should not happen. '
+                           'No database vacuuming will be done here anymore.')
+
+        self._vacuum_task.add_done_callback(vacuum_done)
+
+    async def finalize(self):
+        await self._vacuum.finalize()
+        self._vacuum_task.cancel()
+        await super().finalize()
+
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            self._log.warn("Too long object %d" % (obj.__class__, len(p)))
+            self._log.warning("Too long object %d" % (obj.__class__, len(p)))
         part = writer.part
         if part is None:
             part = 0
@@ -166,9 +289,20 @@ class CockroachStorage(pg.PostgresqlStorage):
         obj._p_estimated_size = len(p)
 
     async def delete(self, txn, oid):
-        # XXX no cascade support!
-        # need to move things around and recursively delete here...
+        # no cascade support, so we push to vacuum
         async with txn._lock:
-            await txn._db_conn.execute(UPDATE_REFERENCED_DELETED_OBJECTS, oid)
-            await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
             await txn._db_conn.execute(pg.DELETE_FROM_OBJECTS, oid)
+            await self._vacuum.add_to_queue(oid)
+
+    async def commit(self, transaction):
+        if transaction._db_txn is not None:
+            async with transaction._lock:
+                try:
+                    await transaction._db_txn.commit()
+                except asyncpg.exceptions.SerializationError as ex:
+                    if 'restart transaction' in ex.args[0]:
+                        raise ConflictError('Cockroach asked to restart the transaction')
+        elif self._transaction_strategy not in ('none', 'cockroach-txnless'):
+            logger.warning('Do not have db transaction to commit')
+
+        return transaction._tid

@@ -384,3 +384,14 @@ class Transaction(object):
 
     async def get_total_number_of_resources(self):
         return await self._manager._storage.get_total_number_of_resources(self)
+
+    async def iterate_keys(self, oid, page_size=1000):
+        page = 1
+        keys = await self._manager._storage.get_page_of_keys(
+            self, oid, page=page, page_size=page_size)
+        while len(keys) > 0:
+            for key in keys:
+                yield key
+            page += 1
+            keys = await self._manager._storage.get_page_of_keys(
+                self, oid, page=page, page_size=page_size)

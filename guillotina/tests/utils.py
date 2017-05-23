@@ -5,9 +5,9 @@ from guillotina.content import Item
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.security.policy import Interaction
+from guillotina.transactions import managed_transaction
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from guillotina.transactions import managed_transaction
 
 import json
 import uuid
@@ -117,10 +117,12 @@ class ContainerRequesterAsyncContextManager(object):
         assert status == 200
 
 
-def create_content(factory=Item, type_name='Item', id='foobar'):
+def create_content(factory=Item, type_name='Item', id=None):
     obj = factory()
     obj.type_name = type_name
     obj._p_oid = uuid.uuid4().hex
+    if id is None:
+        id = f'foobar{uuid.uuid4().hex}'
     obj.__name__ = obj.id = id
     apply_markers(obj, None)
     return obj

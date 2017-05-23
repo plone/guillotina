@@ -41,7 +41,7 @@ def get_settings(configuration):
         with open(configuration, 'r') as config:
             settings = json.load(config)
     else:
-        logger.warn('Could not find the configuration file {}. Using default settings.'.format(
+        logger.warning('Could not find the configuration file {}. Using default settings.'.format(
             configuration
         ))
         settings = MISSING_SETTINGS.copy()

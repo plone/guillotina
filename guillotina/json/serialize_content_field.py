@@ -29,7 +29,7 @@ class DefaultFieldSerializer(object):
         try:
             return await apply_coroutine(self.field.get, self.context)
         except Exception:
-            logger.warn('Could not find value for schema field({}), falling back to getattr'.format(
+            logger.warning('Could not find value for schema field({}), falling back to getattr'.format(
                 self.field.__name__
             ))
             return getattr(self.context, self.field.__name__, default)

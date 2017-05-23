@@ -47,7 +47,7 @@ def convert_field_to_schema(field):
             "type": _type_mappings[field_type]
         })
     else:
-        logger.warn('Could not convert field {} of {} into json schema'.format(
+        logger.warning('Could not convert field {} of {} into json schema'.format(
             field.__name__, get_dotted_name(field.interface)
         ))
         return
@@ -65,7 +65,7 @@ def convert_interface_to_schema(iface):
         try:
             props = convert_field_to_schema(field)
         except Exception:
-            logger.warn('Error converting {} of {} into json schema'.format(
+            logger.warning('Error converting {} of {} into json schema'.format(
                 name, get_dotted_name(iface)
             ))
         if props is not None:

@@ -38,9 +38,9 @@ class WSTokenAuthPolicy(BasePolicy):
 
     async def extract_token(self):
         request = self.request
-        if 'ws_token' in request.GET:
-            jwt_token = request.GET['ws_token'].encode('utf-8')
-            request.GET['ws_token'].encode('utf-8')
+        if 'ws_token' in request.query:
+            jwt_token = request.query['ws_token'].encode('utf-8')
+            request.query['ws_token'].encode('utf-8')
             jwt = jose.decrypt(
                 jose.deserialize_compact(jwt_token), app_settings['rsa']['priv'])
             return {
