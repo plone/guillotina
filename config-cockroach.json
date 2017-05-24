@@ -10,11 +10,9 @@
 				"host": "127.0.0.1",
 	      "port": 2379,
 	      "protocol": "http",
-	      "read_timeout": 2,
 	      "allow_redirect": true,
 	      "allow_reconnect": false,
 				"base_key": "guillotina-",
-				"read_timeout": 3,
 				"acquire_timeout": 1
 			},
 			"lock_ttl": 10,

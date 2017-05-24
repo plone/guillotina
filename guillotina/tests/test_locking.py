@@ -13,23 +13,6 @@ def _make_strategy():
     return trns._strategy
 
 
-# XXX using db implementation for tid
-# async def test_allocate_tid(dummy_guillotina, etcd):
-#
-#     tids = []
-#
-#     async def get_tid():
-#         strategy = _make_strategy()
-#         await strategy.tpc_begin()
-#         tids.append(strategy._transaction._tid)
-#
-#     # simulate many people requesting simultaneously
-#     await asyncio.gather(get_tid(), get_tid(), get_tid(), get_tid(), get_tid())
-#
-#     assert len(tids) == 5
-#     assert len(tids) == len(set(tids))
-
-
 async def test_locked_object_is_unlocked_tpc_finish(dummy_guillotina, etcd):
     strategy = _make_strategy()
     ob = utils.create_content()

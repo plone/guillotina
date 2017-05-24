@@ -203,6 +203,7 @@ Warning: not all storages are compatible with all transaction strategies.
 ## lock transaction strategy
 
 Requires installation and configuration of etcd to lock content for writes.
+See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
 
 ```json
 {
