@@ -249,6 +249,12 @@ class CockroachStorage(pg.PostgresqlStorage):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
         self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
 
+    async def open(self):
+        conn = await super().open()
+        await conn.execute(
+            'SET DEFAULT_TRANSACTION_ISOLATION TO ' + self._isolation_level)
+        return conn
+
     async def initialize(self, loop=None):
         await super().initialize(loop=loop)
         # we need snapshot isolation to allow us to work together with
