@@ -7,6 +7,11 @@ from guillotina.db.strategies.none import TIDOnlyStrategy
 from guillotina.exceptions import ConflictError
 
 import asyncio
+import logging
+import time
+
+
+logger = logging.getLogger('guillotina')
 
 
 @configure.adapter(
@@ -29,7 +34,7 @@ class LockStrategy(TIDOnlyStrategy):
         self._transaction = transaction
 
         options = storage._options
-        self._lock_ttl = options.get('lock_ttl', 3)
+        self._lock_ttl = options.get('lock_ttl', 10)
         etcd_options = options.get('etcd', {})
         self._etcd_base_key = etcd_options.pop('base_key', 'guillotina-')
         self._etcd_acquire_timeout = etcd_options.pop('acquire_timeout', 3)
@@ -67,34 +72,42 @@ class LockStrategy(TIDOnlyStrategy):
     def _get_key(self, ob):
         return '{}-{}-lock'.format(self._etcd_base_key, ob._p_oid)
 
-    async def _wait_for_lock(self, key):
+    async def _wait_for_lock(self, key, wait_index=None):
         '''
         We should probably think of rewriting with wait=true instead of retrying
         '''
         # this method *should* use the wait_for with a timeout
-        result = await self._etcd_client.get(key)
+        if wait_index is None:
+            result = await self._etcd_client.get(key)
+        else:
+            logger.info(f'etcd waiting for {key}, index {wait_index}')
+            start = time.time()
+            result = await self._etcd_client.get(key, wait='true',
+                                                 waitIndex=wait_index + 1)
+            logger.info(f'etcd got change after wait {key}, index {wait_index}, '
+                        f'in {time.time() - start}')
         if 'node' in result:
             if result['node']['value'] == 'locked':
-                asyncio.sleep(0.01)  # sleep a bit and try again...
-                return await self._wait_for_lock(key)
+                return await self._wait_for_lock(
+                    key, wait_index=result['node']['modifiedIndex'])
             else:
-                result = await self._etcd_client.set(
+                set_result = await self._etcd_client.set(
                     key, 'locked', ttl=self._lock_ttl,
                     prevIndex=result['node']['modifiedIndex'])
-                if 'errorCode' in result:
-                    asyncio.sleep(0.01)  # sleep a bit and try again...
-                    return await self._wait_for_lock(key)
+                if 'errorCode' in set_result:
+                    return await self._wait_for_lock(key, wait_index=set_result['index'])
                 else:
-                    return result
+                    logger.info(f"got lock for existing {key}, index {result['node']['modifiedIndex']}, "
+                                f"wait index: {wait_index}")
+                    return set_result
         else:
-            result = await self._etcd_client.set(
+            set_result = await self._etcd_client.set(
                 key, 'locked', ttl=self._lock_ttl,
                 prevExist='false')
-            if 'errorCode' in result:
-                asyncio.sleep(0.01)  # sleep a bit and try again...
-                return await self._wait_for_lock(key)
+            if 'errorCode' in set_result:
+                return await self._wait_for_lock(key, wait_index=set_result['index'])
             else:
-                return result
+                return set_result
 
     async def lock(self, obj):
         assert not obj.__new_marker__  # should be modifying an object
