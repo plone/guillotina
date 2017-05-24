@@ -1,14 +1,13 @@
 from guillotina import configure
+from guillotina.db import etcd
 from guillotina.db.interfaces import ILockingStrategy
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.strategies.none import TIDOnlyStrategy
 from guillotina.exceptions import ConflictError
-import aio_etcd
 
 import asyncio
 import logging
-import time
 
 
 logger = logging.getLogger('guillotina')
@@ -40,7 +39,7 @@ class LockStrategy(TIDOnlyStrategy):
         self._etcd_acquire_timeout = etcd_options.pop('acquire_timeout', 3)
 
         if not hasattr(self._storage, '_etcd_client'):
-            self._storage._etcd_client = aio_etcd.Client(**etcd_options)
+            self._storage._etcd_client = etcd.Client(**etcd_options)
         self._etcd_client = self._storage._etcd_client
 
     async def tpc_vote(self):
@@ -60,28 +59,26 @@ class LockStrategy(TIDOnlyStrategy):
     def _get_key(self, ob):
         return '{}-{}-lock'.format(self._etcd_base_key, ob._p_oid)
 
-    async def _wait_for_lock(self, key, prev_exist=False, prev_index=None):
+    async def _wait_for_lock(self, key, retries=0):
         '''
-        *could* try setting the lock before we even get it and hope we get lucky.
-        Would save us one trip to etcd
+        We do not use *wait* syntax for getting lock because, oddly, it's much
+        more slow than just trying a write and retrying a few times before giving up.
+
+        Yes, MUCH slower.
         '''
         # this method *should* use the wait_for with a timeout
+        if retries > 5:
+            raise ConflictError('Could not lock ob for writing')
 
-        try:
-            params = {}
-            if prev_exist is not None:
-                params['prevExist'] = prev_exist
-            if prev_index is not None:
-                params['prevIndex'] = prev_index
-            return await self._etcd_client.write(
-                key, 'locked', ttl=self._lock_ttl, **params)
-        except aio_etcd.EtcdAlreadyExist as ex:
-            data = await self._etcd_client.watch(key, index=ex.payload['index'] + 1)
-            if data.value == 'unlocked':
-                return await self._wait_for_lock(key, prev_exist=None,
-                                                 prev_index=data.modifiedIndex)
-            else:
-                return await self._wait_for_lock(key)
+        result = await self._etcd_client.set(
+            key, 'locked', ttl=self._lock_ttl, prevExist=False)
+        if 'errorCode' in result:
+            await asyncio.sleep(0.05)
+            return self._wait_for_lock(key, retries=retries + 1)
+
+        if retries > 0:
+            print('got it after retry')
+        return result
 
     async def lock(self, obj):
         assert not obj.__new_marker__  # should be modifying an object
@@ -106,4 +103,4 @@ class LockStrategy(TIDOnlyStrategy):
             return
         obj.__locked__ = False
         key = self._get_key(obj)
-        await self._etcd_client.set(key, 'unlocked', ttl=self._lock_ttl)
+        await self._etcd_client.delete(key, 'unlocked', ttl=self._lock_ttl)

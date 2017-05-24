@@ -45,7 +45,7 @@ async def test_wait_for_lock(dummy_guillotina, etcd):
     result = []
 
     async def work_on_object_1():
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.05)
         result.append(1)
         await strategy.unlock(ob1)
 
