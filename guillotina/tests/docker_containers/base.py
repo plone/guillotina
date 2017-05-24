@@ -47,7 +47,6 @@ class BaseImage:
         count = 1
 
         container_obj = docker_client.containers.get(ident)
-        import pdb; pdb.set_trace()
 
         opened = False
         host = ''
