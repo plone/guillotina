@@ -54,7 +54,7 @@ cov_html
 
 /.idea/
 /.Python
-
+/venv
 # files
 *.log
 *.swp
