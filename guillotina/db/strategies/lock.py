@@ -4,6 +4,7 @@ from guillotina.db.interfaces import ILockingStrategy
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.strategies.none import TIDOnlyStrategy
+from guillotina.exceptions import ConflictError
 
 import asyncio
 
@@ -111,7 +112,7 @@ class LockStrategy(TIDOnlyStrategy):
                 self._wait_for_lock(key),
                 timeout=self._etcd_acquire_timeout)
         except asyncio.TimeoutError:
-            raise Exception('Could not lock ob for writing')
+            raise ConflictError('Could not lock ob for writing')
 
     async def unlock(self, obj):
         if not obj.__locked__:
