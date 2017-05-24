@@ -248,7 +248,6 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
     await cleanup(aps)
 
 
-# @pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not support simple strategy")
 async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
