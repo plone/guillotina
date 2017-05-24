@@ -2,7 +2,8 @@
 	"databases": [{
 		"db": {
 			"storage": "cockroach",
-			"transaction_strategy": "cockroach-txnless",
+			"transaction_strategy": "resolve",
+			"isolation_level": "snapshot",
       "dsn": "postgresql://root@127.0.0.1:26257/guillotina?sslmode=disable",
       "read_only": false,
 			"etcd": {

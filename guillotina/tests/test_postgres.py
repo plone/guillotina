@@ -28,9 +28,14 @@ async def cleanup(aps):
     await aps.finalize()
 
 
-async def get_aps(strategy='resolve', pool_size=15):
+async def get_aps(strategy=None, pool_size=15):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
     klass = PostgresqlStorage
+    if strategy is None:
+        if USE_COCKROACH:
+            strategy = 'novote'
+        else:
+            strategy = 'resolve'
     if USE_COCKROACH:
         klass = CockroachStorage
         dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
@@ -236,14 +241,14 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
 
     # commit 2 before 1
     await tm.commit(txn=txn2)
-    # XXX should not raise conflict error
+    # should not raise conflict error
     await tm.commit(txn=txn1)
 
     await aps.remove()
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not support simple strategy")
+# @pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not support simple strategy")
 async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
@@ -272,7 +277,6 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
 
     # commit 2 before 1
     await tm.commit(txn=txn2)
-    # XXX should not raise conflict error
     with pytest.raises(ConflictError):
         await tm.commit(txn=txn1)
 

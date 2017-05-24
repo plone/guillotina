@@ -6,7 +6,6 @@ import asyncio
 import asyncpg
 import concurrent
 import logging
-import sys
 
 
 logger = logging.getLogger('guillotina')
@@ -55,7 +54,7 @@ RETURNING tid, otid"""
 
 
 NEXT_TID = """SELECT unique_rowid()"""
-MAX_TID = "SELECT MAX(tid) from objects;"
+MAX_TID = "SELECT COALESCE(MAX(tid), 0) from objects;"
 
 DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32);"""
 DELETE_CHILDREN = """DELETE FROM objects where parent_id = $1::varchar(32);"""
@@ -142,7 +141,6 @@ class CockroachVacuum:
         '''
         conn = await self._storage.open()
         try:
-            await conn.execute(DELETE_FROM_BLOBS, oid)
             await self.vacuum_children(conn, oid)
         finally:
             await self._storage.close(conn)
@@ -153,6 +151,39 @@ class CockroachVacuum:
         while self._active:
             # give it a chance to finish...
             await asyncio.sleep(0.1)
+
+
+class CockroachDBTransaction:
+
+    def __init__(self, txn):
+        self._txn = txn
+        self._conn = txn._db_conn
+        self._storage = txn._manager._storage
+        self._status = 'none'
+        self._priority = 'LOW'
+        if txn.request is not None:
+            attempts = getattr(txn.request, '_retry_attempt', 0)
+            if attempts == 1:
+                self._priority = 'NORMAL'
+            elif attempts > 1:
+                self._priority = 'HIGH'
+
+    async def start(self):
+        assert self._status in ('none',)
+        await self._conn.execute(f'''
+BEGIN ISOLATION LEVEL {self._storage._isolation_level.upper()},
+      PRIORITY {self._priority};''')
+        self._status = 'started'
+
+    async def commit(self):
+        assert self._status in ('started',)
+        await self._conn.execute('COMMIT;')
+        self._status = 'committed'
+
+    async def rollback(self):
+        assert self._status in ('started',)
+        await self._conn.execute('ROLLBACK;')
+        self._status = 'rolledback'
 
 
 class CockroachStorage(pg.PostgresqlStorage):
@@ -198,30 +229,31 @@ class CockroachStorage(pg.PostgresqlStorage):
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);'
     ]
 
-    _max_tid = 0
+    _db_transaction_factory = CockroachDBTransaction
     _vacuum = _vacuum_task = None
+    _isolation_level = 'snapshot'
 
     def __init__(self, *args, **kwargs):
-        transaction_strategy = kwargs.get('transaction_strategy', 'cockroach-txnless')
-        if transaction_strategy not in ('none', 'cockroach', 'cockroach-txnless'):
+        transaction_strategy = kwargs.get('transaction_strategy', 'novote')
+        self._isolation_level = kwargs.get('isolation_level', 'snapshot').lower()
+        if (self._isolation_level == 'serializable' and
+                transaction_strategy not in ('none', 'tidonly', 'novote')):
             logger.warning(f'Unsupported transaction strategy specified for '
-                           f'cockroachdb({transaction_strategy}). Forcing to '
-                           f'no strategy')
-            transaction_strategy = 'cockroach'
+                           f'cockroachdb SERIALIZABLE isolation level'
+                           f'({transaction_strategy}). Forcing to `novote` strategy')
+            transaction_strategy = 'novote'
         kwargs['transaction_strategy'] = transaction_strategy
         super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
         self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
-        if hasattr(sys, '_db_tests'):
-            self.get_current_tid = self._test_get_current_tid
-
-    async def _test_get_current_tid(self, txn):
-        return self._max_tid
 
     async def initialize(self, loop=None):
         await super().initialize(loop=loop)
+        # we need snapshot isolation to allow us to work together with
+        # other transactions nicely and prevent deadlocks
+        await self._read_conn.execute('SET DEFAULT_TRANSACTION_ISOLATION TO SNAPSHOT')
         self._vacuum = CockroachVacuum(self, loop)
         self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
 
@@ -256,9 +288,6 @@ class CockroachStorage(pg.PostgresqlStorage):
             statement_sql = UPDATE
             update = True
 
-        if hasattr(sys, '_db_tests') and txn._tid > self._max_tid:
-            self._max_tid = txn._tid
-
         async with txn._lock:
             smt = await txn._db_conn.prepare(statement_sql)
             try:
@@ -288,11 +317,15 @@ class CockroachStorage(pg.PostgresqlStorage):
                     'be an edge case. This should resolve on request retry.')
         obj._p_estimated_size = len(p)
 
+    async def _txn_oid_commit_hook(self, status, oid):
+        await self._vacuum.add_to_queue(oid)
+
     async def delete(self, txn, oid):
         # no cascade support, so we push to vacuum
         async with txn._lock:
             await txn._db_conn.execute(pg.DELETE_FROM_OBJECTS, oid)
-            await self._vacuum.add_to_queue(oid)
+            await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
@@ -301,8 +334,8 @@ class CockroachStorage(pg.PostgresqlStorage):
                     await transaction._db_txn.commit()
                 except asyncpg.exceptions.SerializationError as ex:
                     if 'restart transaction' in ex.args[0]:
-                        raise ConflictError('Cockroach asked to restart the transaction')
-        elif self._transaction_strategy not in ('none', 'cockroach-txnless'):
+                        raise ConflictError(ex.args[0])
+        elif self._transaction_strategy not in ('none', 'tidonly'):
             logger.warning('Do not have db transaction to commit')
 
         return transaction._tid

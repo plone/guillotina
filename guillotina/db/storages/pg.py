@@ -189,6 +189,10 @@ BATCHED_GET_CHILDREN_KEYS = """
     """
 
 
+def PGDBTransactionFactory(txn):
+    return txn._db_conn.transaction(readonly=txn._manager._storage._read_only)
+
+
 @implementer(IStorage)
 class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
@@ -198,6 +202,7 @@ class PostgresqlStorage(BaseStorage):
     _pool_size = None
     _pool = None
     _large_record_size = 1 << 24
+    _db_transaction_factory = PGDBTransactionFactory
 
     _object_schema = {
         'zoid': 'VARCHAR(32) NOT NULL PRIMARY KEY',
@@ -399,7 +404,7 @@ class PostgresqlStorage(BaseStorage):
     async def start_transaction(self, txn, retries=0):
         error = None
         async with txn._lock:
-            txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
+            txn._db_txn = self._db_transaction_factory(txn)
             try:
                 await txn._db_txn.start()
                 return
@@ -428,7 +433,7 @@ class PostgresqlStorage(BaseStorage):
         if transaction._db_txn is not None:
             async with transaction._lock:
                 await transaction._db_txn.commit()
-        elif self.transaction_strategy not in ('none',):
+        elif self.transaction_strategy not in ('none', 'tidonly'):
             log.warning('Do not have db transaction to commit')
         return transaction._tid
 
