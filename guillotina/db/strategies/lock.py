@@ -3,7 +3,7 @@ from guillotina.db import etcd
 from guillotina.db.interfaces import ILockingStrategy
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
-from guillotina.db.strategies.base import BaseStrategy
+from guillotina.db.strategies.none import TIDOnlyStrategy
 
 import asyncio
 
@@ -11,7 +11,7 @@ import asyncio
 @configure.adapter(
     for_=(IStorage, ITransaction),
     provides=ILockingStrategy, name="lock")
-class LockStrategy(BaseStrategy):
+class LockStrategy(TIDOnlyStrategy):
     '''
     *this strategy relies on using etcd for locking*
 
