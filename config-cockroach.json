@@ -2,7 +2,7 @@
 	"databases": [{
 		"db": {
 			"storage": "cockroach",
-			"transaction_strategy": "lock",
+			"transaction_strategy": "novote",
 			"isolation_level": "snapshot",
       "dsn": "postgresql://root@127.0.0.1:26257/guillotina?sslmode=disable",
       "read_only": false,

@@ -1,4 +1,7 @@
+from guillotina.component import getMultiAdapter
 from guillotina.db.interfaces import IStorage
+from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionStrategy
 from zope.interface import implementer
 
 
@@ -12,12 +15,22 @@ class MockDBTransaction:
         self._transacion = trns
 
 
+@implementer(ITransaction)
 class MockTransaction:
-    def __init__(self):
+    def __init__(self, manager):
+        self._manager = manager
         self._tid = 1
+        self.modified = {}
+        self.request = None
+        self._strategy = getMultiAdapter(
+            (manager._storage, self), ITransactionStrategy,
+            name=manager._storage._transaction_strategy)
 
     async def refresh(self, ob):
-        pass
+        return ob
+
+    async def register(self, ob):
+        self.modified[ob._p_oid] = ob
 
 
 @implementer(IStorage)

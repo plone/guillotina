@@ -1,4 +1,3 @@
-from guillotina.db.transaction import Transaction
 from guillotina.db.utils import lock_object
 from guillotina.db.utils import unlock_object
 from guillotina.tests import mocks
@@ -9,7 +8,7 @@ import asyncio
 
 def _make_strategy():
     storage = mocks.MockStorage(transaction_strategy='lock')
-    trns = Transaction(mocks.MockTransactionManager(storage=storage))
+    trns = mocks.MockTransaction(mocks.MockTransactionManager(storage=storage))
     return trns._strategy
 
 
