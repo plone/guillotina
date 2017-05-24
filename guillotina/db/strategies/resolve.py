@@ -1,7 +1,7 @@
 from guillotina import configure
+from guillotina.db.interfaces import IDBTransactionStrategy
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
-from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.strategies.simple import SimpleStrategy
 
 import logging
@@ -12,7 +12,7 @@ logger = logging.getLogger('guillotina')
 
 @configure.adapter(
     for_=(IStorage, ITransaction),
-    provides=ITransactionStrategy, name="resolve")
+    provides=IDBTransactionStrategy, name="resolve")
 class ResolveStrategy(SimpleStrategy):
     '''
     If simultaneous transactions are not editing the same objects, let it go

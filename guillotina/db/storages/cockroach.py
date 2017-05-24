@@ -251,8 +251,11 @@ class CockroachStorage(pg.PostgresqlStorage):
 
     async def open(self):
         conn = await super().open()
-        await conn.execute(
-            'SET DEFAULT_TRANSACTION_ISOLATION TO ' + self._isolation_level)
+        if self._transaction_strategy in ('none', 'tidonly', 'lock'):
+            # if a strategy is used that is not a db transaction we can't
+            # set the isolation level along with the transaction start
+            await conn.execute(
+                'SET DEFAULT_TRANSACTION_ISOLATION TO ' + self._isolation_level)
         return conn
 
     async def initialize(self, loop=None):

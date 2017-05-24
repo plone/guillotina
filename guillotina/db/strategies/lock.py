@@ -43,18 +43,6 @@ class LockStrategy(TIDOnlyStrategy):
             self._storage._etcd_client = etcd.Client(**etcd_options)
         self._etcd_client = self._storage._etcd_client
 
-    # we can still use the database implementation for getting a tid
-    # async def tpc_begin(self):
-    #     if not self.writable_transaction:
-    #         return
-    #
-    #     key = '{}-tid'.format(self._etcd_base_key)
-    #     # instead of doing something complicated to get us a transaction,
-    #     # we are just going to write to the lock key and use the index value
-    #     # from the result for the tid value
-    #     result = await self._etcd_client.set(key, '1')
-    #     self._transaction._tid = result['node']['modifiedIndex']
-
     async def tpc_vote(self):
         """
         Never a problem for voting since we're relying on locking
