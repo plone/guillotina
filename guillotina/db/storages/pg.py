@@ -189,10 +189,6 @@ BATCHED_GET_CHILDREN_KEYS = """
     """
 
 
-def PGDBTransactionFactory(txn):
-    return txn._db_conn.transaction(readonly=txn._manager._storage._read_only)
-
-
 @implementer(IStorage)
 class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
@@ -202,7 +198,6 @@ class PostgresqlStorage(BaseStorage):
     _pool_size = None
     _pool = None
     _large_record_size = 1 << 24
-    _db_transaction_factory = PGDBTransactionFactory
 
     _object_schema = {
         'zoid': 'VARCHAR(32) NOT NULL PRIMARY KEY',
@@ -400,6 +395,9 @@ class PostgresqlStorage(BaseStorage):
         async with self._lock:
             # again, use storage lock here instead of trns lock
             return await self._stmt_max_tid.fetchval()
+
+    def _db_transaction_factory(self, txn):
+        return txn._db_conn.transaction(readonly=txn._manager._storage._read_only)
 
     async def start_transaction(self, txn, retries=0):
         error = None
