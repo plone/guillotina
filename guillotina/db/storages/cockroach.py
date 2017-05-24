@@ -182,7 +182,11 @@ BEGIN ISOLATION LEVEL {self._storage._isolation_level.upper()},
 
     async def rollback(self):
         assert self._status in ('started',)
-        await self._conn.execute('ROLLBACK;')
+        try:
+            await self._conn.execute('ROLLBACK;')
+        except asyncpg.exceptions.InternalServerError as ex:
+            # already aborted...
+            pass
         self._status = 'rolledback'
 
 

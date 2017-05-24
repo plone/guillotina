@@ -16,6 +16,9 @@ class MockTransaction:
     def __init__(self):
         self._tid = 1
 
+    async def refresh(self, ob):
+        pass
+
 
 @implementer(IStorage)
 class MockStorage:
