@@ -15,7 +15,7 @@
 	      "allow_reconnect": false,
 				"base_key": "guillotina-",
 				"read_timeout": 3,
-				"acquire_timeout": 3
+				"acquire_timeout": 1
 			},
 			"lock_ttl": 10,
 			"pool_size": 100

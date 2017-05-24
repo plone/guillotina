@@ -37,7 +37,7 @@ class LockStrategy(TIDOnlyStrategy):
         self._lock_ttl = options.get('lock_ttl', 10)
         etcd_options = options.get('etcd', {})
         self._etcd_base_key = etcd_options.pop('base_key', 'guillotina-')
-        self._etcd_acquire_timeout = etcd_options.pop('acquire_timeout', 3)
+        self._etcd_acquire_timeout = etcd_options.pop('acquire_timeout', 1)
 
         if not hasattr(self._storage, '_etcd_client'):
             self._storage._etcd_client = etcd.Client(**etcd_options)
@@ -62,7 +62,8 @@ class LockStrategy(TIDOnlyStrategy):
 
     async def _wait_for_lock(self, key, wait_index=None):
         '''
-        We should probably think of rewriting with wait=true instead of retrying
+        *could* try setting the lock before we even get it and hope we get lucky.
+        Would save us one trip to etcd
         '''
         # this method *should* use the wait_for with a timeout
         if wait_index is None:
