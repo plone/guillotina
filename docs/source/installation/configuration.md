@@ -179,8 +179,11 @@ Available options:
   No db transaction, no conflict resolution. Fastest but most dangerous mode.
   Use for importing data or if you need high performance and do not have multiple writers.
 - `tidonly`:
-  The same as `none`; however, we still use the database to issue us transaction
-  ids for the data committed.
+  The same as `none` with no database transaction; however, we still use the database
+  to issue us transaction ids for the data committed. Since no transaction is used,
+  this is potentially just as safe as any of the other strategies just as long
+  as you are not writing to multiple objects at the same time--in those cases,
+  you might be in an inconsistent state on tid conflicts.
 - `novote`:
   Use db transaction but do not perform any voting when writing.
 - `simple`:
@@ -193,7 +196,8 @@ Available options:
 - `lock`:
   As safe as the `simple` mode with potential performance impact since every
   object is locked when a known write will be applied to it.
-  While it is locked, no other writers can access the object.
+  While it is locked, no other writers can access the object. Significant
+  performance impacts on contentious writes(writes to same object).
   Requires etcd installation.
 
 
@@ -238,4 +242,4 @@ See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
 
 Another note: why are there so many choices? Well, this is all somewhat experimental
 right now. We're trying to test the best scenarios of usage for different
-database solutions.
+databases and environments. We might eventually pare this down.

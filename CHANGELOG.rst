@@ -1,7 +1,8 @@
 1.1.0a2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix `tidonly` transaction strategy
+  [vangheem]
 
 
 1.1.0a1 (2017-05-24)
