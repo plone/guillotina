@@ -116,6 +116,10 @@ class ITransactionStrategy(Interface):
         '''
 
 
+class IDBTransactionStrategy(ITransactionStrategy):
+    pass
+
+
 class ILockingStrategy(ITransactionStrategy):
     async def lock(obj):
         pass

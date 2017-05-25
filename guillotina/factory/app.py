@@ -98,10 +98,12 @@ class GuillotinaAIOHTTPApplication(web.Application):
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
             if app_settings.get('conflict_retry_attempts', 3) > retries:
+                label = 'DB Conflict detected'
+                if isinstance(e, TIDConflictError):
+                    label = 'TID Conflict Error detected'
+                tid = getattr(getattr(request, '_txn', None), '_tid', 'not issued')
                 logger.warning(
-                    'DB Conflict detected, retrying request, tid: {}, retries: {})'.format(
-                        getattr(getattr(request, '_txn', None), '_tid', 'not issued'),
-                        retries + 1))
+                    f'{label}, retrying request, tid: {tid}, retries: {retries + 1})')
                 request._retry_attempt = retries + 1
                 return await self._handle(request, retries + 1)
             logger.error(

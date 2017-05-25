@@ -1,4 +1,3 @@
-from guillotina.db.transaction import Transaction
 from guillotina.db.utils import lock_object
 from guillotina.db.utils import unlock_object
 from guillotina.tests import mocks
@@ -9,25 +8,8 @@ import asyncio
 
 def _make_strategy():
     storage = mocks.MockStorage(transaction_strategy='lock')
-    trns = Transaction(mocks.MockTransactionManager(storage=storage))
+    trns = mocks.MockTransaction(mocks.MockTransactionManager(storage=storage))
     return trns._strategy
-
-
-# XXX using db implementation for tid
-# async def test_allocate_tid(dummy_guillotina, etcd):
-#
-#     tids = []
-#
-#     async def get_tid():
-#         strategy = _make_strategy()
-#         await strategy.tpc_begin()
-#         tids.append(strategy._transaction._tid)
-#
-#     # simulate many people requesting simultaneously
-#     await asyncio.gather(get_tid(), get_tid(), get_tid(), get_tid(), get_tid())
-#
-#     assert len(tids) == 5
-#     assert len(tids) == len(set(tids))
 
 
 async def test_locked_object_is_unlocked_tpc_finish(dummy_guillotina, etcd):
@@ -62,7 +44,7 @@ async def test_wait_for_lock(dummy_guillotina, etcd):
     result = []
 
     async def work_on_object_1():
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.05)
         result.append(1)
         await strategy.unlock(ob1)
 

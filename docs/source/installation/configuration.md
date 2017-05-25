@@ -34,6 +34,16 @@ map 1-to-1 to database setup:
 }
 ```
 
+Currently supported database drivers are:
+
+- `postgresql`
+- `cockroach`
+
+Both have configurations that are identical. Cockroach has an additional
+`isolation_level` configuration which defaults to `snapshot`. See
+https://www.cockroachlabs.com/docs/transactions.html
+
+
 ## Static files
 
 ```json
@@ -134,6 +144,14 @@ Guillotina provides a few different modes to operate in to customize the level
 of performance vs consistency. The setting used for this is `transaction_strategy`
 which defaults to `resolve`.
 
+Even though we have different transaction strategies that provide different voting
+algorithms to decide if it's a safe write, all writes STILL make sure that the
+object committed to matches the transaction it was retrieved with. If not,
+a conflict error is detected and the request is retried. So even if you choose
+the transaction strategy with no database transactions, there is still a level
+of consistency in that you know you aren't modifying an object that isn't consistent
+with when it was retrieved from the database.
+
 Example configuration:
 
 ```json
@@ -141,7 +159,7 @@ Example configuration:
   "databases": [{
 		"db": {
 			"storage": "postgresql",
-			"transaction_strategy": "simple",
+			"transaction_strategy": "resolve",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -158,8 +176,13 @@ Example configuration:
 Available options:
 
 - `none`:
-  No transactions, no conflict resolution. Fastest but most dangerous mode.
+  No db transaction, no conflict resolution. Fastest but most dangerous mode.
   Use for importing data or if you need high performance and do not have multiple writers.
+- `tidonly`:
+  The same as `none`; however, we still use the database to issue us transaction
+  ids for the data committed.
+- `novote`:
+  Use db transaction but do not perform any voting when writing.
 - `simple`:
   Detect concurrent transactions and error if another transaction id is committed
   to the db ahead of the current transaction id. This is the safest mode to operate
@@ -171,14 +194,7 @@ Available options:
   As safe as the `simple` mode with potential performance impact since every
   object is locked when a known write will be applied to it.
   While it is locked, no other writers can access the object.
-  Requires etcd installation
-- `cockroach`:
-  Use cockroach's transaction support. This has a performance impact as transactions
-  in cockroach are expensive. This does not do *any* voting because it relies
-  on cockroach's strict transactions which lock tables during transactions.
-- `cockroach-txnless`:
-  Do not use cockroach's transaction support but manually check concurrent
-  transactions for conflicts with voting.
+  Requires etcd installation.
 
 
 Warning: not all storages are compatible with all transaction strategies.
@@ -187,6 +203,7 @@ Warning: not all storages are compatible with all transaction strategies.
 ## lock transaction strategy
 
 Requires installation and configuration of etcd to lock content for writes.
+See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
 
 ```json
 {
@@ -217,3 +234,8 @@ Requires installation and configuration of etcd to lock content for writes.
 	}]
 }
 ```
+
+
+Another note: why are there so many choices? Well, this is all somewhat experimental
+right now. We're trying to test the best scenarios of usage for different
+database solutions.

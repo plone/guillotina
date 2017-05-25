@@ -396,10 +396,13 @@ class PostgresqlStorage(BaseStorage):
             # again, use storage lock here instead of trns lock
             return await self._stmt_max_tid.fetchval()
 
+    def _db_transaction_factory(self, txn):
+        return txn._db_conn.transaction(readonly=txn._manager._storage._read_only)
+
     async def start_transaction(self, txn, retries=0):
         error = None
         async with txn._lock:
-            txn._db_txn = txn._db_conn.transaction(readonly=self._read_only)
+            txn._db_txn = self._db_transaction_factory(txn)
             try:
                 await txn._db_txn.start()
                 return
@@ -428,7 +431,7 @@ class PostgresqlStorage(BaseStorage):
         if transaction._db_txn is not None:
             async with transaction._lock:
                 await transaction._db_txn.commit()
-        elif self.transaction_strategy not in ('none',):
+        elif self.transaction_strategy not in ('none', 'tidonly'):
             log.warning('Do not have db transaction to commit')
         return transaction._tid
 

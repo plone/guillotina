@@ -196,13 +196,24 @@ class Transaction(object):
         HARD_CACHE.clear()
         await self._cache.clear()
 
-    # GET AN OBJECT
-    async def get(self, oid):
+    async def refresh(self, ob):
+        '''
+        refresh an object with the value from the database
+        '''
+        new = await self.get(ob._p_oid, ignore_registered=True)
+        for key, value in new.__dict__.items():
+            if key.startswith('_p') or key.startswith('__'):
+                continue
+            ob.__dict__[key] = value
+        ob._p_serial = new._p_serial
+
+    async def get(self, oid, ignore_registered=False):
         """Getting a oid from the db"""
 
-        obj = self.modified.get(oid, None)
-        if obj is not None:
-            return obj
+        if not ignore_registered:
+            obj = self.modified.get(oid, None)
+            if obj is not None:
+                return obj
 
         result = HARD_CACHE.get(oid, None)
         if result is None:

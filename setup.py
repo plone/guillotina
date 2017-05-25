@@ -61,7 +61,8 @@ setup(
         'aioconsole',
         'pyjwt',
         'asyncpg',
-        'cffi'
+        'cffi',
+        'aio_etcd'
     ],
     extras_require={
         'test': [

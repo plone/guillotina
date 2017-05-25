@@ -2,21 +2,20 @@
 	"databases": [{
 		"db": {
 			"storage": "cockroach",
-			"transaction_strategy": "cockroach-txnless",
+			"transaction_strategy": "novote",
+			"isolation_level": "snapshot",
       "dsn": "postgresql://root@127.0.0.1:26257/guillotina?sslmode=disable",
       "read_only": false,
 			"etcd": {
 				"host": "127.0.0.1",
 	      "port": 2379,
 	      "protocol": "http",
-	      "read_timeout": 2,
 	      "allow_redirect": true,
 	      "allow_reconnect": false,
 				"base_key": "guillotina-",
-				"read_timeout": 3,
-				"acquire_timeout": 3
+				"acquire_timeout": 1
 			},
-			"lock_ttl": 3,
+			"lock_ttl": 10,
 			"pool_size": 100
 		}
 	}],

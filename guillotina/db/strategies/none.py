@@ -12,9 +12,6 @@ class TransactionlessStrategy(BaseStrategy):
     """
     Do not handle/detect any conflicts on the database
     """
-    def __init__(self, storage, transaction):
-        self._storage = storage
-        self._transaction = transaction
 
     async def tpc_begin(self):
         self._transaction._tid = 1
@@ -24,3 +21,18 @@ class TransactionlessStrategy(BaseStrategy):
 
     async def tpc_finish(self):
         pass
+
+
+@configure.adapter(
+    for_=(IStorage, ITransaction),
+    provides=ITransactionStrategy, name="tidonly")
+class TIDOnlyStrategy(BaseStrategy):
+    """
+    Still issue a transaction id but not a real transaction
+    """
+
+    async def tpc_begin(self):
+        if self.writable_transaction:
+            tid = await self._storage.get_next_tid(self._transaction)
+            if tid is not None:
+                self._transaction._tid = tid
