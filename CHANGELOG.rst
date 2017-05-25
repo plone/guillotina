@@ -1,4 +1,4 @@
-1.1.0a1 (unreleased)
+1.1.0a1 (2017-05-24)
 --------------------
 
 - Provide payload on container creation
