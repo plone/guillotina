@@ -16,12 +16,6 @@ class TransactionlessStrategy(BaseStrategy):
     async def tpc_begin(self):
         self._transaction._tid = 1
 
-    async def tpc_vote(self):
-        return True
-
-    async def tpc_finish(self):
-        pass
-
 
 @configure.adapter(
     for_=(IStorage, ITransaction),

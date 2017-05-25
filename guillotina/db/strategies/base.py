@@ -14,3 +14,12 @@ class BaseStrategy:
         if hasattr(req, '_db_write_enabled'):
             return req._db_write_enabled
         return True
+
+    async def tpc_vote(self):
+        return True
+
+    async def tpc_begin(self):
+        pass
+
+    async def tpc_finish(self):
+        pass
