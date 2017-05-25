@@ -1,6 +1,12 @@
 1.1.0a1 (unreleased)
 --------------------
 
+- Provide payload on container creation
+  [vangheem]
+
+- Fix type check on creating container
+  [vangheem]
+
 - Provide async task for cockroach to cleanup children since there is no cascade support
   [vangheem]
 

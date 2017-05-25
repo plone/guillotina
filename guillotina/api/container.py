@@ -66,7 +66,7 @@ class DefaultPOST(Service):
 
     async def __call__(self):
         data = await self.request.json()
-        if '@type' not in data and data['@type'] != 'Container':
+        if '@type' not in data or data['@type'] != 'Container':
             return ErrorResponse(
                 'NotAllowed',
                 'can not create this type %s' % data['@type'],
@@ -118,7 +118,8 @@ class DefaultPOST(Service):
             'guillotina.Owner',
             user)
 
-        await notify(ObjectAddedEvent(container, self.context, container.__name__))
+        await notify(ObjectAddedEvent(container, self.context, container.__name__,
+                                      payload=data))
 
         resp = {
             '@type': 'Container',
