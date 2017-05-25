@@ -58,7 +58,8 @@ class ETCDClient(aio_etcd.Client):
                     _ = await response.read()  # noqa
                     # urllib3 doesn't wrap all httplib exceptions and earlier versions
                     # don't wrap socket errors either.
-                except (ClientConnectionError, ClientResponseError, HTTPException, socket.error) as e:
+                except (ClientConnectionError, ClientResponseError,
+                        HTTPException, socket.error) as e:
                     logger.error("Request to server %s failed: %r",
                                  self._base_uri, e)
                     if self._allow_reconnect:
