@@ -17,6 +17,49 @@ class Console(aioconsole.code.AsynchronousConsole):
         return await super().interact(banner, stop, handle_sigint)
 
 
+class ShellHelpers:
+
+    def __init__(self, app, root, request):
+        self._app = app
+        self._root = root
+        self._request = request
+        self._active_db = None
+        self._active_container = None
+        self._active_txn = None
+        self._active_tm = None
+
+    async def use_db(self, db_id):
+        db = self._root[db_id]
+        tm = self._active_tm = db.get_transaction_manager()
+        self._request._db_id = db_id
+        self._active_db = db
+        self._active_txn = await tm.begin()
+        return self._active_txn
+
+    async def use_container(self, container_id):
+        container = await self._active_db.async_get(container_id)
+        if container is None:
+            raise Exception('Container not found')
+        self._request.container = container
+        self._request._container_id = container.id
+        self._active_container = container
+        return container
+
+    async def commit(self):
+        if self._active_tm is None:
+            raise Exception('No active transaction manager')
+        await self._active_tm.commit(txn=self._active_txn)
+        self._active_txn = await self._active_tm.begin()
+        return self._active_txn
+
+    async def abort(self):
+        if self._active_tm is None:
+            raise Exception('No active transaction manager')
+        await self._active_tm.abort(txn=self._active_txn)
+        self._active_txn = await self._active_tm.begin()
+        return self._active_txn
+
+
 class InteractiveEventLoop(asyncio.SelectorEventLoop):
     """Event loop running a python console."""
 
@@ -37,11 +80,17 @@ class InteractiveEventLoop(asyncio.SelectorEventLoop):
         '''
         app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
         root = getUtility(IApplication, name='root')
+        helpers = ShellHelpers(app, root, self.request)
         _locals = {
             'app': app,
             'root': root,
             'app_settings': app_settings,
-            'request': self.request
+            'request': self.request,
+            'helpers': helpers,
+            'use_db': helpers.use_db,
+            'use_container': helpers.use_container,
+            'commit': helpers.commit,
+            'abort': helpers.abort
         }
         self.console = self.console_class(None, locals=_locals, loop=self)
         coro = self.console.interact(self.banner, stop=True, handle_sigint=True)
@@ -66,13 +115,18 @@ Available local variables:
     - root
     - app_settings
     - request
-    - asyncio
     - loop
+    - use_db
+    - use_container
+    - commit
+    - abort
 
 Example
 -------
 
-container = await root['db'].async_get('container')
+txn = await use_db('db')
+container = await use_container('container')
+item = await container.async_get('item')
 
 
 Commit changes
@@ -85,6 +139,12 @@ tm = root['db'].get_transaction_manager()
 txn = await tm.begin()
 // do changes...
 await tm.commit(txn=txn)
+
+Or, using the helper utilities...
+
+txn = await use_db('db')
+container = await use_container('container')
+await commit()
 
 '''
 

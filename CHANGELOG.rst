@@ -1,6 +1,9 @@
 1.1.0a2 (unreleased)
 --------------------
 
+- Provide more helper utilities for shell, so it's less error-prone
+  [vangheem]
+
 - Fix `tidonly` transaction strategy
   [vangheem]
 
