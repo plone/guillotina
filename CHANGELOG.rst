@@ -1,4 +1,4 @@
-1.1.0a4 (unreleased)
+1.1.0a4 (2017-05-26)
 --------------------
 
 - Add more special characters for valid id
