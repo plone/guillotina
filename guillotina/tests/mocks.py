@@ -57,6 +57,12 @@ class MockStorage:
     async def get_next_tid(self, trns):
         return 1
 
+    async def abort(self, txn):
+        pass
+
+    async def commit(self, txn):
+        pass
+
 
 class MockTransactionManager:
     _storage = None
