@@ -1,4 +1,4 @@
-1.1.0a3 (unreleased)
+1.1.0a3 (2017-05-26)
 --------------------
 
 - Put restrictions on what valid ids for content are
