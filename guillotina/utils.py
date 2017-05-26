@@ -275,7 +275,7 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     return result
 
 
-_valid_id_characters = string.digits + string.ascii_lowercase + '.-_'
+_valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+'
 
 
 def valid_id(_id):

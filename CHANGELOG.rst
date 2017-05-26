@@ -1,7 +1,8 @@
 1.1.0a4 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Add more special characters for valid id
+  [vangheem]
 
 
 1.1.0a3 (2017-05-26)
