@@ -86,7 +86,7 @@ async def test_get_registry_value(container_requester):
         assert response['value'] == ['guillotina.interfaces.layer.IDefaultLayer']
 
 
-async def test_create_contenttype(container_requester):
+async def test_create_content(container_requester):
     async with await container_requester as requester:
         response, status = await requester(
             'POST',
@@ -302,3 +302,17 @@ async def test_get_logged_user_info(container_requester):
         except KeyError:
             raise AssertionError("Code should not come here! as User `%s` "
                                  "should be in response" % ROOT_USER_ID)
+
+
+async def test_not_create_content_with_invalid_id(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "lsdkfjl?#($)"
+            })
+        )
+        assert status == 412

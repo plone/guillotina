@@ -89,3 +89,11 @@ class TestGetCurrentRequest:
                 new = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0
                 if new - current > 10:  # memory leak, this shouldn't happen
                     assert new == current
+
+
+def test_valid_id():
+    assert utils.valid_id('FOObar')
+    assert utils.valid_id('FooBAR-_-.')
+    assert not utils.valid_id('FooBar-_-.,')
+    assert not utils.valid_id('FooBar-_-.@#')
+    assert not utils.valid_id('FooBar-_-.?')

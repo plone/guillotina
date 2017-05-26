@@ -41,6 +41,7 @@ from guillotina.json.exceptions import DeserializationError
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
+from guillotina.utils import valid_id
 
 
 _zone = tzlocal()
@@ -129,6 +130,9 @@ class DefaultPOST(Service):
         if not id_:
             new_id = None
         else:
+            if not valid_id(id_):
+                return ErrorResponse('PreconditionFailed', str('Invalid id'),
+                                     status=412)
             new_id = id_
 
         user = get_authenticated_user_id(self.request)

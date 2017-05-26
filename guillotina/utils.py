@@ -275,6 +275,14 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     return result
 
 
+_valid_id_characters = string.digits + string.ascii_lowercase + '.-_'
+
+
+def valid_id(_id):
+    _id = _id.lower()
+    return _id == ''.join([l for l in _id if l in _valid_id_characters])
+
+
 def get_current_request() -> IRequest:
     """
     Return the current request by heuristically looking it up from stack
