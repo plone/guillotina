@@ -154,7 +154,8 @@ class LockStrategy(TIDOnlyStrategy):
     def _get_key(self, ob):
         return '{}-{}-lock'.format(self._etcd_base_key, ob._p_oid)
 
-    async def _wait_for_lock(self, key, prev_exist=False, prev_index=None, update=False):
+    async def _wait_for_lock(self, key, prev_exist=None, prev_index=None,
+                             prev_value=None, update=False):
         '''
         *could* try setting the lock before we even get it and hope we get lucky.
         Would save us one trip to etcd
@@ -167,19 +168,29 @@ class LockStrategy(TIDOnlyStrategy):
                 params['prevExist'] = prev_exist
             if prev_index is not None:
                 params['prevIndex'] = prev_index
+            if prev_value is not None:
+                params['prevValue'] = prev_value
             await self._etcd_client.write(
                 key, 'locked', ttl=self._lock_ttl, **params)
             return update
-        except (aio_etcd.EtcdAlreadyExist, aio_etcd.EtcdCompareFailed) as ex:
+        except aio_etcd.EtcdAlreadyExist as ex:
+            # next, try again with prevValue==unlocked
+            return await self._wait_for_lock(key, prev_value='unlocked')
+        except aio_etcd.EtcdCompareFailed as ex:
             logger.debug(f"start watch on {key} - {ex.payload['index']}")
             start = time.time()
             data = await self._etcd_client.watch(key, index=ex.payload['index'] + 1)
             logger.debug(f"finished watch on {key} - {ex.payload['index']} -- "
                          f"{time.time() - start} seconds")
-            return await self._wait_for_lock(key, prev_exist=None, update=True,
-                                             prev_index=data.modifiedIndex)
+            if data.value == 'unlocked':
+                return await self._wait_for_lock(key, update=True,
+                                                 prev_index=data.modifiedIndex)
+            else:
+                # try again
+                return await self._wait_for_lock(key, update=True,
+                                                 prev_value='unlocked')
         except (aio_etcd.EtcdKeyNotFound,) as ex:
-            return await self._wait_for_lock(key, prev_exist=False, update=True)
+            return await self._wait_for_lock(key, update=True)
 
     async def lock(self, obj):
         assert not obj.__new_marker__  # should be modifying an object
@@ -190,7 +201,7 @@ class LockStrategy(TIDOnlyStrategy):
         key = self._get_key(obj)
 
         try:
-            if await asyncio.wait_for(self._wait_for_lock(key),
+            if await asyncio.wait_for(self._wait_for_lock(key, prev_exist=False),
                                       timeout=self._etcd_acquire_timeout):
                 # have lock; however, need to refresh object so we don't get
                 # tid conflicts

@@ -1,6 +1,9 @@
 1.1.0a2 (unreleased)
 --------------------
 
+- Significant performance fixes to lock implementation with etcd
+  [vangheem]
+
 - Provide more helper utilities for shell, so it's less error-prone
   [vangheem]
 
