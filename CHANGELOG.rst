@@ -1,4 +1,4 @@
-1.1.0a2 (unreleased)
+1.1.0a2 (2017-05-26)
 --------------------
 
 - Significant performance fixes to lock implementation with etcd
