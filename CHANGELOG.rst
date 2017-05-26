@@ -1,7 +1,8 @@
 1.1.0a3 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Put restrictions on what valid ids for content are
+  [vangheem]
 
 
 1.1.0a2 (2017-05-26)
