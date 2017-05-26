@@ -39,9 +39,15 @@ Currently supported database drivers are:
 - `postgresql`
 - `cockroach`
 
-Both have configurations that are identical. Cockroach has an additional
-`isolation_level` configuration which defaults to `snapshot`. See
+
+### Cockroach
+
+Both postgres and cockroach have configurations that are identical; however,
+Cockroach has an additional `isolation_level` configuration which defaults to `snapshot`. See
 https://www.cockroachlabs.com/docs/transactions.html
+
+It is recommended that you use the `lock` transaction strategy with Cockroach
+which requires etcd.
 
 
 ## Static files
@@ -196,8 +202,7 @@ Available options:
 - `lock`:
   As safe as the `simple` mode with potential performance impact since every
   object is locked when a known write will be applied to it.
-  While it is locked, no other writers can access the object. Significant
-  performance impacts on contentious writes(writes to same object).
+  While it is locked, no other writers can access the object.
   Requires etcd installation.
 
 

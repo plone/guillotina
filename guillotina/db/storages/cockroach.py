@@ -241,7 +241,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         transaction_strategy = kwargs.get('transaction_strategy', 'novote')
         self._isolation_level = kwargs.get('isolation_level', 'snapshot').lower()
         if (self._isolation_level == 'serializable' and
-                transaction_strategy not in ('none', 'tidonly', 'novote')):
+                transaction_strategy not in ('none', 'tidonly', 'novote', 'lock')):
             logger.warning(f'Unsupported transaction strategy specified for '
                            f'cockroachdb SERIALIZABLE isolation level'
                            f'({transaction_strategy}). Forcing to `novote` strategy')
