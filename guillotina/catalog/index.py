@@ -4,6 +4,7 @@ from guillotina.api.search import AsyncCatalogReindex
 from guillotina.component import queryUtility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IGroupFolder
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
@@ -63,6 +64,10 @@ def get_hook():
 
 @configure.subscriber(for_=(IResource, IObjectPermissionsModifiedEvent))
 async def security_changed(obj, event):
+    if IGroupFolder.providedBy(obj):
+        # assuming permissions for group are already handled correctly with
+        # group:group id principal
+        return
     # We need to reindex the objects below
     request = get_current_request()
     request._futures.update({obj.id: AsyncCatalogReindex(obj, request, security=True)()})

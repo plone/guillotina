@@ -200,3 +200,11 @@ class IAnnotations(Interface):
 
 class IAnnotationData(Interface):
     pass
+
+
+class IGroupFolder(IFolder):
+    '''
+    Group content.
+    Main purpose of this PR is to prevent reindexing on modify permissions
+    for group content.
+    '''

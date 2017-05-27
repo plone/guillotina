@@ -1,7 +1,8 @@
 1.1.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Group objects should not get reindexing triggered on them
+  [vangheem]
 
 
 1.1.0a4 (2017-05-26)
