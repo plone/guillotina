@@ -1,4 +1,4 @@
-1.1.0a5 (unreleased)
+1.1.0a5 (2017-05-27)
 --------------------
 
 - Group objects should not get reindexing triggered on them
