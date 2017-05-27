@@ -16,6 +16,7 @@ from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa
 from .content import IDatabase  # noqa
 from .content import IFolder  # noqa
+from .content import IGroupFolder  # noqa
 from .content import IItem  # noqa
 from .content import ILocation  # noqa
 from .content import IRegistry  # noqa
