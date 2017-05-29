@@ -3,6 +3,7 @@ from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from zope.interface import implementer
+from guillotina.db.cache.dummy import DummyCache
 
 
 class MockDBTransaction:
@@ -27,12 +28,16 @@ class MockTransaction:
         self._strategy = getMultiAdapter(
             (manager._storage, self), ITransactionStrategy,
             name=manager._storage._transaction_strategy)
+        self._cache = DummyCache(manager._storage, self)
 
     async def refresh(self, ob):
         return ob
 
     def register(self, ob):
         self.modified[ob._p_oid] = ob
+
+    def tpc_cleanup(self):
+        pass
 
 
 @implementer(IStorage)
@@ -73,3 +78,6 @@ class MockTransactionManager:
         if storage is None:
             storage = MockStorage()
         self._storage = storage
+
+    async def _close_txn(self, *args, **kwargs):
+        pass

@@ -1,8 +1,8 @@
 1.1.0a7 (unreleased)
 --------------------
 
-- Nothing changed yet.
-
+- Make sure etcd docker containers do not conflict
+  [vangheem]
 
 1.1.0a6 (2017-05-29)
 --------------------
