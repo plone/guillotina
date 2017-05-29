@@ -1,4 +1,4 @@
-1.1.0a7 (unreleased)
+1.1.0a7 (2017-05-29)
 --------------------
 
 - Make sure etcd docker containers do not conflict
