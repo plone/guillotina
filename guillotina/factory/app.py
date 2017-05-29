@@ -54,7 +54,7 @@ def load_application(module, root, settings):
     # includeme function
     if hasattr(module, 'includeme'):
         args = [root]
-        if len(inspect.getargspec(module.includeme).args) == 2:
+        if len(inspect.signature(module.includeme).parameters) == 2:
             args.append(settings)
         module.includeme(*args)
     # app_settings
