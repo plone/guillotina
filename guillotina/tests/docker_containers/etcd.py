@@ -7,11 +7,9 @@ class ETCD(BaseImage):
     to_port = from_port = 2379
     image_options = BaseImage.image_options.copy()
     image_options.update(dict(
-        name='my-etcd-1',
         mem_limit='200m',
         command=' '.join([
             '/usr/local/bin/etcd',
-            '--name my-etcd-1',
             '--data-dir /etcd-data',
             '--listen-client-urls http://0.0.0.0:2379',
             '--advertise-client-urls http://0.0.0.0:2379',

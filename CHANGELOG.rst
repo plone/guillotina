@@ -1,7 +1,8 @@
 1.1.0a6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Do not name etcd docker image in tests
+  [vangheem]
 
 
 1.1.0a5 (2017-05-27)
