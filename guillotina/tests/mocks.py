@@ -17,7 +17,9 @@ class MockDBTransaction:
 
 @implementer(ITransaction)
 class MockTransaction:
-    def __init__(self, manager):
+    def __init__(self, manager=None):
+        if manager is None:
+            manager = MockTransactionManager()
         self._manager = manager
         self._tid = 1
         self.modified = {}
