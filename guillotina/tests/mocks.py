@@ -31,7 +31,7 @@ class MockTransaction:
     async def refresh(self, ob):
         return ob
 
-    async def register(self, ob):
+    def register(self, ob):
         self.modified[ob._p_oid] = ob
 
 
