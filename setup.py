@@ -51,7 +51,7 @@ setup(
     packages=find_packages(),
     ext_modules=ext_modules,
     install_requires=[
-        'aiohttp>=2.0.0<2.1.0',
+        'aiohttp>=2.0.0<3.0.0',
         'jsonschema',
         'python-dateutil',
         'pycrypto',
@@ -70,7 +70,7 @@ setup(
             'docker',
             'backoff',
             'psycopg2',
-            'pytest-asyncio',
+            'pytest-asyncio<=0.5.0',
             'pytest-aiohttp'
         ]
     },
