@@ -396,6 +396,15 @@ class Transaction(object):
     async def get_total_number_of_resources(self):
         return await self._manager._storage.get_total_number_of_resources(self)
 
+    async def get_total_resources_of_type(self, type_):
+        return await self._manager._storage.get_total_resources_of_type(
+            self, type_)
+
+    async def _get_resources_of_type(self, type_):
+        async for record in self._manager._storage._get_resources_of_type(
+                self, type_):
+            yield record
+
     async def iterate_keys(self, oid, page_size=1000):
         page = 1
         keys = await self._manager._storage.get_page_of_keys(
