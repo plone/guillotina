@@ -128,6 +128,17 @@ NUM_ROWS = "SELECT count(*) FROM objects"
 
 NUM_RESOURCES = "SELECT count(*) FROM objects WHERE resource is TRUE"
 
+NUM_RESOURCES_BY_TYPE = "SELECT count(*) FROM objects WHERE type=$1::TEXT"
+
+RESOURCES_BY_TYPE = """
+    SELECT zoid, tid, state_size, resource, type, state, id
+    FROM objects
+    WHERE type=$1::TEXT
+    ORDER BY zoid
+    LIMIT $2::int
+    OFFSET $3::int
+    """
+
 
 GET_CHILDREN = """
     SELECT zoid, tid, state_size, resource, type, state, id
@@ -546,3 +557,19 @@ class PostgresqlStorage(BaseStorage):
             smt = await txn._db_conn.prepare(NUM_RESOURCES)
             result = await smt.fetchval()
         return result
+
+    async def get_total_resources_of_type(self, txn, type_):
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(NUM_RESOURCES_BY_TYPE)
+            result = await smt.fetchval(type_)
+        return result
+
+    # Massive treatment without security
+    async def _get_page_resources_of_type(self, txn, type_, page, page_size):
+        conn = txn._db_conn
+        async with txn._lock:
+            smt = await conn.prepare(RESOURCES_BY_TYPE)
+        keys = []
+        for record in await smt.fetch(type_, page_size, (page - 1) * page_size):  # noqa
+            keys.append(record)
+        return keys

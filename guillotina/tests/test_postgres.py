@@ -343,6 +343,58 @@ async def test_count_total_objects(postgres, dummy_request):
     await cleanup(aps)
 
 
+async def test_get_resources_of_type(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+
+    # create object first, commit it...
+    txn = await tm.begin()
+
+    ob = create_content()
+    txn.register(ob)
+
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
+
+    count = 0
+    async for item in txn._get_resources_of_type('Item'):
+        assert item['type'] == 'Item'
+        count += 1
+
+    assert count == 1
+
+    await tm.abort(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+async def test_get_total_resources_of_type(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+
+    # create object first, commit it...
+    txn = await tm.begin()
+
+    ob = create_content()
+    txn.register(ob)
+
+    await tm.commit(txn=txn)
+    txn = await tm.begin()
+
+    assert 1 == await txn.get_total_resources_of_type('Item')
+
+    await tm.abort(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+
 async def test_using_gather_with_queries_before_prepare(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
