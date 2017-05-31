@@ -132,7 +132,11 @@ NUM_RESOURCES_BY_TYPE = "SELECT count(*) FROM objects WHERE type=$1::TEXT"
 
 RESOURCES_BY_TYPE = """
     SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects WHERE type=$1::TEXT
+    FROM objects
+    WHERE type=$1::TEXT
+    ORDER BY zoid
+    LIMIT $2::int
+    OFFSET $3::int
     """
 
 
@@ -561,10 +565,11 @@ class PostgresqlStorage(BaseStorage):
         return result
 
     # Massive treatment without security
-    async def _get_resources_of_type(self, txn, type_):
+    async def _get_page_resources_of_type(self, txn, type_, page, page_size):
+        conn = txn._db_conn
         async with txn._lock:
-            smt = await txn._db_conn.prepare(RESOURCES_BY_TYPE)
-        async for record in smt.cursor(type_):
-            # locks are dangerous in cursors since comsuming code might do
-            # sub-queries and they you end up with a deadlock
-            yield record
+            smt = await conn.prepare(RESOURCES_BY_TYPE)
+        keys = []
+        for record in await smt.fetch(type_, page_size, (page - 1) * page_size):  # noqa
+            keys.append(record)
+        return keys
