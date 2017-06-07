@@ -1,4 +1,4 @@
-1.1.0a8 (unreleased)
+1.1.0a8 (2017-06-07)
 --------------------
 
 - Fix AttributeError on commit
