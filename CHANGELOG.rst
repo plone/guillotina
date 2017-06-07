@@ -1,7 +1,8 @@
 1.1.0a8 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix AttributeError on commit
+  [vangheem]
 
 
 1.1.0a7 (2017-05-29)
