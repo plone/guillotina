@@ -1,4 +1,4 @@
-1.1.0a9 (unreleased)
+1.1.0a9 (2017-06-08)
 --------------------
 
 - Fix issue where new annotations would not get registered as new objects on
