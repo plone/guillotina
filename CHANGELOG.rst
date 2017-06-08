@@ -1,4 +1,4 @@
-1.1.0a10 (unreleased)
+1.1.0a10 (2017-06-08)
 ---------------------
 
 - Handle deadlocks at conflict errors
