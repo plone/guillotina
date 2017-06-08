@@ -1,7 +1,8 @@
 1.1.0a10 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Handle deadlocks at conflict errors
+  [vangheem]
 
 
 1.1.0a9 (2017-06-08)

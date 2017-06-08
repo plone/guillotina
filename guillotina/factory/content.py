@@ -34,7 +34,8 @@ class ApplicationRoot(object):
         try:
             utility_object = factory(config['settings'], loop=loop)
         except Exception:
-            logger.error('Error initializing utility {}'.format(repr(factory)))
+            logger.error('Error initializing utility {}'.format(repr(factory)),
+                         exc_info=True)
             raise
         provideUtility(utility_object, interface)
         task = asyncio.ensure_future(utility_object.initialize(app=self.app), loop=loop)

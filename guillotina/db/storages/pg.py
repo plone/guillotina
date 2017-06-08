@@ -380,6 +380,9 @@ class PostgresqlStorage(BaseStorage):
                     raise ConflictError(
                         'asyncpg error, another operation in progress.')
                 raise
+            except asyncpg.exceptions.DeadlockDetectedError:
+                raise ConflictError(
+                    'Deadlock detected.')
             if len(result) != 1 or result[0]['count'] != 1:
                 if update:
                     # raise tid conflict error
