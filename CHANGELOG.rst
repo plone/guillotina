@@ -1,8 +1,10 @@
 1.1.0a8 (unreleased)
 --------------------
 
-- Nothing changed yet.
-
+- Fix issue where new annotations would not get registered as new objects on
+  transaction and added objects on the transaction would get registered twice
+  and cause conflicts
+  [vangheem]
 
 1.1.0a7 (2017-05-29)
 --------------------

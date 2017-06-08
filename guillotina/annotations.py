@@ -66,6 +66,7 @@ class AnnotationsAdapter(object):
         annotations[key] = value
         value.__of__ = self.obj._p_oid
         value.__name__ = key
+        value.__new_marker__ = True
         # we register the value
         value._p_jar = self.obj._p_jar
         value._p_jar.register(value)

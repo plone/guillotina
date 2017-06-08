@@ -179,7 +179,7 @@ class Transaction(object):
         if new or obj.__new_marker__:
             self.added[oid] = obj
             obj.__new_marker__ = False
-        elif oid not in self.modified:
+        elif oid not in self.modified and oid not in self.added:
             self.modified[oid] = obj
 
     def delete(self, obj):
