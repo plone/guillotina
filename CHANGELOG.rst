@@ -1,7 +1,9 @@
-1.1.0a11 (unreleased)
+1.1.0a12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Move fixtures in conftest.py to fixtures.py. This might break your tests
+  that depend on guillotina folks!
+  [vangheem]
 
 
 1.1.0a10 (2017-06-08)
