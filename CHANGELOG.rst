@@ -1,4 +1,4 @@
-1.1.0a12 (unreleased)
+1.1.0a11 (2017-06-09)
 ---------------------
 
 - Move fixtures in conftest.py to fixtures.py. This might break your tests
