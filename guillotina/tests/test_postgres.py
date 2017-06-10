@@ -525,6 +525,7 @@ async def test_iterate_keys(postgres, dummy_request):
     await tm.abort(txn=txn)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not like this test...")
 async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
