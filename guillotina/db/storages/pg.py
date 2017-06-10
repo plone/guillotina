@@ -411,6 +411,9 @@ class PostgresqlStorage(BaseStorage):
             return await self._stmt_max_tid.fetchval()
 
     def _db_transaction_factory(self, txn):
+        # make sure asycpg knows this is a new transaction
+        if txn._db_conn._con is not None:
+            txn._db_conn._con._top_xact = None
         return txn._db_conn.transaction(readonly=txn._manager._storage._read_only)
 
     async def start_transaction(self, txn, retries=0):

@@ -4,6 +4,7 @@ from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
 from guillotina.tests.utils import create_content
+import asyncpg
 
 import asyncio
 import concurrent
@@ -523,3 +524,34 @@ async def test_iterate_keys(postgres, dummy_request):
     assert len(keys) == 50
     assert len(set(keys) - set(original_keys)) == 0
     await tm.abort(txn=txn)
+
+
+async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+    # simulate transaction already started(should not happen)
+    for conn in tm._storage._pool._queue._queue:
+        if conn._con is None:
+            await conn.connect()
+        conn._con._top_xact = asyncpg.transaction.Transaction(conn, 'read_committed', False, False)
+    txn = await tm.begin()
+
+    # then, try doing stuff...
+    ob = create_content()
+    txn.register(ob)
+
+    assert len(txn.modified) == 1
+
+    await tm.commit(txn=txn)
+
+    txn = await tm.begin()
+
+    ob2 = await txn.get(ob._p_oid)
+
+    assert ob2._p_oid == ob._p_oid
+    await tm.commit(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
