@@ -1,4 +1,4 @@
-1.1.0a13 (unreleased)
+1.1.0a13 (2017-06-10)
 ---------------------
 
 - Manually rollback transaction if pg thinks we're in one that isn't managed by us
