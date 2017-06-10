@@ -4,9 +4,9 @@ from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
 from guillotina.tests.utils import create_content
-import asyncpg
 
 import asyncio
+import asyncpg
 import concurrent
 import os
 import pytest
@@ -393,7 +393,6 @@ async def test_get_total_resources_of_type(postgres, dummy_request):
 
     await aps.remove()
     await cleanup(aps)
-
 
 
 async def test_using_gather_with_queries_before_prepare(postgres, dummy_request):

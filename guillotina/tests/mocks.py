@@ -1,9 +1,9 @@
 from guillotina.component import getMultiAdapter
+from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from zope.interface import implementer
-from guillotina.db.cache.dummy import DummyCache
 
 
 class MockDBTransaction:
