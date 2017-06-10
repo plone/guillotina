@@ -1,7 +1,16 @@
-1.1.0a12 (unreleased)
+1.1.0a13 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Manually rollback transaction if pg thinks we're in one that isn't managed by us
+  [vangheem]
+
+
+1.1.0a12 (2017-06-10)
+---------------------
+
+- Make sure we do not have an existing transaction set when starting a new
+  transaction
+  [vangheem]
 
 
 1.1.0a11 (2017-06-09)
