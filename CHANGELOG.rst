@@ -1,3 +1,10 @@
+1.1.0a13 (unreleased)
+---------------------
+
+- Manually rollback transaction if pg thinks we're in one that isn't managed by us
+  [vangheem]
+
+
 1.1.0a12 (2017-06-10)
 ---------------------
 

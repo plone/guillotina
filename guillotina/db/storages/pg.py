@@ -432,6 +432,13 @@ class PostgresqlStorage(BaseStorage):
 
             if ('manually started transaction' in error.args[0] or
                     'connection is closed' in error.args[0]):
+                if 'manually started transaction' in error.args[0]:
+                    try:
+                        # thinks we're manually in txn, manually rollback and try again...
+                        await txn._db_conn.execute('ROLLBACK;')
+                    except asyncpg.exceptions._base.InterfaceError:
+                        # we're okay with this error here...
+                        pass
                 await self.close(txn._db_conn)
                 txn._db_conn = await self.open()
                 return await self.start_transaction(txn, retries + 1)
