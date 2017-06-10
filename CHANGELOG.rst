@@ -1,7 +1,9 @@
 1.1.0a12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Make sure we do not have an existing transaction set when starting a new
+  transaction
+  [vangheem]
 
 
 1.1.0a11 (2017-06-09)
