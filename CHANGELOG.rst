@@ -1,4 +1,4 @@
-1.1.0a14 (unreleased)
+1.1.0a14 (2017-06-14)
 ---------------------
 
 - Proxy params values from cloud file manager to field manager
