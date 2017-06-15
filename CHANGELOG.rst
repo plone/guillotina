@@ -1,7 +1,8 @@
 1.1.0a14 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Proxy params values from cloud file manager to field manager
+  [vangheem]
 
 
 1.1.0a13 (2017-06-10)
