@@ -1,7 +1,8 @@
 1.1.0a15 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Do not throw error for invalid jwt token
+  [vangheem]
 
 
 1.1.0a14 (2017-06-14)
