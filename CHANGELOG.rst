@@ -1,4 +1,4 @@
-1.1.0a15 (unreleased)
+1.1.0a15 (2017-06-19)
 ---------------------
 
 - Document @tusupload, @download and @upload endpoints
