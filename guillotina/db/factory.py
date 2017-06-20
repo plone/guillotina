@@ -26,7 +26,7 @@ async def _PGConfigurationFactory(key, dbconfig, app,
         'dsn': dsn,
         'name': key,
         'partition': partition_object,
-        'pool_size': dbconfig.get('pool_size', config.get('pool_size', 10))
+        'pool_size': dbconfig.get('pool_size', config.get('pool_size', 13))
     })
 
     aps = storage_factory(**dbconfig)

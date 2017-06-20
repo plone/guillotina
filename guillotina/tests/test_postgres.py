@@ -29,7 +29,7 @@ async def cleanup(aps):
     await aps.finalize()
 
 
-async def get_aps(strategy=None, pool_size=15):
+async def get_aps(strategy=None, pool_size=16):
     dsn = "postgres://postgres:@localhost:5432/guillotina"
     klass = PostgresqlStorage
     if strategy is None:
@@ -101,8 +101,11 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
     # delete parent, children should be gone...
     txn.delete(folder2)
     assert len(txn.deleted) == 1
-
     await tm.commit(txn=txn)
+
+    # give delete task a chance to execute
+    await asyncio.sleep(0.1)
+
     txn = await tm.begin()
 
     with pytest.raises(KeyError):
@@ -164,6 +167,7 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     txn.delete(ob)
 
     await tm.commit(txn=txn)
+    await asyncio.sleep(0.1)  # make sure cleanup runs
     txn = await tm.begin()
 
     assert await txn.read_blob_chunk('X' * 32, 0) is None
@@ -335,7 +339,7 @@ async def test_count_total_objects(postgres, dummy_request):
     await tm.commit(txn=txn)
     txn = await tm.begin()
 
-    assert await txn.get_total_number_of_objects() == 1
+    assert await txn.get_total_number_of_objects() == 2
     assert await txn.get_total_number_of_resources() == 1
 
     await tm.abort(txn=txn)

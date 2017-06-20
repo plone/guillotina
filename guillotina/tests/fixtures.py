@@ -216,7 +216,7 @@ class CockroachStorageAsyncContextManager(object):
     async def __aenter__(self):
         dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
         self.storage = CockroachStorage(
-            dsn=dsn, name='db', pool_size=20,
+            dsn=dsn, name='db', pool_size=25,
             conn_acquire_timeout=0.1)
         await self.storage.initialize(self.loop)
         return self.storage

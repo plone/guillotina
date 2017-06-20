@@ -2,9 +2,7 @@ from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 
-import asyncio
 import asyncpg
-import concurrent
 import logging
 
 
@@ -75,6 +73,10 @@ ORDER BY zoid
 LIMIT $2::int
 OFFSET $3::int"""
 
+DELETE_FROM_OBJECTS = """
+    DELETE FROM objects WHERE zoid = $1::varchar(32);
+"""
+
 
 async def iterate_children(conn, parent_oid, page_size=1000):
     smt = await conn.prepare(BATCHED_GET_CHILDREN_OIDS)
@@ -87,35 +89,7 @@ async def iterate_children(conn, parent_oid, page_size=1000):
         results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
 
 
-class CockroachVacuum:
-
-    def __init__(self, storage, loop):
-        self._storage = storage
-        self._loop = loop
-        self._queue = asyncio.Queue(loop=loop)
-        self._active = False
-        self._closed = False
-
-    @property
-    def active(self):
-        return self._active
-
-    async def initialize(self):
-        while not self._closed:
-            oid = await self._queue.get()
-            try:
-                self._active = True
-                await self.vacuum(oid)
-            except concurrent.futures.CancelledError:
-                pass  # task was cancelled, probably because we're shutting down
-            except Exception:
-                logger.warning(f'Error vacuuming oid {oid}', exc_info=True)
-            finally:
-                self._active = False
-                self._queue.task_done()
-
-    async def add_to_queue(self, oid):
-        await self._queue.put(oid)
+class CockroachVacuum(pg.PGVacuum):
 
     async def vacuum_children(self, conn, parent_oid):
         async for child_oid in iterate_children(conn, parent_oid):
@@ -144,13 +118,6 @@ class CockroachVacuum:
             await self.vacuum_children(conn, oid)
         finally:
             await self._storage.close(conn)
-
-    async def finalize(self):
-        self._closed = True
-        await self._queue.join()
-        while self._active:
-            # give it a chance to finish...
-            await asyncio.sleep(0.1)
 
 
 class CockroachDBTransaction:
@@ -236,6 +203,7 @@ class CockroachStorage(pg.PostgresqlStorage):
     _db_transaction_factory = CockroachDBTransaction
     _vacuum = _vacuum_task = None
     _isolation_level = 'snapshot'
+    _vacuum_class = CockroachVacuum
 
     def __init__(self, *args, **kwargs):
         transaction_strategy = kwargs.get('transaction_strategy', 'novote')
@@ -267,22 +235,6 @@ class CockroachStorage(pg.PostgresqlStorage):
         # we need snapshot isolation to allow us to work together with
         # other transactions nicely and prevent deadlocks
         await self._read_conn.execute('SET DEFAULT_TRANSACTION_ISOLATION TO SNAPSHOT')
-        self._vacuum = CockroachVacuum(self, loop)
-        self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
-
-        def vacuum_done(task):
-            if self._vacuum._closed:
-                # if it's closed, we know this is expected
-                return
-            logger.warning('Vacuum cockroach task closed. This should not happen. '
-                           'No database vacuuming will be done here anymore.')
-
-        self._vacuum_task.add_done_callback(vacuum_done)
-
-    async def finalize(self):
-        await self._vacuum.finalize()
-        self._vacuum_task.cancel()
-        await super().finalize()
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -328,15 +280,11 @@ class CockroachStorage(pg.PostgresqlStorage):
                     'Mismatch of tid of object being updated. This is likely '
                     'caused by a cache invalidation race condition and should '
                     'be an edge case. This should resolve on request retry.')
-        obj._p_estimated_size = len(p)
-
-    async def _txn_oid_commit_hook(self, status, oid):
-        await self._vacuum.add_to_queue(oid)
 
     async def delete(self, txn, oid):
         # no cascade support, so we push to vacuum
         async with txn._lock:
-            await txn._db_conn.execute(pg.DELETE_FROM_OBJECTS, oid)
+            await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
             await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
         txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
