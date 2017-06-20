@@ -149,7 +149,7 @@ GET_CHILDREN = """
     """
 
 
-DELETE_FROM_OBJECTS = f"""
+TRASH_PARENT_ID = f"""
 UPDATE objects
 SET
     parent_id = '{TRASHED_ID}'
@@ -205,9 +205,9 @@ BATCHED_GET_CHILDREN_KEYS = """
     OFFSET $3::int
     """
 
-DELETE_TRASHED_OBJECTS = f"""
+DELETE_OBJECT = f"""
 DELETE FROM objects
-WHERE parent_id = '{TRASHED_ID}' AND zoid = $1::varchar(32);
+WHERE zoid = $1::varchar(32);
 """
 
 GET_TRASHED_OBJECTS = f"""
@@ -268,13 +268,11 @@ class PGVacuum:
 
     async def vacuum(self, oid):
         '''
-        DELETED objects has parent id changed to the trashed ob.
-        This will potentially delete more objects than the specified oid and
-        that is okay.
+        DELETED objects has parent id changed to the trashed ob for the oid...
         '''
         conn = await self._storage.open()
         try:
-            await conn.execute(DELETE_TRASHED_OBJECTS, oid)
+            await conn.execute(DELETE_OBJECT, oid)
         except:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
@@ -517,7 +515,8 @@ class PostgresqlStorage(BaseStorage):
 
     async def delete(self, txn, oid):
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
+            # for delete, we reassign the parent id and delete in the vacuum task
+            await txn._db_conn.execute(TRASH_PARENT_ID, oid)
         txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
     async def get_next_tid(self, txn):
