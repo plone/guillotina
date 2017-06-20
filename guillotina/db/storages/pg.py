@@ -1,4 +1,5 @@
 from asyncio import shield
+from guillotina.db import TRASHED_ID
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
@@ -8,6 +9,7 @@ from zope.interface import implementer
 
 import asyncio
 import asyncpg
+import concurrent
 import logging
 import ujson
 
@@ -147,8 +149,12 @@ GET_CHILDREN = """
     """
 
 
-DELETE_FROM_OBJECTS = """
-    DELETE FROM objects WHERE zoid = $1::varchar(32);
+DELETE_FROM_OBJECTS = f"""
+UPDATE objects
+SET
+    parent_id = '{TRASHED_ID}'
+WHERE
+    zoid = $1::varchar(32)
 """
 
 
@@ -199,6 +205,101 @@ BATCHED_GET_CHILDREN_KEYS = """
     OFFSET $3::int
     """
 
+DELETE_TRASHED_OBJECTS = f"""
+DELETE FROM objects
+WHERE parent_id = '{TRASHED_ID}' AND zoid = $1::varchar(32);
+"""
+
+GET_TRASHED_OBJECTS = f"""
+SELECT zoid from objects where parent_id = '{TRASHED_ID}';
+"""
+
+CREATE_TRASH = f'''
+INSERT INTO objects (zoid, tid, state_size, part, resource, type)
+SELECT '{TRASHED_ID}', 0, 0, 0, FALSE, 'TRASH_REF'
+WHERE NOT EXISTS (SELECT * FROM objects WHERE zoid = '{TRASHED_ID}')
+RETURNING id;
+'''
+
+
+class PGVacuum:
+
+    def __init__(self, storage, loop):
+        self._storage = storage
+        self._loop = loop
+        self._queue = asyncio.Queue(loop=loop)
+        self._active = False
+        self._closed = False
+
+    @property
+    def active(self):
+        return self._active
+
+    async def initialize(self):
+        # get existing trashed objects, push them on the queue...
+        # there might be contention, but that is okay
+        conn = await self._storage.open()
+        try:
+            for record in await conn.fetch(GET_TRASHED_OBJECTS):
+                await self._queue.put(record['zoid'])
+        except:
+            log.warn('Error deleting trashed object', exc_info=True)
+        finally:
+            await self._storage.close(conn)
+
+        while not self._closed:
+            try:
+                oid = await self._queue.get()
+                self._active = True
+                await self.vacuum(oid)
+            except (concurrent.futures.CancelledError, RuntimeError):
+                pass  # task was cancelled, probably because we're shutting down
+            except Exception:
+                log.warning(f'Error vacuuming oid {oid}', exc_info=True)
+            finally:
+                self._active = False
+                try:
+                    self._queue.task_done()
+                except ValueError:
+                    pass
+
+    async def add_to_queue(self, oid):
+        await self._queue.put(oid)
+
+    async def vacuum(self, oid):
+        '''
+        DELETED objects has parent id changed to the trashed ob.
+        This will potentially delete more objects than the specified oid and
+        that is okay.
+        '''
+        conn = await self._storage.open()
+        try:
+            await conn.execute(DELETE_TRASHED_OBJECTS, oid)
+        except:
+            log.warn('Error deleting trashed object', exc_info=True)
+        finally:
+            try:
+                await self._storage.close(conn)
+            except asyncpg.exceptions.ConnectionDoesNotExistError:
+                pass
+
+    async def finalize(self):
+        self._closed = True
+        await self._queue.join()
+        # wait for up to two seconds to finish the task...
+        # it's not long but we don't want to wait for a long time to close either....
+        try:
+            await asyncio.wait_for(self.wait_until_no_longer_active(), 2)
+        except concurrent.futures.CancelledError:
+            # we do not care if it's cancelled... things will get cleaned up
+            # in a future task anyways...
+            pass
+
+    async def wait_until_no_longer_active(self):
+        while self._active:
+            # give it a chance to finish...
+            await asyncio.sleep(0.1)
+
 
 @implementer(IStorage)
 class PostgresqlStorage(BaseStorage):
@@ -209,6 +310,7 @@ class PostgresqlStorage(BaseStorage):
     _pool_size = None
     _pool = None
     _large_record_size = 1 << 24
+    _vacuum_class = PGVacuum
 
     _object_schema = {
         'zoid': 'VARCHAR(32) NOT NULL PRIMARY KEY',
@@ -245,7 +347,7 @@ class PostgresqlStorage(BaseStorage):
     ]
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
-                 pool_size=12, transaction_strategy='resolve',
+                 pool_size=13, transaction_strategy='resolve',
                  conn_acquire_timeout=20, cache_strategy='dummy', **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
@@ -261,7 +363,9 @@ class PostgresqlStorage(BaseStorage):
         self._options = options
 
     async def finalize(self):
-        await self._pool.release(self._read_conn)
+        await self._vacuum.finalize()
+        self._vacuum_task.cancel()
+        await shield(self._pool.release(self._read_conn))
         await self._pool.close()
 
     async def create(self):
@@ -306,6 +410,20 @@ class PostgresqlStorage(BaseStorage):
             await self.create()
             await self.initialize_tid_statements()
 
+        await self._read_conn.execute(CREATE_TRASH)
+
+        self._vacuum = self._vacuum_class(self, loop)
+        self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
+
+        def vacuum_done(task):
+            if self._vacuum._closed:
+                # if it's closed, we know this is expected
+                return
+            log.warning('Vacuum pg task closed. This should not happen. '
+                        'No database vacuuming will be done here anymore.')
+
+        self._vacuum_task.add_done_callback(vacuum_done)
+
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
         self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
@@ -323,7 +441,7 @@ class PostgresqlStorage(BaseStorage):
     async def close(self, con):
         try:
             await shield(self._pool.release(con))
-        except asyncio.CancelledError:
+        except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError):
             pass
 
     async def load(self, txn, oid):
@@ -393,11 +511,14 @@ class PostgresqlStorage(BaseStorage):
                 else:
                     self._log.error('Incorrect response count from database update. '
                                     'This should not happen. tid: {}'.format(txn._tid))
-        obj._p_estimated_size = len(p)
+
+    async def _txn_oid_commit_hook(self, status, oid):
+        await self._vacuum.add_to_queue(oid)
 
     async def delete(self, txn, oid):
         async with txn._lock:
             await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
     async def get_next_tid(self, txn):
         async with self._lock:
