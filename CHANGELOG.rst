@@ -1,6 +1,9 @@
 1.1.0a15 (unreleased)
 ---------------------
 
+- Document @tusupload, @download and @upload endpoints
+  [vangheem]
+
 - Do not throw error for invalid jwt token
   [vangheem]
 
