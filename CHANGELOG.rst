@@ -1,4 +1,4 @@
-1.1.0a16 (unreleased)
+1.1.0a16 (2017-06-21)
 ---------------------
 
 - Move deleting objects to a task queue since deleting large leafs could cause
