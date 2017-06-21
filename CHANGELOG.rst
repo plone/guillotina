@@ -1,7 +1,9 @@
 1.1.0a16 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Move deleting objects to a task queue since deleting large leafs could cause
+  postgresql to slow down.
+  [vangheem]
 
 
 1.1.0a15 (2017-06-19)
