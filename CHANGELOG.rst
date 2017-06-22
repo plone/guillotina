@@ -1,4 +1,4 @@
-1.1.0a17 (unreleased)
+1.1.0a17 (2017-06-22)
 ---------------------
 
 - Add get_all_possible_schemas_for_type utility function
