@@ -1,7 +1,8 @@
 1.1.0a17 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Add get_all_possible_schemas_for_type utility function
+  [vangheem]
 
 
 1.1.0a16 (2017-06-21)

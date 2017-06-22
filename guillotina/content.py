@@ -148,17 +148,17 @@ def iter_schemata_for_type(type_name):
         yield schema
 
 
-def iter_schemata_for_type_extended(type_name):
+def get_all_possible_schemas_for_type(type_name):
+    result = set()
     factory = get_cached_factory(type_name)
     if factory.schema is not None:
-        yield factory.schema
+        result.add(factory.schema)
     for schema in factory.behaviors or ():
-        yield schema
-    import pdb; pdb.set_trace()
+        result.add(schema)
     for iface, utility in getUtilitiesFor(IBehavior):
-        adaptable = queryAdapter(
-                fake_context, utility.interface,
-                name='', default=None)
+        if utility.for_.isEqualOrExtendedBy(factory.schema):
+            result.add(utility.interface)
+    return [b for b in result]
 
 
 def iter_schemata(obj):

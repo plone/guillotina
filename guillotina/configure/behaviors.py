@@ -1,7 +1,7 @@
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorAdapterFactory
 from guillotina.interfaces import IBehaviorAssignable
-from zope.interface import implementer
+from zope.interface import implementer, Interface
 
 
 REGISTRATION_REPR = """\
@@ -18,13 +18,14 @@ REGISTRATION_REPR = """\
 class BehaviorRegistration(object):
 
     def __init__(self, title, description, interface,
-                 marker, factory, name=None):
+                 marker, factory, name=None, for_=Interface):
         self.title = title
         self.description = description
         self.interface = interface
         self.marker = marker
         self.factory = factory
         self.name = name
+        self.for_ = for_
 
     def __repr__(self):
         if self.marker is not None:

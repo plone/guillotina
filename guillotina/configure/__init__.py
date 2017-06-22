@@ -186,6 +186,7 @@ def load_behavior(_context, behavior):
         marker=marker,
         factory=real_factory,
         name=name,
+        for_=for_
     )
     if not name_only:
         # behavior registration by provides interface identifier
