@@ -148,6 +148,19 @@ def iter_schemata_for_type(type_name):
         yield schema
 
 
+def get_all_possible_schemas_for_type(type_name):
+    result = set()
+    factory = get_cached_factory(type_name)
+    if factory.schema is not None:
+        result.add(factory.schema)
+    for schema in factory.behaviors or ():
+        result.add(schema)
+    for iface, utility in getUtilitiesFor(IBehavior):
+        if utility.for_.isEqualOrExtendedBy(factory.schema):
+            result.add(utility.interface)
+    return [b for b in result]
+
+
 def iter_schemata(obj):
     type_name = IResource(obj).type_name
     for schema in iter_schemata_for_type(type_name):
