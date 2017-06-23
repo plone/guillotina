@@ -1,4 +1,4 @@
-1.1.0a19 (unreleased)
+1.1.0a19 (2017-06-23)
 ---------------------
 
 - get_principals_with_access_content and get_roles_with_access_content was not
