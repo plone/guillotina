@@ -1,7 +1,8 @@
 1.1.0a18 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Add PUT method for @sharing endpoint
+  [vangheem]
 
 
 1.1.0a17 (2017-06-22)
