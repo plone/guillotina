@@ -67,7 +67,8 @@ async def test_set_local_guillotina(container_requester):
             principals = get_principals_with_access_content(testing_object, request)
             assert principals == ['root']
             roles = get_roles_with_access_content(testing_object, request)
-            assert roles == ['guillotina.ContainerAdmin']
+            assert roles == ['guillotina.Reader', 'guillotina.Reviewer', 'guillotina.Owner',
+                             'guillotina.Editor', 'guillotina.ContainerAdmin']
 
         # Now we add the user1 with inherit on the container
         response, status = await requester(
