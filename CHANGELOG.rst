@@ -1,4 +1,4 @@
-1.1.0a18 (unreleased)
+1.1.0a18 (2017-06-22)
 ---------------------
 
 - Add PUT method for @sharing endpoint
