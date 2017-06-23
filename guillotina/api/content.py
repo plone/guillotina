@@ -338,55 +338,78 @@ PermissionMap = {
             "description": "Successuflly changed permission"
         }
     })
-async def sharing_post(context, request):
-    """Change permissions"""
-    await lock_object(context)
-    lroles = local_roles()
-    data = await request.json()
-    if 'prinrole' not in data and \
-            'roleperm' not in data and \
-            'prinperm' not in data:
-        raise AttributeError('prinrole or roleperm or prinperm missing')
+class SharingPOST(Service):
+    async def __call__(self, changed=False):
+        """Change permissions"""
+        context = self.context
+        request = self.request
+        await lock_object(context)
+        lroles = local_roles()
+        data = await request.json()
+        if 'prinrole' not in data and \
+                'roleperm' not in data and \
+                'prinperm' not in data:
+            raise AttributeError('prinrole or roleperm or prinperm missing')
 
-    # we need to check if we are changing any info
-    changed = False
+        for prinrole in data.get('prinrole') or []:
+            setting = prinrole.get('setting')
+            if setting not in PermissionMap['prinrole']:
+                raise AttributeError('Invalid Type {}'.format(setting))
+            manager = IPrincipalRoleManager(context)
+            operation = PermissionMap['prinrole'][setting]
+            func = getattr(manager, operation)
+            if prinrole['role'] in lroles:
+                changed = True
+                func(prinrole['role'], prinrole['principal'])
+            else:
+                raise KeyError('No valid local role')
 
-    for prinrole in data.get('prinrole') or []:
-        setting = prinrole.get('setting')
-        if setting not in PermissionMap['prinrole']:
-            raise AttributeError('Invalid Type {}'.format(setting))
-        manager = IPrincipalRoleManager(context)
-        operation = PermissionMap['prinrole'][setting]
-        func = getattr(manager, operation)
-        if prinrole['role'] in lroles:
+        for prinperm in data.get('prinperm') or []:
+            setting = prinperm['setting']
+            if setting not in PermissionMap['prinperm']:
+                raise AttributeError('Invalid Type')
+            manager = IPrincipalPermissionManager(context)
+            operation = PermissionMap['prinperm'][setting]
+            func = getattr(manager, operation)
             changed = True
-            func(prinrole['role'], prinrole['principal'])
-        else:
-            raise KeyError('No valid local role')
+            func(prinperm['permission'], prinperm['principal'])
 
-    for prinperm in data.get('prinperm') or []:
-        setting = prinperm['setting']
-        if setting not in PermissionMap['prinperm']:
-            raise AttributeError('Invalid Type')
-        manager = IPrincipalPermissionManager(context)
-        operation = PermissionMap['prinperm'][setting]
-        func = getattr(manager, operation)
-        changed = True
-        func(prinperm['permission'], prinperm['principal'])
+        for roleperm in data.get('roleperm') or []:
+            setting = roleperm['setting']
+            if setting not in PermissionMap['roleperm']:
+                raise AttributeError('Invalid Type')
+            manager = IRolePermissionManager(context)
+            operation = PermissionMap['roleperm'][setting]
+            func = getattr(manager, operation)
+            changed = True
+            func(roleperm['permission'], roleperm['role'])
 
-    for roleperm in data.get('roleperm') or []:
-        setting = roleperm['setting']
-        if setting not in PermissionMap['roleperm']:
-            raise AttributeError('Invalid Type')
-        manager = IRolePermissionManager(context)
-        operation = PermissionMap['roleperm'][setting]
-        func = getattr(manager, operation)
-        changed = True
-        func(roleperm['permission'], roleperm['role'])
+        if changed:
+            context._p_register()  # make sure data is saved
+            await notify(ObjectPermissionsModifiedEvent(context, data))
 
-    if changed:
-        context._p_register()  # make sure data is saved
-        await notify(ObjectPermissionsModifiedEvent(context, data))
+
+@configure.service(
+    context=IResource, method='PUT',
+    permission='guillotina.ChangePermissions', name='@sharing',
+    summary='Replace permissions for a resource',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "type": "object",
+        "schema": {
+            "$ref": "#/definitions/Permissions"
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Successuflly replaced permissions"
+        }
+    })
+class SharingPUT(SharingPOST):
+    async def __call__(self):
+        self.context.__acl__ = None
+        return await super().__call__(True)
 
 
 @configure.service(
