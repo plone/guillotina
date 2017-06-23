@@ -1,7 +1,9 @@
 1.1.0a19 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- get_principals_with_access_content and get_roles_with_access_content was not
+  checking against all roles
+  [vangheem]
 
 
 1.1.0a18 (2017-06-22)
