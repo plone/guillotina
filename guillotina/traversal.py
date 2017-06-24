@@ -154,32 +154,16 @@ async def traverse(request, parent, path):
             try:
                 alsoProvides(request, import_class(layer))
             except ModuleNotFoundError:
-                logger.error('Can not apply layer ' + layer)
+                logger.error('Can not apply layer ' + layer, request=request)
 
     return await traverse(request, context, path[1:])
-
-
-def _url(request):
-    try:
-        return request.url.human_repr()
-    except AttributeError:
-        # older version of aiohttp
-        return request.path
 
 
 def generate_unauthorized_response(e, request):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Not authorized to render operation') + ' ' + eid
-    user = get_authenticated_user_id(request)
-    extra = {
-        'r': _url(request),
-        'u': user
-    }
-    logger.error(
-        message,
-        exc_info=e,
-        extra=extra)
+    logger.error(message, exc_info=e, eid=eid, request=request)
     return UnauthorizedResponse(message)
 
 
@@ -187,21 +171,8 @@ def generate_error_response(e, request, error, status=400):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Error on execution of view') + ' ' + eid
-    user = get_authenticated_user_id(request)
-    extra = {
-        'r': _url(request),
-        'u': user
-    }
-    logger.error(
-        message,
-        exc_info=e,
-        extra=extra)
-
-    return ErrorResponse(
-        error,
-        message,
-        status
-    )
+    logger.error(message, exc_info=e, eid=eid, request=request)
+    return ErrorResponse(error, message, status)
 
 
 class MatchInfo(AbstractMatchInfo):
@@ -324,9 +295,7 @@ class TraversalRouter(AbstractRouter):
         try:
             result = await self.real_resolve(request)
         except Exception as e:
-            logger.error(
-                "Exception on resolve execution",
-                exc_info=e)
+            logger.error("Exception on resolve execution", exc_info=e, request=request)
             await abort(request)
             raise e
         if result is not None:
@@ -387,7 +356,6 @@ class TraversalRouter(AbstractRouter):
 
         # Add anonymous participation
         if len(security.participations) == 0:
-            # logger.info("Anonymous User")
             security.add(AnonymousParticipation(request))
 
         # container registry lookup
@@ -405,9 +373,8 @@ class TraversalRouter(AbstractRouter):
                 try:
                     view = await view.publish_traverse(traverse_to)
                 except Exception as e:
-                    logger.error(
-                        "Exception on view execution",
-                        exc_info=e)
+                    logger.error("Exception on view execution", exc_info=e,
+                                 request=request)
                     return None
 
         permission = getUtility(IPermission, name='guillotina.AccessContent')
@@ -420,7 +387,8 @@ class TraversalRouter(AbstractRouter):
                     logger.warning("No access content {content} with {auths}".format(
                         content=resource,
                         auths=str([x.principal.id
-                                   for x in security.participations])))
+                                   for x in security.participations])),
+                        request=request)
                     raise HTTPUnauthorized()
 
         if view is None and method == IOPTIONS:
@@ -433,7 +401,8 @@ class TraversalRouter(AbstractRouter):
                 logger.warning("No access for view {content} with {auths}".format(
                     content=resource,
                     auths=str([x.principal.id
-                               for x in security.participations])))
+                               for x in security.participations])),
+                    request=request)
                 raise HTTPUnauthorized()
 
         renderer = content_type_negotiation(request, resource, view)
