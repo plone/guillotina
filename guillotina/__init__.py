@@ -4,11 +4,11 @@
 from guillotina import patch  # noqa
 from guillotina.i18n import MessageFactory
 
-import logging
+from guillotina import glogging
 
 
 # create logging
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 _ = MessageFactory('guillotina')
 
