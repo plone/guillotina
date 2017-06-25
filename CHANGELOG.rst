@@ -1,4 +1,4 @@
-1.1.0a110 (unreleased)
+1.1.0a110 (2017-06-25)
 ----------------------
 
 - Provide more logging information for errors
