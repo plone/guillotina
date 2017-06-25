@@ -1,8 +1,8 @@
 1.1.0a110 (unreleased)
 ----------------------
 
-- Nothing changed yet.
-
+- Provide more logging information for errors
+  [vangheem]
 
 1.1.0a19 (2017-06-23)
 ---------------------
