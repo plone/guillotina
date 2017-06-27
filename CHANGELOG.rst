@@ -1,4 +1,4 @@
-1.1.0a111 (unreleased)
+1.1.0a111 (2017-06-26)
 ----------------------
 
 - Change guillotina.Member title
