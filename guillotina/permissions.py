@@ -39,7 +39,7 @@ configure.role("guillotina.Anonymous", "Everybody",
                "All users have this role implicitly", False)
 configure.role("guillotina.Authenticated", "Authenticated user",
                "Role automatically assigned to authenticated users", False)
-configure.role("guillotina.Member", "Container Member", False)
+configure.role("guillotina.Member", "Member", False)
 
 configure.role("guillotina.Reader", "Reader", "can read content", True)
 configure.role("guillotina.Editor", "Editor", "can edit content", True)

@@ -1,7 +1,8 @@
 1.1.0a111 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Change guillotina.Member title
+  [vangheem]
 
 
 1.1.0a110 (2017-06-25)
