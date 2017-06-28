@@ -2,8 +2,11 @@
 from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
+from guillotina.component import getUtility
 from guillotina.exceptions import RequestNotFound
+from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
@@ -284,6 +287,19 @@ def valid_id(_id):
     if not _id or _id[0] == '_':
         return False
     return _id == ''.join([l for l in _id if l in _valid_id_characters])
+
+
+async def get_containers(request):
+    root = getUtility(IApplication, name='root')
+    for _id, db in root:
+        if IDatabase.providedBy(db):
+            db._db._storage._transaction_strategy = 'none'
+            tm = db.get_transaction_manager()
+            tm.request = request
+            txn = await tm.begin(request)
+            async for s_id, container in db.async_items():
+                tm.request.container = container
+                yield txn, tm, container
 
 
 def get_current_request() -> IRequest:

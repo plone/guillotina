@@ -1,7 +1,8 @@
 1.1.0a112 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- add `get_containers` command
+  [vangheem]
 
 
 1.1.0a111 (2017-06-26)
