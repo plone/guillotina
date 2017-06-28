@@ -1,6 +1,9 @@
 1.1.0a112 (unreleased)
 ----------------------
 
+- do not register for writing object when assigning __parent__ pointer
+  [vangheem]
+
 - add `get_containers` command
   [vangheem]
 

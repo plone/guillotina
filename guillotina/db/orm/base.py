@@ -14,7 +14,8 @@ SPECIAL_NAMES = ('__class__',
                  '__del__',
                  '__dict__',
                  '__of__',
-                 '__setstate__',)
+                 '__setstate__',
+                 '__parent__')
 
 # And this is an implementation detail of this class; it holds
 # the standard names plus the slot names, allowing for just one
