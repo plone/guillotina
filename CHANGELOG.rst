@@ -1,4 +1,4 @@
-1.1.0a112 (unreleased)
+1.1.0a112 (2017-06-28)
 ----------------------
 
 - do not register for writing object when assigning __parent__ pointer
