@@ -22,17 +22,12 @@ class DefaultCorsRenderer:
         headers = {}
         origin = self.request.headers.get('Origin', None)
         if origin:
-            if not any([fnmatch.fnmatchcase(origin, o)
-                        for o in settings['allow_origin']]):
+            if '*' in settings['allow_origin'] or any([fnmatch.fnmatchcase(origin, o)
+                                                       for o in settings['allow_origin']]):
+                headers['Access-Control-Allow-Origin'] = origin
+            else:
                 logger.error('Origin %s not allowed' % origin, request=self.request)
                 raise HTTPUnauthorized()
-            elif self.request.headers.get('Access-Control-Allow-Credentials', False):
-                headers['Access-Control-Allow-Origin', origin]
-            else:
-                if any([o == "*" for o in settings['allow_origin']]):
-                    headers['Access-Control-Allow-Origin'] = '*'
-                else:
-                    headers['Access-Control-Allow-Origin'] = origin
         if self.request.headers.get(
                 'Access-Control-Request-Method', None) != 'OPTIONS':
             if settings['allow_credentials']:
