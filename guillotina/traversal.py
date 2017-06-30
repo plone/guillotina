@@ -42,7 +42,11 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
+<<<<<<< HEAD
 from guillotina.utils import apply_cors
+=======
+from guillotina.utils import apply_coroutine
+>>>>>>> Be able to override cors handling
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
@@ -229,7 +233,8 @@ class MatchInfo(AbstractMatchInfo):
             view_result = Response({})
 
         # Apply cors if its needed
-        cors_headers = apply_cors(request)
+        cors_renderer = app_settings['cors_renderer'](request)
+        cors_headers = await cors_renderer.get_headers()
         cors_headers.update(view_result.headers)
         view_result.headers = cors_headers
         retry_attempts = getattr(request, '_retry_attempt', 0)
@@ -380,7 +385,7 @@ class TraversalRouter(AbstractRouter):
 
         if not security.check_permission(permission.id, resource):
             # Check if its a CORS call:
-            if IOPTIONS != method or not app_settings['cors']:
+            if IOPTIONS != method:
                 # Check if the view has permissions explicit
                 if view is None or not view.__allow_access__:
                     logger.warning("No access content {content} with {auths}".format(

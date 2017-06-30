@@ -21,6 +21,7 @@ from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
+from guillotina import cors
 
 import aiohttp
 import asyncio
@@ -88,7 +89,8 @@ _delayed_default_settings = {
         "en": languages.IEN,
         "en-us": languages.IENUS,
         "ca": languages.ICA
-    }
+    },
+    'cors_renderer': cors.renderer
 }
 
 
