@@ -1,6 +1,9 @@
 1.1.0a113 (unreleased)
 ----------------------
 
+- Be able to customize cors handling
+  [vangheem]
+
 - Add new `guillotina.Public` permission and assign it to anoymous role
   [vangheem]
 
