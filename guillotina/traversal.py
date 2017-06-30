@@ -43,7 +43,6 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import apply_cors
-from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
