@@ -42,11 +42,6 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-<<<<<<< HEAD
-from guillotina.utils import apply_cors
-=======
-from guillotina.utils import apply_coroutine
->>>>>>> Be able to override cors handling
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
