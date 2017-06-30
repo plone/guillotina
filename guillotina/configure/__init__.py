@@ -79,7 +79,7 @@ def load_service(_context, service):
     factory = resolve_dotted_name(service['klass'])
 
     permission = service_conf.get(
-        'permission', service_conf.get('default_permission', None))
+        'permission', app_settings.get('default_permission', None))
 
     protect_view(factory, permission)
 
@@ -88,7 +88,7 @@ def load_service(_context, service):
         app_settings.get('default_layer', IDefaultLayer))
     layer = service_conf.get('layer', default_layer)
     name = service_conf.get('name', '')
-    content = service_conf['context']
+    content = service_conf.get('context', Interface)
     logger.debug('Defining adapter for '  # noqa
                  '{0:s} {1:s} {2:s} to {3:s} name {4:s}'.format(
         content.__identifier__,
@@ -117,7 +117,7 @@ def load_service(_context, service):
         ct_api['endpoints'][name][method] = OrderedDict(service_conf)
     else:
         ct_api[method] = OrderedDict(service_conf)
-register_configuration_handler('service', load_service)
+register_configuration_handler('service', load_service)  # noqa
 
 
 def load_contenttype(_context, contenttype):
@@ -144,7 +144,7 @@ def load_contenttype(_context, contenttype):
         component=factory,
         name=conf['type_name'],
     )
-register_configuration_handler('contenttype', load_contenttype)
+register_configuration_handler('contenttype', load_contenttype)  # noqa
 
 
 def load_behavior(_context, behavior):
@@ -234,7 +234,7 @@ def load_behavior(_context, behavior):
         provides=schema,
         for_=(for_,)
     )
-register_configuration_handler('behavior', load_behavior)
+register_configuration_handler('behavior', load_behavior)  # noqa
 
 
 def load_addon(_context, addon):
@@ -244,7 +244,7 @@ def load_addon(_context, addon):
         'title': config['title'],
         'handler': addon['klass']
     }
-register_configuration_handler('addon', load_addon)
+register_configuration_handler('addon', load_addon)  # noqa
 
 
 def _component_conf(conf):
@@ -267,7 +267,7 @@ def load_adapter(_context, adapter):
         factory=(factory,),
         **conf
     )
-register_configuration_handler('adapter', load_adapter)
+register_configuration_handler('adapter', load_adapter)  # noqa
 
 
 def load_subscriber(_context, subscriber):
@@ -278,7 +278,7 @@ def load_subscriber(_context, subscriber):
         _context,
         **conf
     )
-register_configuration_handler('subscriber', load_subscriber)
+register_configuration_handler('subscriber', load_subscriber)  # noqa
 
 
 def load_utility(_context, _utility):
@@ -300,36 +300,36 @@ def load_utility(_context, _utility):
         _context,
         **conf
     )
-register_configuration_handler('utility', load_utility)
+register_configuration_handler('utility', load_utility)  # noqa
 
 
 def load_permission(_context, permission_conf):
     permission = Permission(**permission_conf['config'])
     component.utility(_context, IPermission, permission,
                       name=permission_conf['config']['id'])
-register_configuration_handler('permission', load_permission)
+register_configuration_handler('permission', load_permission)  # noqa
 
 
 def load_role(_context, role):
     defineRole_directive(_context, **role['config'])
-register_configuration_handler('role', load_role)
+register_configuration_handler('role', load_role)  # noqa
 
 
 def load_grant(_context, grant):
     grant_directive(_context, **grant['config'])
-register_configuration_handler('grant', load_grant)
+register_configuration_handler('grant', load_grant)  # noqa
 
 
 def load_grant_all(_context, grant_all):
     grantAll_directive(_context, **grant_all['config'])
-register_configuration_handler('grant_all', load_grant_all)
+register_configuration_handler('grant_all', load_grant_all)  # noqa
 
 
 def load_json_schema_definition(_context, json_schema):
     from guillotina import app_settings
     config = json_schema['config']
     app_settings['json_schema_definitions'][config['name']] = config['schema']
-register_configuration_handler('json_schema_definition', load_json_schema_definition)
+register_configuration_handler('json_schema_definition', load_json_schema_definition)  # noqa
 
 
 class _base_decorator(object):

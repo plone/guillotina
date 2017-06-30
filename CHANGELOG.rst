@@ -1,7 +1,11 @@
 1.1.0a113 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Add new `guillotina.Public` permission and assign it to anoymous role
+  [vangheem]
+
+- Provide default permission as guillotina.AccessContent for services
+  [vangheem]
 
 
 1.1.0a112 (2017-06-28)
