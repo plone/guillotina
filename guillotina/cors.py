@@ -22,8 +22,10 @@ class DefaultCorsRenderer:
         headers = {}
         origin = self.request.headers.get('Origin', None)
         if origin:
-            if '*' in settings['allow_origin'] or any([fnmatch.fnmatchcase(origin, o)
-                                                       for o in settings['allow_origin']]):
+            if '*' in settings['allow_origin']:
+                headers['Access-Control-Allow-Origin'] = '*'
+            elif any([fnmatch.fnmatchcase(origin, o)
+                      for o in settings['allow_origin']]):
                 headers['Access-Control-Allow-Origin'] = origin
             else:
                 logger.error('Origin %s not allowed' % origin, request=self.request)
