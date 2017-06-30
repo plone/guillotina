@@ -13,8 +13,8 @@ import json
 import uuid
 
 
-def get_mocked_request(db=None):
-    request = make_mocked_request('POST', '/')
+def get_mocked_request(db=None, method='POST', path='/', headers={}):
+    request = make_mocked_request(method, path, headers=headers)
     request._futures = {}
     request._txn = None
     request.interaction = None

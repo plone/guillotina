@@ -90,7 +90,7 @@ _delayed_default_settings = {
         "en-us": languages.IENUS,
         "ca": languages.ICA
     },
-    'cors_renderer': cors.renderer
+    'cors_renderer': cors.DefaultCorsRenderer
 }
 
 
