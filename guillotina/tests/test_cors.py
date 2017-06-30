@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
+from guillotina import app_settings
+from guillotina import cors
+from guillotina.tests.utils import get_mocked_request
 
 
 async def test_get_root(container_requester):
@@ -11,3 +15,37 @@ async def test_get_root(container_requester):
         assert 'ACCESS-CONTROL-ALLOW-CREDENTIALS' in headers
         assert 'ACCESS-CONTROL-EXPOSE-HEADERS' in headers
         assert 'ACCESS-CONTROL-ALLOW-HEADERS' in headers
+
+
+class _CorsTestRenderer(cors.DefaultCorsRenderer):
+
+    def __init__(self, request, settings):
+        self.request = request
+        self.settings = settings
+
+    async def get_settings(self):
+        settings = deepcopy(app_settings['cors'])
+        settings.update(self.settings)
+        return settings
+
+
+async def test_allow_origin_star():
+    request = get_mocked_request(headers={
+        'Origin': 'http://localhost:8080'
+    })
+    renderer = _CorsTestRenderer(request, {
+        'allow_origin': ['*']
+    })
+    headers = await renderer.get_headers()
+    assert headers['Access-Control-Allow-Origin'] == '*'
+
+
+async def test_allow_origin_foobar():
+    request = get_mocked_request(headers={
+        'Origin': 'http://foobar.com:8080'
+    })
+    renderer = _CorsTestRenderer(request, {
+        'allow_origin': ['http://foobar.com:8080']
+    })
+    headers = await renderer.get_headers()
+    assert headers['Access-Control-Allow-Origin'] == 'http://foobar.com:8080'

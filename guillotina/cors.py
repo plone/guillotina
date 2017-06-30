@@ -28,13 +28,14 @@ class DefaultCorsRenderer:
                       for o in settings['allow_origin']]):
                 headers['Access-Control-Allow-Origin'] = origin
             else:
-                logger.error('Origin %s not allowed' % origin, request=self.request)
+                logger.error('Origin %s not allowed' % origin,
+                             request=self.request)
                 raise HTTPUnauthorized()
         if self.request.headers.get(
                 'Access-Control-Request-Method', None) != 'OPTIONS':
             if settings['allow_credentials']:
                 headers['Access-Control-Allow-Credentials'] = 'True'
             if len(settings['allow_headers']):
-                headers['Access-Control-Expose-Headers'] = \
-                    ', '.join(settings['allow_headers'])
+                headers['Access-Control-Expose-Headers'] = ', '.join(
+                    settings['allow_headers'])
         return headers

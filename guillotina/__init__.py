@@ -39,7 +39,6 @@ app_settings = {
     "default_permission": 'guillotina.AccessContent',
     "available_addons": {},
     "api_definition": {},
-    "cors_"
     "cors": {
         "allow_origin": ["http://localhost:8080"],
         "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH", "OPTIONS"],
