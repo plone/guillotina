@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import Request
-from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
+from guillotina import glogging
 from guillotina.component import getUtility
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
@@ -14,10 +14,8 @@ from hashlib import sha256 as sha
 from zope.interface.interfaces import IInterface
 
 import asyncio
-import fnmatch
 import importlib
 import inspect
-import logging
 import random
 import string
 import sys
@@ -40,7 +38,7 @@ except NotImplementedError:
 
 
 RANDOM_SECRET = random.randint(0, 1000000)
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 
 def import_class(import_string: str) -> types.ModuleType:
@@ -104,33 +102,6 @@ def get_authenticated_user_id(request: IRequest) -> str:
     user = get_authenticated_user(request)
     if user:
         return user.id
-
-
-def apply_cors(request: IRequest) -> dict:
-    """Second part of the cors function to validate."""
-    from guillotina import app_settings
-    headers = {}
-    origin = request.headers.get('Origin', None)
-    if origin:
-        if not any([fnmatch.fnmatchcase(origin, o)
-                    for o in app_settings['cors']['allow_origin']]):
-            logger.error('Origin %s not allowed' % origin)
-            raise HTTPUnauthorized()
-        elif request.headers.get('Access-Control-Allow-Credentials', False):
-            headers['Access-Control-Allow-Origin', origin]
-        else:
-            if any([o == "*" for o in app_settings['cors']['allow_origin']]):
-                headers['Access-Control-Allow-Origin'] = '*'
-            else:
-                headers['Access-Control-Allow-Origin'] = origin
-    if request.headers.get(
-            'Access-Control-Request-Method', None) != 'OPTIONS':
-        if app_settings['cors']['allow_credentials']:
-            headers['Access-Control-Allow-Credentials'] = 'True'
-        if len(app_settings['cors']['allow_headers']):
-            headers['Access-Control-Expose-Headers'] = \
-                ', '.join(app_settings['cors']['allow_headers'])
-    return headers
 
 
 def strings_differ(string1: str, string2: str) -> bool:

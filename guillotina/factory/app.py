@@ -1,6 +1,7 @@
 from aiohttp import web
 from guillotina import app_settings
 from guillotina import configure
+from guillotina import cors
 from guillotina import interfaces
 from guillotina import languages
 from guillotina.async import IAsyncUtility
@@ -88,7 +89,8 @@ _delayed_default_settings = {
         "en": languages.IEN,
         "en-us": languages.IENUS,
         "ca": languages.ICA
-    }
+    },
+    'cors_renderer': cors.DefaultCorsRenderer
 }
 
 
