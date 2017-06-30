@@ -1,6 +1,7 @@
 from aiohttp import web
 from guillotina import app_settings
 from guillotina import configure
+from guillotina import cors
 from guillotina import interfaces
 from guillotina import languages
 from guillotina.async import IAsyncUtility
@@ -21,7 +22,6 @@ from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
-from guillotina import cors
 
 import aiohttp
 import asyncio
