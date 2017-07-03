@@ -1,4 +1,4 @@
-1.1.0a113 (unreleased)
+1.1.0a113 (2017-07-03)
 ----------------------
 
 - Be able to customize cors handling
