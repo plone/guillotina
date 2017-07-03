@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from aiohttp.web import Request
+from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina import glogging
 from guillotina.component import getUtility
@@ -14,6 +15,7 @@ from hashlib import sha256 as sha
 from zope.interface.interfaces import IInterface
 
 import asyncio
+import fnmatch
 import importlib
 import inspect
 import random
@@ -294,3 +296,30 @@ except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
     pass
 else:
     from guillotina.optimizations import get_current_request  # noqa
+
+
+def apply_cors(request: IRequest) -> dict:
+    # deprecated, will be removed in next major release
+    from guillotina import app_settings
+    headers = {}
+    origin = request.headers.get('Origin', None)
+    if origin:
+        if not any([fnmatch.fnmatchcase(origin, o)
+                    for o in app_settings['cors']['allow_origin']]):
+            logger.error('Origin %s not allowed' % origin)
+            raise HTTPUnauthorized()
+        elif request.headers.get('Access-Control-Allow-Credentials', False):
+            headers['Access-Control-Allow-Origin', origin]
+        else:
+            if any([o == "*" for o in app_settings['cors']['allow_origin']]):
+                headers['Access-Control-Allow-Origin'] = '*'
+            else:
+                headers['Access-Control-Allow-Origin'] = origin
+    if request.headers.get(
+            'Access-Control-Request-Method', None) != 'OPTIONS':
+        if app_settings['cors']['allow_credentials']:
+            headers['Access-Control-Allow-Credentials'] = 'True'
+        if len(app_settings['cors']['allow_headers']):
+            headers['Access-Control-Expose-Headers'] = \
+                ', '.join(app_settings['cors']['allow_headers'])
+    return headers
