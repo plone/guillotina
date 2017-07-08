@@ -2,6 +2,7 @@
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.tests import utils
+from guillotina.transactions import managed_transaction
 
 import json
 
@@ -57,14 +58,17 @@ async def test_set_local_guillotina(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        container = await root.async_get('guillotina')
-        testing_object = await container.async_get('testing')
 
-        # Check the access users/roles
-        principals = get_principals_with_access_content(testing_object, request)
-        assert principals == ['root']
-        roles = get_roles_with_access_content(testing_object, request)
-        assert roles == ['guillotina.ContainerAdmin']
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            testing_object = await container.async_get('testing')
+
+            # Check the access users/roles
+            principals = get_principals_with_access_content(testing_object, request)
+            assert principals == ['root']
+            roles = get_roles_with_access_content(testing_object, request)
+            assert roles == ['guillotina.Reader', 'guillotina.Reviewer', 'guillotina.Owner',
+                             'guillotina.Editor', 'guillotina.ContainerAdmin']
 
         # Now we add the user1 with inherit on the container
         response, status = await requester(
@@ -79,12 +83,15 @@ async def test_set_local_guillotina(container_requester):
             })
         )
 
-        # need to retreive objs again from db since they changed
-        container = await root.async_get('guillotina')
-        testing_object = await container.async_get('testing')
-        principals = get_principals_with_access_content(testing_object, request)
-        assert len(principals) == 2
-        assert 'user1' in principals
+        root = await utils.get_root(request)
+
+        async with managed_transaction(request=request, abort_when_done=True):
+            # need to retreive objs again from db since they changed
+            container = await root.async_get('guillotina')
+            testing_object = await container.async_get('testing')
+            principals = get_principals_with_access_content(testing_object, request)
+            assert len(principals) == 2
+            assert 'user1' in principals
 
         # Now we add the user1 with deny on the object
         response, status = await requester(
@@ -99,7 +106,10 @@ async def test_set_local_guillotina(container_requester):
             })
         )
         # need to retreive objs again from db since they changed
-        container = await root.async_get('guillotina')
-        testing_object = await container.async_get('testing')
-        principals = get_principals_with_access_content(testing_object, request)
-        assert principals == ['root']
+        root = await utils.get_root(request)
+
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            testing_object = await container.async_get('testing')
+            principals = get_principals_with_access_content(testing_object, request)
+            assert principals == ['root']

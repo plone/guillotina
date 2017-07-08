@@ -2,7 +2,7 @@
 from guillotina import configure
 from guillotina.content import Item
 from guillotina.content import load_cached_schema
-from guillotina.tests.conftest import ContainerRequesterAsyncContextManager
+from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from zope.interface import Interface
 
 import json

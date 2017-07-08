@@ -1,5 +1,5 @@
-from guillotina.interfaces import IApplication
 from guillotina.component import getUtility
+from guillotina.interfaces import IApplication
 
 
 def test_get_static_folder(dummy_guillotina):

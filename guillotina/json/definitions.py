@@ -359,7 +359,7 @@ configure.json_schema_definition('AllPermissions', {
 })
 
 
-configure.json_schema_definition('SearchResults', {
+configure.json_schema_definition('SearchResult', {
     "type": "object",
     "title": "Search result",
     "properties": {
@@ -377,7 +377,7 @@ configure.json_schema_definition('SearchResults', {
             "items": {
                 "type": "object",
                 "schema": {
-                    "$ref": "#/definitions/SearchResults"
+                    "$ref": "#/definitions/SearchResult"
                 }
             },
             "required": True

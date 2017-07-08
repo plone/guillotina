@@ -6,8 +6,6 @@ from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
-from guillotina.event import notify
-from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import NoInteraction
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -17,8 +15,15 @@ from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.json.exceptions import DeserializationError
 from guillotina.schema import getFields
 from guillotina.schema.exceptions import ValidationError
+from guillotina.utils import apply_coroutine
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
+
+import logging
+
+
+logger = logging.getLogger('guillotina')
+_missing = object()
 
 
 @configure.adapter(
@@ -31,9 +36,7 @@ class DeserializeFromJson(object):
 
         self.permission_cache = {}
 
-    async def __call__(self, data, validate_all=False):
-
-        modified = False
+    async def __call__(self, data, validate_all=False, ignore_errors=False):
         errors = []
 
         factory = get_cached_factory(self.context.type_name)
@@ -46,12 +49,10 @@ class DeserializeFromJson(object):
                 behavior_schema, behavior, data, errors,
                 validate_all, True)
 
-        if errors:
+        if errors and not ignore_errors:
             raise DeserializationError(errors)
 
-        if modified:
-            self.context._p_register()
-            await notify(ObjectModifiedEvent(self.context, data))
+        self.context._p_register()
 
         return self.context
 
@@ -59,6 +60,7 @@ class DeserializeFromJson(object):
             self, schema, obj, data, errors,
             validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
+
         for name, field in getFields(schema).items():
 
             if field.readonly:
@@ -99,9 +101,13 @@ class DeserializeFromJson(object):
                     errors.append({
                         'message': e.args[0], 'field': name, 'error': e})
                 else:
+                    # record object changes for potential future conflict resolution
                     try:
-                        field.set(obj, value)
-                    except:  # noqa
+                        await apply_coroutine(field.set, obj, value)
+                    except Exception:
+                        logger.warning(
+                            'Error setting data on field, falling back to setattr',
+                            exc_info=True)
                         setattr(obj, name, value)
             else:
                 if f.required and not hasattr(obj, name):

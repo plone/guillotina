@@ -39,21 +39,21 @@ class IDublinCore(Interface):
         title=u'Description',
         description=u"The first unqualified Dublin Core 'Description' element value.")
 
-    created = schema.Datetime(
+    creation_date = schema.Datetime(
         title=u'Creation Date',
         description=u"The date and time that an object is created. "
                     u"\nThis is normally set automatically.")
 
-    modified = schema.Datetime(
+    modification_date = schema.Datetime(
         title=u'Modification Date',
         description=u"The date and time that the object was last modified in a\n"
                     u"meaningful way.")
 
-    effective = schema.Datetime(
+    effective_date = schema.Datetime(
         title=u'Effective Date',
         description=u"The date and time that an object should be published. ")
 
-    expires = schema.Datetime(
+    expiration_date = schema.Datetime(
         title=u'Expiration Date',
         description=u"The date and time that the object should become unpublished.")
 
@@ -84,13 +84,14 @@ class IDublinCore(Interface):
     for_="guillotina.interfaces.IResource")
 class DublinCore(AnnotationBehavior):
 
-    creators = ContextProperty(u'creators', ())
-    contributors = ContextProperty(u'contributors', ())
-    created = ContextProperty(u'created', None)
-    modified = ContextProperty(u'modified', None)
+    creators = ContextProperty('creators', ())
+    contributors = ContextProperty('contributors', ())
+    creation_date = ContextProperty('creation_date', None)
+    modification_date = ContextProperty('modification_date', None)
 
     # all properties but these 4 are not annotated
-    __local__properties__ = ('creators', 'contributors', 'created', 'modified')
+    __local__properties__ = ('creation_date', 'modification_date',
+                             'creators', 'contributors')
 
     def __init__(self, context):
         self.__dict__['context'] = context

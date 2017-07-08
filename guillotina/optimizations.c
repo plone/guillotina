@@ -1,11 +1,18 @@
 #include <Python.h>
 #include <frameobject.h>
 
-static PyObject *RequestNotFound, *RequestHandler, *Request;
+static PyObject *RequestNotFound, *Request;
 
 /* current_request frame obtainer */
 
-
+/*
+  useful documentation
+  - https://docs.python.org/3/c-api/intro.html
+  - https://docs.python.org/3/c-api/object.html#c.PyObject_GetAttr
+    - returns new reference
+  - https://docs.python.org/3.6/c-api/dict.html#c.PyDict_GetItem
+    - returns barrowed reference
+*/
 static PyObject*
 current_request()
 {
@@ -17,45 +24,52 @@ current_request()
       if (PyFrame_FastToLocalsWithError(f) < 0){
         return NULL;
       }
+      Py_INCREF(f->f_locals);
 
       if (PyDict_CheckExact(f->f_locals)) {
 
         self = PyDict_GetItem(f->f_locals, PyUnicode_FromString("self"));
-        if (self != NULL) {
-          if (PyObject_HasAttr(self, PyUnicode_FromString("request"))) {
-            request = PyObject_GetAttr(self, PyUnicode_FromString("request"));
-            if(request != NULL && PyObject_IsInstance(request, Request)){
-              found = 1;
-              break;
-            }
+        if (self != NULL &&
+            PyObject_HasAttr(self, PyUnicode_FromString("request"))) {
+          request = PyObject_GetAttr(self, PyUnicode_FromString("request"));
+          if(request != NULL){
+            // PyObject_GetAttr does not require Py_INCREF
+            found = 1;
+            Py_DECCREF(f->f_locals);
+            break;
           }
         }
 
         request = PyDict_GetItem(f->f_locals, PyUnicode_FromString("request"));
-        if (request != NULL && PyObject_IsInstance(request, Request)) {
+        if (request != NULL) {
+          // If we return the value from a PyDict_GetItem
+          // it is expected that you use Py_INCREF
+          Py_INCREF(request);
           found = 1;
+          Py_DECCREF(f->f_locals);
           break;
         }
 
       }
+      Py_DECCREF(f->f_locals);
       f = f->f_back;
     }
 
 
     if (f == NULL) {
         PyErr_SetString(RequestNotFound,
-                        "Could not found the request");
+                        "Could not find the request");
         return NULL;
     }
 
-    Py_INCREF(request);
     return (PyObject*)request;
 }
 
 
 static PyMethodDef OptimizationsMethods[] =
 {
-     {"get_current_request", current_request, METH_VARARGS, "Return the current request by heuristically looking it up from stack"},
+     {"get_current_request", current_request, METH_VARARGS,
+      "Return the current request by heuristically looking it up from stack"},
      {NULL, NULL, 0, NULL}
 };
 
@@ -84,16 +98,6 @@ PyInit_optimizations(void)
 
     RequestNotFound = PyObject_GetAttrString(m, "RequestNotFound");
     if (RequestNotFound == NULL)
-    {
-      return NULL;
-    }
-    Py_DECREF(m);
-
-    if ((m = PyImport_ImportModule("aiohttp.web_server")) == NULL)
-    {
-      return NULL;
-    }
-    if ((RequestHandler = PyObject_GetAttrString(m, "RequestHandler")) == NULL)
     {
       return NULL;
     }

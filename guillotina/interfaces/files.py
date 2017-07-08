@@ -58,6 +58,10 @@ class IFile(Interface):
         title='MD5',
         default='')
 
+    size = schema.Int(
+        title='Size',
+        default=0)
+
     def get_size():
         """Return the byte-size of the data of the object."""
 

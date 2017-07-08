@@ -2,9 +2,11 @@
 from guillotina import configure
 from guillotina.addons import Addon
 from guillotina.api.service import Service
+from guillotina.content import get_all_possible_schemas_for_type
 from guillotina.content import Item
-from guillotina.interfaces import IContainer
+from guillotina.interfaces import IContainer, IApplication
 from zope.interface import Interface
+from guillotina.component import getUtility
 
 
 async def test_register_service(container_requester):
@@ -67,12 +69,15 @@ async def test_register_behavior(container_requester):
     cur_count = len(
         configure.get_configurations('guillotina.tests', 'behavior'))
 
-    from guillotina.interfaces import IFormFieldProvider
+    from guillotina.interfaces import IFormFieldProvider, IResource
     from zope.interface import provider
     from guillotina import schema
 
     @provider(IFormFieldProvider)
     class IMyBehavior(Interface):
+        foobar = schema.Text()
+
+    class IMyBehavior2(Interface):
         foobar = schema.Text()
 
     configure.behavior(
@@ -81,10 +86,16 @@ async def test_register_behavior(container_requester):
         factory="guillotina.behaviors.instance.AnnotationBehavior",
         for_="guillotina.interfaces.IResource"
     )()
+    configure.behavior(
+        title="MyBehavior2",
+        provides=IMyBehavior2,
+        factory="guillotina.behaviors.instance.AnnotationBehavior",
+        for_="guillotina.interfaces.IResource"
+    )()
 
-    assert len(configure.get_configurations('guillotina.tests', 'behavior')) == cur_count + 1
+    assert len(configure.get_configurations('guillotina.tests', 'behavior')) == cur_count + 2
 
-    class IMyType(Interface):
+    class IMyType(IResource):
         pass
 
     class MyType(Item):
@@ -97,16 +108,21 @@ async def test_register_behavior(container_requester):
         behaviors=[IMyBehavior]
     ), 'contenttype')
 
-    async with await container_requester as requester:
-        config = requester.root.app.config
-        # now test it...
-        configure.load_configuration(
-            config, 'guillotina.tests', 'contenttype')
-        config.execute_actions()
+    root = getUtility(IApplication, name='root')
+    config = root.app.config
+    # now test it...
+    configure.load_configuration(config, 'guillotina.tests', 'contenttype')
+    configure.load_configuration(config, 'guillotina.tests', 'behavior')
+    config.execute_actions()
 
+    async with await container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@types')
         type_ = [s for s in response if s['title'] == 'MyType2'][0]
         assert 'foobar' in type_['definitions']['IMyBehavior']['properties']
+
+    # also get_all_possible_schemas_for_type should come with this new behavior
+    behaviors_schemas = get_all_possible_schemas_for_type('MyType2')
+    assert IMyBehavior2 in behaviors_schemas
 
 
 async def test_register_addon(container_requester):

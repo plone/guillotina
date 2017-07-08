@@ -18,6 +18,7 @@ from guillotina.component import queryMultiAdapter
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
@@ -41,14 +42,11 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-from guillotina.utils import apply_cors
-from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
 import aiohttp
 import asyncio
-import asyncpg
 import json
 import traceback
 import uuid
@@ -89,24 +87,24 @@ async def subrequest(
         orig_request, path, relative_to_container=True,
         headers={}, body=None, params=None, method='GET'):
     """Subrequest, initial implementation doing a real request."""
-    session = aiohttp.ClientSession()
-    method = method.lower()
-    if method not in SUBREQUEST_METHODS:
-        raise AttributeError('No valid method ' + method)
-    caller = getattr(session, method)
+    async with aiohttp.ClientSession() as session:
+        method = method.lower()
+        if method not in SUBREQUEST_METHODS:
+            raise AttributeError('No valid method ' + method)
+        caller = getattr(session, method)
 
-    for head in orig_request.headers:
-        if head not in headers:
-            headers[head] = orig_request.headers[head]
+        for head in orig_request.headers:
+            if head not in headers:
+                headers[head] = orig_request.headers[head]
 
-    params = {
-        'headers': headers,
-        'params': params
-    }
-    if method in ['put', 'patch']:
-        params['data'] = body
+        params = {
+            'headers': headers,
+            'params': params
+        }
+        if method in ['put', 'patch']:
+            params['data'] = body
 
-    return caller(path, **params)
+        return caller(path, **params)
 
 
 async def traverse(request, parent, path):
@@ -135,17 +133,14 @@ async def traverse(request, parent, path):
         return parent, path
 
     if IDatabase.providedBy(context):
-        request._db_write_enabled = False
+        request._db_write_enabled = request.method in WRITING_VERBS
         request._db_id = context.id
-        # Create a transaction Manager
-        request._tm = context.new_transaction_manager()
+        # Add a transaction Manager to request
+        tm = request._tm = context.get_transaction_manager()
         # Start a transaction
-        try:
-            await request._tm.begin(request=request)
-        except asyncpg.exceptions.UndefinedTableError:
-            pass
+        txn = await tm.begin(request=request)
         # Get the root of the tree
-        context = await request._tm.root()
+        context = await tm.get_root(txn=txn)
 
     if IContainer.providedBy(context):
         request._container_id = context.id
@@ -154,32 +149,19 @@ async def traverse(request, parent, path):
         request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
         layers = request.container_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
-            alsoProvides(request, import_class(layer))
+            try:
+                alsoProvides(request, import_class(layer))
+            except ModuleNotFoundError:
+                logger.error('Can not apply layer ' + layer, request=request)
 
     return await traverse(request, context, path[1:])
-
-
-def _url(request):
-    try:
-        return request.url.human_repr()
-    except AttributeError:
-        # older version of aiohttp
-        return request.path
 
 
 def generate_unauthorized_response(e, request):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Not authorized to render operation') + ' ' + eid
-    user = get_authenticated_user_id(request)
-    extra = {
-        'r': _url(request),
-        'u': user
-    }
-    logger.error(
-        message,
-        exc_info=e,
-        extra=extra)
+    logger.error(message, exc_info=e, eid=eid, request=request)
     return UnauthorizedResponse(message)
 
 
@@ -187,21 +169,8 @@ def generate_error_response(e, request, error, status=400):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Error on execution of view') + ' ' + eid
-    user = get_authenticated_user_id(request)
-    extra = {
-        'r': _url(request),
-        'u': user
-    }
-    logger.error(
-        message,
-        exc_info=e,
-        extra=extra)
-
-    return ErrorResponse(
-        error,
-        message,
-        status
-    )
+    logger.error(message, exc_info=e, eid=eid, request=request)
+    return ErrorResponse(error, message, status)
 
 
 class MatchInfo(AbstractMatchInfo):
@@ -220,7 +189,6 @@ class MatchInfo(AbstractMatchInfo):
         """Main handler function for aiohttp."""
         if request.method in WRITING_VERBS:
             try:
-                request._db_write_enabled = True
                 # We try to avoid collisions on the same instance of
                 # guillotina
                 view_result = await self.view()
@@ -230,14 +198,14 @@ class MatchInfo(AbstractMatchInfo):
                     # ErrorReponse just abort
                     await abort(request)
                 else:
-                    await commit(request)
+                    await commit(request, warn=False)
 
             except Unauthorized as e:
                 await abort(request)
                 view_result = generate_unauthorized_response(e, request)
-            except ConflictError as e:
-                view_result = generate_error_response(
-                    e, request, 'ConflictDB', 409)
+            except (ConflictError, TIDConflictError) as e:
+                # bubble this error up
+                raise
             except Exception as e:
                 await abort(request)
                 view_result = generate_error_response(
@@ -245,13 +213,12 @@ class MatchInfo(AbstractMatchInfo):
         else:
             try:
                 view_result = await self.view()
-                await abort(request)
             except Unauthorized as e:
-                await abort(request)
                 view_result = generate_unauthorized_response(e, request)
             except Exception as e:
-                await abort(request)
                 view_result = generate_error_response(e, request, 'ViewError')
+            finally:
+                await abort(request)
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
@@ -261,9 +228,13 @@ class MatchInfo(AbstractMatchInfo):
             view_result = Response({})
 
         # Apply cors if its needed
-        cors_headers = apply_cors(request)
+        cors_renderer = app_settings['cors_renderer'](request)
+        cors_headers = await cors_renderer.get_headers()
         cors_headers.update(view_result.headers)
         view_result.headers = cors_headers
+        retry_attempts = getattr(request, '_retry_attempt', 0)
+        if retry_attempts > 0:
+            view_result.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
 
         resp = await self.rendered(view_result)
         if not resp.prepared:
@@ -274,7 +245,7 @@ class MatchInfo(AbstractMatchInfo):
 
         futures_to_wait = request._futures.values()
         if futures_to_wait:
-            await asyncio.gather(*list(futures_to_wait))
+            await asyncio.gather(*[f for f in futures_to_wait])
 
         return resp
 
@@ -323,9 +294,7 @@ class TraversalRouter(AbstractRouter):
         try:
             result = await self.real_resolve(request)
         except Exception as e:
-            logger.error(
-                "Exception on resolve execution",
-                exc_info=e)
+            logger.error("Exception on resolve execution", exc_info=e, request=request)
             await abort(request)
             raise e
         if result is not None:
@@ -341,7 +310,7 @@ class TraversalRouter(AbstractRouter):
 
         request._futures = {}
 
-        request.security = IInteraction(request)
+        security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
 
@@ -385,9 +354,8 @@ class TraversalRouter(AbstractRouter):
             resource = translator.translate()
 
         # Add anonymous participation
-        if len(request.security.participations) == 0:
-            # logger.info("Anonymous User")
-            request.security.add(AnonymousParticipation(request))
+        if len(security.participations) == 0:
+            security.add(AnonymousParticipation(request))
 
         # container registry lookup
         try:
@@ -404,25 +372,22 @@ class TraversalRouter(AbstractRouter):
                 try:
                     view = await view.publish_traverse(traverse_to)
                 except Exception as e:
-                    logger.error(
-                        "Exception on view execution",
-                        exc_info=e)
+                    logger.error("Exception on view execution", exc_info=e,
+                                 request=request)
                     return None
 
         permission = getUtility(IPermission, name='guillotina.AccessContent')
 
-        interaction = IInteraction(request)
-        allowed = interaction.check_permission(permission.id, resource)
-
-        if not allowed:
+        if not security.check_permission(permission.id, resource):
             # Check if its a CORS call:
-            if IOPTIONS != method or not app_settings['cors']:
+            if IOPTIONS != method:
                 # Check if the view has permissions explicit
                 if view is None or not view.__allow_access__:
-                    logger.warn("No access content {content} with {auths}".format(
+                    logger.warning("No access content {content} with {auths}".format(
                         content=resource,
                         auths=str([x.principal.id
-                                   for x in request.security.participations])))
+                                   for x in security.participations])),
+                        request=request)
                     raise HTTPUnauthorized()
 
         if view is None and method == IOPTIONS:
@@ -431,11 +396,12 @@ class TraversalRouter(AbstractRouter):
         if view:
             ViewClass = view.__class__
             view_permission = get_view_permission(ViewClass)
-            if not interaction.check_permission(view_permission, view):
-                logger.warn("No access for view {content} with {auths}".format(
+            if not security.check_permission(view_permission, view):
+                logger.warning("No access for view {content} with {auths}".format(
                     content=resource,
                     auths=str([x.principal.id
-                               for x in request.security.participations])))
+                               for x in security.participations])),
+                    request=request)
                 raise HTTPUnauthorized()
 
         renderer = content_type_negotiation(request, resource, view)

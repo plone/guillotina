@@ -1,9 +1,9 @@
 from aiohttp import web
 from guillotina import app_settings
 from guillotina import configure
+from guillotina import cors
 from guillotina import interfaces
 from guillotina import languages
-from guillotina import logger
 from guillotina.async import IAsyncUtility
 from guillotina.component import getAllUtilitiesRegisteredFor
 from guillotina.component import getUtility
@@ -13,7 +13,8 @@ from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.contentnegotiation import ContentNegotiatorUtility
-from guillotina.exceptions import ConfigurationConflictError
+from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -22,10 +23,13 @@ from guillotina.interfaces.content import IContentNegotiation
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
 
+import aiohttp
 import asyncio
 import collections
 import inspect
 import json
+import logging
+import logging.config
 import os
 import pathlib
 
@@ -34,6 +38,9 @@ try:
     from Crypto.PublicKey import RSA
 except ImportError:
     RSA = None
+
+
+logger = logging.getLogger('guillotina')
 
 
 def update_app_settings(settings):
@@ -45,25 +52,22 @@ def update_app_settings(settings):
 
 
 def load_application(module, root, settings):
-    app = root.app
     # includeme function
     if hasattr(module, 'includeme'):
         args = [root]
-        if len(inspect.getargspec(module.includeme).args) == 2:
+        if len(inspect.signature(module.includeme).parameters) == 2:
             args.append(settings)
         module.includeme(*args)
     # app_settings
     if hasattr(module, 'app_settings') and app_settings != module.app_settings:
         update_app_settings(module.app_settings)
     # services
-    configure.load_all_configurations(app.config, module.__name__)
+    configure.load_all_configurations(root.config, module.__name__)
 
 
 # XXX use this to delay imports for these settings
 _delayed_default_settings = {
-    "default_layers": [
-        interfaces.IDefaultLayer
-    ],
+    "default_layer": interfaces.IDefaultLayer,
     "http_methods": {
         "PUT": interfaces.IPUT,
         "POST": interfaces.IPOST,
@@ -85,11 +89,40 @@ _delayed_default_settings = {
         "en": languages.IEN,
         "en-us": languages.IENUS,
         "ca": languages.ICA
-    }
+    },
+    'cors_renderer': cors.DefaultCorsRenderer
 }
 
 
-def make_app(config_file=None, settings=None, loop=None):
+class GuillotinaAIOHTTPApplication(web.Application):
+    async def _handle(self, request, retries=0):
+        try:
+            return await super()._handle(request)
+        except (ConflictError, TIDConflictError) as e:
+            if app_settings.get('conflict_retry_attempts', 3) > retries:
+                label = 'DB Conflict detected'
+                if isinstance(e, TIDConflictError):
+                    label = 'TID Conflict Error detected'
+                tid = getattr(getattr(request, '_txn', None), '_tid', 'not issued')
+                logger.warning(
+                    f'{label}, retrying request, tid: {tid}, retries: {retries + 1})')
+                request._retry_attempt = retries + 1
+                return await self._handle(request, retries + 1)
+            logger.error(
+                'Exhausted retry attempts for conflict error on tid: {}'.format(
+                    getattr(getattr(request, '_txn', None), '_tid', 'not issued')
+                ))
+            return aiohttp.web_exceptions.HTTPConflict()
+
+
+def make_aiohttp_application(settings, middlewares=[]):
+    return GuillotinaAIOHTTPApplication(
+        router=TraversalRouter(),
+        middlewares=middlewares,
+        **settings.get('aiohttp_settings', {}))
+
+
+def make_app(config_file=None, settings=None, loop=None, server_app=None):
     app_settings.update(_delayed_default_settings)
 
     if loop is None:
@@ -103,22 +136,20 @@ def make_app(config_file=None, settings=None, loop=None):
 
     middlewares = [resolve_dotted_name(m) for m in settings.get('middlewares', [])]
     # Initialize aiohttp app
-    app = web.Application(
-        router=TraversalRouter(),
-        loop=loop,
-        middlewares=middlewares)
+    if server_app is None:
+        server_app = make_aiohttp_application(settings, middlewares)
 
     # Create root Application
     root = ApplicationRoot(config_file)
-    root.app = app
+    root.app = server_app
+    server_app.root = root
     provideUtility(root, IApplication, 'root')
 
     # Initialize global (threadlocal) ZCA configuration
-    app.config = ConfigurationMachine()
+    config = root.config = server_app.config = ConfigurationMachine()
 
     import guillotina
     import guillotina.db.factory
-    import guillotina.db.partition
     import guillotina.db.writer
     import guillotina.db.db
     configure.scan('guillotina.translation')
@@ -141,15 +172,17 @@ def make_app(config_file=None, settings=None, loop=None):
     configure.scan('guillotina.annotations')
     configure.scan('guillotina.constraintypes')
     configure.scan('guillotina.subscribers')
+    configure.scan('guillotina.db.strategies')
+    configure.scan('guillotina.db.cache')
     load_application(guillotina, root, settings)
+    config.execute_actions()
+    config.commit()
 
     for module_name in settings.get('applications', []):
+        config.begin(module_name)
         load_application(resolve_dotted_name(module_name), root, settings)
-    try:
-        app.config.execute_actions()
-    except ConfigurationConflictError as e:
-        logger.error(str(e._conflicts))
-        raise e
+        config.execute_actions()
+        config.commit()
 
     # XXX we clear now to save some memory
     # it's unclear to me if this is necesary or not but it seems to me that
@@ -158,6 +191,9 @@ def make_app(config_file=None, settings=None, loop=None):
 
     # update *after* plugins loaded
     update_app_settings(settings)
+
+    if 'logging' in app_settings:
+        logging.config.dictConfig(app_settings['logging'])
 
     content_type = ContentNegotiatorUtility(
         'content_type', app_settings['renderers'].keys())
@@ -173,9 +209,9 @@ def make_app(config_file=None, settings=None, loop=None):
                 IDatabaseConfigurationFactory, name=dbconfig['storage'])
             if asyncio.iscoroutinefunction(factory):
                 future = asyncio.ensure_future(
-                    factory(key, dbconfig, app), loop=app.loop)
+                    factory(key, dbconfig, server_app), loop=loop)
 
-                app.loop.run_until_complete(future)
+                loop.run_until_complete(future)
                 root[key] = future.result()
             else:
                 root[key] = factory(key, dbconfig)
@@ -210,22 +246,22 @@ def make_app(config_file=None, settings=None, loop=None):
         }
 
     # Set router root
-    app.router.set_root(root)
+    server_app.router.set_root(root)
 
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
         # In case there is Utilties that are registered
-        ident = asyncio.ensure_future(utility.initialize(app=app), loop=app.loop)
-        root.add_async_utility(ident, {})
+        ident = asyncio.ensure_future(utility.initialize(app=server_app), loop=loop)
+        root.add_async_task(utility, ident, {})
 
-    app.on_cleanup.append(close_utilities)
+    server_app.on_cleanup.append(close_utilities)
 
     for util in app_settings['utilities']:
-        root.add_async_utility(util)
+        root.add_async_utility(util, loop=loop)
 
     # Load cached Schemas
     load_cached_schema()
 
-    return app
+    return server_app
 
 
 async def close_utilities(app):

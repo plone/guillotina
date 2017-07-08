@@ -58,11 +58,11 @@ setup(
         'setuptools',
         'ujson',
         'zope.interface',
-        'aiocache',
         'aioconsole',
         'pyjwt',
         'asyncpg',
-        'cffi'
+        'cffi',
+        'aio_etcd'
     ],
     extras_require={
         'test': [
@@ -70,7 +70,7 @@ setup(
             'docker',
             'backoff',
             'psycopg2',
-            'pytest-asyncio',
+            'pytest-asyncio<=0.5.0',
             'pytest-aiohttp'
         ]
     },

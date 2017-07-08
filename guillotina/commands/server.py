@@ -1,6 +1,8 @@
 from aiohttp import web
 from guillotina.commands import Command
 
+import cProfile
+
 
 try:
     import aiomonitor
@@ -26,11 +28,35 @@ class ServerCommand(Command):
         parser.add_argument('-r', '--reload', action='store_true',
                             dest='reload', help='Auto reload on code changes',
                             default=False)
+        parser.add_argument('--profile', action='store_true',
+                            dest='profile', help='Profile execution',
+                            default=False)
+        parser.add_argument('--profile-output',
+                            help='Where to store the output of the profile data',
+                            default=None)
+        parser.add_argument('--port',
+                            help='Override port to run this server on',
+                            default=None, type=int)
+        parser.add_argument('--host',
+                            help='Override host to run this server on',
+                            default=None)
         return parser
 
     def _run(self, arguments, settings, app):
-        port = settings.get('address', settings.get('port'))
-        web.run_app(app, host=settings.get('host', '0.0.0.0'), port=port)
+        port = arguments.port or settings.get('address', settings.get('port'))
+        host = arguments.host or settings.get('host', '0.0.0.0')
+        if arguments.profile:
+            cProfile.runctx("web.run_app(app, host=host, port=port, loop=loop)", {
+                'web': web
+            }, {
+                'port': port,
+                'host': host,
+                'settings': settings,
+                'app': app,
+                'loop': self.get_loop()
+            }, filename=arguments.profile_output)
+        else:
+            web.run_app(app, host=host, port=port, loop=self.get_loop())
 
     def run(self, arguments, settings, app):
         if arguments.monitor:

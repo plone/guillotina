@@ -102,8 +102,8 @@ class DefaultSchemaFieldSerializer(object):
                 result[attribute_name] = text
 
         if result['type'] == 'object':
-            if isinstance(self.field.schema, dict):
-                result['properties'] = self.field.schema
+            if IJSONField.providedBy(self.field):
+                result['properties'] = self.field.json_schema
             else:
                 schema_serializer = getMultiAdapter((self.field.schema, self.request),
                                                     ISchemaSerializeToJson)

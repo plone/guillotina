@@ -83,6 +83,10 @@ class ConflictError(Exception):
     pass
 
 
+class TIDConflictError(ConflictError):
+    pass
+
+
 class ConfigurationError(Exception):
     """There was an error in a configuration
     """
@@ -112,3 +116,18 @@ class ConfigurationConflictError(ConfigurationError):
 
 class NoIndexField(Exception):
     pass
+
+
+class ReadOnlyError(Exception):
+    pass
+
+
+class BlobChunkNotFound(Exception):
+    pass
+
+
+class ResourceLockedTimeout(Exception):
+    '''
+    The resource you are trying to lock for writing is already locked by
+    another process and the wait time for the lock has expired
+    '''

@@ -8,6 +8,7 @@ from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
 from .catalog import ISecurityInfo  # noqa
 from .configuration import IDatabaseConfigurationFactory  # noqa
+from .content import IAnnotationData  # noqa
 from .content import IAnnotations  # noqa
 from .content import IApplication  # noqa
 from .content import IAsyncContainer  # noqa
@@ -15,12 +16,12 @@ from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa
 from .content import IDatabase  # noqa
 from .content import IFolder  # noqa
+from .content import IGroupFolder  # noqa
 from .content import IItem  # noqa
 from .content import ILocation  # noqa
 from .content import IRegistry  # noqa
 from .content import IResource  # noqa
 from .content import IResourceFactory  # noqa
-from .content import IContainer  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
@@ -29,12 +30,13 @@ from .events import IBeforeObjectRemovedEvent  # noqa
 from .events import IFileFinishUploaded  # noqa
 from .events import INewUserAdded  # noqa
 from .events import IObjectAddedEvent  # noqa
+from .events import IObjectLoadedEvent  # noqa
 from .events import IObjectModifiedEvent  # noqa
 from .events import IObjectMovedEvent  # noqa
 from .events import IObjectPermissionsModifiedEvent  # noqa
 from .events import IObjectPermissionsViewEvent  # noqa
 from .events import IObjectRemovedEvent  # noqa
-from .events import IObjectVIContainerdEvent  # noqa
+from .events import IObjectVisitedEvent  # noqa
 from .exceptions import IForbidden  # noqa
 from .exceptions import IForbiddenAttribute  # noqa
 from .exceptions import ISerializableException  # noqa
@@ -104,7 +106,6 @@ DEFAULT_ADD_PERMISSION = 'guillotina.AddContent'
 DEFAULT_READ_PERMISSION = 'guillotina.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'guillotina.ManageContent'
 
-SHARED_CONNECTION = False
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 

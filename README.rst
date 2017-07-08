@@ -52,7 +52,7 @@ Run postgresql
 If you don't have a postgresql server to play with, you can run one easily
 with docker.
 
-In the termainl::
+In the terminal::
 
   make run-postgres
 
@@ -87,6 +87,11 @@ and for test coverage::
 With file watcher...
 
     ./bin/ptw guillotina --runner=./bin/py.test
+
+
+To run tests with cockroach db:
+
+   USE_COCKROACH=true ./bin/pytest guillotina
 
 Default
 -------

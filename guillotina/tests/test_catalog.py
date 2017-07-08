@@ -12,7 +12,7 @@ def test_indexed_fields(dummy_guillotina, loop):
     assert 'uuid' in fields
     assert 'path' in fields
     assert 'title' in fields
-    assert 'created' in fields
+    assert 'creation_date' in fields
 
 
 @pytest.mark.usefixtures("dummy_request")

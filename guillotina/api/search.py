@@ -27,7 +27,7 @@ from guillotina.utils import get_content_path
         }
     })
 async def search_get(context, request):
-    q = request.GET.get('q')
+    q = request.query.get('q')
     search = queryUtility(ICatalogUtility)
     if search is None:
         return {

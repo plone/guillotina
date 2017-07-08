@@ -4,12 +4,18 @@ from guillotina.auth.validators import hash_password
 from guillotina.component import getGlobalSiteManager
 from guillotina.component import getUtility
 from guillotina.component import provideUtility
+from guillotina.db import ROOT_ID
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from zope.interface import implementer
 
 import asyncio
+import logging
+
+
+logger = logging.getLogger('guillotina')
 
 
 @implementer(IApplication)
@@ -25,7 +31,12 @@ class ApplicationRoot(object):
     def add_async_utility(self, config, loop=None):
         interface = import_class(config['provides'])
         factory = import_class(config['factory'])
-        utility_object = factory(config['settings'], loop=loop)
+        try:
+            utility_object = factory(config['settings'], loop=loop)
+        except Exception:
+            logger.error('Error initializing utility {}'.format(repr(factory)),
+                         exc_info=True)
+            raise
         provideUtility(utility_object, interface)
         task = asyncio.ensure_future(utility_object.initialize(app=self.app), loop=loop)
         self.add_async_task(config['provides'], task, config)
@@ -106,21 +117,14 @@ class Database(object):
         self._conn = None
 
     def get_transaction_manager(self):
-        if self._db.request is not None and hasattr(self._db.request, '_tm'):
-            return self._db.request._tm
-        if self._db._tm is None:
-            self._db.new_transaction_manager()
-        return self._db._tm
-
-    def new_transaction_manager(self):
-        return self._db.new_transaction_manager()
+        return self._db.get_transaction_manager()
 
     @property
     def _p_jar(self):
-        return self.get_transaction_manager()
+        return self.get_transaction_manager()._last_txn
 
     async def get_root(self):
-        return await self._p_jar.root()
+        return await self._p_jar.get(ROOT_ID)
 
     async def async_get(self, key):
         root = await self.get_root()
@@ -128,7 +132,7 @@ class Database(object):
 
     async def async_keys(self):
         root = await self.get_root()
-        return root._p_jar.keys(root._p_oid)
+        return await root._p_jar.keys(root._p_oid)
 
     async def async_set(self, key, value):
         """ This operation can only be done through HTTP request
@@ -146,7 +150,7 @@ class Database(object):
         XXX TODO
         """
         root = await self.get_root()
-        await root._p_jar.delete(await root.async_get(key))
+        await apply_coroutine(root._p_jar.delete, await root.async_get(key))
 
     async def async_items(self):
         root = await self.get_root()
@@ -156,8 +160,8 @@ class Database(object):
     async def async_contains(self, key):
         # is there any request active ? -> conn there
         root = await self.get_root()
-        return root._p_jar.contains(root._p_oid, key)
+        return await apply_coroutine(root._p_jar.contains, root._p_oid, key)
 
     async def async_len(self):
         root = await self.get_root()
-        return root._p_jar.len(root._p_oid)
+        return await apply_coroutine(root._p_jar.len, root._p_oid)

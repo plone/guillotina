@@ -23,6 +23,7 @@ install:
   - sleep 15
 script:
   - bin/py.test -s --cov=guillotina -v --cov-report term-missing guillotina
+  - USE_COCKROACH=true bin/py.test -s -v guillotina
   - bin/code-analysis
 after_success:
   - pip install coveralls

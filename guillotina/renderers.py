@@ -14,12 +14,13 @@ from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
+from guillotina.utils import apply_coroutine
 from zope.interface.interface import InterfaceClass
 
 import json
 
 
-class PServerJSONEncoder(json.JSONEncoder):
+class GuillotinaJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, complex):
             return [obj.real, obj.imag]
@@ -44,6 +45,10 @@ class PServerJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+# b/w compat import
+PServerJSONEncoder = GuillotinaJSONEncoder
+
+
 def json_response(data=sentinel, *, text=None, body=None, status=200,
                   reason=None, headers=None, content_type='application/json',
                   dumps=json.dumps):
@@ -53,7 +58,7 @@ def json_response(data=sentinel, *, text=None, body=None, status=200,
                 "only one of data, text, or body should be specified"
             )
         else:
-            text = dumps(data, cls=PServerJSONEncoder)
+            text = dumps(data, cls=GuillotinaJSONEncoder)
     return aioResponse(
         text=text, body=body, status=status, reason=reason,
         headers=headers, content_type=content_type)
@@ -115,10 +120,10 @@ class RendererJson(Renderer):
             return value
         # Framing of options
         frame = self.request.get('frame')
-        frame = self.request.GET['frame'] if 'frame' in self.request.GET else ''
+        frame = self.request.query['frame'] if 'frame' in self.request.query else ''
         if frame:
             framer = queryAdapter(self.request, IFrameFormatsJson, frame)
-            json_value = await framer(json_value)
+            json_value = await apply_coroutine(framer, json_value)
         resp = json_response(json_value)
         resp.headers.update(headers)
         resp.headers.update(
@@ -159,11 +164,8 @@ class RendererRaw(Renderer):
 
     def guess_response(self, value):
         resp = value.response
-        if isinstance(resp, dict):
-            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder), 'utf-8'))
-            resp.headers['Content-Type'] = 'application/json'
-        elif isinstance(resp, list):
-            resp = aioResponse(body=bytes(json.dumps(resp, cls=PServerJSONEncoder), 'utf-8'))
+        if type(resp) in (dict, list, int, float, bool):
+            resp = aioResponse(body=bytes(json.dumps(resp, cls=GuillotinaJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
             resp = aioResponse(body=bytes(resp, 'utf-8'))

@@ -12,8 +12,13 @@ from zope.interface import implementer_only
 class Root(Folder):
 
     __name__ = None
-    __cache__ = 0
+    __immutable_cache__ = True
+    __db_id__ = None
     type_name = 'GuillotinaDBRoot'
+
+    def __init__(self, db_id):
+        super().__init__()
+        self.__db_id__ = db_id
 
     def __repr__(self):
         return "<Database %d>" % id(self)
@@ -23,46 +28,59 @@ class GuillotinaDB(object):
 
     def __init__(self,
                  storage,
-                 remote_cache=None,
                  database_name='unnamed'):
-        """Create an object database.
+        """
+        Create an object database.
+
+        Database object is persistent through the application
         """
         self._tm = None
-        self.remote_cache = remote_cache
-        self.storage = storage
-        if remote_cache is not None:
-            self.storage.use_cache(remote_cache)
-        self.database_name = database_name
+        self._storage = storage
+        self._database_name = database_name
+        self._tm = None
+
+    @property
+    def storage(self):
+        return self._storage
 
     async def initialize(self):
-        # Make sure we have a root:
+        """
+        create root object if necessary
+        """
         request = make_mocked_request('POST', '/')
         request._db_write_enabled = True
-        request._tm = TransactionManager(self.storage)
-        t = await request._tm.begin(request=request)
+        tm = request._tm = self.get_transaction_manager()
+        txn = await tm.begin(request=request)
+        # for get_current_request magic
         self.request = request
 
         try:
-            assert request._tm.get() == t
-            await t.get(0)
+            assert tm.get(request=request) == txn
+            root = await txn.get(ROOT_ID)
+            if root.__db_id__ is None:
+                root.__db_id__ = self._database_name
+                txn.register(root)
         except KeyError:
-            root = Root()
-            t.register(root, new_oid=ROOT_ID)
+            root = Root(self._database_name)
+            txn.register(root, new_oid=ROOT_ID)
 
-        await request._tm.commit()
+        await tm.commit(txn=txn)
 
     async def open(self):
         """Return a database Connection for use by application code.
         """
-        return await self.storage.open()
+        return await self._storage.open()
 
     async def close(self, conn):
-        await self.storage.close(conn)
+        await self._storage.close(conn)
 
     async def finalize(self):
-        await self.storage.finalize()
+        await self._storage.finalize()
 
-    def new_transaction_manager(self):
-        tm = TransactionManager(self.storage)
-        self._tm = tm
-        return tm
+    def get_transaction_manager(self):
+        """
+        New transaction manager for every request
+        """
+        if self._tm is None:
+            self._tm = TransactionManager(self._storage)
+        return self._tm

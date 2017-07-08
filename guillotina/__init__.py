@@ -4,22 +4,25 @@
 from guillotina import patch  # noqa
 from guillotina.i18n import MessageFactory
 
-import logging
+from guillotina import glogging
 
 
 # create logging
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 _ = MessageFactory('guillotina')
 
 
 app_settings = {
+    "aiohttp_settings": {},
     "databases": [],
+    "conflict_retry_attempts": 3,
     "host": "127.0.0.1",
     "port": 8080,
     "static": [],
     "default_static_filenames": ['index.html', 'index.htm'],
     "utilities": [],
+    "store_json": True,
     "root_user": {
         "password": ""
     },
@@ -33,7 +36,7 @@ app_settings = {
         "guillotina.auth.validators.SaltedHashPasswordValidator",
         "guillotina.auth.validators.JWTValidator"
     ],
-    "default_permission": 'zope.Public',
+    "default_permission": 'guillotina.AccessContent',
     "available_addons": {},
     "api_definition": {},
     "cors": {
@@ -53,9 +56,11 @@ app_settings = {
         'serve': 'guillotina.commands.server.ServerCommand',
         'cli': 'guillotina.commands.cli.CliCommand',
         'create': 'guillotina.commands.create.CreateCommand',
-        'shell': 'guillotina.commands.shell.ShellCommand'
+        'shell': 'guillotina.commands.shell.ShellCommand',
+        'testdata': 'guillotina.commands.testdata.TestDataCommand',
+        'initialize-db': 'guillotina.commands.initialize_db.DatabaseInitializationCommand'
     },
-    "json_schema_definitions": {}  # json schemas available to reference in docs
+    "json_schema_definitions": {},  # json schemas available to reference in docs
 }
 
 SCHEMA_CACHE = {}

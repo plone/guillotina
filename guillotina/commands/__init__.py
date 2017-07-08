@@ -9,8 +9,8 @@ from guillotina.utils import resolve_dotted_name
 import argparse
 import asyncio
 import json
-import logging
 import os
+import signal
 import sys
 
 
@@ -18,7 +18,6 @@ MISSING_SETTINGS = {
     "databases": [{
         "db": {
             "storage": "postgresql",
-            "type": "postgres",
             "dsn": {
                 "scheme": "postgres",
                 "dbname": "guillotina",
@@ -27,9 +26,7 @@ MISSING_SETTINGS = {
                 "password": "test",
                 "port": 5432
             },
-            "options": {
-                "read_only": False
-            }
+            "read_only": False
         }
     }],
     "port": 8080,
@@ -44,7 +41,7 @@ def get_settings(configuration):
         with open(configuration, 'r') as config:
             settings = json.load(config)
     else:
-        logger.warn('Could not find the configuration file {}. Using default settings.'.format(
+        logger.warning('Could not find the configuration file {}. Using default settings.'.format(
             configuration
         ))
         settings = MISSING_SETTINGS.copy()
@@ -65,7 +62,6 @@ class Command(object):
         settings = get_settings(self.arguments.configuration)
         app = self.make_app(settings)
 
-        self.setup_logging()
         self.run_command(app, settings)
 
     def parse_arguments(self):
@@ -85,22 +81,14 @@ class Command(object):
         self.request = get_mocked_request()
         login(self.request)
 
-    def setup_logging(self):
-        logging.basicConfig(stream=sys.stdout)
-        logger.setLevel(logging.INFO)
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.INFO)
-        if self.arguments.debug:
-            logger.setLevel(logging.DEBUG)
-            logging.basicConfig(
-                stream=sys.stdout,
-                level=logging.DEBUG)
-            ch.setLevel(logging.DEBUG)
-
     def get_loop(self):
         return asyncio.get_event_loop()
 
+    def signal_handler(self, signal, frame):
+        sys.exit(0)
+
     def make_app(self, settings):
+        signal.signal(signal.SIGINT, self.signal_handler)
         return make_app(settings=settings, loop=self.get_loop())
 
     def get_parser(self):

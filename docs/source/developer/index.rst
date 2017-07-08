@@ -19,4 +19,5 @@ Contents:
    applicationconfiguration
    design
    persistence
+   blob
    api/index

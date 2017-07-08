@@ -32,7 +32,7 @@ def schema_compatible(value, schema_or_field):
         logger.error((u'Deserializer not found for field type '
                       u'"{0:s}" with value "{1:s}" and it was '
                       u'deserialized to None.').format(
-            schema_or_field, value))
+            repr(schema_or_field), value))
         return None
 
 
@@ -43,8 +43,8 @@ def schema_dict_converter(value, schema):
     if value == {}:
         return {}
 
-    keys, values = zip(*value.items())
-    keys = map(str, keys)
+    keys = [k for k in value.keys()]
+    values = [k for k in value.values()]
     values = [schema_compatible(values[idx], schema[keys[idx]])
               for idx in range(len(keys))]
     return dict(zip(keys, values))

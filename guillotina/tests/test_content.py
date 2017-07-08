@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import getUtility
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
@@ -74,3 +75,38 @@ class TestContent:
         with pytest.raises(NotAllowedContentType):
             await create_content_in_container(obj, 'TestType', 'foobar')
         await create_content_in_container(obj, 'Item', 'foobar')
+
+    async def test_creator_used_from_content_creation(self, dummy_request):
+        self.request = dummy_request
+        utils.login(self.request)
+
+        container = await create_content(
+            'Container',
+            id='guillotina',
+            title='Guillotina')
+        container.__name__ = 'guillotina'
+        utils._p_register(container)
+
+        import guillotina.tests
+        configure.register_configuration(Folder, dict(
+            type_name="TestType2",
+            behaviors=[],
+            module=guillotina.tests  # for registration initialization
+        ), 'contenttype')
+        root = getUtility(IApplication, name='root')
+
+        configure.load_configuration(
+            root.app.config, 'guillotina.tests', 'contenttype')
+        root.app.config.execute_actions()
+        load_cached_schema()
+
+        obj = await create_content_in_container(
+            container, 'TestType2', 'foobar',
+            creators=('root',), contributors=('root',))
+
+        assert obj.creators == ('root',)
+        assert obj.contributors == ('root',)
+
+        behavior = IDublinCore(obj)
+        assert behavior.creators == ('root',)
+        assert behavior.contributors == ('root',)

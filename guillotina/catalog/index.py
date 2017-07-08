@@ -4,6 +4,7 @@ from guillotina.api.search import AsyncCatalogReindex
 from guillotina.component import queryUtility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IGroupFolder
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
@@ -28,8 +29,10 @@ class CommitHook(object):
         # Commits are run in sync thread so there is no asyncloop
         search = queryUtility(ICatalogUtility)
         if search:
-            await search.remove(self.container, self.remove)
-            await search.index(self.container, self.index)
+            if len(self.remove) > 0:
+                await search.remove(self.container, self.remove)
+            if len(self.index) > 0:
+                await search.index(self.container, self.index)
 
         self.index = {}
         self.remove = []
@@ -61,6 +64,10 @@ def get_hook():
 
 @configure.subscriber(for_=(IResource, IObjectPermissionsModifiedEvent))
 async def security_changed(obj, event):
+    if IGroupFolder.providedBy(obj):
+        # assuming permissions for group are already handled correctly with
+        # group:group id principal
+        return
     # We need to reindex the objects below
     request = get_current_request()
     request._futures.update({obj.id: AsyncCatalogReindex(obj, request, security=True)()})
@@ -87,7 +94,7 @@ def remove_object(obj, event):
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent))
 @configure.subscriber(for_=(IResource, IObjectModifiedEvent))
-def add_object(obj, event):
+async def add_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
@@ -100,7 +107,7 @@ def add_object(obj, event):
         return
     search = queryUtility(ICatalogUtility)
     if search:
-        hook.index[uid] = search.get_data(obj)
+        hook.index[uid] = await search.get_data(obj)
 
 
 @configure.subscriber(for_=(IContainer, IObjectAddedEvent))

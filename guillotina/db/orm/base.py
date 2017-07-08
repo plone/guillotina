@@ -5,16 +5,6 @@ from zope.interface import implementer
 import copyreg
 
 
-GHOST = -1
-ROOT = 0
-FULL = 1
-CHANGED = 1
-UPTODATE = 2
-
-# Bitwise flags
-_CHANGED = 0x0001
-_STICKY = 0x0002
-
 _OGA = object.__getattribute__
 _OSA = object.__setattr__
 
@@ -24,7 +14,8 @@ SPECIAL_NAMES = ('__class__',
                  '__del__',
                  '__dict__',
                  '__of__',
-                 '__setstate__',)
+                 '__setstate__',
+                 '__parent__')
 
 # And this is an implementation detail of this class; it holds
 # the standard names plus the slot names, allowing for just one
@@ -51,39 +42,28 @@ class BaseObject(object):
 
     # This slots are NOT going to be on the serialization on the DB
     __slots__ = (
-        '__jar', '__oid', '__serial', '__flags', '__size',
-        '__of', '__parent', '__annotations', '__name', '__cache')
+        '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
+        '__name', '__immutable_cache', '__new_marker', '__locked')
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
         _OSA(inst, '_BaseObject__jar', None)
         _OSA(inst, '_BaseObject__oid', None)
         _OSA(inst, '_BaseObject__serial', None)
-        _OSA(inst, '_BaseObject__flags', CHANGED)  # start with changed...
-        _OSA(inst, '_BaseObject__size', 0)
         _OSA(inst, '_BaseObject__of', None)
         _OSA(inst, '_BaseObject__parent', None)
         _OSA(inst, '_BaseObject__name', None)
         _OSA(inst, '_BaseObject__annotations', {})
-        _OSA(inst, '_BaseObject__cache', -1)
+        _OSA(inst, '_BaseObject__immutable_cache', False)
+        _OSA(inst, '_BaseObject__new_marker', False)
+        _OSA(inst, '_BaseObject__locked', False)
         return inst
 
     def __repr__(self):
         return "<%s %d>" % (self.__class__.__name__, id(self))
 
     def _get_parent(self):
-        parent = _OGA(self, '_BaseObject__parent')
-        if parent is None:
-            return None
-        if not isinstance(parent, int):
-            return parent
-        jar = _OGA(self, '_BaseObject__jar')
-        if jar is None:
-            raise Exception('No JAR and has a parent, impossible')
-        oid = _OGA(self, '_BaseObject__oid')
-        if oid is None:
-            raise Exception('No OID')
-        # await jar.get_parent(oid)
+        return _OGA(self, '_BaseObject__parent')
 
     def _set_parent(self, value):
         _OSA(self, '_BaseObject__parent', value)
@@ -141,39 +121,6 @@ class BaseObject(object):
 
     _p_serial = property(_get_serial, _set_serial, _del_serial)
 
-    # _p_state
-    def _get_state(self):
-        # Note the use of OGA and caching to avoid recursive calls to __getattribute__:
-        # __getattribute__ calls _p_accessed calls cache.mru() calls _p_state
-        if _OGA(self, '_BaseObject__jar') is None:
-            return UPTODATE
-        flags = _OGA(self, '_BaseObject__flags')
-        if flags is None:
-            return GHOST
-        if flags & _CHANGED:
-            result = CHANGED
-        else:
-            result = UPTODATE
-        return result
-
-    _p_state = property(_get_state)
-
-    # The '_p_status' property is not (yet) part of the API:  for now,
-    # it exists to simplify debugging and testing assertions.
-    def _get_status(self):
-        if _OGA(self, '_BaseObject__jar') is None:
-            return 'unsaved'
-        flags = _OGA(self, '_BaseObject__flags')
-        if flags is None:
-            return 'ghost'
-        if flags & _STICKY:
-            return 'sticky'
-        if flags & _CHANGED:
-            return 'changed'
-        return 'saved'
-
-    _p_status = property(_get_status)
-
     def __setattr__(self, name, value):
         special_name = (name in _SPECIAL_NAMES or
                         name.startswith('_p_'))
@@ -183,11 +130,7 @@ class BaseObject(object):
                 _OGA(self, '_BaseObject__oid') is not None and
                 not special_name and
                 not volatile):
-            before = _OGA(self, '_BaseObject__flags')
-            after = before | _CHANGED
-            if before != after:
-                _OSA(self, '_BaseObject__flags', after)
-                _OGA(self, '_p_register')()
+            _OGA(self, '_p_register')()
 
     def _slotnames(self):
         """Returns all the slot names from the object"""
@@ -278,18 +221,42 @@ class BaseObject(object):
 
     __annotations__ = property(_get_annotation, _set_annotation, _del_annotation)
 
-    # CACHE
-    # -1 : No cache
-    # 0 : Allways
-    # X : ttl
+    # Immutable cache
+    # if we want to cache something in memory forever, think root db object here
 
     def _get_cache(self):
-        return _OGA(self, '_BaseObject__cache')
+        return _OGA(self, '_BaseObject__immutable_cache')
 
     def _set_cache(self, value):
-        _OSA(self, '_BaseObject__cache', value)
+        _OSA(self, '_BaseObject__immutable_cache', value)
 
     def _del_cache(self):
-        return _OSA(self, '_BaseObject__cache', None)
+        return _OSA(self, '_BaseObject__immutable_cache', False)
 
-    __cache__ = property(_get_cache, _set_cache, _del_cache)
+    __immutable_cache__ = property(_get_cache, _set_cache, _del_cache)
+
+    # __new_marker__:  marks an object as being newly created.
+    # this is useful for the transaction manager to know about it.
+    def _get_new_marker(self):
+        return _OGA(self, '_BaseObject__new_marker')
+
+    def _set_new_marker(self, value):
+        _OSA(self, '_BaseObject__new_marker', value)
+
+    def _del_new_marker(self):
+        _OSA(self, '_BaseObject__new_marker', False)
+
+    __new_marker__ = property(_get_new_marker, _set_new_marker, _del_new_marker)
+
+    # __locked__:  marks an object as being locked for writing
+    # and that after the transaction commits, it should unlock
+    def _get_locked(self):
+        return _OGA(self, '_BaseObject__locked')
+
+    def _set_locked(self, value):
+        _OSA(self, '_BaseObject__locked', value)
+
+    def _del_locked(self):
+        _OSA(self, '_BaseObject__locked', False)
+
+    __locked__ = property(_get_locked, _set_locked, _del_locked)

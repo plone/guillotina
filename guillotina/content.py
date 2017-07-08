@@ -9,7 +9,7 @@ from guillotina import PERMISSIONS_CACHE
 from guillotina import SCHEMA_CACHE
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
-from guillotina.behaviors import applyMarkers
+from guillotina.behaviors import apply_markers
 from guillotina.browser import get_physical_path
 from guillotina.component import getUtilitiesFor
 from guillotina.component import getUtility
@@ -17,6 +17,7 @@ from guillotina.component import queryUtility
 from guillotina.component.factory import Factory
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
+from guillotina.events import ObjectLoadedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -42,6 +43,7 @@ from guillotina.interfaces import IStaticFile
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
+from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 from zope.interface import alsoProvides
 from zope.interface import implementer
@@ -83,8 +85,8 @@ class ResourceFactory(Factory):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.type_name = self.type_name
         now = datetime.now(tz=_zone)
-        obj.created = now
-        obj.modified = now
+        obj.creation_date = now
+        obj.modification_date = now
         if id is None:
             if obj._p_oid is None:
                 # uuid uses _p_oid...
@@ -92,11 +94,11 @@ class ResourceFactory(Factory):
             obj.id = obj._p_oid
         else:
             obj.id = id
-        applyMarkers(obj, None)
+        apply_markers(obj, None)
         return obj
 
-    def getInterfaces(self):
-        spec = super(ResourceFactory, self).getInterfaces()
+    def get_interfaces(self):
+        spec = super(ResourceFactory, self).get_interfaces()
         spec.__name__ = self.type_name
         return spec
 
@@ -146,6 +148,19 @@ def iter_schemata_for_type(type_name):
         yield schema
 
 
+def get_all_possible_schemas_for_type(type_name):
+    result = set()
+    factory = get_cached_factory(type_name)
+    if factory.schema is not None:
+        result.add(factory.schema)
+    for schema in factory.behaviors or ():
+        result.add(schema)
+    for iface, utility in getUtilitiesFor(IBehavior):
+        if utility.for_.isEqualOrExtendedBy(factory.schema):
+            result.add(utility.interface)
+    return [b for b in result]
+
+
 def iter_schemata(obj):
     type_name = IResource(obj).type_name
     for schema in iter_schemata_for_type(type_name):
@@ -169,6 +184,7 @@ async def create_content(type_, **kw):
     obj = factory(id=id_)
     for key, value in kw.items():
         setattr(obj, key, value)
+    obj.__new_marker__ = True
     return obj
 
 
@@ -207,9 +223,10 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
         setattr(obj, key, value)
 
     if request is None or 'OVERWRITE' not in request.headers:
-        value = await container.async_contains(obj.id)
-        if value:
+        if await container.async_contains(obj.id):
             raise ConflictIdOnContainer(str(container), obj.id)
+
+    obj.__new_marker__ = True
 
     await notify(BeforeObjectAddedEvent(obj, container, id_))
     await container.async_set(obj.id, obj)
@@ -288,8 +305,8 @@ class Resource(guillotina.db.orm.base.BaseObject):
     __acl__ = None
 
     type_name = None
-    created = None
-    modified = None
+    creation_date = None
+    modification_date = None
     title = None
 
     @property
@@ -419,11 +436,16 @@ class Folder(Resource):
     to work with contained objects asynchronously.
     """
 
+    def _get_transaction(self):
+        if self._p_jar is not None:
+            return self._p_jar
+        return get_transaction()
+
     async def async_contains(self, key: str) -> bool:
         """
         Asynchronously check if key exists inside this folder
         """
-        return await self._p_jar.contains(self._p_oid, key)
+        return await self._get_transaction().contains(self._p_oid, key)
 
     async def async_set(self, key: str, value: IResource) -> None:
         """
@@ -431,17 +453,19 @@ class Folder(Resource):
         """
         value.__parent__ = self
         value.__name__ = key
-        if self._p_jar is not None:
-            value._p_jar = self._p_jar
-            self._p_jar.register(value)
+        trns = self._get_transaction()
+        if trns is not None:
+            value._p_jar = trns
+            trns.register(value)
 
     async def async_get(self, key: str, default=None) -> IResource:
         """
         Asynchronously get an object inside this folder
         """
         try:
-            val = await self._p_jar.get_child(self, key)
+            val = await self._get_transaction().get_child(self, key)
             if val is not None:
+                await notify(ObjectLoadedEvent(val))
                 return val
         except KeyError:
             pass
@@ -451,26 +475,32 @@ class Folder(Resource):
         """
         Asynchronously delete object in the folder
         """
-        return self._p_jar.delete(await self.async_get(key))
+        return self._get_transaction().delete(await self.async_get(key))
 
     async def async_len(self) -> int:
         """
         Asynchronously calculate the len of the folder
         """
-        return await self._p_jar.len(self._p_oid)
+        return await self._get_transaction().len(self._p_oid)
 
     async def async_keys(self) -> typing.List[str]:
         """
         Asynchronously get the sub object keys in this folder
         """
-        return await self._p_jar.keys(self._p_oid)
+        return await self._get_transaction().keys(self._p_oid)
 
     async def async_items(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
         """
         Asynchronously iterate through contents of folder
         """
-        async for key, value in self._p_jar.items(self):
+        async for key, value in self._get_transaction().items(self):
+            await notify(ObjectLoadedEvent(value))
             yield key, value
+
+    async def async_values(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
+        async for key, value in self._get_transaction().items(self):
+            await notify(ObjectLoadedEvent(value))
+            yield value
 
 
 @configure.contenttype(type_name="Container", schema=IContainer)
@@ -530,7 +560,7 @@ class StaticDirectory(dict):
     def __contains__(self, filename):
         try:
             return self[filename] is not None
-        except:
+        except KeyError:
             return False
 
 

@@ -1,13 +1,17 @@
 from guillotina.db import ROOT_ID
-from guillotina.db.storage import BaseStorage
+from guillotina.db.interfaces import IStorage
+from guillotina.db.storages.base import BaseStorage
+from zope.interface import implementer
 
 import asyncio
 
 
+@implementer(IStorage)
 class DummyStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
     _last_transaction = 1
+    _transaction_strategy = 'resolve'
 
     # MAIN MEMORY DB OBJECT OID -> OBJ
     DB = {}
@@ -52,7 +56,7 @@ class DummyStorage(BaseStorage):
     async def last_transaction(self, txn):
         return self._last_transaction
 
-    async def next_tid(self, txn):
+    async def get_next_tid(self, txn):
         async with self._lock:
             self._last_transaction += 1
             return self._last_transaction
@@ -63,15 +67,9 @@ class DummyStorage(BaseStorage):
             raise KeyError(oid)
         return objects
 
-    async def tpc_begin(self, txn, conn):
+    async def start_transaction(self, txn):
         # Add the new tid
         txn._db_txn = {}
-        txn._db_conn = conn
-
-    async def precommit(self, txn):
-        tid = await self.next_tid(txn)
-        if tid is not None:
-            txn._tid = tid
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -96,7 +94,6 @@ class DummyStorage(BaseStorage):
             'state': p
         }
         txn._db_txn[oid] = tobj
-        obj._p_estimated_size = len(p)
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
@@ -105,18 +102,18 @@ class DummyStorage(BaseStorage):
         self.PARENT_ID[tobj['parent_id']].remove(oid)
         del self.DB[oid]
 
-    async def tpc_vote(self, transaction):
+    async def get_current_tid(self, transaction):
         # Check if there is any commit bigger than the one we already have
         # For each object going to be written we need to check if it has
         # a new TID
         for oid, tobj in transaction._db_txn.items():
             if oid in self.DB:
                 if self.DB[oid]['tid'] > tobj['tid']:
-                    return False
+                    return self.DB[oid]['tid']
 
-        return True
+        return 0
 
-    async def tpc_finish(self, transaction):
+    async def commit(self, transaction):
         for oid, element in transaction._db_txn.items():
             self.DB[oid] = element
             if element['parent_id'] in self.PARENT_ID:

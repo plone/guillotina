@@ -15,6 +15,7 @@ from guillotina.component import getMultiAdapter
 from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
+from guillotina.db.utils import lock_object
 from guillotina.event import notify
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
@@ -22,7 +23,7 @@ from guillotina.events import ObjectModifiedEvent
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
-from guillotina.events import ObjectVIContainerdEvent
+from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
@@ -39,8 +40,8 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_class_dotted_name
 from guillotina.utils import iter_parents
+from guillotina.utils import valid_id
 
 
 _zone = tzlocal()
@@ -85,7 +86,7 @@ class DefaultGET(Service):
             (self.context, self.request),
             IResourceSerializeToJson)
         result = await serializer()
-        await notify(ObjectVIContainerdEvent(self.context))
+        await notify(ObjectVisitedEvent(self.context))
         return result
 
 
@@ -129,6 +130,9 @@ class DefaultPOST(Service):
         if not id_:
             new_id = None
         else:
+            if not valid_id(id_):
+                return ErrorResponse('PreconditionFailed', str('Invalid id'),
+                                     status=412)
             new_id = id_
 
         user = get_authenticated_user_id(self.request)
@@ -181,7 +185,7 @@ class DefaultPOST(Service):
             'guillotina.Owner',
             user)
 
-        await notify(ObjectAddedEvent(obj, self.context, obj.id, data=data))
+        await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
 
         absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
 
@@ -212,6 +216,7 @@ class DefaultPOST(Service):
     })
 class DefaultPATCH(Service):
     async def __call__(self):
+        await lock_object(self.context)
         data = await self.get_data()
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
@@ -333,54 +338,78 @@ PermissionMap = {
             "description": "Successuflly changed permission"
         }
     })
-async def sharing_post(context, request):
-    """Change permissions"""
-    lroles = local_roles()
-    data = await request.json()
-    if 'prinrole' not in data and \
-            'roleperm' not in data and \
-            'prinperm' not in data:
-        raise AttributeError('prinrole or roleperm or prinperm missing')
+class SharingPOST(Service):
+    async def __call__(self, changed=False):
+        """Change permissions"""
+        context = self.context
+        request = self.request
+        await lock_object(context)
+        lroles = local_roles()
+        data = await request.json()
+        if 'prinrole' not in data and \
+                'roleperm' not in data and \
+                'prinperm' not in data:
+            raise AttributeError('prinrole or roleperm or prinperm missing')
 
-    # we need to check if we are changing any info
-    changed = False
+        for prinrole in data.get('prinrole') or []:
+            setting = prinrole.get('setting')
+            if setting not in PermissionMap['prinrole']:
+                raise AttributeError('Invalid Type {}'.format(setting))
+            manager = IPrincipalRoleManager(context)
+            operation = PermissionMap['prinrole'][setting]
+            func = getattr(manager, operation)
+            if prinrole['role'] in lroles:
+                changed = True
+                func(prinrole['role'], prinrole['principal'])
+            else:
+                raise KeyError('No valid local role')
 
-    for prinrole in data.get('prinrole') or []:
-        setting = prinrole.get('setting')
-        if setting not in PermissionMap['prinrole']:
-            raise AttributeError('Invalid Type {}'.format(setting))
-        manager = IPrincipalRoleManager(context)
-        operation = PermissionMap['prinrole'][setting]
-        func = getattr(manager, operation)
-        if prinrole['role'] in lroles:
+        for prinperm in data.get('prinperm') or []:
+            setting = prinperm['setting']
+            if setting not in PermissionMap['prinperm']:
+                raise AttributeError('Invalid Type')
+            manager = IPrincipalPermissionManager(context)
+            operation = PermissionMap['prinperm'][setting]
+            func = getattr(manager, operation)
             changed = True
-            func(prinrole['role'], prinrole['principal'])
-        else:
-            raise KeyError('No valid local role')
+            func(prinperm['permission'], prinperm['principal'])
 
-    for prinperm in data.get('prinperm') or []:
-        setting = prinperm['setting']
-        if setting not in PermissionMap['prinperm']:
-            raise AttributeError('Invalid Type')
-        manager = IPrincipalPermissionManager(context)
-        operation = PermissionMap['prinperm'][setting]
-        func = getattr(manager, operation)
-        changed = True
-        func(prinperm['permission'], prinperm['principal'])
+        for roleperm in data.get('roleperm') or []:
+            setting = roleperm['setting']
+            if setting not in PermissionMap['roleperm']:
+                raise AttributeError('Invalid Type')
+            manager = IRolePermissionManager(context)
+            operation = PermissionMap['roleperm'][setting]
+            func = getattr(manager, operation)
+            changed = True
+            func(roleperm['permission'], roleperm['role'])
 
-    for roleperm in data.get('roleperm') or []:
-        setting = roleperm['setting']
-        if setting not in PermissionMap['roleperm']:
-            raise AttributeError('Invalid Type')
-        manager = IRolePermissionManager(context)
-        operation = PermissionMap['roleperm'][setting]
-        func = getattr(manager, operation)
-        changed = True
-        func(roleperm['permission'], roleperm['role'])
+        if changed:
+            context._p_register()  # make sure data is saved
+            await notify(ObjectPermissionsModifiedEvent(context, data))
 
-    if changed:
-        context._p_register()  # make sure data is saved
-        await notify(ObjectPermissionsModifiedEvent(context, data))
+
+@configure.service(
+    context=IResource, method='PUT',
+    permission='guillotina.ChangePermissions', name='@sharing',
+    summary='Replace permissions for a resource',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "type": "object",
+        "schema": {
+            "$ref": "#/definitions/Permissions"
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Successuflly replaced permissions"
+        }
+    })
+class SharingPUT(SharingPOST):
+    async def __call__(self):
+        self.context.__acl__ = None
+        return await super().__call__(True)
 
 
 @configure.service(
@@ -398,9 +427,9 @@ async def sharing_post(context, request):
         }
     })
 async def can_i_do(context, request):
-    if 'permission' not in request.GET:
+    if 'permission' not in request.query:
         raise TypeError('No permission param')
-    permission = request.GET['permission']
+    permission = request.query['permission']
     return IInteraction(request).check_permission(permission, context)
 
 
@@ -437,7 +466,10 @@ class DefaultOPTIONS(Service):
         """We need to check if there is cors enabled and is valid."""
         headers = {}
 
-        if not app_settings['cors']:
+        renderer = app_settings['cors_renderer'](self.request)
+        settings = await renderer.get_settings()
+
+        if not settings:
             return {}
 
         origin = self.request.headers.get('Origin', None)
@@ -456,13 +488,13 @@ class DefaultOPTIONS(Service):
             requested_headers = map(str.strip, requested_headers.split(', '))
 
         requested_method = requested_method.upper()
-        allowed_methods = app_settings['cors']['allow_methods']
+        allowed_methods = settings['allow_methods']
         if requested_method not in allowed_methods:
             raise HTTPMethodNotAllowed(
                 requested_method, allowed_methods,
                 text='Access-Control-Request-Method Method not allowed')
 
-        supported_headers = app_settings['cors']['allow_headers']
+        supported_headers = settings['allow_headers']
         if '*' not in supported_headers and requested_headers:
             supported_headers = [s.lower() for s in supported_headers]
             for h in requested_headers:
@@ -475,11 +507,9 @@ class DefaultOPTIONS(Service):
 
         supported_headers = set(supported_headers) | set(requested_headers)
 
-        headers['Access-Control-Allow-Headers'] = ','.join(
-            supported_headers)
-        headers['Access-Control-Allow-Methods'] = ','.join(
-            app_settings['cors']['allow_methods'])
-        headers['Access-Control-Max-Age'] = str(app_settings['cors']['max_age'])
+        headers['Access-Control-Allow-Headers'] = ','.join(supported_headers)
+        headers['Access-Control-Allow-Methods'] = ','.join(settings['allow_methods'])
+        headers['Access-Control-Max-Age'] = str(settings['max_age'])
         return headers
 
     async def render(self):

@@ -29,8 +29,8 @@ class GuillotinaParticipation(object):
             if user is not None:
                 self.request._cache_user = user
                 self.principal = user
-                if hasattr(user, '_roles') and 'guillotina.Authenticated' not in user._roles:
-                    user._roles['guillotina.Authenticated'] = 1
+                if hasattr(user, 'roles') and 'guillotina.Authenticated' not in user.roles:
+                    user.roles['guillotina.Authenticated'] = 1
         else:
             self.principal = getattr(self.request, '_cache_user', None)
         self.interaction = None

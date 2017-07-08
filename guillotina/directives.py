@@ -145,6 +145,7 @@ class index(MetadataDictDirective):
         'searchabletext',
         'text',
         'keyword',
+        'textkeyword',
         'int',
         'date',
         'boolean',

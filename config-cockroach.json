@@ -1,0 +1,39 @@
+{
+	"databases": [{
+		"db": {
+			"storage": "cockroach",
+			"transaction_strategy": "lock",
+			"isolation_level": "snapshot",
+      "dsn": "postgresql://root@127.0.0.1:26257/guillotina?sslmode=disable",
+      "read_only": false,
+			"etcd": {
+				"host": "127.0.0.1",
+	      "port": 2379,
+	      "protocol": "http",
+	      "allow_redirect": true,
+	      "allow_reconnect": false,
+				"base_key": "guillotina-",
+				"acquire_timeout": 1
+			},
+			"lock_ttl": 10,
+			"pool_size": 100
+		}
+	}],
+	"host": "127.0.0.1",
+	"port": 8080,
+	"static": [
+		{"favicon.ico": "static/favicon.ico"}
+	],
+	"root_user": {
+		"password": "root"
+	},
+	"cors": {
+		"allow_origin": ["*"],
+		"allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
+		"allow_headers": ["*"],
+		"expose_headers": ["*"],
+		"allow_credentials": true,
+		"max_age": 3660
+	},
+	"utilities": []
+}

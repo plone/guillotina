@@ -70,23 +70,23 @@ class CloudFileManager(object):
         self.real_file_manager = getMultiAdapter(
             (context, request, field), IFileManager)
 
-    async def download(self):
-        return await self.real_file_manager.download()
+    async def download(self, *args, **kwargs):
+        return await self.real_file_manager.download(*args, **kwargs)
 
-    async def tus_options(self):
-        return await self.real_file_manager.tus_options()
+    async def tus_options(self, *args, **kwargs):
+        return await self.real_file_manager.tus_options(*args, **kwargs)
 
-    async def tus_head(self):
-        return await self.real_file_manager.tus_head()
+    async def tus_head(self, *args, **kwargs):
+        return await self.real_file_manager.tus_head(*args, **kwargs)
 
-    async def tus_patch(self):
-        return await self.real_file_manager.tus_patch()
+    async def tus_patch(self, *args, **kwargs):
+        return await self.real_file_manager.tus_patch(*args, **kwargs)
 
-    async def tus_create(self):
-        return await self.real_file_manager.tus_create()
+    async def tus_create(self, *args, **kwargs):
+        return await self.real_file_manager.tus_create(*args, **kwargs)
 
-    async def upload(self):
-        return await self.real_file_manager.upload()
+    async def upload(self, *args, **kwargs):
+        return await self.real_file_manager.upload(*args, **kwargs)
 
 
 # This file was borrowed from z3c.blobfile and is licensed under the terms of

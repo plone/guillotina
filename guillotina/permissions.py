@@ -33,13 +33,14 @@ configure.permission('guillotina.ReindexContent', 'Reindex Content')
 configure.permission('guillotina.ManageCatalog', 'Manage catalog')
 
 configure.permission('guillotina.GetAPIDefinition', 'Get the API definition')
+configure.permission('guillotina.Public', 'Public access to content')
 
 
 configure.role("guillotina.Anonymous", "Everybody",
                "All users have this role implicitly", False)
 configure.role("guillotina.Authenticated", "Authenticated user",
                "Role automatically assigned to authenticated users", False)
-configure.role("guillotina.Member", "Container Member", False)
+configure.role("guillotina.Member", "Member", False)
 
 configure.role("guillotina.Reader", "Reader", "can read content", True)
 configure.role("guillotina.Editor", "Editor", "can edit content", True)
@@ -59,6 +60,17 @@ configure.role("guillotina.ContainerDeleter", "Container Remover", "Can destroy 
 configure.grant(
     permission="guillotina.AccessPreflight",
     role="guillotina.Anonymous")
+configure.grant(
+    permission="guillotina.Public",
+    role="guillotina.Anonymous")
+
+# Authenticated
+configure.grant(
+    permission="guillotina.AccessPreflight",
+    role="guillotina.Authenticated")
+configure.grant(
+    permission="guillotina.Public",
+    role="guillotina.Authenticated")
 
 # Reader
 configure.grant(

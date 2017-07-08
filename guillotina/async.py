@@ -5,8 +5,8 @@ from guillotina import logger
 from guillotina.browser import ErrorResponse
 from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
+from guillotina.db.transaction import Status
 from guillotina.exceptions import Unauthorized
-from guillotina.interfaces import SHARED_CONNECTION
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
 from zope.interface import Interface
@@ -43,34 +43,40 @@ class QueueUtility(object):
                 priority, view = await self._queue.get()
                 got_obj = True
                 txn = get_transaction(view.request)
-                if txn is None:
-                    tm = get_tm(view.request)
-                    txn = tm.begin(view.request)
+                tm = get_tm(view.request)
+                if txn is None or txn.status in (Status.ABORTED, Status.COMMITTED):
+                    txn = await tm.begin(view.request)
+                else:
+                    # still finishing current transaction, this connection
+                    # will be cut off, so we need to wait until we no longer
+                    # have an active transaction on the reqeust...
+                    await self.add(view)
+                    await asyncio.sleep(1)
+                    continue
 
                 try:
                     view_result = await view()
                     if isinstance(view_result, ErrorResponse):
-                        await txn.commit()
+                        await tm.commit(txn=txn)
                     elif isinstance(view_result, UnauthorizedResponse):
-                        await txn.abort()
+                        await tm.abort(txn=txn)
                     else:
-                        await txn.commit()
+                        await tm.commit(txn=txn)
                 except Unauthorized:
-                    await txn.abort()
+                    await tm.abort(txn=txn)
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",
                         exc_info=e)
-                    await txn.abort()
-            except KeyboardInterrupt or MemoryError or SystemExit or asyncio.CancelledError:
+                    await tm.abort(txn=txn)
+            except (KeyboardInterrupt, MemoryError, SystemExit,
+                    asyncio.CancelledError, GeneratorExit, RuntimeError):
                 self._exceptions = True
                 raise
             except Exception as e:  # noqa
                 self._exceptions = True
                 logger.error('Worker call failed', exc_info=e)
             finally:
-                if SHARED_CONNECTION is False and hasattr(view.request, 'conn'):
-                    view.request.conn.close()
                 if got_obj:
                     self._queue.task_done()
 

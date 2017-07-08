@@ -2,7 +2,12 @@
 from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
+from guillotina import glogging
+from guillotina.component import getUtility
 from guillotina.exceptions import RequestNotFound
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
+from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
@@ -13,7 +18,6 @@ import asyncio
 import fnmatch
 import importlib
 import inspect
-import logging
 import random
 import string
 import sys
@@ -36,7 +40,7 @@ except NotImplementedError:
 
 
 RANDOM_SECRET = random.randint(0, 1000000)
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 
 def import_class(import_string: str) -> types.ModuleType:
@@ -54,7 +58,7 @@ def get_content_path(content: IResource) -> str:
     parts = []
     parent = getattr(content, '__parent__', None)
     while content is not None and content.__name__ is not None and\
-            parent is not None:
+            parent is not None and not IContainer.providedBy(content):
         parts.append(content.__name__)
         content = parent
         parent = getattr(content, '__parent__', None)
@@ -100,33 +104,6 @@ def get_authenticated_user_id(request: IRequest) -> str:
     user = get_authenticated_user(request)
     if user:
         return user.id
-
-
-def apply_cors(request: IRequest) -> dict:
-    """Second part of the cors function to validate."""
-    from guillotina import app_settings
-    headers = {}
-    origin = request.headers.get('Origin', None)
-    if origin:
-        if not any([fnmatch.fnmatchcase(origin, o)
-                    for o in app_settings['cors']['allow_origin']]):
-            logger.error('Origin %s not allowed' % origin)
-            raise HTTPUnauthorized()
-        elif request.headers.get('Access-Control-Allow-Credentials', False):
-            headers['Access-Control-Allow-Origin', origin]
-        else:
-            if any([o == "*" for o in app_settings['cors']['allow_origin']]):
-                headers['Access-Control-Allow-Origin'] = '*'
-            else:
-                headers['Access-Control-Allow-Origin'] = origin
-    if request.headers.get(
-            'Access-Control-Request-Method', None) != 'OPTIONS':
-        if app_settings['cors']['allow_credentials']:
-            headers['Access-Control-Allow-Credentials'] = 'True'
-        if len(app_settings['cors']['allow_headers']):
-            headers['Access-Control-Expose-Headers'] = \
-                ', '.join(app_settings['cors']['allow_headers'])
-    return headers
 
 
 def strings_differ(string1: str, string2: str) -> bool:
@@ -231,12 +208,16 @@ def get_module_dotted_name(ob) -> str:
     return getattr(ob, '__module__', None) or getattr(ob, '__name__', None)
 
 
-def get_class_dotted_name(ob) -> str:
-    if inspect.isclass(ob) or IInterface.providedBy(ob):
-        class_name = ob.__name__
+def get_dotted_name(ob) -> str:
+    if inspect.isclass(ob) or IInterface.providedBy(ob) or isinstance(ob, types.FunctionType):
+        name = ob.__name__
     else:
-        class_name = ob.__class__.__name__
-    return ob.__module__ + '.' + class_name
+        name = ob.__class__.__name__
+    return ob.__module__ + '.' + name
+
+
+# get_class_dotted_name is deprecated
+get_class_dotted_name = get_dotted_name
 
 
 def merge_dicts(d1: dict, d2: dict) -> dict:
@@ -270,6 +251,30 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     return result
 
 
+_valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+'
+
+
+def valid_id(_id):
+    _id = _id.lower()
+    # can't start with _
+    if not _id or _id[0] == '_':
+        return False
+    return _id == ''.join([l for l in _id if l in _valid_id_characters])
+
+
+async def get_containers(request):
+    root = getUtility(IApplication, name='root')
+    for _id, db in root:
+        if IDatabase.providedBy(db):
+            db._db._storage._transaction_strategy = 'none'
+            tm = db.get_transaction_manager()
+            tm.request = request
+            txn = await tm.begin(request)
+            async for s_id, container in db.async_items():
+                tm.request.container = container
+                yield txn, tm, container
+
+
 def get_current_request() -> IRequest:
     """
     Return the current request by heuristically looking it up from stack
@@ -291,3 +296,30 @@ except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
     pass
 else:
     from guillotina.optimizations import get_current_request  # noqa
+
+
+def apply_cors(request: IRequest) -> dict:
+    # deprecated, will be removed in next major release
+    from guillotina import app_settings
+    headers = {}
+    origin = request.headers.get('Origin', None)
+    if origin:
+        if not any([fnmatch.fnmatchcase(origin, o)
+                    for o in app_settings['cors']['allow_origin']]):
+            logger.error('Origin %s not allowed' % origin)
+            raise HTTPUnauthorized()
+        elif request.headers.get('Access-Control-Allow-Credentials', False):
+            headers['Access-Control-Allow-Origin', origin]
+        else:
+            if any([o == "*" for o in app_settings['cors']['allow_origin']]):
+                headers['Access-Control-Allow-Origin'] = '*'
+            else:
+                headers['Access-Control-Allow-Origin'] = origin
+    if request.headers.get(
+            'Access-Control-Request-Method', None) != 'OPTIONS':
+        if app_settings['cors']['allow_credentials']:
+            headers['Access-Control-Allow-Credentials'] = 'True'
+        if len(app_settings['cors']['allow_headers']):
+            headers['Access-Control-Expose-Headers'] = \
+                ', '.join(app_settings['cors']['allow_headers'])
+    return headers

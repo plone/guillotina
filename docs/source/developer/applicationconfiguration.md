@@ -108,3 +108,12 @@ to those decorators.
 
 * _principal_: ID of principal
 * _role_: ID of role
+
+
+# Overriding Configuration
+
+`guillotina` applications can override default `guillotina` configuration.
+
+If multiple `guillotina` applications configure conflicting configurations,
+`guillotina` chooses the configuration according to the order the `guillotina`
+applications that are included.

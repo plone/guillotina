@@ -7,6 +7,7 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
 from guillotina.directives import metadata
 from guillotina.exceptions import NoIndexField
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
@@ -16,7 +17,6 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
-from guillotina.utils import apply_coroutine
 from zope.interface import implementer
 
 
@@ -125,10 +125,13 @@ class DefaultCatalogDataAdapter(object):
 
         for schema in iter_schemata_for_type(self.content.type_name):
             behavior = schema(self.content)
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load(create=False)
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
                 try:
                     if 'accessor' in index_data:
-                        values[index_name] = await apply_coroutine(index_data['accessor'], behavior)
+                        values[index_name] = index_data['accessor'](behavior)
                     else:
                         values[index_name] = self.get_data(behavior, schema, index_name)
                 except NoIndexField:

@@ -3,6 +3,7 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
 from guillotina.tests import utils
+from guillotina.transactions import managed_transaction
 from zope.interface import Interface
 
 import json
@@ -85,7 +86,7 @@ async def test_get_registry_value(container_requester):
         assert response['value'] == ['guillotina.interfaces.layer.IDefaultLayer']
 
 
-async def test_create_contenttype(container_requester):
+async def test_create_content(container_requester):
     async with await container_requester as requester:
         response, status = await requester(
             'POST',
@@ -99,9 +100,10 @@ async def test_create_contenttype(container_requester):
         assert status == 201
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        container = await root.async_get('guillotina')
-        obj = await container.async_get('item1')
-        assert obj.title == 'Item1'
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('item1')
+            assert obj.title == 'Item1'
 
 
 async def test_create_delete_contenttype(container_requester):
@@ -167,21 +169,22 @@ async def test_create_contenttype_with_date(container_requester):
             '/db/guillotina/item1',
             data=json.dumps({
                 "guillotina.behaviors.dublincore.IDublinCore": {
-                    "created": date_to_test,
-                    "expires": date_to_test
+                    "creation_date": date_to_test,
+                    "expiration_date": date_to_test
                 }
             })
         )
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        container = await root.async_get('guillotina')
-        obj = await container.async_get('item1')
-        from guillotina.behaviors.dublincore import IDublinCore
-        behavior = IDublinCore(obj)
-        await behavior.load()
-        assert behavior.created.isoformat() == date_to_test
-        assert behavior.expires.isoformat() == date_to_test
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('item1')
+            from guillotina.behaviors.dublincore import IDublinCore
+            behavior = IDublinCore(obj)
+            await behavior.load()
+            assert behavior.creation_date.isoformat() == date_to_test
+            assert behavior.expiration_date.isoformat() == date_to_test
 
 
 async def test_create_duplicate_id(container_requester):
@@ -299,3 +302,17 @@ async def test_get_logged_user_info(container_requester):
         except KeyError:
             raise AssertionError("Code should not come here! as User `%s` "
                                  "should be in response" % ROOT_USER_ID)
+
+
+async def test_not_create_content_with_invalid_id(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "lsdkfjl?#($)"
+            })
+        )
+        assert status == 412
