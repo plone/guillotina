@@ -12,7 +12,7 @@ from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import getMultiAdapter
-from guillotina.component import queryMultiAdapter
+from guillotina.component import queryMultiAdapter, getUtility
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
 from guillotina.db.utils import lock_object
@@ -32,7 +32,7 @@ from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IResource
+from guillotina.interfaces import IResource, IGetOwner
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
@@ -180,10 +180,10 @@ class DefaultPOST(Service):
                 status=400)
 
         # Local Roles assign owner as the creator user
+        get_owner = getUtility(IGetOwner)
         roleperm = IPrincipalRoleManager(obj)
         roleperm.assign_role_to_principal(
-            'guillotina.Owner',
-            user)
+            'guillotina.Owner', await get_owner(obj, user))
 
         await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
 

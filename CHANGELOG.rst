@@ -1,7 +1,8 @@
 1.1.0a115 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Be able to provide utility for getting the owner of a new resource
+  [vangheem]
 
 
 1.1.0a114 (2017-07-10)

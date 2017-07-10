@@ -30,6 +30,7 @@ from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
+from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
 from guillotina.interfaces import ILayers
@@ -570,3 +571,8 @@ class StaticFileSpecialPermissions(PrincipalPermissionManager):
     def __init__(self, db):
         super(StaticFileSpecialPermissions, self).__init__()
         self.grant_permission_to_principal('guillotina.AccessContent', ANONYMOUS_USER_ID)
+
+
+@configure.utility(IGetOwner)
+async def default_get_owner(obj, creator):
+    return creator
