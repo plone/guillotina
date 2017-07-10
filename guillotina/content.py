@@ -573,6 +573,6 @@ class StaticFileSpecialPermissions(PrincipalPermissionManager):
         self.grant_permission_to_principal('guillotina.AccessContent', ANONYMOUS_USER_ID)
 
 
-@configure.utility(IGetOwner)
+@configure.utility(provides=IGetOwner)
 async def default_get_owner(obj, creator):
     return creator
