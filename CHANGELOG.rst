@@ -1,4 +1,4 @@
-1.1.0a115 (unreleased)
+1.1.0a115 (2017-07-10)
 ----------------------
 
 - Be able to provide utility for getting the owner of a new resource
