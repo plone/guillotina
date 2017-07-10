@@ -326,12 +326,14 @@ def apply_cors(request: IRequest) -> dict:
     return headers
 
 
-def get_owner(obj):
+def get_owners(obj):
     try:
         prinrole = IPrincipalRoleMap(obj)
     except TypeError:
-        return
+        return []
+    owners = []
     for user, roles in prinrole._bycol.items():
         for role in roles:
-            if role == 'guillotina.Owner' and user in getattr(obj, 'creators', []):
-                return user
+            if role == 'guillotina.Owner':
+                owners.append(user)
+    return owners
