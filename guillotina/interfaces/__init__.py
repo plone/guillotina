@@ -25,6 +25,7 @@ from .content import IResourceFactory  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
+from .content import IGetOwner  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
 from .events import IFileFinishUploaded  # noqa

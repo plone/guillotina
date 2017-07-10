@@ -1,5 +1,7 @@
 from guillotina import utils
+from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
+from guillotina.tests.utils import create_content
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import get_root
 
@@ -97,3 +99,12 @@ def test_valid_id():
     assert not utils.valid_id('FooBar-_-.,')
     assert not utils.valid_id('FooBar-_-.@#')
     assert not utils.valid_id('FooBar-_-.?')
+
+
+def test_get_owners(dummy_guillotina):
+    content = create_content()
+    roleperm = IPrincipalRoleManager(content)
+    roleperm.assign_role_to_principal('guillotina.Owner', 'foobar')
+    assert utils.get_owners(content) == ['foobar']
+    roleperm.assign_role_to_principal('guillotina.Owner', 'foobar2')
+    assert utils.get_owners(content) == ['foobar', 'foobar2']

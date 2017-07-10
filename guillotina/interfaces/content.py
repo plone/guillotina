@@ -208,3 +208,9 @@ class IGroupFolder(IFolder):
     Main purpose of this PR is to prevent reindexing on modify permissions
     for group content.
     '''
+
+
+class IGetOwner(Interface):
+    '''
+    Defines a utility for calculating the owner of a new resource
+    '''
