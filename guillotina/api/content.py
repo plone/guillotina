@@ -12,7 +12,8 @@ from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import getMultiAdapter
-from guillotina.component import queryMultiAdapter, getUtility
+from guillotina.component import getUtility
+from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
 from guillotina.db.utils import lock_object
@@ -27,12 +28,13 @@ from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IResource, IGetOwner
+from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
