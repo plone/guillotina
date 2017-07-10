@@ -1,7 +1,8 @@
 1.1.0a114 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Add `get_owner` utility
+  [vangheem]
 
 
 1.1.0a113 (2017-07-03)

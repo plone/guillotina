@@ -9,6 +9,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipal
+from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from hashlib import sha256 as sha
@@ -323,3 +324,14 @@ def apply_cors(request: IRequest) -> dict:
             headers['Access-Control-Expose-Headers'] = \
                 ', '.join(app_settings['cors']['allow_headers'])
     return headers
+
+
+def get_owner(obj):
+    try:
+        prinrole = IPrincipalRoleMap(obj)
+    except TypeError:
+        return
+    for user, roles in prinrole._bycol.items():
+        for role in roles:
+            if role == 'guillotina.Owner' and user in getattr(obj, 'creators', []):
+                return user
