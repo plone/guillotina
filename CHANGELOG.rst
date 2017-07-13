@@ -1,7 +1,8 @@
 1.1.0a116 (unreleased)
 ----------------------
 
-- Nothing changed yet.
+- Fix starting with request without txn would cause an error with managed_transaction
+  [vangheem]
 
 
 1.1.0a115 (2017-07-10)
