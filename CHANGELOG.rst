@@ -1,4 +1,4 @@
-1.1.0a116 (unreleased)
+1.1.0a116 (2017-07-13)
 ----------------------
 
 - Fix starting with request without txn would cause an error with managed_transaction
