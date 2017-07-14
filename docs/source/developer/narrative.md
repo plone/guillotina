@@ -38,7 +38,7 @@ python setup.py develop
 
 ## Configuring
 
-The scaffold produces an initial `config.json` configuration file for you.
+The scaffold produces an initial `config.yaml` configuration file for you.
 
 You can inspect and customize your configuration. Most notably is the database
 configuration. If you want to run a development `postgresql` server, the
@@ -85,7 +85,7 @@ so add this to your `__init__.py` `includeme` function:
 You run you application by using the guillotina command runner again:
 
 ```
-guillotina serve -c config.json
+guillotina serve -c config.yaml
 ```
 
 

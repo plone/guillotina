@@ -1,7 +1,8 @@
-1.1.0a117 (unreleased)
-----------------------
+1.2.0a1 (unreleased)
+--------------------
 
-- Nothing changed yet.
+- Switch to defaulting to yaml for configuration but still supporting json
+  [vangheem]
 
 
 1.1.0a116 (2017-07-13)

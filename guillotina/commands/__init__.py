@@ -12,6 +12,7 @@ import json
 import os
 import signal
 import sys
+import yaml
 
 
 MISSING_SETTINGS = {
@@ -39,7 +40,11 @@ MISSING_SETTINGS = {
 def get_settings(configuration):
     if os.path.exists(configuration):
         with open(configuration, 'r') as config:
-            settings = json.load(config)
+            if configuration.lower().endswith('.json'):
+                settings = json.load(config)
+            else:
+                # should be yaml then...
+                settings = yaml.load(config)
     else:
         logger.warning('Could not find the configuration file {}. Using default settings.'.format(
             configuration
@@ -94,7 +99,7 @@ class Command(object):
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)
         parser.add_argument('-c', '--configuration',
-                            default='config.json', help='Configuration file')
+                            default='config.yaml', help='Configuration file')
         parser.add_argument('--debug', dest='debug', action='store_true',
                             help='Log verbose')
         parser.set_defaults(debug=False)
@@ -113,7 +118,7 @@ def command_runner():
         add_help=False)
     parser.add_argument('command', nargs='?', default='serve')
     parser.add_argument('-c', '--configuration',
-                        default='config.json', help='Configuration file')
+                        default='config.yaml', help='Configuration file')
     parser.add_argument('-h', '--help', action='store_true',
                         dest='help', help='Help', default=False)
 
