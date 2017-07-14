@@ -4,8 +4,8 @@
 the `guillotina`. All of these settings are configurable by providing a
 JSON configuration file to the start script.
 
-By default, the startup script looks for a `config.json` file. You can use a different
-file by using the `-c` option for the script script like this `./bin/guillotina -c myconfig.json`.
+By default, the startup script looks for a `config.yaml` file. You can use a different
+file by using the `-c` option for the script script like this `./bin/guillotina -c myconfig.yaml`.
 
 
 ## Databases
@@ -163,9 +163,9 @@ Example configuration:
 ```json
 {
   "databases": [{
-		"db": {
-			"storage": "postgresql",
-			"transaction_strategy": "resolve",
+    "db": {
+      "storage": "postgresql",
+      "transaction_strategy": "resolve",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -174,8 +174,8 @@ Example configuration:
         "password": "",
         "port": 5432
       }
-		}
-	}]
+    }
+  }]
 }
 ```
 
@@ -217,9 +217,9 @@ See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
 ```json
 {
   "databases": [{
-		"db": {
-			"storage": "postgresql",
-			"transaction_strategy": "lock",
+    "db": {
+      "storage": "postgresql",
+      "transaction_strategy": "lock",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -229,18 +229,18 @@ See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
         "port": 5432
       },
       "etcd": {
-				"host": "127.0.0.1",
-	      "port": 2379,
-	      "protocol": "http",
-	      "read_timeout": 2,
-	      "allow_redirect": true,
-	      "allow_reconnect": false,
-				"base_key": "guillotina-",
-				"read_timeout": 3,
-				"acquire_timeout": 10
-			}
-		}
-	}]
+        "host": "127.0.0.1",
+        "port": 2379,
+        "protocol": "http",
+        "read_timeout": 2,
+        "allow_redirect": true,
+        "allow_reconnect": false,
+        "base_key": "guillotina-",
+        "read_timeout": 3,
+        "acquire_timeout": 10
+      }
+    }
+  }]
 }
 ```
 

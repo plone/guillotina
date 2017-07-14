@@ -62,7 +62,8 @@ setup(
         'pyjwt',
         'asyncpg',
         'cffi',
-        'aio_etcd'
+        'aio_etcd',
+        'PyYAML'
     ],
     extras_require={
         'test': [
