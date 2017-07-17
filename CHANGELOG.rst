@@ -1,6 +1,9 @@
 1.2.0a1 (unreleased)
 --------------------
 
+- Support ssl for cockroachdb
+  [bloodbare]
+
 - Switch to defaulting to yaml for configuration but still supporting json
   [vangheem]
 
