@@ -19,6 +19,8 @@ import asyncio
 import fnmatch
 import importlib
 import inspect
+import os
+import pathlib
 import random
 import string
 import sys
@@ -337,3 +339,15 @@ def get_owners(obj):
             if role == 'guillotina.Owner':
                 owners.append(user)
     return owners
+
+
+def resolve_path(file_path):
+    if ':' in file_path:
+        # referencing a module
+        dotted_mod_name, _, rel_path = file_path.partition(':')
+        module = resolve_dotted_name(dotted_mod_name)
+        if module is None:
+            raise Exception('Invalid module for static directory {}'.format(file_path))
+        file_path = os.path.join(
+            os.path.dirname(os.path.realpath(module.__file__)), rel_path)
+    return pathlib.Path(file_path)

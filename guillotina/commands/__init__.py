@@ -38,9 +38,13 @@ MISSING_SETTINGS = {
 
 
 def get_settings(configuration):
-    if os.path.exists(configuration):
-        with open(configuration, 'r') as config:
-            if configuration.lower().endswith('.json'):
+    configuration_filename = configuration
+    if configuration == 'config.yaml' and not os.path.exists(configuration):
+        # try config.json as well...
+        configuration_filename = 'config.json'
+    if os.path.exists(configuration_filename):
+        with open(configuration_filename, 'r') as config:
+            if configuration_filename.lower().endswith('.json'):
                 settings = json.load(config)
             else:
                 # should be yaml then...

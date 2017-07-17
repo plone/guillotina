@@ -14,9 +14,28 @@ async def test_render_static_file(container_requester):
         assert response.decode('utf8').strip() == 'foobar'
 
 
+async def test_render_javascript_app(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester('GET', '/jsapp_static/teststatic.txt')
+        assert status == 200
+        assert response.decode('utf8').strip() == 'foobar'
+
+
 async def test_render_static_default_directory_file(container_requester):
     async with await container_requester as requester:
         response, status = await requester('GET', '/static/tests')
+        assert status == 200
+        assert response.decode('utf8').strip() == 'foobar'
+
+
+async def test_render_jsapp_default_directory_file(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester('GET', '/jsapp_static')
+        assert status == 200
+        assert response.decode('utf8').strip() == 'foobar'
+
+        # and further down...
+        response, status = await requester('GET', '/jsapp_static/foobar/foobar/foobar')
         assert status == 200
         assert response.decode('utf8').strip() == 'foobar'
 

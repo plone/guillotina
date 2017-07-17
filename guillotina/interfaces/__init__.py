@@ -16,8 +16,10 @@ from .content import IContainer  # noqa
 from .content import IContentNegotiation  # noqa
 from .content import IDatabase  # noqa
 from .content import IFolder  # noqa
+from .content import IGetOwner  # noqa
 from .content import IGroupFolder  # noqa
 from .content import IItem  # noqa
+from .content import IJavaScriptApplication  # noqa
 from .content import ILocation  # noqa
 from .content import IRegistry  # noqa
 from .content import IResource  # noqa
@@ -25,7 +27,6 @@ from .content import IResourceFactory  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
-from .content import IGetOwner  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
 from .events import IFileFinishUploaded  # noqa

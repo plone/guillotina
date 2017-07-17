@@ -26,7 +26,7 @@ from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IBehaviorAssignable
+from guillotina.interfaces import IBehaviorAssignable, IJavaScriptApplication
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
@@ -546,15 +546,19 @@ class StaticDirectory(dict):
     Using dict makes this a simple container so traversing works
     """
 
-    def __init__(self, file_path: pathlib.Path):
+    def __init__(self, file_path: pathlib.Path, base_path: pathlib.Path=None):
         self.file_path = file_path
+        if base_path is None:
+            self.base_path = file_path
+        else:
+            self.base_path = base_path
 
     def __getitem__(self, filename):
         path = pathlib.Path(os.path.join(self.file_path.absolute(), filename))
         if not path.exists():
             raise KeyError(filename)
         if path.is_dir():
-            return StaticDirectory(path)
+            return StaticDirectory(path, self.base_path)
         else:
             return StaticFile(path)
 
@@ -565,8 +569,37 @@ class StaticDirectory(dict):
             return False
 
 
+@implementer(IJavaScriptApplication)
+class JavaScriptApplication(StaticDirectory):
+    """
+    Same as StaticDirectory; however, it renders /index.html for every
+    sub-directory
+    """
+
+    def __getitem__(self, filename):
+        from guillotina import app_settings
+        if filename.lower() in app_settings['default_static_filenames']:
+            path = pathlib.Path(os.path.join(self.base_path.absolute(), filename))
+            return StaticFile(path)
+        path = pathlib.Path(os.path.join(self.file_path.absolute(), filename))
+        if path.is_dir() or not path.exists():
+            return JavaScriptApplication(path, self.base_path)
+        else:
+            return StaticFile(path)
+
+    def __contains__(self, filename):
+        if not self.file_path.exists():
+            # we're in every path is valid mode
+            return True
+        try:
+            return self[filename] is not None
+        except KeyError:
+            return False
+
+
 @configure.adapter(for_=IStaticFile, provides=IPrincipalPermissionManager)
 @configure.adapter(for_=IStaticDirectory, provides=IPrincipalPermissionManager)
+@configure.adapter(for_=IJavaScriptApplication, provides=IPrincipalPermissionManager)
 class StaticFileSpecialPermissions(PrincipalPermissionManager):
     def __init__(self, db):
         super(StaticFileSpecialPermissions, self).__init__()

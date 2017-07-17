@@ -99,6 +99,10 @@ class IStaticDirectory(ITraversable):
     pass
 
 
+class IJavaScriptApplication(IStaticDirectory):
+    pass
+
+
 class ILocation(Interface):
     """Objects that can be located in a hierachy.
 
