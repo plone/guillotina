@@ -391,14 +391,15 @@ class PostgresqlStorage(BaseStorage):
             # no need to upgrade
             pass
 
-    async def initialize(self, loop=None):
+    async def initialize(self, loop=None, **kw):
         if loop is None:
             loop = asyncio.get_event_loop()
         self._pool = await asyncpg.create_pool(
             dsn=self._dsn,
             max_size=self._pool_size,
             min_size=2,
-            loop=loop)
+            loop=loop,
+            **kw)
 
         # shared read connection on all transactions
         self._read_conn = await self.open()
