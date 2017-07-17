@@ -230,8 +230,8 @@ class CockroachStorage(pg.PostgresqlStorage):
                 'SET DEFAULT_TRANSACTION_ISOLATION TO ' + self._isolation_level)
         return conn
 
-    async def initialize(self, loop=None):
-        await super().initialize(loop=loop)
+    async def initialize(self, loop=None, **kw):
+        await super().initialize(loop=loop, **kw)
         # we need snapshot isolation to allow us to work together with
         # other transactions nicely and prevent deadlocks
         await self._read_conn.execute('SET DEFAULT_TRANSACTION_ISOLATION TO SNAPSHOT')

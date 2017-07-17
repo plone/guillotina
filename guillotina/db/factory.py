@@ -12,6 +12,7 @@ async def _PGConfigurationFactory(key, dbconfig, app,
                                   storage_factory=PostgresqlStorage):
     # b/w compat, we don't use this for storage options anymore
     config = dbconfig.get('configuration', {})
+
     if isinstance(dbconfig['dsn'], str):
         dsn = dbconfig['dsn']
     else:
@@ -29,11 +30,20 @@ async def _PGConfigurationFactory(key, dbconfig, app,
         'pool_size': dbconfig.get('pool_size', config.get('pool_size', 13))
     })
 
+    connection_options = {}
+    if 'ssl' in dbconfig:
+        import ssl
+        ssl_config = dbconfig['ssl']
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        ssl_context.load_verify_locations(ssl_config['ca'])
+        ssl_context.load_cert_chain(ssl_config['cert'], keyfile=ssl_config['key'])
+        connection_options['ssl'] = ssl_context
+
     aps = storage_factory(**dbconfig)
     if app is not None:
-        await aps.initialize(loop=app.loop)
+        await aps.initialize(loop=app.loop, **connection_options)
     else:
-        await aps.initialize()
+        await aps.initialize(**connection_options)
     dbc = {}
     dbc['database_name'] = key
     db = GuillotinaDB(aps, **dbc)
