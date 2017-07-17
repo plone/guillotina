@@ -26,13 +26,14 @@ from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IBehaviorAssignable, IJavaScriptApplication
+from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
+from guillotina.interfaces import IJavaScriptApplication
 from guillotina.interfaces import ILayers
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IPrincipalPermissionManager

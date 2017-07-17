@@ -9,9 +9,10 @@ from guillotina.component import getAllUtilitiesRegisteredFor
 from guillotina.component import getUtility
 from guillotina.component import provideUtility
 from guillotina.configure.config import ConfigurationMachine
+from guillotina.content import JavaScriptApplication
 from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
-from guillotina.content import StaticFile, JavaScriptApplication
+from guillotina.content import StaticFile
 from guillotina.contentnegotiation import ContentNegotiatorUtility
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
@@ -21,7 +22,8 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
 from guillotina.traversal import TraversalRouter
-from guillotina.utils import resolve_dotted_name, resolve_path
+from guillotina.utils import resolve_dotted_name
+from guillotina.utils import resolve_path
 
 import aiohttp
 import asyncio
