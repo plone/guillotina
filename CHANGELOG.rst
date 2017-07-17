@@ -1,4 +1,4 @@
-1.2.0a1 (unreleased)
+1.2.0a1 (2017-07-17)
 --------------------
 
 - Support ssl for cockroachdb
