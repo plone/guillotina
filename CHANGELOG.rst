@@ -1,7 +1,8 @@
 1.2.0a2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Provide `jsapps` option to render single page javascript applications
+  [vangheem]
 
 
 1.2.0a1 (2017-07-17)

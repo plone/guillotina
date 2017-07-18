@@ -10,7 +10,7 @@ from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
-from guillotina.interfaces import IStaticFile
+from guillotina.interfaces import IStaticFile, IJavaScriptApplication
 
 import mimetypes
 

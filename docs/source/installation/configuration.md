@@ -54,14 +54,32 @@ which requires etcd.
 
 ```json
 {
-  "static": [
-    {"favicon.ico": "static/favicon.ico"},
-    {"static_files": "module_name:static"}
-  ]
+  "static": {
+    "favicon.ico": "static/favicon.ico",
+    "static_files": "module_name:static"
+  }
 }
 ```
 
 These files will then be available on urls `/favicon.ico` and `/static_files`.
+
+
+## JS Applications
+
+We can also serve js apps from guillotina. These will allow routing on your
+js application without any extra configuration by returning the base directory
+index.html for every sub directory in the url.
+
+Once there is SSR support in python, guillotina will integrate with it through
+this as well.
+
+```json
+{
+  "jsapps": {
+    "app": "path/to/app"
+  }
+}
+```
 
 
 ## Server port

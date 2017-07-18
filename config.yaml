@@ -13,9 +13,9 @@ databases:
     pool_size: 40
     read_only: false
 host: 127.0.0.1
-port: 8081
+port: 8080
 static:
-- favicon.ico: static/favicon.ico
+  favicon.ico: static/favicon.ico
 root_user:
   password: root
 cors:
