@@ -1,4 +1,4 @@
-1.2.0a2 (unreleased)
+1.2.0a2 (2017-07-18)
 --------------------
 
 - Fix upstream fetch issue on cockroach
