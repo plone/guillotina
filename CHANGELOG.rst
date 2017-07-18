@@ -1,6 +1,9 @@
 1.2.0a2 (unreleased)
 --------------------
 
+- Fix upstream fetch issue on cockroach
+  [bloodbare]
+
 - Provide `jsapps` option to render single page javascript applications
   [vangheem]
 
