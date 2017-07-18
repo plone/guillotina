@@ -300,3 +300,9 @@ class CockroachStorage(pg.PostgresqlStorage):
             logger.warning('Do not have db transaction to commit')
 
         return transaction._tid
+
+    # Cockroach cant use at version 1.0.3 row count (no fetch)
+    async def get_one_row(self, smt, *args):
+        # Helper function to provide easy adaptation to cockroach
+        result = await smt.fetch(*args)
+        return result[0] if len(result) > 0 else None
