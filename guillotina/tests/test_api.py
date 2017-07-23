@@ -30,7 +30,7 @@ class TestAddon(Addon):
 async def test_get_root(container_requester):
     async with await container_requester as requester:
         response, status = await requester('GET', '/')
-        assert response['static_directory'] == ['static', 'module_static']
+        assert response['static_directory'] == ['static', 'module_static', 'jsapp_static']
         assert response['databases'] == ['db']
         assert response['static_file'] == ['favicon.ico']
 

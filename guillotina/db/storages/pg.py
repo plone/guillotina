@@ -391,14 +391,15 @@ class PostgresqlStorage(BaseStorage):
             # no need to upgrade
             pass
 
-    async def initialize(self, loop=None):
+    async def initialize(self, loop=None, **kw):
         if loop is None:
             loop = asyncio.get_event_loop()
         self._pool = await asyncpg.create_pool(
             dsn=self._dsn,
             max_size=self._pool_size,
             min_size=2,
-            loop=loop)
+            loop=loop,
+            **kw)
 
         # shared read connection on all transactions
         self._read_conn = await self.open()
@@ -445,7 +446,7 @@ class PostgresqlStorage(BaseStorage):
     async def load(self, txn, oid):
         async with txn._lock:
             smt = await txn._db_conn.prepare(GET_OID)
-            objects = await smt.fetchrow(oid)
+            objects = await self.get_one_row(smt, oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -530,6 +531,10 @@ class PostgresqlStorage(BaseStorage):
             # again, use storage lock here instead of trns lock
             return await self._stmt_max_tid.fetchval()
 
+    async def get_one_row(self, smt, *args):
+        # Helper function to provide easy adaptation to cockroach
+        return await smt.fetchrow(*args)
+
     def _db_transaction_factory(self, txn):
         # make sure asycpg knows this is a new transaction
         if txn._db_conn._con is not None:
@@ -609,13 +614,13 @@ class PostgresqlStorage(BaseStorage):
     async def get_child(self, txn, parent_oid, id):
         async with txn._lock:
             smt = await txn._db_conn.prepare(GET_CHILD)
-            result = await smt.fetchrow(parent_oid, id)
+            result = await self.get_one_row(smt, parent_oid, id)
         return result
 
     async def has_key(self, txn, parent_oid, id):
         async with txn._lock:
             smt = await txn._db_conn.prepare(EXIST_CHILD)
-            result = await smt.fetchrow(parent_oid, id)
+            result = await self.get_one_row(smt, parent_oid, id)
         if result is None:
             return False
         else:
@@ -638,7 +643,7 @@ class PostgresqlStorage(BaseStorage):
     async def get_annotation(self, txn, oid, id):
         async with txn._lock:
             smt = await txn._db_conn.prepare(GET_ANNOTATION)
-            result = await smt.fetchrow(oid, id)
+            result = await self.get_one_row(smt, oid, id)
         return result
 
     async def get_annotation_keys(self, txn, oid):
@@ -650,7 +655,7 @@ class PostgresqlStorage(BaseStorage):
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         async with txn._lock:
             smt = await txn._db_conn.prepare(HAS_OBJECT)
-            result = await smt.fetchrow(oid)
+            result = await self.get_one_row(smt, oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
@@ -665,7 +670,7 @@ class PostgresqlStorage(BaseStorage):
     async def read_blob_chunk(self, txn, bid, chunk=0):
         async with txn._lock:
             smt = await txn._db_conn.prepare(READ_BLOB_CHUNK)
-            return await smt.fetchrow(bid, chunk)
+            return await self.get_one_row(smt, bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
         async with txn._lock:

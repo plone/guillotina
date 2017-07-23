@@ -53,7 +53,7 @@ class CreateCommand(Command):
             # special case where we are just copying a file over
             # right now, cookiecutter does not support this use-case
             file_path = os.path.join(tmpl_dir, 'file.tmpl')
-            new_path = input('path [config.json]:') or 'config.json'
+            new_path = input('path [config.yaml]:') or 'config.yaml'
             # can eventually do some replacement here...
             with open(new_path, 'w') as new_fi:
                 with open(file_path) as tmpl_fi:

@@ -70,7 +70,7 @@ async def do_traverse(request, parent, path):
         raise HTTPUnauthorized()
 
     try:
-        if path[0].startswith('_'):
+        if path[0].startswith('_') or path[0] in ('.', '..'):
             raise HTTPUnauthorized()
         context = parent[path[0]]
     except TypeError:
@@ -121,7 +121,7 @@ async def traverse(request, parent, path):
         # not a traversable context
         return parent, path
     try:
-        if path[0].startswith('_'):
+        if path[0].startswith('_') or path[0] in ('.', '..'):
             raise HTTPUnauthorized()
         if IAsyncContainer.providedBy(parent):
             context = await parent.async_get(path[0])

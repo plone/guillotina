@@ -25,7 +25,7 @@ In this example, `guillotina_myaddon` is your package module.
 
 ## Initialization
 
-Your `config.json` file will need to provide the application name in the
+Your `config.yaml` file will need to provide the application name in the
 `applications` array for it to be initialized.
 
 

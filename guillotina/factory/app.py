@@ -9,6 +9,7 @@ from guillotina.component import getAllUtilitiesRegisteredFor
 from guillotina.component import getUtility
 from guillotina.component import provideUtility
 from guillotina.configure.config import ConfigurationMachine
+from guillotina.content import JavaScriptApplication
 from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
@@ -22,6 +23,7 @@ from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
+from guillotina.utils import resolve_path
 
 import aiohttp
 import asyncio
@@ -30,8 +32,6 @@ import inspect
 import json
 import logging
 import logging.config
-import os
-import pathlib
 
 
 try:
@@ -45,7 +45,8 @@ logger = logging.getLogger('guillotina')
 
 def update_app_settings(settings):
     for key, value in settings.items():
-        if isinstance(app_settings.get(key), dict):
+        if (isinstance(app_settings.get(key), dict) and
+                isinstance(value, dict)):
             app_settings[key].update(value)
         else:
             app_settings[key] = value
@@ -120,6 +121,15 @@ def make_aiohttp_application(settings, middlewares=[]):
         router=TraversalRouter(),
         middlewares=middlewares,
         **settings.get('aiohttp_settings', {}))
+
+
+def list_or_dict_items(val):
+    if isinstance(val, list):
+        new_val = []
+        for item in val:
+            new_val.extend([(k, v) for k, v in item.items()])
+        return new_val
+    return [(k, v) for k, v in val.items()]
 
 
 def make_app(config_file=None, settings=None, loop=None, server_app=None):
@@ -216,23 +226,19 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
             else:
                 root[key] = factory(key, dbconfig)
 
-    for static in app_settings['static']:
-        for key, file_path in static.items():
-            if ':' in file_path:
-                # referencing a module
-                dotted_mod_name, _, rel_path = file_path.partition(':')
-                module = resolve_dotted_name(dotted_mod_name)
-                if module is None:
-                    raise Exception('Invalid module for static directory {}'.format(file_path))
-                file_path = os.path.join(
-                    os.path.dirname(os.path.realpath(module.__file__)), rel_path)
-            path = pathlib.Path(file_path)
-            if not path.exists():
-                raise Exception('Invalid static directory {}'.format(file_path))
-            if path.is_dir():
-                root[key] = StaticDirectory(path)
-            else:
-                root[key] = StaticFile(path)
+    for key, file_path in list_or_dict_items(app_settings['static']):
+        path = resolve_path(file_path).resolve()
+        if not path.exists():
+            raise Exception('Invalid static directory {}'.format(file_path))
+        if path.is_dir():
+            root[key] = StaticDirectory(path)
+        else:
+            root[key] = StaticFile(path)
+    for key, file_path in list_or_dict_items(app_settings['jsapps']):
+        path = resolve_path(file_path).resolve()
+        if not path.exists() or not path.is_dir():
+            raise Exception('Invalid jsapps directory {}'.format(file_path))
+        root[key] = JavaScriptApplication(path)
 
     root.set_root_user(app_settings['root_user'])
 

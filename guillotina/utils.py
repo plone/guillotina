@@ -9,6 +9,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipal
+from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from hashlib import sha256 as sha
@@ -18,6 +19,8 @@ import asyncio
 import fnmatch
 import importlib
 import inspect
+import os
+import pathlib
 import random
 import string
 import sys
@@ -323,3 +326,28 @@ def apply_cors(request: IRequest) -> dict:
             headers['Access-Control-Expose-Headers'] = \
                 ', '.join(app_settings['cors']['allow_headers'])
     return headers
+
+
+def get_owners(obj):
+    try:
+        prinrole = IPrincipalRoleMap(obj)
+    except TypeError:
+        return []
+    owners = []
+    for user, roles in prinrole._bycol.items():
+        for role in roles:
+            if role == 'guillotina.Owner':
+                owners.append(user)
+    return owners
+
+
+def resolve_path(file_path):
+    if ':' in file_path:
+        # referencing a module
+        dotted_mod_name, _, rel_path = file_path.partition(':')
+        module = resolve_dotted_name(dotted_mod_name)
+        if module is None:
+            raise Exception('Invalid module for static directory {}'.format(file_path))
+        file_path = os.path.join(
+            os.path.dirname(os.path.realpath(module.__file__)), rel_path)
+    return pathlib.Path(file_path)

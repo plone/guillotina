@@ -4,8 +4,8 @@
 the `guillotina`. All of these settings are configurable by providing a
 JSON configuration file to the start script.
 
-By default, the startup script looks for a `config.json` file. You can use a different
-file by using the `-c` option for the script script like this `./bin/guillotina -c myconfig.json`.
+By default, the startup script looks for a `config.yaml` file. You can use a different
+file by using the `-c` option for the script script like this `./bin/guillotina -c myconfig.yaml`.
 
 
 ## Databases
@@ -54,14 +54,32 @@ which requires etcd.
 
 ```json
 {
-  "static": [
-    {"favicon.ico": "static/favicon.ico"},
-    {"static_files": "module_name:static"}
-  ]
+  "static": {
+    "favicon.ico": "static/favicon.ico",
+    "static_files": "module_name:static"
+  }
 }
 ```
 
 These files will then be available on urls `/favicon.ico` and `/static_files`.
+
+
+## JS Applications
+
+We can also serve js apps from guillotina. These will allow routing on your
+js application without any extra configuration by returning the base directory
+index.html for every sub directory in the url.
+
+Once there is SSR support in python, guillotina will integrate with it through
+this as well.
+
+```json
+{
+  "jsapps": {
+    "app": "path/to/app"
+  }
+}
+```
 
 
 ## Server port
@@ -163,9 +181,9 @@ Example configuration:
 ```json
 {
   "databases": [{
-		"db": {
-			"storage": "postgresql",
-			"transaction_strategy": "resolve",
+    "db": {
+      "storage": "postgresql",
+      "transaction_strategy": "resolve",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -174,8 +192,8 @@ Example configuration:
         "password": "",
         "port": 5432
       }
-		}
-	}]
+    }
+  }]
 }
 ```
 
@@ -217,9 +235,9 @@ See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
 ```json
 {
   "databases": [{
-		"db": {
-			"storage": "postgresql",
-			"transaction_strategy": "lock",
+    "db": {
+      "storage": "postgresql",
+      "transaction_strategy": "lock",
       "dsn": {
         "scheme": "postgres",
         "dbname": "guillotina",
@@ -229,18 +247,18 @@ See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
         "port": 5432
       },
       "etcd": {
-				"host": "127.0.0.1",
-	      "port": 2379,
-	      "protocol": "http",
-	      "read_timeout": 2,
-	      "allow_redirect": true,
-	      "allow_reconnect": false,
-				"base_key": "guillotina-",
-				"read_timeout": 3,
-				"acquire_timeout": 10
-			}
-		}
-	}]
+        "host": "127.0.0.1",
+        "port": 2379,
+        "protocol": "http",
+        "read_timeout": 2,
+        "allow_redirect": true,
+        "allow_reconnect": false,
+        "base_key": "guillotina-",
+        "read_timeout": 3,
+        "acquire_timeout": 10
+      }
+    }
+  }]
 }
 ```
 

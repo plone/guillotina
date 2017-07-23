@@ -30,9 +30,9 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
     return request
 
 
-def login(request):
+def login(request, user=RootUser('foobar')):
     request.security = Interaction(request)
-    request.security.add(TestParticipation(request))
+    request.security.add(TestParticipation(request, user))
     request.security.invalidate_cache()
     request._cache_groups = {}
 
@@ -64,8 +64,8 @@ class FakeRequest(object):
 
 class TestParticipation(object):
 
-    def __init__(self, request):
-        self.principal = RootUser('foobar')
+    def __init__(self, request, user=RootUser('foobar')):
+        self.principal = user
         self.interaction = None
 
 

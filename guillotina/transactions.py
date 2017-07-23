@@ -74,7 +74,7 @@ class managed_transaction:
         self.adopted = []
 
     async def __aenter__(self):
-        if self.request is not None:
+        if self.request is not None and hasattr(self.request, '_txn'):
             self.previous_txn = self.request._txn
             self.previous_write_setting = getattr(self.request, '_db_write_enabled', False)
             if self.write:

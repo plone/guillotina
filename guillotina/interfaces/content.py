@@ -99,6 +99,10 @@ class IStaticDirectory(ITraversable):
     pass
 
 
+class IJavaScriptApplication(IStaticDirectory):
+    pass
+
+
 class ILocation(Interface):
     """Objects that can be located in a hierachy.
 
@@ -207,4 +211,10 @@ class IGroupFolder(IFolder):
     Group content.
     Main purpose of this PR is to prevent reindexing on modify permissions
     for group content.
+    '''
+
+
+class IGetOwner(Interface):
+    '''
+    Defines a utility for calculating the owner of a new resource
     '''

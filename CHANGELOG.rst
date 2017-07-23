@@ -1,7 +1,48 @@
-1.1.0a114 (unreleased)
-----------------------
+1.2.0a3 (unreleased)
+--------------------
 
 - Nothing changed yet.
+
+
+1.2.0a2 (2017-07-18)
+--------------------
+
+- Fix upstream fetch issue on cockroach
+  [bloodbare]
+
+- Provide `jsapps` option to render single page javascript applications
+  [vangheem]
+
+
+1.2.0a1 (2017-07-17)
+--------------------
+
+- Support ssl for cockroachdb
+  [bloodbare]
+
+- Switch to defaulting to yaml for configuration but still supporting json
+  [vangheem]
+
+
+1.1.0a116 (2017-07-13)
+----------------------
+
+- Fix starting with request without txn would cause an error with managed_transaction
+  [vangheem]
+
+
+1.1.0a115 (2017-07-10)
+----------------------
+
+- Be able to provide utility for getting the owner of a new resource
+  [vangheem]
+
+
+1.1.0a114 (2017-07-10)
+----------------------
+
+- Add `get_owner` utility
+  [vangheem]
 
 
 1.1.0a113 (2017-07-03)
