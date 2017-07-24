@@ -1,4 +1,4 @@
-1.2.0a3 (unreleased)
+1.2.0a3 (2017-07-24)
 --------------------
 
 - Fix issue where stacked service configuration would not work with function
