@@ -43,7 +43,7 @@ async def install(context, request):
     handler = app_settings['available_addons'][id_to_install]['handler']
     await apply_coroutine(handler.install, context, request)
     config['enabled'] |= {id_to_install}
-    return await get_addons(context, request)()
+    return await get_addons(context, request)
 
 
 @configure.service(
