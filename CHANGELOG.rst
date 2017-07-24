@@ -1,7 +1,10 @@
 1.2.0a3 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix issue where stacked service configuration would not work with function
+  services since they would get changed into views that were not from the
+  original package.
+  [vangheem]
 
 
 1.2.0a2 (2017-07-18)
