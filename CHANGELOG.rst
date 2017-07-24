@@ -1,4 +1,4 @@
-1.2.0a5 (unreleased)
+1.2.0a5 (2017-07-24)
 --------------------
 
 - managed_transaction context manager did not properly restore read only write
