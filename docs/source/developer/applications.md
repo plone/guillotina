@@ -29,10 +29,10 @@ Your `config.yaml` file will need to provide the application name in the
 `applications` array for it to be initialized.
 
 
-```json
-{
-  "applications": ["guillotina_myaddon"]
-}
+```yaml
+applications:
+    - guillotina_myaddon
+
 ```
 
 

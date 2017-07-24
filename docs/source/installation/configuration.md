@@ -15,23 +15,19 @@ Guillotina uses postgresql OOTB.
 To configure available databases, use the `databases` option. Configuration options
 map 1-to-1 to database setup:
 
-```json
-{
-  "databases": [{
-    "db": {
-      "storage": "postgresql",
-      "dsn": {
-        "scheme": "postgres",
-        "dbname": "guillotina",
-        "user": "postgres",
-        "host": "localhost",
-        "password": "",
-        "port": 5432
-      },
-      "read_only": false
-    }
-  }]
-}
+```yaml
+---
+databases:
+  - db:
+      storage: postgresql
+      dsn:
+        scheme: postgres
+        dbname: guillotina
+        user: postgres
+        host: localhost
+        password: ''
+        port: 5432
+      read_only: false
 ```
 
 Currently supported database drivers are:
@@ -52,13 +48,10 @@ which requires etcd.
 
 ## Static files
 
-```json
-{
-  "static": {
-    "favicon.ico": "static/favicon.ico",
-    "static_files": "module_name:static"
-  }
-}
+```yaml
+static:
+  favicon.ico: static/favicon.ico
+  static_files: module_name:static
 ```
 
 These files will then be available on urls `/favicon.ico` and `/static_files`.
@@ -73,66 +66,59 @@ index.html for every sub directory in the url.
 Once there is SSR support in python, guillotina will integrate with it through
 this as well.
 
-```json
-{
-  "jsapps": {
-    "app": "path/to/app"
-  }
-}
+```yaml
+jsapps:
+  app: path/to/app
 ```
 
 
 ## Server port
 
-```json
-{
-  "port": 8080
-}
+```yaml
+port: 8080
 ```
 
 ## Server host
 
-```json
-{
-  "host": "0.0.0.0"
-}
+```yaml
+host: 0.0.0.0
 ```
 
 ## Root user password
 
-```json
-{
-  "root_user": {
-    "password": "root"
-  }
-}
+```yaml
+root_user:
+  password: root
 ```
 
 ## CORS
 
-```json
-{
-  "cors": {
-    "allow_origin": ["*"],
-    "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
-    "allow_headers": ["*"],
-    "expose_headers": ["*"],
-    "allow_credentials": true,
-    "max_age": 3660
-  }
-}
+```yaml
+cors:
+  allow_origin:
+    - "*"
+  allow_methods:
+    - GET
+    - POST
+    - DELETE
+    - HEAD
+    - PATCH
+  allow_headers:
+    - "*"
+  expose_headers:
+    - "*"
+  allow_credentials: true
+  max_age: 3660
 ```
 
 ## Async utilities
 
-```json
-{
-  "utilities": [{
-    "provides": "guillotina.interfaces.ICatalogUtility",
-    "factory": "guillotina_elasticsearch.utility.ElasticSearchUtility",
-    "settings": {}
-  }]
-}
+```yaml
+utilities:
+  -
+    provides: guillotina.interfaces.ICatalogUtility
+    factory: guillotina_elasticsearch.utility.ElasticSearchUtility
+    settings: {}
 ```
 
 ## Middleware
@@ -140,12 +126,9 @@ this as well.
 `guillotina` is built on aiohttp which provides support for middleware.
 You can provide an array of dotted names to middle ware to use for your application.
 
-```json
-{
-  "middlewares": [
-    "guillotina_myaddon.Middleware"
-  ]
-}
+```yaml
+middlewares:
+  - guillotina_myaddon.Middleware
 ```
 
 
@@ -154,12 +137,9 @@ You can provide an array of dotted names to middle ware to use for your applicat
 You can pass in aiohttp_settings to configure the aiohttp server.
 
 
-```json
-{
-  "aiohttp_settings": {
-    "client_max_size": 20971520
-  }
-}
+```yaml
+aiohttp_settings:
+  client_max_size: 20971520
 ```
 
 ## transaction strategy
@@ -178,23 +158,18 @@ with when it was retrieved from the database.
 
 Example configuration:
 
-```json
-{
-  "databases": [{
-    "db": {
-      "storage": "postgresql",
-      "transaction_strategy": "resolve",
-      "dsn": {
-        "scheme": "postgres",
-        "dbname": "guillotina",
-        "user": "postgres",
-        "host": "localhost",
-        "password": "",
-        "port": 5432
-      }
-    }
-  }]
-}
+```yaml
+databases:
+  - db:
+      storage: postgresql
+      transaction_strategy: resolve
+      dsn:
+        scheme: postgres
+        dbname: guillotina
+        user: postgres
+        host: localhost
+        password: ''
+        port: 5432
 ```
 
 Available options:
@@ -232,34 +207,28 @@ Warning: not all storages are compatible with all transaction strategies.
 Requires installation and configuration of etcd to lock content for writes.
 See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
 
-```json
-{
-  "databases": [{
-    "db": {
-      "storage": "postgresql",
-      "transaction_strategy": "lock",
-      "dsn": {
-        "scheme": "postgres",
-        "dbname": "guillotina",
-        "user": "postgres",
-        "host": "localhost",
-        "password": "",
-        "port": 5432
-      },
-      "etcd": {
-        "host": "127.0.0.1",
-        "port": 2379,
-        "protocol": "http",
-        "read_timeout": 2,
-        "allow_redirect": true,
-        "allow_reconnect": false,
-        "base_key": "guillotina-",
-        "read_timeout": 3,
-        "acquire_timeout": 10
-      }
-    }
-  }]
-}
+```yaml
+databases:
+  - db:
+      storage: postgresql
+      transaction_strategy: lock
+      dsn:
+        scheme: postgres
+        dbname: guillotina
+        user": postgres
+        host": localhost
+        password: ''
+        port: 5432
+  - etcd:
+      host: 127.0.0.1
+      port: 2379
+      protocol: http
+      read_timeout: 2
+      allow_redirect: true
+      allow_reconnect: false
+      base_key: "guillotina-"
+      read_timeout: 3
+      acquire_timeout: 10
 ```
 
 
