@@ -1,4 +1,4 @@
-1.2.0a4 (unreleased)
+1.2.0a4 (2017-07-24)
 --------------------
 
 - Make sure `allow_access` setting works on class based views as well
