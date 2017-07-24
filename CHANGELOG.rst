@@ -1,7 +1,9 @@
 1.2.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- managed_transaction context manager did not properly restore read only write
+  flag on current request
+  [vangheem]
 
 
 1.2.0a4 (2017-07-24)
