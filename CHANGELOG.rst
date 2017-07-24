@@ -1,3 +1,10 @@
+1.2.0a3 (unreleased)
+--------------------
+
+- Make sure `allow_access` setting works on class based views as well
+  [vangheem]
+
+
 1.2.0a3 (2017-07-24)
 --------------------
 
