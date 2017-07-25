@@ -1,7 +1,31 @@
-1.2.0a3 (unreleased)
+1.2.0a6 (unreleased)
 --------------------
 
 - Nothing changed yet.
+
+
+1.2.0a5 (2017-07-24)
+--------------------
+
+- managed_transaction context manager did not properly restore read only write
+  flag on current request
+  [vangheem]
+
+
+1.2.0a4 (2017-07-24)
+--------------------
+
+- Make sure `allow_access` setting works on class based views as well
+  [vangheem]
+
+
+1.2.0a3 (2017-07-24)
+--------------------
+
+- Fix issue where stacked service configuration would not work with function
+  services since they would get changed into views that were not from the
+  original package.
+  [vangheem]
 
 
 1.2.0a2 (2017-07-18)

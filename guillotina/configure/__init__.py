@@ -362,7 +362,8 @@ class service(_base_decorator):
         if isinstance(func, type):
             # it is a class view, we don't need to generate one for it...
             register_configuration(func, self.config, 'service')
-            return func
+            if 'allow_access' in self.config:
+                func.__allow_access__ = self.config['allow_access']
         else:
             # avoid circular imports
             from guillotina.api.service import Service
@@ -375,7 +376,7 @@ class service(_base_decorator):
 
             self.config['module'] = func
             register_configuration(_View, self.config, 'service')
-            return _View
+        return func
 
 
 class contenttype(_base_decorator):

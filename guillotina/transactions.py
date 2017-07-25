@@ -129,4 +129,5 @@ class managed_transaction:
                 # stale objects that reference dangling transactions with no
                 # db connection
                 self.request._txn = self.previous_txn
-            self.request._db_write_enabled = self.previous_write_setting
+            if self.previous_write_setting is not None:
+                self.request._db_write_enabled = self.previous_write_setting
