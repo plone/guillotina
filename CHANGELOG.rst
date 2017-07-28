@@ -1,4 +1,4 @@
-1.2.0a6 (unreleased)
+1.2.0a6 (2017-07-28)
 --------------------
 
 - Fix issue where dynamic behaviors were not getting indexed
