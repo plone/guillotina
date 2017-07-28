@@ -1,7 +1,8 @@
 1.2.0a6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix issue where dynamic behaviors were not getting indexed
+  [vangheem]
 
 
 1.2.0a5 (2017-07-24)
