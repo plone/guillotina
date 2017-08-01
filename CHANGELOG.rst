@@ -1,7 +1,8 @@
-1.2.0a7 (unreleased)
---------------------
+1.3.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Fix instance where we were doing a permission lookup with title instead of id
+  [bloodbare]
 
 
 1.2.0a6 (2017-07-28)
