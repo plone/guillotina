@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.component import queryAdapter
-from guillotina.content import iter_schemata_for_type
+from guillotina.content import iter_schemata
 from guillotina.directives import index
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
@@ -123,7 +123,7 @@ class DefaultCatalogDataAdapter(object):
         # For each type
         values = {}
 
-        for schema in iter_schemata_for_type(self.content.type_name):
+        for schema in iter_schemata(self.content):
             behavior = schema(self.content)
             if IAsyncBehavior.implementedBy(behavior.__class__):
                 # providedBy not working here?
