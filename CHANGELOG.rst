@@ -1,4 +1,4 @@
-1.3.0 (unreleased)
+1.3.0 (2017-08-01)
 ------------------
 
 - Fix instance where we were doing a permission lookup with title instead of id
