@@ -1,10 +1,9 @@
 # -*- encoding: utf-8 -*-
 
 # load the patch before anything else.
+from guillotina import glogging
 from guillotina import patch  # noqa
 from guillotina.i18n import MessageFactory
-
-from guillotina import glogging
 
 
 # create logging
@@ -59,7 +58,8 @@ app_settings = {
         'create': 'guillotina.commands.create.CreateCommand',
         'shell': 'guillotina.commands.shell.ShellCommand',
         'testdata': 'guillotina.commands.testdata.TestDataCommand',
-        'initialize-db': 'guillotina.commands.initialize_db.DatabaseInitializationCommand'
+        'initialize-db': 'guillotina.commands.initialize_db.DatabaseInitializationCommand',
+        'apigen': 'guillotina.commands.apigen.APIGenCommand'
     },
     "json_schema_definitions": {},  # json schemas available to reference in docs
 }

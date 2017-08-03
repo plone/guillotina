@@ -88,7 +88,7 @@ class HTTPService(CodeBlock):
         service = data['service']
         name = service.get('name') or ''
         path_scheme = data.get('path_scheme') or name
-        description = service.get('description') or ''
+        summary = service.get('summary') or ''
         permission = service.get('permission') or ''
 
         container = nodes.container('')
@@ -99,7 +99,7 @@ class HTTPService(CodeBlock):
         inner_container = nodes.definition('')
         container.append(inner_container)
 
-        inner_container.append(nodes.paragraph(description, description))
+        inner_container.append(nodes.paragraph(summary, summary))
         inner_container.append(addnodes.desc_name('permission', 'permission'))
         perm_label = ': ' + permission
         inner_container.append(addnodes.desc_annotation(perm_label, perm_label))

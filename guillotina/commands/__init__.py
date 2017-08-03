@@ -60,6 +60,7 @@ def get_settings(configuration):
 class Command(object):
 
     description = ''
+    hide = False
 
     def __init__(self):
         '''

@@ -1,0 +1,100 @@
+[
+  {
+    "path": "/",
+    "actions": [
+      {"method": "get"},
+      {"method": "get", "path": "@apidefinition"}
+    ]
+  },{
+    "path": "/db",
+    "actions": [
+      {"method": "get"},
+      {"method": "post", "jsond": {
+        "@type": "Container",
+        "id": "container",
+        "title": "Container"
+        }
+      }
+    ]
+  },{
+    "path": "/db/container",
+    "actions": [
+      {"method": "get"},
+      {"method": "get", "path": "@types"},
+      {
+        "method": "post", "jsond": {
+          "@type": "Folder",
+          "id": "folder",
+          "title": "My Folder"
+        }
+      },
+      {
+        "method": "post", "path": "@addons", "jsond": {
+          "id": "myaddon"
+        }
+      },
+      {
+        "method": "delete", "path": "@addons", "jsond": {
+          "id": "myaddon"
+        }
+      },
+      {"method": "get", "path": "@registry"},
+      {
+        "method": "post", "path": "@registry", "jsond": {
+          "interface": "guillotina.documentation.testmodule.ISchema",
+          "initial_values": {
+            "foo": "bar"
+          }
+        }
+      },
+      {
+        "method": "patch", "path": "@registry/guillotina.documentation.testmodule.ISchema.foo", "jsond": {
+          "value": "New foobar value"
+        }
+      },
+      {"method": "get", "path": "@registry/guillotina.documentation.testmodule.ISchema.foo"}
+    ]
+  },{
+    "path": "/db/container/folder", "type_name": "folder",
+    "actions": [
+      {"method": "get"},
+      {"method": "get", "path": "@sharing"},
+      {"method": "get", "path": "@all_permissions"},
+      {"method": "get", "path": "@behaviors"},
+      {
+        "method": "patch", "jsond": {
+          "title": "My Folder Updated"
+        }
+      },
+      {
+        "method": "post", "jsond": {
+          "@type": "Item", "id": "item", "title": "My Item"
+        }
+      }
+    ]
+  },{
+    "path": "/db/container/folder/item", "type_name": "item",
+    "actions": [
+      {"method": "get"},
+      {"method": "get", "path": "@sharing"},
+      {"method": "get", "path": "@all_permissions"},
+      {"method": "get", "path": "@behaviors"},
+      {
+        "method": "patch", "jsond": {
+          "title": "My Item Updated"
+        }
+      },
+      {"method": "delete"}
+    ]
+  },{
+    "path": "/db/container/folder", "type_name": "folder",
+    "actions": [
+      {"method": "delete"}
+    ]
+  },{
+    "path": "/db/container", "type_name": "folder",
+    "actions": [
+      {"method": "delete"}
+    ]
+  }
+]
