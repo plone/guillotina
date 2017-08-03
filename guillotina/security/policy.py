@@ -223,8 +223,8 @@ class Interaction(object):
         # We reached the end of the recursive we check global / local
         if parent is None:
             # We check the global configuration of the user and groups
-            prinper = self._global_permissions_for(permission, principal)
-            if prinper is None:
+            prinper = self._global_permissions_for(principal, permission)
+            if prinper is not None:
                 cache_prin_per[permission] = prinper
                 return prinper
 
