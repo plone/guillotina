@@ -1,4 +1,4 @@
-1.3.1 (unreleased)
+1.3.1 (2017-08-04)
 ------------------
 
 - Throw a 412 response code if type not allowed
