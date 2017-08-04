@@ -26,6 +26,7 @@ from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ConflictIdOnContainer
+from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IGetOwner
@@ -144,7 +145,7 @@ class DefaultPOST(Service):
             obj = await create_content_in_container(
                 self.context, type_, new_id, id=new_id, creators=(user,),
                 contributors=(user,))
-        except PreconditionFailed as e:
+        except (PreconditionFailed, NotAllowedContentType) as e:
             return ErrorResponse(
                 'PreconditionFailed',
                 str(e),

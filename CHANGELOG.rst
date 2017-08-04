@@ -1,6 +1,9 @@
 1.3.1 (unreleased)
 ------------------
 
+- Throw a 412 response code if type not allowed
+  [vangheem]
+
 - Be able to generate custom api doc files
   [vangheem]
 
