@@ -1,7 +1,10 @@
 1.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Change IQueueUtility to being a regular Queue instead of a PriorityQueue. A
+  PriorityQueue request comparison functions to be implemented on the added
+  objects.
+  [vangheem] 
 
 
 1.3.1 (2017-08-04)
