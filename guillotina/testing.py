@@ -97,13 +97,15 @@ class Example(Resource):
 
 class AsyncMockView(View):
 
-    def __init__(self, context, request, func):
+    def __init__(self, context, request, func, *args, **kwargs):
         self.context = context
         self.request = request
         self.func = func
+        self.args = args
+        self.kwargs = kwargs
 
-    async def __call__(self, *args, **kw):
-        await self.func(*args, **kw)
+    async def __call__(self):
+        await self.func(*self.args, **self.kwargs)
 
 
 class GuillotinaRequester(object):
