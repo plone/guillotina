@@ -1,4 +1,4 @@
-1.3.2 (unreleased)
+1.3.2 (2017-08-04)
 ------------------
 
 - Change IQueueUtility to being a regular Queue instead of a PriorityQueue. A
