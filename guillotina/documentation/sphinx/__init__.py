@@ -92,9 +92,8 @@ class HTTPService(CodeBlock):
         permission = service.get('permission') or ''
 
         container = nodes.container('')
-        container.append(nodes.header())
-        container.append(addnodes.desc_name(method + ' ', method + ' '))
-        container.append(addnodes.desc_name(path_scheme, path_scheme))
+        container.append(addnodes.desc_name('', method + ' '))
+        container.append(addnodes.desc_name('', path_scheme))
 
         inner_container = nodes.definition('')
         container.append(inner_container)
@@ -105,9 +104,19 @@ class HTTPService(CodeBlock):
         inner_container.append(addnodes.desc_annotation(perm_label, perm_label))
         inner_container.append(example.run()[0])
 
+        # extra = nodes.paragraph('', '')
+        # inner_container.append(extra)
+        # if service.get('responses'):
+        #     extra.append(nodes.strong('', 'Responses'))
+        #     blist = nodes.bullet_list('')
+        #     extra.append(blist)
+        #     for code, config in service['responses'].items():
+        #         blist.append(render_response(code, 'Hello'))
+
         # cleanup
         os.remove(request_filename)
         os.remove(response_filename)
+
         return container
 
     def run(self):
@@ -117,7 +126,12 @@ class HTTPService(CodeBlock):
             if filename.startswith(type_name + '-'):
                 files.append(filename)
         files.sort(key=service_filename_sort_key)
-        return [self.process_service(filename) for filename in files]
+
+        env = self.state.document.settings.env
+        targetid = "service-%d" % env.new_serialno('service')
+        targetnode = nodes.target('', '', ids=[targetid])
+
+        return [targetnode] + [self.process_service(filename) for filename in files]
 
 
 def setup(app):
