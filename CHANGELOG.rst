@@ -1,7 +1,8 @@
 1.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to generate custom api doc files
+  [vangheem]
 
 
 1.3.0 (2017-08-01)

@@ -19,7 +19,8 @@ class DatabaseToJson(object):
     async def __call__(self):
         keys = await self.dbo.async_keys()
         return {
-            'containers': list(keys)
+            'containers': list(keys),
+            '@type': 'Database'
         }
 
 
@@ -36,7 +37,8 @@ class ApplicationToJson(object):
         result = {
             'databases': [],
             'static_file': [],
-            'static_directory': []
+            'static_directory': [],
+            '@type': 'Application'
         }
         allowed = IInteraction(self.request).check_permission(
             'guillotina.GetDatabases', self.application)

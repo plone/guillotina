@@ -18,15 +18,30 @@
     "path": "/db/container",
     "path_scheme": null,
     "request": "POST /db/container HTTP/1.1\nAccept: application/json\nHost: localhost:8080\nContent-Type: application/json\nAuthorization: Basic cm9vdDpyb290\n\n{\n    \"@type\": \"Folder\",\n    \"id\": \"folder\",\n    \"title\": \"My Folder\"\n}",
-    "response": "HTTP/1.1 201 Created\nLocation: http://localhost:8080/db/container/folder\nContent-Type: application/json\nServer: Python/3.6 aiohttp/1.3.3\n\n{\n    \"@id\": \"http://localhost:8080/db/container/folder\",\n    \"@type\": \"Folder\",\n    \"UID\": \"3db6825b7a5d4f89ab42d62404c4b96e\",\n    \"__behaviors__\": [],\n    \"__name__\": \"folder\",\n    \"created\": \"2017-03-24T12:49:05.309537-05:00\",\n    \"guillotina.behaviors.dublincore.IDublinCore\": {\n        \"contributors\": [\n            \"root\"\n        ],\n        \"created\": \"2017-03-24T12:49:05.309537-05:00\",\n        \"creators\": [\n            \"root\"\n        ],\n        \"description\": null,\n        \"effective\": null,\n        \"expires\": null,\n        \"modified\": \"2017-03-24T12:49:05.309537-05:00\",\n        \"publisher\": null,\n        \"subjects\": null,\n        \"title\": null\n    },\n    \"items\": [],\n    \"length\": 0,\n    \"modified\": \"2017-03-24T12:49:05.309537-05:00\",\n    \"parent\": {\n        \"@id\": \"http://localhost:8080/db/container\",\n        \"@type\": \"Container\"\n    },\n    \"title\": \"My Folder\",\n    \"type_name\": \"Folder\"\n}",
+    "response": "HTTP/1.1 201 Created\nContent-Type: application/json\nLocation: http://localhost:8080/db/container/folder\nServer: Python/3.6 aiohttp/2.2.5\n\n{\n    \"@id\": \"http://localhost:8080/db/container/folder\",\n    \"@type\": \"Folder\",\n    \"UID\": \"691c83337ab74a85a162fbec877d614c\",\n    \"__behaviors__\": [],\n    \"__name__\": \"folder\",\n    \"creation_date\": \"2017-08-03T16:54:08.479606-05:00\",\n    \"guillotina.behaviors.dublincore.IDublinCore\": {\n        \"contributors\": [\n            \"root\"\n        ],\n        \"creation_date\": \"2017-08-03T16:54:08.479606-05:00\",\n        \"creators\": [\n            \"root\"\n        ],\n        \"description\": null,\n        \"effective_date\": null,\n        \"expiration_date\": null,\n        \"modification_date\": \"2017-08-03T16:54:08.479606-05:00\",\n        \"publisher\": null,\n        \"tags\": null,\n        \"title\": null\n    },\n    \"items\": [],\n    \"length\": 0,\n    \"modification_date\": \"2017-08-03T16:54:08.479606-05:00\",\n    \"parent\": {\n        \"@id\": \"http://localhost:8080/db/container\",\n        \"@type\": \"Container\"\n    },\n    \"title\": \"My Folder\",\n    \"type_name\": \"Folder\"\n}",
     "service": {
         "context": "guillotina.interfaces.content.IContainer",
-        "description": "Add new resouce inside this container resource",
         "method": "POST",
         "name": null,
-        "payload": null,
+        "parameters": [
+            {
+                "in": "body",
+                "name": "body",
+                "schema": {
+                    "$ref": "#/definitions/AddableResource"
+                }
+            }
+        ],
         "permission": "guillotina.AddContent",
-        "query_params": null,
+        "responses": {
+            "200": {
+                "description": "Resource data",
+                "schema": {
+                    "$ref": "#/definitions/ResourceFolder"
+                }
+            }
+        },
+        "summary": "Add new resouce inside this container resource",
         "title": null
     }
 }
