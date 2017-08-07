@@ -1,4 +1,4 @@
-1.3.3 (unreleased)
+1.3.3 (2017-08-07)
 ------------------
 
 - Recover when postgresql gets restarted
