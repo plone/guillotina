@@ -319,6 +319,9 @@ class TraversalRouter(AbstractRouter):
 
         try:
             resource, tail = await self.traverse(request)
+        except ConflictError:
+            # can also happen from connection errors so we bubble this...
+            raise
         except Exception as _exc:
             request.resource = request.tail = None
             request.exc = _exc

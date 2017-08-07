@@ -8,6 +8,7 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 
+import asyncpg
 import logging
 
 
@@ -101,7 +102,14 @@ class TransactionManager(object):
 
     async def _close_txn(self, txn):
         if txn is not None and txn._db_conn is not None:
-            await self._storage.close(txn._db_conn)
+            try:
+                await self._storage.close(txn._db_conn)
+            except asyncpg.exceptions.InterfaceError as ex:
+                if 'received invalid connection' in str(ex):
+                    # ignore, new pool was created so we can not close this conn
+                    pass
+                else:
+                    raise
             txn._db_conn = None
         if txn == self._last_txn:
             self._last_txn = None

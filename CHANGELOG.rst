@@ -1,6 +1,9 @@
 1.3.3 (unreleased)
 ------------------
 
+- Recover when postgresql gets restarted
+  [vangheem]
+
 - Only show traceback if in debug mode
   [vangheem]
 
