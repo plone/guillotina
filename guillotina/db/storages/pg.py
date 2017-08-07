@@ -553,7 +553,7 @@ class PostgresqlStorage(BaseStorage):
 
     async def _check_bad_connection(self, ex):
         if str(ex) in ('connection is closed', 'pool is closed'):
-            if (time.time() - self._connection_initialized_on) < BAD_CONNECTION_RESTART_DELAY:
+            if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
                 # we need to make sure we aren't calling this over and over again
                 return await self.restart_connection()
 
