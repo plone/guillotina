@@ -11,6 +11,7 @@ import asyncio
 import asyncpg
 import concurrent
 import logging
+import time
 import ujson
 
 
@@ -222,6 +223,10 @@ RETURNING id;
 '''
 
 
+# how long to wait before trying to recover bad connections
+BAD_CONNECTION_RESTART_DELAY = 0.25
+
+
 class PGVacuum:
 
     def __init__(self, storage, loop):
@@ -360,6 +365,7 @@ class PostgresqlStorage(BaseStorage):
         self._conn_acquire_timeout = conn_acquire_timeout
         self._options = options
         self._connection_options = {}
+        self._connection_initialized_on = time.time()
 
     async def finalize(self):
         await self._vacuum.finalize()
@@ -407,6 +413,7 @@ class PostgresqlStorage(BaseStorage):
         # shared read connection on all transactions
         self._read_conn = await self.open()
         await self.initialize_tid_statements()
+        self._connection_initialized_on = time.time()
         raise ConflictError('Restarting connection to postgresql')
 
     async def initialize(self, loop=None, **kw):
@@ -441,6 +448,7 @@ class PostgresqlStorage(BaseStorage):
                         'No database vacuuming will be done here anymore.')
 
         self._vacuum_task.add_done_callback(vacuum_done)
+        self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
@@ -456,7 +464,8 @@ class PostgresqlStorage(BaseStorage):
         try:
             conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
         except asyncpg.exceptions.InterfaceError as ex:
-            await self._check_bad_connection(ex)
+            async with self._lock:
+                await self._check_bad_connection(ex)
         return conn
 
     async def close(self, con):
@@ -543,9 +552,10 @@ class PostgresqlStorage(BaseStorage):
         txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
     async def _check_bad_connection(self, ex):
-        if str(ex) in ('connection is closed',
-                       'pool is closed'):
-            return await self.restart_connection()
+        if str(ex) in ('connection is closed', 'pool is closed'):
+            if (time.time() - self._connection_initialized_on) < BAD_CONNECTION_RESTART_DELAY:
+                # we need to make sure we aren't calling this over and over again
+                return await self.restart_connection()
 
     async def get_next_tid(self, txn):
         async with self._lock:
@@ -578,7 +588,8 @@ class PostgresqlStorage(BaseStorage):
             try:
                 txn._db_txn = self._db_transaction_factory(txn)
             except asyncpg.exceptions.InterfaceError as ex:
-                await self._check_bad_connection(ex)
+                async with self._lock:
+                    await self._check_bad_connection(ex)
                 raise
             try:
                 await txn._db_txn.start()

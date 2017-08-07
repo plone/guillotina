@@ -89,7 +89,8 @@ async def test_restart_connection(postgres, dummy_request):
 
     await tm.commit(txn=txn)
 
-    await aps.restart_connection()
+    with pytest.raises(ConflictError):
+        await aps.restart_connection()
 
     txn = await tm.begin()
 
