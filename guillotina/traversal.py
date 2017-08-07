@@ -322,13 +322,15 @@ class TraversalRouter(AbstractRouter):
         except Exception as _exc:
             request.resource = request.tail = None
             request.exc = _exc
-            # XXX should only should traceback if in some sort of dev mode?
-            raise HTTPBadRequest(text=json.dumps({
+            data = {
                 'success': False,
                 'exception_message': str(_exc),
                 'exception_type': getattr(type(_exc), '__name__', str(type(_exc))),  # noqa
-                'traceback': traceback.format_exc()
-            }))
+            }
+            if app_settings.get('debug'):
+                data['traceback'] = traceback.format_exc()
+            # XXX should only should traceback if in some sort of dev mode?
+            raise HTTPBadRequest(text=json.dumps(data))
 
         request.resource = resource
         request.tail = tail

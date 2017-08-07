@@ -97,3 +97,12 @@ Default
 -------
 
 Default root access can be done with AUTHORIZATION header : Basic root:root
+
+
+
+TODO
+----
+
+- be able to configure renderer from function view configuration
+- view functions can take 2, 1 or zero args
+- handle routes in definitions...

@@ -1,7 +1,8 @@
 1.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Only show traceback if in debug mode
+  [vangheem]
 
 
 1.3.2 (2017-08-04)
