@@ -359,6 +359,7 @@ class PostgresqlStorage(BaseStorage):
         self._lock = asyncio.Lock()
         self._conn_acquire_timeout = conn_acquire_timeout
         self._options = options
+        self._connection_options = {}
 
     async def finalize(self):
         await self._vacuum.finalize()
@@ -391,7 +392,25 @@ class PostgresqlStorage(BaseStorage):
             # no need to upgrade
             pass
 
+    async def restart_connection(self):
+        log.error('Connection potentially lost to pg, restarting')
+        await self._pool.close()
+        self._pool.terminate()
+        # re-bind, throw conflict error so the request is restarted...
+        self._pool = await asyncpg.create_pool(
+            dsn=self._dsn,
+            max_size=self._pool_size,
+            min_size=2,
+            loop=self._pool._loop,
+            **self._connection_options)
+
+        # shared read connection on all transactions
+        self._read_conn = await self.open()
+        await self.initialize_tid_statements()
+        raise ConflictError('Restarting connection to postgresql')
+
     async def initialize(self, loop=None, **kw):
+        self._connection_options = kw
         if loop is None:
             loop = asyncio.get_event_loop()
         self._pool = await asyncpg.create_pool(
@@ -434,7 +453,10 @@ class PostgresqlStorage(BaseStorage):
             await conn.execute("DROP TABLE IF EXISTS objects;")
 
     async def open(self):
-        conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+        try:
+            conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+        except asyncpg.exceptions.InterfaceError as ex:
+            await self._check_bad_connection(ex)
         return conn
 
     async def close(self, con):
@@ -520,11 +542,20 @@ class PostgresqlStorage(BaseStorage):
             await txn._db_conn.execute(TRASH_PARENT_ID, oid)
         txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
+    async def _check_bad_connection(self, ex):
+        if str(ex) in ('connection is closed',
+                       'pool is closed'):
+            return await self.restart_connection()
+
     async def get_next_tid(self, txn):
         async with self._lock:
             # we do not use transaction lock here but a storage lock because
             # a storage object has a shard conn for reads
-            return await self._stmt_next_tid.fetchval()
+            try:
+                return await self._stmt_next_tid.fetchval()
+            except asyncpg.exceptions.InterfaceError as ex:
+                await self._check_bad_connection(ex)
+                raise
 
     async def get_current_tid(self, txn):
         async with self._lock:
@@ -544,7 +575,11 @@ class PostgresqlStorage(BaseStorage):
     async def start_transaction(self, txn, retries=0):
         error = None
         async with txn._lock:
-            txn._db_txn = self._db_transaction_factory(txn)
+            try:
+                txn._db_txn = self._db_transaction_factory(txn)
+            except asyncpg.exceptions.InterfaceError as ex:
+                await self._check_bad_connection(ex)
+                raise
             try:
                 await txn._db_txn.start()
                 return

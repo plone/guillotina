@@ -74,6 +74,34 @@ async def test_read_obs(postgres, dummy_request):
     await cleanup(aps)
 
 
+async def test_restart_connection(postgres, dummy_request):
+    """Low level test checks that root is not there"""
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps()
+    tm = TransactionManager(aps)
+    txn = await tm.begin()
+
+    ob = create_content()
+    txn.register(ob)
+
+    assert len(txn.modified) == 1
+
+    await tm.commit(txn=txn)
+
+    await aps.restart_connection()
+
+    txn = await tm.begin()
+
+    ob2 = await txn.get(ob._p_oid)
+
+    assert ob2._p_oid == ob._p_oid
+    await tm.commit(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
 @pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not have cascade support")
 async def test_deleting_parent_deletes_children(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
