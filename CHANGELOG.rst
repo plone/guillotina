@@ -1,4 +1,4 @@
-1.3.4 (unreleased)
+1.3.4 (2017-08-08)
 ------------------
 
 - Implement Guillotina Request object and store view info on it
