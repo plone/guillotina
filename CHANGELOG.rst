@@ -1,7 +1,8 @@
 1.3.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement Guillotina Request object and store view info on it
+  [vangheem]
 
 
 1.3.3 (2017-08-07)
