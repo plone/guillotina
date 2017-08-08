@@ -21,7 +21,7 @@ class Request(web_request.Request):
     tail = None
     resource = None
     exc = None
-    matched_view = None
+    found_view = None
     security = None
 
     def __init__(self, *args, **kwargs):

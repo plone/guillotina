@@ -21,10 +21,10 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
+from guillotina.request import Request
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
-from guillotina.request import Request
 
 import aiohttp
 import asyncio

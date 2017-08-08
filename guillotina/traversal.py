@@ -369,6 +369,8 @@ class TraversalRouter(AbstractRouter):
         except AttributeError:
             view = None
 
+        request.found_view = view
+
         # Traverse view if its needed
         if traverse_to is not None and view is not None:
             if not ITraversableView.providedBy(view):
