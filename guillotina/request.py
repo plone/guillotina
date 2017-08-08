@@ -21,6 +21,7 @@ class Request(web_request.Request):
     tail = None
     resource = None
     exc = None
+    view_name = None
     found_view = None
     security = None
 

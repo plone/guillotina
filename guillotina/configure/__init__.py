@@ -370,6 +370,7 @@ class service(_base_decorator):
 
             class _View(self.config.get('base', Service)):
                 __allow_access__ = self.config.get('allow_access', False)
+                view_func = staticmethod(func)
 
                 async def __call__(self):
                     return await func(self.context, self.request)
