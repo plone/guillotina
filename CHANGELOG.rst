@@ -1,7 +1,8 @@
 1.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not provide default values for all request object values
+  [vangheem]
 
 
 1.3.4 (2017-08-08)
