@@ -1,4 +1,4 @@
-1.3.5 (unreleased)
+1.3.5 (2017-08-08)
 ------------------
 
 - Do not provide default values for all request object values
