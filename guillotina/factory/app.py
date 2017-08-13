@@ -21,6 +21,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
+from guillotina.request import Request
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
@@ -115,6 +116,12 @@ class GuillotinaAIOHTTPApplication(web.Application):
                 ))
             return aiohttp.web_exceptions.HTTPConflict()
 
+    def _make_request(self, message, payload, protocol, writer, task,
+                      _cls=Request):
+        return _cls(
+            message, payload, protocol, writer, protocol._time_service, task,
+            secure_proxy_ssl_header=self._secure_proxy_ssl_header,
+            client_max_size=self._client_max_size)
 
 def make_aiohttp_application(settings, middlewares=[]):
     return GuillotinaAIOHTTPApplication(

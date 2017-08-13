@@ -1,7 +1,50 @@
-1.3.1 (unreleased)
+1.3.6 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+1.3.5 (2017-08-08)
+------------------
+
+- Do not provide default values for all request object values
+  [vangheem]
+
+
+1.3.4 (2017-08-08)
+------------------
+
+- Implement Guillotina Request object and store view info on it
+  [vangheem]
+
+
+1.3.3 (2017-08-07)
+------------------
+
+- Recover when postgresql gets restarted
+  [vangheem]
+
+- Only show traceback if in debug mode
+  [vangheem]
+
+
+1.3.2 (2017-08-04)
+------------------
+
+- Change IQueueUtility to being a regular Queue instead of a PriorityQueue. A
+  PriorityQueue request comparison functions to be implemented on the added
+  objects.
+  [vangheem] 
+
+
+1.3.1 (2017-08-04)
+------------------
+
+- Throw a 412 response code if type not allowed
+  [vangheem]
+
+- Be able to generate custom api doc files
+  [vangheem]
 
 
 1.3.0 (2017-08-01)

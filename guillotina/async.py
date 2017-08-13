@@ -30,7 +30,7 @@ class IQueueUtility(IAsyncUtility):
 class QueueUtility(object):
 
     def __init__(self, settings, loop=None):
-        self._queue = asyncio.PriorityQueue(loop=loop)
+        self._queue = asyncio.Queue(loop=loop)
         self._exceptions = False
         self._total_queued = 0
 
@@ -40,7 +40,7 @@ class QueueUtility(object):
         while True:
             got_obj = False
             try:
-                priority, view = await self._queue.get()
+                view = await self._queue.get()
                 got_obj = True
                 txn = get_transaction(view.request)
                 tm = get_tm(view.request)
@@ -88,8 +88,8 @@ class QueueUtility(object):
     def total_queued(self):
         return self._total_queued
 
-    async def add(self, view, priority=3):
-        await self._queue.put((priority, view))
+    async def add(self, view):
+        await self._queue.put(view)
         self._total_queued += 1
         return self._queue.qsize()
 
