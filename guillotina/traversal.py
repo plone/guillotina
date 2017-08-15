@@ -26,13 +26,11 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRendered
-from guillotina.interfaces import IRequest
 from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
@@ -305,9 +303,6 @@ class TraversalRouter(AbstractRouter):
 
     async def real_resolve(self, request):
         """Main function to resolve a request."""
-        alsoProvides(request, IRequest)
-        alsoProvides(request, IDefaultLayer)
-
         request._futures = {}
 
         security = IInteraction(request)
