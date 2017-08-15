@@ -1,4 +1,4 @@
-1.3.6 (unreleased)
+1.3.6 (2017-08-15)
 ------------------
 
 - directly provide base request interfaces instead of dynamically applying them
