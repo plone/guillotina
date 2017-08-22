@@ -1,6 +1,10 @@
 from aiohttp import web_request
+from guillotina.interfaces import IDefaultLayer
+from guillotina.interfaces import IRequest
+from zope.interface import implementer
 
 
+@implementer(IRequest, IDefaultLayer)
 class Request(web_request.Request):
     """
     Guillotina specific request type.

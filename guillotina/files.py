@@ -88,6 +88,10 @@ class CloudFileManager(object):
     async def upload(self, *args, **kwargs):
         return await self.real_file_manager.upload(*args, **kwargs)
 
+    async def iter_data(self, *args, **kwargs):
+        async for chunk in self.real_file_manager.iter_data(*args, **kwargs):
+            yield chunk
+
 
 # This file was borrowed from z3c.blobfile and is licensed under the terms of
 # the ZPL.

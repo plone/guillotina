@@ -1,7 +1,17 @@
-1.3.6 (unreleased)
+1.3.7 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+1.3.6 (2017-08-15)
+------------------
+
+- directly provide base request interfaces instead of dynamically applying them
+  [vangheem]
+
+- Provide iter_data method on cloud file manager
+  [vangheem]
 
 
 1.3.5 (2017-08-08)
