@@ -1,4 +1,4 @@
-1.3.7 (unreleased)
+1.3.7 (2017-08-25)
 ------------------
 
 - Add text/plain content negotation response type
