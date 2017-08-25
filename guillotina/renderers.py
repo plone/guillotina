@@ -166,14 +166,14 @@ class StringRenderer(Renderer):
 @configure.adapter(
     for_=(IRendererFormatHtml, IView, IRequest),
     provides=IRendered)
-class RendererHtml(Renderer):
+class RendererHtml(StringRenderer):
     content_type = 'text/html'
 
 
 @configure.adapter(
     for_=(IRendererFormatPlain, IView, IRequest),
     provides=IRendered)
-class RendererPlain(Renderer):
+class RendererPlain(StringRenderer):
     content_type = 'text/plain'
 
 
