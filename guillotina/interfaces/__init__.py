@@ -64,6 +64,7 @@ from .registry import IAddons  # noqa
 from .registry import ILayers  # noqa
 from .renderers import IRendererFormatHtml  # noqa
 from .renderers import IRendererFormatJson  # noqa
+from .renderers import IRendererFormatPlain  # noqa
 from .renderers import IRendererFormatRaw  # noqa
 from .renderers import IRenderFormats  # noqa
 from .security import Allow  # noqa
