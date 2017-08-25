@@ -11,6 +11,10 @@ class IRendererFormatHtml(IRenderFormats):
     pass
 
 
+class IRendererFormatPlain(IRenderFormats):
+    pass
+
+
 class IRendererFormatJson(IRenderFormats):
     pass
 

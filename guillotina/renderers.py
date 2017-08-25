@@ -9,6 +9,7 @@ from guillotina.interfaces import IFrameFormatsJson
 from guillotina.interfaces import IRendered
 from guillotina.interfaces import IRendererFormatHtml
 from guillotina.interfaces import IRendererFormatJson
+from guillotina.interfaces import IRendererFormatPlain
 from guillotina.interfaces import IRendererFormatRaw
 from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
@@ -82,6 +83,12 @@ class RendererFormatHtml(object):
         self.request = request
 
 
+@configure.adapter(for_=IRequest, provides=IRendererFormatPlain)
+class RendererFormatPlain(object):
+    def __init__(self, request):
+        self.request = request
+
+
 @configure.adapter(for_=IRequest, provides=IRendererFormatRaw)
 class RendererFormatRaw(object):
     def __init__(self, request):
@@ -134,10 +141,9 @@ class RendererJson(Renderer):
         return resp
 
 
-@configure.adapter(
-    for_=(IRendererFormatHtml, IView, IRequest),
-    provides=IRendered)
-class RendererHtml(Renderer):
+class StringRenderer(Renderer):
+    content_type = 'text/plain'
+
     async def __call__(self, value):
         # Safe html transformation
         if _is_guillotina_response(value):
@@ -152,9 +158,23 @@ class RendererHtml(Renderer):
                 headers=value.headers)
         if 'content-type' not in value.headers:
             value.headers.update({
-                'content-type': 'text/html'
+                'content-type': self.content_type
             })
         return value
+
+
+@configure.adapter(
+    for_=(IRendererFormatHtml, IView, IRequest),
+    provides=IRendered)
+class RendererHtml(Renderer):
+    content_type = 'text/html'
+
+
+@configure.adapter(
+    for_=(IRendererFormatPlain, IView, IRequest),
+    provides=IRendered)
+class RendererPlain(Renderer):
+    content_type = 'text/plain'
 
 
 @configure.adapter(
@@ -169,7 +189,10 @@ class RendererRaw(Renderer):
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
             resp = aioResponse(body=bytes(resp, 'utf-8'))
-            resp.headers['Content-Type'] = 'text/html'
+            if '<html' in resp:
+                resp.headers['Content-Type'] = 'text/html'
+            else:
+                resp.headers['Content-Type'] = 'text/plain'
         elif resp is None:
             # missing result...
             resp = aioResponse(body=b'{}')

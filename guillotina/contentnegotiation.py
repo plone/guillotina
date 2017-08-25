@@ -682,7 +682,7 @@ class ContentNegotiator(object):
             # "type;params;q"
             # strip the "q=" from the start of the q value
             params = components[1].strip()
-            q = components[1].strip()[2:]
+            q = components[2].strip()[2:]
 
         return (type, params, float(q))
 

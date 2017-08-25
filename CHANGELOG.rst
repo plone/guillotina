@@ -1,7 +1,11 @@
 1.3.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add text/plain content negotation response type
+  [vangheem]
+
+- Fix content negotiation bug where we could not parse more complex Accept headers
+  [vangheem]
 
 
 1.3.6 (2017-08-15)

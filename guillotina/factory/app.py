@@ -85,7 +85,8 @@ _delayed_default_settings = {
     # header is provided, it'll default to the first type provided
     "renderers": collections.OrderedDict((
         ("application/json", interfaces.IRendererFormatJson),
-        ("text/html", interfaces.IRendererFormatHtml)
+        ("text/html", interfaces.IRendererFormatHtml),
+        ("text/plain", interfaces.IRendererFormatHtml)
     )),
     "languages": {
         "en": languages.IEN,
