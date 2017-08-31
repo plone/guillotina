@@ -34,6 +34,8 @@ class ShellHelpers:
         self._request._db_id = db_id
         self._active_db = db
         self._active_txn = await tm.begin()
+        self._request._txn = self._active_txn
+        self._request._tm = tm
         return self._active_txn
 
     async def use_container(self, container_id):

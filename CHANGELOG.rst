@@ -1,7 +1,8 @@
 1.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add request._tm and request._txn when using `use_db()` with shell command
+  [vangheem]
 
 
 1.3.7 (2017-08-25)
