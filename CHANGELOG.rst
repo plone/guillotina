@@ -1,6 +1,9 @@
 1.3.8 (unreleased)
 ------------------
 
+- provide `@component-subscribers` endpoint to inspect configured subscribers
+  [vangheem]
+
 - Add request._tm and request._txn when using `use_db()` with shell command
   [vangheem]
 
