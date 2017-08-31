@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from guillotina import app_settings
+from guillotina import component
 from guillotina import configure
 from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.utils import get_dotted_name
 
 
 @configure.service(
@@ -32,3 +34,26 @@ async def get(context, request):
     description="Retrieves information on API configuration")
 async def get_api_definition(context, request):
     return app_settings['api_definition']
+
+
+@configure.service(
+    context=IApplication, method='GET',
+    name='@component-subscribers',
+    permission='guillotina.ReadConfiguration',
+    summary='Get all registered subscribers')
+async def get_all_subscribers(context, request):
+    subscribers = {
+    }
+    sm = component.getGlobalSiteManager()
+    for registration in sm.registeredHandlers():
+        if len(registration.required) != 2:
+            continue
+        handler = get_dotted_name(registration.handler)
+        event = get_dotted_name(registration.required[1])
+        resource = get_dotted_name(registration.required[0])
+        if resource not in subscribers:
+            subscribers[resource] = {}
+        if event not in subscribers[resource]:
+            subscribers[resource][event] = []
+        subscribers[resource][event].append(handler)
+    return subscribers

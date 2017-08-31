@@ -100,9 +100,12 @@ Default root access can be done with AUTHORIZATION header : Basic root:root
 
 
 
-TODO
-----
+Roadmap for 2.0
+---------------
 
 - be able to configure renderer from function view configuration
 - view functions can take 2, 1 or zero args
 - handle routes in definitions...
+- change subsriber registration syntax to something like:
+  @subscriber(IResource, IObjectModified)
+
