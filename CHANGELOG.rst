@@ -1,4 +1,4 @@
-1.3.8 (unreleased)
+1.3.8 (2017-09-01)
 ------------------
 
 - provide `@component-subscribers` endpoint to inspect configured subscribers
