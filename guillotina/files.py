@@ -92,6 +92,8 @@ class CloudFileManager(object):
         async for chunk in self.real_file_manager.iter_data(*args, **kwargs):
             yield chunk
 
+    async def save_file(self, generator, *args, **kwargs):
+        await self.real_file_manager.save_file(generator, *args, **kwargs)
 
 # This file was borrowed from z3c.blobfile and is licensed under the terms of
 # the ZPL.

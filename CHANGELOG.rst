@@ -1,7 +1,8 @@
 1.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- add `save_file` method to the file manager interface
+  [vangheem]
 
 
 1.3.8 (2017-09-01)
