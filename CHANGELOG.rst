@@ -1,4 +1,4 @@
-1.3.9 (unreleased)
+1.3.9 (2017-09-01)
 ------------------
 
 - add `save_file` method to the file manager interface
