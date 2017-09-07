@@ -1,7 +1,34 @@
-1.3.7 (unreleased)
-------------------
+1.3.10 (unreleased)
+-------------------
 
 - Nothing changed yet.
+
+
+1.3.9 (2017-09-01)
+------------------
+
+- add `save_file` method to the file manager interface
+  [vangheem]
+
+
+1.3.8 (2017-09-01)
+------------------
+
+- provide `@component-subscribers` endpoint to inspect configured subscribers
+  [vangheem]
+
+- Add request._tm and request._txn when using `use_db()` with shell command
+  [vangheem]
+
+
+1.3.7 (2017-08-25)
+------------------
+
+- Add text/plain content negotation response type
+  [vangheem]
+
+- Fix content negotiation bug where we could not parse more complex Accept headers
+  [vangheem]
 
 
 1.3.6 (2017-08-15)
