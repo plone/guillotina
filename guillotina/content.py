@@ -113,6 +113,7 @@ def load_cached_schema():
     for x in getUtilitiesFor(IResourceFactory):
         factory = x[1]
         if factory.type_name not in SCHEMA_CACHE:
+            FACTORY_CACHE[factory.type_name] = factory
             behaviors_registrations = []
             for iface in factory.behaviors or ():
                 if Interface.providedBy(iface):
