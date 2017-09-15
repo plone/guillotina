@@ -23,6 +23,7 @@ from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
 from guillotina.request import Request
 from guillotina.traversal import TraversalRouter
+from guillotina.utils import lazy_apply
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 from guillotina.writable import check_writable_request
@@ -30,7 +31,6 @@ from guillotina.writable import check_writable_request
 import aiohttp
 import asyncio
 import collections
-import inspect
 import json
 import logging
 import logging.config
@@ -57,10 +57,7 @@ def update_app_settings(settings):
 def load_application(module, root, settings):
     # includeme function
     if hasattr(module, 'includeme'):
-        args = [root]
-        if len(inspect.signature(module.includeme).parameters) == 2:
-            args.append(settings)
-        module.includeme(*args)
+        lazy_apply(module.includeme, root, settings)
     # app_settings
     if hasattr(module, 'app_settings') and app_settings != module.app_settings:
         update_app_settings(module.app_settings)
@@ -266,7 +263,11 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
         # In case there is Utilties that are registered
-        ident = asyncio.ensure_future(utility.initialize(app=server_app), loop=loop)
+        if hasattr(utility, 'initialize'):
+            ident = asyncio.ensure_future(
+                lazy_apply(utility.initialize, app=server_app), loop=loop)
+        else:
+            logger.warn(f'No initialize method found on {utility} object')
         root.add_async_task(utility, ident, {})
 
     server_app.on_cleanup.append(close_utilities)
@@ -282,7 +283,8 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
 async def close_utilities(app):
     for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
-        asyncio.ensure_future(utility.finalize(app=app), loop=app.loop)
+        if hasattr(utility, 'finalize'):
+            asyncio.ensure_future(lazy_apply(utility.finalize, app=app), loop=app.loop)
     for db in app.router._root:
         if IDatabase.providedBy(db[1]):
             await db[1]._db.finalize()

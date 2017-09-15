@@ -108,3 +108,29 @@ def test_get_owners(dummy_guillotina):
     assert utils.get_owners(content) == ['foobar']
     roleperm.assign_role_to_principal('guillotina.Owner', 'foobar2')
     assert utils.get_owners(content) == ['foobar', 'foobar2']
+
+
+def _test_empty_func():
+    return True
+
+
+def _test_some_args(foo, bar):
+    return foo, bar
+
+
+def _test_some_kwargs(foo=None, bar=None):
+    return foo, bar
+
+
+def _test_some_stars(foo, bar=None, **kwargs):
+    return foo, bar, kwargs
+
+
+def test_lazy_apply():
+    assert utils.lazy_apply(_test_empty_func, 'blah', foo='bar')
+    assert utils.lazy_apply(_test_some_args, 'foo', 'bar') == ('foo', 'bar')
+    assert utils.lazy_apply(_test_some_args, 'foo', 'bar', 'ldkfks', 'dsflk') == ('foo', 'bar')
+    assert utils.lazy_apply(_test_some_kwargs, 'foo', bar='bar') == ('foo', 'bar')
+    assert utils.lazy_apply(_test_some_kwargs, 'foo', bar='bar', rsdfk='ldskf') == ('foo', 'bar')
+    assert (utils.lazy_apply(_test_some_stars, 'foo', 'blah', bar='bar', another='another') ==
+            ('foo', 'bar', {'another': 'another'}))
