@@ -1,7 +1,8 @@
 1.3.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- When loading schema cache, also set factory cache
+  [vangheem]
 
 
 1.3.9 (2017-09-01)
@@ -71,7 +72,7 @@
 - Change IQueueUtility to being a regular Queue instead of a PriorityQueue. A
   PriorityQueue request comparison functions to be implemented on the added
   objects.
-  [vangheem] 
+  [vangheem]
 
 
 1.3.1 (2017-08-04)
