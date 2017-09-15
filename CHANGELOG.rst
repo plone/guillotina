@@ -1,4 +1,4 @@
-1.3.10 (unreleased)
+1.3.10 (2017-09-15)
 -------------------
 
 - When loading schema cache, also set factory cache
