@@ -1,4 +1,4 @@
-1.3.12 (unreleased)
+1.3.12 (2017-09-21)
 -------------------
 
 - Change uncaught exception status code to 500
