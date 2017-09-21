@@ -1,4 +1,4 @@
-1.3.15 (unreleased)
+1.3.15 (2017-09-21)
 -------------------
 
 - executing request futures should be a Task since finishing execution of
