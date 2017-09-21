@@ -47,7 +47,11 @@ class Request(web_request.Request):
         except (AttributeError, KeyError):
             return
 
-    async def execute_futures(self):
+    def execute_futures(self):
+        '''
+        Should *not* be a coroutine since the deleting of
+        the request object causes this to be canceled otherwise.
+        '''
         if self._futures is None:
             return
         futures = []
@@ -55,5 +59,5 @@ class Request(web_request.Request):
             if not asyncio.iscoroutine(fut):
                 fut = fut()
             futures.append(fut)
-        await asyncio.gather(*futures)
+        asyncio.ensure_future(asyncio.gather(*futures))
         self._futures = {}

@@ -1,7 +1,9 @@
 1.3.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- executing request futures should be a Task since finishing execution of
+  the request object causes it to be deleted
+  [vangheem]
 
 
 1.3.14 (2017-09-21)

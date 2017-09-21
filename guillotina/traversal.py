@@ -240,7 +240,7 @@ class MatchInfo(AbstractMatchInfo):
         resp._body = None
         resp.force_close()
 
-        await request.execute_futures()
+        request.execute_futures()
 
         return resp
 
