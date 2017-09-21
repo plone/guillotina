@@ -1,7 +1,8 @@
 1.3.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix logging of large objects
+  [vangheem]
 
 
 1.3.10 (2017-09-15)
