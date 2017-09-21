@@ -10,12 +10,11 @@ from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
-from guillotina.transactions import get_transaction
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
 
 
-class CommitHook(object):
+class IndexFuture(object):
 
     def __init__(self, container, request):
         self.remove = []
@@ -23,9 +22,7 @@ class CommitHook(object):
         self.container = container
         self.request = request
 
-    async def __call__(self, trns):
-        if not trns:
-            return
+    async def __call__(self):
         # Commits are run in sync thread so there is no asyncloop
         search = queryUtility(ICatalogUtility)
         if search:
@@ -38,7 +35,7 @@ class CommitHook(object):
         self.remove = []
 
 
-def get_hook():
+def get_future():
 
     request = get_current_request()
     try:
@@ -50,16 +47,11 @@ def get_hook():
     if not search:
         return  # no search configured
 
-    trns = get_transaction(request)
-    hook = None
-    for _hook in trns._after_commit:
-        if isinstance(_hook[0], CommitHook):
-            hook = _hook[0]
-            break
-    if hook is None:
-        hook = CommitHook(container, request)
-        trns.add_after_commit_hook(hook)
-    return hook
+    fut = request.get_future('indexer')
+    if fut is None:
+        fut = IndexFuture(container, request)
+        request.add_future('indexer', fut)
+    return fut
 
 
 @configure.subscriber(for_=(IResource, IObjectPermissionsModifiedEvent))
@@ -70,7 +62,8 @@ async def security_changed(obj, event):
         return
     # We need to reindex the objects below
     request = get_current_request()
-    request._futures.update({obj.id: AsyncCatalogReindex(obj, request, security=True)()})
+    request.add_future(
+        obj.id, AsyncCatalogReindex(obj, request, security=True)())
 
 
 @configure.subscriber(for_=(IResource, IObjectRemovedEvent))
@@ -84,12 +77,12 @@ def remove_object(obj, event):
 
     content_path = get_content_path(obj)
 
-    hook = get_hook()
-    if hook is None:
+    fut = get_future()
+    if fut is None:
         return
-    hook.remove.append((uid, type_name, content_path))
-    if uid in hook.index:
-        del hook.index[uid]
+    fut.remove.append((uid, type_name, content_path))
+    if uid in fut.index:
+        del fut.index[uid]
 
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent))
@@ -102,12 +95,12 @@ async def add_object(obj, event):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    hook = get_hook()
-    if hook is None:
+    fut = get_future()
+    if fut is None:
         return
     search = queryUtility(ICatalogUtility)
     if search:
-        hook.index[uid] = await search.get_data(obj)
+        fut.index[uid] = await search.get_data(obj)
 
 
 @configure.subscriber(for_=(IContainer, IObjectAddedEvent))

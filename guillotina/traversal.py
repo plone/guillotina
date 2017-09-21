@@ -44,7 +44,6 @@ from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
 import aiohttp
-import asyncio
 import json
 import traceback
 import uuid
@@ -241,9 +240,8 @@ class MatchInfo(AbstractMatchInfo):
         resp._body = None
         resp.force_close()
 
-        futures_to_wait = request._futures.values()
-        if futures_to_wait:
-            await asyncio.gather(*[f for f in futures_to_wait])
+        if request._futures is not None:
+            await request.execute_futures()
 
         return resp
 
@@ -303,8 +301,6 @@ class TraversalRouter(AbstractRouter):
 
     async def real_resolve(self, request):
         """Main function to resolve a request."""
-        request._futures = {}
-
         security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
