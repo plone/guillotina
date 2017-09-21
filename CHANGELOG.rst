@@ -1,4 +1,4 @@
-1.3.11 (unreleased)
+1.3.11 (2017-09-21)
 -------------------
 
 - Add another connection closed handler
