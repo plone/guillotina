@@ -1,4 +1,4 @@
-1.3.14 (unreleased)
+1.3.14 (2017-09-21)
 -------------------
 
 - Fix executing futures in web service
