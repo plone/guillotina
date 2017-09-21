@@ -1,7 +1,8 @@
 1.3.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Change uncaught exception status code to 500
+  [vangheem]
 
 
 1.3.11 (2017-09-21)

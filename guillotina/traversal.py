@@ -163,7 +163,7 @@ def generate_unauthorized_response(e, request):
     return UnauthorizedResponse(message)
 
 
-def generate_error_response(e, request, error, status=400):
+def generate_error_response(e, request, error, status=500):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Error on execution of view') + ' ' + eid
