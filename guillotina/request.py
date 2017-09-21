@@ -3,6 +3,8 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from zope.interface import implementer
 
+import asyncio
+
 
 @implementer(IRequest, IDefaultLayer)
 class Request(web_request.Request):
@@ -32,4 +34,26 @@ class Request(web_request.Request):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._futures = {}
+
+    def add_future(self, name, fut):
+        if self._futures is None:
+            self._futures = {}
+        self._futures[name] = fut
+
+    def get_future(self, name):
+        try:
+            return self._futures[name]
+        except (AttributeError, KeyError):
+            return
+
+    async def execute_futures(self):
+        if self._futures is None:
+            return
+        futures = []
+        for fut in self._futures.values():
+            if not asyncio.iscoroutine(fut):
+                fut = fut()
+            futures.append(fut)
+        await asyncio.gather(*futures)
         self._futures = {}

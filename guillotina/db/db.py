@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
-from aiohttp.test_utils import make_mocked_request
 from guillotina.content import Folder
 from guillotina.db import ROOT_ID
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IDatabase
+from guillotina.tests.utils import make_mocked_request
 from zope.interface import implementer_only
 
 

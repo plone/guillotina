@@ -1,11 +1,22 @@
-from aiohttp.test_utils import make_mocked_request
+from aiohttp import hdrs
+from aiohttp import test_utils
+from aiohttp.helpers import noop
+from aiohttp.helpers import sentinel
+from aiohttp.http import HttpVersion
+from aiohttp.http import RawRequestMessage
+from aiohttp.web import UrlMappingMatchInfo
+from contextlib import contextmanager
 from guillotina.auth.users import RootUser
 from guillotina.behaviors import apply_markers
 from guillotina.content import Item
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
+from guillotina.request import Request
 from guillotina.security.policy import Interaction
 from guillotina.transactions import managed_transaction
+from multidict import CIMultiDict
+from unittest import mock
+from yarl import URL
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
@@ -126,3 +137,90 @@ def create_content(factory=Item, type_name='Item', id=None):
     obj.__name__ = obj.id = id
     apply_markers(obj, None)
     return obj
+
+
+def make_mocked_request(method, path, headers=None, *,
+                        version=HttpVersion(1, 1), closing=False,
+                        app=None,
+                        writer=sentinel,
+                        payload_writer=sentinel,
+                        protocol=sentinel,
+                        transport=sentinel,
+                        payload=sentinel,
+                        sslcontext=None,
+                        secure_proxy_ssl_header=None,
+                        client_max_size=1024**2):
+    """
+    XXX copied from aiohttp but using guillotina request object
+    Creates mocked web.Request testing purposes.
+
+    Useful in unit tests, when spinning full web server is overkill or
+    specific conditions and errors are hard to trigger.
+
+    """
+
+    task = mock.Mock()
+    loop = mock.Mock()
+    loop.create_future.return_value = ()
+
+    if version < HttpVersion(1, 1):
+        closing = True
+
+    if headers:
+        headers = CIMultiDict(headers)
+        raw_hdrs = tuple(
+            (k.encode('utf-8'), v.encode('utf-8')) for k, v in headers.items())
+    else:
+        headers = CIMultiDict()
+        raw_hdrs = ()
+
+    chunked = 'chunked' in headers.get(hdrs.TRANSFER_ENCODING, '').lower()
+
+    message = RawRequestMessage(
+        method, path, version, headers,
+        raw_hdrs, closing, False, False, chunked, URL(path))
+    if app is None:
+        app = test_utils._create_app_mock()
+
+    if protocol is sentinel:
+        protocol = mock.Mock()
+
+    if transport is sentinel:
+        transport = test_utils._create_transport(sslcontext)
+
+    if writer is sentinel:
+        writer = mock.Mock()
+        writer.transport = transport
+
+    if payload_writer is sentinel:
+        payload_writer = mock.Mock()
+        payload_writer.write_eof.side_effect = noop
+        payload_writer.drain.side_effect = noop
+
+    protocol.transport = transport
+    protocol.writer = writer
+
+    if payload is sentinel:
+        payload = mock.Mock()
+
+    time_service = mock.Mock()
+    time_service.time.return_value = 12345
+    time_service.strtime.return_value = "Tue, 15 Nov 1994 08:12:31 GMT"
+
+    @contextmanager
+    def timeout(*args, **kw):
+        yield
+
+    time_service.timeout = mock.Mock()
+    time_service.timeout.side_effect = timeout
+
+    req = Request(message, payload,
+                  protocol, payload_writer, time_service, task,
+                  secure_proxy_ssl_header=secure_proxy_ssl_header,
+                  client_max_size=client_max_size)
+
+    match_info = UrlMappingMatchInfo({}, mock.Mock())
+    match_info.add_app(app)
+    req._match_info = match_info
+
+    return req

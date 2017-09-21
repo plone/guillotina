@@ -1,7 +1,11 @@
 1.3.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add add_future, get_future and execute_futures methods to Request class
+  [vangheem]
+
+- Move indexing to be done in a future instead of after commit hook
+  [vangheem]
 
 
 1.3.12 (2017-09-21)
