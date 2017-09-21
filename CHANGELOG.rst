@@ -1,6 +1,9 @@
 1.3.11 (unreleased)
 -------------------
 
+- Add another connection closed handler
+  [vangheem]
+
 - Fix logging of large objects
   [vangheem]
 
