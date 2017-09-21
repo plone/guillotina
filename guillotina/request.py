@@ -48,9 +48,12 @@ class Request(web_request.Request):
             return
 
     async def execute_futures(self):
+        if self._futures is None:
+            return
         futures = []
         for fut in self._futures.values():
             if not asyncio.iscoroutine(fut):
                 fut = fut()
             futures.append(fut)
         await asyncio.gather(*futures)
+        self._futures = {}
