@@ -1,4 +1,4 @@
-1.3.13 (unreleased)
+1.3.13 (2017-09-21)
 -------------------
 
 - Add add_future, get_future and execute_futures methods to Request class
