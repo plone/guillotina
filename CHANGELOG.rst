@@ -1,7 +1,8 @@
 1.3.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix executing futures in web service
+  [vangheem]
 
 
 1.3.13 (2017-09-21)
