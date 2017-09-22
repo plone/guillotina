@@ -25,6 +25,7 @@ from guillotina.request import Request
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
+from guillotina.writable import check_writable_request
 
 import aiohttp
 import asyncio
@@ -93,7 +94,8 @@ _delayed_default_settings = {
         "en-us": languages.IENUS,
         "ca": languages.ICA
     },
-    'cors_renderer': cors.DefaultCorsRenderer
+    'cors_renderer': cors.DefaultCorsRenderer,
+    'check_writable_request': check_writable_request
 }
 
 
