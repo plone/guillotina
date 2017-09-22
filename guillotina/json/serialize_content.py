@@ -66,8 +66,7 @@ class SerializeToJson(object):
 
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
             dotted_name = behavior_schema.__identifier__
-            if (dotted_name in self.omit or (
-                    len(self.include) > 0 and dotted_name not in self.include)):
+            if dotted_name in self.omit:
                 # make sure the schema isn't filtered
                 continue
             if IAsyncBehavior.implementedBy(behavior.__class__):
@@ -91,7 +90,9 @@ class SerializeToJson(object):
             else:
                 dotted_name = name
             if (dotted_name in self.omit or (
-                    len(self.include) > 0 and dotted_name not in self.include)):
+                    len(self.include) > 0 and (
+                        dotted_name not in self.include and
+                        schema.__identifier__ not in self.include))):
                 # make sure the fields aren't filtered
                 continue
 
