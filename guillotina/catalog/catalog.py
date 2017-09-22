@@ -64,7 +64,7 @@ class DefaultSearchUtility(object):
         pass
 
     async def reindex_all_content(self, container, security=False):
-        """ For all Dexterity Content add a queue task that reindex the object
+        """ For all content add a queue task that reindex the object
         """
         pass
 
@@ -138,7 +138,8 @@ class DefaultCatalogDataAdapter(object):
                 try:
                     # accessors we always reindex since we can't know if updated
                     # from the indexes param--they are "fake" like indexes, not fields
-                    if 'accessor' in index_data:
+                    if ('accessor' in index_data and (
+                            indexes is None or index_data.get('field') in indexes)):
                         values[index_name] = index_data['accessor'](behavior)
                     elif (indexes is None or index_name in indexes or
                             isinstance(getattr(type(self.content), index_name, None), property)):

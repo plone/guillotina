@@ -108,7 +108,15 @@ async def add_object(obj, event):
     search = queryUtility(ICatalogUtility)
     if search:
         if IObjectModifiedEvent.providedBy(event):
-            fut.update[uid] = await search.get_data(obj, event.payload)
+            indexes = []
+            # get a list of potential indexes
+            for field_name in event.payload.keys():
+                if '.' in field_name:
+                    for behavior_field_name in event.payload[field_name].keys():
+                        indexes.append(behavior_field_name)
+                else:
+                    indexes.append(field_name)
+            fut.update[uid] = await search.get_data(obj, indexes)
         else:
             fut.index[uid] = await search.get_data(obj)
 
