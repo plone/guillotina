@@ -1,7 +1,8 @@
 1.3.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Limit max object cache size to 5mb
+  [vangheem]
 
 
 1.3.16 (2017-09-21)
