@@ -1,7 +1,9 @@
 1.3.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to provide omit/include on GET requests to limit number of fields
+  that are returned in the payload
+  [vangheem]
 
 
 1.3.16 (2017-09-21)
