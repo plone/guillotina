@@ -97,8 +97,11 @@ class DefaultGET(Service):
         serializer = getMultiAdapter(
             (self.context, self.request),
             IResourceSerializeToJson)
-        include = self.request.GET.get('include', '').split(',')
-        omit = self.request.GET.get('omit', '').split(',')
+        include = omit = []
+        if self.request.GET.get('include'):
+            include = self.request.GET.get('include').split(',')
+        if self.request.GET.get('omit'):
+            omit = self.request.GET.get('omit').split(',')
         result = await serializer(include=include, omit=omit)
         await notify(ObjectVisitedEvent(self.context))
         return result
