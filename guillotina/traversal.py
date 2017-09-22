@@ -35,7 +35,6 @@ from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SUBREQUEST_METHODS
-from guillotina.interfaces import WRITING_VERBS
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
@@ -130,7 +129,7 @@ async def traverse(request, parent, path):
         return parent, path
 
     if IDatabase.providedBy(context):
-        request._db_write_enabled = request.method in WRITING_VERBS
+        request._db_write_enabled = app_settings['check_writable_request'](request)
         request._db_id = context.id
         # Add a transaction Manager to request
         tm = request._tm = context.get_transaction_manager()
@@ -184,7 +183,7 @@ class MatchInfo(AbstractMatchInfo):
 
     async def handler(self, request):
         """Main handler function for aiohttp."""
-        if request.method in WRITING_VERBS:
+        if app_settings['check_writable_request'](request):
             try:
                 # We try to avoid collisions on the same instance of
                 # guillotina

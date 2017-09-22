@@ -1,7 +1,9 @@
 1.3.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide `check_writable_request` configuration to allow customizing what
+  requests are writable requests
+  [vangheem]
 
 
 1.3.15 (2017-09-21)
