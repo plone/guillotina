@@ -102,7 +102,10 @@ class DefaultGET(Service):
             include = self.request.GET.get('include').split(',')
         if self.request.GET.get('omit'):
             omit = self.request.GET.get('omit').split(',')
-        result = await serializer(include=include, omit=omit)
+        try:
+            result = await serializer(include=include, omit=omit)
+        except TypeError:
+            result = await serializer()
         await notify(ObjectVisitedEvent(self.context))
         return result
 
