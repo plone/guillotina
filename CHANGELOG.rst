@@ -1,4 +1,4 @@
-1.3.16 (unreleased)
+1.3.16 (2017-09-21)
 -------------------
 
 - Provide `check_writable_request` configuration to allow customizing what
