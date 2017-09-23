@@ -109,14 +109,15 @@ async def add_object(obj, event):
     if search:
         if IObjectModifiedEvent.providedBy(event):
             indexes = []
-            # get a list of potential indexes
-            for field_name in event.payload.keys():
-                if '.' in field_name:
-                    for behavior_field_name in event.payload[field_name].keys():
-                        indexes.append(behavior_field_name)
-                else:
-                    indexes.append(field_name)
-            fut.update[uid] = await search.get_data(obj, indexes)
+            if event.payload and len(event.payload) > 0:
+                # get a list of potential indexes
+                for field_name in event.payload.keys():
+                    if '.' in field_name:
+                        for behavior_field_name in event.payload[field_name].keys():
+                            indexes.append(behavior_field_name)
+                    else:
+                        indexes.append(field_name)
+                fut.update[uid] = await search.get_data(obj, indexes)
         else:
             fut.index[uid] = await search.get_data(obj)
 
