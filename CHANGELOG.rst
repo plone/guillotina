@@ -1,6 +1,9 @@
 1.3.17 (unreleased)
 -------------------
 
+- Do not call ObjectLoadedEvent on object traversal
+  [vangheem]
+
 - Be able to provide omit/include on GET requests to limit number of fields
   that are returned in the payload
   [vangheem]
