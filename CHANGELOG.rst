@@ -1,4 +1,4 @@
-1.3.17 (unreleased)
+1.3.17 (2017-09-25)
 -------------------
 
 - Do not call ObjectLoadedEvent on object traversal
