@@ -248,13 +248,14 @@ def get_all_behavior_interfaces(content) -> list:
     return behaviors
 
 
-async def get_all_behaviors(content, create=False) -> list:
+async def get_all_behaviors(content, create=False, load=True) -> list:
     behaviors = []
     for behavior_schema in get_all_behavior_interfaces(content):
         behavior = behavior_schema(content)
-        if IAsyncBehavior.implementedBy(behavior.__class__):
-            # providedBy not working here?
-            await behavior.load(create=create)
+        if load:
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load(create=create)
         behaviors.append((behavior_schema, behavior))
     return behaviors
 

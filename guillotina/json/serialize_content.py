@@ -19,6 +19,7 @@ from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import getFields
 from zope.interface import Interface
+from guillotina.interfaces import IAsyncBehavior
 
 
 MAX_ALLOWED = 200
@@ -34,7 +35,10 @@ class SerializeToJson(object):
         self.request = request
         self.permission_cache = {}
 
-    async def __call__(self):
+    async def __call__(self, include=[], omit=[]):
+        self.include = include
+        self.omit = omit
+
         parent = self.context.__parent__
         if parent is not None:
             # We render the summary of the parent
@@ -60,7 +64,14 @@ class SerializeToJson(object):
         main_schema = factory.schema
         await self.get_schema(main_schema, self.context, result, False)
 
-        for behavior_schema, behavior in await get_all_behaviors(self.context):
+        for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
+            dotted_name = behavior_schema.__identifier__
+            if dotted_name in self.omit:
+                # make sure the schema isn't filtered
+                continue
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load(create=False)
             await self.get_schema(behavior_schema, behavior, result, True)
 
         return result
@@ -72,6 +83,19 @@ class SerializeToJson(object):
 
             if not self.check_permission(read_permissions.get(name)):
                 continue
+
+            if behavior:
+                # omit/include for behaviors need full name
+                dotted_name = schema.__identifier__ + '.' + name
+            else:
+                dotted_name = name
+            if (dotted_name in self.omit or (
+                    len(self.include) > 0 and (
+                        dotted_name not in self.include and
+                        schema.__identifier__ not in self.include))):
+                # make sure the fields aren't filtered
+                continue
+
             serializer = queryMultiAdapter(
                 (field, context, self.request),
                 IResourceFieldSerializer)
