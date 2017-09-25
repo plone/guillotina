@@ -27,6 +27,9 @@ global_roles_for_permission = role_permission_manager.get_roles_for_permission
 @implementer(ICatalogUtility)
 class DefaultSearchUtility(object):
 
+    async def initialize(self, app):
+        pass
+
     async def search(self, container, query):
         pass
 

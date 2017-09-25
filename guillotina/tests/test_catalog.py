@@ -11,7 +11,6 @@ import pytest
 
 def test_indexed_fields(dummy_guillotina, loop):
     fields = get_index_fields('Item')
-    assert 'type_name' in fields
     assert 'uuid' in fields
     assert 'path' in fields
     assert 'title' in fields
