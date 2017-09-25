@@ -1,12 +1,12 @@
 # -*- encoding: utf-8 -*-
 from guillotina.catalog.utils import get_index_fields
+from guillotina.component import getAdapter
+from guillotina.component import queryUtility
 from guillotina.content import create_content
 from guillotina.interfaces import ICatalogDataAdapter
-from guillotina.interfaces import ICatalogUtility, ISecurityInfo
-from guillotina.component import queryUtility, getAdapter
+from guillotina.interfaces import ICatalogUtility
+from guillotina.interfaces import ISecurityInfo
 from guillotina.tests import utils as test_utils
-
-import pytest
 
 
 def test_indexed_fields(dummy_guillotina, loop):

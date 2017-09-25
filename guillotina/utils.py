@@ -15,7 +15,6 @@ from guillotina.interfaces import IResource
 from hashlib import sha256 as sha
 from zope.interface.interfaces import IInterface
 
-import inspect
 import asyncio
 import fnmatch
 import importlib

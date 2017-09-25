@@ -494,7 +494,7 @@ class Folder(Resource):
         """
         return await self._get_transaction().keys(self._p_oid)
 
-    async def async_items(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:
+    async def async_items(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
         """
         Asynchronously iterate through contents of folder
         """
@@ -503,7 +503,7 @@ class Folder(Resource):
                 await notify(ObjectLoadedEvent(value))
             yield key, value
 
-    async def async_values(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:
+    async def async_values(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
         async for key, value in self._get_transaction().items(self):
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))

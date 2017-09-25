@@ -2,11 +2,12 @@
 from guillotina import configure
 from guillotina.addons import Addon
 from guillotina.api.service import Service
+from guillotina.component import getUtility
 from guillotina.content import get_all_possible_schemas_for_type
 from guillotina.content import Item
-from guillotina.interfaces import IContainer, IApplication
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
 from zope.interface import Interface
-from guillotina.component import getUtility
 
 
 async def test_register_service(container_requester):
