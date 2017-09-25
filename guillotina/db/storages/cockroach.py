@@ -1,12 +1,12 @@
+from guillotina import glogging
 from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 
 import asyncpg
-import logging
 
 
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 # upsert without checking matching tids on updated object
 NAIVE_UPSERT = """

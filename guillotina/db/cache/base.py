@@ -1,7 +1,7 @@
-import logging
+from guillotina import glogging
 
 
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 
 class BaseCache:

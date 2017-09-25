@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
+from guillotina import glogging
 from guillotina.component import queryMultiAdapter
 from guillotina.component import queryUtility
 from guillotina.content import get_all_behaviors
@@ -20,10 +21,8 @@ from guillotina.utils import apply_coroutine
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
 
-import logging
 
-
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 _missing = object()
 
 
