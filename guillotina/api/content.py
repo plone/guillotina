@@ -241,7 +241,7 @@ class DefaultPATCH(Service):
                 str(e),
                 status=400)
 
-        await notify(ObjectModifiedEvent(self.context, data))
+        await notify(ObjectModifiedEvent(self.context, payload=data))
 
         return Response(response={}, status=204)
 
