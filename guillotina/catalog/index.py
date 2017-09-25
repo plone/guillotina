@@ -19,6 +19,7 @@ class IndexFuture(object):
     def __init__(self, container, request):
         self.remove = []
         self.index = {}
+        self.update = {}
         self.container = container
         self.request = request
 
@@ -30,8 +31,11 @@ class IndexFuture(object):
                 await search.remove(self.container, self.remove)
             if len(self.index) > 0:
                 await search.index(self.container, self.index)
+            if len(self.update) > 0:
+                await search.update(self.container, self.update)
 
         self.index = {}
+        self.update = {}
         self.remove = []
 
 
@@ -80,9 +84,12 @@ def remove_object(obj, event):
     fut = get_future()
     if fut is None:
         return
+
     fut.remove.append((uid, type_name, content_path))
     if uid in fut.index:
         del fut.index[uid]
+    if uid in fut.update:
+        del fut.update[uid]
 
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent))
@@ -100,7 +107,19 @@ async def add_object(obj, event):
         return
     search = queryUtility(ICatalogUtility)
     if search:
-        fut.index[uid] = await search.get_data(obj)
+        if IObjectModifiedEvent.providedBy(event):
+            indexes = []
+            if event.payload and len(event.payload) > 0:
+                # get a list of potential indexes
+                for field_name in event.payload.keys():
+                    if '.' in field_name:
+                        for behavior_field_name in event.payload[field_name].keys():
+                            indexes.append(behavior_field_name)
+                    else:
+                        indexes.append(field_name)
+                fut.update[uid] = await search.get_data(obj, indexes)
+        else:
+            fut.index[uid] = await search.get_data(obj)
 
 
 @configure.subscriber(for_=(IContainer, IObjectAddedEvent))

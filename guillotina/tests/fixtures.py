@@ -19,6 +19,11 @@ import pytest
 import sys
 
 
+TESTING_SETTINGS["utilities"].append({
+    "provides": "guillotina.interfaces.ICatalogUtility",
+    "factory": "guillotina.catalog.catalog.DefaultSearchUtility"
+})
+
 IS_TRAVIS = 'TRAVIS' in os.environ
 USE_COCKROACH = 'USE_COCKROACH' in os.environ
 

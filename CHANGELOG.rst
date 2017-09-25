@@ -5,6 +5,13 @@
   that are returned in the payload
   [vangheem]
 
+- Limit max object cache size to 5mb
+  [vangheem]
+
+- Optimize indexing for patch operations to only index changed data instead
+  of the full object
+  [vangheem]
+
 
 1.3.16 (2017-09-21)
 -------------------
