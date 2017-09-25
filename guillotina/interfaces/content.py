@@ -16,7 +16,7 @@ class IAsyncContainer(Interface):
     asynchronously
     """
 
-    async def async_get(name):
+    async def async_get(name, default=None, suppress_events=False):
         """
         asynchronously get subobject
         """

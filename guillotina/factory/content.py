@@ -133,7 +133,7 @@ class Database(object):
     async def get_root(self):
         return await self._p_jar.get(ROOT_ID)
 
-    async def async_get(self, key):
+    async def async_get(self, key, suppress_events=False):
         root = await self.get_root()
         return await root.async_get(key)
 

@@ -462,14 +462,15 @@ class Folder(Resource):
             value._p_jar = trns
             trns.register(value)
 
-    async def async_get(self, key: str, default=None) -> IResource:
+    async def async_get(self, key: str, default=None, suppress_events=False) -> IResource:
         """
         Asynchronously get an object inside this folder
         """
         try:
             val = await self._get_transaction().get_child(self, key)
             if val is not None:
-                await notify(ObjectLoadedEvent(val))
+                if not suppress_events:
+                    await notify(ObjectLoadedEvent(val))
                 return val
         except KeyError:
             pass
@@ -493,17 +494,19 @@ class Folder(Resource):
         """
         return await self._get_transaction().keys(self._p_oid)
 
-    async def async_items(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
+    async def async_items(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:
         """
         Asynchronously iterate through contents of folder
         """
         async for key, value in self._get_transaction().items(self):
-            await notify(ObjectLoadedEvent(value))
+            if not suppress_events:
+                await notify(ObjectLoadedEvent(value))
             yield key, value
 
-    async def async_values(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
+    async def async_values(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:
         async for key, value in self._get_transaction().items(self):
-            await notify(ObjectLoadedEvent(value))
+            if not suppress_events:
+                await notify(ObjectLoadedEvent(value))
             yield value
 
 
