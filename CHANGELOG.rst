@@ -1,4 +1,4 @@
-1.3.18 (unreleased)
+1.3.18 (2017-09-25)
 -------------------
 
 - Provide extra logging data for more loggers
