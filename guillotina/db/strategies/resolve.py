@@ -1,13 +1,12 @@
 from guillotina import configure
+from guillotina import glogging
 from guillotina.db.interfaces import IDBTransactionStrategy
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.strategies.simple import SimpleStrategy
 
-import logging
 
-
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 
 @configure.adapter(
