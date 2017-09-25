@@ -1,6 +1,9 @@
 1.3.17 (unreleased)
 -------------------
 
+- Limit max object cache size to 5mb
+  [vangheem]
+
 - Optimize indexing for patch operations to only index changed data instead
   of the full object
   [vangheem]

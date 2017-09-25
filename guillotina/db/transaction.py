@@ -232,7 +232,8 @@ class Transaction(object):
             # ttl of zero means we want to provide a hard cache here
             HARD_CACHE[oid] = result
         else:
-            await self._cache.set(result, oid=oid)
+            if self._cache.max_cache_record_size > len(result['state']):
+                await self._cache.set(result, oid=oid)
 
         return obj
 
@@ -337,7 +338,8 @@ class Transaction(object):
             result = await self._manager._storage.get_child(self, container._p_oid, key)
             if result is None:
                 return None
-            await self._cache.set(result, container=container, id=key)
+            if self._cache.max_cache_record_size > len(result['state']):
+                await self._cache.set(result, container=container, id=key)
 
         obj = reader(result)
         obj.__parent__ = container
@@ -366,7 +368,8 @@ class Transaction(object):
             result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
             if result is None:
                 raise KeyError(id)
-            await self._cache.set(result, container=base_obj, id=id, variant='annotation')
+            if self._cache.max_cache_record_size > len(result['state']):
+                await self._cache.set(result, container=base_obj, id=id, variant='annotation')
         obj = reader(result)
         obj.__of__ = base_obj._p_oid
         obj._p_jar = self
