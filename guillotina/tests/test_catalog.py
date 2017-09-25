@@ -1,17 +1,16 @@
 # -*- encoding: utf-8 -*-
 from guillotina.catalog.utils import get_index_fields
+from guillotina.component import getAdapter
+from guillotina.component import queryUtility
 from guillotina.content import create_content
 from guillotina.interfaces import ICatalogDataAdapter
-from guillotina.interfaces import ICatalogUtility, ISecurityInfo
-from guillotina.component import queryUtility, getAdapter
+from guillotina.interfaces import ICatalogUtility
+from guillotina.interfaces import ISecurityInfo
 from guillotina.tests import utils as test_utils
-
-import pytest
 
 
 def test_indexed_fields(dummy_guillotina, loop):
     fields = get_index_fields('Item')
-    assert 'type_name' in fields
     assert 'uuid' in fields
     assert 'path' in fields
     assert 'title' in fields
@@ -61,7 +60,7 @@ async def test_get_data_uses_indexes_param(dummy_request):
     container.__name__ = 'guillotina'
     ob = await create_content('Item', id='foobar')
     data = await util.get_data(ob, indexes=['title'])
-    assert len(data) == 2  # uuid always returned
+    assert len(data) == 3  # uuid and type_name always returned
 
     data = await util.get_data(ob)
     assert len(data) > 7

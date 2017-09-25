@@ -123,6 +123,7 @@ class GuillotinaAIOHTTPApplication(web.Application):
             secure_proxy_ssl_header=self._secure_proxy_ssl_header,
             client_max_size=self._client_max_size)
 
+
 def make_aiohttp_application(settings, middlewares=[]):
     return GuillotinaAIOHTTPApplication(
         router=TraversalRouter(),

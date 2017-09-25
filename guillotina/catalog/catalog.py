@@ -27,6 +27,9 @@ global_roles_for_permission = role_permission_manager.get_roles_for_permission
 @implementer(ICatalogUtility)
 class DefaultSearchUtility(object):
 
+    async def initialize(self, app):
+        pass
+
     async def search(self, container, query):
         pass
 
@@ -132,7 +135,9 @@ class DefaultCatalogDataAdapter(object):
 
     async def __call__(self, indexes=None):
         # For each type
-        values = {}
+        values = {
+            'type_name': self.content.type_name
+        }
 
         for schema in iter_schemata(self.content):
             behavior = schema(self.content)
@@ -166,6 +171,8 @@ class DefaultCatalogDataAdapter(object):
                 if not loaded:
                     await self.load_behavior(behavior)
                     loaded = True
-                values[metadata_name] = self.get_data(behavior, schema, metadata_name)
-
+                try:
+                    values[metadata_name] = self.get_data(behavior, schema, metadata_name)
+                except NoIndexField:
+                    pass
         return values

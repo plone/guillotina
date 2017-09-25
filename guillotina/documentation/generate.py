@@ -109,7 +109,7 @@ class Generator:
             response_data = response.json()
             if '@type' in response_data:
                 self._cached_type_names[path] = response_data['@type']
-        except:
+        except Exception:
             pass
         if url in self._cached_type_names:
             return
@@ -118,7 +118,7 @@ class Generator:
         response_content = response.json()
         try:
             self._cached_type_names[path] = response_content['@type']
-        except:
+        except Exception:
             # no type for this... it's okay, probably root or db
             self._cached_type_names[path] = 'Unknown'
 

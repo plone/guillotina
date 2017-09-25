@@ -17,6 +17,8 @@ from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
+from guillotina.event import notify
+from guillotina.events import ObjectLoadedEvent
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
@@ -120,7 +122,7 @@ async def traverse(request, parent, path):
         if path[0].startswith('_') or path[0] in ('.', '..'):
             raise HTTPUnauthorized()
         if IAsyncContainer.providedBy(parent):
-            context = await parent.async_get(path[0])
+            context = await parent.async_get(path[0], suppress_events=True)
             if context is None:
                 return parent, path
         else:
@@ -324,6 +326,7 @@ class TraversalRouter(AbstractRouter):
             # XXX should only should traceback if in some sort of dev mode?
             raise HTTPBadRequest(text=json.dumps(data))
 
+        await notify(ObjectLoadedEvent(resource))
         request.resource = resource
         request.tail = tail
 

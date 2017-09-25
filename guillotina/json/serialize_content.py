@@ -9,6 +9,7 @@ from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -19,7 +20,6 @@ from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import getFields
 from zope.interface import Interface
-from guillotina.interfaces import IAsyncBehavior
 
 
 MAX_ALLOWED = 200
@@ -64,9 +64,17 @@ class SerializeToJson(object):
         main_schema = factory.schema
         await self.get_schema(main_schema, self.context, result, False)
 
+        # include can be one of:
+        # - <field name> on content schema
+        # - namespace.IBehavior
+        # - namespace.IBehavior.field_name
+        included_ifaces = [name for name in self.include if '.' in name]
+        included_ifaces.extend([name.rsplit('.', 1)[0] for name in self.include
+                                if '.' in name])
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
             dotted_name = behavior_schema.__identifier__
-            if dotted_name in self.omit:
+            if (dotted_name in self.omit or
+                    (len(included_ifaces) > 0 and dotted_name not in included_ifaces)):
                 # make sure the schema isn't filtered
                 continue
             if IAsyncBehavior.implementedBy(behavior.__class__):
@@ -105,7 +113,7 @@ class SerializeToJson(object):
             else:
                 schema_serial[name] = value
 
-        if behavior:
+        if behavior and len(schema_serial) > 0:
             result[schema.__identifier__] = schema_serial
 
     def check_permission(self, permission_name):
@@ -129,8 +137,8 @@ class SerializeToJson(object):
     provides=IResourceSerializeToJson)
 class SerializeFolderToJson(SerializeToJson):
 
-    async def __call__(self):
-        result = await super(SerializeFolderToJson, self).__call__()
+    async def __call__(self, include=[], omit=[]):
+        result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
 
         security = IInteraction(self.request)
         length = await self.context.async_len()
