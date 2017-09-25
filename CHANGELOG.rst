@@ -1,7 +1,8 @@
 1.3.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide extra logging data for more loggers
+  [vangheem]
 
 
 1.3.17 (2017-09-25)
