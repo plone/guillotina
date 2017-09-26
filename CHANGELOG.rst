@@ -1,7 +1,8 @@
 1.3.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix adding metadata to index data
+  [vangheem]
 
 
 1.3.18 (2017-09-25)

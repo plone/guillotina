@@ -162,9 +162,10 @@ class DefaultCatalogDataAdapter(object):
                         values[index_name] = self.get_data(behavior, schema, index_name)
                 except NoIndexField:
                     pass
+
             for metadata_name in merged_tagged_value_list(schema, metadata.key):
-                if (indexes is not None and index_name not in indexes and
-                        not isinstance(getattr(type(self.content), index_name, None), property)):
+                if (indexes is not None and metadata_name not in indexes and
+                        not isinstance(getattr(type(self.content), metadata_name, None), property)):
                     # in this case, properties are also dynamic so we have to make sure
                     # to allow for them to be reindexed every time.
                     continue  # skip
