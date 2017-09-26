@@ -1,7 +1,8 @@
 1.3.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Conflict errors now log with traceback and additional info
+  [vangheem]
 
 
 1.3.19 (2017-09-25)

@@ -2,6 +2,7 @@ from aiohttp import web
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import cors
+from guillotina import glogging
 from guillotina import interfaces
 from guillotina import languages
 from guillotina.async import IAsyncUtility
@@ -32,7 +33,6 @@ import aiohttp
 import asyncio
 import collections
 import json
-import logging
 import logging.config
 
 
@@ -42,7 +42,7 @@ except ImportError:
     RSA = None
 
 
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 
 def update_app_settings(settings):
@@ -107,7 +107,8 @@ class GuillotinaAIOHTTPApplication(web.Application):
                     label = 'TID Conflict Error detected'
                 tid = getattr(getattr(request, '_txn', None), '_tid', 'not issued')
                 logger.warning(
-                    f'{label}, retrying request, tid: {tid}, retries: {retries + 1})')
+                    f'{label}, retrying request, tid: {tid}, retries: {retries + 1})',
+                    exc_info=True)
                 request._retry_attempt = retries + 1
                 return await self._handle(request, retries + 1)
             logger.error(
