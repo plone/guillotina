@@ -1,4 +1,4 @@
-1.3.20 (unreleased)
+1.3.20 (2017-09-26)
 -------------------
 
 - Conflict errors now log with traceback and additional info
