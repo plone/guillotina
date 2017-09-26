@@ -1,4 +1,4 @@
-1.3.19 (unreleased)
+1.3.19 (2017-09-25)
 -------------------
 
 - Fix adding metadata to index data
