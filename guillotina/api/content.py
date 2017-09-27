@@ -80,6 +80,12 @@ def patch_content_json_schema_parameters(content):
 
 
 @configure.service(
+    context=IResource, method='HEAD', permission='guillotina.ViewContent')
+async def default_head(context, request):
+    return {}
+
+
+@configure.service(
     context=IResource, method='GET', permission='guillotina.ViewContent',
     summary="Retrieves serialization of resource",
     responses=get_content_json_schema_responses,
