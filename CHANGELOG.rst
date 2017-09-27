@@ -1,4 +1,4 @@
-1.3.21 (unreleased)
+1.3.21 (2017-09-27)
 -------------------
 
 - Add `Request.uid` property and issue a unique id to each request object to
