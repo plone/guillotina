@@ -1,7 +1,9 @@
 1.3.21 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add `Request.uid` property and issue a unique id to each request object to
+  be using with logging.
+  [vangheem]
 
 
 1.3.20 (2017-09-26)

@@ -38,7 +38,9 @@ def _wrapped(name):
                 'db_id': getattr(request, '_db_id', None),
                 'user': get_authenticated_user_id(request) or 'Anonymous',
                 'eid': eid,
-                'agent': agent
+                'agent': agent,
+                # in case a fake req object doesn't use the guillotina Request object
+                'request_uid': getattr(request, '_uid', None)
             })
             kwargs['extra'] = extra
         return func(*args, **kwargs)
