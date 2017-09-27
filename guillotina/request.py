@@ -4,6 +4,7 @@ from guillotina.interfaces import IRequest
 from zope.interface import implementer
 
 import asyncio
+import uuid
 
 
 @implementer(IRequest, IDefaultLayer)
@@ -26,6 +27,7 @@ class Request(web_request.Request):
 
     _db_write_enabled = True
     _futures = None
+    _uid = None
 
     application = None
     exc = None
@@ -35,6 +37,7 @@ class Request(web_request.Request):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._futures = {}
+        self._uid = uuid.uuid4().hex
 
     def add_future(self, name, fut):
         if self._futures is None:
@@ -46,6 +49,10 @@ class Request(web_request.Request):
             return self._futures[name]
         except (AttributeError, KeyError):
             return
+
+    @property
+    def futures(self):
+        return self._futures
 
     def execute_futures(self):
         '''
@@ -61,3 +68,7 @@ class Request(web_request.Request):
             futures.append(fut)
         asyncio.ensure_future(asyncio.gather(*futures))
         self._futures = {}
+
+    @property
+    def uid(self):
+        return self._uid
