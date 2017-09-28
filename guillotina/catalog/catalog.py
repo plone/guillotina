@@ -143,6 +143,11 @@ class DefaultCatalogDataAdapter(object):
             behavior = schema(self.content)
             loaded = False
             for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
+                if index_name in values:
+                    # you can override indexers so we do not want to index
+                    # the same value more than once
+                    continue
+
                 try:
                     # accessors we always reindex since we can't know if updated
                     # from the indexes param--they are "fake" like indexes, not fields

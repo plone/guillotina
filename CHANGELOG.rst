@@ -1,6 +1,9 @@
 1.3.22 (unreleased)
 -------------------
 
+- Allow overriding indexers
+  [vangheem]
+
 - Add default head endpoint
   [vangheem]
 
