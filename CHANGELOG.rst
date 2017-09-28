@@ -1,4 +1,4 @@
-1.3.23 (unreleased)
+1.3.23 (2017-09-28)
 -------------------
 
 - Track errors rendering view and make sure to not index data when there has
