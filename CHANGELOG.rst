@@ -1,4 +1,4 @@
-1.3.22 (unreleased)
+1.3.22 (2017-09-28)
 -------------------
 
 - Allow overriding indexers
