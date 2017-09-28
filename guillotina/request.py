@@ -28,6 +28,7 @@ class Request(web_request.Request):
     _db_write_enabled = True
     _futures = None
     _uid = None
+    _view_error = False
 
     application = None
     exc = None
@@ -53,6 +54,10 @@ class Request(web_request.Request):
     @property
     def futures(self):
         return self._futures
+
+    @property
+    def view_error(self):
+        return self._view_error
 
     def execute_futures(self):
         '''

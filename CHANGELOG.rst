@@ -1,7 +1,9 @@
 1.3.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Track errors rendering view and make sure to not index data when there has
+  been a error on the view(like conflict error).
+  [vangheem]
 
 
 1.3.22 (2017-09-28)

@@ -24,6 +24,10 @@ class IndexFuture(object):
         self.request = request
 
     async def __call__(self):
+        if self.request.view_error:
+            # there was an error executing this view, we do not want to execute
+            return
+
         # Commits are run in sync thread so there is no asyncloop
         search = queryUtility(ICatalogUtility)
         if search:

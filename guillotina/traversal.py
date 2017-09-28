@@ -185,6 +185,7 @@ class MatchInfo(AbstractMatchInfo):
 
     async def handler(self, request):
         """Main handler function for aiohttp."""
+        request._view_error = False
         if app_settings['check_writable_request'](request):
             try:
                 # We try to avoid collisions on the same instance of
@@ -195,12 +196,14 @@ class MatchInfo(AbstractMatchInfo):
                     # If we don't throw an exception and return an specific
                     # ErrorReponse just abort
                     await abort(request)
+                    request._view_error = True
                 else:
                     await commit(request, warn=False)
 
             except Unauthorized as e:
                 await abort(request)
                 view_result = generate_unauthorized_response(e, request)
+                request._view_error = True
             except (ConflictError, TIDConflictError) as e:
                 # bubble this error up
                 raise
@@ -208,12 +211,15 @@ class MatchInfo(AbstractMatchInfo):
                 await abort(request)
                 view_result = generate_error_response(
                     e, request, 'ServiceError')
+                request._view_error = True
         else:
             try:
                 view_result = await self.view()
             except Unauthorized as e:
+                request._view_error = True
                 view_result = generate_unauthorized_response(e, request)
             except Exception as e:
+                request._view_error = True
                 view_result = generate_error_response(e, request, 'ViewError')
             finally:
                 await abort(request)
@@ -235,6 +241,7 @@ class MatchInfo(AbstractMatchInfo):
             view_result.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
 
         resp = await self.rendered(view_result)
+
         if not resp.prepared:
             await resp.prepare(request)
         await resp.write_eof()
