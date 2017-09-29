@@ -1,7 +1,8 @@
 1.3.24 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix error when rendering plain text from response
+  [vangheem]
 
 
 1.3.23 (2017-09-28)
