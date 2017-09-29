@@ -1,4 +1,4 @@
-1.3.24 (unreleased)
+1.3.24 (2017-09-29)
 -------------------
 
 - Fix error when rendering plain text from response
