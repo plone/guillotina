@@ -22,7 +22,7 @@ from guillotina.schema import getFields
 from zope.interface import Interface
 
 
-MAX_ALLOWED = 200
+MAX_ALLOWED = 20
 
 
 @configure.adapter(
@@ -147,7 +147,7 @@ class SerializeFolderToJson(SerializeToJson):
             result['items'] = []
         else:
             result['items'] = []
-            async for ident, member in self.context.async_items():
+            async for ident, member in self.context.async_items(suppress_events=True):
                 if not ident.startswith('_') and bool(
                         security.check_permission(
                         'guillotina.AccessContent', member)):

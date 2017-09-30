@@ -1,7 +1,8 @@
 1.3.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Change how much sub-items we should by default from 200 to 20
+  [vangheem]
 
 
 1.3.24 (2017-09-29)
