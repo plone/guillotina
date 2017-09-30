@@ -1,4 +1,5 @@
 from asyncio import shield
+from guillotina import glogging
 from guillotina.db import ROOT_ID
 from guillotina.db.transaction import Status
 from guillotina.db.transaction import Transaction
@@ -9,10 +10,9 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 
 import asyncpg
-import logging
 
 
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 
 class TransactionManager(object):

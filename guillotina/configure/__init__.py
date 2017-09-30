@@ -364,12 +364,15 @@ class service(_base_decorator):
             register_configuration(func, self.config, 'service')
             if 'allow_access' in self.config:
                 func.__allow_access__ = self.config['allow_access']
+            if 'read_only' in self.config:
+                func.__read_only__ = self.config['read_only']
         else:
             # avoid circular imports
             from guillotina.api.service import Service
 
             class _View(self.config.get('base', Service)):
                 __allow_access__ = self.config.get('allow_access', False)
+                __read_only__ = self.config.get('read_only', None)
                 view_func = staticmethod(func)
 
                 async def __call__(self):

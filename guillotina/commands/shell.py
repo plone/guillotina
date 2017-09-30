@@ -51,6 +51,7 @@ class ShellHelpers:
         if self._active_tm is None:
             raise Exception('No active transaction manager')
         await self._active_tm.commit(txn=self._active_txn)
+        self._request.execute_futures()
         self._active_txn = await self._active_tm.begin()
         return self._active_txn
 

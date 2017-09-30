@@ -26,13 +26,21 @@ def _wrapped(name):
             except AttributeError:
                 # older version of aiohttp
                 url = request.path
+            try:
+                agent = request.headers['User-Agent']
+            except (AttributeError, KeyError):
+                agent = 'Unknown'
             extra.update({
                 'method': request.method,
                 'url': url,
                 'container': getattr(request, '_container_id', None),
+                'account': getattr(request, '_container_id', None),
                 'db_id': getattr(request, '_db_id', None),
                 'user': get_authenticated_user_id(request) or 'Anonymous',
-                'eid': eid
+                'eid': eid,
+                'agent': agent,
+                # in case a fake req object doesn't use the guillotina Request object
+                'request_uid': getattr(request, '_uid', None)
             })
             kwargs['extra'] = extra
         return func(*args, **kwargs)

@@ -33,6 +33,7 @@ class View(object):
     # by another mechanism on the view
 
     __allow_access__ = False
+    __read_only__ = None
 
     def __init__(self, context, request):
         self.context = context

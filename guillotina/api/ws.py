@@ -139,10 +139,7 @@ class WebsocketsView(Service):
         ws.send_str(ujson.dumps(view_result))
 
         # Wait for possible value
-        futures_to_wait = self.request._futures.values()
-        if futures_to_wait:
-            await asyncio.gather(*list(futures_to_wait))
-            self.request._futures = {}
+        self.request.execute_futures()
 
     async def __call__(self):
         tm = get_tm(self.request)

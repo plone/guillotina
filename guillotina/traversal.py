@@ -17,6 +17,8 @@ from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
+from guillotina.event import notify
+from guillotina.events import ObjectLoadedEvent
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
@@ -35,7 +37,6 @@ from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SUBREQUEST_METHODS
-from guillotina.interfaces import WRITING_VERBS
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
@@ -44,7 +45,6 @@ from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
 import aiohttp
-import asyncio
 import json
 import traceback
 import uuid
@@ -122,7 +122,7 @@ async def traverse(request, parent, path):
         if path[0].startswith('_') or path[0] in ('.', '..'):
             raise HTTPUnauthorized()
         if IAsyncContainer.providedBy(parent):
-            context = await parent.async_get(path[0])
+            context = await parent.async_get(path[0], suppress_events=True)
             if context is None:
                 return parent, path
         else:
@@ -131,7 +131,7 @@ async def traverse(request, parent, path):
         return parent, path
 
     if IDatabase.providedBy(context):
-        request._db_write_enabled = request.method in WRITING_VERBS
+        request._db_write_enabled = app_settings['check_writable_request'](request)
         request._db_id = context.id
         # Add a transaction Manager to request
         tm = request._tm = context.get_transaction_manager()
@@ -163,7 +163,7 @@ def generate_unauthorized_response(e, request):
     return UnauthorizedResponse(message)
 
 
-def generate_error_response(e, request, error, status=400):
+def generate_error_response(e, request, error, status=500):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
     message = _('Error on execution of view') + ' ' + eid
@@ -185,7 +185,8 @@ class MatchInfo(AbstractMatchInfo):
 
     async def handler(self, request):
         """Main handler function for aiohttp."""
-        if request.method in WRITING_VERBS:
+        request._view_error = False
+        if app_settings['check_writable_request'](request):
             try:
                 # We try to avoid collisions on the same instance of
                 # guillotina
@@ -195,12 +196,14 @@ class MatchInfo(AbstractMatchInfo):
                     # If we don't throw an exception and return an specific
                     # ErrorReponse just abort
                     await abort(request)
+                    request._view_error = True
                 else:
                     await commit(request, warn=False)
 
             except Unauthorized as e:
                 await abort(request)
                 view_result = generate_unauthorized_response(e, request)
+                request._view_error = True
             except (ConflictError, TIDConflictError) as e:
                 # bubble this error up
                 raise
@@ -208,12 +211,15 @@ class MatchInfo(AbstractMatchInfo):
                 await abort(request)
                 view_result = generate_error_response(
                     e, request, 'ServiceError')
+                request._view_error = True
         else:
             try:
                 view_result = await self.view()
             except Unauthorized as e:
+                request._view_error = True
                 view_result = generate_unauthorized_response(e, request)
             except Exception as e:
+                request._view_error = True
                 view_result = generate_error_response(e, request, 'ViewError')
             finally:
                 await abort(request)
@@ -235,15 +241,14 @@ class MatchInfo(AbstractMatchInfo):
             view_result.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
 
         resp = await self.rendered(view_result)
+
         if not resp.prepared:
             await resp.prepare(request)
         await resp.write_eof()
         resp._body = None
         resp.force_close()
 
-        futures_to_wait = request._futures.values()
-        if futures_to_wait:
-            await asyncio.gather(*[f for f in futures_to_wait])
+        request.execute_futures()
 
         return resp
 
@@ -303,8 +308,6 @@ class TraversalRouter(AbstractRouter):
 
     async def real_resolve(self, request):
         """Main function to resolve a request."""
-        request._futures = {}
-
         security = IInteraction(request)
 
         method = app_settings['http_methods'][request.method]
@@ -330,6 +333,7 @@ class TraversalRouter(AbstractRouter):
             # XXX should only should traceback if in some sort of dev mode?
             raise HTTPBadRequest(text=json.dumps(data))
 
+        await notify(ObjectLoadedEvent(resource))
         request.resource = resource
         request.tail = tail
 

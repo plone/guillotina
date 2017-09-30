@@ -351,3 +351,38 @@ def resolve_path(file_path):
         file_path = os.path.join(
             os.path.dirname(os.path.realpath(module.__file__)), rel_path)
     return pathlib.Path(file_path)
+
+
+def lazy_apply(func, *call_args, **call_kwargs):
+    '''
+    apply arguments in the order that they come in the function signature
+    and do not apply if argument not provided
+
+    call_args will be applied in order if func signature has args.
+    otherwise, call_kwargs is the magic here...
+    '''
+    sig = inspect.signature(func)
+    args = []
+    kwargs = {}
+    for idx, param_name in enumerate(sig.parameters):
+        param = sig.parameters[param_name]
+        if param.kind == inspect.Parameter.KEYWORD_ONLY:
+            if param.name in call_kwargs:
+                kwargs.append(call_kwargs.pop(param.name))
+            continue
+        if param.kind == inspect.Parameter.VAR_KEYWORD:
+            kwargs.update(call_kwargs)  # this will be the last iteration...
+            continue
+
+        if param.kind == inspect.Parameter.POSITIONAL_ONLY:
+            if len(call_args) >= (idx + 1):
+                args.append(call_args[idx])
+            elif param.name in call_kwargs:
+                args.append(call_kwargs.pop(param.name))
+        else:
+            if param.name in call_kwargs:
+                kwargs[param.name] = call_kwargs.pop(param.name)
+            elif (param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD and
+                    len(call_args) >= (idx + 1)):
+                args.append(call_args[idx])
+    return func(*args, **kwargs)

@@ -113,6 +113,7 @@ def load_cached_schema():
     for x in getUtilitiesFor(IResourceFactory):
         factory = x[1]
         if factory.type_name not in SCHEMA_CACHE:
+            FACTORY_CACHE[factory.type_name] = factory
             behaviors_registrations = []
             for iface in factory.behaviors or ():
                 if Interface.providedBy(iface):
@@ -247,13 +248,14 @@ def get_all_behavior_interfaces(content) -> list:
     return behaviors
 
 
-async def get_all_behaviors(content, create=False) -> list:
+async def get_all_behaviors(content, create=False, load=True) -> list:
     behaviors = []
     for behavior_schema in get_all_behavior_interfaces(content):
         behavior = behavior_schema(content)
-        if IAsyncBehavior.implementedBy(behavior.__class__):
-            # providedBy not working here?
-            await behavior.load(create=create)
+        if load:
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load(create=create)
         behaviors.append((behavior_schema, behavior))
     return behaviors
 
@@ -460,14 +462,15 @@ class Folder(Resource):
             value._p_jar = trns
             trns.register(value)
 
-    async def async_get(self, key: str, default=None) -> IResource:
+    async def async_get(self, key: str, default=None, suppress_events=False) -> IResource:
         """
         Asynchronously get an object inside this folder
         """
         try:
             val = await self._get_transaction().get_child(self, key)
             if val is not None:
-                await notify(ObjectLoadedEvent(val))
+                if not suppress_events:
+                    await notify(ObjectLoadedEvent(val))
                 return val
         except KeyError:
             pass
@@ -491,17 +494,19 @@ class Folder(Resource):
         """
         return await self._get_transaction().keys(self._p_oid)
 
-    async def async_items(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
+    async def async_items(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
         """
         Asynchronously iterate through contents of folder
         """
         async for key, value in self._get_transaction().items(self):
-            await notify(ObjectLoadedEvent(value))
+            if not suppress_events:
+                await notify(ObjectLoadedEvent(value))
             yield key, value
 
-    async def async_values(self) -> typing.Iterator[typing.Tuple[str, IResource]]:
+    async def async_values(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
         async for key, value in self._get_transaction().items(self):
-            await notify(ObjectLoadedEvent(value))
+            if not suppress_events:
+                await notify(ObjectLoadedEvent(value))
             yield value
 
 

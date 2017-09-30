@@ -1,7 +1,137 @@
-1.3.10 (unreleased)
+1.3.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Change how much sub-items we should by default from 200 to 20
+  [vangheem]
+
+
+1.3.24 (2017-09-29)
+-------------------
+
+- Fix error when rendering plain text from response
+  [vangheem]
+
+
+1.3.23 (2017-09-28)
+-------------------
+
+- Track errors rendering view and make sure to not index data when there has
+  been a error on the view(like conflict error).
+  [vangheem]
+
+
+1.3.22 (2017-09-28)
+-------------------
+
+- Allow overriding indexers
+  [vangheem]
+
+- Add default head endpoint
+  [vangheem]
+
+
+1.3.21 (2017-09-27)
+-------------------
+
+- Add `Request.uid` property and issue a unique id to each request object to
+  be using with logging.
+  [vangheem]
+
+
+1.3.20 (2017-09-26)
+-------------------
+
+- Conflict errors now log with traceback and additional info
+  [vangheem]
+
+
+1.3.19 (2017-09-25)
+-------------------
+
+- Fix adding metadata to index data
+  [vangheem]
+
+
+1.3.18 (2017-09-25)
+-------------------
+
+- Provide extra logging data for more loggers
+  [vangheem]
+
+
+1.3.17 (2017-09-25)
+-------------------
+
+- Do not call ObjectLoadedEvent on object traversal
+  [vangheem]
+
+- Be able to provide omit/include on GET requests to limit number of fields
+  that are returned in the payload
+  [vangheem]
+
+- Limit max object cache size to 5mb
+  [vangheem]
+
+- Optimize indexing for patch operations to only index changed data instead
+  of the full object
+  [vangheem]
+
+
+1.3.16 (2017-09-21)
+-------------------
+
+- Provide `check_writable_request` configuration to allow customizing what
+  requests are writable requests
+  [vangheem]
+
+
+1.3.15 (2017-09-21)
+-------------------
+
+- executing request futures should be a Task since finishing execution of
+  the request object causes it to be deleted
+  [vangheem]
+
+
+1.3.14 (2017-09-21)
+-------------------
+
+- Fix executing futures in web service
+  [vangheem]
+
+
+1.3.13 (2017-09-21)
+-------------------
+
+- Add add_future, get_future and execute_futures methods to Request class
+  [vangheem]
+
+- Move indexing to be done in a future instead of after commit hook
+  [vangheem]
+
+
+1.3.12 (2017-09-21)
+-------------------
+
+- Change uncaught exception status code to 500
+  [vangheem]
+
+
+1.3.11 (2017-09-21)
+-------------------
+
+- Add another connection closed handler
+  [vangheem]
+
+- Fix logging of large objects
+  [vangheem]
+
+
+1.3.10 (2017-09-15)
+-------------------
+
+- When loading schema cache, also set factory cache
+  [vangheem]
 
 
 1.3.9 (2017-09-01)
@@ -71,7 +201,7 @@
 - Change IQueueUtility to being a regular Queue instead of a PriorityQueue. A
   PriorityQueue request comparison functions to be implemented on the added
   objects.
-  [vangheem] 
+  [vangheem]
 
 
 1.3.1 (2017-08-04)

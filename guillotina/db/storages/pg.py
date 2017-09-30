@@ -487,7 +487,7 @@ class PostgresqlStorage(BaseStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            self._log.warning("Too long object %d" % (obj.__class__, len(p)))
+            log.warning("Too long object %d" % (obj.__class__, len(p)))
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
@@ -539,8 +539,8 @@ class PostgresqlStorage(BaseStorage):
                         'caused by a cache invalidation race condition and should '
                         'be an edge case. This should resolve on request retry.')
                 else:
-                    self._log.error('Incorrect response count from database update. '
-                                    'This should not happen. tid: {}'.format(txn._tid))
+                    log.error('Incorrect response count from database update. '
+                              'This should not happen. tid: {}'.format(txn._tid))
 
     async def _txn_oid_commit_hook(self, status, oid):
         await self._vacuum.add_to_queue(oid)
@@ -552,7 +552,8 @@ class PostgresqlStorage(BaseStorage):
         txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
     async def _check_bad_connection(self, ex):
-        if str(ex) in ('connection is closed', 'pool is closed'):
+        if str(ex) in ('cannot perform operation: connection is closed',
+                       'connection is closed', 'pool is closed'):
             if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
                 # we need to make sure we aren't calling this over and over again
                 return await self.restart_connection()

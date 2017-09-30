@@ -9,6 +9,7 @@ from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -21,7 +22,7 @@ from guillotina.schema import getFields
 from zope.interface import Interface
 
 
-MAX_ALLOWED = 200
+MAX_ALLOWED = 20
 
 
 @configure.adapter(
@@ -34,7 +35,10 @@ class SerializeToJson(object):
         self.request = request
         self.permission_cache = {}
 
-    async def __call__(self):
+    async def __call__(self, include=[], omit=[]):
+        self.include = include
+        self.omit = omit
+
         parent = self.context.__parent__
         if parent is not None:
             # We render the summary of the parent
@@ -60,7 +64,22 @@ class SerializeToJson(object):
         main_schema = factory.schema
         await self.get_schema(main_schema, self.context, result, False)
 
-        for behavior_schema, behavior in await get_all_behaviors(self.context):
+        # include can be one of:
+        # - <field name> on content schema
+        # - namespace.IBehavior
+        # - namespace.IBehavior.field_name
+        included_ifaces = [name for name in self.include if '.' in name]
+        included_ifaces.extend([name.rsplit('.', 1)[0] for name in self.include
+                                if '.' in name])
+        for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
+            dotted_name = behavior_schema.__identifier__
+            if (dotted_name in self.omit or
+                    (len(included_ifaces) > 0 and dotted_name not in included_ifaces)):
+                # make sure the schema isn't filtered
+                continue
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load(create=False)
             await self.get_schema(behavior_schema, behavior, result, True)
 
         return result
@@ -72,6 +91,19 @@ class SerializeToJson(object):
 
             if not self.check_permission(read_permissions.get(name)):
                 continue
+
+            if behavior:
+                # omit/include for behaviors need full name
+                dotted_name = schema.__identifier__ + '.' + name
+            else:
+                dotted_name = name
+            if (dotted_name in self.omit or (
+                    len(self.include) > 0 and (
+                        dotted_name not in self.include and
+                        schema.__identifier__ not in self.include))):
+                # make sure the fields aren't filtered
+                continue
+
             serializer = queryMultiAdapter(
                 (field, context, self.request),
                 IResourceFieldSerializer)
@@ -81,7 +113,7 @@ class SerializeToJson(object):
             else:
                 schema_serial[name] = value
 
-        if behavior:
+        if behavior and len(schema_serial) > 0:
             result[schema.__identifier__] = schema_serial
 
     def check_permission(self, permission_name):
@@ -105,8 +137,8 @@ class SerializeToJson(object):
     provides=IResourceSerializeToJson)
 class SerializeFolderToJson(SerializeToJson):
 
-    async def __call__(self):
-        result = await super(SerializeFolderToJson, self).__call__()
+    async def __call__(self, include=[], omit=[]):
+        result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
 
         security = IInteraction(self.request)
         length = await self.context.async_len()
@@ -115,7 +147,7 @@ class SerializeFolderToJson(SerializeToJson):
             result['items'] = []
         else:
             result['items'] = []
-            async for ident, member in self.context.async_items():
+            async for ident, member in self.context.async_items(suppress_events=True):
                 if not ident.startswith('_') and bool(
                         security.check_permission(
                         'guillotina.AccessContent', member)):

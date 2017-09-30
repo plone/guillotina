@@ -188,8 +188,9 @@ class RendererRaw(Renderer):
             resp = aioResponse(body=bytes(json.dumps(resp, cls=GuillotinaJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
+            original_resp = resp
             resp = aioResponse(body=bytes(resp, 'utf-8'))
-            if '<html' in resp:
+            if '<html' in original_resp:
                 resp.headers['Content-Type'] = 'text/html'
             else:
                 resp.headers['Content-Type'] = 'text/plain'

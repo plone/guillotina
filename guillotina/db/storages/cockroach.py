@@ -1,12 +1,12 @@
+from guillotina import glogging
 from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 
 import asyncpg
-import logging
 
 
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 # upsert without checking matching tids on updated object
 NAIVE_UPSERT = """
@@ -241,7 +241,7 @@ class CockroachStorage(pg.PostgresqlStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            self._log.warning("Too long object %d" % (obj.__class__, len(p)))
+            logging.warning("Too long object %d" % (obj.__class__, len(p)))
         part = writer.part
         if part is None:
             part = 0

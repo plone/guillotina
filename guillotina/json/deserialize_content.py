@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
+from guillotina import glogging
 from guillotina.component import queryMultiAdapter
 from guillotina.component import queryUtility
 from guillotina.content import get_all_behaviors
@@ -7,6 +8,7 @@ from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.exceptions import NoInteraction
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
@@ -19,10 +21,8 @@ from guillotina.utils import apply_coroutine
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
 
-import logging
 
-
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 _missing = object()
 
 
@@ -44,7 +44,15 @@ class DeserializeFromJson(object):
         await self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)
 
-        for behavior_schema, behavior in await get_all_behaviors(self.context, True):
+        for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
+            dotted_name = behavior_schema.__identifier__
+            if dotted_name not in data:
+                # syntax {"namespace.IBehavior": {"foo": "bar"}}
+                # we're not even patching this behavior if no iface found in payload
+                continue
+            if IAsyncBehavior.implementedBy(behavior.__class__):
+                # providedBy not working here?
+                await behavior.load(create=True)
             await self.set_schema(
                 behavior_schema, behavior, data, errors,
                 validate_all, True)

@@ -80,15 +80,38 @@ def patch_content_json_schema_parameters(content):
 
 
 @configure.service(
+    context=IResource, method='HEAD', permission='guillotina.ViewContent')
+async def default_head(context, request):
+    return {}
+
+
+@configure.service(
     context=IResource, method='GET', permission='guillotina.ViewContent',
     summary="Retrieves serialization of resource",
-    responses=get_content_json_schema_responses)
+    responses=get_content_json_schema_responses,
+    parameters=[{
+        "name": "include",
+        "in": "query",
+        "type": "string"
+    }, {
+        "name": "omit",
+        "in": "query",
+        "type": "string"
+    }])
 class DefaultGET(Service):
     async def __call__(self):
         serializer = getMultiAdapter(
             (self.context, self.request),
             IResourceSerializeToJson)
-        result = await serializer()
+        include = omit = []
+        if self.request.GET.get('include'):
+            include = self.request.GET.get('include').split(',')
+        if self.request.GET.get('omit'):
+            omit = self.request.GET.get('omit').split(',')
+        try:
+            result = await serializer(include=include, omit=omit)
+        except TypeError:
+            result = await serializer()
         await notify(ObjectVisitedEvent(self.context))
         return result
 
@@ -241,7 +264,7 @@ class DefaultPATCH(Service):
                 str(e),
                 status=400)
 
-        await notify(ObjectModifiedEvent(self.context, data))
+        await notify(ObjectModifiedEvent(self.context, payload=data))
 
         return Response(response={}, status=204)
 

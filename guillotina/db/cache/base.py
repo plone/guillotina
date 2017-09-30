@@ -1,10 +1,12 @@
-import logging
+from guillotina import glogging
 
 
-logger = logging.getLogger('guillotina')
+logger = glogging.getLogger('guillotina')
 
 
 class BaseCache:
+
+    max_cache_record_size = 1024 * 1024 * 5  # even 5mb is quite large...
 
     def __init__(self, storage, transaction):
         self._storage = storage
