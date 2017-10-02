@@ -78,20 +78,6 @@ def dictfile_converter(value, field):
     return CloudFile(**value)
 
 
-@configure.adapter(for_=IFile, provides=IValueToJson)
-def json_converter(value):
-    if value is None:
-        return value
-
-    return {
-        'filename': value.filename,
-        'contenttype': value.content_type,
-        'size': value.size,
-        'extension': value.extension,
-        'md5': value.md5
-    }
-
-
 @configure.contenttype(
     schema=IFileContent, type_name="File",
     behaviors=[

@@ -452,7 +452,7 @@ class ConfigurationConflictError(ConfigurationError):
 
     def __str__(self):  # pragma NO COVER
         r = ["Conflicting configuration actions"]
-        items = self._conflicts.items()
+        items = [(k, v) for k, v in self._conflicts.items()]
         items.sort()
         for discriminator, infos in items:
             r.append("  For: %s" % (discriminator, ))
