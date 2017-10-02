@@ -654,9 +654,9 @@ async def move(context, request):
 
 
 @configure.service(
-    context=IResource, method='GET', name="@duplicate",
+    context=IResource, method='POST', name="@duplicate",
     permission='guillotina.DuplicateContent',
-    summary='Copy a resource',
+    summary='Duplicate resource',
     parameters=[{
         "name": "body",
         "in": "body",
@@ -678,7 +678,7 @@ async def move(context, request):
     }],
     responses={
         "200": {
-            "description": "Successfully returned list of ids"
+            "description": "Successfully duplicated object"
         }
     })
 async def duplicate(context, request):
@@ -706,7 +706,6 @@ async def duplicate(context, request):
 
     if 'new_id' in data:
         new_id = data['new_id']
-        context.id = context.__name__ = new_id
         if await destination_ob.async_contains(new_id):
             return ErrorResponse(
                 'Configuration',
@@ -726,18 +725,22 @@ async def duplicate(context, request):
     for key in context.__dict__.keys():
         if key.startswith('__') or key.startswith('_BaseObject'):
             continue
+        if key in ('id',):
+            continue
         new_obj.__dict__[key] = context.__dict__[key]
+    new_obj.__acl__ = context.__acl__
+    new_obj.__behaviors__ = context.__behaviors__
 
     await notify(
         ObjectDuplicatedEvent(new_obj, context, destination_ob, new_id, payload=data))
 
-    get = DefaultGET(context, request)
+    get = DefaultGET(new_obj, request)
     return await get()
 
 
 @configure.service(
     context=IFolder, method='GET', name="@ids",
-    permission='guillotina.MoveContent',
+    permission='guillotina.ViewContent',
     summary='Return a list of ids in the resource',
     responses={
         "200": {

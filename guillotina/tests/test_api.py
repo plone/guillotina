@@ -388,10 +388,7 @@ async def test_duplicate_content(container_requester):
             'POST',
             '/db/guillotina/foobar1/@duplicate'
         )
-        response, status = await requester(
-            'POST',
-            '/db/guillotina/@ids'
-        )
+        response, status = await requester('GET', '/db/guillotina/@ids')
         assert len(response) == 2
 
         response, status = await requester(
@@ -402,12 +399,10 @@ async def test_duplicate_content(container_requester):
             })
         )
 
-        response, status = await requester(
-            'POST',
-            '/db/guillotina/@ids'
-        )
+        response, status = await requester('GET', '/db/guillotina/@ids')
         assert len(response) == 3
         assert 'foobar2' in response
+        assert 'foobar1' in response
 
         response, status = await requester(
             'POST',
@@ -426,9 +421,6 @@ async def test_duplicate_content(container_requester):
             })
         )
 
-        response, status = await requester(
-            'POST',
-            '/db/guillotina/folder/@ids'
-        )
+        response, status = await requester('GET', '/db/guillotina/folder/@ids')
         assert len(response) == 1
         assert 'foobar' in response
