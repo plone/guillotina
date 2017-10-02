@@ -1,4 +1,4 @@
-1.3.26 (unreleased)
+1.3.26 (2017-10-02)
 -------------------
 
 - Add `@move`, `@duplicate` and `@ids` endpoints
