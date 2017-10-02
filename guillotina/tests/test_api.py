@@ -316,3 +316,119 @@ async def test_not_create_content_with_invalid_id(container_requester):
             })
         )
         assert status == 412
+
+
+async def test_move_content(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Folder",
+                "id": "container1"
+            })
+        )
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Folder",
+                "id": "container2"
+            })
+        )
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/container1',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "foobar"
+            })
+        )
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/container1/foobar/@move',
+            data=json.dumps({
+                "destination": "/container2"
+            })
+        )
+
+        response, status = await requester('GET', '/db/guillotina/container2/foobar')
+        assert status == 200
+        response, status = await requester('GET', '/db/guillotina/container1/foobar')
+        assert status == 404
+
+        # move back with new id
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/container2/foobar/@move',
+            data=json.dumps({
+                "destination": "/container1",
+                "new_id": "foobar_new"
+            })
+        )
+
+        response, status = await requester('GET', '/db/guillotina/container1/foobar_new')
+        assert status == 200
+        response, status = await requester('GET', '/db/guillotina/container2/foobar')
+        assert status == 404
+
+
+async def test_duplicate_content(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "foobar1"
+            })
+        )
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/foobar1/@duplicate'
+        )
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@ids'
+        )
+        assert len(response) == 2
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/foobar1/@duplicate',
+            data=json.dumps({
+                "new_id": "foobar2"
+            })
+        )
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@ids'
+        )
+        assert len(response) == 3
+        assert 'foobar2' in response
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Folder",
+                "id": "folder"
+            })
+        )
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/foobar1/@duplicate',
+            data=json.dumps({
+                "new_id": "foobar",
+                "destination": "/folder"
+            })
+        )
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/folder/@ids'
+        )
+        assert len(response) == 1
+        assert 'foobar' in response

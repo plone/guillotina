@@ -386,3 +386,16 @@ def lazy_apply(func, *call_args, **call_kwargs):
                     len(call_args) >= (idx + 1)):
                 args.append(call_args[idx])
     return func(*args, **kwargs)
+
+
+async def navigate_to(obj, path):
+    actual = obj
+    path_components = path.strip('/').split('/')
+    for p in path_components:
+        if p != '':
+            item = await actual.async_get(p)
+            if item is None:
+                raise KeyError('No %s in %s' % (p, actual))
+            else:
+                actual = item
+    return actual

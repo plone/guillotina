@@ -28,11 +28,14 @@ from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
+from .events import IBeforeObjectMovedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
 from .events import IFileFinishUploaded  # noqa
 from .events import INewUserAdded  # noqa
 from .events import IObjectAddedEvent  # noqa
+from .events import IObjectDuplicatedEvent  # noqa
 from .events import IObjectLoadedEvent  # noqa
+from .events import IObjectLocationEvent  # noqa
 from .events import IObjectModifiedEvent  # noqa
 from .events import IObjectMovedEvent  # noqa
 from .events import IObjectPermissionsModifiedEvent  # noqa

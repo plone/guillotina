@@ -18,6 +18,8 @@ from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from zope.interface import implementer
+from guillotina.utils import get_content_depth
+from guillotina.utils import get_content_path
 
 
 global_principal_permission_setting = principal_permission_manager.get_setting
@@ -99,6 +101,10 @@ class DefaultSecurityInfoAdapter(object):
     def __call__(self):
         """ access_users and access_roles """
         return {
+            'path': get_content_path(self.content),
+            'depth': get_content_depth(self.content),
+            'parent_uuid': getattr(
+                getattr(self.content, '__parent__', None), 'uuid', None),
             'access_users': get_principals_with_access_content(self.content),
             'access_roles': get_roles_with_access_content(self.content),
             'type_name': self.content.type_name
