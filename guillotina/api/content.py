@@ -7,6 +7,7 @@ from guillotina import _
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import security
+from guillotina.annotations import AnnotationData
 from guillotina.api.service import Service
 from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
@@ -16,6 +17,7 @@ from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
+from guillotina.content import get_all_behaviors
 from guillotina.db.utils import lock_object
 from guillotina.event import notify
 from guillotina.events import BeforeObjectMovedEvent
@@ -32,6 +34,7 @@ from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IInteraction
@@ -730,6 +733,16 @@ async def duplicate(context, request):
         new_obj.__dict__[key] = context.__dict__[key]
     new_obj.__acl__ = context.__acl__
     new_obj.__behaviors__ = context.__behaviors__
+
+    # need to copy annotation data as well...
+    # load all annotations for context
+    [b for b in await get_all_behaviors(context, load=True)]
+    annotations_container = IAnnotations(new_obj)
+    for anno_id, anno_data in context.__annotations__.items():
+        new_anno_data = AnnotationData()
+        for key, value in anno_data.items():
+            new_anno_data[key] = value
+        await annotations_container.async_set(anno_id, new_anno_data)
 
     await notify(
         ObjectDuplicatedEvent(new_obj, context, destination_ob, new_id, payload=data))
