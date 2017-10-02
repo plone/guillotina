@@ -1,4 +1,4 @@
-1.3.25 (unreleased)
+1.3.25 (2017-10-02)
 -------------------
 
 - Change how much sub-items we should by default from 200 to 20
