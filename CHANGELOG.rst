@@ -1,14 +1,12 @@
 1.3.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add `@move`, `@duplicate` and `@ids` endpoints
+  [vangheem]
 
 
 1.3.25 (2017-10-02)
 -------------------
-
-- Add `@move`, `@duplicate` and `@ids` endpoints
-  [vangheem]
 
 - Change how much sub-items we should by default from 200 to 20
   [vangheem]
