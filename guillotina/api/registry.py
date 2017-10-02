@@ -30,7 +30,7 @@ _marker = object()
     summary='Read container registry settings',
     responses={
         "200": {
-            "description": "Successuflly registered interface",
+            "description": "Successfully registered interface",
             "type": "object",
             "schema": {
                 "properties": {
@@ -99,7 +99,7 @@ class Read(TraversableService):
     }],
     responses={
         "200": {
-            "description": "Successuflly registered interface"
+            "description": "Successfully registered interface"
         }
     })
 class Register(Service):
@@ -157,7 +157,7 @@ class Register(Service):
     },
     responses={
         "200": {
-            "description": "Successuflly wrote configuration"
+            "description": "Successfully wrote configuration"
         }
     })
 class Write(TraversableService):

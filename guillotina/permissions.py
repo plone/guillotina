@@ -5,6 +5,8 @@ configure.permission('guillotina.AccessContent', 'Access content')
 configure.permission('guillotina.ModifyContent', 'Modify content')
 configure.permission('guillotina.DeleteContent', 'Delete content')
 configure.permission('guillotina.AddContent', 'Add content')
+configure.permission('guillotina.MoveContent', 'Move content')
+configure.permission('guillotina.DuplicateContent', 'Duplicate content')
 configure.permission('guillotina.ViewContent', 'View content')
 
 configure.permission('guillotina.AddContainer', 'Add a portal/DB')
@@ -79,6 +81,9 @@ configure.grant(
 configure.grant(
     permission="guillotina.AccessContent",
     role="guillotina.Reader")
+configure.grant(
+    permission="guillotina.DuplicateContent",
+    role="guillotina.Reader")
 
 # Reviewer
 configure.grant(
@@ -94,6 +99,12 @@ configure.grant(
     role="guillotina.Owner")
 configure.grant(
     permission="guillotina.AddContent",
+    role="guillotina.Owner")
+configure.grant(
+    permission="guillotina.MoveContent",
+    role="guillotina.Owner")
+configure.grant(
+    permission="guillotina.DuplicateContent",
     role="guillotina.Owner")
 configure.grant(
     permission="guillotina.AccessContent",
@@ -124,6 +135,12 @@ configure.grant(
     role="guillotina.Editor")
 configure.grant(
     permission="guillotina.ModifyContent",
+    role="guillotina.Editor")
+configure.grant(
+    permission="guillotina.MoveContent",
+    role="guillotina.Editor")
+configure.grant(
+    permission="guillotina.DuplicateContent",
     role="guillotina.Editor")
 configure.grant(
     permission="guillotina.ReindexContent",

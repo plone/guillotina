@@ -7,28 +7,38 @@ class IObjectModifiedEvent(interfaces.IObjectEvent):
     """An object has been modified"""
 
 
-class IObjectMovedEvent(interfaces.IObjectEvent):
-    """An object has been moved."""
-
+class IObjectLocationEvent(interfaces.IObjectEvent):
     old_parent = Attribute("The old location parent for the object.")
     old_name = Attribute("The old location name for the object.")
     new_parent = Attribute("The new location parent for the object.")
     new_name = Attribute("The new location name for the object.")
 
 
-class IObjectAddedEvent(IObjectMovedEvent):
+class IObjectMovedEvent(IObjectLocationEvent):
+    """An object has been moved."""
+
+
+class IBeforeObjectMovedEvent(IObjectLocationEvent):
+    pass
+
+
+class IObjectAddedEvent(IObjectLocationEvent):
     """An object has been added to a container."""
 
 
-class IObjectRemovedEvent(IObjectMovedEvent):
+class IObjectDuplicatedEvent(IObjectAddedEvent):
+    """An object has been added to a container."""
+
+
+class IObjectRemovedEvent(IObjectLocationEvent):
     """An object has been removed from a container."""
 
 
-class IBeforeObjectAddedEvent(IObjectMovedEvent):
+class IBeforeObjectAddedEvent(IObjectLocationEvent):
     """An object has been removed from a container."""
 
 
-class IBeforeObjectRemovedEvent(IObjectMovedEvent):
+class IBeforeObjectRemovedEvent(IObjectLocationEvent):
     """An object has been removed from a container."""
 
 
