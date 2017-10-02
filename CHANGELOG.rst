@@ -1,7 +1,8 @@
-1.3.27 (unreleased)
--------------------
+1.4.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Provide base classes and utilities for cloud storage implementations
+  [vangheem]
 
 
 1.3.26 (2017-10-02)

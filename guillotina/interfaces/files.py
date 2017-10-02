@@ -74,16 +74,3 @@ class IFileField(IObject):
 
 class ICloudFileField(IObject):
     """Field for storing generic cloud File objects."""
-
-
-class IStorage(Interface):
-    """Store file data."""
-
-    def store(data, blob):
-        """Store the data into the blob
-        Raises NonStorable if data is not storable.
-        """
-
-
-class NotStorable(Exception):
-    """Data is not storable."""
