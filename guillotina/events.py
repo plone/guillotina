@@ -47,7 +47,7 @@ class BeforeObjectMovedEvent(ObjectLocationEvent):
     pass
 
 
-class BaseAddedEvent(ObjectMovedEvent):
+class BaseAddedEvent(ObjectLocationEvent):
     """An object has been added to a container"""
 
     def __init__(self, object, new_parent=None, new_name=None, payload=None):
@@ -55,8 +55,8 @@ class BaseAddedEvent(ObjectMovedEvent):
             new_parent = object.__parent__
         if new_name is None:
             new_name = object.__name__
-        ObjectMovedEvent.__init__(self, object, None, None, new_parent, new_name,
-                                  payload=payload)
+        super().__init__(object, None, None, new_parent, new_name,
+                         payload=payload)
 
 
 @implementer(IObjectAddedEvent)
@@ -76,7 +76,7 @@ class BeforeObjectAddedEvent(BaseAddedEvent):
     pass
 
 
-class BaseObjectRemovedEvent(ObjectMovedEvent):
+class BaseObjectRemovedEvent(ObjectLocationEvent):
     """An object has been removed from a container"""
 
     def __init__(self, object, old_parent=None, old_name=None, payload=None):
@@ -84,7 +84,7 @@ class BaseObjectRemovedEvent(ObjectMovedEvent):
             old_parent = object.__parent__
         if old_name is None:
             old_name = object.__name__
-        ObjectMovedEvent.__init__(self, object, old_parent, old_name, None, None)
+        super().__init__(object, old_parent, old_name, None, None)
 
 
 @implementer(IObjectRemovedEvent)
