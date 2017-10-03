@@ -241,7 +241,7 @@ class CockroachStorage(pg.PostgresqlStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            logging.warning("Too long object %d" % (obj.__class__, len(p)))
+            logger.warning("Too long object %d" % (obj.__class__, len(p)))
         part = writer.part
         if part is None:
             part = 0
@@ -271,11 +271,15 @@ class CockroachStorage(pg.PostgresqlStorage):
                 )
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
+                    self.log_conflict_error(oid, txn, old_serial, writer,
+                                            'Conflict another op in progress')
                     raise ConflictError(
                         'asyncpg error, another operation in progress.')
                 raise
             if update and len(result) != 1:
                 # raise tid conflict error
+                self.log_conflict_error(oid, txn, old_serial, writer,
+                                        'TID Mismatch')
                 raise TIDConflictError(
                     'Mismatch of tid of object being updated. This is likely '
                     'caused by a cache invalidation race condition and should '

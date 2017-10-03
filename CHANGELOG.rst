@@ -1,7 +1,8 @@
 1.4.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- More logging for conflict errors
+  [vangheem]
 
 
 1.4.1 (2017-10-03)
