@@ -273,7 +273,7 @@ def convert_base64_to_binary(b64data):
 
 
 @configure.adapter(
-    for_=(str, Interface),
+    for_=(str, ICloudFileField),
     provides=IJSONToValue)
 class CloudFileStrDeserializeValue:
 
