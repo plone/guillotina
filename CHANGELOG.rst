@@ -1,4 +1,4 @@
-1.4.1 (unreleased)
+1.4.1 (2017-10-03)
 ------------------
 
 - Handle value is None for cloud deserializer
