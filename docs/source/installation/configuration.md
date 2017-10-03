@@ -42,9 +42,6 @@ Both postgres and cockroach have configurations that are identical; however,
 Cockroach has an additional `isolation_level` configuration which defaults to `snapshot`. See
 https://www.cockroachlabs.com/docs/transactions.html
 
-It is recommended that you use the `lock` transaction strategy with Cockroach
-which requires etcd.
-
 
 ## Static files
 
@@ -192,44 +189,9 @@ Available options:
 - `resolve`:
   Same as simple; however, it allows commits when conflicting transactions
   are writing to different objects.
-- `lock`:
-  As safe as the `simple` mode with potential performance impact since every
-  object is locked when a known write will be applied to it.
-  While it is locked, no other writers can access the object.
-  Requires etcd installation.
 
 
 Warning: not all storages are compatible with all transaction strategies.
-
-
-## lock transaction strategy
-
-Requires installation and configuration of etcd to lock content for writes.
-See https://pypi.python.org/pypi/aio_etcd for etcd configuration options
-
-```yaml
-databases:
-  - db:
-      storage: postgresql
-      transaction_strategy: lock
-      dsn:
-        scheme: postgres
-        dbname: guillotina
-        user": postgres
-        host": localhost
-        password: ''
-        port: 5432
-  - etcd:
-      host: 127.0.0.1
-      port: 2379
-      protocol: http
-      read_timeout: 2
-      allow_redirect: true
-      allow_reconnect: false
-      base_key: "guillotina-"
-      read_timeout: 3
-      acquire_timeout: 10
-```
 
 
 Another note: why are there so many choices? Well, this is all somewhat experimental

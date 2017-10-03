@@ -120,14 +120,6 @@ class IDBTransactionStrategy(ITransactionStrategy):
     pass
 
 
-class ILockingStrategy(ITransactionStrategy):
-    async def lock(obj):
-        pass
-
-    async def unlock(obj):
-        pass
-
-
 class IStorageCache(Interface):
 
     async def clear():
