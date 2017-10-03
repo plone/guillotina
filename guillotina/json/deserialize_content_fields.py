@@ -43,6 +43,9 @@ class CloudFileResourceFieldDeserializer(DefaultResourceFieldDeserializer):
     '''
 
     async def __call__(self, value):
+        if value is None:
+            return value
+
         try:
             # cloud files are callable adapters...
             converter = getMultiAdapter((value, self.field), IJSONToValue)

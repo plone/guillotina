@@ -1,7 +1,8 @@
 1.4.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle value is None for cloud deserializer
+  [vangheem]
 
 
 1.4.0 (2017-10-02)
