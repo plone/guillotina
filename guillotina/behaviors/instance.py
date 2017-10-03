@@ -3,6 +3,7 @@ from guillotina.annotations import AnnotationData
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
+from guillotina.interfaces import IContentBehavior
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface.declarations import Provides
@@ -78,6 +79,7 @@ class AnnotationBehavior(object):
                 data._p_register()
 
 
+@implementer(IContentBehavior)
 class ContextBehavior(object):
     """A factory that knows how to store data in a dict in the context."""
 

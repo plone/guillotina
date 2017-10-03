@@ -98,7 +98,7 @@ class DeserializeFromJson(object):
                     continue
 
                 try:
-                    value = deserializer(data_value)
+                    value = await apply_coroutine(deserializer, data_value)
                 except ValueError as e:
                     errors.append({
                         'message': e.message, 'field': name, 'error': e})

@@ -51,12 +51,14 @@ class IFile(Interface):
     index('extension', type='text')
     extension = schema.TextLine(
         title='Extension of the file',
-        default='')
+        default='',
+        required=False)
 
     index('md5', type='text')
     md5 = schema.TextLine(
         title='MD5',
-        default='')
+        default='',
+        required=False)
 
     size = schema.Int(
         title='Size',

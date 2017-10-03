@@ -106,7 +106,11 @@ class IBehaviorAdapterFactory(Interface):
         """
 
 
-class IAsyncBehavior(Interface):
+class IContentBehavior(Interface):
+    pass
+
+
+class IAsyncBehavior(IContentBehavior):
     """
     A behavior that needs to load initial data asynchronously.
     In order for data api to work correctly, `await behavior.load()` will

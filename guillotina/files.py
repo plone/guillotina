@@ -4,8 +4,10 @@ from guillotina import configure
 from guillotina.component import getMultiAdapter
 from guillotina.exceptions import UnRetryableRequestError
 from guillotina.interfaces import ICloudFileField
+from guillotina.interfaces import IContentBehavior
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IFileManager
+from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IValueToJson
@@ -16,11 +18,17 @@ from guillotina.utils import import_class
 from guillotina.utils import to_str
 from zope.interface import alsoProvides
 from zope.interface import implementer
+from zope.interface import Interface
 
 import asyncio
+import base64
+import logging
 import mimetypes
 import os
 import uuid
+
+
+logger = logging.getLogger('guillotina')
 
 
 def get_contenttype(
@@ -97,7 +105,7 @@ class CloudFileManager(object):
             yield chunk
 
     async def save_file(self, generator, *args, **kwargs):
-        await self.real_file_manager.save_file(generator, *args, **kwargs)
+        return await self.real_file_manager.save_file(generator, *args, **kwargs)
 
 
 @configure.adapter(for_=IFile, provides=IValueToJson)
@@ -177,6 +185,7 @@ class BaseCloudFile:
 
         self._size = size
         self._md5 = md5
+        self._data = b''
 
     def guess_content_type(self):
         ct = to_str(self.content_type)
@@ -198,10 +207,10 @@ class BaseCloudFile:
         return self._current_upload
 
     def _set_data(self, data):
-        raise NotImplemented('Only specific upload permitted')
+        self._data = data
 
     def _get_data(self):
-        raise NotImplemented('Only specific download permitted')
+        return self._data
 
     data = property(_get_data, _set_data)
 
@@ -251,3 +260,38 @@ class BaseCloudFile:
 
     async def download(self, buf):
         raise NotImplemented()
+
+
+def convert_base64_to_binary(b64data):
+    prefix, _, b64data = b64data.partition(',')
+    content_type = prefix.replace('data:', '').replace(';base64', '')
+    data = base64.b64decode(b64data)
+    return {
+        'content_type': content_type,
+        'data': data
+    }
+
+
+@configure.adapter(
+    for_=(str, Interface),
+    provides=IJSONToValue)
+class CloudFileStrDeserializeValue:
+
+    def __init__(self, value, field):
+        self.value = convert_base64_to_binary(value)
+        self.field = field
+
+    async def generator(self):
+        yield self.value['data']
+
+    async def __call__(self, context, request):
+        if IContentBehavior.implementedBy(context.__class__):
+            field = self.field.bind(context)
+            context = context.context
+        else:
+            field = self.field.bind(context)
+        file_manager = getMultiAdapter((context, request, field), IFileManager)
+        val = await file_manager.save_file(
+            self.generator, content_type=self.value['content_type'],
+            size=len(self.value['data']))
+        return val
