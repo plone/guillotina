@@ -1,6 +1,10 @@
 1.4.0 (unreleased)
 ------------------
 
+- Remove unused etcd/locking support
+  [vangheem]
+
+
 - Provide base classes and utilities for cloud storage implementations
   [vangheem]
 
