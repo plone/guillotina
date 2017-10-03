@@ -40,6 +40,10 @@ class ConflictIdOnContainer(Exception):
             path=self.container)
 
 
+class UnRetryableRequestError(Exception):
+    pass
+
+
 class PreconditionFailed(Exception):
 
     def __init__(self, container, precondition):

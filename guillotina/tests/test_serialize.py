@@ -79,7 +79,7 @@ async def test_deserialize_cloud_file(dummy_request):
     deserializer = queryMultiAdapter(
         (IFileContent['file'], obj, dummy_request),
         IResourceFieldDeserializer)
-    value = deserializer({
+    value = await deserializer({
         'filename': 'foobar.json',
         'size': 25,
         'md5': 'foobar'

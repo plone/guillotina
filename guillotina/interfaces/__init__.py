@@ -4,6 +4,7 @@ from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
 from .behaviors import IBehaviorAssignable  # noqa
 from .behaviors import IBehaviorSchemaAwareFactory  # noqa
+from .behaviors import IContentBehavior  # noqa
 from .catalog import ICatalogDataAdapter  # noqa
 from .catalog import ICatalogUtility  # noqa
 from .catalog import ISecurityInfo  # noqa
@@ -50,8 +51,6 @@ from .files import ICloudFileField  # noqa
 from .files import IFile  # noqa
 from .files import IFileField  # noqa
 from .files import IFileManager  # noqa
-from .files import IStorage  # noqa
-from .files import NotStorable  # noqa
 from .json import IFactorySerializeToJson  # noqa
 from .json import IJSONToValue  # noqa
 from .json import IResourceDeserializeFromJson  # noqa

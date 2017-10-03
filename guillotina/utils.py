@@ -399,3 +399,9 @@ async def navigate_to(obj, path):
             else:
                 actual = item
     return actual
+
+
+def to_str(value):
+    if isinstance(value, bytes):
+        value = value.decode('utf-8')
+    return value
