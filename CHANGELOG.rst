@@ -1,4 +1,4 @@
-1.4.2 (unreleased)
+1.4.2 (2017-10-03)
 ------------------
 
 - More logging for conflict errors
