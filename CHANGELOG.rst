@@ -1,7 +1,9 @@
 1.4.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- `index.with_accessor` decorator did not return the original function so you
+  could not reuse the function.
+  [vangheem]
 
 
 1.4.3 (2017-10-03)
