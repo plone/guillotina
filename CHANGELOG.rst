@@ -1,4 +1,4 @@
-1.4.3 (unreleased)
+1.4.3 (2017-10-03)
 ------------------
 
 - Fix cache data being undefined for reading cloud data
