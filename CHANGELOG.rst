@@ -1,7 +1,8 @@
 1.4.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix cache data being undefined for reading cloud data
+  [vangheem]
 
 
 1.4.2 (2017-10-03)

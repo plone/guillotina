@@ -133,7 +133,7 @@ async def read_request_data(request, chunk_size):
     if getattr(request, '_retry_attempt', 0) > 0:
         # we are on a retry request, see if we have read cached data yet...
         if request._retry_attempt > getattr(request, '_last_cache_data_retry_count', 0):
-            if request._cache_data is None:
+            if getattr(request, '_cache_data', None) is None:
                 # request payload was too large to fit into request cache.
                 # so retrying this request is not supported and we need to throw
                 # another error
