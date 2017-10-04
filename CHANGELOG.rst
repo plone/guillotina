@@ -1,4 +1,4 @@
-1.4.4 (unreleased)
+1.4.4 (2017-10-04)
 ------------------
 
 - `index.with_accessor` decorator did not return the original function so you
