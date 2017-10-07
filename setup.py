@@ -78,6 +78,9 @@ setup(
         'console_scripts': [
             'guillotina = guillotina.commands:command_runner',
             'g = guillotina.commands:command_runner'
+        ],
+        'sphinx_themes': [
+            'guillotina = guillotina.documentation.sphinx.theme'
         ]
     }
 )
