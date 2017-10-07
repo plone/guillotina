@@ -482,15 +482,12 @@ class PostgresqlStorage(BaseStorage):
             raise KeyError(oid)
         return objects
 
-    def log_conflict_error(self, oid, txn, old_serial, writer, message='Conflict'):
-        log.warn(
-            f'{message}\n'
-            f'Object ID: {oid}\n'
-            f'TID: {txn._tid}\n'
-            f'Old Object TID: {old_serial}\n'
-            f'Belongs to: {writer.of}\n'
-            f'Parent ID: {writer.id}'
-        )
+    def get_conflict_summary(self, oid, txn, old_serial, writer):
+        return f'''Object ID: {oid}
+TID: {txn._tid}
+Old Object TID: {old_serial}
+Belongs to: {writer.of}
+Parent ID: {writer.id}'''
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -530,32 +527,29 @@ class PostgresqlStorage(BaseStorage):
                 )
             except asyncpg.exceptions.ForeignKeyViolationError:
                 txn.deleted[obj._p_oid] = obj
-                self.log_conflict_error(oid, txn, old_serial, writer,
-                                        'TID Conflict bad value')
+                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                 raise TIDConflictError(
-                    'Bad value inserting into database that could be caused '
-                    'by a bad cache value. This should resolve on request retry.')
+                    f'Bad value inserting into database that could be caused '
+                    f'by a bad cache value. This should resolve on request retry.\n'
+                    f'{conflict_summary}')
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
-                    self.log_conflict_error(oid, txn, old_serial, writer,
-                                            'Conflict another op in progress')
+                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise ConflictError(
-                        'asyncpg error, another operation in progress.')
+                        f'asyncpg error, another operation in progress.\n{conflict_summary}')
                 raise
             except asyncpg.exceptions.DeadlockDetectedError:
-                self.log_conflict_error(oid, txn, old_serial, writer,
-                                        'Conflict: Deadlock')
-                raise ConflictError(
-                    'Deadlock detected.')
+                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
+                raise ConflictError(f'Deadlock detected.\n{conflict_summary}')
             if len(result) != 1 or result[0]['count'] != 1:
                 if update:
                     # raise tid conflict error
-                    self.log_conflict_error(oid, txn, old_serial, writer,
-                                            'TID Mismatch')
+                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise TIDConflictError(
-                        'Mismatch of tid of object being updated. This is likely '
-                        'caused by a cache invalidation race condition and should '
-                        'be an edge case. This should resolve on request retry.')
+                        f'Mismatch of tid of object being updated. This is likely '
+                        f'caused by a cache invalidation race condition and should '
+                        f'be an edge case. This should resolve on request retry.\n'
+                        f'{conflict_summary}')
                 else:
                     log.error('Incorrect response count from database update. '
                               'This should not happen. tid: {}'.format(txn._tid))

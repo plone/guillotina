@@ -271,19 +271,18 @@ class CockroachStorage(pg.PostgresqlStorage):
                 )
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
-                    self.log_conflict_error(oid, txn, old_serial, writer,
-                                            'Conflict another op in progress')
+                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise ConflictError(
-                        'asyncpg error, another operation in progress.')
+                        f'asyncpg error, another operation in progress.\n{conflict_summary}')
                 raise
             if update and len(result) != 1:
                 # raise tid conflict error
-                self.log_conflict_error(oid, txn, old_serial, writer,
-                                        'TID Mismatch')
+                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                 raise TIDConflictError(
-                    'Mismatch of tid of object being updated. This is likely '
-                    'caused by a cache invalidation race condition and should '
-                    'be an edge case. This should resolve on request retry.')
+                    f'Mismatch of tid of object being updated. This is likely '
+                    f'caused by a cache invalidation race condition and should '
+                    f'be an edge case. This should resolve on request retry.\n'
+                    f'{conflict_summary}')
 
     async def delete(self, txn, oid):
         # no cascade support, so we push to vacuum

@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.6.3-slim
 MAINTAINER Plone Community
 
 # Update packages
@@ -9,23 +9,12 @@ RUN apt-get install -y locales git-core gcc g++ netcat libxml2-dev libxslt-dev l
 
 RUN mkdir /app
 
-# Bundle app source
-ADD . /app
+COPY requirements.txt /requirements.txt
 
 ENV LANG C.UTF-8
 ENV LANGUAGE C.UTF-8
 ENV LC_ALL C.UTF-8
 
 # Install buildout
-RUN cd /app; python3.5 bootstrap-buildout.py
-
-# Run buildout
-RUN cd /app; ./bin/buildout -vvv
-
-WORKDIR /app
-
-# Expose
-EXPOSE  8080
-
-# Configure and Run
-CMD ["/app/bin/guillotina"]
+RUN pip install -r /requirements.txt
+RUN pip install guillotina==1.4.4
