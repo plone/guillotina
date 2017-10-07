@@ -54,7 +54,7 @@ templates_path = ['_templates']
 master_doc = 'index'
 
 # General information about the project.
-project = 'guillotina'
+project = 'Guillotina'
 copyright = '2016, Ramon Navarro Bosch, Asko Soukka & Nathan Van Gheem'
 author = 'Ramon Navarro Bosch, Asko Soukka & Nathan Van Gheem'
 
@@ -125,7 +125,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'nature'
+html_theme = 'guillotina'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -240,7 +240,7 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'guillotina'
+htmlhelp_basename = 'Guillotina'
 
 # -- Options for LaTeX output ---------------------------------------------
 
