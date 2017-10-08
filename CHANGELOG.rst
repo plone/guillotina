@@ -1,7 +1,8 @@
 1.4.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not require `title` for creating containers
+  [vangheem]
 
 
 1.4.4 (2017-10-04)

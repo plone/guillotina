@@ -72,17 +72,14 @@ class DefaultPOST(Service):
                 'can not create this type %s' % data['@type'],
                 status=401)
 
-        if 'title' not in data and not data['title']:
-            return ErrorResponse(
-                'NotAllowed',
-                'We need a title',
-                status=401)
-
         if 'id' not in data:
             return ErrorResponse(
                 'NotAllowed',
                 'We need an id',
                 status=401)
+
+        if not data.get('title'):
+            data['title'] = data['id']
 
         if 'description' not in data:
             data['description'] = ''

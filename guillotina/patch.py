@@ -23,8 +23,8 @@ async def asubscribers(self, objects, provided):
         for subscription in subscriptions:
             if asyncio.iscoroutinefunction(subscription):
                 subscriber = await subscription(*objects)
-            if subscriber is not None:
-                result.append(subscriber)
+                if subscriber is not None:
+                    result.append(subscriber)
     return result
 
 
@@ -40,8 +40,8 @@ def subscribers(self, objects, provided):
         for subscription in subscriptions:
             if not asyncio.iscoroutinefunction(subscription):
                 subscriber = subscription(*objects)
-            if subscriber is not None:
-                result.append(subscriber)
+                if subscriber is not None:
+                    result.append(subscriber)
     return result
 
 

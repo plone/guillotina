@@ -80,15 +80,6 @@ def postgres():
         containers.postgres_image.stop()
 
 
-@pytest.fixture(scope='session')
-def etcd():
-    host = containers.etcd_image.run()
-
-    yield host  # provide the fixture value
-
-    containers.etcd_image.stop()
-
-
 class GuillotinaDBRequester(object):
 
     def __init__(self, server, loop):
