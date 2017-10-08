@@ -590,7 +590,7 @@ class DefaultOPTIONS(Service):
 async def move(context, request):
     try:
         data = await request.json()
-    except:
+    except Exception:
         data = {}
     destination = data.get('destination')
     if not destination:
@@ -684,7 +684,7 @@ async def move(context, request):
 async def duplicate(context, request):
     try:
         data = await request.json()
-    except:
+    except Exception:
         data = {}
     destination = data.get('destination')
     if destination is not None:

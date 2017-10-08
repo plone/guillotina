@@ -247,7 +247,7 @@ class PGVacuum:
         try:
             for record in await conn.fetch(GET_TRASHED_OBJECTS):
                 await self._queue.put(record['zoid'])
-        except:
+        except Exception:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
             await self._storage.close(conn)
@@ -278,7 +278,7 @@ class PGVacuum:
         conn = await self._storage.open()
         try:
             await conn.execute(DELETE_OBJECT, oid)
-        except:
+        except Exception:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
             try:
