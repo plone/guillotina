@@ -135,10 +135,6 @@ class HTTPService(CodeBlock):
 
 
 def setup(app):
-    app.add_html_theme(
-        'guillotina', os.path.join(
-            os.path.abspath(os.path.dirname(__file__)), 'theme.zip'))
-
     app.add_directive_to_domain('http', 'service', HTTPService)
     dist = pkg_resources.get_distribution('guillotina')
     return {'version': dist.version}

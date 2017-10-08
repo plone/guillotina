@@ -1,3 +1,4 @@
 recommonmark
 sphinxcontrib-httpexample
 sphinx==1.6.4
+sphinx-guillotina-theme

@@ -37,7 +37,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinxcontrib.httpdomain',
     'sphinxcontrib.httpexample',
-    'guillotina.documentation.sphinx'
+    'guillotina.documentation.sphinx',
+    'sphinx_guillotina_theme'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
