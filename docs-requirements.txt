@@ -1,2 +1,3 @@
 recommonmark
 sphinxcontrib-httpexample
+sphinx==1.6.4
