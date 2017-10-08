@@ -1,5 +1,5 @@
-from guillotina import app_settings
 from guillotina import jose
+from guillotina._settings import app_settings
 
 import base64
 

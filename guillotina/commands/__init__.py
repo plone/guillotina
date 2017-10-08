@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from guillotina import app_settings
 from guillotina import logger
+from guillotina._settings import app_settings
 from guillotina.factory import make_app
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login

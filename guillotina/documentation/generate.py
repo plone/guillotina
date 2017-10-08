@@ -1,7 +1,7 @@
 # this script requries the `requests` library to be installed in the environment
 # which is no long a dependency of guillotina since it isn't used anywhere
 # else.
-from guillotina import app_settings
+from guillotina._settings import app_settings
 from guillotina.component import getUtility
 from guillotina.interfaces import IResourceFactory
 from guillotina.tests.utils import create_content

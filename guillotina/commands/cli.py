@@ -1,4 +1,4 @@
-from guillotina import app_settings
+from guillotina._settings import app_settings
 from guillotina.commands import Command
 from guillotina.testing import GuillotinaRequester
 from guillotina.testing import TESTING_SETTINGS

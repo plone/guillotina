@@ -2,10 +2,10 @@
 from aiohttp import web
 from datetime import datetime
 from datetime import timedelta
-from guillotina import app_settings
 from guillotina import configure
 from guillotina import jose
 from guillotina import logger
+from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.browser import Response
 from guillotina.component import getUtility
@@ -17,7 +17,6 @@ from guillotina.interfaces import ITraversableView
 from guillotina.transactions import get_tm
 
 import aiohttp
-import asyncio
 import ujson
 
 

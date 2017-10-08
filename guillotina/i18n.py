@@ -31,3 +31,6 @@ class MessageFactory(object):
 
     def __call__(self, ustr, default=None, mapping=None):
         return Message(ustr, self._domain, default, mapping)
+
+
+default_message_factory = MessageFactory('guillotina')

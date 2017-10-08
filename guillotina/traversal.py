@@ -5,9 +5,8 @@ from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPBadRequest
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from guillotina import _
-from guillotina import app_settings
 from guillotina import logger
+from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.participation import AnonymousParticipation
 from guillotina.browser import ErrorResponse
@@ -22,6 +21,7 @@ from guillotina.events import ObjectLoadedEvent
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
+from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
