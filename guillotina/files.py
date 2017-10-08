@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-from guillotina import app_settings
 from guillotina import configure
+from guillotina._settings import app_settings
 from guillotina.component import getMultiAdapter
 from guillotina.exceptions import UnRetryableRequestError
 from guillotina.interfaces import ICloudFileField
@@ -18,7 +18,6 @@ from guillotina.utils import import_class
 from guillotina.utils import to_str
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from zope.interface import Interface
 
 import asyncio
 import base64

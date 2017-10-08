@@ -3,6 +3,7 @@ from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina import glogging
+from guillotina._settings import app_settings
 from guillotina.component import getUtility
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
@@ -303,7 +304,6 @@ else:
 
 def apply_cors(request: IRequest) -> dict:
     # deprecated, will be removed in next major release
-    from guillotina import app_settings
     headers = {}
     origin = request.headers.get('Origin', None)
     if origin:

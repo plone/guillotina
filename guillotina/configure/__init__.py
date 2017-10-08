@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from guillotina._settings import app_settings
 from guillotina.configure import component
 from guillotina.configure.behaviors import BehaviorAdapterFactory
 from guillotina.configure.behaviors import BehaviorRegistration
@@ -72,7 +73,6 @@ def load_all_configurations(_context, module_name):
 
 def load_service(_context, service):
     # prevent circular import
-    from guillotina import app_settings
     from guillotina.security.utils import protect_view
 
     service_conf = service['config']
@@ -238,7 +238,6 @@ register_configuration_handler('behavior', load_behavior)  # noqa
 
 
 def load_addon(_context, addon):
-    from guillotina import app_settings
     config = addon['config']
     app_settings['available_addons'][config['name']] = {
         'title': config['title'],
@@ -326,7 +325,6 @@ register_configuration_handler('grant_all', load_grant_all)  # noqa
 
 
 def load_json_schema_definition(_context, json_schema):
-    from guillotina import app_settings
     config = json_schema['config']
     app_settings['json_schema_definitions'][config['name']] = config['schema']
 register_configuration_handler('json_schema_definition', load_json_schema_definition)  # noqa

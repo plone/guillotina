@@ -1,4 +1,4 @@
-from guillotina import app_settings
+from guillotina._settings import app_settings
 from guillotina.component import getUtilitiesFor
 from guillotina.interfaces import IRole
 from zope.interface import implementer

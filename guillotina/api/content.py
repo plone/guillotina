@@ -3,10 +3,9 @@ from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from dateutil.tz import tzlocal
-from guillotina import _
-from guillotina import app_settings
 from guillotina import configure
 from guillotina import security
+from guillotina._settings import app_settings
 from guillotina.annotations import AnnotationData
 from guillotina.api.service import Service
 from guillotina.auth.role import local_roles
@@ -32,6 +31,7 @@ from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
+from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IFolder

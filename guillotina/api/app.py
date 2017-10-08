@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from guillotina import app_settings
 from guillotina import component
 from guillotina import configure
+from guillotina._settings import app_settings
 from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceSerializeToJson

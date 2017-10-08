@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from guillotina import app_settings
 from guillotina import configure
+from guillotina._settings import app_settings
 from guillotina.browser import ErrorResponse
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IAddons
