@@ -9,3 +9,16 @@ in the `docs-requirements.txt` file.
 
 We use a mix of RestructuredText and MarkDown in these docs because, well,
 we're difficult I guess.
+
+
+todo
+----
+
+- request object
+- events
+- static assets
+- logging
+- command line
+- testing
+- traversal
+- middlewares

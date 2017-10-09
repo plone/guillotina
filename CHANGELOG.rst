@@ -1,6 +1,10 @@
 1.4.5 (unreleased)
 ------------------
 
+- provide `guillotina.testing.configure_with` and `guillotina.testing.get_settings`
+  functions to help configure test environment settings.
+  [vangheem]
+
 - Do not require `title` for creating containers
   [vangheem]
 
