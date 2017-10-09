@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from distutils.core import Extension
+from setuptools import Extension
 from setuptools import find_packages
 from setuptools import setup
 
