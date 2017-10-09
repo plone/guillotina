@@ -1,4 +1,4 @@
-1.4.5 (unreleased)
+1.4.5 (2017-10-09)
 ------------------
 
 - provide `guillotina.testing.configure_with` and `guillotina.testing.get_settings`
