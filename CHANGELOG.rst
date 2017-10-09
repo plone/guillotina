@@ -1,7 +1,8 @@
 1.4.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix logging conflict ID message
+  [vangheem]
 
 
 1.4.5 (2017-10-09)
