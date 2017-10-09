@@ -11,14 +11,14 @@ from Plone, Pyramid, Django and others all while utilizing Python's great AsyncI
 Using Python's AsyncIO, it works well with micro-service oriented environments.
 
 Features:
-- REST JSON API
-- Built-in authentication/authorization, built-in JWT support
-- Hierarchical data/url structure
-- Permissions/roles/groups
-- Fully customizable permission/roles/groups based on hierarchical structure
-- Robust customizable component architecture and configuration syntax
-- Content types, dynamic behaviors
-- Built-in CORS support
+ - REST JSON API
+ - Built-in authentication/authorization, built-in JWT support
+ - Hierarchical data/url structure
+ - Permissions/roles/groups
+ - Fully customizable permission/roles/groups based on hierarchical structure
+ - Robust customizable component architecture and configuration syntax
+ - Content types, dynamic behaviors
+ - Built-in CORS support
 
 
 Example configuration:

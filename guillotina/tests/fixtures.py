@@ -1,58 +1,65 @@
 # -*- coding: utf-8 -*-
+from guillotina import testing
 from guillotina.component import getUtility
 from guillotina.content import load_cached_schema
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
-from guillotina.testing import ADMIN_TOKEN
-from guillotina.testing import TESTING_SETTINGS
 from guillotina.tests import docker_containers as containers
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 
 import aiohttp
 import asyncio
-import copy
 import os
 import pytest
-import sys
 
-
-TESTING_SETTINGS["utilities"].append({
-    "provides": "guillotina.interfaces.ICatalogUtility",
-    "factory": "guillotina.catalog.catalog.DefaultSearchUtility"
-})
 
 IS_TRAVIS = 'TRAVIS' in os.environ
 USE_COCKROACH = 'USE_COCKROACH' in os.environ
 
-PG_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
-PG_SETTINGS['databases'][0]['db']['storage'] = 'postgresql'
 
-PG_SETTINGS['databases'][0]['db']['partition'] = \
-    'guillotina.interfaces.IResource'
-PG_SETTINGS['databases'][0]['db']['dsn'] = {
-    'scheme': 'postgres',
-    'dbname': 'guillotina',
-    'user': 'postgres',
-    'host': 'localhost',
-    'password': '',
-    'port': 5432
-}
-if USE_COCKROACH:
-    PG_SETTINGS['databases'][0]['db']['storage'] = 'cockroach'
-    PG_SETTINGS['databases'][0]['db']['dsn'].update({
-        'user': 'root',
-        'port': 26257
+def base_settings_configurator(settings):
+    settings["utilities"].append({
+        "provides": "guillotina.interfaces.ICatalogUtility",
+        "factory": "guillotina.catalog.catalog.DefaultSearchUtility"
     })
 
-DUMMY_SETTINGS = copy.deepcopy(TESTING_SETTINGS)
-DUMMY_SETTINGS['databases'][0]['db']['storage'] = 'DUMMY'
 
-DUMMY_SETTINGS['databases'][0]['db']['partition'] = \
-    'guillotina.interfaces.IResource'
-DUMMY_SETTINGS['databases'][0]['db']['dsn'] = {}
+testing.configure_with(base_settings_configurator)
+
+
+def get_dummy_settings():
+    settings = testing.get_settings()
+    settings['databases'][0]['db']['storage'] = 'DUMMY'
+
+    settings['databases'][0]['db']['partition'] = 'guillotina.interfaces.IResource'
+    settings['databases'][0]['db']['dsn'] = {}
+    return settings
+
+
+def get_pg_settings():
+    settings = testing.get_settings()
+    settings['databases'][0]['db']['storage'] = 'postgresql'
+
+    settings['databases'][0]['db']['partition'] = \
+        'guillotina.interfaces.IResource'
+    settings['databases'][0]['db']['dsn'] = {
+        'scheme': 'postgres',
+        'dbname': 'guillotina',
+        'user': 'postgres',
+        'host': getattr(get_pg_settings, 'host', 'localhost'),
+        'password': '',
+        'port': 5432
+    }
+    if USE_COCKROACH:
+        settings['databases'][0]['db']['storage'] = 'cockroach'
+        settings['databases'][0]['db']['dsn'].update({
+            'user': 'root',
+            'port': 26257
+        })
+    return settings
 
 
 @pytest.fixture(scope='session')
@@ -60,7 +67,6 @@ def postgres():
     """
     detect travis, use travis's postgres; otherwise, use docker
     """
-    sys._db_tests = True
 
     if USE_COCKROACH:
         host = containers.cockroach_image.run()
@@ -70,7 +76,8 @@ def postgres():
         else:
             host = 'localhost'
 
-    PG_SETTINGS['databases'][0]['db']['dsn']['host'] = host
+    # mark the function with the actual host
+    setattr(get_pg_settings, 'host', host)
 
     yield host  # provide the fixture value
 
@@ -89,7 +96,8 @@ class GuillotinaDBRequester(object):
         self.db = self.root['db']
 
     async def __call__(self, method, path, params=None, data=None, authenticated=True,
-                       auth_type='Basic', headers={}, token=ADMIN_TOKEN, accept='application/json'):
+                       auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
+                       accept='application/json'):
         value, status, headers = await self.make_request(
             method, path, params, data, authenticated,
             auth_type, headers, token, accept)
@@ -97,7 +105,7 @@ class GuillotinaDBRequester(object):
 
     async def make_request(self, method, path, params=None, data=None,
                            authenticated=True, auth_type='Basic', headers={},
-                           token=ADMIN_TOKEN, accept='application/json'):
+                           token=testing.ADMIN_TOKEN, accept='application/json'):
         settings = {}
         headers = headers.copy()
         settings['headers'] = headers
@@ -125,7 +133,7 @@ class GuillotinaDBRequester(object):
 @pytest.fixture(scope='function')
 def dummy_guillotina(loop):
     from guillotina import test_package  # noqa
-    aioapp = make_app(settings=DUMMY_SETTINGS, loop=loop)
+    aioapp = make_app(settings=get_dummy_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
     return aioapp
@@ -184,7 +192,7 @@ async def dummy_txn_root(dummy_request):
 def guillotina_main(loop):
     HARD_CACHE.clear()
     from guillotina import test_package  # noqa
-    aioapp = make_app(settings=PG_SETTINGS, loop=loop)
+    aioapp = make_app(settings=get_pg_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp

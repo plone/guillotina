@@ -1,7 +1,7 @@
 # Web sockets
 
 
-`guillotina` has support for web sockets built into the api.
+`guillotina` has support for web sockets built into the api OOTB.
 
 
 ## Flow
