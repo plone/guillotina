@@ -17,4 +17,4 @@ ENV LC_ALL C.UTF-8
 
 # Install buildout
 RUN pip install -r /requirements.txt
-RUN pip install guillotina==1.4.6
+RUN pip install guillotina==1.4.7
