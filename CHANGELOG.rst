@@ -1,7 +1,9 @@
 1.4.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `run` command to allow running scripts from the command line against
+  a guillotina configuration.
+  [vangheem]
 
 
 1.4.6 (2017-10-09)

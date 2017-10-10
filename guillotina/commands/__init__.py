@@ -83,9 +83,25 @@ class Command(object):
             loop = asyncio.get_event_loop()
             # Blocking call which returns when finished
             loop.run_until_complete(self.run(self.arguments, settings, app))
+            loop.run_until_complete(self.wait_for_tasks())
             loop.close()
         else:
             self.run(self.arguments, settings, app)
+
+    async def wait_for_tasks(self):
+        for task in asyncio.Task.all_tasks():
+            if task.done():
+                continue
+            try:
+                if task._coro.__qualname__ in ('Pool.release',):
+                    # put known tasks that should be waited on here...
+                    logger.info(f'Waiting for {task._coro.__qualname__} to finish')
+                    try:
+                        await asyncio.wait_for(asyncio.shield(task), 1)
+                    except asyncio.TimeoutError:
+                        pass
+            except (AttributeError, KeyError):
+                pass
 
     def setup_fake_request(self):
         self.request = get_mocked_request()
