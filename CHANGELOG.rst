@@ -1,4 +1,4 @@
-1.4.7 (unreleased)
+1.4.7 (2017-10-10)
 ------------------
 
 - Add `run` command to allow running scripts from the command line against
