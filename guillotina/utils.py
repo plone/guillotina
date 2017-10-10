@@ -271,11 +271,13 @@ async def get_containers(request):
     for _id, db in root:
         if IDatabase.providedBy(db):
             db._db._storage._transaction_strategy = 'none'
-            tm = db.get_transaction_manager()
+            tm = request._tm = db.get_transaction_manager()
             tm.request = request
-            txn = await tm.begin(request)
+            request._db_id = _id
+            request._txn = txn = await tm.begin(request)
             async for s_id, container in db.async_items():
                 tm.request.container = container
+                tm.request._container_id = container.id
                 yield txn, tm, container
 
 
