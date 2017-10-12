@@ -1,4 +1,4 @@
-1.5.0 (unreleased)
+1.5.0 (2017-10-12)
 ------------------
 
 - Provide default cloud file implementation
