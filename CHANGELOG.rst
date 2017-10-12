@@ -1,7 +1,8 @@
 1.5.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add back missing imports from guillotina.files
+  [vangheem]
 
 
 1.5.0 (2017-10-12)

@@ -1,3 +1,4 @@
+from .const import CHUNK_SIZE
 from .dbfile import DBFile
 from aiohttp.web import StreamResponse
 from aiohttp.web_exceptions import HTTPNotFound
@@ -16,10 +17,6 @@ from guillotina.interfaces import IResource
 
 import base64
 import uuid
-
-
-CHUNK_SIZE = 1024 * 1024 * 5
-MAX_RETRIES = 5
 
 
 @configure.adapter(

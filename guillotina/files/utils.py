@@ -1,13 +1,10 @@
+from .const import MAX_REQUEST_CACHE_SIZE
 from guillotina.exceptions import UnRetryableRequestError
 
 import asyncio
 import base64
 import mimetypes
 import os
-
-
-MAXCHUNKSIZE = 1 << 16
-MAX_REQUEST_CACHE_SIZE = 6 * 1024 * 1024
 
 
 async def read_request_data(request, chunk_size):
