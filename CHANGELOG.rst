@@ -1,7 +1,8 @@
-1.4.8 (unreleased)
+1.5.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide default cloud file implementation
+  [vangheem]
 
 
 1.4.7 (2017-10-10)

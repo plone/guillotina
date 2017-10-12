@@ -76,3 +76,14 @@ class IFileField(IObject):
 
 class ICloudFileField(IObject):
     """Field for storing generic cloud File objects."""
+
+
+class IDBFileField(ICloudFileField):
+    '''
+    Store files in database blob storage
+    '''
+
+
+class IDBFile(IFile):
+    """Marker for a DBFile
+    """

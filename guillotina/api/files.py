@@ -7,6 +7,7 @@ from guillotina.api.service import DownloadService
 from guillotina.api.service import TraversableDownloadService
 from guillotina.api.service import TraversableFieldService
 from guillotina.component import getMultiAdapter
+from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
@@ -82,6 +83,10 @@ class DirectoryGET(FileGET):
 class UploadFile(TraversableFieldService):
 
     async def __call__(self):
+        if (self.behavior is not None and
+                IAsyncBehavior.implementedBy(self.behavior.__class__)):
+            # providedBy not working here?
+            await self.behavior.load(create=True)
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
         adapter = getMultiAdapter(
@@ -155,6 +160,10 @@ class DownloadFile(TraversableDownloadService):
 class TusCreateFile(UploadFile):
 
     async def __call__(self):
+        if (self.behavior is not None and
+                IAsyncBehavior.implementedBy(self.behavior.__class__)):
+            # providedBy not working here?
+            await self.behavior.load(create=True)
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
         adapter = getMultiAdapter(

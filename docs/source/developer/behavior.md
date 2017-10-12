@@ -193,3 +193,12 @@ DELETE behaviors : DELETE on the object/@behaviors:
         "behavior": "guillotina.behaviors.dublincore.IDublinCore"
     }
 ```
+
+
+
+## OOTB Behaviors
+
+Guillotina comes with a couple behaviors OOTB.
+
+- guillotina.behaviors.dublincore.IDublinCore: Dublin core field
+- guillotina.behaviors.attachment.IAttachment: Provide file field

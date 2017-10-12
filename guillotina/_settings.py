@@ -73,5 +73,6 @@ app_settings = {
         ("application/json", interfaces.IRendererFormatJson),
         ("text/html", interfaces.IRendererFormatHtml),
         ("text/plain", interfaces.IRendererFormatPlain)
-    ))
+    )),
+    'cloud_storage': "guillotina.interfaces.IDBFileField"
 }
