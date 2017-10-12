@@ -1,4 +1,4 @@
-1.5.1 (unreleased)
+1.5.1 (2017-10-12)
 ------------------
 
 - Add back missing imports from guillotina.files
