@@ -48,6 +48,8 @@ from .exceptions import IForbiddenAttribute  # noqa
 from .exceptions import ISerializableException  # noqa
 from .exceptions import IUnauthorized  # noqa
 from .files import ICloudFileField  # noqa
+from .files import IDBFile  # noqa
+from .files import IDBFileField  # noqa
 from .files import IFile  # noqa
 from .files import IFileField  # noqa
 from .files import IFileManager  # noqa
