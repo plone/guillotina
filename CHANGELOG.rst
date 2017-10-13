@@ -1,7 +1,8 @@
 1.5.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to override aiohttp access_log_format
+  [vangheem]
 
 
 1.5.1 (2017-10-12)
