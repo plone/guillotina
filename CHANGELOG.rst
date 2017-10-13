@@ -1,4 +1,4 @@
-1.5.2 (unreleased)
+1.5.2 (2017-10-13)
 ------------------
 
 - Be able to override aiohttp access_log_format
