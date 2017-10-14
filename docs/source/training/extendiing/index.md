@@ -24,8 +24,16 @@ Follow the prompts and name your application `guillotina_chat`.
    permissions
    events
    users
+   serialize
    services
    static
    websockets
    utilities
+   query
 ```
+
+
+todo:
+
+- serialize/deserialize
+-

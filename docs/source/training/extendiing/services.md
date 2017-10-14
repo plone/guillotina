@@ -1,6 +1,53 @@
 # Services
 
-Services are synomymous with what other frameworks might call `endpoints` or `views`.
+Services are synonymous with what other frameworks might call `endpoints` or `views`.
 
-- create service to get all conversations user is a part of in order
-- create service to get all messages of conversation in order
+For the sake of our application, let's use services for getting a user's most
+recent conversations and messages for a conversation.
+
+
+## Creating the services
+
+We'll name our endpoints `@get-conversations` and `@get-messages` and put them
+in a file named `services.py`.
+
+```python
+from guillotina import configure
+from guillotina.component import getMultiAdapter
+from guillotina.interfaces import IContainer, IResourceSerializeToJsonSummary
+from guillotina.utils import get_authenticated_user_id
+from guillotina_chat.content import IConversation
+
+
+@configure.service(for_=IContainer, name='@get-conversations',
+                   permission='guillotina.Authenticated')
+async def get_conversations(context, request):
+    results = []
+    conversations = await context.async_get('conversations')
+    user_id = get_authenticated_user_id(request)
+    async for conversation in conversations.async_values():
+        if user_id in conversation.users:
+            summary = await getMultiAdapter(
+                (conversation, request),
+                IResourceSerializeToJsonSummary)()
+            results.append(summary)
+    return results
+
+
+@configure.service(for_=IConversation, name='@get-messages',
+                   permission='guillotina.Authenticated')
+async def get_messages(context, request):
+    results = []
+    async for message in context.async_values():
+        summary = await getMultiAdapter(
+            (message, request),
+            IResourceSerializeToJsonSummary)()
+        results.append(summary)
+    return results
+```
+
+And make sure to add the scan.
+
+```python
+configure.scan('guillotina_chat.services')
+```

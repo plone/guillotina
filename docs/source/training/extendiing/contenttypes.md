@@ -5,10 +5,7 @@ For chatting, we'll need a content type for conversations and messages.
 Create a `content.py` file in your application and create the content types.
 
 ```python
-from guillotina import Interface
-from guillotina import configure
-from guillotina import schema
-from guillotina import content
+from guillotina import configure, content, Interface, schema
 
 
 class IConversation(Interface):
@@ -21,7 +18,8 @@ class IConversation(Interface):
 @configure.contenttype(
     type_name="Conversation",
     schema=IConversation,
-    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
+    behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+    allowed_types=['Message'])
 class Conversation(content.Folder):
     pass
 
