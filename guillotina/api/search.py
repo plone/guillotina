@@ -90,7 +90,9 @@ class CatalogReindex(Service):
 
     async def __call__(self):
         search = queryUtility(ICatalogUtility)
-        await search.reindex_all_content(self.context, self._security_reindex)
+        if search is not None:
+            await search.reindex_all_content(
+                self.context, self._security_reindex)
         return {}
 
 
