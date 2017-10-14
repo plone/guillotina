@@ -24,7 +24,7 @@ MISSING_SETTINGS = {
                 "dbname": "guillotina",
                 "user": "guillotina",
                 "host": "localhost",
-                "password": "test",
+                "password": "",
                 "port": 5432
             },
             "read_only": False
@@ -50,9 +50,11 @@ def get_settings(configuration):
                 # should be yaml then...
                 settings = yaml.load(config)
     else:
-        logger.warning('Could not find the configuration file {}. Using default settings.'.format(
-            configuration
-        ))
+        if 'logged' not in MISSING_SETTINGS:
+            logger.warning('Could not find the configuration file {}. Using default settings.'.format(
+                configuration
+            ))
+        MISSING_SETTINGS['logged'] = True
         settings = MISSING_SETTINGS.copy()
     return settings
 

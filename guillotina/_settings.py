@@ -40,13 +40,11 @@ app_settings = {
         "max_age": 3660
     },
     "jwt": {
-        "secret": "foobar",
         "algorithm": "HS256"
     },
     'commands': {
         '': 'guillotina.commands.server.ServerCommand',
         'serve': 'guillotina.commands.server.ServerCommand',
-        'cli': 'guillotina.commands.cli.CliCommand',
         'create': 'guillotina.commands.create.CreateCommand',
         'shell': 'guillotina.commands.shell.ShellCommand',
         'testdata': 'guillotina.commands.testdata.TestDataCommand',

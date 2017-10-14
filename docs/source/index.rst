@@ -15,10 +15,28 @@ Features:
  - Built-in authentication/authorization, built-in JWT support
  - Hierarchical data/url structure
  - Permissions/roles/groups
- - Fully customizable permission/roles/groups based on hierarchical structure
+ - Fully customizable permission/roles/groups based on hierarchical data structure
  - Robust customizable component architecture and configuration syntax
  - Content types, dynamic behaviors
  - Built-in CORS support
+
+
+Detailed Documentation
+======================
+
+ .. toctree::
+    :maxdepth: 2
+
+    about
+    quickstart
+    rest/index
+    installation/index
+    developer/index
+    training/index
+
+
+What is Guillotina like?
+========================
 
 
 Example configuration:
@@ -94,16 +112,3 @@ Example usage:
     :statuscode 200: no error
     :statuscode 401: Invalid Auth code
     :statuscode 500: Error processing request
-
-
-Detailed Documentation
-======================
-
-.. toctree::
-   :maxdepth: 2
-
-   about
-   quickstart
-   rest/index
-   installation/index
-   developer/index

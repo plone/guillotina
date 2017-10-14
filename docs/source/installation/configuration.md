@@ -68,19 +68,6 @@ jsapps:
   app: path/to/app
 ```
 
-
-## Server port
-
-```yaml
-port: 8080
-```
-
-## Server host
-
-```yaml
-host: 0.0.0.0
-```
-
 ## Root user password
 
 ```yaml
@@ -108,6 +95,17 @@ cors:
   max_age: 3660
 ```
 
+## Applications
+
+To extend/override Guillotina, the `applications` configuration allows you to
+specify which to enable.
+
+```yaml
+applications:
+- guillotina_elasticsearch
+```
+
+
 ## Async utilities
 
 ```yaml
@@ -128,7 +126,6 @@ middlewares:
   - guillotina_myaddon.Middleware
 ```
 
-
 ## aiohttp settings
 
 You can pass in aiohttp_settings to configure the aiohttp server.
@@ -138,6 +135,29 @@ You can pass in aiohttp_settings to configure the aiohttp server.
 aiohttp_settings:
   client_max_size: 20971520
 ```
+
+## JWT Settings
+
+If you want to enable JWT authentication, you'll need to configure the JWT
+secret in Guillotina.
+
+```yaml
+jwt:
+  secret: foobar
+  algorithm: HS256
+```
+
+
+## Miscellaneous settings
+
+  - port(number): Port to bind to. `defaults to 8080`
+  - access_log_format(string): Customize access log format for aiohttp. `defaults to None`
+  - store_json(boolean): Serialize object into json field in database. `defaults to true`
+  - host(string): Where to host the server. `defaults to "0.0.0.0"`
+  - port(number): Port to bind to. `defaults to 8080`
+  - conflict_retry_attempts(number): Number of times to retry database conflict errors. `defaults to 3`
+  - cloud_storage(string): Dotted path to cloud storage field type. `defaults to "guillotina.interfaces.IDBFileField"`
+
 
 ## transaction strategy
 

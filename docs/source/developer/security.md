@@ -88,23 +88,34 @@ interaction.check_permission(permission, obj)
 [POST] RESOURCE/@sharing (you need guillotina.ChangePermissions permission)
 
 ```json
+{
+"prinperm": [
   {
-    "type": "Allow",
-    "prinrole": {
-      "principal_id": ["role1", "role2"]
-    },
-    "prinperm": {
-      "principal_id": ["perm1", "perm2"]
-    },
-    "roleperm": {
-      "role1": ["perm1", "perm2"]
-    }
+    "principal": "foobar",
+    "permission": "guillotina.ModifyContent",
+    "setting": "Allow"
   }
+],
+"prinrole": [
+  {
+    "principal": "foobar",
+    "role": "guillotina.Owner",
+    "setting": "Allow"
+  }
+],
+"roleperm": [
+  {
+    "permission": "guillotina.ModifyContent",
+    "role": "guillotina.Member",
+    "setting": "Allow"
+  }
+]
+}
 ```
 
 The different type of types are :
 
-- Allow : you set it on the resource and the childs will inherit
-- Deny : you set in on the resource and the childs will inherit
-- AllowSingle : you set in on the resource and the childs will not inherit
+- Allow : you set it on the resource and the children will inherit
+- Deny : you set in on the resource and the children will inherit
+- AllowSingle : you set in on the resource and the children will not inherit
 - Unset : you remove the setting

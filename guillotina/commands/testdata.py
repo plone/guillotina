@@ -30,22 +30,21 @@ class AsyncUrlRetriever:
                        'JSON', 'PostgreSQL', 'Cockroach Labs']
 
     async def initialize(self):
-        async with aiohttp.ClientSession() as session:
-            while True:
-                if len(self._data) >= self._max_size:
-                    await asyncio.sleep(0.2)
-                elif len(self._queue) > 0:
-                    # we'll do a batch at a time here...
-                    async def _parse(page):
-                        self._parsed.append(page)
-                        self._data.append(await self._api.parse_page(session, page))
+        while True:
+            if len(self._data) >= self._max_size:
+                await asyncio.sleep(0.2)
+            elif len(self._queue) > 0:
+                # we'll do a batch at a time here...
+                async def _parse(page):
+                    self._parsed.append(page)
+                    self._data.append(await self._api.parse_page(page))
 
-                    batch = self._queue[:20]
-                    self._queue = self._queue[20:]
-                    await asyncio.gather(*[_parse(p) for p in batch])
-                else:
-                    print('queue empty...')
-                    await asyncio.sleep(0.2)
+                batch = self._queue[:20]
+                self._queue = self._queue[20:]
+                await asyncio.gather(*[_parse(p) for p in batch])
+            else:
+                print('queue empty...')
+                await asyncio.sleep(0.2)
 
     def push(self, title):
         if title not in self._parsed and title not in self._queue:
@@ -55,8 +54,7 @@ class AsyncUrlRetriever:
         if len(self._data) == 0:
             print('data 0, manually process one')
             page = self._queue.pop()
-            async with aiohttp.ClientSession() as session:
-                return await self._api.parse_page(session, page)
+            return await self._api.parse_page(page)
         return self._data.pop()
 
 
@@ -75,21 +73,25 @@ class WikipediaAPI:
         self._count = 0
         self._parsed = []  # page ids of already parsed
         self._url_retriever = AsyncUrlRetriever(self)
-        asyncio.ensure_future(self._url_retriever.initialize())
+        self._task = asyncio.ensure_future(self._url_retriever.initialize())
 
-    async def parse_page(self, session, page):
+    async def parse_page(self, page):
         self._parsed_count += 1
         # print(f'{self._parsed_count} parsing page {page}')
         params = self._base_query.copy()
         params['titles'] = page
-        resp = await session.get(self._endpoint, params=params)
-        return await resp.json()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self._endpoint, params=params) as resp:
+                data = await resp.json()
+                return data
 
-    async def parse_pages(self, session, pages):
+    async def parse_pages(self, pages):
         results = []
 
         async def _parse(page):
-            results.append(await self.parse_page(page))
+            result = await self.parse_page(page)
+            if result:
+                results.append(result)
 
         await asyncio.gather(*[_parse(page) for page in pages])
         return results
@@ -110,6 +112,9 @@ class WikipediaAPI:
                     self._url_retriever.push(link['title'].replace('Talk:', ''))
                 yield page_data
 
+    def close(self):
+        self._task.cancel()
+
 
 class TestDataCommand(Command):
     description = 'Populate the database with test data'
@@ -122,32 +127,26 @@ class TestDataCommand(Command):
                             type=int, default=30)
         parser.add_argument('--depth', help='How deep to make the nodes',
                             type=int, default=6)
+        parser.add_argument('--container', help='Container to put data in',
+                            default='testdata')
         return parser
-
-    async def get_dbs(self):
-        root = getUtility(IApplication, name='root')
-        for _id, db in root:
-            if IDatabase.providedBy(db):
-                tm = db.get_transaction_manager()
-                tm.request = self.request
-                await tm.begin(self.request)
-                async for s_id, container in db.async_items():
-                    tm.request.container = container
-                    yield tm, container
 
     async def generate_test_data(self, db):
         # don't slow us down with transactions
         db._db._storage._transaction_strategy = 'none'
 
+        tm = self.request._tm = db.get_transaction_manager()
+        self.request._db_id = db.id
         tm = db.get_transaction_manager()
         tm.request = self.request
-        await tm.begin(self.request)
-        container = await db.async_get('testdata')
+        self.request._txn = txn = await tm.begin(self.request)
+
+        container = await db.async_get(self.arguments.container)
         if container is None:
             container = await create_content(
-                'Container', id='testdata', title='Test Data')
-            container.__name__ = 'testdata'
-            await db.async_set('testdata', container)
+                'Container', id=self.arguments.container, title='Test Data')
+            container.__name__ = self.arguments.container
+            await db.async_set(self.arguments.container, container)
             await container.install()
             self.request._container_id = container.__name__
             # Local Roles assign owner as the creator user
@@ -155,18 +154,24 @@ class TestDataCommand(Command):
             roleperm.assign_role_to_principal('guillotina.Owner', 'root')
 
             await notify(ObjectAddedEvent(container, db, container.__name__))
-            await tm.commit()
-            await tm.begin(self.request)
+            await tm.commit(txn=txn)
+            txn = await tm.begin(self.request)
+
+        self.request.container = container
+        self.request._container_id = container.id
 
         api = WikipediaAPI()
         folder_count = 0
         async for page_data in api.iter_pages():
-            await self.import_folder(api, tm, container, page_data)
+            await self.import_folder(api, tm, txn, container, page_data)
             folder_count += 1
             if folder_count >= self.arguments.per_node:
                 break
 
-    async def import_folder(self, api, tm, folder, page_data, depth=1):
+        await tm.commit(txn=txn)
+        api.close()
+
+    async def import_folder(self, api, tm, txn, folder, page_data, depth=1):
         self._count += 1
         if 'pageid' not in page_data:
             print(f"XXX could not import {page_data['title']}")
@@ -185,18 +190,19 @@ class TestDataCommand(Command):
         behavior.description = page_data.get('extract', '')
 
         if self._count % self._batch_size == 0:
-            await tm.commit()
+            await tm.commit(txn=txn)
             await tm.begin(self.request)
 
         if self.arguments.depth > depth:
             folder_count = 0
             async for page_data in api.iter_pages():
-                await self.import_folder(api, tm, obj, page_data, depth + 1)
+                await self.import_folder(api, tm, txn, obj, page_data, depth + 1)
                 folder_count += 1
                 if folder_count >= self.arguments.per_node:
                     break
 
     async def run(self, arguments, settings, app):
+        self.arguments = arguments
         root = getUtility(IApplication, name='root')
         for _id, db in root:
             if IDatabase.providedBy(db):
