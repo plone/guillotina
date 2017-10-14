@@ -1,4 +1,4 @@
-1.5.3 (unreleased)
+1.5.3 (2017-10-14)
 ------------------
 
 - Update does and default values to match docs
