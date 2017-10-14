@@ -1,4 +1,4 @@
-1.5.4 (unreleased)
+1.5.4 (2017-10-14)
 ------------------
 
 - More documentation updates and fixes
