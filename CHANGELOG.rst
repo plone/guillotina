@@ -1,7 +1,8 @@
 1.5.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- More documentation updates and fixes
+  [vangheem]
 
 
 1.5.3 (2017-10-14)

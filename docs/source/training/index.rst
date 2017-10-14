@@ -18,6 +18,6 @@ Contents:
    configuration
    api
    asyncio
-   extendiing
+   extendiing/index
    commands
    websockets

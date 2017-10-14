@@ -109,7 +109,7 @@ First, run postgresql:
 
     docker run --rm \
         -e POSTGRES_DB=guillotina \
-        -e POSTGRES_USER=postgres \
+        -e POSTGRES_USER=guillotina \
         -p 127.0.0.1:5432:5432 \
         --name postgres \
         postgres:9.6
@@ -132,7 +132,7 @@ Roadmap for 2.0
 ---------------
 
 - be able to configure renderer from function view configuration
+- match on more predicates
+- get rid of renderer, in favor of predicates for diff output
 - view functions can take 2, 1 or zero args
 - handle routes in definitions...
-- change subsriber registration syntax to something like:
-  @subscriber(IResource, IObjectModified)
