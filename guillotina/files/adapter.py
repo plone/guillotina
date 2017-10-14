@@ -33,15 +33,19 @@ class DBFileManagerAdapter:
 
     async def upload(self):
         """In order to support TUS and IO upload.
-
-        we need to provide an upload that concats the incoming
         """
-        self.context._p_register()  # writing to object
+        try:
+            self.field.context.data._p_register()  # register change...
+        except AttributeError:
+            self.context._p_register()
 
         file = self.field.get(self.field.context or self.context)
         if not isinstance(file, self.file_class):
             file = self.file_class(content_type=self.request.content_type)
             self.field.set(self.field.context or self.context, file)
+        else:
+            self.content_type = self.request.content_type
+
         if 'X-UPLOAD-MD5HASH' in self.request.headers:
             file._md5 = self.request.headers['X-UPLOAD-MD5HASH']
         else:
@@ -55,7 +59,10 @@ class DBFileManagerAdapter:
         if 'X-UPLOAD-SIZE' in self.request.headers:
             file._size = int(self.request.headers['X-UPLOAD-SIZE'])
         else:
-            raise AttributeError('x-upload-size header needed')
+            if 'Content-Length' in self.request.headers:
+                file._size = int(self.request.headers['Content-Length'])
+            else:
+                raise AttributeError('x-upload-size or content-length header needed')
 
         if 'X-UPLOAD-FILENAME' in self.request.headers:
             file.filename = self.request.headers['X-UPLOAD-FILENAME']
@@ -77,7 +84,10 @@ class DBFileManagerAdapter:
         await file.finish_upload(self.context)
 
     async def tus_create(self):
-        self.context._p_register()  # writing to object
+        try:
+            self.field.context.data._p_register()  # register change...
+        except AttributeError:
+            self.context._p_register()
 
         # This only happens in tus-java-client, redirect this POST to a PATCH
         if self.request.headers.get('X-HTTP-Method-Override') == 'PATCH':
@@ -123,6 +133,11 @@ class DBFileManagerAdapter:
         return resp
 
     async def tus_patch(self):
+        try:
+            self.field.context.data._p_register()  # register change...
+        except AttributeError:
+            self.context._p_register()
+
         file = self.field.get(self.field.context or self.context)
         if 'CONTENT-LENGTH' in self.request.headers:
             to_upload = int(self.request.headers['CONTENT-LENGTH'])
@@ -212,7 +227,10 @@ class DBFileManagerAdapter:
 
     async def save_file(self, generator, content_type=None, size=None,
                         filename=None):
-        self.context._p_register()  # writing to object
+        try:
+            self.field.context.data._p_register()  # register change...
+        except AttributeError:
+            self.context._p_register()
 
         file = self.field.get(self.field.context or self.context)
         if not isinstance(file, self.file_class):

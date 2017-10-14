@@ -54,6 +54,10 @@ TESTING_SETTINGS = {
     "root_user": {
         "password": "admin"
     },
+    "jwt": {
+        "secret": "foobar",
+        "algorithm": "HS256"
+    },
     "utilities": []
 }
 

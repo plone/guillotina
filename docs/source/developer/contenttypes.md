@@ -2,9 +2,12 @@
 
 Content types allow you to provide custom schemas and content to your services.
 
-OOTB, `guillotina` ships with simple `Folder` and `Item` content types. The
-`Folder` type allowing someone to add items inside of it. Both types only have
-simple dublin core fields.
+OOTB, `guillotina` ships with simple `Container`, `Folder` and `Item` content types.
+The `Container` content type is the main content type to hold your data in. It is
+the started point of where applications and other things operate within.
+
+The `Folder` type allowing someone to add items inside of it. Both types only have
+simple dublin core fields by default.
 
 
 ## Defining content types
@@ -35,15 +38,6 @@ This example creates a simple schema and assigns it to the `MyType` content
 type.
 
 
-**Scanning**
-If your service modules are not imported at run-time, you may need to provide an
-additional scan call to get your services noticed by `guillotina`.
-
-In your application `__init__.py` file, you can simply provide a `scan` call.
-
-```python
-from guillotina import configure
-
-def includeme(root):
-    configure.scan('my.package.content')
+```eval_rst
+.. include:: ./_scanning.rst
 ```

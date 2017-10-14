@@ -19,16 +19,17 @@ Install `guillotina`:
 ./bin/pip install guillotina
 ```
 
-Generate configuration file:
+Generate configuration file(requires cookie cutter):
 
 ```
-./bin/guillotina create configuration
+./bin/pip install cookiecutter
+./bin/g create --template=configuration
 ```
 
 Finally, run the server:
 
 ```
-./bin/guillotina
+./bin/g
 ```
 
 The server should now be running on http://0.0.0.0:8080
@@ -47,7 +48,7 @@ to get one running quickly.
 Example docker run command:
 
 ```
-docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres -p 127.0.0.1:5432:5432 postgres:9.6
+docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:9.6
 ```
 
 

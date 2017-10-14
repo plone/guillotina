@@ -31,6 +31,8 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 import pkg_resources
+from recommonmark.parser import CommonMarkParser
+from recommonmark.transform import AutoStructify
 
 extensions = [
     'sphinx.ext.coverage',
@@ -331,8 +333,6 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-from recommonmark.parser import CommonMarkParser
-
 source_parsers = {
     '.md': CommonMarkParser,
 }
@@ -354,3 +354,7 @@ source_suffix = ['.rst', '.md']
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #
 # texinfo_no_detailmenu = False
+
+# At the bottom of conf.py
+def setup(app):
+    app.add_transform(AutoStructify)

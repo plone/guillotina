@@ -124,9 +124,11 @@ class BaseCloudFile:
 
     @property
     def extension(self):
-        if hasattr(self, '_extension'):
+        if getattr(self, '_extension', None):
             return self._extension
         else:
+            if '.' in self.filename:
+                return self.filename.split('.')[-1]
             return None
 
     async def copy_cloud_file(self, new_uri):
