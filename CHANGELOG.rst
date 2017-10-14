@@ -1,7 +1,8 @@
 1.5.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update does and default values to match docs
+  [vangheem]
 
 
 1.5.2 (2017-10-13)
