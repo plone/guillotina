@@ -26,14 +26,8 @@ Follow the prompts and name your application `guillotina_chat`.
    users
    serialize
    services
-   static
-   websockets
    utilities
+   websockets
+   static
    query
 ```
-
-
-todo:
-
-- serialize/deserialize
--

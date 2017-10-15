@@ -1,7 +1,11 @@
 1.5.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update docs and finish training.
+  [vangheem]
+
+- Fix websocket token authentication.
+  [vangheem]
 
 
 1.5.4 (2017-10-14)

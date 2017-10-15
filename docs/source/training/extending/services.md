@@ -31,11 +31,12 @@ async def get_conversations(context, request):
                 (conversation, request),
                 IResourceSerializeToJsonSummary)()
             results.append(summary)
+    results = sorted(results, key=lambda conv: conv['creation_date'])
     return results
 
 
 @configure.service(for_=IConversation, name='@get-messages',
-                   permission='guillotina.Authenticated')
+                   permission='guillotina.AccessContent')
 async def get_messages(context, request):
     results = []
     async for message in context.async_values():
@@ -43,6 +44,7 @@ async def get_messages(context, request):
             (message, request),
             IResourceSerializeToJsonSummary)()
         results.append(summary)
+    results = sorted(results, key=lambda mes: mes['creation_date'])
     return results
 ```
 
