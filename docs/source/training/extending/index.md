@@ -29,5 +29,4 @@ Follow the prompts and name your application `guillotina_chat`.
    utilities
    websockets
    static
-   query
 ```
