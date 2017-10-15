@@ -1,4 +1,4 @@
-1.5.5 (unreleased)
+1.5.5 (2017-10-15)
 ------------------
 
 - Update docs and finish training.
