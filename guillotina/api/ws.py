@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from aiohttp import web
-from datetime import datetime
-from datetime import timedelta
 from guillotina import configure
 from guillotina import jose
 from guillotina import logger
@@ -17,6 +15,7 @@ from guillotina.interfaces import ITraversableView
 from guillotina.transactions import get_tm
 
 import aiohttp
+import time
 import ujson
 
 
@@ -41,12 +40,9 @@ class WebsocketGetToken(Service):
     _websockets_ttl = 60
 
     def generate_websocket_token(self, real_token):
-        exp = datetime.utcnow() + timedelta(
-            seconds=self._websockets_ttl)
-
         claims = {
-            'iat': int(datetime.utcnow().timestamp()),
-            'exp': int(exp.timestamp()),
+            'iat': int(time.time()),
+            'exp': int(time.time() + self._websockets_ttl),
             'token': real_token
         }
         jwe = jose.encrypt(claims, app_settings['rsa']['priv'])

@@ -149,7 +149,7 @@ Simple file uploads can be done with the `@upload` endpoint.
 
      .. sourcecode:: http
 
-        HTTP/1.1 201 OK
+        HTTP/1.1 200 OK
         Content-Type: application/json
 
      :reqheader Authorization: Required token to authenticate
@@ -176,7 +176,8 @@ Then, to download the file, use the `@download` endpoint.
 
      .. sourcecode:: http
 
-        HTTP/1.1 201 OK
+        HTTP/1.1 200 OK
+        <binary data>
 
      :reqheader Authorization: Required token to authenticate
      :statuscode 200: no error
@@ -288,7 +289,7 @@ There are three types of permission settings you can modify:
 
 - prinperm: principal + permission
 - prinrole: principal + role
-- roleperm: role = permission
+- roleperm: role + permission
 
 Each change can use the following settings:
 

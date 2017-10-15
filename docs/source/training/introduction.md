@@ -1,11 +1,13 @@
 # Introduction
 
-The Guillotina training is designed to run the full gambit of using Guillotina.
+The Guillotina training is designed to give a complete experience of using and
+extending Guillotina.
 
 The training can be useful for consumers of Guillotina API as well as developers
 extending the framework with customizations/addons.
 
-Please read the [about](../about.html#about) chapter for details about Guillotina.
+Please read the [about](../../about.html) chapter for details about what
+Guillotina is and why you should use it.
 
 
 ## Using the training materials

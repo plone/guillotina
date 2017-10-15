@@ -1,7 +1,8 @@
 1.5.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- More docs fixes
+  [vangheem]
 
 
 1.5.5 (2017-10-15)

@@ -8,7 +8,7 @@ to build your web applications around.
 It is designed for building JavaScript applications. It is an API framework, not
 a typical template-based rendering framework like most web frameworks(Django/Pyramid/Plone).
 What we mean by this is that Guillotina will not generate HTML OOTB for you.
-It is designed to be consumed by JavaScript application that do the HTML rendering.
+It is designed to be consumed by JavaScript applications that do the HTML rendering.
 
 Features:
   - REST JSON API
@@ -69,7 +69,7 @@ And so on... It's a simple way to build APIs from data around a hierarchy(or tre
 Extrapolating this concept, Jim Fulton also built the ZODB package. This was a
 complete database built on serializing Python objects using the pickle library. Then,
 frameworks like Zope(and eventually Plone), used this database and the `bobo`
-style of publishing objects to URLs to build a framework around.
+style of publishing objects to URLs to build a framework and CMS around.
 
 
 Fork'd dependency packages

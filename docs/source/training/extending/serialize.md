@@ -7,8 +7,9 @@ summary serializations that show in listings.
 For customize a serialization for a type, you need to provide a multi adapter
 for the `IResourceSerializeToJsonSummary` or `IResourceSerializeToJson` interfaces.
 
-For our use-case, we want to make sure to include the `creation_date` in the
-summary serialization of conversations and messages.
+For our use-case, we want to make sure to include the `creation_date` and
+some other data in the summary serialization of conversations and messages
+so we can get all the info we need for our application without doing full objet serialization.
 
 
 # Defining a custom serialization

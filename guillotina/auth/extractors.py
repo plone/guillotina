@@ -2,6 +2,10 @@ from guillotina import jose
 from guillotina._settings import app_settings
 
 import base64
+import logging
+
+
+logger = logging.getLogger('guillotina')
 
 
 class BasePolicy(object):
@@ -40,9 +44,16 @@ class WSTokenAuthPolicy(BasePolicy):
         request = self.request
         if 'ws_token' in request.query:
             jwt_token = request.query['ws_token'].encode('utf-8')
-            request.query['ws_token'].encode('utf-8')
-            jwt = jose.decrypt(
-                jose.deserialize_compact(jwt_token), app_settings['rsa']['priv'])
+            try:
+                jwt = jose.decrypt(
+                    jose.deserialize_compact(jwt_token), app_settings['rsa']['priv'])
+            except jose.Expired:
+                # expired token
+                logger.warn(f'Expired token {jwt_token}', exc_info=True)
+                return
+            except jose.Error:
+                logger.warn(f'Error decrypting JWT token', exc_info=True)
+                return
             return {
                 'type': 'wstoken',
                 'token': jwt.claims['token']

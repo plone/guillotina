@@ -21,11 +21,11 @@ Also make sure you are not overriding the `auth_user_identifiers` configuration
 value in your `config.yaml` as `guillotina_dbusers` uses that to work.
 
 
-After you restart guillotina, you can also install `guillotina_dbusers`
+After you restart guillotina, you can also install `dbusers`
 into your container using the `@addons` endpoint:
 
 ```
-POST /db/container/@users
+POST /db/container/users
 {
   "id": "dbusers"
 }
@@ -60,7 +60,7 @@ POST /db/container/conversations
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MDgwMTU0OTcsImlkIjoiZm9vYmFyIn0.vC6HHuLmcf8d1I7RpOTxAeHQDfMRjsOoBS-xH4Q1sdw
 {
   "@type": "Conversation",
-  "title": "New convo with root",
-  "users": ["root", "foobar"]
+  "title": "New convo with foobar2",
+  "users": ["foobar", "foobar2"]
 }
 ```

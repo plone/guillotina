@@ -13,6 +13,13 @@ g create --template=application
 
 Follow the prompts and name your application `guillotina_chat`.
 
+Then,
+
+```
+cd guillotina_chat
+python setup.py develop
+```
+
 
 ```eval_rst
 .. toctree::

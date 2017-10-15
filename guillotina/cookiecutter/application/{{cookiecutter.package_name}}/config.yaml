@@ -1,4 +1,6 @@
 ---
+applications:
+- {{cookiecutter.package_name}}
 databases:
 - db:
     storage: postgresql
