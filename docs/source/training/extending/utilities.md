@@ -75,3 +75,36 @@ For us, we will send messages to registered websockets.
 
 Make sure, like all other configured moduels, to ensure this file is scanned
 by the packages `__init__.py` file.
+
+## Sending messages
+
+We'll need to add another event subscriber to the `subscribers.py` file
+in order for the utility to know to send out new messages to registered
+web serveices. So your `utility.py` file will now look like:
+
+```
+from guillotina import configure
+from guillotina.component import getUtility
+from guillotina.interfaces import IObjectAddedEvent, IPrincipalRoleManager
+from guillotina.utils import get_authenticated_user_id, get_current_request
+from guillotina_chat.content import IConversation, IMessage
+from guillotina_chat.utility import IMessageSender
+
+
+@configure.subscriber(for_=(IConversation, IObjectAddedEvent))
+async def container_added(conversation, event):
+    user_id = get_authenticated_user_id(get_current_request())
+    if user_id not in conversation.users:
+        conversation.users.append(user_id)
+
+    manager = IPrincipalRoleManager(conversation)
+    for user in conversation.users or []:
+        manager.assign_role_to_principal(
+            'guillotina_chat.ConversationParticipant', user)
+
+
+@configure.subscriber(for_=(IMessage, IObjectAddedEvent))
+async def message_added(message, event):
+    utility = getUtility(IMessageSender)
+    await utility.send_message(message)
+```
