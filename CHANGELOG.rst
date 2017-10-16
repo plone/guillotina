@@ -1,6 +1,9 @@
 1.5.7 (unreleased)
 ------------------
 
+- Let buildout depend on cookiecutter to be able to create project skeletons.
+  [thet]
+
 - Fix ``Py_DECREF`` typo in ``optimizations.c``.
   [thet]
 
