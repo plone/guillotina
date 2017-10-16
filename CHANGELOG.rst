@@ -1,7 +1,8 @@
 1.5.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix ``Py_DECREF`` typo in ``optimizations.c``.
+  [thet]
 
 
 1.5.6 (2017-10-16)
