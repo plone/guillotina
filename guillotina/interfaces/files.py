@@ -51,12 +51,14 @@ class IFile(Interface):
     index('extension', type='text')
     extension = schema.TextLine(
         title='Extension of the file',
-        default='')
+        default='',
+        required=False)
 
     index('md5', type='text')
     md5 = schema.TextLine(
         title='MD5',
-        default='')
+        default='',
+        required=False)
 
     size = schema.Int(
         title='Size',
@@ -76,14 +78,12 @@ class ICloudFileField(IObject):
     """Field for storing generic cloud File objects."""
 
 
-class IStorage(Interface):
-    """Store file data."""
-
-    def store(data, blob):
-        """Store the data into the blob
-        Raises NonStorable if data is not storable.
-        """
+class IDBFileField(ICloudFileField):
+    '''
+    Store files in database blob storage
+    '''
 
 
-class NotStorable(Exception):
-    """Data is not storable."""
+class IDBFile(IFile):
+    """Marker for a DBFile
+    """

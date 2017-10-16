@@ -1,4 +1,4 @@
-from guillotina import app_settings
+from guillotina._settings import app_settings
 from guillotina.auth import find_user
 from guillotina.utils import strings_differ
 
@@ -58,7 +58,7 @@ class JWTValidator(object):
         self.request = request
 
     async def validate(self, token):
-        if token.get('type') != 'bearer':
+        if token.get('type') not in ('bearer', 'wstoken'):
             return
 
         if '.' not in token.get('token', ''):

@@ -1,0 +1,65 @@
+<html>
+<head>
+  <link rel="stylesheet" href="/static/main.css" type="text/css" />
+  <link rel="stylesheet" href="/static/site.css" type="text/css" />
+  <style>
+  body > .container {
+    margin: auto auto;
+    max-width: 700px;
+    margin-top: 50px;
+  }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="ui secondary pointing menu" id="top-menu">
+      <a href="#" class="item" section="conversations">Conversations</a>
+      <a href="#" class="item" section="login">Login</a>
+    </div>
+
+    <div id="login" class="section">
+      <h1>Login</h1>
+      <form>
+        <div class="ui action input">
+          <input id="login-username" type="text" name="username" placeholder="Username">
+        </div>
+        <div class="ui action input">
+          <input id="login-password" type="password" name="password" placeholder="Password">
+        </div>
+        <div class="ui teal button">Login</div>
+      </form>
+    </div>
+
+    <div id="conversations" class="section" style="display:none;">
+      <h1>Conversations</h1>
+      <ul>
+
+      </ul>
+
+      <h3>New conversation</h3>
+      <form id="new-conversation-form">
+        <div class="ui action input">
+          <input id="new-conversation" type="text" name="message" placeholder="With...">
+        </div>
+        <div id="new-conversation-btn" class="ui teal button">Start</div>
+      </form>
+    </div>
+
+    <div id="conversation" class="section" style="display:none;">
+      <h1>Conversation</h1>
+      <ul>
+
+      </ul>
+      <form id="new-message-form">
+        <div class="ui action input">
+          <input id="new-message" type="text" name="message" placeholder="New message...">
+        </div>
+        <div id="new-message-btn" class="ui teal button">Send</div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/chat.js"></script>
+</body>
+</html>

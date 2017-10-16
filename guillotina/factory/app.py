@@ -1,10 +1,9 @@
 from aiohttp import web
-from guillotina import app_settings
 from guillotina import configure
 from guillotina import cors
 from guillotina import glogging
-from guillotina import interfaces
 from guillotina import languages
+from guillotina._settings import app_settings
 from guillotina.async import IAsyncUtility
 from guillotina.component import getAllUtilitiesRegisteredFor
 from guillotina.component import getUtility
@@ -31,7 +30,6 @@ from guillotina.writable import check_writable_request
 
 import aiohttp
 import asyncio
-import collections
 import json
 import logging.config
 
@@ -67,25 +65,6 @@ def load_application(module, root, settings):
 
 # XXX use this to delay imports for these settings
 _delayed_default_settings = {
-    "default_layer": interfaces.IDefaultLayer,
-    "http_methods": {
-        "PUT": interfaces.IPUT,
-        "POST": interfaces.IPOST,
-        "PATCH": interfaces.IPATCH,
-        "DELETE": interfaces.IDELETE,
-        "GET": interfaces.IGET,
-        "OPTIONS": interfaces.IOPTIONS,
-        "HEAD": interfaces.IHEAD,
-        "CONNECT": interfaces.ICONNECT
-    },
-    # pass in tuple to force ordering for default provided renderers here
-    # XXX ordering is *required* for some views to work as if no accept
-    # header is provided, it'll default to the first type provided
-    "renderers": collections.OrderedDict((
-        ("application/json", interfaces.IRendererFormatJson),
-        ("text/html", interfaces.IRendererFormatHtml),
-        ("text/plain", interfaces.IRendererFormatPlain)
-    )),
     "languages": {
         "en": languages.IEN,
         "en-us": languages.IENUS,

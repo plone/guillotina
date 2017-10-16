@@ -16,11 +16,11 @@ from guillotina import configure
 from guillotina.interfaces import IContainer
 
 @configure.service(context=IContainer, name='@myservice', method='GET',
-									 permission='guillotina.AccessContent')
+                   permission='guillotina.AccessContent')
 async def my_service(context, request):
-		return {
-				'foo': 'bar'
-		}
+    return {
+        'foo': 'bar'
+    }
 ```
 
 The most simple way to define a service is to use the decorator method shown here.
@@ -32,17 +32,8 @@ In this example, the service will apply to a GET request against a container,
 `/zodb/guillotina/@myservice`.
 
 
-**Scanning**
-If your service modules are not imported at run-time, you may need to provide an
-additional scan call to get your services noticed by `guillotina`.
-
-In your application `__init__.py` file, you can simply provide a `scan` call.
-
-```python
-from guillotina import configure
-
-def includeme(root):
-		configure.scan('my.package.services')
+```eval_rst
+.. include:: ./_scanning.rst
 ```
 
 
@@ -59,29 +50,25 @@ from guillotina.api.service import Service
 
 
 @configure.service(context=IContainer, name='@myservice', method='GET',
-									 permission='guillotina.AccessContent')
-class DefaultGET(Service):
-		async def __call__(self):
-			# self.context
-			# self.request
-			return {
-					'foo': 'bar'
-			}
-
+                   permission='guillotina.AccessContent')
+async def my_service(context, request):
+    return {
+        'foo': 'bar'
+    }
 ```
 
 ## special cases
 
 ### I want that my service is accessible no matter the content
 
-you can define in the Service class the __allow_access__ = True
+you can define in the service configuration with `allow_acces=True`
 
 
 ```python
 @service(
-		context=IResource, name='@download',
-		method='GET', permission='guillotina.Public')
-class DefaultGET(DownloadService):
-
-		__allow_access__ = True
+    context=IResource, name='@download',
+    method='GET', permission='guillotina.Public',
+    allow_access=True)
+async def my_service(context, request):
+    pass
 ```

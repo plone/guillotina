@@ -7,6 +7,7 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IGroupFolder
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectModifiedEvent
+from guillotina.interfaces import IObjectMovedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
@@ -69,6 +70,13 @@ async def security_changed(obj, event):
         # group:group id principal
         return
     # We need to reindex the objects below
+    request = get_current_request()
+    request.add_future(
+        obj.id, AsyncCatalogReindex(obj, request, security=True)())
+
+
+@configure.subscriber(for_=(IResource, IObjectMovedEvent))
+def moved_object(obj, event):
     request = get_current_request()
     request.add_future(
         obj.id, AsyncCatalogReindex(obj, request, security=True)())

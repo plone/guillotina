@@ -56,8 +56,8 @@ Create a `content.py` file with the following:
 ```python
 from guillotina import configure
 from guillotina import schema
+from guillotina import Interface
 from guillotina.content import Item
-from zope.interface import Interface
 
 
 class IToDo(Interface):

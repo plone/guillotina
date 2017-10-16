@@ -7,8 +7,7 @@ stored in the database.
 ## Registering a blobs
 
 Blobs must be registered with and store on a resource object. This is so we
-can keep things keep rudimentary garbage collection on the blobs that were
-created for resources.
+can do garbage collection on the blobs that were created for resources.
 
 ```python
 

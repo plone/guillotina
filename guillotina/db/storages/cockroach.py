@@ -241,7 +241,7 @@ class CockroachStorage(pg.PostgresqlStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            logging.warning("Too long object %d" % (obj.__class__, len(p)))
+            logger.warning("Too long object %d" % (obj.__class__, len(p)))
         part = writer.part
         if part is None:
             part = 0
@@ -271,15 +271,18 @@ class CockroachStorage(pg.PostgresqlStorage):
                 )
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
+                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise ConflictError(
-                        'asyncpg error, another operation in progress.')
+                        f'asyncpg error, another operation in progress.\n{conflict_summary}')
                 raise
             if update and len(result) != 1:
                 # raise tid conflict error
+                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                 raise TIDConflictError(
-                    'Mismatch of tid of object being updated. This is likely '
-                    'caused by a cache invalidation race condition and should '
-                    'be an edge case. This should resolve on request retry.')
+                    f'Mismatch of tid of object being updated. This is likely '
+                    f'caused by a cache invalidation race condition and should '
+                    f'be an edge case. This should resolve on request retry.\n'
+                    f'{conflict_summary}')
 
     async def delete(self, txn, oid):
         # no cascade support, so we push to vacuum

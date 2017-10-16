@@ -6,9 +6,35 @@ You can provide your own CLI commands for guillotina through a simple interface.
 ## Available commands
 
 * serve: run the http rest api server(this is default command if none given)
-* cli: command line utility to run manually RUN API requests with
 * shell: drop into a shell with root object to manually work with
 * create: use cookiecutter to generate guillotina applications
+* initialize-db: databases are automatically initialized; however, you can use this command to manually do it
+* testdata: populate the database with test data from wikipedia
+* run: run a script
+
+
+## Command Options
+
+- *
+  - `--config`: path to configuration file. `defaults to config.(yaml|json)`
+- serve:
+  - `--host`: host to bind to
+  - `--port`: port to bind to
+  - `--reload`: auto reload on code changes. `requires aiohttp_autoreload`
+  - `--profile`: profile Guillotina while it's running
+  - `--profile-output`: where to save profiling output
+  - `--monitor`: run with aiomonitor. `requires aiomonitor`
+- shell
+- create
+  - `--template`: name of template to use
+  - `--overwrite`: overwrite existing file
+  - `--output`: where to save the file
+- initialize-db
+- testdata
+  - `--per-node`: How many items to import per node
+  - `--depth`: How deep to make the nodes
+- run
+  - `--script`: path to script to run with `run` async function
 
 
 ## Running commands

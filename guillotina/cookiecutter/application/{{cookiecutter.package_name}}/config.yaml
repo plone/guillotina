@@ -1,0 +1,44 @@
+---
+applications:
+- {{cookiecutter.package_name}}
+databases:
+- db:
+    storage: postgresql
+    dsn:
+      scheme: postgres
+      dbname: guillotina
+      user: guillotina
+      host: localhost
+      password:
+      port: 5432
+    read_only: false
+host: 127.0.0.1
+port: 8080
+root_user:
+  password: root
+auth_extractors:
+- guillotina.auth.extractors.BearerAuthPolicy
+- guillotina.auth.extractors.BasicAuthPolicy
+- guillotina.auth.extractors.WSTokenAuthPolicy
+auth_token_validators:
+- guillotina.auth.validators.SaltedHashPasswordValidator
+- guillotina.auth.validators.JWTValidator
+cors:
+  allow_origin:
+  - http://localhost:8080
+  allow_methods:
+  - GET
+  - POST
+  - DELETE
+  - HEAD
+  - PATCH
+  - OPTIONS
+  allow_headers:
+  - "*"
+  expose_headers:
+  - "*"
+  allow_credentials: true
+  max_age: 3660
+jwt:
+  secret: foobar
+  algorithm: HS256

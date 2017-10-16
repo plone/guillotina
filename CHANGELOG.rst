@@ -1,4 +1,142 @@
-1.3.25 (unreleased)
+1.5.8 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
+1.5.7 (2017-10-16)
+------------------
+
+- pdb!
+  [vangheem]
+
+
+1.5.6 (2017-10-16)
+------------------
+
+- More docs fixes
+  [vangheem]
+
+
+1.5.5 (2017-10-15)
+------------------
+
+- Update docs and finish training.
+  [vangheem]
+
+- Fix websocket token authentication.
+  [vangheem]
+
+
+1.5.4 (2017-10-14)
+------------------
+
+- More documentation updates and fixes
+  [vangheem]
+
+
+1.5.3 (2017-10-14)
+------------------
+
+- Update does and default values to match docs
+  [vangheem]
+
+
+1.5.2 (2017-10-13)
+------------------
+
+- Be able to override aiohttp access_log_format
+  [vangheem]
+
+
+1.5.1 (2017-10-12)
+------------------
+
+- Add back missing imports from guillotina.files
+  [vangheem]
+
+
+1.5.0 (2017-10-12)
+------------------
+
+- Provide default cloud file implementation
+  [vangheem]
+
+
+1.4.7 (2017-10-10)
+------------------
+
+- Add `run` command to allow running scripts from the command line against
+  a guillotina configuration.
+  [vangheem]
+
+
+1.4.6 (2017-10-09)
+------------------
+
+- Fix logging conflict ID message
+  [vangheem]
+
+
+1.4.5 (2017-10-09)
+------------------
+
+- provide `guillotina.testing.configure_with` and `guillotina.testing.get_settings`
+  functions to help configure test environment settings.
+  [vangheem]
+
+- Do not require `title` for creating containers
+  [vangheem]
+
+
+1.4.4 (2017-10-04)
+------------------
+
+- `index.with_accessor` decorator did not return the original function so you
+  could not reuse the function.
+  [vangheem]
+
+
+1.4.3 (2017-10-03)
+------------------
+
+- Fix cache data being undefined for reading cloud data
+  [vangheem]
+
+
+1.4.2 (2017-10-03)
+------------------
+
+- More logging for conflict errors
+  [vangheem]
+
+
+1.4.1 (2017-10-03)
+------------------
+
+- Handle value is None for cloud deserializer
+  [vangheem]
+
+
+1.4.0 (2017-10-02)
+------------------
+
+- Remove unused etcd/locking support
+  [vangheem]
+
+
+- Provide base classes and utilities for cloud storage implementations
+  [vangheem]
+
+
+1.3.26 (2017-10-02)
+-------------------
+
+- Add `@move`, `@duplicate` and `@ids` endpoints
+  [vangheem]
+
+
+1.3.25 (2017-10-02)
 -------------------
 
 - Change how much sub-items we should by default from 200 to 20

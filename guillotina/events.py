@@ -1,10 +1,13 @@
 from guillotina.component.interfaces import IObjectEvent
 from guillotina.interfaces import IBeforeObjectAddedEvent
+from guillotina.interfaces import IBeforeObjectMovedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
 from guillotina.interfaces import IFileFinishUploaded
 from guillotina.interfaces import INewUserAdded
 from guillotina.interfaces import IObjectAddedEvent
+from guillotina.interfaces import IObjectDuplicatedEvent
 from guillotina.interfaces import IObjectLoadedEvent
+from guillotina.interfaces import IObjectLocationEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectMovedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
@@ -21,8 +24,8 @@ class ObjectEvent(object):
         self.object = object
 
 
-@implementer(IObjectMovedEvent)
-class ObjectMovedEvent(ObjectEvent):
+@implementer(IObjectLocationEvent)
+class ObjectLocationEvent(ObjectEvent):
     """An object has been moved"""
 
     def __init__(self, object, old_parent, old_name, new_parent, new_name, payload=None):
@@ -34,7 +37,17 @@ class ObjectMovedEvent(ObjectEvent):
         self.payload = payload
 
 
-class BaseAddedEvent(ObjectMovedEvent):
+@implementer(IObjectMovedEvent)
+class ObjectMovedEvent(ObjectLocationEvent):
+    """An object has been moved"""
+
+
+@implementer(IBeforeObjectMovedEvent)
+class BeforeObjectMovedEvent(ObjectLocationEvent):
+    pass
+
+
+class BaseAddedEvent(ObjectLocationEvent):
     """An object has been added to a container"""
 
     def __init__(self, object, new_parent=None, new_name=None, payload=None):
@@ -42,8 +55,8 @@ class BaseAddedEvent(ObjectMovedEvent):
             new_parent = object.__parent__
         if new_name is None:
             new_name = object.__name__
-        ObjectMovedEvent.__init__(self, object, None, None, new_parent, new_name,
-                                  payload=payload)
+        super().__init__(object, None, None, new_parent, new_name,
+                         payload=payload)
 
 
 @implementer(IObjectAddedEvent)
@@ -51,12 +64,19 @@ class ObjectAddedEvent(BaseAddedEvent):
     """An object has been added to a container"""
 
 
+@implementer(IObjectDuplicatedEvent)
+class ObjectDuplicatedEvent(ObjectAddedEvent):
+    def __init__(self, object, original_object, new_parent=None, new_name=None,
+                 payload=None):
+        super().__init__(object, new_parent, new_name, payload)
+
+
 @implementer(IBeforeObjectAddedEvent)
 class BeforeObjectAddedEvent(BaseAddedEvent):
     pass
 
 
-class BaseObjectRemovedEvent(ObjectMovedEvent):
+class BaseObjectRemovedEvent(ObjectLocationEvent):
     """An object has been removed from a container"""
 
     def __init__(self, object, old_parent=None, old_name=None, payload=None):
@@ -64,7 +84,7 @@ class BaseObjectRemovedEvent(ObjectMovedEvent):
             old_parent = object.__parent__
         if old_name is None:
             old_name = object.__name__
-        ObjectMovedEvent.__init__(self, object, old_parent, old_name, None, None)
+        super().__init__(object, old_parent, old_name, None, None)
 
 
 @implementer(IObjectRemovedEvent)

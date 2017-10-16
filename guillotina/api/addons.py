@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from guillotina import app_settings
 from guillotina import configure
+from guillotina._settings import app_settings
 from guillotina.browser import ErrorResponse
-from guillotina.db.utils import lock_object
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IContainer
@@ -24,8 +23,6 @@ _ = MessageFactory('guillotina')
         }
     }])
 async def install(context, request):
-    await lock_object(request.container_settings)
-
     data = await request.json()
     id_to_install = data.get('id', None)
     if id_to_install not in app_settings['available_addons']:
@@ -58,7 +55,6 @@ async def install(context, request):
         }
     }])
 async def uninstall(context, request):
-    await lock_object(request.container_settings)
     data = await request.json()
     id_to_install = data.get('id', None)
     if id_to_install not in app_settings['available_addons']:

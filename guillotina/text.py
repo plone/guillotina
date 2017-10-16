@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
-from guillotina import _
 from guillotina.component import queryAdapter
 from guillotina.db.orm.base import BaseObject
+from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IRichText
 from guillotina.interfaces import IRichTextValue
 from guillotina.interfaces import ITransformer

@@ -3,6 +3,7 @@ from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina import glogging
+from guillotina._settings import app_settings
 from guillotina.component import getUtility
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
@@ -270,11 +271,13 @@ async def get_containers(request):
     for _id, db in root:
         if IDatabase.providedBy(db):
             db._db._storage._transaction_strategy = 'none'
-            tm = db.get_transaction_manager()
+            tm = request._tm = db.get_transaction_manager()
             tm.request = request
-            txn = await tm.begin(request)
+            request._db_id = _id
+            request._txn = txn = await tm.begin(request)
             async for s_id, container in db.async_items():
                 tm.request.container = container
+                tm.request._container_id = container.id
                 yield txn, tm, container
 
 
@@ -303,7 +306,6 @@ else:
 
 def apply_cors(request: IRequest) -> dict:
     # deprecated, will be removed in next major release
-    from guillotina import app_settings
     headers = {}
     origin = request.headers.get('Origin', None)
     if origin:
@@ -386,3 +388,22 @@ def lazy_apply(func, *call_args, **call_kwargs):
                     len(call_args) >= (idx + 1)):
                 args.append(call_args[idx])
     return func(*args, **kwargs)
+
+
+async def navigate_to(obj, path):
+    actual = obj
+    path_components = path.strip('/').split('/')
+    for p in path_components:
+        if p != '':
+            item = await actual.async_get(p)
+            if item is None:
+                raise KeyError('No %s in %s' % (p, actual))
+            else:
+                actual = item
+    return actual
+
+
+def to_str(value):
+    if isinstance(value, bytes):
+        value = value.decode('utf-8')
+    return value

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.browser import View
 from guillotina.content import Resource
@@ -7,6 +8,7 @@ from guillotina.directives import metadata
 from guillotina.interfaces import IResource
 from guillotina.schema import JSONField
 from guillotina.schema import List
+from guillotina.utils import lazy_apply
 from zope.interface import implementer
 
 import aiohttp
@@ -52,6 +54,10 @@ TESTING_SETTINGS = {
     "root_user": {
         "password": "admin"
     },
+    "jwt": {
+        "secret": "foobar",
+        "algorithm": "HS256"
+    },
     "utilities": []
 }
 
@@ -74,6 +80,20 @@ TERM_SCHEMA = json.dumps({
         'number': {'type': 'number'}
     },
 })
+
+
+_configurators = []
+
+
+def configure_with(func):
+    _configurators.append(func)
+
+
+def get_settings(override_settings={}):
+    settings = deepcopy(TESTING_SETTINGS)
+    for func in _configurators:
+        lazy_apply(func, settings, _configurators)
+    return settings
 
 
 class IExample(IResource):

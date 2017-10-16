@@ -2,11 +2,12 @@
 from copy import deepcopy
 from datetime import datetime
 from dateutil.tz import tzlocal
-from guillotina import BEHAVIOR_CACHE
 from guillotina import configure
-from guillotina import FACTORY_CACHE
-from guillotina import PERMISSIONS_CACHE
-from guillotina import SCHEMA_CACHE
+from guillotina._cache import BEHAVIOR_CACHE
+from guillotina._cache import FACTORY_CACHE
+from guillotina._cache import PERMISSIONS_CACHE
+from guillotina._cache import SCHEMA_CACHE
+from guillotina._settings import app_settings
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.behaviors import apply_markers
@@ -583,7 +584,6 @@ class JavaScriptApplication(StaticDirectory):
     """
 
     def __getitem__(self, filename):
-        from guillotina import app_settings
         if filename.lower() in app_settings['default_static_filenames']:
             path = pathlib.Path(os.path.join(self.base_path.absolute(), filename))
             return StaticFile(path)

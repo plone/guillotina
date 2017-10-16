@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+from setuptools import Extension
 from setuptools import find_packages
 from setuptools import setup
-from distutils.core import Extension
+
 import os
-import sys
 import platform
+import sys
 
 
 py_impl = getattr(platform, 'python_implementation', lambda: None)
@@ -62,7 +63,6 @@ setup(
         'pyjwt',
         'asyncpg',
         'cffi',
-        'aio_etcd',
         'PyYAML'
     ],
     extras_require={

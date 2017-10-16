@@ -5,7 +5,6 @@ from guillotina.api.service import TraversableService
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import getMultiAdapter
-from guillotina.db.utils import lock_object
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
@@ -30,7 +29,7 @@ _marker = object()
     summary='Read container registry settings',
     responses={
         "200": {
-            "description": "Successuflly registered interface",
+            "description": "Successfully registered interface",
             "type": "object",
             "schema": {
                 "properties": {
@@ -99,7 +98,7 @@ class Read(TraversableService):
     }],
     responses={
         "200": {
-            "description": "Successuflly registered interface"
+            "description": "Successfully registered interface"
         }
     })
 class Register(Service):
@@ -111,8 +110,6 @@ class Register(Service):
             return ErrorResponse(
                 'BadRequest',
                 _("Not in a container request"))
-
-        await lock_object(self.request.container_settings)
 
         data = await self.request.json()
         interface = data.get('interface', None)
@@ -157,7 +154,7 @@ class Register(Service):
     },
     responses={
         "200": {
-            "description": "Successuflly wrote configuration"
+            "description": "Successfully wrote configuration"
         }
     })
 class Write(TraversableService):
@@ -175,8 +172,6 @@ class Write(TraversableService):
         if self.key is _marker:
             # No option to write the root of registry
             return ErrorResponse('InvalidRequest', 'Needs the registry key')
-
-        await lock_object(self.request.container_settings)
 
         data = await self.request.json()
         if 'value' in data:

@@ -176,4 +176,5 @@ class index(MetadataDictDirective):
         def _func(func):
             kwargs['accessor'] = func
             cls.apply(*args, **kwargs)
+            return func
         return _func

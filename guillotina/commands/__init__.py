@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from guillotina import app_settings
 from guillotina import logger
+from guillotina._settings import app_settings
 from guillotina.factory import make_app
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
@@ -24,7 +24,7 @@ MISSING_SETTINGS = {
                 "dbname": "guillotina",
                 "user": "guillotina",
                 "host": "localhost",
-                "password": "test",
+                "password": "",
                 "port": 5432
             },
             "read_only": False
@@ -50,9 +50,11 @@ def get_settings(configuration):
                 # should be yaml then...
                 settings = yaml.load(config)
     else:
-        logger.warning('Could not find the configuration file {}. Using default settings.'.format(
-            configuration
-        ))
+        if 'logged' not in MISSING_SETTINGS:
+            logger.warning('Could not find the configuration file {}. Using default settings.'.format(
+                configuration
+            ))
+        MISSING_SETTINGS['logged'] = True
         settings = MISSING_SETTINGS.copy()
     return settings
 
@@ -83,9 +85,25 @@ class Command(object):
             loop = asyncio.get_event_loop()
             # Blocking call which returns when finished
             loop.run_until_complete(self.run(self.arguments, settings, app))
+            loop.run_until_complete(self.wait_for_tasks())
             loop.close()
         else:
             self.run(self.arguments, settings, app)
+
+    async def wait_for_tasks(self):
+        for task in asyncio.Task.all_tasks():
+            if task.done():
+                continue
+            try:
+                if task._coro.__qualname__ in ('Pool.release',):
+                    # put known tasks that should be waited on here...
+                    logger.info(f'Waiting for {task._coro.__qualname__} to finish')
+                    try:
+                        await asyncio.wait_for(asyncio.shield(task), 1)
+                    except asyncio.TimeoutError:
+                        pass
+            except (AttributeError, KeyError):
+                pass
 
     def setup_fake_request(self):
         self.request = get_mocked_request()

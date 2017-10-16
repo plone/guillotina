@@ -1,8 +1,12 @@
 from guillotina import configure
+from guillotina import glogging
 from guillotina.db.interfaces import IDBTransactionStrategy
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.strategies.base import BaseStrategy
+
+
+logger = glogging.getLogger('guillotina')
 
 
 @configure.adapter(
@@ -26,6 +30,10 @@ class SimpleStrategy(BaseStrategy):
 
         current_tid = await self._storage.get_current_tid(self._transaction)
         if current_tid > self._transaction._tid:
+            logger.warn(
+                f'Could not resolve conflicts in TID: {self._transaction._tid}\n'
+                f'Conflicted TID: {current_tid}'
+            )
             return False
 
         return True

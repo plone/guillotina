@@ -38,38 +38,31 @@ of functionality so it will never be as fast as say Pyramid.
 
 ## Asynchronous
 
-`guillotina` is asynchronous from the group up, built on top of `aiohttp`
+`guillotina` is asynchronous from the ground up, built on top of `aiohttp`
 using Python 3.6's asyncio features.
 
 Practically speaking, being built completely on asyncio compatible technologies,
 `guillotina` does not block for network IO to the database, index catalog,
-redis, etc or whenever you'd integrated.
+redis, etc or whatever you've integrated.
 
 Additionally, we have support for async utilities that run in the same async
 loop and async content events.
 
-Finally, the web server can also support web sockets OOTB.
-
-
-## Tooling
-
-I've talked some about it but these are the basic technologies `guillotina`
-is built with:
-
-- aiohttp
+Finally, we also support web sockets OOTB.
 
 
 ## Security
 
 `Guillotina` uses the same great security infrastructure that Plone
-has been using for the last 15 years.
+has been using for the last 15 years which allows you to define permissions, roles,
+groups, users and customize all of them contextual based on where the content
+is location in your container.
 
 
 ## Style
 
-Stylistically, currently the project isn't extremely coherent right now so I'll speak
-to what we'd like to work toward stylistically long term::
+Stylistically, `guillotina` pulls ideas from the best web frameworks:
 
-- JSON configuration
+- YAML/JSON configuration
 - Pyramid-like idioms and syntax where it makes sense
 - Functions + decorators over classes

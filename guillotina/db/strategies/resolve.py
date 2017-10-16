@@ -28,6 +28,12 @@ class ResolveStrategy(SimpleStrategy):
             for conflict in conflicts:
                 # both writing to same object...
                 if conflict['zoid'] in self._transaction.modified:
+                    modified_keys = [k for k in self._transaction.modified.keys()]
+                    logger.warn(
+                        f'Could not resolve conflicts in TID: {self._transaction._tid}\n'
+                        f'Conflicted TID: {current_tid}\n',
+                        f'IDs: {modified_keys}'
+                    )
                     return False
             if len(conflicts) > 0:
                 logger.info('Resolved conflict between transaction ids: {}, {}'.format(

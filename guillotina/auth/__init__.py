@@ -1,4 +1,4 @@
-from guillotina import app_settings
+from guillotina._settings import app_settings
 from guillotina.auth import groups  # noqa
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.utils import resolve_dotted_name

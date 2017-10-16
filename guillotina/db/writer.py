@@ -1,5 +1,5 @@
-from guillotina import app_settings
 from guillotina import configure
+from guillotina._settings import app_settings
 from guillotina.component import queryAdapter
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject

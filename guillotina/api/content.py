@@ -3,10 +3,10 @@ from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from dateutil.tz import tzlocal
-from guillotina import _
-from guillotina import app_settings
 from guillotina import configure
 from guillotina import security
+from guillotina._settings import app_settings
+from guillotina.annotations import AnnotationData
 from guillotina.api.service import Service
 from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
@@ -16,11 +16,14 @@ from guillotina.component import getUtility
 from guillotina.component import queryMultiAdapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
-from guillotina.db.utils import lock_object
+from guillotina.content import get_all_behaviors
 from guillotina.event import notify
+from guillotina.events import BeforeObjectMovedEvent
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
+from guillotina.events import ObjectDuplicatedEvent
 from guillotina.events import ObjectModifiedEvent
+from guillotina.events import ObjectMovedEvent
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
@@ -28,7 +31,10 @@ from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
+from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAbsoluteURL
+from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionManager
@@ -42,8 +48,10 @@ from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.utils import convert_interfaces_to_schema
+from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
+from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
 
 
@@ -242,7 +250,6 @@ class DefaultPOST(Service):
     })
 class DefaultPATCH(Service):
     async def __call__(self):
-        await lock_object(self.context)
         data = await self.get_data()
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
@@ -361,7 +368,7 @@ PermissionMap = {
     }],
     responses={
         "200": {
-            "description": "Successuflly changed permission"
+            "description": "Successfully changed permission"
         }
     })
 class SharingPOST(Service):
@@ -369,7 +376,6 @@ class SharingPOST(Service):
         """Change permissions"""
         context = self.context
         request = self.request
-        await lock_object(context)
         lroles = local_roles()
         data = await request.json()
         if 'prinrole' not in data and \
@@ -429,7 +435,7 @@ class SharingPOST(Service):
     }],
     responses={
         "200": {
-            "description": "Successuflly replaced permissions"
+            "description": "Successfully replaced permissions"
         }
     })
 class SharingPUT(SharingPOST):
@@ -449,7 +455,7 @@ class SharingPUT(SharingPOST):
     }],
     responses={
         "200": {
-            "description": "Successuflly changed permission"
+            "description": "Successfully changed permission"
         }
     })
 async def can_i_do(context, request):
@@ -464,7 +470,7 @@ async def can_i_do(context, request):
     summary='Delete resource',
     responses={
         "200": {
-            "description": "Successuflly deleted resource"
+            "description": "Successfully deleted resource"
         }
     })
 class DefaultDELETE(Service):
@@ -551,3 +557,205 @@ class DefaultOPTIONS(Service):
             resp.headers = headers
             return resp
         return Response(response=resp, headers=headers, status=200)
+
+
+@configure.service(
+    context=IResource, method='POST', name="@move",
+    permission='guillotina.MoveContent',
+    summary='Move resource',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "type": "object",
+        "schema": {
+            "properties": {
+                "destination": {
+                    "type": "string",
+                    "description": "Absolute path to destination object from container",
+                    "required": True
+                },
+                "new_id": {
+                    "type": "string",
+                    "description": "Optional new id to assign object",
+                    "required": False
+                }
+            }
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Successfully moved resource"
+        }
+    })
+async def move(context, request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    destination = data.get('destination')
+    if not destination:
+        return ErrorResponse(
+            'Configuration',
+            'Missing destination option',
+            status=400)
+    try:
+        destination_ob = await navigate_to(request.container, destination)
+    except KeyError:
+        destination_ob = None
+
+    if destination_ob is None:
+        return ErrorResponse(
+            'Configuration',
+            'Could not find destination object',
+            status=400)
+    old_id = context.id
+    if 'new_id' in data:
+        new_id = data['new_id']
+        context.id = context.__name__ = new_id
+    else:
+        new_id = context.id
+
+    security = IInteraction(request)
+    if not security.check_permission('guillotina.AddContent', destination_ob):
+        return ErrorResponse(
+            'Configuration',
+            'You do not have permission to add content to the destination object',
+            status=400)
+
+    if await destination_ob.async_contains(new_id):
+        return ErrorResponse(
+            'Configuration',
+            f'Destination already has object with the id {new_id}',
+            status=400)
+
+    original_parent = context.__parent__
+
+    txn = get_transaction(request)
+    cache_keys = txn._cache.get_cache_keys(context, 'deleted')
+
+    await notify(
+        BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,
+                               new_id, payload=data))
+
+    context.__parent__ = destination_ob
+    context._p_register()
+
+    await notify(
+        ObjectMovedEvent(context, original_parent, old_id, destination_ob,
+                         new_id, payload=data))
+
+    cache_keys += txn._cache.get_cache_keys(context, 'added')
+    await txn._cache.delete_all(cache_keys)
+
+    absolute_url = queryMultiAdapter((context, request), IAbsoluteURL)
+    return {
+        '@url': absolute_url()
+    }
+
+
+@configure.service(
+    context=IResource, method='POST', name="@duplicate",
+    permission='guillotina.DuplicateContent',
+    summary='Duplicate resource',
+    parameters=[{
+        "name": "body",
+        "in": "body",
+        "type": "object",
+        "schema": {
+            "properties": {
+                "destination": {
+                    "type": "string",
+                    "description": "Absolute path to destination object from container",
+                    "required": False
+                },
+                "new_id": {
+                    "type": "string",
+                    "description": "Optional new id to assign object",
+                    "required": False
+                }
+            }
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Successfully duplicated object"
+        }
+    })
+async def duplicate(context, request):
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    destination = data.get('destination')
+    if destination is not None:
+        destination_ob = await navigate_to(request.container, destination)
+        if destination_ob is None:
+            return ErrorResponse(
+                'Configuration',
+                'Could not find destination object',
+                status=400)
+    else:
+        destination_ob = context.__parent__
+
+    security = IInteraction(request)
+    if not security.check_permission('guillotina.AddContent', destination_ob):
+        return ErrorResponse(
+            'Configuration',
+            'You do not have permission to add content to the destination object',
+            status=400)
+
+    if 'new_id' in data:
+        new_id = data['new_id']
+        if await destination_ob.async_contains(new_id):
+            return ErrorResponse(
+                'Configuration',
+                f'Destination already has object with the id {new_id}',
+                status=400)
+    else:
+        count = 1
+        new_id = f'{context.id}-duplicate-{count}'
+        while await destination_ob.async_contains(new_id):
+            count += 1
+            new_id = f'{context.id}-duplicate-{count}'
+
+    new_obj = await create_content_in_container(
+        destination_ob, context.type_name, new_id, id=new_id,
+        creators=context.creators, contributors=context.contributors)
+
+    for key in context.__dict__.keys():
+        if key.startswith('__') or key.startswith('_BaseObject'):
+            continue
+        if key in ('id',):
+            continue
+        new_obj.__dict__[key] = context.__dict__[key]
+    new_obj.__acl__ = context.__acl__
+    new_obj.__behaviors__ = context.__behaviors__
+
+    # need to copy annotation data as well...
+    # load all annotations for context
+    [b for b in await get_all_behaviors(context, load=True)]
+    annotations_container = IAnnotations(new_obj)
+    for anno_id, anno_data in context.__annotations__.items():
+        new_anno_data = AnnotationData()
+        for key, value in anno_data.items():
+            new_anno_data[key] = value
+        await annotations_container.async_set(anno_id, new_anno_data)
+
+    await notify(
+        ObjectDuplicatedEvent(new_obj, context, destination_ob, new_id, payload=data))
+
+    get = DefaultGET(new_obj, request)
+    return await get()
+
+
+@configure.service(
+    context=IFolder, method='GET', name="@ids",
+    permission='guillotina.ViewContent',
+    summary='Return a list of ids in the resource',
+    responses={
+        "200": {
+            "description": "Successfully returned list of ids"
+        }
+    })
+async def ids(context, request):
+    return await context.async_keys()

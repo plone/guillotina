@@ -3,69 +3,14 @@
 # load the patch before anything else.
 from guillotina import glogging
 from guillotina import patch  # noqa
-from guillotina.i18n import MessageFactory
+from guillotina._cache import BEHAVIOR_CACHE  # noqa
+from guillotina._cache import FACTORY_CACHE  # noqa
+from guillotina._cache import PERMISSIONS_CACHE  # noqa
+from guillotina._cache import SCHEMA_CACHE  # noqa
+from guillotina._settings import app_settings  # noqa
+from guillotina.i18n import default_message_factory as _  # noqa
+from zope.interface import Interface  # noqa
 
 
 # create logging
 logger = glogging.getLogger('guillotina')
-
-_ = MessageFactory('guillotina')
-
-
-app_settings = {
-    "debug": False,
-    "aiohttp_settings": {},
-    "databases": [],
-    "conflict_retry_attempts": 3,
-    "host": "127.0.0.1",
-    "port": 8080,
-    "static": {},
-    "jsapps": {},
-    "default_static_filenames": ['index.html', 'index.htm'],
-    "utilities": [],
-    "store_json": True,
-    "root_user": {
-        "password": ""
-    },
-    "auth_extractors": [
-        "guillotina.auth.extractors.BearerAuthPolicy",
-        "guillotina.auth.extractors.BasicAuthPolicy",
-        "guillotina.auth.extractors.WSTokenAuthPolicy",
-    ],
-    "auth_user_identifiers": [],
-    "auth_token_validators": [
-        "guillotina.auth.validators.SaltedHashPasswordValidator",
-        "guillotina.auth.validators.JWTValidator"
-    ],
-    "default_permission": 'guillotina.AccessContent',
-    "available_addons": {},
-    "api_definition": {},
-    "cors": {
-        "allow_origin": ["http://localhost:8080"],
-        "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH", "OPTIONS"],
-        "allow_headers": ["*"],
-        "expose_headers": ["*"],
-        "allow_credentials": True,
-        "max_age": 3660
-    },
-    "jwt": {
-        "secret": "foobar",
-        "algorithm": "HS256"
-    },
-    'commands': {
-        '': 'guillotina.commands.server.ServerCommand',
-        'serve': 'guillotina.commands.server.ServerCommand',
-        'cli': 'guillotina.commands.cli.CliCommand',
-        'create': 'guillotina.commands.create.CreateCommand',
-        'shell': 'guillotina.commands.shell.ShellCommand',
-        'testdata': 'guillotina.commands.testdata.TestDataCommand',
-        'initialize-db': 'guillotina.commands.initialize_db.DatabaseInitializationCommand',
-        'apigen': 'guillotina.commands.apigen.APIGenCommand'
-    },
-    "json_schema_definitions": {},  # json schemas available to reference in docs
-}
-
-SCHEMA_CACHE = {}
-PERMISSIONS_CACHE = {}
-FACTORY_CACHE = {}
-BEHAVIOR_CACHE = {}

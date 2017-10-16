@@ -19,16 +19,17 @@ Install `guillotina`:
 ./bin/pip install guillotina
 ```
 
-Generate configuration file:
+Generate configuration file(requires cookie cutter):
 
 ```
-./bin/guillotina create configuration
+./bin/pip install cookiecutter
+./bin/g create --template=configuration
 ```
 
 Finally, run the server:
 
 ```
-./bin/guillotina
+./bin/g
 ```
 
 The server should now be running on http://0.0.0.0:8080
@@ -47,7 +48,7 @@ to get one running quickly.
 Example docker run command:
 
 ```
-docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres -p 127.0.0.1:5432:5432 postgres:9.6
+docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:9.6
 ```
 
 
@@ -64,18 +65,7 @@ Once started, you will require to add at least a Guillotina container to start f
   }' "http://127.0.0.1:8080/db/"
 ```
 
-and give permissions to add content to it:
-
-```
-  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
-    "prinrole": {
-        "Anonymous User": ["guillotina.Member", "guillotina.Reader"]
-    },
-    "type": "Allow"
-  }' "http://127.0.0.1:8080/db/guillotina/@sharing"
-```
-
-and create actual content:
+and create content:
 
 ```
   curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{

@@ -247,7 +247,7 @@ class PGVacuum:
         try:
             for record in await conn.fetch(GET_TRASHED_OBJECTS):
                 await self._queue.put(record['zoid'])
-        except:
+        except Exception:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
             await self._storage.close(conn)
@@ -278,7 +278,7 @@ class PGVacuum:
         conn = await self._storage.open()
         try:
             await conn.execute(DELETE_OBJECT, oid)
-        except:
+        except Exception:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
             try:
@@ -482,6 +482,13 @@ class PostgresqlStorage(BaseStorage):
             raise KeyError(oid)
         return objects
 
+    def get_conflict_summary(self, oid, txn, old_serial, writer):
+        return f'''Object ID: {oid}
+TID: {txn._tid}
+Old Object TID: {old_serial}
+Belongs to: {writer.of}
+Parent ID: {writer.id}'''
+
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
@@ -520,24 +527,29 @@ class PostgresqlStorage(BaseStorage):
                 )
             except asyncpg.exceptions.ForeignKeyViolationError:
                 txn.deleted[obj._p_oid] = obj
+                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                 raise TIDConflictError(
-                    'Bad value inserting into database that could be caused '
-                    'by a bad cache value. This should resolve on request retry.')
+                    f'Bad value inserting into database that could be caused '
+                    f'by a bad cache value. This should resolve on request retry.\n'
+                    f'{conflict_summary}')
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
+                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise ConflictError(
-                        'asyncpg error, another operation in progress.')
+                        f'asyncpg error, another operation in progress.\n{conflict_summary}')
                 raise
             except asyncpg.exceptions.DeadlockDetectedError:
-                raise ConflictError(
-                    'Deadlock detected.')
+                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
+                raise ConflictError(f'Deadlock detected.\n{conflict_summary}')
             if len(result) != 1 or result[0]['count'] != 1:
                 if update:
                     # raise tid conflict error
+                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise TIDConflictError(
-                        'Mismatch of tid of object being updated. This is likely '
-                        'caused by a cache invalidation race condition and should '
-                        'be an edge case. This should resolve on request retry.')
+                        f'Mismatch of tid of object being updated. This is likely '
+                        f'caused by a cache invalidation race condition and should '
+                        f'be an edge case. This should resolve on request retry.\n'
+                        f'{conflict_summary}')
                 else:
                     log.error('Incorrect response count from database update. '
                               'This should not happen. tid: {}'.format(txn._tid))

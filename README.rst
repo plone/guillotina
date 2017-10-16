@@ -99,13 +99,40 @@ Default
 Default root access can be done with AUTHORIZATION header : Basic root:root
 
 
+Docker
+------
+
+You can also run Guillotina with Docker!
+
+
+First, run postgresql:
+
+    docker run --rm \
+        -e POSTGRES_DB=guillotina \
+        -e POSTGRES_USER=guillotina \
+        -p 127.0.0.1:5432:5432 \
+        --name postgres \
+        postgres:9.6
+
+Then, run guillotina:
+
+    docker run --rm -it \
+        --link=postgres \
+        -p 127.0.0.1:8080:8080 \
+        -v $(echo $PWD):/g \
+        guillotina/guillotina \
+        --name g \
+        g -c /g/config.yaml
+
+
+This assumes you have a config.yaml in your current working directory
+
 
 Roadmap for 2.0
 ---------------
 
 - be able to configure renderer from function view configuration
+- match on more predicates
+- get rid of renderer, in favor of predicates for diff output
 - view functions can take 2, 1 or zero args
 - handle routes in definitions...
-- change subsriber registration syntax to something like:
-  @subscriber(IResource, IObjectModified)
-
