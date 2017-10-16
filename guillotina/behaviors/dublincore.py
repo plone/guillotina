@@ -84,6 +84,7 @@ class IDublinCore(Interface):
     for_="guillotina.interfaces.IResource")
 class DublinCore(AnnotationBehavior):
 
+    title = ContextProperty('title', None)
     creators = ContextProperty('creators', ())
     contributors = ContextProperty('contributors', ())
     creation_date = ContextProperty('creation_date', None)
@@ -91,7 +92,7 @@ class DublinCore(AnnotationBehavior):
 
     # all properties but these 4 are not annotated
     __local__properties__ = ('creation_date', 'modification_date',
-                             'creators', 'contributors')
+                             'creators', 'contributors', 'title')
 
     def __init__(self, context):
         self.__dict__['context'] = context
