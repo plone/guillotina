@@ -462,7 +462,6 @@ def _format_timestamp(ts):
 def _check_expiration_time(now, expiration_time):
     # Token is valid when nbf <= now < exp
     if now >= expiration_time:
-        import pdb; pdb.set_trace()
         raise Expired('Token expired at {}'.format(
             _format_timestamp(expiration_time))
         )

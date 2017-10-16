@@ -95,3 +95,14 @@ Forks:
   - zope.lifecycleevent
   - zope.location
   - zope.event
+
+
+What it isn't
+-------------
+
+- Guillotina is not a replacement for Plone
+- Guillotina is not a re-implementation of Plone
+- Guillotina does not implement all the features and APIs of Plone
+
+It could some day with the `guillotina_cms` package but replacement Plone is
+not the goal of Guillotina.
