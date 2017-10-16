@@ -1,7 +1,8 @@
 1.5.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding Dublin Core behavior as a context field so there is not two titles.
+  [ramon]
 
 
 1.5.7 (2017-10-16)
