@@ -1,4 +1,4 @@
-1.5.8 (unreleased)
+1.5.8 (2017-10-18)
 ------------------
 
 - Fix version requirements of aiohttp
