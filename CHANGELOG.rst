@@ -1,6 +1,9 @@
 1.5.7 (unreleased)
 ------------------
 
+- Fix version requirements of aiohttp
+  [vangheem]
+
 - Let buildout depend on cookiecutter to be able to create project skeletons.
   [thet]
 
