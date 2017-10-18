@@ -1,5 +1,8 @@
-1.5.8 (unreleased)
+1.6.0 (unreleased)
 ------------------
+
+- Require aiohttp < 2.3.0
+  [vangheem]
 
 - Adding Dublin Core behavior as a context field so there is not two titles.
   [ramon]

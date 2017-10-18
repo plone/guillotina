@@ -52,7 +52,7 @@ setup(
     packages=find_packages(),
     ext_modules=ext_modules,
     install_requires=[
-        'aiohttp>=2.0.0<3.0.0',
+        'aiohttp>=2.0.0,<2.3.0',
         'jsonschema',
         'python-dateutil',
         'pycrypto',
