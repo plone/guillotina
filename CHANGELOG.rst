@@ -1,12 +1,8 @@
 
-1.5.10 (unreleased)
+
+
+1.5.10 (2017-10-18)
 -------------------
-
-- Nothing changed yet.
-
-
-1.5.9 (2017-10-18)
-------------------
 
 - Fix version requirements of aiohttp
   [vangheem]
