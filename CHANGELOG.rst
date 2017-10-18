@@ -12,6 +12,19 @@
   [vangheem]
 
 
+1.5.7 (2017-10-18)
+------------------
+
+- Fix version requirements of aiohttp
+  [vangheem]
+
+- Let buildout depend on cookiecutter to be able to create project skeletons.
+  [thet]
+
+- Fix ``Py_DECREF`` typo in ``optimizations.c``.
+  [thet]
+
+
 1.5.6 (2017-10-16)
 ------------------
 

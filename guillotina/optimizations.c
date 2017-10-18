@@ -35,7 +35,7 @@ current_request()
           if(request != NULL){
             // PyObject_GetAttr does not require Py_INCREF
             found = 1;
-            Py_DECCREF(f->f_locals);
+            Py_DECREF(f->f_locals);
             break;
           }
         }
@@ -46,12 +46,12 @@ current_request()
           // it is expected that you use Py_INCREF
           Py_INCREF(request);
           found = 1;
-          Py_DECCREF(f->f_locals);
+          Py_DECREF(f->f_locals);
           break;
         }
 
       }
-      Py_DECCREF(f->f_locals);
+      Py_DECREF(f->f_locals);
       f = f->f_back;
     }
 

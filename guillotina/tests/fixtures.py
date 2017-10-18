@@ -132,6 +132,7 @@ class GuillotinaDBRequester(object):
 
 @pytest.fixture(scope='function')
 def dummy_guillotina(loop):
+    request = get_mocked_request()  # noqa for get_current_request to find
     from guillotina import test_package  # noqa
     aioapp = make_app(settings=get_dummy_settings(), loop=loop)
     aioapp.config.execute_actions()
