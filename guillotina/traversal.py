@@ -45,8 +45,8 @@ from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
 import aiohttp
-import json
 import traceback
+import ujson
 import uuid
 
 
@@ -331,7 +331,7 @@ class TraversalRouter(AbstractRouter):
             if app_settings.get('debug'):
                 data['traceback'] = traceback.format_exc()
             # XXX should only should traceback if in some sort of dev mode?
-            raise HTTPBadRequest(text=json.dumps(data))
+            raise HTTPBadRequest(text=ujson.dumps(data))
 
         await notify(ObjectLoadedEvent(resource))
         request.resource = resource

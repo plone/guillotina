@@ -16,8 +16,8 @@ from time import time
 
 import binascii
 import datetime
-import json
 import struct
+import ujson
 import zlib
 
 
@@ -318,7 +318,7 @@ def json_encode(x):
     """
     Dict -> Binary
     """
-    return json.dumps(x).encode()
+    return ujson.dumps(x).encode()
 
 
 def json_decode(x):

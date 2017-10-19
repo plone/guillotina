@@ -19,6 +19,7 @@ from guillotina.utils import apply_coroutine
 from zope.interface.interface import InterfaceClass
 
 import json
+import ujson
 
 
 class GuillotinaJSONEncoder(json.JSONEncoder):
@@ -150,7 +151,7 @@ class StringRenderer(Renderer):
             body = value.response
             if not isinstance(body, bytes):
                 if not isinstance(body, str):
-                    body = json.dumps(value.response)
+                    body = ujson.dumps(value.response)
                 body = body.encode('utf8')
 
             value = aioResponse(
