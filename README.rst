@@ -44,7 +44,7 @@ We use buildout of course::
     ./bin/pip install zc.buildout
     ./bin/buildout
 
-The buildout installs the app itself, code analysis tools, and a test runner.
+Running buildout installs the app itself, code analysis tools, and a test runner.
 
 Run postgresql
 --------------
@@ -52,7 +52,7 @@ Run postgresql
 If you don't have a postgresql server to play with, you can run one easily
 with docker.
 
-In the terminal::
+Download and start the docker container by running::
 
   make run-postgres
 
@@ -78,7 +78,7 @@ Run tests
 
 We're using py.test::
 
-    ./bin/py.test src
+    ./bin/py.test guillotina
 
 and for test coverage::
 
