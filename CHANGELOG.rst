@@ -1,6 +1,9 @@
 1.6.1 (unreleased)
 ------------------
 
+- Fix logging for large objects
+  [vangheem]
+
 - Make sure to use ujson everywhere it makes sense
   [vangheem]
 

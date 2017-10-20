@@ -494,7 +494,7 @@ Parent ID: {writer.id}'''
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            log.warning("Too long object %d" % (obj.__class__, len(p)))
+            log.warning(f"Large object {obj.__class__}: {len(p)}")
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
