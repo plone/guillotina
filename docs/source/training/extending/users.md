@@ -25,7 +25,7 @@ After you restart guillotina, you can also install `dbusers`
 into your container using the `@addons` endpoint:
 
 ```
-POST /db/container/users
+POST /db/container/@addons
 {
   "id": "dbusers"
 }

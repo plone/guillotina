@@ -1,7 +1,27 @@
-1.5.8 (unreleased)
+1.6.2 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+1.6.1 (2017-10-20)
+------------------
+
+- Fix logging for large objects
+  [vangheem]
+
+- Make sure to use ujson everywhere it makes sense
+  [vangheem]
+
+
+1.6.0 (2017-10-18)
+------------------
+
+- Require aiohttp < 2.3.0
+  [vangheem]
+
+- Adding Dublin Core behavior as a context field so there is not two titles.
+  [ramon]
 
 
 1.5.7 (2017-10-16)

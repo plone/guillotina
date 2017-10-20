@@ -26,7 +26,7 @@ async def get_conversations(context, request):
     conversations = await context.async_get('conversations')
     user_id = get_authenticated_user_id(request)
     async for conversation in conversations.async_values():
-        if user_id in conversation.users:
+        if user_id in getattr(conversation, 'users', []):
             summary = await getMultiAdapter(
                 (conversation, request),
                 IResourceSerializeToJsonSummary)()

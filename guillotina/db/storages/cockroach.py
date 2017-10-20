@@ -241,7 +241,7 @@ class CockroachStorage(pg.PostgresqlStorage):
 
         p = writer.serialize()  # This calls __getstate__ of obj
         if len(p) >= self._large_record_size:
-            logger.warning("Too long object %d" % (obj.__class__, len(p)))
+            logger.warning(f"Large object {obj.__class__}: {len(p)}")
         part = writer.part
         if part is None:
             part = 0

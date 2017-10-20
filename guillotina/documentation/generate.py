@@ -9,9 +9,9 @@ from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 from urllib.parse import urlparse
 
-import json
 import os
 import requests
+import ujson
 
 
 IGNORED_HEADERS = (
@@ -57,8 +57,8 @@ class Generator:
         if body is None:
             return ''
         try:
-            body = json.loads(body)
-            return json.dumps(body, indent=4, sort_keys=True)
+            body = ujson.loads(body)
+            return ujson.dumps(body, indent=4, sort_keys=True)
         except Exception:
             return body
 
@@ -180,7 +180,7 @@ class Generator:
 
         filepath += '.json'
         fi = open(filepath, 'w')
-        fi.write(json.dumps(data, indent=4, sort_keys=True))
+        fi.write(ujson.dumps(data, indent=4, sort_keys=True))
         fi.close()
 
     def get_type_services(self, iface):
@@ -272,7 +272,7 @@ class APIExplorer(object):
 
 def process_command_file(filepath, base_url, output_dir):
     with open(filepath) as fi:
-        commands = json.loads(fi.read())
+        commands = ujson.loads(fi.read())
     generator = Generator(base_url, output_dir)
     for command in commands:
         explorer = APIExplorer(generator, command.get("path"), command.get('type_name'))
@@ -280,5 +280,5 @@ def process_command_file(filepath, base_url, output_dir):
             method = action.pop('method', 'get').lower()
             func = getattr(explorer, method, None)
             if func is None:
-                raise Exception(f'Invalid method {method} for {json.dumps(action)}')
+                raise Exception(f'Invalid method {method} for {ujson.dumps(action)}')
             func(**action)
