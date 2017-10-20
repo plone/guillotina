@@ -1,4 +1,4 @@
-1.6.1 (unreleased)
+1.6.1 (2017-10-20)
 ------------------
 
 - Fix logging for large objects
