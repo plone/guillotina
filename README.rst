@@ -89,7 +89,7 @@ With file watcher...
     ./bin/ptw guillotina --runner=./bin/py.test
 
 
-To run tests with cockroach db:
+To run tests with cockroach db::
 
    USE_COCKROACH=true ./bin/pytest guillotina
 
@@ -105,7 +105,7 @@ Docker
 You can also run Guillotina with Docker!
 
 
-First, run postgresql:
+First, run postgresql::
 
     docker run --rm \
         -e POSTGRES_DB=guillotina \
@@ -114,7 +114,7 @@ First, run postgresql:
         --name postgres \
         postgres:9.6
 
-Then, run guillotina:
+Then, run guillotina::
 
     docker run --rm -it \
         --link=postgres \
