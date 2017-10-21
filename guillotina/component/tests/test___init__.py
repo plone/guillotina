@@ -49,7 +49,7 @@ class Test_Interface_call(unittest.TestCase):
     def test_hit(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component import getGlobalSiteManager
+        from guillotina.component import get_global_components
         class IFoo(Interface):
             pass
         class IBar(Interface):
@@ -61,7 +61,7 @@ class Test_Interface_call(unittest.TestCase):
         class Baz(object):
             def __init__(self, context):
                 self.context = context
-        getGlobalSiteManager().registerAdapter(Baz, (IBar,), IFoo, '')
+        get_global_components().registerAdapter(Baz, (IBar,), IFoo, '')
         bar = Bar()
         adapted = IFoo(bar)
         self.assertTrue(adapted.__class__ is Baz)
@@ -70,14 +70,14 @@ class Test_Interface_call(unittest.TestCase):
     def test_hit_registered_for_None(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component import getGlobalSiteManager
+        from guillotina.component import get_global_components
         class IFoo(Interface):
             pass
         @implementer(IFoo)
         class Baz(object):
             def __init__(self, context):
                 self.context = context
-        getGlobalSiteManager().registerAdapter(Baz, (None,), IFoo, '')
+        get_global_components().registerAdapter(Baz, (None,), IFoo, '')
         ctx = object()
         adapted = IFoo(ctx)
         self.assertTrue(adapted.__class__ is Baz)

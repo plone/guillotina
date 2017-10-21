@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.component import ComponentLookupError
-from guillotina.component import getMultiAdapter
-from guillotina.component import queryMultiAdapter
-from guillotina.component import queryUtility
+from guillotina.component import get_multi_adapter
+from guillotina.component import query_utility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
@@ -14,12 +13,18 @@ from guillotina.interfaces import IFolder
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
-from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
+from guillotina.profile import profilable
 from guillotina.schema import getFields
+from guillotina.utils import apply_coroutine
 from zope.interface import Interface
+
+import logging
+
+
+logger = logging.getLogger('guillotina')
 
 
 MAX_ALLOWED = 20
@@ -35,6 +40,7 @@ class SerializeToJson(object):
         self.request = request
         self.permission_cache = {}
 
+    @profilable
     async def __call__(self, include=[], omit=[]):
         self.include = include
         self.omit = omit
@@ -43,7 +49,7 @@ class SerializeToJson(object):
         if parent is not None:
             # We render the summary of the parent
             try:
-                parent_summary = await getMultiAdapter(
+                parent_summary = await get_multi_adapter(
                     (parent, self.request), IResourceSerializeToJsonSummary)()
             except ComponentLookupError:
                 parent_summary = {}
@@ -84,6 +90,7 @@ class SerializeToJson(object):
 
         return result
 
+    @profilable
     async def get_schema(self, schema, context, result, behavior):
         read_permissions = merged_tagged_value_dict(schema, read_permission.key)
         schema_serial = {}
@@ -104,10 +111,7 @@ class SerializeToJson(object):
                 # make sure the fields aren't filtered
                 continue
 
-            serializer = queryMultiAdapter(
-                (field, context, self.request),
-                IResourceFieldSerializer)
-            value = await serializer()
+            value = await self.serialize_field(context, field)
             if not behavior:
                 result[name] = value
             else:
@@ -116,12 +120,21 @@ class SerializeToJson(object):
         if behavior and len(schema_serial) > 0:
             result[schema.__identifier__] = schema_serial
 
+    async def serialize_field(self, context, field, default=None):
+        try:
+            value = await apply_coroutine(field.get, context)
+        except Exception:
+            logger.warning(f'Could not find value for schema field'
+                           f'({self.field.__name__}), falling back to getattr')
+            value = getattr(context, field.__name__, default)
+        return json_compatible(value)
+
     def check_permission(self, permission_name):
         if permission_name is None:
             return True
 
         if permission_name not in self.permission_cache:
-            permission = queryUtility(IPermission,
+            permission = query_utility(IPermission,
                                       name=permission_name)
             if permission is None:
                 self.permission_cache[permission_name] = True
@@ -137,6 +150,7 @@ class SerializeToJson(object):
     provides=IResourceSerializeToJson)
 class SerializeFolderToJson(SerializeToJson):
 
+    @profilable
     async def __call__(self, include=[], omit=[]):
         result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
 
@@ -152,7 +166,7 @@ class SerializeFolderToJson(SerializeToJson):
                         security.check_permission(
                         'guillotina.AccessContent', member)):
                     result['items'].append(
-                        await getMultiAdapter(
+                        await get_multi_adapter(
                             (member, self.request),
                             IResourceSerializeToJsonSummary)())
         result['length'] = length

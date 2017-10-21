@@ -16,18 +16,15 @@
 # HACK to make sure basicmost event subscriber is installed
 import guillotina.component.event
 
-# we really don't need special setup now:
-try:
-    from zope.testing.cleanup import CleanUp as PlacelessSetup
-except ImportError:
-    class PlacelessSetup(object):
-        def cleanUp(self):
-            from guillotina.component.globalregistry import base
-            base.__init__('base')
-        def setUp(self):
-            self.cleanUp()
-        def tearDown(self):
-            self.cleanUp()
+
+class PlacelessSetup(object):
+    def cleanUp(self):
+        from guillotina.component.globalregistry import base
+        base.__init__('base')
+    def setUp(self):
+        self.cleanUp()
+    def tearDown(self):
+        self.cleanUp()
 
 def setUp(test=None):
     PlacelessSetup().setUp()

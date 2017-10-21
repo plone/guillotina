@@ -1,7 +1,7 @@
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.async import IQueueUtility
-from guillotina.component import queryUtility
+from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.utils import get_content_path
@@ -27,7 +27,7 @@ from guillotina.utils import get_content_path
     })
 async def search_get(context, request):
     q = request.query.get('q')
-    search = queryUtility(ICatalogUtility)
+    search = query_utility(ICatalogUtility)
     if search is None:
         return {
             'items_count': 0,
@@ -62,7 +62,7 @@ async def search_get(context, request):
     })
 async def search_post(context, request):
     q = await request.json()
-    search = queryUtility(ICatalogUtility)
+    search = query_utility(ICatalogUtility)
     if search is None:
         return {
             'items_count': 0,
@@ -88,7 +88,7 @@ class CatalogReindex(Service):
         self._security_reindex = security
 
     async def __call__(self):
-        search = queryUtility(ICatalogUtility)
+        search = query_utility(ICatalogUtility)
         if search is not None:
             await search.reindex_all_content(
                 self.context, self._security_reindex)
@@ -111,7 +111,7 @@ class AsyncCatalogReindex(Service):
         self._security_reindex = security
 
     async def __call__(self):
-        util = queryUtility(IQueueUtility)
+        util = query_utility(IQueueUtility)
         if util:
             await util.add(CatalogReindex(
                 self.context, self.request, self._security_reindex))
@@ -128,7 +128,7 @@ class AsyncCatalogReindex(Service):
         }
     })
 async def catalog_post(context, request):
-    search = queryUtility(ICatalogUtility)
+    search = query_utility(ICatalogUtility)
     await search.initialize_catalog(context)
     return {}
 
@@ -143,6 +143,6 @@ async def catalog_post(context, request):
         }
     })
 async def catalog_delete(context, request):
-    search = queryUtility(ICatalogUtility)
+    search = query_utility(ICatalogUtility)
     await search.remove_catalog(context)
     return {}

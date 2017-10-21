@@ -24,7 +24,7 @@ class Test_handler(unittest.TestCase):  # noqa: N801
 
     def test_uses_configured_site_manager(self):
         from zope.interface.registry import Components
-        from guillotina.component import getSiteManager
+        from guillotina.component import get_component_registry
         from guillotina.component.testfiles.components import comp, IApp
         from guillotina.component._compat import _BLANK
 
@@ -32,13 +32,13 @@ class Test_handler(unittest.TestCase):  # noqa: N801
 
         def dummy(context=None):
             return registry
-        getSiteManager.sethook(dummy)
+        get_component_registry.sethook(dummy)
 
         try:
             self._callFUT('registerUtility', comp, IApp, _BLANK)
             self.assertTrue(registry.getUtility(IApp) is comp)
         finally:
-            getSiteManager.reset()
+            get_component_registry.reset()
 
 
 class Test__rolledUpFactory(unittest.TestCase):  # noqa: N801
@@ -130,8 +130,8 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
         class IBar(Interface):
             pass
 
-        from guillotina.component import adapter, named
-        from zope.interface import implementer
+        from guillotina.component import adapter
+        from zope.interface import implementer, named
 
         @adapter(IFoo)
         @implementer(IBar)
@@ -159,7 +159,7 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
 
     def test_multiple_factory_single_for__w_name(self):
         from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
         class IFoo(Interface):
@@ -188,13 +188,13 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IFoo))
         # Register the required interface(s)
         self.assertEqual(_cfg_ctx._actions[2][0], ())
         action = _cfg_ctx._actions[2][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', Interface))
 
@@ -289,7 +289,7 @@ class Test_subscriber(unittest.TestCase):  # noqa: N801
 
     def test_no_factory_w_handler_no_provides(self):
         from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
         def _handler(*args):
@@ -309,13 +309,13 @@ class Test_subscriber(unittest.TestCase):  # noqa: N801
         # Register the required interface(s)
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', Interface))
 
     def test_w_factory_w_provides(self):
         from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
         class IFoo(Interface):
@@ -342,13 +342,13 @@ class Test_subscriber(unittest.TestCase):  # noqa: N801
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IFoo))
         # Register the required interface(s)
         self.assertEqual(_cfg_ctx._actions[2][0], ())
         action = _cfg_ctx._actions[2][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', Interface))
 
@@ -382,7 +382,7 @@ class Test_utility(unittest.TestCase):  # noqa: N801
 
     def test_w_factory_w_provides(self):
         from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
         class IFoo(Interface):
@@ -406,14 +406,14 @@ class Test_utility(unittest.TestCase):  # noqa: N801
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IFoo))
 
     def test_w_factory_wo_provides_factory_implement(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
         class IFoo(Interface):
@@ -438,13 +438,13 @@ class Test_utility(unittest.TestCase):  # noqa: N801
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IFoo))
 
     def test_w_component_w_provides_w_name(self):
         from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
         class IFoo(Interface):
@@ -467,7 +467,7 @@ class Test_utility(unittest.TestCase):  # noqa: N801
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IFoo))
 
@@ -492,7 +492,7 @@ class Test_utility(unittest.TestCase):  # noqa: N801
     def test_w_component_wo_provides_component_provides(self):
         from zope.interface import Interface
         from zope.interface import directlyProvides
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
         class IFoo(Interface):
@@ -517,7 +517,7 @@ class Test_utility(unittest.TestCase):  # noqa: N801
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IFoo))
 
@@ -530,7 +530,7 @@ class Test_interface(unittest.TestCase):  # noqa: N801
 
     def test_wo_name_wo_type(self):
         from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
 
         class IFoo(Interface):
             pass
@@ -540,13 +540,13 @@ class Test_interface(unittest.TestCase):  # noqa: N801
         self.assertEqual(len(_cfg_ctx._actions), 1)
         self.assertEqual(_cfg_ctx._actions[0][0], ())
         action = _cfg_ctx._actions[0][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IFoo, None))
 
     def test_w_name_w_type(self):
         from zope.interface import Interface
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
 
         class IFoo(Interface):
             pass
@@ -559,7 +559,7 @@ class Test_interface(unittest.TestCase):  # noqa: N801
         self.assertEqual(len(_cfg_ctx._actions), 1)
         self.assertEqual(_cfg_ctx._actions[0][0], ())
         action = _cfg_ctx._actions[0][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('foo', IFoo, IBar))
 
@@ -616,7 +616,7 @@ class Test_view(unittest.TestCase):  # noqa: N801
     def test_w_single_factory_single_for__wo_permission_w_name(self):
         from zope.interface import Interface
         from guillotina.configure.component import handler
-        from guillotina.component.interface import provideInterface
+        from guillotina.component.interface import provide_interface
 
         class IViewType(Interface):
             pass
@@ -641,18 +641,18 @@ class Test_view(unittest.TestCase):  # noqa: N801
         # Register the provided interface
         self.assertEqual(_cfg_ctx._actions[1][0], ())
         action = _cfg_ctx._actions[1][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', Interface))
         # Register the required interface(s)
         self.assertEqual(_cfg_ctx._actions[2][0], ())
         action = _cfg_ctx._actions[2][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', Interface))
         self.assertEqual(_cfg_ctx._actions[3][0], ())
         action = _cfg_ctx._actions[3][1]
-        self.assertEqual(action['callable'], provideInterface)
+        self.assertEqual(action['callable'], provide_interface)
         self.assertEqual(action['discriminator'], None)
         self.assertEqual(action['args'], ('', IViewType))
 
@@ -721,8 +721,8 @@ def test_suite():
 def test_configuration_machine_allows_overriding():
     from guillotina.configure.config import ConfigurationMachine
     from guillotina.configure import component
-    from guillotina.component import adapter, named, getAdapter
-    from zope.interface import implementer, Interface
+    from guillotina.component import adapter, get_adapter
+    from zope.interface import implementer, Interface, named
 
     class IFoo(Interface):
         pass
@@ -753,5 +753,5 @@ def test_configuration_machine_allows_overriding():
     component.adapter(cm, (_FactoryOverride,))
     cm.execute_actions()
 
-    adapter = getAdapter(Foo(), name='bar')
+    adapter = get_adapter(Foo(), name='bar')
     assert isinstance(adapter, _FactoryOverride)

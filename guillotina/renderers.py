@@ -3,7 +3,7 @@ from aiohttp.web import Response as aioResponse
 from datetime import datetime
 from guillotina import configure
 from guillotina.browser import Response
-from guillotina.component import queryAdapter
+from guillotina.component import query_adapter
 from guillotina.interfaces import IFrameFormatsJson
 from guillotina.interfaces import IRendered
 from guillotina.interfaces import IRendererFormatHtml
@@ -14,6 +14,7 @@ from guillotina.interfaces import IRenderFormats
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
+from guillotina.profile import profilable
 from guillotina.utils import apply_coroutine
 from zope.interface.interface import InterfaceClass
 
@@ -116,6 +117,7 @@ def _is_guillotina_response(resp):
     for_=(IRendererFormatJson, IView, IRequest),
     provides=IRendered)
 class RendererJson(Renderer):
+    @profilable
     async def __call__(self, value):
         headers = {}
         if _is_guillotina_response(value):
@@ -129,7 +131,7 @@ class RendererJson(Renderer):
         frame = self.request.get('frame')
         frame = self.request.query['frame'] if 'frame' in self.request.query else ''
         if frame:
-            framer = queryAdapter(self.request, IFrameFormatsJson, frame)
+            framer = query_adapter(self.request, IFrameFormatsJson, frame)
             json_value = await apply_coroutine(framer, json_value)
         resp = json_response(json_value)
         resp.headers.update(headers)
@@ -144,8 +146,8 @@ class RendererJson(Renderer):
 class StringRenderer(Renderer):
     content_type = 'text/plain'
 
+    @profilable
     async def __call__(self, value):
-        # Safe html transformation
         if _is_guillotina_response(value):
             body = value.response
             if not isinstance(body, bytes):
@@ -182,6 +184,7 @@ class RendererPlain(StringRenderer):
     provides=IRendered)
 class RendererRaw(Renderer):
 
+    @profilable
     def guess_response(self, value):
         resp = value.response
         if type(resp) in (dict, list, int, float, bool):
@@ -204,6 +207,7 @@ class RendererRaw(Renderer):
             resp.set_status(value.status)
         return resp
 
+    @profilable
     async def __call__(self, value):
         resp = value
         if isinstance(value, Response):

@@ -15,13 +15,13 @@
 import unittest
 
 
-class Test_dispatchUtilityRegistrationEvent(unittest.TestCase):
+class Test_dispatch_utility_registration_event(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.registry import dispatchUtilityRegistrationEvent
-        return dispatchUtilityRegistrationEvent(*args, **kw)
+        from guillotina.component.registry import dispatch_utility_registration_event
+        return dispatch_utility_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
@@ -36,13 +36,13 @@ class Test_dispatchUtilityRegistrationEvent(unittest.TestCase):
         self.assertEqual(_handled, [(_Registration.component, _EVENT)])
 
 
-class Test_dispatchAdapterRegistrationEvent(unittest.TestCase):
+class Test_dispatch_adapter_registration_event(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.registry import dispatchAdapterRegistrationEvent
-        return dispatchAdapterRegistrationEvent(*args, **kw)
+        from guillotina.component.registry import dispatch_adapter_registration_event
+        return dispatch_adapter_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
@@ -59,14 +59,14 @@ class Test_dispatchAdapterRegistrationEvent(unittest.TestCase):
         self.assertEqual(_handled, [(_registration.factory, _EVENT)])
 
 
-class Test_dispatchSubscriptionAdapterRegistrationEvent(unittest.TestCase):
+class Test_dispatch_subscription_adapter_registration_event(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry \
-            import dispatchSubscriptionAdapterRegistrationEvent
-        return dispatchSubscriptionAdapterRegistrationEvent(*args, **kw)
+            import dispatch_subscription_adapter_registration_event
+        return dispatch_subscription_adapter_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
@@ -83,13 +83,13 @@ class Test_dispatchSubscriptionAdapterRegistrationEvent(unittest.TestCase):
         self.assertEqual(_handled, [(_registration.factory, _EVENT)])
 
 
-class Test_dispatchHandlerRegistrationEvent(unittest.TestCase):
+class Test_dispatch_handler_registration_event(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.registry import dispatchHandlerRegistrationEvent
-        return dispatchHandlerRegistrationEvent(*args, **kw)
+        from guillotina.component.registry import dispatch_handler_registration_event
+        return dispatch_handler_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
@@ -123,8 +123,8 @@ class _Monkey(object):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(Test_dispatchUtilityRegistrationEvent),
-        unittest.makeSuite(Test_dispatchAdapterRegistrationEvent),
-        unittest.makeSuite(Test_dispatchSubscriptionAdapterRegistrationEvent),
-        unittest.makeSuite(Test_dispatchHandlerRegistrationEvent),
+        unittest.makeSuite(Test_dispatch_utility_registration_event),
+        unittest.makeSuite(Test_dispatch_adapter_registration_event),
+        unittest.makeSuite(Test_dispatch_subscription_adapter_registration_event),
+        unittest.makeSuite(Test_dispatch_handler_registration_event),
     ))

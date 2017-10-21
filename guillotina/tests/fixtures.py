@@ -1,11 +1,12 @@
 from guillotina import testing
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.content import load_cached_schema
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.tests import docker_containers as containers
+from guillotina.tests import mocks
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 
@@ -91,7 +92,7 @@ class GuillotinaDBRequester(object):
     def __init__(self, server, loop):
         self.server = server
         self.loop = loop
-        self.root = getUtility(IApplication, name='root')
+        self.root = get_utility(IApplication, name='root')
         self.db = self.root['db']
 
     async def __call__(self, method, path, params=None, data=None, authenticated=True,
@@ -158,8 +159,8 @@ class DummyRequestAsyncContextManager(object):
 def dummy_request(dummy_guillotina, monkeypatch):
     HARD_CACHE.clear()
     from guillotina.interfaces import IApplication
-    from guillotina.component import getUtility
-    root = getUtility(IApplication, name='root')
+    from guillotina.component import get_utility
+    root = get_utility(IApplication, name='root')
     db = root['db']
 
     request = get_mocked_request(db)

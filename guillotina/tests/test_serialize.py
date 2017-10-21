@@ -1,14 +1,15 @@
-from guillotina.component import getMultiAdapter
-from guillotina.component import queryMultiAdapter
-from guillotina.interfaces import IResourceFieldDeserializer
-from guillotina.interfaces import IResourceFieldSerializer
+from guillotina.component import get_adapter
+from guillotina.component import get_multi_adapter
+from guillotina.files.dbfile import DBFile
+from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.json.serialize_value import json_compatible
 from guillotina.tests.utils import create_content
 
 
 async def test_serialize_resource(dummy_request):
     content = create_content()
-    serializer = getMultiAdapter(
+    serializer = get_multi_adapter(
         (content, dummy_request),
         IResourceSerializeToJson)
     result = await serializer()
@@ -17,7 +18,7 @@ async def test_serialize_resource(dummy_request):
 
 async def test_serialize_resource_omit_behavior(dummy_request):
     content = create_content()
-    serializer = getMultiAdapter(
+    serializer = get_multi_adapter(
         (content, dummy_request),
         IResourceSerializeToJson)
     result = await serializer(omit=['guillotina.behaviors.dublincore.IDublinCore'])
@@ -26,7 +27,7 @@ async def test_serialize_resource_omit_behavior(dummy_request):
 
 async def test_serialize_resource_omit_field(dummy_request):
     content = create_content()
-    serializer = getMultiAdapter(
+    serializer = get_multi_adapter(
         (content, dummy_request),
         IResourceSerializeToJson)
     result = await serializer(omit=['guillotina.behaviors.dublincore.IDublinCore.creators'])
@@ -34,10 +35,10 @@ async def test_serialize_resource_omit_field(dummy_request):
 
 
 async def test_serialize_resource_include_field(dummy_request):
-    from guillotina.test_package import FileContent, CloudFile
+    from guillotina.test_package import FileContent
     obj = create_content(FileContent, type_name='File')
-    obj.file = CloudFile(filename='foobar.json', size=25, md5='foobar')
-    serializer = getMultiAdapter(
+    obj.file = DBFile(filename='foobar.json', size=25, md5='foobar')
+    serializer = get_multi_adapter(
         (obj, dummy_request),
         IResourceSerializeToJson)
     result = await serializer(include=['guillotina.behaviors.dublincore.IDublinCore.creators'])
@@ -47,10 +48,10 @@ async def test_serialize_resource_include_field(dummy_request):
 
 
 async def test_serialize_omit_main_interface_field(dummy_request):
-    from guillotina.test_package import FileContent, CloudFile
+    from guillotina.test_package import FileContent
     obj = create_content(FileContent, type_name='File')
-    obj.file = CloudFile(filename='foobar.json', size=25, md5='foobar')
-    serializer = getMultiAdapter(
+    obj.file = DBFile(filename='foobar.json', size=25, md5='foobar')
+    serializer = get_multi_adapter(
         (obj, dummy_request),
         IResourceSerializeToJson)
     result = await serializer(omit=['file'])
@@ -60,31 +61,27 @@ async def test_serialize_omit_main_interface_field(dummy_request):
 
 
 async def test_serialize_cloud_file(dummy_request):
-    from guillotina.test_package import IFileContent, FileContent, CloudFile
+    from guillotina.test_package import FileContent
     obj = create_content(FileContent)
-    obj.file = CloudFile(filename='foobar.json', size=25, md5='foobar')
-    serializer = queryMultiAdapter(
-        (IFileContent['file'], obj, dummy_request),
-        IResourceFieldSerializer)
-    value = await serializer()
+    obj.file = DBFile(filename='foobar.json', size=25, md5='foobar')
+    value = json_compatible(obj.file)
     assert value['filename'] == 'foobar.json'
     assert value['size'] == 25
     assert value['md5'] == 'foobar'
 
 
 async def test_deserialize_cloud_file(dummy_request):
-    from guillotina.test_package import IFileContent, FileContent, CloudFile
-    obj = FileContent()
-    deserializer = queryMultiAdapter(
-        (IFileContent['file'], obj, dummy_request),
-        IResourceFieldDeserializer)
-    value = await deserializer({
-        'filename': 'foobar.json',
-        'size': 25,
-        'md5': 'foobar'
-    })
-
-    assert isinstance(value, CloudFile)
-    assert value.size == 25
-    assert value.filename == 'foobar.json'
-    assert value.md5 == 'foobar'
+    from guillotina.test_package import IFileContent, FileContent
+    request = dummy_request  # noqa
+    tm = dummy_request._tm
+    await tm.begin(dummy_request)
+    obj = create_content(FileContent)
+    obj.file = None
+    value = await get_adapter(
+        IFileContent['file'], IJSONToValue,
+        args=[
+            'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+            obj
+        ])
+    assert isinstance(value, DBFile)
+    assert value.size == 42

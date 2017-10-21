@@ -55,8 +55,6 @@ from .files import IFileManager  # noqa
 from .json import IFactorySerializeToJson  # noqa
 from .json import IJSONToValue  # noqa
 from .json import IResourceDeserializeFromJson  # noqa
-from .json import IResourceFieldDeserializer  # noqa
-from .json import IResourceFieldSerializer  # noqa
 from .json import IResourceSerializeToJson  # noqa
 from .json import IResourceSerializeToJsonSummary  # noqa
 from .json import ISchemaFieldSerializeToJson  # noqa
@@ -88,8 +86,6 @@ from .security import IRolePermissionMap  # noqa
 from .security import ISecurityPolicy  # noqa
 from .security import Public  # noqa
 from .security import Unset  # noqa
-from .text import IRichText  # noqa
-from .text import IRichTextValue  # noqa
 from .types import IConstrainTypes  # noqa
 from .views import ICONNECT  # noqa
 from .views import IDELETE  # noqa
@@ -172,36 +168,3 @@ class IAddOn(Interface):
 
     def uninstall(cls, container, request):  # noqa: N805
         pass
-
-
-class TransformError(Exception):
-    """Exception raised if a value could not be transformed. This is normally
-    caused by another exception. Inspect self.cause to find that.
-    """
-
-    def __init__(self, message, cause=None):
-        self.message = message
-        self.cause = cause
-
-    def __str__(self):
-        return self.message
-
-
-class ITransformer(Interface):
-    """A simple abstraction for invoking a transformation from one MIME
-    type to another.
-    This is not intended as a general transformations framework, but rather
-    as a way to abstract away a dependency on the underlying transformation
-    engine.
-    This interface will be implemented by an adapter onto the context where
-    the value is stored.
-    """
-
-    def __init__(object):  # noqa: N805
-        """Set the value object."""
-
-    def __call__():
-        """Transform the IRichTextValue 'value' to the given MIME type.
-        Return a unicode string. Raises TransformError if something went
-        wrong.
-        """

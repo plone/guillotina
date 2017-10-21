@@ -12,12 +12,12 @@
 #
 ##############################################################################
 # flake8: noqa
+from guillotina.component._compat import _BLANK
+from guillotina.component.interfaces import IComponentLookup
 from zope.interface import implementer
 from zope.interface.adapter import AdapterRegistry
 from zope.interface.registry import Components
 
-from guillotina.component.interfaces import IComponentLookup
-from guillotina.component._compat import _BLANK
 
 def GAR(components, registryName):
     return getattr(components, registryName)
@@ -38,7 +38,7 @@ class GlobalAdapterRegistry(AdapterRegistry):
 
 
 @implementer(IComponentLookup)
-class BaseGlobalComponents(Components):
+class GlobalComponents(Components):
 
     def _init_registries(self):
         self.adapters = GlobalAdapterRegistry(self, 'adapters')
@@ -49,25 +49,21 @@ class BaseGlobalComponents(Components):
         return self.__name__
 
 
-base = BaseGlobalComponents('base')
+base = GlobalComponents('base')
 
 
-globalSiteManager = base
-def getGlobalSiteManager():
-    return globalSiteManager
+def get_global_components():
+    return base
 
-# The following APIs provide global registration support for Python code.
-# We eventually want to deprecate these in favor of using the global
-# component registry directly.
 
-def provideUtility(component, provides=None, name=_BLANK):
+def provide_utility(component, provides=None, name=_BLANK):
     base.registerUtility(component, provides, name, event=False)
 
-def provideAdapter(factory, adapts=None, provides=None, name=_BLANK):
+def provide_adapter(factory, adapts=None, provides=None, name=_BLANK):
     base.registerAdapter(factory, adapts, provides, name, event=False)
 
-def provideSubscriptionAdapter(factory, adapts=None, provides=None):
+def provide_subscription_adapter(factory, adapts=None, provides=None):
     base.registerSubscriptionAdapter(factory, adapts, provides, event=False)
 
-def provideHandler(factory, adapts=None):
+def provide_handler(factory, adapts=None):
     base.registerHandler(factory, adapts, event=False)

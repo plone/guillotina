@@ -11,8 +11,9 @@ from guillotina.auth.participation import AnonymousParticipation
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
-from guillotina.component import getUtility
-from guillotina.component import queryMultiAdapter
+from guillotina.component import get_adapter
+from guillotina.component import get_utility
+from guillotina.component import query_multi_adapter
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
 from guillotina.event import notify
@@ -36,6 +37,7 @@ from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
 from guillotina.interfaces import SUBREQUEST_METHODS
+from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
@@ -182,6 +184,7 @@ class MatchInfo(AbstractMatchInfo):
         self._apps = []
         self._frozen = False
 
+    @profilable
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
@@ -305,9 +308,10 @@ class TraversalRouter(AbstractRouter):
             await abort(request)
             raise HTTPNotFound()
 
+    @profilable
     async def real_resolve(self, request):
         """Main function to resolve a request."""
-        security = IInteraction(request)
+        security = get_adapter(request, IInteraction)
 
         method = app_settings['http_methods'][request.method]
 
@@ -350,7 +354,7 @@ class TraversalRouter(AbstractRouter):
 
         await self.apply_authorization(request)
 
-        translator = queryMultiAdapter(
+        translator = query_multi_adapter(
             (language_object, resource, request),
             ITranslated)
         if translator is not None:
@@ -362,7 +366,7 @@ class TraversalRouter(AbstractRouter):
 
         # container registry lookup
         try:
-            view = queryMultiAdapter(
+            view = query_multi_adapter(
                 (resource, request), method, name=view_name)
         except AttributeError:
             view = None
@@ -382,7 +386,7 @@ class TraversalRouter(AbstractRouter):
                                  request=request)
                     return None
 
-        permission = getUtility(IPermission, name='guillotina.AccessContent')
+        permission = get_utility(IPermission, name='guillotina.AccessContent')
 
         if not security.check_permission(permission.id, resource):
             # Check if its a CORS call:
@@ -413,7 +417,7 @@ class TraversalRouter(AbstractRouter):
         renderer = content_type_negotiation(request, resource, view)
         renderer_object = renderer(request)
 
-        rendered = queryMultiAdapter(
+        rendered = query_multi_adapter(
             (renderer_object, view, request), IRendered)
 
         if rendered is not None:
@@ -427,6 +431,7 @@ class TraversalRouter(AbstractRouter):
         root = self._root
         return await traverse(request, root, path)
 
+    @profilable
     async def apply_authorization(self, request):
         # User participation
         participation = IParticipation(request)

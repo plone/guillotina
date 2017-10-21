@@ -1,6 +1,6 @@
 from guillotina import configure
 from guillotina.behaviors.dublincore import IDublinCore
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.content import Folder
@@ -59,7 +59,7 @@ class TestContent:
             allowed_types=['Item'],
             module=guillotina.tests  # for registration initialization
         ), 'contenttype')
-        root = getUtility(IApplication, name='root')
+        root = get_utility(IApplication, name='root')
 
         configure.load_configuration(
             root.app.config, 'guillotina.tests', 'contenttype')
@@ -93,7 +93,7 @@ class TestContent:
             behaviors=[],
             module=guillotina.tests  # for registration initialization
         ), 'contenttype')
-        root = getUtility(IApplication, name='root')
+        root = get_utility(IApplication, name='root')
 
         configure.load_configuration(
             root.app.config, 'guillotina.tests', 'contenttype')

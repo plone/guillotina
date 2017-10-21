@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
@@ -10,6 +10,7 @@ from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
+from guillotina.profile import profilable
 from guillotina.utils import get_current_request
 from zope.interface import implementer
 
@@ -21,6 +22,7 @@ import uuid
 
 
 HARD_CACHE = {}
+_EMPTY = '__<EMPTY VALUE>__'
 
 
 logger = logging.getLogger(__name__)
@@ -76,10 +78,10 @@ class Transaction(object):
         # we *not* follow naming standards of using "_request" here so
         # get_current_request can magically find us here...
         self.request = request
-        self._strategy = getMultiAdapter(
+        self._strategy = get_multi_adapter(
             (manager._storage, self), ITransactionStrategy,
             name=manager._storage._transaction_strategy)
-        self._cache = getMultiAdapter(
+        self._cache = get_multi_adapter(
             (manager._storage, self), IStorageCache,
             name=manager._storage._cache_strategy)
 
@@ -115,6 +117,7 @@ class Transaction(object):
             kws = {}
         self._after_commit.append((hook, tuple(args), kws))
 
+    @profilable
     async def _call_after_commit_hooks(self, status=True):
         # Avoid to abort anything at the end if no hooks are registred.
         if not self._after_commit:
@@ -137,7 +140,6 @@ class Transaction(object):
         self._before_commit = []
 
     # BEGIN TXN
-
     async def tpc_begin(self, conn):
         """Begin commit of a transaction
 
@@ -237,6 +239,7 @@ class Transaction(object):
 
         return obj
 
+    @profilable
     async def commit(self):
         await self._call_before_commit_hooks()
         self.status = Status.COMMITTING
@@ -257,6 +260,7 @@ class Transaction(object):
         self.status = Status.COMMITTED
         await self._call_after_commit_hooks()
 
+    @profilable
     async def abort(self):
         self.status = Status.ABORTED
         await self._manager._storage.abort(self)
@@ -268,6 +272,7 @@ class Transaction(object):
             await hook(*args, **kws)
         self._before_commit = []
 
+    @profilable
     async def _store_object(self, obj, oid, added=False):
         # Modified objects
         if obj._p_jar is not self and obj._p_jar is not None:
@@ -279,14 +284,15 @@ class Transaction(object):
         else:
             serial = getattr(obj, "_p_serial", 0)
 
-        await self._manager._storage.store(
-            oid, serial, IWriter(obj), obj, self)
+        writer = IWriter(obj)
+        await self._manager._storage.store(oid, serial, writer, obj, self)
         obj._p_serial = self._tid
         obj._p_oid = oid
         if obj._p_jar is None:
             obj._p_jar = self
         self._objects_to_invalidate.append(obj)
 
+    @profilable
     async def real_commit(self):
         """Commit changes to an object"""
         for oid, obj in self.added.items():
@@ -299,6 +305,7 @@ class Transaction(object):
             await self._manager._storage.delete(self, oid)
             self._objects_to_invalidate.append(obj)
 
+    @profilable
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
         ok = await self._strategy.tpc_vote()
@@ -307,6 +314,7 @@ class Transaction(object):
             await self._cache.close(invalidate=False)
             raise ConflictError(self)
 
+    @profilable
     async def tpc_finish(self):
         """Indicate confirmation that the transaction is done.
         """
@@ -323,6 +331,7 @@ class Transaction(object):
 
     # Inspection
 
+    @profilable
     async def keys(self, oid):
         keys = await self._cache.get(oid=oid, variant='keys')
         if keys is None:
@@ -332,6 +341,7 @@ class Transaction(object):
             await self._cache.set(keys, oid=oid, variant='keys')
         return keys
 
+    @profilable
     async def get_child(self, container, key):
         result = await self._cache.get(container=container, id=key)
         if result is None:
@@ -362,11 +372,15 @@ class Transaction(object):
         for key in keys:
             yield key, await self.get_child(container, key)
 
+    @profilable
     async def get_annotation(self, base_obj, id):
         result = await self._cache.get(container=base_obj, id=id, variant='annotation')
+        if result == _EMPTY:
+            raise KeyError(id)
         if result is None:
             result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
             if result is None:
+                await self._cache.set(_EMPTY, container=base_obj, id=id, variant='annotation')
                 raise KeyError(id)
             if self._cache.max_cache_record_size > len(result['state']):
                 await self._cache.set(result, container=base_obj, id=id, variant='annotation')
@@ -375,6 +389,7 @@ class Transaction(object):
         obj._p_jar = self
         return obj
 
+    @profilable
     async def get_annotation_keys(self, oid):
         result = await self._cache.get(oid=oid, variant='annotation-keys')
         if result is None:

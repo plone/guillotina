@@ -11,44 +11,31 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-# flake8: noqa
-# BBB, import component-related from zope.interface
-from zope.interface.registry import Components
-from zope.interface.registry import _getUtilityProvided
-from zope.interface.registry import _getAdapterProvided
-from zope.interface.registry import _getAdapterRequired
-from zope.interface.registry import UtilityRegistration
-from zope.interface.registry import AdapterRegistration
-from zope.interface.registry import SubscriptionRegistration
-from zope.interface.registry import HandlerRegistration
-
 from guillotina.component._api import handle
 from guillotina.component._declaration import adapter
-
 from guillotina.component.interfaces import IAdapterRegistration
 from guillotina.component.interfaces import IHandlerRegistration
 from guillotina.component.interfaces import IRegistrationEvent
 from guillotina.component.interfaces import ISubscriptionAdapterRegistration
 from guillotina.component.interfaces import IUtilityRegistration
-from guillotina.component.globalregistry import provideAdapter
 
 
 @adapter(IUtilityRegistration, IRegistrationEvent)
-def dispatchUtilityRegistrationEvent(registration, event):
+def dispatch_utility_registration_event(registration, event):
     handle(registration.component, event)
-# provideAdapter(dispatchUtilityRegistrationEvent)
+# provide_adapter(dispatch_utility_registration_event)
 
 
 @adapter(IAdapterRegistration, IRegistrationEvent)
-def dispatchAdapterRegistrationEvent(registration, event):
+def dispatch_adapter_registration_event(registration, event):
     handle(registration.factory, event)
 
 
 @adapter(ISubscriptionAdapterRegistration, IRegistrationEvent)
-def dispatchSubscriptionAdapterRegistrationEvent(registration, event):
+def dispatch_subscription_adapter_registration_event(registration, event):
     handle(registration.factory, event)
 
 
 @adapter(IHandlerRegistration, IRegistrationEvent)
-def dispatchHandlerRegistrationEvent(registration, event):
+def dispatch_handler_registration_event(registration, event):
     handle(registration.handler, event)

@@ -7,98 +7,57 @@ from guillotina import configure
 from guillotina.i18n import Message
 from guillotina.interfaces import IValueToJson
 from guillotina.schema.vocabulary import SimpleVocabulary
-from guillotina.text import IRichTextValue
-from zope.interface import Interface
-
-
-try:
-    unicode
-except NameError:
-    unicode = str
-
-try:
-    long
-except NameError:
-    long = int
 
 
 def json_compatible(value):
-    """The json_compatible function converts any value to JSON compatible
-    data when possible, raising a TypeError for unsupported values.
-    This is done by using the IJsonCompatible converters.
+    type_ = type(value)
 
-    Be aware that adapting the value `None` will result in a component
-    lookup error unless `None` is passed in as default value.
-    Because of that the `json_compatible` helper method should always be
-    used for converting values that may be None.
-    """
-    return IValueToJson(value, None)
-
-
-def encoding():
-    return 'utf-8'
-
-
-@configure.adapter(
-    for_=Interface,
-    provides=IValueToJson)
-def default_converter(value):
     if value is None:
         return value
 
-    if type(value) in (unicode, bool, int, float, long):
+    if type_ in (str, bool, int, float):
         return value
 
-    raise TypeError(
-        'No converter for making'
-        ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
+    value = IValueToJson(value, None)
+    if value is None:
+        raise TypeError(
+            'No converter for making'
+            ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
+    else:
+        return value
 
 
-@configure.adapter(
-    for_=SimpleVocabulary,
-    provides=IValueToJson)
+@configure.value_serializer(SimpleVocabulary)
 def vocabulary_converter(value):
     return [x.token for x in value]
 
 
-@configure.adapter(
-    for_=str,
-    provides=IValueToJson)
+@configure.value_serializer(str)
 def string_converter(value):
-    return str(value, )
+    return str(value)
 
 
-@configure.adapter(
-    for_=list,
-    provides=IValueToJson)
+@configure.value_serializer(list)
 def list_converter(value):
     return list(map(json_compatible, value))
 
 
-@configure.adapter(
-    for_=tuple,
-    provides=IValueToJson)
+@configure.value_serializer(tuple)
 def tuple_converter(value):
     return list(map(json_compatible, value))
 
 
-@configure.adapter(
-    for_=frozenset,
-    provides=IValueToJson)
+@configure.value_serializer(frozenset)
 def frozenset_converter(value):
     return list(map(json_compatible, value))
 
 
-@configure.adapter(
-    for_=set,
-    provides=IValueToJson)
+@configure.value_serializer(set)
 def set_converter(value):
     return list(map(json_compatible, value))
 
 
-@configure.adapter(
-    for_=dict,
-    provides=IValueToJson)
+@configure.value_serializer(dict)
 def dict_converter(value):
     if value == {}:
         return {}
@@ -109,51 +68,30 @@ def dict_converter(value):
     return dict(zip(keys, values))
 
 
-@configure.adapter(
-    for_=datetime,
-    provides=IValueToJson)
+@configure.value_serializer(datetime)
 def python_datetime_converter(value):
     try:
-        return json_compatible(value.isoformat())
+        return value.isoformat()
     except AttributeError:  # handle date problems
         return None
 
 
-@configure.adapter(
-    for_=date,
-    provides=IValueToJson)
+@configure.value_serializer(date)
 def date_converter(value):
-    return json_compatible(value.isoformat())
+    return value.isoformat()
 
 
-@configure.adapter(
-    for_=time,
-    provides=IValueToJson)
+@configure.value_serializer(time)
 def time_converter(value):
-    return json_compatible(value.isoformat())
+    return value.isoformat()
 
 
-@configure.adapter(
-    for_=timedelta,
-    provides=IValueToJson)
+@configure.value_serializer(timedelta)
 def timedelta_converter(value):
-    return json_compatible(value.total_seconds())
+    return value.total_seconds()
 
 
-@configure.adapter(
-    for_=IRichTextValue,
-    provides=IValueToJson)
-def richtext_converter(value):
-    return {
-        u'data': json_compatible(value.raw),
-        u'content-type': json_compatible(value.mimeType),
-        u'encoding': json_compatible(value.encoding),
-    }
-
-
-@configure.adapter(
-    for_=Message,
-    provides=IValueToJson)
+@configure.value_serializer(Message)
 def i18n_message_converter(value):
     # TODO:
     # value = translate(value, context=getRequest())

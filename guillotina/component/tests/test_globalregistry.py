@@ -14,11 +14,11 @@
 # flake8: noqa
 import unittest
 
-class Test_getGlobalSiteManager(unittest.TestCase):
+class Test_get_global_components(unittest.TestCase):
 
     def _callFUT(self):
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        return getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        return get_global_components()
 
     def test_gsm_is_IComponentLookup(self):
         from guillotina.component.globalregistry import base
@@ -47,18 +47,18 @@ class Test_getGlobalSiteManager(unittest.TestCase):
         self.assertTrue(loaded_adapters is gsm.adapters)
 
 
-class Test_provideUtility(unittest.TestCase):
+class Test_provide_utility(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.globalregistry import provideUtility
-        return provideUtility(*args, **kw)
+        from guillotina.component.globalregistry import provide_utility
+        return provide_utility(*args, **kw)
 
     def test_anonymous_no_provides(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         class IFoo(Interface):
             pass
         @implementer(IFoo)
@@ -66,34 +66,34 @@ class Test_provideUtility(unittest.TestCase):
             pass
         foo = Foo()
         self._callFUT(foo)
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         self.assertTrue(gsm.getUtility(IFoo, '') is foo)
 
     def test_named_w_provides(self):
         from zope.interface import Interface
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         class IFoo(Interface):
             pass
         class Foo(object):
             pass
         foo = Foo()
         self._callFUT(foo, IFoo, 'named')
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         self.assertTrue(gsm.getUtility(IFoo, 'named') is foo)
 
 
-class Test_provideAdapter(unittest.TestCase):
+class Test_provide_adapter(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.globalregistry import provideAdapter
-        return provideAdapter(*args, **kw)
+        from guillotina.component.globalregistry import provide_adapter
+        return provide_adapter(*args, **kw)
 
     def test_anonymous_no_provides_no_adapts(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         from guillotina.component._declaration import adapter
         class IFoo(Interface):
             pass
@@ -108,7 +108,7 @@ class Test_provideAdapter(unittest.TestCase):
             def __init__(self, context):
                 self.context = context
         self._callFUT(Bar)
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         foo = Foo()
         adapted = gsm.getAdapter(foo, IBar)
         self.assertTrue(isinstance(adapted, Bar))
@@ -117,7 +117,7 @@ class Test_provideAdapter(unittest.TestCase):
     def test_named_w_provides_w_adapts(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         class IFoo(Interface):
             pass
         class IBar(Interface):
@@ -129,25 +129,25 @@ class Test_provideAdapter(unittest.TestCase):
             def __init__(self, context):
                 self.context = context
         self._callFUT(Bar, (IFoo,), IBar, 'test')
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         foo = Foo()
         adapted = gsm.getAdapter(foo, IBar, name='test')
         self.assertTrue(isinstance(adapted, Bar))
         self.assertTrue(adapted.context is foo)
 
 
-class Test_provideSubscriptionAdapter(unittest.TestCase):
+class Test_provide_subscription_adapter(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.globalregistry import provideSubscriptionAdapter
-        return provideSubscriptionAdapter(*args, **kw)
+        from guillotina.component.globalregistry import provide_subscription_adapter
+        return provide_subscription_adapter(*args, **kw)
 
     def test_no_provides_no_adapts(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         from guillotina.component._declaration import adapter
         class IFoo(Interface):
             pass
@@ -162,7 +162,7 @@ class Test_provideSubscriptionAdapter(unittest.TestCase):
             def __init__(self, context):
                 self.context = context
         self._callFUT(Bar)
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         foo = Foo()
         adapted = gsm.subscribers((foo,), IBar)
         self.assertEqual(len(adapted), 1)
@@ -172,7 +172,7 @@ class Test_provideSubscriptionAdapter(unittest.TestCase):
     def test_w_provides_w_adapts(self):
         from zope.interface import Interface
         from zope.interface import implementer
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         class IFoo(Interface):
             pass
         class IBar(Interface):
@@ -184,7 +184,7 @@ class Test_provideSubscriptionAdapter(unittest.TestCase):
             def __init__(self, context):
                 self.context = context
         self._callFUT(Bar, (IFoo,), IBar)
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         foo = Foo()
         adapted = gsm.subscribers((foo,), IBar)
         self.assertEqual(len(adapted), 1)
@@ -192,19 +192,19 @@ class Test_provideSubscriptionAdapter(unittest.TestCase):
         self.assertTrue(adapted[0].context is foo)
 
 
-class Test_provideHandler(unittest.TestCase):
+class Test_provide_handler(unittest.TestCase):
 
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.globalregistry import provideHandler
-        return provideHandler(*args, **kw)
+        from guillotina.component.globalregistry import provide_handler
+        return provide_handler(*args, **kw)
 
     def test_no_adapts(self):
         from zope.interface import Interface
         from zope.interface import implementer
         from zope.interface import providedBy
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         from guillotina.component._declaration import adapter
         class IFoo(Interface):
             pass
@@ -215,7 +215,7 @@ class Test_provideHandler(unittest.TestCase):
         def _handler(context):
             assert 0, "DON'T GO HERE"
         self._callFUT(_handler)
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         regs = list(gsm.registeredHandlers())
         self.assertEqual(len(regs), 1)
         hr = regs[0]
@@ -225,13 +225,13 @@ class Test_provideHandler(unittest.TestCase):
 
     def test_w_adapts(self):
         from zope.interface import Interface
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         class IFoo(Interface):
             pass
         def _handler(context):
             assert 0, "DON'T GO HERE"
         self._callFUT(_handler, (IFoo,))
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         regs = list(gsm.registeredHandlers())
         self.assertEqual(len(regs), 1)
         hr = regs[0]
@@ -242,9 +242,9 @@ class Test_provideHandler(unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(Test_getGlobalSiteManager),
-        unittest.makeSuite(Test_provideUtility),
-        unittest.makeSuite(Test_provideAdapter),
-        unittest.makeSuite(Test_provideSubscriptionAdapter),
-        unittest.makeSuite(Test_provideHandler),
+        unittest.makeSuite(Test_get_global_components),
+        unittest.makeSuite(Test_provide_utility),
+        unittest.makeSuite(Test_provide_adapter),
+        unittest.makeSuite(Test_provide_subscription_adapter),
+        unittest.makeSuite(Test_provide_handler),
     ))

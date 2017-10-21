@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IRequest
@@ -34,7 +34,7 @@ class SerializeFactoryToJson(object):
         for name, field in getFieldsInOrder(factory.schema):
             if field.required:
                 result['required'].append(name)
-            serializer = getMultiAdapter(
+            serializer = get_multi_adapter(
                 (field, factory.schema, self.request),
                 ISchemaFieldSerializeToJson)
             result['properties'][name] = await serializer()
@@ -46,7 +46,7 @@ class SerializeFactoryToJson(object):
 
         # Behavior serialization
         for schema in factory.behaviors or ():
-            schema_serializer = getMultiAdapter(
+            schema_serializer = get_multi_adapter(
                 (schema, self.request), ISchemaSerializeToJson)
 
             serialization = await schema_serializer()
@@ -74,7 +74,7 @@ class DefaultSchemaSerializer(object):
 
     async def __call__(self):
         for name, field in getFieldsInOrder(self.schema):
-            serializer = getMultiAdapter(
+            serializer = get_multi_adapter(
                 (field, self.schema, self.request),
                 ISchemaFieldSerializeToJson)
             self.schema_json['properties'][name] = await serializer()

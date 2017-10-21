@@ -6,6 +6,7 @@ from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from zope.interface import implementer
+from guillotina.profile import profilable
 
 import asyncio
 import asyncpg
@@ -246,7 +247,7 @@ class PGVacuum:
         conn = await self._storage.open()
         try:
             for record in await conn.fetch(GET_TRASHED_OBJECTS):
-                await self._queue.put(record['zoid'])
+                self._queue.put_nowait(record['zoid'])
         except Exception:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
@@ -258,7 +259,7 @@ class PGVacuum:
                 self._active = True
                 await self.vacuum(oid)
             except (concurrent.futures.CancelledError, RuntimeError):
-                pass  # task was cancelled, probably because we're shutting down
+                raise  # task was cancelled, this is okay, raise and let it die
             except Exception:
                 log.warning(f'Error vacuuming oid {oid}', exc_info=True)
             finally:
@@ -343,6 +344,7 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
         'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
         'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
+        'CREATE INDEX IF NOT EXISTS object_type ON objects (type);',
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
@@ -384,7 +386,11 @@ class PostgresqlStorage(BaseStorage):
         statements.extend(self._initialize_statements)
 
         for statement in statements:
-            await self._read_conn.execute(statement)
+            try:
+                await self._read_conn.execute(statement)
+            except asyncpg.exceptions.UniqueViolationError:
+                # this is okay on creation, means 2 getting created at same time
+                pass
 
         await self.initialize_tid_statements()
         # migrate old transaction table scheme over
@@ -444,7 +450,7 @@ class PostgresqlStorage(BaseStorage):
             if self._vacuum._closed:
                 # if it's closed, we know this is expected
                 return
-            log.warning('Vacuum pg task closed. This should not happen. '
+            log.warning('Vacuum pg task ended. This should not happen. '
                         'No database vacuuming will be done here anymore.')
 
         self._vacuum_task.add_done_callback(vacuum_done)
@@ -471,7 +477,8 @@ class PostgresqlStorage(BaseStorage):
     async def close(self, con):
         try:
             await shield(self._pool.release(con))
-        except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError):
+        except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError,
+                RuntimeError):
             pass
 
     async def load(self, txn, oid):
@@ -489,6 +496,7 @@ Old Object TID: {old_serial}
 Belongs to: {writer.of}
 Parent ID: {writer.id}'''
 
+    @profilable
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 

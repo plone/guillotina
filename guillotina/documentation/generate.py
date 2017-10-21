@@ -2,7 +2,7 @@
 # which is no long a dependency of guillotina since it isn't used anywhere
 # else.
 from guillotina._settings import app_settings
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IResourceFactory
 from guillotina.tests.utils import create_content
 from guillotina.utils import get_dotted_name
@@ -81,7 +81,7 @@ class Generator:
 
     def _get_stub_content(self, url):
         type_name = self._get_type_name(url)
-        rfactory = getUtility(IResourceFactory, name=type_name)
+        rfactory = get_utility(IResourceFactory, name=type_name)
         return create_content(rfactory._callable, type_name)
 
     def _function_swagger_param(self, data, url):
@@ -202,7 +202,7 @@ class Generator:
             iface = 'guillotina.interfaces.content.IDatabase'
         else:
             type_name = self._get_type_name(path)
-            rfactory = getUtility(IResourceFactory, name=type_name)
+            rfactory = get_utility(IResourceFactory, name=type_name)
             iface = get_dotted_name(rfactory.schema)
         return base_path, subpath, iface
 

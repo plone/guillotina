@@ -53,8 +53,8 @@ class SiteInfoTests(unittest.TestCase):
         return self._getTargetClass()()
 
     def test_initial(self):
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        gsm = getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        gsm = get_global_components()
         si = self._makeOne()
         self.assertEqual(si.site, None)
         self.assertTrue(si.sm is gsm)
@@ -82,8 +82,8 @@ class Test_setSite(unittest.TestCase):
 
     def test_w_None(self):
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        gsm = getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        gsm = get_global_components()
         _SM2 = object()
         _SITE = object()
         _HOOK = object()
@@ -101,7 +101,7 @@ class Test_setSite(unittest.TestCase):
         from guillotina.component import hooks
         _SM2 = object()
         class _Site(object):
-            def getSiteManager(self):
+            def get_component_registry(self):
                 return _SM2
         siteinfo = _DummySiteInfo()
         _site = _Site()
@@ -120,16 +120,16 @@ class Test_getSite(unittest.TestCase):
 
     def test_w_None(self):
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        gsm = getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        gsm = get_global_components()
         siteinfo = _DummySiteInfo()
         with _Monkey(hooks, siteinfo=siteinfo):
             self.assertTrue(self._callFUT() is None)
 
     def test_w_site(self):
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        gsm = getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        gsm = get_global_components()
         _SM2 = object()
         _SITE = object()
         siteinfo = _DummySiteInfo()
@@ -147,11 +147,11 @@ class Test_site(unittest.TestCase):
 
     def test_it(self):
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        gsm = getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        gsm = get_global_components()
         _SM2 = object()
         class _Site(object):
-            def getSiteManager(self):
+            def get_component_registry(self):
                 return _SM2
         _site = _Site()
         siteinfo = _DummySiteInfo()
@@ -165,16 +165,16 @@ class Test_site(unittest.TestCase):
             self.assertTrue(siteinfo.sm is gsm)
 
 
-class Test_getSiteManager(unittest.TestCase):
+class Test_get_component_registry(unittest.TestCase):
 
     def _callFUT(self, context=None):
-        from guillotina.component.hooks import getSiteManager
-        return getSiteManager(context)
+        from guillotina.component.hooks import get_component_registry
+        return get_component_registry(context)
 
     def test_default(self):
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        gsm = getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        gsm = get_global_components()
         _SM2 = object()
         siteinfo = _DummySiteInfo()
         siteinfo.sm = _SM2
@@ -183,8 +183,8 @@ class Test_getSiteManager(unittest.TestCase):
 
     def test_w_explicit_context_no_IComponentLookup(self):
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
-        gsm = getGlobalSiteManager()
+        from guillotina.component.globalregistry import get_global_components
+        gsm = get_global_components()
         _SM2 = object()
         siteinfo = _DummySiteInfo()
         siteinfo.sm = _SM2
@@ -194,12 +194,12 @@ class Test_getSiteManager(unittest.TestCase):
     def test_w_explicit_context_w_IComponentLookup(self):
         from zope.interface import Interface
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         from guillotina.component.interfaces import IComponentLookup
         class _Lookup(object):
             def __init__(self, context):
                 self.context = context
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         gsm.registerAdapter(_Lookup, (Interface,), IComponentLookup, '')
         _SM2 = object()
         siteinfo = _DummySiteInfo()
@@ -220,10 +220,10 @@ class Test_adapter_hook(unittest.TestCase):
     def test_success(self):
         from zope.interface import Interface
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         class IFoo(Interface):
             pass
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         _ADAPTER = object()
         _DEFAULT = object()
         _CONTEXT = object()
@@ -241,11 +241,11 @@ class Test_adapter_hook(unittest.TestCase):
     def test_hook_raises(self):
         from zope.interface import Interface
         from guillotina.component import hooks
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         from guillotina.component.interfaces import ComponentLookupError
         class IFoo(Interface):
             pass
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         _DEFAULT = object()
         _CONTEXT = object()
         _called = []
@@ -275,13 +275,13 @@ class Test_setHooks(unittest.TestCase):
             def sethook(self, value):
                 self._hooked = value
         adapter_hook = _Hook()
-        getSiteManager = _Hook()
+        get_component_registry = _Hook()
         with _Monkey(guillotina.component._api,
                      adapter_hook=adapter_hook,
-                     getSiteManager=getSiteManager):
+                     get_component_registry=get_component_registry):
             self._callFUT()
         self.assertEqual(adapter_hook._hooked, hooks.adapter_hook)
-        self.assertEqual(getSiteManager._hooked, hooks.getSiteManager)
+        self.assertEqual(get_component_registry._hooked, hooks.get_component_registry)
 
 
 class Test_resetHooks(unittest.TestCase):
@@ -299,10 +299,10 @@ class Test_resetHooks(unittest.TestCase):
             def reset(self):
                 self._reset = True
         adapter_hook = _Hook()
-        getSiteManager = _Hook()
+        get_component_registry = _Hook()
         with _Monkey(guillotina.component._api,
                      adapter_hook=adapter_hook,
-                     getSiteManager=getSiteManager):
+                     get_component_registry=get_component_registry):
             # Access the adapter_hook of the site info to be
             # sure it caches
             getattr(hooks.siteinfo, 'adapter_hook')
@@ -311,7 +311,7 @@ class Test_resetHooks(unittest.TestCase):
             self._callFUT()
 
         self.assertTrue(adapter_hook._reset)
-        self.assertTrue(getSiteManager._reset)
+        self.assertTrue(get_component_registry._reset)
         # adapter_hook cache also reset
         self.assertFalse('adapter_hook' in hooks.siteinfo.__dict__)
 
@@ -344,7 +344,7 @@ def test_suite():
         unittest.makeSuite(Test_setSite),
         unittest.makeSuite(Test_getSite),
         unittest.makeSuite(Test_site),
-        unittest.makeSuite(Test_getSiteManager),
+        unittest.makeSuite(Test_get_component_registry),
         unittest.makeSuite(Test_adapter_hook),
         unittest.makeSuite(Test_setHooks),
         unittest.makeSuite(Test_resetHooks),

@@ -1,6 +1,6 @@
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.commands import Command
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.event import notify
@@ -203,7 +203,7 @@ class TestDataCommand(Command):
 
     async def run(self, arguments, settings, app):
         self.arguments = arguments
-        root = getUtility(IApplication, name='root')
+        root = get_utility(IApplication, name='root')
         for _id, db in root:
             if IDatabase.providedBy(db):
                 await self.generate_test_data(db)

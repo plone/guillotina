@@ -1,4 +1,4 @@
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
@@ -26,7 +26,7 @@ class MockTransaction:
         self._tid = 1
         self.modified = {}
         self.request = None
-        self._strategy = getMultiAdapter(
+        self._strategy = get_multi_adapter(
             (manager._storage, self), ITransactionStrategy,
             name=manager._storage._transaction_strategy)
         self._cache = DummyCache(manager._storage, self)
@@ -38,6 +38,12 @@ class MockTransaction:
         self.modified[ob._p_oid] = ob
 
     def tpc_cleanup(self):
+        pass
+
+    async def del_blob(self, bid):
+        pass
+
+    async def write_blob_chunk(self, bid, zoid, chunk_number, data):
         pass
 
 
@@ -108,3 +114,10 @@ class MockTransactionManager:
 
     async def _close_txn(self, *args, **kwargs):
         pass
+
+    def get(self, request):
+        return request._txn
+
+    async def begin(self, request):
+        request._txn = MockTransaction(self)
+        return request._txn

@@ -14,12 +14,12 @@
 # flake8: noqa
 __docformat__ = 'restructuredtext'
 
-import contextlib
-import threading
-
-from guillotina.component.globalregistry import getGlobalSiteManager
+from guillotina.component.globalregistry import get_global_components
 from guillotina.component.interfaces import ComponentLookupError
 from guillotina.component.interfaces import IComponentLookup
+
+import contextlib
+import threading
 
 
 class read_property(object):
@@ -39,7 +39,7 @@ class read_property(object):
 
 class SiteInfo(threading.local):
     site = None
-    sm = getGlobalSiteManager()
+    sm = get_global_components()
 
     @read_property
     def adapter_hook(self):
@@ -51,7 +51,7 @@ siteinfo = SiteInfo()
 
 def setSite(site=None):
     if site is None:
-        sm = getGlobalSiteManager()
+        sm = get_global_components()
     else:
 
         # We remove the security proxy because there's no way for
@@ -61,8 +61,8 @@ def setSite(site=None):
         # once site managers do less.  There's probably no good reason why
         # they can't be proxied.  Well, except maybe for performance.
 
-        # The getSiteManager method is defined by IPossibleSite.
-        sm = site.getSiteManager()
+        # The get_component_registry method is defined by IPossibleSite.
+        sm = site.get_component_registry()
 
     siteinfo.site = site
     siteinfo.sm = sm
@@ -85,7 +85,7 @@ def site(site):
         setSite(old_site)
 
 
-def getSiteManager(context=None):
+def get_component_registry(context=None):
     """A special hook for getting the site manager.
 
     Here we take the currently set site into account to find the appropriate
@@ -101,7 +101,7 @@ def getSiteManager(context=None):
     # once site managers do less.  There's probably no good reason why
     # they can't be proxied.  Well, except maybe for performance.
     sm = IComponentLookup(
-        context, getGlobalSiteManager())
+        context, get_global_components())
     return sm
 
 
@@ -115,13 +115,13 @@ def adapter_hook(interface, object, name='', default=None):
 def setHooks():
     from guillotina.component import _api
     _api.adapter_hook.sethook(adapter_hook)
-    _api.getSiteManager.sethook(getSiteManager)
+    _api.get_component_registry.sethook(get_component_registry)
 
 def resetHooks():
     # Reset hookable functions to original implementation.
     from guillotina.component import _api
     _api.adapter_hook.reset()
-    _api.getSiteManager.reset()
+    _api.get_component_registry.reset()
     # be sure the old adapter hook isn't cached, since
     # it is derived from the SiteManager
     try:

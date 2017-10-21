@@ -1,5 +1,5 @@
 from guillotina import configure
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInteraction
@@ -30,7 +30,7 @@ async def get_user_info(context, request):
     }
     groups.update(principal.groups)
 
-    group_search = getUtility(IGroups)
+    group_search = get_utility(IGroups)
     result['groups'] = {}
     for group in groups:
         group_object = group_search.get_principal(group)

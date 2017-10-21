@@ -3,7 +3,7 @@ from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina import glogging
 from guillotina._settings import app_settings
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
@@ -12,9 +12,11 @@ from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
+from guillotina.profile import profilable
 from hashlib import sha256 as sha
 from zope.interface.interfaces import IInterface
 
+import aiotask_context
 import asyncio
 import fnmatch
 import importlib
@@ -266,7 +268,7 @@ def valid_id(_id):
 
 
 async def get_containers(request):
-    root = getUtility(IApplication, name='root')
+    root = get_utility(IApplication, name='root')
     for _id, db in root:
         if IDatabase.providedBy(db):
             db._db._storage._transaction_strategy = 'none'
@@ -280,10 +282,19 @@ async def get_containers(request):
                 yield txn, tm, container
 
 
+@profilable
 def get_current_request() -> IRequest:
     """
     Return the current request by heuristically looking it up from stack
     """
+    try:
+        task_context = aiotask_context.get('request')
+        if task_context is not None:
+            return task_context
+    except (ValueError, AttributeError, RuntimeError):
+        pass
+
+    # fallback
     frame = inspect.currentframe()
     while frame is not None:
         request = getattr(frame.f_locals.get('self'), 'request', None)
@@ -293,14 +304,6 @@ def get_current_request() -> IRequest:
             return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
-
-
-try:
-    import guillotina.optimizations  # noqa
-except (ImportError, AttributeError):  # pragma NO COVER PyPy / PURE_PYTHON
-    pass
-else:
-    from guillotina.optimizations import get_current_request  # noqa
 
 
 def apply_cors(request: IRequest) -> dict:

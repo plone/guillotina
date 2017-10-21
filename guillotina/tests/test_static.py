@@ -1,9 +1,9 @@
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 
 
 def test_get_static_folder(dummy_guillotina):
-    root = getUtility(IApplication, name='root')
+    root = get_utility(IApplication, name='root')
     assert 'static' in root._items
 
 

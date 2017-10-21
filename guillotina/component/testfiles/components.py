@@ -12,11 +12,12 @@
 #
 ##############################################################################
 # flake8: noqa
-from zope.interface import Interface
+from guillotina.component import adapter
 from zope.interface import Attribute
 from zope.interface import implementer
-from guillotina.component import adapter
-from guillotina.component import named
+from zope.interface import Interface
+from zope.interface import named
+
 
 class IAppb(Interface):
     a = Attribute('test attribute')

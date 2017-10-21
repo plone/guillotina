@@ -1,8 +1,8 @@
 from guillotina import configure
 from guillotina.browser import Response
-from guillotina.component import getMultiAdapter
-from guillotina.component import getUtilitiesFor
-from guillotina.component import queryAdapter
+from guillotina.component import get_multi_adapter
+from guillotina.component import get_utilities_for
+from guillotina.component import query_adapter
 from guillotina.content import get_cached_factory
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResource
@@ -90,27 +90,27 @@ async def default_get(context, request):
 
     result['available'] = []
 
-    for iface, utility in getUtilitiesFor(IBehavior):
+    for iface, utility in get_utilities_for(IBehavior):
         serialize = False
         if isinstance(iface, str):
             name = iface
         else:
             name = iface.__identifier__
         if name not in result['dynamic'] and name not in result['static']:
-            adaptable = queryAdapter(
+            adaptable = query_adapter(
                 context, utility.interface,
                 name='', default=None)
             if adaptable:
                 result['available'].append(name)
                 serialize = True
-                schema_serializer = getMultiAdapter(
+                schema_serializer = get_multi_adapter(
                     (utility.interface, request),
                     ISchemaSerializeToJson)
                 result[name] = await schema_serializer()
         else:
             serialize = True
         if serialize:
-            schema_serializer = getMultiAdapter(
+            schema_serializer = get_multi_adapter(
                 (utility.interface, request), ISchemaSerializeToJson)
             result[name] = await schema_serializer()
     return result

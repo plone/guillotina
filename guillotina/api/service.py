@@ -1,6 +1,6 @@
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina.browser import View
-from guillotina.component import queryUtility
+from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IDownloadView
@@ -32,7 +32,7 @@ class TraversableFieldService(View):
         if len(traverse) == 1:
             # we want have the field
             name = traverse[0]
-            fti = queryUtility(IFactory, name=self.context.type_name)
+            fti = query_utility(IFactory, name=self.context.type_name)
             schema = fti.schema
             field = None
             self.behavior = None

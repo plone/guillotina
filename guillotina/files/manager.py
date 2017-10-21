@@ -1,6 +1,6 @@
 from guillotina import configure
 from guillotina._settings import app_settings
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IRequest
@@ -17,7 +17,7 @@ class CloudFileManager(object):
     def __init__(self, context, request, field):
         iface = import_class(app_settings['cloud_storage'])
         alsoProvides(field, iface)
-        self.real_file_manager = getMultiAdapter(
+        self.real_file_manager = get_multi_adapter(
             (context, request, field), IFileManager)
 
     async def download(self, *args, **kwargs):

@@ -1,7 +1,7 @@
 from guillotina import configure
 from guillotina.addons import Addon
 from guillotina.api.service import Service
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.content import get_all_possible_schemas_for_type
 from guillotina.content import Item
 from guillotina.interfaces import IApplication
@@ -108,7 +108,7 @@ async def test_register_behavior(container_requester):
         behaviors=[IMyBehavior]
     ), 'contenttype')
 
-    root = getUtility(IApplication, name='root')
+    root = get_utility(IApplication, name='root')
     config = root.app.config
     # now test it...
     configure.load_configuration(config, 'guillotina.tests', 'contenttype')

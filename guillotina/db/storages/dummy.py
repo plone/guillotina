@@ -166,3 +166,9 @@ class DummyStorage(BaseStorage):
             obj = await self.load(txn, record)
             keys.append(obj['id'])
         return keys
+
+    async def del_blob(self, txn, bid):
+        pass
+
+    async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
+        pass
