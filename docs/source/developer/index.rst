@@ -7,8 +7,8 @@ Contents:
    :maxdepth: 1
 
    narrative
-   roles
    security
+   roles
    applications
    addons
    services

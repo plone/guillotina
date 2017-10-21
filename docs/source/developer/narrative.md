@@ -57,17 +57,18 @@ Create a `content.py` file with the following:
 from guillotina import configure
 from guillotina import schema
 from guillotina import Interface
-from guillotina.content import Item
+from guillotina import interfaces
+from guillotina import content
 
 
-class IToDo(Interface):
+class IToDo(interfaces.IItem):
     text = schema.Text()
 
 
 @configure.contenttype(
     type_name="ToDo",
     schema=IToDo)
-class ToDo(Item):
+class ToDo(content.Item):
     """
     Our ToDo type
     """

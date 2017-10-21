@@ -52,9 +52,13 @@ docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:54
 ```
 
 
-## Creating default content
+## Creating a container
 
-Once started, you will require to add at least a Guillotina container to start fiddling around:
+Guillotina containers are the building block of all other content. A container
+is where you place all other content for your application. Only containers can
+be created inside databases.
+
+Let's create one:
 
 ```
   curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
@@ -65,7 +69,7 @@ Once started, you will require to add at least a Guillotina container to start f
   }' "http://127.0.0.1:8080/db/"
 ```
 
-and create content:
+and create content inside the container:
 
 ```
   curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{

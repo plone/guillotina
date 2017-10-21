@@ -12,7 +12,8 @@ An overview of our security features are:
 
 ## Requests security
 
-By default request has participation of anonymous user plus the ones added by auth pluggins
+By default request has participation of anonymous user plus the ones added by auth plugins
+
 
 ## Databases, Application and static files objects
 
@@ -34,7 +35,6 @@ Anonymous user has on DB/StaticFiles/StaticDirectories/Application object :
 Defined at:
 
  * guillotina/permissions.py
- * guillotina/security.py
 
 ## Content Related
 
@@ -100,6 +100,4 @@ Created objects set the guillotina.Owner role to the user who created it.
 
 There is a `root` user who has permissions to all containers:
 
-DB/APP permissions are defined on factory.py
-
-Guillotina permissions because belongs to Managers group auth/participation.py
+DB/APP permissions are defined on factory/content.py
