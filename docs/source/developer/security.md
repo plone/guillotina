@@ -1,50 +1,46 @@
 # Security
 
-Security information for every operation is checked against three informations:
-
-* Code definitions
-* Local definitions
-* Global definitions
-
-Order or priority :
+Security for every operation is managed against three definitions(in order of priority):
 
 + Local
 + Global
 + Code
 
-Locally can be defined :
+Locally can be defined:
 
-* A user/group has a permission in this object and its not inherit
-* A user/group has a permission in this object and its going to be inherit
-* A user/group has a forbitten permission in this object and its inherit
+* A user/group has a permission in this object but not children
+* A user/group has a permission in this object and it's children
+* A user/group has is forbidden permission in this object and its children
 
-* A user/group has a role in this object and its not inherit
-* A user/group has a role in this object and its inherit
-* A user/group has a forbitten role in this object and its inherit
+* A user/group has a role on this object but not it's children
+* A user/group has a role on this object and it's children
+* A user/group has is forbidden a role on this object and its children
 
-* A role has a permission in this object and its not inherit
-* A role has a permission in this object and its inherit
-* A role has a forbitten permission in this object and its inherit
+* A role has a permission on this object and its children
+* A role has a permission on this object and its children
+* A role has is forbidden permission in this object and its children
 
 
-Globally :
+Globally:
 
-* This user/group has this Role
-* This user/group has this Permission
+* A user/group has this Role
+* A user/group has this Permission
 
-Code :
+Code:
 
-* This user/group has this Role
-* This user/group has this permission
-* This role has this permission
+* A user/group has this Role
+* A user/group has this permission
+* A role has this permission
 
-# Roles
 
-There is two kind of roles : Global and Local. Ones that are defined to be local
-can't be used globally and viceversa. On indexing the global roles are the ones
+## Roles
+
+There is two kind of roles: Global and Local. Ones that are defined to be local
+can't be used globally and vice-versa. On indexing, the global roles are the ones
 that are indexed for security plus the flat user/group information from each resource.
 
-# Python helper functions
+
+## Python helper functions
 
 ```python
 
@@ -73,17 +69,17 @@ interaction.global_principal_roles(principal, groups)
 interaction.check_permission(permission, obj)
 ```
 
-# REST APIS
+## REST APIS
 
-## Get all the endpoints and its security
+### Get all the endpoints and its security
 
 [GET] APPLICATION_URL/@apidefinition (you need guillotina.GetContainers permission)
 
-## Get the security info for a resource (with inherited info)
+### Get the security info for a resource (with inherited info)
 
 [GET] RESOURCE/@sharing (you need guillotina.SeePermissions permission)
 
-## Modify the local roles/permission for a resource
+### Modify the local roles/permission for a resource
 
 [POST] RESOURCE/@sharing (you need guillotina.ChangePermissions permission)
 

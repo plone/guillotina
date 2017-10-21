@@ -31,6 +31,7 @@ Detailed Documentation
     quickstart
     rest/index
     installation/index
+    awesome
     developer/index
     training/index
 
