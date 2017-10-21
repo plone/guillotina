@@ -11,7 +11,7 @@ class IBehaviorAssignable(Interface):
     assigning behaiors to an object or type of object is application specific.
     """
 
-    def supports(behavior_interface):
+    def supports(behavior_interface):  # noqa: N805
         """Determine if the context supports the given behavior, returning
         True or False.
         """
@@ -94,11 +94,11 @@ class IBehaviorAdapterFactory(Interface):
     """
 
     behavior = schema.Object(
-        title=u"The behavior this is a factory for",
+        title='The behavior this is a factory for',
         schema=IBehavior
     )
 
-    def __call__(context):
+    def __call__(context):  # noqa: N805
         """Invoke the behavior-specific factory if the context can be adapted
         to IBehaviorAssignable and
         IBehaviorAssignable(context).supports(self.behavior.interface) returns
@@ -116,5 +116,5 @@ class IAsyncBehavior(IContentBehavior):
     In order for data api to work correctly, `await behavior.load()` will
     need to be called first.
     """
-    def load(create=False):
+    def load(create=False):  # noqa: N805
         pass

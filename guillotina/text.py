@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina.component import queryAdapter
 from guillotina.db.orm.base import BaseObject
 from guillotina.i18n import default_message_factory as _
@@ -23,7 +22,7 @@ class RawValueHolder(BaseObject):
         self.value = value
 
     def __repr__(self):
-        return u"<RawValueHolder: {0:s}>".format(self.value)
+        return '<RawValueHolder: {0:s}>'.format(self.value)
 
     def __eq__(self, other):
         if not isinstance(other, RawValueHolder):
@@ -72,12 +71,12 @@ class RichTextValue(object):
 
     # the current mime type
     @property
-    def mimeType(self):
+    def mimeType(self):  # noqa: N802
         return self._mimeType
     # the default mime type
 
     @property
-    def outputMimeType(self):
+    def outputMimeType(self):  # noqa: N802
         return self._outputMimeType
 
     @property
@@ -108,8 +107,8 @@ class RichTextValue(object):
         return transformer()
 
     def __repr__(self):
-        return u"RichTextValue object. (Did you mean <attribute>.raw or "\
-               u"<attribute>.output?)"
+        return 'RichTextValue object. (Did you mean <attribute>.raw or '\
+               '<attribute>.output?)'
 
     def __eq__(self, other):
         if not isinstance(other, RichTextValue):

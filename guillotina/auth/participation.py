@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.auth import authenticate_request
 from guillotina.auth.users import AnonymousUser

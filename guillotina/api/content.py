@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized

@@ -1,5 +1,3 @@
-# -*- encoding: utf-8 -*-
-
 from guillotina import configure
 from guillotina.interfaces import ILanguage
 from guillotina.interfaces import IRequest

@@ -1,7 +1,8 @@
-import json
 from guillotina.behaviors.attachment import IAttachment
-from guillotina.transactions import managed_transaction
 from guillotina.tests import utils
+from guillotina.transactions import managed_transaction
+
+import json
 
 
 async def test_create_content_with_behavior(container_requester):

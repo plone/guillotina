@@ -16,7 +16,7 @@ class IConfigurationContext(Interface):
     """
 
     package = BytesLine(
-        title="The current package name",
+        title='The current package name',
         description="""\
           This is the name of the package containing the configuration
           file being executed. If the configuration file was not
@@ -24,7 +24,7 @@ class IConfigurationContext(Interface):
           """,
         required=False)
 
-    def action(discriminator, callable, args=(), kw={}, order=0,
+    def action(discriminator, callable, args=(), kw={}, order=0,  # noqa: N805
                includepath=None, info=None):
         """Record a configuration action
 

@@ -330,7 +330,7 @@ def load_json_schema_definition(_context, json_schema):
 register_configuration_handler('json_schema_definition', load_json_schema_definition)  # noqa
 
 
-class _base_decorator(object):
+class _base_decorator(object):  # noqa: N801
     configuration_type = ''
 
     def __init__(self, **config):
@@ -341,7 +341,7 @@ class _base_decorator(object):
         return klass
 
 
-class _factory_decorator(_base_decorator):
+class _factory_decorator(_base_decorator):  # noqa: N801
     """
     behavior that can pass factory to it so it can be used standalone
     """
@@ -355,7 +355,7 @@ class _factory_decorator(_base_decorator):
         return super(_factory_decorator, self).__call__(klass)
 
 
-class service(_base_decorator):
+class service(_base_decorator):  # noqa: N801
     def __call__(self, func):
         if isinstance(func, type):
             # it is a class view, we don't need to generate one for it...
@@ -381,27 +381,27 @@ class service(_base_decorator):
         return func
 
 
-class contenttype(_base_decorator):
+class contenttype(_base_decorator):  # noqa: N801
     configuration_type = 'contenttype'
 
 
-class behavior(_factory_decorator):
+class behavior(_factory_decorator):  # noqa: N801
     configuration_type = 'behavior'
 
 
-class addon(_base_decorator):
+class addon(_base_decorator):  # noqa: N801
     configuration_type = 'addon'
 
 
-class adapter(_factory_decorator):
+class adapter(_factory_decorator):  # noqa: N801
     configuration_type = 'adapter'
 
 
-class subscriber(_factory_decorator):
+class subscriber(_factory_decorator):  # noqa: N801
     configuration_type = 'subscriber'
 
 
-class utility(_factory_decorator):
+class utility(_factory_decorator):  # noqa: N801
     configuration_type = 'utility'
 
 
@@ -502,7 +502,7 @@ def grant_directive(
             )
 
 
-def grantAll_directive(_context, principal=None, role=None):
+def grantAll_directive(_context, principal=None, role=None):  # noqa: N802
     """Grant all permissions to a role or principal
     """
     from guillotina.security.security_code import role_permission_manager
@@ -531,7 +531,7 @@ def grantAll_directive(_context, principal=None, role=None):
         )
 
 
-def defineRole_directive(_context, id, title, description='', local=True):
+def defineRole_directive(_context, id, title, description='', local=True):  # noqa: N802
     from guillotina.auth.role import Role
 
     role = Role(id, title, description, local)

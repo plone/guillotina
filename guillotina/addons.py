@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina.interfaces import IAddOn
 from zope.interface import implementer
 

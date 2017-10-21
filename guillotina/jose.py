@@ -325,7 +325,7 @@ def json_decode(x):
     """
     Binary -> Dict
     """
-    return json.loads(x.decode())
+    return ujson.loads(x.decode())
 
 
 def auth_tag(hmac):

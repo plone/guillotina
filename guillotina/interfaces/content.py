@@ -16,12 +16,12 @@ class IAsyncContainer(Interface):
     asynchronously
     """
 
-    async def async_get(name, default=None, suppress_events=False):
+    async def async_get(name, default=None, suppress_events=False):  # noqa: N805
         """
         asynchronously get subobject
         """
 
-    async def async_set(name, value):
+    async def async_set(name, value):  # noqa: N805
         """
         asynchronously get subobject
         """
@@ -31,7 +31,7 @@ class IAsyncContainer(Interface):
         asynchronously get keys for sub objects
         """
 
-    async def async_del(name):
+    async def async_del(name):  # noqa: N805
         """
         asynchronously delete sub object
         """
@@ -46,7 +46,7 @@ class IAsyncContainer(Interface):
         asynchronously get len
         """
 
-    async def async_contains(name):
+    async def async_contains(name):  # noqa: N805
         """
         asynchronously check if contains
         """
@@ -54,13 +54,13 @@ class IAsyncContainer(Interface):
 
 class IRegistry(IMapping):
 
-    def for_interface(interface, check=True, omit=(), prefix=None):
+    def for_interface(interface, check=True, omit=(), prefix=None):  # noqa: N805
         """Get an IRecordsProxy for the given interface. If `check` is True,
         an error will be raised if one or more fields in the interface does
         not have an equivalent setting.
         """
 
-    def register_interface(interface, omit=(), prefix=None):
+    def register_interface(interface, omit=(), prefix=None):  # noqa: N805
         """Create a set of records based on the given interface. For each
         schema field in the interface, a record will be inserted with a
         name like `${interface.__identifier__}.${field.__name__}`, and a
@@ -75,7 +75,7 @@ class ITraversable(Interface):
     A content object that contains content that can be traversed to
     """
 
-    def get(name):
+    def get(name):  # noqa: N805
         pass
 
 
@@ -121,12 +121,12 @@ class ILocation(Interface):
 
     """
 
-    __parent__ = Attribute("The parent in the location hierarchy.")
+    __parent__ = Attribute('The parent in the location hierarchy.')
 
     __name__ = TextLine(
-        title=u"The name within the parent",
+        title='The name within the parent',
         description="The object can be looked up from the parent's "
-                    "sublocations using this name.",
+                    'sublocations using this name.',
         required=False,
         default=None)
 
@@ -145,7 +145,7 @@ class IResource(ILocation):
     __behaviors__ = guillotina.schema.FrozenSet(
         title='Enabled behaviors',
         required=False,
-        description=u'Dynamic behaviors for the content type',
+        description='Dynamic behaviors for the content type',
         default=frozenset({})
     )
 

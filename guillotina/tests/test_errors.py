@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 
 async def test_non_existing_container(container_requester):

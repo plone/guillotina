@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.content import Item
 from guillotina.content import load_cached_schema

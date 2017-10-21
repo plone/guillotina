@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .behaviors import IAsyncBehavior  # noqa
 from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
@@ -131,7 +130,7 @@ class IRequest(Interface):
 
 class IResponse(Interface):
 
-    def __init__(context, request):
+    def __init__(context, request):  # noqa: N805
         pass
 
 
@@ -168,10 +167,10 @@ class IAbsoluteURL(Interface):
 
 class IAddOn(Interface):
 
-    def install(cls, container, request):
+    def install(cls, container, request):  # noqa: N805
         pass
 
-    def uninstall(cls, container, request):
+    def uninstall(cls, container, request):  # noqa: N805
         pass
 
 
@@ -198,7 +197,7 @@ class ITransformer(Interface):
     the value is stored.
     """
 
-    def __init__(object):
+    def __init__(object):  # noqa: N805
         """Set the value object."""
 
     def __call__():

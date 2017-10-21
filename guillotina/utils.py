@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from aiohttp.web import Request
 from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping

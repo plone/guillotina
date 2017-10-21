@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.tests import utils

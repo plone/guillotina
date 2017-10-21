@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina import configure
 from guillotina.component import getUtility
 from guillotina.interfaces import IContainer

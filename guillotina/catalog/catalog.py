@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.component import queryAdapter
 from guillotina.content import iter_schemata

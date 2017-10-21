@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina.auth.role import check_role
 from guillotina.interfaces import Allow
 from guillotina.interfaces import Deny

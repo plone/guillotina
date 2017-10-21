@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina.browser import View
 from guillotina.component import queryUtility

@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from datetime import datetime
 from dateutil.tz import tzlocal
 from dateutil.tz import tzutc

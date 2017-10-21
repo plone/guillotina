@@ -59,5 +59,5 @@ class Logger:
     debug = _wrapped('debug')
 
 
-def getLogger(name):
+def getLogger(name):  # noqa: N802
     return Logger(name)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import testing
 from guillotina.component import getUtility
 from guillotina.content import load_cached_schema

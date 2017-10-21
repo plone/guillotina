@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.component import adapter
 from guillotina.interfaces import IAbsoluteURL
@@ -51,7 +50,7 @@ class View(object):
 
 
 @configure.adapter(
-    for_=(IResource, IRequest),
+    for_=(IResource, IRequest),  # noqa: N801
     provides=IAbsoluteURL)
 class Absolute_URL(object):
 
@@ -85,7 +84,7 @@ class Absolute_URL(object):
 
 
 @configure.adapter(
-    for_=IResource,
+    for_=IResource,  # noqa: N801
     provides=IAbsoluteURL)
 class Absolute_URL_ObtainRequest(Absolute_URL):
 

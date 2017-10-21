@@ -3,7 +3,7 @@ from zope.interface import Interface
 
 class IView(Interface):
 
-    def __init__(context, request):
+    def __init__(context, request):  # noqa: N805
         pass
 
     async def __call__(self):
@@ -12,7 +12,7 @@ class IView(Interface):
 
 class ITraversableView(IView):
 
-    async def publish_traverse(traverse_to):
+    async def publish_traverse(traverse_to):  # noqa: N805
         pass
 
 

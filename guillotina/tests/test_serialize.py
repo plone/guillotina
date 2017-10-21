@@ -4,7 +4,6 @@ from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.interfaces import IResourceFieldSerializer
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.tests.utils import create_content
-from zope.interface import classImplements
 
 
 async def test_serialize_resource(dummy_request):

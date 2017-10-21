@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from .adapter import DBFileManagerAdapter  # noqa
 from .const import CHUNK_SIZE  # noqa
 from .const import MAX_REQUEST_CACHE_SIZE  # noqa
