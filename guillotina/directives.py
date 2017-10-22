@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from zope.interface.interface import TAGGED_DATA
 
 import sys
@@ -17,7 +16,7 @@ class Fieldset(object):
             self.fields = []
 
     def __repr__(self):
-        return "<Fieldset '%s' of %s>" % (self.__name__, ', '.join(self.fields))  # noqa
+        return "<Fieldset '%s' of %s>" % (self.__name__, ', '.join(self.fields))
 
 
 class DirectiveClass(type):
@@ -37,7 +36,7 @@ class DirectiveClass(type):
         instance.store(tags, value)
         return self
 
-    def apply(self, IClass, *args, **kw):
+    def apply(self, IClass, *args, **kw):  # noqa: N803
         instance = self.__instance
         existing = IClass.queryTaggedValue(instance.key)
         tags = {}
@@ -93,7 +92,7 @@ def merged_tagged_value_dict(iface, name):
     return tv
 
 
-class fieldset(MetadataListDirective):
+class fieldset(MetadataListDirective):  # noqa: N801
     """Directive used to create fieldsets
     """
     key = 'guillotina.directives.fieldsets'
@@ -105,7 +104,7 @@ class fieldset(MetadataListDirective):
         return [fieldset]
 
 
-class read_permission(MetadataDictDirective):
+class read_permission(MetadataDictDirective):  # noqa: N801
     """Directive used to set a field read permission
     """
     key = 'guillotina.directives.read-permissions'
@@ -114,13 +113,13 @@ class read_permission(MetadataDictDirective):
         return kw
 
 
-class write_permission(read_permission):
+class write_permission(read_permission):  # noqa: N801
     """Directive used to set a field write permission
     """
     key = 'guillotina.directives.write-permissions'
 
 
-class metadata(MetadataListDirective):
+class metadata(MetadataListDirective):  # noqa: N801
     """
     define data to be included and stored with the indexing data
     but is not able to be queried
@@ -131,7 +130,7 @@ class metadata(MetadataListDirective):
         return names
 
 
-class index(MetadataDictDirective):
+class index(MetadataDictDirective):  # noqa: N801
     """
     Directive used to set indexed attributes.
 

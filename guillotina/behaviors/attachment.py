@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina import configure
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.files import CloudFileField

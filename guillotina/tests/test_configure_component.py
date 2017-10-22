@@ -16,9 +16,9 @@
 import unittest
 
 
-class Test_handler(unittest.TestCase):
+class Test_handler(unittest.TestCase):  # noqa: N801
 
-    def _callFUT(self, *args, **kw):
+    def _callFUT(self, *args, **kw):  # noqa: N802
         from guillotina.configure.component import handler
         return handler(*args, **kw)
 
@@ -41,9 +41,9 @@ class Test_handler(unittest.TestCase):
             getSiteManager.reset()
 
 
-class Test__rolledUpFactory(unittest.TestCase):
+class Test__rolledUpFactory(unittest.TestCase):  # noqa: N801
 
-    def _callFUT(self, *args, **kw):
+    def _callFUT(self, *args, **kw):  # noqa: N802
         from guillotina.configure.component import _rolledUpFactory
         return _rolledUpFactory(*args, **kw)
 
@@ -76,9 +76,9 @@ class Test__rolledUpFactory(unittest.TestCase):
         self.assertTrue(rolled(_OBJ) is _CREATED3)
 
 
-class Test_adapter(unittest.TestCase):
+class Test_adapter(unittest.TestCase):  # noqa: N801
 
-    def _callFUT(self, *args, **kw):
+    def _callFUT(self, *args, **kw):  # noqa: N802
         from guillotina.configure.component import adapter
         return adapter(*args, **kw)
 
@@ -226,9 +226,9 @@ class Test_adapter(unittest.TestCase):
                           ''))
 
 
-class Test_subscriber(unittest.TestCase):
+class Test_subscriber(unittest.TestCase):  # noqa: N801
 
-    def _callFUT(self, *args, **kw):
+    def _callFUT(self, *args, **kw):  # noqa: N802
         from guillotina.configure.component import subscriber
         return subscriber(*args, **kw)
 
@@ -353,9 +353,9 @@ class Test_subscriber(unittest.TestCase):
         self.assertEqual(action['args'], ('', Interface))
 
 
-class Test_utility(unittest.TestCase):
+class Test_utility(unittest.TestCase):  # noqa: N801
 
-    def _callFUT(self, *args, **kw):
+    def _callFUT(self, *args, **kw):  # noqa: N802
         from guillotina.configure.component import utility
         return utility(*args, **kw)
 
@@ -522,9 +522,9 @@ class Test_utility(unittest.TestCase):
         self.assertEqual(action['args'], ('', IFoo))
 
 
-class Test_interface(unittest.TestCase):
+class Test_interface(unittest.TestCase):  # noqa: N801
 
-    def _callFUT(self, *args, **kw):
+    def _callFUT(self, *args, **kw):  # noqa: N802
         from guillotina.configure.component import interface
         return interface(*args, **kw)
 
@@ -564,9 +564,9 @@ class Test_interface(unittest.TestCase):
         self.assertEqual(action['args'], ('foo', IFoo, IBar))
 
 
-class Test_view(unittest.TestCase):
+class Test_view(unittest.TestCase):  # noqa: N801
 
-    def _callFUT(self, *args, **kw):
+    def _callFUT(self, *args, **kw):  # noqa: N802
         from guillotina.configure.component import view
         return view(*args, **kw)
 
@@ -695,7 +695,7 @@ class Test_view(unittest.TestCase):
         self.assertEqual(action['args'][4], '')
 
 
-def _makeConfigContext():
+def _makeConfigContext():  # noqa: N802
     class _Context(object):
 
         def __init__(self):

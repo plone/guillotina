@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import logger
 from guillotina._settings import app_settings
 from guillotina.factory import make_app

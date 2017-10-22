@@ -33,7 +33,7 @@ def reraise(tp, value, tb=None):
     raise value
 
 
-_import_chickens = {}, {}, ("*",)  # dead chickens needed by __import__
+_import_chickens = {}, {}, ('*',)  # dead chickens needed by __import__
 
 
 class ConfigurationContext(object):
@@ -138,7 +138,7 @@ class ConfigurationExecutionError(ConfigurationError):
         self.etype, self.evalue = etype, evalue
 
     def __str__(self):  # pragma NO COVER
-        return "%s: %s\n  in:\n  %s" % (self.etype, self.evalue)
+        return '%s: %s\n  in:\n  %s' % (self.etype, self.evalue)
 
 
 ##############################################################################
@@ -152,7 +152,7 @@ class IStackItem(Interface):
     A stack item is created for each directive use.
     """
 
-    def contained(name, data):
+    def contained(name, data):  # noqa: N805
         """Begin processing a contained directive
 
         The data are a dictionary of attribute names mapped to unicode
@@ -185,7 +185,7 @@ class SimpleStackItem(object):
         self.argdata = argdata
 
     def contained(self, name, data):
-        raise ConfigurationError("Invalid directive %s" % str(name))
+        raise ConfigurationError('Invalid directive %s' % str(name))
 
     def finish(self):
         # We're going to use the context that was passed to us, which wasn't
@@ -217,7 +217,7 @@ class RootStackItem(object):
         """
         factory = self.context.factory(self.context, name)
         if factory is None:
-            raise ConfigurationError("Invalid directive", name)
+            raise ConfigurationError('Invalid directive', name)
         adapter = factory(self.context, data)
         return adapter
 
@@ -329,7 +329,7 @@ def toargs(context, schema, data):
             try:
                 args[str(name)] = field.from_unicode(s)
             except ValidationError as v:
-                reraise(ConfigurationError("Invalid value for", n, str(v)),
+                reraise(ConfigurationError('Invalid value for', n, str(v)),
                         None, sys.exc_info()[2])
         elif field.required:
             # if the default is valid, we can use that:
@@ -337,7 +337,7 @@ def toargs(context, schema, data):
             try:
                 field.validate(default)
             except ValidationError:
-                raise ConfigurationError("Missing parameter:", n)
+                raise ConfigurationError('Missing parameter:', n)
             args[str(name)] = default
 
     if data:
@@ -347,7 +347,7 @@ def toargs(context, schema, data):
         except KeyError:
             keyword_arguments = False
         if not keyword_arguments:
-            raise ConfigurationError("Unrecognized parameters:", *data)
+            raise ConfigurationError('Unrecognized parameters:', *data)
 
         for name in data:
             args[str(name)] = data[name]
@@ -451,13 +451,13 @@ class ConfigurationConflictError(ConfigurationError):
         self._conflicts = conflicts
 
     def __str__(self):  # pragma NO COVER
-        r = ["Conflicting configuration actions"]
+        r = ['Conflicting configuration actions']
         items = [(k, v) for k, v in self._conflicts.items()]
         items.sort()
         for discriminator, infos in items:
-            r.append("  For: %s" % (discriminator, ))
+            r.append('  For: %s' % (discriminator, ))
             for info in infos:
                 for line in str(info).rstrip().split('\n'):
-                    r.append("    " + line)
+                    r.append('    ' + line)
 
-        return "\n".join(r)
+        return '\n'.join(r)

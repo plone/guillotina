@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina.content import Folder
 from guillotina.db import ROOT_ID
 from guillotina.db.orm.interfaces import IBaseObject

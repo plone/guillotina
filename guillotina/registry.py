@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina.annotations import AnnotationData
 from guillotina.browser import get_physical_path
 from guillotina.db.orm.interfaces import IBaseObject

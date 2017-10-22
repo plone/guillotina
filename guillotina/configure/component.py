@@ -28,12 +28,12 @@ from zope.interface import providedBy
 _ = MessageFactory('guillotina')
 
 
-def handler(methodName, *args, **kwargs):
-    method = getattr(getSiteManager(), methodName)
+def handler(method_name, *args, **kwargs):
+    method = getattr(getSiteManager(), method_name)
     method(*args, **kwargs)
 
 
-def _rolledUpFactory(factories):
+def _rolledUpFactory(factories):  # noqa: N802
     # This has to be named 'factory', aparently, so as not to confuse
     # apidoc :(
     def factory(ob):

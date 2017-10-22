@@ -2,6 +2,7 @@ from guillotina.commands import Command
 
 import guillotina
 import os
+import sys
 
 
 class CreateCommand(Command):
@@ -31,9 +32,12 @@ class CreateCommand(Command):
         try:
             from cookiecutter.main import cookiecutter
         except ImportError:
-            return print('You must have cookiecutter installed in order for the '
-                         'pcreate command to work. Use `pip install cookiecutter` '
-                         'to install cookiecutter.')
+            sys.stderr.write(
+                'You must have cookiecutter installed in order for the '
+                'pcreate command to work. Use `pip install cookiecutter` '
+                'to install cookiecutter.'
+            )
+            return 1
         cookiecutter(
             tmpl_dir,
             no_input=arguments.no_input,
@@ -43,7 +47,8 @@ class CreateCommand(Command):
     def run(self, arguments, settings, app):
 
         if not arguments.template:
-            return print('You must provide a template to use.')
+            sys.stderr.write('You must provide a template to use.')
+            return 1
 
         _dir = os.path.dirname(os.path.realpath(guillotina.__file__))
         cutter_dir = os.path.join(_dir, "cookiecutter")

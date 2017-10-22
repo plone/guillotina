@@ -1,6 +1,6 @@
-from guillotina import configure
-from guillotina.interfaces import IRichTextValue
-from guillotina.interfaces import ITransformer
+# from guillotina import configure
+# from guillotina.interfaces import IRichTextValue
+# from guillotina.interfaces import ITransformer
 
 
 # @configure.adapter(

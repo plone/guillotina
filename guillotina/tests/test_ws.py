@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina.testing import ADMIN_TOKEN
 
 import aiohttp

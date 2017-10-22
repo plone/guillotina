@@ -1,5 +1,3 @@
-# -*- encoding: utf-8 -*-
-
 # load the patch before anything else.
 from guillotina import glogging
 from guillotina import patch  # noqa

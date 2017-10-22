@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Main routing traversal class."""
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter

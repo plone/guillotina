@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon

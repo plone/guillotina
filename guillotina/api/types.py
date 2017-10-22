@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.api.service import TraversableService
 from guillotina.component import getMultiAdapter

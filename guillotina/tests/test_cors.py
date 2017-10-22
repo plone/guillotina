@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from copy import deepcopy
 from guillotina import cors
 from guillotina._settings import app_settings

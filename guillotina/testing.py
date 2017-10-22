@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from copy import deepcopy
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.browser import View

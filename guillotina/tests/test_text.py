@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina.component import adapter
 from guillotina.component import provideAdapter
 from guillotina.db.orm.base import BaseObject

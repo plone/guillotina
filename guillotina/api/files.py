@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings

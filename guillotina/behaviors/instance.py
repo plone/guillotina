@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina.annotations import AnnotationData
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations

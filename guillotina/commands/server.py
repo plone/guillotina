@@ -2,6 +2,7 @@ from aiohttp import web
 from guillotina.commands import Command
 
 import cProfile
+import sys
 
 
 try:
@@ -64,16 +65,22 @@ class ServerCommand(Command):
     def run(self, arguments, settings, app):
         if arguments.monitor:
             if not HAS_AIOMONITOR:
-                return print('You must install aiomonitor for the --monitor option to work'
-                             'Use `pip install aiomonitor` to install aiomonitor.')
+                sys.stderr.write(
+                    'You must install aiomonitor for the '
+                    '--monitor option to work'
+                    'Use `pip install aiomonitor` to install aiomonitor.')
+                return 1
             # init monitor just before run_app
             loop = self.get_loop()
             with aiomonitor.start_monitor(loop=loop):
                 self._run(arguments, settings, app)
         if arguments.reload:
             if not HAS_AUTORELOAD:
-                return print('You must install aiohttp_autoreload for the --reload option to work'
-                             'Use `pip install aiohttp_autoreload` to install aiohttp_autoreload.')
+                sys.stderr.write(
+                    'You must install aiohttp_autoreload for the --reload option to work'
+                    'Use `pip install aiohttp_autoreload` to install aiohttp_autoreload.'
+                )
+                return 1
             aiohttp_autoreload.start()
 
         self._run(arguments, settings, app)

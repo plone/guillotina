@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.api.search import AsyncCatalogReindex
 from guillotina.component import queryUtility

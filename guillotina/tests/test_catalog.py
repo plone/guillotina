@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina.catalog.utils import get_index_fields
 from guillotina.component import getAdapter
 from guillotina.component import queryUtility
