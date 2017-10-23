@@ -10,7 +10,7 @@ Some useful applications to get you started:
 - [guillotina_s3storage](https://github.com/onna/guillotina_s3storage): S3 file storage
 - [guillotina_gcloudstorage](https://github.com/onna/guillotina_gcloudstorage): GCloud file storage
 - [guillotina_statsd](https://github.com/onna/guillotina_statsd): statsd metrics
-- [guillotina_prometheus](https://github.com/onna/guillotina_prometheus): prometeus stats
+- [guillotina_prometheus](https://github.com/onna/guillotina_prometheus): prometheus stats
 
 
 Where to find more packages:

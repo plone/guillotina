@@ -5,12 +5,12 @@ You can provide your own CLI commands for guillotina through a simple interface.
 
 ## Available commands
 
-* serve: run the http rest api server(this is default command if none given)
-* shell: drop into a shell with root object to manually work with
-* create: use cookiecutter to generate guillotina applications
-* initialize-db: databases are automatically initialized; however, you can use this command to manually do it
-* testdata: populate the database with test data from wikipedia
-* run: run a script
+* `serve`: run the HTTP rest api server (this is the default command if none given)
+* `shell`: drop into a shell with root object to manually work with
+* `create`: use cookiecutter to generate guillotina applications
+* `initialize-db`: databases are automatically initialized; however, you can use this command to manually do it
+* `testdata`: populate the database with test data from wikipedia
+* `run`: run a script
 
 
 ## Command Options

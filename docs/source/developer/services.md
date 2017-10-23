@@ -1,6 +1,6 @@
 # Services
 
-Services provide responses to api endpoint requests. A service is the same as
+Services provide responses to API endpoint requests. A service is the same as
 a "view" that you might see in many web frameworks.
 
 The reason we're using the convention "service" is because we're focusing on
@@ -37,7 +37,7 @@ In this example, the service will apply to a GET request against a container,
 ```
 
 
-## class based services
+## Class based services
 
 For more complex services, you might want to use class based services.
 
@@ -57,7 +57,7 @@ async def my_service(context, request):
     }
 ```
 
-## special cases
+## Special cases
 
 ### I want that my service is accessible no matter the content
 

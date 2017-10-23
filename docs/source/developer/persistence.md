@@ -1,12 +1,12 @@
 # Persistence
 
-There is three kind of objects that are considered on the system:
+There are three kinds of objects that are considered on the system:
 
 
 ## Tree objects
 
-Called Resources that implement guillotina.interfaces.IResource. This objects
-has a __name__ and a __parent__, fields that indicate the id on the tree and
+Called Resources that implement `guillotina.interfaces.IResource`. This object
+has a `__name__` and a `__parent__` fields that indicate the id on the tree and
 the link to the parent. By themselves they don't have access to the children
 they have, it needs to interact with the transaction object to get them.
 
@@ -15,7 +15,7 @@ they have, it needs to interact with the transaction object to get them.
 
 Objects that are linked at some attribute inside the Tree object, this object
 are serialized with the main object and may lead to conflicts if there is lots
-f this kind of objects.
+of this kind of objects.
 
 It can belong to:
 
@@ -24,7 +24,7 @@ It can belong to:
 
 ## Nested References
 
-Base objects that belong to an specific object, its enough big to have its own
+Base objects that belong to a specific object, it is big enough to have its own
 entity and be saved in a different persistence object. Its not an element of the tree.
 
 It can belong to:

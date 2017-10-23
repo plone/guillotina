@@ -2,7 +2,7 @@
 
 ## Nginx front
 
-Its so common to add the api with a nginx with a proxy_pass in front so there is the option
+Its so common to add the api with a Nginx with a `proxy_pass` in front so there is the option
 define which is going to be the url for the generated urls inside the api:
 
 Adding the header:

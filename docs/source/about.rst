@@ -1,13 +1,13 @@
 About
 =====
 
-As the web evolves, so do the frameworks we use to work with the web. Guillotina,
-is part of that evolution--providing a rich, REST API, asynchronous web server
+As the Web evolves, so do the frameworks we use to work with the Web. Guillotina
+is part of that evolution providing a rich, REST API, asynchronous web server
 to build your web applications around.
 
 It is designed for building JavaScript applications. It is an API framework, not
-a typical template-based rendering framework like most web frameworks(Django/Pyramid/Plone).
-What we mean by this is that Guillotina will not generate HTML OOTB for you.
+a typical template-based rendering framework like most web frameworks (Django/Pyramid/Plone).
+What we mean by this is that Guillotina will not generate HTML out-of-the-box for you.
 It is designed to be consumed by JavaScript applications that do the HTML rendering.
 
 Features:
@@ -35,7 +35,7 @@ Inspirations:
  - JSON Schema
 
 
-Lessons Learned(from said inspired frameworks):
+Lessons Learned (from said inspired frameworks):
  - Trade-offs for the sake of performance is okay
  - Too many complex dependencies causes difficulties in management and upgrades
  - It's okay to fork dependency packages
@@ -64,11 +64,11 @@ The corresponding urls for a site based off this dictionary would be:
  - http://localhost:8080/foo
  - http://localhost:8080/foo/bar
 
-And so on... It's a simple way to build APIs from data around a hierarchy(or tree).
+And so on... It's a simple way to build APIs from data around a hierarchy (or tree).
 
 Extrapolating this concept, Jim Fulton also built the ZODB package. This was a
 complete database built on serializing Python objects using the pickle library. Then,
-frameworks like Zope(and eventually Plone), used this database and the `bobo`
+frameworks like Zope (and eventually Plone), used this database and the `bobo`
 style of publishing objects to URLs to build a framework and CMS around.
 
 
@@ -104,5 +104,5 @@ What it isn't
 - Guillotina is not a re-implementation of Plone
 - Guillotina does not implement all the features and APIs of Plone
 
-It could some day with the `guillotina_cms` package but replacement Plone is
+It could some day with the `guillotina_cms` package but replacement of Plone is
 not the goal of Guillotina.
