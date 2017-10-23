@@ -1,6 +1,6 @@
 # Security
 
-Security for every operation is managed against three definitions(in order of priority):
+Security for every operation is managed against three definitions (in order of priority):
 
 + Local
 + Global
@@ -35,9 +35,9 @@ Code:
 
 ## Roles
 
-There is two kind of roles: Global and Local. Ones that are defined to be local
+There are two kind of roles: Global and Local. The ones that are defined to be local
 can't be used globally and vice-versa. On indexing, the global roles are the ones
-that are indexed for security plus the flat user/group information from each resource.
+that are indexed for security in addition to the flat user/group information from each resource.
 
 
 ## Python helper functions

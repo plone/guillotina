@@ -48,7 +48,7 @@ docker: `make run-postgres`.
 
 ## Creating to do type
 
-Types consist of an interface(schema) using the excellent zope.interface package
+Types consist of an interface(schema) using the excellent `zope.interface` package
 and a class that uses that interface.
 
 Create a `content.py` file with the following:

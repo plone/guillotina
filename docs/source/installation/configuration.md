@@ -1,6 +1,6 @@
 # Configuration
 
-`guillotina` and it's addon define global configuration that is used throughout
+`guillotina` and its addons define a global configuration that is used throughout
 the `guillotina`. All of these settings are configurable by providing a
 JSON configuration file to the start script.
 
@@ -10,7 +10,7 @@ file by using the `-c` option for the script script like this `./bin/guillotina 
 
 ## Databases
 
-Guillotina uses postgresql OOTB.
+Guillotina uses PostgreSQL out-of-the-box.
 
 To configure available databases, use the `databases` option. Configuration options
 map 1-to-1 to database setup:
@@ -38,7 +38,7 @@ Currently supported database drivers are:
 
 ### Cockroach
 
-Both postgres and cockroach have configurations that are identical; however,
+Both PostgreSQL and Cockroach have configurations that are identical; however,
 Cockroach has an additional `isolation_level` configuration which defaults to `snapshot`. See
 https://www.cockroachlabs.com/docs/transactions.html
 
@@ -54,13 +54,13 @@ static:
 These files will then be available on urls `/favicon.ico` and `/static_files`.
 
 
-## JS Applications
+## JavaScript Applications
 
-We can also serve js apps from guillotina. These will allow routing on your
-js application without any extra configuration by returning the base directory
-index.html for every sub directory in the url.
+We can also serve JS apps from guillotina. These will allow routing on your
+JS application without any extra configuration by returning the base directory
+`index.html` for every sub directory in the url.
 
-Once there is SSR support in python, guillotina will integrate with it through
+Once there is SSR support in Python, guillotina will integrate with it through
 this as well.
 
 ```yaml
@@ -118,8 +118,8 @@ utilities:
 
 ## Middleware
 
-`guillotina` is built on aiohttp which provides support for middleware.
-You can provide an array of dotted names to middle ware to use for your application.
+`guillotina` is built on `aiohttp` which provides support for middleware.
+You can provide an array of dotted names to use for your application.
 
 ```yaml
 middlewares:
@@ -128,7 +128,7 @@ middlewares:
 
 ## aiohttp settings
 
-You can pass in aiohttp_settings to configure the aiohttp server.
+You can pass `aiohttp_settings` to configure the aiohttp server.
 
 
 ```yaml
@@ -150,28 +150,28 @@ jwt:
 
 ## Miscellaneous settings
 
-  - port(number): Port to bind to. `defaults to 8080`
-  - access_log_format(string): Customize access log format for aiohttp. `defaults to None`
-  - store_json(boolean): Serialize object into json field in database. `defaults to true`
-  - host(string): Where to host the server. `defaults to "0.0.0.0"`
-  - port(number): Port to bind to. `defaults to 8080`
-  - conflict_retry_attempts(number): Number of times to retry database conflict errors. `defaults to 3`
-  - cloud_storage(string): Dotted path to cloud storage field type. `defaults to "guillotina.interfaces.IDBFileField"`
+  - port (number): Port to bind to. `defaults to 8080`
+  - access_log_format (string): Customize access log format for aiohttp. `defaults to None`
+  - store_json (boolean): Serialize object into json field in database. `defaults to true`
+  - host (string): Where to host the server. `defaults to "0.0.0.0"`
+  - port (number): Port to bind to. `defaults to 8080`
+  - conflict_retry_attempts (number): Number of times to retry database conflict errors. `defaults to 3`
+  - cloud_storage (string): Dotted path to cloud storage field type. `defaults to "guillotina.interfaces.IDBFileField"`
 
 
-## transaction strategy
+## Transaction strategy
 
 Guillotina provides a few different modes to operate in to customize the level
-of performance vs consistency. The setting used for this is `transaction_strategy`
+of performance versus consistency. The setting used for this is `transaction_strategy`
 which defaults to `resolve`.
 
 Even though we have different transaction strategies that provide different voting
-algorithms to decide if it's a safe write, all writes STILL make sure that the
-object committed to matches the transaction it was retrieved with. If not,
+algorithms to decide if it's a safe write, all write operations STILL make sure that the
+object committed matches the transaction it was retrieved with. If not,
 a conflict error is detected and the request is retried. So even if you choose
 the transaction strategy with no database transactions, there is still a level
-of consistency in that you know you aren't modifying an object that isn't consistent
-with when it was retrieved from the database.
+of consistency so that you know you will only modify an object that is consistent
+with the one retrieved from the database.
 
 Example configuration:
 
@@ -198,7 +198,7 @@ Available options:
   The same as `none` with no database transaction; however, we still use the database
   to issue us transaction ids for the data committed. Since no transaction is used,
   this is potentially just as safe as any of the other strategies just as long
-  as you are not writing to multiple objects at the same time--in those cases,
+  as you are not writing to multiple objects at the same time — in those cases,
   you might be in an inconsistent state on tid conflicts.
 - `novote`:
   Use db transaction but do not perform any voting when writing.

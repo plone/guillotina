@@ -2,7 +2,7 @@
 
 Content types allow you to provide custom schemas and content to your services.
 
-OOTB, `guillotina` ships with simple `Container`, `Folder` and `Item` content types.
+Out-of-the-box, `guillotina` ships with simple `Container`, `Folder` and `Item` content types.
 The `Container` content type is the main content type to hold your data in. It is
 the started point of where applications and other things operate within.
 

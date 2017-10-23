@@ -1,10 +1,10 @@
 # Behaviors
 
-Besides having static content type definition with its schema there is the concept of behaviors that provide us cross-content type definitions with specific marker interface to create adapters and subscribers based on that behavior and not the content type.
+Besides having static content types definitions with their schema, there is the concept of behaviors that provide us definitions accross content types with specific marker interface to create adapters and subscribers based on that behavior and not the content type.
 
 ## Definition of a behavior
 
-If you want to have a shared behavior based on some fields and operations that needs to be shared across different content you can define them on a guillotina.schema interface:
+If you want to have a shared behavior based on some fields and operations that needs to be shared across different content types you can define them on a `guillotina.schema` interface:
 
 ```python
     from guillotina.interfaces import IFormFieldProvider
@@ -35,7 +35,7 @@ Once you define the schema you can define a specific marker interface that will 
 
 ```
 
-Finally the instance class that implements the schema can be defined in case you want to enable specific operations or you can use guillotina.behaviors.instance.AnnotationBehavior as the default annotation storage.
+Finally the instance class that implements the schema can be defined in case you want to enable specific operations. Or you can use `guillotina.behaviors.instance.AnnotationBehavior` as the default annotation storage.
 
 For example in case you want to have a class that stores the field on the content and not on annotations:
 
@@ -84,7 +84,7 @@ class MyItem(Item):
 
 ### Create and modify content with behaviors
 
-On the deserialization of the content you will need to pass on the POST/PATCH operation the behavior as a object on the JSON.
+For the deserialization of the content you will need to pass on the POST/PATCH operation the behavior as a object on the JSON.
 
 
 CREATE an ITEM with the expires : POST on parent:
@@ -187,9 +187,9 @@ DELETE behaviors : DELETE on the object/@behaviors:
 
 
 
-## OOTB Behaviors
+## Out-of-the-box Behaviors
 
-Guillotina comes with a couple behaviors OOTB.
+Guillotina comes with a couple behaviors:
 
-- guillotina.behaviors.dublincore.IDublinCore: Dublin core field
-- guillotina.behaviors.attachment.IAttachment: Provide file field
+- `guillotina.behaviors.dublincore.IDublinCore`: Dublin core field
+- `guillotina.behaviors.attachment.IAttachment`: Provide file field
