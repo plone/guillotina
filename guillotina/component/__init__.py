@@ -42,5 +42,16 @@ from guillotina.component.interfaces import IFactory
 from zope.interface import moduleProvides
 
 
+# b/w compat imports. Will be removed in 3.0
+getMultiAdapter = get_multi_adapter
+queryMultiAdapter = query_multi_adapter
+getAdapter = get_adapter
+queryAdapter = query_adapter
+getUtility = get_utility
+queryUtility = query_utility
+getUtilitiesFor = get_utilities_for
+getAdapters = get_adapters
+
+
 moduleProvides(IComponentArchitecture, IComponentRegistrationConvenience)
 __all__ = tuple(IComponentArchitecture)
