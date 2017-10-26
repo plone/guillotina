@@ -90,12 +90,8 @@ async def default_get(context, request):
 
     result['available'] = []
 
-    for iface, utility in get_utilities_for(IBehavior):
+    for name, utility in get_utilities_for(IBehavior):
         serialize = False
-        if isinstance(iface, str):
-            name = iface
-        else:
-            name = iface.__identifier__
         if name not in result['dynamic'] and name not in result['static']:
             adaptable = query_adapter(
                 context, utility.interface,

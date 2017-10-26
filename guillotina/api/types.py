@@ -26,6 +26,8 @@ class Read(TraversableService):
         if len(traverse) == 1:
             # we want have the key of the registry
             self.value = query_utility(IResourceFactory, name=traverse[0])
+            if self.value is None:
+                raise KeyError(traverse[0])
         return self
 
     async def __call__(self):

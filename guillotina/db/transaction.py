@@ -395,6 +395,8 @@ class Transaction(object):
         if result is None:
             result = [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]
             await self._cache.set(result, oid=oid, variant='annotation-keys')
+            return result
+        return []
 
     async def del_blob(self, bid):
         return await self._manager._storage.del_blob(self, bid)

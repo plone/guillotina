@@ -381,6 +381,8 @@ class TraversalRouter(AbstractRouter):
             else:
                 try:
                     view = await view.publish_traverse(traverse_to)
+                except KeyError:
+                    return None  # not found, it's okay.
                 except Exception as e:
                     logger.error("Exception on view execution", exc_info=e,
                                  request=request)

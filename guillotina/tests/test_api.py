@@ -19,11 +19,11 @@ class ITestingRegistry(Interface):
 class TestAddon(Addon):
     @classmethod
     def install(cls, container, request):
-        pass
+        Addon.install(container, request)
 
     @classmethod
     def uninstall(cls, container, request):
-        pass
+        Addon.uninstall(container, request)
 
 
 async def test_get_root(container_requester):
@@ -252,6 +252,18 @@ async def test_get_addons(container_requester):
         assert status == 200
 
 
+async def test_install_invalid_addon_should_give_error(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": 'foobar'
+            })
+        )
+        assert status == 400
+
+
 async def test_install_addons(container_requester):
     id_ = 'testaddon'
     async with await container_requester as requester:
@@ -264,6 +276,28 @@ async def test_install_addons(container_requester):
         )
         assert status == 200
         assert id_ in response['installed']
+
+
+async def test_install_same_addon_twice_gives_error(container_requester):
+    id_ = 'testaddon'
+    async with await container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+        assert status == 200
+        assert id_ in response['installed']
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+        assert status == 400
 
 
 async def test_uninstall_addons(container_requester):
@@ -286,6 +320,27 @@ async def test_uninstall_addons(container_requester):
         )
         assert status == 200
         assert response is None
+
+
+async def test_uninstall_invalid_addon(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester(
+            'DELETE',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": 'foobar'
+            })
+        )
+        assert status == 400
+
+        response, status = await requester(
+            'DELETE',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": 'testaddon'  # not installed yet...
+            })
+        )
+        assert status == 400
 
 
 async def test_get_logged_user_info(container_requester):
@@ -315,6 +370,21 @@ async def test_not_create_content_with_invalid_id(container_requester):
             })
         )
         assert status == 412
+
+
+async def test_get_api_def(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester('GET', '/@apidefinition')
+        assert status == 200
+
+
+async def test_get_subscribers(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester('GET', '/@component-subscribers')
+        resource = response['guillotina.interfaces.content.IResource']
+        modified = resource['guillotina.interfaces.events.IObjectPermissionsModifiedEvent']
+        assert modified == ['guillotina.catalog.index.security_changed']
+        assert status == 200
 
 
 async def test_move_content(container_requester):

@@ -5,8 +5,8 @@ from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
-from zope.interface import implementer
 from guillotina.profile import profilable
+from zope.interface import implementer
 
 import asyncio
 import asyncpg
@@ -33,10 +33,10 @@ GET_CHILDREN_KEYS = """
     WHERE parent_id = $1::varchar(32)
     """
 
-GET_ANNOTATIONS_KEYS = """
+GET_ANNOTATIONS_KEYS = f"""
     SELECT id
     FROM objects
-    WHERE of = $1::varchar(32)
+    WHERE of = $1::varchar(32) AND (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
     """
 
 GET_CHILD = """
@@ -59,12 +59,14 @@ HAS_OBJECT = """
     """
 
 
-GET_ANNOTATION = """
+GET_ANNOTATION = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE of = $1::varchar(32) AND id = $2::text
+    WHERE
+        of = $1::varchar(32) AND
+        id = $2::text AND
+        (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
     """
-
 
 def _wrap_return_count(txt):
     return """WITH rows AS (
@@ -259,7 +261,7 @@ class PGVacuum:
                 self._active = True
                 await self.vacuum(oid)
             except (concurrent.futures.CancelledError, RuntimeError):
-                raise  # task was cancelled, this is okay, raise and let it die
+                return  # task was cancelled, this is okay, return and let it finish
             except Exception:
                 log.warning(f'Error vacuuming oid {oid}', exc_info=True)
             finally:
