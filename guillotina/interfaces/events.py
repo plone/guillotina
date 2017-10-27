@@ -19,7 +19,8 @@ class IObjectMovedEvent(IObjectLocationEvent):
 
 
 class IBeforeObjectMovedEvent(IObjectLocationEvent):
-    pass
+    '''
+    '''
 
 
 class IObjectAddedEvent(IObjectLocationEvent):

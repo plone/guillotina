@@ -107,7 +107,8 @@ class IBehaviorAdapterFactory(Interface):
 
 
 class IContentBehavior(Interface):
-    pass
+    '''
+    '''
 
 
 class IAsyncBehavior(IContentBehavior):
@@ -117,4 +118,6 @@ class IAsyncBehavior(IContentBehavior):
     need to be called first.
     """
     def load(create=False):  # noqa: N805
-        pass
+        '''
+        load data for a behavior
+        '''

@@ -8,6 +8,7 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.json.serialize_value import json_compatible
 from guillotina.tests.utils import create_content
 from guillotina.json.deserialize_value import schema_compatible
+from datetime import datetime
 
 
 async def test_serialize_resource(dummy_request):
@@ -97,12 +98,15 @@ class ITestSchema(Interface):
     floating = schema.Float()
     list_of_text = schema.List(value_type=schema.TextLine())
     tuple_of_text = schema.Tuple(value_type=schema.TextLine())
-    set_of_text = schema.Tuple(value_type=schema.TextLine())
-    frozenset_of_text = schema.Tuple(value_type=schema.TextLine())
+    set_of_text = schema.Set(value_type=schema.TextLine())
+    frozenset_of_text = schema.FrozenSet(value_type=schema.TextLine())
     dict_value = schema.Dict(
         key_type=schema.TextLine(),
         value_type=schema.TextLine()
     )
+    datetime = schema.Datetime()
+    date = schema.Date()
+    time = schema.Time()
 
 
 async def test_deserialize_text(dummy_guillotina):
@@ -135,3 +139,9 @@ async def test_deserialize_frozenset(dummy_guillotina):
 
 async def test_deserialize_dict(dummy_guillotina):
     assert schema_compatible({'foo': 'bar'}, ITestSchema['dict_value']) == {'foo': 'bar'}
+
+
+async def test_deserialize_datetime(dummy_guillotina):
+    now = datetime.utcnow()
+    converted = schema_compatible(now.isoformat(), ITestSchema['datetime'])
+    assert converted.minute == now.minute

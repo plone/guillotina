@@ -9,22 +9,28 @@ class IFileManager(Interface):
     """Interface to create uploaders and downloaders."""
 
     async def upload(self):
-        pass
+        '''
+        '''
 
     async def download(self):
-        pass
+        '''
+        '''
 
     async def tus_post(self):
-        pass
+        '''
+        '''
 
     async def tus_patch(self):
-        pass
+        '''
+        '''
 
     async def tus_options(self):
-        pass
+        '''
+        '''
 
     async def tus_head(self):
-        pass
+        '''
+        '''
 
 
 class IFile(Interface):

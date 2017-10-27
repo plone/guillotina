@@ -15,12 +15,15 @@ class ISerializableException(IException):
 
 
 class IUnauthorized(IException):
-    pass
+    '''
+    '''
 
 
 class IForbidden(IException):
-    pass
+    '''
+    '''
 
 
 class IForbiddenAttribute(IForbidden, IAttributeError):
-    pass
+    '''
+    '''

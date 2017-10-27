@@ -127,7 +127,8 @@ class IRequest(Interface):
 class IResponse(Interface):
 
     def __init__(context, request):  # noqa: N805
-        pass
+        '''
+        '''
 
 
 class IFrameFormats(Interface):
@@ -164,7 +165,9 @@ class IAbsoluteURL(Interface):
 class IAddOn(Interface):
 
     def install(cls, container, request):  # noqa: N805
-        pass
+        '''
+        '''
 
     def uninstall(cls, container, request):  # noqa: N805
-        pass
+        '''
+        '''
