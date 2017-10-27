@@ -544,7 +544,7 @@ class FrozenSet(AbstractCollection):
         super(FrozenSet, self).__init__(unique=True, **kw)
 
 
-VALIDATED_VALUES = threading.local()
+VALIDATED_VALUES = {}
 
 
 def _validate_fields(schema, value, errors=None):
@@ -560,9 +560,9 @@ def _validate_fields(schema, value, errors=None):
     # infinite recursion. Collect validated objects in a thread local dict by
     # it's python represenation. A previous version was setting a volatile
     # attribute which didn't work with security proxy
-    if id(value) in VALIDATED_VALUES.__dict__:
+    if id(value) in VALIDATED_VALUES:
         return errors
-    VALIDATED_VALUES.__dict__[id(value)] = True
+    VALIDATED_VALUES[id(value)] = True
     # (If we have gotten here, we know that `value` provides an interface
     # other than zope.interface.Interface;
     # iow, we can rely on the fact that it is an instance
@@ -586,7 +586,7 @@ def _validate_fields(schema, value, errors=None):
                     # property for the given name is not implemented
                     errors.append(SchemaNotFullyImplemented(error))
     finally:
-        del VALIDATED_VALUES.__dict__[id(value)]
+        del VALIDATED_VALUES[id(value)]
     return errors
 
 
