@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from guillotina.component import get_multi_adapter
+from guillotina.component import get_adapter
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
@@ -78,12 +78,10 @@ class Transaction(object):
         # we *not* follow naming standards of using "_request" here so
         # get_current_request can magically find us here...
         self.request = request
-        self._strategy = get_multi_adapter(
-            (manager._storage, self), ITransactionStrategy,
-            name=manager._storage._transaction_strategy)
-        self._cache = get_multi_adapter(
-            (manager._storage, self), IStorageCache,
-            name=manager._storage._cache_strategy)
+        self._strategy = get_adapter(self, ITransactionStrategy,
+                                     name=manager._storage._transaction_strategy)
+        self._cache = get_adapter(self, IStorageCache,
+                                  name=manager._storage._cache_strategy)
 
     @property
     def strategy(self):

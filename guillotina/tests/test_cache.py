@@ -6,8 +6,8 @@ from guillotina.tests.utils import create_content
 
 class MemoryCache(BaseCache):
 
-    def __init__(self, storage, transaction):
-        super().__init__(storage, transaction)
+    def __init__(self, transaction):
+        super().__init__(transaction)
         self._cache = {}
         self._actions = []
 
@@ -49,7 +49,7 @@ async def test_cache_object(dummy_guillotina):
     tm = mocks.MockTransactionManager()
     storage = tm._storage
     txn = Transaction(tm)
-    cache = MemoryCache(storage, txn)
+    cache = MemoryCache(txn)
     txn._cache = cache
     ob = create_content()
     storage.store(ob)
@@ -67,7 +67,7 @@ async def test_cache_object_from_child(dummy_guillotina):
     tm = mocks.MockTransactionManager()
     storage = tm._storage
     txn = Transaction(tm)
-    cache = MemoryCache(storage, txn)
+    cache = MemoryCache(txn)
     txn._cache = cache
     ob = create_content()
     parent = create_content()
@@ -89,7 +89,7 @@ async def test_do_not_cache_large_object(dummy_guillotina):
     tm = mocks.MockTransactionManager()
     storage = tm._storage
     txn = Transaction(tm)
-    cache = MemoryCache(storage, txn)
+    cache = MemoryCache(txn)
     txn._cache = cache
     ob = create_content()
     ob.foobar = 'X' * cache.max_cache_record_size  # push size above cache threshold

@@ -244,24 +244,39 @@ class PGVacuum:
         return self._active
 
     async def initialize(self):
+        while not self._closed:
+            try:
+                await self._initialize()
+            except (concurrent.futures.CancelledError, RuntimeError):
+                # we're okay with the task getting cancelled
+                return
+            finally:
+                self._active = False
+
+    async def _initialize(self):
         # get existing trashed objects, push them on the queue...
         # there might be contention, but that is okay
-        conn = await self._storage.open()
+        conn = None
         try:
+            conn = await self._storage.open()
             for record in await conn.fetch(GET_TRASHED_OBJECTS):
                 self._queue.put_nowait(record['zoid'])
+        except concurrent.futures.TimeoutError:
+            log.info('Timed out connecting to storage')
         except Exception:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
-            await self._storage.close(conn)
+            if conn is not None:
+                await self._storage.close(conn)
 
         while not self._closed:
+            oid = None
             try:
                 oid = await self._queue.get()
                 self._active = True
                 await self.vacuum(oid)
             except (concurrent.futures.CancelledError, RuntimeError):
-                return  # task was cancelled, this is okay, return and let it finish
+                raise
             except Exception:
                 log.warning(f'Error vacuuming oid {oid}', exc_info=True)
             finally:

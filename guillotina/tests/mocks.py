@@ -1,4 +1,4 @@
-from guillotina.component import get_multi_adapter
+from guillotina.component import get_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
@@ -26,8 +26,8 @@ class MockTransaction:
         self._tid = 1
         self.modified = {}
         self.request = None
-        self._strategy = get_multi_adapter(
-            (manager._storage, self), ITransactionStrategy,
+        self._strategy = get_adapter(
+            self, ITransactionStrategy,
             name=manager._storage._transaction_strategy)
         self._cache = DummyCache(manager._storage, self)
 

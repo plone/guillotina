@@ -4,10 +4,15 @@ from zope.interface import Interface
 class IConstrainTypes(Interface):
 
     def __init__(context):  # noqa: N805
-        pass
+        '''
+        '''
 
     def is_type_allowed(type_id: str) -> bool:  # noqa: N805
-        pass
+        '''
+        return true if type is allowed
+        '''
 
     def get_allowed_types():
-        pass
+        '''
+        get all allowed types
+        '''

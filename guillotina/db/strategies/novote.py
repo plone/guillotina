@@ -1,6 +1,5 @@
 from guillotina import configure
 from guillotina.db.interfaces import IDBTransactionStrategy
-from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.strategies.simple import SimpleStrategy
 
@@ -11,8 +10,7 @@ logger = logging.getLogger('guillotina')
 
 
 @configure.adapter(
-    for_=(IStorage, ITransaction),
-    provides=IDBTransactionStrategy, name="novote")
+    for_=ITransaction, provides=IDBTransactionStrategy, name="novote")
 class NoVoteStrategy(SimpleStrategy):
     '''
     Get us a transaction, but we don't care about voting

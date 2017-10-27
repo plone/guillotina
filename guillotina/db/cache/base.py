@@ -8,8 +8,8 @@ class BaseCache:
 
     max_cache_record_size = 1024 * 1024 * 5  # even 5mb is quite large...
 
-    def __init__(self, storage, transaction):
-        self._storage = storage
+    def __init__(self, transaction):
+        self._storage = transaction._manager._storage
         self._transaction = transaction
 
     def get_key(self, oid=None, container=None, id=None, variant=None):

@@ -4,8 +4,8 @@ class BaseStrategy:
     '''
     Do not attempt to resolve conflicts but detect for them
     '''
-    def __init__(self, storage, transaction):
-        self._storage = storage
+    def __init__(self, transaction):
+        self._storage = transaction._manager._storage
         self._transaction = transaction
 
     @property
