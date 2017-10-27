@@ -6,7 +6,6 @@ from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.tests import docker_containers as containers
-from guillotina.tests import mocks
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 

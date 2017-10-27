@@ -9,6 +9,7 @@ from guillotina.schema._bootstrapinterfaces import IFromUnicode
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IDatetime
 from guillotina.schema.interfaces import IDict
+from guillotina.schema.interfaces import IField
 from guillotina.schema.interfaces import IFrozenSet
 from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
@@ -17,7 +18,7 @@ from guillotina.schema.interfaces import ITuple
 from zope.interface import Interface
 
 
-def schema_compatible(value, schema_or_field, context):
+def schema_compatible(value, schema_or_field, context=None):
     """The schema_compatible function converts any value to guillotina.schema
     compatible data when possible, raising a TypeError for unsupported values.
     This is done by using the ISchemaCompatible converters.
@@ -54,6 +55,9 @@ def json_dict_converter(schemafield, value, context):
 
     return value
 
+@configure.value_deserializer(for_=IField)
+def default_converter(field, value):
+    return value
 
 @configure.value_deserializer(IBool)
 def bool_converter(field, value, context):
@@ -62,8 +66,6 @@ def bool_converter(field, value, context):
 
 @configure.value_deserializer(IFromUnicode)
 def from_unicode_converter(field, value, context):
-    if not isinstance(value, str):
-        raise ValueDeserializationError(field, value, 'Not a string')
     return field.from_unicode(value)
 
 
@@ -79,21 +81,21 @@ def list_converter(field, value, context):
 def tuple_converter(field, value, context):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, 'Not an array')
-    return tuple(list_converter(value, field))
+    return tuple(list_converter(field, value, context))
 
 
 @configure.value_deserializer(ISet)
 def set_converter(field, value, context):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, 'Not an array')
-    return set(list_converter(value, field))
+    return set(list_converter(field, value, context))
 
 
 @configure.value_deserializer(IFrozenSet)
 def frozenset_converter(field, value, context):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, 'Not an array')
-    return frozenset(list_converter(value, field))
+    return frozenset(list_converter(field, value, context))
 
 
 @configure.value_deserializer(IDict)

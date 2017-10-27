@@ -34,6 +34,9 @@ class DefaultSearchUtility(object):
     async def search(self, container, query):
         pass
 
+    async def query(self, container, q):
+        pass
+
     async def get_by_uuid(self, container, uuid):
         pass
 
