@@ -11,7 +11,7 @@ Create a `utility.py` file and put the following code in it.
 ```python
 from guillotina import configure
 from guillotina.async import IAsyncUtility
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.renderers import GuillotinaJSONEncoder
 from guillotina.utils import get_authenticated_user_id, get_current_request
@@ -43,7 +43,7 @@ class MessageSenderUtility:
         self._webservices.remove(ws)
 
     async def send_message(self, message):
-        summary = await getMultiAdapter(
+        summary = await get_multi_adapter(
             (message, get_current_request()),
             IResourceSerializeToJsonSummary)()
         await self._queue.put((message, summary))
@@ -84,7 +84,7 @@ web serveices. So your `utility.py` file will now look like:
 
 ```
 from guillotina import configure
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IObjectAddedEvent, IPrincipalRoleManager
 from guillotina.utils import get_authenticated_user_id, get_current_request
 from guillotina_chat.content import IConversation, IMessage
@@ -105,6 +105,6 @@ async def container_added(conversation, event):
 
 @configure.subscriber(for_=(IMessage, IObjectAddedEvent))
 async def message_added(message, event):
-    utility = getUtility(IMessageSender)
+    utility = get_utility(IMessageSender)
     await utility.send_message(message)
 ```

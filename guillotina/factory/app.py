@@ -5,9 +5,9 @@ from guillotina import glogging
 from guillotina import languages
 from guillotina._settings import app_settings
 from guillotina.async import IAsyncUtility
-from guillotina.component import getAllUtilitiesRegisteredFor
-from guillotina.component import getUtility
-from guillotina.component import provideUtility
+from guillotina.component import get_all_utilities_registered_for
+from guillotina.component import get_utility
+from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
 from guillotina.content import load_cached_schema
@@ -29,6 +29,7 @@ from guillotina.utils import resolve_path
 from guillotina.writable import check_writable_request
 
 import aiohttp
+import aiotask_context
 import asyncio
 import json
 import logging.config
@@ -77,6 +78,7 @@ _delayed_default_settings = {
 
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
+        aiotask_context.set('request', request)
         try:
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
@@ -120,11 +122,38 @@ def list_or_dict_items(val):
     return [(k, v) for k, v in val.items()]
 
 
+_dotted_name_settings = (
+    'auth_extractors',
+    'auth_token_validators',
+    'auth_user_identifiers'
+)
+
+def optimize_settings(settings):
+    '''
+    pre-render settings that come in as strings but are used by the app
+    '''
+    for name in _dotted_name_settings:
+        if name not in settings:
+            continue
+        val = settings[name]
+        if isinstance(val, str):
+            settings[name] = resolve_dotted_name(val)
+        elif isinstance(val, list):
+            new_val = []
+            for v in val:
+                if isinstance(v, str):
+                    v = resolve_dotted_name(v)
+                new_val.append(v)
+            settings[name] = resolve_dotted_name(new_val)
+
+
 def make_app(config_file=None, settings=None, loop=None, server_app=None):
     app_settings.update(_delayed_default_settings)
 
     if loop is None:
         loop = asyncio.get_event_loop()
+
+    loop.set_task_factory(aiotask_context.task_factory)
 
     if config_file is not None:
         with open(config_file, 'r') as config:
@@ -141,7 +170,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     root = ApplicationRoot(config_file)
     root.app = server_app
     server_app.root = root
-    provideUtility(root, IApplication, 'root')
+    provide_utility(root, IApplication, 'root')
 
     # Initialize global (threadlocal) ZCA configuration
     config = root.config = server_app.config = ConfigurationMachine()
@@ -198,12 +227,12 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     language = ContentNegotiatorUtility(
         'language', app_settings['languages'].keys())
 
-    provideUtility(content_type, IContentNegotiation, 'content_type')
-    provideUtility(language, IContentNegotiation, 'language')
+    provide_utility(content_type, IContentNegotiation, 'content_type')
+    provide_utility(language, IContentNegotiation, 'language')
 
     for database in app_settings['databases']:
         for key, dbconfig in database.items():
-            factory = getUtility(
+            factory = get_utility(
                 IDatabaseConfigurationFactory, name=dbconfig['storage'])
             if asyncio.iscoroutinefunction(factory):
                 future = asyncio.ensure_future(
@@ -242,7 +271,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # Set router root
     server_app.router.set_root(root)
 
-    for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
+    for utility in get_all_utilities_registered_for(IAsyncUtility):
         # In case there is Utilties that are registered
         if hasattr(utility, 'initialize'):
             ident = asyncio.ensure_future(
@@ -259,11 +288,13 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # Load cached Schemas
     load_cached_schema()
 
+    optimize_settings(app_settings)
+
     return server_app
 
 
 async def close_utilities(app):
-    for utility in getAllUtilitiesRegisteredFor(IAsyncUtility):
+    for utility in get_all_utilities_registered_for(IAsyncUtility):
         if hasattr(utility, 'finalize'):
             asyncio.ensure_future(lazy_apply(utility.finalize, app=app), loop=app.loop)
     for db in app.router._root:

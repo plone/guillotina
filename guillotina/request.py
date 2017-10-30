@@ -1,6 +1,7 @@
 from aiohttp import web_request
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
+from guillotina.profile import profilable
 from zope.interface import implementer
 
 import asyncio
@@ -59,6 +60,7 @@ class Request(web_request.Request):
     def view_error(self):
         return self._view_error
 
+    @profilable
     def execute_futures(self):
         '''
         Should *not* be a coroutine since the deleting of

@@ -6,6 +6,7 @@ from guillotina.db.transaction import Transaction
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
+from guillotina.profile import profilable
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 
@@ -34,6 +35,7 @@ class TransactionManager(object):
             txn = self._last_txn
         return await txn.get(ROOT_ID)
 
+    @profilable
     async def begin(self, request=None):
         """Starts a new transaction.
         """
@@ -74,6 +76,7 @@ class TransactionManager(object):
 
         if user is not None:
             txn.user = user
+
         await txn.tpc_begin(db_conn)
 
         return txn

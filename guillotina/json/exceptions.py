@@ -32,6 +32,16 @@ class DeserializationError(Exception):
         }
 
 
+class ValueDeserializationError(Exception):
+    """An error happened during deserialization of content.
+    """
+
+    def __init__(self, field, value, msg):
+        self.msg = 'Error deserializing content'
+        self.field = field
+        self.value = value
+
+
 class QueryParsingError(Exception):
     """An error happened while parsing a search query.
     """

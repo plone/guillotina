@@ -12,46 +12,46 @@
 #
 ##############################################################################
 # flake8: noqa
-from zope.interface import Interface
-from zope.interface import implementedBy
-from zope.interface import moduleProvides
-from zope.interface import named
-from zope.interface import providedBy
-
+from guillotina.component._api import get_adapter
+from guillotina.component._api import get_adapters
+from guillotina.component._api import get_all_utilities_registered_for
+from guillotina.component._api import get_component_registry
+from guillotina.component._api import get_factories_for
+from guillotina.component._api import get_factory_interfaces
+from guillotina.component._api import get_multi_adapter
+from guillotina.component._api import get_utilities_for
+from guillotina.component._api import get_utility
+from guillotina.component._api import handle
+from guillotina.component._api import query_adapter
+from guillotina.component._api import query_multi_adapter
+from guillotina.component._api import query_utility
+from guillotina.component._api import subscribers
+from guillotina.component._declaration import adaptedBy
+from guillotina.component._declaration import adapter
+from guillotina.component._declaration import adapts
+from guillotina.component.globalregistry import get_global_components
+from guillotina.component.globalregistry import provide_adapter
+from guillotina.component.globalregistry import provide_handler
+from guillotina.component.globalregistry import provide_subscription_adapter
+from guillotina.component.globalregistry import provide_utility
 from guillotina.component.interfaces import ComponentLookupError
 from guillotina.component.interfaces import IComponentArchitecture
 from guillotina.component.interfaces import IComponentLookup
 from guillotina.component.interfaces import IComponentRegistrationConvenience
 from guillotina.component.interfaces import IFactory
+from zope.interface import moduleProvides
 
-from guillotina.component.globalregistry import getGlobalSiteManager
-from guillotina.component.globalregistry import globalSiteManager
-from guillotina.component.globalregistry import provideAdapter
-from guillotina.component.globalregistry import provideHandler
-from guillotina.component.globalregistry import provideSubscriptionAdapter
-from guillotina.component.globalregistry import provideUtility
 
-from guillotina.component._api import adapter_hook
-from guillotina.component._api import getAdapter
-from guillotina.component._api import getAdapterInContext
-from guillotina.component._api import getAdapters
-from guillotina.component._api import getAllUtilitiesRegisteredFor
-from guillotina.component._api import getFactoriesFor
-from guillotina.component._api import getFactoryInterfaces
-from guillotina.component._api import getMultiAdapter
-from guillotina.component._api import getSiteManager
-from guillotina.component._api import getUtilitiesFor
-from guillotina.component._api import getUtility
-from guillotina.component._api import handle
-from guillotina.component._api import queryAdapter
-from guillotina.component._api import queryAdapterInContext
-from guillotina.component._api import queryMultiAdapter
-from guillotina.component._api import queryUtility
-from guillotina.component._api import subscribers
+# b/w compat imports. Will be removed in 3.0
+getMultiAdapter = get_multi_adapter
+queryMultiAdapter = query_multi_adapter
+getAdapter = get_adapter
+queryAdapter = query_adapter
+getUtility = get_utility
+queryUtility = query_utility
+getUtilitiesFor = get_utilities_for
+getAdapters = get_adapters
 
-from guillotina.component._declaration import adaptedBy
-from guillotina.component._declaration import adapter
-from guillotina.component._declaration import adapts
 
 moduleProvides(IComponentArchitecture, IComponentRegistrationConvenience)
 __all__ = tuple(IComponentArchitecture)

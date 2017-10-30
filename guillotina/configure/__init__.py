@@ -8,9 +8,11 @@ from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorSchemaAwareFactory
 from guillotina.interfaces import IDefaultLayer
+from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IRole
+from guillotina.interfaces import IValueToJson
 from guillotina.security.permission import Permission
 from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
@@ -330,6 +332,11 @@ def load_json_schema_definition(_context, json_schema):
 register_configuration_handler('json_schema_definition', load_json_schema_definition)  # noqa
 
 
+# serializers are just adapters
+register_configuration_handler('value_serializer', load_adapter)
+register_configuration_handler('value_deserializer', load_adapter)
+
+
 class _base_decorator(object):  # noqa: N801
     configuration_type = ''
 
@@ -379,6 +386,22 @@ class service(_base_decorator):  # noqa: N801
             self.config['module'] = func
             register_configuration(_View, self.config, 'service')
         return func
+
+
+class value_serializer(_base_decorator):  # noqa: N801
+    configuration_type = 'value_serializer'
+    provides = IValueToJson
+
+    def __init__(self, for_, **config):
+        assert type(for_) not in (list, set, tuple)
+        config['for_'] = for_
+        config['provides'] = self.provides
+        self.config = config
+
+
+class value_deserializer(value_serializer):  # noqa: N801
+    configuration_type = 'value_deserializer'
+    provides = IJSONToValue
 
 
 class contenttype(_base_decorator):  # noqa: N801

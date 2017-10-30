@@ -1,28 +1,7 @@
 # -*- coding: utf-8 -*-
-from setuptools import Extension
 from setuptools import find_packages
 from setuptools import setup
 
-import os
-import platform
-import sys
-
-
-py_impl = getattr(platform, 'python_implementation', lambda: None)
-pure_python = os.environ.get('PURE_PYTHON', False)
-is_pypy = py_impl() == 'PyPy'
-is_jython = 'java' in sys.platform
-
-
-if pure_python or is_pypy or is_jython:
-    ext_modules = []
-else:
-    optimization_path = os.path.join('guillotina', 'optimizations.c')
-    ext_modules = [
-        Extension(
-            'guillotina.optimizations',
-            sources=[optimization_path]),
-    ]
 
 setup(
     name='guillotina',
@@ -50,7 +29,6 @@ setup(
     include_package_data=True,
     package_data={'': ['*.txt', '*.rst', 'guillotina/documentation/meta/*.json']},
     packages=find_packages(),
-    ext_modules=ext_modules,
     install_requires=[
         'aiohttp>=2.0.0,<2.3.0',
         'jsonschema',
@@ -63,7 +41,8 @@ setup(
         'pyjwt',
         'asyncpg',
         'cffi',
-        'PyYAML'
+        'PyYAML',
+        'aiotask_context'
     ],
     extras_require={
         'test': [

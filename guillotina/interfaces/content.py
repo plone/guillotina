@@ -76,31 +76,38 @@ class ITraversable(Interface):
     """
 
     def get(name):  # noqa: N805
-        pass
+        '''
+        '''
 
 
 class IApplication(ITraversable):
-    pass
+    '''
+    '''
 
 
 class IDatabase(ITraversable, IAsyncContainer):
     def get_transaction_manager():
-        pass
+        '''
+        '''
 
     def open():
-        pass
+        '''
+        '''
 
 
 class IStaticFile(Interface):
-    pass
+    '''
+    '''
 
 
 class IStaticDirectory(ITraversable):
-    pass
+    '''
+    '''
 
 
 class IJavaScriptApplication(IStaticDirectory):
-    pass
+    '''
+    '''
 
 
 class ILocation(Interface):
@@ -179,7 +186,8 @@ class IResourceFactory(IFactory):
 
 
 class IFolder(IResource, IAsyncContainer, ITraversable):
-    pass
+    '''
+    '''
 
 
 class IContainer(IResource, IAsyncContainer, ITraversable, IComponentSite):
@@ -191,19 +199,23 @@ class IContainer(IResource, IAsyncContainer, ITraversable, IComponentSite):
 
 
 class IItem(IResource):
-    pass
+    '''
+    '''
 
 
 class IContentNegotiation(Interface):
-    pass
+    '''
+    '''
 
 
 class IAnnotations(Interface):
-    pass
+    '''
+    '''
 
 
 class IAnnotationData(Interface):
-    pass
+    '''
+    '''
 
 
 class IGroupFolder(IFolder):

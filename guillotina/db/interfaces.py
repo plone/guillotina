@@ -19,79 +19,119 @@ class IStorage(Interface):
     '''
 
     async def finalize():
-        pass
+        '''
+        Run cleanup
+        '''
 
     async def initialize(loop):
-        pass
+        '''
+        Initialize database
+        '''
 
     async def remove():
-        pass
+        '''
+        Remove database
+        '''
 
     async def load(txn, oid):
-        pass
+        '''
+        load ob from oid
+        '''
 
     async def store(oid, old_serial, writer, obj, txn):
-        pass
+        '''
+        store oid with obj
+        '''
 
     async def delete(txn, oid):
-        pass
+        '''
+        delete ob by oid
+        '''
 
     async def get_next_tid(txn):
-        pass
+        '''
+        get next transaction id
+        '''
 
     async def start_transaction(txn):
-        pass
+        '''
+        start transaction
+        '''
 
     async def get_current_tid(txn):
-        pass
+        '''
+        Get current tid
+        '''
 
     async def get_conflicts(txn, full=False):
-        pass
+        '''
+        get conflicted ob writes
+        '''
 
     async def commit(txn):
-        pass
+        '''
+        Commit current transaction
+        '''
 
     async def abort(txn):
-        pass
+        '''
+        abort transaction
+        '''
 
     async def keys(txn, oid):
-        pass
+        '''
+        get keys for oid
+        '''
 
     async def get_child(txn, parent_oid, id):
-        pass
+        '''
+        get child of parent oid
+        '''
 
     async def has_key(txn, parent_oid, id):
-        pass
+        '''
+        check if key exists
+        '''
 
     async def len(txn, oid):
-        pass
+        '''
+        get length of folder
+        '''
 
     async def items(txn, oid):
-        pass
+        '''
+        get items in a folder
+        '''
 
     async def get_annotation(txn, oid, id):
-        pass
+        '''
+        get annotation
+        '''
 
     async def get_annotation_keys(txn, oid):
-        pass
+        '''
+        get annotation keys
+        '''
 
     async def write_blob_chunk(txn, bid, oid, chunk_index, data):
-        pass
+        '''
+        write blob chunk
+        '''
 
     async def read_blob_chunk(txn, bid, chunk=0):
-        pass
+        '''
+        read blob chunk
+        '''
 
     async def read_blob_chunks(txn, bid):
-        pass
+        '''
+        read blob chunks
+        '''
 
     async def del_blob(txn, bid):
-        pass
-
-    async def get_total_number_of_objects(txn):
-        pass
-
-    async def get_total_number_of_resources(txn):
-        pass
+        '''
+        delete blob
+        '''
 
 
 class IPostgresStorage(IStorage):
@@ -123,19 +163,31 @@ class IDBTransactionStrategy(ITransactionStrategy):
 class IStorageCache(Interface):
 
     async def clear():
-        pass
+        '''
+        clear cache
+        '''
 
     async def get(oid=None, container=None, id=None, variant=None):
-        pass
+        '''
+        get cached object
+        '''
 
     async def set(value, oid=None, container=None, id=None, variant=None):
-        pass
+        '''
+        set cached data
+        '''
 
     async def delete(key):
-        pass
+        '''
+        delete cache key
+        '''
 
     async def delete_all(keys):
-        pass
+        '''
+        delete list of keys
+        '''
 
     async def close():
-        pass
+        '''
+        close the cache
+        '''

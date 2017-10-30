@@ -18,13 +18,13 @@ class Test_dispatch(unittest.TestCase):
 
     def test_it(self):
         from zope.interface import Interface
-        from guillotina.component.globalregistry import getGlobalSiteManager
+        from guillotina.component.globalregistry import get_global_components
         from guillotina.component.event import dispatch
         _adapted = []
         def _adapter(context):
             _adapted.append(context)
             return object()
-        gsm = getGlobalSiteManager()
+        gsm = get_global_components()
         gsm.registerHandler(_adapter, (Interface,))
         del _adapted[:] # clear handler reg
         event = object()

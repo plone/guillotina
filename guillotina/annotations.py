@@ -75,4 +75,6 @@ class AnnotationsAdapter(object):
         ))
 
     async def async_del(self, key):
-        raise NotImplemented()
+        annotation = await self.async_get(key)
+        if annotation is not None:
+            self.obj._p_jar.delete(annotation)

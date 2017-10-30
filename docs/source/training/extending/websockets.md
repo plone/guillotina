@@ -10,7 +10,7 @@ Create a `ws.py` file and put the following code in:
 ```python
 from aiohttp import web
 from guillotina import configure
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IContainer
 from guillotina.transactions import get_tm
 from guillotina_chat.utility import IMessageSender
@@ -26,7 +26,7 @@ logger = logging.getLogger('guillotina_chat')
     permission='guillotina.AccessContent', name='@conversate')
 async def ws_conversate(context, request):
     ws = web.WebSocketResponse()
-    utility = getUtility(IMessageSender)
+    utility = get_utility(IMessageSender)
     utility.register_ws(ws, request)
 
     tm = get_tm(request)
@@ -48,7 +48,7 @@ async def ws_conversate(context, request):
 ```
 
 
-Here, we use the `utility = getUtility(IMessageSender)` to get our async
+Here, we use the `utility = get_utility(IMessageSender)` to get our async
 utility we defined previously. Then we register our webservice with
 `utility.register_ws(ws, request)`.
 

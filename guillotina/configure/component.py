@@ -13,11 +13,11 @@
 ##############################################################################
 """Component Architecture configuration handlers
 """
-from guillotina.component._api import getSiteManager
+from guillotina.component._api import get_component_registry
 from guillotina.component._compat import _BLANK
 from guillotina.component._declaration import adaptedBy
 from guillotina.component._declaration import getName
-from guillotina.component.interface import provideInterface
+from guillotina.component.interface import provide_interface
 from guillotina.exceptions import ComponentConfigurationError
 from guillotina.i18n import MessageFactory
 from zope.interface import implementedBy
@@ -29,7 +29,7 @@ _ = MessageFactory('guillotina')
 
 
 def handler(method_name, *args, **kwargs):
-    method = getattr(getSiteManager(), method_name)
+    method = getattr(get_component_registry(), method_name)
     method(*args, **kwargs)
 
 
@@ -88,14 +88,14 @@ def adapter(_context, factory, provides=None, for_=None, name=''):
         args=('registerAdapter', factory, for_, provides, name))
     _context.action(
         discriminator=None,
-        callable=provideInterface,
+        callable=provide_interface,
         args=('', provides))
     if for_:
         for iface in for_:
             if iface is not None:
                 _context.action(
                     discriminator=None,
-                    callable=provideInterface,
+                    callable=provide_interface,
                     args=('', iface))
 
 
@@ -139,7 +139,7 @@ def subscriber(_context, for_=None, factory=None, handler=None, provides=None):
     if provides is not None:
         _context.action(
             discriminator=None,
-            callable=provideInterface,
+            callable=provide_interface,
             args=('', provides))
 
     # For each interface, state that the adapter provides that interface.
@@ -147,7 +147,7 @@ def subscriber(_context, for_=None, factory=None, handler=None, provides=None):
         if iface is not None:
             _context.action(
                 discriminator=None,
-                callable=provideInterface,
+                callable=provide_interface,
                 args=('', iface))
 
 
@@ -178,14 +178,14 @@ def utility(_context, provides=None, component=None, factory=None, name=''):
         kw=dict(factory=factory))
     _context.action(
         discriminator=None,
-        callable=provideInterface,
+        callable=provide_interface,
         args=('', provides))
 
 
 def interface(_context, interface, type=None, name=''):
     _context.action(
         discriminator=None,
-        callable=provideInterface,
+        callable=provide_interface,
         args=(name, interface, type))
 
 
@@ -220,7 +220,7 @@ def view(_context, factory, type, name, for_, provides=Interface):
 
     _context.action(
         discriminator=None,
-        callable=provideInterface,
+        callable=provide_interface,
         args=('', provides))
 
     if for_ is not None:
@@ -228,7 +228,7 @@ def view(_context, factory, type, name, for_, provides=Interface):
             if iface is not None:
                 _context.action(
                     discriminator=None,
-                    callable=provideInterface,
+                    callable=provide_interface,
                     args=('', iface))
 
 
@@ -240,9 +240,9 @@ def resource(_context, factory, type, name, provides=Interface):
         args=('registerAdapter', factory, (type,), provides, name))
     _context.action(
         discriminator=None,
-        callable=provideInterface,
+        callable=provide_interface,
         args=('', type))
     _context.action(
         discriminator=None,
-        callable=provideInterface,
+        callable=provide_interface,
         args=('', provides))

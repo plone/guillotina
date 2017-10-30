@@ -1,11 +1,10 @@
 from guillotina import configure
 from guillotina.db.cache.base import BaseCache
-from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 
 
-@configure.adapter(for_=(IStorage, ITransaction), provides=IStorageCache, name="dummy")
+@configure.adapter(for_=ITransaction, provides=IStorageCache, name="dummy")
 class DummyCache(BaseCache):
 
     async def get(self, **kwargs):

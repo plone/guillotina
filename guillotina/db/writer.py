@@ -1,6 +1,6 @@
 from guillotina import configure
 from guillotina._settings import app_settings
-from guillotina.component import queryAdapter
+from guillotina.component import query_adapter
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
@@ -70,6 +70,6 @@ class ResourceWriter(Writer):
     async def get_json(self):
         if not app_settings.get('store_json', True):
             return {}
-        adapter = queryAdapter(self._obj, ICatalogDataAdapter)
+        adapter = query_adapter(self._obj, ICatalogDataAdapter)
         if adapter is not None:
             return await adapter()

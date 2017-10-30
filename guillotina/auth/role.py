@@ -1,5 +1,5 @@
 from guillotina._settings import app_settings
-from guillotina.component import getUtilitiesFor
+from guillotina.component import get_utilities_for
 from guillotina.interfaces import IRole
 from zope.interface import implementer
 
@@ -15,7 +15,7 @@ class Role(object):
 
 
 def check_role(context, role_id):
-    names = [name for name, util in getUtilitiesFor(IRole, context)]
+    names = [name for name, util in get_utilities_for(IRole, context)]
     if role_id not in names:
         raise ValueError("Undefined role id", role_id)
 
@@ -23,7 +23,7 @@ def check_role(context, role_id):
 def local_roles():
     if 'local_roles' in app_settings:
         return app_settings['local_roles']
-    names = [name for name, util in getUtilitiesFor(IRole) if util.local]
+    names = [name for name, util in get_utilities_for(IRole) if util.local]
     app_settings['local_roles'] = names
     return names
 
@@ -31,6 +31,6 @@ def local_roles():
 def global_roles():
     if 'global_roles' in app_settings:
         return app_settings['global_roles']
-    names = [name for name, util in getUtilitiesFor(IRole) if not util.local]
+    names = [name for name, util in get_utilities_for(IRole) if not util.local]
     app_settings['global_roles'] = names
     return names

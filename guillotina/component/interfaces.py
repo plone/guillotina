@@ -12,32 +12,30 @@
 #
 ############################################################################
 # flake8: noqa
+from guillotina.component._compat import _BLANK
 from zope.interface import Attribute
-from zope.interface import Interface
 from zope.interface import implements
-
+from zope.interface import Interface
 # BBB 2011-09-09, import interfaces from zope.interface
-from zope.interface.interfaces import ComponentLookupError
-from zope.interface.interfaces import Invalid
-from zope.interface.interfaces import IObjectEvent
-from zope.interface.interfaces import ObjectEvent
-from zope.interface.interfaces import IComponentLookup
-from zope.interface.interfaces import IRegistration
-from zope.interface.interfaces import IUtilityRegistration
 from zope.interface.interfaces import _IBaseAdapterRegistration
+from zope.interface.interfaces import ComponentLookupError
 from zope.interface.interfaces import IAdapterRegistration
-from zope.interface.interfaces import ISubscriptionAdapterRegistration
-from zope.interface.interfaces import IHandlerRegistration
-from zope.interface.interfaces import IRegistrationEvent
-from zope.interface.interfaces import RegistrationEvent
-from zope.interface.interfaces import IRegistered
-from zope.interface.interfaces import Registered
-from zope.interface.interfaces import IUnregistered
-from zope.interface.interfaces import Unregistered
+from zope.interface.interfaces import IComponentLookup
 from zope.interface.interfaces import IComponentRegistry
 from zope.interface.interfaces import IComponents
-
-from guillotina.component._compat import _BLANK
+from zope.interface.interfaces import IHandlerRegistration
+from zope.interface.interfaces import Invalid
+from zope.interface.interfaces import IObjectEvent
+from zope.interface.interfaces import IRegistered
+from zope.interface.interfaces import IRegistration
+from zope.interface.interfaces import IRegistrationEvent
+from zope.interface.interfaces import ISubscriptionAdapterRegistration
+from zope.interface.interfaces import IUnregistered
+from zope.interface.interfaces import IUtilityRegistration
+from zope.interface.interfaces import ObjectEvent
+from zope.interface.interfaces import Registered
+from zope.interface.interfaces import RegistrationEvent
+from zope.interface.interfaces import Unregistered
 
 
 class IComponentArchitecture(Interface):
@@ -47,14 +45,14 @@ class IComponentArchitecture(Interface):
     """
     # Site Manager API
 
-    def getGlobalSiteManager():
+    def get_global_components():
         """Return the global site manager.
 
         This function should never fail and always return an object that
         provides `IGlobalSiteManager`.
         """
 
-    def getSiteManager(context=None):
+    def get_component_registry(context=None):
         """Get the nearest site manager in the given context.
 
         If `context` is `None`, return the global site manager.
@@ -67,7 +65,7 @@ class IComponentArchitecture(Interface):
 
     # Utility API
 
-    def getUtility(interface, name='', context=None):
+    def get_utility(interface, name='', context=None):
         """Get the utility that provides interface
 
         Returns the nearest utility to the context that implements the
@@ -75,20 +73,20 @@ class IComponentArchitecture(Interface):
         ComponentLookupError.
         """
 
-    def queryUtility(interface, name='', default=None, context=None):
+    def query_utility(interface, name='', default=None, context=None):
         """Look for the utility that provides interface
 
         Returns the nearest utility to the context that implements
         the specified interface.  If one is not found, returns default.
         """
 
-    def getUtilitiesFor(interface, context=None):
+    def get_utilities_for(interface, context=None):
         """Return the utilities that provide an interface
 
         An iterable of utility name-value pairs is returned.
         """
 
-    def getAllUtilitiesRegisteredFor(interface, context=None):
+    def get_all_utilities_registered_for(interface, context=None):
         """Return all registered utilities for an interface
 
         This includes overridden utilities.
@@ -99,9 +97,9 @@ class IComponentArchitecture(Interface):
 
     # Adapter API
 
-    def getAdapter(object,
-                   interface=Interface, name=_BLANK,
-                   context=None):
+    def get_adapter(object,
+                    interface=Interface, name=_BLANK,
+                    context=None):
         """Get a named adapter to an interface for an object
 
         Returns an adapter that can adapt object to interface.  If a matching
@@ -114,31 +112,9 @@ class IComponentArchitecture(Interface):
         and this adapter's 'Adapters' service is used.
         """
 
-    def getAdapterInContext(object, interface, context):
-        """Get a special adapter to an interface for an object
-
-        NOTE: This method should only be used if a custom context
-        needs to be provided to provide custom component
-        lookup. Otherwise, call the interface, as in::
-
-           interface(object)
-
-        Returns an adapter that can adapt object to interface.  If a matching
-        adapter cannot be found, raises ComponentLookupError.
-
-        Context is adapted to IServiceService, and this adapter's
-        'Adapters' service is used.
-
-        If the object has a __conform__ method, this method will be
-        called with the requested interface.  If the method returns a
-        non-None value, that value will be returned. Otherwise, if the
-        object already implements the interface, the object will be
-        returned.
-        """
-
-    def getMultiAdapter(objects,
-                        interface=Interface, name='',
-                        context=None):
+    def get_multi_adapter(objects,
+                          interface=Interface, name='',
+                          context=None):
         """Look for a multi-adapter to an interface for an objects
 
         Returns a multi-adapter that can adapt objects to interface.  If a
@@ -155,8 +131,8 @@ class IComponentArchitecture(Interface):
         named adapter methods with an empty string for a name.
         """
 
-    def queryAdapter(object, interface=Interface, name=_BLANK,
-                     default=None, context=None):
+    def query_adapter(object, interface=Interface, name=_BLANK,
+                      default=None, context=None):
         """Look for a named adapter to an interface for an object
 
         Returns an adapter that can adapt object to interface.  If a matching
@@ -169,32 +145,10 @@ class IComponentArchitecture(Interface):
         and this adapter's 'Adapters' service is used.
         """
 
-    def queryAdapterInContext(object, interface, context, default=None):
-        """Look for a special adapter to an interface for an object
-
-        NOTE: This method should only be used if a custom context
-        needs to be provided to provide custom component
-        lookup. Otherwise, call the interface, as in::
-
-           interface(object, default)
-
-        Returns an adapter that can adapt object to interface.  If a matching
-        adapter cannot be found, returns the default.
-
-        Context is adapted to IServiceService, and this adapter's
-        'Adapters' service is used.
-
-        If the object has a __conform__ method, this method will be
-        called with the requested interface.  If the method returns a
-        non-None value, that value will be returned. Otherwise, if the
-        object already implements the interface, the object will be
-        returned.
-        """
-
-    def queryMultiAdapter(objects,
-                          interface=Interface, name=_BLANK,
-                          default=None,
-                          context=None):
+    def query_multi_adapter(objects,
+                            interface=Interface, name=_BLANK,
+                            default=None,
+                            context=None):
         """Look for a multi-adapter to an interface for objects
 
         Returns a multi-adapter that can adapt objects to interface.  If a
@@ -211,7 +165,7 @@ class IComponentArchitecture(Interface):
         named adapter methods with an empty string for a name.
         """
 
-    def getAdapters(objects, provided, context=None):
+    def get_adapters(objects, provided, context=None):
         """Look for all matching adapters to a provided interface for objects
 
         Return a list of adapters that match. If an adapter is named, only the
@@ -259,7 +213,7 @@ class IComponentArchitecture(Interface):
         """
 
     # Factory service
-    def getFactoryInterfaces(name, context=None):
+    def get_factory_interfaces(name, context=None):
         """Get interfaces implemented by a factory
 
         Finds the factory of the given name that is nearest to the
@@ -267,7 +221,7 @@ class IComponentArchitecture(Interface):
         object instances created by the named factory will implement.
         """
 
-    def getFactoriesFor(interface, context=None):
+    def get_factories_for(interface, context=None):
         """Return a tuple (name, factory) of registered factories that
         create objects which implement the given interface.
         """
@@ -290,7 +244,7 @@ class IComponentRegistrationConvenience(Interface):
     activity.
     """
 
-    def provideUtility(component, provides=None, name=_BLANK):
+    def provide_utility(component, provides=None, name=_BLANK):
         """Register a utility globally
 
         A utility is registered to provide an interface with a
@@ -306,7 +260,7 @@ class IComponentRegistrationConvenience(Interface):
 
         """
 
-    def provideAdapter(factory, adapts=None, provides=None, name=_BLANK):
+    def provide_adapter(factory, adapts=None, provides=None, name=_BLANK):
         """Register an adapter globally
 
         An adapter is registered to provide an interface with a name
@@ -326,7 +280,7 @@ class IComponentRegistrationConvenience(Interface):
         activity.
         """
 
-    def provideSubscriptionAdapter(factory, adapts=None, provides=None):
+    def provide_subscription_adapter(factory, adapts=None, provides=None):
         """Register a subscription adapter
 
         A subscription adapter is registered to provide an interface
@@ -346,7 +300,7 @@ class IComponentRegistrationConvenience(Interface):
         activity.
         """
 
-    def provideHandler(handler, adapts=None):
+    def provide_handler(handler, adapts=None):
         """Register a handler
 
         Handlers are subscription adapter factories that don't produce
@@ -372,7 +326,7 @@ class IPossibleSite(Interface):
         """Sets the site manager for this object.
         """
 
-    def getSiteManager():
+    def get_component_registry():
         """Returns the site manager contained in this object.
 
         If there isn't a site manager, raise a component lookup.

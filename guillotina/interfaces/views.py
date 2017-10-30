@@ -4,16 +4,19 @@ from zope.interface import Interface
 class IView(Interface):
 
     def __init__(context, request):  # noqa: N805
-        pass
+        '''
+        '''
 
     async def __call__(self):
-        pass
+        '''
+        '''
 
 
 class ITraversableView(IView):
 
     async def publish_traverse(traverse_to):  # noqa: N805
-        pass
+        '''
+        '''
 
 
 class IDownloadView(IView):

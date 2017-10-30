@@ -10,9 +10,9 @@ from guillotina.api.service import Service
 from guillotina.auth.role import local_roles
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
-from guillotina.component import getMultiAdapter
-from guillotina.component import getUtility
-from guillotina.component import queryMultiAdapter
+from guillotina.component import get_multi_adapter
+from guillotina.component import get_utility
+from guillotina.component import query_multi_adapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
 from guillotina.content import get_all_behaviors
@@ -47,6 +47,7 @@ from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.utils import convert_interfaces_to_schema
+from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
@@ -106,8 +107,9 @@ async def default_head(context, request):
         "type": "string"
     }])
 class DefaultGET(Service):
+    @profilable
     async def __call__(self):
-        serializer = getMultiAdapter(
+        serializer = get_multi_adapter(
             (self.context, self.request),
             IResourceSerializeToJson)
         include = omit = []
@@ -143,6 +145,7 @@ class DefaultGET(Service):
     })
 class DefaultPOST(Service):
 
+    @profilable
     async def __call__(self):
         """To create a content."""
         data = await self.get_data()
@@ -195,7 +198,7 @@ class DefaultPOST(Service):
             obj.add_behavior(behavior)
 
         # Update fields
-        deserializer = queryMultiAdapter((obj, self.request),
+        deserializer = query_multi_adapter((obj, self.request),
                                          IResourceDeserializeFromJson)
         if deserializer is None:
             return ErrorResponse(
@@ -213,21 +216,21 @@ class DefaultPOST(Service):
                 status=400)
 
         # Local Roles assign owner as the creator user
-        get_owner = getUtility(IGetOwner)
+        get_owner = get_utility(IGetOwner)
         roleperm = IPrincipalRoleManager(obj)
         roleperm.assign_role_to_principal(
             'guillotina.Owner', await get_owner(obj, user))
 
         await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
 
-        absolute_url = queryMultiAdapter((obj, self.request), IAbsoluteURL)
+        absolute_url = query_multi_adapter((obj, self.request), IAbsoluteURL)
 
         headers = {
             'Access-Control-Expose-Headers': 'Location',
             'Location': absolute_url()
         }
 
-        serializer = queryMultiAdapter(
+        serializer = query_multi_adapter(
             (obj, self.request),
             IResourceSerializeToJson
         )
@@ -250,17 +253,24 @@ class DefaultPOST(Service):
 class DefaultPATCH(Service):
     async def __call__(self):
         data = await self.get_data()
+
+        if 'id' in data and data['id'] != self.context.id:
+            return ErrorResponse(
+                'DeserializationError',
+                'Not allowed to change id of content.',
+                status=412)
+
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
             self.context.add_behavior(behavior)
 
-        deserializer = queryMultiAdapter((self.context, self.request),
+        deserializer = query_multi_adapter((self.context, self.request),
                                          IResourceDeserializeFromJson)
         if deserializer is None:
             return ErrorResponse(
                 'DeserializationError',
                 'Cannot deserialize type {}'.format(self.context.type_name),
-                status=501)
+                status=412)
 
         try:
             await deserializer(data)
@@ -268,7 +278,7 @@ class DefaultPATCH(Service):
             return ErrorResponse(
                 'DeserializationError',
                 str(e),
-                status=400)
+                status=422)
 
         await notify(ObjectModifiedEvent(self.context, payload=data))
 
@@ -571,7 +581,7 @@ class DefaultOPTIONS(Service):
                 "destination": {
                     "type": "string",
                     "description": "Absolute path to destination object from container",
-                    "required": True
+                    "required": False
                 },
                 "new_id": {
                     "type": "string",
@@ -592,11 +602,8 @@ async def move(context, request):
     except Exception:
         data = {}
     destination = data.get('destination')
-    if not destination:
-        return ErrorResponse(
-            'Configuration',
-            'Missing destination option',
-            status=400)
+    if destination is None:
+        destination_ob = context.__parent__
     try:
         destination_ob = await navigate_to(request.container, destination)
     except KeyError:
@@ -646,7 +653,7 @@ async def move(context, request):
     cache_keys += txn._cache.get_cache_keys(context, 'added')
     await txn._cache.delete_all(cache_keys)
 
-    absolute_url = queryMultiAdapter((context, request), IAbsoluteURL)
+    absolute_url = query_multi_adapter((context, request), IAbsoluteURL)
     return {
         '@url': absolute_url()
     }

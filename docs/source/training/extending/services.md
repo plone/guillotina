@@ -13,7 +13,7 @@ in a file named `services.py`.
 
 ```python
 from guillotina import configure
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IContainer, IResourceSerializeToJsonSummary
 from guillotina.utils import get_authenticated_user_id
 from guillotina_chat.content import IConversation
@@ -27,7 +27,7 @@ async def get_conversations(context, request):
     user_id = get_authenticated_user_id(request)
     async for conversation in conversations.async_values():
         if user_id in getattr(conversation, 'users', []):
-            summary = await getMultiAdapter(
+            summary = await get_multi_adapter(
                 (conversation, request),
                 IResourceSerializeToJsonSummary)()
             results.append(summary)
@@ -40,7 +40,7 @@ async def get_conversations(context, request):
 async def get_messages(context, request):
     results = []
     async for message in context.async_values():
-        summary = await getMultiAdapter(
+        summary = await get_multi_adapter(
             (message, request),
             IResourceSerializeToJsonSummary)()
         results.append(summary)

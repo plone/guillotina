@@ -3,7 +3,7 @@ from guillotina.api import content
 from guillotina.api.service import Service
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.content import create_content
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
@@ -35,7 +35,7 @@ from guillotina.utils import get_authenticated_user_id
     })
 class DefaultGET(Service):
     async def __call__(self):
-        serializer = getMultiAdapter(
+        serializer = get_multi_adapter(
             (self.context, self.request),
             IResourceSerializeToJson)
         return await serializer()

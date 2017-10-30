@@ -1,5 +1,5 @@
 from guillotina.async import IQueueUtility
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.testing import AsyncMockView
 from guillotina.tests import utils
@@ -17,10 +17,10 @@ QUEUE_UTILITY_CONFIG = {
 async def test_add_sync_utility(guillotina, loop):
     requester = await guillotina
 
-    app = getUtility(IApplication, name='root')
+    app = get_utility(IApplication, name='root')
     app.add_async_utility(QUEUE_UTILITY_CONFIG, loop)
 
-    util = getUtility(IQueueUtility)
+    util = get_utility(IQueueUtility)
     var = []
 
     async def printHi(msg):

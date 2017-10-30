@@ -1,5 +1,5 @@
 from guillotina._settings import app_settings
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IContentNegotiation
 from guillotina.interfaces import IDownloadView
 from guillotina.interfaces import IRendererFormatRaw
@@ -812,7 +812,7 @@ def content_type_negotiation(request, resource, view):
         # or if no or */* accept header provided
         return IRendererFormatRaw
 
-    np = getUtility(IContentNegotiation, 'content_type')
+    np = get_utility(IContentNegotiation, 'content_type')
     ap = np.negotiate(accept=accept)
     # We need to check for the accept
     if str(ap.content_type) in app_settings['renderers']:
@@ -831,11 +831,14 @@ def language_negotiation(request):
     else:
         accept_lang = 'en'
 
-    np = getUtility(IContentNegotiation, 'language')
+    np = get_utility(IContentNegotiation, 'language')
     ap = np.negotiate(accept_language=accept_lang)
     # We need to check for the accept
     if ap is None:
         language = app_settings['languages']['en']
     else:
-        language = app_settings['languages'][str(ap.language)]
+        if str(ap.language) in app_settings['languages']:
+            language = app_settings['languages'][str(ap.language)]
+        else:
+            language = app_settings['languages']['en']
     return language

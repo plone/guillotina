@@ -2,7 +2,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from guillotina import configure
 from guillotina.component._api import subscribers as component_subscribers
-from guillotina.component._api import getSiteManager
+from guillotina.component._api import get_component_registry
 from guillotina.component.interfaces import ComponentLookupError
 from guillotina.component.interfaces import IObjectEvent
 from guillotina.interfaces import IObjectModifiedEvent
@@ -23,7 +23,7 @@ def modified_object(obj, event):
 async def object_event_notify(event):
     """Dispatch ObjectEvents to interested adapters."""
     try:
-        sitemanager = getSiteManager()
+        sitemanager = get_component_registry()
     except ComponentLookupError:
         # Oh blast, no site manager. This should *never* happen!
         return []

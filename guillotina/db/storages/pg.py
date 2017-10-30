@@ -5,6 +5,7 @@ from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
+from guillotina.profile import profilable
 from zope.interface import implementer
 
 import asyncio
@@ -32,10 +33,10 @@ GET_CHILDREN_KEYS = """
     WHERE parent_id = $1::varchar(32)
     """
 
-GET_ANNOTATIONS_KEYS = """
+GET_ANNOTATIONS_KEYS = f"""
     SELECT id
     FROM objects
-    WHERE of = $1::varchar(32)
+    WHERE of = $1::varchar(32) AND (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
     """
 
 GET_CHILD = """
@@ -58,12 +59,14 @@ HAS_OBJECT = """
     """
 
 
-GET_ANNOTATION = """
+GET_ANNOTATION = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE of = $1::varchar(32) AND id = $2::text
+    WHERE
+        of = $1::varchar(32) AND
+        id = $2::text AND
+        (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
     """
-
 
 def _wrap_return_count(txt):
     return """WITH rows AS (
@@ -241,24 +244,39 @@ class PGVacuum:
         return self._active
 
     async def initialize(self):
+        while not self._closed:
+            try:
+                await self._initialize()
+            except (concurrent.futures.CancelledError, RuntimeError):
+                # we're okay with the task getting cancelled
+                return
+            finally:
+                self._active = False
+
+    async def _initialize(self):
         # get existing trashed objects, push them on the queue...
         # there might be contention, but that is okay
-        conn = await self._storage.open()
+        conn = None
         try:
+            conn = await self._storage.open()
             for record in await conn.fetch(GET_TRASHED_OBJECTS):
-                await self._queue.put(record['zoid'])
+                self._queue.put_nowait(record['zoid'])
+        except concurrent.futures.TimeoutError:
+            log.info('Timed out connecting to storage')
         except Exception:
             log.warn('Error deleting trashed object', exc_info=True)
         finally:
-            await self._storage.close(conn)
+            if conn is not None:
+                await self._storage.close(conn)
 
         while not self._closed:
+            oid = None
             try:
                 oid = await self._queue.get()
                 self._active = True
                 await self.vacuum(oid)
             except (concurrent.futures.CancelledError, RuntimeError):
-                pass  # task was cancelled, probably because we're shutting down
+                raise
             except Exception:
                 log.warning(f'Error vacuuming oid {oid}', exc_info=True)
             finally:
@@ -343,6 +361,7 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
         'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
         'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
+        'CREATE INDEX IF NOT EXISTS object_type ON objects (type);',
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
@@ -384,7 +403,11 @@ class PostgresqlStorage(BaseStorage):
         statements.extend(self._initialize_statements)
 
         for statement in statements:
-            await self._read_conn.execute(statement)
+            try:
+                await self._read_conn.execute(statement)
+            except asyncpg.exceptions.UniqueViolationError:
+                # this is okay on creation, means 2 getting created at same time
+                pass
 
         await self.initialize_tid_statements()
         # migrate old transaction table scheme over
@@ -444,7 +467,7 @@ class PostgresqlStorage(BaseStorage):
             if self._vacuum._closed:
                 # if it's closed, we know this is expected
                 return
-            log.warning('Vacuum pg task closed. This should not happen. '
+            log.warning('Vacuum pg task ended. This should not happen. '
                         'No database vacuuming will be done here anymore.')
 
         self._vacuum_task.add_done_callback(vacuum_done)
@@ -471,7 +494,8 @@ class PostgresqlStorage(BaseStorage):
     async def close(self, con):
         try:
             await shield(self._pool.release(con))
-        except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError):
+        except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError,
+                RuntimeError):
             pass
 
     async def load(self, txn, oid):
@@ -489,6 +513,7 @@ Old Object TID: {old_serial}
 Belongs to: {writer.of}
 Parent ID: {writer.id}'''
 
+    @profilable
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 

@@ -1,6 +1,6 @@
 from guillotina._settings import app_settings
 from guillotina.commands import Command
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.testing import TESTING_SETTINGS
 
@@ -82,7 +82,7 @@ class InteractiveEventLoop(asyncio.SelectorEventLoop):
         locals that matter to us...
         '''
         app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
-        root = getUtility(IApplication, name='root')
+        root = get_utility(IApplication, name='root')
         helpers = ShellHelpers(app, root, self.request)
         _locals = {
             'app': app,

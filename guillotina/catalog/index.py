@@ -1,6 +1,6 @@
 from guillotina import configure
 from guillotina.api.search import AsyncCatalogReindex
-from guillotina.component import queryUtility
+from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IGroupFolder
@@ -29,7 +29,7 @@ class IndexFuture(object):
             return
 
         # Commits are run in sync thread so there is no asyncloop
-        search = queryUtility(ICatalogUtility)
+        search = query_utility(ICatalogUtility)
         if search:
             if len(self.remove) > 0:
                 await search.remove(self.container, self.remove)
@@ -48,7 +48,7 @@ def get_future():
     request = get_current_request()
     try:
         container = request.container
-        search = queryUtility(ICatalogUtility)
+        search = query_utility(ICatalogUtility)
     except (AttributeError, KeyError):
         return
 
@@ -116,7 +116,7 @@ async def add_object(obj, event):
     fut = get_future()
     if fut is None:
         return
-    search = queryUtility(ICatalogUtility)
+    search = query_utility(ICatalogUtility)
     if search:
         if IObjectModifiedEvent.providedBy(event):
             indexes = []
@@ -135,13 +135,13 @@ async def add_object(obj, event):
 
 @configure.subscriber(for_=(IContainer, IObjectAddedEvent))
 async def initialize_catalog(container, event):
-    search = queryUtility(ICatalogUtility)
+    search = query_utility(ICatalogUtility)
     if search:
         await search.initialize_catalog(container)
 
 
 @configure.subscriber(for_=(IContainer, IObjectRemovedEvent))
 async def remove_catalog(container, event):
-    search = queryUtility(ICatalogUtility)
+    search = query_utility(ICatalogUtility)
     if search:
         await search.remove_catalog(container)

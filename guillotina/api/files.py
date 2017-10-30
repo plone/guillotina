@@ -5,7 +5,7 @@ from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
 from guillotina.api.service import TraversableDownloadService
 from guillotina.api.service import TraversableFieldService
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
@@ -88,7 +88,7 @@ class UploadFile(TraversableFieldService):
             await self.behavior.load(create=True)
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        adapter = getMultiAdapter(
+        adapter = get_multi_adapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.upload()
 
@@ -102,7 +102,7 @@ class DownloadFile(TraversableDownloadService):
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        adapter = getMultiAdapter(
+        adapter = get_multi_adapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.download()
 
@@ -165,7 +165,7 @@ class TusCreateFile(UploadFile):
             await self.behavior.load(create=True)
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        adapter = getMultiAdapter(
+        adapter = get_multi_adapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.tus_create()
 
@@ -194,7 +194,7 @@ class TusHeadFile(UploadFile):
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        adapter = getMultiAdapter(
+        adapter = get_multi_adapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.tus_head()
 
@@ -227,7 +227,7 @@ class TusPatchFile(UploadFile):
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        adapter = getMultiAdapter(
+        adapter = get_multi_adapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.tus_patch()
 
@@ -259,6 +259,6 @@ class TusOptionsFile(DefaultOPTIONS, UploadFile):
     async def render(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        adapter = getMultiAdapter(
+        adapter = get_multi_adapter(
             (self.context, self.request, self.field), IFileManager)
         return await adapter.tus_options()

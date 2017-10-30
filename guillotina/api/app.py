@@ -1,7 +1,7 @@
 from guillotina import component
 from guillotina import configure
 from guillotina._settings import app_settings
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.utils import get_dotted_name
@@ -20,7 +20,7 @@ from guillotina.utils import get_dotted_name
         }
     })
 async def get(context, request):
-    serializer = getMultiAdapter(
+    serializer = get_multi_adapter(
         (context, request),
         IResourceSerializeToJson)
     return await serializer()
@@ -43,7 +43,7 @@ async def get_api_definition(context, request):
 async def get_all_subscribers(context, request):
     subscribers = {
     }
-    sm = component.getGlobalSiteManager()
+    sm = component.get_global_components()
     for registration in sm.registeredHandlers():
         if len(registration.required) != 2:
             continue

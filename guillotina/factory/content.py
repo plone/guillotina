@@ -1,9 +1,9 @@
 from concurrent.futures import ThreadPoolExecutor
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
-from guillotina.component import getGlobalSiteManager
-from guillotina.component import getUtility
-from guillotina.component import provideUtility
+from guillotina.component import get_global_components
+from guillotina.component import get_utility
+from guillotina.component import provide_utility
 from guillotina.db import ROOT_ID
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -38,7 +38,7 @@ class ApplicationRoot(object):
             logger.error('Error initializing utility {}'.format(repr(factory)),
                          exc_info=True)
             raise
-        provideUtility(utility_object, interface)
+        provide_utility(utility_object, interface)
         if hasattr(utility_object, 'initialize'):
             task = asyncio.ensure_future(
                 lazy_apply(utility_object.initialize, app=self.app), loop=loop)
@@ -65,8 +65,8 @@ class ApplicationRoot(object):
     def del_async_utility(self, config):
         self.cancel_async_utility(config['provides'])
         interface = import_class(config['provides'])
-        utility = getUtility(interface)
-        gsm = getGlobalSiteManager()
+        utility = get_utility(interface)
+        gsm = get_global_components()
         gsm.unregisterUtility(utility, provided=interface)
         del self._async_utilities[config['provides']]
 

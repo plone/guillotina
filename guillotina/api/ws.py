@@ -5,8 +5,8 @@ from guillotina import logger
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.browser import Response
-from guillotina.component import getUtility
-from guillotina.component import queryMultiAdapter
+from guillotina.component import get_utility
+from guillotina.component import query_multi_adapter
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -90,7 +90,7 @@ class WebsocketsView(Service):
             view_name = tail[0]
             traverse_to = tail[1:]
 
-        permission = getUtility(
+        permission = get_utility(
             IPermission, name='guillotina.AccessContent')
 
         allowed = IInteraction(self.request).check_permission(
@@ -102,7 +102,7 @@ class WebsocketsView(Service):
             ws.send_str(ujson.dumps(response))
 
         try:
-            view = queryMultiAdapter(
+            view = query_multi_adapter(
                 (obj, self.request), method, name=view_name)
         except AttributeError:
             view = None

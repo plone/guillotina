@@ -10,19 +10,11 @@ class ContextProperty(object):
         if inst is None:
             return self
 
-        if hasattr(inst.context, self.__name__):
-            return getattr(inst.context, self.__name__, self.default)
-        else:
-            raise AttributeError('{field} not found on {context}'.format(
-                field=self.__name__, context=str(inst.context)))
+        return getattr(inst.context, self.__name__, self.default)
 
     def __set__(self, inst, value):
-        if hasattr(inst.context, self.__name__):
-            setattr(inst.context, self.__name__, value)
-            inst.context._p_register()
-        else:
-            raise AttributeError('{field} not found on {context}'.format(
-                field=self.__name__, context=str(inst.context)))
+        setattr(inst.context, self.__name__, value)
+        inst.context._p_register()
 
 
 class FunctionProperty(object):

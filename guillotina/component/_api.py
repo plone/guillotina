@@ -11,7 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-# flake8: noqa
+from guillotina.component import globalregistry
 from guillotina.component._compat import _BLANK
 from guillotina.component._declaration import adapter  # noqa
 from guillotina.component.hookable import hookable
@@ -19,139 +19,114 @@ from guillotina.component.interfaces import ComponentLookupError
 from guillotina.component.interfaces import IComponentLookup
 from guillotina.component.interfaces import IFactory
 from zope.interface import Interface
+from zope.interface import providedBy
 
-import sys
 import zope.interface.interface
 
 
-# getSiteManager() returns a component registry.  Although the term
-# "site manager" is deprecated in favor of "component registry",
-# the old term is kept around to maintain a stable API.
-base = None
-
-
 @hookable
-def getSiteManager(context=None):
+def get_component_registry(context=None):
     """ See IComponentArchitecture.
     """
-    global base
     if context is None:
-        if base is None:
-            from guillotina.component.globalregistry import base
-        return base
+        return globalregistry.base
     else:
         # Use the global site manager to adapt context to `IComponentLookup`
-        # to avoid the recursion implied by using a local `getAdapter()` call.
+        # to avoid the recursion implied by using a local `get_adapter()` call.
         try:
             return IComponentLookup(context)
         except TypeError as error:
             raise ComponentLookupError(*error.args)
 
 
-def getAdapterInContext(object, interface, context):
-    adapter_ = queryAdapterInContext(object, interface, context)
-    if adapter_ is None:
-        raise ComponentLookupError(object, interface)
-    return adapter_
-
-
-def queryAdapterInContext(object, interface, context, default=None):
-    conform = getattr(object, '__conform__', None)
-    if conform is not None:
-        try:
-            adapter_ = conform(interface)
-        except TypeError:
-            # We got a TypeError. It might be an error raised by
-            # the __conform__ implementation, or *we* may have
-            # made the TypeError by calling an unbound method
-            # (object is a class).  In the later case, we behave
-            # as though there is no __conform__ method. We can
-            # detect this case by checking whether there is more
-            # than one traceback object in the traceback chain:
-            if sys.exc_info()[2].tb_next is not None:
-                # There is more than one entry in the chain, so
-                # reraise the error:
-                raise
-            # This clever trick is from Phillip Eby
-        else:
-            if adapter_ is not None:
-                return adapter_
-
-    if interface.providedBy(object):
-        return object
-
-    return getSiteManager(context).queryAdapter(object, interface, '', default)
-
-
-def getAdapter(object, interface=Interface, name=_BLANK, context=None):
-    adapter_ = queryAdapter(object, interface, name, None, context)
+def get_adapter(object, interface=Interface, name=_BLANK, context=None,
+                args=[], kwargs={}):
+    adapter_ = query_adapter(object, interface, name, None, context, args=args, kwargs=kwargs)
     if adapter_ is None:
         raise ComponentLookupError(object, interface, name)
     return adapter_
 
 
-def queryAdapter(object, interface=Interface, name=_BLANK, default=None,
-                 context=None):
+def query_adapter(object, interface=Interface, name=_BLANK, default=None,
+                  context=None, args=[], kwargs={}):
     if context is None:
-        return adapter_hook(interface, object, name, default)
-    return getSiteManager(context).queryAdapter(object, interface, name,
-                                                default)
+        return adapter_hook(interface, object, name, default, args=args, kwargs=kwargs)
+    return get_component_registry(context).queryAdapter(
+        object, interface, name, default)
 
 
-def getMultiAdapter(objects, interface=Interface, name=_BLANK, context=None):
-    adapter_ = queryMultiAdapter(objects, interface, name, context=context)
+def get_multi_adapter(objects, interface=Interface, name=_BLANK, context=None,
+                      args=[], kwargs={}):
+    adapter_ = query_multi_adapter(
+        objects, interface, name, context=context, args=args, kwargs=kwargs)
     if adapter_ is None:
         raise ComponentLookupError(objects, interface, name)
     return adapter_
 
 
-def queryMultiAdapter(objects, interface=Interface, name=_BLANK, default=None,
-                      context=None):
+def query_multi_adapter(objects, interface=Interface, name=_BLANK, default=None,
+                        context=None, args=[], kwargs={}):
     try:
-        sitemanager = getSiteManager(context)
+        registry = get_component_registry(context)
     except ComponentLookupError:
         # Oh blast, no site manager. This should *never* happen!
         return default
 
-    return sitemanager.queryMultiAdapter(objects, interface, name, default)
+    factory = registry.adapters.lookup(map(providedBy, objects), interface, name)
+    if factory is None:
+        return default
+
+    result = factory(*objects, *args, **kwargs)
+    if result is None:
+        return default
+
+    return result
 
 
-def getAdapters(objects, provided, context=None):
+def get_adapters(objects, provided, context=None):
     try:
-        sitemanager = getSiteManager(context)
+        registry = get_component_registry(context)
     except ComponentLookupError:
         # Oh blast, no site manager. This should *never* happen!
         return []
-    return sitemanager.getAdapters(objects, provided)
+    return registry.getAdapters(objects, provided)
 
 
 def subscribers(objects, interface, context=None):
     try:
-        sitemanager = getSiteManager(context)
+        registry = get_component_registry(context)
     except ComponentLookupError:
         # Oh blast, no site manager. This should *never* happen!
         return []
-    return sitemanager.subscribers(objects, interface)
+    return registry.subscribers(objects, interface)
 
 
 def handle(*objects):
-    getSiteManager(None).subscribers(objects, None)
+    get_component_registry(None).subscribers(objects, None)
 
 #############################################################################
 # Register the component architectures adapter hook, with the adapter hook
 # registry of the `zope.inteface` package. This way we will be able to call
-# interfaces to create adapters for objects. For example, `I1(ob)` is
-# equvalent to `getAdapterInContext(I1, ob, '')`.
+# interfaces to create adapters for objects.
 
 
 @hookable
-def adapter_hook(interface, object, name='', default=None):
+def adapter_hook(interface, object, name='', default=None, args=[], kwargs={}):
     try:
-        sitemanager = getSiteManager()
+        registry = get_component_registry()
     except ComponentLookupError:  # pragma NO COVER w/o context, cannot test
         # Oh blast, no site manager. This should *never* happen!
         return None
-    return sitemanager.queryAdapter(object, interface, name, default)
+
+    factory = registry.adapters.lookup((providedBy(object),), interface, name)
+    if factory is None:
+        return default
+
+    result = factory(object, *args, **kwargs)
+    if result is None:
+        return default
+
+    return result
 
 
 zope.interface.interface.adapter_hooks.append(adapter_hook)
@@ -160,40 +135,40 @@ zope.interface.interface.adapter_hooks.append(adapter_hook)
 
 # Utility API
 
-def getUtility(interface, name='', context=None):
-    utility = queryUtility(interface, name, context=context)
+def get_utility(interface, name='', context=None):
+    utility = query_utility(interface, name, context=context)
     if utility is not None:
         return utility
     raise ComponentLookupError(interface, name)
 
 
-def queryUtility(interface, name='', default=None, context=None):
-    return getSiteManager(context).queryUtility(interface, name, default)
+def query_utility(interface, name='', default=None, context=None):
+    return get_component_registry(context).queryUtility(interface, name, default)
 
 
-def getUtilitiesFor(interface, context=None):
-    return getSiteManager(context).getUtilitiesFor(interface)
+def get_utilities_for(interface, context=None):
+    return get_component_registry(context).getUtilitiesFor(interface)
 
 
-def getAllUtilitiesRegisteredFor(interface, context=None):
-    return getSiteManager(context).getAllUtilitiesRegisteredFor(interface)
+def get_all_utilities_registered_for(interface, context=None):
+    return get_component_registry(context).getAllUtilitiesRegisteredFor(interface)
 
 
 _marker = object()
 
 
-def getFactoryInterfaces(name, context=None):
+def get_factory_interfaces(name, context=None):
     """Return the interface provided by the named factory's objects
 
     Result might be a single interface. XXX
     """
-    return getUtility(IFactory, name, context).get_interfaces()
+    return get_utility(IFactory, name, context).get_interfaces()
 
 
-def getFactoriesFor(interface, context=None):
+def get_factories_for(interface, context=None):
     """Return info on all factories implementing the given interface.
     """
-    utils = getSiteManager(context)
+    utils = get_component_registry(context)
     for (name, factory) in utils.getUtilitiesFor(IFactory):
         interfaces = factory.get_interfaces()
         try:

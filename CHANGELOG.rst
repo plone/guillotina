@@ -1,7 +1,45 @@
-1.6.2 (unreleased)
-------------------
+2.0.0a1 (unreleased)
+--------------------
 
-- Nothing changed yet.
+- Make components more pythonic:
+    - guillotina.component.getMultiAdapter -> get_multi_adapter
+    - guillotina.component.getAdapter -> get_adapter
+    - guillotina.component.getUtility -> get_utility
+    - guillotina.component.queryUtility -> query_utility
+    - guillotina.component.getUtilitiesFor -> get_utilities_for
+    - guillotina.component.getAllUtilitiesRegisteredFor -> get_all_utilities_registered_for
+    - guillotina.component.getGlobalSiteManager -> get_global_components
+    - guillotina.component.provideUtility -> provide_utility
+  [vangheem]
+
+- Allow passing arguments to component lookup factories with `args=[]` and `kwargs={}` params
+  [vangheem]
+
+- Optimize serialization framework to use less and faster adapter lookups
+  [vangheem]
+
+- Added `guillotina.profile.profilable` decorator to be able to tell line_profiler
+  what functions to profile.
+
+- Integrate line_profiler with `--line-profiler`, `--line-profiler-matcher="*foobar*"`
+  and `--line-profiler-output`.
+  [vangheem]
+
+- Pre-render resolve_dotted_name on authentication plugins
+  [vangheem]
+
+- Implement aiotask_context for request object lookup
+  [vangheem]
+
+- Add `@configure.value_deserializer` and `@configure.value_serializer`
+  configurators
+  [vangheem]
+
+- Remove transform framework
+  [vangheem]
+
+- Remove RichText since it was not used and didn't make much sense
+  [vangheem]
 
 
 1.6.1 (2017-10-20)

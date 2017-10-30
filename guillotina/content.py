@@ -11,9 +11,9 @@ from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.behaviors import apply_markers
 from guillotina.browser import get_physical_path
-from guillotina.component import getUtilitiesFor
-from guillotina.component import getUtility
-from guillotina.component import queryUtility
+from guillotina.component import get_utilities_for
+from guillotina.component import get_utility
+from guillotina.component import query_utility
 from guillotina.component.factory import Factory
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
@@ -42,6 +42,7 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
+from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
@@ -110,7 +111,7 @@ class ResourceFactory(Factory):
 
 
 def load_cached_schema():
-    for x in getUtilitiesFor(IResourceFactory):
+    for x in get_utilities_for(IResourceFactory):
         factory = x[1]
         if factory.type_name not in SCHEMA_CACHE:
             FACTORY_CACHE[factory.type_name] = factory
@@ -120,12 +121,12 @@ def load_cached_schema():
                     name = iface.__identifier__
                 else:
                     name = iface
-                behaviors_registrations.append(getUtility(IBehavior, name=name))
+                behaviors_registrations.append(get_utility(IBehavior, name=name))
             SCHEMA_CACHE[factory.type_name] = {
                 'behaviors': behaviors_registrations,
                 'schema': factory.schema
             }
-    for iface, utility in getUtilitiesFor(IBehavior):
+    for iface, utility in get_utilities_for(IBehavior):
         if isinstance(iface, str):
             name = iface
         elif Interface.providedBy(iface):
@@ -138,7 +139,7 @@ def get_cached_factory(type_name):
     if type_name in FACTORY_CACHE:
         factory = FACTORY_CACHE[type_name]
     else:
-        factory = getUtility(IResourceFactory, type_name)
+        factory = get_utility(IResourceFactory, type_name)
         FACTORY_CACHE[type_name] = factory
     return factory
 
@@ -158,7 +159,7 @@ def get_all_possible_schemas_for_type(type_name):
         result.add(factory.schema)
     for schema in factory.behaviors or ():
         result.add(schema)
-    for iface, utility in getUtilitiesFor(IBehavior):
+    for iface, utility in get_utilities_for(IBehavior):
         if utility.for_.isEqualOrExtendedBy(factory.schema):
             result.add(utility.interface)
     return [b for b in result]
@@ -172,6 +173,7 @@ def iter_schemata(obj):
         yield schema
 
 
+@profilable
 async def create_content(type_, **kw):
     """Utility to create a content.
 
@@ -191,6 +193,7 @@ async def create_content(type_, **kw):
     return obj
 
 
+@profilable
 async def create_content_in_container(container, type_, id_, request=None, **kw):
     """Utility to create a content.
 
@@ -203,7 +206,7 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
         if factory.add_permission in PERMISSIONS_CACHE:
             permission = PERMISSIONS_CACHE[factory.add_permission]
         else:
-            permission = queryUtility(IPermission, name=factory.add_permission)
+            permission = query_utility(IPermission, name=factory.add_permission)
             PERMISSIONS_CACHE[factory.add_permission] = permission
 
         if request is None:
@@ -369,7 +372,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             name = iface.__identifier__
         else:
             raise AttributeError('Cant identify Interface')
-        behavior_registration = getUtility(IBehavior, name=name)
+        behavior_registration = get_utility(IBehavior, name=name)
         if behavior_registration is not None and\
                 behavior_registration.interface(self) is not None:
             # We can adapt so we can apply this dynamic behavior
@@ -387,7 +390,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             name = iface
         elif Interface.providedBy(iface):
             name = iface.__identifier__
-        behavior_registration = getUtility(IBehavior, name=name)
+        behavior_registration = get_utility(IBehavior, name=name)
         if behavior_registration is not None and\
                 behavior_registration.marker is not None:
             noLongerProvides(self, behavior_registration.marker)

@@ -1,15 +1,15 @@
+from functools import partial
 from guillotina import configure
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.files.utils import convert_base64_to_binary
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IContentBehavior
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IFileManager
-from guillotina.interfaces import IJSONToValue
-from guillotina.interfaces import IValueToJson
 from guillotina.schema import Object
 from guillotina.schema.fieldproperty import FieldProperty
 from guillotina.utils import get_content_path
+from guillotina.utils import get_current_request
 from guillotina.utils import to_str
 from zope.interface import implementer
 
@@ -38,7 +38,7 @@ class CloudFileField(Object):
         super(CloudFileField, self).__init__(schema=self.schema, **kw)
 
 
-@configure.adapter(for_=IFile, provides=IValueToJson)
+@configure.value_serializer(for_=IFile)
 def json_converter(value):
     if value is None:
         return value
@@ -153,26 +153,21 @@ class BaseCloudFile:
         raise NotImplemented()
 
 
-@configure.adapter(
-    for_=(str, ICloudFileField),
-    provides=IJSONToValue)
-class CloudFileStrDeserializeValue:
+async def _generator(value):
+    yield value['data']
 
-    def __init__(self, value, field):
-        self.value = convert_base64_to_binary(value)
-        self.field = field
 
-    async def generator(self):
-        yield self.value['data']
-
-    async def __call__(self, context, request):
-        if IContentBehavior.implementedBy(context.__class__):
-            field = self.field.bind(context)
-            context = context.context
-        else:
-            field = self.field.bind(context)
-        file_manager = getMultiAdapter((context, request, field), IFileManager)
-        val = await file_manager.save_file(
-            self.generator, content_type=self.value['content_type'],
-            size=len(self.value['data']))
-        return val
+@configure.value_deserializer(ICloudFileField)
+async def deserialize_cloud_field(field, value, context):
+    request = get_current_request()
+    value = convert_base64_to_binary(value)
+    if IContentBehavior.implementedBy(context.__class__):
+        field = field.bind(context)
+        context = context.context
+    else:
+        field = field.bind(context)
+    file_manager = get_multi_adapter((context, request, field), IFileManager)
+    val = await file_manager.save_file(
+        partial(_generator, value), content_type=value['content_type'],
+        size=len(value['data']))
+    return val

@@ -1,7 +1,6 @@
 from guillotina import configure
 from guillotina import glogging
 from guillotina.db.interfaces import IDBTransactionStrategy
-from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.strategies.base import BaseStrategy
 
@@ -10,8 +9,7 @@ logger = glogging.getLogger('guillotina')
 
 
 @configure.adapter(
-    for_=(IStorage, ITransaction),
-    provides=IDBTransactionStrategy, name="simple")
+    for_=ITransaction, provides=IDBTransactionStrategy, name="simple")
 class SimpleStrategy(BaseStrategy):
     '''
     Do not attempt to resolve conflicts but detect for them

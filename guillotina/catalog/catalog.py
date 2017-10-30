@@ -1,5 +1,5 @@
 from guillotina import configure
-from guillotina.component import queryAdapter
+from guillotina.component import query_adapter
 from guillotina.content import iter_schemata
 from guillotina.directives import index
 from guillotina.directives import merged_tagged_value_dict
@@ -32,6 +32,9 @@ class DefaultSearchUtility(object):
         pass
 
     async def search(self, container, query):
+        pass
+
+    async def query(self, container, q):
         pass
 
     async def get_by_uuid(self, container, uuid):
@@ -84,7 +87,7 @@ class DefaultSearchUtility(object):
 
     async def get_data(self, content, indexes=None):
         data = {}
-        adapter = queryAdapter(content, ICatalogDataAdapter)
+        adapter = query_adapter(content, ICatalogDataAdapter)
         if adapter:
             data.update(await adapter(indexes))
         return data

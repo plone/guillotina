@@ -1,5 +1,5 @@
 from guillotina.blob import Blob
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.content import create_content_in_container
 from guillotina.interfaces import IApplication
 from guillotina.tests.utils import get_mocked_request
@@ -8,7 +8,7 @@ from guillotina.transactions import managed_transaction
 
 
 async def test_create_blob(postgres, guillotina_main):
-    root = getUtility(IApplication, name='root')
+    root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)
     login(request)
@@ -29,7 +29,7 @@ async def test_create_blob(postgres, guillotina_main):
 
 
 async def test_write_blob_data(postgres, guillotina_main):
-    root = getUtility(IApplication, name='root')
+    root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)
     login(request)
@@ -55,7 +55,7 @@ async def test_write_blob_data(postgres, guillotina_main):
 
 
 async def test_write_large_blob_data(postgres, guillotina_main):
-    root = getUtility(IApplication, name='root')
+    root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)
     login(request)

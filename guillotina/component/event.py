@@ -13,7 +13,7 @@
 ##############################################################################
 # flake8: noqa
 from guillotina.component._api import subscribers as component_subscribers
-from guillotina.component._api import getSiteManager
+from guillotina.component._api import get_component_registry
 from guillotina.component.interfaces import ComponentLookupError
 
 
@@ -27,7 +27,7 @@ def dispatch(*event):
 
 async def async_dispatch(*event):
     try:
-        sitemanager = getSiteManager()
+        sitemanager = get_component_registry()
     except ComponentLookupError:
         # Oh blast, no site manager. This should *never* happen!
         return []

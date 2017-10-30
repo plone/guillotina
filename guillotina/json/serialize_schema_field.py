@@ -1,11 +1,10 @@
 from guillotina import configure
-from guillotina.component import getMultiAdapter
+from guillotina.component import get_multi_adapter
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
-from guillotina.interfaces import IRichText
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
-from guillotina.interfaces import IValueToJson
+from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import getFields
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IChoice
@@ -80,12 +79,12 @@ class DefaultSchemaFieldSerializer(object):
             elif isinstance(value, str):
                 text = value
             elif IField.providedBy(value):
-                serializer = getMultiAdapter(
+                serializer = get_multi_adapter(
                     (value, self.field, self.request),
                     ISchemaFieldSerializeToJson)
                 text = await serializer()
             elif value is not None and (force or value != self.field.missing_value):
-                text = IValueToJson(value)
+                text = json_compatible(value)
 
             # handle i18n
             # if isinstance(value, Message):
@@ -105,7 +104,7 @@ class DefaultSchemaFieldSerializer(object):
             if IJSONField.providedBy(self.field):
                 result['properties'] = self.field.json_schema
             else:
-                schema_serializer = getMultiAdapter((self.field.schema, self.request),
+                schema_serializer = get_multi_adapter((self.field.schema, self.request),
                                                     ISchemaSerializeToJson)
                 result['properties'] = await schema_serializer()
         return result
@@ -224,16 +223,6 @@ class DefaultObjectSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return 'object'
-
-
-@configure.adapter(
-    for_=(IRichText, Interface, Interface),
-    provides=ISchemaFieldSerializeToJson)
-class DefaultRichTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
-
-    @property
-    def field_type(self):
-        return 'string'
 
 
 @configure.adapter(

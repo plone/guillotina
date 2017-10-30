@@ -1,9 +1,9 @@
-from guillotina.component import getUtility
+from guillotina.component import get_utility
 from guillotina.interfaces import IContentNegotiation
 
 
 def test_negotiate_html_accept_header(dummy_guillotina):
-    np = getUtility(IContentNegotiation, 'content_type')
+    np = get_utility(IContentNegotiation, 'content_type')
     ap = np.negotiate(
         accept='text/html,application/xhtml+xml,application/xml;'
                'q=0.9,image/webp,image/apng,*/*;q=0.8')
@@ -11,7 +11,7 @@ def test_negotiate_html_accept_header(dummy_guillotina):
 
 
 def test_negotiate_complex_accept_header(dummy_guillotina):
-    np = getUtility(IContentNegotiation, 'content_type')
+    np = get_utility(IContentNegotiation, 'content_type')
     ap = np.negotiate(
         accept='application/vnd.google.protobuf;'
                'proto=io.prometheus.client.MetricFamily;'

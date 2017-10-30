@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina import glogging
-from guillotina.component import queryMultiAdapter
-from guillotina.component import queryUtility
+from guillotina.component import ComponentLookupError
+from guillotina.component import get_adapter
+from guillotina.component import query_utility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
@@ -10,16 +11,19 @@ from guillotina.directives import write_permission
 from guillotina.exceptions import NoInteraction
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.interfaces import IResourceFieldDeserializer
 from guillotina.json.exceptions import DeserializationError
+from guillotina.json.exceptions import ValueDeserializationError
 from guillotina.schema import getFields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
 from zope.interface import Interface
 from zope.interface.exceptions import Invalid
+
+import asyncio
 
 
 logger = glogging.getLogger('guillotina')
@@ -90,21 +94,17 @@ class DeserializeFromJson(object):
                 if not self.check_permission(write_permissions.get(name)):
                     continue
 
-                # Deserialize to field value
-                deserializer = queryMultiAdapter(
-                    (f, obj, self.request),
-                    IResourceFieldDeserializer)
-                if deserializer is None:
-                    continue
-
                 try:
-                    value = await apply_coroutine(deserializer, data_value)
+                    value = await self.get_value(f, obj, data_value)
                 except ValueError as e:
                     errors.append({
                         'message': e.message, 'field': name, 'error': e})
                 except ValidationError as e:
                     errors.append({
                         'message': e.doc(), 'field': name, 'error': e})
+                except ValueDeserializationError as e:
+                    errors.append({
+                        'message': e.message, 'field': name, 'error': e})
                 except Invalid as e:
                     errors.append({
                         'message': e.args[0], 'field': name, 'error': e})
@@ -140,13 +140,24 @@ class DeserializeFromJson(object):
                         'error': e
                     })
 
+    async def get_value(self, field, obj, value):
+        try:
+            value = get_adapter(field, IJSONToValue, args=[value, obj])
+            if asyncio.iscoroutine(value):
+                value = await value
+            field.validate(value)
+            return value
+        except ComponentLookupError:
+            raise ValueDeserializationError(
+                field, value, 'Deserializer not found for field')
+
     def check_permission(self, permission_name):
         if permission_name is None:
             return True
 
         if permission_name not in self.permission_cache:
-            permission = queryUtility(IPermission,
-                                      name=permission_name)
+            permission = query_utility(IPermission,
+                                       name=permission_name)
             if permission is None:
                 self.permission_cache[permission_name] = True
             else:
