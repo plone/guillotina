@@ -13,6 +13,7 @@ from guillotina.browser import Response
 from guillotina.browser import UnauthorizedResponse
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
+from guillotina.component import query_adapter
 from guillotina.component import query_multi_adapter
 from guillotina.contentnegotiation import content_type_negotiation
 from guillotina.contentnegotiation import language_negotiation
@@ -354,9 +355,8 @@ class TraversalRouter(AbstractRouter):
 
         await self.apply_authorization(request)
 
-        translator = query_multi_adapter(
-            (language_object, resource, request),
-            ITranslated)
+        translator = query_adapter(language_object, ITranslated,
+                                   args=[resource, request])
         if translator is not None:
             resource = translator.translate()
 
