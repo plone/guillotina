@@ -17,7 +17,7 @@ By default request has participation of anonymous user plus the ones added by au
 
 ## Databases, Application and static files objects
 
-Databases and static files has an specific permission system. They don't have roles by default
+Databases and static files have a specific permission system. They don't have roles by default
 and the permissions are specified to root user
 
  * guillotina.AddContainer
@@ -88,9 +88,9 @@ Defined at:
 
 ## Default roles on Guillotina Container
 
-They are stored in annotations using IRolePermissionMap.
+They are stored in annotations using `IRolePermissionMap`.
 
-Created objects set the guillotina.Owner role to the user who created it.
+Created objects set the `guillotina.Owner` role to the user who created it.
 
 ## Default groups on Guillotina Container
 

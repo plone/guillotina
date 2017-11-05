@@ -39,11 +39,9 @@ Detailed Documentation
 What is Guillotina like?
 ========================
 
-
 Example configuration:
 
 .. literalinclude:: examples/config.yaml
-
 
 Example service:
 
@@ -52,7 +50,6 @@ Example service:
 Example content type:
 
 .. literalinclude:: examples/ct.py
-
 
 Example usage:
 

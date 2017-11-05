@@ -3,9 +3,7 @@
 This section is meant to explain and defend the design of `guillotina`.
 
 
-
 ## JavaScript application development focus
-
 
 One of the main driving factors behind the development of `guillotina` is to
 streamline the development of custom web applications.
@@ -55,8 +53,8 @@ Finally, we also support web sockets OOTB.
 
 `Guillotina` uses the same great security infrastructure that Plone
 has been using for the last 15 years which allows you to define permissions, roles,
-groups, users and customize all of them contextual based on where the content
-is location in your container.
+groups, users and customize all of them contextually based on where the content
+is located in your container.
 
 
 ## Style

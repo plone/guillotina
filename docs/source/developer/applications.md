@@ -13,12 +13,12 @@ Some useful addons to use in your own development:
 
 ## Creating
 
-An application is a python package that implements an entry point to tell guillotina
+An application is a Python package that implements an entry point to tell guillotina
 to load it.
 
-If you're not familiar with how to build python applications, please
+If you're not familiar with how to build Python applications, please
 [read documentation on building packages](https://python-packaging.readthedocs.io/en/latest/)
-before you continue on.
+before you continue.
 
 In this example, `guillotina_myaddon` is your package module.
 
@@ -42,7 +42,7 @@ Once you create a `guillotina` application, there are two primary ways for it
 to hook into `guillotina`.
 
 
-### Call includeme function
+### Call the `includeme` function
 
 Your application can provide an `includeme` function at the root of the module
 and `guillotina` will call it with the instance of the `root` object.
@@ -54,8 +54,8 @@ def includeme(root):
   pass
 ```
 
-### Load app_settings
+### Load `app_settings`
 
 If an `app_settings` dict is provided at the module root, it will automatically
-merge the global `guillotina` app_settings with the module's. This allows you
+merge the global `guillotina` `app_settings` with the module's. This allows you
 to provide custom configuration.

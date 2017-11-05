@@ -2,13 +2,13 @@
 
 Logging configuration is built into `guillotina`'s configuration syntax.
 
-If the `logging` setting is provide, it is simply passed to python's dict config
+If the `logging` setting is provided, it is simply passed to Python's `dict` config
 method: https://docs.python.org/3.6/library/logging.config.html#logging-config-dictschema
 
 
 ## Example guillotina configuration
 
-To logs errors for guillotina for example
+To log errors for guillotina for example:
 
 ```json
 {
@@ -78,10 +78,10 @@ To logs errors for guillotina for example
 
 ## Available Loggers
 
-- guillotina
-- aiohttp.access
-- aiohttp.client
-- aiohttp.internal
-- aiohttp.server
-- aiohttp.web
-- aiohttp.websocket
+- `guillotina`
+- `aiohttp.access`
+- `aiohttp.client`
+- `aiohttp.internal`
+- `aiohttp.server`
+- `aiohttp.web`
+- `aiohttp.websocket`

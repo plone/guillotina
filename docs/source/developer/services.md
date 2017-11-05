@@ -37,18 +37,18 @@ In this example, the service will apply to a GET request against a container,
 ```
 
 
-## Class based services
+## Class-based services
 
-For more complex services, you might want to use class based services.
+For more complex services, you might want to use class-based services.
 
-The example above, with the class based approach will look like:
+With the class-based approach, the example above will look like this:
 
 ```python
 from guillotina import configure
 from guillotina.interfaces import IContainer
 from guillotina.api.service import Service
 
-
+# TODO: this is the same as above
 @configure.service(context=IContainer, name='@myservice', method='GET',
                    permission='guillotina.AccessContent')
 async def my_service(context, request):
@@ -61,7 +61,7 @@ async def my_service(context, request):
 
 ### I want that my service is accessible no matter the content
 
-you can define in the service configuration with `allow_acces=True`
+You can define in the service configuration with `allow_acces=True`
 
 
 ```python

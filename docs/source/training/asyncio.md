@@ -15,7 +15,7 @@ Python >= 3.4(best features and performance in 3.6)
 The event loop allows you to handle a larger number of network connections at once.
 
 No network blocks, so you can have long running connections with very little performance
-impact(HTML5 sockets for example)
+impact (HTML5 sockets for example).
 
 
 ### How web servers are typically designed
@@ -24,7 +24,7 @@ impact(HTML5 sockets for example)
 - Processes X Threads = Total number of concurrent connections that can be handled at once.
 - Client makes a request to web server, request is assigned thread, thread handle request and sends response
 - If no threads available, request is blocked, waiting for an open thread
-- Threads are expensive(CPU), Processes are expensive on RAM
+- Threads are expensive (CPU), Processes are expensive on RAM
 
 
 ### How it works with AsyncIO
@@ -32,8 +32,8 @@ impact(HTML5 sockets for example)
 - All requests are thrown on thread loop
 - Since we don’t block on network traffic, we can juggle many requests at the same time
 - Modern web application servers connect with many different services that can
-  potentially block on network traffic—BAD
-- Limiting factor is maxed out CPU, not costly thread switching between requests—GOOD
+  potentially block on network traffic — BAD
+- Limiting factor is maxed out CPU, not costly thread switching between requests — GOOD
 
 
 ### Where is network traffic used?
@@ -48,11 +48,11 @@ impact(HTML5 sockets for example)
 
 ### Implementation details
 
-In order to benefit, the whole stack needs to be asyncio aware.
+In order to benefit, the whole stack needs to be asyncio-aware.
 
 Anywhere in your application server that is not and does network traffic
-WILL BLOCK all other connections while it is doing it’s network traffic
-(example: using requests library instead of aiohttp)
+WILL BLOCK all other connections while it is doing its network traffic
+(example: using the `requests` library instead of `aiohttp`)
 
 
 ## Basics

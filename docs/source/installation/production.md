@@ -2,8 +2,8 @@
 
 ## Nginx front
 
-Its so common to add the api with a Nginx with a `proxy_pass` in front so there is the option
-define which is going to be the url for the generated urls inside the api:
+It's very common to run the API using `nginx` with a `proxy_pass` in front, 
+so there is an option to define the URL for the generated URLs inside the api:
 
 Adding the header:
 
@@ -11,9 +11,9 @@ Adding the header:
 X-VirtualHost-Monster https://example.com/api/
 ```
 
-Will do a rewrite of the urls.
+will do a rewrite of the URLs.
 
-Some configuration on nginx :
+Sample configuration on `nginx`:
 
 ```
     location /api/ {

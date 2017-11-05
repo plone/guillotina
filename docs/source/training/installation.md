@@ -26,7 +26,7 @@ pip install guillotina
 ```
 
 
-For the purpose of this training, you'll also need to install cookiecutter.
+For the purpose of this training, you'll also need to install `cookiecutter`.
 
 ```
 pip install cookiecutter

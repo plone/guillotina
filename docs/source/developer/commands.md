@@ -5,7 +5,7 @@ You can provide your own CLI commands for guillotina through a simple interface.
 
 ## Available commands
 
-* `serve`: run the HTTP rest api server (this is the default command if none given)
+* `serve`: run the HTTP REST API server (this is the default command if none given)
 * `shell`: drop into a shell with root object to manually work with
 * `create`: use cookiecutter to generate guillotina applications
 * `initialize-db`: databases are automatically initialized; however, you can use this command to manually do it
@@ -71,7 +71,7 @@ class MyCommand(Command):
 
 ```
 
-Then, just add your command to your application's app_settings in the `__init__.py`:
+Then, just add your command to your application's `app_settings` in the `__init__.py`:
 
 ```python
 

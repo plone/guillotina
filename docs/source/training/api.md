@@ -186,7 +186,7 @@ Then, to download the file, use the `@download` endpoint.
 ```
 
 Guillotina also supports the TUS protocol using the `@tusupload` endpoint. The
-TUS protocol allows you to upload large file in chunks and allows you to have
+TUS protocol allows you to upload large files in chunks and allows you to have
 resumable uploads.
 
 

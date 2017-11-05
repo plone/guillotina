@@ -9,16 +9,16 @@ Security for every operation is managed against three definitions (in order of p
 Locally can be defined:
 
 * A user/group has a permission in this object but not children
-* A user/group has a permission in this object and it's children
-* A user/group has is forbidden permission in this object and its children
+* A user/group has a permission in this object and its children
+* A user/group is forbidden permission in this object and its children
 
-* A user/group has a role on this object but not it's children
-* A user/group has a role on this object and it's children
-* A user/group has is forbidden a role on this object and its children
+* A user/group has a role on this object but not its children
+* A user/group has a role on this object and its children
+* A user/group is forbidden a role on this object and its children
 
 * A role has a permission on this object and its children
 * A role has a permission on this object and its children
-* A role has is forbidden permission in this object and its children
+* A role is forbidden permission in this object and its children
 
 
 Globally:
@@ -29,8 +29,8 @@ Globally:
 Code:
 
 * A user/group has this Role
-* A user/group has this permission
-* A role has this permission
+* A user/group has this Permission
+* A Role has this Permission
 
 
 ## Roles
@@ -69,19 +69,19 @@ interaction.global_principal_roles(principal, groups)
 interaction.check_permission(permission, obj)
 ```
 
-## REST APIS
+## REST APIs
 
-### Get all the endpoints and its security
+### Get all the endpoints and their security
 
-[GET] APPLICATION_URL/@apidefinition (you need guillotina.GetContainers permission)
+`[GET] APPLICATION_URL/@apidefinition` (you need `guillotina.GetContainers` permission)
 
 ### Get the security info for a resource (with inherited info)
 
-[GET] RESOURCE/@sharing (you need guillotina.SeePermissions permission)
+`[GET] RESOURCE/@sharing` (you need `guillotina.SeePermissions` permission)
 
 ### Modify the local roles/permission for a resource
 
-[POST] RESOURCE/@sharing (you need guillotina.ChangePermissions permission)
+`[POST] RESOURCE/@sharing` (you need `guillotina.ChangePermissions` permission)
 
 ```json
 {
@@ -109,9 +109,9 @@ interaction.check_permission(permission, obj)
 }
 ```
 
-The different type of types are :
+The different types are:
 
-- Allow : you set it on the resource and the children will inherit
-- Deny : you set in on the resource and the children will inherit
-- AllowSingle : you set in on the resource and the children will not inherit
-- Unset : you remove the setting
+- Allow: you set it on the resource and the children will inherit
+- Deny: you set it on the resource and the children will inherit
+- AllowSingle: you set it on the resource and the children will not inherit
+- Unset: you remove the setting
