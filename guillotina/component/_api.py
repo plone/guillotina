@@ -23,6 +23,8 @@ from zope.interface import providedBy
 
 import zope.interface.interface
 
+_MISSING = object()
+
 
 @hookable
 def get_component_registry(context=None):
@@ -41,8 +43,11 @@ def get_component_registry(context=None):
 
 def get_adapter(object, interface=Interface, name=_BLANK, context=None,
                 args=[], kwargs={}):
-    adapter_ = query_adapter(object, interface, name, None, context, args=args, kwargs=kwargs)
-    if adapter_ is None:
+    adapter_ = query_adapter(object, interface=interface, name=name,
+                             default=_MISSING, context=context,
+                             args=args, kwargs=kwargs)
+    if adapter_ is _MISSING:
+        # result from get_adapter can be None and still be valid
         raise ComponentLookupError(object, interface, name)
     return adapter_
 
@@ -50,7 +55,9 @@ def get_adapter(object, interface=Interface, name=_BLANK, context=None,
 def query_adapter(object, interface=Interface, name=_BLANK, default=None,
                   context=None, args=[], kwargs={}):
     if context is None:
-        return adapter_hook(interface, object, name, default, args=args, kwargs=kwargs)
+        return adapter_hook(interface, object,
+                            name=name, default=default,
+                            args=args, kwargs=kwargs)
     return get_component_registry(context).queryAdapter(
         object, interface, name, default)
 
@@ -122,11 +129,7 @@ def adapter_hook(interface, object, name='', default=None, args=[], kwargs={}):
     if factory is None:
         return default
 
-    result = factory(object, *args, **kwargs)
-    if result is None:
-        return default
-
-    return result
+    return factory(object, *args, **kwargs)
 
 
 zope.interface.interface.adapter_hooks.append(adapter_hook)

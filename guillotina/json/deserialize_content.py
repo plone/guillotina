@@ -141,6 +141,8 @@ class DeserializeFromJson(object):
                     })
 
     async def get_value(self, field, obj, value):
+        if value is None:
+            return None
         try:
             value = get_adapter(field, IJSONToValue, args=[value, obj])
             if asyncio.iscoroutine(value):

@@ -5,8 +5,7 @@ from guillotina.content import Resource
 from guillotina.directives import index
 from guillotina.directives import metadata
 from guillotina.interfaces import IResource
-from guillotina.schema import JSONField
-from guillotina.schema import List
+from guillotina import schema
 from guillotina.utils import lazy_apply
 from zope.interface import implementer
 
@@ -100,13 +99,21 @@ class IExample(IResource):
     metadata('categories')
 
     index('categories', type='nested')
-    categories = List(
+    categories = schema.List(
         title='categories',
         default=[],
-        value_type=JSONField(
+        value_type=schema.JSONField(
             title='term',
             schema=TERM_SCHEMA)
     )
+
+    textline_field = schema.TextLine()
+    text_field = schema.Text()
+    dict_value = schema.Dict(
+        key_type=schema.TextLine(),
+        value_type=schema.TextLine()
+    )
+    datetime = schema.Datetime()
 
 
 @implementer(IExample)

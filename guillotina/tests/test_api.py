@@ -1,3 +1,4 @@
+from datetime import datetime
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
@@ -493,3 +494,25 @@ async def test_duplicate_content(container_requester):
         response, status = await requester('GET', '/db/guillotina/folder/@ids')
         assert len(response) == 1
         assert 'foobar' in response
+
+
+async def test_create_content_fields(container_requester):
+    async with await container_requester as requester:
+        response, status = await requester('POST', '/db/guillotina', data=json.dumps({
+            '@type': 'Example',
+            'categories': [{
+                'label': 'foobar',
+                'number': 5
+            }],
+            'textline_field': 'foobar',
+            'text_field': 'foobar',
+            'dict_value': {
+                'foo': 'bar'
+            },
+            'datetime': datetime.utcnow().isoformat()
+        }))
+        assert status == 201
+        assert response['dict_value']['foo'] == 'bar'
+        assert len(response['categories']) == 1
+        assert response['textline_field'] == 'foobar'
+        assert response['text_field'] == 'foobar'
