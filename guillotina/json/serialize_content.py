@@ -135,7 +135,7 @@ class SerializeToJson(object):
 
         if permission_name not in self.permission_cache:
             permission = query_utility(IPermission,
-                                      name=permission_name)
+                                       name=permission_name)
             if permission is None:
                 self.permission_cache[permission_name] = True
             else:

@@ -1,7 +1,8 @@
 2.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use adapter lookup correctly for value serializer
+  [vangheem]
 
 
 2.0.5 (2017-11-06)

@@ -4,9 +4,13 @@ from datetime import datetime
 from datetime import time
 from datetime import timedelta
 from guillotina import configure
+from guillotina.component import query_adapter
 from guillotina.i18n import Message
 from guillotina.interfaces import IValueToJson
 from guillotina.schema.vocabulary import SimpleVocabulary
+
+
+_MISSING = object()
 
 
 def json_compatible(value):
@@ -18,13 +22,13 @@ def json_compatible(value):
     if type_ in (str, bool, int, float):
         return value
 
-    value = IValueToJson(value, None)
-    if value is None:
+    result_value = query_adapter(value, IValueToJson, default=_MISSING)
+    if result_value is _MISSING:
         raise TypeError(
             'No converter for making'
             ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
     else:
-        return value
+        return result_value
 
 
 @configure.value_serializer(SimpleVocabulary)
