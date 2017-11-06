@@ -1,4 +1,4 @@
-2.0.4 (unreleased)
+2.0.4 (2017-11-06)
 ------------------
 
 - Fix MockTransaction implementation
