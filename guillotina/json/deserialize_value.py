@@ -56,7 +56,7 @@ def json_dict_converter(schemafield, value, context):
     return value
 
 @configure.value_deserializer(for_=IField)
-def default_converter(field, value):
+def default_converter(field, value, context):
     return value
 
 @configure.value_deserializer(IBool)

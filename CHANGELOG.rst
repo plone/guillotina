@@ -1,7 +1,8 @@
 2.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide correct signature for default value converter
+  [vangheem]
 
 
 2.0.2 (2017-11-06)
