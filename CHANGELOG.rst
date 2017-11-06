@@ -1,4 +1,4 @@
-2.0.3 (unreleased)
+2.0.3 (2017-11-06)
 ------------------
 
 - Provide correct signature for default value converter
