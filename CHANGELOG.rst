@@ -1,7 +1,9 @@
 2.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- DeserializationError and ValueDeserializationError should implement message
+  attribute
+  [vangheem]
 
 
 2.0.0 (2017-11-06)

@@ -11,7 +11,7 @@ class DeserializationError(Exception):
     """
 
     def __init__(self, errors):
-        self.msg = 'Error deserializing content'
+        self.msg = self.message = 'Error deserializing content'
         self.errors = errors
 
     def __str__(self):
@@ -37,7 +37,7 @@ class ValueDeserializationError(Exception):
     """
 
     def __init__(self, field, value, msg):
-        self.msg = 'Error deserializing content'
+        self.msg = self.message = 'Error deserializing content'
         self.field = field
         self.value = value
 
