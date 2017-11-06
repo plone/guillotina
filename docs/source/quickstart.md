@@ -19,7 +19,7 @@ Install `guillotina`:
 ./bin/pip install guillotina
 ```
 
-Generate configuration file(requires cookie cutter):
+Generate configuration file (requires `cookiecutter`):
 
 ```
 ./bin/pip install cookiecutter
@@ -34,10 +34,10 @@ Finally, run the server:
 
 The server should now be running on http://0.0.0.0:8080
 
-Then, [use Postman](https://www.getpostman.com/), curl or whatever tool you
+Then, [use Postman](https://www.getpostman.com/), `curl` or whatever tool you
 prefer to interact with the REST API.
 
-Modify the configuration in config.yaml to customize server setttings.
+Modify the configuration in `config.yaml` to customize server setttings.
 
 
 ### Postgresql installation instructions

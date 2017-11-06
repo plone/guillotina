@@ -1,11 +1,11 @@
 # Configuration
 
-`guillotina` and its addons define a global configuration that is used throughout
-the `guillotina`. All of these settings are configurable by providing a
+`guillotina` and its addons define a global configuration that is used.
+All of these settings are configurable by providing a
 JSON configuration file to the start script.
 
 By default, the startup script looks for a `config.yaml` file. You can use a different
-file by using the `-c` option for the script script like this `./bin/guillotina -c myconfig.yaml`.
+file by using the `-c` option for the script like this: `./bin/guillotina -c myconfig.yaml`.
 
 
 ## Databases
@@ -102,7 +102,7 @@ specify which to enable.
 
 ```yaml
 applications:
-- guillotina_elasticsearch
+  - guillotina_elasticsearch
 ```
 
 
@@ -150,13 +150,13 @@ jwt:
 
 ## Miscellaneous settings
 
-  - port (number): Port to bind to. `defaults to 8080`
-  - access_log_format (string): Customize access log format for aiohttp. `defaults to None`
-  - store_json (boolean): Serialize object into json field in database. `defaults to true`
-  - host (string): Where to host the server. `defaults to "0.0.0.0"`
-  - port (number): Port to bind to. `defaults to 8080`
-  - conflict_retry_attempts (number): Number of times to retry database conflict errors. `defaults to 3`
-  - cloud_storage (string): Dotted path to cloud storage field type. `defaults to "guillotina.interfaces.IDBFileField"`
+- `port` (number): Port to bind to. _defaults to `8080`_
+- `access_log_format` (string): Customize access log format for aiohttp. _defaults to `None`_
+- `store_json` (boolean): Serialize object into json field in database. _defaults to `true`_
+- `host` (string): Where to host the server. _defaults to `"0.0.0.0"`_
+- `port` (number): Port to bind to. _defaults to `8080`_
+- `conflict_retry_attempts` (number): Number of times to retry database conflict errors. _defaults to `3`_
+- `cloud_storage` (string): Dotted path to cloud storage field type. _defaults to `"guillotina.interfaces.IDBFileField"`_
 
 
 ## Transaction strategy
@@ -199,7 +199,7 @@ Available options:
   to issue us transaction ids for the data committed. Since no transaction is used,
   this is potentially just as safe as any of the other strategies just as long
   as you are not writing to multiple objects at the same time — in those cases,
-  you might be in an inconsistent state on tid conflicts.
+  you might be in an inconsistent state on `tid` conflicts.
 - `novote`:
   Use db transaction but do not perform any voting when writing.
 - `simple`:

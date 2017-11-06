@@ -1,9 +1,9 @@
 About
 =====
 
-As the Web evolves, so do the frameworks we use to work with the Web. Guillotina
-is part of that evolution providing a rich, REST API, asynchronous web server
-to build your web applications around.
+As the Web evolves, so do the frameworks that we use to work with the Web.
+Guillotina is part of that evolution, providing an asynchronous web server
+with a rich, REST-ful API to build your web applications around.
 
 It is designed for building JavaScript applications. It is an API framework, not
 a typical template-based rendering framework like most web frameworks (Django/Pyramid/Plone).
@@ -49,7 +49,7 @@ In the beginning, there was `bobo`.
 `bobo` was what Jim Fulton called his initial idea of mapping objects to web
 urls. It's an old idea. A beautiful idea. The developers of Guillotina think
 it's the best possible way to conceptualize most content-centric APIs and
-organization how your web applications think about data or their APIs.
+organization of how your web applications think about data or their APIs.
 
 Think about this simple example. Assuming you have the following dictionary::
 
@@ -72,7 +72,7 @@ frameworks like Zope (and eventually Plone), used this database and the `bobo`
 style of publishing objects to URLs to build a framework and CMS around.
 
 
-Fork'd dependency packages
+Forked dependency packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Guillotina has eaten a few packages that would have otherwise been dependencies.
@@ -81,11 +81,11 @@ The reasons for forking are:
   - Required to support asyncio
   - Provide tighter fit for framework
   - Make installations less painful and error-prone
-  - Groking framework is easier when one package to import from
+  - Groking framework is easier when there is one package to import from
 
 
 Forks:
-  - parts of zodb data model: we're on a relational storage model now
+  - parts of the ZODB data model: we're on a relational storage model now
   - plone.behavior
   - zope.security
   - zope.schema

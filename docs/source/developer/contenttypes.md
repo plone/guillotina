@@ -4,10 +4,10 @@ Content types allow you to provide custom schemas and content to your services.
 
 Out-of-the-box, `guillotina` ships with simple `Container`, `Folder` and `Item` content types.
 The `Container` content type is the main content type to hold your data in. It is
-the started point of where applications and other things operate within.
+the starting point for applications and other things to operate within.
 
-The `Folder` type allowing someone to add items inside of it. Both types only have
-simple dublin core fields by default.
+The `Folder` type allows someone to add items inside of it. Both types only have
+simple Dublin Core fields by default.
 
 
 ## Defining content types

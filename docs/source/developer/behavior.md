@@ -1,10 +1,11 @@
 # Behaviors
 
-Besides having static content types definitions with their schema, there is the concept of behaviors that provide us definitions accross content types with specific marker interface to create adapters and subscribers based on that behavior and not the content type.
+Besides having static content types definitions with their schema, there is the concept of *behaviors*.
+This allows us to provide functionality across content types, using specific marker interfaces to create adapters and subscribers based on that behavior and not the content type.
 
 ## Definition of a behavior
 
-If you want to have a shared behavior based on some fields and operations that needs to be shared across different content types you can define them on a `guillotina.schema` interface:
+If you want to have a shared behavior based on some fields and operations that needs to be shared across different content types, you can define them on a `guillotina.schema` interface:
 
 ```python
     from guillotina.interfaces import IFormFieldProvider
@@ -35,9 +36,10 @@ Once you define the schema you can define a specific marker interface that will 
 
 ```
 
-Finally the instance class that implements the schema can be defined in case you want to enable specific operations. Or you can use `guillotina.behaviors.instance.AnnotationBehavior` as the default annotation storage.
+Finally the instance class that implements the schema can be defined in case you want to enable specific operations.
+Or you can use `guillotina.behaviors.instance.AnnotationBehavior` as the default annotation storage.
 
-For example in case you want to have a class that stores the field on the content and not on annotations:
+For example, in case you want to have a class that stores the field as content and not as annotations:
 
 ```python
 from guillotina.behaviors.properties import ContextProperty
@@ -56,7 +58,7 @@ class MyBehavior(AnnotationBehavior):
     text = ContextProperty(u'attribute', ())
 ```
 
-On this example text will be stored on the context object and text2 as a annotation.
+In this example `text` will be stored on the context object and `text2` as a annotation.
 
 
 ## Static behaviors
@@ -127,13 +129,13 @@ GET an ITEM : GET on the object:
 
 ## Dynamic Behaviors
 
-guillotina offers the option to have content that has dynamic behaviors applied to them.
+`guillotina` offers the option to have content that has dynamic behaviors applied to them.
 
 ### Which behaviors are available on a context
 
 We can know which behaviors can be applied to a specific content.
 
-GET CONTENT_URI/@behaviors:
+`GET CONTENT_URI/@behaviors`:
 
 ```json
 
@@ -146,13 +148,14 @@ GET CONTENT_URI/@behaviors:
     }
 ```
 
-This list of behaviors is based on the for statement on the configure of the behavior.
-The list on static are the ones defined on the content type definition on the configure.
-The list on dynamic are the ones that have been assigned.
+This list of behaviors is based on the `for` statement on the configure of the behavior.
+The list of static ones are the ones defined on the content type definition on the configure.
+The list of dynamic ones are the ones that have been assigned.
 
 ### Add a new behavior to a content
 
-We can add a new dynamic behavior to a content by a PATCH operation on the object with the @behavior attribute or in a small PATCH operation to @behavior entry point with the value to add.
+We can add a new dynamic behavior to a content using a `PATCH` operation on the object with the `@behavior` attribute,
+or in a small `PATCH` operation to the `@behavior` entry point with the value to add.
 
 MODIFY an ITEM with the expires : PATCH on the object:
 
@@ -175,7 +178,7 @@ MODIFY behaviors : PATCH on the object/@behaviors:
 
 ### Delete a behavior to a content
 
-We can add a new dynamic behavior to a content by a DELETE operation to @behavior entry point with the value to remove.
+We can add a new dynamic behavior to a content by a `DELETE` operation to the `@behavior` entry point with the value to remove.
 
 DELETE behaviors : DELETE on the object/@behaviors:
 
