@@ -1,4 +1,4 @@
-2.0.5 (unreleased)
+2.0.5 (2017-11-06)
 ------------------
 
 - Do not do async suscribers in a gather since we can lose get_current_request context
