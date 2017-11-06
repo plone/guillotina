@@ -1,5 +1,5 @@
-2.0.0a1 (unreleased)
---------------------
+2.0.0 (2017-11-06)
+------------------
 
 - Make components more pythonic:
     - guillotina.component.getMultiAdapter -> get_multi_adapter
