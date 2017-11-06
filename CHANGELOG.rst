@@ -1,7 +1,8 @@
 2.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not do async suscribers in a gather since we can lose get_current_request context
+  [vangheem]
 
 
 2.0.4 (2017-11-06)
