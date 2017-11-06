@@ -1,4 +1,4 @@
-2.0.6 (unreleased)
+2.0.6 (2017-11-06)
 ------------------
 
 - Use adapter lookup correctly for value serializer
