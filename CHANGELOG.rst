@@ -1,7 +1,8 @@
 2.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix MockTransaction implementation
+  [vangheem]
 
 
 2.0.3 (2017-11-06)

@@ -29,7 +29,7 @@ class MockTransaction:
         self._strategy = get_adapter(
             self, ITransactionStrategy,
             name=manager._storage._transaction_strategy)
-        self._cache = DummyCache(manager._storage, self)
+        self._cache = DummyCache(self)
 
     async def refresh(self, ob):
         return ob
