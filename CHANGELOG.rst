@@ -1,4 +1,4 @@
-2.0.2 (unreleased)
+2.0.2 (2017-11-06)
 ------------------
 
 - Handle missing component lookups more correctly for factories that return None
