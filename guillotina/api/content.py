@@ -199,7 +199,7 @@ class DefaultPOST(Service):
 
         # Update fields
         deserializer = query_multi_adapter((obj, self.request),
-                                         IResourceDeserializeFromJson)
+                                           IResourceDeserializeFromJson)
         if deserializer is None:
             return ErrorResponse(
                 'DeserializationError',

@@ -1,7 +1,9 @@
 2.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle missing component lookups more correctly for factories that return None
+  for the value.
+  [vangheem]
 
 
 2.0.1 (2017-11-06)

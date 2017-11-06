@@ -1,14 +1,14 @@
-from guillotina.component import get_adapter
-from zope.interface import Interface
+from datetime import datetime
 from guillotina import schema
+from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.files.dbfile import DBFile
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.json.deserialize_value import schema_compatible
 from guillotina.json.serialize_value import json_compatible
 from guillotina.tests.utils import create_content
-from guillotina.json.deserialize_value import schema_compatible
-from datetime import datetime
+from zope.interface import Interface
 
 
 async def test_serialize_resource(dummy_request):
