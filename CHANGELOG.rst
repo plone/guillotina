@@ -1,4 +1,4 @@
-2.1.0 (unreleased)
+2.1.0 (2017-11-07)
 ------------------
 
 - Remove use of buildout for development/travis
