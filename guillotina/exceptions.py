@@ -96,6 +96,10 @@ class ConfigurationError(Exception):
     """
 
 
+class ServiceConfigurationError(ConfigurationError):
+    pass
+
+
 class ComponentConfigurationError(ValueError, ConfigurationError):
     pass
 

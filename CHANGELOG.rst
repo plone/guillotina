@@ -1,7 +1,8 @@
 2.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Verify service method signatures when configuration is loaded
+  [vangheem]
 
 
 2.0.6 (2017-11-06)

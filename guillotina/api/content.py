@@ -265,7 +265,7 @@ class DefaultPATCH(Service):
             self.context.add_behavior(behavior)
 
         deserializer = query_multi_adapter((self.context, self.request),
-                                         IResourceDeserializeFromJson)
+                                           IResourceDeserializeFromJson)
         if deserializer is None:
             return ErrorResponse(
                 'DeserializationError',
