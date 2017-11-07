@@ -16,15 +16,15 @@ cache:
   directories:
     - eggs
 install:
-  - python bootstrap-buildout.py
-  - bin/buildout -t 3
+  - pip install -r requirements.txt
+  - pip install -e .[test]
   - pip install flake8
-  - pip install coverage==4.0.3
-  - sleep 15
+  - pip install coverage==4.0.3 pytest-cov
+  - sleep 5
 script:
-  - bin/py.test -s --cov=guillotina -v --cov-report term-missing guillotina
-  - USE_COCKROACH=true bin/py.test -s -v guillotina
-  - bin/code-analysis
+  - pytest -s --cov=guillotina -v --cov-report term-missing guillotina
+  - USE_COCKROACH=true pytest -s -v guillotina
+  - flake8 guillotina --config=setup.cfg
 after_success:
   - pip install coveralls
   - coveralls

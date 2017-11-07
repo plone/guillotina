@@ -21,7 +21,7 @@ async def test_tid_created_for_writes(dummy_request, loop):
 
 
 async def test_managed_transaction_with_adoption(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
         async with managed_transaction(request=request, abort_when_done=True):

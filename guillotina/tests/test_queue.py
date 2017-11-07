@@ -15,8 +15,6 @@ QUEUE_UTILITY_CONFIG = {
 
 
 async def test_add_sync_utility(guillotina, loop):
-    requester = await guillotina
-
     app = get_utility(IApplication, name='root')
     app.add_async_utility(QUEUE_UTILITY_CONFIG, loop)
 
@@ -27,7 +25,7 @@ async def test_add_sync_utility(guillotina, loop):
         asyncio.sleep(0.01)
         var.append(msg)
 
-    request = utils.get_mocked_request(requester.db)
+    request = utils.get_mocked_request(guillotina.db)
     root = await utils.get_root(request)
 
     await util.add(AsyncMockView(root, request, printHi, 'hola1'))

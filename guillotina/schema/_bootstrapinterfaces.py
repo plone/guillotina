@@ -11,8 +11,6 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from guillotina.schema._messageid import _
-
 import zope.interface
 
 
@@ -43,5 +41,6 @@ class IContextAwareDefaultFactory(zope.interface.Interface):
 class NO_VALUE(object):
     def __repr__(self):
         return '<NO_VALUE>'
+
 
 NO_VALUE = NO_VALUE()

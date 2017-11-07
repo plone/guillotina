@@ -219,7 +219,7 @@ class DBFileManagerAdapter:
 
     async def iter_data(self):
         file = self.field.get(self.field.context or self.context)
-        if not isinstance(file, self.file_class) or file.uri is None:
+        if not isinstance(file, self.file_class):
             raise AttributeError('No field value')
 
         async for chunk in file.iter_data(self.context):

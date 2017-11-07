@@ -101,8 +101,8 @@ class GuillotinaAIOHTTPApplication(web.Application):
     def _make_request(self, message, payload, protocol, writer, task,
                       _cls=Request):
         return _cls(
-            message, payload, protocol, writer, protocol._time_service, task,
-            secure_proxy_ssl_header=self._secure_proxy_ssl_header,
+            message, payload, protocol, writer, task,
+            self._loop,
             client_max_size=self._client_max_size)
 
 

@@ -15,7 +15,7 @@ class ObjectTest(BaseObject):
 
 
 async def test_create_object(dummy_txn_root):
-    async with await dummy_txn_root as root:
+    async with dummy_txn_root as root:
         assert isinstance(root._p_jar, Transaction)
         ob1 = ObjectTest()
         ob1.__new_marker__ = True
@@ -38,7 +38,7 @@ async def test_create_object(dummy_txn_root):
 
 
 async def test_create_annotation(dummy_txn_root):
-    async with await dummy_txn_root as root:
+    async with dummy_txn_root as root:
         ob1 = ObjectTest()
         await root.async_set('ob1', ob1)
         annotations = IAnnotations(ob1)
@@ -61,7 +61,7 @@ async def test_create_annotation(dummy_txn_root):
 
 
 async def test_use_behavior_annotation(dummy_txn_root):
-    async with await dummy_txn_root as root:
+    async with dummy_txn_root as root:
         ob1 = Item()
         await root.async_set('ob1', ob1)
         dublin = IDublinCore(ob1)

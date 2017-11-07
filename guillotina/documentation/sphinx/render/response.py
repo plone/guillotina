@@ -1,5 +1,4 @@
 from docutils import nodes
-from sphinx import addnodes
 
 
 HTTP_STATUS_CODES = {

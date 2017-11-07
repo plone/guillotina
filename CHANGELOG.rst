@@ -1,5 +1,14 @@
-2.0.7 (unreleased)
+2.1.0 (unreleased)
 ------------------
+
+- Remove use of buildout for development/travis
+  [vangheem]
+
+- Upgrade to aiohttp > 2.3.0
+  [vangheem]
+
+- Fix iter_data method for DBFile(no uri attribute)
+  [vangheem]
 
 - Verify service method signatures when configuration is loaded
   [vangheem]

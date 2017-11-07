@@ -34,7 +34,7 @@ def test_get_current_interaction(dummy_request):
 
 
 async def test_DatabaseSpecialPermissions_IDatabase(dummy_txn_root):  # noqa: N802
-    async with await dummy_txn_root as root:
+    async with dummy_txn_root as root:
         adapter = get_adapter(root, interface=IPrincipalPermissionManager)
         assert isinstance(adapter, DatabaseSpecialPermissions)
 
@@ -47,20 +47,20 @@ async def test_RootSpecialPermissions_IApplication(dummy_guillotina):  # noqa: N
 
 async def test_SerializeFolderToJson(dummy_request):  # noqa: N802
     adapter = get_multi_adapter((Container(), dummy_request),
-                              interface=IResourceSerializeToJson)
+                                interface=IResourceSerializeToJson)
     assert isinstance(adapter, SerializeFolderToJson)
 
 
 async def test_SerializeToJson(dummy_request):  # noqa: N802
     obj = Item()
     adapter = get_multi_adapter((obj, dummy_request),
-                              interface=IResourceSerializeToJson)
+                                interface=IResourceSerializeToJson)
     assert isinstance(adapter, SerializeToJson)
 
 
 def test_DefaultJSONSummarySerializer(dummy_request):  # noqa: N802
     adapter = get_multi_adapter((Container(), dummy_request),
-                              interface=IResourceSerializeToJsonSummary)
+                                interface=IResourceSerializeToJsonSummary)
     assert isinstance(adapter, DefaultJSONSummarySerializer)
 
 
@@ -85,7 +85,7 @@ def test_all(dummy_request):
     container = Container()
     for field, klass in mapping:
         adapter = get_multi_adapter((field, container, dummy_request),
-                                  interface=ISchemaFieldSerializeToJson)
+                                    interface=ISchemaFieldSerializeToJson)
         assert isinstance(adapter, klass)
 
 
@@ -101,7 +101,7 @@ def test_vocabulary():
 def test_SerializeFactoryToJson(dummy_request):  # noqa: N802
     factory = get_utility(IResourceFactory, name='Item')
     adapter = get_multi_adapter((factory, dummy_request),
-                              interface=IFactorySerializeToJson)
+                                interface=IFactorySerializeToJson)
     assert isinstance(adapter, serialize_schema.SerializeFactoryToJson)
 
 
@@ -115,5 +115,5 @@ def test_DefaultSchemaSerializer(dummy_request):  # noqa: N802
 def test_DeserializeFromJson(dummy_request):  # noqa: N802
     obj = Item()
     adapter = get_multi_adapter((obj, dummy_request),
-                              interface=IResourceDeserializeFromJson)
+                                interface=IResourceDeserializeFromJson)
     assert isinstance(adapter, deserialize_content.DeserializeFromJson)

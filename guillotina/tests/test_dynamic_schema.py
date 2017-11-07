@@ -40,7 +40,7 @@ async def custom_type_container_requester(guillotina):
 
 
 async def test_set_dynamic_behavior(custom_type_container_requester):
-    async with await custom_type_container_requester as requester:
+    async with custom_type_container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -71,7 +71,7 @@ async def test_set_dynamic_behavior(custom_type_container_requester):
 
 
 async def test_create_delete_dynamic_behavior(custom_type_container_requester):
-    async with await custom_type_container_requester as requester:
+    async with custom_type_container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -121,7 +121,7 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
 
 
 async def test_get_behaviors(custom_type_container_requester):
-    async with await custom_type_container_requester as requester:
+    async with custom_type_container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',

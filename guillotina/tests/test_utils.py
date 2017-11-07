@@ -30,7 +30,7 @@ def test_dotted_name():
 
 
 async def test_get_content_path(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -52,7 +52,7 @@ async def test_get_content_path(container_requester):
 
 
 async def test_get_content_depth(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
