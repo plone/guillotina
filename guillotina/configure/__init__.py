@@ -4,6 +4,7 @@ from guillotina.configure import component
 from guillotina.configure.behaviors import BehaviorAdapterFactory
 from guillotina.configure.behaviors import BehaviorRegistration
 from guillotina.exceptions import ConfigurationError
+from guillotina.exceptions import ServiceConfigurationError
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorSchemaAwareFactory
@@ -18,9 +19,12 @@ from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
+from pprint import pformat
 from zope.interface import classImplements
 from zope.interface import Interface
 
+import asyncio
+import inspect
 import logging
 
 
@@ -362,9 +366,27 @@ class _factory_decorator(_base_decorator):  # noqa: N801
         return super(_factory_decorator, self).__call__(klass)
 
 
+def _has_parameters(func, number=2):
+    sig = inspect.signature(func)
+    required_params = [p for p in sig.parameters.keys()
+                       if sig.parameters[p].default == inspect.Parameter.empty]
+    return len(sig.parameters) >= number and not len(required_params) > number
+
+
 class service(_base_decorator):  # noqa: N801
     def __call__(self, func):
         if isinstance(func, type):
+            if not hasattr(func, '__call__'):
+                raise ServiceConfigurationError(
+                    f'Service must have async def __call__ method: {func.__call__}\n'
+                    f'{pformat(self.config)}'
+                )
+            if not asyncio.iscoroutinefunction(func.__call__):
+                raise ServiceConfigurationError(
+                    f'Service __call__ method must be async: {func.__call__}\n'
+                    f'{pformat(self.config)}'
+                )
+
             # it is a class view, we don't need to generate one for it...
             register_configuration(func, self.config, 'service')
             if 'allow_access' in self.config:
@@ -372,6 +394,16 @@ class service(_base_decorator):  # noqa: N801
             if 'read_only' in self.config:
                 func.__read_only__ = self.config['read_only']
         else:
+            if not _has_parameters(func):
+                raise ServiceConfigurationError(
+                    f'Service configuration must accept 2 required parameters: {func}\n'
+                    f'{pformat(self.config)}')
+            if not asyncio.iscoroutinefunction(func):
+                raise ServiceConfigurationError(
+                    f'Service function must be async: {func}\n'
+                    f'{pformat(self.config)}'
+                )
+
             # avoid circular imports
             from guillotina.api.service import Service
 
