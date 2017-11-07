@@ -11,14 +11,14 @@ pytestmark = pytest.mark.skipif('USE_COCKROACH' not in os.environ,
 
 
 async def test_creates_vacuum_task(cockroach_storage):
-    async with await cockroach_storage as storage:
+    async with cockroach_storage as storage:
         assert storage._vacuum is not None
         assert storage._vacuum_task is not None
 
 
 async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
     request = dummy_request  # noqa
-    async with await cockroach_storage as storage:
+    async with cockroach_storage as storage:
         tm = TransactionManager(storage)
         txn = await tm.begin()
 
