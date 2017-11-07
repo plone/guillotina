@@ -7,14 +7,14 @@ import json
 
 
 async def test_get_guillotina(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@sharing')
         assert response['local']['prinrole']['root']['guillotina.ContainerAdmin'] == 'Allow'
         assert response['local']['prinrole']['root']['guillotina.Owner'] == 'Allow'
 
 
 async def test_database_root_has_none_parent(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         # important for security checks to not inherit...
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
@@ -22,7 +22,7 @@ async def test_database_root_has_none_parent(container_requester):
 
 
 async def test_set_local_guillotina(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/@sharing',

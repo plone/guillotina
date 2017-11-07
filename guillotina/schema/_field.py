@@ -87,7 +87,6 @@ import decimal
 import json
 import jsonschema
 import re
-import threading
 
 
 __docformat__ = 'restructuredtext'

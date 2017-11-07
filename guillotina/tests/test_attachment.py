@@ -6,7 +6,7 @@ import json
 
 
 async def test_create_content_with_behavior(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -37,7 +37,7 @@ async def test_create_content_with_behavior(container_requester):
 
 
 async def test_large_upload_chunks(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -77,7 +77,7 @@ async def test_large_upload_chunks(container_requester):
 
 
 async def test_tus(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester(
             'POST',
             '/db/guillotina/',

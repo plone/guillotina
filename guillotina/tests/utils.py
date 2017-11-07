@@ -110,7 +110,7 @@ class ContainerRequesterAsyncContextManager(object):
         self.requester = None
 
     async def get_requester(self):
-        return await self.guillotina
+        return self.guillotina
 
     async def __aenter__(self):
         self.requester = await self.get_requester()
@@ -148,7 +148,6 @@ def make_mocked_request(method, path, headers=None, *,
                         transport=sentinel,
                         payload=sentinel,
                         sslcontext=None,
-                        secure_proxy_ssl_header=None,
                         client_max_size=1024**2):
     """
     XXX copied from aiohttp but using guillotina request object
@@ -216,7 +215,6 @@ def make_mocked_request(method, path, headers=None, *,
 
     req = Request(message, payload,
                   protocol, payload_writer, time_service, task,
-                  secure_proxy_ssl_header=secure_proxy_ssl_header,
                   client_max_size=client_max_size)
 
     match_info = UrlMappingMatchInfo({}, mock.Mock())

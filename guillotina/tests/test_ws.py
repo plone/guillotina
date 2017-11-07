@@ -5,7 +5,7 @@ import json
 
 
 async def test_hello(container_requester, loop):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         async with aiohttp.ClientSession() as session:
             async with session.ws_connect(
                     'ws://localhost:{port}/db/guillotina/@ws'.format(

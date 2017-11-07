@@ -105,7 +105,7 @@ class DefaultSchemaFieldSerializer(object):
                 result['properties'] = self.field.json_schema
             else:
                 schema_serializer = get_multi_adapter((self.field.schema, self.request),
-                                                    ISchemaSerializeToJson)
+                                                      ISchemaSerializeToJson)
                 result['properties'] = await schema_serializer()
         return result
 

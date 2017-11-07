@@ -5,7 +5,7 @@ from guillotina.tests.utils import get_mocked_request
 
 
 async def test_get_root(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         value, status, headers = await requester.make_request(
             'OPTIONS', '/db/guillotina', headers={
                 'Origin': 'http://localhost',

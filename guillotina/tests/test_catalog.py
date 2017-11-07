@@ -66,31 +66,31 @@ async def test_get_data_uses_indexes_param(dummy_request):
 
 
 async def test_search_endpoint(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@search')
         assert status == 200
 
 
 async def test_search_post_endpoint(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester('POST', '/db/guillotina/@search', data='{}')
         assert status == 200
 
 
 async def test_reindex_endpoint(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester('POST', '/db/guillotina/@catalog-reindex', data='{}')
         assert status == 200
 
 
 async def test_async_reindex_endpoint(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester('POST', '/db/guillotina/@async-catalog-reindex', data='{}')
         assert status == 200
 
 
 async def test_create_catalog(container_requester):
-    async with await container_requester as requester:
+    async with container_requester as requester:
         response, status = await requester('POST', '/db/guillotina/@catalog', data='{}')
         assert status == 200
         response, status = await requester('DELETE', '/db/guillotina/@catalog')

@@ -374,6 +374,7 @@ class VocabularyRegistry(object):
     def register(self, name, factory):
         self._map[name] = factory
 
+
 _vocabularies = None
 
 

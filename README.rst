@@ -38,13 +38,11 @@ Dependencies
 Getting started with development
 --------------------------------
 
-We use buildout of course::
+Using pip:
 
-    virtualenv .
-    ./bin/pip install zc.buildout
-    ./bin/buildout
+    ./bin/pip install requirements.txt
+    ./bin/pip install -e .[test]
 
-Running buildout installs the app itself, code analysis tools, and a test runner.
 
 Run postgresql
 --------------
@@ -126,13 +124,3 @@ Then, run guillotina::
 
 
 This assumes you have a config.yaml in your current working directory
-
-
-Roadmap for 2.0
----------------
-
-- be able to configure renderer from function view configuration
-- match on more predicates
-- get rid of renderer, in favor of predicates for diff output
-- view functions can take 2, 1 or zero args
-- handle routes in definitions...
