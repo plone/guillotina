@@ -1,7 +1,8 @@
 2.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle CancelledError on server close
+  [vangheem]
 
 
 2.1.1 (2017-11-08)
