@@ -1,11 +1,12 @@
 from guillotina import testing
-from guillotina.component import get_utility, get_all_utilities_registered_for
+from guillotina.async import IAsyncUtility
+from guillotina.component import get_all_utilities_registered_for
+from guillotina.component import get_utility
 from guillotina.content import load_cached_schema
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
-from guillotina.async import IAsyncUtility
 from guillotina.tests import docker_containers as containers
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request

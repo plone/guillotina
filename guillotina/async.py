@@ -77,6 +77,10 @@ class QueueUtility(object):
                 logger.error('Worker call failed', exc_info=e)
             finally:
                 if got_obj:
+                    try:
+                        view.request.execute_futures()
+                    except AttributeError:
+                        pass
                     self._queue.task_done()
 
     @property
