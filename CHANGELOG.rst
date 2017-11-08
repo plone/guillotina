@@ -1,7 +1,8 @@
 2.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Clean up async tasks better
+  [vangheem]
 
 
 2.1.0 (2017-11-07)

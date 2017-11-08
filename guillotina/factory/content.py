@@ -58,7 +58,8 @@ class ApplicationRoot(object):
     def cancel_async_utility(self, ident):
         if ident in self._async_utilities:
             if self._async_utilities[ident]['task'] is not None:
-                self._async_utilities[ident]['task'].cancel()
+                if not self._async_utilities[ident]['task'].done():
+                    self._async_utilities[ident]['task'].cancel()
         else:
             raise KeyError("Ident does not exist as utility")
 
