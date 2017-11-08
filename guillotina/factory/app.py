@@ -274,11 +274,11 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     for utility in get_all_utilities_registered_for(IAsyncUtility):
         # In case there is Utilties that are registered
         if hasattr(utility, 'initialize'):
-            ident = asyncio.ensure_future(
+            task = asyncio.ensure_future(
                 lazy_apply(utility.initialize, app=server_app), loop=loop)
+            root.add_async_task(utility, task, {})
         else:
             logger.warn(f'No initialize method found on {utility} object')
-        root.add_async_task(utility, ident, {})
 
     server_app.on_cleanup.append(close_utilities)
 
@@ -294,9 +294,14 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
 
 async def close_utilities(app):
+    root = get_utility(IApplication, name='root')
     for utility in get_all_utilities_registered_for(IAsyncUtility):
+        try:
+            root.cancel_async_utility(utility)
+        except KeyError:
+            pass
         if hasattr(utility, 'finalize'):
-            asyncio.ensure_future(lazy_apply(utility.finalize, app=app), loop=app.loop)
-    for db in app.router._root:
+            await lazy_apply(utility.finalize, app=app)
+    for db in root:
         if IDatabase.providedBy(db[1]):
             await db[1]._db.finalize()
