@@ -1,4 +1,4 @@
-2.1.1 (unreleased)
+2.1.1 (2017-11-08)
 ------------------
 
 - Clean up async tasks better
