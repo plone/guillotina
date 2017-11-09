@@ -34,8 +34,8 @@ class CreateCommand(Command):
         except ImportError:
             sys.stderr.write(
                 'You must have cookiecutter installed in order for the '
-                'pcreate command to work. Use `pip install cookiecutter` '
-                'to install cookiecutter.'
+                'pcreate command to work.\n Use `pip install cookiecutter` '
+                'to install cookiecutter.\n'
             )
             return 1
         cookiecutter(

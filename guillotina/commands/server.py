@@ -68,8 +68,8 @@ class ServerCommand(Command):
         if arguments.line_profiler:
             if not HAS_LINE_PROFILER:
                 sys.stderr.write(
-                    'You must first install line_profiler for the --line-profiler option to work.'
-                    'Use `pip install line_profiler` to install line_profiler.'
+                    'You must first install line_profiler for the --line-profiler option to work.\n'
+                    'Use `pip install line_profiler` to install line_profiler.\n'
                 )
                 return 1
             self.line_profiler = line_profiler.LineProfiler()
@@ -97,7 +97,7 @@ class ServerCommand(Command):
                 sys.stderr.write(
                     'You must install aiomonitor for the '
                     '--monitor option to work.\n'
-                    'Use `pip install aiomonitor` to install aiomonitor.')
+                    'Use `pip install aiomonitor` to install aiomonitor.\n')
                 return 1
             # init monitor just before run_app
             loop = self.get_loop()
@@ -107,7 +107,7 @@ class ServerCommand(Command):
             if not HAS_AUTORELOAD:
                 sys.stderr.write(
                     'You must install aiohttp_autoreload for the --reload option to work.\n'
-                    'Use `pip install aiohttp_autoreload` to install aiohttp_autoreload.'
+                    'Use `pip install aiohttp_autoreload` to install aiohttp_autoreload.\n'
                 )
                 return 1
             aiohttp_autoreload.start()

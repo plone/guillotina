@@ -72,5 +72,6 @@ app_settings = {
         ("text/html", interfaces.IRendererFormatHtml),
         ("text/plain", interfaces.IRendererFormatPlain)
     )),
-    'cloud_storage': "guillotina.interfaces.IDBFileField"
+    'cloud_storage': "guillotina.interfaces.IDBFileField",
+    "router": "guillotina.traversal.TraversalRouter"
 }

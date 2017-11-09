@@ -20,4 +20,5 @@ Contents:
    design
    persistence
    blob
+   router
    api/index
