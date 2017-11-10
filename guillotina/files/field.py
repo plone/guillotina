@@ -131,7 +131,7 @@ class BaseCloudFile:
                 return self.filename.split('.')[-1]
             return None
 
-    async def copy_cloud_file(self, new_uri):
+    async def copy_cloud_file(self, context, new_uri):
         raise NotImplemented()
 
     async def rename_cloud_file(self, new_uri):

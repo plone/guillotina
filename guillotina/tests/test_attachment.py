@@ -128,3 +128,37 @@ async def test_tus(container_requester):
             behavior = IAttachment(obj)
             await behavior.load()
             assert behavior.file._blob.chunks == 10
+
+
+async def test_copy_file_ob(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                '@behaviors': ['guillotina.behaviors.attachment.IAttachment'],
+                'id': 'foobar'
+            })
+        )
+        assert status == 201
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/foobar/@upload/file',
+            data=b'X' * 1024 * 1024 * 4,
+            headers={
+                'x-upload-size': str(1024 * 1024 * 4)
+            }
+        )
+        assert status == 200
+
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('foobar')
+            attachment = IAttachment(obj)
+            await attachment.load()
+            existing_bid = attachment.file._blob.bid
+            await attachment.file.copy_cloud_file(obj)
+            assert existing_bid != attachment.file._blob.bid

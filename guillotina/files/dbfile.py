@@ -49,3 +49,16 @@ class DBFile(BaseCloudFile):
         bfile = self._blob.open()
         async for chunk in bfile.iter_async_read():
             yield chunk
+
+    async def copy_cloud_file(self, context, new_uri=None):
+        if self._blob is None:
+            return
+        existing_blob = self._blob
+        self._blob = None  # make sure to set None or init will delete it!
+        await self.init_upload(context)
+
+        existing_bfile = existing_blob.open('r', context._p_jar)
+        bfile = self._blob.open('w', context._p_jar)
+        async for chunk in existing_bfile.iter_async_read():
+            await bfile.async_write_chunk(chunk)
+        self._current_upload = self._blob.size

@@ -1,7 +1,8 @@
 2.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement copy_cloud_file on DBFile
+  [vangheem]
 
 
 2.1.2 (2017-11-08)

@@ -74,7 +74,7 @@ class BlobFile:
     async def async_read_chunk(self, chunk_index):
         try:
             return (await self.transaction.read_blob_chunk(self.blob.bid, chunk_index))['data']
-        except KeyError:
+        except (KeyError, TypeError):
             raise BlobChunkNotFound('Could not find blob({}), chunk({})'.format(
                 self.blob.bid, chunk_index
             ))
