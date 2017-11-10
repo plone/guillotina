@@ -1,4 +1,4 @@
-2.1.3 (unreleased)
+2.1.3 (2017-11-10)
 ------------------
 
 - Implement copy_cloud_file on DBFile
