@@ -1,4 +1,4 @@
-2.1.4 (unreleased)
+2.1.4 (2017-11-14)
 ------------------
 
 - Be able to provide request.uid value from request header `X-FORWARDED-REQUEST-UID`.
