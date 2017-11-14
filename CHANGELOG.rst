@@ -1,7 +1,8 @@
 2.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Track timing of various parts of request. Helps with providing metrics
+  [vangheem]
 
 
 2.1.4 (2017-11-14)

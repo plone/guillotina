@@ -2,6 +2,7 @@
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPBadRequest
+from aiohttp.web_exceptions import HTTPException
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import logger
@@ -194,6 +195,7 @@ class MatchInfo(AbstractMatchInfo):
                 # We try to avoid collisions on the same instance of
                 # guillotina
                 view_result = await self.view()
+                request.record('view')
                 if isinstance(view_result, ErrorResponse) or \
                         isinstance(view_result, UnauthorizedResponse):
                     # If we don't throw an exception and return an specific
@@ -244,6 +246,7 @@ class MatchInfo(AbstractMatchInfo):
             view_result.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
 
         resp = await self.rendered(view_result)
+        request.record('rendered')
 
         if not resp.prepared:
             await resp.prepare(request)
@@ -253,6 +256,7 @@ class MatchInfo(AbstractMatchInfo):
 
         request.execute_futures()
 
+        request.record('finish')
         return resp
 
     def get_info(self):
@@ -261,6 +265,47 @@ class MatchInfo(AbstractMatchInfo):
             'resource': self.resource,
             'view': self.view,
             'rendered': self.rendered
+        }
+
+    @property
+    def apps(self):
+        return tuple(self._apps)
+
+    def add_app(self, app):
+        if self._frozen:
+            raise RuntimeError("Cannot change apps stack after .freeze() call")
+        self._apps.insert(0, app)
+
+    def freeze(self):
+        self._frozen = True
+
+    async def expect_handler(self, request):
+        return None
+
+    async def http_exception(self):
+        return None
+
+
+class BasicMatchInfo(AbstractMatchInfo):
+    """Function that returns from traversal request on aiohttp."""
+
+    def __init__(self, request, resp):
+        """Value that comes from the traversing."""
+        self.request = request
+        self.resp = resp
+        self._apps = []
+        self._frozen = False
+
+    @profilable
+    async def handler(self, request):
+        """Main handler function for aiohttp."""
+        request.record('finish')
+        return self.resp
+
+    def get_info(self):
+        return {
+            'request': self.request,
+            'resp': self.resp
         }
 
     @property
@@ -296,9 +341,12 @@ class TraversalRouter(AbstractRouter):
         self._root = root
 
     async def resolve(self, request):
+        request.record('start')
         result = None
         try:
             result = await self.real_resolve(request)
+        except HTTPException as exc:
+            return BasicMatchInfo(request, exc)
         except Exception as e:
             logger.error("Exception on resolve execution", exc_info=e, request=request)
             await abort(request)
@@ -307,7 +355,7 @@ class TraversalRouter(AbstractRouter):
             return result
         else:
             await abort(request)
-            raise HTTPNotFound()
+            return BasicMatchInfo(request, HTTPNotFound())
 
     @profilable
     async def real_resolve(self, request):
@@ -337,6 +385,8 @@ class TraversalRouter(AbstractRouter):
             # XXX should only should traceback if in some sort of dev mode?
             raise HTTPBadRequest(text=ujson.dumps(data))
 
+        request.record('traversed')
+
         await notify(ObjectLoadedEvent(resource))
         request.resource = resource
         request.tail = tail
@@ -354,6 +404,7 @@ class TraversalRouter(AbstractRouter):
             traverse_to = tail[1:]
 
         await self.apply_authorization(request)
+        request.record('authentication')
 
         translator = query_adapter(language_object, ITranslated,
                                    args=[resource, request])
@@ -415,6 +466,8 @@ class TraversalRouter(AbstractRouter):
                                for x in security.participations])),
                     request=request)
                 raise HTTPUnauthorized()
+
+        request.record('authorization')
 
         renderer = content_type_negotiation(request, resource, view)
         renderer_object = renderer(request)
