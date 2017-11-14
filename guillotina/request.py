@@ -5,7 +5,7 @@ from guillotina.profile import profilable
 from zope.interface import implementer
 
 import asyncio
-import timeit
+import time
 import uuid
 
 
@@ -44,7 +44,7 @@ class Request(web_request.Request):
         self._events = {}
 
     def record(self, event_name):
-        self._events[event_name] = timeit.default_timer()
+        self._events[event_name] = time.time()
 
     def add_future(self, name, fut):
         if self._futures is None:
