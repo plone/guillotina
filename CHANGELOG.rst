@@ -1,7 +1,8 @@
 2.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to provide request.uid value from request header `X-FORWARDED-REQUEST-UID`.
+  [vangheem]
 
 
 2.1.3 (2017-11-10)
