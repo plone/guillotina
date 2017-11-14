@@ -1,4 +1,4 @@
-2.1.5 (unreleased)
+2.1.5 (2017-11-14)
 ------------------
 
 - Track timing of various parts of request. Helps with providing metrics
