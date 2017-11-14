@@ -5,6 +5,7 @@ from guillotina.profile import profilable
 from zope.interface import implementer
 
 import asyncio
+import time
 import uuid
 
 
@@ -30,6 +31,7 @@ class Request(web_request.Request):
     _futures = None
     _uid = None
     _view_error = False
+    _events = None
 
     application = None
     exc = None
@@ -39,6 +41,10 @@ class Request(web_request.Request):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._futures = {}
+        self._events = {}
+
+    def record(self, event_name):
+        self._events[event_name] = time.time()
 
     def add_future(self, name, fut):
         if self._futures is None:
@@ -50,6 +56,10 @@ class Request(web_request.Request):
             return self._futures[name]
         except (AttributeError, KeyError):
             return
+
+    @property
+    def events(self):
+        return self._events
 
     @property
     def futures(self):
