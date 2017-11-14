@@ -39,7 +39,6 @@ class Request(web_request.Request):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._futures = {}
-        self._uid = uuid.uuid4().hex
 
     def add_future(self, name, fut):
         if self._futures is None:
@@ -73,9 +72,15 @@ class Request(web_request.Request):
             if not asyncio.iscoroutine(fut):
                 fut = fut()
             futures.append(fut)
-        asyncio.ensure_future(asyncio.gather(*futures))
+        task = asyncio.ensure_future(asyncio.gather(*futures))
         self._futures = {}
+        return task
 
     @property
     def uid(self):
+        if self._uid is None:
+            if 'X-FORWARDED-REQUEST-UID' in self.headers:
+                self._uid = self.headers['X-FORWARDED-REQUEST-UID']
+            else:
+                self._uid = uuid.uuid4().hex
         return self._uid
