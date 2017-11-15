@@ -267,11 +267,12 @@ def valid_id(_id):
     return _id == ''.join([l for l in _id if l in _valid_id_characters])
 
 
-async def get_containers(request):
+async def get_containers(request, transaction_strategy='none'):
     root = get_utility(IApplication, name='root')
     for _id, db in root:
         if IDatabase.providedBy(db):
-            db._db._storage._transaction_strategy = 'none'
+            if transaction_strategy is not None:
+                db._db._storage._transaction_strategy = transaction_strategy
             tm = request._tm = db.get_transaction_manager()
             tm.request = request
             request._db_id = _id

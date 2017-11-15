@@ -1,7 +1,8 @@
 2.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `id` index
+  [vangheem]
 
 
 2.1.6 (2017-11-15)
