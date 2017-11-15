@@ -346,6 +346,7 @@ class TraversalRouter(AbstractRouter):
         try:
             result = await self.real_resolve(request)
         except HTTPException as exc:
+            await abort(request)
             return BasicMatchInfo(request, exc)
         except Exception as e:
             logger.error("Exception on resolve execution", exc_info=e, request=request)

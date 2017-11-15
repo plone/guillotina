@@ -1,7 +1,8 @@
 2.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure to abort all error responses
+  [vangheem]
 
 
 2.1.5 (2017-11-14)
