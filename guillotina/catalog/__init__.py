@@ -23,6 +23,11 @@ def get_access_roles(ob):
     return roles
 
 
+@index.with_accessor(IResource, 'id', type='keyword', field='id')
+def get_id(ob):
+    return ob.id
+
+
 @index.with_accessor(IResource, 'access_users', type='keyword')
 def get_access_users(ob):
     # Users that has specific access to the object
