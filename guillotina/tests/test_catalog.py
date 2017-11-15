@@ -59,10 +59,10 @@ async def test_get_data_uses_indexes_param(dummy_request):
     container.__name__ = 'guillotina'
     ob = await create_content('Item', id='foobar')
     data = await util.get_data(ob, indexes=['title'])
-    assert len(data) == 3  # uuid and type_name always returned
+    assert len(data) == 4  # uuid, type_name, id, etc always returned
 
     data = await util.get_data(ob)
-    assert len(data) > 7
+    assert len(data) > 8
 
 
 async def test_search_endpoint(container_requester):
