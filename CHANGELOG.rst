@@ -1,4 +1,4 @@
-2.1.6 (unreleased)
+2.1.6 (2017-11-15)
 ------------------
 
 - Make sure to abort all error responses
