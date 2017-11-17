@@ -1,7 +1,8 @@
 2.1.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to provide a custom router using the `router` setting
+  [vangheem]
 
 
 2.1.7 (2017-11-15)

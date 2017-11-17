@@ -106,11 +106,14 @@ class GuillotinaAIOHTTPApplication(web.Application):
             client_max_size=self._client_max_size)
 
 
-def make_aiohttp_application(settings, middlewares=[]):
+def make_aiohttp_application():
+    middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
+    router_klass = app_settings.get('router', TraversalRouter)
+    router = resolve_dotted_name(router_klass)()
     return GuillotinaAIOHTTPApplication(
-        router=TraversalRouter(),
+        router=router,
         middlewares=middlewares,
-        **settings.get('aiohttp_settings', {}))
+        **app_settings.get('aiohttp_settings', {}))
 
 
 def list_or_dict_items(val):
@@ -161,19 +164,12 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     elif settings is None:
         raise Exception('Neither configuration or settings')
 
-    middlewares = [resolve_dotted_name(m) for m in settings.get('middlewares', [])]
-    # Initialize aiohttp app
-    if server_app is None:
-        server_app = make_aiohttp_application(settings, middlewares)
-
     # Create root Application
     root = ApplicationRoot(config_file)
-    root.app = server_app
-    server_app.root = root
     provide_utility(root, IApplication, 'root')
 
     # Initialize global (threadlocal) ZCA configuration
-    config = root.config = server_app.config = ConfigurationMachine()
+    config = root.config = ConfigurationMachine()
 
     import guillotina
     import guillotina.db.factory
@@ -221,6 +217,13 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     if 'logging' in app_settings:
         logging.config.dictConfig(app_settings['logging'])
+
+    # Make and initialize aiohttp app
+    if server_app is None:
+        server_app = make_aiohttp_application()
+    root.app = server_app
+    server_app.root = root
+    server_app.config = config
 
     content_type = ContentNegotiatorUtility(
         'content_type', app_settings['renderers'].keys())

@@ -35,6 +35,8 @@ from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRendered
+from guillotina.interfaces import IRequest
+from guillotina.interfaces import IResource
 from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
@@ -332,16 +334,18 @@ class TraversalRouter(AbstractRouter):
 
     _root = None
 
-    def __init__(self, root=None):
+    def __init__(self, root: IApplication=None):
         """On traversing aiohttp sets the root object."""
         self.set_root(root)
 
-    def set_root(self, root):
+    def set_root(self, root: IApplication):
         """Warpper to set the root object."""
         self._root = root
 
-    async def resolve(self, request):
-        request.record('start')
+    async def resolve(self, request: IRequest) -> MatchInfo:
+        '''
+        Resolve a request
+        '''
         result = None
         try:
             result = await self.real_resolve(request)
@@ -359,7 +363,7 @@ class TraversalRouter(AbstractRouter):
             return BasicMatchInfo(request, HTTPNotFound())
 
     @profilable
-    async def real_resolve(self, request):
+    async def real_resolve(self, request: IRequest) -> MatchInfo:
         """Main function to resolve a request."""
         security = get_adapter(request, IInteraction)
 
@@ -481,14 +485,14 @@ class TraversalRouter(AbstractRouter):
         else:
             return None
 
-    async def traverse(self, request):
+    async def traverse(self, request: IRequest) -> IResource:
         """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
 
     @profilable
-    async def apply_authorization(self, request):
+    async def apply_authorization(self, request: IRequest):
         # User participation
         participation = IParticipation(request)
         # Lets extract the user from the request
