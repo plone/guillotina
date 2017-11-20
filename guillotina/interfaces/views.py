@@ -53,3 +53,7 @@ class IHEAD(IView):
 
 class ICONNECT(IView):
     pass
+
+
+class IPROPFIND(IView):
+    pass

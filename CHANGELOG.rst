@@ -1,6 +1,9 @@
 2.1.8 (unreleased)
 ------------------
 
+- Adding PROPFIND HTTP Verb
+  [ramon]
+
 - Be able to provide a custom router using the `router` setting
   [vangheem]
 
