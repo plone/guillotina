@@ -95,6 +95,7 @@ from .views import IHEAD  # noqa
 from .views import IOPTIONS  # noqa
 from .views import IPATCH  # noqa
 from .views import IPOST  # noqa
+from .views import IPROPFIND  # noqa
 from .views import IPUT  # noqa
 from .views import ITraversableView  # noqa
 from .views import IView  # noqa
