@@ -1,7 +1,8 @@
 2.1.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Raising aiohttp http exception is handled correctly in publisher
+  [vangheem]
 
 
 2.1.9 (2017-11-21)
