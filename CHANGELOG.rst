@@ -1,4 +1,4 @@
-2.1.8 (unreleased)
+2.1.8 (2017-11-21)
 ------------------
 
 - Adding X-Forwarded-Proto in order to allow https rewrite of absolute url
