@@ -15,7 +15,9 @@ class BaseImage:
         cap_add=['IPC_LOCK'],
         mem_limit='1g',
         environment={},
-        privileged=True)
+        privileged=True,
+        detach=True,
+        publish_all_ports=True)
 
     def get_image_options(self):
         image_options = self.base_image_options.copy()
@@ -43,8 +45,6 @@ class BaseImage:
         # Create a new one
         container = docker_client.containers.run(
             image=self.image,
-            detach=True,
-            publish_all_ports=True,
             **self.get_image_options()
         )
         ident = container.id
@@ -77,6 +77,10 @@ class BaseImage:
 
             if self.host != '':
                 opened = self.check()
+        if not opened:
+            logs = self.container_obj.logs()
+            self.stop()
+            raise Exception(f'Could not start {self.name}: {logs}')
         print(f'{self.name} started')
         return self.host, self.get_port()
 
