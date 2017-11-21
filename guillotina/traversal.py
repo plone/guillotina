@@ -214,6 +214,9 @@ class MatchInfo(AbstractMatchInfo):
             except (ConflictError, TIDConflictError) as e:
                 # bubble this error up
                 raise
+            except HTTPException as exc:
+                await abort(request)
+                return exc
             except Exception as e:
                 await abort(request)
                 view_result = generate_error_response(
@@ -225,6 +228,8 @@ class MatchInfo(AbstractMatchInfo):
             except Unauthorized as e:
                 request._view_error = True
                 view_result = generate_unauthorized_response(e, request)
+            except HTTPException as exc:
+                return exc
             except Exception as e:
                 request._view_error = True
                 view_result = generate_error_response(e, request, 'ViewError')
