@@ -362,7 +362,7 @@ async def test_none_strat_allows_trans_commits(postgres, dummy_request):
 async def test_count_total_objects(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
 
     # create object first, commit it...

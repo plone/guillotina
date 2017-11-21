@@ -24,6 +24,8 @@ class BaseImage:
     def get_port(self):
         if os.environ.get('TESTING', '') == 'jenkins':
             return self.port
+        if 'TRAVIS' in os.environ:
+            return self.port
         for port in self.container_obj.attrs['NetworkSettings']['Ports'].keys():
             if port == '6543/tcp':
                 continue
