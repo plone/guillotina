@@ -13,7 +13,11 @@ class CockroachDB(BaseImage):
         image_options.update(dict(
             command=' '.join([
                 'start --insecure',
-            ])
+            ]),
+            publish_all_ports=False,
+            ports={
+                f'26257/tcp': '26257'
+            }
         ))
         return image_options
 
