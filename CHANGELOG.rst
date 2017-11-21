@@ -1,4 +1,4 @@
-2.1.10 (unreleased)
+2.1.10 (2017-11-21)
 -------------------
 
 - Raising aiohttp http exception is handled correctly in publisher
