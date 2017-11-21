@@ -29,7 +29,7 @@ class ResolveStrategy(SimpleStrategy):
                     modified_keys = [k for k in self._transaction.modified.keys()]
                     logger.warn(
                         f'Could not resolve conflicts in TID: {self._transaction._tid}\n'
-                        f'Conflicted TID: {current_tid}\n',
+                        f'Conflicted TID: {current_tid}\n'
                         f'IDs: {modified_keys}'
                     )
                     return False
