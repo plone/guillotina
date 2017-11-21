@@ -1,4 +1,4 @@
-2.1.9 (unreleased)
+2.1.9 (2017-11-21)
 ------------------
 
 - Fix dockers test infrastructure to not conflict with multiple tests running
