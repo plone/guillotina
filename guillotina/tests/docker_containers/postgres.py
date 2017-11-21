@@ -4,21 +4,25 @@ import psycopg2
 
 
 class Postgresql(BaseImage):
-    label = 'postgresql'
+    name = 'postgresql'
     image = 'postgres:9.6'
-    to_port = from_port = 5432
-    image_options = BaseImage.image_options.copy()
-    image_options.update(dict(
-        environment={
-            'POSTGRES_PASSWORD': '',
-            'POSTGRES_DB': 'guillotina',
-            'POSTGRES_USER': 'postgres'
-        }
-    ))
+    port = 5432
 
-    def check(self, host):
+    def get_image_options(self):
+        image_options = super().get_image_options()
+        image_options.update(dict(
+            environment={
+                'POSTGRES_PASSWORD': '',
+                'POSTGRES_DB': 'guillotina',
+                'POSTGRES_USER': 'postgres'
+            }
+        ))
+        return image_options
+
+    def check(self):
         try:
-            conn = psycopg2.connect("dbname=guillotina user=postgres host=%s port=5432" % host)  # noqa
+            conn = psycopg2.connect(
+                f"dbname=guillotina user=postgres host={self.host} port={self.get_port()}")
             cur = conn.cursor()
             cur.execute("SELECT 1;")
             cur.fetchone()

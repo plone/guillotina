@@ -51,14 +51,13 @@ def get_pg_settings():
         'dbname': 'guillotina',
         'user': 'postgres',
         'host': getattr(get_pg_settings, 'host', 'localhost'),
+        'port': getattr(get_pg_settings, 'port', 5432),
         'password': '',
-        'port': 5432
     }
     if USE_COCKROACH:
         settings['databases'][0]['db']['storage'] = 'cockroach'
         settings['databases'][0]['db']['dsn'].update({
-            'user': 'root',
-            'port': 26257
+            'user': 'root'
         })
     return settings
 
@@ -70,17 +69,19 @@ def postgres():
     """
 
     if USE_COCKROACH:
-        host = containers.cockroach_image.run()
+        host, port = containers.cockroach_image.run()
     else:
         if not IS_TRAVIS:
-            host = containers.postgres_image.run()
+            host, port = containers.postgres_image.run()
         else:
             host = 'localhost'
+            port = 5432
 
     # mark the function with the actual host
     setattr(get_pg_settings, 'host', host)
+    setattr(get_pg_settings, 'port', port)
 
-    yield host  # provide the fixture value
+    yield host, port  # provide the fixture value
 
     if USE_COCKROACH:
         containers.cockroach_image.stop()
@@ -223,13 +224,17 @@ async def container_requester(guillotina):
 
 
 class CockroachStorageAsyncContextManager(object):
-    def __init__(self, request, loop):
+    def __init__(self, request, loop, postgres):
         self.loop = loop
         self.request = request
         self.storage = None
+        self.postgres = postgres
 
     async def __aenter__(self):
-        dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
+        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
+            self.postgres[0],
+            self.postgres[1]
+        )
         self.storage = CockroachStorage(
             dsn=dsn, name='db', pool_size=25,
             conn_acquire_timeout=0.1)
@@ -245,4 +250,4 @@ class CockroachStorageAsyncContextManager(object):
 
 @pytest.fixture(scope='function')
 async def cockroach_storage(postgres, dummy_request, loop):
-    return CockroachStorageAsyncContextManager(dummy_request, loop)
+    return CockroachStorageAsyncContextManager(dummy_request, loop, postgres)

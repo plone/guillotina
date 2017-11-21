@@ -29,8 +29,11 @@ async def cleanup(aps):
     await aps.finalize()
 
 
-async def get_aps(strategy=None, pool_size=16):
-    dsn = "postgres://postgres:@localhost:5432/guillotina"
+async def get_aps(postgres, strategy=None, pool_size=16):
+    dsn = "postgres://postgres:@{}:{}/guillotina".format(
+        postgres[0],
+        postgres[1],
+    )
     klass = PostgresqlStorage
     if strategy is None:
         if USE_COCKROACH:
@@ -39,7 +42,10 @@ async def get_aps(strategy=None, pool_size=16):
             strategy = 'resolve'
     if USE_COCKROACH:
         klass = CockroachStorage
-        dsn = "postgres://root:@localhost:26257/guillotina?sslmode=disable"
+        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
+            postgres[0],
+            postgres[1],
+        )
     aps = klass(
         dsn=dsn, name='db',
         transaction_strategy=strategy, pool_size=pool_size,
@@ -52,7 +58,7 @@ async def test_read_obs(postgres, dummy_request):
     """Low level test checks that root is not there"""
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -78,7 +84,7 @@ async def test_restart_connection(postgres, dummy_request):
     """Low level test checks that root is not there"""
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -107,7 +113,7 @@ async def test_restart_connection(postgres, dummy_request):
 async def test_deleting_parent_deletes_children(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -151,7 +157,7 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
 async def test_create_blob(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -180,7 +186,7 @@ async def test_create_blob(postgres, dummy_request):
 async def test_delete_resource_deletes_blob(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -213,7 +219,7 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
         postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps('resolve')
+    aps = await get_aps(postgres, 'resolve')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -250,7 +256,7 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
 async def test_should_resolve_conflict_error(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps('resolve')
+    aps = await get_aps(postgres, 'resolve')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -285,7 +291,7 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
 async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps('simple')
+    aps = await get_aps(postgres, 'simple')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -320,7 +326,7 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
 async def test_none_strat_allows_trans_commits(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps('none')
+    aps = await get_aps(postgres, 'none')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -356,7 +362,7 @@ async def test_none_strat_allows_trans_commits(postgres, dummy_request):
 async def test_count_total_objects(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -380,7 +386,7 @@ async def test_count_total_objects(postgres, dummy_request):
 async def test_get_resources_of_type(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -408,7 +414,7 @@ async def test_get_resources_of_type(postgres, dummy_request):
 async def test_get_total_resources_of_type(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -431,7 +437,7 @@ async def test_get_total_resources_of_type(postgres, dummy_request):
 async def test_using_gather_with_queries_before_prepare(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -459,7 +465,7 @@ async def test_using_gather_with_queries_before_prepare(postgres, dummy_request)
 async def test_using_gather_with_queries_after_prepare(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -491,7 +497,7 @@ async def test_exhausting_pool_size(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     # base aps uses 1 connection from the pool for starting transactions
-    aps = await get_aps(pool_size=2)
+    aps = await get_aps(postgres, pool_size=2)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -509,7 +515,7 @@ async def test_mismatched_tid_causes_conflict_error(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     # base aps uses 1 connection from the pool for starting transactions
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -533,7 +539,7 @@ async def test_iterate_keys(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     # base aps uses 1 connection from the pool for starting transactions
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -562,7 +568,7 @@ async def test_iterate_keys(postgres, dummy_request):
 async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)
     for conn in tm._storage._pool._queue._queue:
@@ -594,7 +600,7 @@ async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
 async def test_handles_asyncpg_trying_txn_with_manual_txn(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps()
+    aps = await get_aps(postgres)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)
     for conn in tm._storage._pool._queue._queue:

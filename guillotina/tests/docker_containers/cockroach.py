@@ -4,20 +4,28 @@ import psycopg2
 
 
 class CockroachDB(BaseImage):
-    label = 'cockroach'
+    name = 'cockroach'
     image = 'cockroachdb/cockroach:v1.0'
-    to_port = from_port = 26257
-    image_options = BaseImage.image_options.copy()
-    image_options.update(dict(
-        command=' '.join([
-            'start --insecure',
-        ])
-    ))
+    port = 26257
 
-    def check(self, host):
+    def get_image_options(self):
+        image_options = super().get_image_options()
+        image_options.update(dict(
+            command=' '.join([
+                'start --insecure',
+            ]),
+            publish_all_ports=False,
+            ports={
+                f'26257/tcp': '26257'
+            }
+        ))
+        return image_options
+
+    def check(self):
         conn = cur = None
         try:
-            conn = psycopg2.connect("dbname=guillotina user=root host=%s port=26257" % host)  # noqa
+            conn = psycopg2.connect(
+                f"dbname=guillotina user=root host={self.host} port={self.get_port()}")
             conn.set_session(autocommit=True)
             cur = conn.cursor()
             cur.execute('SHOW DATABASES;')
