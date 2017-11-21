@@ -1,6 +1,9 @@
 2.1.8 (unreleased)
 ------------------
 
+- Adding X-Forwarded-Proto in order to allow https rewrite of absolute url
+  [ramon] 
+
 - Adding PROPFIND HTTP Verb
   [ramon]
 
