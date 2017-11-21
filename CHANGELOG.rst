@@ -1,14 +1,16 @@
 2.1.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix dockers test infrastructure to not conflict with multiple tests running
+  at the same time.
+  [vangheem]
 
 
 2.1.8 (2017-11-21)
 ------------------
 
 - Adding X-Forwarded-Proto in order to allow https rewrite of absolute url
-  [ramon] 
+  [ramon]
 
 - Adding PROPFIND HTTP Verb
   [ramon]
