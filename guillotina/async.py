@@ -10,6 +10,7 @@ from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
 from zope.interface import Interface
 
+import aiotask_context
 import asyncio
 
 
@@ -54,6 +55,7 @@ class QueueUtility(object):
                     continue
 
                 try:
+                    aiotask_context.set('request', view.request)
                     view_result = await view()
                     if isinstance(view_result, ErrorResponse):
                         await tm.commit(txn=txn)
@@ -76,6 +78,7 @@ class QueueUtility(object):
                 self._exceptions = True
                 logger.error('Worker call failed', exc_info=e)
             finally:
+                aiotask_context.set('request', None)
                 if got_obj:
                     try:
                         view.request.execute_futures()
