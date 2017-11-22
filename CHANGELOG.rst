@@ -1,7 +1,8 @@
 2.1.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Set task request for async utility
+  [vangheem]
 
 
 2.1.10 (2017-11-21)

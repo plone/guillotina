@@ -59,6 +59,8 @@ async def get_container(requester=None, request=None):
     root = await get_root(request)
     async with managed_transaction(request=request):
         container = await root.async_get('guillotina')
+        request._container_id = container.id
+        request.container = container
         return container
 
 
