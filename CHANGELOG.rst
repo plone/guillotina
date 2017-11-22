@@ -1,4 +1,4 @@
-2.1.11 (unreleased)
+2.1.11 (2017-11-22)
 -------------------
 
 - Set task request for async utility
