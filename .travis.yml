@@ -19,7 +19,6 @@ install:
   - pip install -r requirements.txt
   - pip install -e .[test]
   - pip install flake8
-  - pip install coverage==4.0.3 pytest-cov
   - sleep 5
 script:
   - pytest -s --cov=guillotina -s --tb=native -v --cov-report term-missing guillotina

@@ -1,7 +1,8 @@
 2.1.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Handle restart transaction error from cockroach on retrieving data from db
+  [vangheem]
 
 
 2.1.11 (2017-11-22)

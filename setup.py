@@ -46,12 +46,14 @@ setup(
     ],
     extras_require={
         'test': [
-            'pytest',
+            'pytest<=3.1.0',
             'docker',
             'backoff',
             'psycopg2',
             'pytest-asyncio>=0.8.0',
-            'pytest-aiohttp'
+            'pytest-aiohttp',
+            'pytest-cov',
+            'coverage==4.0.3'
         ]
     },
     entry_points={
