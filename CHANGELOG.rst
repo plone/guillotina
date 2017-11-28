@@ -1,4 +1,4 @@
-2.1.12 (unreleased)
+2.1.12 (2017-11-28)
 -------------------
 
 - Handle restart transaction error from cockroach on retrieving data from db
