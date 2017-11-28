@@ -89,7 +89,7 @@ def test_all(dummy_request):
         assert isinstance(adapter, klass)
 
 
-def test_vocabulary():
+def test_vocabulary(dummy_request):
     from guillotina.schema.vocabulary import SimpleVocabulary
     vocab = SimpleVocabulary.fromItems((
         (u"Foo", "id_foo"),
