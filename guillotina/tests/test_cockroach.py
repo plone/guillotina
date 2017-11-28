@@ -1,7 +1,10 @@
 from guillotina.db.transaction_manager import TransactionManager
+from guillotina.exceptions import ConflictError
 from guillotina.tests.utils import create_content
+from unittest import mock
 
 import asyncio
+import asyncpg
 import os
 import pytest
 
@@ -57,3 +60,21 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
             await tm.abort(txn=txn)
 
         await tm.abort(txn=txn)
+
+
+async def test_handle_serialization_error(cockroach_storage):
+    async with cockroach_storage as storage:
+        tm = TransactionManager(storage)
+        txn = await tm.begin()
+        folder1 = create_content()
+        txn.register(folder1)
+        await tm.commit(txn=txn)
+        txn = await tm.begin()
+
+        with mock.patch('asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute') as exe_mock:  # noqa
+            exe_mock.side_effect = asyncpg.exceptions.SerializationError(
+                'restart transaction: HandledRetryableTxnError: '
+                'ReadWithinUncertaintyIntervalError: read at time '
+                '1511374585.730535846,0 encountered')
+            with pytest.raises(ConflictError):
+                await txn.get(folder1._p_oid)

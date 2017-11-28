@@ -307,5 +307,9 @@ class CockroachStorage(pg.PostgresqlStorage):
     # Cockroach cant use at version 1.0.3 row count (no fetch)
     async def get_one_row(self, smt, *args):
         # Helper function to provide easy adaptation to cockroach
-        result = await smt.fetch(*args)
+        try:
+            result = await smt.fetch(*args)
+        except asyncpg.exceptions.SerializationError as ex:
+            if 'restart transaction' in ex.args[0]:
+                raise ConflictError(ex.args[0])
         return result[0] if len(result) > 0 else None
