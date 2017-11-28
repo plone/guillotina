@@ -78,3 +78,4 @@ async def test_handle_serialization_error(cockroach_storage):
                 '1511374585.730535846,0 encountered')
             with pytest.raises(ConflictError):
                 await txn.get(folder1._p_oid)
+        await tm.abort(txn=txn)
