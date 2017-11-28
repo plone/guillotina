@@ -34,7 +34,7 @@ class BaseImage:
     def get_host(self):
         return self.container_obj.attrs['NetworkSettings']['IPAddress']
 
-    def check(self, host):
+    def check(self):
         return True
 
     def run(self):

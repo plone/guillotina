@@ -351,6 +351,7 @@ class TraversalRouter(AbstractRouter):
         '''
         Resolve a request
         '''
+        request.record('start')
         result = None
         try:
             result = await self.real_resolve(request)
