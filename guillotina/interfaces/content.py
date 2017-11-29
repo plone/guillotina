@@ -149,6 +149,21 @@ class IResource(ILocation):
         default=u''
     )
 
+    uuid = guillotina.schema.TextLine(
+        title='UUID',
+        required=True
+    )
+
+    modification_date = guillotina.schema.Datetime(
+        title='Modification date',
+        required=False
+    )
+
+    creation_date = guillotina.schema.Datetime(
+        title='Creation date',
+        required=False
+    )
+
     __behaviors__ = guillotina.schema.FrozenSet(
         title='Enabled behaviors',
         required=False,

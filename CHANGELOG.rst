@@ -1,7 +1,8 @@
 2.1.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix ContextBehavior implementation to get data correctly from object
+  [vangheem]
 
 
 2.1.12 (2017-11-28)

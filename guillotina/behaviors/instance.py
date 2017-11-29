@@ -3,7 +3,6 @@ from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IContentBehavior
-from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface.declarations import Provides
 
@@ -86,7 +85,13 @@ class ContextBehavior(object):
         self.__dict__['schema'] = [x for x in self.__implemented__][0]
         self.__dict__['prefix'] = self.__dict__['schema'].__identifier__ + '.'
         self.__dict__['context'] = context
-        alsoProvides(self, self.__dict__['schema'])
+        self.__dict__['__provides__'] = Provides(self.__dict__['schema'])
+
+    async def load(self, create=False):
+        '''
+        implement interface so users of behaviors can be lazy
+        '''
+        pass
 
     def __getattr__(self, name):
         if name not in self.__dict__['schema']:
@@ -94,10 +99,11 @@ class ContextBehavior(object):
 
         context = self.__dict__['context']
         key_name = self.__dict__['prefix'] + name
-        if hasattr(context, key_name):
-            return self.__dict__['schema'][name].missing_value
+        field = self.__dict__['schema'][name]
+        if not hasattr(context, key_name):
+            return field.missing_value
 
-        return context.__getattr__(key_name)
+        return getattr(context, key_name, field.default)
 
     def __setattr__(self, name, value):
         if name not in self.__dict__['schema']:
