@@ -1,4 +1,4 @@
-2.1.14 (unreleased)
+2.1.14 (2017-11-30)
 -------------------
 
 - Improve performance of json schema serialization
