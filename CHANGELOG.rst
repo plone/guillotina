@@ -1,7 +1,8 @@
 2.1.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improve performance of json schema serialization
+  [vangheem]
 
 
 2.1.13 (2017-11-29)

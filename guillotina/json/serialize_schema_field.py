@@ -5,6 +5,7 @@ from guillotina.interfaces import IFileField
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.json.serialize_value import json_compatible
+from guillotina.profile import profilable
 from guillotina.schema import getFields
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IChoice
@@ -22,6 +23,9 @@ from guillotina.schema.interfaces import ITextLine
 from guillotina.schema.interfaces import ITime
 from zope.interface import implementedBy
 from zope.interface import Interface
+
+
+FIELDS_CACHE = {}
 
 
 @configure.adapter(
@@ -49,14 +53,20 @@ class DefaultSchemaFieldSerializer(object):
         self.field = field
         self.schema = schema
         self.request = request
-        self.field_attributes = {}
 
+    @profilable
     async def __call__(self):
         result = {'type': self.field_type}
-        for schema in implementedBy(self.field.__class__).flattened():
-            self.field_attributes.update(getFields(schema))
-        for attribute_name in sorted(self.field_attributes.keys()):
-            attribute_field = self.field_attributes[attribute_name]
+        # caching the field_attributes here improves performance dramatically
+        if self.field.__class__ in FIELDS_CACHE:
+            field_attributes = FIELDS_CACHE[self.field.__class__].copy()
+        else:
+            field_attributes = {}
+            for schema in implementedBy(self.field.__class__).flattened():
+                field_attributes.update(getFields(schema))
+            FIELDS_CACHE[self.field.__class__] = field_attributes
+        for attribute_name in sorted(field_attributes.keys()):
+            attribute_field = field_attributes[attribute_name]
             if attribute_name in self.filtered_attributes:
                 continue
 
