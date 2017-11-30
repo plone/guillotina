@@ -6,6 +6,7 @@ from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
+from guillotina.profile import profilable
 from guillotina.schema import getFieldsInOrder
 from zope.interface import Interface
 
@@ -19,6 +20,7 @@ class SerializeFactoryToJson(object):
         self.factory = factory
         self.request = request
 
+    @profilable
     async def __call__(self):
         factory = self.factory
         result = {
