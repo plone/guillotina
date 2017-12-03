@@ -2,6 +2,7 @@
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPBadRequest
+from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPException
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
@@ -373,6 +374,8 @@ class TraversalRouter(AbstractRouter):
         """Main function to resolve a request."""
         security = get_adapter(request, IInteraction)
 
+        if request.method not in app_settings['http_methods']:
+            raise HTTPMethodNotAllowed()
         method = app_settings['http_methods'][request.method]
 
         language = language_negotiation(request)
