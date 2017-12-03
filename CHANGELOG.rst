@@ -1,7 +1,8 @@
 2.1.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- In case there is no method raise an error
+  [ramon]
 
 
 2.1.14 (2017-11-30)
