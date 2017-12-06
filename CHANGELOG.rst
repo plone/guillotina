@@ -1,4 +1,4 @@
-2.1.17 (unreleased)
+2.1.17 (2017-12-06)
 -------------------
 
 - Fix getting sharing information for database objects
