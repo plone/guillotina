@@ -343,6 +343,9 @@ def get_owners(obj):
         for role in roles:
             if role == 'guillotina.Owner':
                 owners.append(user)
+    if len(owners) == 0 and getattr(obj, '__parent__', None) is not None:
+        # owner can be parent if none found on current object
+        return get_owners(obj.__parent__)
     return owners
 
 
