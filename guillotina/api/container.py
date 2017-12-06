@@ -105,6 +105,7 @@ class DefaultPOST(Service):
         await container.install()
 
         self.request._container_id = container.__name__
+        self.request.container = container
 
         user = get_authenticated_user_id(self.request)
 

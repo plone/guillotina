@@ -1,7 +1,8 @@
 2.1.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide security cache implementation
+  [vangheem]
 
 
 2.1.14 (2017-11-30)
