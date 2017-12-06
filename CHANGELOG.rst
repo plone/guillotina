@@ -1,4 +1,4 @@
-2.1.18 (unreleased)
+2.1.18 (2017-12-06)
 -------------------
 
 - get_owners will lookup to parent object for owner.
