@@ -97,6 +97,7 @@ class DefaultSearchUtility(object):
     for_=IResource,
     provides=ISecurityInfo)
 class DefaultSecurityInfoAdapter(object):
+
     def __init__(self, content):
         self.content = content
 

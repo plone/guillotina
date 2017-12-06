@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina import security
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.interfaces import IApplication
@@ -16,23 +17,18 @@ class DatabaseSpecialPermissions(PrincipalPermissionManager):
     We cache this because granting these permissions on every request is costly
     """
 
-    __cached__db_maps = {}
-
     def __init__(self, db):
-        super(DatabaseSpecialPermissions, self).__init__()
+        super().__init__()
         db_id = getattr(db, '__db_id__', None)
-        if db_id in self.__cached__db_maps:
+        cache_key = f'dbperms-{db_id}'
+        if cache_key in security.security_map_cache:
             # an optimization since granting this is costly and it happens
             # on every single lookup.
-            self._byrow = self.__cached__db_maps[db.__db_id__]['byrow']
-            self._bycol = self.__cached__db_maps[db.__db_id__]['bycol']
+            security.security_map_cache.apply(cache_key, self)
         else:
             self._grants()
             if db_id:
-                self.__cached__db_maps[db.__db_id__] = {
-                    'byrow': self._byrow,
-                    'bycol': self._bycol
-                }
+                security.security_map_cache.put(cache_key, self)
 
     def _grants(self):
         self.grant_permission_to_principal('guillotina.AddContainer', ROOT_USER_ID)

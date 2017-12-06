@@ -1,6 +1,9 @@
 2.1.15 (unreleased)
 -------------------
 
+- Provide security cache implementation
+  [vangheem]
+
 - In case there is no method raise an error
   [ramon]
 
