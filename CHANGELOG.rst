@@ -1,4 +1,4 @@
-2.1.15 (unreleased)
+2.1.15 (2017-12-06)
 -------------------
 
 - Provide security cache implementation
