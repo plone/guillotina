@@ -4,6 +4,9 @@
 - Provide security cache implementation
   [vangheem]
 
+- In case there is no method raise an error
+  [ramon]
+
 
 2.1.14 (2017-11-30)
 -------------------
