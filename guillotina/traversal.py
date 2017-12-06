@@ -2,10 +2,11 @@
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
 from aiohttp.web_exceptions import HTTPBadRequest
-from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPException
+from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
+from contextlib import contextmanager
 from guillotina import logger
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
@@ -177,17 +178,59 @@ def generate_error_response(e, request, error, status=500):
     return ErrorResponse(error, message, status)
 
 
-class MatchInfo(AbstractMatchInfo):
+class BaseMatchInfo(AbstractMatchInfo):
+
+    def __init__(self):
+        self._apps = ()
+        self._frozen = False
+        self._current_app = None
+
+    def add_app(self, app):
+        if self._frozen:
+            raise RuntimeError("Cannot change apps stack after .freeze() call")
+        if self._current_app is None:
+            self._current_app = app
+        self._apps = (app,) + self._apps
+
+    @property
+    def current_app(self):
+        return self._current_app
+
+    @contextmanager
+    def set_current_app(self, app):
+        assert app in self._apps, (
+            "Expected one of the following apps {!r}, got {!r}"
+            .format(self._apps, app))
+        prev = self._current_app
+        self._current_app = app
+        try:
+            yield
+        finally:
+            self._current_app = prev
+
+    @property
+    def apps(self):
+        return tuple(self._apps)
+
+    def freeze(self):
+        self._frozen = True
+
+    async def expect_handler(self, request):
+        return None
+
+    async def http_exception(self):
+        return None
+
+
+class MatchInfo(BaseMatchInfo):
     """Function that returns from traversal request on aiohttp."""
 
     def __init__(self, resource, request, view, rendered):
-        """Value that comes from the traversing."""
+        super().__init__()
         self.request = request
         self.resource = resource
         self.view = view
         self.rendered = rendered
-        self._apps = []
-        self._frozen = False
 
     @profilable
     async def handler(self, request):
@@ -275,34 +318,14 @@ class MatchInfo(AbstractMatchInfo):
             'rendered': self.rendered
         }
 
-    @property
-    def apps(self):
-        return tuple(self._apps)
 
-    def add_app(self, app):
-        if self._frozen:
-            raise RuntimeError("Cannot change apps stack after .freeze() call")
-        self._apps.insert(0, app)
-
-    def freeze(self):
-        self._frozen = True
-
-    async def expect_handler(self, request):
-        return None
-
-    async def http_exception(self):
-        return None
-
-
-class BasicMatchInfo(AbstractMatchInfo):
+class BasicMatchInfo(BaseMatchInfo):
     """Function that returns from traversal request on aiohttp."""
 
     def __init__(self, request, resp):
-        """Value that comes from the traversing."""
+        super().__init__()
         self.request = request
         self.resp = resp
-        self._apps = []
-        self._frozen = False
 
     @profilable
     async def handler(self, request):
@@ -315,24 +338,6 @@ class BasicMatchInfo(AbstractMatchInfo):
             'request': self.request,
             'resp': self.resp
         }
-
-    @property
-    def apps(self):
-        return tuple(self._apps)
-
-    def add_app(self, app):
-        if self._frozen:
-            raise RuntimeError("Cannot change apps stack after .freeze() call")
-        self._apps.insert(0, app)
-
-    def freeze(self):
-        self._frozen = True
-
-    async def expect_handler(self, request):
-        return None
-
-    async def http_exception(self):
-        return None
 
 
 class TraversalRouter(AbstractRouter):

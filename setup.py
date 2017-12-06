@@ -30,7 +30,7 @@ setup(
     package_data={'': ['*.txt', '*.rst', 'guillotina/documentation/meta/*.json']},
     packages=find_packages(),
     install_requires=[
-        'aiohttp>=2.3.0,<2.4.0',
+        'aiohttp>=2.3.6,<2.4.0',
         'jsonschema',
         'python-dateutil',
         'pycrypto',

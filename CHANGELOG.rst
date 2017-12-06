@@ -1,7 +1,8 @@
 2.1.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix compatibility with aiohttp 2.3.6
+  [vangheem]
 
 
 2.1.15 (2017-12-06)
