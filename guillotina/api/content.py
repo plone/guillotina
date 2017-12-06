@@ -311,11 +311,12 @@ async def sharing_get(context, request):
     result['local']['prinrole'] = prinrole._bycol
     for obj in iter_parents(context):
         roleperm = IRolePermissionMap(obj, None)
-        if roleperm is not None:
+        url_factory = query_multi_adapter((obj, request), IAbsoluteURL)
+        if roleperm is not None and url_factory is not None:
             prinperm = IPrincipalPermissionMap(obj)
             prinrole = IPrincipalRoleMap(obj)
             result['inherit'].append({
-                '@id': IAbsoluteURL(obj, request)(),
+                '@id': url_factory(),
                 'roleperm': roleperm._bycol,
                 'prinperm': prinperm._bycol,
                 'prinrole': prinrole._bycol,

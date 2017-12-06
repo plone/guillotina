@@ -1,7 +1,8 @@
 2.1.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix getting sharing information for database objects
+  [vangheem]
 
 
 2.1.16 (2017-12-06)
