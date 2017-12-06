@@ -1,7 +1,11 @@
 2.1.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- get_owners will lookup to parent object for owner.
+  [vangheem]
+
+- if IGetOwner returns none, no owner will be set on object
+  [vangheem]
 
 
 2.1.17 (2017-12-06)

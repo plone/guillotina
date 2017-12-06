@@ -218,8 +218,9 @@ class DefaultPOST(Service):
         # Local Roles assign owner as the creator user
         get_owner = get_utility(IGetOwner)
         roleperm = IPrincipalRoleManager(obj)
-        roleperm.assign_role_to_principal(
-            'guillotina.Owner', await get_owner(obj, user))
+        owner = await get_owner(obj, user)
+        if owner is not None:
+            roleperm.assign_role_to_principal('guillotina.Owner', owner)
 
         data['id'] = obj.id
         await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
