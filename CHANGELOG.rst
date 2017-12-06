@@ -1,4 +1,4 @@
-2.1.16 (unreleased)
+2.1.16 (2017-12-06)
 -------------------
 
 - Fix compatibility with aiohttp 2.3.6
