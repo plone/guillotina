@@ -129,9 +129,9 @@ class GuillotinaSecurityMap(SecurityMap):
         self.context._p_register()
 
     def add_cell(self, rowentry, colentry, value):
-        if SecurityMap.add_cell(self, rowentry, colentry, value):
+        if super().add_cell(rowentry, colentry, value):
             self._changed()
 
     def del_cell(self, rowentry, colentry):
-        if SecurityMap.del_cell(self, rowentry, colentry):
+        if super().del_cell(rowentry, colentry):
             self._changed()

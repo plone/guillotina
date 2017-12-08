@@ -1,7 +1,9 @@
 2.1.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Properly use super() for security map classes so things can be overridden
+  with custom permission adapters.
+  [vangheem]
 
 
 2.1.18 (2017-12-06)

@@ -127,7 +127,7 @@ class ContainerRequesterAsyncContextManager(object):
 
     async def __aexit__(self, exc_type, exc, tb):
         resp, status = await self.requester('DELETE', '/db/guillotina')
-        assert status == 200
+        assert status in (200, 404)
 
 
 def create_content(factory=Item, type_name='Item', id=None):
