@@ -1,4 +1,4 @@
-2.1.19 (unreleased)
+2.1.19 (2017-12-08)
 -------------------
 
 - Properly use super() for security map classes so things can be overridden
