@@ -420,9 +420,9 @@ class service(_base_decorator):  # noqa: N801
         return func
 
 
-class value_serializer(_base_decorator):  # noqa: N801
-    configuration_type = 'value_serializer'
-    provides = IValueToJson
+class generic_adapter(_base_decorator):  # noqa: N801
+    configuration_type = None
+    provides = None
 
     def __init__(self, for_, **config):
         assert type(for_) not in (list, set, tuple)
@@ -431,7 +431,12 @@ class value_serializer(_base_decorator):  # noqa: N801
         self.config = config
 
 
-class value_deserializer(value_serializer):  # noqa: N801
+class value_serializer(generic_adapter):  # noqa: N801
+    configuration_type = 'value_serializer'
+    provides = IValueToJson
+
+
+class value_deserializer(generic_adapter):  # noqa: N801
     configuration_type = 'value_deserializer'
     provides = IJSONToValue
 

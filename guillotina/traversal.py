@@ -401,7 +401,6 @@ class TraversalRouter(AbstractRouter):
             }
             if app_settings.get('debug'):
                 data['traceback'] = traceback.format_exc()
-            # XXX should only should traceback if in some sort of dev mode?
             raise HTTPBadRequest(text=ujson.dumps(data))
 
         request.record('traversed')
