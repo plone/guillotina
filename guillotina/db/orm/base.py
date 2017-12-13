@@ -19,6 +19,21 @@ class ObjectProperty(object):
         setattr(inst, self.attribute, self.default)
 
 
+class DictDefaultProperty(ObjectProperty):
+    def __init__(self, attribute):
+        self.attribute = attribute
+
+    def __get__(self, inst, klass):
+        val = getattr(inst, self.attribute, None)
+        if val is None:
+            setattr(inst, self.attribute, {})
+            return getattr(inst, self.attribute, None)
+        return val
+
+    def __delete__(self, inst, value):
+        setattr(inst, self.attribute, {})
+
+
 @implementer(IBaseObject)
 class BaseObject(object):
     """
@@ -36,7 +51,7 @@ class BaseObject(object):
     __parent__ = ObjectProperty('_BaseObject__parent', None)
     __of__ = ObjectProperty('_BaseObject__of', None)
     __name__ = ObjectProperty('_BaseObject__name', None)
-    __annotations__ = ObjectProperty('_BaseObject__annotations', None)
+    __annotations__ = DictDefaultProperty('_BaseObject__annotations')
     __immutable_cache__ = ObjectProperty('_BaseObject__immutable_cache', False)
     __new_marker__ = ObjectProperty('_BaseObject__new_marker', False)
 
