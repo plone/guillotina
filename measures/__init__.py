@@ -8,5 +8,4 @@ app_settings = {
 
 
 def includeme():
-    configure.scan('measures.lookups')
-    configure.scan('measures.lookups_interfaces')
+    configure.scan('measures.configuration')
