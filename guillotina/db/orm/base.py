@@ -1,5 +1,6 @@
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interface import implementer
+from guillotina.profile import profilable
 from sys import intern
 
 import copyreg
@@ -45,6 +46,7 @@ class BaseObject(object):
         '__jar', '__oid', '__serial', '__of', '__parent', '__annotations',
         '__name', '__immutable_cache', '__new_marker', '__locked')
 
+    @profilable
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
         _OSA(inst, '_BaseObject__jar', None)
@@ -121,6 +123,7 @@ class BaseObject(object):
 
     _p_serial = property(_get_serial, _set_serial, _del_serial)
 
+    @profilable
     def __setattr__(self, name, value):
         special_name = (name in _SPECIAL_NAMES or
                         name.startswith('_p_'))
@@ -132,6 +135,7 @@ class BaseObject(object):
                 not volatile):
             _OGA(self, '_p_register')()
 
+    @profilable
     def _slotnames(self):
         """Returns all the slot names from the object"""
         slotnames = copyreg._slotnames(type(self))
@@ -142,6 +146,7 @@ class BaseObject(object):
             not x.startswith('_BaseObject__') and
             x not in BaseObject.__slots__]
 
+    @profilable
     def __getstate__(self):
         """ See IPersistent.
         """
@@ -161,6 +166,7 @@ class BaseObject(object):
             return d, s
         return d
 
+    @profilable
     def __setstate__(self, state):
         """ See IPersistent.
         """
@@ -182,6 +188,7 @@ class BaseObject(object):
             for k, v in slots.items():
                 setattr(self, k, v)
 
+    @profilable
     def __reduce__(self):
         """ See IPersistent.
         """
@@ -189,11 +196,13 @@ class BaseObject(object):
         return (copyreg.__newobj__,
                 (type(self),) + gna(), self.__getstate__())
 
+    @profilable
     def _p_register(self):
         jar = _OGA(self, '_BaseObject__jar')
         if jar is not None:
             jar.register(self)
 
+    @profilable
     def _p_unregister(self):
         jar = _OGA(self, '_BaseObject__jar')
         if jar is not None and _OGA(self, '_BaseObject__oid') is not None:
@@ -247,16 +256,3 @@ class BaseObject(object):
         _OSA(self, '_BaseObject__new_marker', False)
 
     __new_marker__ = property(_get_new_marker, _set_new_marker, _del_new_marker)
-
-    # __locked__:  marks an object as being locked for writing
-    # and that after the transaction commits, it should unlock
-    def _get_locked(self):
-        return _OGA(self, '_BaseObject__locked')
-
-    def _set_locked(self, value):
-        _OSA(self, '_BaseObject__locked', value)
-
-    def _del_locked(self):
-        _OSA(self, '_BaseObject__locked', False)
-
-    __locked__ = property(_get_locked, _set_locked, _del_locked)

@@ -5,6 +5,8 @@ from guillotina.configure.behaviors import BehaviorAdapterFactory
 from guillotina.configure.behaviors import BehaviorRegistration
 from guillotina.exceptions import ConfigurationError
 from guillotina.exceptions import ServiceConfigurationError
+from guillotina.interface import class_implements
+from guillotina.interface import Interface
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorSchemaAwareFactory
@@ -20,8 +22,6 @@ from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
 from pprint import pformat
-from zope.interface import classImplements
-from zope.interface import Interface
 
 import asyncio
 import inspect
@@ -130,7 +130,7 @@ def load_contenttype(_context, contenttype):
     conf = contenttype['config']
     klass = contenttype['klass']
     if 'schema' in conf:
-        classImplements(klass, conf['schema'])
+        class_implements(klass, conf['schema'])
 
     from guillotina.content import ResourceFactory
 
@@ -159,7 +159,7 @@ def load_behavior(_context, behavior):
     factory = conf.get('factory') or klass
     real_factory = resolve_dotted_name(factory)
     schema = resolve_dotted_name(conf['provides'])
-    classImplements(real_factory, schema)
+    class_implements(real_factory, schema)
 
     name = conf.get('name')
     name_only = conf.get('name_only', False)
@@ -266,7 +266,7 @@ def load_adapter(_context, adapter):
         # not sure if this is what we want or not for sure but
         # we are automatically applying the provides interface to
         # registered class objects
-        classImplements(klass, conf['provides'])
+        class_implements(klass, conf['provides'])
     component.adapter(
         _context,
         factory=(factory,),

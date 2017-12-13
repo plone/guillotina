@@ -22,8 +22,9 @@ import time
 #
 # Lessons:
 #   - datetimes objects with local tz are slow
+#       - switched to use utc datetime objects
 #   - dynamically applying interfaces on objects is slow
-#       - pre-apply interfaces for behaviors on content(since they always belong)?
+#       - pre-apply interfaces for behaviors on content
 # ----------------------------------------------------
 
 

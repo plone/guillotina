@@ -1,6 +1,11 @@
 2.2.0 (unreleased)
 ------------------
 
+- Pre-calculate registered behavior implementations to improve object creation
+  performance. Previously registered behaviors were dynamically provided with
+  `alsoProvides`.
+  [vangheem]
+
 - Remove `guillotina.interfaces.IFormFieldProvider` as it was not implemented
   [vangheem]
 

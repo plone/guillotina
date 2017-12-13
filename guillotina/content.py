@@ -167,7 +167,7 @@ def get_all_possible_schemas_for_type(type_name):
 
 
 def iter_schemata(obj):
-    type_name = IResource(obj).type_name
+    type_name = obj.type_name
     for schema in iter_schemata_for_type(type_name):
         yield schema
     for schema in obj.__behaviors_schemas__:
@@ -246,9 +246,8 @@ def get_all_behavior_interfaces(content) -> list:
     for behavior_schema in factory.behaviors or ():
         behaviors.append(behavior_schema)
 
-    for dynamic_behavior in content.__behaviors__ or ():
-        dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
-        behaviors.append(dynamic_behavior_obj)
+    for dynamic_behavior in content.__behaviors_schemas__:
+        behaviors.append(dynamic_behavior)
     return behaviors
 
 
