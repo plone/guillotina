@@ -60,16 +60,14 @@ class BaseObject(object):
     _p_oid = ObjectProperty('_BaseObject__oid', None)
     _p_serial = ObjectProperty('_BaseObject__serial', None)
 
-    @profilable
     def _p_register(self):
-        jar = self._BaseObject__jar
+        jar = self._p_jar
         if jar is not None:
             jar.register(self)
 
-    @profilable
     def _p_unregister(self):
-        jar = self._BaseObject__jar
-        if jar is not None and self._BaseObject__oid is not None:
+        jar = self._p_jar
+        if jar is not None and self._p_oid is not None:
             jar.unregister(self)
 
     @profilable

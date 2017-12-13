@@ -13,11 +13,13 @@ class Root(Folder):
     __name__ = None
     __immutable_cache__ = True
     __db_id__ = None
+    _p_oid = ROOT_ID
+
     type_name = 'GuillotinaDBRoot'
 
     def __init__(self, db_id):
         super().__init__()
-        self.__db_id__ = db_id
+        self.__db_id__ = self.__name__ = db_id
 
     def __repr__(self):
         return "<Database %d>" % id(self)
