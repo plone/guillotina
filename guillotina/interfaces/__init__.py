@@ -116,11 +116,6 @@ ACTIVE_LAYERS_KEY = 'guillotina.registry.ILayers.active_layers'
 ADDONS_KEY = 'guillotina.registry.IAddons.enabled'
 
 
-class IFormFieldProvider(Interface):
-    """Marker interface for schemata that provide form fields.
-    """
-
-
 class IRequest(Interface):
     pass
 

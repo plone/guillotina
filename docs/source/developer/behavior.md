@@ -8,12 +8,10 @@ This allows us to provide functionality across content types, using specific mar
 If you want to have a shared behavior based on some fields and operations that needs to be shared across different content types, you can define them on a `guillotina.schema` interface:
 
 ```python
-    from guillotina.interfaces import IFormFieldProvider
     from zope.interface import Interface
     from zope.interface import provider
     from guillotina.schema import Textline
 
-    @provider(IFormFieldProvider)
     class IMyLovedBehavior(Interface):
         text = Textline(
             title=u'Text line field',

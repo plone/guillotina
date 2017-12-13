@@ -6,8 +6,6 @@ from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index
 from guillotina.interface import Interface
-from guillotina.interface import provider
-from guillotina.interfaces import IFormFieldProvider
 
 
 _utc = tzutc()
@@ -22,7 +20,6 @@ class IMarkerDublinCore(Interface):
     """Marker interface for content with dublin core."""
 
 
-@provider(IFormFieldProvider)
 class IDublinCore(Interface):
     index('creators', type='keyword')
     index('tags', type='keyword')

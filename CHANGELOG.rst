@@ -1,6 +1,9 @@
 2.2.0 (unreleased)
 ------------------
 
+- Remove `guillotina.interfaces.IFormFieldProvider` as it was not implemented
+  [vangheem]
+
 - Remove `guillotina.framing` module since it wasn't used and any implemenation
   like it should be in another module
   [vangheem]

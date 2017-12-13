@@ -69,11 +69,9 @@ async def test_register_behavior(container_requester):
     cur_count = len(
         configure.get_configurations('guillotina.tests', 'behavior'))
 
-    from guillotina.interfaces import IFormFieldProvider, IResource
-    from guillotina.interface import provider
+    from guillotina.interfaces import IResource
     from guillotina import schema
 
-    @provider(IFormFieldProvider)
     class IMyBehavior(Interface):
         foobar = schema.Text()
 
