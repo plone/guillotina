@@ -1,10 +1,10 @@
 from guillotina.annotations import AnnotationData
+from guillotina.interface import implementer
+from guillotina.interface import Provides
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IContentBehavior
-from zope.interface import implementer
-from zope.interface.declarations import Provides
 
 
 _default = object()

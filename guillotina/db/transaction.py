@@ -10,9 +10,9 @@ from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
+from guillotina.interface import implementer
 from guillotina.profile import profilable
 from guillotina.utils import get_current_request
-from zope.interface import implementer
 
 import asyncio
 import logging
@@ -159,6 +159,7 @@ class Transaction(object):
         if self._manager._storage._read_only:
             raise ReadOnlyError()
 
+    @profilable
     def register(self, obj, new_oid=None):
         """We are adding a new object on the DB"""
         self.check_read_only()
@@ -207,6 +208,7 @@ class Transaction(object):
             ob.__dict__[key] = value
         ob._p_serial = new._p_serial
 
+    @profilable
     async def get(self, oid, ignore_registered=False):
         """Getting a oid from the db"""
 
@@ -354,9 +356,11 @@ class Transaction(object):
         obj._p_jar = self
         return obj
 
+    @profilable
     async def contains(self, oid, key):
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
+    @profilable
     async def len(self, oid):
         result = await self._cache.get(oid=oid, variant='len')
         if result is None:
@@ -364,6 +368,7 @@ class Transaction(object):
             await self._cache.set(result, oid=oid, variant='len')
         return result
 
+    @profilable
     async def items(self, container):
         # XXX not using cursor because we can't cache with cursor results...
         keys = await self.keys(container._p_oid)
@@ -429,6 +434,7 @@ class Transaction(object):
             keys = await self._manager._storage._get_page_resources_of_type(
                 self, type_, page=page, page_size=page_size)
 
+    @profilable
     async def iterate_keys(self, oid, page_size=1000):
         page = 1
         keys = await self._manager._storage.get_page_of_keys(

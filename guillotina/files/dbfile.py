@@ -1,7 +1,7 @@
 from .field import BaseCloudFile
 from guillotina.blob import Blob
+from guillotina.interface import implementer
 from guillotina.interfaces import IDBFile
-from zope.interface import implementer
 
 
 @implementer(IDBFile)

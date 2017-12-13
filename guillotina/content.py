@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime
-from dateutil.tz import tzlocal
+from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina._cache import FACTORY_CACHE
@@ -21,12 +21,15 @@ from guillotina.events import ObjectLoadedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
+from guillotina.interface import also_provides
+from guillotina.interface import implementer
+from guillotina.interface import Interface
+from guillotina.interface import no_longer_provides
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
@@ -48,10 +51,6 @@ from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
-from zope.interface import alsoProvides
-from zope.interface import implementer
-from zope.interface import Interface
-from zope.interface import noLongerProvides
 
 import guillotina.db.orm.base
 import os
@@ -60,7 +59,7 @@ import typing
 import uuid
 
 
-_zone = tzlocal()
+_zone = tzutc()  # utz tz is much faster than local tz info
 _marker = object()
 
 
@@ -84,6 +83,7 @@ class ResourceFactory(Factory):
         self.add_permission = add_permission
         self.allowed_types = allowed_types
 
+    @profilable
     def __call__(self, id, *args, **kw):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.type_name = self.type_name
@@ -97,9 +97,10 @@ class ResourceFactory(Factory):
             obj.id = obj._p_oid
         else:
             obj.id = id
-        apply_markers(obj, None)
+        apply_markers(obj)
         return obj
 
+    @profilable
     def get_interfaces(self):
         spec = super(ResourceFactory, self).get_interfaces()
         spec.__name__ = self.type_name
@@ -263,25 +264,6 @@ async def get_all_behaviors(content, create=False, load=True) -> list:
     return behaviors
 
 
-@configure.adapter(for_=IResource, provides=IBehaviorAssignable)
-class BehaviorAssignable(object):
-    """Support guillotina.behaviors behaviors stored on the CACHE
-    """
-
-    def __init__(self, context):
-        self.context = context
-
-    def supports(self, behavior_interface):
-        """We support all behaviors that accomplish the for_."""
-        return True
-
-    def enumerate_behaviors(self):
-        for behavior in SCHEMA_CACHE[self.context.type_name]['behaviors']:
-            yield behavior
-        for behavior in self.context.__behaviors__:
-            yield BEHAVIOR_CACHE[behavior]
-
-
 def _default_from_schema(context, schema, fieldname):
     """helper to lookup default value of a field
     """
@@ -378,7 +360,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             # We can adapt so we can apply this dynamic behavior
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
-                alsoProvides(self, behavior_registration.marker)
+                also_provides(self, behavior_registration.marker)
                 self._p_register()  # make sure we resave this obj
 
     def remove_behavior(self, iface: Interface) -> None:
@@ -393,7 +375,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         behavior_registration = get_utility(IBehavior, name=name)
         if behavior_registration is not None and\
                 behavior_registration.marker is not None:
-            noLongerProvides(self, behavior_registration.marker)
+            no_longer_provides(self, behavior_registration.marker)
         if iface in self.__behaviors__:
             self.__behaviors__ -= {name}
         self._p_register()  # make sure we resave this obj

@@ -4,7 +4,7 @@ from aiohttp.web import StreamResponse
 from aiohttp.web_exceptions import HTTPNotFound
 from datetime import datetime
 from datetime import timedelta
-from dateutil.tz import tzlocal
+from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.browser import Response
@@ -121,7 +121,7 @@ class DBFileManagerAdapter:
             filename = self.request.headers['UPLOAD-METADATA']
             file.filename = base64.b64decode(filename.split()[1]).decode('utf-8')
 
-        file._resumable_uri_date = datetime.now(tz=tzlocal())
+        file._resumable_uri_date = datetime.now(tz=tzutc())
 
         await file.init_upload(self.context)
         # Location will need to be adapted on aiohttp 1.1.x

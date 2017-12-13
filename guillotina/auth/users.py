@@ -1,5 +1,5 @@
+from guillotina.interface import implementer
 from guillotina.interfaces import IPrincipal
-from zope.interface import implementer
 
 
 ROOT_USER_ID = 'root'

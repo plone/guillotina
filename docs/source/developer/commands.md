@@ -10,20 +10,23 @@ You can provide your own CLI commands for guillotina through a simple interface.
 * `create`: use cookiecutter to generate guillotina applications
 * `initialize-db`: databases are automatically initialized; however, you can use this command to manually do it
 * `testdata`: populate the database with test data from wikipedia
-* `run`: run a script
+* `run`: run a python script. The file must have a function `async def run(container):`
 
 
 ## Command Options
 
 - *
   - `--config`: path to configuration file. `defaults to config.(yaml|json)`
+  - `--profile`: profile Guillotina while it's running
+  - `--profile-output`: where to save profiling output
+  - `--monitor`: run with aiomonitor `requires aiomonitor`
+  - `--line-profiler`: use line_profiler `requires line_profiler`
+  - `--line-profiler-matcher`: fnmatch of module/function to profile `requires line_profiler`
+  - `--line-profiler-output`: to store output in a file `requires line_profiler`
 - serve:
   - `--host`: host to bind to
   - `--port`: port to bind to
   - `--reload`: auto reload on code changes. `requires aiohttp_autoreload`
-  - `--profile`: profile Guillotina while it's running
-  - `--profile-output`: where to save profiling output
-  - `--monitor`: run with aiomonitor. `requires aiomonitor`
 - shell
 - create
   - `--template`: name of template to use

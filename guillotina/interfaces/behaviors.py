@@ -3,24 +3,6 @@ from zope.interface import Interface
 from zope.interface.interfaces import IInterface
 
 
-class IBehaviorAssignable(Interface):
-    """An object will be adapted to this interface to determine if it supports
-    one or more behaviors.
-
-    There is no default implementation of this adapter. The mechanism for
-    assigning behaiors to an object or type of object is application specific.
-    """
-
-    def supports(behavior_interface):  # noqa: N805
-        """Determine if the context supports the given behavior, returning
-        True or False.
-        """
-
-    def enumerate_behaviors():
-        """Return an iterable of all the IBehaviors supported by the context.
-        """
-
-
 class IBehavior(Interface):
     """A description of a behavior. These should be registered as named
     utilities. There should also be an adapter factory registered, probably
@@ -87,10 +69,6 @@ class IBehaviorAdapterFactory(Interface):
         context = SomeObject()
         behavior_adapter = ISomeBehavior(context, None)
 
-     The ISomeBehavior adapter factory (i.e. the object providing
-     IBehaviorAdapterFactory) will return None if
-     IBehaviorAssignable(context).supports(ISomeBehavior) is False, or if
-     the context cannot be adapted to IBehaviorAssignable at all.
     """
 
     behavior = schema.Object(
@@ -99,10 +77,8 @@ class IBehaviorAdapterFactory(Interface):
     )
 
     def __call__(context):  # noqa: N805
-        """Invoke the behavior-specific factory if the context can be adapted
-        to IBehaviorAssignable and
-        IBehaviorAssignable(context).supports(self.behavior.interface) returns
-        True.
+        """
+        Invoke the behavior-specific factory if the context can be adapted
         """
 
 

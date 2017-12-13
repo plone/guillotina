@@ -1,4 +1,5 @@
 from guillotina.component.interfaces import IObjectEvent
+from guillotina.interface import implementer
 from guillotina.interfaces import IBeforeObjectAddedEvent
 from guillotina.interfaces import IBeforeObjectMovedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
@@ -14,7 +15,6 @@ from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectPermissionsViewEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectVisitedEvent
-from zope.interface import implementer
 
 
 @implementer(IObjectEvent)

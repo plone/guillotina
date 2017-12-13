@@ -6,6 +6,7 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
 from guillotina.directives import metadata
 from guillotina.exceptions import NoIndexField
+from guillotina.interface import implementer
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
@@ -18,7 +19,6 @@ from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
-from zope.interface import implementer
 
 
 global_principal_permission_setting = principal_permission_manager.get_setting

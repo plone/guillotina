@@ -2,13 +2,13 @@
 from guillotina import configure
 from guillotina.component import get_multi_adapter
 from guillotina.component.interfaces import IFactory
+from guillotina.interface import Interface
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.profile import profilable
-from guillotina.schema import getFieldsInOrder
-from zope.interface import Interface
+from guillotina.schema import get_fields_in_order
 
 
 @configure.adapter(
@@ -33,7 +33,7 @@ class SerializeFactoryToJson(object):
         }
 
         # Base object class serialized
-        for name, field in getFieldsInOrder(factory.schema):
+        for name, field in get_fields_in_order(factory.schema):
             if field.required:
                 result['required'].append(name)
             serializer = get_multi_adapter(
@@ -75,7 +75,7 @@ class DefaultSchemaSerializer(object):
         }
 
     async def __call__(self):
-        for name, field in getFieldsInOrder(self.schema):
+        for name, field in get_fields_in_order(self.schema):
             serializer = get_multi_adapter(
                 (field, self.schema, self.request),
                 ISchemaFieldSerializeToJson)

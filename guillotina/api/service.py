@@ -2,10 +2,10 @@ from guillotina._cache import BEHAVIOR_CACHE
 from guillotina.browser import View
 from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
+from guillotina.interface import also_provides
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IDownloadView
 from guillotina.interfaces import ITraversableView
-from zope.interface import alsoProvides
 
 
 class Service(View):
@@ -17,14 +17,14 @@ class DownloadService(View):
 
     def __init__(self, context, request):
         super(DownloadService, self).__init__(context, request)
-        alsoProvides(self, IDownloadView)
+        also_provides(self, IDownloadView)
 
 
 class TraversableService(View):
 
     def __init__(self, context, request):
         super(TraversableService, self).__init__(context, request)
-        alsoProvides(self, ITraversableView)
+        also_provides(self, ITraversableView)
 
 
 class TraversableFieldService(View):
@@ -67,11 +67,11 @@ class TraversableFieldService(View):
 
     def __init__(self, context, request):
         super(TraversableFieldService, self).__init__(context, request)
-        alsoProvides(self, ITraversableView)
+        also_provides(self, ITraversableView)
 
 
 class TraversableDownloadService(TraversableFieldService):
 
     def __init__(self, context, request):
         super(TraversableDownloadService, self).__init__(context, request)
-        alsoProvides(self, IDownloadView)
+        also_provides(self, IDownloadView)

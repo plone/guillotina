@@ -4,7 +4,7 @@ from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
-from zope.interface import implementer
+from guillotina.interface import implementer
 
 
 class MockDBTransaction:
@@ -44,6 +44,9 @@ class MockTransaction:
         pass
 
     async def write_blob_chunk(self, bid, zoid, chunk_number, data):
+        pass
+
+    async def get_annotation(self, ob, key):
         pass
 
 

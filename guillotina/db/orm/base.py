@@ -1,6 +1,6 @@
 from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.interface import implementer
 from sys import intern
-from zope.interface import implementer
 
 import copyreg
 

@@ -1,4 +1,4 @@
-from zope.interface import Interface
+from guillotina.interface import Interface
 
 
 class IPartition(Interface):

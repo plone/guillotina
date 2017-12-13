@@ -1,17 +1,15 @@
 from datetime import datetime
-from dateutil.tz import tzlocal
 from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina import schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index
+from guillotina.interface import Interface
+from guillotina.interface import provider
 from guillotina.interfaces import IFormFieldProvider
-from zope.interface import Interface
-from zope.interface import provider
 
 
-_zone = tzlocal()
 _utc = tzutc()
 
 # never expires

@@ -1,5 +1,5 @@
+from guillotina.interface import implementer
 from guillotina.interfaces import IAddOn
-from zope.interface import implementer
 
 
 @implementer(IAddOn)

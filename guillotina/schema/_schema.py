@@ -22,7 +22,7 @@ def getFieldNames(schema):
     return [name for name in schema if IField.providedBy(schema[name])]
 
 
-def getFields(schema):
+def get_fields(schema):
     """Return a dictionary containing all the Fields in a schema.
     """
     from guillotina.schema.interfaces import IField
@@ -34,16 +34,16 @@ def getFields(schema):
     return fields
 
 
-def getFieldsInOrder(schema, _field_key=lambda x: x[1].order):
+def get_fields_in_order(schema, _field_key=lambda x: x[1].order):
     """Return a list of (name, value) tuples in native schema order.
     """
-    return sorted(getFields(schema).items(), key=_field_key)
+    return sorted(get_fields(schema).items(), key=_field_key)
 
 
 def getFieldNamesInOrder(schema):
     """Return a list of all the Field names in a schema in schema order.
     """
-    return [name for name, field in getFieldsInOrder(schema)]
+    return [name for name, field in get_fields_in_order(schema)]
 
 
 def getValidationErrors(schema, object):

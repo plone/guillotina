@@ -52,11 +52,11 @@ def _makeDerivedSchema(base=None):
     return ISchemaTestSubclass
 
 
-class Test_getFields(unittest.TestCase):
+class Test_get_fields(unittest.TestCase):
 
     def _callFUT(self, schema):
-        from guillotina.schema import getFields
-        return getFields(schema)
+        from guillotina.schema import get_fields
+        return get_fields(schema)
 
     def test_simple(self):
         fields = self._callFUT(_makeSchema())
@@ -82,11 +82,11 @@ class Test_getFields(unittest.TestCase):
             self.assertEqual(key, value.getName())
 
 
-class Test_getFieldsInOrder(unittest.TestCase):
+class Test_get_fields_in_order(unittest.TestCase):
 
     def _callFUT(self, schema):
-        from guillotina.schema import getFieldsInOrder
-        return getFieldsInOrder(schema)
+        from guillotina.schema import get_fields_in_order
+        return get_fields_in_order(schema)
 
     def test_simple(self):
         fields = self._callFUT(_makeSchema())
@@ -261,8 +261,8 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(Test_getFields),
-        unittest.makeSuite(Test_getFieldsInOrder),
+        unittest.makeSuite(Test_get_fields),
+        unittest.makeSuite(Test_get_fields_in_order),
         unittest.makeSuite(Test_getFieldNames),
         unittest.makeSuite(Test_getFieldNamesInOrder),
         unittest.makeSuite(Test_getValidationErrors),

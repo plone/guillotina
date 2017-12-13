@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from guillotina.interface import implementer
 from guillotina.interfaces.exceptions import ISerializableException
-from zope.interface import implementer
 
 import ujson
 

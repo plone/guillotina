@@ -1,12 +1,14 @@
 from guillotina import configure
 from guillotina.component import get_multi_adapter
+from guillotina.interface import implemented_by
+from guillotina.interface import Interface
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
-from guillotina.schema import getFields
+from guillotina.schema import get_fields
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IChoice
 from guillotina.schema.interfaces import ICollection
@@ -21,8 +23,6 @@ from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IText
 from guillotina.schema.interfaces import ITextLine
 from guillotina.schema.interfaces import ITime
-from zope.interface import implementedBy
-from zope.interface import Interface
 
 
 FIELDS_CACHE = {}
@@ -62,8 +62,8 @@ class DefaultSchemaFieldSerializer(object):
             field_attributes = FIELDS_CACHE[self.field.__class__].copy()
         else:
             field_attributes = {}
-            for schema in implementedBy(self.field.__class__).flattened():
-                field_attributes.update(getFields(schema))
+            for schema in implemented_by(self.field.__class__).flattened():
+                field_attributes.update(get_fields(schema))
             FIELDS_CACHE[self.field.__class__] = field_attributes
         for attribute_name in sorted(field_attributes.keys()):
             attribute_field = field_attributes[attribute_name]

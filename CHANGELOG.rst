@@ -1,7 +1,19 @@
-2.1.20 (unreleased)
--------------------
+2.2.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Remove `guillotina.framing` module since it wasn't used and any implemenation
+  like it should be in another module
+  [vangheem]
+
+- Provide alias imports for zope.interface in guillotina.interface to make docs
+  simple and api usage more pythonic(alsoProvides -> also_provides)
+  [vangheem]
+
+- Use UTC timezones everywhere. Local timezones are performance impacting.
+  [vangheem]
+
+- Be able to profile all commands instead of just the `serve` command
+  [vangheem]
 
 
 2.1.19 (2017-12-08)

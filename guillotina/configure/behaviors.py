@@ -1,6 +1,5 @@
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorAdapterFactory
-from guillotina.interfaces import IBehaviorAssignable
 from zope.interface import implementer
 from zope.interface import Interface
 
@@ -55,11 +54,6 @@ class BehaviorAdapterFactory(object):
         self.behavior = behavior
 
     def __call__(self, context):
-        assignable = IBehaviorAssignable(context, None)
-        if assignable is None:
-            return None
-        if not assignable.supports(self.behavior.interface):
-            return None
         if self.behavior.factory is not None:
             adapted = self.behavior.factory(context)
         else:

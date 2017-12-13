@@ -5,6 +5,7 @@ from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
+from guillotina.interface import IInterface
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
@@ -14,7 +15,6 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.profile import profilable
 from hashlib import sha256 as sha
-from zope.interface.interfaces import IInterface
 
 import aiotask_context
 import asyncio

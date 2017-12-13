@@ -4,6 +4,7 @@ from datetime import datetime
 from guillotina import configure
 from guillotina.browser import Response
 from guillotina.component import query_adapter
+from guillotina.interface import InterfaceClass
 from guillotina.interfaces import IFrameFormatsJson
 from guillotina.interfaces import IRendered
 from guillotina.interfaces import IRendererFormatHtml
@@ -16,7 +17,6 @@ from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
 from guillotina.profile import profilable
 from guillotina.utils import apply_coroutine
-from zope.interface.interface import InterfaceClass
 
 import json
 import ujson

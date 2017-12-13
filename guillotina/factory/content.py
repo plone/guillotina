@@ -5,12 +5,12 @@ from guillotina.component import get_global_components
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.db import ROOT_ID
+from guillotina.interface import implementer
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import lazy_apply
-from zope.interface import implementer
 
 import asyncio
 import logging

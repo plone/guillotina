@@ -7,6 +7,7 @@ from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
+from guillotina.interface import Interface
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFolder
@@ -17,9 +18,8 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
-from guillotina.schema import getFields
+from guillotina.schema import get_fields
 from guillotina.utils import apply_coroutine
-from zope.interface import Interface
 
 import logging
 
@@ -94,7 +94,7 @@ class SerializeToJson(object):
     async def get_schema(self, schema, context, result, behavior):
         read_permissions = merged_tagged_value_dict(schema, read_permission.key)
         schema_serial = {}
-        for name, field in getFields(schema).items():
+        for name, field in get_fields(schema).items():
 
             if not self.check_permission(read_permissions.get(name)):
                 continue

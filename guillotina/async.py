@@ -1,20 +1,20 @@
 from datetime import datetime
-from dateutil.tz import tzlocal
+from dateutil.tz import tzutc
 from guillotina import logger
 from guillotina.browser import ErrorResponse
 from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
 from guillotina.db.transaction import Status
 from guillotina.exceptions import Unauthorized
+from guillotina.interface import Interface
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
-from zope.interface import Interface
 
 import aiotask_context
 import asyncio
 
 
-_zone = tzlocal()
+_zone = tzutc()
 
 
 class IAsyncUtility(Interface):

@@ -1,7 +1,7 @@
+# zope.interface convenience imports
 from .behaviors import IAsyncBehavior  # noqa
 from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
-from .behaviors import IBehaviorAssignable  # noqa
 from .behaviors import IBehaviorSchemaAwareFactory  # noqa
 from .behaviors import IContentBehavior  # noqa
 from .catalog import ICatalogDataAdapter  # noqa
@@ -100,7 +100,7 @@ from .views import IPUT  # noqa
 from .views import ITraversableView  # noqa
 from .views import IView  # noqa
 from guillotina.i18n import MessageFactory
-from zope.interface import Interface
+from guillotina.interface import Interface
 
 
 _ = MessageFactory('guillotina')

@@ -26,6 +26,7 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.i18n import default_message_factory as _
+from guillotina.interface import also_provides
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
@@ -49,7 +50,6 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import import_class
-from zope.interface import alsoProvides
 
 import aiohttp
 import traceback
@@ -155,7 +155,7 @@ async def traverse(request, parent, path):
         layers = request.container_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             try:
-                alsoProvides(request, import_class(layer))
+                also_provides(request, import_class(layer))
             except ModuleNotFoundError:
                 logger.error('Can not apply layer ' + layer, request=request)
 

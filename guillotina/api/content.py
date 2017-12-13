@@ -1,7 +1,6 @@
 from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
-from dateutil.tz import tzlocal
 from guillotina import configure
 from guillotina import security
 from guillotina._settings import app_settings
@@ -53,9 +52,6 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
 from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
-
-
-_zone = tzlocal()
 
 
 def get_content_json_schema_responses(content):

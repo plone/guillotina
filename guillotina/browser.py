@@ -1,5 +1,6 @@
 from guillotina import configure
 from guillotina.component import adapter
+from guillotina.interface import implementer
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import ILocation
 from guillotina.interfaces import IRequest
@@ -7,7 +8,6 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import ISerializableException
 from guillotina.interfaces import IView
 from guillotina.utils import get_current_request
-from zope.interface import implementer
 
 
 def get_physical_path(context):

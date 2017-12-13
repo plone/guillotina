@@ -50,22 +50,25 @@ from guillotina.schema._field import Time
 from guillotina.schema._field import Timedelta
 from guillotina.schema._field import Tuple
 from guillotina.schema._field import URI
+from guillotina.schema._schema import get_fields
+from guillotina.schema._schema import get_fields_in_order
 from guillotina.schema._schema import getFieldNames
 from guillotina.schema._schema import getFieldNamesInOrder
-from guillotina.schema._schema import getFields
-from guillotina.schema._schema import getFieldsInOrder
 from guillotina.schema._schema import getSchemaValidationErrors
 from guillotina.schema._schema import getValidationErrors
 from guillotina.schema.accessors import accessors
 from guillotina.schema.exceptions import ValidationError
 
 
+getFields = get_fields  # b/w
+getFieldsInOrder = get_fields_in_order  # b/w
+
 # pep 8 friendlyness
 ASCII, ASCIILine, Bool, Bytes, BytesLine, Choice, Container, Date, Datetime
 Decimal, Dict, DottedName, Field, Float, FrozenSet, Id, Int, InterfaceField
 Iterable, List, MinMaxLen, NativeString, NativeStringLine, Object, Orderable
 Password, Set, SourceText, Text, TextLine, Time, Timedelta, Tuple, URI
-getFields, getFieldsInOrder, getFieldNames, getFieldNamesInOrder,
+get_fields, get_fields_in_order, getFieldNames, getFieldNamesInOrder,
 getValidationErrors, getSchemaValidationErrors, JSONField
 accessors
 ValidationError
