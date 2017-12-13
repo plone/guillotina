@@ -12,7 +12,10 @@ from guillotina.profile import profilable
 
 def apply_concrete_behaviors():
     '''
-    Should be called once at startup instead of doing alsoProvides every
+    Configured behaviors for an object should always be applied and can't
+    be removed.
+
+    Should be called once at startup instead of doing also_provides every
     time an object is created
     '''
     for type_name, factory in get_utilities_for(IResourceFactory):

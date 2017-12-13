@@ -372,9 +372,13 @@ class Resource(guillotina.db.orm.base.BaseObject):
         elif Interface.providedBy(iface):
             name = iface.__identifier__
         behavior_registration = get_utility(IBehavior, name=name)
-        if behavior_registration is not None and\
-                behavior_registration.marker is not None:
-            no_longer_provides(self, behavior_registration.marker)
+        if (behavior_registration is not None and
+                behavior_registration.marker is not None):
+            try:
+                no_longer_provides(self, behavior_registration.marker)
+            except ValueError:
+                # could not remove interface
+                pass
         if iface in self.__behaviors__:
             self.__behaviors__ -= {name}
         self._p_register()  # make sure we resave this obj
