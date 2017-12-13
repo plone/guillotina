@@ -190,7 +190,6 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.auth.participation')
     configure.scan('guillotina.catalog.index')
     configure.scan('guillotina.catalog.catalog')
-    configure.scan('guillotina.framing')
     configure.scan('guillotina.files')
     configure.scan('guillotina.annotations')
     configure.scan('guillotina.constraintypes')

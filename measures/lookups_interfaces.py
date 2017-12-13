@@ -1,10 +1,13 @@
 from guillotina import configure
+from guillotina import schema
+from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.component import get_multi_adapter
 from guillotina.content import create_content
 from guillotina.content import Item
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import ObjectAddedEvent
+from guillotina.interface import Interface
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.tests import mocks
@@ -17,7 +20,57 @@ import time
 # Measure performance of different types of lookups with different inheritance
 # depths and complexity to see if there is a difference in speed
 #
+# Lessons:
+#   - datetimes objects with local tz are slow
+#   - dynamically applying interfaces on objects is slow
+#       - pre-apply interfaces for behaviors on content(since they always belong)?
 # ----------------------------------------------------
+
+
+class IMarkerBehavior1(Interface):
+    pass
+
+class IMarkerBehavior2(Interface):
+    pass
+
+class IMarkerBehavior3(Interface):
+    pass
+
+class ITestBehavior1(Interface):
+    foobar = schema.TextLine()
+
+class ITestBehavior2(Interface):
+    foobar = schema.TextLine()
+
+class ITestBehavior3(Interface):
+    foobar = schema.TextLine()
+
+
+@configure.behavior(
+    title="",
+    provides=ITestBehavior1,
+    marker=IMarkerBehavior1,
+    for_="guillotina.interfaces.IResource")
+class TestBehavior1(AnnotationBehavior):
+    pass
+
+
+@configure.behavior(
+    title="",
+    provides=ITestBehavior2,
+    marker=IMarkerBehavior2,
+    for_="guillotina.interfaces.IResource")
+class TestBehavior2(AnnotationBehavior):
+    pass
+
+
+@configure.behavior(
+    title="",
+    provides=ITestBehavior3,
+    marker=IMarkerBehavior3,
+    for_="guillotina.interfaces.IResource")
+class TestBehavior3(AnnotationBehavior):
+    pass
 
 
 ITERATIONS = 10000
@@ -46,7 +99,12 @@ class ITestContent6(ITestContent5):
 @configure.contenttype(
     type_name="TestContent1",
     schema=ITestContent1,
-    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
+    behaviors=[
+        "guillotina.behaviors.dublincore.IDublinCore",
+        "measures.lookups_interfaces.ITestBehavior1",
+        "measures.lookups_interfaces.ITestBehavior2",
+        "measures.lookups_interfaces.ITestBehavior3",
+    ])
 class TestContent1(Item):
     pass
 
@@ -54,7 +112,12 @@ class TestContent1(Item):
 @configure.contenttype(
     type_name="TestContent6",
     schema=ITestContent6,
-    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
+    behaviors=[
+        "guillotina.behaviors.dublincore.IDublinCore",
+        "measures.lookups_interfaces.ITestBehavior1",
+        "measures.lookups_interfaces.ITestBehavior2",
+        "measures.lookups_interfaces.ITestBehavior3",
+    ])
 class TestContent6(Item):
     pass
 
@@ -76,6 +139,15 @@ async def runit(type_name):
             'title': 'Foobar',
             'guillotina.behaviors.dublincore.IDublinCore': {
                 'tags': ['foo', 'bar']
+            },
+            'measures.lookups_interfaces.ITestBehavior1': {
+                'foobar': '123'
+            },
+            'measures.lookups_interfaces.ITestBehavior2': {
+                'foobar': '123'
+            },
+            'measures.lookups_interfaces.ITestBehavior3': {
+                'foobar': '123'
             }
         }
         await deserializer(data, validate_all=True)
