@@ -1,7 +1,7 @@
 2.2.0 (unreleased)
 ------------------
 
-- Improve performance of serialization/deserialize from db
+- Improve performance of pickle/unpickle from db
   [vangheem]
 
 - Pre-calculate registered behavior implementations to improve object creation

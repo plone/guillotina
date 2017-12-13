@@ -72,12 +72,13 @@ class BaseObject(object):
 
     @profilable
     def __getstate__(self):
-        data = getattr(self, '__dict__')
-        if data is None:
-            data = {}
-        for name in [k for k in data.keys() if k.startswith('_BaseObject__')]:
-            del data[name]
-        return data
+        idict = getattr(self, '__dict__', None)
+        if idict is not None:
+            d = dict([x for x in idict.items()
+                      if not x[0].startswith('_BaseObject__')])
+        else:
+            d = None
+        return d
 
     @profilable
     def __setstate__(self, state):
