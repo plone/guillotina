@@ -5,7 +5,7 @@ from zope.interface import Interface
 
 
 class IAttachmentMarker(Interface):
-    """Marker interface for content with dublin core."""
+    """Marker interface for content with attachments."""
 
 
 class IAttachment(Interface):
