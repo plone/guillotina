@@ -1,8 +1,8 @@
 from guillotina.component import get_multi_adapter
 from guillotina.content import create_content
-from guillotina.tests import mocks
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.tests import mocks
 from guillotina.utils import get_current_request
 
 import time

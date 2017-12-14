@@ -2,8 +2,8 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.content import Item
-from guillotina.interface import Interface
 from guillotina.interfaces import IItem
+from zope.interface import Interface
 
 
 class IMarkerBehavior1(Interface):
