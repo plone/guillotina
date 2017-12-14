@@ -1,12 +1,12 @@
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.component import get_multi_adapter
-from guillotina.interface import also_provides
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.utils import import_class
+from zope.interface import alsoProvides
 
 
 @configure.adapter(
@@ -16,7 +16,7 @@ class CloudFileManager(object):
 
     def __init__(self, context, request, field):
         iface = import_class(app_settings['cloud_storage'])
-        also_provides(field, iface)
+        alsoProvides(field, iface)
         self.real_file_manager = get_multi_adapter(
             (context, request, field), IFileManager)
 

@@ -10,9 +10,9 @@ from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
-from guillotina.interface import implementer
 from guillotina.profile import profilable
 from guillotina.utils import get_current_request
+from zope.interface import implementer
 
 import asyncio
 import logging

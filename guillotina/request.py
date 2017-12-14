@@ -1,8 +1,8 @@
 from aiohttp import web_request
-from guillotina.interface import implementer
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
+from zope.interface import implementer
 
 import asyncio
 import time

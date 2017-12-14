@@ -21,10 +21,6 @@ from guillotina.events import ObjectLoadedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
-from guillotina.interface import also_provides
-from guillotina.interface import implementer
-from guillotina.interface import Interface
-from guillotina.interface import no_longer_provides
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
@@ -51,6 +47,10 @@ from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
+from zope.interface import alsoProvides
+from zope.interface import implementer
+from zope.interface import Interface
+from zope.interface import noLongerProvides
 
 import guillotina.db.orm.base
 import os
@@ -359,7 +359,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             # We can adapt so we can apply this dynamic behavior
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
-                also_provides(self, behavior_registration.marker)
+                alsoProvides(self, behavior_registration.marker)
                 self._p_register()  # make sure we resave this obj
 
     def remove_behavior(self, iface: Interface) -> None:
@@ -375,7 +375,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         if (behavior_registration is not None and
                 behavior_registration.marker is not None):
             try:
-                no_longer_provides(self, behavior_registration.marker)
+                noLongerProvides(self, behavior_registration.marker)
             except ValueError:
                 # could not remove interface
                 pass

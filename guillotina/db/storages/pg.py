@@ -5,8 +5,8 @@ from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
-from guillotina.interface import implementer
 from guillotina.profile import profilable
+from zope.interface import implementer
 
 import asyncio
 import asyncpg

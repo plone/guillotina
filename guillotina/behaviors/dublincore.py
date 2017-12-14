@@ -5,7 +5,7 @@ from guillotina import schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index
-from guillotina.interface import Interface
+from zope.interface import Interface
 
 
 _utc = tzutc()

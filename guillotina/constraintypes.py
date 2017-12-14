@@ -1,7 +1,7 @@
 from guillotina import configure
 from guillotina.content import get_cached_factory
-from guillotina.interface import Interface
 from guillotina.interfaces import IConstrainTypes
+from zope.interface import Interface
 
 
 @configure.adapter(

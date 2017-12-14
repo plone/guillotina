@@ -2,13 +2,13 @@
 from guillotina import configure
 from guillotina.component import get_multi_adapter
 from guillotina.component.interfaces import IFactory
-from guillotina.interface import Interface
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.profile import profilable
 from guillotina.schema import get_fields_in_order
+from zope.interface import Interface
 
 
 @configure.adapter(

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-from guillotina.interface import Attribute
-from guillotina.interface import Interface
+from zope.interface import Attribute
+from zope.interface import Interface
 
 
 OID_TYPE = SERIAL_TYPE = bytes

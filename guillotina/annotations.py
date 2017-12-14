@@ -1,10 +1,10 @@
 from collections import UserDict
 from guillotina import configure
 from guillotina.db.orm.base import BaseObject
-from guillotina.interface import implementer
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IResource
+from zope.interface import implementer
 
 import logging
 

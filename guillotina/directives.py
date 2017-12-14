@@ -1,4 +1,4 @@
-from guillotina.interface import TAGGED_DATA
+from zope.interface.interface import TAGGED_DATA
 
 import sys
 

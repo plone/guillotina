@@ -1,9 +1,9 @@
 from guillotina._settings import app_settings
 from guillotina.component import get_utility
-from guillotina.interface import implementer
 from guillotina.interfaces import IContentNegotiation
 from guillotina.interfaces import IDownloadView
 from guillotina.interfaces import IRendererFormatRaw
+from zope.interface import implementer
 
 import logging
 

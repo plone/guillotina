@@ -10,7 +10,6 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.exceptions import Invalid
 from guillotina.exceptions import NoInteraction
-from guillotina.interface import Interface
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IJSONToValue
@@ -22,6 +21,7 @@ from guillotina.json.exceptions import ValueDeserializationError
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
+from zope.interface import Interface
 
 import asyncio
 

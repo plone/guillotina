@@ -4,7 +4,7 @@ from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
-from guillotina.interface import implementer
+from zope.interface import implementer
 
 
 class MockDBTransaction:

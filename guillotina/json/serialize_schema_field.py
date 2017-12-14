@@ -1,7 +1,5 @@
 from guillotina import configure
 from guillotina.component import get_multi_adapter
-from guillotina.interface import implemented_by
-from guillotina.interface import Interface
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
 from guillotina.interfaces import ISchemaFieldSerializeToJson
@@ -23,6 +21,8 @@ from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IText
 from guillotina.schema.interfaces import ITextLine
 from guillotina.schema.interfaces import ITime
+from zope.interface import implementedBy
+from zope.interface import Interface
 
 
 FIELDS_CACHE = {}
@@ -62,7 +62,7 @@ class DefaultSchemaFieldSerializer(object):
             field_attributes = FIELDS_CACHE[self.field.__class__].copy()
         else:
             field_attributes = {}
-            for schema in implemented_by(self.field.__class__).flattened():
+            for schema in implementedBy(self.field.__class__).flattened():
                 field_attributes.update(get_fields(schema))
             FIELDS_CACHE[self.field.__class__] = field_attributes
         for attribute_name in sorted(field_attributes.keys()):

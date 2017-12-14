@@ -3,11 +3,11 @@ from . import attachment  # noqa
 from . import dublincore  # noqa
 from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
-from guillotina.interface import also_provides
-from guillotina.interface import class_implements
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResourceFactory
 from guillotina.profile import profilable
+from zope.interface import alsoProvides
+from zope.interface import classImplements
 
 
 def apply_concrete_behaviors():
@@ -15,7 +15,7 @@ def apply_concrete_behaviors():
     Configured behaviors for an object should always be applied and can't
     be removed.
 
-    Should be called once at startup instead of doing also_provides every
+    Should be called once at startup instead of doing alsoProvides every
     time an object is created
     '''
     for type_name, factory in get_utilities_for(IResourceFactory):
@@ -23,7 +23,7 @@ def apply_concrete_behaviors():
             behavior_registration = get_utility(
                 IBehavior, name=behavior.__identifier__)
             if behavior_registration.marker is not None:
-                class_implements(factory._callable, behavior_registration.marker)
+                classImplements(factory._callable, behavior_registration.marker)
 
 @profilable
 def apply_markers(obj, event=None):
@@ -38,4 +38,4 @@ def apply_markers(obj, event=None):
         if behavior.marker is not None:
             markers.append(behavior.marker)
     if len(markers) > 0:
-        also_provides(obj, *markers)
+        alsoProvides(obj, *markers)

@@ -16,8 +16,6 @@
 from guillotina import configure
 from guillotina.auth.users import SystemUser
 from guillotina.component import get_utility
-from guillotina.interface import implementer
-from guillotina.interface import provider
 from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
@@ -36,6 +34,8 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.utils import get_current_request
+from zope.interface import implementer
+from zope.interface import provider
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting

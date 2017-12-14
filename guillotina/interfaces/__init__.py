@@ -100,7 +100,7 @@ from .views import IPUT  # noqa
 from .views import ITraversableView  # noqa
 from .views import IView  # noqa
 from guillotina.i18n import MessageFactory
-from guillotina.interface import Interface
+from zope.interface import Interface
 
 
 _ = MessageFactory('guillotina')

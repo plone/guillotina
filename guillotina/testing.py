@@ -5,9 +5,9 @@ from guillotina.browser import View
 from guillotina.content import Resource
 from guillotina.directives import index
 from guillotina.directives import metadata
-from guillotina.interface import implementer
 from guillotina.interfaces import IResource
 from guillotina.utils import lazy_apply
+from zope.interface import implementer
 
 import aiohttp
 import base64

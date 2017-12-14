@@ -9,8 +9,6 @@ from contextlib import contextmanager
 from guillotina.auth.users import RootUser
 from guillotina.behaviors import apply_markers
 from guillotina.content import Item
-from guillotina.interface import also_provides
-from guillotina.interface import implementer
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.request import Request
@@ -19,6 +17,8 @@ from guillotina.transactions import managed_transaction
 from multidict import CIMultiDict
 from unittest import mock
 from yarl import URL
+from zope.interface import alsoProvides
+from zope.interface import implementer
 
 import json
 import uuid
@@ -30,8 +30,8 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
     request._txn = None
     request.interaction = None
     request._db_write_enabled = True
-    also_provides(request, IRequest)
-    also_provides(request, IDefaultLayer)
+    alsoProvides(request, IRequest)
+    alsoProvides(request, IDefaultLayer)
     if db is not None:
         db._db.request = request
         request._db_id = db.id

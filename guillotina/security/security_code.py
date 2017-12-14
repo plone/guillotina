@@ -1,5 +1,4 @@
 from guillotina.auth.role import check_role
-from guillotina.interface import implementer
 from guillotina.interfaces import Allow
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IPrincipalPermissionManager
@@ -8,6 +7,7 @@ from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import Unset
 from guillotina.security.permission import get_all_permissions
 from guillotina.security.securitymap import SecurityMap
+from zope.interface import implementer
 
 
 @implementer(IPrincipalRoleManager)

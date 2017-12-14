@@ -1,7 +1,7 @@
 from guillotina.db import ROOT_ID
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
-from guillotina.interface import implementer
+from zope.interface import implementer
 
 import asyncio
 

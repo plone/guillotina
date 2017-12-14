@@ -2,7 +2,6 @@ from functools import partial
 from guillotina import configure
 from guillotina.component import get_multi_adapter
 from guillotina.files.utils import convert_base64_to_binary
-from guillotina.interface import implementer
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IContentBehavior
 from guillotina.interfaces import IFile
@@ -12,6 +11,7 @@ from guillotina.schema.fieldproperty import FieldProperty
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
 from guillotina.utils import to_str
+from zope.interface import implementer
 
 import mimetypes
 import uuid
