@@ -93,6 +93,9 @@ class Command(object):
         self.arguments = parser.parse_known_args()[0]
 
     def run_command(self):
+        settings = get_settings(self.arguments.configuration)
+        app = self.make_app(settings)
+
         if self.arguments.line_profiler:
             if not HAS_LINE_PROFILER:
                 sys.stderr.write(
@@ -118,18 +121,16 @@ class Command(object):
 
         if self.arguments.profile:
             self.profiler = cProfile.Profile()
-            self.profiler.runcall(run_func)
+            self.profiler.runcall(run_func, app, settings)
         else:
-            run_func()
+            run_func(app, settings)
 
-    def __run_with_monitor(self):
+    def __run_with_monitor(self, app, settings):
         loop = self.get_loop()
         with aiomonitor.start_monitor(loop=loop):
-            self.__run()
+            self.__run(app, settings)
 
-    def __run(self):
-        settings = get_settings(self.arguments.configuration)
-        app = self.make_app(settings)
+    def __run(self, app, settings):
         if asyncio.iscoroutinefunction(self.run):
             # Blocking call which returns when finished
             loop = asyncio.get_event_loop()
