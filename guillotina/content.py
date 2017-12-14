@@ -383,6 +383,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             self.__behaviors__ -= {name}
         self._p_register()  # make sure we resave this obj
 
+    @profilable
     def __getattr__(self, name):
         # python basics:  __getattr__ is only invoked if the attribute wasn't
         # found by __getattribute__

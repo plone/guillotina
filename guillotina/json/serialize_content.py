@@ -120,6 +120,7 @@ class SerializeToJson(object):
         if behavior and len(schema_serial) > 0:
             result[schema.__identifier__] = schema_serial
 
+    @profilable
     async def serialize_field(self, context, field, default=None):
         try:
             value = await apply_coroutine(field.get, context)
