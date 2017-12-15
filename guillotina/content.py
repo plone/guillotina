@@ -515,7 +515,7 @@ class Container(Folder):
         registry.register_interface(ILayers)
         registry.register_interface(IAddons)
         layers = registry.for_interface(ILayers)
-        layers['active_layers'] = frozenset({'guillotina.interfaces.layer.IDefaultLayer'})
+        layers['active_layers'] = frozenset()
 
         roles = IPrincipalRoleManager(self)
         roles.assign_role_to_principal(
