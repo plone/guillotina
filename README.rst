@@ -1,6 +1,10 @@
 Introduction
 ============
 
+.. image:: https://badges.gitter.im/plone/guillotina.svg
+   :alt: Join the chat at https://gitter.im/plone/guillotina
+   :target: https://gitter.im/plone/guillotina?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
    :target: http://guillotina.readthedocs.io/en/latest/
 
