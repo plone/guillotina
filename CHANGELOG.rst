@@ -1,4 +1,4 @@
-2.2.0 (unreleased)
+2.2.0 (2017-12-15)
 ------------------
 
 - Improve performance of pickle/unpickle from db
