@@ -16,10 +16,6 @@
   like it should be in another module
   [vangheem]
 
-- Provide alias imports for zope.interface in guillotina.interface to make docs
-  simple and api usage more pythonic(alsoProvides -> also_provides)
-  [vangheem]
-
 - Use UTC timezones everywhere. Local timezones are performance impacting.
   [vangheem]
 
