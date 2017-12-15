@@ -93,27 +93,15 @@ class ApplicationRoot(object):
             pass
 
     def __delitem__(self, key):
-        """ This operation can only be done throw HTTP request
-
-        We can check if there is permission to delete a db
-        XXX TODO
-        """
-
         del self._items[key]
 
     def __iter__(self):
         return iter(self._items.items())
 
     def __setitem__(self, key, value):
-        """ This operation can only be done throw HTTP request
-
-        We can check if there is permission to delete a db
-        XXX TODO
-        """
-
         self._items[key] = value
 
-    async def asyncget(self, key):
+    async def async_get(self, key):
         return self._items[key]
 
 
