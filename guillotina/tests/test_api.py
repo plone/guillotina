@@ -83,7 +83,7 @@ async def test_get_registry_value(container_requester):
         response, status = await requester(
             'GET',
             '/db/guillotina/@registry/guillotina.interfaces.registry.ILayers.active_layers')
-        assert response['value'] == ['guillotina.interfaces.layer.IDefaultLayer']
+        assert response['value'] == []
 
 
 async def test_create_content(container_requester):
