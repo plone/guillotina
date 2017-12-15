@@ -22,6 +22,10 @@ Introduction
    :target: https://pypi.python.org/pypi/guillotina/
    :alt: License
 
+.. image:: https://badges.gitter.im/plone/guillotina.png
+   :target: https://gitter.im/plone/guillotina
+   :alt: Chat
+
 Please `read the detailed docs <http://guillotina.readthedocs.io/en/latest/>`_
 
 
@@ -124,3 +128,9 @@ Then, run guillotina::
 
 
 This assumes you have a config.yaml in your current working directory
+
+
+Chat
+----
+
+Join us to talk about Guillotina at https://gitter.im/plone/guillotina
