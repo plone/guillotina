@@ -1,7 +1,26 @@
-2.1.20 (unreleased)
--------------------
+2.2.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Improve performance of pickle/unpickle from db
+  [vangheem]
+
+- Pre-calculate registered behavior implementations to improve object creation
+  performance. Previously registered behaviors were dynamically provided with
+  `alsoProvides`.
+  [vangheem]
+
+- Remove `guillotina.interfaces.IFormFieldProvider` as it was not implemented
+  [vangheem]
+
+- Remove `guillotina.framing` module since it wasn't used and any implemenation
+  like it should be in another module
+  [vangheem]
+
+- Use UTC timezones everywhere. Local timezones are performance impacting.
+  [vangheem]
+
+- Be able to profile all commands instead of just the `serve` command
+  [vangheem]
 
 
 2.1.19 (2017-12-08)

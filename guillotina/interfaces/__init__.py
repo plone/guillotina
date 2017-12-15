@@ -1,7 +1,7 @@
+# zope.interface convenience imports
 from .behaviors import IAsyncBehavior  # noqa
 from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
-from .behaviors import IBehaviorAssignable  # noqa
 from .behaviors import IBehaviorSchemaAwareFactory  # noqa
 from .behaviors import IContentBehavior  # noqa
 from .catalog import ICatalogDataAdapter  # noqa
@@ -114,11 +114,6 @@ SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 
 ACTIVE_LAYERS_KEY = 'guillotina.registry.ILayers.active_layers'
 ADDONS_KEY = 'guillotina.registry.IAddons.enabled'
-
-
-class IFormFieldProvider(Interface):
-    """Marker interface for schemata that provide form fields.
-    """
 
 
 class IRequest(Interface):

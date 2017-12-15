@@ -13,7 +13,7 @@
 ##############################################################################
 from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
-from guillotina.schema._schema import getFields
+from guillotina.schema._schema import get_fields
 from guillotina.schema.exceptions import ConstraintNotSatisfied
 from guillotina.schema.exceptions import NotAContainer
 from guillotina.schema.exceptions import NotAnIterator
@@ -185,7 +185,7 @@ class Field(Attribute):
         # should have the same properties
         names = {}  # used as set of property names, ignoring values
         for interface in providedBy(self):
-            names.update(getFields(interface))
+            names.update(get_fields(interface))
 
         # order will be different always, don't compare it
         if 'order' in names:

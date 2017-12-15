@@ -6,7 +6,7 @@ from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
-from guillotina.schema import getFields
+from guillotina.schema import get_fields
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IChoice
 from guillotina.schema.interfaces import ICollection
@@ -63,7 +63,7 @@ class DefaultSchemaFieldSerializer(object):
         else:
             field_attributes = {}
             for schema in implementedBy(self.field.__class__).flattened():
-                field_attributes.update(getFields(schema))
+                field_attributes.update(get_fields(schema))
             FIELDS_CACHE[self.field.__class__] = field_attributes
         for attribute_name in sorted(field_attributes.keys()):
             attribute_field = field_attributes[attribute_name]

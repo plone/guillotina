@@ -93,27 +93,15 @@ class ApplicationRoot(object):
             pass
 
     def __delitem__(self, key):
-        """ This operation can only be done throw HTTP request
-
-        We can check if there is permission to delete a db
-        XXX TODO
-        """
-
         del self._items[key]
 
     def __iter__(self):
         return iter(self._items.items())
 
     def __setitem__(self, key, value):
-        """ This operation can only be done throw HTTP request
-
-        We can check if there is permission to delete a db
-        XXX TODO
-        """
-
         self._items[key] = value
 
-    async def asyncget(self, key):
+    async def async_get(self, key):
         return self._items[key]
 
 
@@ -143,20 +131,10 @@ class Database(object):
         return await root._p_jar.keys(root._p_oid)
 
     async def async_set(self, key, value):
-        """ This operation can only be done through HTTP request
-
-        We can check if there is permission to delete a container?
-        XXX TODO
-        """
         root = await self.get_root()
         await root.async_set(key, value)
 
     async def async_del(self, key):
-        """ This operation can only be done throw HTTP request
-
-        We can check if there is permission to delete a container
-        XXX TODO
-        """
         root = await self.get_root()
         await apply_coroutine(root._p_jar.delete, await root.async_get(key))
 

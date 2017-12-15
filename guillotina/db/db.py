@@ -17,7 +17,7 @@ class Root(Folder):
 
     def __init__(self, db_id):
         super().__init__()
-        self.__db_id__ = db_id
+        self.__db_id__ = self.__name__ = db_id
 
     def __repr__(self):
         return "<Database %d>" % id(self)
@@ -53,17 +53,23 @@ class GuillotinaDB(object):
         # for get_current_request magic
         self.request = request
 
+        commit = False
         try:
             assert tm.get(request=request) == txn
             root = await txn.get(ROOT_ID)
             if root.__db_id__ is None:
                 root.__db_id__ = self._database_name
                 txn.register(root)
+                commit = True
         except KeyError:
             root = Root(self._database_name)
             txn.register(root, new_oid=ROOT_ID)
+            commit = True
 
-        await tm.commit(txn=txn)
+        if commit:
+            await tm.commit(txn=txn)
+        else:
+            await tm.abort(txn=txn)
 
     async def open(self):
         """Return a database Connection for use by application code.

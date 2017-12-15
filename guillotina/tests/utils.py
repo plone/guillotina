@@ -137,7 +137,7 @@ def create_content(factory=Item, type_name='Item', id=None):
     if id is None:
         id = f'foobar{uuid.uuid4().hex}'
     obj.__name__ = obj.id = id
-    apply_markers(obj, None)
+    apply_markers(obj)
     return obj
 
 

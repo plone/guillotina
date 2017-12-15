@@ -4,16 +4,16 @@ from guillotina.api.service import TraversableService
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import get_adapter
+from guillotina.exceptions import ComponentLookupError
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.serialize_value import json_compatible
-from guillotina.schema import getFields
+from guillotina.schema import get_fields
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
-from zope.interface.interfaces import ComponentLookupError
 
 
 _ = MessageFactory('guillotina')
@@ -126,7 +126,7 @@ class Register(Service):
         # Initialize values
         # If its defined on the guillotina.schema default will not be overwritten
         #  you will need to PATCH
-        for key, field in getFields(iObject).items():
+        for key, field in get_fields(iObject).items():
             if key in initial_values and getattr(config, key, _marker) == _marker:
                 # We don't have a value
                 config[key] = initial_values[key]

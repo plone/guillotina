@@ -1,5 +1,5 @@
 from datetime import datetime
-from dateutil.tz import tzlocal
+from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina.component._api import subscribers as component_subscribers
 from guillotina.component._api import get_component_registry
@@ -9,7 +9,7 @@ from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IResource
 
 
-_zone = tzlocal()
+_zone = tzutc()
 
 
 @configure.subscriber(for_=(IResource, IObjectModifiedEvent))

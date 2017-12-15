@@ -7,6 +7,7 @@ from guillotina.content import get_cached_factory
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISchemaSerializeToJson
+from guillotina.utils import resolve_dotted_name
 
 
 @configure.service(
@@ -31,6 +32,15 @@ from guillotina.interfaces import ISchemaSerializeToJson
 async def default_patch(context, request):
     data = await request.json()
     behavior = data.get('behavior', None)
+    try:
+        behavior_class = resolve_dotted_name(behavior)
+    except ModuleNotFoundError:
+        behavior_class = None
+    if behavior_class is None:
+        return Response(response={}, status=404)
+    factory = get_cached_factory(context.type_name)
+    if behavior_class in factory.behaviors:
+        return Response(response={}, status=201)
     if behavior in context.__behaviors__:
         return Response(response={}, status=201)
     context.add_behavior(behavior)
@@ -59,6 +69,11 @@ async def default_patch(context, request):
 async def default_delete(context, request):
     data = await request.json()
     behavior = data.get('behavior', None)
+    factory = get_cached_factory(context.type_name)
+    behavior_class = resolve_dotted_name(behavior)
+    if behavior_class is not None:
+        if behavior_class in factory.behaviors:
+            return Response(response={}, status=201)
     if behavior not in context.__behaviors__:
         return Response(response={}, status=201)
     context.remove_behavior(behavior)
@@ -89,6 +104,8 @@ async def default_get(context, request):
     result['dynamic'] = [b for b in context.__behaviors__]
 
     result['available'] = []
+
+    factory = get_cached_factory(context.type_name)
 
     for name, utility in get_utilities_for(IBehavior):
         serialize = False

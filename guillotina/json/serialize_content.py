@@ -17,7 +17,7 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
-from guillotina.schema import getFields
+from guillotina.schema import get_fields
 from guillotina.utils import apply_coroutine
 from zope.interface import Interface
 
@@ -94,7 +94,7 @@ class SerializeToJson(object):
     async def get_schema(self, schema, context, result, behavior):
         read_permissions = merged_tagged_value_dict(schema, read_permission.key)
         schema_serial = {}
-        for name, field in getFields(schema).items():
+        for name, field in get_fields(schema).items():
 
             if not self.check_permission(read_permissions.get(name)):
                 continue
@@ -120,6 +120,7 @@ class SerializeToJson(object):
         if behavior and len(schema_serial) > 0:
             result[schema.__identifier__] = schema_serial
 
+    @profilable
     async def serialize_field(self, context, field, default=None):
         try:
             value = await apply_coroutine(field.get, context)

@@ -8,6 +8,7 @@ from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
+from guillotina.exceptions import Invalid
 from guillotina.exceptions import NoInteraction
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
@@ -17,11 +18,10 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.exceptions import ValueDeserializationError
-from guillotina.schema import getFields
+from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
 from zope.interface import Interface
-from zope.interface.exceptions import Invalid
 
 import asyncio
 
@@ -73,7 +73,7 @@ class DeserializeFromJson(object):
             validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
 
-        for name, field in getFields(schema).items():
+        for name, field in get_fields(schema).items():
 
             if field.readonly:
                 continue

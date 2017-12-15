@@ -1,5 +1,5 @@
 from datetime import datetime
-from dateutil.tz import tzlocal
+from dateutil.tz import tzutc
 from guillotina import logger
 from guillotina.browser import ErrorResponse
 from guillotina.browser import UnauthorizedResponse
@@ -14,7 +14,7 @@ import aiotask_context
 import asyncio
 
 
-_zone = tzlocal()
+_zone = tzutc()
 
 
 class IAsyncUtility(Interface):

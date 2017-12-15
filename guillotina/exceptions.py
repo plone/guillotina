@@ -2,6 +2,8 @@ from guillotina.interfaces import IForbidden
 from guillotina.interfaces import IForbiddenAttribute
 from guillotina.interfaces import IUnauthorized
 from zope.interface import implementer
+from zope.interface.exceptions import Invalid  # noqa
+from zope.interface.interfaces import ComponentLookupError  # noqa
 
 
 class NoPermissionToAdd(Exception):

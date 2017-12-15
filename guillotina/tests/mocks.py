@@ -46,6 +46,9 @@ class MockTransaction:
     async def write_blob_chunk(self, bid, zoid, chunk_number, data):
         pass
 
+    async def get_annotation(self, ob, key):
+        pass
+
 
 @implementer(IStorage)
 class MockStorage:

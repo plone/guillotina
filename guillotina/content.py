@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime
-from dateutil.tz import tzlocal
+from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina._cache import FACTORY_CACHE
@@ -26,7 +26,6 @@ from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IBehaviorAssignable
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
@@ -60,7 +59,7 @@ import typing
 import uuid
 
 
-_zone = tzlocal()
+_zone = tzutc()  # utz tz is much faster than local tz info
 _marker = object()
 
 
@@ -84,6 +83,7 @@ class ResourceFactory(Factory):
         self.add_permission = add_permission
         self.allowed_types = allowed_types
 
+    @profilable
     def __call__(self, id, *args, **kw):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
         obj.type_name = self.type_name
@@ -97,9 +97,10 @@ class ResourceFactory(Factory):
             obj.id = obj._p_oid
         else:
             obj.id = id
-        apply_markers(obj, None)
+        apply_markers(obj)
         return obj
 
+    @profilable
     def get_interfaces(self):
         spec = super(ResourceFactory, self).get_interfaces()
         spec.__name__ = self.type_name
@@ -166,7 +167,7 @@ def get_all_possible_schemas_for_type(type_name):
 
 
 def iter_schemata(obj):
-    type_name = IResource(obj).type_name
+    type_name = obj.type_name
     for schema in iter_schemata_for_type(type_name):
         yield schema
     for schema in obj.__behaviors_schemas__:
@@ -245,9 +246,8 @@ def get_all_behavior_interfaces(content) -> list:
     for behavior_schema in factory.behaviors or ():
         behaviors.append(behavior_schema)
 
-    for dynamic_behavior in content.__behaviors__ or ():
-        dynamic_behavior_obj = BEHAVIOR_CACHE[dynamic_behavior]
-        behaviors.append(dynamic_behavior_obj)
+    for dynamic_behavior in content.__behaviors_schemas__:
+        behaviors.append(dynamic_behavior)
     return behaviors
 
 
@@ -261,25 +261,6 @@ async def get_all_behaviors(content, create=False, load=True) -> list:
                 await behavior.load(create=create)
         behaviors.append((behavior_schema, behavior))
     return behaviors
-
-
-@configure.adapter(for_=IResource, provides=IBehaviorAssignable)
-class BehaviorAssignable(object):
-    """Support guillotina.behaviors behaviors stored on the CACHE
-    """
-
-    def __init__(self, context):
-        self.context = context
-
-    def supports(self, behavior_interface):
-        """We support all behaviors that accomplish the for_."""
-        return True
-
-    def enumerate_behaviors(self):
-        for behavior in SCHEMA_CACHE[self.context.type_name]['behaviors']:
-            yield behavior
-        for behavior in self.context.__behaviors__:
-            yield BEHAVIOR_CACHE[behavior]
 
 
 def _default_from_schema(context, schema, fieldname):
@@ -391,13 +372,18 @@ class Resource(guillotina.db.orm.base.BaseObject):
         elif Interface.providedBy(iface):
             name = iface.__identifier__
         behavior_registration = get_utility(IBehavior, name=name)
-        if behavior_registration is not None and\
-                behavior_registration.marker is not None:
-            noLongerProvides(self, behavior_registration.marker)
+        if (behavior_registration is not None and
+                behavior_registration.marker is not None):
+            try:
+                noLongerProvides(self, behavior_registration.marker)
+            except ValueError:
+                # could not remove interface
+                pass
         if iface in self.__behaviors__:
             self.__behaviors__ -= {name}
         self._p_register()  # make sure we resave this obj
 
+    @profilable
     def __getattr__(self, name):
         # python basics:  __getattr__ is only invoked if the attribute wasn't
         # found by __getattribute__
@@ -529,7 +515,7 @@ class Container(Folder):
         registry.register_interface(ILayers)
         registry.register_interface(IAddons)
         layers = registry.for_interface(ILayers)
-        layers['active_layers'] = frozenset({'guillotina.interfaces.layer.IDefaultLayer'})
+        layers['active_layers'] = frozenset()
 
         roles = IPrincipalRoleManager(self)
         roles.assign_role_to_principal(

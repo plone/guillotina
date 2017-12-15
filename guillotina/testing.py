@@ -1,11 +1,11 @@
 from copy import deepcopy
+from guillotina import schema
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.browser import View
 from guillotina.content import Resource
 from guillotina.directives import index
 from guillotina.directives import metadata
 from guillotina.interfaces import IResource
-from guillotina import schema
 from guillotina.utils import lazy_apply
 from zope.interface import implementer
 

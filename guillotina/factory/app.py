@@ -11,6 +11,7 @@ from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
 from guillotina.content import load_cached_schema
+from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.contentnegotiation import ContentNegotiatorUtility
@@ -190,7 +191,6 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.auth.participation')
     configure.scan('guillotina.catalog.index')
     configure.scan('guillotina.catalog.catalog')
-    configure.scan('guillotina.framing')
     configure.scan('guillotina.files')
     configure.scan('guillotina.annotations')
     configure.scan('guillotina.constraintypes')
@@ -211,6 +211,8 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # it's unclear to me if this is necesary or not but it seems to me that
     # we don't need things registered in both components AND here.
     configure.clear()
+
+    apply_concrete_behaviors()
 
     # update *after* plugins loaded
     update_app_settings(settings)

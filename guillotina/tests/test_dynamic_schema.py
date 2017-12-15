@@ -22,7 +22,9 @@ class CustomTypeContainerRequesterAsyncContextManager(ContainerRequesterAsyncCon
         configure.register_configuration(FoobarType, dict(
             schema=IFoobarType,
             type_name="Foobar",
-            behaviors=[]
+            behaviors=[
+                'guillotina.behaviors.dublincore.IDublinCore'
+            ]
         ), 'contenttype')
         requester = await super(CustomTypeContainerRequesterAsyncContextManager, self).__aenter__()
         config = requester.root.app.config
@@ -57,7 +59,7 @@ async def test_set_dynamic_behavior(custom_type_container_requester):
             'PATCH',
             '/db/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
+                'behavior': 'guillotina.test_package.ITestBehavior'
             })
         )
         assert status == 200
@@ -67,7 +69,7 @@ async def test_set_dynamic_behavior(custom_type_container_requester):
             'GET',
             '/db/guillotina/item1'
         )
-        assert 'guillotina.behaviors.dublincore.IDublinCore' in response
+        assert 'guillotina.test_package.ITestBehavior' in response
 
 
 async def test_create_delete_dynamic_behavior(custom_type_container_requester):
@@ -88,10 +90,30 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
             'PATCH',
             '/db/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
+                'behavior': 'guillotina.test_package.ITestBehavior'
             })
         )
         assert status == 200
+
+        # test patch again
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': 'guillotina.test_package.ITestBehavior'
+            })
+        )
+        assert status == 201
+
+        # test patch invalid...
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': 'guillotina.test_package.sldkflsdf'
+            })
+        )
+        assert status == 404
 
         # We check that the behavior is there
         response, status = await requester(
@@ -99,25 +121,34 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
             '/db/guillotina/item1'
         )
 
-        assert 'guillotina.behaviors.dublincore.IDublinCore' in response
+        assert 'guillotina.test_package.ITestBehavior' in response
 
         # We delete the behavior
         response, status = await requester(
             'DELETE',
             '/db/guillotina/item1/@behaviors',
             data=json.dumps({
-                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
+                'behavior': 'guillotina.test_package.ITestBehavior'
             })
         )
         assert status == 200
+
+        # test delete again gives 201
+        response, status = await requester(
+            'DELETE',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': 'guillotina.test_package.ITestBehavior'
+            })
+        )
+        assert status == 201
 
         # We check that the behavior is there
         response, status = await requester(
             'GET',
             '/db/guillotina/item1'
         )
-
-        assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
+        assert 'guillotina.test_package.ITestBehavior' not in response
 
 
 async def test_get_behaviors(custom_type_container_requester):
@@ -138,5 +169,46 @@ async def test_get_behaviors(custom_type_container_requester):
             '/db/guillotina/item1/@behaviors'
         )
         assert status == 200
-        assert 'guillotina.behaviors.dublincore.IDublinCore' in response['available']  # noqa
+        assert 'guillotina.behaviors.dublincore.IDublinCore' not in response['available']  # noqa
+        assert 'guillotina.behaviors.dublincore.IDublinCore' in response['static']
+
+
+async def test_can_not_delete_concrete_behaviors(custom_type_container_requester):
+    async with custom_type_container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Foobar",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+
+        # We create the behavior
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
+            })
+        )
+        assert status == 201
+
+        # We try to delete the behavior
+        response, status = await requester(
+            'DELETE',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
+            })
+        )
+        assert status == 201
+
+        # We check that the behavior is still there
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/item1'
+        )
         assert 'guillotina.behaviors.dublincore.IDublinCore' in response

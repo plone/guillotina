@@ -7,18 +7,19 @@ from guillotina import configure
 from guillotina.component import query_adapter
 from guillotina.i18n import Message
 from guillotina.interfaces import IValueToJson
+from guillotina.profile import profilable
 from guillotina.schema.vocabulary import SimpleVocabulary
 
 
 _MISSING = object()
 
 
+@profilable
 def json_compatible(value):
-    type_ = type(value)
-
     if value is None:
         return value
 
+    type_ = type(value)
     if type_ in (str, bool, int, float):
         return value
 

@@ -1,0 +1,23 @@
+---
+applications:
+- measures
+host: 0.0.0.0
+port: 9999
+root_user:
+  password: root
+cors:
+  allow_origin:
+  - "*"
+  allow_methods:
+  - GET
+  - POST
+  - DELETE
+  - HEAD
+  - PATCH
+  allow_headers:
+  - "*"
+  expose_headers:
+  - "*"
+  allow_credentials: true
+  max_age: 3660
+utilities: []
