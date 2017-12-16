@@ -8,3 +8,4 @@ omit =
   */commands/*
   */one_connection_storage.py
   */cockroach.py
+  */dummy.py

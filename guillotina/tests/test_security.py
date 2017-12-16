@@ -1,5 +1,6 @@
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
+from guillotina.security.utils import settings_for_object
 from guillotina.tests import utils
 from guillotina.transactions import managed_transaction
 
@@ -68,6 +69,8 @@ async def test_set_local_guillotina(container_requester):
             roles = get_roles_with_access_content(testing_object, request)
             assert roles == ['guillotina.Reader', 'guillotina.Reviewer', 'guillotina.Owner',
                              'guillotina.Editor', 'guillotina.ContainerAdmin']
+            data = settings_for_object(testing_object)
+            assert 'testing' in data[0]
 
         # Now we add the user1 with inherit on the container
         response, status = await requester(
