@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.behaviors.properties import FunctionProperty
 from guillotina.content import Item
 from guillotina.content import load_cached_schema
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
@@ -212,3 +213,19 @@ async def test_can_not_delete_concrete_behaviors(custom_type_container_requester
             '/db/guillotina/item1'
         )
         assert 'guillotina.behaviors.dublincore.IDublinCore' in response
+
+
+def test_function_property():
+    class Ob:
+        pass
+
+    def set_foo(inst, val):
+        inst.foo = val
+
+    def get_foo(inst):
+        return inst.foo
+
+    prop = FunctionProperty('foobar', get_foo, set_foo)
+    ob = Ob()
+    prop.__set__(ob, 'foobar')
+    assert prop.__get__(ob, Ob) == 'foobar'

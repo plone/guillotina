@@ -1,6 +1,6 @@
 
 
-class ContextProperty(object):
+class ContextProperty:
 
     def __init__(self, attribute, default):
         self.__name__ = attribute
@@ -17,7 +17,7 @@ class ContextProperty(object):
         inst.context._p_register()
 
 
-class FunctionProperty(object):
+class FunctionProperty:
 
     def __init__(self, attribute, getter, setter):
         self.__name__ = attribute

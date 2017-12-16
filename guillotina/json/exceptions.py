@@ -37,7 +37,7 @@ class ValueDeserializationError(Exception):
     """
 
     def __init__(self, field, value, msg):
-        self.msg = self.message = 'Error deserializing content'
+        self.msg = self.message = msg
         self.field = field
         self.value = value
 

@@ -16,10 +16,7 @@
 from guillotina.exceptions import ConfigurationError
 from guillotina.interfaces.configuration import IConfigurationContext
 from guillotina.interfaces.configuration import IGroupingContext
-from guillotina.schema import ValidationError
-from keyword import iskeyword
 from zope.interface import implementer
-from zope.interface import Interface
 
 import operator
 import sys
@@ -98,7 +95,6 @@ class ConfigurationMachine(ConfigurationContext):
     def __init__(self):
         super(ConfigurationMachine, self).__init__()
         self.actions = []
-        self.stack = [RootStackItem(self)]
 
     def execute_actions(self, clear=True, testing=False):
         """Execute the configuration actions.
@@ -142,133 +138,6 @@ class ConfigurationExecutionError(ConfigurationError):
 
 
 ##############################################################################
-# Stack items
-
-class IStackItem(Interface):
-    """Configuration machine stack items
-
-    Stack items are created when a directive is being processed.
-
-    A stack item is created for each directive use.
-    """
-
-    def contained(name, data):  # noqa: N805
-        """Begin processing a contained directive
-
-        The data are a dictionary of attribute names mapped to unicode
-        strings.
-
-        The begin method returns the next item to be placed on the stack.
-        """
-
-    def finish():
-        """Finish processing a directive
-        """
-
-
-@implementer(IStackItem)
-class SimpleStackItem(object):
-    """Simple stack item
-
-    A simple stack item can't have anything added after it.  It can
-    only be removed.  It is used for simple directives and
-    subdirectives, which can't contain other directives.
-
-    It also defers any computation until the end of the directive
-    has been reached.
-    """
-    # XXX why this *argdata hack instead of schema, data?
-    def __init__(self, context, handler, *argdata):
-        newcontext = GroupingContextDecorator(context)
-        self.context = newcontext
-        self.handler = handler
-        self.argdata = argdata
-
-    def contained(self, name, data):
-        raise ConfigurationError('Invalid directive %s' % str(name))
-
-    def finish(self):
-        # We're going to use the context that was passed to us, which wasn't
-        # created for the directive.  We want to set it's info to the one
-        # passed to us while we make the call, so we'll save the old one
-        # and restore it.
-        context = self.context
-        args = toargs(context, *self.argdata)
-        actions = self.handler(context, **args)
-        if actions:
-            # we allow the handler to return nothing
-            for action in actions:
-                if not isinstance(action, dict):
-                    action = expand_action(*action)  # b/c
-                context.action(**action)
-
-
-@implementer(IStackItem)
-class RootStackItem(object):
-
-    def __init__(self, context):
-        self.context = context
-
-    def contained(self, name, data):
-        """Handle a contained directive
-
-        We have to compute a new stack item by getting a named adapter
-        for the current context object.
-        """
-        factory = self.context.factory(self.context, name)
-        if factory is None:
-            raise ConfigurationError('Invalid directive', name)
-        adapter = factory(self.context, data)
-        return adapter
-
-    def finish(self):
-        pass
-
-
-@implementer(IStackItem)
-class GroupingStackItem(RootStackItem):
-    """Stack item for a grouping directive
-
-    A grouping stack item is in the stack when a grouping directive is
-    being processed.  Grouping directives group other directives.
-    Often, they just manage common data, but they may also take
-    actions, either before or after contained directives are executed.
-
-    A grouping stack item is created with a grouping directive
-    definition, a configuration context, and directive data.
-    """
-
-    def __init__(self, context):
-        super(GroupingStackItem, self).__init__(context)
-
-    def __call_before(self):
-        actions = self.context.before()
-        if actions:
-            for action in actions:
-                if not isinstance(action, dict):
-                    action = expand_action(*action)
-                self.context.action(**action)
-        self.__call_before = noop
-
-    def contained(self, name, data):
-        self.__call_before()
-        return RootStackItem.contained(self, name, data)
-
-    def finish(self):
-        self.__call_before()
-        actions = self.context.after()
-        if actions:
-            for action in actions:
-                if not isinstance(action, dict):
-                    action = expand_action(*action)
-                self.context.action(**action)
-
-
-def noop():
-    pass
-
-
-##############################################################################
 # Helper classes
 
 @implementer(IConfigurationContext, IGroupingContext)
@@ -295,64 +164,6 @@ class GroupingContextDecorator(ConfigurationContext):
 
     def after(self):
         pass
-
-
-##############################################################################
-# Argument conversion
-
-def toargs(context, schema, data):
-    """Marshal data to an argument dictionary using a schema
-
-    Names that are python keywords have an underscore added as a
-    suffix in the schema and in the argument list, but are used
-    without the underscore in the data.
-
-    The fields in the schema must all implement IFromUnicode.
-
-    All of the items in the data must have corresponding fields in the
-    schema unless the schema has a true tagged value named
-    'keyword_arguments'.
-    """
-    data = dict(data)
-    args = {}
-    for name, field in schema.namesAndDescriptions(True):
-        field = field.bind(context)
-        n = name
-        if n.endswith('_') and iskeyword(n[:-1]):
-            n = n[:-1]
-
-        s = data.get(n, data)
-        if s is not data:
-            s = str(s)
-            del data[n]
-
-            try:
-                args[str(name)] = field.from_unicode(s)
-            except ValidationError as v:
-                reraise(ConfigurationError('Invalid value for', n, str(v)),
-                        None, sys.exc_info()[2])
-        elif field.required:
-            # if the default is valid, we can use that:
-            default = field.default
-            try:
-                field.validate(default)
-            except ValidationError:
-                raise ConfigurationError('Missing parameter:', n)
-            args[str(name)] = default
-
-    if data:
-        # we had data left over
-        try:
-            keyword_arguments = schema.getTaggedValue('keyword_arguments')
-        except KeyError:
-            keyword_arguments = False
-        if not keyword_arguments:
-            raise ConfigurationError('Unrecognized parameters:', *data)
-
-        for name in data:
-            args[str(name)] = data[name]
-
-    return args
 
 
 ##############################################################################
