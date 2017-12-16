@@ -531,3 +531,15 @@ async def test_addable_types(container_requester):
         response, status = await requester('GET', '/db/guillotina/@addable-types')
         assert status == 200
         assert 'Item' in response
+
+
+async def test_not_allowed_to_create_container_inside_container(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                '@type': 'Container'
+            }))
+        assert status == 412
+
