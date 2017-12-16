@@ -1,7 +1,8 @@
 2.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `@addable-types` endpoint
+  [vangheem]
 
 
 2.2.0 (2017-12-15)

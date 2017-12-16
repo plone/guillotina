@@ -3,6 +3,7 @@ from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import configure
 from guillotina import security
+from guillotina._cache import FACTORY_CACHE
 from guillotina._settings import app_settings
 from guillotina.annotations import AnnotationData
 from guillotina.api.service import Service
@@ -32,6 +33,7 @@ from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IInteraction
@@ -766,3 +768,22 @@ async def duplicate(context, request):
     })
 async def ids(context, request):
     return await context.async_keys()
+
+
+@configure.service(
+    context=IFolder, method='GET', name="@addable-types",
+    permission='guillotina.AddContent',
+    summary='Return a list of type names that can be added to container',
+    responses={
+        "200": {
+            "description": "Successfully returned list of type names"
+        }
+    })
+async def addable_types(context, request):
+    constrains = IConstrainTypes(context, None)
+    types = constrains and constrains.get_allowed_types()
+    if types is None:
+        types = []
+        for type_name, factory in FACTORY_CACHE.items():
+            types.append(type_name)
+    return types

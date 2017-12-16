@@ -524,3 +524,10 @@ async def test_raise_http_exception_works(container_requester):
         assert status == 422
         response, status = await requester('GET', '/@raise-http-exception')
         assert status == 422
+
+
+async def test_addable_types(container_requester):
+    async with container_requester as requester:
+        response, status = await requester('POST', '/db/guillotina/@addable-types')
+        assert status == 200
+        assert 'Item' in response
