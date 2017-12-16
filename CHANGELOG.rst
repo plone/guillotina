@@ -1,7 +1,8 @@
 2.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not allow to add containers inside containers
+  [vangheem]
 
 
 2.2.0 (2017-12-15)

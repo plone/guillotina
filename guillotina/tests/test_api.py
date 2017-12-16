@@ -524,3 +524,14 @@ async def test_raise_http_exception_works(container_requester):
         assert status == 422
         response, status = await requester('GET', '/@raise-http-exception')
         assert status == 422
+
+
+async def test_not_allowed_to_create_container_inside_container(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                '@type': 'Container'
+            }))
+        assert status == 412
