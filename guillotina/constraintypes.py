@@ -13,6 +13,8 @@ class FTIConstrainAllowedTypes(object):
         self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:
+        if type_id == 'Container':
+            return False
         allowed = self.get_allowed_types()
         if allowed is None:
             # not define
