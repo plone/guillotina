@@ -33,6 +33,7 @@ from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
@@ -771,7 +772,7 @@ async def ids(context, request):
 
 
 @configure.service(
-    context=IFolder, method='GET', name="@addable-types",
+    context=IAsyncContainer, method='GET', name="@addable-types",
     permission='guillotina.AddContent',
     summary='Return a list of type names that can be added to container',
     responses={
