@@ -1,14 +1,14 @@
 from guillotina import configure
-from guillotina.interfaces import IDatabase
 from guillotina.content import get_cached_factory
 from guillotina.interfaces import IConstrainTypes
+from guillotina.interfaces import IDatabase
 from zope.interface import Interface
 
 
 @configure.adapter(
     for_=Interface,
     provides=IConstrainTypes)
-class FTIConstrainAllowedTypes(object):
+class FTIConstrainAllowedTypes:
 
     def __init__(self, context: Interface):
         self.context = context
@@ -37,6 +37,9 @@ class DatabaseAllowedTypes:
     '''
     Can only add containers to databases
     '''
+
+    def __init__(self, context: Interface):
+        self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:
         return type_id == 'Container'
