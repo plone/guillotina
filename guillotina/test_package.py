@@ -26,7 +26,7 @@ class ITestBehavior(Interface):
     provides=ITestBehavior,
     marker=IMarkerBehavior,
     for_="guillotina.interfaces.IResource")
-class TestBehavior(AnnotationBehavior):
+class GTestBehavior(AnnotationBehavior):
     pass
 
 

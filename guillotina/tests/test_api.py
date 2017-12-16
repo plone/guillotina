@@ -526,6 +526,13 @@ async def test_raise_http_exception_works(container_requester):
         assert status == 422
 
 
+async def test_addable_types(container_requester):
+    async with container_requester as requester:
+        response, status = await requester('GET', '/db/guillotina/@addable-types')
+        assert status == 200
+        assert 'Item' in response
+
+
 async def test_not_allowed_to_create_container_inside_container(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:
@@ -535,3 +542,4 @@ async def test_not_allowed_to_create_container_inside_container(container_reques
                 '@type': 'Container'
             }))
         assert status == 412
+

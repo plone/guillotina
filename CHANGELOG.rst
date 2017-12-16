@@ -1,6 +1,9 @@
 2.2.1 (unreleased)
 ------------------
 
+- Add `@addable-types` endpoint
+  [vangheem]
+
 - Do not allow to add containers inside containers
   [vangheem]
 
