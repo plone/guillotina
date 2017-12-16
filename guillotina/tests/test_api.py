@@ -528,6 +528,6 @@ async def test_raise_http_exception_works(container_requester):
 
 async def test_addable_types(container_requester):
     async with container_requester as requester:
-        response, status = await requester('POST', '/db/guillotina/@addable-types')
+        response, status = await requester('GET', '/db/guillotina/@addable-types')
         assert status == 200
         assert 'Item' in response
