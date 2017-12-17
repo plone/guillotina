@@ -115,3 +115,57 @@ async def test_set_local_guillotina(container_requester):
             testing_object = await container.async_get('testing')
             principals = get_principals_with_access_content(testing_object, request)
             assert principals == ['root']
+
+
+async def test_sharing_prinrole(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@sharing',
+            data=json.dumps({
+                'prinrole': [{
+                    'principal': 'user1',
+                    'role': 'guillotina.Reader',
+                    'setting': 'AllowSingle'
+                }]
+            })
+        )
+        assert status == 200
+
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            assert 'user1' in container.__acl__['prinrole']._bycol
+
+
+async def test_sharing_roleperm(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@sharing',
+            data=json.dumps({
+                'roleperm': [{
+                    'permission': 'guillotina.ViewContent',
+                    'role': 'guillotina.Reader',
+                    'setting': 'AllowSingle'
+                }]
+            })
+        )
+        assert status == 200
+
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            assert 'guillotina.Reader' in container.__acl__['roleperm']._bycol
+
+
+async def test_canido(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'GET', '/db/guillotina/@canido?permission=guillotina.ViewContent')
+        assert status == 200
+        assert response
