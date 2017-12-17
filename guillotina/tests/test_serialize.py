@@ -6,12 +6,12 @@ from guillotina.files.dbfile import DBFile
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.json import deserialize_value
 from guillotina.json.deserialize_value import schema_compatible
 from guillotina.json.serialize_value import json_compatible
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
-from guillotina.json import deserialize_value
 
 
 async def test_serialize_resource(dummy_request):
