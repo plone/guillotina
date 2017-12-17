@@ -4,11 +4,14 @@ from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.files.dbfile import DBFile
 from guillotina.interfaces import IJSONToValue
+from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.json.deserialize_value import schema_compatible
 from guillotina.json.serialize_value import json_compatible
 from guillotina.tests.utils import create_content
+from guillotina.tests.utils import login
 from zope.interface import Interface
+from guillotina.json import deserialize_value
 
 
 async def test_serialize_resource(dummy_request):
@@ -145,3 +148,20 @@ async def test_deserialize_datetime(dummy_guillotina):
     now = datetime.utcnow()
     converted = schema_compatible(now.isoformat(), ITestSchema['datetime'])
     assert converted.minute == now.minute
+
+
+async def test_check_permission_deserialize_content(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    assert deserializer.check_permission('guillotina.ViewContent')
+    assert deserializer.check_permission('guillotina.ViewContent')  # with cache
+
+
+def test_default_value_deserialize(dummy_request):
+    content = create_content()
+    assert {'text': 'foobar'} == deserialize_value.default_value_converter(ITestSchema, {
+        'text': 'foobar'
+    }, content)
