@@ -14,7 +14,7 @@ async def test_hello(container_requester, loop):
                 # we should check version
                 sending = {
                     'op': 'GET',
-                    'value': '/'
+                    'value': '/@registry/guillotina.interfaces.registry.ILayers.active_layers'
                 }
                 ws.send_str(json.dumps(sending))
                 async for msg in ws:
@@ -24,7 +24,7 @@ async def test_hello(container_requester, loop):
                             await ws.close()
                             break  # noqa
                         else:
-                            assert message['__name__'] == 'guillotina'
+                            assert message == {'value': []}
                             await ws.close()
                     elif msg.tp == aiohttp.WSMsgType.closed:
                         break  # noqa
