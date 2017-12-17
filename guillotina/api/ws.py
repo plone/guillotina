@@ -13,7 +13,6 @@ from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import ITraversableView
 from guillotina.transactions import get_tm
-from guillotina.utils import navigate_to
 
 import aiohttp
 import time
@@ -84,7 +83,8 @@ class WebsocketsView(Service):
         method = app_settings['http_methods']['GET']
         path = tuple(p for p in message['value'].split('/') if p)
 
-        obj, tail = await navigate_to(self.request.container, path)
+        from guillotina.traversal import traverse
+        obj, tail = await traverse(self.request, self.request.container, path)
 
         traverse_to = None
 

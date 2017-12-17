@@ -24,7 +24,7 @@ async def test_hello(container_requester, loop):
                             await ws.close()
                             break  # noqa
                         else:
-                            assert len(message['items']) == 0
+                            assert message['__name__'] == 'guillotina'
                             await ws.close()
                     elif msg.tp == aiohttp.WSMsgType.closed:
                         break  # noqa
