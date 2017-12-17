@@ -40,14 +40,3 @@ class IConfigurationContext(Interface):
         'includepath' is None (the default) or a tuple of include paths for
         this action.
         """
-
-
-class IGroupingContext(Interface):
-
-    def before():
-        """Do something before processing nested directives
-        """
-
-    def after():
-        """Do something after processing nested directives
-        """

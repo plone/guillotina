@@ -54,17 +54,23 @@ class WSTokenAuthPolicy(BasePolicy):
             except jose.Error:
                 logger.warn(f'Error decrypting JWT token', exc_info=True)
                 return
-            return {
+            data = {
                 'type': 'wstoken',
                 'token': jwt.claims['token']
             }
+            if 'id' in jwt.claims:
+                data['id'] = jwt.claims['id']
+            return data
 
 
 class BasicAuthPolicy(BasePolicy):
     name = 'basic'
 
-    async def extract_token(self):
-        header_auth = self.request.headers.get('AUTHORIZATION')
+    async def extract_token(self, value=None):
+        if value is None:
+            header_auth = self.request.headers.get('AUTHORIZATION')
+        else:
+            header_auth = value
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'basic':

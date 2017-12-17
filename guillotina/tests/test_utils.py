@@ -134,3 +134,29 @@ def test_lazy_apply():
     assert utils.lazy_apply(_test_some_kwargs, 'foo', bar='bar', rsdfk='ldskf') == ('foo', 'bar')
     assert (utils.lazy_apply(_test_some_stars, 'foo', 'blah', bar='bar', another='another') ==
             ('foo', 'bar', {'another': 'another'}))
+
+
+def test_get_random_string():
+    utils.test_get_random_string()
+
+
+def test_merge_dicts():
+    result = utils.merge_dicts({
+        'foo': {
+            'foo': 2
+        }
+    }, {
+        'bar': 5,
+        'foo': {
+            'bar': 3
+        }
+    })
+    assert result['foo']['foo'] == 2
+    assert result['foo']['bar'] == 3
+
+
+async def test_get_containers(container_requester):
+    async with container_requester as requester:
+        request = get_mocked_request(requester.db)
+        containers = [c async for c in utils.get_containers(request)]
+        assert len(containers) == 1

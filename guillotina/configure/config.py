@@ -15,7 +15,6 @@
 """
 from guillotina.exceptions import ConfigurationError
 from guillotina.interfaces.configuration import IConfigurationContext
-from guillotina.interfaces.configuration import IGroupingContext
 from zope.interface import implementer
 
 import operator
@@ -138,50 +137,7 @@ class ConfigurationExecutionError(ConfigurationError):
 
 
 ##############################################################################
-# Helper classes
-
-@implementer(IConfigurationContext, IGroupingContext)
-class GroupingContextDecorator(ConfigurationContext):
-    """Helper mix-in class for building grouping directives
-
-    See the discussion (and test) in GroupingStackItem.
-    """
-
-    def __init__(self, context, **kw):
-        self.context = context
-        for name, v in kw.items():
-            setattr(self, name, v)
-
-    def __getattr__(self, name,
-                    getattr=getattr, setattr=setattr):
-        v = getattr(self.context, name)
-        # cache result in self
-        setattr(self, name, v)
-        return v
-
-    def before(self):
-        pass
-
-    def after(self):
-        pass
-
-
-##############################################################################
 # Conflict resolution
-
-def expand_action(discriminator, callable=None, args=(), kw=None,
-                  order=0, **extra):
-    if kw is None:
-        kw = {}
-    action = extra
-    action.update(
-        dict(
-            discriminator=discriminator,
-            callable=callable,
-            args=args,
-            kw=kw,
-            order=order))
-    return action
 
 
 def resolve_conflicts(actions):
@@ -197,10 +153,6 @@ def resolve_conflicts(actions):
     unique = {}
     output = []
     for i, action in enumerate(actions):
-        if not isinstance(action, dict):
-            # old-style tuple action
-            action = expand_action(*action)
-
         # "order" is an integer grouping. Actions in a lower order will be
         # executed before actions in a higher order.  Within an order,
         # actions are executed sequentially based on original action ordering

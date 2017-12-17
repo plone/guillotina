@@ -1,6 +1,9 @@
 2.2.1 (unreleased)
 ------------------
 
+- Cleanup unused undocumented code: `traversal.do_traverse`
+  [vangheem]
+
 - Add `@addable-types` endpoint
   [vangheem]
 

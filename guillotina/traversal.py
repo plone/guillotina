@@ -42,7 +42,6 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
 from guillotina.interfaces import ITraversableView
-from guillotina.interfaces import SUBREQUEST_METHODS
 from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
@@ -51,65 +50,9 @@ from guillotina.transactions import commit
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
-import aiohttp
 import traceback
 import ujson
 import uuid
-
-
-async def do_traverse(request, parent, path):
-    """Traverse for the code API."""
-    if not path:
-        return parent, path
-
-    assert request is not None  # could be used for permissions, etc
-
-    if IContainer.providedBy(parent) and \
-       path[0] != request._db_id:
-        # Tried to access a container outside the request
-        raise HTTPUnauthorized()
-
-    if IApplication.providedBy(parent) and \
-       path[0] != request._container_id:
-        # Tried to access a container outside the request
-        raise HTTPUnauthorized()
-
-    try:
-        if path[0].startswith('_') or path[0] in ('.', '..'):
-            raise HTTPUnauthorized()
-        context = parent[path[0]]
-    except TypeError:
-        return parent, path
-    except KeyError:
-        return parent, path
-
-    context._v_parent = parent
-
-    return await traverse(request, context, path[1:])
-
-
-async def subrequest(
-        orig_request, path, relative_to_container=True,
-        headers={}, body=None, params=None, method='GET'):
-    """Subrequest, initial implementation doing a real request."""
-    async with aiohttp.ClientSession() as session:
-        method = method.lower()
-        if method not in SUBREQUEST_METHODS:
-            raise AttributeError('No valid method ' + method)
-        caller = getattr(session, method)
-
-        for head in orig_request.headers:
-            if head not in headers:
-                headers[head] = orig_request.headers[head]
-
-        params = {
-            'headers': headers,
-            'params': params
-        }
-        if method in ['put', 'patch']:
-            params['data'] = body
-
-        return caller(path, **params)
 
 
 async def traverse(request, parent, path):
