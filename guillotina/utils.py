@@ -1,8 +1,6 @@
 from aiohttp.web import Request
-from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina import glogging
-from guillotina._settings import app_settings
 from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
@@ -18,7 +16,6 @@ from zope.interface.interfaces import IInterface
 
 import aiotask_context
 import asyncio
-import fnmatch
 import importlib
 import inspect
 import os

@@ -1,18 +1,9 @@
 from copy import deepcopy
-from guillotina import schema
 from guillotina.auth.users import ROOT_USER_ID
-from guillotina.browser import View
-from guillotina.content import Resource
-from guillotina.directives import index
-from guillotina.directives import metadata
-from guillotina.interfaces import IResource
 from guillotina.utils import lazy_apply
-from zope.interface import implementer
 
-import aiohttp
 import base64
 import guillotina.patch  # noqa
-import json
 import os
 
 
@@ -71,14 +62,6 @@ ADMIN_TOKEN = base64.b64encode(
         'utf-8')).decode('utf-8')
 DEBUG = False
 
-TERM_SCHEMA = json.dumps({
-    'type': 'object',
-    'properties': {
-        'label': {'type': 'string'},
-        'number': {'type': 'number'}
-    },
-})
-
 
 _configurators = []
 
@@ -92,82 +75,3 @@ def get_settings(override_settings={}):
     for func in _configurators:
         lazy_apply(func, settings, _configurators)
     return settings
-
-
-class IExample(IResource):
-
-    metadata('categories')
-
-    index('categories', type='nested')
-    categories = schema.List(
-        title='categories',
-        default=[],
-        value_type=schema.JSONField(
-            title='term',
-            schema=TERM_SCHEMA)
-    )
-
-    textline_field = schema.TextLine()
-    text_field = schema.Text()
-    dict_value = schema.Dict(
-        key_type=schema.TextLine(),
-        value_type=schema.TextLine()
-    )
-    datetime = schema.Datetime()
-
-
-@implementer(IExample)
-class Example(Resource):
-    pass
-
-
-class AsyncMockView(View):
-
-    def __init__(self, context, request, func, *args, **kwargs):
-        self.context = context
-        self.request = request
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-
-    async def __call__(self):
-        await self.func(*self.args, **self.kwargs)
-
-
-class GuillotinaRequester(object):
-
-    def __init__(self, uri=None, server=None):
-        self.uri = uri
-        self.server = server
-
-    async def __call__(
-            self,
-            method,
-            path,
-            params=None,
-            data=None,
-            authenticated=True,
-            auth_type='Basic',
-            headers={},
-            token=ADMIN_TOKEN,
-            accept='application/json'):
-
-        settings = {}
-        settings['headers'] = headers
-        if accept is not None:
-            settings['headers']['ACCEPT'] = accept
-        if authenticated and token is not None:
-            settings['headers']['AUTHORIZATION'] = '{} {}'.format(
-                auth_type, token)
-
-        settings['params'] = params
-        settings['data'] = data
-        async with aiohttp.ClientSession() as session:
-            operation = getattr(session, method.lower(), None)
-            if operation:
-                if self.server is not None:
-                    resp = await operation(self.server.make_url(path), **settings)
-                else:
-                    resp = await operation(self.uri + path, **settings)
-                return resp
-        return None

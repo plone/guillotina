@@ -1,4 +1,5 @@
 from guillotina.catalog.utils import get_index_fields
+from guillotina.catalog.utils import get_metadata_fields
 from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import create_content
@@ -14,6 +15,8 @@ def test_indexed_fields(dummy_guillotina, loop):
     assert 'path' in fields
     assert 'title' in fields
     assert 'creation_date' in fields
+    metadata = get_metadata_fields('Example')
+    assert len(metadata) == 1
 
 
 async def test_get_index_data(dummy_request):

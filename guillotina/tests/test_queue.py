@@ -1,10 +1,23 @@
 from guillotina.async import IQueueUtility
+from guillotina.browser import View
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
-from guillotina.testing import AsyncMockView
 from guillotina.tests import utils
 
 import asyncio
+
+
+class AsyncMockView(View):
+
+    def __init__(self, context, request, func, *args, **kwargs):
+        self.context = context
+        self.request = request
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    async def __call__(self):
+        await self.func(*self.args, **self.kwargs)
 
 
 QUEUE_UTILITY_CONFIG = {
