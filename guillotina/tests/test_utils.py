@@ -137,7 +137,7 @@ def test_lazy_apply():
 
 
 def test_get_random_string():
-    utils.test_get_random_string()
+    utils.get_random_string()
 
 
 def test_merge_dicts():
