@@ -1,4 +1,4 @@
-2.2.1 (unreleased)
+2.2.1 (2017-12-18)
 ------------------
 
 - Fix ws token to work with basic auth
