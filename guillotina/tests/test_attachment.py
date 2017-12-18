@@ -90,6 +90,11 @@ async def test_tus(container_requester):
         assert status == 201
 
         response, status = await requester(
+            'OPTIONS',
+            '/db/guillotina/foobar/@tusupload/file')
+        assert status == 200
+
+        response, status = await requester(
             'POST',
             '/db/guillotina/foobar/@tusupload/file',
             headers={
@@ -98,6 +103,11 @@ async def test_tus(container_requester):
             }
         )
         assert status == 201
+
+        response, status = await requester(
+            'HEAD',
+            '/db/guillotina/foobar/@tusupload/file')
+        assert status == 200
 
         for idx in range(10):
             # 10, 1mb chunks

@@ -542,3 +542,29 @@ async def test_not_allowed_to_create_container_inside_container(container_reques
                 '@type': 'Container'
             }))
         assert status == 412
+
+
+async def test_get_with_include_omit(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                '@type': 'Item',
+                'id': 'foobar'
+            }))
+        response, status = await requester('GET', '/db/guillotina/foobar?include=title')
+        assert 'title' in response
+        assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
+
+        response, status = await requester(
+            'GET', '/db/guillotina/foobar?omit=guillotina.behaviors.dublincore.IDublinCore')
+        assert 'title' in response
+        assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
+
+
+async def test_get_all_permissions(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        response, status = await requester('GET', '/db/guillotina/@all_permissions')
+        assert status == 200

@@ -110,7 +110,6 @@ DEFAULT_READ_PERMISSION = 'guillotina.ViewContent'
 DEFAULT_WRITE_PERMISSION = 'guillotina.ManageContent'
 
 WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
-SUBREQUEST_METHODS = ['get', 'delete', 'head', 'options', 'patch', 'put']
 
 ACTIVE_LAYERS_KEY = 'guillotina.registry.ILayers.active_layers'
 ADDONS_KEY = 'guillotina.registry.IAddons.enabled'

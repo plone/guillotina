@@ -4,13 +4,54 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.content import Item
+from guillotina.content import Resource
+from guillotina.directives import index
+from guillotina.directives import metadata
 from guillotina.files import CloudFileField
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IItem
-from guillotina.testing import Example
-from guillotina.testing import IExample
+from guillotina.interfaces import IResource
+from zope.interface import implementer
 from zope.interface import Interface
+
+import json
+
+
+TERM_SCHEMA = json.dumps({
+    'type': 'object',
+    'properties': {
+        'label': {'type': 'string'},
+        'number': {'type': 'number'}
+    },
+})
+
+
+class IExample(IResource):
+
+    metadata('categories')
+
+    index('categories', type='nested')
+    categories = schema.List(
+        title='categories',
+        default=[],
+        value_type=schema.JSONField(
+            title='term',
+            schema=TERM_SCHEMA)
+    )
+
+    textline_field = schema.TextLine()
+    text_field = schema.Text()
+    dict_value = schema.Dict(
+        key_type=schema.TextLine(),
+        value_type=schema.TextLine()
+    )
+    datetime = schema.Datetime()
+
+
+@implementer(IExample)
+class Example(Resource):
+    pass
 
 
 class IMarkerBehavior(Interface):

@@ -1,6 +1,14 @@
 2.2.1 (unreleased)
 ------------------
 
+- Fix ws token to work with basic auth
+  [vangheem]
+
+- Cleanup unused undocumented code: `traversal.do_traverse`,
+  `traversal.subrequest`, `testing.GuillotinaRequester`, `testing.AsyncMockView`,
+  `utils.get_caller_package`, `utils.apply_cors`
+  [vangheem]
+
 - Add `@addable-types` endpoint
   [vangheem]
 

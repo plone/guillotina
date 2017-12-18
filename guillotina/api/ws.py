@@ -4,6 +4,7 @@ from guillotina import jose
 from guillotina import logger
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
+from guillotina.auth.extractors import BasicAuthPolicy
 from guillotina.browser import Response
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
@@ -38,12 +39,13 @@ import ujson
 class WebsocketGetToken(Service):
     _websockets_ttl = 60
 
-    def generate_websocket_token(self, real_token):
+    def generate_websocket_token(self, real_token, data={}):
         claims = {
             'iat': int(time.time()),
             'exp': int(time.time() + self._websockets_ttl),
             'token': real_token
         }
+        claims.update(data)
         jwe = jose.encrypt(claims, app_settings['rsa']['priv'])
         token = jose.serialize_compact(jwe)
         return token.decode('utf-8')
@@ -52,13 +54,20 @@ class WebsocketGetToken(Service):
         # Get token
         header_auth = self.request.headers.get('AUTHORIZATION')
         token = None
+        data = {}
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
-            if schema.lower() == 'basic' or schema.lower() == 'bearer':
+            if schema.lower() == 'basic':
+                # special case, we need to hash passwd here...
+                policy = BasicAuthPolicy(self.request)
+                extracted = await policy.extract_token(header_auth)
+                data['id'] = extracted['id']
+                token = extracted['token']
+            elif schema.lower() == 'bearer':
                 token = encoded_token
 
         # Create ws token
-        new_token = self.generate_websocket_token(token)
+        new_token = self.generate_websocket_token(token, data)
         return {
             "token": new_token
         }
@@ -74,11 +83,8 @@ class WebsocketsView(Service):
         method = app_settings['http_methods']['GET']
         path = tuple(p for p in message['value'].split('/') if p)
 
-        # avoid circular import
-        from guillotina.traversal import do_traverse
-
-        obj, tail = await do_traverse(
-            self.request, self.request.container, path)
+        from guillotina.traversal import traverse
+        obj, tail = await traverse(self.request, self.request.container, path)
 
         traverse_to = None
 

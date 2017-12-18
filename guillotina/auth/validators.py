@@ -30,7 +30,7 @@ def hash_password(password, salt=None, algorithm='sha512'):
 
 
 class SaltedHashPasswordValidator(object):
-    for_validators = ('basic', )
+    for_validators = ('basic', 'wstoken')
 
     def __init__(self, request):
         self.request = request

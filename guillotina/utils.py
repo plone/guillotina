@@ -1,8 +1,6 @@
 from aiohttp.web import Request
-from aiohttp.web_exceptions import HTTPUnauthorized
 from collections import MutableMapping
 from guillotina import glogging
-from guillotina._settings import app_settings
 from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
@@ -18,7 +16,6 @@ from zope.interface.interfaces import IInterface
 
 import aiotask_context
 import asyncio
-import fnmatch
 import importlib
 import inspect
 import os
@@ -145,23 +142,13 @@ def get_random_string(length: int=30,
     return ''.join([random.choice(allowed_chars) for i in range(length)])
 
 
-def resolve_dotted_name(name: str, module: str=None) -> type:
+def resolve_dotted_name(name: str) -> type:
     """
     import the provided dotted name
     """
     if not isinstance(name, str):
         return name  # already an object
     name = name.split('.')
-    if not name[0]:
-        if module is None:
-            raise ValueError("relative name without base module")
-        module = module.split('.')
-        name.pop(0)
-        while not name[0]:
-            module.pop()
-            name.pop(0)
-        name = module + name
-
     used = name.pop(0)
     found = __import__(used)
     for n in name:
@@ -183,21 +170,6 @@ def get_caller_module(level: int=2, sys: types.ModuleType=sys) -> types.ModuleTy
     module_name = module_globals.get('__name__') or '__main__'
     module = sys.modules[module_name]
     return module
-
-
-def get_caller_package(level=2, get_caller_module=get_caller_module) -> types.ModuleType:
-    """
-    Pulled out of pyramid
-    """
-    # get_caller_module in arglist for tests
-    module = get_caller_module(level + 1)
-    f = getattr(module, '__file__', '')
-    if (('__init__.py' in f) or ('__init__$py' in f)):  # empty at >>>
-        # Module is a package
-        return module
-    # Go up one level to get package
-    package_name = module.__name__.rsplit('.', 1)[0]
-    return sys.modules[package_name]
 
 
 def resolve_module_path(path: str) -> str:
@@ -305,32 +277,6 @@ def get_current_request() -> IRequest:
             return frame.f_locals['request']
         frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
-
-
-def apply_cors(request: IRequest) -> dict:
-    # deprecated, will be removed in next major release
-    headers = {}
-    origin = request.headers.get('Origin', None)
-    if origin:
-        if not any([fnmatch.fnmatchcase(origin, o)
-                    for o in app_settings['cors']['allow_origin']]):
-            logger.error('Origin %s not allowed' % origin)
-            raise HTTPUnauthorized()
-        elif request.headers.get('Access-Control-Allow-Credentials', False):
-            headers['Access-Control-Allow-Origin', origin]
-        else:
-            if any([o == "*" for o in app_settings['cors']['allow_origin']]):
-                headers['Access-Control-Allow-Origin'] = '*'
-            else:
-                headers['Access-Control-Allow-Origin'] = origin
-    if request.headers.get(
-            'Access-Control-Request-Method', None) != 'OPTIONS':
-        if app_settings['cors']['allow_credentials']:
-            headers['Access-Control-Allow-Credentials'] = 'True'
-        if len(app_settings['cors']['allow_headers']):
-            headers['Access-Control-Expose-Headers'] = \
-                ', '.join(app_settings['cors']['allow_headers'])
-    return headers
 
 
 def get_owners(obj):
