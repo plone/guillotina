@@ -1,7 +1,8 @@
 2.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `__delete__` on base object properties
+  [vangheem]
 
 
 2.2.1 (2017-12-18)

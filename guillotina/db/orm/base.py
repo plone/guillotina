@@ -15,7 +15,7 @@ class ObjectProperty(object):
     def __set__(self, inst, value):
         setattr(inst, self.attribute, value)
 
-    def __delete__(self, inst, value):
+    def __delete__(self, inst):
         setattr(inst, self.attribute, self.default)
 
 
@@ -30,7 +30,7 @@ class DictDefaultProperty(ObjectProperty):
             return getattr(inst, self.attribute, None)
         return val
 
-    def __delete__(self, inst, value):
+    def __delete__(self, inst):
         setattr(inst, self.attribute, {})
 
 
