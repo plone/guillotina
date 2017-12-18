@@ -1,4 +1,4 @@
-2.2.2 (unreleased)
+2.2.2 (2017-12-18)
 ------------------
 
 - Fix `__delete__` on base object properties
