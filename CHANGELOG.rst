@@ -1,7 +1,9 @@
 2.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+
+- Make sure to use `_p_register` on context behaviors and registering new behaviors
+  [vangheem]
 
 
 2.2.2 (2017-12-18)

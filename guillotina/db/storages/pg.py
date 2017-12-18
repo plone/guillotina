@@ -264,7 +264,7 @@ class PGVacuum:
         except concurrent.futures.TimeoutError:
             log.info('Timed out connecting to storage')
         except Exception:
-            log.warn('Error deleting trashed object', exc_info=True)
+            log.warning('Error deleting trashed object', exc_info=True)
         finally:
             if conn is not None:
                 await self._storage.close(conn)
@@ -297,7 +297,7 @@ class PGVacuum:
         try:
             await conn.execute(DELETE_OBJECT, oid)
         except Exception:
-            log.warn('Error deleting trashed object', exc_info=True)
+            log.warning('Error deleting trashed object', exc_info=True)
         finally:
             try:
                 await self._storage.close(conn)

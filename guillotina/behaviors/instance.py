@@ -111,3 +111,4 @@ class ContextBehavior(object):
         else:
             prefixed_name = self.__dict__['prefix'] + name
             self.__dict__['context'].__setattr__(prefixed_name, value)
+            self.__dict__['context']._p_register()

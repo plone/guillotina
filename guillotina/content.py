@@ -360,7 +360,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
                 alsoProvides(self, behavior_registration.marker)
-                self._p_register()  # make sure we resave this obj
+            self._p_register()  # make sure we resave this obj
 
     def remove_behavior(self, iface: Interface) -> None:
         """We need to apply the marker interface.
