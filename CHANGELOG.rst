@@ -1,4 +1,4 @@
-2.2.4 (unreleased)
+2.2.4 (2017-12-19)
 ------------------
 
 - `get_containers` now clears the `request.container_settings` value
