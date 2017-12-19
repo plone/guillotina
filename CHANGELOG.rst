@@ -1,7 +1,8 @@
 2.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- `get_containers` now clears the `request.container_settings` value
+  [vangheem]
 
 
 2.2.3 (2017-12-18)

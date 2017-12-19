@@ -252,6 +252,8 @@ async def get_containers(request, transaction_strategy='none'):
             async for s_id, container in db.async_items():
                 tm.request.container = container
                 tm.request._container_id = container.id
+                if hasattr(request, 'container_settings'):
+                    del request.container_settings
                 yield txn, tm, container
 
 
