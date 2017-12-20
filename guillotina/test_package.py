@@ -2,6 +2,7 @@
 from aiohttp.web_exceptions import HTTPUnprocessableEntity
 from guillotina import configure
 from guillotina import schema
+from guillotina.async import IAsyncUtility
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.content import Item
 from guillotina.content import Resource
@@ -102,3 +103,19 @@ configure.register_configuration(Example, dict(
     name='@raise-http-exception')
 async def raise_http_exception(context, request):
     raise HTTPUnprocessableEntity()
+
+
+class ITestAsyncUtility(IAsyncUtility):
+    pass
+
+
+@configure.utility(provides=ITestAsyncUtility)
+class AsyncUtility:
+    def __init__(self, settings=None, loop=None):
+        self.state = 'init'
+
+    async def initialize(self):
+        self.state = 'initialize'
+
+    async def finalize(self):
+        self.state = 'finalize'

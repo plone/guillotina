@@ -157,7 +157,7 @@ await commit()
             asyncio.set_event_loop(self.loop)
         return self.loop
 
-    def run_command(self, app, settings):
+    def run(self, arguments, settings, app):
         loop = self.get_loop()
         loop.setup(app)
         try:

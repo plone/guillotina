@@ -88,9 +88,9 @@ class DefaultPOST(Service):
         if value:
             # Already exist
             return ErrorResponse(
-                'NotAllowed',
-                'Duplicate id',
-                status=401)
+                'ConflictId',
+                'Container with id already exists',
+                status=409)
 
         container = await create_content(
             'Container',

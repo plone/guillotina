@@ -1,7 +1,12 @@
-2.2.6 (unreleased)
+2.3.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix cockroach db transactional support
+  [vangheem]
+
+- Implement `novote_readcommitted` and `resolve_readcommitted` transaction
+  strategies
+  [vangheem]
 
 
 2.2.5 (2017-12-28)

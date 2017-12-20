@@ -5,13 +5,13 @@ from guillotina import glogging
 from guillotina import languages
 from guillotina._settings import app_settings
 from guillotina.async import IAsyncUtility
+from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_all_utilities_registered_for
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
 from guillotina.content import load_cached_schema
-from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.contentnegotiation import ContentNegotiatorUtility

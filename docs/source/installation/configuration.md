@@ -201,7 +201,11 @@ Available options:
   as you are not writing to multiple objects at the same time — in those cases,
   you might be in an inconsistent state on `tid` conflicts.
 - `novote`:
-  Use db transaction but do not perform any voting when writing.
+  Use db transaction but do not perform any voting when writing(no conflict resolution).
+- `novote_readcommitted`:
+  Same as no vote; however, db transaction only started at commit phase. This
+  should provide better performance; however, you'll need to consider the side
+  affects of this for reading data.
 - `simple`:
   Detect concurrent transactions and error if another transaction id is committed
   to the db ahead of the current transaction id. This is the safest mode to operate
@@ -209,11 +213,10 @@ Available options:
 - `resolve`:
   Same as simple; however, it allows commits when conflicting transactions
   are writing to different objects.
+- `resolve_readcommitted`:
+  Same as resolve however, db transaction only started at commit phase. This
+  should provide better performance; however, you'll need to consider that side
+  affects of this for reading data.
 
 
 Warning: not all storages are compatible with all transaction strategies.
-
-
-Another note: why are there so many choices? Well, this is all somewhat experimental
-right now. We're trying to test the best scenarios of usage for different
-databases and environments. We might eventually pare this down.

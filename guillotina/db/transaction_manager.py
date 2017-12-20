@@ -40,8 +40,6 @@ class TransactionManager(object):
         """Starts a new transaction.
         """
 
-        db_conn = self._last_db_conn = await self._storage.open()
-
         if request is None:
             try:
                 request = get_current_request()
@@ -51,19 +49,15 @@ class TransactionManager(object):
         user = None
 
         txn = None
+
         # already has txn registered, as long as connection is closed, it
         # is safe
         if (getattr(request, '_txn', None) is not None and
-                request._txn._db_conn is None and
-                request._txn.status in (Status.ABORTED, Status.COMMITTED)):
+                request._txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
             txn = request._txn
             txn.status = Status.ACTIVE
-        # XXX do we want to auto clean up here? Or throw an error?
-        # This will break tests that are starting multiple transactions
-        # else:
-        #     await self._close_txn(request._txn)
-        else:
+        if txn is None:
             txn = Transaction(self, request=request)
 
         self._last_txn = txn
@@ -77,6 +71,7 @@ class TransactionManager(object):
         if user is not None:
             txn.user = user
 
+        db_conn = self._last_db_conn = await self._storage.open()
         await txn.tpc_begin(db_conn)
 
         return txn
@@ -93,7 +88,8 @@ class TransactionManager(object):
             try:
                 await txn.commit()
             except (ConflictError, TIDConflictError):
-                # we're okay with ConflictError being handled...
+                # # we're okay with ConflictError being handled...
+                txn.status = Status.CONFLICT
                 raise
             except Exception:
                 logger.error('Error committing transaction {}'.format(txn._tid),

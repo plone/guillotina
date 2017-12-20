@@ -172,3 +172,6 @@ class DummyStorage(BaseStorage):
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         pass
+
+    async def get_conflicts(self, txn):
+        return []

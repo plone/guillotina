@@ -1,9 +1,6 @@
 
 
 class BaseStrategy:
-    '''
-    Do not attempt to resolve conflicts but detect for them
-    '''
     def __init__(self, transaction):
         self._storage = transaction._manager._storage
         self._transaction = transaction
@@ -16,6 +13,9 @@ class BaseStrategy:
         return True
 
     async def tpc_begin(self):
+        self._transaction._tid = -1  # temporary before committing
+
+    async def tpc_commit(self):
         pass
 
     async def tpc_vote(self):
@@ -23,3 +23,9 @@ class BaseStrategy:
 
     async def tpc_finish(self):
         pass
+
+    async def retrieve_tid(self):
+        if self.writable_transaction:
+            tid = await self._storage.get_next_tid(self._transaction)
+            if tid is not None:
+                self._transaction._tid = tid

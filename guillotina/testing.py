@@ -10,6 +10,7 @@ import os
 TESTING_PORT = 55001
 
 TESTING_SETTINGS = {
+    "applications": ["guillotina.test_package"],
     "databases": [
         {
             "db": {
@@ -47,8 +48,20 @@ TESTING_SETTINGS = {
         "secret": "foobar",
         "algorithm": "HS256"
     },
-    "utilities": []
+    "utilities": [],
+    "logging": {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'loggers': {
+            'foobar': {
+                'handlers': [],
+                'level': 'INFO',
+                'propagate': True
+            }
+        }
+    }
 }
+
 
 QUEUE_UTILITY_CONFIG = {
     "provides": "guillotina.async.IQueueUtility",

@@ -9,3 +9,4 @@ omit =
   */one_connection_storage.py
   */cockroach.py
   */dummy.py
+  */storages/base.py

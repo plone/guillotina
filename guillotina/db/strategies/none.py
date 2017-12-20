@@ -19,11 +19,8 @@ class TransactionlessStrategy(BaseStrategy):
     for_=ITransaction, provides=ITransactionStrategy, name="tidonly")
 class TIDOnlyStrategy(BaseStrategy):
     """
-    Still issue a transaction id but not a real transaction
+    Still issue a transaction id and never issue explicit transaction
     """
 
-    async def tpc_begin(self):
-        if self.writable_transaction:
-            tid = await self._storage.get_next_tid(self._transaction)
-            if tid is not None:
-                self._transaction._tid = tid
+    async def tpc_commit(self):
+        await self.retrieve_tid()

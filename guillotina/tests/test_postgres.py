@@ -3,6 +3,7 @@ from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
+from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 
 import asyncio
@@ -17,13 +18,17 @@ USE_COCKROACH = 'USE_COCKROACH' in os.environ
 
 async def cleanup(aps):
     conn = await aps.open()
-    txn = conn.transaction()
-    await txn.start()
+    tm = mocks.MockTransactionManager(aps)
+    txn = mocks.MockTransaction(tm)
+    txn._db_conn = conn
+    await aps.start_transaction(txn)
+
+    conn = txn._db_conn
     await conn.execute("DROP TABLE IF EXISTS objects;")
     await conn.execute("DROP TABLE IF EXISTS blobs;")
     if not USE_COCKROACH:
         await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
-    await txn.commit()
+    await txn._db_txn.commit()
     await aps._pool.release(conn)
     await aps.create()
     await aps.finalize()
@@ -37,9 +42,9 @@ async def get_aps(postgres, strategy=None, pool_size=16):
     klass = PostgresqlStorage
     if strategy is None:
         if USE_COCKROACH:
-            strategy = 'novote'
+            strategy = 'novote_readcommitted'
         else:
-            strategy = 'resolve'
+            strategy = 'resolve_readcommitted'
     if USE_COCKROACH:
         klass = CockroachStorage
         dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
@@ -215,6 +220,7 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support resolve...")
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
         postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
@@ -253,6 +259,7 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support resolve...")
 async def test_should_resolve_conflict_error(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
@@ -288,6 +295,42 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
     await cleanup(aps)
 
 
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support resolve...")
+async def test_should_not_resolve_conflict_error_with_resolve(postgres, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps(postgres, 'resolve')
+    tm = TransactionManager(aps)
+
+    # create object first, commit it...
+    txn = await tm.begin()
+
+    ob1 = create_content()
+    txn.register(ob1)
+
+    await tm.commit(txn=txn)
+
+    # 1 started before 2
+    txn1 = await tm.begin()
+    txn2 = await tm.begin()
+
+    ob1 = await txn1.get(ob1._p_oid)
+    ob2 = await txn2.get(ob1._p_oid)
+
+    txn1.register(ob1)
+    txn2.register(ob2)
+
+    # commit 2 before 1
+    await tm.commit(txn=txn2)
+    ob1._p_serial = txn2._tid  # prevent tid error since we're testing trns conflict error
+    with pytest.raises(ConflictError):
+        await tm.commit(txn=txn1)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support simple...")
 async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 

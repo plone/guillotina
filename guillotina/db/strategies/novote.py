@@ -18,3 +18,19 @@ class NoVoteStrategy(SimpleStrategy):
 
     async def tpc_vote(self):
         return True
+
+
+@configure.adapter(
+    for_=ITransaction, provides=IDBTransactionStrategy, name="novote_readcommitted")
+class NoVoteReadCommittedStrategy(NoVoteStrategy):
+    '''
+    Delay starting transaction to the commit phase so reads will be inconsistent.
+    '''
+
+    async def tpc_begin(self):
+        pass
+
+    async def tpc_commit(self):
+        if self._transaction._tid in (-1, None):
+            await self.retrieve_tid()
+        await self._storage.start_transaction(self._transaction)
