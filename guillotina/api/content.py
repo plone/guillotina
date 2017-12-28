@@ -738,7 +738,8 @@ async def duplicate(context, request):
             continue
         new_obj.__dict__[key] = context.__dict__[key]
     new_obj.__acl__ = context.__acl__
-    new_obj.__behaviors__ = context.__behaviors__
+    for behavior in context.__behaviors__:
+        new_obj.add_behavior(behavior)
 
     # need to copy annotation data as well...
     # load all annotations for context
@@ -749,6 +750,8 @@ async def duplicate(context, request):
         for key, value in anno_data.items():
             new_anno_data[key] = value
         await annotations_container.async_set(anno_id, new_anno_data)
+
+    # make sure to apply marker interfaces for behaviors
 
     data['id'] = new_id
     await notify(
