@@ -1,4 +1,4 @@
-2.2.5 (unreleased)
+2.2.5 (2017-12-28)
 ------------------
 
 - Fix behaviors for duplicated objects
