@@ -11,14 +11,18 @@ TESTING_PORT = 55001
 
 TESTING_SETTINGS = {
     "applications": ["guillotina.test_package"],
-    "databases": [
-        {
-            "db": {
-                "storage": "DUMMY",
-                "name": "guillotina"
-            }
-        },
-    ],
+    "databases": {
+        "db": {
+            "storage": "DUMMY",
+            "name": "guillotina"
+        }
+    },
+    "storages": {
+        "db": {
+            "storage": "DUMMY",
+            "name": "guillotina"
+        }
+    },
     "port": TESTING_PORT,
     "static": {
         "static": os.path.dirname(os.path.realpath(__file__)),

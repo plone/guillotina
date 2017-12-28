@@ -1,6 +1,6 @@
+from aiohttp.web_exceptions import HTTPNotFound
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.api.service import TraversableService
 from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import get_adapter
@@ -8,7 +8,6 @@ from guillotina.exceptions import ComponentLookupError
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
-from guillotina.interfaces import IRegistry
 from guillotina.json.exceptions import DeserializationError
 from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import get_fields
@@ -20,6 +19,42 @@ _ = MessageFactory('guillotina')
 
 
 _marker = object()
+
+
+@configure.service(
+    context=IContainer, method='GET',
+    permission='guillotina.ReadConfiguration', name='@registry/{key}',
+    summary='Read container registry settings',
+    responses={
+        "200": {
+            "description": "Successfully registered interface",
+            "type": "object",
+            "schema": {
+                "properties": {
+                    "value": {
+                        "type": "object"
+                    }
+                }
+            }
+        }
+    })
+class Read(Service):
+
+    async def prepare(self):
+        # we want have the key of the registry
+        self.key = self.request.matchdict['key']
+        self.value = self.request.container_settings.get(self.key, _marker)
+        if self.value is _marker:
+            raise HTTPNotFound(text=f'{self.key} not in settings')
+
+    async def __call__(self):
+        try:
+            result = json_compatible(self.value)
+        except (ComponentLookupError, TypeError):
+            result = self.value
+        return {
+            'value': result
+        }
 
 
 @configure.service(
@@ -39,39 +74,17 @@ _marker = object()
             }
         }
     })
-class Read(TraversableService):
-    key = _marker
-    value = None
-
-    async def publish_traverse(self, traverse):
-        if len(traverse) == 1:
-            # we want have the key of the registry
-            self.key = traverse[0]
-            self.value = self.request.container_settings.get(self.key, _marker)
-            if self.value is _marker:
-                raise KeyError(self.key)
-        return self
-
-    async def __call__(self):
-        if self.key is _marker:
-            # Root of registry
-            self.value = self.request.container_settings
-        if IRegistry.providedBy(self.value):
-            result = {}
-            for key in self.value.keys():
-                try:
-                    value = json_compatible(self.value[key])
-                except (ComponentLookupError, TypeError):
-                    value = self.value[key]
-                result[key] = value
-        else:
-            try:
-                result = json_compatible(self.value)
-            except (ComponentLookupError, TypeError):
-                result = self.value
-        return {
-            'value': result
-        }
+async def get_registry(context, request):
+    result = {}
+    for key in request.container_settings.keys():
+        try:
+            value = json_compatible(request.container_settings[key])
+        except (ComponentLookupError, TypeError):
+            value = request.container_settings[key]
+        result[key] = value
+    return {
+        'value': result
+    }
 
 
 @configure.service(
@@ -136,7 +149,7 @@ class Register(Service):
 
 @configure.service(
     context=IContainer, method='PATCH',
-    permission='guillotina.WriteConfiguration', name='@registry',
+    permission='guillotina.WriteConfiguration', name='@registry/{dotted_name}',
     summary='Update registry setting',
     parameters={
         "name": "body",
@@ -156,16 +169,15 @@ class Register(Service):
             "description": "Successfully wrote configuration"
         }
     })
-class Write(TraversableService):
+class Write(Service):
     key = _marker
     value = None
 
-    async def publish_traverse(self, traverse):
-        if len(traverse) == 1 and traverse[0] in self.request.container_settings:
+    async def prepare(self):
+        if self.request.matchdict['dotted_name'] in self.request.container_settings:
             # we want have the key of the registry
-            self.key = traverse[0]
+            self.key = self.request.matchdict['dotted_name']
             self.value = self.request.container_settings.get(self.key)
-        return self
 
     async def __call__(self):
         if self.key is _marker:

@@ -2,7 +2,6 @@ from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.content import load_cached_schema
 from guillotina.db.storages.cockroach import CockroachStorage
-from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.tests import docker_containers as containers
@@ -31,32 +30,48 @@ testing.configure_with(base_settings_configurator)
 
 def get_dummy_settings():
     settings = testing.get_settings()
-    settings['databases'][0]['db']['storage'] = 'DUMMY'
-
-    settings['databases'][0]['db']['partition'] = 'guillotina.interfaces.IResource'
-    settings['databases'][0]['db']['dsn'] = {}
+    settings['databases']['db']['storage'] = 'DUMMY'
+    settings['databases']['db']['partition'] = 'guillotina.interfaces.IResource'
+    settings['databases']['db']['dsn'] = {}
     return settings
+
+
+def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
+                 host='localhost', port=5432, password='', storage='postgresql'):
+    obj.update({
+        'storage': storage,
+        'partition': 'guillotina.interfaces.IResource'
+    })
+    obj['dsn'] = {
+        'scheme': scheme,
+        'dbname': dbname,
+        'user': user,
+        'host': host,
+        'port': port,
+        'password': password
+    }
 
 
 def get_pg_settings():
     settings = testing.get_settings()
-    settings['databases'][0]['db']['storage'] = 'postgresql'
+    options = dict(
+        host=getattr(get_pg_settings, 'host', 'localhost'),
+        port=getattr(get_pg_settings, 'port', 5432),
+    )
 
-    settings['databases'][0]['db']['partition'] = \
-        'guillotina.interfaces.IResource'
-    settings['databases'][0]['db']['dsn'] = {
-        'scheme': 'postgres',
-        'dbname': 'guillotina',
-        'user': 'postgres',
-        'host': getattr(get_pg_settings, 'host', 'localhost'),
-        'port': getattr(get_pg_settings, 'port', 5432),
-        'password': '',
-    }
     if USE_COCKROACH:
-        settings['databases'][0]['db']['storage'] = 'cockroach'
-        settings['databases'][0]['db']['dsn'].update({
-            'user': 'root'
-        })
+        configure_db(
+            settings['databases']['db'],
+            **options,
+            user='root',
+            storage='cockroach')
+        configure_db(
+            settings['storages']['db'], **options,
+            user='root',
+            storage='cockroach')
+    else:
+        configure_db(settings['databases']['db'], **options)
+        configure_db(settings['storages']['db'], **options)
     return settings
 
 
@@ -162,7 +177,6 @@ class DummyRequestAsyncContextManager(object):
 
 @pytest.fixture(scope='function')
 def dummy_request(dummy_guillotina, monkeypatch):
-    HARD_CACHE.clear()
     from guillotina.interfaces import IApplication
     from guillotina.component import get_utility
     root = get_utility(IApplication, name='root')
@@ -189,13 +203,11 @@ class RootAsyncContextManager(object):
 
 @pytest.fixture(scope='function')
 async def dummy_txn_root(dummy_request):
-    HARD_CACHE.clear()
     return RootAsyncContextManager(dummy_request)
 
 
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
-    HARD_CACHE.clear()
     aioapp = make_app(settings=get_pg_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
@@ -205,7 +217,6 @@ def guillotina_main(loop):
 
 @pytest.fixture(scope='function')
 async def guillotina(test_server, postgres, guillotina_main, loop):
-    HARD_CACHE.clear()
     server = await test_server(guillotina_main)
     requester = GuillotinaDBRequester(server=server, loop=loop)
     return requester

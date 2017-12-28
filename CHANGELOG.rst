@@ -1,8 +1,13 @@
-2.3.2 (unreleased)
+3.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix issue with multiple databases mounted
 
+- Add support for dynamic database mappings
+
+- Add route support
+
+- Remove traversable views, add support for `prepare` method on class views
 
 2.3.1 (2017-12-29)
 ------------------
@@ -12,12 +17,6 @@
 
 
 2.3.0 (2017-12-29)
-------------------
-
-- Nothing changed yet.
-
-
-2.2.7 (2017-12-29)
 ------------------
 
 - Rename `novote` strategy to `dbresolve`

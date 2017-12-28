@@ -1,23 +1,46 @@
+from copy import deepcopy
 from guillotina import configure
-from guillotina.db.db import GuillotinaDB
+from guillotina.component import get_utility
+from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.dummy import DummyStorage
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.factory.content import Database
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
+from guillotina.utils import apply_coroutine
 from guillotina.utils import resolve_dotted_name
 
+import asyncpg
+import re
 
-async def _PGConfigurationFactory(key, dbconfig, app,
+
+def _get_connection_options(dbconfig):
+    connection_options = {}
+    if 'ssl' in dbconfig:
+        import ssl
+        ssl_config = dbconfig['ssl']
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        ssl_context.load_verify_locations(ssl_config['ca'])
+        ssl_context.load_cert_chain(ssl_config['cert'], keyfile=ssl_config['key'])
+        connection_options['ssl'] = ssl_context
+    return connection_options
+
+
+def _convert_dsn(obj):
+    txt = "{scheme}://{user}:{password}@{host}:{port}"
+    if 'dbname' in obj:
+        txt += "/{dbname}"
+    return txt.format(**obj)
+
+
+async def _PGConfigurationFactory(key, dbconfig, loop=None,
                                   storage_factory=PostgresqlStorage):
-    # b/w compat, we don't use this for storage options anymore
-    config = dbconfig.get('configuration', {})
-
     if isinstance(dbconfig['dsn'], str):
         dsn = dbconfig['dsn']
     else:
-        dsn = "{scheme}://{user}:{password}@{host}:{port}/{dbname}".format(
-            **dbconfig['dsn'])
+        dsn = _convert_dsn(dbconfig['dsn'])
 
     partition_object = None
     if 'partition' in dbconfig:
@@ -27,46 +50,110 @@ async def _PGConfigurationFactory(key, dbconfig, app,
         'dsn': dsn,
         'name': key,
         'partition': partition_object,
-        'pool_size': dbconfig.get('pool_size', config.get('pool_size', 13))
+        'pool_size': dbconfig.get('pool_size', 13)
     })
 
-    connection_options = {}
-    if 'ssl' in dbconfig:
-        import ssl
-        ssl_config = dbconfig['ssl']
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-        ssl_context.load_verify_locations(ssl_config['ca'])
-        ssl_context.load_cert_chain(ssl_config['cert'], keyfile=ssl_config['key'])
-        connection_options['ssl'] = ssl_context
+    connection_options = _get_connection_options(dbconfig)
 
     aps = storage_factory(**dbconfig)
-    if app is not None:
-        await aps.initialize(loop=app.loop, **connection_options)
+    if loop is not None:
+        await aps.initialize(loop=loop, **connection_options)
     else:
         await aps.initialize(**connection_options)
-    dbc = {}
-    dbc['database_name'] = key
-    db = GuillotinaDB(aps, **dbc)
+    db = Database(key, aps)
     await db.initialize()
-    return Database(key, db)
+    return db
 
 
 @configure.utility(provides=IDatabaseConfigurationFactory, name="postgresql")
-async def PGDatabaseConfigurationFactory(key, dbconfig, app):
-    return await _PGConfigurationFactory(key, dbconfig, app)
+async def PGDatabaseConfigurationFactory(key, dbconfig, loop=None):
+    return await _PGConfigurationFactory(key, dbconfig, loop=loop)
 
 
 @configure.utility(provides=IDatabaseConfigurationFactory, name="cockroach")
-async def CRDatabaseConfigurationFactory(key, dbconfig, app):
-    return await _PGConfigurationFactory(key, dbconfig, app,
+async def CRDatabaseConfigurationFactory(key, dbconfig, loop=None):
+    return await _PGConfigurationFactory(key, dbconfig, loop=loop,
                                          storage_factory=CockroachStorage)
 
 
 @configure.utility(provides=IDatabaseConfigurationFactory, name="DUMMY")
-async def DummyDatabaseConfigurationFactory(key, dbconfig, app):
+async def DummyDatabaseConfigurationFactory(key, dbconfig, loop=None):
     dss = DummyStorage()
-    dbc = {}
-    dbc['database_name'] = key
-    db = GuillotinaDB(dss, **dbc)
+    db = Database(key, dss)
     await db.initialize()
-    return Database(key, db)
+    return db
+
+
+CREATE_DB = '''CREATE DATABASE {};'''
+DELETE_DB = '''DROP DATABASE {};'''
+
+
+@configure.adapter(
+    for_=IApplication,  # noqa: N801
+    provides=IDatabaseManager,
+    name='postgresql')
+@configure.adapter(
+    for_=IApplication,  # noqa: N801
+    provides=IDatabaseManager,
+    name='cockroach')
+class PostgresqlDatabaseManager:
+
+    def __init__(self, app: IApplication, storage_config: dict):
+        self.app = app
+        self.config = storage_config
+
+    def get_dsn(self, name: str=None) -> str:
+        if isinstance(self.config['dsn'], str):
+            dsn = self.config['dsn']
+        else:
+            if 'dbname' in self.config['dsn']:
+                del self.config['dsn']['dbname']
+            dsn = _convert_dsn(self.config['dsn'])
+        if name is not None:
+            dsn = dsn.strip('/') + '/' + name
+        return dsn
+
+    async def get_connection(self, name: str=None) -> asyncpg.connection.Connection:
+        connection_options = _get_connection_options(self.config)
+        dsn = self.get_dsn(name)
+        return await asyncpg.connect(dsn=dsn, **connection_options)
+
+    async def get_names(self) -> list:
+        conn = await self.get_connection()
+        try:
+            result = await conn.fetch('''SELECT datname FROM pg_database
+WHERE datistemplate = false;''')
+            return [item['datname'] for item in result]
+        finally:
+            await conn.close()
+
+    async def create(self, name: str) -> bool:
+        conn = await self.get_connection()
+        try:
+            await conn.execute(CREATE_DB.format(re.escape(name)))
+            return True
+        finally:
+            await conn.close()
+        return False
+
+    async def delete(self, name: str) -> bool:
+        if name in self.app:
+            await self.app[name].finalize()
+            del self.app[name]
+
+        conn = await self.get_connection()
+        try:
+            await conn.execute(DELETE_DB.format(re.escape(name)))
+            return True
+        finally:
+            await conn.close()
+        return False
+
+    async def get_database(self, name: str) -> IDatabase:
+        if name not in self.app:
+            config = deepcopy(self.config)
+            config['dsn'] = self.get_dsn(name)
+            factory = get_utility(
+                IDatabaseConfigurationFactory, name=config['storage'])
+            self.app[name] = await apply_coroutine(factory, name, config)
+        return self.app[name]

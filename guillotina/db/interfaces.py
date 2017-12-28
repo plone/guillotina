@@ -1,3 +1,4 @@
+from guillotina.interfaces import IDatabase
 from zope.interface import Interface
 
 
@@ -190,4 +191,26 @@ class IStorageCache(Interface):
     async def close():
         '''
         close the cache
+        '''
+
+
+class IDatabaseManager(Interface):
+    async def get_names() -> list:
+        '''
+        Return a list of available databases
+        '''
+
+    async def create(name: str) -> IStorage:
+        '''
+        Create a new database on the storage
+        '''
+
+    async def delete(name: str):
+        '''
+        Delete database on the storage
+        '''
+
+    async def get_database(name: str) -> IDatabase:
+        '''
+        Return storage instance for database
         '''

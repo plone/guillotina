@@ -80,7 +80,7 @@ class ITraversable(Interface):
         '''
 
 
-class IApplication(ITraversable):
+class IApplication(ITraversable, IAsyncContainer):
     '''
     '''
 

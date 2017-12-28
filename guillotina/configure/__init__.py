@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.configure import component
 from guillotina.configure.behaviors import BehaviorAdapterFactory
@@ -102,12 +103,16 @@ def load_service(_context, service):
         layer.__identifier__,
         str(factory),
         name))
+
+    route = routes.Route(name)
+    factory.__route__ = route
+
     component.adapter(
         _context,
         factory=(factory,),
         provides=app_settings['http_methods'][method],
         for_=(content, layer),
-        name=name
+        name=route.view_name
     )
 
     api = app_settings['api_definition']

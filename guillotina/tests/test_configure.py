@@ -2,6 +2,7 @@ from guillotina import configure
 from guillotina.addons import Addon
 from guillotina.api.service import Service
 from guillotina.component import get_utility
+from guillotina.component import query_multi_adapter
 from guillotina.content import get_all_possible_schemas_for_type
 from guillotina.content import Item
 from guillotina.interfaces import IApplication
@@ -153,3 +154,18 @@ async def test_register_addon(container_requester):
 
         response, status = await requester('GET', '/db/guillotina/@addons')
         assert 'myaddon' in [a['id'] for a in response['available']]
+
+
+async def test_view_registered_for_sub_path_matching(dummy_guillotina, dummy_request):
+    view = query_multi_adapter((dummy_guillotina.root, dummy_request), name='@match//')
+    assert view is not None
+
+
+async def test_route_match_view(container_requester):
+    async with container_requester as requester:
+        response, status = await requester('GET', '/@match/foo/bar')
+        assert response == {
+            '__parts': ['@match', 'foo', 'bar'],
+            'foo': 'foo',
+            'bar': 'bar'
+        }
