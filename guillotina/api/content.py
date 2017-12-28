@@ -751,8 +751,6 @@ async def duplicate(context, request):
             new_anno_data[key] = value
         await annotations_container.async_set(anno_id, new_anno_data)
 
-    # make sure to apply marker interfaces for behaviors
-
     data['id'] = new_id
     await notify(
         ObjectDuplicatedEvent(new_obj, context, destination_ob, new_id, payload=data))
