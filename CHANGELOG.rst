@@ -1,7 +1,8 @@
 2.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix behaviors for duplicated objects
+  [vangheem]
 
 
 2.2.4 (2017-12-19)
