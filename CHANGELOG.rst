@@ -1,7 +1,8 @@
 2.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Log unhandled exception responses
+  [vangheem]
 
 
 2.2.5 (2017-12-28)
