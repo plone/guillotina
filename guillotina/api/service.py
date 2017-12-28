@@ -1,10 +1,10 @@
+from aiohttp.web_exceptions import HTTPNotFound
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina.browser import View
 from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IDownloadView
-from guillotina.interfaces import ITraversableView
 from zope.interface import alsoProvides
 
 
@@ -20,57 +20,45 @@ class DownloadService(View):
         alsoProvides(self, IDownloadView)
 
 
-class TraversableService(View):
-
-    def __init__(self, context, request):
-        super(TraversableService, self).__init__(context, request)
-        alsoProvides(self, ITraversableView)
-
-
 class TraversableFieldService(View):
-    async def publish_traverse(self, traverse):
-        if len(traverse) == 1:
-            # we want have the field
-            name = traverse[0]
-            fti = query_utility(IFactory, name=self.context.type_name)
-            schema = fti.schema
-            field = None
-            self.behavior = None
-            if name in schema:
-                field = schema[name]
-            else:
-                # TODO : We need to optimize and move to content.py iterSchema
-                for behavior_schema in fti.behaviors or ():
-                    if name in behavior_schema:
-                        field = behavior_schema[name]
-                        self.behavior = behavior_schema(self.context)
-                        break
-                for behavior_name in self.context.__behaviors__ or ():
-                    behavior_schema = BEHAVIOR_CACHE[behavior_name]
-                    if name in behavior_schema:
-                        field = behavior_schema[name]
-                        self.behavior = behavior_schema(self.context)
-                        break
-            # Check that its a File Field
-            if field is None:
-                raise KeyError('No valid name')
 
-            if self.behavior is not None:
-                self.field = field.bind(self.behavior)
-            else:
-                self.field = field.bind(self.context)
+    async def prepare(self):
+        # we want have the field
+        name = self.request.matchdict['field_name']
+        fti = query_utility(IFactory, name=self.context.type_name)
+        schema = fti.schema
+        field = None
+        self.behavior = None
+        if name in schema:
+            field = schema[name]
+
         else:
-            self.field = None
+            # TODO : We need to optimize and move to content.py iterSchema
+            for behavior_schema in fti.behaviors or ():
+                if name in behavior_schema:
+                    field = behavior_schema[name]
+                    self.behavior = behavior_schema(self.context)
+                    break
+            for behavior_name in self.context.__behaviors__ or ():
+                behavior_schema = BEHAVIOR_CACHE[behavior_name]
+                if name in behavior_schema:
+                    field = behavior_schema[name]
+                    self.behavior = behavior_schema(self.context)
+                    break
+        # Check that its a File Field
+        if field is None:
+            raise HTTPNotFound(text='No valid name')
+
+        if self.behavior is not None:
+            self.field = field.bind(self.behavior)
+        else:
+            self.field = field.bind(self.context)
 
         if (self.behavior is not None and
                 IAsyncBehavior.implementedBy(self.behavior.__class__)):
             # providedBy not working here?
             await self.behavior.load()
         return self
-
-    def __init__(self, context, request):
-        super(TraversableFieldService, self).__init__(context, request)
-        alsoProvides(self, ITraversableView)
 
 
 class TraversableDownloadService(TraversableFieldService):

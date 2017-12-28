@@ -1,5 +1,5 @@
 from asyncio import shield
-from guillotina import app_settings
+from guillotina._settings import app_settings
 from guillotina.db import TRASHED_ID
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage

@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger('guillotina')
 
 
-class BasePolicy(object):
+class BasePolicy:
     name = '<FILL IN>'
 
     def __init__(self, request):

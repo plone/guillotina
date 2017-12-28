@@ -23,7 +23,6 @@ import time
 import uuid
 
 
-HARD_CACHE = {}
 _EMPTY = '__<EMPTY VALUE>__'
 
 
@@ -257,7 +256,7 @@ class Transaction(object):
             self.deleted[oid] = obj
 
     async def clean_cache(self):
-        HARD_CACHE.clear()
+        self._manager._hard_cache.clear()
         await self._cache.clear()
 
     async def refresh(self, ob):
@@ -283,14 +282,15 @@ class Transaction(object):
             if obj is not None:
                 return obj
 
-        result = HARD_CACHE.get(oid, None)
+        result = self._manager._hard_cache.get(oid, None)
         if result is None:
             result = await self._get(oid)
 
         obj = reader(result)
         obj._p_jar = self
         if obj.__immutable_cache__:
-            HARD_CACHE[oid] = result
+            # ttl of zero means we want to provide a hard cache here
+            self._manager._hard_cache[oid] = result
 
         return obj
 
@@ -544,6 +544,10 @@ class Transaction(object):
             page += 1
             keys = await self._manager._storage._get_page_resources_of_type(
                 self, type_, page=page, page_size=page_size)
+
+    async def get_page_of_keys(self, parent_oid, page=1, page_size=1000):
+        return await self._manager._storage.get_page_of_keys(
+            self, parent_oid, page=page, page_size=page_size)
 
     @profilable
     async def iterate_keys(self, oid, page_size=1000):

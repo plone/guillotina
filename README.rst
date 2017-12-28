@@ -7,8 +7,8 @@ Introduction
 .. image:: https://travis-ci.org/plone/guillotina.svg?branch=master
    :target: https://travis-ci.org/plone/guillotina
 
-.. image:: https://coveralls.io/repos/github/plone/guillotina/badge.svg?branch=master
-   :target: https://coveralls.io/github/plone/guillotina?branch=master
+.. image:: https://codecov.io/gh/plone/guillotina/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/plone/guillotina/branch/master
    :alt: Test Coverage
 
 .. image:: https://img.shields.io/pypi/pyversions/guillotina.svg

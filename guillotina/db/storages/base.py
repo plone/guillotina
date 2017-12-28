@@ -1,6 +1,6 @@
 
 
-class BaseStorage(object):
+class BaseStorage:
 
     _cache_strategy = 'dummy'
     _read_only = False
@@ -19,91 +19,91 @@ class BaseStorage(object):
         return self._read_only
 
     async def finalize(self):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def initialize(self, loop=None, **kw):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def open(self):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def close(self, con):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def load(self, txn, oid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def store(self, oid, old_serial, writer, obj, txn):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def delete(self, txn, oid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_next_tid(self, txn):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_current_tid(self, txn):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_one_row(self, smt, *args):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def start_transaction(self, txn, retries=0):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_conflicts(self, txn):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def commit(self, transaction):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def abort(self, transaction):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def keys(self, txn, oid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_child(self, txn, parent_oid, id):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def has_key(self, txn, parent_oid, id):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def len(self, txn, oid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def items(self, txn, oid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_annotation(self, txn, oid, id):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_annotation_keys(self, txn, oid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def read_blob_chunks(self, txn, bid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def del_blob(self, txn, bid):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_total_number_of_objects(self, txn):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_total_number_of_resources(self, txn):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def get_total_resources_of_type(self, txn, type_):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover
 
     async def _get_page_resources_of_type(self, txn, type_, page, page_size):
-        raise NotImplemented()
+        raise NotImplemented()  # pragma: no cover

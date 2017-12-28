@@ -38,6 +38,7 @@ class Request(web_request.Request):
     exc = None
     view_name = None
     found_view = None
+    matchdict = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

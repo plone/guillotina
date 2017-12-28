@@ -1,3 +1,4 @@
+from aiohttp.web_exceptions import HTTPNotFound
 from guillotina._settings import app_settings
 from guillotina.interfaces import IForbidden
 from guillotina.interfaces import IForbiddenAttribute
@@ -214,4 +215,10 @@ class QueryParsingError(Exception):
 
 class FileNotFoundException(Exception):
     '''
+    '''
+
+
+class InvalidRoute(HTTPNotFound):
+    '''
+    The defined route is invalid
     '''

@@ -149,3 +149,10 @@ class AsyncUtility:
 
     async def finalize(self):
         self.state = 'finalize'
+
+
+@configure.service(
+    context=IApplication, method='GET', permission='guillotina.AccessContent',
+    name='@match/{foo}/{bar}')
+async def matching_service(context, request):
+    return request.matchdict

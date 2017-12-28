@@ -3,31 +3,53 @@
 There are three kinds of objects that are considered on the system:
 
 
-## Tree objects
-
-Called Resources that implement `guillotina.interfaces.IResource`. This object
-has a `__name__` and a `__parent__` field that indicate the id on the tree and
-the link to the parent. By themselves they don't have access to their children,
-they need to interact with the transaction object to get them.
-
-
-## Nested
-
-Objects that are linked at some attribute inside the Tree object, this object
-are serialized with the main object and may lead to conflicts if there are lots
-of this kind of objects.
-
-It can belong to:
-
-- A field that is an object
+- Tree objects: objects are resources that implement `guillotina.interfaces.IResource`.
+  This object has a `__name__` and a `__parent__` property that indicate the id
+  on the tree and the link to the parent. By themselves they don't have access to\
+  their children, they need to interact with the transaction object to get them.
+- Nested: objects that are linked at some attribute inside the Tree object, this object
+  are serialized with the main object and may lead to conflicts if there are lots
+  of this kind of objects. It can belong to a field that is an object
+- Annotations: objects that are associated with tree objects. These can be
+  any type of data. In Guillotina, the main source of annotation objects are
+  behaviors.
 
 
-## Nested References
+## Saving objects
 
-Base objects that belong to a specific object, it is big enough to have its own
-entity and be saved in a different persistence object. Its not an element of the tree.
+If you're manually modifying objects in services(or views) without using
+the serialization adapters, you need to register the object to be saved
+to the database. To do this, just use the `_p_register()` method.
 
-It can belong to:
 
-- An annotation that is stored on a different object
-- A BaseObject inherited field object
+```python
+@configure.service(
+    method='PATCH', name='@dosomething')
+async def matching_service(context, request):
+    context.foobar = 'foobar'
+    context._p_register()
+```
+
+
+## Transactions
+
+Guillotina automatically manages transactions for you in services; however,
+if you have long running services and need to flush data to the database,
+you can manually manage transactions as well.
+
+```python
+from guillotina.transactions import get_tm
+
+tm = get_tm()
+await tm.commit()  # commit current transaction
+await tm.begin()  # start new one
+```
+
+There is also an async context manager:
+
+```python
+from guillotina.transactions import managed_transaction
+
+async with managed_transaction() as txn:
+    # modify objects
+```

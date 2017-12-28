@@ -2,10 +2,8 @@ from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.content import load_cached_schema
 from guillotina.db.storages.cockroach import CockroachStorage
-from guillotina.db.transaction import HARD_CACHE
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
-from guillotina.tests import docker_containers as containers
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from unittest import mock
@@ -20,7 +18,7 @@ import pytest
 _dir = os.path.dirname(os.path.realpath(__file__))
 
 IS_TRAVIS = 'TRAVIS' in os.environ
-USE_COCKROACH = 'USE_COCKROACH' in os.environ
+DATABASE = os.environ.get('DATABASE', 'DUMMY')
 
 
 def base_settings_configurator(settings):
@@ -35,57 +33,92 @@ testing.configure_with(base_settings_configurator)
 
 def get_dummy_settings():
     settings = testing.get_settings()
-    settings['databases'][0]['db']['storage'] = 'DUMMY'
-
-    settings['databases'][0]['db']['dsn'] = {}
+    settings['databases']['db']['storage'] = 'DUMMY'
+    settings['databases']['db']['dsn'] = {}
     return settings
 
 
-def get_pg_settings():
-    settings = testing.get_settings()
-    settings['databases'][0]['db']['storage'] = 'postgresql'
+def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
+                 host='localhost', port=5432, password='', storage='postgresql'):
+    obj.update({
+        'storage': storage,
+        'partition': 'guillotina.interfaces.IResource'
+    })
+    obj['dsn'] = {
+        'scheme': scheme,
+        'dbname': dbname,
+        'user': user,
+        'host': host,
+        'port': port,
+        'password': password
+    }
 
-    settings['databases'][0]['db']['dsn'] = {
+
+def get_db_settings():
+    settings = testing.get_settings()
+    if DATABASE == 'DUMMY':
+        return settings
+
+    settings['databases']['db']['storage'] = 'postgresql'
+
+    settings['databases']['db']['dsn'] = {
         'scheme': 'postgres',
         'dbname': 'guillotina',
         'user': 'postgres',
-        'host': getattr(get_pg_settings, 'host', 'localhost'),
-        'port': getattr(get_pg_settings, 'port', 5432),
+        'host': getattr(get_db_settings, 'host', 'localhost'),
+        'port': getattr(get_db_settings, 'port', 5432),
         'password': '',
     }
-    if USE_COCKROACH:
-        settings['databases'][0]['db']['storage'] = 'cockroach'
-        settings['databases'][0]['db']['dsn'].update({
-            'user': 'root'
-        })
+
+    options = dict(
+        host=getattr(get_db_settings, 'host', 'localhost'),
+        port=getattr(get_db_settings, 'port', 5432),
+    )
+
+    if DATABASE == 'cockroachdb':
+        configure_db(
+            settings['databases']['db'],
+            **options,
+            user='root',
+            storage='cockroach')
+        configure_db(
+            settings['storages']['db'], **options,
+            user='root',
+            storage='cockroach')
+    else:
+        configure_db(settings['databases']['db'], **options)
+        configure_db(settings['storages']['db'], **options)
     return settings
 
 
 @pytest.fixture(scope='session')
-def postgres():
+def db():
     """
     detect travis, use travis's postgres; otherwise, use docker
     """
-
-    if USE_COCKROACH:
-        host, port = containers.cockroach_image.run()
+    if DATABASE == 'DUMMY':
+        yield
     else:
-        if not IS_TRAVIS:
-            host, port = containers.postgres_image.run()
+        import pytest_docker_fixtures
+        if DATABASE == 'cockroachdb':
+            host, port = pytest_docker_fixtures.cockroach_image.run()
         else:
-            host = 'localhost'
-            port = 5432
+            if not IS_TRAVIS:
+                host, port = pytest_docker_fixtures.pg_image.run()
+            else:
+                host = 'localhost'
+                port = 5432
 
-    # mark the function with the actual host
-    setattr(get_pg_settings, 'host', host)
-    setattr(get_pg_settings, 'port', port)
+        # mark the function with the actual host
+        setattr(get_db_settings, 'host', host)
+        setattr(get_db_settings, 'port', port)
 
-    yield host, port  # provide the fixture value
+        yield host, port  # provide the fixture value
 
-    if USE_COCKROACH:
-        containers.cockroach_image.stop()
-    elif not IS_TRAVIS:
-        containers.postgres_image.stop()
+        if DATABASE == 'cockroachdb':
+            pytest_docker_fixtures.cockroach_image.stop()
+        elif not IS_TRAVIS:
+            pytest_docker_fixtures.pg_image.stop()
 
 
 class GuillotinaDBRequester(object):
@@ -142,7 +175,10 @@ def dummy_guillotina(loop):
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
-    loop.run_until_complete(close_async_tasks(aioapp))
+    try:
+        loop.run_until_complete(close_async_tasks(aioapp))
+    except asyncio.CancelledError:
+        pass
 
 
 class DummyRequestAsyncContextManager(object):
@@ -163,7 +199,6 @@ class DummyRequestAsyncContextManager(object):
 
 @pytest.fixture(scope='function')
 def dummy_request(dummy_guillotina, monkeypatch):
-    HARD_CACHE.clear()
     from guillotina.interfaces import IApplication
     from guillotina.component import get_utility
     root = get_utility(IApplication, name='root')
@@ -190,23 +225,23 @@ class RootAsyncContextManager(object):
 
 @pytest.fixture(scope='function')
 async def dummy_txn_root(dummy_request):
-    HARD_CACHE.clear()
     return RootAsyncContextManager(dummy_request)
 
 
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
-    HARD_CACHE.clear()
-    aioapp = make_app(settings=get_pg_settings(), loop=loop)
+    aioapp = make_app(settings=get_db_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
-    loop.run_until_complete(close_async_tasks(aioapp))
+    try:
+        loop.run_until_complete(close_async_tasks(aioapp))
+    except asyncio.CancelledError:
+        pass
 
 
 @pytest.fixture(scope='function')
-async def guillotina(test_server, postgres, guillotina_main, loop):
-    HARD_CACHE.clear()
+async def guillotina(test_server, db, guillotina_main, loop):
     server = await test_server(guillotina_main)
     requester = GuillotinaDBRequester(server=server, loop=loop)
     return requester
@@ -225,16 +260,16 @@ async def _bomb_shelter(future, timeout=2):
 
 
 class CockroachStorageAsyncContextManager(object):
-    def __init__(self, request, loop, postgres):
+    def __init__(self, request, loop, db):
         self.loop = loop
         self.request = request
         self.storage = None
-        self.postgres = postgres
+        self.db = db
 
     async def __aenter__(self):
         dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
-            self.postgres[0],
-            self.postgres[1]
+            self.db[0],
+            self.db[1]
         )
         self.storage = CockroachStorage(
             dsn=dsn, name='db', pool_size=25,
@@ -253,8 +288,8 @@ class CockroachStorageAsyncContextManager(object):
 
 
 @pytest.fixture(scope='function')
-async def cockroach_storage(postgres, dummy_request, loop):
-    return CockroachStorageAsyncContextManager(dummy_request, loop, postgres)
+async def cockroach_storage(db, dummy_request, loop):
+    return CockroachStorageAsyncContextManager(dummy_request, loop, db)
 
 
 @pytest.fixture(scope='function')
@@ -267,10 +302,10 @@ def command_arguments():
 
 
 @pytest.fixture(scope='function')
-def container_command(postgres):
-    settings = get_pg_settings()
-    host = settings['databases'][0]['db']['dsn']['host']
-    port = settings['databases'][0]['db']['dsn']['port']
+def container_command(db):
+    settings = get_db_settings()
+    host = settings['databases']['db']['dsn']['host']
+    port = settings['databases']['db']['dsn']['port']
     conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
     cur = conn.cursor()
     cur.execute(open(os.path.join(_dir, "data/tables.sql"), "r").read())

@@ -10,7 +10,7 @@
   .. autoclass:: Item
 
   .. autoclass:: Folder
-     :members: async_contains, async_set, async_get, async_del, async_len, async_keys, async_items
+     :members: async_contains, async_set, async_get, async_del, async_len, async_keys, async_items, async_multi_get
 
   .. autoclass:: Container
      :members: install

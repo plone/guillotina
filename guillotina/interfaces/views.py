@@ -12,13 +12,6 @@ class IView(Interface):
         '''
 
 
-class ITraversableView(IView):
-
-    async def publish_traverse(traverse_to):  # noqa: N805
-        '''
-        '''
-
-
 class IDownloadView(IView):
     pass
 

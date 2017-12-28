@@ -12,4 +12,4 @@ class DatabaseInitializationCommand(Command):
         for _id, db in root:
             if IDatabase.providedBy(db):
                 print(f'Initializing database: {_id}')
-                await db._db._storage.create()
+                await db._storage.create()

@@ -4,10 +4,31 @@ Guillotina uses `aiohttp` for it's webserver. In order to route requests against
 Guillotina's traversal url structure, Guillotina provides it's own router
 that does traversal: `guillotina.traversal.router`.
 
+## How URLs are routed
 
-.. automodule:: guillotina.traversal
+Guillotina's content is structured like a file system. Objects are routed to
+URL paths. HTTP verbs are provided against those objects on those paths.
+Additional services(or views depending on terminology) are provided with
+URL path parts that start with `@`, for example, the `@move` endpoint.
 
-  .. autofunction:: TraversalRouter
+## Route matching
+
+With Guillotina, you can also route custom sub paths off a registered service.
+Guillotina is primarily for routing objects to urls; however, this feature is
+used to provide additional parameters to the service.
+
+An example of where this is used is for file services: `/db/container/item/@upload/file`.
+
+### Registering custom route parts
+
+
+```python
+@configure.service(
+    method='GET', permission='guillotina.AccessContent',
+    name='@match/{foo}/{bar}')
+async def matching_service(context, request):
+    return request.matchdict  # will return {'foo': 'foo', 'bar': 'bar'}
+```
 
 
 ## Providing your own router
@@ -17,7 +38,7 @@ settings.
 
 Here is an example router that provides `/v1` and `/v2` type url structure:
 
-``python
+```python
 from guillotina import configure
 from guillotina.content import Resource
 from guillotina.interfaces import IContainer

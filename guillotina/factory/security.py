@@ -36,6 +36,8 @@ class DatabaseSpecialPermissions(PrincipalPermissionManager):
         self.grant_permission_to_principal('guillotina.DeleteContainers', ROOT_USER_ID)
         self.grant_permission_to_principal('guillotina.AccessContent', ROOT_USER_ID)
         self.grant_permission_to_principal('guillotina.GetDatabases', ROOT_USER_ID)
+        self.grant_permission_to_principal('guillotina.MountDatabase', ROOT_USER_ID)
+        self.grant_permission_to_principal('guillotina.UmountDatabase', ROOT_USER_ID)
         self.grant_permission_to_principal('guillotina.GetAPIDefinition', ROOT_USER_ID)
 
 

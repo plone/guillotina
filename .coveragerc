@@ -1,13 +1,8 @@
 [run]
 omit =
-  guillotina/__init__.py
   */tests/*
   */testfiles/*
   */examples/*
   */documentation/*
   */docs/*
   */commands/*
-  */one_connection_storage.py
-  */cockroach.py
-  */dummy.py
-  */storages/base.py

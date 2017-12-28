@@ -228,6 +228,21 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     return result
 
 
+def loop_apply_coroutine(loop, func: types.FunctionType, *args, **kwargs) -> object:
+    """
+    Call a function with the supplied arguments.
+    If the result is a coroutine, use the supplied loop to run it.
+    """
+    if asyncio.iscoroutinefunction(func):
+        future = asyncio.ensure_future(
+            func(*args, **kwargs), loop=loop)
+
+        loop.run_until_complete(future)
+        return future.result()
+    else:
+        return func(*args, **kwargs)
+
+
 _valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+'
 
 
@@ -243,6 +258,8 @@ async def get_containers(request, transaction_strategy='none'):
     root = get_utility(IApplication, name='root')
     for _id, db in root:
         if IDatabase.providedBy(db):
+            if transaction_strategy is not None:
+                db._storage._transaction_strategy = transaction_strategy
             tm = request._tm = db.get_transaction_manager()
             tm.request = request
             request._db_id = _id
@@ -289,7 +306,7 @@ def get_current_request() -> IRequest:
     raise RequestNotFound(RequestNotFound.__doc__)
 
 
-def get_owners(obj):
+def get_owners(obj) -> list:
     try:
         prinrole = IPrincipalRoleMap(obj)
     except TypeError:
@@ -305,7 +322,7 @@ def get_owners(obj):
     return owners
 
 
-def resolve_path(file_path):
+def resolve_path(file_path) -> pathlib.PosixPath:
     if ':' in file_path:
         # referencing a module
         dotted_mod_name, _, rel_path = file_path.partition(':')
@@ -374,8 +391,17 @@ def to_str(value):
 def clear_conn_statement_cache(conn):
     try:
         conn._con._stmt_cache.clear()
-    except Exception:
+    except Exception:  # pragma: no cover
         try:
             conn._stmt_cache.clear()
         except Exception:
             pass
+
+
+def list_or_dict_items(val):
+    if isinstance(val, list):
+        new_val = []
+        for item in val:
+            new_val.extend([(k, v) for k, v in item.items()])
+        return new_val
+    return [(k, v) for k, v in val.items()]

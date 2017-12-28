@@ -4,35 +4,26 @@ from guillotina.db.storages.base import BaseStorage
 from zope.interface import implementer
 
 import asyncio
+import os
+import pickle
 
 
 @implementer(IStorage)
 class DummyStorage(BaseStorage):
-    """Storage to a relational database, based on invalidation polling"""
+    """
+    Dummy in-memory storage for testing
+    """
 
     _last_transaction = 1
     _transaction_strategy = 'resolve'
 
-    # MAIN MEMORY DB OBJECT OID -> OBJ
-    DB = {}
-
-    # PARENT_ID_ID INDEX
-    # TUPLE (PARENT_OID + ID) -> OID
-    PARENT_ID_ID = {}
-
-    # PARENT_ID INDEX (OID -> LIST OID)
-    PARENT_ID = {}
-
-    # OF_ID INDEX
-    # TUPLE (OF_OID + ID) -> OID
-    OF_ID = {}
-
-    # OF INDEX (OID -> LIST OID)
-    OF = {}
+    __db = None
 
     def __init__(self, read_only=False):
-        super(DummyStorage, self).__init__(read_only)
         self._lock = asyncio.Lock()
+        self.__db = {}
+        self.__blobs = {}
+        super().__init__(read_only)
 
     async def finalize(self):
         pass
@@ -62,14 +53,21 @@ class DummyStorage(BaseStorage):
             return self._last_transaction
 
     async def load(self, txn, oid):
-        objects = self.DB[oid]
+        objects = self.__db[oid]
         if objects is None:
             raise KeyError(oid)
         return objects
 
     async def start_transaction(self, txn):
-        # Add the new tid
-        txn._db_txn = {}
+        pass
+
+    def get_txn(self, txn):
+        if not getattr(txn, '_db_txn', None):
+            txn._db_txn = {
+                'added': {},
+                'removed': []
+            }
+        return txn._db_txn
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -78,7 +76,7 @@ class DummyStorage(BaseStorage):
         part = writer.part
         if part is None:
             part = 0
-        # (zoid, tid, state_size, part, main, parent_id, type, json, state)
+        existing = self.__db.get(oid, {})
         tobj = {
             'zoid': oid,
             'tid': txn._tid,
@@ -91,41 +89,48 @@ class DummyStorage(BaseStorage):
             'id': writer.id,
             'type': writer.type,
             'json': json,
-            'state': p
+            'state': p,
+            'children': existing.get('children', {}),
+            'ofs': existing.get('ofs', {})
         }
-        txn._db_txn[oid] = tobj
+        self.get_txn(txn)['added'][oid] = tobj
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
-        tobj = self.DB[oid]
-        del self.PARENT_ID_ID[(tobj['parent_id'], tobj['id'])]
-        self.PARENT_ID[tobj['parent_id']].remove(oid)
-        del self.DB[oid]
-
-    async def get_current_tid(self, transaction):
-        # Check if there is any commit bigger than the one we already have
-        # For each object going to be written we need to check if it has
-        # a new TID
-        for oid, tobj in transaction._db_txn.items():
-            if oid in self.DB:
-                if self.DB[oid]['tid'] > tobj['tid']:
-                    return self.DB[oid]['tid']
-
-        return 0
+        self.get_txn(txn)['removed'].append(oid)
 
     async def commit(self, transaction):
-        for oid, element in transaction._db_txn.items():
-            self.DB[oid] = element
-            if element['parent_id'] in self.PARENT_ID:
-                self.PARENT_ID[element['parent_id']].append(oid)
-            else:
-                self.PARENT_ID[element['parent_id']] = [oid]
-            if element['of'] in self.OF:
-                self.OF[element['of']].append(oid)
-            else:
-                self.OF[element['of']] = [oid]
-            self.PARENT_ID_ID[(element['parent_id'], element['id'])] = oid
-            self.OF_ID[(element['of'], element['id'])] = oid
+        for oid, element in self.get_txn(transaction)['added'].items():
+            if oid in self.__db and self.__db[oid]['parent_id'] != element['parent_id']:
+                # can move object move, we need to cleanup here...
+                old_parent_ob = self.__db[self.__db[oid]['parent_id']]
+                children = {v: k for k, v in old_parent_ob['children'].items()}
+                if oid in children:
+                    del old_parent_ob['children'][children[oid]]
+
+            self.__db[oid] = element
+            if element['parent_id'] in self.__db:
+                children = {v: k for k, v in self.__db[element['parent_id']]['children'].items()}
+                if oid in children:
+                    # clear in case of object rename
+                    del self.__db[element['parent_id']]['children'][children[oid]]
+                self.__db[element['parent_id']]['children'][element['id']] = oid
+            if element['of'] and element['of'] in self.__db:
+                self.__db[element['of']]['ofs'][element['id']] = oid
+
+        for oid in self.get_txn(transaction)['removed']:
+            tobj = self.__db[oid]
+            del self.__db[oid]
+            if tobj['parent_id'] and tobj['parent_id'] in self.__db:
+                parent_ob = self.__db[tobj['parent_id']]
+                children = {v: k for k, v in parent_ob['children'].items()}
+                if oid in children:
+                    del parent_ob['children'][children[oid]]
+            if tobj['of'] and tobj['of'] in self.__db:
+                of_ob = self.__db[tobj['of']]
+                ofs = {v: k for k, v in of_ob['ofs'].items()}
+                if oid in ofs:
+                    del of_ob['ofs'][ofs[oid]]
 
         return transaction._tid
 
@@ -136,42 +141,97 @@ class DummyStorage(BaseStorage):
 
     async def keys(self, txn, oid):
         keys = []
-        for record in self.PARENT_ID[oid]:
-            obj = await self.load(txn, record)
-            keys.append(obj['id'])
+        if oid not in self.__db:
+            return []
+        for cid, coid in self.__db[oid]['children'].items():
+            obj = await self.load(txn, coid)
+            keys.append(obj)
         return keys
 
     async def get_child(self, txn, parent_id, id):
-        oid = self.PARENT_ID_ID[(parent_id, id)]
-        return await self.load(txn, oid)
+        parent_ob = self.__db[parent_id]
+        return await self.load(txn, parent_ob['children'][id])
 
     async def has_key(self, txn, parent_id, id):
-        return True if (parent_id, id) in self.PARENT_ID_ID.keys() else False
+        if parent_id in self.__db:
+            parent_ob = self.__db[parent_id]
+            return id in parent_ob['children']
 
     async def len(self, txn, oid):
-        return len(self.PARENT_ID[oid])
+        if oid in self.__db:
+            return len(self.__db[oid]['children'])
+        return 0
 
-    async def items(self, txn, oid):
-        for record in self.PARENT_ID[oid]:
-            obj = await self.load(txn, record)
+    async def items(self, txn, oid):  # pragma: no cover
+        for cid, coid in self.__db[oid]['children'].items():
+            obj = await self.load(txn, coid)
             yield obj
 
-    async def get_annotation(self, txn, oid, id):
-        oid = self.OF_ID[(oid, id)]
-        return await self.load(txn, oid)
+    async def get_children(self, txn, parent, keys):
+        children = []
+        for cid, coid in self.__db[parent]['children'].items():
+            if cid not in keys:
+                continue
+            record = await self.load(txn, coid)
+            children.append(record)
+        return children
 
-    async def get_annotations_keys(self, txn, oid):
+    async def get_annotation(self, txn, oid, id):
+        return await self.load(txn, self.__db[oid]['ofs'][id])
+
+    async def get_annotation_keys(self, txn, oid):
         keys = []
-        for record in self.OF[oid]:
-            obj = await self.load(txn, record)
-            keys.append(obj['id'])
+        for of_id in self.__db[oid]['ofs'].values():
+            obj = await self.load(txn, of_id)
+            keys.append(obj)
         return keys
 
     async def del_blob(self, txn, bid):
-        pass
+        if bid in self.__blobs:
+            del self.__blobs[bid]
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
-        pass
+        if bid not in self.__blobs:
+            self.__blobs[bid] = {
+                'oid': oid,
+                'chunks': []
+            }
+        self.__blobs[bid]['chunks'].append(data)
+
+    async def read_blob_chunk(self, txn, bid, chunk=0):
+        return {
+            'data': self.__blobs[bid]['chunks'][chunk]
+        }
 
     async def get_conflicts(self, txn):
         return []
+
+    async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
+        children = self.__db[oid]['children']
+        keys = [k for k in sorted(children.keys())]
+        start = (page - 1) * page_size
+        end = start + page_size
+        return [self.__db[key]['id'] for key in keys[start:end]]
+
+
+@implementer(IStorage)
+class DummyFileStorage(DummyStorage):  # pragma: no cover
+
+    def __init__(self, filename='g.db'):
+        super(DummyFileStorage, self).__init__()
+        self.filename = filename
+        self.__load()
+
+    def __load(self):
+        if not os.path.exists(self.filename):
+            return
+        with open(self.filename, 'rb') as fi:
+            self.__db = pickle.loads(fi.read())
+
+    def __save(self):
+        with open(self.filename, 'wb') as fi:
+            fi.write(pickle.dumps(self.__db))
+
+    async def commit(self, transaction):
+        await super().commit(transaction)
+        self.__save()
