@@ -1,4 +1,4 @@
-2.2.6 (unreleased)
+2.2.6 (2017-12-28)
 ------------------
 
 - Log unhandled exception responses
