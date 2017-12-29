@@ -1,4 +1,4 @@
-2.2.8 (unreleased)
+2.3.0 (2017-12-29)
 ------------------
 
 - Nothing changed yet.
