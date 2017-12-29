@@ -87,5 +87,5 @@ async def run(container):
     await runner(container, 'none')
     await runner(container, 'tidonly')
     await runner(container, 'simple')
-    await runner(container, 'novote')
-    await runner(container, 'novote_readcommitted')
+    await runner(container, 'dbresolve')
+    await runner(container, 'dbresolve_readcommitted')

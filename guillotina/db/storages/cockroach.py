@@ -198,13 +198,13 @@ class CockroachStorage(pg.PostgresqlStorage):
     _vacuum_class = CockroachVacuum
 
     def __init__(self, *args, **kwargs):
-        transaction_strategy = kwargs.get('transaction_strategy', 'novote_readcommitted')
+        transaction_strategy = kwargs.get('transaction_strategy', 'dbresolve_readcommitted')
         if transaction_strategy not in (
-                'none', 'tidonly', 'novote', 'novote_readcommitted'):
+                'none', 'tidonly', 'dbresolve', 'dbresolve_readcommitted'):
             logger.warning(f'Unsupported transaction strategy specified for '
                            f'cockroachdb({transaction_strategy}). '
-                           f'Forcing to `novote_readcommitted` strategy')
-            transaction_strategy = 'novote_readcommitted'
+                           f'Forcing to `dbresolve_readcommitted` strategy')
+            transaction_strategy = 'dbresolve_readcommitted'
         kwargs['transaction_strategy'] = transaction_strategy
         super().__init__(*args, **kwargs)
 

@@ -200,9 +200,9 @@ Available options:
   this is potentially just as safe as any of the other strategies just as long
   as you are not writing to multiple objects at the same time — in those cases,
   you might be in an inconsistent state on `tid` conflicts.
-- `novote`:
+- `dbresolve`:
   Use db transaction but do not perform any voting when writing(no conflict resolution).
-- `novote_readcommitted`:
+- `dbresolve_readcommitted`:
   Same as no vote; however, db transaction only started at commit phase. This
   should provide better performance; however, you'll need to consider the side
   affects of this for reading data.

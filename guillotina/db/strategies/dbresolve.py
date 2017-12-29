@@ -10,8 +10,8 @@ logger = logging.getLogger('guillotina')
 
 
 @configure.adapter(
-    for_=ITransaction, provides=IDBTransactionStrategy, name="novote")
-class NoVoteStrategy(SimpleStrategy):
+    for_=ITransaction, provides=IDBTransactionStrategy, name="dbresolve")
+class DBResolveStrategy(SimpleStrategy):
     '''
     Get us a transaction, but we don't care about voting
     '''
@@ -21,8 +21,8 @@ class NoVoteStrategy(SimpleStrategy):
 
 
 @configure.adapter(
-    for_=ITransaction, provides=IDBTransactionStrategy, name="novote_readcommitted")
-class NoVoteReadCommittedStrategy(NoVoteStrategy):
+    for_=ITransaction, provides=IDBTransactionStrategy, name="dbresolve_readcommitted")
+class DBResolveReadCommittedStrategy(DBResolveStrategy):
     '''
     Delay starting transaction to the commit phase so reads will be inconsistent.
     '''

@@ -42,7 +42,7 @@ async def get_aps(postgres, strategy=None, pool_size=16):
     klass = PostgresqlStorage
     if strategy is None:
         if USE_COCKROACH:
-            strategy = 'novote_readcommitted'
+            strategy = 'dbresolve_readcommitted'
         else:
             strategy = 'resolve_readcommitted'
     if USE_COCKROACH:
