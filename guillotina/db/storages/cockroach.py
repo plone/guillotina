@@ -1,6 +1,7 @@
 from guillotina import glogging
 from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 
 import asyncpg
@@ -25,10 +26,8 @@ DO UPDATE SET
     parent_id = EXCLUDED.parent_id,
     id = EXCLUDED.id,
     type = EXCLUDED.type,
-    state = EXCLUDED.state"""
-UPSERT = NAIVE_UPSERT + """
-    WHERE
-        tid = EXCLUDED.otid"""
+    state = EXCLUDED.state
+RETURNING NOTHING"""
 
 
 # update without checking matching tids on updated object
@@ -52,29 +51,24 @@ RETURNING tid, otid"""
 
 
 NEXT_TID = """SELECT unique_rowid()"""
-MAX_TID = "SELECT COALESCE(MAX(tid), 0) from objects;"
 
-DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32);"""
-DELETE_CHILDREN = """DELETE FROM objects where parent_id = $1::varchar(32);"""
-DELETE_DANGLING = '''DELETE FROM objects
-WHERE
-    parent_id IS NOT NULL and parent_id NOT IN (
-        SELECT zoid FROM objects
-    )
-RETURNING 1
-'''
+DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32) RETURNING NOTHING;"""
+
 DELETE_BY_PARENT_OID = '''DELETE FROM objects
-WHERE parent_id = $1::varchar(32);'''
-GET_OIDS_BY_PARENT = '''SELECT zoid FROM objects
-WHERE parent_id = $1::varchar(32);'''
-BATCHED_GET_CHILDREN_OIDS = """SELECT zoid FROM objects
+WHERE parent_id = $1::varchar(32)
+RETURNING NOTHING;'''
+
+BATCHED_GET_CHILDREN_OIDS = """
+SELECT zoid FROM objects
 WHERE parent_id = $1::varchar(32)
 ORDER BY zoid
 LIMIT $2::int
-OFFSET $3::int"""
+OFFSET $3::int;"""
 
-DELETE_FROM_OBJECTS = """
-    DELETE FROM objects WHERE zoid = $1::varchar(32);
+DELETE_OBJECT = f"""
+DELETE FROM objects
+WHERE zoid = $1::varchar(32)
+RETURNING NOTHING;
 """
 
 
@@ -95,23 +89,14 @@ class CockroachVacuum(pg.PGVacuum):
         async for child_oid in iterate_children(conn, parent_oid):
             await self.vacuum_children(conn, child_oid)
         await conn.execute(DELETE_BY_PARENT_OID, parent_oid)
+        await conn.execute(DELETE_FROM_BLOBS, parent_oid)
 
     async def vacuum(self, oid):
         '''
-        Options for vacuuming...
-        1. Recursively go through objects, deleting children as you find them,
-           checking if they have their own children and so on...
-           - possibly more ram usage
-           - more application logic
-           - need to batch children
-        2. Delete initial children, then delete objects that are dangling(parent_id missing)
-           - less error prone
-           - self-correcting(will correct deletes that went wrong before)
-           - more overhead on cockroach
+        Recursively go through objects, deleting children as you find them,
+        checking if they have their own children and so on...
 
-        We're choosing #1 for now....
-
-        Long term, might need a combination of both
+        Once cockroachdb 2.0 is stable, we can remove this custom vacuum implementation.
         '''
         conn = await self._storage.open()
         try:
@@ -121,6 +106,14 @@ class CockroachVacuum(pg.PGVacuum):
 
 
 class CockroachDBTransaction:
+    '''
+    Custom transaction object to work with cockroachdb so we can...
+    1. restart commits when cockroach throws a 40001 error
+    2. retry transctions with custom priorities
+    '''
+
+    commit_statement = '''RELEASE SAVEPOINT cockroach_restart;
+COMMIT;'''
 
     def __init__(self, txn):
         self._txn = txn
@@ -137,15 +130,17 @@ class CockroachDBTransaction:
 
     async def start(self):
         assert self._status in ('none',)
-        await self._conn.execute(f'''
-BEGIN ISOLATION LEVEL {self._storage._isolation_level.upper()},
-      PRIORITY {self._priority};''')
+        await self._conn.execute(f'''BEGIN PRIORITY {self._priority};
+SAVEPOINT cockroach_restart;''')
         self._status = 'started'
 
     async def commit(self):
         assert self._status in ('started',)
-        await self._conn.execute('COMMIT;')
+        await self._conn.execute(self.commit_statement)
         self._status = 'committed'
+
+    async def restart(self):
+        await self._conn.execute('ROLLBACK TO SAVEPOINT COCKROACH_RESTART')
 
     async def rollback(self):
         assert self._status in ('started',)
@@ -163,18 +158,15 @@ class CockroachStorage(pg.PostgresqlStorage):
         - no jsonb support
         - no CASCADE support(ON DELETE CASCADE)
             - used by objects and blobs tables
-            - right now, deleting will potentially leave dangling rows around
-            - potential solutions
-                - utility to recursively delete?
-                - complex delete from query that does the sub queries to delete?
+            - cockroachdb 2.0 has it but is alpha!
         - no sequence support
             - use serial construct of unique_rowid() instead
-        - no referencial integrity support!
-            - because we can't do ON DELETE support of any kind, we would get
-              errors after we run deletes unless we walk the whole sub tree
-              first, which is costly
-            - so we need to manually clean it up in a task that runs periodically,
-              our own db vacuum task.
+        - referencial integrity support
+            - latest cockroachdb has it; however, without ON DELETE CASCADE,
+              it is not worth implementing yet like the postgresql driver
+    Once cockroachdb 2.0 is stable...
+        - we can change this cockroach driver to work almost the exact same
+          way as postgresql driver with on delete cascade support
     '''
 
     _object_schema = pg.PostgresqlStorage._object_schema.copy()
@@ -206,35 +198,21 @@ class CockroachStorage(pg.PostgresqlStorage):
     _vacuum_class = CockroachVacuum
 
     def __init__(self, *args, **kwargs):
-        transaction_strategy = kwargs.get('transaction_strategy', 'novote')
-        self._isolation_level = kwargs.get('isolation_level', 'snapshot').lower()
-        if (self._isolation_level == 'serializable' and
-                transaction_strategy not in ('none', 'tidonly', 'novote', 'lock')):
+        transaction_strategy = kwargs.get('transaction_strategy', 'dbresolve_readcommitted')
+        if transaction_strategy not in (
+                'none', 'tidonly', 'dbresolve', 'dbresolve_readcommitted'):
             logger.warning(f'Unsupported transaction strategy specified for '
-                           f'cockroachdb SERIALIZABLE isolation level'
-                           f'({transaction_strategy}). Forcing to `novote` strategy')
-            transaction_strategy = 'novote'
+                           f'cockroachdb({transaction_strategy}). '
+                           f'Forcing to `dbresolve_readcommitted` strategy')
+            transaction_strategy = 'dbresolve_readcommitted'
         kwargs['transaction_strategy'] = transaction_strategy
         super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
-        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
 
-    async def open(self):
-        conn = await super().open()
-        if self._transaction_strategy in ('none', 'tidonly', 'lock'):
-            # if a strategy is used that is not a db transaction we can't
-            # set the isolation level along with the transaction start
-            await conn.execute(
-                'SET DEFAULT_TRANSACTION_ISOLATION TO ' + self._isolation_level)
-        return conn
-
-    async def initialize(self, loop=None, **kw):
-        await super().initialize(loop=loop, **kw)
-        # we need snapshot isolation to allow us to work together with
-        # other transactions nicely and prevent deadlocks
-        await self._read_conn.execute('SET DEFAULT_TRANSACTION_ISOLATION TO SNAPSHOT')
+    async def get_current_tid(self, txn):
+        raise Exception("cockroach does not support voting")
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -246,8 +224,8 @@ class CockroachStorage(pg.PostgresqlStorage):
         if part is None:
             part = 0
 
-        update = False
         statement_sql = NAIVE_UPSERT
+        update = False
         if not obj.__new_marker__ and obj._p_serial is not None:
             # we should be confident this is an object update
             statement_sql = UPDATE
@@ -271,23 +249,22 @@ class CockroachStorage(pg.PostgresqlStorage):
                 )
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
-                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise ConflictError(
-                        f'asyncpg error, another operation in progress.\n{conflict_summary}')
+                        f'asyncpg error, another operation in progress.',
+                        oid, txn, old_serial, writer)
                 raise
             if update and len(result) != 1:
                 # raise tid conflict error
-                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                 raise TIDConflictError(
                     f'Mismatch of tid of object being updated. This is likely '
                     f'caused by a cache invalidation race condition and should '
-                    f'be an edge case. This should resolve on request retry.\n'
-                    f'{conflict_summary}')
+                    f'be an edge case. This should resolve on request retry.',
+                    oid, txn, old_serial, writer)
 
     async def delete(self, txn, oid):
         # no cascade support, so we push to vacuum
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_FROM_OBJECTS, oid)
+            await txn._db_conn.execute(DELETE_OBJECT, oid)
             await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
         txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
 
@@ -297,8 +274,8 @@ class CockroachStorage(pg.PostgresqlStorage):
                 try:
                     await transaction._db_txn.commit()
                 except asyncpg.exceptions.SerializationError as ex:
-                    if 'restart transaction' in ex.args[0]:
-                        raise ConflictError(ex.args[0])
+                    if ex.sqlstate == '40001':
+                        raise RestartCommit(ex.args[0])
         elif self._transaction_strategy not in ('none', 'tidonly'):
             logger.warning('Do not have db transaction to commit')
 
@@ -310,6 +287,9 @@ class CockroachStorage(pg.PostgresqlStorage):
         try:
             result = await smt.fetch(*args)
         except asyncpg.exceptions.SerializationError as ex:
-            if 'restart transaction' in ex.args[0]:
+            if ex.sqlstate == '40001':
+                # these are not handled with the ROLLBACK TO SAVEPOINT COCKROACH_RESTART
+                # logic unfortunately; however, it does give us a chance to handle
+                # it like a restart with higher priority
                 raise ConflictError(ex.args[0])
         return result[0] if len(result) > 0 else None

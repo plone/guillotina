@@ -1,6 +1,4 @@
 from guillotina import testing
-from guillotina.async import IAsyncUtility
-from guillotina.component import get_all_utilities_registered_for
 from guillotina.component import get_utility
 from guillotina.content import load_cached_schema
 from guillotina.db.storages.cockroach import CockroachStorage
@@ -132,22 +130,18 @@ class GuillotinaDBRequester(object):
                 return value, status, resp.headers
 
 
-def close_async_tasks():
-    root = get_utility(IApplication, name='root')
-    for utility in get_all_utilities_registered_for(IAsyncUtility):
-        try:
-            root.cancel_async_utility(utility)
-        except KeyError:
-            pass
+async def close_async_tasks(app):
+    for clean in app.on_cleanup:
+        await clean(app)
+
 
 @pytest.fixture(scope='function')
 def dummy_guillotina(loop):
-    from guillotina import test_package  # noqa
     aioapp = make_app(settings=get_dummy_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
-    close_async_tasks()
+    loop.run_until_complete(close_async_tasks(aioapp))
 
 
 class DummyRequestAsyncContextManager(object):
@@ -202,12 +196,11 @@ async def dummy_txn_root(dummy_request):
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
     HARD_CACHE.clear()
-    from guillotina import test_package  # noqa
     aioapp = make_app(settings=get_pg_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
-    close_async_tasks()
+    loop.run_until_complete(close_async_tasks(aioapp))
 
 
 @pytest.fixture(scope='function')
@@ -221,6 +214,13 @@ async def guillotina(test_server, postgres, guillotina_main, loop):
 @pytest.fixture(scope='function')
 async def container_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina)
+
+
+async def _bomb_shelter(future, timeout=2):
+    try:
+        return await asyncio.shield(asyncio.wait_for(future, timeout))
+    except asyncio.TimeoutError:
+        pass
 
 
 class CockroachStorageAsyncContextManager(object):
@@ -242,9 +242,12 @@ class CockroachStorageAsyncContextManager(object):
         return self.storage
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self.storage._read_conn.execute("DROP TABLE IF EXISTS objects;")
-        await self.storage._read_conn.execute("DROP TABLE IF EXISTS blobs;")
-        await self.storage.create()
+        conn = await self.storage.open()
+        await _bomb_shelter(
+            conn.execute("DROP DATABASE IF EXISTS guillotina;"))
+        await _bomb_shelter(
+            conn.execute("CREATE DATABASE guillotina;"))
+        await self.storage._pool.release(conn)
         await self.storage.finalize()
 
 

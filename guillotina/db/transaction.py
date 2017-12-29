@@ -8,6 +8,7 @@ from guillotina.db.reader import reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RequestNotFound
+from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.profile import profilable
@@ -34,10 +35,12 @@ class Status:
     COMMITTING = "Committing"
     COMMITTED = "Committed"
     ABORTED = "Aborted"
+    CONFLICT = 'Conflict'
 
 
 @implementer(ITransaction)
 class Transaction(object):
+    _status = 'empty'
 
     def __init__(self, manager, request=None, loop=None):
         self._txn_time = None
@@ -239,24 +242,38 @@ class Transaction(object):
 
         return obj
 
-    @profilable
     async def commit(self):
+        restarts = 0
+        while True:
+            # for now, the max commit restarts we'll manage...
+            try:
+                return await self._commit()
+            except RestartCommit:
+                restarts += 1
+                if restarts >= 3:
+                    raise
+                else:
+                    logger.warn(f'Restarting commit for tid: {self._tid}')
+                    await self._db_txn.restart()
+
+    @profilable
+    async def _commit(self):
         await self._call_before_commit_hooks()
         self.status = Status.COMMITTING
         try:
-            await self.real_commit()
+            await self.tpc_commit()
+            # vote will do conflict resolution if there are conflicting writes
+            await self.tpc_vote()
+            await self.tpc_finish()
         except (ConflictError, TIDConflictError) as ex:
             # this exception should bubble up
             # in the case of TIDConflictError, we should make sure to try
             # and invalidate again to make sure we aren't caching the ob
-            self.status = Status.ABORTED
+            self.status = Status.CONFLICT
             await self._manager._storage.abort(self)
             await self._cache.close(invalidate=isinstance(ex, TIDConflictError))
             self.tpc_cleanup()
             raise
-        # vote will do conflict resolution if there are conflicting writes
-        await self.tpc_vote()
-        await self.tpc_finish()
         self.status = Status.COMMITTED
         await self._call_after_commit_hooks()
 
@@ -293,8 +310,9 @@ class Transaction(object):
         self._objects_to_invalidate.append(obj)
 
     @profilable
-    async def real_commit(self):
+    async def tpc_commit(self):
         """Commit changes to an object"""
+        await self._strategy.tpc_commit()
         for oid, obj in self.added.items():
             await self._store_object(obj, oid, True)
         for oid, obj in self.modified.items():
@@ -310,8 +328,6 @@ class Transaction(object):
         """Verify that a data manager can commit the transaction."""
         ok = await self._strategy.tpc_vote()
         if ok is False:
-            await self._manager.abort(request=self.request, txn=self)
-            await self._cache.close(invalidate=False)
             raise ConflictError(self)
 
     @profilable

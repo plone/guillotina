@@ -20,7 +20,14 @@ _zone = tzutc()
 class IAsyncUtility(Interface):
 
     async def initialize(self):
-        pass
+        '''
+        Method that is called on startup and used to create task.
+        '''
+
+    async def finalize(self):
+        '''
+        Called to shut down and cleanup the task
+        '''
 
 
 class IQueueUtility(IAsyncUtility):

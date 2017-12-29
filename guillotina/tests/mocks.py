@@ -6,6 +6,8 @@ from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from zope.interface import implementer
 
+import asyncio
+
 
 class MockDBTransaction:
     '''
@@ -30,6 +32,8 @@ class MockTransaction:
             self, ITransactionStrategy,
             name=manager._storage._transaction_strategy)
         self._cache = DummyCache(self)
+        self._lock = asyncio.Lock()
+        self._status = 'started'
 
     async def refresh(self, ob):
         return ob

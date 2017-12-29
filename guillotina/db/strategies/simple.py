@@ -16,11 +16,8 @@ class SimpleStrategy(BaseStrategy):
     '''
 
     async def tpc_begin(self):
+        await self.retrieve_tid()
         await self._storage.start_transaction(self._transaction)
-        if self.writable_transaction:
-            tid = await self._storage.get_next_tid(self._transaction)
-            if tid is not None:
-                self._transaction._tid = tid
 
     async def tpc_vote(self):
         if not self.writable_transaction:
@@ -37,5 +34,6 @@ class SimpleStrategy(BaseStrategy):
         return True
 
     async def tpc_finish(self):
+        # do actual db commit
         if self.writable_transaction:
             await self._storage.commit(self._transaction)

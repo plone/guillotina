@@ -7,9 +7,9 @@ run-postgres:
 
 
 run-cockroachdb:
-	docker pull cockroachdb/cockroach:v1.0
-	docker run -p 127.0.0.1:26257:26257 -p 127.0.0.1:9080:8080 --rm cockroachdb/cockroach:v1.0 start --insecure
+	docker pull cockroachdb/cockroach:v1.1.3
+	docker run -p 127.0.0.1:26257:26257 -p 127.0.0.1:9080:8080 --rm cockroachdb/cockroach:v1.1.3 start --insecure
 
 
 create-cockroachdb:
-	./bin/py _cockroachdb-createdb.py
+	./bin/python _cockroachdb-createdb.py

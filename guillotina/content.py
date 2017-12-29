@@ -401,7 +401,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         # a default
         value = _default_from_schema(
             self,
-            SCHEMA_CACHE.get(self.type_name).get('schema'),
+            SCHEMA_CACHE.get(self.type_name, {}).get('schema'),
             name
         )
         if value is not _marker:

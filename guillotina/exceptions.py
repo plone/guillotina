@@ -1,3 +1,4 @@
+from guillotina._settings import app_settings
 from guillotina.interfaces import IForbidden
 from guillotina.interfaces import IForbiddenAttribute
 from guillotina.interfaces import IUnauthorized
@@ -86,11 +87,34 @@ class NoInteraction(Exception):
 
 
 class ConflictError(Exception):
-    pass
+
+    def __init__(self, msg='', oid=None, txn=None, old_serial=None, writer=None):
+        if oid is not None:
+            conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
+            msg = f'{msg}.\n{conflict_summary}'
+        super().__init__(msg)
+
+    def get_conflict_summary(self, oid, txn, old_serial, writer):
+        from guillotina.utils import get_current_request
+        req = get_current_request()
+        max_attempts = app_settings.get('conflict_retry_attempts', 3)
+        attempts = getattr(req, '_retry_attempt', 0)
+        return f'''Object ID: {oid}
+TID: {txn._tid}
+Old Object TID: {old_serial}
+Belongs to: {writer.of}
+Parent ID: {writer.id}
+Retries: {attempts}/{max_attempts}'''
 
 
 class TIDConflictError(ConflictError):
     pass
+
+
+class RestartCommit(Exception):
+    '''
+    Commits requires restart
+    '''
 
 
 class ConfigurationError(Exception):

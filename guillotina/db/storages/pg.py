@@ -190,15 +190,9 @@ DELETE_BLOB = """
 TXN_CONFLICTS = """
     SELECT zoid, tid, state_size, resource, type, id
     FROM objects
-    WHERE tid > $1
-    """
+    WHERE tid > $1"""
+TXN_CONFLICTS_ON_OIDS = TXN_CONFLICTS + ' AND zoid = ANY($2)'
 
-
-TXN_CONFLICTS_FULL = """
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE tid > $1
-    """
 
 BATCHED_GET_CHILDREN_KEYS = """
     SELECT id
@@ -251,7 +245,7 @@ class PGVacuum:
                 # we're okay with the task getting cancelled
                 return
             finally:
-                self._active = False
+                self._active = True
 
     async def _initialize(self):
         # get existing trashed objects, push them on the queue...
@@ -311,6 +305,8 @@ class PGVacuum:
         # it's not long but we don't want to wait for a long time to close either....
         try:
             await asyncio.wait_for(self.wait_until_no_longer_active(), 2)
+        except asyncio.TimeoutError:
+            pass
         except concurrent.futures.CancelledError:
             # we do not care if it's cancelled... things will get cleaned up
             # in a future task anyways...
@@ -369,7 +365,7 @@ class PostgresqlStorage(BaseStorage):
     ]
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
-                 pool_size=13, transaction_strategy='resolve',
+                 pool_size=13, transaction_strategy='resolve_readcommitted',
                  conn_acquire_timeout=20, cache_strategy='dummy', **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
@@ -389,7 +385,10 @@ class PostgresqlStorage(BaseStorage):
     async def finalize(self):
         await self._vacuum.finalize()
         self._vacuum_task.cancel()
-        await shield(self._pool.release(self._read_conn))
+        try:
+            await shield(self._pool.release(self._read_conn))
+        except asyncpg.exceptions.InterfaceError:
+            pass
         await self._pool.close()
 
     async def create(self):
@@ -410,16 +409,6 @@ class PostgresqlStorage(BaseStorage):
                 pass
 
         await self.initialize_tid_statements()
-        # migrate old transaction table scheme over
-        try:
-            old_tid = await self._read_conn.fetchval('SELECT max(tid) from transaction')
-            current_tid = await self.get_current_tid(None)
-            if old_tid > current_tid:
-                await self._read_conn.execute(
-                    'ALTER SEQUENCE tid_sequence RESTART WITH ' + str(old_tid + 1))
-        except asyncpg.exceptions.UndefinedTableError:
-            # no need to upgrade
-            pass
 
     async def restart_connection(self):
         log.error('Connection potentially lost to pg, restarting')
@@ -454,11 +443,11 @@ class PostgresqlStorage(BaseStorage):
         self._read_conn = await self.open()
         try:
             await self.initialize_tid_statements()
+            await self._read_conn.execute(CREATE_TRASH)
         except asyncpg.exceptions.UndefinedTableError:
             await self.create()
             await self.initialize_tid_statements()
-
-        await self._read_conn.execute(CREATE_TRASH)
+            await self._read_conn.execute(CREATE_TRASH)
 
         self._vacuum = self._vacuum_class(self, loop)
         self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
@@ -506,13 +495,6 @@ class PostgresqlStorage(BaseStorage):
             raise KeyError(oid)
         return objects
 
-    def get_conflict_summary(self, oid, txn, old_serial, writer):
-        return f'''Object ID: {oid}
-TID: {txn._tid}
-Old Object TID: {old_serial}
-Belongs to: {writer.of}
-Parent ID: {writer.id}'''
-
     @profilable
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
@@ -552,29 +534,27 @@ Parent ID: {writer.id}'''
                 )
             except asyncpg.exceptions.ForeignKeyViolationError:
                 txn.deleted[obj._p_oid] = obj
-                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                 raise TIDConflictError(
                     f'Bad value inserting into database that could be caused '
-                    f'by a bad cache value. This should resolve on request retry.\n'
-                    f'{conflict_summary}')
+                    f'by a bad cache value. This should resolve on request retry.',
+                    oid, txn, old_serial, writer)
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
-                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise ConflictError(
-                        f'asyncpg error, another operation in progress.\n{conflict_summary}')
+                        f'asyncpg error, another operation in progress.',
+                        oid, txn, old_serial, writer)
                 raise
             except asyncpg.exceptions.DeadlockDetectedError:
-                conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
-                raise ConflictError(f'Deadlock detected.\n{conflict_summary}')
+                raise ConflictError(f'Deadlock detected.',
+                                    oid, txn, old_serial, writer)
             if len(result) != 1 or result[0]['count'] != 1:
                 if update:
                     # raise tid conflict error
-                    conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
                     raise TIDConflictError(
                         f'Mismatch of tid of object being updated. This is likely '
                         f'caused by a cache invalidation race condition and should '
-                        f'be an edge case. This should resolve on request retry.\n'
-                        f'{conflict_summary}')
+                        f'be an edge case. This should resolve on request retry.',
+                        oid, txn, old_serial, writer)
                 else:
                     log.error('Incorrect response count from database update. '
                               'This should not happen. tid: {}'.format(txn._tid))
@@ -632,31 +612,45 @@ Parent ID: {writer.id}'''
             try:
                 await txn._db_txn.start()
                 return
-            except asyncpg.exceptions._base.InterfaceError as ex:
+            except (asyncpg.exceptions.InterfaceError,
+                    asyncpg.exceptions.InternalServerError) as ex:
                 error = ex
 
         if error is not None:
             if retries > 2:
                 raise error
 
-            if ('manually started transaction' in error.args[0] or
+            restart = rollback = False
+            if isinstance(error, asyncpg.exceptions.InternalServerError):
+                restart = True
+                if error.sqlstate == 'XX000':
+                    rollback = True
+            elif ('manually started transaction' in error.args[0] or
                     'connection is closed' in error.args[0]):
+                restart = True
                 if 'manually started transaction' in error.args[0]:
-                    try:
-                        # thinks we're manually in txn, manually rollback and try again...
-                        await txn._db_conn.execute('ROLLBACK;')
-                    except asyncpg.exceptions._base.InterfaceError:
-                        # we're okay with this error here...
-                        pass
+                    rollback = True
+
+            if rollback:
+                try:
+                    # thinks we're manually in txn, manually rollback and try again...
+                    await txn._db_conn.execute('ROLLBACK;')
+                except asyncpg.exceptions._base.InterfaceError:
+                    # we're okay with this error here...
+                    pass
+            if restart:
                 await self.close(txn._db_conn)
                 txn._db_conn = await self.open()
                 return await self.start_transaction(txn, retries + 1)
 
-    async def get_conflicts(self, txn, full=False):
+    async def get_conflicts(self, txn):
         async with self._lock:
             # use storage lock instead of transaction lock
-            if full:
-                return await self._read_conn.fetch(TXN_CONFLICTS_FULL, txn._tid)
+            if len(txn.modified) < 1000:
+                # if it's too large, we're not going to check on object ids
+                modified_oids = [k for k in txn.modified.keys()]
+                return await self._read_conn.fetch(
+                    TXN_CONFLICTS_ON_OIDS, txn._tid, modified_oids)
             else:
                 return await self._read_conn.fetch(TXN_CONFLICTS, txn._tid)
 

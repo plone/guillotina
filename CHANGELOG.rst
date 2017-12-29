@@ -1,7 +1,14 @@
-2.2.7 (unreleased)
+2.3.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Rename `novote` strategy to `dbresolve`
+
+- Fix cockroach db transactional support
+  [vangheem]
+
+- Implement `dbresolve_readcommitted` and `resolve_readcommitted` transaction
+  strategies
+  [vangheem]
 
 
 2.2.6 (2017-12-28)

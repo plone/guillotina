@@ -5,7 +5,7 @@ import psycopg2
 
 class CockroachDB(BaseImage):
     name = 'cockroach'
-    image = 'cockroachdb/cockroach:v1.0'
+    image = 'cockroachdb/cockroach:v1.1.3'
     port = 26257
 
     def get_image_options(self):
