@@ -1,4 +1,4 @@
-2.3.0 (unreleased)
+2.2.7 (2017-12-29)
 ------------------
 
 - Rename `novote` strategy to `dbresolve`
