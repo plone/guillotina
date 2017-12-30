@@ -1,4 +1,4 @@
-2.3.1 (unreleased)
+2.3.1 (2017-12-29)
 ------------------
 
 - Fix scheduling async tasks with after commit hooks
