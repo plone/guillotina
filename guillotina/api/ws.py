@@ -2,16 +2,18 @@ from aiohttp import web
 from guillotina import configure
 from guillotina import jose
 from guillotina import logger
+from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
 from guillotina.browser import Response
+from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
-from guillotina.interfaces import ITraversableView
+from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
 
 import aiohttp
@@ -86,26 +88,23 @@ class WebsocketsView(Service):
         from guillotina.traversal import traverse
         obj, tail = await traverse(self.request, self.request.container, path)
 
-        traverse_to = None
-
-        if tail and len(tail) == 1:
-            view_name = tail[0]
-        elif tail is None or len(tail) == 0:
+        if tail and len(tail) > 0:
+            # convert match lookups
+            view_name = routes.path_to_view_name(tail)
+        elif not tail:
             view_name = ''
         else:
-            view_name = tail[0]
-            traverse_to = tail[1:]
+            raise
 
         permission = get_utility(
             IPermission, name='guillotina.AccessContent')
 
-        allowed = IInteraction(self.request).check_permission(
-            permission.id, obj)
+        security = get_adapter(self.request, IInteraction)
+        allowed = security.check_permission(permission.id, obj)
         if not allowed:
-            response = {
+            return ws.send_str(ujson.dumps({
                 'error': 'Not allowed'
-            }
-            ws.send_str(ujson.dumps(response))
+            }))
 
         try:
             view = query_multi_adapter(
@@ -113,23 +112,25 @@ class WebsocketsView(Service):
         except AttributeError:
             view = None
 
-        if traverse_to is not None:
-            if view is None or not ITraversableView.providedBy(view):
-                response = {
-                    'error': 'Not found'
-                }
-                ws.send_str(ujson.dumps(response))
-            else:
-                try:
-                    view = await view.publish_traverse(traverse_to)
-                except Exception as e:
-                    logger.error(
-                        "Exception on view execution",
-                        exc_info=e)
-                    response = {
-                        'error': 'Not found'
-                    }
-                    ws.send_str(ujson.dumps(response))
+        try:
+            view.__route__.matches(self.request, tail or [])
+        except (KeyError, IndexError):
+            view = None
+
+        if view is None:
+            return ws.send_str(ujson.dumps({
+                'error': 'Not found'
+            }))
+
+        ViewClass = view.__class__
+        view_permission = get_view_permission(ViewClass)
+        if not security.check_permission(view_permission, view):
+            return ws.send_str(ujson.dumps({
+                'error': 'No view access'
+            }))
+
+        if hasattr(view, 'prepare'):
+            view = (await view.prepare()) or view
 
         view_result = await view()
         if isinstance(view_result, Response):

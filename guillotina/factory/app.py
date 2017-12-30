@@ -25,6 +25,8 @@ from guillotina.interfaces.content import IContentNegotiation
 from guillotina.request import Request
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
+from guillotina.utils import list_or_dict_items
+from guillotina.utils import loop_apply_coroutine
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 from guillotina.writable import check_writable_request
@@ -115,15 +117,6 @@ def make_aiohttp_application():
         router=router,
         middlewares=middlewares,
         **app_settings.get('aiohttp_settings', {}))
-
-
-def list_or_dict_items(val):
-    if isinstance(val, list):
-        new_val = []
-        for item in val:
-            new_val.extend([(k, v) for k, v in item.items()])
-        return new_val
-    return [(k, v) for k, v in val.items()]
 
 
 _dotted_name_settings = (
@@ -235,18 +228,10 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     provide_utility(content_type, IContentNegotiation, 'content_type')
     provide_utility(language, IContentNegotiation, 'language')
 
-    for database in app_settings['databases']:
-        for key, dbconfig in database.items():
-            factory = get_utility(
-                IDatabaseConfigurationFactory, name=dbconfig['storage'])
-            if asyncio.iscoroutinefunction(factory):
-                future = asyncio.ensure_future(
-                    factory(key, dbconfig, server_app), loop=loop)
-
-                loop.run_until_complete(future)
-                root[key] = future.result()
-            else:
-                root[key] = factory(key, dbconfig)
+    for key, dbconfig in list_or_dict_items(app_settings['databases']):
+        factory = get_utility(
+            IDatabaseConfigurationFactory, name=dbconfig['storage'])
+        root[key] = loop_apply_coroutine(loop, factory, key, dbconfig, loop)
 
     for key, file_path in list_or_dict_items(app_settings['static']):
         path = resolve_path(file_path).resolve()
@@ -256,6 +241,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
             root[key] = StaticDirectory(path)
         else:
             root[key] = StaticFile(path)
+
     for key, file_path in list_or_dict_items(app_settings['jsapps']):
         path = resolve_path(file_path).resolve()
         if not path.exists() or not path.is_dir():
@@ -309,4 +295,4 @@ async def close_utilities(app):
             await lazy_apply(utility.finalize, app=app)
     for db in root:
         if IDatabase.providedBy(db[1]):
-            await db[1]._db.finalize()
+            await db[1].finalize()

@@ -1,15 +1,21 @@
 from concurrent.futures import ThreadPoolExecutor
+from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
+from guillotina.component import get_adapter
 from guillotina.component import get_global_components
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.db import ROOT_ID
+from guillotina.db.interfaces import IDatabaseManager
+from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.tests.utils import make_mocked_request
 from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import lazy_apply
+from guillotina.utils import list_or_dict_items
 from zope.interface import implementer
 
 import asyncio
@@ -101,19 +107,82 @@ class ApplicationRoot(object):
     def __setitem__(self, key, value):
         self._items[key] = value
 
-    async def async_get(self, key):
-        return self._items[key]
+    async def async_get(self, key, suppress_events=True):
+        if key in self._items:
+            return self._items[key]
+        # check configured storages, see if there is a database registered under this name...
+        for storage_id, config in list_or_dict_items(app_settings['storages']):
+            factory = get_adapter(self, IDatabaseManager,
+                                  name=config['storage'], args=[config])
+            if key in await factory.get_names():
+                return await factory.get_database(key)
 
 
 @implementer(IDatabase)
-class Database(object):
-    def __init__(self, id, db):
-        self.id = id
-        self._db = db
-        self._conn = None
+class Database:
+
+    def __init__(self, key, storage):
+        """
+        Create an object database.
+
+        Database object is persistent through the application
+        """
+        self._storage = storage
+        self.id = self._database_name = key
+        self._tm = None
+
+    @property
+    def storage(self):
+        return self._storage
+
+    async def initialize(self):
+        """
+        create root object if necessary
+        """
+        request = make_mocked_request('POST', '/')
+        request._db_write_enabled = True
+        tm = request._tm = self.get_transaction_manager()
+        txn = await tm.begin(request=request)
+        # for get_current_request magic
+        self.request = request
+
+        commit = False
+        try:
+            assert tm.get(request=request) == txn
+            root = await txn.get(ROOT_ID)
+            if root.__db_id__ is None:
+                root.__db_id__ = self._database_name
+                txn.register(root)
+                commit = True
+        except KeyError:
+            from guillotina.db.db import Root
+            root = Root(self._database_name)
+            txn.register(root, new_oid=ROOT_ID)
+            commit = True
+
+        if commit:
+            await tm.commit(txn=txn)
+        else:
+            await tm.abort(txn=txn)
+
+    async def open(self):
+        """Return a database Connection for use by application code.
+        """
+        return await self._storage.open()
+
+    async def close(self, conn):
+        await self._storage.close(conn)
+
+    async def finalize(self):
+        await self._storage.finalize()
 
     def get_transaction_manager(self):
-        return self._db.get_transaction_manager()
+        """
+        New transaction manager for every request
+        """
+        if self._tm is None:
+            self._tm = TransactionManager(self._storage)
+        return self._tm
 
     @property
     def _p_jar(self):

@@ -8,6 +8,7 @@ from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from contextlib import contextmanager
 from guillotina import logger
+from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.participation import AnonymousParticipation
@@ -41,7 +42,6 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ITranslated
 from guillotina.interfaces import ITraversable
-from guillotina.interfaces import ITraversableView
 from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
@@ -69,8 +69,12 @@ async def traverse(request, parent, path):
         # not a traversable context
         return parent, path
     try:
-        if path[0].startswith('_') or path[0] in ('.', '..'):
+        if path[0][0] == '_' or path[0] in ('.', '..'):
             raise HTTPUnauthorized()
+        if path[0][0] == '@':
+            # shortcut
+            return parent, path
+
         if IAsyncContainer.providedBy(parent):
             context = await parent.async_get(path[0], suppress_events=True)
             if context is None:
@@ -354,16 +358,15 @@ class TraversalRouter(AbstractRouter):
         request.tail = tail
 
         if request.resource is None:
-            raise HTTPBadRequest(text='Resource not found')
+            raise HTTPNotFound(text='Resource not found')
 
-        traverse_to = None
-        if tail and len(tail) == 1:
-            view_name = tail[0]
-        elif tail is None or len(tail) == 0:
+        if tail and len(tail) > 0:
+            # convert match lookups
+            view_name = routes.path_to_view_name(tail)
+        elif not tail:
             view_name = ''
         else:
-            view_name = tail[0]
-            traverse_to = tail[1:]
+            return
 
         await self.apply_authorization(request)
         request.record('authentication')
@@ -384,22 +387,12 @@ class TraversalRouter(AbstractRouter):
         except AttributeError:
             view = None
 
+        if not view and len(tail) > 0:
+            # we should have a view in this case because we are matching routes
+            return
+
         request.found_view = view
         request.view_name = view_name
-
-        # Traverse view if its needed
-        if traverse_to is not None and view is not None:
-            if not ITraversableView.providedBy(view):
-                return None
-            else:
-                try:
-                    view = await view.publish_traverse(traverse_to)
-                except KeyError:
-                    return None  # not found, it's okay.
-                except Exception as e:
-                    logger.error("Exception on view execution", exc_info=e,
-                                 request=request)
-                    return None
 
         permission = get_utility(IPermission, name='guillotina.AccessContent')
 
@@ -415,19 +408,29 @@ class TraversalRouter(AbstractRouter):
                         request=request)
                     raise HTTPUnauthorized()
 
-        if view is None and method == IOPTIONS:
-            view = DefaultOPTIONS(resource, request)
+        if view is None:
+            if method == IOPTIONS:
+                view = DefaultOPTIONS(resource, request)
+            else:
+                return
 
-        if view:
-            ViewClass = view.__class__
-            view_permission = get_view_permission(ViewClass)
-            if not security.check_permission(view_permission, view):
-                logger.warning("No access for view {content} with {auths}".format(
-                    content=resource,
-                    auths=str([x.principal.id
-                               for x in security.participations])),
-                    request=request)
-                raise HTTPUnauthorized()
+        ViewClass = view.__class__
+        view_permission = get_view_permission(ViewClass)
+        if not security.check_permission(view_permission, view):
+            logger.warning("No access for view {content} with {auths}".format(
+                content=resource,
+                auths=str([x.principal.id
+                           for x in security.participations])),
+                request=request)
+            raise HTTPUnauthorized()
+
+        try:
+            view.__route__.matches(request, tail or [])
+        except (KeyError, IndexError):
+            return
+
+        if hasattr(view, 'prepare'):
+            view = (await view.prepare()) or view
 
         request.record('authorization')
 

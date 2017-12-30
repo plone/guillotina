@@ -228,13 +228,28 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     return result
 
 
+def loop_apply_coroutine(loop, func: types.FunctionType, *args, **kwargs) -> object:
+    """
+    Call a function with the supplied arguments.
+    If the result is a coroutine, use the supplied loop to run it.
+    """
+    if asyncio.iscoroutinefunction(func):
+        future = asyncio.ensure_future(
+            func(*args, **kwargs), loop=loop)
+
+        loop.run_until_complete(future)
+        return future.result()
+    else:
+        return func(*args, **kwargs)
+
+
 _valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+'
 
 
 def valid_id(_id):
     _id = _id.lower()
     # can't start with _
-    if not _id or _id[0] == '_':
+    if not _id or _id[0] in ('_', '@'):
         return False
     return _id == ''.join([l for l in _id if l in _valid_id_characters])
 
@@ -244,7 +259,7 @@ async def get_containers(request, transaction_strategy='none'):
     for _id, db in root:
         if IDatabase.providedBy(db):
             if transaction_strategy is not None:
-                db._db._storage._transaction_strategy = transaction_strategy
+                db._storage._transaction_strategy = transaction_strategy
             tm = request._tm = db.get_transaction_manager()
             tm.request = request
             request._db_id = _id
@@ -361,3 +376,12 @@ def to_str(value):
     if isinstance(value, bytes):
         value = value.decode('utf-8')
     return value
+
+
+def list_or_dict_items(val):
+    if isinstance(val, list):
+        new_val = []
+        for item in val:
+            new_val.extend([(k, v) for k, v in item.items()])
+        return new_val
+    return [(k, v) for k, v in val.items()]

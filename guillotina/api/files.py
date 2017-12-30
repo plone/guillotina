@@ -77,7 +77,7 @@ class DirectoryGET(FileGET):
 # Field File
 @configure.service(
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
-    name='@upload',
+    name='@upload/{field_name}',
     **_traversed_file_doc('Update the content of a file'))
 class UploadFile(TraversableFieldService):
 
@@ -95,7 +95,7 @@ class UploadFile(TraversableFieldService):
 
 @configure.service(
     context=IResource, method='GET', permission='guillotina.ViewContent',
-    name='@download',
+    name='@download/{field_name}',
     **_traversed_file_doc('Download the content of a file'))
 class DownloadFile(TraversableDownloadService):
 
@@ -109,7 +109,7 @@ class DownloadFile(TraversableDownloadService):
 
 @configure.service(
     context=IResource, method='POST', permission='guillotina.ModifyContent',
-    name='@tusupload',
+    name='@tusupload/{field_name}',
     **_traversed_file_doc('TUS endpoint', parameters=[{
         "name": "Upload-Offset",
         "in": "headers",
@@ -172,7 +172,7 @@ class TusCreateFile(UploadFile):
 
 @configure.service(
     context=IResource, method='HEAD', permission='guillotina.ModifyContent',
-    name='@tusupload',
+    name='@tusupload/{field_name}',
     **_traversed_file_doc('TUS endpoint', responses={
         '200': {
             'description': 'Successfully patched data',
@@ -201,7 +201,7 @@ class TusHeadFile(UploadFile):
 
 @configure.service(
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
-    name='@tusupload',
+    name='@tusupload/{field_name}',
     **_traversed_file_doc('TUS endpoint', parameters=[{
         "name": "Upload-Offset",
         "in": "headers",
@@ -234,7 +234,7 @@ class TusPatchFile(UploadFile):
 
 @configure.service(
     context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight',
-    name='@tusupload',
+    name='@tusupload/{field_name}',
     **_traversed_file_doc('TUS endpoint', responses={
         '200': {
             'description': 'Successfully returned tus info',

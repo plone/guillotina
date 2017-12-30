@@ -22,7 +22,6 @@ import time
 import uuid
 
 
-HARD_CACHE = {}
 _EMPTY = '__<EMPTY VALUE>__'
 
 
@@ -197,7 +196,7 @@ class Transaction(object):
             self.deleted[oid] = obj
 
     async def clean_cache(self):
-        HARD_CACHE.clear()
+        self._manager._hard_cache.clear()
         await self._cache.clear()
 
     async def refresh(self, ob):
@@ -220,7 +219,7 @@ class Transaction(object):
             if obj is not None:
                 return obj
 
-        result = HARD_CACHE.get(oid, None)
+        result = self._manager._hard_cache.get(oid, None)
         if result is None:
             result = await self._cache.get(oid=oid)
 
@@ -235,7 +234,7 @@ class Transaction(object):
 
         if obj.__immutable_cache__:
             # ttl of zero means we want to provide a hard cache here
-            HARD_CACHE[oid] = result
+            self._manager._hard_cache[oid] = result
         else:
             if self._cache.max_cache_record_size > len(result['state']):
                 await self._cache.set(result, oid=oid)

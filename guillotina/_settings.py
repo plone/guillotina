@@ -7,6 +7,7 @@ app_settings = {
     "debug": False,
     "aiohttp_settings": {},
     "databases": [],
+    "storages": {},
     "conflict_retry_attempts": 3,
     "host": "127.0.0.1",
     "port": 8080,

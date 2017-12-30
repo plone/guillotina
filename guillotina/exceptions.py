@@ -165,3 +165,9 @@ class ResourceLockedTimeout(Exception):
     The resource you are trying to lock for writing is already locked by
     another process and the wait time for the lock has expired
     '''
+
+
+class InvalidRoute(Exception):
+    '''
+    The defined route is invalid
+    '''

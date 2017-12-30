@@ -3,7 +3,9 @@ from zope.interface import Interface
 
 
 class IDatabaseConfigurationFactory(Interface):
-    pass
+    '''
+    Factory to create database object
+    '''
 
 
 class IConfigurationContext(Interface):
