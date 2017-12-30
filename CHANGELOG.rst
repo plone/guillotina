@@ -1,5 +1,5 @@
-3.0.0 (unreleased)
-------------------
+3.0.0a1 (2017-12-30)
+--------------------
 
 - Fix issue with multiple databases mounted
 
