@@ -51,7 +51,9 @@ class QueueUtility(object):
                 got_obj = True
                 txn = get_transaction(view.request)
                 tm = get_tm(view.request)
-                if txn is None or txn.status in (Status.ABORTED, Status.COMMITTED):
+                if txn is None or (txn.status in (
+                        Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and
+                        txn._db_conn is None):
                     txn = await tm.begin(view.request)
                 else:
                     # still finishing current transaction, this connection

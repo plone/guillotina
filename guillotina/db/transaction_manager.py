@@ -57,7 +57,12 @@ class TransactionManager(object):
             # re-use txn if possible
             txn = request._txn
             txn.status = Status.ACTIVE
-        if txn is None:
+            if txn._db_conn is not None:
+                try:
+                    await self._close_txn(txn)
+                except Exception:
+                    logger.warn('Unable to close spurious connection', exc_info=True)
+        else:
             txn = Transaction(self, request=request)
 
         self._last_txn = txn
@@ -109,7 +114,8 @@ class TransactionManager(object):
                     pass
                 else:
                     raise
-            txn._db_conn = None
+            finally:
+                txn._db_conn = None
         if txn == self._last_txn:
             self._last_txn = None
             self._last_db_conn = None

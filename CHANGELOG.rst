@@ -1,7 +1,8 @@
 2.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix scheduling async tasks with after commit hooks
+  [vangheem]
 
 
 2.3.0 (2017-12-29)
