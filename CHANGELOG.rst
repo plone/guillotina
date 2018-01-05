@@ -1,7 +1,8 @@
 2.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide new `@listing` endpoint
+  [vangheem]
 
 
 2.3.1 (2017-12-29)

@@ -772,6 +772,88 @@ async def ids(context, request):
     return await context.async_keys()
 
 
+BATCHED_GET_CHILDREN_KEYS = """
+    SELECT id
+    FROM objects
+    WHERE parent_id = $1::varchar(32)
+    ORDER BY zoid
+    LIMIT $2::int
+    OFFSET $3::int
+    """
+
+@configure.service(
+    context=IFolder, method='GET', name="@items",
+    permission='guillotina.ViewContent',
+    summary='Paginated list of sub objects',
+    parameters=[{
+        "name": "include",
+        "in": "query",
+        "type": "string"
+    }, {
+        "name": "omit",
+        "in": "query",
+        "type": "string"
+    }, {
+        "name": "page_size",
+        "in": "query",
+        "type": "number",
+        "default": 20
+    }, {
+        "name": "page",
+        "in": "query",
+        "type": "number",
+        "default": 1
+    }],
+    responses={
+        "200": {
+            "description": "Successfully returned list of ids"
+        }
+    })
+async def items(context, request):
+
+    try:
+        page_size = int(request.GET['page_size'])
+    except:
+        page_size = 20
+    try:
+        page = int(request.GET['page'])
+    except:
+        page = 1
+
+    # alright, we'll do our own batching now...
+    txn = request._txn
+    conn = txn._db_conn
+    smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS)
+    result = await smt.fetch(
+        context._p_oid,
+        page_size,
+        (page - 1) * page_size)
+
+    include = omit = []
+    if request.GET.get('include'):
+        include = request.GET.get('include').split(',')
+    if request.GET.get('omit'):
+        omit = request.GET.get('omit').split(',')
+
+    results = []
+    for record in result:
+        ob = await context.async_get(record['id'])
+        serializer = get_multi_adapter(
+            (ob, request),
+            IResourceSerializeToJson)
+        try:
+            results.append(await serializer(include=include, omit=omit))
+        except TypeError:
+            results.append(await serializer())
+
+    return {
+        'items': results,
+        'total': await context.async_len(),
+        'page': page,
+        'page_size': page_size
+    }
+
+
 @configure.service(
     context=IAsyncContainer, method='GET', name="@addable-types",
     permission='guillotina.AddContent',

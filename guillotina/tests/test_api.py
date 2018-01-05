@@ -568,3 +568,25 @@ async def test_get_all_permissions(container_requester):
     async with container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@all_permissions')
         assert status == 200
+
+
+async def test_items(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        # add 20 items
+        for _ in range(22):
+            response, status = await requester(
+                'POST', '/db/guillotina',
+                data=json.dumps({
+                    '@type': 'Item'
+                }))
+        response, status = await requester('GET', '/db/guillotina/@items?page_size=10')
+        assert len(response['items']) == 10
+        assert response['total'] == 22
+
+        response, status = await requester('GET', '/db/guillotina/@items?page_size=10&page=2')
+        assert len(response['items']) == 10
+        assert response['total'] == 22
+
+        response, status = await requester('GET', '/db/guillotina/@items?page_size=10&page=3')
+        assert len(response['items']) == 2
