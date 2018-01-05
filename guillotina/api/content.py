@@ -806,7 +806,7 @@ BATCHED_GET_CHILDREN_KEYS = """
     }],
     responses={
         "200": {
-            "description": "Successfully returned list of ids"
+            "description": "Successfully respect object"
         }
     })
 async def items(context, request):
