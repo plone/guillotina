@@ -806,7 +806,7 @@ BATCHED_GET_CHILDREN_KEYS = """
     }],
     responses={
         "200": {
-            "description": "Successfully respect object"
+            "description": "Successfully returned response object"
         }
     })
 async def items(context, request):

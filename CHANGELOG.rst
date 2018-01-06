@@ -1,7 +1,7 @@
 2.3.2 (unreleased)
 ------------------
 
-- Provide new `@listing` endpoint
+- Provide new `@items` endpoint
   [vangheem]
 
 
