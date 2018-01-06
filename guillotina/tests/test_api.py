@@ -601,3 +601,8 @@ async def test_items(container_requester):
             'GET', '/db/guillotina/@items?omit=guillotina.behaviors.dublincore.IDublinCore')
         item = response['items'][0]
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in item
+
+        response, status = await requester(
+            'GET', '/db/guillotina/@items?include=title')
+        item = response['items'][0]
+        assert 'guillotina.behaviors.dublincore.IDublinCore' not in item
