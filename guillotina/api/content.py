@@ -813,11 +813,11 @@ async def items(context, request):
 
     try:
         page_size = int(request.GET['page_size'])
-    except:
+    except Exception:
         page_size = 20
     try:
         page = int(request.GET['page'])
-    except:
+    except Exception:
         page = 1
 
     # alright, we'll do our own batching now...
