@@ -146,17 +146,19 @@ class RendererJson(Renderer):
 class StringRenderer(Renderer):
     content_type = 'text/plain'
 
+    def get_body(self, value: Response) -> bytes:
+        body = value.response
+        if not isinstance(body, bytes):
+            if not isinstance(body, str):
+                body = ujson.dumps(value.response)
+            body = body.encode('utf8')
+        return body
+
     @profilable
     async def __call__(self, value):
         if _is_guillotina_response(value):
-            body = value.response
-            if not isinstance(body, bytes):
-                if not isinstance(body, str):
-                    body = ujson.dumps(value.response)
-                body = body.encode('utf8')
-
             value = aioResponse(
-                body=body, status=value.status,
+                body=self.get_body(value), status=value.status,
                 headers=value.headers)
         if 'content-type' not in value.headers:
             value.headers.update({
@@ -170,6 +172,12 @@ class StringRenderer(Renderer):
     provides=IRendered)
 class RendererHtml(StringRenderer):
     content_type = 'text/html'
+
+    def get_body(self, value: Response) -> bytes:
+        body = super().get_body(value)
+        if b'<html' not in body:
+            body = b'<html><body>' + body + b'</body></html>'
+        return body
 
 
 @configure.adapter(

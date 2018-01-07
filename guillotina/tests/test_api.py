@@ -563,6 +563,20 @@ async def test_get_with_include_omit(container_requester):
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
 
 
+async def test_return_correct_content_type(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        response, status, headers = await requester.make_request(
+            'GET', '/db/guillotina', accept='application/json')
+        assert headers['Content-Type'] == 'application/json'
+
+        response, status, headers = await requester.make_request(
+            'GET', '/db/guillotina', accept='text/html,*/*')
+        # it will convert it to string with html
+        assert 'text/html' in headers['Content-Type']
+        assert b'<html' in response
+
+
 async def test_get_all_permissions(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:

@@ -4,6 +4,9 @@
 - Provide new `@items` endpoint
   [vangheem]
 
+- Make sure the `text/html` renderer wraps content in html tags
+  [vangheem]
+
 
 2.3.1 (2017-12-29)
 ------------------
