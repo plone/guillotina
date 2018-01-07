@@ -1,7 +1,8 @@
 2.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure the `text/html` renderer wraps content in html tags
+  [vangheem]
 
 
 2.3.1 (2017-12-29)
