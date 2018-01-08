@@ -1,6 +1,9 @@
 2.3.2 (unreleased)
 ------------------
 
+- Fix potential connection leak with `utils.get_containers`
+  [vangheem]
+
 - Make sure `_p_jar` on database object finds the right connection
   [vangheem]
 
@@ -31,7 +34,6 @@
 
 - Implement `dbresolve_readcommitted` and `resolve_readcommitted` transaction
   strategies
-  [vangheem]
 
 
 2.2.6 (2017-12-28)
