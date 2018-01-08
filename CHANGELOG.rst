@@ -1,7 +1,8 @@
 2.2.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure `_p_jar` on database object finds the right connection
+  [vangheem]
 
 
 2.2.8 (2018-01-08)
