@@ -250,6 +250,7 @@ Available commands:
 Available commands:
 {}\n\n'''.format(arguments.command, '\n  - '.join(c for c in _commands.keys())))
 
+    app_settings['_command'] = arguments.command
     Command = resolve_dotted_name(_commands[arguments.command])
     if Command is None:
         return print('Could not resolve command {}:{}'.format(

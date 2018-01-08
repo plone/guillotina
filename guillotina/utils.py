@@ -255,6 +255,12 @@ async def get_containers(request, transaction_strategy='none'):
                 if hasattr(request, 'container_settings'):
                     del request.container_settings
                 yield txn, tm, container
+            try:
+                # do not rely on consumer of object to always close it.
+                # there is no harm in aborting twice
+                await tm.abort(txn=txn)
+            except Exception:
+                logger.warn('Error aborting transaction', exc_info=True)
 
 
 @profilable

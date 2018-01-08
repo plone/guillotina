@@ -1,3 +1,10 @@
+2.2.8 (unreleased)
+------------------
+
+- Fix potential connection leak with `utils.get_containers`
+  [vangheem]
+
+
 2.2.6 (2017-12-28)
 ------------------
 
