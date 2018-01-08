@@ -119,7 +119,10 @@ class Database(object):
     @property
     def _p_jar(self):
         try:
-            return get_transaction()
+            txn = get_transaction()
+            if txn is None:
+                txn = self.get_transaction_manager()._last_txn
+            return txn
         except AttributeError:
             return self.get_transaction_manager()._last_txn
 
