@@ -1,4 +1,4 @@
-2.3.3 (unreleased)
+2.3.3 (2018-01-08)
 ------------------
 
 - Make sure `_p_jar` on database object defaults to _last_txn
