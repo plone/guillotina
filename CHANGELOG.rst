@@ -1,4 +1,4 @@
-2.2.9 (unreleased)
+2.2.9 (2018-01-08)
 ------------------
 
 - Make sure `_p_jar` on database object finds the right connection
