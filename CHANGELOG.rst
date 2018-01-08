@@ -1,6 +1,9 @@
 2.3.2 (unreleased)
 ------------------
 
+- Make sure `_p_jar` on database object finds the right connection
+  [vangheem]
+
 - Make sure the `text/html` renderer wraps content in html tags
   [vangheem]
 
@@ -15,8 +18,7 @@
 2.3.0 (2017-12-29)
 ------------------
 
-- Make sure `_p_jar` on database object finds the right connection
-  [vangheem]
+- Nothing changed yet.
 
 
 2.2.7 (2017-12-29)
