@@ -1,7 +1,8 @@
 2.2.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure `_p_jar` on database object defaults to _last_txn
+  [vangheem]
 
 
 2.2.9 (2018-01-08)
