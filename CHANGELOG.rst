@@ -15,7 +15,8 @@
 2.3.0 (2017-12-29)
 ------------------
 
-- Nothing changed yet.
+- Make sure `_p_jar` on database object finds the right connection
+  [vangheem]
 
 
 2.2.7 (2017-12-29)
