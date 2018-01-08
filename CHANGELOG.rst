@@ -1,4 +1,4 @@
-2.3.2 (unreleased)
+2.3.2 (2018-01-08)
 ------------------
 
 - Fix potential connection leak with `utils.get_containers`
