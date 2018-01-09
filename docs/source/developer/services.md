@@ -48,13 +48,13 @@ from guillotina import configure
 from guillotina.interfaces import IContainer
 from guillotina.api.service import Service
 
-# TODO: this is the same as above
 @configure.service(context=IContainer, name='@myservice', method='GET',
                    permission='guillotina.AccessContent')
-async def my_service(context, request):
-    return {
-        'foo': 'bar'
-    }
+class MyService(Service):
+    async def __call__(self):
+        return {
+            'foo': 'bar'
+        }
 ```
 
 ## Special cases
