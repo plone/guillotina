@@ -582,3 +582,41 @@ async def test_get_all_permissions(container_requester):
     async with container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@all_permissions')
         assert status == 200
+
+
+async def test_items(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        # add 20 items
+        for _ in range(22):
+            response, status = await requester(
+                'POST', '/db/guillotina',
+                data=json.dumps({
+                    '@type': 'Item'
+                }))
+        response, status = await requester('GET', '/db/guillotina/@items?page_size=10')
+        assert len(response['items']) == 10
+        assert response['total'] == 22
+        items = [i['UID'] for i in response['items']]
+
+        response, status = await requester('GET', '/db/guillotina/@items?page_size=10&page=2')
+        assert len(response['items']) == 10
+        assert response['total'] == 22
+        items.extend([i['UID'] for i in response['items']])
+
+        response, status = await requester('GET', '/db/guillotina/@items?page_size=10&page=3')
+        assert len(response['items']) == 2
+        items.extend([i['UID'] for i in response['items']])
+
+        # we should have 22 unique uids now
+        assert len(set(items)) == 22
+
+        response, status = await requester(
+            'GET', '/db/guillotina/@items?omit=guillotina.behaviors.dublincore.IDublinCore')
+        item = response['items'][0]
+        assert 'guillotina.behaviors.dublincore.IDublinCore' not in item
+
+        response, status = await requester(
+            'GET', '/db/guillotina/@items?include=title')
+        item = response['items'][0]
+        assert 'guillotina.behaviors.dublincore.IDublinCore' not in item

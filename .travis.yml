@@ -21,9 +21,9 @@ install:
   - pip install flake8
   - sleep 5
 script:
+  - flake8 guillotina --config=setup.cfg
   - pytest -s --cov=guillotina -s --tb=native -v --cov-report term-missing guillotina
   - USE_COCKROACH=true pytest -s --tb=native -v guillotina
-  - flake8 guillotina --config=setup.cfg
 after_success:
   - pip install coveralls
   - coveralls

@@ -1,6 +1,7 @@
 2.3.4 (unreleased)
 ------------------
 
+- Provide new `@items` endpoint
 - Nothing changed yet.
 
 
