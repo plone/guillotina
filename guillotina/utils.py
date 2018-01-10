@@ -234,7 +234,7 @@ _valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+'
 def valid_id(_id):
     _id = _id.lower()
     # can't start with _
-    if not _id or _id[0] == '_':
+    if not _id or _id[0] in ('_', '@'):
         return False
     return _id == ''.join([l for l in _id if l in _valid_id_characters])
 

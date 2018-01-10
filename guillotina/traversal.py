@@ -69,8 +69,12 @@ async def traverse(request, parent, path):
         # not a traversable context
         return parent, path
     try:
-        if path[0].startswith('_') or path[0] in ('.', '..'):
+        if path[0][0] == '_' or path[0] in ('.', '..'):
             raise HTTPUnauthorized()
+        if path[0][0] == '@':
+            # shortcut
+            return parent, path
+
         if IAsyncContainer.providedBy(parent):
             context = await parent.async_get(path[0], suppress_events=True)
             if context is None:

@@ -1,8 +1,11 @@
 2.3.4 (unreleased)
 ------------------
 
+- Do not allow `@` in ids
+  [vangheem]
+
 - Provide new `@items` endpoint
-- Nothing changed yet.
+  [vangheem]
 
 
 2.3.3 (2018-01-08)
