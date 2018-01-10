@@ -1,4 +1,4 @@
-2.3.6 (unreleased)
+2.3.6 (2018-01-10)
 ------------------
 
 - Log access denied with info instead of warning
