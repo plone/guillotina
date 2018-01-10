@@ -1,4 +1,4 @@
-2.3.5 (unreleased)
+2.3.5 (2018-01-10)
 ------------------
 
 - Do not allow overriding transaction strategy in `utils.get_containers`
