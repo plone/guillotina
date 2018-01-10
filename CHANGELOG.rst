@@ -1,7 +1,8 @@
 2.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not allow overriding transaction strategy in `utils.get_containers`
+  [vangheem]
 
 
 2.3.4 (2018-01-10)
