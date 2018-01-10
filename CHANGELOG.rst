@@ -1,7 +1,24 @@
-2.3.2 (unreleased)
+2.3.4 (unreleased)
 ------------------
 
 - Provide new `@items` endpoint
+- Nothing changed yet.
+
+
+2.3.3 (2018-01-08)
+------------------
+
+- Make sure `_p_jar` on database object defaults to _last_txn
+  [vangheem]
+
+
+2.3.2 (2018-01-08)
+------------------
+
+- Fix potential connection leak with `utils.get_containers`
+  [vangheem]
+
+- Make sure `_p_jar` on database object finds the right connection
   [vangheem]
 
 - Make sure the `text/html` renderer wraps content in html tags
@@ -31,7 +48,6 @@
 
 - Implement `dbresolve_readcommitted` and `resolve_readcommitted` transaction
   strategies
-  [vangheem]
 
 
 2.2.6 (2017-12-28)

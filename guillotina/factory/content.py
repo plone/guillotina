@@ -7,6 +7,7 @@ from guillotina.component import provide_utility
 from guillotina.db import ROOT_ID
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.transactions import get_transaction
 from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import lazy_apply
@@ -117,7 +118,13 @@ class Database(object):
 
     @property
     def _p_jar(self):
-        return self.get_transaction_manager()._last_txn
+        try:
+            txn = get_transaction()
+            if txn is None:
+                txn = self.get_transaction_manager()._last_txn
+            return txn
+        except AttributeError:
+            return self.get_transaction_manager()._last_txn
 
     async def get_root(self):
         return await self._p_jar.get(ROOT_ID)
