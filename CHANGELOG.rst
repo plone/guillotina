@@ -1,7 +1,8 @@
 2.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Log access denied with info instead of warning
+  [vangheem]
 
 
 2.3.5 (2018-01-10)
