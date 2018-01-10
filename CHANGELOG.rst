@@ -1,7 +1,8 @@
 2.2.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Do not allow `@` in ids
+  [vangheem]
 
 
 2.2.11 (2018-01-10)
