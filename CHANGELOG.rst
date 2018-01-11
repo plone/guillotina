@@ -1,7 +1,9 @@
 2.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure `utils.get_containers` works with transaction being manipulated
+  by the consumer of the async generator
+  [vangheem]
 
 
 2.3.7 (2018-01-11)

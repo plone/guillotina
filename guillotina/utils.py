@@ -247,18 +247,22 @@ async def get_containers(request, transaction_strategy='none'):
             tm.request = request
             request._db_id = _id
             request._txn = txn = await tm.begin(request)
-            async for s_id, container in db.async_items():
+            items = {(k, v) async for k, v in db.async_items()}
+            await tm.abort(txn=txn)
+
+            for s_id, container in items:
+                request._txn = txn = await tm.begin(request)
                 tm.request.container = container
                 tm.request._container_id = container.id
                 if hasattr(request, 'container_settings'):
                     del request.container_settings
                 yield txn, tm, container
-            try:
-                # do not rely on consumer of object to always close it.
-                # there is no harm in aborting twice
-                await tm.abort(txn=txn)
-            except Exception:
-                logger.warn('Error aborting transaction', exc_info=True)
+                try:
+                    # do not rely on consumer of object to always close it.
+                    # there is no harm in aborting twice
+                    await tm.abort(txn=txn)
+                except Exception:
+                    logger.warn('Error aborting transaction', exc_info=True)
 
 
 @profilable
