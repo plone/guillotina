@@ -1,7 +1,9 @@
 2.3.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `__run_command__` in app_settings to record what the current guillotina
+  was started with.
+  [vangheem]
 
 
 2.3.6 (2018-01-10)

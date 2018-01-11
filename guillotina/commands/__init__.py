@@ -257,6 +257,7 @@ Available commands:
             arguments.command, _commands[arguments.command]
         ))
 
+    app_settings['__run_command__'] = arguments.command
     # finally, run it...
     command = Command()
     command.run_command()
