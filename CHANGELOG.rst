@@ -1,7 +1,9 @@
 2.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not manually return the response object in traversal, let aiohttp handle it.
+  This should fix cases where response were being held open that shouldn't be.
+  [vangheem]
 
 
 2.3.8 (2018-01-11)
