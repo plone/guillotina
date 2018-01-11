@@ -1,7 +1,9 @@
 2.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `guillotina.commands.utils.change_transaction_strategy` to be able to
+  override transactions strategies in commands
+  [vangheem]
 
 
 2.3.8 (2018-01-11)
