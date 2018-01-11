@@ -1,4 +1,4 @@
-2.3.8 (unreleased)
+2.3.8 (2018-01-11)
 ------------------
 
 - Make sure `utils.get_containers` works with transaction being manipulated
