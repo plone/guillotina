@@ -246,12 +246,6 @@ class MatchInfo(BaseMatchInfo):
         resp = await self.rendered(view_result)
         request.record('rendered')
 
-        if not resp.prepared:
-            await resp.prepare(request)
-        await resp.write_eof()
-        resp._body = None
-        resp.force_close()
-
         request.execute_futures()
 
         request.record('finish')

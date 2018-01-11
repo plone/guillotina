@@ -1,7 +1,9 @@
 2.3.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to customize the pg connection class with pg_connection_class
+  config option.
+  [vangheem]
 
 
 2.3.9 (2018-01-11)

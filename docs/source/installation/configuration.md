@@ -220,3 +220,13 @@ Available options:
 
 
 Warning: not all storages are compatible with all transaction strategies.
+
+
+## Connection class
+
+The default asyncpg connection class has some overhead. Guillotina provides
+a way to override it with a custom class or a provided lighter one:
+
+```yaml
+pg_connection_class: guillotina.db.storages.pg.LightweightConnection
+```

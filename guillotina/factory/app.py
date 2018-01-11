@@ -129,7 +129,8 @@ def list_or_dict_items(val):
 _dotted_name_settings = (
     'auth_extractors',
     'auth_token_validators',
-    'auth_user_identifiers'
+    'auth_user_identifiers',
+    'pg_connection_class'
 )
 
 def optimize_settings(settings):
@@ -227,6 +228,8 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     server_app.root = root
     server_app.config = config
 
+    optimize_settings(app_settings)
+
     content_type = ContentNegotiatorUtility(
         'content_type', app_settings['renderers'].keys())
     language = ContentNegotiatorUtility(
@@ -292,8 +295,6 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     # Load cached Schemas
     load_cached_schema()
-
-    optimize_settings(app_settings)
 
     return server_app
 
