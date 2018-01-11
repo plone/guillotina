@@ -1,4 +1,4 @@
-2.3.9 (unreleased)
+2.3.9 (2018-01-11)
 ------------------
 
 - Add `guillotina.commands.utils.change_transaction_strategy` to be able to
