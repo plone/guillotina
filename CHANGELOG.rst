@@ -1,4 +1,4 @@
-2.3.7 (unreleased)
+2.3.7 (2018-01-11)
 ------------------
 
 - Add `__run_command__` in app_settings to record what the current guillotina
