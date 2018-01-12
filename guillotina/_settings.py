@@ -73,5 +73,6 @@ app_settings = {
         ("text/plain", interfaces.IRendererFormatPlain)
     )),
     'cloud_storage': "guillotina.interfaces.IDBFileField",
-    "router": "guillotina.traversal.TraversalRouter"
+    "router": "guillotina.traversal.TraversalRouter",
+    'pg_connection_class': 'asyncpg.connection.Connection'
 }

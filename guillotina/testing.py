@@ -59,7 +59,8 @@ TESTING_SETTINGS = {
                 'propagate': True
             }
         }
-    }
+    },
+    'pg_connection_class': 'guillotina.db.storages.pg.LightweightConnection'
 }
 
 

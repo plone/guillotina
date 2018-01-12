@@ -1,8 +1,20 @@
-2.3.9 (unreleased)
+2.3.10 (unreleased)
+-------------------
+
+- Be able to customize the pg connection class with pg_connection_class
+  config option.
+  [vangheem]
+
+
+2.3.9 (2018-01-11)
 ------------------
 
 - Do not manually return the response object in traversal, let aiohttp handle it.
   This should fix cases where response were being held open that shouldn't be.
+  [vangheem]
+
+- Add `guillotina.commands.utils.change_transaction_strategy` to be able to
+  override transactions strategies in commands
   [vangheem]
 
 

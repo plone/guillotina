@@ -200,4 +200,4 @@ class Write(TraversableService):
                 exc=e,
                 status=400)
 
-        return Response(response={}, status=204)
+        return Response(response='', status=204)

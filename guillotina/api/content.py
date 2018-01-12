@@ -283,7 +283,7 @@ class DefaultPATCH(Service):
 
         await notify(ObjectModifiedEvent(self.context, payload=data))
 
-        return Response(response={}, status=204)
+        return Response(response='', status=204)
 
 
 @configure.service(
