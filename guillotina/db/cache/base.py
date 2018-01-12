@@ -11,6 +11,9 @@ class BaseCache:
     def __init__(self, transaction):
         self._storage = transaction._manager._storage
         self._transaction = transaction
+        self._hits = 0
+        self._misses = 0
+        self._stored = 0
 
     def get_key(self, oid=None, container=None, id=None, variant=None):
         key = ''
@@ -49,6 +52,9 @@ class BaseCache:
 
     async def delete_all(self, keys):
         raise NotImplemented()
+
+    async def store_object(self, obj, pickled):
+        pass
 
     def get_cache_keys(self, ob, type_='modified'):
         keys = []

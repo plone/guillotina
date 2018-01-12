@@ -57,10 +57,13 @@ async def test_cache_object(dummy_guillotina):
     assert id(loaded) != id(ob)
     assert loaded._p_oid == ob._p_oid
     assert cache._actions[0]['action'] == 'stored'
+    assert cache._hits == 0
+    assert cache._misses == 1
 
     # and load from cache
     await txn.get(ob._p_oid)
     assert cache._actions[-1]['action'] == 'loaded'
+    assert cache._hits == 1
 
 
 async def test_cache_object_from_child(dummy_guillotina):
@@ -78,8 +81,10 @@ async def test_cache_object_from_child(dummy_guillotina):
     loaded = await txn.get_child(parent, ob.id)
     assert len(cache._actions) == 1
     assert cache._actions[0]['action'] == 'stored'
+    assert cache._hits == 0
     loaded = await txn.get_child(parent, ob.id)
     assert cache._actions[-1]['action'] == 'loaded'
+    assert cache._hits == 1
 
     assert id(loaded) != id(ob)
     assert loaded._p_oid == ob._p_oid

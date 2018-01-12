@@ -1,4 +1,5 @@
 from aiohttp import web_request
+from collections import OrderedDict
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
@@ -41,7 +42,8 @@ class Request(web_request.Request):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._futures = {}
-        self._events = {}
+        self._events = OrderedDict()
+        self._initialized = time.time()
 
     def record(self, event_name):
         self._events[event_name] = time.time()

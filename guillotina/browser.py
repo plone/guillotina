@@ -104,6 +104,9 @@ class Response(object):
         self.response = response
         self.headers = headers
         self.status = status
+        if status == 204:
+            # 204 is not allowed to have content
+            self.response = ''
 
 
 class UnauthorizedResponse(Response):

@@ -620,3 +620,14 @@ async def test_items(container_requester):
             'GET', '/db/guillotina/@items?include=title')
         item = response['items'][0]
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in item
+
+
+async def test_debug_headers(container_requester):
+    async with container_requester as requester:
+        response, status, headers = await requester.make_request(
+            'GET', '/db/guillotina',
+            headers={
+                'X-Debug': '1'
+            })
+        assert 'XG-Cache-hits' in headers
+        assert 'XG-Timing-0-Start' in headers
