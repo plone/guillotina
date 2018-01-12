@@ -249,6 +249,8 @@ class MatchInfo(BaseMatchInfo):
         resp = await self.rendered(view_result)
         request.record('rendered')
 
+        request.execute_futures()
+
         if 'X-Debug' in request.headers:
             try:
                 last = request._initialized
@@ -269,13 +271,7 @@ class MatchInfo(BaseMatchInfo):
             except (KeyError, AttributeError):
                 resp.headers['XG-Error'] = 'Could not get stats'
 
-        if not resp.prepared:
-            await resp.prepare(request)
-        await resp.write_eof()
-        resp._body = None
-        resp.force_close()
-
-        request.execute_futures()
+        request.record('finish')
 
         return resp
 
@@ -465,6 +461,8 @@ class TraversalRouter(AbstractRouter):
 
         rendered = query_multi_adapter(
             (renderer_object, view, request), IRendered)
+
+        request.record('renderer')
 
         if rendered is not None:
             return MatchInfo(resource, request, view, rendered)

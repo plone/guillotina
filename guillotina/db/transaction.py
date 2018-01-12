@@ -372,7 +372,7 @@ class Transaction(object):
     # Inspection
 
     @profilable
-    @cache(lambda oid: {'oid': oid})
+    @cache(lambda oid: {'oid': oid, 'variant': 'keys'})
     async def keys(self, oid):
         keys = []
         for record in await self._manager._storage.keys(self, oid):
