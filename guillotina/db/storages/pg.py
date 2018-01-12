@@ -499,9 +499,9 @@ class PostgresqlStorage(BaseStorage):
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
-        p = writer.serialize()  # This calls __getstate__ of obj
-        if len(p) >= self._large_record_size:
-            log.warning(f"Large object {obj.__class__}: {len(p)}")
+        pickled = writer.serialize()  # This calls __getstate__ of obj
+        if len(pickled) >= self._large_record_size:
+            log.warning(f"Large object {obj.__class__}: {len(pickled)}")
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
@@ -521,7 +521,7 @@ class PostgresqlStorage(BaseStorage):
                 result = await smt.fetch(
                     oid,                 # The OID of the object
                     txn._tid,            # Our TID
-                    len(p),              # Len of the object
+                    len(pickled),        # Len of the object
                     part,                # Partition indicator
                     writer.resource,     # Is a resource ?
                     writer.of,           # It belogs to a main
@@ -530,7 +530,7 @@ class PostgresqlStorage(BaseStorage):
                     writer.id,           # Traversal ID
                     writer.type,         # Guillotina type
                     json,                # JSON catalog
-                    p                    # Pickle state)
+                    pickled              # Pickle state)
                 )
             except asyncpg.exceptions.ForeignKeyViolationError:
                 txn.deleted[obj._p_oid] = obj
@@ -558,6 +558,7 @@ class PostgresqlStorage(BaseStorage):
                 else:
                     log.error('Incorrect response count from database update. '
                               'This should not happen. tid: {}'.format(txn._tid))
+        await txn._cache.store_object(obj, pickled)
 
     async def _txn_oid_commit_hook(self, status, oid):
         await self._vacuum.add_to_queue(oid)

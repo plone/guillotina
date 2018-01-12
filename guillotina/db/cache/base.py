@@ -50,6 +50,9 @@ class BaseCache:
     async def delete_all(self, keys):
         raise NotImplemented()
 
+    async def store_object(self, obj, pickled):
+        pass
+
     def get_cache_keys(self, ob, type_='modified'):
         keys = []
 

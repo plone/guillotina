@@ -38,6 +38,32 @@ class Status:
     CONFLICT = 'Conflict'
 
 
+class cache:
+
+    def __init__(self, key_gen, check_state_size=False):
+        self.key_gen = key_gen
+        self.check_state_size = check_state_size
+
+    def __call__(self, func):
+        this = self
+
+        async def _wrapper(self, *args, **kwargs):
+            key_args = this.key_gen(*args, **kwargs)
+            result = await self._cache.get(**key_args)
+            if result is not None:
+                return result
+            result = await func(self, *args, **kwargs)
+            try:
+                if (this.check_state_size and
+                        len(result['state']) < self._cache.max_cache_record_size):
+                    await self._cache.set(result, **key_args)
+            except (TypeError, KeyError):
+                await self._cache.set(result, **key_args)
+            return result
+
+        return _wrapper
+
+
 @implementer(ITransaction)
 class Transaction(object):
     _status = 'empty'
@@ -211,10 +237,13 @@ class Transaction(object):
             ob.__dict__[key] = value
         ob._p_serial = new._p_serial
 
+    @cache(lambda oid: {'oid': oid})
+    async def _get(self, oid):
+        return await self._manager._storage.load(self, oid)
+
     @profilable
     async def get(self, oid, ignore_registered=False):
         """Getting a oid from the db"""
-
         if not ignore_registered:
             obj = self.modified.get(oid, None)
             if obj is not None:
@@ -222,23 +251,12 @@ class Transaction(object):
 
         result = HARD_CACHE.get(oid, None)
         if result is None:
-            result = await self._cache.get(oid=oid)
+            result = await self._get(oid)
 
-        if result is not None:
-            obj = reader(result)
-            obj._p_jar = self
-            return obj
-
-        result = await self._manager._storage.load(self, oid)
         obj = reader(result)
         obj._p_jar = self
-
         if obj.__immutable_cache__:
-            # ttl of zero means we want to provide a hard cache here
             HARD_CACHE[oid] = result
-        else:
-            if self._cache.max_cache_record_size > len(result['state']):
-                await self._cache.set(result, oid=oid)
 
         return obj
 
@@ -348,24 +366,19 @@ class Transaction(object):
     # Inspection
 
     @profilable
+    @cache(lambda oid: {'oid': oid})
     async def keys(self, oid):
-        keys = await self._cache.get(oid=oid, variant='keys')
-        if keys is None:
-            keys = []
-            for record in await self._manager._storage.keys(self, oid):
-                keys.append(record['id'])
-            await self._cache.set(keys, oid=oid, variant='keys')
+        keys = []
+        for record in await self._manager._storage.keys(self, oid):
+            keys.append(record['id'])
         return keys
 
     @profilable
+    @cache(lambda container, key: {'container': container, 'id': key}, True)
     async def get_child(self, container, key):
-        result = await self._cache.get(container=container, id=key)
+        result = await self._manager._storage.get_child(self, container._p_oid, key)
         if result is None:
-            result = await self._manager._storage.get_child(self, container._p_oid, key)
-            if result is None:
-                return None
-            if self._cache.max_cache_record_size > len(result['state']):
-                await self._cache.set(result, container=container, id=key)
+            return None
 
         obj = reader(result)
         obj.__parent__ = container
@@ -377,12 +390,9 @@ class Transaction(object):
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     @profilable
+    @cache(lambda oid: {'oid': oid, 'variant': 'len'})
     async def len(self, oid):
-        result = await self._cache.get(oid=oid, variant='len')
-        if result is None:
-            result = await self._manager._storage.len(self, oid)
-            await self._cache.set(result, oid=oid, variant='len')
-        return result
+        return await self._manager._storage.len(self, oid)
 
     @profilable
     async def items(self, container):
@@ -392,30 +402,28 @@ class Transaction(object):
             yield key, await self.get_child(container, key)
 
     @profilable
+    @cache(lambda base_obj, id: {'container': base_obj, 'id': id, 'variant': 'annotation'}, True)
+    async def _get_annotation(self, base_obj, id):
+        result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+        if result is None:
+            return _EMPTY
+        return result
+
+    @profilable
     async def get_annotation(self, base_obj, id):
-        result = await self._cache.get(container=base_obj, id=id, variant='annotation')
+        result = await self._get_annotation(base_obj, id)
         if result == _EMPTY:
             raise KeyError(id)
-        if result is None:
-            result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
-            if result is None:
-                await self._cache.set(_EMPTY, container=base_obj, id=id, variant='annotation')
-                raise KeyError(id)
-            if self._cache.max_cache_record_size > len(result['state']):
-                await self._cache.set(result, container=base_obj, id=id, variant='annotation')
         obj = reader(result)
         obj.__of__ = base_obj._p_oid
         obj._p_jar = self
         return obj
 
     @profilable
+    @cache(lambda oid: {'oid': oid})
     async def get_annotation_keys(self, oid):
-        result = await self._cache.get(oid=oid, variant='annotation-keys')
-        if result is None:
-            result = [r['id'] for r in await self._manager._storage.get_annotation_keys(self, oid)]
-            await self._cache.set(result, oid=oid, variant='annotation-keys')
-            return result
-        return []
+        return [r['id'] for r in
+                await self._manager._storage.get_annotation_keys(self, oid)]
 
     async def del_blob(self, bid):
         return await self._manager._storage.del_blob(self, bid)

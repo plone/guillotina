@@ -217,9 +217,9 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
-        p = writer.serialize()  # This calls __getstate__ of obj
-        if len(p) >= self._large_record_size:
-            logger.warning(f"Large object {obj.__class__}: {len(p)}")
+        pickled = writer.serialize()  # This calls __getstate__ of obj
+        if len(pickled) >= self._large_record_size:
+            logger.warning(f"Large object {obj.__class__}: {len(pickled)}")
         part = writer.part
         if part is None:
             part = 0
@@ -237,7 +237,7 @@ class CockroachStorage(pg.PostgresqlStorage):
                 result = await smt.fetch(
                     oid,                 # The OID of the object
                     txn._tid,            # Our TID
-                    len(p),              # Len of the object
+                    len(pickled),        # Len of the object
                     part,                # Partition indicator
                     writer.resource,     # Is a resource ?
                     writer.of,           # It belogs to a main
@@ -245,7 +245,7 @@ class CockroachStorage(pg.PostgresqlStorage):
                     writer.parent_id,    # Parent OID
                     writer.id,           # Traversal ID
                     writer.type,         # Guillotina type
-                    p                    # Pickle state)
+                    pickled              # Pickle state)
                 )
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
@@ -260,6 +260,7 @@ class CockroachStorage(pg.PostgresqlStorage):
                     f'caused by a cache invalidation race condition and should '
                     f'be an edge case. This should resolve on request retry.',
                     oid, txn, old_serial, writer)
+        await txn._cache.store_object(obj, pickled)
 
     async def delete(self, txn, oid):
         # no cascade support, so we push to vacuum
