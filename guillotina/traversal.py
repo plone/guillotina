@@ -183,12 +183,12 @@ class MatchInfo(BaseMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
+        request.record('viewrender')
         if app_settings['check_writable_request'](request):
             try:
                 # We try to avoid collisions on the same instance of
                 # guillotina
                 view_result = await self.view()
-                request.record('view')
                 if isinstance(view_result, ErrorResponse) or \
                         isinstance(view_result, UnauthorizedResponse):
                     # If we don't throw an exception and return an specific
@@ -226,6 +226,7 @@ class MatchInfo(BaseMatchInfo):
                 view_result = generate_error_response(e, request, 'ViewError')
             finally:
                 await abort(request)
+        request.record('viewrendered')
 
         # Make sure its a Response object to send to renderer
         if not isinstance(view_result, Response):
@@ -243,8 +244,30 @@ class MatchInfo(BaseMatchInfo):
         if retry_attempts > 0:
             view_result.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
 
+        request.record('headers')
+
         resp = await self.rendered(view_result)
         request.record('rendered')
+
+        if 'X-Debug' in request.headers:
+            try:
+                last = request._initialized
+                for idx, event_name in enumerate(request._events.keys()):
+                    timing = request._events[event_name]
+                    header_name = 'XG-Timing-{}-{}'.format(idx, event_name)
+                    resp.headers[header_name] = "{0:.5f}".format((timing - last) * 1000)
+                    last = timing
+                resp.headers['XG-Timing-Total'] = "{0:.5f}".format(
+                    (last - request._initialized) * 1000)
+                try:
+                    txn = request._txn
+                    resp.headers['XG-Cache-hits'] = str(txn._cache._hits)
+                    resp.headers['XG-Cache-misses'] = str(txn._cache._misses)
+                    resp.headers['XG-Cache-stored'] = str(txn._cache._stored)
+                except AttributeError:
+                    pass
+            except (KeyError, AttributeError):
+                resp.headers['XG-Error'] = 'Could not get stats'
 
         if not resp.prepared:
             await resp.prepare(request)
@@ -254,7 +277,6 @@ class MatchInfo(BaseMatchInfo):
 
         request.execute_futures()
 
-        request.record('finish')
         return resp
 
     def get_info(self):
@@ -405,6 +427,7 @@ class TraversalRouter(AbstractRouter):
                                  request=request)
                     return None
 
+        request.record('viewfound')
         permission = get_utility(IPermission, name='guillotina.AccessContent')
 
         if not security.check_permission(permission.id, resource):
