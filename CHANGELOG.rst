@@ -1,6 +1,12 @@
 2.3.10 (unreleased)
 -------------------
 
+- Be able to proactively fill cache
+  [vangheem]
+
+- Be able to send `X-Debug` header to get stats on the request timings
+  [vangheem]
+
 - Be able to customize the pg connection class with pg_connection_class
   config option.
   [vangheem]
