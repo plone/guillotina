@@ -1,4 +1,4 @@
-2.3.10 (unreleased)
+2.3.10 (2018-01-12)
 -------------------
 
 - Be able to proactively fill cache
