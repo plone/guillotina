@@ -54,17 +54,18 @@ class cache:
                 self._cache._hits += 1
                 return result
             result = await func(self, *args, **kwargs)
-            self._cache._misses += 1
 
-            try:
-                if (not this.check_state_size or
-                        len(result['state']) < self._cache.max_cache_record_size):
+            if result is not None:
+                self._cache._misses += 1
+                try:
+                    if (not this.check_state_size or
+                            len(result['state']) < self._cache.max_cache_record_size):
+                        await self._cache.set(result, **key_args)
+                        self._cache._stored += 1
+                except (TypeError, KeyError):
                     await self._cache.set(result, **key_args)
                     self._cache._stored += 1
-            except (TypeError, KeyError):
-                await self._cache.set(result, **key_args)
-                self._cache._stored += 1
-            return result
+                return result
 
         return _wrapper
 
@@ -378,10 +379,13 @@ class Transaction(object):
             keys.append(record['id'])
         return keys
 
-    @profilable
     @cache(lambda container, key: {'container': container, 'id': key}, True)
+    async def _get_child(self, container, key):
+        return await self._manager._storage.get_child(self, container._p_oid, key)
+
+    @profilable
     async def get_child(self, container, key):
-        result = await self._manager._storage.get_child(self, container._p_oid, key)
+        result = await self._get_child(container, key)
         if result is None:
             return None
 
@@ -425,7 +429,7 @@ class Transaction(object):
         return obj
 
     @profilable
-    @cache(lambda oid: {'oid': oid})
+    @cache(lambda oid: {'oid': oid, 'variant': 'annotation-keys'})
     async def get_annotation_keys(self, oid):
         return [r['id'] for r in
                 await self._manager._storage.get_annotation_keys(self, oid)]
