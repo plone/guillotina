@@ -1,4 +1,5 @@
 from asyncio import shield
+from guillotina import app_settings
 from guillotina.db import TRASHED_ID
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
@@ -10,6 +11,7 @@ from zope.interface import implementer
 
 import asyncio
 import asyncpg
+import asyncpg.connection
 import concurrent
 import logging
 import time
@@ -224,6 +226,30 @@ RETURNING id;
 BAD_CONNECTION_RESTART_DELAY = 0.25
 
 
+class LightweightConnection(asyncpg.connection.Connection):
+    '''
+    See asyncpg.connection.Connection._get_reset_query to see
+    details of the point of this.
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # we purposefully do not support these options for performance
+        self._server_caps = asyncpg.connection.ServerCapabilities(
+            advisory_locks=False,
+            notifications=False,
+            sql_reset=False,
+            sql_close_all=False,
+            plpgsql=self._server_caps.plpgsql
+        )
+
+    async def add_listener(self, channel, callback):
+        raise NotImplemented('Does not support listeners')
+
+    async def remove_listener(self, channel, callback):
+        raise NotImplemented('Does not support listeners')
+
+
 class PGVacuum:
 
     def __init__(self, storage, loop):
@@ -420,6 +446,7 @@ class PostgresqlStorage(BaseStorage):
             max_size=self._pool_size,
             min_size=2,
             loop=self._pool._loop,
+            connection_class=app_settings['pg_connection_class'],
             **self._connection_options)
 
         # shared read connection on all transactions
@@ -436,6 +463,7 @@ class PostgresqlStorage(BaseStorage):
             dsn=self._dsn,
             max_size=self._pool_size,
             min_size=2,
+            connection_class=app_settings['pg_connection_class'],
             loop=loop,
             **kw)
 
