@@ -51,14 +51,19 @@ class cache:
             key_args = this.key_gen(*args, **kwargs)
             result = await self._cache.get(**key_args)
             if result is not None:
+                self._cache._hits += 1
                 return result
             result = await func(self, *args, **kwargs)
+            self._cache._misses += 1
+
             try:
-                if (this.check_state_size and
+                if (not this.check_state_size or
                         len(result['state']) < self._cache.max_cache_record_size):
                     await self._cache.set(result, **key_args)
+                    self._cache._stored += 1
             except (TypeError, KeyError):
                 await self._cache.set(result, **key_args)
+                self._cache._stored += 1
             return result
 
         return _wrapper
@@ -237,7 +242,7 @@ class Transaction(object):
             ob.__dict__[key] = value
         ob._p_serial = new._p_serial
 
-    @cache(lambda oid: {'oid': oid})
+    @cache(lambda oid: {'oid': oid}, True)
     async def _get(self, oid):
         return await self._manager._storage.load(self, oid)
 
