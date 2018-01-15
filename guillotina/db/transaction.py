@@ -384,15 +384,60 @@ class Transaction(object):
         return await self._manager._storage.get_child(self, container._p_oid, key)
 
     @profilable
-    async def get_child(self, container, key):
-        result = await self._get_child(container, key)
+    async def get_child(self, parent, key):
+        result = await self._get_child(parent, key)
         if result is None:
             return None
 
-        obj = reader(result)
-        obj.__parent__ = container
+        return self._fill_object(result, parent)
+
+    def _fill_object(self, item, parent):
+        obj = reader(item)
+        obj.__parent__ = parent
         obj._p_jar = self
         return obj
+
+    async def _get_batch_children(self, parent, keys):
+        for litem in await self._manager._storage.get_children(
+                self, parent._p_oid, keys):
+            if len(litem['state']) < self._cache.max_cache_record_size:
+                await self._cache.set(litem, container=parent, id=litem['id'])
+                self._cache._stored += 1
+            yield self._fill_object(litem, parent)
+
+    async def get_children(self, parent, keys):
+        '''
+        More performant way to get groups of items.
+        - look at cache
+        - batch get from storage
+        - async for iterate items
+        - store retrieved values in storage
+        '''
+        lookup_group = []  # backlog of object that need to be looked up
+        for key in keys:
+            item = await self._cache.get(container=parent, id=key)
+            if item is None:
+                self._cache._misses += 1
+                lookup_group.append(key)
+                if len(lookup_group) > 15:  # limit batch size
+                    async for litem in self._get_batch_children(parent, lookup_group):
+                        yield litem
+                    lookup_group = []
+                continue
+
+            self._cache._hits += 1
+            if len(lookup_group) > 0:
+                # we need to clear this buffer first before we can yield this item
+                async for litem in self._get_batch_children(parent, lookup_group):
+                    yield litem
+                lookup_group = []
+
+            yield self._fill_object(item, parent)
+
+        # flush the rest
+        if len(lookup_group) > 0:
+            async for item in self._get_batch_children(parent, lookup_group):
+                yield item
 
     @profilable
     async def contains(self, oid, key):
@@ -407,8 +452,8 @@ class Transaction(object):
     async def items(self, container):
         # XXX not using cursor because we can't cache with cursor results...
         keys = await self.keys(container._p_oid)
-        for key in keys:
-            yield key, await self.get_child(container, key)
+        async for item in self.get_children(container, keys):
+            yield item.__name__, item
 
     @profilable
     @cache(lambda base_obj, id: {'container': base_obj, 'id': id, 'variant': 'annotation'}, True)
