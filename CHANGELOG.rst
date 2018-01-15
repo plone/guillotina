@@ -1,4 +1,4 @@
-2.3.11 (unreleased)
+2.3.11 (2018-01-15)
 -------------------
 
 - Add `Item.async_multi_get` method to get batches of objects in a scalable way
