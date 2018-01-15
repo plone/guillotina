@@ -47,6 +47,12 @@ GET_CHILD = """
     WHERE parent_id = $1::varchar(32) AND id = $2::text
     """
 
+GET_CHILDREN_BATCH = """
+    SELECT zoid, tid, state_size, resource, type, state, id
+    FROM objects
+    WHERE parent_id = $1::varchar(32) AND id = ANY($2)
+    """
+
 EXIST_CHILD = """
     SELECT zoid
     FROM objects
@@ -723,6 +729,11 @@ class PostgresqlStorage(BaseStorage):
             smt = await txn._db_conn.prepare(GET_CHILD)
             result = await self.get_one_row(smt, parent_oid, id)
         return result
+
+    async def get_children(self, txn, parent_oid, ids):
+        async with txn._lock:
+            return await self._read_conn.fetch(
+                GET_CHILDREN_BATCH, txn._tid, ids)
 
     async def has_key(self, txn, parent_oid, id):
         async with txn._lock:
