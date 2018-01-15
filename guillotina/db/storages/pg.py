@@ -733,7 +733,7 @@ class PostgresqlStorage(BaseStorage):
     async def get_children(self, txn, parent_oid, ids):
         async with txn._lock:
             return await self._read_conn.fetch(
-                GET_CHILDREN_BATCH, txn._tid, ids)
+                GET_CHILDREN_BATCH, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
         async with txn._lock:
