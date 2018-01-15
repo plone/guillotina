@@ -438,7 +438,7 @@ class Folder(Resource):
         """
         Asynchronously check if key exists inside this folder
         """
-        return await self._get_transaction().contains(self._p_oid, key)
+        return await self._get_transaction().contains(self, key)
 
     async def async_set(self, key: str, value: IResource) -> None:
         """
@@ -482,13 +482,13 @@ class Folder(Resource):
         """
         Asynchronously calculate the len of the folder
         """
-        return await self._get_transaction().len(self._p_oid)
+        return await self._get_transaction().len(self)
 
     async def async_keys(self) -> typing.List[str]:
         """
         Asynchronously get the sub object keys in this folder
         """
-        return await self._get_transaction().keys(self._p_oid)
+        return await self._get_transaction().keys(self)
 
     async def async_items(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
         """

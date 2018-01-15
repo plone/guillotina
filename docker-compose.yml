@@ -1,5 +1,5 @@
 postgresql:
-  image: postgres:9.6
+  image: postgres:10.1
   ports:
     - "127.0.0.1:5432:5432"
   environment:

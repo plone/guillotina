@@ -48,7 +48,7 @@ to get one running quickly.
 Example docker run command:
 
 ```
-docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:9.6
+docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:10.1
 ```
 
 

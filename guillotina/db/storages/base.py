@@ -60,7 +60,7 @@ class BaseStorage(object):
     async def abort(self, transaction):
         raise NotImplemented()
 
-    async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
+    async def get_page_of_keys(self, txn, ob, page=1, page_size=1000):
         raise NotImplemented()
 
     async def keys(self, txn, oid):
@@ -69,7 +69,7 @@ class BaseStorage(object):
     async def get_child(self, txn, parent_oid, id):
         raise NotImplemented()
 
-    async def has_key(self, txn, parent_oid, id):
+    async def has_key(self, txn, parent, id):
         raise NotImplemented()
 
     async def len(self, txn, oid):
@@ -81,28 +81,19 @@ class BaseStorage(object):
     async def get_annotation(self, txn, oid, id):
         raise NotImplemented()
 
-    async def get_annotation_keys(self, txn, oid):
+    async def get_annotation_keys(self, txn, obj):
         raise NotImplemented()
 
-    async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
+    async def write_blob_chunk(self, txn, bid, ob, chunk_index, data):
         raise NotImplemented()
 
-    async def read_blob_chunk(self, txn, bid, chunk=0):
+    async def read_blob_chunk(self, txn, bid, ob, chunk=0):
         raise NotImplemented()
 
-    async def read_blob_chunks(self, txn, bid):
+    async def read_blob_chunks(self, txn, bid, ob):
         raise NotImplemented()
 
-    async def del_blob(self, txn, bid):
-        raise NotImplemented()
-
-    async def get_total_number_of_objects(self, txn):
-        raise NotImplemented()
-
-    async def get_total_number_of_resources(self, txn):
-        raise NotImplemented()
-
-    async def get_total_resources_of_type(self, txn, type_):
+    async def del_blob(self, txn, bid, ob):
         raise NotImplemented()
 
     async def _get_page_resources_of_type(self, txn, type_, page, page_size):

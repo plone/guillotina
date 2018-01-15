@@ -25,7 +25,7 @@ class Writer(object):
 
     @property
     def of(self):
-        return getattr(self._obj, '__of__', None)
+        return getattr(getattr(self._obj, '__of__', None), '_p_oid', None)
 
     @property
     def type(self):
@@ -37,7 +37,8 @@ class Writer(object):
 
     @property
     def part(self):
-        return getattr(self._obj, '__partition_id__', 0)
+        partitioner = app_settings['partitioner'](self._obj)
+        return partitioner.part_id
 
     def serialize(self):
         return pickle.dumps(self._obj, protocol=pickle.HIGHEST_PROTOCOL)

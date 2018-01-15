@@ -74,5 +74,6 @@ app_settings = {
     )),
     'cloud_storage': "guillotina.interfaces.IDBFileField",
     "router": "guillotina.traversal.TraversalRouter",
-    'pg_connection_class': 'asyncpg.connection.Connection'
+    'pg_connection_class': 'asyncpg.connection.Connection',
+    'partitioner': 'guillotina.db.partition.DefaultPartitioner'
 }

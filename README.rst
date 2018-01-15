@@ -36,7 +36,7 @@ Dependencies
 ------------
 
 * python >= 3.6
-* postgresql >= 9.6
+* postgresql >= 10.1
 
 
 Getting started with development
@@ -114,7 +114,7 @@ First, run postgresql::
         -e POSTGRES_USER=guillotina \
         -p 127.0.0.1:5432:5432 \
         --name postgres \
-        postgres:9.6
+        postgres:10.1
 
 Then, run guillotina::
 

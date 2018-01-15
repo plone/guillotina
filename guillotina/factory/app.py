@@ -130,7 +130,8 @@ _dotted_name_settings = (
     'auth_extractors',
     'auth_token_validators',
     'auth_user_identifiers',
-    'pg_connection_class'
+    'pg_connection_class',
+    'partitioner'
 )
 
 def optimize_settings(settings):

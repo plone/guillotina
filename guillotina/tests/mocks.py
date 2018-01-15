@@ -44,10 +44,10 @@ class MockTransaction:
     def tpc_cleanup(self):
         pass
 
-    async def del_blob(self, bid):
+    async def del_blob(self, bid, ob):
         pass
 
-    async def write_blob_chunk(self, bid, zoid, chunk_number, data):
+    async def write_blob_chunk(self, bid, obb, chunk_number, data):
         pass
 
     async def get_annotation(self, ob, key):

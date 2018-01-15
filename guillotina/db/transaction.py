@@ -344,7 +344,7 @@ class Transaction(object):
         for oid, obj in self.deleted.items():
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception('Invalid reference to txn')
-            await self._manager._storage.delete(self, oid)
+            await self._manager._storage.delete(self, obj)
             self._objects_to_invalidate.append(obj)
 
     @profilable
@@ -372,16 +372,16 @@ class Transaction(object):
     # Inspection
 
     @profilable
-    @cache(lambda oid: {'oid': oid, 'variant': 'keys'})
-    async def keys(self, oid):
+    @cache(lambda ob: {'oid': ob._p_oid, 'variant': 'keys'})
+    async def keys(self, ob):
         keys = []
-        for record in await self._manager._storage.keys(self, oid):
+        for record in await self._manager._storage.keys(self, ob):
             keys.append(record['id'])
         return keys
 
     @cache(lambda container, key: {'container': container, 'id': key}, True)
     async def _get_child(self, container, key):
-        return await self._manager._storage.get_child(self, container._p_oid, key)
+        return await self._manager._storage.get_child(self, container, key)
 
     @profilable
     async def get_child(self, parent, key):
@@ -399,7 +399,7 @@ class Transaction(object):
 
     async def _get_batch_children(self, parent, keys):
         for litem in await self._manager._storage.get_children(
-                self, parent._p_oid, keys):
+                self, parent, keys):
             if len(litem['state']) < self._cache.max_cache_record_size:
                 await self._cache.set(litem, container=parent, id=litem['id'])
                 self._cache._stored += 1
@@ -440,25 +440,25 @@ class Transaction(object):
                 yield item
 
     @profilable
-    async def contains(self, oid, key):
-        return await self._manager._storage.has_key(self, oid, key)  # noqa
+    async def contains(self, parent, key):
+        return await self._manager._storage.has_key(self, parent, key)  # noqa
 
     @profilable
-    @cache(lambda oid: {'oid': oid, 'variant': 'len'})
-    async def len(self, oid):
-        return await self._manager._storage.len(self, oid)
+    @cache(lambda ob: {'oid': ob._p_oid, 'variant': 'len'})
+    async def len(self, ob):
+        return await self._manager._storage.len(self, ob)
 
     @profilable
     async def items(self, container):
         # XXX not using cursor because we can't cache with cursor results...
-        keys = await self.keys(container._p_oid)
+        keys = await self.keys(container)
         async for item in self.get_children(container, keys):
             yield item.__name__, item
 
     @profilable
     @cache(lambda base_obj, id: {'container': base_obj, 'id': id, 'variant': 'annotation'}, True)
     async def _get_annotation(self, base_obj, id):
-        result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+        result = await self._manager._storage.get_annotation(self, base_obj, id)
         if result is None:
             return _EMPTY
         return result
@@ -469,37 +469,27 @@ class Transaction(object):
         if result == _EMPTY:
             raise KeyError(id)
         obj = reader(result)
-        obj.__of__ = base_obj._p_oid
+        obj.__of__ = base_obj
         obj._p_jar = self
         return obj
 
     @profilable
-    @cache(lambda oid: {'oid': oid, 'variant': 'annotation-keys'})
-    async def get_annotation_keys(self, oid):
+    @cache(lambda obj: {'oid': obj._p_oid, 'variant': 'annotation-keys'})
+    async def get_annotation_keys(self, obj):
         return [r['id'] for r in
-                await self._manager._storage.get_annotation_keys(self, oid)]
+                await self._manager._storage.get_annotation_keys(self, obj)]
 
-    async def del_blob(self, bid):
-        return await self._manager._storage.del_blob(self, bid)
+    async def del_blob(self, bid, ob):
+        return await self._manager._storage.del_blob(self, bid, ob)
 
-    async def write_blob_chunk(self, bid, oid, chunk_index, data):
-        return await self._manager._storage.write_blob_chunk(self, bid, oid, chunk_index, data)
+    async def write_blob_chunk(self, bid, ob, chunk_index, data):
+        return await self._manager._storage.write_blob_chunk(self, bid, ob, chunk_index, data)
 
-    async def read_blob_chunk(self, bid, chunk=0):
-        return await self._manager._storage.read_blob_chunk(self, bid, chunk)
+    async def read_blob_chunk(self, bid, ob, chunk=0):
+        return await self._manager._storage.read_blob_chunk(self, bid, ob, chunk)
 
-    async def read_blob_chunks(self, bid):
-        return await self._manager._storage.read_blob_chunks(self, bid)
-
-    async def get_total_number_of_objects(self):
-        return await self._manager._storage.get_total_number_of_objects(self)
-
-    async def get_total_number_of_resources(self):
-        return await self._manager._storage.get_total_number_of_resources(self)
-
-    async def get_total_resources_of_type(self, type_):
-        return await self._manager._storage.get_total_resources_of_type(
-            self, type_)
+    async def read_blob_chunks(self, bid, ob):
+        return await self._manager._storage.read_blob_chunks(self, bid, ob)
 
     async def _get_resources_of_type(self, type_, page_size=1000):
         page = 1
@@ -513,13 +503,13 @@ class Transaction(object):
                 self, type_, page=page, page_size=page_size)
 
     @profilable
-    async def iterate_keys(self, oid, page_size=1000):
+    async def iterate_keys(self, ob, page_size=1000):
         page = 1
         keys = await self._manager._storage.get_page_of_keys(
-            self, oid, page=page, page_size=page_size)
+            self, ob, page=page, page_size=page_size)
         while len(keys) > 0:
             for key in keys:
                 yield key
             page += 1
             keys = await self._manager._storage.get_page_of_keys(
-                self, oid, page=page, page_size=page_size)
+                self, ob, page=page, page_size=page_size)

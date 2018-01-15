@@ -1,3 +1,6 @@
+from . import partition  # noqa
+
+
 # base root object
 ROOT_ID = '0' * 32
 

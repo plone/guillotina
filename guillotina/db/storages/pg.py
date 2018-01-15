@@ -1,9 +1,13 @@
 from asyncio import shield
 from guillotina import app_settings
-from guillotina.db import TRASHED_ID
 from guillotina.db.interfaces import IStorage
+from guillotina.db.storages import sql
 from guillotina.db.storages.base import BaseStorage
-from guillotina.db.storages.utils import get_table_definition
+from guillotina.db.storages.sql import Column
+from guillotina.db.storages.sql import Index
+from guillotina.db.storages.sql import Sequence
+from guillotina.db.storages.sql import SQL
+from guillotina.db.storages.sql import Table
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
@@ -20,61 +24,57 @@ import ujson
 
 log = logging.getLogger("guillotina.storage")
 
-
 # we can not use FOR UPDATE or FOR SHARE unfortunately because
 # it can cause deadlocks on the database--we need to resolve them ourselves
-GET_OID = """
-    SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
-    FROM objects
-    WHERE zoid = $1::varchar(32)
-    """
+GET_OID = SQL("""
+SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
+FROM {table}
+WHERE zoid = $1::varchar(32)
+""")
 
-GET_CHILDREN_KEYS = """
-    SELECT id
-    FROM objects
-    WHERE parent_id = $1::varchar(32)
-    """
-
-GET_ANNOTATIONS_KEYS = f"""
-    SELECT id
-    FROM objects
-    WHERE of = $1::varchar(32) AND (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
-    """
-
-GET_CHILD = """
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE parent_id = $1::varchar(32) AND id = $2::text
-    """
-
-GET_CHILDREN_BATCH = """
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE parent_id = $1::varchar(32) AND id = ANY($2)
-    """
-
-EXIST_CHILD = """
-    SELECT zoid
-    FROM objects
-    WHERE parent_id = $1::varchar(32) AND id = $2::text
-    """
+GET_CHILDREN_KEYS = SQL("""
+SELECT id
+FROM {table}
+WHERE parent_id = $1::varchar(32)
+""")
 
 
-HAS_OBJECT = """
-    SELECT zoid
-    FROM objects
-    WHERE zoid = $1::varchar(32)
-    """
+GET_ANNOTATIONS_KEYS = SQL("""
+SELECT id
+FROM {table}
+WHERE of = $1::varchar(32) AND (parent_id IS NULL OR parent_id != '{trashed_id}')
+""")
 
 
-GET_ANNOTATION = f"""
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE
-        of = $1::varchar(32) AND
-        id = $2::text AND
-        (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
-    """
+GET_CHILD = SQL("""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {table}
+WHERE parent_id = $1::varchar(32) AND id = $2::text
+""")
+
+
+EXIST_CHILD = SQL("""
+SELECT zoid
+FROM {table}
+WHERE parent_id = $1::varchar(32) AND id = $2::text
+""")
+
+
+HAS_OBJECT = SQL("""
+SELECT zoid, part
+FROM {table}
+WHERE zoid = $1::varchar(32)
+""")
+
+
+GET_ANNOTATION = SQL("""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {table}
+WHERE
+    of = $1::varchar(32) AND
+    id = $2::text AND
+    (parent_id IS NULL OR parent_id != '{trashed_id}')
+""")
 
 def _wrap_return_count(txt):
     return """WITH rows AS (
@@ -85,33 +85,17 @@ SELECT count(*) FROM rows""".format(txt)
 
 
 # upsert without checking matching tids on updated object
-NAIVE_UPSERT = """
-INSERT INTO objects
+INSERT = SQL(_wrap_return_count("""
+INSERT INTO {table}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
 VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
         $8::varchar(32), $9::text, $10::text, $11::json, $12::bytea)
-ON CONFLICT (zoid)
-DO UPDATE SET
-    tid = EXCLUDED.tid,
-    state_size = EXCLUDED.state_size,
-    part = EXCLUDED.part,
-    resource = EXCLUDED.resource,
-    of = EXCLUDED.of,
-    otid = EXCLUDED.otid,
-    parent_id = EXCLUDED.parent_id,
-    id = EXCLUDED.id,
-    type = EXCLUDED.type,
-    json = EXCLUDED.json,
-    state = EXCLUDED.state"""
-UPSERT = _wrap_return_count(NAIVE_UPSERT + """
-    WHERE
-        tid = EXCLUDED.otid""")
-NAIVE_UPSERT = _wrap_return_count(NAIVE_UPSERT)
+"""))
 
 
 # update without checking matching tids on updated object
-NAIVE_UPDATE = """
-UPDATE objects
+UPDATE = SQL(_wrap_return_count("""
+UPDATE {table}
 SET
     tid = $2::int,
     state_size = $3::int,
@@ -125,108 +109,115 @@ SET
     json = $11::json,
     state = $12::bytea
 WHERE
-    zoid = $1::varchar(32)"""
-UPDATE = _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int""")
-NAIVE_UPDATE = _wrap_return_count(NAIVE_UPDATE)
+    zoid = $1::varchar(32) AND tid = $7::int"""))
 
 
-NEXT_TID = "SELECT nextval('tid_sequence');"
-MAX_TID = "SELECT last_value FROM tid_sequence;"
+NEXT_TID = SQL("SELECT nextval('tid_sequence');")
+MAX_TID = SQL("SELECT last_value FROM tid_sequence;")
 
 
-NUM_CHILDREN = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
+NUM_CHILDREN = SQL("SELECT count(*) FROM {table} WHERE parent_id = $1::varchar(32)")
+
+RESOURCES_BY_TYPE = SQL("""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {table}
+WHERE type=$1::TEXT
+ORDER BY zoid
+LIMIT $2::int
+OFFSET $3::int
+""")
 
 
-NUM_ROWS = "SELECT count(*) FROM objects"
+GET_CHILDREN = SQL("""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {table}
+WHERE parent_id = $1::VARCHAR(32)
+""")
 
 
-NUM_RESOURCES = "SELECT count(*) FROM objects WHERE resource is TRUE"
-
-NUM_RESOURCES_BY_TYPE = "SELECT count(*) FROM objects WHERE type=$1::TEXT"
-
-RESOURCES_BY_TYPE = """
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE type=$1::TEXT
-    ORDER BY zoid
-    LIMIT $2::int
-    OFFSET $3::int
-    """
+GET_CHILDREN_BATCH = SQL("""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {table}
+WHERE parent_id = $1::varchar(32) AND id = ANY($2)
+""")
 
 
-GET_CHILDREN = """
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE parent_id = $1::VARCHAR(32)
-    """
-
-
-TRASH_PARENT_ID = f"""
-UPDATE objects
+TRASH_PARENT_ID = SQL("""
+UPDATE {table}
 SET
-    parent_id = '{TRASHED_ID}'
+    parent_id = '{trashed_id}'
 WHERE
     zoid = $1::varchar(32)
-"""
+""")
 
 
-INSERT_BLOB_CHUNK = """
-    INSERT INTO blobs
-    (bid, zoid, chunk_index, data)
-    VALUES ($1::VARCHAR(32), $2::VARCHAR(32), $3::INT, $4::BYTEA)
-"""
+INSERT_BLOB_CHUNK = SQL("""
+INSERT INTO {table}
+(bid, zoid, chunk_index, data, part)
+VALUES ($1::VARCHAR(32), $2::VARCHAR(32), $3::INT, $4::BYTEA, $5::BIGINT)
+""", 'blobs')
 
 
-READ_BLOB_CHUNKS = """
-    SELECT * from blobs
-    WHERE bid = $1::VARCHAR(32)
-    ORDER BY chunk_index
-"""
+READ_BLOB_CHUNKS = SQL("""
+SELECT * from {table}
+WHERE bid = $1::VARCHAR(32)
+ORDER BY chunk_index
+""", 'blobs')
 
-READ_BLOB_CHUNK = """
-    SELECT * from blobs
-    WHERE bid = $1::VARCHAR(32)
-    AND chunk_index = $2::int
-"""
-
-
-DELETE_BLOB = """
-    DELETE FROM blobs WHERE bid = $1::VARCHAR(32);
-"""
+READ_BLOB_CHUNK = SQL("""
+SELECT * from {table}
+WHERE bid = $1::VARCHAR(32)
+AND chunk_index = $2::int
+""", 'blobs')
 
 
-TXN_CONFLICTS = """
-    SELECT zoid, tid, state_size, resource, type, id
-    FROM objects
-    WHERE tid > $1"""
-TXN_CONFLICTS_ON_OIDS = TXN_CONFLICTS + ' AND zoid = ANY($2)'
+DELETE_BLOB = SQL("""
+DELETE FROM {table} WHERE bid = $1::VARCHAR(32);
+""", 'blobs')
 
 
-BATCHED_GET_CHILDREN_KEYS = """
-    SELECT id
-    FROM objects
-    WHERE parent_id = $1::varchar(32)
-    ORDER BY zoid
-    LIMIT $2::int
-    OFFSET $3::int
-    """
+TXN_CONFLICTS = SQL("""
+SELECT zoid, tid, state_size, resource, type, id
+FROM {table}
+WHERE tid > $1""")
+TXN_CONFLICTS_ON_OIDS = SQL(TXN_CONFLICTS.sql + ' AND zoid = ANY($2)')
 
-DELETE_OBJECT = f"""
-DELETE FROM objects
+
+BATCHED_GET_CHILDREN_KEYS = SQL("""
+SELECT id
+FROM {table}
+WHERE parent_id = $1::varchar(32)
+ORDER BY zoid
+LIMIT $2::int
+OFFSET $3::int
+""")
+
+DELETE_OBJECT = SQL("""
+DELETE FROM {table}
 WHERE zoid = $1::varchar(32);
-"""
+""")
 
-GET_TRASHED_OBJECTS = f"""
-SELECT zoid from objects where parent_id = '{TRASHED_ID}';
-"""
-
-CREATE_TRASH = f'''
-INSERT INTO objects (zoid, tid, state_size, part, resource, type)
-SELECT '{TRASHED_ID}', 0, 0, 0, FALSE, 'TRASH_REF'
-WHERE NOT EXISTS (SELECT * FROM objects WHERE zoid = '{TRASHED_ID}')
+CREATE_TRASH = SQL('''
+INSERT INTO {table} (zoid, tid, state_size, part, resource, type)
+SELECT '{trashed_id}', 0, 0, 0, FALSE, 'TRASH_REF'
+WHERE NOT EXISTS (SELECT * FROM {table} WHERE zoid = '{trashed_id}')
 RETURNING id;
-'''
+''')
 
+DROP_BLOBS = SQL("DROP TABLE IF EXISTS {table};", 'blobs')
+DROP_OBJECTS = SQL("DROP TABLE IF EXISTS {table};")
+
+DELETE_BY_PARENT_OID = SQL('''DELETE FROM {table}
+WHERE parent_id = $1::varchar(32);''')
+DELETE_FROM_BLOBS = SQL(
+    "DELETE FROM {table} WHERE zoid = $1::varchar(32);", 'blobs')
+
+BATCHED_GET_CHILDREN_OIDS = SQL("""
+SELECT zoid FROM {table}
+WHERE parent_id = $1::varchar(32)
+ORDER BY zoid
+LIMIT $2::int
+OFFSET $3::int;""")
 
 # how long to wait before trying to recover bad connections
 BAD_CONNECTION_RESTART_DELAY = 0.25
@@ -256,7 +247,28 @@ class LightweightConnection(asyncpg.connection.Connection):
         raise NotImplemented('Does not support listeners')
 
 
+async def iterate_children(conn, parent_oid, page_size=1000):
+    smt = await conn.prepare(BATCHED_GET_CHILDREN_OIDS.render())
+    page = 1
+    results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
+    while len(results) > 0:
+        for record in results:
+            yield record['zoid']
+        page += 1
+        results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
+
+
 class PGVacuum:
+    '''
+    Since cascade on delete can be very slow, when we delete on object,
+    we actual set it's parent_id to a placeholder to make sure the delete
+    transaction finishes fast.
+
+    Then in this vacuum task, we do cleanup with autocommit mode.
+    '''
+
+    _delete_by_parent_oid = DELETE_BY_PARENT_OID
+    _delete_from_blobs = DELETE_FROM_BLOBS
 
     def __init__(self, storage, loop):
         self._storage = storage
@@ -264,6 +276,12 @@ class PGVacuum:
         self._queue = asyncio.Queue(loop=loop)
         self._active = False
         self._closed = False
+
+    async def vacuum_children(self, conn, parent_oid):
+        async for child_oid in iterate_children(conn, parent_oid):
+            await self.vacuum_children(conn, child_oid)
+        await conn.execute(self._delete_by_parent_oid.render(), parent_oid)
+        await conn.execute(self._delete_from_blobs.render(), parent_oid)
 
     @property
     def active(self):
@@ -282,18 +300,6 @@ class PGVacuum:
     async def _initialize(self):
         # get existing trashed objects, push them on the queue...
         # there might be contention, but that is okay
-        conn = None
-        try:
-            conn = await self._storage.open()
-            for record in await conn.fetch(GET_TRASHED_OBJECTS):
-                self._queue.put_nowait(record['zoid'])
-        except concurrent.futures.TimeoutError:
-            log.info('Timed out connecting to storage')
-        except Exception:
-            log.warning('Error deleting trashed object', exc_info=True)
-        finally:
-            if conn is not None:
-                await self._storage.close(conn)
 
         while not self._closed:
             oid = None
@@ -317,13 +323,14 @@ class PGVacuum:
 
     async def vacuum(self, oid):
         '''
-        DELETED objects has parent id changed to the trashed ob for the oid...
+        Recursively go through objects, deleting children as you find them,
+        checking if they have their own children and so on...
+
+        Once cockroachdb 2.0 is stable, we can remove this custom vacuum implementation.
         '''
         conn = await self._storage.open()
         try:
-            await conn.execute(DELETE_OBJECT, oid)
-        except Exception:
-            log.warning('Error deleting trashed object', exc_info=True)
+            await self.vacuum_children(conn, oid)
         finally:
             try:
                 await self._storage.close(conn)
@@ -355,48 +362,50 @@ class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
     _dsn = None
-    _partition_class = None
     _pool_size = None
     _pool = None
     _large_record_size = 1 << 24
     _vacuum_class = PGVacuum
+    _partitioning_supported = True
 
-    _object_schema = {
-        'zoid': 'VARCHAR(32) NOT NULL PRIMARY KEY',
-        'tid': 'BIGINT NOT NULL',
-        'state_size': 'BIGINT NOT NULL',
-        'part': 'BIGINT NOT NULL',
-        'resource': 'BOOLEAN NOT NULL',
-        'of': 'VARCHAR(32) REFERENCES objects ON DELETE CASCADE',
-        'otid': 'BIGINT',
-        'parent_id': 'VARCHAR(32) REFERENCES objects ON DELETE CASCADE',  # parent oid
-        'id': 'TEXT',
-        'type': 'TEXT NOT NULL',
-        'json': 'JSONB',
-        'state': 'BYTEA'
-    }
+    _object_table = Table('objects', [
+        Column('zoid', sql.VARCHAR(32), not_null=True),
+        Column('tid', sql.BIGINT, not_null=True),
+        Column('state_size', sql.BIGINT, not_null=True),
+        Column('part', sql.BIGINT, not_null=True),
+        Column('resource', sql.BOOLEAN, not_null=True),
+        Column('of', sql.VARCHAR(32)),
+        Column('otid', sql.BIGINT),
+        Column('parent_id', sql.VARCHAR(32)),
+        Column('id', sql.TEXT),
+        Column('type', sql.TEXT, not_null=True),
+        Column('json', sql.JSONB),
+        Column('state', sql.BYTEA),
+    ], indexes=[
+        Index('object_tid', 'tid'),
+        Index('object_of', 'of'),
+        Index('object_part', 'part'),
+        Index('object_parent', 'parent_id'),
+        Index('object_id', 'id'),
+        Index('object_type', 'type')
+    ])
+    _blob_table = Table('blobs', [
+        Column('bid', sql.VARCHAR(32), not_null=True),
+        Column('zoid', sql.VARCHAR(32), not_null=True),
+        Column('chunk_index', sql.INT, not_null=True),
+        Column('data', sql.BYTEA),
+        Column('part', sql.BIGINT, not_null=True),
+    ], indexes=[
+        Index('blob_bid', 'bid'),
+        Index('blob_zoid', 'zoid'),
+        Index('blob_chunk', 'chunk_index'),
+    ])
 
-    _blob_schema = {
-        'bid': 'VARCHAR(32) NOT NULL',
-        'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects ON DELETE CASCADE',
-        'chunk_index': 'INT NOT NULL',
-        'data': 'BYTEA'
-    }
-
-    _initialize_statements = [
-        'CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);',
-        'CREATE INDEX IF NOT EXISTS object_of ON objects (of);',
-        'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
-        'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
-        'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
-        'CREATE INDEX IF NOT EXISTS object_type ON objects (type);',
-        'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
-        'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
-        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
+    _statements = [
+        Sequence('tid_sequence')
     ]
 
-    def __init__(self, dsn=None, partition=None, read_only=False, name=None,
+    def __init__(self, dsn=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
                  conn_acquire_timeout=20, cache_strategy='dummy', **options):
         super(PostgresqlStorage, self).__init__(
@@ -404,7 +413,6 @@ class PostgresqlStorage(BaseStorage):
             cache_strategy=cache_strategy)
         self._dsn = dsn
         self._pool_size = pool_size
-        self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
         self._read_conn = None
@@ -413,6 +421,7 @@ class PostgresqlStorage(BaseStorage):
         self._options = options
         self._connection_options = {}
         self._connection_initialized_on = time.time()
+        self._known_partitions = []
 
     async def finalize(self):
         await self._vacuum.finalize()
@@ -423,24 +432,36 @@ class PostgresqlStorage(BaseStorage):
             pass
         await self._pool.close()
 
-    async def create(self):
-        # Check DB
-        log.info('Creating initial database objects')
-        statements = [
-            get_table_definition('objects', self._object_schema),
-            get_table_definition('blobs', self._blob_schema,
-                                 primary_keys=('bid', 'zoid', 'chunk_index'))
-        ]
-        statements.extend(self._initialize_statements)
+    async def _create_table(self, table):
+        try:
+            async with self._lock:
+                statements = '\n'.join([str(s) for s in table.get_statements()])
+                print(statements)
+                await self._read_conn.execute(statements)
+        except asyncpg.exceptions.UniqueViolationError:
+            # this is okay on creation, means 2 getting created at same time
+            pass
 
-        for statement in statements:
-            try:
+    async def _create_partition(self, table, partition=0):
+        async with self._lock:
+            for statement in table.get_statements(partition=partition):
+                print(statement)
                 await self._read_conn.execute(statement)
+        self._known_partitions.append(partition)
+
+    async def create(self):
+        await self._create_table(self._object_table, partitioning_support=self._partitioning_supported)
+        await self._create_table(self._blob_table, partitioning_support=self._partitioning_supported)
+        if self._partitioning_supported:
+            await self._create_partition(self._object_table)
+            await self._create_partition(self._blob_table)
+        await self._read_conn.execute(CREATE_TRASH.render())
+        for statement in self._statements:
+            try:
+                await self._read_conn.execute(str(statement))
             except asyncpg.exceptions.UniqueViolationError:
                 # this is okay on creation, means 2 getting created at same time
                 pass
-
-        await self.initialize_tid_statements()
 
     async def restart_connection(self):
         log.error('Connection potentially lost to pg, restarting')
@@ -477,11 +498,9 @@ class PostgresqlStorage(BaseStorage):
         self._read_conn = await self.open()
         try:
             await self.initialize_tid_statements()
-            await self._read_conn.execute(CREATE_TRASH)
         except asyncpg.exceptions.UndefinedTableError:
             await self.create()
             await self.initialize_tid_statements()
-            await self._read_conn.execute(CREATE_TRASH)
 
         self._vacuum = self._vacuum_class(self, loop)
         self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
@@ -497,14 +516,14 @@ class PostgresqlStorage(BaseStorage):
         self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
-        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
+        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID.render())
+        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID.render())
 
     async def remove(self):
         """Reset the tables"""
         async with self._pool.acquire() as conn:
-            await conn.execute("DROP TABLE IF EXISTS blobs;")
-            await conn.execute("DROP TABLE IF EXISTS objects;")
+            await conn.execute(DROP_BLOBS.render())
+            await conn.execute(DROP_OBJECTS.render())
 
     async def open(self):
         try:
@@ -523,11 +542,27 @@ class PostgresqlStorage(BaseStorage):
 
     async def load(self, txn, oid):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_OID)
+            smt = await txn._db_conn.prepare(GET_OID.render())
             objects = await self.get_one_row(smt, oid)
         if objects is None:
             raise KeyError(oid)
         return objects
+
+    async def _get_store_statement(self, txn, obj, update=UPDATE, insert=INSERT):
+        if self._partitioning_supported:
+            if obj.__part_id__ not in self._known_partitions:
+                await self._create_partition(self._object_table, obj.__part_id__)
+                await self._create_partition(self._blob_table, obj.__part_id__)
+
+        update = False
+        statement_sql = insert
+        if not obj.__new_marker__ and obj._p_serial is not None:
+            # we should be confident this is an object update
+            statement_sql = update
+            update = True
+        async with txn._lock:
+            smt = await txn._db_conn.prepare(statement_sql.render(ob=obj))
+        return smt, update
 
     @profilable
     async def store(self, oid, old_serial, writer, obj, txn):
@@ -542,15 +577,8 @@ class PostgresqlStorage(BaseStorage):
         if part is None:
             part = 0
 
-        update = False
-        statement_sql = NAIVE_UPSERT
-        if not obj.__new_marker__ and obj._p_serial is not None:
-            # we should be confident this is an object update
-            statement_sql = UPDATE
-            update = True
-
+        smt, update = await self._get_store_statement(txn, obj)
         async with txn._lock:
-            smt = await txn._db_conn.prepare(statement_sql)
             try:
                 result = await smt.fetch(
                     oid,                 # The OID of the object
@@ -597,11 +625,24 @@ class PostgresqlStorage(BaseStorage):
     async def _txn_oid_commit_hook(self, status, oid):
         await self._vacuum.add_to_queue(oid)
 
-    async def delete(self, txn, oid):
+    async def _txn_drop_db_commit_hook(self, status, partition):
+        async with self._lock:
+            await self._read_conn.execute(self._object_table.drop(partition))
+
+    async def delete(self, txn, ob):
+        # no cascade support, so we push to vacuum
         async with txn._lock:
-            # for delete, we reassign the parent id and delete in the vacuum task
-            await txn._db_conn.execute(TRASH_PARENT_ID, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
+            await txn._db_conn.execute(DELETE_OBJECT.render(ob=ob), ob._p_oid)
+            await txn._db_conn.execute(DELETE_FROM_BLOBS.render(ob=ob), ob._p_oid)
+        if self._partitioning_supported:
+            partitioner = app_settings['partitioner'](ob)
+            if partitioner.root:
+                # root of paritition so we just drop the whole table and do not
+                # do the whole recursive delete thing
+                txn.add_after_commit_hook(
+                    self._txn_drop_db_commit_hook, [partitioner.part_id])
+                return
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, [ob._p_oid])
 
     async def _check_bad_connection(self, ex):
         if str(ex) in ('cannot perform operation: connection is closed',
@@ -679,15 +720,16 @@ class PostgresqlStorage(BaseStorage):
                 return await self.start_transaction(txn, retries + 1)
 
     async def get_conflicts(self, txn):
+        # XXX Might be slow because we need to check conflicts against all tables?
         async with self._lock:
             # use storage lock instead of transaction lock
             if len(txn.modified) < 1000:
                 # if it's too large, we're not going to check on object ids
                 modified_oids = [k for k in txn.modified.keys()]
                 return await self._read_conn.fetch(
-                    TXN_CONFLICTS_ON_OIDS, txn._tid, modified_oids)
+                    TXN_CONFLICTS_ON_OIDS.render(), txn._tid, modified_oids)
             else:
-                return await self._read_conn.fetch(TXN_CONFLICTS, txn._tid)
+                return await self._read_conn.fetch(TXN_CONFLICTS.render(), txn._tid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
@@ -710,121 +752,107 @@ class PostgresqlStorage(BaseStorage):
         #     log.warning('Do not have db transaction to rollback')
 
     # Introspection
-    async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
+    async def get_page_of_keys(self, txn, ob, page=1, page_size=1000):
         conn = txn._db_conn
-        smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS)
+        smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS.render(ob=ob))
         keys = []
-        for record in await smt.fetch(oid, page_size, (page - 1) * page_size):
+        for record in await smt.fetch(ob._p_oid, page_size, (page - 1) * page_size):
             keys.append(record['id'])
         return keys
 
-    async def keys(self, txn, oid):
+    async def keys(self, txn, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS)
-            result = await smt.fetch(oid)
+            smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS.render(ob=ob))
+            result = await smt.fetch(ob._p_oid)
         return result
 
-    async def get_child(self, txn, parent_oid, id):
+    async def get_child(self, txn, parent, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILD)
-            result = await self.get_one_row(smt, parent_oid, id)
+            smt = await txn._db_conn.prepare(GET_CHILD.render(ob=parent))
+            result = await self.get_one_row(smt, parent._p_oid, id)
         return result
 
-    async def get_children(self, txn, parent_oid, ids):
+    async def get_children(self, txn, parent, ids):
         async with txn._lock:
             return await self._read_conn.fetch(
-                GET_CHILDREN_BATCH, parent_oid, ids)
+                GET_CHILDREN_BATCH.render(ob=parent), parent._p_oid, ids)
 
-    async def has_key(self, txn, parent_oid, id):
+    async def has_key(self, txn, parent, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(EXIST_CHILD)
-            result = await self.get_one_row(smt, parent_oid, id)
+            smt = await txn._db_conn.prepare(EXIST_CHILD.render(ob=parent))
+            result = await self.get_one_row(smt, parent._p_oid, id)
         if result is None:
             return False
         else:
             return True
 
-    async def len(self, txn, oid):
+    async def len(self, txn, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_CHILDREN)
-            result = await smt.fetchval(oid)
+            smt = await txn._db_conn.prepare(NUM_CHILDREN.render(ob=ob))
+            result = await smt.fetchval(ob._p_oid)
         return result
 
-    async def items(self, txn, oid):
+    async def items(self, txn, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILDREN)
-        async for record in smt.cursor(oid):
+            smt = await txn._db_conn.prepare(GET_CHILDREN.render(ob=ob))
+        async for record in smt.cursor(ob._p_oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
-    async def get_annotation(self, txn, oid, id):
+    async def get_annotation(self, txn, base_obj, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_ANNOTATION)
-            result = await self.get_one_row(smt, oid, id)
+            smt = await txn._db_conn.prepare(GET_ANNOTATION.render(ob=base_obj))
+            result = await self.get_one_row(smt, base_obj._p_oid, id)
         return result
 
-    async def get_annotation_keys(self, txn, oid):
+    async def get_annotation_keys(self, txn, obj):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS)
-            result = await smt.fetch(oid)
+            smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS.render(ob=obj))
+            result = await smt.fetch(obj._p_oid)
         return result
 
-    async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
+    async def write_blob_chunk(self, txn, bid, ob, chunk_index, data):
+
         async with txn._lock:
-            smt = await txn._db_conn.prepare(HAS_OBJECT)
-            result = await self.get_one_row(smt, oid)
+            smt = await txn._db_conn.prepare(HAS_OBJECT.render(ob=ob))
+            result = await self.get_one_row(smt, ob._p_oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
             async with txn._lock:
                 await txn._db_conn.execute('''INSERT INTO objects
                     (zoid, tid, state_size, part, resource, type)
-                    VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
+                    VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', ob._p_oid)
+            part = 0
+        else:
+            part = result['part']
         async with txn._lock:
             return await txn._db_conn.execute(
-                INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
+                INSERT_BLOB_CHUNK.render(), bid, ob._p_oid, chunk_index, data, part)
 
-    async def read_blob_chunk(self, txn, bid, chunk=0):
+    async def read_blob_chunk(self, txn, bid, ob, chunk=0):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(READ_BLOB_CHUNK)
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNK.render(ob=ob))
             return await self.get_one_row(smt, bid, chunk)
 
-    async def read_blob_chunks(self, txn, bid):
+    async def read_blob_chunks(self, txn, bid, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS)
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS.render(ob=ob))
         async for record in smt.cursor(bid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
-    async def del_blob(self, txn, bid):
+    async def del_blob(self, txn, bid, ob):
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_BLOB, bid)
-
-    async def get_total_number_of_objects(self, txn):
-        async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_ROWS)
-            result = await smt.fetchval()
-        return result
-
-    async def get_total_number_of_resources(self, txn):
-        async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_RESOURCES)
-            result = await smt.fetchval()
-        return result
-
-    async def get_total_resources_of_type(self, txn, type_):
-        async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_RESOURCES_BY_TYPE)
-            result = await smt.fetchval(type_)
-        return result
+            await txn._db_conn.execute(DELETE_BLOB.render(ob=ob), bid)
 
     # Massive treatment without security
     async def _get_page_resources_of_type(self, txn, type_, page, page_size):
         conn = txn._db_conn
         async with txn._lock:
-            smt = await conn.prepare(RESOURCES_BY_TYPE)
+            smt = await conn.prepare(RESOURCES_BY_TYPE.render())
         keys = []
         for record in await smt.fetch(type_, page_size, (page - 1) * page_size):  # noqa
             keys.append(record)

@@ -90,8 +90,8 @@ class BaseCache:
             # like an annotiation, invalidate diff
             keys = [
                 self.get_key(oid=ob._p_oid),
-                self.get_key(oid=ob.__of__, id=ob.__name__, variant='annotation'),
-                self.get_key(oid=ob.__of__, variant='annotation-keys')
+                self.get_key(oid=ob.__of__._p_oid, id=ob.__name__, variant='annotation'),
+                self.get_key(oid=ob.__of__._p_oid, variant='annotation-keys')
             ]
         else:
             if type_ == 'modified':

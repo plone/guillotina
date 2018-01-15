@@ -5,7 +5,6 @@ from guillotina.db.storages.dummy import DummyStorage
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.factory.content import Database
 from guillotina.interfaces import IDatabaseConfigurationFactory
-from guillotina.utils import resolve_dotted_name
 
 
 async def _PGConfigurationFactory(key, dbconfig, app,
@@ -19,14 +18,9 @@ async def _PGConfigurationFactory(key, dbconfig, app,
         dsn = "{scheme}://{user}:{password}@{host}:{port}/{dbname}".format(
             **dbconfig['dsn'])
 
-    partition_object = None
-    if 'partition' in dbconfig:
-        partition_object = resolve_dotted_name(dbconfig['partition'])
-
     dbconfig.update({
         'dsn': dsn,
         'name': key,
-        'partition': partition_object,
         'pool_size': dbconfig.get('pool_size', config.get('pool_size', 13))
     })
 
