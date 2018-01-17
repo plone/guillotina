@@ -394,6 +394,7 @@ class TraversalRouter(AbstractRouter):
             view_name = tail[0]
             traverse_to = tail[1:]
 
+        request.record('beforeauthentication')
         await self.apply_authorization(request)
         request.record('authentication')
 

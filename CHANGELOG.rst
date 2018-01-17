@@ -1,7 +1,8 @@
 2.3.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Record before authentication timing for request object
+  [vangheem]
 
 
 2.3.12 (2018-01-17)
