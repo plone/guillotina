@@ -168,6 +168,30 @@ class BaseMatchInfo(AbstractMatchInfo):
     async def http_exception(self):
         return None
 
+    def debug(self, request, resp):
+        if 'X-Debug' in request.headers:
+            try:
+                last = request._initialized
+                for idx, event_name in enumerate(request._events.keys()):
+                    timing = request._events[event_name]
+                    header_name = 'XG-Timing-{}-{}'.format(idx, event_name)
+                    resp.headers[header_name] = "{0:.5f}".format((timing - last) * 1000)
+                    last = timing
+                resp.headers['XG-Timing-Total'] = "{0:.5f}".format(
+                    (last - request._initialized) * 1000)
+                try:
+                    txn = request._txn
+                    resp.headers['XG-Request-Cache-hits'] = str(txn._cache._hits)
+                    resp.headers['XG-Request-Cache-misses'] = str(txn._cache._misses)
+                    resp.headers['XG-Request-Cache-stored'] = str(txn._cache._stored)
+                    resp.headers['XG-Total-Cache-hits'] = str(txn._manager._storage._hits)
+                    resp.headers['XG-Total-Cache-misses'] = str(txn._manager._storage._misses)
+                    resp.headers['XG-Total-Cache-stored'] = str(txn._manager._storage._stored)
+                except AttributeError:
+                    pass
+            except (KeyError, AttributeError):
+                resp.headers['XG-Error'] = 'Could not get stats'
+
 
 class MatchInfo(BaseMatchInfo):
     """Function that returns from traversal request on aiohttp."""
@@ -251,25 +275,7 @@ class MatchInfo(BaseMatchInfo):
 
         request.execute_futures()
 
-        if 'X-Debug' in request.headers:
-            try:
-                last = request._initialized
-                for idx, event_name in enumerate(request._events.keys()):
-                    timing = request._events[event_name]
-                    header_name = 'XG-Timing-{}-{}'.format(idx, event_name)
-                    resp.headers[header_name] = "{0:.5f}".format((timing - last) * 1000)
-                    last = timing
-                resp.headers['XG-Timing-Total'] = "{0:.5f}".format(
-                    (last - request._initialized) * 1000)
-                try:
-                    txn = request._txn
-                    resp.headers['XG-Cache-hits'] = str(txn._cache._hits)
-                    resp.headers['XG-Cache-misses'] = str(txn._cache._misses)
-                    resp.headers['XG-Cache-stored'] = str(txn._cache._stored)
-                except AttributeError:
-                    pass
-            except (KeyError, AttributeError):
-                resp.headers['XG-Error'] = 'Could not get stats'
+        self.debug(request, resp)
 
         request.record('finish')
 
@@ -296,6 +302,7 @@ class BasicMatchInfo(BaseMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request.record('finish')
+        self.debug(request, self.resp)
         return self.resp
 
     def get_info(self):

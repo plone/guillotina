@@ -69,6 +69,9 @@ class MockStorage:
         self._transaction = None
         self._objects = {}
         self._parent_objs = {}
+        self._hits = 0
+        self._misses = 0
+        self._stored = 0
 
     async def get_annotation(self, trns, oid, id):
         return None

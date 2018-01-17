@@ -11,6 +11,9 @@ class BaseStorage(object):
         self._read_only = read_only
         self._transaction_strategy = transaction_strategy
         self._cache_strategy = cache_strategy
+        self._hits = 0
+        self._misses = 0
+        self._stored = 0
 
     def read_only(self):
         return self._read_only

@@ -1,7 +1,8 @@
 2.3.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Keep a counter of hits, misses and stored on the db object
+  [vangheem]
 
 
 2.3.11 (2018-01-15)

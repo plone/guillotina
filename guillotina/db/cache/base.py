@@ -11,9 +11,36 @@ class BaseCache:
     def __init__(self, transaction):
         self._storage = transaction._manager._storage
         self._transaction = transaction
-        self._hits = 0
-        self._misses = 0
-        self._stored = 0
+        self.__hits = 0
+        self.__misses = 0
+        self.__stored = 0
+
+    @property
+    def _hits(self):
+        return self.__hits
+
+    @_hits.setter
+    def _hits(self, value):
+        self.__hits += 1
+        self._storage._hits += 1
+
+    @property
+    def _misses(self):
+        return self.__misses
+
+    @_misses.setter
+    def _misses(self, value):
+        self.__misses += 1
+        self._storage._misses += 1
+
+    @property
+    def _stored(self):
+        return self.__stored
+
+    @_stored.setter
+    def _stored(self, value):
+        self.__stored += 1
+        self._storage._stored += 1
 
     def get_key(self, oid=None, container=None, id=None, variant=None):
         key = ''
