@@ -1,4 +1,4 @@
-from guillotina.async import IQueueUtility
+from guillotina.async_util import IQueueUtility
 from guillotina.browser import View
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication

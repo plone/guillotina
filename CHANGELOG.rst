@@ -1,7 +1,8 @@
-2.3.14 (unreleased)
--------------------
+2.4.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Rename `guillotina.async` to `guillotina.async_util` to fix Python 3.7 compatibility
+  [vangheem]
 
 
 2.3.13 (2018-01-17)

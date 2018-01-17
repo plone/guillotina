@@ -4,7 +4,7 @@ from guillotina import cors
 from guillotina import glogging
 from guillotina import languages
 from guillotina._settings import app_settings
-from guillotina.async import IAsyncUtility
+from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_all_utilities_registered_for
 from guillotina.component import get_utility
