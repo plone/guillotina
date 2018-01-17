@@ -1,4 +1,4 @@
-2.3.12 (unreleased)
+2.3.12 (2018-01-17)
 -------------------
 
 - Keep a counter of hits, misses and stored on the db object
