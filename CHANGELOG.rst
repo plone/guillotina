@@ -1,4 +1,4 @@
-2.3.13 (unreleased)
+2.3.13 (2018-01-17)
 -------------------
 
 - Record before authentication timing for request object
