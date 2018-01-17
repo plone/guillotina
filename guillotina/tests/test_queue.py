@@ -21,8 +21,8 @@ class AsyncMockView(View):
 
 
 QUEUE_UTILITY_CONFIG = {
-    "provides": "guillotina.async.IQueueUtility",
-    "factory": "guillotina.async.QueueUtility",
+    "provides": "guillotina.async_util.IQueueUtility",
+    "factory": "guillotina.async_util.QueueUtility",
     "settings": {}
 }
 
