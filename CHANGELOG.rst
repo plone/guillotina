@@ -1,4 +1,4 @@
-2.3.14 (unreleased)
+2.3.13 (2018-01-18)
 -------------------
 
 - Add debugging for queries
