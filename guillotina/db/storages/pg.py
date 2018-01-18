@@ -142,15 +142,6 @@ WHERE parent_id = $1::varchar(32) AND id = ANY($2)
 """)
 
 
-TRASH_PARENT_ID = SQL("""
-UPDATE {table}
-SET
-    parent_id = '{trashed_id}'
-WHERE
-    zoid = $1::varchar(32)
-""")
-
-
 INSERT_BLOB_CHUNK = SQL("""
 INSERT INTO {table}
 (bid, zoid, chunk_index, data, part)
@@ -197,27 +188,29 @@ DELETE FROM {table}
 WHERE zoid = $1::varchar(32);
 """)
 
-CREATE_TRASH = SQL('''
-INSERT INTO {table} (zoid, tid, state_size, part, resource, type)
-SELECT '{trashed_id}', 0, 0, 0, FALSE, 'TRASH_REF'
-WHERE NOT EXISTS (SELECT * FROM {table} WHERE zoid = '{trashed_id}')
-RETURNING id;
-''')
-
 DROP_BLOBS = SQL("DROP TABLE IF EXISTS {table};", 'blobs')
 DROP_OBJECTS = SQL("DROP TABLE IF EXISTS {table};")
-
-DELETE_BY_PARENT_OID = SQL('''DELETE FROM {table}
-WHERE parent_id = $1::varchar(32);''')
 DELETE_FROM_BLOBS = SQL(
     "DELETE FROM {table} WHERE zoid = $1::varchar(32);", 'blobs')
 
-BATCHED_GET_CHILDREN_OIDS = SQL("""
-SELECT zoid FROM {table}
-WHERE parent_id = $1::varchar(32)
-ORDER BY zoid
-LIMIT $2::int
-OFFSET $3::int;""")
+
+GC_OBJECTS = SQL('''
+delete from objects
+where resource is TRUE and
+      (parent_id = '{trashed_id}' OR parent_id not in (select zoid from objects))
+RETURNING zoid;
+''')
+GC_ANNOTATIONS = SQL('''
+delete from objects
+where resource is FALSE and
+      (parent_id = '{trashed_id}' OR of not in (select zoid from objects))
+RETURNING zoid;
+''')
+GC_BLOBS = SQL('''
+delete from blobs
+where zoid not in (select zoid from objects)
+RETURNING zoid;''', 'blobs')
+
 
 # how long to wait before trying to recover bad connections
 BAD_CONNECTION_RESTART_DELAY = 0.25
@@ -247,17 +240,6 @@ class LightweightConnection(asyncpg.connection.Connection):
         raise NotImplemented('Does not support listeners')
 
 
-async def iterate_children(conn, parent_oid, page_size=1000):
-    smt = await conn.prepare(BATCHED_GET_CHILDREN_OIDS.render())
-    page = 1
-    results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
-    while len(results) > 0:
-        for record in results:
-            yield record['zoid']
-        page += 1
-        results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
-
-
 class PGVacuum:
     '''
     Since cascade on delete can be very slow, when we delete on object,
@@ -267,21 +249,11 @@ class PGVacuum:
     Then in this vacuum task, we do cleanup with autocommit mode.
     '''
 
-    _delete_by_parent_oid = DELETE_BY_PARENT_OID
-    _delete_from_blobs = DELETE_FROM_BLOBS
-
     def __init__(self, storage, loop):
         self._storage = storage
         self._loop = loop
-        self._queue = asyncio.Queue(loop=loop)
         self._active = False
         self._closed = False
-
-    async def vacuum_children(self, conn, parent_oid):
-        async for child_oid in iterate_children(conn, parent_oid):
-            await self.vacuum_children(conn, child_oid)
-        await conn.execute(self._delete_by_parent_oid.render(), parent_oid)
-        await conn.execute(self._delete_from_blobs.render(), parent_oid)
 
     @property
     def active(self):
@@ -302,44 +274,45 @@ class PGVacuum:
         # there might be contention, but that is okay
 
         while not self._closed:
-            oid = None
             try:
-                oid = await self._queue.get()
                 self._active = True
-                await self.vacuum(oid)
+                await self.vacuum()
             except (concurrent.futures.CancelledError, RuntimeError):
                 raise
             except Exception:
-                log.warning(f'Error vacuuming oid {oid}', exc_info=True)
+                log.warning(f'Error vacuuming', exc_info=True)
+                await asyncio.sleep(30)
             finally:
                 self._active = False
-                try:
-                    self._queue.task_done()
-                except ValueError:
-                    pass
 
-    async def add_to_queue(self, oid):
-        await self._queue.put(oid)
+    async def _vacuum(self, conn):
+        count = len(await conn.fetch(GC_OBJECTS.render()))
+        count += len(await conn.fetch(GC_ANNOTATIONS.render()))
+        count += len(await conn.fetch(GC_BLOBS.render()))
+        return count
 
-    async def vacuum(self, oid):
+    async def vacuum(self):
         '''
-        Recursively go through objects, deleting children as you find them,
-        checking if they have their own children and so on...
-
-        Once cockroachdb 2.0 is stable, we can remove this custom vacuum implementation.
+        Run clean up queries on the database
         '''
-        conn = await self._storage.open()
-        try:
-            await self.vacuum_children(conn, oid)
-        finally:
+        while True:
+            conn = await self._storage.open()
             try:
-                await self._storage.close(conn)
-            except asyncpg.exceptions.ConnectionDoesNotExistError:
-                pass
+                count = await self._vacuum(conn)
+                if count == 0:
+                    # sleep longer, nothing found
+                    await asyncio.sleep(30)
+                else:
+                    # we delete objects, it might cause more children to be found, keep going
+                    await asyncio.sleep(1)
+            finally:
+                try:
+                    await self._storage.close(conn)
+                except asyncpg.exceptions.ConnectionDoesNotExistError:
+                    pass
 
     async def finalize(self):
         self._closed = True
-        await self._queue.join()
         # wait for up to two seconds to finish the task...
         # it's not long but we don't want to wait for a long time to close either....
         try:
@@ -387,7 +360,8 @@ class PostgresqlStorage(BaseStorage):
         Index('object_part', 'part'),
         Index('object_parent', 'parent_id'),
         Index('object_id', 'id'),
-        Index('object_type', 'type')
+        Index('object_type', 'type'),
+        Index('object_resource', 'resource')
     ])
     _blob_table = Table('blobs', [
         Column('bid', sql.VARCHAR(32), not_null=True),
@@ -407,7 +381,8 @@ class PostgresqlStorage(BaseStorage):
 
     def __init__(self, dsn=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
-                 conn_acquire_timeout=20, cache_strategy='dummy', **options):
+                 conn_acquire_timeout=20, cache_strategy='dummy',
+                 paritioning_enabled=False, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
             cache_strategy=cache_strategy)
@@ -422,6 +397,8 @@ class PostgresqlStorage(BaseStorage):
         self._connection_options = {}
         self._connection_initialized_on = time.time()
         self._known_partitions = []
+        if not paritioning_enabled:
+            self._partitioning_supported = False
 
     async def finalize(self):
         await self._vacuum.finalize()
@@ -435,7 +412,7 @@ class PostgresqlStorage(BaseStorage):
     async def _create_table(self, table):
         try:
             async with self._lock:
-                statements = '\n'.join([str(s) for s in table.get_statements()])
+                statements = '\n'.join([str(s) for s in table.get_statements(self)])
                 print(statements)
                 await self._read_conn.execute(statements)
         except asyncpg.exceptions.UniqueViolationError:
@@ -450,12 +427,11 @@ class PostgresqlStorage(BaseStorage):
         self._known_partitions.append(partition)
 
     async def create(self):
-        await self._create_table(self._object_table, partitioning_support=self._partitioning_supported)
-        await self._create_table(self._blob_table, partitioning_support=self._partitioning_supported)
+        await self._create_table(self._object_table)
+        await self._create_table(self._blob_table)
         if self._partitioning_supported:
             await self._create_partition(self._object_table)
             await self._create_partition(self._blob_table)
-        await self._read_conn.execute(CREATE_TRASH.render())
         for statement in self._statements:
             try:
                 await self._read_conn.execute(str(statement))
@@ -516,14 +492,14 @@ class PostgresqlStorage(BaseStorage):
         self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID.render())
-        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID.render())
+        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID.render(self))
+        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID.render(self))
 
     async def remove(self):
         """Reset the tables"""
         async with self._pool.acquire() as conn:
-            await conn.execute(DROP_BLOBS.render())
-            await conn.execute(DROP_OBJECTS.render())
+            await conn.execute(DROP_BLOBS.render(self))
+            await conn.execute(DROP_OBJECTS.render(self))
 
     async def open(self):
         try:
@@ -542,7 +518,7 @@ class PostgresqlStorage(BaseStorage):
 
     async def load(self, txn, oid):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_OID.render())
+            smt = await txn._db_conn.prepare(GET_OID.render(self))
             objects = await self.get_one_row(smt, oid)
         if objects is None:
             raise KeyError(oid)
@@ -554,15 +530,15 @@ class PostgresqlStorage(BaseStorage):
                 await self._create_partition(self._object_table, obj.__part_id__)
                 await self._create_partition(self._blob_table, obj.__part_id__)
 
-        update = False
+        update_query = False
         statement_sql = insert
         if not obj.__new_marker__ and obj._p_serial is not None:
             # we should be confident this is an object update
             statement_sql = update
-            update = True
+            update_query = True
         async with txn._lock:
-            smt = await txn._db_conn.prepare(statement_sql.render(ob=obj))
-        return smt, update
+            smt = await txn._db_conn.prepare(statement_sql.render(self, ob=obj))
+        return smt, update_query
 
     @profilable
     async def store(self, oid, old_serial, writer, obj, txn):
@@ -622,18 +598,16 @@ class PostgresqlStorage(BaseStorage):
                               'This should not happen. tid: {}'.format(txn._tid))
         await txn._cache.store_object(obj, pickled)
 
-    async def _txn_oid_commit_hook(self, status, oid):
-        await self._vacuum.add_to_queue(oid)
-
     async def _txn_drop_db_commit_hook(self, status, partition):
         async with self._lock:
             await self._read_conn.execute(self._object_table.drop(partition))
+            await self._read_conn.execute(self._blob_table.drop(partition))
 
     async def delete(self, txn, ob):
         # no cascade support, so we push to vacuum
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_OBJECT.render(ob=ob), ob._p_oid)
-            await txn._db_conn.execute(DELETE_FROM_BLOBS.render(ob=ob), ob._p_oid)
+            await txn._db_conn.execute(DELETE_OBJECT.render(self, ob=ob), ob._p_oid)
+            await txn._db_conn.execute(DELETE_FROM_BLOBS.render(self, ob=ob), ob._p_oid)
         if self._partitioning_supported:
             partitioner = app_settings['partitioner'](ob)
             if partitioner.root:
@@ -642,7 +616,6 @@ class PostgresqlStorage(BaseStorage):
                 txn.add_after_commit_hook(
                     self._txn_drop_db_commit_hook, [partitioner.part_id])
                 return
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [ob._p_oid])
 
     async def _check_bad_connection(self, ex):
         if str(ex) in ('cannot perform operation: connection is closed',
@@ -727,9 +700,9 @@ class PostgresqlStorage(BaseStorage):
                 # if it's too large, we're not going to check on object ids
                 modified_oids = [k for k in txn.modified.keys()]
                 return await self._read_conn.fetch(
-                    TXN_CONFLICTS_ON_OIDS.render(), txn._tid, modified_oids)
+                    TXN_CONFLICTS_ON_OIDS.render(self), txn._tid, modified_oids)
             else:
-                return await self._read_conn.fetch(TXN_CONFLICTS.render(), txn._tid)
+                return await self._read_conn.fetch(TXN_CONFLICTS.render(self), txn._tid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
@@ -754,7 +727,7 @@ class PostgresqlStorage(BaseStorage):
     # Introspection
     async def get_page_of_keys(self, txn, ob, page=1, page_size=1000):
         conn = txn._db_conn
-        smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS.render(ob=ob))
+        smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS.render(self, ob=ob))
         keys = []
         for record in await smt.fetch(ob._p_oid, page_size, (page - 1) * page_size):
             keys.append(record['id'])
@@ -762,24 +735,24 @@ class PostgresqlStorage(BaseStorage):
 
     async def keys(self, txn, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS.render(ob=ob))
+            smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS.render(self, ob=ob))
             result = await smt.fetch(ob._p_oid)
         return result
 
     async def get_child(self, txn, parent, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILD.render(ob=parent))
+            smt = await txn._db_conn.prepare(GET_CHILD.render(self, ob=parent))
             result = await self.get_one_row(smt, parent._p_oid, id)
         return result
 
     async def get_children(self, txn, parent, ids):
         async with txn._lock:
             return await self._read_conn.fetch(
-                GET_CHILDREN_BATCH.render(ob=parent), parent._p_oid, ids)
+                GET_CHILDREN_BATCH.render(self, ob=parent), parent._p_oid, ids)
 
     async def has_key(self, txn, parent, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(EXIST_CHILD.render(ob=parent))
+            smt = await txn._db_conn.prepare(EXIST_CHILD.render(self, ob=parent))
             result = await self.get_one_row(smt, parent._p_oid, id)
         if result is None:
             return False
@@ -788,13 +761,13 @@ class PostgresqlStorage(BaseStorage):
 
     async def len(self, txn, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_CHILDREN.render(ob=ob))
+            smt = await txn._db_conn.prepare(NUM_CHILDREN.render(self, ob=ob))
             result = await smt.fetchval(ob._p_oid)
         return result
 
     async def items(self, txn, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILDREN.render(ob=ob))
+            smt = await txn._db_conn.prepare(GET_CHILDREN.render(self, ob=ob))
         async for record in smt.cursor(ob._p_oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
@@ -802,20 +775,20 @@ class PostgresqlStorage(BaseStorage):
 
     async def get_annotation(self, txn, base_obj, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_ANNOTATION.render(ob=base_obj))
+            smt = await txn._db_conn.prepare(GET_ANNOTATION.render(self, ob=base_obj))
             result = await self.get_one_row(smt, base_obj._p_oid, id)
         return result
 
     async def get_annotation_keys(self, txn, obj):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS.render(ob=obj))
+            smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS.render(self, ob=obj))
             result = await smt.fetch(obj._p_oid)
         return result
 
     async def write_blob_chunk(self, txn, bid, ob, chunk_index, data):
 
         async with txn._lock:
-            smt = await txn._db_conn.prepare(HAS_OBJECT.render(ob=ob))
+            smt = await txn._db_conn.prepare(HAS_OBJECT.render(self, ob=ob))
             result = await self.get_one_row(smt, ob._p_oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
@@ -829,16 +802,16 @@ class PostgresqlStorage(BaseStorage):
             part = result['part']
         async with txn._lock:
             return await txn._db_conn.execute(
-                INSERT_BLOB_CHUNK.render(), bid, ob._p_oid, chunk_index, data, part)
+                INSERT_BLOB_CHUNK.render(self, ob=ob), bid, ob._p_oid, chunk_index, data, part)
 
     async def read_blob_chunk(self, txn, bid, ob, chunk=0):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(READ_BLOB_CHUNK.render(ob=ob))
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNK.render(self, ob=ob))
             return await self.get_one_row(smt, bid, chunk)
 
     async def read_blob_chunks(self, txn, bid, ob):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS.render(ob=ob))
+            smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS.render(self, ob=ob))
         async for record in smt.cursor(bid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
@@ -846,13 +819,13 @@ class PostgresqlStorage(BaseStorage):
 
     async def del_blob(self, txn, bid, ob):
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_BLOB.render(ob=ob), bid)
+            await txn._db_conn.execute(DELETE_BLOB.render(self, ob=ob), bid)
 
     # Massive treatment without security
     async def _get_page_resources_of_type(self, txn, type_, page, page_size):
         conn = txn._db_conn
         async with txn._lock:
-            smt = await conn.prepare(RESOURCES_BY_TYPE.render())
+            smt = await conn.prepare(RESOURCES_BY_TYPE.render(self))
         keys = []
         for record in await smt.fetch(type_, page_size, (page - 1) * page_size):  # noqa
             keys.append(record)

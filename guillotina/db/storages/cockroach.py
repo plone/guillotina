@@ -59,22 +59,12 @@ NEXT_TID = SQL("""SELECT unique_rowid()""")
 DELETE_FROM_BLOBS = SQL(
     "DELETE FROM {table} WHERE zoid = $1::varchar(32) RETURNING NOTHING;", 'blobs')
 
-DELETE_BY_PARENT_OID = SQL('''DELETE FROM {table}
-WHERE parent_id = $1::varchar(32)
-RETURNING NOTHING;''')
-
 
 DELETE_OBJECT = SQL("""
 DELETE FROM {table}
 WHERE zoid = $1::varchar(32)
 RETURNING NOTHING;
 """)
-
-
-class CockroachVacuum(pg.PGVacuum):
-
-    _delete_by_parent_oid = DELETE_BY_PARENT_OID
-    _delete_from_blobs = DELETE_FROM_BLOBS
 
 
 class CockroachDBTransaction:
@@ -155,7 +145,6 @@ class CockroachStorage(pg.PostgresqlStorage):
     _db_transaction_factory = CockroachDBTransaction
     _vacuum = _vacuum_task = None
     _isolation_level = 'snapshot'
-    _vacuum_class = CockroachVacuum
 
     def __init__(self, *args, **kwargs):
         transaction_strategy = kwargs.get('transaction_strategy', 'dbresolve_readcommitted')
@@ -166,6 +155,7 @@ class CockroachStorage(pg.PostgresqlStorage):
                            f'Forcing to `dbresolve_readcommitted` strategy')
             transaction_strategy = 'dbresolve_readcommitted'
         kwargs['transaction_strategy'] = transaction_strategy
+        kwargs['paritioning_enabled'] = False  # force now allowed
         super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):

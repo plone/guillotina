@@ -75,7 +75,7 @@ class Table:
             table_name = self.name
         return f"DROP TABLE IF EXISTS {table_name}"
 
-    def get_statements(self, partition=False, partitioning_support=True):
+    def get_statements(self, storage, partition=False):
         columns = ',\n'.join(['    ' + str(c) for c in self.columns])
         if partition is not False:
             table_name = f'{self.name}_{partition}'
@@ -86,16 +86,16 @@ FOR VALUES IN ({partition});
 """]
             statements.extend([i.get_sql(table_name) for i in self.indexes])
         else:
-            table_name = 'objects'
+            table_name = self.name
             statement = f"""CREATE TABLE IF NOT EXISTS {self.name} (
 {columns}
 )
 """
-            if partitioning_support:
+            if storage._partitioning_supported:
                 statement += ' PARTITION BY LIST (part)'
             statement += ';'
             statements = [statement]
-            if not partitioning_support:
+            if not storage._partitioning_supported:
                 statements.extend([i.get_sql(table_name) for i in self.indexes])
         return statements
 
@@ -131,10 +131,11 @@ class SQL:
     def __str__(self):
         return self.render()
 
-    def render(self, table=None, ob=None, **kwargs):
+    def render(self, storage=None, table=None, ob=None, **kwargs):
         if table is None:
             table = self.default_table
-        if ob is not None and ob.__part_id__ != 0:
+        if (storage is not None and storage._partitioning_supported and
+                ob is not None and ob.__part_id__ != 0):
             table += f'_{ob.__part_id__}'
         return self.sql.format(
             table=table,
