@@ -118,6 +118,8 @@ class Transaction(object):
         self._cache = get_adapter(self, IStorageCache,
                                   name=manager._storage._cache_strategy)
 
+        self._query_count_start = self._query_count_end = 0
+
     @property
     def strategy(self):
         return self._strategy

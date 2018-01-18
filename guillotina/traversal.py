@@ -187,6 +187,12 @@ class BaseMatchInfo(AbstractMatchInfo):
                     resp.headers['XG-Total-Cache-hits'] = str(txn._manager._storage._hits)
                     resp.headers['XG-Total-Cache-misses'] = str(txn._manager._storage._misses)
                     resp.headers['XG-Total-Cache-stored'] = str(txn._manager._storage._stored)
+                    resp.headers['XG-Num-Queries'] = str(
+                        txn._query_count_end - txn._query_count_start)
+                    for idx, query in enumerate(txn._queries.keys()):
+                        counts = txn._queries[query]
+                        duration = "{0:.5f}".format(counts[1] * 1000)
+                        resp.headers[f'XG-Query-{idx}'] = f'count: {counts[0]}, time: {duration}, query: {query}'  # noqa
                 except AttributeError:
                     pass
             except (KeyError, AttributeError):

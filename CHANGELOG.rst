@@ -1,3 +1,10 @@
+2.3.14 (unreleased)
+-------------------
+
+- Add debugging for queries
+  [vangheem]
+
+
 2.3.13 (2018-01-17)
 -------------------
 
