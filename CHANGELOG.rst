@@ -1,7 +1,8 @@
 2.3.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Clear pg statement cache before each query to fix bug
+  [vangheem]
 
 
 2.3.14 (2018-01-18)
