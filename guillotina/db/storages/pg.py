@@ -509,6 +509,14 @@ class PostgresqlStorage(BaseStorage):
     async def open(self):
         try:
             conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+            # clear statement cache to prevent asyncpg bug
+            try:
+                conn._con._stmt_cache.clear()
+            except Exception:
+                try:
+                    conn._stmt_cache.clear()
+                except Exception:
+                    pass
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:
                 await self._check_bad_connection(ex)
