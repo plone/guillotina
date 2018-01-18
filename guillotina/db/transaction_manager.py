@@ -16,6 +16,20 @@ import asyncpg
 logger = glogging.getLogger('guillotina')
 
 
+def _get_conn_query_count(conn):
+    '''
+    diff versions of asyncpg
+    '''
+    try:
+        return conn._protocol.queries_count
+    except Exception:
+        try:
+            return conn._con._protocol.queries_count
+        except Exception:
+            pass
+    return 0
+
+
 class TransactionManager(object):
     """
     Transaction manager for storing the managed transaction in the
@@ -77,6 +91,7 @@ class TransactionManager(object):
             txn.user = user
 
         db_conn = self._last_db_conn = await self._storage.open()
+        txn._query_count_start = _get_conn_query_count(db_conn)
         await txn.tpc_begin(db_conn)
 
         return txn
@@ -106,6 +121,10 @@ class TransactionManager(object):
 
     async def _close_txn(self, txn):
         if txn is not None and txn._db_conn is not None:
+            try:
+                txn._query_count_end = _get_conn_query_count(txn._db_conn)
+            except AttributeError:
+                pass
             try:
                 await self._storage.close(txn._db_conn)
             except asyncpg.exceptions.InterfaceError as ex:
