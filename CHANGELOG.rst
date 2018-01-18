@@ -1,7 +1,8 @@
 2.3.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- tweak annotation queries
+  [vangheem]
 
 
 2.3.14 (2018-01-18)

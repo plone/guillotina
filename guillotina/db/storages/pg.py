@@ -38,7 +38,7 @@ GET_CHILDREN_KEYS = """
 GET_ANNOTATIONS_KEYS = f"""
     SELECT id
     FROM objects
-    WHERE of = $1::varchar(32) AND (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
+    WHERE of = $1::varchar(32) AND parent_id != '{TRASHED_ID}'
     """
 
 GET_CHILD = """
@@ -73,7 +73,7 @@ GET_ANNOTATION = f"""
     WHERE
         of = $1::varchar(32) AND
         id = $2::text AND
-        (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
+        parent_id != '{TRASHED_ID}'
     """
 
 def _wrap_return_count(txt):
