@@ -7,11 +7,13 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 
 import logging
+import asyncio
 
 
 logger = logging.getLogger('guillotina')
 
 BATCH_SIZE = 1000
+NUM_CONNECTIONS = 5
 
 GET_OBJECTS = SQL('''
 SELECT zoid, resource, parent_id, of
@@ -40,10 +42,27 @@ class DBVacuum:
         self.removed = []
         self.total = 0
         self.run_total = 0
+        self.tm = self.db.get_transaction_manager()
+        self.storage = self.tm._storage
+
+    async def get_batch_batch(self, conns, offset=0):
+        funcs = []
+        for conn in conns:
+            funcs.append(conn.fetch(GET_OBJECTS.render(), BATCH_SIZE, offset))
+            offset += BATCH_SIZE
+
+        results = []
+        for result in await asyncio.gather(*funcs):
+            results.extend(result)
+        return results
 
     async def gather_data(self):
         offset = 0
-        results = await self.conn.fetch(GET_OBJECTS, BATCH_SIZE, offset)
+        conns = []
+        for _ in range(5):
+            conns.append(await self.storage.open())
+
+        results = await self.get_batch_batch(conns)
         while len(results) > 0:
             for item in results:
                 self.objects[item['zoid']] = {
@@ -53,8 +72,11 @@ class DBVacuum:
                 }
             offset += len(results)
             print(f'Got page of {len(results)}/{len(self.objects)} objects')
-            self.conn._con._stmt_cache.clear()
-            results = await self.conn.fetch(GET_OBJECTS, BATCH_SIZE, offset)
+            [c._con._stmt_cache.clear() for c in conns]
+            results = await self.get_batch_batch(conns, offset)
+
+        for conn in conns:
+            await self.storage.close(conn)
 
     async def process_batch(self):
         if not self.options.dry_run:
@@ -67,9 +89,7 @@ class DBVacuum:
         self.remove_batch = []
 
     async def vacuum(self):
-        tm = self.db.get_transaction_manager()
-        txn = await tm.begin(self.request)
-        self.conn = txn._db_conn
+        self.conn = await self.storage.open()
         await self.gather_data()
 
         while await self._vacuum() > 0:
