@@ -42,9 +42,8 @@ class DBVacuum:
         self.run_total = 0
 
     async def gather_data(self):
-        smt = await self.conn.prepare(GET_OBJECTS.render())
-        page = 0
-        results = await smt.fetch(BATCH_SIZE, page * BATCH_SIZE)
+        offset = 0
+        results = await self.conn.fetch(GET_OBJECTS, BATCH_SIZE, offset)
         while len(results) > 0:
             for item in results:
                 self.objects[item['zoid']] = {
@@ -52,9 +51,10 @@ class DBVacuum:
                     'parent_id': item['parent_id'],
                     'of': item['of']
                 }
-            page += 1
+            offset += len(results)
             print(f'Got page of {len(results)}/{len(self.objects)} objects')
-            results = await smt.fetch(BATCH_SIZE, page * BATCH_SIZE)
+            self.conn._con._stmt_cache.clear()
+            results = await self.conn.fetch(GET_OBJECTS, BATCH_SIZE, offset)
 
     async def process_batch(self):
         if not self.options.dry_run:
