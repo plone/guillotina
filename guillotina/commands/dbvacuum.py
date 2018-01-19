@@ -16,6 +16,7 @@ BATCH_SIZE = 1000
 GET_OBJECTS = SQL('''
 SELECT zoid, resource, parent_id, of
 FROM {table}
+ORDER BY zoid
 LIMIT $1
 OFFSET $2
 ''')
@@ -45,7 +46,6 @@ class DBVacuum:
         page = 0
         results = await smt.fetch(BATCH_SIZE, page * BATCH_SIZE)
         while len(results) > 0:
-            print(f'Got page of {len(results)}/{len(self.objects)} objects')
             for item in results:
                 self.objects[item['zoid']] = {
                     'resource': item['resource'],
@@ -53,6 +53,7 @@ class DBVacuum:
                     'of': item['of']
                 }
             page += 1
+            print(f'Got page of {len(results)}/{len(self.objects)} objects')
             results = await smt.fetch(BATCH_SIZE, page * BATCH_SIZE)
 
     async def process_batch(self):
