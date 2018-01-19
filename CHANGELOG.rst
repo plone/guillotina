@@ -1,4 +1,4 @@
-2.3.16 (unreleased)
+2.3.16 (2018-01-19)
 -------------------
 
 - Use correct connection object when getting children from database
