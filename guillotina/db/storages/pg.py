@@ -195,20 +195,23 @@ DELETE_FROM_BLOBS = SQL(
 
 
 GC_OBJECTS = SQL('''
-delete from objects
+delete from objects O
 where resource is TRUE and
-      (parent_id = '{trashed_id}' OR parent_id not in (select zoid from objects))
+      (parent_id = '{trashed_id}' OR NOT EXISTS(
+            select NULL FROM objects O2 WHERE O.parent_id = O2.zoid))
 RETURNING zoid;
 ''')
 GC_ANNOTATIONS = SQL('''
-delete from objects
-where resource is FALSE and
-      (parent_id = '{trashed_id}' OR of not in (select zoid from objects))
+delete from objects O
+where resource is FALSE AND
+      zoid != '{root_id}' AND (
+        parent_id = '{trashed_id}' OR NOT EXISTS(
+            select NULL FROM objects O2 WHERE O.of = O2.zoid))
 RETURNING zoid;
 ''')
 GC_BLOBS = SQL('''
-delete from blobs
-where zoid not in (select zoid from objects)
+delete from blobs B
+where NOT EXISTS(select NULL FROM objects O WHERE B.zoid = O.zoid)
 RETURNING zoid;''', 'blobs')
 
 

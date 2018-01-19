@@ -1,3 +1,4 @@
+from guillotina.db import ROOT_ID
 from guillotina.db import TRASHED_ID
 
 
@@ -140,5 +141,6 @@ class SQL:
         return self.sql.format(
             table=table,
             trashed_id=TRASHED_ID,
+            root_id=ROOT_ID,
             **kwargs
         )
