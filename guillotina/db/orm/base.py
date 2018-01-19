@@ -1,3 +1,4 @@
+from guillotina._settings import app_settings
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.profile import profilable
 from zope.interface import implementer
@@ -89,3 +90,14 @@ class BaseObject(object):
         idict = getattr(self, '__dict__', None)
         if inst_dict is not None:
             idict.update(inst_dict)
+
+    @property
+    def __part_id__(self):
+        '''
+        Cache getting part id of object
+        '''
+        if hasattr(self, '_BaseObject__part_id'):
+            return self._BaseObject__part_id
+        partitioner = app_settings['partitioner'](self)
+        self._BaseObject__part_id = partitioner.part_id
+        return self._BaseObject__part_id

@@ -169,12 +169,12 @@ async def test_create_blob(postgres, dummy_request):
     ob = create_content()
     txn.register(ob)
 
-    await txn.write_blob_chunk('X' * 32, ob._p_oid, 0, b'foobar')
+    await txn.write_blob_chunk('X' * 32, ob, 0, b'foobar')
 
     await tm.commit(txn=txn)
     txn = await tm.begin()
 
-    blob_record = await txn.read_blob_chunk('X' * 32, 0)
+    blob_record = await txn.read_blob_chunk('X' * 32, ob, 0)
     assert blob_record['data'] == b'foobar'
 
     # also get data from ob that started as a stub...
@@ -198,7 +198,7 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     ob = create_content()
     txn.register(ob)
 
-    await txn.write_blob_chunk('X' * 32, ob._p_oid, 0, b'foobar')
+    await txn.write_blob_chunk('X' * 32, ob, 0, b'foobar')
 
     await tm.commit(txn=txn)
     txn = await tm.begin()
@@ -210,7 +210,7 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await asyncio.sleep(0.1)  # make sure cleanup runs
     txn = await tm.begin()
 
-    assert await txn.read_blob_chunk('X' * 32, 0) is None
+    assert await txn.read_blob_chunk('X' * 32, ob, 0) is None
 
     with pytest.raises(KeyError):
         await txn.get(ob._p_oid)
@@ -395,30 +395,6 @@ async def test_none_strat_allows_trans_commits(postgres, dummy_request):
     txn = await tm.begin()
     ob1 = await txn.get(ob1._p_oid)
     assert ob1.title == 'foobar1'
-
-    await tm.abort(txn=txn)
-
-    await aps.remove()
-    await cleanup(aps)
-
-
-async def test_count_total_objects(postgres, dummy_request):
-    request = dummy_request  # noqa so magically get_current_request can find
-
-    aps = await get_aps(postgres)
-    tm = TransactionManager(aps)
-
-    # create object first, commit it...
-    txn = await tm.begin()
-
-    ob = create_content()
-    txn.register(ob)
-
-    await tm.commit(txn=txn)
-    txn = await tm.begin()
-
-    assert await txn.get_total_number_of_objects() == 2
-    assert await txn.get_total_number_of_resources() == 1
 
     await tm.abort(txn=txn)
 

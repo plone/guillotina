@@ -145,8 +145,8 @@ class DummyStorage(BaseStorage):
         oid = self.PARENT_ID_ID[(parent_id, id)]
         return await self.load(txn, oid)
 
-    async def has_key(self, txn, parent_id, id):
-        return True if (parent_id, id) in self.PARENT_ID_ID.keys() else False
+    async def has_key(self, txn, parent, id):
+        return True if (parent, id) in self.PARENT_ID_ID.keys() else False
 
     async def len(self, txn, oid):
         return len(self.PARENT_ID[oid])
@@ -167,10 +167,10 @@ class DummyStorage(BaseStorage):
             keys.append(obj['id'])
         return keys
 
-    async def del_blob(self, txn, bid):
+    async def del_blob(self, txn, bid, ob):
         pass
 
-    async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
+    async def write_blob_chunk(self, txn, bid, ob, chunk_index, data):
         pass
 
     async def get_conflicts(self, txn):

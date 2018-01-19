@@ -53,7 +53,7 @@ async def test_create_annotation(dummy_txn_root):
         assert len(ob1.__annotations__) == 0
 
         await annotations.async_set('test2', ob2)
-        assert ob2.__of__ is ob1._p_oid
+        assert ob2.__of__._p_oid is ob1._p_oid
         assert ob2._p_jar is ob1._p_jar
         assert ob2.__name__ == 'test2'
         assert ob2.__parent__ is None

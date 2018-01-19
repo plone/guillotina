@@ -5,7 +5,7 @@ import psycopg2
 
 class Postgresql(BaseImage):
     name = 'postgresql'
-    image = 'postgres:9.6'
+    image = 'postgres:10.1'
     port = 5432
 
     def get_image_options(self):

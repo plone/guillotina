@@ -1,5 +1,9 @@
+from copy import deepcopy
 from guillotina import glogging
 from guillotina.db.storages import pg
+from guillotina.db.storages import sql
+from guillotina.db.storages.sql import Column
+from guillotina.db.storages.sql import SQL
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
@@ -10,8 +14,8 @@ import asyncpg
 logger = glogging.getLogger('guillotina')
 
 # upsert without checking matching tids on updated object
-NAIVE_UPSERT = """
-INSERT INTO objects
+NAIVE_UPSERT = SQL("""
+INSERT INTO {table}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
 VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
         $8::varchar(32), $9::text, $10::text, $11::bytea)
@@ -27,12 +31,12 @@ DO UPDATE SET
     id = EXCLUDED.id,
     type = EXCLUDED.type,
     state = EXCLUDED.state
-RETURNING NOTHING"""
+RETURNING NOTHING""")
 
 
 # update without checking matching tids on updated object
-UPDATE = """
-UPDATE objects
+UPDATE = SQL("""
+UPDATE {table}
 SET
     tid = $2::int,
     state_size = $3::int,
@@ -47,62 +51,20 @@ SET
 WHERE
     zoid = $1::varchar(32)
     AND tid = $7::int
-RETURNING tid, otid"""
+RETURNING tid, otid""")
 
 
-NEXT_TID = """SELECT unique_rowid()"""
+NEXT_TID = SQL("""SELECT unique_rowid()""")
 
-DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32) RETURNING NOTHING;"""
+DELETE_FROM_BLOBS = SQL(
+    "DELETE FROM {table} WHERE zoid = $1::varchar(32) RETURNING NOTHING;", 'blobs')
 
-DELETE_BY_PARENT_OID = '''DELETE FROM objects
-WHERE parent_id = $1::varchar(32)
-RETURNING NOTHING;'''
 
-BATCHED_GET_CHILDREN_OIDS = """
-SELECT zoid FROM objects
-WHERE parent_id = $1::varchar(32)
-ORDER BY zoid
-LIMIT $2::int
-OFFSET $3::int;"""
-
-DELETE_OBJECT = f"""
-DELETE FROM objects
+DELETE_OBJECT = SQL("""
+DELETE FROM {table}
 WHERE zoid = $1::varchar(32)
 RETURNING NOTHING;
-"""
-
-
-async def iterate_children(conn, parent_oid, page_size=1000):
-    smt = await conn.prepare(BATCHED_GET_CHILDREN_OIDS)
-    page = 1
-    results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
-    while len(results) > 0:
-        for record in results:
-            yield record['zoid']
-        page += 1
-        results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
-
-
-class CockroachVacuum(pg.PGVacuum):
-
-    async def vacuum_children(self, conn, parent_oid):
-        async for child_oid in iterate_children(conn, parent_oid):
-            await self.vacuum_children(conn, child_oid)
-        await conn.execute(DELETE_BY_PARENT_OID, parent_oid)
-        await conn.execute(DELETE_FROM_BLOBS, parent_oid)
-
-    async def vacuum(self, oid):
-        '''
-        Recursively go through objects, deleting children as you find them,
-        checking if they have their own children and so on...
-
-        Once cockroachdb 2.0 is stable, we can remove this custom vacuum implementation.
-        '''
-        conn = await self._storage.open()
-        try:
-            await self.vacuum_children(conn, oid)
-        finally:
-            await self._storage.close(conn)
+""")
 
 
 class CockroachDBTransaction:
@@ -168,34 +130,21 @@ class CockroachStorage(pg.PostgresqlStorage):
         - we can change this cockroach driver to work almost the exact same
           way as postgresql driver with on delete cascade support
     '''
+    _partitioning_supported = False
 
-    _object_schema = pg.PostgresqlStorage._object_schema.copy()
-    del _object_schema['json']  # no json db support
-    _object_schema.update({
-        'of': 'VARCHAR(32)',
-        'parent_id': 'VARCHAR(32)'
-    })
+    _object_table = deepcopy(pg.PostgresqlStorage._object_table)
+    _object_table.remove_column('json')  # no json db support
+    _object_table.replace_column(Column('of', sql.VARCHAR(32)))
+    _object_table.replace_column(Column('parent_id', sql.VARCHAR(32)))
 
-    _blob_schema = pg.PostgresqlStorage._blob_schema.copy()
-    _blob_schema.update({
-        'zoid': 'VARCHAR(32) NOT NULL',
-    })
+    _blob_table = deepcopy(pg.PostgresqlStorage._blob_table)
+    _blob_table.replace_column(Column('zoid', sql.VARCHAR(32), not_null=True))
 
-    _initialize_statements = [
-        'CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);',
-        'CREATE INDEX IF NOT EXISTS object_of ON objects (of);',
-        'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
-        'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
-        'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
-        'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
-        'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);'
-    ]
+    _statements = []
 
     _db_transaction_factory = CockroachDBTransaction
     _vacuum = _vacuum_task = None
     _isolation_level = 'snapshot'
-    _vacuum_class = CockroachVacuum
 
     def __init__(self, *args, **kwargs):
         transaction_strategy = kwargs.get('transaction_strategy', 'dbresolve_readcommitted')
@@ -206,10 +155,11 @@ class CockroachStorage(pg.PostgresqlStorage):
                            f'Forcing to `dbresolve_readcommitted` strategy')
             transaction_strategy = 'dbresolve_readcommitted'
         kwargs['transaction_strategy'] = transaction_strategy
+        kwargs['paritioning_enabled'] = False  # force now allowed
         super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
+        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID.render())
 
     async def get_current_tid(self, txn):
         raise Exception("cockroach does not support voting")
@@ -224,15 +174,10 @@ class CockroachStorage(pg.PostgresqlStorage):
         if part is None:
             part = 0
 
-        statement_sql = NAIVE_UPSERT
-        update = False
-        if not obj.__new_marker__ and obj._p_serial is not None:
-            # we should be confident this is an object update
-            statement_sql = UPDATE
-            update = True
+        smt, update = await self._get_store_statement(
+            txn, obj, update=UPDATE, insert=NAIVE_UPSERT)
 
         async with txn._lock:
-            smt = await txn._db_conn.prepare(statement_sql)
             try:
                 result = await smt.fetch(
                     oid,                 # The OID of the object
@@ -262,12 +207,12 @@ class CockroachStorage(pg.PostgresqlStorage):
                     oid, txn, old_serial, writer)
         await txn._cache.store_object(obj, pickled)
 
-    async def delete(self, txn, oid):
+    async def delete(self, txn, ob):
         # no cascade support, so we push to vacuum
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_OBJECT, oid)
-            await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
+            await txn._db_conn.execute(DELETE_OBJECT.render(), ob._p_oid)
+            await txn._db_conn.execute(DELETE_FROM_BLOBS.render(), ob._p_oid)
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, [ob._p_oid])
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:

@@ -1,10 +1,6 @@
 from zope.interface import Interface
 
 
-class IPartition(Interface):
-    """Get the partition of the object"""
-
-
 class IWriter(Interface):
     """Serializes the object for DB storage"""
 
@@ -88,7 +84,7 @@ class IStorage(Interface):
         get child of parent oid
         '''
 
-    async def has_key(txn, parent_oid, id):
+    async def has_key(txn, parent, id):
         '''
         check if key exists
         '''
@@ -108,27 +104,27 @@ class IStorage(Interface):
         get annotation
         '''
 
-    async def get_annotation_keys(txn, oid):
+    async def get_annotation_keys(txn, obj):
         '''
         get annotation keys
         '''
 
-    async def write_blob_chunk(txn, bid, oid, chunk_index, data):
+    async def write_blob_chunk(txn, bid, ob, chunk_index, data):
         '''
         write blob chunk
         '''
 
-    async def read_blob_chunk(txn, bid, chunk=0):
+    async def read_blob_chunk(txn, bid, ob, chunk=0):
         '''
         read blob chunk
         '''
 
-    async def read_blob_chunks(txn, bid):
+    async def read_blob_chunks(txn, bid, ob):
         '''
         read blob chunks
         '''
 
-    async def del_blob(txn, bid):
+    async def del_blob(txn, bid, ob):
         '''
         delete blob
         '''

@@ -56,7 +56,7 @@ class AnnotationsAdapter(object):
         return default
 
     async def async_keys(self):
-        return await self.obj._p_jar.get_annotation_keys(self.obj._p_oid)
+        return await self.obj._p_jar.get_annotation_keys(self.obj)
 
     async def async_set(self, key, value):
         if not isinstance(value, BaseObject):
@@ -64,14 +64,14 @@ class AnnotationsAdapter(object):
         annotations = self.obj.__annotations__
         value.id = key  # make sure id is set...
         annotations[key] = value
-        value.__of__ = self.obj._p_oid
+        value.__of__ = self.obj
         value.__name__ = key
         value.__new_marker__ = True
         # we register the value
         value._p_jar = self.obj._p_jar
         value._p_jar.register(value)
         logger.debug('registering annotation {}({}), of: {}'.format(
-            value._p_oid, key, value.__of__
+            value._p_oid, key, value.__of__._p_oid
         ))
 
     async def async_del(self, key):

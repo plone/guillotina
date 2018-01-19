@@ -18,6 +18,7 @@ class Blob:
 
     def __init__(self, resource):
         self.bid = uuid.uuid4().hex
+        self.resource = resource
         self.resource_zoid = resource._p_oid
         self.size = 0
         self.chunks = 0
@@ -40,7 +41,7 @@ class BlobFile:
         self.transaction = transaction
 
     async def async_del(self):
-        await self.transaction.del_blob(self.blob.bid)
+        await self.transaction.del_blob(self.blob.bid, self.blob.resource)
 
     async def async_write_chunk(self, data):
         if self.mode not in ('w', 'a'):
@@ -49,14 +50,14 @@ class BlobFile:
 
         if self.mode == 'w' and not self._started_writing:
             # we're writing a new set of blobs, delete existing blobs...
-            await self.transaction.del_blob(self.blob.bid)
+            await self.transaction.del_blob(self.blob.bid, self.blob.resource)
             self.blob.size = 0
             self.blob.chunks = 0
 
         self._started_writing = True
 
         await self.transaction.write_blob_chunk(
-            self.blob.bid, self.blob.resource_zoid, self.blob.chunks, data)
+            self.blob.bid, self.blob.resource, self.blob.chunks, data)
 
         self.blob.chunks += 1
         self.blob.size += len(data)
@@ -73,7 +74,8 @@ class BlobFile:
 
     async def async_read_chunk(self, chunk_index):
         try:
-            return (await self.transaction.read_blob_chunk(self.blob.bid, chunk_index))['data']
+            return (await self.transaction.read_blob_chunk(
+                self.blob.bid, self.blob.resource, chunk_index))['data']
         except (KeyError, TypeError):
             raise BlobChunkNotFound('Could not find blob({}), chunk({})'.format(
                 self.blob.bid, chunk_index

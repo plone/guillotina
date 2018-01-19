@@ -32,3 +32,4 @@ cors:
   allow_credentials: true
   max_age: 3660
 utilities: []
+partitioner: guillotina.db.partition.ContainerPartitioner
