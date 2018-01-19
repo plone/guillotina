@@ -385,7 +385,7 @@ class PostgresqlStorage(BaseStorage):
     def __init__(self, dsn=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
                  conn_acquire_timeout=20, cache_strategy='dummy',
-                 paritioning_enabled=False, **options):
+                 paritioning_enabled=False, auto_vacuum=True, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
             cache_strategy=cache_strategy)
@@ -402,10 +402,12 @@ class PostgresqlStorage(BaseStorage):
         self._known_partitions = []
         if not paritioning_enabled:
             self._partitioning_supported = False
+        self._auto_vacuum = auto_vacuum
 
     async def finalize(self):
-        await self._vacuum.finalize()
-        self._vacuum_task.cancel()
+        if self._auto_vacuum:
+            await self._vacuum.finalize()
+            self._vacuum_task.cancel()
         try:
             await shield(self._pool.release(self._read_conn))
         except asyncpg.exceptions.InterfaceError:
@@ -481,17 +483,18 @@ class PostgresqlStorage(BaseStorage):
             await self.create()
             await self.initialize_tid_statements()
 
-        self._vacuum = self._vacuum_class(self, loop)
-        self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
+        if self._auto_vacuum:
+            self._vacuum = self._vacuum_class(self, loop)
+            self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
 
-        def vacuum_done(task):
-            if self._vacuum._closed:
-                # if it's closed, we know this is expected
-                return
-            log.warning('Vacuum pg task ended. This should not happen. '
-                        'No database vacuuming will be done here anymore.')
+            def vacuum_done(task):
+                if self._vacuum._closed:
+                    # if it's closed, we know this is expected
+                    return
+                log.warning('Vacuum pg task ended. This should not happen. '
+                            'No database vacuuming will be done here anymore.')
 
-        self._vacuum_task.add_done_callback(vacuum_done)
+            self._vacuum_task.add_done_callback(vacuum_done)
         self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
