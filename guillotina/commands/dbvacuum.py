@@ -11,7 +11,7 @@ import logging
 
 logger = logging.getLogger('guillotina')
 
-BATCH_SIZE = 2
+BATCH_SIZE = 1000
 
 GET_OBJECTS = SQL('''
 SELECT zoid, resource, parent_id, of
