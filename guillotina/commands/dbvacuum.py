@@ -6,8 +6,8 @@ from guillotina.db.storages.sql import SQL
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 
-import logging
 import asyncio
+import logging
 
 
 logger = logging.getLogger('guillotina')
@@ -72,7 +72,6 @@ class DBVacuum:
                 }
             offset += len(results)
             print(f'Got page of {len(results)}/{len(self.objects)} objects')
-            [c._con._stmt_cache.clear() for c in conns]
             results = await self.get_batch_batch(conns, offset)
 
         for conn in conns:

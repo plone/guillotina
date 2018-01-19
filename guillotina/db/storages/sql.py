@@ -103,14 +103,16 @@ FOR VALUES IN ({partition});
 
 class Index:
 
-    def __init__(self, name, on_field):
+    def __init__(self, name, on_field, index_type='btree'):
         self.name = name
         self.on_field = on_field
+        self.index_type = index_type
 
     def get_sql(self, table_name):
-        return 'CREATE INDEX IF NOT EXISTS {} ON {} ({});'.format(
+        return 'CREATE INDEX IF NOT EXISTS {} ON {} USING {}({});'.format(
             self.name,
             table_name,
+            self.index_type,
             self.on_field
         )
 

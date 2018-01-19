@@ -359,12 +359,12 @@ class PostgresqlStorage(BaseStorage):
         Column('state', sql.BYTEA),
     ], indexes=[
         Index('object_tid', 'tid'),
-        Index('object_of', 'of'),
+        Index('object_of', 'of', index_type='hash'),
         Index('object_part', 'part'),
-        Index('object_parent', 'parent_id'),
-        Index('object_id', 'id'),
-        Index('object_type', 'type'),
-        Index('object_resource', 'resource')
+        Index('object_parent', 'parent_id', index_type='hash'),
+        Index('object_id', 'id', index_type='hash'),
+        Index('object_type', 'type', index_type='hash'),
+        Index('object_resource', 'resource', index_type='hash')
     ])
     _blob_table = Table('blobs', [
         Column('bid', sql.VARCHAR(32), not_null=True),
@@ -373,8 +373,8 @@ class PostgresqlStorage(BaseStorage):
         Column('data', sql.BYTEA),
         Column('part', sql.BIGINT, not_null=True),
     ], indexes=[
-        Index('blob_bid', 'bid'),
-        Index('blob_zoid', 'zoid'),
+        Index('blob_bid', 'bid', index_type='hash'),
+        Index('blob_zoid', 'zoid', index_type='hash'),
         Index('blob_chunk', 'chunk_index'),
     ])
 
