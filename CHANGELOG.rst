@@ -1,7 +1,8 @@
 2.3.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Use correct connection object when getting children from database
+  [vangheem]
 
 
 2.3.15 (2018-01-18)
