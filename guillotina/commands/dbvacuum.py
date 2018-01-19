@@ -45,7 +45,7 @@ class DBVacuum:
         page = 0
         results = await smt.fetch(BATCH_SIZE, page * BATCH_SIZE)
         while len(results) > 0:
-            print(f'Got page of {len(results)} objects')
+            print(f'Got page of {len(results)}/{len(self.objects)} objects')
             for item in results:
                 self.objects[item['zoid']] = {
                     'resource': item['resource'],
