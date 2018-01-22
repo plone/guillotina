@@ -23,3 +23,7 @@ any additional configuration settings defined in addons.
  - guillotina's default settings
  - each application in order it is defined can override default guillotina settings
  - config.yaml takes final precedence over all configuration
+
+`app_settings` has an extra key '__file__' that contains the path of the
+configuration file, allowing relative paths to be used in an application
+settings.
