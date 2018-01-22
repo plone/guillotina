@@ -65,6 +65,7 @@ def get_settings(configuration):
             else:
                 # should be yaml then...
                 settings = yaml.load(config)
+        settings['__file__'] = configuration_filename
     else:
         if 'logged' not in MISSING_SETTINGS:
             logger.warning('Could not find the configuration file {}. Using default settings.'.format(
