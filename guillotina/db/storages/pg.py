@@ -509,6 +509,14 @@ class PostgresqlStorage(BaseStorage):
     async def open(self):
         try:
             conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+            # clear statement cache to prevent asyncpg bug
+            try:
+                conn._con._stmt_cache.clear()
+            except Exception:
+                try:
+                    conn._stmt_cache.clear()
+                except Exception:
+                    pass
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:
                 await self._check_bad_connection(ex)
@@ -732,7 +740,7 @@ class PostgresqlStorage(BaseStorage):
 
     async def get_children(self, txn, parent_oid, ids):
         async with txn._lock:
-            return await self._read_conn.fetch(
+            return await txn._db_conn.fetch(
                 GET_CHILDREN_BATCH, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):

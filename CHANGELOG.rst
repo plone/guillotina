@@ -5,6 +5,20 @@
   [vangheem]
 
 
+2.3.16 (2018-01-19)
+-------------------
+
+- Use correct connection object when getting children from database
+  [vangheem]
+
+
+2.3.15 (2018-01-18)
+-------------------
+
+- Clear pg statement cache before each query to fix bug
+  [vangheem]
+
+
 2.3.14 (2018-01-18)
 -------------------
 
