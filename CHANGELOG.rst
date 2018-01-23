@@ -1,7 +1,8 @@
 2.3.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to customize loop policy with `loop_policy` app setting
+  [vangheem]
 
 
 2.3.16 (2018-01-19)

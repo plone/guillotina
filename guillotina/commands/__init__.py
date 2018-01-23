@@ -95,6 +95,9 @@ class Command(object):
 
     def run_command(self):
         settings = get_settings(self.arguments.configuration)
+        if settings.get('loop_policy'):
+            loop_policy = resolve_dotted_name(settings['loop_policy'])
+            asyncio.set_event_loop_policy(loop_policy())
         app = self.make_app(settings)
 
         if self.arguments.line_profiler:
