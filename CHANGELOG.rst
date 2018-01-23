@@ -1,4 +1,4 @@
-2.3.17 (unreleased)
+2.3.17 (2018-01-22)
 -------------------
 
 - Be able to customize loop policy with `loop_policy` app setting
