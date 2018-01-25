@@ -49,7 +49,7 @@ class BaseObject(object):
         return "<%s %d>" % (self.__class__.__name__, id(self))
 
     __slots__ = ('__parent', '__of', '__name', '__annotations', '__immutable_cache',
-                 '__new_marker', '__p_jar', '__p_oid', '__p_serial')
+                 '__new_marker', '__jar', '__oid', '__serial')
     __parent__ = ObjectProperty('_BaseObject__parent', None)
     __of__ = ObjectProperty('_BaseObject__of', None)
     __name__ = ObjectProperty('_BaseObject__name', None)
