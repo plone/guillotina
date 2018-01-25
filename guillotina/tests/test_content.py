@@ -115,14 +115,24 @@ class TestContent:
 
 
 def test_base_object():
-    item = Item()
-    item.__name__ = 'foobar'
-    assert '__name__' not in item.__dict__
-    assert '_BaseObject__name' not in item.__dict__
-    pickled = pickle.dumps(item, protocol=pickle.HIGHEST_PROTOCOL)
-    new_item = pickle.loads(pickled)
-    assert new_item.__name__ is None
-    with pytest.raises(AttributeError):
-        assert new_item._BaseObject__name is None
-    assert '__name__' not in item.__dict__
-    assert '_BaseObject__name' not in item.__dict__
+    testing = {
+        '__parent__': '_BaseObject__parent',
+        '__of__': '_BaseObject__of',
+        '__name__': '_BaseObject__name',
+        '__annotations__': '_BaseObject__annotations',
+        '__immutable_cache__': '_BaseObject__immutable_cache',
+        '__new_marker__': '_BaseObject__new_marker',
+        '_p_jar': '_BaseObject__jar',
+        '_p_oid': '_BaseObject__oid',
+        '_p_serial': '_BaseObject__serial'
+    }
+    for name, attr in testing.items():
+        item = Item()
+        setattr(item, name, 'foobar')
+        assert name not in item.__dict__
+        assert attr not in item.__dict__
+        pickled = pickle.dumps(item, protocol=pickle.HIGHEST_PROTOCOL)
+        new_item = pickle.loads(pickled)
+        assert getattr(new_item, name) != 'foobar'
+        assert name not in item.__dict__
+        assert attr not in item.__dict__
