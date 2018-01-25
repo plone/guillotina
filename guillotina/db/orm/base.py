@@ -10,13 +10,13 @@ class ObjectProperty(object):
         self.default = default
 
     def __get__(self, inst, klass):
-        return getattr(inst, self.attribute, self.default)
+        return object.__getattribute__(inst, self.attribute)
 
     def __set__(self, inst, value):
-        setattr(inst, self.attribute, value)
+        object.__setattr__(inst, self.attribute, value)
 
     def __delete__(self, inst):
-        setattr(inst, self.attribute, self.default)
+        object.__setattr__(inst, self.attribute, self.default)
 
 
 class DictDefaultProperty(ObjectProperty):
@@ -24,14 +24,14 @@ class DictDefaultProperty(ObjectProperty):
         self.attribute = attribute
 
     def __get__(self, inst, klass):
-        val = getattr(inst, self.attribute, None)
+        val = object.__getattribute__(inst, self.attribute)
         if val is None:
-            setattr(inst, self.attribute, {})
-            return getattr(inst, self.attribute, None)
+            object.__setattr__(inst, self.attribute, {})
+            return object.__getattribute__(inst, self.attribute)
         return val
 
     def __delete__(self, inst):
-        setattr(inst, self.attribute, {})
+        object.__setattr__(inst, self.attribute, {})
 
 
 @implementer(IBaseObject)
@@ -42,7 +42,15 @@ class BaseObject(object):
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
-        inst._BaseObject__annotations = {}
+        object.__setattr__(inst, '_BaseObject__annotations', {})
+        object.__setattr__(inst, '_BaseObject__jar', None)
+        object.__setattr__(inst, '_BaseObject__oid', None)
+        object.__setattr__(inst, '_BaseObject__serial', None)
+        object.__setattr__(inst, '_BaseObject__new_marker', False)
+        object.__setattr__(inst, '_BaseObject__parent', None)
+        object.__setattr__(inst, '_BaseObject__of', None)
+        object.__setattr__(inst, '_BaseObject__name', None)
+        object.__setattr__(inst, '_BaseObject__immutable_cache', False)
         return inst
 
     def __repr__(self):
