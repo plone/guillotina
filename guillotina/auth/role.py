@@ -17,7 +17,7 @@ class Role(object):
 def check_role(context, role_id):
     names = [name for name, util in get_utilities_for(IRole, context)]
     if role_id not in names:
-        raise ValueError("Undefined role id", role_id)
+        raise ValueError(f'Undefined role id "{role_id}"')
 
 
 def local_roles():
