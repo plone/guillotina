@@ -1,7 +1,8 @@
 2.3.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Use __slots__ for BaseObject
+  [vangheem]
 
 
 2.3.17 (2018-01-22)

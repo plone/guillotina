@@ -287,8 +287,6 @@ class Resource(guillotina.db.orm.base.BaseObject):
     Base resource object class
     """
 
-    __name__ = None
-    __parent__ = None
     __behaviors__ = frozenset({})
     __acl__ = None
 

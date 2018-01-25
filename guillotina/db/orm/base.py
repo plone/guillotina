@@ -48,6 +48,8 @@ class BaseObject(object):
     def __repr__(self):
         return "<%s %d>" % (self.__class__.__name__, id(self))
 
+    __slots__ = ('__parent', '__of', '__name', '__annotations', '__immutable_cache',
+                 '__new_marker')
     __parent__ = ObjectProperty('_BaseObject__parent', None)
     __of__ = ObjectProperty('_BaseObject__of', None)
     __name__ = ObjectProperty('_BaseObject__name', None)
@@ -72,20 +74,4 @@ class BaseObject(object):
 
     @profilable
     def __getstate__(self):
-        idict = getattr(self, '__dict__', None)
-        if idict is not None:
-            d = dict([x for x in idict.items()
-                      if not x[0].startswith('_BaseObject__')])
-        else:
-            d = None
-        return d
-
-    @profilable
-    def __setstate__(self, state):
-        if isinstance(state, tuple):
-            inst_dict = state[0]
-        else:
-            inst_dict = state
-        idict = getattr(self, '__dict__', None)
-        if inst_dict is not None:
-            idict.update(inst_dict)
+        return self.__dict__

@@ -4,6 +4,7 @@ from guillotina.component import get_utility
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.content import Folder
+from guillotina.content import Item
 from guillotina.content import load_cached_schema
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -11,6 +12,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces.types import IConstrainTypes
 from guillotina.tests import utils
 
+import pickle
 import pytest
 
 
@@ -110,3 +112,17 @@ class TestContent:
         behavior = IDublinCore(obj)
         assert behavior.creators == ('root',)
         assert behavior.contributors == ('root',)
+
+
+def test_base_object():
+    item = Item()
+    item.__name__ = 'foobar'
+    assert '__name__' not in item.__dict__
+    assert '_BaseObject__name' not in item.__dict__
+    pickled = pickle.dumps(item, protocol=pickle.HIGHEST_PROTOCOL)
+    new_item = pickle.loads(pickled)
+    assert new_item.__name__ is None
+    with pytest.raises(AttributeError):
+        assert new_item._BaseObject__name is None
+    assert '__name__' not in item.__dict__
+    assert '_BaseObject__name' not in item.__dict__
