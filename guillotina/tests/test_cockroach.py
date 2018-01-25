@@ -1,11 +1,8 @@
 from guillotina.content import Folder
 from guillotina.db.transaction_manager import TransactionManager
-from guillotina.exceptions import ConflictError
 from guillotina.tests.utils import create_content
-from unittest import mock
 
 import asyncio
-import asyncpg
 import os
 import pytest
 
