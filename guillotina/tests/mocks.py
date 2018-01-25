@@ -34,9 +34,10 @@ class MockTransaction:
         self._cache = DummyCache(self)
         self._lock = asyncio.Lock()
         self._status = 'started'
+        self._db_conn = None
 
     async def get_connection(self):
-        return None
+        return self._db_conn
 
     async def refresh(self, ob):
         return ob
