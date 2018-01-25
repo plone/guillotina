@@ -63,29 +63,6 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
         await tm.abort(txn=txn)
 
 
-async def test_handle_serialization_error(cockroach_storage, dummy_request):
-    request = dummy_request  # noqa
-    async with cockroach_storage as storage:
-        tm = TransactionManager(storage)
-        txn = await tm.begin()
-        folder1 = create_content()
-        txn.register(folder1)
-        await tm.commit(txn=txn)
-        txn = await tm.begin()
-        await txn.get_connection()
-
-        with mock.patch('asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute') as exe_mock:  # noqa
-            exc = asyncpg.exceptions.SerializationError(
-                'restart transaction: HandledRetryableTxnError: '
-                'ReadWithinUncertaintyIntervalError: read at time '
-                '1511374585.730535846,0 encountered')
-            exc.sqlstate = '40001'
-            exe_mock.side_effect = exc
-            with pytest.raises(ConflictError):
-                await txn.get(folder1._p_oid)
-        await tm.abort(txn=txn)
-
-
 async def test_deleting_parent_deletes_children(cockroach_storage, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
