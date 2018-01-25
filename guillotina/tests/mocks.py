@@ -35,6 +35,9 @@ class MockTransaction:
         self._lock = asyncio.Lock()
         self._status = 'started'
 
+    async def get_connection(self):
+        return None
+
     async def refresh(self, ob):
         return ob
 
