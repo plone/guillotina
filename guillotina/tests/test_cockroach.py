@@ -72,6 +72,7 @@ async def test_handle_serialization_error(cockroach_storage, dummy_request):
         txn.register(folder1)
         await tm.commit(txn=txn)
         txn = await tm.begin()
+        await txn.get_connection()
 
         with mock.patch('asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute') as exe_mock:  # noqa
             exc = asyncpg.exceptions.SerializationError(
