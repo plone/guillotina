@@ -837,6 +837,7 @@ class PostgresqlStorage(BaseStorage):
         conn = await txn.get_connection()
         async with txn._lock:
             keys = []
-            for record in await conn.fetch(type_, page_size, (page - 1) * page_size):  # noqa
+            for record in await conn.fetch(
+                    RESOURCES_BY_TYPE, type_, page_size, (page - 1) * page_size):
                 keys.append(record)
             return keys
