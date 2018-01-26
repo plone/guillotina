@@ -4,7 +4,7 @@ from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
-from guillotina.json.serialize_value import json_compatible
+from guillotina.serialize.serialize_value import json_compatible
 from guillotina.profile import profilable
 from guillotina.schema import get_fields
 from guillotina.schema.interfaces import IBool

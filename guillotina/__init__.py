@@ -16,6 +16,9 @@ import os
 # create logging
 logger = glogging.getLogger('guillotina')
 
+import asyncio
+import uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 if os.environ.get('GDEBUG', '').lower() in ('true', 't', '1'):
     # patches for extra debugging....

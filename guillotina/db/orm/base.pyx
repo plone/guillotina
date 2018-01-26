@@ -42,15 +42,15 @@ class BaseObject(object):
 
     def __new__(cls, *args, **kw):
         inst = super(BaseObject, cls).__new__(cls)
-        object.__setattr__(inst, '_BaseObject__annotations', {})
-        object.__setattr__(inst, '_BaseObject__jar', None)
-        object.__setattr__(inst, '_BaseObject__oid', None)
-        object.__setattr__(inst, '_BaseObject__serial', None)
-        object.__setattr__(inst, '_BaseObject__new_marker', False)
-        object.__setattr__(inst, '_BaseObject__parent', None)
-        object.__setattr__(inst, '_BaseObject__of', None)
-        object.__setattr__(inst, '_BaseObject__name', None)
-        object.__setattr__(inst, '_BaseObject__immutable_cache', False)
+        inst._BaseObject__annotations = {}
+        inst._BaseObject__jar = None
+        inst._BaseObject__oid = None
+        inst._BaseObject__serial = None
+        inst._BaseObject__new_marker = False
+        inst._BaseObject__parent = None
+        inst._BaseObject__of =None
+        inst._BaseObject__name = None
+        inst._BaseObject__immutable_cache = False
         return inst
 
     def __repr__(self):

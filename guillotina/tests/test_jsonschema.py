@@ -1,5 +1,5 @@
 from guillotina.behaviors.dublincore import IDublinCore
-from guillotina.json.utils import convert_interface_to_schema
+from guillotina.serialize.utils import convert_interface_to_schema
 
 
 def test_convert_dublin_core():

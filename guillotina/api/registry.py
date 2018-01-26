@@ -9,8 +9,8 @@ from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
-from guillotina.json.exceptions import DeserializationError
-from guillotina.json.serialize_value import json_compatible
+from guillotina.serialize.exceptions import DeserializationError
+from guillotina.serialize.serialize_value import json_compatible
 from guillotina.schema import get_fields
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name

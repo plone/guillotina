@@ -18,13 +18,13 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.interfaces import ISchemaSerializeToJson
-from guillotina.json import deserialize_content
-from guillotina.json import serialize_schema
-from guillotina.json import serialize_schema_field
-from guillotina.json.serialize_content import DefaultJSONSummarySerializer
-from guillotina.json.serialize_content import SerializeFolderToJson
-from guillotina.json.serialize_content import SerializeToJson
-from guillotina.json.serialize_value import json_compatible
+from guillotina.serialize import deserialize_content
+from guillotina.serialize import serialize_schema
+from guillotina.serialize import serialize_schema_field
+from guillotina.serialize.serialize_content import DefaultJSONSummarySerializer
+from guillotina.serialize.serialize_content import SerializeFolderToJson
+from guillotina.serialize.serialize_content import SerializeToJson
+from guillotina.serialize.serialize_value import json_compatible
 from guillotina.security.policy import Interaction
 
 

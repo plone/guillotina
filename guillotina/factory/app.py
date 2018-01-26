@@ -183,7 +183,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.content')
     configure.scan('guillotina.registry')
     configure.scan('guillotina.auth')
-    configure.scan('guillotina.json')
+    configure.scan('guillotina.serialize')
     configure.scan('guillotina.behaviors')
     configure.scan('guillotina.languages')
     configure.scan('guillotina.permissions')

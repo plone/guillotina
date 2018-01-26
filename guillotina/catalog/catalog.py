@@ -11,7 +11,7 @@ from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
-from guillotina.json.serialize_value import json_compatible
+from guillotina.serialize.serialize_value import json_compatible
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content

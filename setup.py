@@ -2,6 +2,9 @@
 from setuptools import find_packages
 from setuptools import setup
 
+from Cython.Build import cythonize
+
+
 
 setup(
     name='guillotina',
@@ -25,6 +28,19 @@ setup(
     setup_requires=[
         'pytest-runner',
     ],
+    ext_modules = cythonize([
+        "guillotina/db/orm/base.pyx",
+        "guillotina/security/policy.pyx",
+        "guillotina/component/_api.pyx",
+        "guillotina/serialize/serialize_content.pyx",
+        "guillotina/serialize/serialize_schema.pyx",
+        "guillotina/serialize/serialize_schema_field.pyx",
+        "guillotina/serialize/serialize_value.pyx",
+        "guillotina/db/transaction.pyx",
+        "guillotina/db/transaction_manager.pyx",
+        "guillotina/content.pyx",
+        "guillotina/renderers.pyx",
+        "guillotina/traversal.pyx"]),
     zip_safe=True,
     include_package_data=True,
     package_data={'': ['*.txt', '*.rst', 'guillotina/documentation/meta/*.json']},

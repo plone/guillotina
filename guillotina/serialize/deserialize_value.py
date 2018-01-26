@@ -4,7 +4,7 @@ from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_adapter
 from guillotina.interfaces import IJSONToValue
-from guillotina.json.exceptions import ValueDeserializationError
+from guillotina.serialize.exceptions import ValueDeserializationError
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IDatetime

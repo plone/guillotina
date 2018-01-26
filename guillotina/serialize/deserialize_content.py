@@ -16,8 +16,8 @@ from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.json.exceptions import DeserializationError
-from guillotina.json.exceptions import ValueDeserializationError
+from guillotina.serialize.exceptions import DeserializationError
+from guillotina.serialize.exceptions import ValueDeserializationError
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine

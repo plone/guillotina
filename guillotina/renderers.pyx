@@ -18,11 +18,11 @@ from guillotina.profile import profilable
 from guillotina.utils import apply_coroutine
 from zope.interface.interface import InterfaceClass
 
-import json
+import json as pyjson
 import ujson
 
 
-class GuillotinaJSONEncoder(json.JSONEncoder):
+class GuillotinaJSONEncoder(pyjson.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, complex):
             return [obj.real, obj.imag]
@@ -44,7 +44,7 @@ class GuillotinaJSONEncoder(json.JSONEncoder):
         if callable(obj):
             return obj.__module__ + '.' + obj.__name__
         # Let the base class default method raise the TypeError
-        return json.JSONEncoder.default(self, obj)
+        return pyjson.JSONEncoder.default(self, obj)
 
 
 # b/w compat import
@@ -53,7 +53,7 @@ PServerJSONEncoder = GuillotinaJSONEncoder
 
 def json_response(data=sentinel, *, text=None, body=None, status=200,
                   reason=None, headers=None, content_type='application/json',
-                  dumps=json.dumps):
+                  dumps=pyjson.dumps):
     if data is not sentinel:
         if text or body:
             raise ValueError(
@@ -196,7 +196,7 @@ class RendererRaw(Renderer):
     def guess_response(self, value):
         resp = value.response
         if type(resp) in (dict, list, int, float, bool):
-            resp = aioResponse(body=bytes(json.dumps(resp, cls=GuillotinaJSONEncoder), 'utf-8'))
+            resp = aioResponse(body=bytes(pyjson.dumps(resp, cls=GuillotinaJSONEncoder), 'utf-8'))
             resp.headers['Content-Type'] = 'application/json'
         elif isinstance(resp, str):
             original_resp = resp

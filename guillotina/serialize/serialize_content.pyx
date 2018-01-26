@@ -15,7 +15,7 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
-from guillotina.json.serialize_value import json_compatible
+from guillotina.serialize.serialize_value import json_compatible
 from guillotina.profile import profilable
 from guillotina.schema import get_fields
 from guillotina.utils import apply_coroutine
@@ -41,8 +41,8 @@ class SerializeToJson(object):
         self.permission_cache = {}
 
     @profilable
-    async def __call__(self, include=[], omit=[]):
-        self.include = include
+    async def __call__(self, include_fields=[], omit=[]):
+        self.include_fields = include_fields
         self.omit = omit
 
         parent = self.context.__parent__
@@ -74,8 +74,8 @@ class SerializeToJson(object):
         # - <field name> on content schema
         # - namespace.IBehavior
         # - namespace.IBehavior.field_name
-        included_ifaces = [name for name in self.include if '.' in name]
-        included_ifaces.extend([name.rsplit('.', 1)[0] for name in self.include
+        included_ifaces = [name for name in self.include_fields if '.' in name]
+        included_ifaces.extend([name.rsplit('.', 1)[0] for name in self.include_fields
                                 if '.' in name])
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
             dotted_name = behavior_schema.__identifier__
@@ -105,9 +105,9 @@ class SerializeToJson(object):
             else:
                 dotted_name = name
             if (dotted_name in self.omit or (
-                    len(self.include) > 0 and (
-                        dotted_name not in self.include and
-                        schema.__identifier__ not in self.include))):
+                    len(self.include_fields) > 0 and (
+                        dotted_name not in self.include_fields and
+                        schema.__identifier__ not in self.include_fields))):
                 # make sure the fields aren't filtered
                 continue
 
@@ -152,8 +152,8 @@ class SerializeToJson(object):
 class SerializeFolderToJson(SerializeToJson):
 
     @profilable
-    async def __call__(self, include=[], omit=[]):
-        result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
+    async def __call__(self, include_fields=[], omit=[]):
+        result = await super(SerializeFolderToJson, self).__call__(include_fields=include_fields, omit=omit)
 
         security = IInteraction(self.request)
         length = await self.context.async_len()

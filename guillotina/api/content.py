@@ -47,8 +47,8 @@ from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
-from guillotina.json.exceptions import DeserializationError
-from guillotina.json.utils import convert_interfaces_to_schema
+from guillotina.serialize.exceptions import DeserializationError
+from guillotina.serialize.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
@@ -117,7 +117,7 @@ class DefaultGET(Service):
         if self.request.GET.get('omit'):
             omit = self.request.GET.get('omit').split(',')
         try:
-            result = await serializer(include=include, omit=omit)
+            result = await serializer(include_fields=include, omit=omit)
         except TypeError:
             result = await serializer()
         await notify(ObjectVisitedEvent(self.context))
@@ -842,7 +842,7 @@ async def items(context, request):
             (ob, request),
             IResourceSerializeToJson)
         try:
-            results.append(await serializer(include=include, omit=omit))
+            results.append(await serializer(include_fields=include, omit=omit))
         except TypeError:
             results.append(await serializer())
 
