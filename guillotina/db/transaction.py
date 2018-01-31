@@ -120,6 +120,27 @@ class Transaction(object):
 
         self._query_count_start = self._query_count_end = 0
 
+    def get_query_count(self):
+        '''
+        diff versions of asyncpg
+        '''
+        if self._db_conn is None:
+            return 0
+        try:
+            return self._db_conn._protocol.queries_count
+        except Exception:
+            try:
+                return self._db_conn._con._protocol.queries_count
+            except Exception:
+                pass
+        return 0
+
+    async def get_connection(self):
+        if self._db_conn is None:
+            self._db_conn = await self._manager._storage.open()
+            self._query_count_start = self.get_query_count()
+        return self._db_conn
+
     @property
     def strategy(self):
         return self._strategy
@@ -175,13 +196,12 @@ class Transaction(object):
         self._before_commit = []
 
     # BEGIN TXN
-    async def tpc_begin(self, conn):
+    async def tpc_begin(self):
         """Begin commit of a transaction
 
         conn is a real db that will be got by db.open()
         """
         self._txn_time = time.time()
-        self._db_conn = conn
         await self._strategy.tpc_begin()
 
     def check_read_only(self):
