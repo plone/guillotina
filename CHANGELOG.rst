@@ -1,7 +1,8 @@
-2.4.8 (unreleased)
+2.5.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- normalize file manager api so we can have more simple integrations with s3/gcloud
+  [vangheem]
 
 
 2.4.7 (2018-03-17)

@@ -185,9 +185,129 @@ Then, to download the file, use the `@download` endpoint.
      :statuscode 500: Error processing request
 ```
 
+## Uploading files with TUS
+
 Guillotina also supports the TUS protocol using the `@tusupload` endpoint. The
 TUS protocol allows you to upload large files in chunks and allows you to have
 resumable uploads.
+
+
+First, initialize the TUS upload with a POST
+
+```eval_rst
+.. http:post:: /db/container/foobar/@tusupload/file
+
+     Upload file
+
+     **Example request**
+
+     .. sourcecode:: http
+
+        POST /db/container/foobar/@tusupload/file HTTP/1.1
+        Authorization: Basic cm9vdDpyb290
+        UPLOAD-LENGTH: 2097152
+        TUS-RESUMABLE: 1
+
+     **Example response**
+
+     .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+     :reqheader Authorization: Required token to authenticate
+     :statuscode 200: no error
+     :statuscode 401: Invalid Auth code
+     :statuscode 500: Error processing request
+```
+
+Next, upload the chunks(here we're doing chunks of 1MB):
+
+```eval_rst
+.. http:patch:: /db/container/foobar/@tusupload/file
+
+     Upload file
+
+     **Example request**
+
+     .. sourcecode:: http
+
+        PATCH /db/container/foobar/@tusupload/file HTTP/1.1
+        Authorization: Basic cm9vdDpyb290
+        Upload-Offset: 0
+        TUS-RESUMABLE: 1
+        CONTENT-LENGTH: 1048576
+
+        < binary data >
+
+     **Example response**
+
+     .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+     :reqheader Authorization: Required token to authenticate
+     :statuscode 200: no error
+     :statuscode 401: Invalid Auth code
+     :statuscode 500: Error processing request
+```
+
+And final chunk of 1MB:
+
+```eval_rst
+.. http:patch:: /db/container/foobar/@tusupload/file
+
+     Upload file
+
+     **Example request**
+
+     .. sourcecode:: http
+
+        PATCH /db/container/foobar/@tusupload/file HTTP/1.1
+        Authorization: Basic cm9vdDpyb290
+        Upload-Offset: 1048576
+        TUS-RESUMABLE: 1
+        CONTENT-LENGTH: 1048576
+
+        < binary data >
+
+     **Example response**
+
+     .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+     :reqheader Authorization: Required token to authenticate
+     :statuscode 200: no error
+     :statuscode 401: Invalid Auth code
+     :statuscode 500: Error processing request
+```
+
+### Unknown upload size
+
+Guillotina's TUS implementation has support for the `Upload-Defer-Length` header.
+This means you can upload files with an unknown final upload size.
+
+In order to implement this correctly, you will need to provide the
+`Upload-Defer-Length: 1` header and value on the initial POST to start the TUS
+upload. You are then not required to provide the `UPLOAD-LENGTH` header.
+
+Then, before or on your last chunk, provide a `UPLOAD-LENGTH` value to let
+TUS know the upload can not finish.
+
+
+### Simultaneous TUS uploads
+
+Guillotina's TUS implementation also attempts to prevent simultaneous uploaders.
+
+If two users attempt to start an upload on the same object + field at the same
+time, a 412 error will be thrown. Guillotina tracks upload activity to detect this.
+If there is no activity detected for 15 seconds with an unfinished TUS upload,
+no error is thrown.
+
+To override this, send the `TUS-OVERRIDE-UPLOAD: 1` header.
 
 
 ## Modifying permissions

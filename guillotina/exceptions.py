@@ -210,3 +210,8 @@ class ValueDeserializationError(Exception):
 class QueryParsingError(Exception):
     """An error happened while parsing a search query.
     """
+
+
+class FileNotFoundException(Exception):
+    '''
+    '''

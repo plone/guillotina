@@ -30,7 +30,10 @@ from .content import ITraversable  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
 from .events import IBeforeObjectMovedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
+from .events import IFileBeforeFinishUploaded  # noqa
 from .events import IFileFinishUploaded  # noqa
+from .events import IFileStartedUpload  # noqa
+from .events import IFileUploadEvent  # noqa
 from .events import INewUserAdded  # noqa
 from .events import IObjectAddedEvent  # noqa
 from .events import IObjectDuplicatedEvent  # noqa
@@ -54,6 +57,8 @@ from .files import IFile  # noqa
 from .files import IFileCleanup  # noqa
 from .files import IFileField  # noqa
 from .files import IFileManager  # noqa
+from .files import IFileStorageManager  # noqa
+from .files import IUploadDataManager  # noqa
 from .json import IFactorySerializeToJson  # noqa
 from .json import IJSONToValue  # noqa
 from .json import IResourceDeserializeFromJson  # noqa

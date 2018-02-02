@@ -5,31 +5,119 @@ from guillotina.schema.interfaces import IObject
 from zope.interface import Interface
 
 
+class IUploadDataManager(Interface):
+    '''
+    Interface to manage upload data
+    '''
+
+    async def load():
+        '''
+        Load the current upload status
+        '''
+
+    async def update(**kwargs):
+        '''
+        update file upload data
+        '''
+
+    async def finish():
+        '''
+        finish upload
+        '''
+
+    async def save():
+        '''
+        save any current operations to db
+        '''
+
+    async def get(name):
+        '''
+        get attribute
+        '''
+
+    async def get_offset(self):
+        '''
+        get current upload offset
+        '''
+
+
+class IFileStorageManager(Interface):
+    '''
+    Manage storing file data
+    '''
+
+    async def start(dm):
+        '''
+        start upload
+        '''
+
+    async def iter_data():
+        '''
+        iterate through data in file
+        '''
+
+    async def append(data):
+        '''
+        append data to the file
+        '''
+
+    async def finish():
+        '''
+        finish upload
+        '''
+
+    async def copy(dm, other_storage_manager, other_dm):
+        '''
+        copy file to another file
+        '''
+
+
 class IFileManager(Interface):
     """Interface to create uploaders and downloaders."""
 
-    async def upload(self):
+    async def upload():
         '''
-        '''
-
-    async def download(self):
-        '''
+        Upload complete file in one shot
         '''
 
-    async def tus_post(self):
+    async def download():
         '''
-        '''
-
-    async def tus_patch(self):
-        '''
+        Download file
         '''
 
-    async def tus_options(self):
+    async def tus_post():
         '''
+        Start tus upload process
         '''
 
-    async def tus_head(self):
+    async def tus_patch():
         '''
+        Upload part of file
+        '''
+
+    async def tus_options():
+        '''
+        Get tus supported version
+        '''
+
+    async def tus_head():
+        '''
+        Get current tus status
+        '''
+
+    async def iter_data():
+        '''
+        Return an async iterator of the file
+        '''
+
+    async def save_file(generator):
+        '''
+        Save data to a file from an async generator
+        '''
+
+    async def copy(other_manager):
+        '''
+        Copy current file to new one
         '''
 
 
