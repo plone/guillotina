@@ -55,7 +55,10 @@ class TraversableFieldService(View):
             if field is None:
                 raise KeyError('No valid name')
 
-            self.field = field.bind(self.behavior)
+            if self.behavior is not None:
+                self.field = field.bind(self.behavior)
+            else:
+                self.field = field.bind(self.context)
         else:
             self.field = None
 

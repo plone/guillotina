@@ -74,7 +74,9 @@ class BaseCloudFile:
 
         self._size = size
         self._md5 = md5
+        self._current_upload = 0
         self._data = b''
+        self._resumable_uri_date = None
 
     def guess_content_type(self):
         ct = to_str(self.content_type)
@@ -92,21 +94,25 @@ class BaseCloudFile:
             context._p_oid,
             uuid.uuid4().hex)
 
-    def get_actual_size(self):
+    @property
+    def current_upload(self):
         return self._current_upload
 
-    def _set_data(self, data):
-        self._data = data
+    @current_upload.setter
+    def current_upload(self, val):
+        self._current_upload = val
 
-    def _get_data(self):
-        return self._data
-
-    data = property(_get_data, _set_data)
+    def get_actual_size(self):
+        return self._current_upload
 
     @property
     def uri(self):
         if hasattr(self, '_uri'):
             return self._uri
+
+    @uri.setter
+    def uri(self, val):
+        self._uri = val
 
     @property
     def size(self):
@@ -115,12 +121,20 @@ class BaseCloudFile:
         else:
             return None
 
+    @size.setter
+    def size(self, val):
+        self._size = val
+
     @property
     def md5(self):
         if hasattr(self, '_md5'):
             return self._md5
         else:
             return None
+
+    @md5.setter
+    def md5(self, val):
+        self._md5 = val
 
     @property
     def extension(self):
@@ -131,26 +145,17 @@ class BaseCloudFile:
                 return self.filename.split('.')[-1]
             return None
 
-    async def copy_cloud_file(self, context, new_uri):
-        raise NotImplemented()
+    @extension.setter
+    def extension(self, val):
+        self._extension = val
 
-    async def rename_cloud_file(self, new_uri):
-        raise NotImplemented()
+    @property
+    def resumable_uri_date(self):
+        return self._resumable_uri_date
 
-    async def init_upload(self, context):
-        raise NotImplemented()
-
-    async def append_data(self, data):
-        raise NotImplemented()
-
-    async def finish_upload(self, context):
-        raise NotImplemented()
-
-    async def delete_upload(self, uri=None):
-        raise NotImplemented()
-
-    async def download(self, buf):
-        raise NotImplemented()
+    @resumable_uri_date.setter
+    def resumable_uri_date(self, val):
+        self._resumable_uri_date = val
 
 
 async def _generator(value):
@@ -168,6 +173,5 @@ async def deserialize_cloud_field(field, value, context):
         field = field.bind(context)
     file_manager = get_multi_adapter((context, request, field), IFileManager)
     val = await file_manager.save_file(
-        partial(_generator, value), content_type=value['content_type'],
-        size=len(value['data']))
+        partial(_generator, value), content_type=value['content_type'])
     return val

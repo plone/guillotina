@@ -1,4 +1,6 @@
 from guillotina.behaviors.attachment import IAttachment
+from guillotina.component import get_multi_adapter
+from guillotina.interfaces import IFileManager
 from guillotina.tests import utils
 from guillotina.transactions import managed_transaction
 
@@ -170,5 +172,11 @@ async def test_copy_file_ob(container_requester):
             attachment = IAttachment(obj)
             await attachment.load()
             existing_bid = attachment.file._blob.bid
-            await attachment.file.copy_cloud_file(obj)
+            cfm = get_multi_adapter(
+                (obj, request, IAttachment['file'].bind(attachment)), IFileManager
+            )
+            from_cfm = get_multi_adapter(
+                (obj, request, IAttachment['file'].bind(attachment)), IFileManager
+            )
+            await cfm.copy(from_cfm)
             assert existing_bid != attachment.file._blob.bid

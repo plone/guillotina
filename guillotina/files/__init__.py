@@ -1,4 +1,4 @@
-from .adapter import DBFileManagerAdapter  # noqa
+from .adapter import DBFileStorageManagerAdapter  # noqa
 from .const import CHUNK_SIZE  # noqa
 from .const import MAX_REQUEST_CACHE_SIZE  # noqa
 from .const import MAX_RETRIES  # noqa
