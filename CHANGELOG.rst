@@ -1,4 +1,4 @@
-2.3.18 (unreleased)
+2.3.18 (2018-02-05)
 -------------------
 
 - lazy create connection
