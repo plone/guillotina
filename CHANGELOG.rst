@@ -1,7 +1,8 @@
 2.3.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure to get connection object correctly with `@items` endpoint
+  [vangheem]
 
 
 2.3.18 (2018-02-05)

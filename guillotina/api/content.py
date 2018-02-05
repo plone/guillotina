@@ -822,9 +822,9 @@ async def items(context, request):
 
     # alright, we'll do our own batching now...
     txn = request._txn
-    conn = txn._db_conn
-    smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS)
-    result = await smt.fetch(
+    conn = await txn.get_connection()
+    result = await conn.fetch(
+        BATCHED_GET_CHILDREN_KEYS,
         context._p_oid,
         page_size,
         (page - 1) * page_size)
