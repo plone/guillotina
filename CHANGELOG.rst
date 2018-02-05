@@ -1,6 +1,9 @@
 2.3.18 (unreleased)
 -------------------
 
+- lazy create connection
+  [vangheem]
+
 - Use __slots__ for BaseObject
   [vangheem]
 
