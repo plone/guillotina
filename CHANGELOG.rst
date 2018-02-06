@@ -1,4 +1,4 @@
-2.3.19 (unreleased)
+2.3.19 (2018-02-06)
 -------------------
 
 - Make sure to check field permissions correctly
