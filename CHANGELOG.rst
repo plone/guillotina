@@ -1,6 +1,9 @@
 2.3.19 (unreleased)
 -------------------
 
+- Make sure to check field permissions correctly
+  [vangheem]
+
 - Make sure to get connection object correctly with `@items` endpoint
   [vangheem]
 
