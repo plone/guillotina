@@ -98,7 +98,7 @@ class DeserializeFromJson(object):
                     value = await self.get_value(f, obj, data_value)
                 except ValueError as e:
                     errors.append({
-                        'message': e.message, 'field': name, 'error': e})
+                        'message': 'Value error', 'field': name, 'error': e})
                 except ValidationError as e:
                     errors.append({
                         'message': e.doc(), 'field': name, 'error': e})

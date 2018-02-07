@@ -1,7 +1,8 @@
 2.3.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- ValueError does not have a `message` attribute
+  [vangheem]
 
 
 2.3.19 (2018-02-06)
