@@ -1,4 +1,4 @@
-2.3.20 (unreleased)
+2.3.20 (2018-02-07)
 -------------------
 
 - ValueError does not have a `message` attribute
