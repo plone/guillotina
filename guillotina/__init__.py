@@ -7,10 +7,13 @@ from guillotina._cache import PERMISSIONS_CACHE  # noqa
 from guillotina._cache import SCHEMA_CACHE  # noqa
 from guillotina._settings import app_settings  # noqa
 from guillotina.i18n import default_message_factory as _  # noqa
-from guillotina.transactions import get_transaction
 from zope.interface import Interface  # noqa
 
 import os
+import pkg_resources
+
+
+__version__ = pkg_resources.get_distribution('guillotina').version
 
 
 # create logging
@@ -26,6 +29,7 @@ if os.environ.get('GDEBUG', '').lower() in ('true', 't', '1'):
     def _record(query, duration):
         # log each query on the transaction object...
         try:
+            from guillotina.transactions import get_transaction
             txn = get_transaction()
             if txn:
                 if not hasattr(txn, '_queries'):

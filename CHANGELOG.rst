@@ -1,7 +1,8 @@
 2.3.21 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add Server header
+  [vangheem]
 
 
 2.3.20 (2018-02-07)

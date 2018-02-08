@@ -7,6 +7,7 @@ from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from contextlib import contextmanager
+from guillotina import __version__
 from guillotina import logger
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
@@ -169,6 +170,7 @@ class BaseMatchInfo(AbstractMatchInfo):
         return None
 
     def debug(self, request, resp):
+        resp.headers['Server'] = 'Guillotina/' + __version__
         if 'X-Debug' in request.headers:
             try:
                 last = request._initialized
