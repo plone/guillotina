@@ -835,9 +835,13 @@ async def items(context, request):
     if request.GET.get('omit'):
         omit = request.GET.get('omit').split(',')
 
+    security = IInteraction(request)
+
     results = []
     for record in result:
         ob = await context.async_get(record['id'])
+        if not security.check_permission('guillotina.ViewContent', ob):
+            continue
         serializer = get_multi_adapter(
             (ob, request),
             IResourceSerializeToJson)
