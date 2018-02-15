@@ -1,7 +1,8 @@
 2.3.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Change log level of conflict errors
+  [vangheem]
 
 
 2.3.21 (2018-02-07)

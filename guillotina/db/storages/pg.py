@@ -542,7 +542,7 @@ class PostgresqlStorage(BaseStorage):
 
         pickled = writer.serialize()  # This calls __getstate__ of obj
         if len(pickled) >= self._large_record_size:
-            log.warning(f"Large object {obj.__class__}: {len(pickled)}")
+            log.info(f"Large object {obj.__class__}: {len(pickled)}")
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
