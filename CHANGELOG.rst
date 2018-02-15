@@ -1,4 +1,4 @@
-2.3.22 (unreleased)
+2.3.22 (2018-02-15)
 -------------------
 
 - Change log level of conflict errors
