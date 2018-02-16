@@ -165,7 +165,7 @@ class DefaultPOST(Service):
         if not id_:
             new_id = None
         else:
-            if not valid_id(id_):
+            if not isinstance(id_, str) or not valid_id(id_):
                 return ErrorResponse('PreconditionFailed', str('Invalid id'),
                                      status=412)
             new_id = id_
