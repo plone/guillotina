@@ -1,7 +1,8 @@
 2.3.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure id when creating content is string
+  [vangheem]
 
 
 2.3.22 (2018-02-15)
