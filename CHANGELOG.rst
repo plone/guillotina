@@ -1,7 +1,8 @@
 2.3.24 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add a serializer for IDecimal fields
+  [cdevienne]
 
 
 2.3.23 (2018-02-16)

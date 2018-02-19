@@ -3,6 +3,7 @@ from datetime import date
 from datetime import datetime
 from datetime import time
 from datetime import timedelta
+from decimal import Decimal
 from guillotina import configure
 from guillotina.component import query_adapter
 from guillotina.i18n import Message
@@ -101,3 +102,8 @@ def i18n_message_converter(value):
     # TODO:
     # value = translate(value, context=getRequest())
     return value
+
+
+@configure.value_serializer(Decimal)
+def decimal_converter(value):
+    return str(value)
