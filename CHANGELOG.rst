@@ -1,4 +1,4 @@
-2.3.24 (unreleased)
+2.3.24 (2018-02-20)
 -------------------
 
 - Add IFileCleanup adapter to be able to customize if old cloud files are cleaned
