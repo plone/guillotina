@@ -1,7 +1,8 @@
 2.3.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Allow indexer accessors to be async
+  [vangheem]
 
 
 2.3.24 (2018-02-20)
