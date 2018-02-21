@@ -1,4 +1,4 @@
-2.3.25 (unreleased)
+2.3.25 (2018-02-20)
 -------------------
 
 - Allow indexer accessors to be async
