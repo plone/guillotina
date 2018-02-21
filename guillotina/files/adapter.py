@@ -28,8 +28,7 @@ class DefaultFileCleanup:
     def __init__(self, context):
         pass
 
-    @property
-    def should_clean(self):
+    def should_clean(self, **kwargs):
         return True
 
 

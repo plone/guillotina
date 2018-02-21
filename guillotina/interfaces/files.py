@@ -40,7 +40,7 @@ class IFileCleanup(Interface):
         adapter of ob file is on
         '''
 
-    def should_clean(self):
+    def should_clean(**kwargs):
         '''
         whether or not old file should be cleaned
         '''

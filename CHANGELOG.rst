@@ -1,7 +1,8 @@
 2.3.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- IFileCleanup accepts kwargs
+  [vangheem]
 
 
 2.3.25 (2018-02-20)

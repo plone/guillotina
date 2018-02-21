@@ -20,7 +20,7 @@ class DBFile(BaseCloudFile):
         self._current_upload = 0
         if self._blob is not None:
             cleanup = IFileCleanup(context, None)
-            if cleanup is None or cleanup.should_clean:
+            if cleanup is None or cleanup.should_clean(file=self):
                 bfile = self._blob.open('r')
                 await bfile.async_del()
             else:
