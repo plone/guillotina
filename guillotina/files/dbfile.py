@@ -23,6 +23,8 @@ class DBFile(BaseCloudFile):
             if cleanup is None or cleanup.should_clean:
                 bfile = self._blob.open('r')
                 await bfile.async_del()
+            else:
+                self._previous_blob = self._blob
         blob = Blob(context)
         self._blob = blob
 
