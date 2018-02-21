@@ -1,4 +1,4 @@
-2.3.26 (unreleased)
+2.3.26 (2018-02-21)
 -------------------
 
 - IFileCleanup accepts kwargs
