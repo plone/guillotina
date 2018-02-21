@@ -50,6 +50,7 @@ from .files import ICloudFileField  # noqa
 from .files import IDBFile  # noqa
 from .files import IDBFileField  # noqa
 from .files import IFile  # noqa
+from .files import IFileCleanup  # noqa
 from .files import IFileField  # noqa
 from .files import IFileManager  # noqa
 from .json import IFactorySerializeToJson  # noqa

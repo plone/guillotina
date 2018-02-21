@@ -1,6 +1,9 @@
 2.3.24 (unreleased)
 -------------------
 
+- Add IFileCleanup adapter to be able to customize if old cloud files are cleaned
+  [vangheem]
+
 - Add a serializer for IDecimal fields
   [cdevienne]
 

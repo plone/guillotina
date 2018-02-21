@@ -1,6 +1,7 @@
 from .field import BaseCloudFile
 from guillotina.blob import Blob
 from guillotina.interfaces import IDBFile
+from guillotina.interfaces import IFileCleanup
 from zope.interface import implementer
 
 
@@ -18,8 +19,12 @@ class DBFile(BaseCloudFile):
         context._p_register()
         self._current_upload = 0
         if self._blob is not None:
-            bfile = self._blob.open('r')
-            await bfile.async_del()
+            cleanup = IFileCleanup(context, None)
+            if cleanup is None or cleanup.should_clean:
+                bfile = self._blob.open('r')
+                await bfile.async_del()
+            else:
+                self._previous_blob = self._blob
         blob = Blob(context)
         self._blob = blob
 
