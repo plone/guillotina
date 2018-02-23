@@ -1,7 +1,8 @@
 2.3.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Upgrade asyncpg, do not clear statement cache after every connection open
+  [vangheem]
 
 
 2.3.26 (2018-02-21)
