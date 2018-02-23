@@ -1,4 +1,4 @@
-2.3.27 (unreleased)
+2.3.27 (2018-02-23)
 -------------------
 
 - Upgrade asyncpg, do not clear statement cache after every connection open
