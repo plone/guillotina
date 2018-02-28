@@ -20,8 +20,9 @@ from zope.interface import implementer
 @implementer(IObjectEvent)
 class ObjectEvent(object):
 
-    def __init__(self, object):
+    def __init__(self, object, **kwargs):
         self.object = object
+        self.data = kwargs
 
 
 @implementer(IObjectLocationEvent)

@@ -1,7 +1,8 @@
 2.3.28 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add IBeforeFileFinishUploaded event
+  [vangheem]
 
 
 2.3.27 (2018-02-23)
