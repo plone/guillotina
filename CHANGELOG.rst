@@ -1,4 +1,4 @@
-2.3.28 (unreleased)
+2.3.28 (2018-02-27)
 -------------------
 
 - Add IBeforeFileFinishUploaded event
