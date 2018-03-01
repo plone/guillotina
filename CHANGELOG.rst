@@ -1,7 +1,8 @@
 2.3.28 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Use lazy_apply when calling commit hooks
+  [vangheem]
 
 
 2.3.27 (2018-02-23)
