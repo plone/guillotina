@@ -1,4 +1,4 @@
-2.3.30 (unreleased)
+2.3.30 (2018-03-01)
 -------------------
 
 - Store record of previous file data on upload
