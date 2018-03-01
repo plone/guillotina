@@ -1,7 +1,8 @@
 2.3.30 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Store record of previous file data on upload
+  [vangheem]
 
 
 2.3.29 (2018-03-01)

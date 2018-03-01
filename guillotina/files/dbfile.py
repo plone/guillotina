@@ -6,6 +6,8 @@ from guillotina.interfaces import IDBFile
 from guillotina.interfaces import IFileCleanup
 from zope.interface import implementer
 
+import uuid
+
 
 @implementer(IDBFile)
 class DBFile(BaseCloudFile):
@@ -19,6 +21,13 @@ class DBFile(BaseCloudFile):
 
     async def init_upload(self, context):
         context._p_register()
+
+        self._old_uri = self.uri
+        self._old_size = self.size
+        self._old_filename = self.filename
+        self._old_md5 = self.md5
+        self._old_content_type = self.guess_content_type()
+
         self._current_upload = 0
         if self._blob is not None:
             cleanup = IFileCleanup(context, None)
@@ -28,6 +37,7 @@ class DBFile(BaseCloudFile):
             else:
                 self._previous_blob = self._blob
         blob = Blob(context)
+        self._uri = uuid.uuid4().hex
         self._blob = blob
 
     async def append_data(self, context, data):
