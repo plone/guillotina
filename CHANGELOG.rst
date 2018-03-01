@@ -1,7 +1,11 @@
 2.3.28 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Send file upload finished event
+  [vangheem]
+
+- Use lazy_apply when calling commit hooks
+  [vangheem]
 
 
 2.3.27 (2018-02-23)

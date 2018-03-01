@@ -1,5 +1,7 @@
 from .field import BaseCloudFile
 from guillotina.blob import Blob
+from guillotina.event import notify
+from guillotina.events import FileUploadFinishedEvent
 from guillotina.interfaces import IDBFile
 from guillotina.interfaces import IFileCleanup
 from zope.interface import implementer
@@ -41,7 +43,7 @@ class DBFile(BaseCloudFile):
         return self._blob.size
 
     async def finish_upload(self, context):
-        pass
+        await notify(FileUploadFinishedEvent(context))
 
     async def download(self, context, resp):
         bfile = self._blob.open()
