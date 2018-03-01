@@ -269,7 +269,7 @@ class CockroachStorage(pg.PostgresqlStorage):
             conn = await txn.get_connection()
             await conn.execute(DELETE_OBJECT, oid)
             await conn.execute(DELETE_FROM_BLOBS, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:

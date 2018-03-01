@@ -601,7 +601,7 @@ class PostgresqlStorage(BaseStorage):
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
             await conn.execute(TRASH_PARENT_ID, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
         if str(ex) in ('cannot perform operation: connection is closed',
