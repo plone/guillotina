@@ -189,7 +189,7 @@ class Write(TraversableService):
             return ErrorResponse(
                 'DeserializationError',
                 'Cannot deserialize type {}'.format(str(self.field)),
-                status=501)
+                status=412)
 
         try:
             self.request.container_settings[self.key] = new_value
@@ -198,6 +198,6 @@ class Write(TraversableService):
                 'DeserializationError',
                 str(e),
                 exc=e,
-                status=400)
+                status=412)
 
         return Response(response='', status=204)

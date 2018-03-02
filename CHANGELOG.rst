@@ -1,7 +1,8 @@
 2.3.31 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Normalize status codes to not use generate 400 all the time
+  [vangheem]
 
 
 2.3.30 (2018-03-01)
