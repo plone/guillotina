@@ -191,7 +191,7 @@ class DefaultPOST(Service):
             return ErrorResponse(
                 'CreatingObject',
                 str(e),
-                status=400)
+                status=412)
 
         for behavior in behaviors or ():
             obj.add_behavior(behavior)
@@ -203,7 +203,7 @@ class DefaultPOST(Service):
             return ErrorResponse(
                 'DeserializationError',
                 'Cannot deserialize type {}'.format(obj.type_name),
-                status=501)
+                status=412)
 
         try:
             await deserializer(data, validate_all=True)
@@ -212,7 +212,7 @@ class DefaultPOST(Service):
                 'DeserializationError',
                 str(e),
                 exc=e,
-                status=400)
+                status=412)
 
         # Local Roles assign owner as the creator user
         get_owner = get_utility(IGetOwner)
@@ -615,7 +615,7 @@ async def move(context, request):
         return ErrorResponse(
             'Configuration',
             'Could not find destination object',
-            status=400)
+            status=412)
     old_id = context.id
     if 'new_id' in data:
         new_id = data['new_id']
@@ -628,13 +628,13 @@ async def move(context, request):
         return ErrorResponse(
             'Configuration',
             'You do not have permission to add content to the destination object',
-            status=400)
+            status=412)
 
     if await destination_ob.async_contains(new_id):
         return ErrorResponse(
             'Configuration',
             f'Destination already has object with the id {new_id}',
-            status=400)
+            status=412)
 
     original_parent = context.__parent__
 
@@ -702,7 +702,7 @@ async def duplicate(context, request):
             return ErrorResponse(
                 'Configuration',
                 'Could not find destination object',
-                status=400)
+                status=412)
     else:
         destination_ob = context.__parent__
 
@@ -711,7 +711,7 @@ async def duplicate(context, request):
         return ErrorResponse(
             'Configuration',
             'You do not have permission to add content to the destination object',
-            status=400)
+            status=412)
 
     if 'new_id' in data:
         new_id = data['new_id']
@@ -719,7 +719,7 @@ async def duplicate(context, request):
             return ErrorResponse(
                 'Configuration',
                 f'Destination already has object with the id {new_id}',
-                status=400)
+                status=412)
     else:
         count = 1
         new_id = f'{context.id}-duplicate-{count}'

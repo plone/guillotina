@@ -123,7 +123,7 @@ def generate_error_response(e, request, error, status=500):
     eid = uuid.uuid4().hex
     message = _('Error on execution of view') + ' ' + eid
     logger.error(message, exc_info=e, eid=eid, request=request)
-    return ErrorResponse(error, message, status)
+    return ErrorResponse(error, message, status=status)
 
 
 class BaseMatchInfo(AbstractMatchInfo):
