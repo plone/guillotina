@@ -1,4 +1,4 @@
-2.3.31 (unreleased)
+2.3.31 (2018-03-02)
 -------------------
 
 - Normalize status codes to not use generate 400 all the time
