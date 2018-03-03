@@ -1,4 +1,4 @@
-2.3.32 (unreleased)
+2.3.32 (2018-03-03)
 -------------------
 
 - Disable statement cache on guillotina
