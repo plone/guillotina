@@ -453,7 +453,6 @@ class PostgresqlStorage(BaseStorage):
             min_size=2,
             loop=self._pool._loop,
             connection_class=app_settings['pg_connection_class'],
-            statement_cache_size=0,
             **self._connection_options)
 
         # shared read connection on all transactions
@@ -471,7 +470,6 @@ class PostgresqlStorage(BaseStorage):
             max_size=self._pool_size,
             min_size=2,
             connection_class=app_settings['pg_connection_class'],
-            statement_cache_size=0,
             loop=loop,
             **kw)
 
@@ -510,7 +508,15 @@ class PostgresqlStorage(BaseStorage):
 
     async def open(self):
         try:
-            return await self._pool.acquire(timeout=self._conn_acquire_timeout)
+            conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+            try:
+                conn._con._stmt_cache.clear()
+            except Exception:
+                try:
+                    conn._stmt_cache.clear()
+                except Exception:
+                    pass
+            return conn
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:
                 await self._check_bad_connection(ex)
