@@ -453,6 +453,7 @@ class PostgresqlStorage(BaseStorage):
             min_size=2,
             loop=self._pool._loop,
             connection_class=app_settings['pg_connection_class'],
+            statement_cache_size=0,
             **self._connection_options)
 
         # shared read connection on all transactions
@@ -470,6 +471,7 @@ class PostgresqlStorage(BaseStorage):
             max_size=self._pool_size,
             min_size=2,
             connection_class=app_settings['pg_connection_class'],
+            statement_cache_size=0,
             loop=loop,
             **kw)
 

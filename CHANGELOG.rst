@@ -1,7 +1,8 @@
 2.3.32 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Disable statement cache on guillotina
+  [vangheem]
 
 
 2.3.31 (2018-03-02)
