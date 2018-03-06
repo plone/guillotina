@@ -1,7 +1,8 @@
 2.3.34 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Deny permissions take precedence over allow permissions on content
+  [vangheem]
 
 
 2.3.33 (2018-03-03)

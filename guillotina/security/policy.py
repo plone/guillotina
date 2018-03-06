@@ -197,10 +197,18 @@ class Interaction(object):
             # Get the roles from the user
             prin_roles = self.cached_principal_roles(
                 parent, principal, groups, 'o')
+            found = False
             for role, setting in prin_roles.items():
                 if setting and (role in roles):
-                    cache_decision_prin[permission] = decision = True
-                    return decision
+                    cache_decision_prin[permission] = decision = bool(roles[role])
+                    found = True
+                    if roles[role] == 0:
+                        # if it is deny, dive out immediately
+                        # otherwise, it is allow and we need to make sure there
+                        # are no deny roles here
+                        return decision
+            if found:
+                return decision
 
         cache_decision_prin[permission] = decision = False
         return decision
@@ -365,8 +373,14 @@ class Interaction(object):
                     roles[role] = 1
                 elif setting is AllowSingle and level == 'o':
                     roles[role] = 1
-                elif setting is Deny and role in roles:
-                    del roles[role]
+                elif setting is Deny:
+                    if role in roles and roles[role] == 1:
+                        # on role that has been allowed already, delete it
+                        del roles[role]
+                    else:
+                        # not already applied on parent so explicitly
+                        # deny access here
+                        roles[role] = 0
 
         if level != 'o':
             # Only cache on non 1rst level queries needs new way
