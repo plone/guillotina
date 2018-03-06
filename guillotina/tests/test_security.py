@@ -1,3 +1,4 @@
+from guillotina.interfaces import IRolePermissionManager
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.security.utils import settings_for_object
@@ -169,3 +170,14 @@ async def test_canido(container_requester):
             'GET', '/db/guillotina/@canido?permission=guillotina.ViewContent')
         assert status == 200
         assert response
+
+
+async def test_deny_on_object_permissions(dummy_request):
+    request = dummy_request
+    content = utils.create_content()
+    utils.login(request)
+    request.security.participations[0].principal.roles['guillotina.Editor'] = 1
+    assert request.security.check_permission('guillotina.AddContent', content)
+    manager = IRolePermissionManager(content)
+    manager.deny_permission_to_role('guillotina.AddContent', 'guillotina.Editor')
+    assert not request.security.check_permission('guillotina.AddContent', content)
