@@ -375,8 +375,11 @@ class Interaction(object):
                     roles[role] = 1
                 elif setting is Deny:
                     if role in roles and roles[role] == 1:
+                        # on role that has been allowed already, delete it
                         del roles[role]
                     else:
+                        # not already applied on parent so explicitly
+                        # deny access here
                         roles[role] = 0
 
         if level != 'o':
