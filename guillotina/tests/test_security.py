@@ -181,3 +181,23 @@ async def test_deny_on_object_permissions(dummy_request):
     manager = IRolePermissionManager(content)
     manager.deny_permission_to_role('guillotina.AddContent', 'guillotina.Editor')
     assert not request.security.check_permission('guillotina.AddContent', content)
+
+
+async def test_deny_on_children_permissions(dummy_request):
+    request = dummy_request
+    from guillotina.content import Folder
+    content = utils.create_content(Folder, 'Folder', id='folder')
+    utils.login(request)
+    request.security.participations[0].principal.roles['guillotina.Editor'] = 1
+    assert request.security.check_permission('guillotina.AddContent', content)
+
+    children = utils.create_content(Folder, 'Folder', id='folder')
+    children.__parent__ = content
+    manager = IRolePermissionManager(content)
+    manager.deny_permission_to_role('guillotina.AddContent', 'guillotina.Editor')
+    assert not request.security.check_permission('guillotina.AddContent', content)
+    assert not request.security.check_permission('guillotina.AddContent', children)
+
+    manager = IRolePermissionManager(children)
+    manager.grant_permission_to_role('guillotina.AddContent', 'guillotina.Editor')
+    assert request.security.check_permission('guillotina.AddContent', children)
