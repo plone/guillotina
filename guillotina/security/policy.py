@@ -203,6 +203,9 @@ class Interaction(object):
                     cache_decision_prin[permission] = decision = bool(roles[role])
                     found = True
                     if roles[role] == 0:
+                        # if it is deny, dive out immediately
+                        # otherwise, it is allow and we need to make sure there
+                        # are no deny roles here
                         return decision
             if found:
                 return decision
