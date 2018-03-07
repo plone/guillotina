@@ -108,16 +108,16 @@ class Response(object):
     def __init__(self, response={}, headers={}, status=None):
         self.response = response
         self.headers = headers
-        if status == 204:
-            # 204 is not allowed to have content
-            self.response = ''
-        elif status is None:
+        if status is None:
             if isinstance(response, aioResponse):
                 self.status = response.status
             else:
                 self.status = self._missing_status_code
         else:
             self.status = status
+            if status == 204:
+                # 204 is not allowed to have content
+                self.response = ''
 
 
 class UnauthorizedResponse(Response):
