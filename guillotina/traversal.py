@@ -116,7 +116,7 @@ def generate_unauthorized_response(e, request):
     eid = uuid.uuid4().hex
     message = _('Not authorized to render operation') + ' ' + eid
     logger.error(message, exc_info=e, eid=eid, request=request)
-    return UnauthorizedResponse(message)
+    return UnauthorizedResponse(message, eid=eid)
 
 
 def generate_error_response(e, request, error, status=500):
@@ -131,7 +131,7 @@ def generate_error_response(e, request, error, status=500):
         })
     if http_response is not None:
         return http_response
-    return ErrorResponse(error, message, status=status)
+    return ErrorResponse(error, message, status=status, eid=eid)
 
 
 class BaseMatchInfo(AbstractMatchInfo):

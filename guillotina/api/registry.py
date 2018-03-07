@@ -5,11 +5,11 @@ from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import get_adapter
 from guillotina.exceptions import ComponentLookupError
+from guillotina.exceptions import DeserializationError
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
-from guillotina.json.exceptions import DeserializationError
 from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import get_fields
 from guillotina.utils import import_class

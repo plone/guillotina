@@ -639,4 +639,4 @@ async def test_adapter_exception_handlers(container_requester):
             'POST', '/db/guillotina',
             data='{"foobar": "}')  # bug in json
         assert status == 412
-        assert b'JSONDecodeError' in response
+        assert response['reason'] == 'jsonDecodeError'

@@ -1,6 +1,8 @@
 from aiohttp.web import Response as aioResponse
 from guillotina import configure
+from guillotina import error_reasons
 from guillotina.component import adapter
+from guillotina.exc_resp import render_error_response
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import ILocation
 from guillotina.interfaces import IRequest
@@ -121,20 +123,23 @@ class Response(object):
 class UnauthorizedResponse(Response):
     _missing_status_code = 401
 
-    def __init__(self, message, headers={}, status=None):
+    def __init__(self, message, headers={}, status=None, eid=None):
         response = {
             'error': {
                 'type': 'Unauthorized',
                 'message': message
             }
         }
+        response.update(
+            render_error_response('Unauthorized', error_reasons.UNAUTHORIZED, eid))
         super(UnauthorizedResponse, self).__init__(response, headers, status)
 
 
 class ErrorResponse(Response):
     _missing_status_code = 500
 
-    def __init__(self, type, message, exc=None, headers={}, status=None):
+    def __init__(self, type, message, exc=None, headers={}, status=None,
+                 reason=error_reasons.UNKNOWN, eid=None):
         data = {
             'type': type,
             'message': message
@@ -144,4 +149,6 @@ class ErrorResponse(Response):
         response = {
             'error': data
         }
+        if reason is not None:
+            response.update(render_error_response(type, eid, reason))
         super(ErrorResponse, self).__init__(response, headers, status)
