@@ -158,7 +158,8 @@ class DefaultPOST(Service):
             return ErrorResponse(
                 'RequiredParam',
                 _("Property '@type' is required"),
-                reason=error_reasons.REQUIRED_PARAM_MISSING)
+                reason=error_reasons.REQUIRED_PARAM_MISSING,
+                status=412)
 
         # Generate a temporary id if the id is not given
         if not id_:
