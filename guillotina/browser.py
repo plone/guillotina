@@ -1,5 +1,8 @@
+from aiohttp.web import Response as aioResponse
 from guillotina import configure
+from guillotina import error_reasons
 from guillotina.component import adapter
+from guillotina.exc_resp import render_error_response
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import ILocation
 from guillotina.interfaces import IRequest
@@ -100,30 +103,43 @@ class Absolute_URL_ObtainRequest(Absolute_URL):
 class Response(object):
     """Middle response to be rendered."""
 
-    def __init__(self, response={}, headers={}, status=200):
+    _missing_status_code = 200
+
+    def __init__(self, response={}, headers={}, status=None):
         self.response = response
         self.headers = headers
-        self.status = status
-        if status == 204:
-            # 204 is not allowed to have content
-            self.response = ''
+        if status is None:
+            if isinstance(response, aioResponse):
+                self.status = response.status
+            else:
+                self.status = self._missing_status_code
+        else:
+            self.status = status
+            if status == 204:
+                # 204 is not allowed to have content
+                self.response = ''
 
 
 class UnauthorizedResponse(Response):
+    _missing_status_code = 401
 
-    def __init__(self, message, headers={}, status=401):
+    def __init__(self, message, headers={}, status=None, eid=None):
         response = {
             'error': {
                 'type': 'Unauthorized',
                 'message': message
             }
         }
+        response.update(
+            render_error_response('Unauthorized', error_reasons.UNAUTHORIZED, eid))
         super(UnauthorizedResponse, self).__init__(response, headers, status)
 
 
 class ErrorResponse(Response):
+    _missing_status_code = 500
 
-    def __init__(self, type, message, exc=None, headers={}, status=400):
+    def __init__(self, type, message, exc=None, headers={}, status=None,
+                 reason=error_reasons.UNKNOWN, eid=None):
         data = {
             'type': type,
             'message': message
@@ -133,4 +149,6 @@ class ErrorResponse(Response):
         response = {
             'error': data
         }
+        if reason is not None:
+            response.update(render_error_response(type, reason, eid))
         super(ErrorResponse, self).__init__(response, headers, status)

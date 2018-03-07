@@ -33,6 +33,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
+from guillotina.interfaces import IErrorResponseException
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IParticipation
@@ -115,15 +116,22 @@ def generate_unauthorized_response(e, request):
     eid = uuid.uuid4().hex
     message = _('Not authorized to render operation') + ' ' + eid
     logger.error(message, exc_info=e, eid=eid, request=request)
-    return UnauthorizedResponse(message)
+    return UnauthorizedResponse(message, eid=eid)
 
 
 def generate_error_response(e, request, error, status=500):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
+    http_response = query_adapter(
+        e, IErrorResponseException, kwargs={
+            'error': error,
+            'eid': eid
+        })
+    if http_response is not None:
+        return http_response
     message = _('Error on execution of view') + ' ' + eid
     logger.error(message, exc_info=e, eid=eid, request=request)
-    return ErrorResponse(error, message, status=status)
+    return ErrorResponse(error, message, status=status, eid=eid)
 
 
 class BaseMatchInfo(AbstractMatchInfo):
@@ -239,7 +247,8 @@ class MatchInfo(BaseMatchInfo):
                 raise
             except HTTPException as exc:
                 await abort(request)
-                return exc
+                view_result = exc
+                request._view_error = True
             except Exception as e:
                 await abort(request)
                 view_result = generate_error_response(
@@ -252,7 +261,8 @@ class MatchInfo(BaseMatchInfo):
                 request._view_error = True
                 view_result = generate_unauthorized_response(e, request)
             except HTTPException as exc:
-                return exc
+                view_result = exc
+                request._view_error = True
             except Exception as e:
                 request._view_error = True
                 view_result = generate_error_response(e, request, 'ViewError')
@@ -281,7 +291,8 @@ class MatchInfo(BaseMatchInfo):
         resp = await self.rendered(view_result)
         request.record('rendered')
 
-        request.execute_futures()
+        if not request._view_error:
+            request.execute_futures()
 
         self.debug(request, resp)
 

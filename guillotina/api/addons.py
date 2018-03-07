@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina import error_reasons
 from guillotina._settings import app_settings
 from guillotina.browser import ErrorResponse
 from guillotina.i18n import MessageFactory
@@ -27,7 +28,8 @@ async def install(context, request):
     if id_to_install not in app_settings['available_addons']:
         return ErrorResponse(
             'RequiredParam',
-            _("Property 'id' is required to be valid"))
+            _("Property 'id' is required to be valid"),
+            status=412, reason=error_reasons.INVALID_ID)
 
     registry = request.container_settings
     config = registry.for_interface(IAddons)
@@ -35,7 +37,8 @@ async def install(context, request):
     if id_to_install in config['enabled']:
         return ErrorResponse(
             'Duplicate',
-            _("Addon already installed"))
+            _("Addon already installed"),
+            status=412, reason=error_reasons.ALREADY_INSTALLED)
     handler = app_settings['available_addons'][id_to_install]['handler']
     await apply_coroutine(handler.install, context, request)
     config['enabled'] |= {id_to_install}
@@ -59,7 +62,8 @@ async def uninstall(context, request):
     if id_to_install not in app_settings['available_addons']:
         return ErrorResponse(
             'RequiredParam',
-            _("Property 'id' is required to be valid"))
+            _("Property 'id' is required to be valid"),
+            status=412, reason=error_reasons.INVALID_ID)
 
     registry = request.container_settings
     config = registry.for_interface(IAddons)
@@ -67,7 +71,8 @@ async def uninstall(context, request):
     if id_to_install not in config['enabled']:
         return ErrorResponse(
             'Duplicate',
-            _("Addon not installed"))
+            _("Addon not installed"),
+            status=412, reason=error_reasons.NOT_INSTALLED)
 
     handler = app_settings['available_addons'][id_to_install]['handler']
     await apply_coroutine(handler.uninstall, context, request)

@@ -1,5 +1,5 @@
-from guillotina.json.exceptions import DeserializationError
-from guillotina.json.exceptions import ValueDeserializationError
+from guillotina.exceptions import DeserializationError
+from guillotina.exceptions import ValueDeserializationError
 
 
 async def test_non_existing_container(container_requester):

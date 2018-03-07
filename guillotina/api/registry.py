@@ -5,11 +5,11 @@ from guillotina.browser import ErrorResponse
 from guillotina.browser import Response
 from guillotina.component import get_adapter
 from guillotina.exceptions import ComponentLookupError
+from guillotina.exceptions import DeserializationError
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IRegistry
-from guillotina.json.exceptions import DeserializationError
 from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import get_fields
 from guillotina.utils import import_class
@@ -108,7 +108,8 @@ class Register(Service):
         if not hasattr(self.request, 'container_settings'):
             return ErrorResponse(
                 'BadRequest',
-                _("Not in a container request"))
+                _("Not in a container request"),
+                status=412)
 
         data = await self.request.json()
         interface = data.get('interface', None)
@@ -116,7 +117,8 @@ class Register(Service):
         if interface is None:
             return ErrorResponse(
                 'InvalidRequest',
-                'Non existent Interface')
+                'Non existent Interface',
+                status=412)
 
         registry = self.request.container_settings
         iObject = import_class(interface)
@@ -170,7 +172,7 @@ class Write(TraversableService):
     async def __call__(self):
         if self.key is _marker:
             # No option to write the root of registry
-            return ErrorResponse('InvalidRequest', 'Needs the registry key')
+            return ErrorResponse('InvalidRequest', 'Needs the registry key', status=412)
 
         data = await self.request.json()
         if 'value' in data:

@@ -21,4 +21,5 @@ Contents:
    persistence
    blob
    router
+   exceptions
    api/index
