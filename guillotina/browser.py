@@ -150,5 +150,5 @@ class ErrorResponse(Response):
             'error': data
         }
         if reason is not None:
-            response.update(render_error_response(type, eid, reason))
+            response.update(render_error_response(type, reason, eid))
         super(ErrorResponse, self).__init__(response, headers, status)

@@ -262,7 +262,7 @@ async def test_install_invalid_addon_should_give_error(container_requester):
                 "id": 'foobar'
             })
         )
-        assert status == 400
+        assert status == 412
 
 
 async def test_install_addons(container_requester):
@@ -298,7 +298,7 @@ async def test_install_same_addon_twice_gives_error(container_requester):
                 "id": id_
             })
         )
-        assert status == 400
+        assert status == 412
 
 
 async def test_uninstall_addons(container_requester):
@@ -341,7 +341,7 @@ async def test_uninstall_invalid_addon(container_requester):
                 "id": 'testaddon'  # not installed yet...
             })
         )
-        assert status == 400
+        assert status == 412
 
 
 async def test_get_logged_user_info(container_requester):

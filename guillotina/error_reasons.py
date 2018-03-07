@@ -20,3 +20,5 @@ CONFLICT_ID = ErrorReason('conflictId', 'This ID already exists')
 DESERIALIZATION_FAILED = ErrorReason(
     'deserializationError', 'Could not deserialize the content')
 ID_NOT_ALLOWED = ErrorReason('idNotAllowed', '"id" not allowed in payload')
+ALREADY_INSTALLED = ErrorReason('alreadyInstalled', 'Addon already installed')
+NOT_INSTALLED = ErrorReason('notInstalled', 'Addon not installed')
