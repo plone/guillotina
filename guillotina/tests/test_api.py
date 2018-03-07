@@ -332,7 +332,7 @@ async def test_uninstall_invalid_addon(container_requester):
                 "id": 'foobar'
             })
         )
-        assert status == 400
+        assert status == 412
 
         response, status = await requester(
             'DELETE',
