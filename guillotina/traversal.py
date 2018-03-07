@@ -122,8 +122,6 @@ def generate_unauthorized_response(e, request):
 def generate_error_response(e, request, error, status=500):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
-    message = _('Error on execution of view') + ' ' + eid
-    logger.error(message, exc_info=e, eid=eid, request=request)
     http_response = query_adapter(
         e, IErrorResponseException, kwargs={
             'error': error,
@@ -131,6 +129,8 @@ def generate_error_response(e, request, error, status=500):
         })
     if http_response is not None:
         return http_response
+    message = _('Error on execution of view') + ' ' + eid
+    logger.error(message, exc_info=e, eid=eid, request=request)
     return ErrorResponse(error, message, status=status, eid=eid)
 
 
