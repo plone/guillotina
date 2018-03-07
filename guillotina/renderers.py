@@ -1,4 +1,3 @@
-from aiohttp.helpers import sentinel
 from aiohttp.web import Response as aioResponse
 from datetime import datetime
 from guillotina import configure

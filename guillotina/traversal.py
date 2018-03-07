@@ -28,11 +28,12 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
-from guillotina.interfaces import IAnnotations, IErrorResponseException
+from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
+from guillotina.interfaces import IErrorResponseException
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IParticipation
