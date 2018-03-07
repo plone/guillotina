@@ -1,4 +1,4 @@
-2.3.34 (unreleased)
+2.3.34 (2018-03-07)
 -------------------
 
 - Be able to provide custom responses for unhandled exceptions
