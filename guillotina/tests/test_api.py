@@ -631,3 +631,12 @@ async def test_debug_headers(container_requester):
             })
         assert 'XG-Request-Cache-hits' in headers
         assert 'XG-Timing-0-Start' in headers
+
+
+async def test_adapter_exception_handlers(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST', '/db/guillotina',
+            data='{"foobar": "}')  # bug in json
+        assert status == 412
+        assert b'JSONDecodeError' in response

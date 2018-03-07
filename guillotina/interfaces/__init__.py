@@ -42,6 +42,7 @@ from .events import IObjectPermissionsModifiedEvent  # noqa
 from .events import IObjectPermissionsViewEvent  # noqa
 from .events import IObjectRemovedEvent  # noqa
 from .events import IObjectVisitedEvent  # noqa
+from .exceptions import IErrorResponseException  # noqa
 from .exceptions import IForbidden  # noqa
 from .exceptions import IForbiddenAttribute  # noqa
 from .exceptions import ISerializableException  # noqa

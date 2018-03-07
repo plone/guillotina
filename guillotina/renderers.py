@@ -51,21 +51,6 @@ class GuillotinaJSONEncoder(json.JSONEncoder):
 PServerJSONEncoder = GuillotinaJSONEncoder
 
 
-def json_response(data=sentinel, *, text=None, body=None, status=200,
-                  reason=None, headers=None, content_type='application/json',
-                  dumps=json.dumps):
-    if data is not sentinel:
-        if text or body:
-            raise ValueError(
-                "only one of data, text, or body should be specified"
-            )
-        else:
-            text = dumps(data, cls=GuillotinaJSONEncoder)
-    return aioResponse(
-        text=text, body=body, status=status, reason=reason,
-        headers=headers, content_type=content_type)
-
-
 @configure.adapter(for_=IRequest, provides=IRenderFormats)
 class RendererFormats(object):
     def __init__(self, request):
@@ -127,19 +112,21 @@ class RendererJson(Renderer):
         else:
             # Not a Response object, don't convert
             return value
+        if isinstance(json_value, aioResponse):
+            # not actually json
+            return json_value
+
         # Framing of options
         frame = self.request.get('frame')
         frame = self.request.query['frame'] if 'frame' in self.request.query else ''
         if frame:
             framer = query_adapter(self.request, IFrameFormatsJson, frame)
             json_value = await apply_coroutine(framer, json_value)
-        resp = json_response(json_value)
+        resp = aioResponse(text=json.dumps(json_value, cls=GuillotinaJSONEncoder))
         resp.headers.update(headers)
         resp.headers.update(
             {'Content-Type': 'application/json'})
         resp.set_status(status)
-        # Actions / workflow / roles
-
         return resp
 
 

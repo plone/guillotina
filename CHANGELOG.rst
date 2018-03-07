@@ -1,7 +1,8 @@
 2.3.34 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to provide custom responses for unhandled exceptions
+  [vangheem]
 
 
 2.3.33 (2018-03-03)

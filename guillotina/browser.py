@@ -1,3 +1,4 @@
+from aiohttp.web import Response as aioResponse
 from guillotina import configure
 from guillotina.component import adapter
 from guillotina.interfaces import IAbsoluteURL
@@ -100,18 +101,27 @@ class Absolute_URL_ObtainRequest(Absolute_URL):
 class Response(object):
     """Middle response to be rendered."""
 
-    def __init__(self, response={}, headers={}, status=200):
+    _missing_status_code = 200
+
+    def __init__(self, response={}, headers={}, status=None):
         self.response = response
         self.headers = headers
-        self.status = status
         if status == 204:
             # 204 is not allowed to have content
             self.response = ''
+        elif status is None:
+            if isinstance(response, aioResponse):
+                self.status = response.status
+            else:
+                self.status = self._missing_status_code
+        else:
+            self.status = status
 
 
 class UnauthorizedResponse(Response):
+    _missing_status_code = 401
 
-    def __init__(self, message, headers={}, status=401):
+    def __init__(self, message, headers={}, status=None):
         response = {
             'error': {
                 'type': 'Unauthorized',
@@ -122,8 +132,9 @@ class UnauthorizedResponse(Response):
 
 
 class ErrorResponse(Response):
+    _missing_status_code = 500
 
-    def __init__(self, type, message, exc=None, headers={}, status=400):
+    def __init__(self, type, message, exc=None, headers={}, status=None):
         data = {
             'type': type,
             'message': message
