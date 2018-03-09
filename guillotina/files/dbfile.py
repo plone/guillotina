@@ -1,7 +1,12 @@
 from .field import BaseCloudFile
 from guillotina.blob import Blob
+from guillotina.event import notify
+from guillotina.events import FileUploadFinishedEvent
 from guillotina.interfaces import IDBFile
+from guillotina.interfaces import IFileCleanup
 from zope.interface import implementer
+
+import uuid
 
 
 @implementer(IDBFile)
@@ -16,11 +21,23 @@ class DBFile(BaseCloudFile):
 
     async def init_upload(self, context):
         context._p_register()
+
+        self._old_uri = self.uri
+        self._old_size = self.size
+        self._old_filename = self.filename
+        self._old_md5 = self.md5
+        self._old_content_type = self.guess_content_type()
+
         self._current_upload = 0
         if self._blob is not None:
-            bfile = self._blob.open('r')
-            await bfile.async_del()
+            cleanup = IFileCleanup(context, None)
+            if cleanup is None or cleanup.should_clean(file=self):
+                bfile = self._blob.open('r')
+                await bfile.async_del()
+            else:
+                self._previous_blob = self._blob
         blob = Blob(context)
+        self._uri = uuid.uuid4().hex
         self._blob = blob
 
     async def append_data(self, context, data):
@@ -36,7 +53,7 @@ class DBFile(BaseCloudFile):
         return self._blob.size
 
     async def finish_upload(self, context):
-        pass
+        await notify(FileUploadFinishedEvent(context))
 
     async def download(self, context, resp):
         bfile = self._blob.open()

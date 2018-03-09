@@ -33,6 +33,19 @@ class IFileManager(Interface):
         '''
 
 
+class IFileCleanup(Interface):
+
+    def __init__(context):
+        '''
+        adapter of ob file is on
+        '''
+
+    def should_clean(**kwargs):
+        '''
+        whether or not old file should be cleaned
+        '''
+
+
 class IFile(Interface):
 
     metadata('extension', 'md5', 'content_type', 'filename')

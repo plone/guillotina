@@ -11,12 +11,25 @@ from guillotina.browser import Response
 from guillotina.files.utils import read_request_data
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IDBFileField
+from guillotina.interfaces import IFileCleanup
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 
 import base64
 import uuid
+
+
+@configure.adapter(
+    for_=IResource,
+    provides=IFileCleanup
+)
+class DefaultFileCleanup:
+    def __init__(self, context):
+        pass
+
+    def should_clean(self, **kwargs):
+        return True
 
 
 @configure.adapter(

@@ -142,7 +142,7 @@ class SerializeToJson(object):
             else:
                 security = IInteraction(self.request)
                 self.permission_cache[permission_name] = bool(
-                    security.check_permission(permission.title, self.context))
+                    security.check_permission(permission.id, self.context))
         return self.permission_cache[permission_name]
 
 

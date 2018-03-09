@@ -13,6 +13,7 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import Unauthorized
 from guillotina.profile import profilable
 from guillotina.utils import get_current_request
+from guillotina.utils import lazy_apply
 from zope.interface import implementer
 
 import asyncio
@@ -120,6 +121,27 @@ class Transaction(object):
 
         self._query_count_start = self._query_count_end = 0
 
+    def get_query_count(self):
+        '''
+        diff versions of asyncpg
+        '''
+        if self._db_conn is None:
+            return 0
+        try:
+            return self._db_conn._protocol.queries_count
+        except Exception:
+            try:
+                return self._db_conn._con._protocol.queries_count
+            except Exception:
+                pass
+        return 0
+
+    async def get_connection(self):
+        if self._db_conn is None:
+            self._db_conn = await self._manager._storage.open()
+            self._query_count_start = self.get_query_count()
+        return self._db_conn
+
     @property
     def strategy(self):
         return self._strategy
@@ -133,24 +155,26 @@ class Transaction(object):
         """
         return iter(self._before_commit)
 
-    def add_before_commit_hook(self, hook, args=(), kws=None):
+    def add_before_commit_hook(self, hook, *real_args, args=[], kws=None, **kwargs):
         """ See ITransaction.
         """
         if kws is None:
             kws = {}
-        self._before_commit.append((hook, tuple(args), kws))
+        kwargs.update(kws)
+        self._before_commit.append((hook, real_args + tuple(args), kwargs))
 
     def get_after_commit_hooks(self):
         """ See ITransaction.
         """
         return iter(self._after_commit)
 
-    def add_after_commit_hook(self, hook, args=(), kws=None):
+    def add_after_commit_hook(self, hook, *real_args, args=[], kws=None, **kwargs):
         """ See ITransaction.
         """
         if kws is None:
             kws = {}
-        self._after_commit.append((hook, tuple(args), kws))
+        kwargs.update(kws)
+        self._after_commit.append((hook, real_args + tuple(args), kwargs))
 
     @profilable
     async def _call_after_commit_hooks(self, status=True):
@@ -165,7 +189,7 @@ class Transaction(object):
             # The first argument passed to the hook is a Boolean value,
             # true if the commit succeeded, or false if the commit aborted.
             try:
-                await hook(status, *args, **kws)
+                await lazy_apply(hook, status, *args, **kws)
             except:  # noqa
                 # We need to catch the exceptions if we want all hooks
                 # to be called
@@ -175,13 +199,12 @@ class Transaction(object):
         self._before_commit = []
 
     # BEGIN TXN
-    async def tpc_begin(self, conn):
+    async def tpc_begin(self):
         """Begin commit of a transaction
 
         conn is a real db that will be got by db.open()
         """
         self._txn_time = time.time()
-        self._db_conn = conn
         await self._strategy.tpc_begin()
 
     def check_read_only(self):
@@ -312,7 +335,7 @@ class Transaction(object):
 
     async def _call_before_commit_hooks(self):
         for hook, args, kws in self._before_commit:
-            await hook(*args, **kws)
+            await lazy_apply(hook, *args, **kws)
         self._before_commit = []
 
     @profilable

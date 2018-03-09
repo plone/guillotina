@@ -287,8 +287,6 @@ class Resource(guillotina.db.orm.base.BaseObject):
     Base resource object class
     """
 
-    __name__ = None
-    __parent__ = None
     __behaviors__ = frozenset({})
     __acl__ = None
 
@@ -465,7 +463,8 @@ class Folder(Resource):
             pass
         return default
 
-    async def async_multi_get(self, keys: str, default=None, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
+    async def async_multi_get(self, keys: typing.List[str], default=None,
+                              suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
         """
         Asynchronously get an object inside this folder
         """

@@ -12,6 +12,7 @@ from guillotina.schema.interfaces import IChoice
 from guillotina.schema.interfaces import ICollection
 from guillotina.schema.interfaces import IDate
 from guillotina.schema.interfaces import IDatetime
+from guillotina.schema.interfaces import IDecimal
 from guillotina.schema.interfaces import IDict
 from guillotina.schema.interfaces import IField
 from guillotina.schema.interfaces import IFloat
@@ -273,3 +274,12 @@ class DefaultDictSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return 'dict'
+
+
+@configure.adapter(
+    for_=(IDecimal, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
+class DefaultDecimalSchemaFieldSerializer(DefaultSchemaFieldSerializer):
+    @property
+    def field_type(self):
+        return 'decimal'

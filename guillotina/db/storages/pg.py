@@ -517,10 +517,10 @@ class PostgresqlStorage(BaseStorage):
                     conn._stmt_cache.clear()
                 except Exception:
                     pass
+            return conn
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:
                 await self._check_bad_connection(ex)
-        return conn
 
     async def close(self, con):
         try:
@@ -531,8 +531,7 @@ class PostgresqlStorage(BaseStorage):
 
     async def load(self, txn, oid):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_OID)
-            objects = await self.get_one_row(smt, oid)
+            objects = await self.get_one_row(txn, GET_OID, oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -543,7 +542,7 @@ class PostgresqlStorage(BaseStorage):
 
         pickled = writer.serialize()  # This calls __getstate__ of obj
         if len(pickled) >= self._large_record_size:
-            log.warning(f"Large object {obj.__class__}: {len(pickled)}")
+            log.info(f"Large object {obj.__class__}: {len(pickled)}")
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
@@ -557,10 +556,11 @@ class PostgresqlStorage(BaseStorage):
             statement_sql = UPDATE
             update = True
 
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(statement_sql)
             try:
-                result = await smt.fetch(
+                result = await conn.fetch(
+                    statement_sql,
                     oid,                 # The OID of the object
                     txn._tid,            # Our TID
                     len(pickled),        # Len of the object
@@ -606,10 +606,11 @@ class PostgresqlStorage(BaseStorage):
         await self._vacuum.add_to_queue(oid)
 
     async def delete(self, txn, oid):
+        conn = await txn.get_connection()
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
-            await txn._db_conn.execute(TRASH_PARENT_ID, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
+            await conn.execute(TRASH_PARENT_ID, oid)
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
         if str(ex) in ('cannot perform operation: connection is closed',
@@ -633,9 +634,15 @@ class PostgresqlStorage(BaseStorage):
             # again, use storage lock here instead of trns lock
             return await self._stmt_max_tid.fetchval()
 
-    async def get_one_row(self, smt, *args):
+    async def get_one_row(self, txn, sql, *args, prepare=False):
+        conn = await txn.get_connection()
         # Helper function to provide easy adaptation to cockroach
-        return await smt.fetchrow(*args)
+        if prepare:
+            # latest version of asyncpg has prepare bypassing statement cache
+            smt = await conn.prepare(sql)
+            return await smt.fetchrow(*args)
+        else:
+            return await conn.fetchrow(sql, *args)
 
     def _db_transaction_factory(self, txn):
         # make sure asycpg knows this is a new transaction
@@ -645,6 +652,7 @@ class PostgresqlStorage(BaseStorage):
 
     async def start_transaction(self, txn, retries=0):
         error = None
+        conn = await txn.get_connection()
         async with txn._lock:
             try:
                 txn._db_txn = self._db_transaction_factory(txn)
@@ -677,12 +685,12 @@ class PostgresqlStorage(BaseStorage):
             if rollback:
                 try:
                     # thinks we're manually in txn, manually rollback and try again...
-                    await txn._db_conn.execute('ROLLBACK;')
+                    await conn.execute('ROLLBACK;')
                 except asyncpg.exceptions._base.InterfaceError:
                     # we're okay with this error here...
                     pass
             if restart:
-                await self.close(txn._db_conn)
+                await self.close(conn)
                 txn._db_conn = await self.open()
                 return await self.start_transaction(txn, retries + 1)
 
@@ -719,121 +727,117 @@ class PostgresqlStorage(BaseStorage):
 
     # Introspection
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
-        conn = txn._db_conn
-        smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS)
+        conn = await txn.get_connection()
         keys = []
-        for record in await smt.fetch(oid, page_size, (page - 1) * page_size):
+        for record in await conn.fetch(
+                BATCHED_GET_CHILDREN_KEYS, oid, page_size, (page - 1) * page_size):
             keys.append(record['id'])
         return keys
 
     async def keys(self, txn, oid):
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILDREN_KEYS)
-            result = await smt.fetch(oid)
+            result = await conn.fetch(GET_CHILDREN_KEYS, oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILD)
-            result = await self.get_one_row(smt, parent_oid, id)
+            result = await self.get_one_row(txn, GET_CHILD, parent_oid, id)
         return result
 
     async def get_children(self, txn, parent_oid, ids):
+        conn = await txn.get_connection()
         async with txn._lock:
-            return await txn._db_conn.fetch(
-                GET_CHILDREN_BATCH, parent_oid, ids)
+            return await conn.fetch(GET_CHILDREN_BATCH, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(EXIST_CHILD)
-            result = await self.get_one_row(smt, parent_oid, id)
+            result = await self.get_one_row(txn, EXIST_CHILD, parent_oid, id)
         if result is None:
             return False
         else:
             return True
 
     async def len(self, txn, oid):
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_CHILDREN)
-            result = await smt.fetchval(oid)
+            result = await conn.fetchval(NUM_CHILDREN, oid)
         return result
 
     async def items(self, txn, oid):
-        async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_CHILDREN)
-        async for record in smt.cursor(oid):
+        conn = await txn.get_connection()
+        async for record in conn.cursor(GET_CHILDREN, oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
     async def get_annotation(self, txn, oid, id):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_ANNOTATION)
-            result = await self.get_one_row(smt, oid, id)
+            result = await self.get_one_row(txn, GET_ANNOTATION, oid, id, prepare=True)
         return result
 
     async def get_annotation_keys(self, txn, oid):
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(GET_ANNOTATIONS_KEYS)
-            result = await smt.fetch(oid)
+            result = await conn.fetch(GET_ANNOTATIONS_KEYS, oid)
         return result
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(HAS_OBJECT)
-            result = await self.get_one_row(smt, oid)
+            result = await self.get_one_row(txn, HAS_OBJECT, oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
+            conn = await txn.get_connection()
             async with txn._lock:
-                await txn._db_conn.execute('''INSERT INTO objects
+                await conn.execute('''INSERT INTO objects
                     (zoid, tid, state_size, part, resource, type)
                     VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
+        conn = await txn.get_connection()
         async with txn._lock:
-            return await txn._db_conn.execute(
+            return await conn.execute(
                 INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         async with txn._lock:
-            smt = await txn._db_conn.prepare(READ_BLOB_CHUNK)
-            return await self.get_one_row(smt, bid, chunk)
+            return await self.get_one_row(txn, READ_BLOB_CHUNK, bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
-        async with txn._lock:
-            smt = await txn._db_conn.prepare(READ_BLOB_CHUNKS)
-        async for record in smt.cursor(bid):
+        conn = await txn.get_connection()
+        async for record in conn.cursor(bid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
     async def del_blob(self, txn, bid):
+        conn = await txn.get_connection()
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_BLOB, bid)
+            await conn.execute(DELETE_BLOB, bid)
 
     async def get_total_number_of_objects(self, txn):
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_ROWS)
-            result = await smt.fetchval()
+            result = await conn.fetchval(NUM_ROWS)
         return result
 
     async def get_total_number_of_resources(self, txn):
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_RESOURCES)
-            result = await smt.fetchval()
+            result = await conn.fetchval(NUM_RESOURCES)
         return result
 
     async def get_total_resources_of_type(self, txn, type_):
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(NUM_RESOURCES_BY_TYPE)
-            result = await smt.fetchval(type_)
+            result = await conn.fetchval(NUM_RESOURCES_BY_TYPE, type_)
         return result
 
     # Massive treatment without security
     async def _get_page_resources_of_type(self, txn, type_, page, page_size):
-        conn = txn._db_conn
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await conn.prepare(RESOURCES_BY_TYPE)
-        keys = []
-        for record in await smt.fetch(type_, page_size, (page - 1) * page_size):  # noqa
-            keys.append(record)
-        return keys
+            keys = []
+            for record in await conn.fetch(
+                    RESOURCES_BY_TYPE, type_, page_size, (page - 1) * page_size):
+                keys.append(record)
+            return keys

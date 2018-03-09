@@ -543,10 +543,12 @@ async def test_exhausting_pool_size(postgres, dummy_request):
     aps = await get_aps(postgres, pool_size=2)
     tm = TransactionManager(aps)
     txn = await tm.begin()
+    await txn.get_connection()
 
     with pytest.raises(concurrent.futures._base.TimeoutError):
         # should throw an error because we've run out of connections in pool
-        await tm.begin()
+        txn2 = await tm.begin()
+        await asyncio.wait_for(txn2.get_connection(), 0.5)
 
     await tm.abort(txn=txn)
 
@@ -617,7 +619,8 @@ async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
     for conn in tm._storage._pool._queue._queue:
         if conn._con is None:
             await conn.connect()
-        conn._con._top_xact = asyncpg.transaction.Transaction(conn._con, 'read_committed', False, False)
+        conn._con._top_xact = asyncpg.transaction.Transaction(
+            conn._con, 'read_committed', False, False)
     txn = await tm.begin()
 
     # then, try doing stuff...

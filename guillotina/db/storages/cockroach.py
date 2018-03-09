@@ -231,10 +231,11 @@ class CockroachStorage(pg.PostgresqlStorage):
             statement_sql = UPDATE
             update = True
 
+        conn = await txn.get_connection()
         async with txn._lock:
-            smt = await txn._db_conn.prepare(statement_sql)
             try:
-                result = await smt.fetch(
+                result = await conn.fetch(
+                    statement_sql,
                     oid,                 # The OID of the object
                     txn._tid,            # Our TID
                     len(pickled),        # Len of the object
@@ -265,9 +266,10 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def delete(self, txn, oid):
         # no cascade support, so we push to vacuum
         async with txn._lock:
-            await txn._db_conn.execute(DELETE_OBJECT, oid)
-            await txn._db_conn.execute(DELETE_FROM_BLOBS, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
+            conn = await txn.get_connection()
+            await conn.execute(DELETE_OBJECT, oid)
+            await conn.execute(DELETE_FROM_BLOBS, oid)
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
@@ -283,10 +285,17 @@ class CockroachStorage(pg.PostgresqlStorage):
         return transaction._tid
 
     # Cockroach cant use at version 1.0.3 row count (no fetch)
-    async def get_one_row(self, smt, *args):
+    async def get_one_row(self, txn, sql, *args, prepare=False):
         # Helper function to provide easy adaptation to cockroach
+        conn = await txn.get_connection()
         try:
-            result = await smt.fetch(*args)
+            # Helper function to provide easy adaptation to cockroach
+            if prepare:
+                # latest version of asyncpg has prepare bypassing statement cache
+                smt = await conn.prepare(sql)
+                result = await smt.fetch(*args)
+            else:
+                result = await conn.fetch(sql, *args)
         except asyncpg.exceptions.SerializationError as ex:
             if ex.sqlstate == '40001':
                 # these are not handled with the ROLLBACK TO SAVEPOINT COCKROACH_RESTART

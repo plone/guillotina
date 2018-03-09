@@ -4,6 +4,7 @@ from guillotina.component import get_utility
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.content import Folder
+from guillotina.content import Item
 from guillotina.content import load_cached_schema
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -11,6 +12,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces.types import IConstrainTypes
 from guillotina.tests import utils
 
+import pickle
 import pytest
 
 
@@ -110,3 +112,27 @@ class TestContent:
         behavior = IDublinCore(obj)
         assert behavior.creators == ('root',)
         assert behavior.contributors == ('root',)
+
+
+def test_base_object():
+    testing = {
+        '__parent__': '_BaseObject__parent',
+        '__of__': '_BaseObject__of',
+        '__name__': '_BaseObject__name',
+        '__annotations__': '_BaseObject__annotations',
+        '__immutable_cache__': '_BaseObject__immutable_cache',
+        '__new_marker__': '_BaseObject__new_marker',
+        '_p_jar': '_BaseObject__jar',
+        '_p_oid': '_BaseObject__oid',
+        '_p_serial': '_BaseObject__serial'
+    }
+    for name, attr in testing.items():
+        item = Item()
+        setattr(item, name, 'foobar')
+        assert name not in item.__dict__
+        assert attr not in item.__dict__
+        pickled = pickle.dumps(item, protocol=pickle.HIGHEST_PROTOCOL)
+        new_item = pickle.loads(pickled)
+        assert getattr(new_item, name) != 'foobar'
+        assert name not in item.__dict__
+        assert attr not in item.__dict__

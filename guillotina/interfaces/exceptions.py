@@ -1,3 +1,4 @@
+from zope.interface import Interface
 from zope.interface.common.interfaces import IAttributeError
 from zope.interface.common.interfaces import IException
 
@@ -26,4 +27,10 @@ class IForbidden(IException):
 
 class IForbiddenAttribute(IForbidden, IAttributeError):
     '''
+    '''
+
+
+class IErrorResponseException(Interface):
+    '''
+    Provide response object for uncaught exceptions
     '''

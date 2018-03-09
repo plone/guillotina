@@ -8,16 +8,16 @@ from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
+from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import Invalid
 from guillotina.exceptions import NoInteraction
+from guillotina.exceptions import ValueDeserializationError
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.json.exceptions import DeserializationError
-from guillotina.json.exceptions import ValueDeserializationError
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
@@ -98,7 +98,7 @@ class DeserializeFromJson(object):
                     value = await self.get_value(f, obj, data_value)
                 except ValueError as e:
                     errors.append({
-                        'message': e.message, 'field': name, 'error': e})
+                        'message': 'Value error', 'field': name, 'error': e})
                 except ValidationError as e:
                     errors.append({
                         'message': e.doc(), 'field': name, 'error': e})

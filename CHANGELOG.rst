@@ -5,6 +5,149 @@
   [vangheem]
 
 
+2.3.35 (2018-03-09)
+-------------------
+
+- More error handling
+  [vangheem]
+
+
+2.3.34 (2018-03-07)
+-------------------
+
+- Be able to provide custom responses for unhandled exceptions
+  [vangheem]
+
+
+2.3.33 (2018-03-03)
+-------------------
+
+- Bump
+
+
+2.3.32 (2018-03-03)
+-------------------
+
+- Disable statement cache on guillotina
+  [vangheem]
+
+
+2.3.31 (2018-03-02)
+-------------------
+
+- Normalize status codes to not use generate 400 all the time
+  [vangheem]
+
+
+2.3.30 (2018-03-01)
+-------------------
+
+- Store record of previous file data on upload
+  [vangheem]
+
+
+2.3.29 (2018-03-01)
+-------------------
+
+- bump
+
+
+2.3.28 (2018-03-01)
+-------------------
+
+- Send file upload finished event
+  [vangheem]
+
+- Use lazy_apply when calling commit hooks
+  [vangheem]
+
+
+2.3.27 (2018-02-23)
+-------------------
+
+- Upgrade asyncpg, do not clear statement cache after every connection open
+  [vangheem]
+
+
+2.3.26 (2018-02-21)
+-------------------
+
+- IFileCleanup accepts kwargs
+  [vangheem]
+
+
+2.3.25 (2018-02-20)
+-------------------
+
+- Allow indexer accessors to be async
+  [vangheem]
+
+
+2.3.24 (2018-02-20)
+-------------------
+
+- Add IFileCleanup adapter to be able to customize if old cloud files are cleaned
+  [vangheem]
+
+- Add a serializer for IDecimal fields
+  [cdevienne]
+
+
+2.3.23 (2018-02-16)
+-------------------
+
+- Make sure id when creating content is string
+  [vangheem]
+
+
+2.3.22 (2018-02-15)
+-------------------
+
+- Change log level of conflict errors
+  [vangheem]
+
+
+2.3.21 (2018-02-07)
+-------------------
+
+- Add Server header
+  [vangheem]
+
+
+2.3.20 (2018-02-07)
+-------------------
+
+- ValueError does not have a `message` attribute
+  [vangheem]
+
+
+2.3.19 (2018-02-06)
+-------------------
+
+- Make sure to check field permissions correctly
+  [vangheem]
+
+- Make sure to get connection object correctly with `@items` endpoint
+  [vangheem]
+
+
+2.3.18 (2018-02-05)
+-------------------
+
+- lazy create connection
+  [vangheem]
+
+- Use __slots__ for BaseObject
+  [vangheem]
+
+
+2.3.17 (2018-01-22)
+-------------------
+
+- Be able to customize loop policy with `loop_policy` app setting
+  [vangheem]
+
+
 2.3.16 (2018-01-19)
 -------------------
 
