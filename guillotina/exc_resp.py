@@ -1,4 +1,5 @@
 from aiohttp.web_exceptions import HTTPConflict
+from aiohttp.web_exceptions import HTTPExpectationFailed
 from aiohttp.web_exceptions import HTTPPreconditionFailed
 from guillotina import configure
 from guillotina import error_reasons
@@ -6,6 +7,7 @@ from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
+from guillotina.exceptions import UnRetryableRequestError
 from guillotina.interfaces import IErrorResponseException
 
 import json
@@ -63,3 +65,8 @@ register_handler_factory(
     exception_handler_factory(error_reasons.DESERIALIZATION_FAILED,
                               'DeserializationError',
                               serialize_exc=True))
+register_handler_factory(
+    UnRetryableRequestError,
+    exception_handler_factory(error_reasons.UNRETRYALBE_REQUEST,
+                              'UnRetryableRequestError',
+                              serialize_exc=True, klass=HTTPExpectationFailed))

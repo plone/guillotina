@@ -1,7 +1,8 @@
 2.3.35 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- More error handling
+  [vangheem]
 
 
 2.3.34 (2018-03-07)

@@ -22,3 +22,5 @@ DESERIALIZATION_FAILED = ErrorReason(
 ID_NOT_ALLOWED = ErrorReason('idNotAllowed', '"id" not allowed in payload')
 ALREADY_INSTALLED = ErrorReason('alreadyInstalled', 'Addon already installed')
 NOT_INSTALLED = ErrorReason('notInstalled', 'Addon not installed')
+UNRETRYALBE_REQUEST = ErrorReason(
+    'unretriableRequest', 'Request retry attempted but not allowed due to error type')
