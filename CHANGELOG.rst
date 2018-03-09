@@ -1,4 +1,4 @@
-2.3.35 (unreleased)
+2.3.35 (2018-03-09)
 -------------------
 
 - More error handling
