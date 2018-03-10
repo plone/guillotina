@@ -1,4 +1,4 @@
-2.4.0 (unreleased)
+2.4.0 (2018-03-10)
 ------------------
 
 - Rename `guillotina.async` to `guillotina.async_util` to fix Python 3.7 compatibility
