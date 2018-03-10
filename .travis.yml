@@ -6,6 +6,7 @@ sudo: required
 
 services:
   - postgresql
+  - docker
 # make sure we're on the latest version of postgresql
 addons:
   postgresql: "9.6"
@@ -27,3 +28,9 @@ script:
 after_success:
   - pip install coveralls
   - coveralls
+
+deploy:
+  provider: script
+  script: bash docker_push
+  on:
+    tags: true
