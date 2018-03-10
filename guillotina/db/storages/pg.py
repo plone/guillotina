@@ -7,6 +7,7 @@ from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
+from guillotina.utils import clear_conn_statement_cache
 from zope.interface import implementer
 
 import asyncio
@@ -509,13 +510,7 @@ class PostgresqlStorage(BaseStorage):
     async def open(self):
         try:
             conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
-            try:
-                conn._con._stmt_cache.clear()
-            except Exception:
-                try:
-                    conn._stmt_cache.clear()
-                except Exception:
-                    pass
+            clear_conn_statement_cache(conn)
             return conn
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:

@@ -1,7 +1,8 @@
 2.3.36 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide utils.clear_conn_statement_cache
+  [vangheem]
 
 
 2.3.35 (2018-03-09)
