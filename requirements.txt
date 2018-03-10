@@ -8,7 +8,7 @@ jsonschema==2.6.0
 multidict==3.2.0
 pycparser==2.18
 pycrypto==2.6.1
-PyJWT==1.5.3
+PyJWT==1.6.0
 python-dateutil==2.6.1
 PyYAML==3.12
 six==1.11.0
