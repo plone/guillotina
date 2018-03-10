@@ -1,7 +1,7 @@
 # we want to make sure it is run on trusty where sudo is provided for postgres
 dist: trusty
 language: python
-python: 3.7-dev
+python: 3.6
 sudo: required
 
 services:
@@ -17,6 +17,7 @@ cache:
   directories:
     - eggs
 install:
+  - pip install Cython==0.27.3
   - pip install -r requirements.txt
   - pip install -e .[test]
   - pip install flake8
