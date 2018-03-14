@@ -1,5 +1,6 @@
 [run]
 omit =
+  guillotina/__init__.py
   */tests/*
   */testfiles/*
   */examples/*

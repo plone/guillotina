@@ -22,4 +22,5 @@ Contents:
    blob
    router
    exceptions
+   fields
    api/index
