@@ -1,7 +1,11 @@
 2.4.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- New `PatchField`
+  [vangheem]
+
+- New `BucketListField`
+  [vangheem]
 
 
 2.4.1 (2018-03-14)
