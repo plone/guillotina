@@ -183,6 +183,21 @@ async def test_check_permission_deserialize_content(dummy_request):
     assert deserializer.check_permission('guillotina.ViewContent')  # with cache
 
 
+async def test_patch_list_field_normal_patch(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_list': [{
+                'foo': 'bar'
+            }]
+        }, [])
+    assert len(content.patch_list) == 1
+
+
 async def test_patch_list_field(dummy_request):
     request = dummy_request  # noqa
     login(request)
@@ -274,6 +289,21 @@ async def test_patch_list_field_invalid_type(dummy_request):
     assert len(getattr(content, 'patch_list', [])) == 0
     assert len(errors) == 1
     assert isinstance(errors[0]['error'], WrongType)
+
+
+async def test_patch_dict_field_normal_patch(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_dict': {
+                'foo': 'bar'
+            }
+        }, [])
+    assert len(content.patch_dict) == 1
 
 
 async def test_patch_dict_field(dummy_request):

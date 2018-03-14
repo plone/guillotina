@@ -20,27 +20,31 @@ class PatchField(schema.Field):
         self.field = field
         super().__init__(*args, **kwargs)
 
-    async def set(self, obj, value):
-        operation_name = value['op']
+    def set(self, obj, value):
+        self.field.__name__ = self.__name__
         bound_field = self.field.bind(obj)
-        operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
-        operation(obj, value['value'])
+        if isinstance(value, dict) and 'op' in value:
+            operation_name = value['op']
+            operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
+            operation(obj, value['value'])
+        else:
+            bound_field.set(obj, value)
         obj._p_register()
 
 
 @configure.value_deserializer(IPatchField)
 def field_converter(field, value, context):
-    field.field.__name__ = field.__name__
-    if not isinstance(value, dict):
-        raise ValueDeserializationError(field, value, 'Not an object')
-    operation_name = value.get('op', 'undefined')
-    operation = query_adapter(field.field, IPatchFieldOperation, name=operation_name)
-    if operation is None:
-        raise ValueDeserializationError(
-            field, value, f'"{operation_name}" not a valid operation')
-    if 'value' not in value:
-        raise ValueDeserializationError(
-            field, value, f'Mising value')
+    if isinstance(value, dict) and 'op' in value:
+        if not isinstance(value, dict):
+            raise ValueDeserializationError(field, value, 'Not an object')
+        operation_name = value.get('op', 'undefined')
+        operation = query_adapter(field.field, IPatchFieldOperation, name=operation_name)
+        if operation is None:
+            raise ValueDeserializationError(
+                field, value, f'"{operation_name}" not a valid operation')
+        if 'value' not in value:
+            raise ValueDeserializationError(
+                field, value, f'Mising value')
     return value
 
 
