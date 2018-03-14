@@ -369,3 +369,13 @@ def to_str(value):
     if isinstance(value, bytes):
         value = value.decode('utf-8')
     return value
+
+
+def clear_conn_statement_cache(conn):
+    try:
+        conn._con._stmt_cache.clear()
+    except Exception:
+        try:
+            conn._stmt_cache.clear()
+        except Exception:
+            pass

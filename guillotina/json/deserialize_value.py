@@ -3,10 +3,11 @@ from dateutil.parser import parse
 from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_adapter
+from guillotina.exceptions import ValueDeserializationError
 from guillotina.interfaces import IJSONToValue
-from guillotina.json.exceptions import ValueDeserializationError
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
 from guillotina.schema.interfaces import IBool
+from guillotina.schema.interfaces import IDate
 from guillotina.schema.interfaces import IDatetime
 from guillotina.schema.interfaces import IDict
 from guillotina.schema.interfaces import IField
@@ -16,6 +17,8 @@ from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
 from zope.interface import Interface
+
+import datetime
 
 
 def schema_compatible(value, schema_or_field, context=None):
@@ -119,3 +122,10 @@ def datetime_converter(field, value, context):
     if not isinstance(value, str):
         raise ValueDeserializationError(field, value, 'Not a string')
     return parse(value)
+
+
+@configure.value_deserializer(IDate)
+def date_converter(field, value, context):
+    if not isinstance(value, str):
+        raise ValueDeserializationError(field, value, 'Not a string')
+    return datetime.datetime.strptime(value, '%Y-%m-%d').date()

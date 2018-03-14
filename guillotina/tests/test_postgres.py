@@ -619,7 +619,8 @@ async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
     for conn in tm._storage._pool._queue._queue:
         if conn._con is None:
             await conn.connect()
-        conn._con._top_xact = asyncpg.transaction.Transaction(conn, 'read_committed', False, False)
+        conn._con._top_xact = asyncpg.transaction.Transaction(
+            conn._con, 'read_committed', False, False)
     txn = await tm.begin()
 
     # then, try doing stuff...

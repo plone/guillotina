@@ -4,7 +4,7 @@ from guillotina import cors
 from guillotina import glogging
 from guillotina import languages
 from guillotina._settings import app_settings
-from guillotina.async import IAsyncUtility
+from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_all_utilities_registered_for
 from guillotina.component import get_utility
@@ -88,7 +88,7 @@ class GuillotinaAIOHTTPApplication(web.Application):
                 if isinstance(e, TIDConflictError):
                     label = 'TID Conflict Error detected'
                 tid = getattr(getattr(request, '_txn', None), '_tid', 'not issued')
-                logger.warning(
+                logger.debug(
                     f'{label}, retrying request, tid: {tid}, retries: {retries + 1})',
                     exc_info=True)
                 request._retry_attempt = retries + 1
@@ -198,6 +198,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.subscribers')
     configure.scan('guillotina.db.strategies')
     configure.scan('guillotina.db.cache')
+    configure.scan('guillotina.exc_resp')
     load_application(guillotina, root, settings)
     config.execute_actions()
     config.commit()

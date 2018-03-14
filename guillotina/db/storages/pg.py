@@ -7,6 +7,7 @@ from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
+from guillotina.utils import clear_conn_statement_cache
 from zope.interface import implementer
 
 import asyncio
@@ -509,18 +510,11 @@ class PostgresqlStorage(BaseStorage):
     async def open(self):
         try:
             conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
-            # clear statement cache to prevent asyncpg bug
-            try:
-                conn._con._stmt_cache.clear()
-            except Exception:
-                try:
-                    conn._stmt_cache.clear()
-                except Exception:
-                    pass
+            clear_conn_statement_cache(conn)
+            return conn
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:
                 await self._check_bad_connection(ex)
-        return conn
 
     async def close(self, con):
         try:
@@ -542,7 +536,7 @@ class PostgresqlStorage(BaseStorage):
 
         pickled = writer.serialize()  # This calls __getstate__ of obj
         if len(pickled) >= self._large_record_size:
-            log.warning(f"Large object {obj.__class__}: {len(pickled)}")
+            log.info(f"Large object {obj.__class__}: {len(pickled)}")
         json_dict = await writer.get_json()
         json = ujson.dumps(json_dict)
         part = writer.part
@@ -610,7 +604,7 @@ class PostgresqlStorage(BaseStorage):
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
             await conn.execute(TRASH_PARENT_ID, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, [oid])
+        txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
         if str(ex) in ('cannot perform operation: connection is closed',

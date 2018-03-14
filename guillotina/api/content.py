@@ -2,6 +2,7 @@ from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import configure
+from guillotina import error_reasons
 from guillotina import security
 from guillotina._cache import FACTORY_CACHE
 from guillotina._settings import app_settings
@@ -27,8 +28,6 @@ from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
-from guillotina.exceptions import ConflictIdOnContainer
-from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAbsoluteURL
@@ -47,7 +46,6 @@ from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
-from guillotina.json.exceptions import DeserializationError
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
@@ -159,15 +157,17 @@ class DefaultPOST(Service):
         if not type_:
             return ErrorResponse(
                 'RequiredParam',
-                _("Property '@type' is required"))
+                _("Property '@type' is required"),
+                reason=error_reasons.REQUIRED_PARAM_MISSING,
+                status=412)
 
         # Generate a temporary id if the id is not given
         if not id_:
             new_id = None
         else:
-            if not valid_id(id_):
+            if not isinstance(id_, str) or not valid_id(id_):
                 return ErrorResponse('PreconditionFailed', str('Invalid id'),
-                                     status=412)
+                                     status=412, reason=error_reasons.INVALID_ID)
             new_id = id_
 
         user = get_authenticated_user_id(self.request)
@@ -177,21 +177,11 @@ class DefaultPOST(Service):
             obj = await create_content_in_container(
                 self.context, type_, new_id, id=new_id, creators=(user,),
                 contributors=(user,))
-        except (PreconditionFailed, NotAllowedContentType) as e:
-            return ErrorResponse(
-                'PreconditionFailed',
-                str(e),
-                status=412)
-        except ConflictIdOnContainer as e:
-            return ErrorResponse(
-                'ConflictId',
-                str(e),
-                status=409)
         except ValueError as e:
             return ErrorResponse(
                 'CreatingObject',
                 str(e),
-                status=400)
+                status=412)
 
         for behavior in behaviors or ():
             obj.add_behavior(behavior)
@@ -203,16 +193,10 @@ class DefaultPOST(Service):
             return ErrorResponse(
                 'DeserializationError',
                 'Cannot deserialize type {}'.format(obj.type_name),
-                status=501)
+                status=412,
+                reason=error_reasons.DESERIALIZATION_FAILED)
 
-        try:
-            await deserializer(data, validate_all=True)
-        except DeserializationError as e:
-            return ErrorResponse(
-                'DeserializationError',
-                str(e),
-                exc=e,
-                status=400)
+        await deserializer(data, validate_all=True)
 
         # Local Roles assign owner as the creator user
         get_owner = get_utility(IGetOwner)
@@ -259,7 +243,8 @@ class DefaultPATCH(Service):
             return ErrorResponse(
                 'DeserializationError',
                 'Not allowed to change id of content.',
-                status=412)
+                status=412,
+                reason=error_reasons.ID_NOT_ALLOWED)
 
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
@@ -271,15 +256,10 @@ class DefaultPATCH(Service):
             return ErrorResponse(
                 'DeserializationError',
                 'Cannot deserialize type {}'.format(self.context.type_name),
-                status=412)
+                status=412,
+                reason=error_reasons.DESERIALIZATION_FAILED)
 
-        try:
-            await deserializer(data)
-        except DeserializationError as e:
-            return ErrorResponse(
-                'DeserializationError',
-                str(e),
-                status=422)
+        await deserializer(data)
 
         await notify(ObjectModifiedEvent(self.context, payload=data))
 
@@ -392,12 +372,14 @@ class SharingPOST(Service):
         if 'prinrole' not in data and \
                 'roleperm' not in data and \
                 'prinperm' not in data:
-            raise AttributeError('prinrole or roleperm or prinperm missing')
+            raise PreconditionFailed(
+                self.context, 'prinrole or roleperm or prinperm missing')
 
         for prinrole in data.get('prinrole') or []:
             setting = prinrole.get('setting')
             if setting not in PermissionMap['prinrole']:
-                raise AttributeError('Invalid Type {}'.format(setting))
+                raise PreconditionFailed(
+                    self.context, 'Invalid Type {}'.format(setting))
             manager = IPrincipalRoleManager(context)
             operation = PermissionMap['prinrole'][setting]
             func = getattr(manager, operation)
@@ -405,12 +387,14 @@ class SharingPOST(Service):
                 changed = True
                 func(prinrole['role'], prinrole['principal'])
             else:
-                raise KeyError('No valid local role')
+                raise PreconditionFailed(
+                    self.context, 'No valid local role')
 
         for prinperm in data.get('prinperm') or []:
             setting = prinperm['setting']
             if setting not in PermissionMap['prinperm']:
-                raise AttributeError('Invalid Type')
+                raise PreconditionFailed(
+                    self.context, 'Invalid Type')
             manager = IPrincipalPermissionManager(context)
             operation = PermissionMap['prinperm'][setting]
             func = getattr(manager, operation)
@@ -420,7 +404,8 @@ class SharingPOST(Service):
         for roleperm in data.get('roleperm') or []:
             setting = roleperm['setting']
             if setting not in PermissionMap['roleperm']:
-                raise AttributeError('Invalid Type')
+                raise PreconditionFailed(
+                    self.context, 'Invalid Type')
             manager = IRolePermissionManager(context)
             operation = PermissionMap['roleperm'][setting]
             func = getattr(manager, operation)
@@ -471,7 +456,7 @@ class SharingPUT(SharingPOST):
     })
 async def can_i_do(context, request):
     if 'permission' not in request.query:
-        raise TypeError('No permission param')
+        raise PreconditionFailed(context, 'No permission param')
     permission = request.query['permission']
     return IInteraction(request).check_permission(permission, context)
 
@@ -612,10 +597,7 @@ async def move(context, request):
         destination_ob = None
 
     if destination_ob is None:
-        return ErrorResponse(
-            'Configuration',
-            'Could not find destination object',
-            status=400)
+        raise PreconditionFailed(context, 'Could not find destination object')
     old_id = context.id
     if 'new_id' in data:
         new_id = data['new_id']
@@ -625,16 +607,13 @@ async def move(context, request):
 
     security = IInteraction(request)
     if not security.check_permission('guillotina.AddContent', destination_ob):
-        return ErrorResponse(
-            'Configuration',
-            'You do not have permission to add content to the destination object',
-            status=400)
+        raise PreconditionFailed(
+            context, 'You do not have permission to add content to the '
+                     'destination object')
 
     if await destination_ob.async_contains(new_id):
-        return ErrorResponse(
-            'Configuration',
-            f'Destination already has object with the id {new_id}',
-            status=400)
+        raise PreconditionFailed(
+            context, f'Destination already has object with the id {new_id}')
 
     original_parent = context.__parent__
 
@@ -699,27 +678,22 @@ async def duplicate(context, request):
     if destination is not None:
         destination_ob = await navigate_to(request.container, destination)
         if destination_ob is None:
-            return ErrorResponse(
-                'Configuration',
-                'Could not find destination object',
-                status=400)
+            raise PreconditionFailed(
+                context, 'Could not find destination object',)
     else:
         destination_ob = context.__parent__
 
     security = IInteraction(request)
     if not security.check_permission('guillotina.AddContent', destination_ob):
-        return ErrorResponse(
-            'Configuration',
-            'You do not have permission to add content to the destination object',
-            status=400)
+        raise PreconditionFailed(
+            context, 'You do not have permission to add content to '
+                     'the destination object',)
 
     if 'new_id' in data:
         new_id = data['new_id']
         if await destination_ob.async_contains(new_id):
-            return ErrorResponse(
-                'Configuration',
-                f'Destination already has object with the id {new_id}',
-                status=400)
+            raise PreconditionFailed(
+                context, f'Destination already has object with the id {new_id}')
     else:
         count = 1
         new_id = f'{context.id}-duplicate-{count}'
@@ -822,9 +796,9 @@ async def items(context, request):
 
     # alright, we'll do our own batching now...
     txn = request._txn
-    conn = txn._db_conn
-    smt = await conn.prepare(BATCHED_GET_CHILDREN_KEYS)
-    result = await smt.fetch(
+    conn = await txn.get_connection()
+    result = await conn.fetch(
+        BATCHED_GET_CHILDREN_KEYS,
         context._p_oid,
         page_size,
         (page - 1) * page_size)
@@ -835,9 +809,13 @@ async def items(context, request):
     if request.GET.get('omit'):
         omit = request.GET.get('omit').split(',')
 
+    security = IInteraction(request)
+
     results = []
     for record in result:
         ob = await context.async_get(record['id'])
+        if not security.check_permission('guillotina.ViewContent', ob):
+            continue
         serializer = get_multi_adapter(
             (ob, request),
             IResourceSerializeToJson)

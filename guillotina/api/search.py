@@ -1,6 +1,6 @@
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.async import IQueueUtility
+from guillotina.async_util import IQueueUtility
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource

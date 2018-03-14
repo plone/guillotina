@@ -16,6 +16,7 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
+from guillotina.utils import apply_coroutine
 from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 from zope.interface import implementer
@@ -165,7 +166,8 @@ class DefaultCatalogDataAdapter(object):
                         if not loaded:
                             await self.load_behavior(behavior)
                             loaded = True
-                        values[index_name] = index_data['accessor'](behavior)
+                        values[index_name] = await apply_coroutine(
+                            index_data['accessor'], behavior)
                     elif (indexes is None or index_name in indexes or
                             isinstance(getattr(type(self.content), index_name, None), property)):
                         if not loaded:
