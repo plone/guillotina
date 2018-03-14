@@ -1,4 +1,4 @@
-2.4.2 (unreleased)
+2.4.2 (2018-03-14)
 ------------------
 
 - Be able to provide `index_name` for index directive to rename index name
