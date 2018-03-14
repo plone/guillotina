@@ -152,7 +152,8 @@ class DefaultCatalogDataAdapter(object):
         for schema in iter_schemata(self.content):
             behavior = schema(self.content)
             loaded = False
-            for index_name, index_data in merged_tagged_value_dict(schema, index.key).items():
+            for field_name, index_data in merged_tagged_value_dict(schema, index.key).items():
+                index_name = index_data.get('index_name', field_name)
                 if index_name in values:
                     # you can override indexers so we do not want to index
                     # the same value more than once
@@ -161,21 +162,21 @@ class DefaultCatalogDataAdapter(object):
                 try:
                     # accessors we always reindex since we can't know if updated
                     # from the indexes param--they are "fake" like indexes, not fields
-                    if ('accessor' in index_data and (
-                            indexes is None or index_data.get('field') in indexes)):
-                        if not loaded:
-                            await self.load_behavior(behavior)
-                            loaded = True
-                        values[index_name] = await apply_coroutine(
-                            index_data['accessor'], behavior)
-                    elif (indexes is None or index_name in indexes or
-                            isinstance(getattr(type(self.content), index_name, None), property)):
+                    if 'accessor' in index_data:
+                        if indexes is None or index_data.get('field') in indexes:
+                            if not loaded:
+                                await self.load_behavior(behavior)
+                                loaded = True
+                            values[index_name] = await apply_coroutine(
+                                index_data['accessor'], behavior)
+                    elif (indexes is None or field_name in indexes or
+                            isinstance(getattr(type(self.content), field_name, None), property)):
                         if not loaded:
                             await self.load_behavior(behavior)
                             loaded = True
                         # in this case, properties are also dynamic so we have to make sure
                         # to allow for them to be reindexed every time.
-                        values[index_name] = self.get_data(behavior, schema, index_name)
+                        values[index_name] = self.get_data(behavior, schema, field_name)
                 except NoIndexField:
                     pass
 
