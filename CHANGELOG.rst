@@ -1,7 +1,9 @@
 2.4.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to provide `index_name` for index directive to rename index name
+  to use for catalog data
+  [vangheem]
 
 
 2.4.1 (2018-03-14)
