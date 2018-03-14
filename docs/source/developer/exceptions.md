@@ -1,4 +1,4 @@
-# Persistence
+# Exceptions
 
 Exceptions during the rendering of API calls are wrapped, logged and provided
 generic http status codes by default.

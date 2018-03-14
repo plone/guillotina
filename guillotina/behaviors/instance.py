@@ -76,6 +76,10 @@ class AnnotationBehavior(object):
             if IAnnotationData.providedBy(data):
                 data._p_register()
 
+    def _p_register(self):
+        if IAnnotationData.providedBy(self.__dict__['data']):
+            self.__dict__['data']._p_register()
+
 
 @implementer(IContentBehavior)
 class ContextBehavior(object):
@@ -112,3 +116,6 @@ class ContextBehavior(object):
             prefixed_name = self.__dict__['prefix'] + name
             self.__dict__['context'].__setattr__(prefixed_name, value)
             self.__dict__['context']._p_register()
+
+    def _p_register(self):
+        self.__dict__['context']._p_register()

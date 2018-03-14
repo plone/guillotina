@@ -199,6 +199,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.db.strategies')
     configure.scan('guillotina.db.cache')
     configure.scan('guillotina.exc_resp')
+    configure.scan('guillotina.fields')
     load_application(guillotina, root, settings)
     config.execute_actions()
     config.commit()

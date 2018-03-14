@@ -112,13 +112,19 @@ class DeserializeFromJson(object):
                     # record object changes for potential future conflict resolution
                     try:
                         await apply_coroutine(field.set, obj, value)
+                    except ValidationError as e:
+                        errors.append({
+                            'message': e.doc(), 'field': name, 'error': e})
+                    except ValueDeserializationError as e:
+                        errors.append({
+                            'message': e.message, 'field': name, 'error': e})
                     except Exception:
                         logger.warning(
                             'Error setting data on field, falling back to setattr',
                             exc_info=True)
                         setattr(obj, name, value)
             else:
-                if f.required and not hasattr(obj, name):
+                if validate_all and f.required and not hasattr(obj, name):
                     errors.append({
                         'message': 'Required parameter', 'field': name,
                         'error': ValueError('Required parameter')})
