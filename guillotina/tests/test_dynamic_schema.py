@@ -73,6 +73,48 @@ async def test_set_dynamic_behavior(custom_type_container_requester):
         assert 'guillotina.test_package.ITestBehavior' in response
 
 
+async def test_set_dynamic_context_behavior(custom_type_container_requester):
+    async with custom_type_container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Foobar",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+
+        # We create the behavior
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': 'guillotina.test_package.ITestContextBehavior'
+            })
+        )
+        assert status == 200
+
+        # We check that the behavior is there
+        response, status = await requester('GET', '/db/guillotina/item1')
+        assert 'guillotina.test_package.ITestContextBehavior' in response
+
+        # set values on behavior
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1',
+            data=json.dumps({
+                'guillotina.test_package.ITestContextBehavior': {
+                    'foobar': 'foobar'
+                }
+            })
+        )
+        response, status = await requester('GET', '/db/guillotina/item1')
+        assert 'guillotina.test_package.ITestContextBehavior' in response
+        assert response['guillotina.test_package.ITestContextBehavior']['foobar'] == 'foobar'
+
+
 async def test_create_delete_dynamic_behavior(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
