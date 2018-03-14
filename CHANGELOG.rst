@@ -1,4 +1,4 @@
-2.4.1 (unreleased)
+2.4.1 (2018-03-14)
 ------------------
 
 - Provide utils.clear_conn_statement_cache
