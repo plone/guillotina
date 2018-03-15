@@ -1,4 +1,4 @@
-2.4.4 (unreleased)
+2.4.4 (2018-03-15)
 ------------------
 
 - fix `BucketListValue.iter_buckets` to correctly load uncached annotations
