@@ -1,4 +1,4 @@
-2.4.5 (unreleased)
+2.4.5 (2018-03-15)
 ------------------
 
 - `BucketListValue.iter_buckets` returns annotation object
