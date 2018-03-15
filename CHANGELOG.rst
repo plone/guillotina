@@ -1,7 +1,8 @@
 2.4.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- `BucketListValue.iter_buckets` returns annotation object
+  [vangheem]
 
 
 2.4.4 (2018-03-15)

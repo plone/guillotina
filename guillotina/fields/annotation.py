@@ -89,11 +89,11 @@ class BucketListValue:
                     annotation_name, _default)
                 if annotation is _default:
                     continue
-            yield annotation['items']
+            yield annotation
 
     async def iter_items(self, context):
         async for bucket in self.iter_buckets(context):
-            for item in bucket:
+            for item in bucket['items']:
                 yield item
 
 
