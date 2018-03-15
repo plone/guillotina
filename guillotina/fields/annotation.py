@@ -85,7 +85,10 @@ class BucketListValue:
             annotations_container = IAnnotations(context)
             annotation = annotations_container.get(annotation_name, _default)
             if annotation is _default:
-                continue
+                annotation = await annotations_container.async_get(
+                    annotation_name, _default)
+                if annotation is _default:
+                    continue
             yield annotation['items']
 
     async def iter_items(self, context):

@@ -1,7 +1,9 @@
 2.4.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- fix `BucketListValue.iter_buckets` to correctly load uncached annotations
+  from database
+  [vangheem]
 
 
 2.4.3 (2018-03-14)
