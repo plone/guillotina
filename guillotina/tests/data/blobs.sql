@@ -7,27 +7,12 @@
 
 -- Started on 2018-03-16 08:41:38 EDT
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
-
-SET search_path = public, pg_catalog;
-
-SET default_tablespace = '';
-
-SET default_with_oids = false;
-
 --
 -- TOC entry 186 (class 1259 OID 16403)
 -- Name: blobs; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE blobs (
+CREATE TABLE IF NOT EXISTS blobs (
     bid character varying(32) NOT NULL,
     zoid character varying(32) NOT NULL,
     chunk_index integer NOT NULL,
@@ -49,7 +34,7 @@ ALTER TABLE blobs OWNER TO postgres;
 -- Name: blob_bid; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX blob_bid ON blobs USING btree (bid);
+CREATE INDEX IF NOT EXISTS blob_bid ON blobs USING btree (bid);
 
 
 --
@@ -57,7 +42,7 @@ CREATE INDEX blob_bid ON blobs USING btree (bid);
 -- Name: blob_chunk; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX blob_chunk ON blobs USING btree (chunk_index);
+CREATE INDEX IF NOT EXISTS blob_chunk ON blobs USING btree (chunk_index);
 
 
 --
@@ -65,7 +50,7 @@ CREATE INDEX blob_chunk ON blobs USING btree (chunk_index);
 -- Name: blob_zoid; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX blob_zoid ON blobs USING btree (zoid);
+CREATE INDEX IF NOT EXISTS blob_zoid ON blobs USING btree (zoid);
 
 
 --
@@ -73,6 +58,7 @@ CREATE INDEX blob_zoid ON blobs USING btree (zoid);
 -- Name: blobs blobs_zoid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
+ALTER TABLE objects DROP CONSTRAINT IF EXISTS blobs_zoid_fkey;
 ALTER TABLE ONLY blobs
     ADD CONSTRAINT blobs_zoid_fkey FOREIGN KEY (zoid) REFERENCES objects(zoid) ON DELETE CASCADE;
 
