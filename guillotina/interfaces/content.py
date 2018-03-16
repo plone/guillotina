@@ -135,12 +135,13 @@ class ILocation(Interface):
         description="The object can be looked up from the parent's "
                     'sublocations using this name.',
         required=False,
-        default=None)
+        default=None,
+        readonly=True)
 
 
 class IResource(ILocation):
 
-    type_name = guillotina.schema.TextLine()
+    type_name = guillotina.schema.TextLine(readonly=True)
 
     title = guillotina.schema.TextLine(
         title='Title',
@@ -151,7 +152,8 @@ class IResource(ILocation):
 
     uuid = guillotina.schema.TextLine(
         title='UUID',
-        required=True
+        required=True,
+        readonly=True
     )
 
     modification_date = guillotina.schema.Datetime(
@@ -168,7 +170,8 @@ class IResource(ILocation):
         title='Enabled behaviors',
         required=False,
         description='Dynamic behaviors for the content type',
-        default=frozenset({})
+        default=frozenset({}),
+        readonly=True
     )
 
 

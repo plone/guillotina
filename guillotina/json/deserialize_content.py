@@ -18,6 +18,7 @@ from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
+from guillotina.interfaces import RESERVED_ATTRS
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
@@ -43,11 +44,7 @@ class DeserializeFromJson(object):
     async def __call__(self, data, validate_all=False, ignore_errors=False):
         errors = []
 
-        factory = get_cached_factory(self.context.type_name)
-        main_schema = factory.schema
-        await self.set_schema(
-            main_schema, self.context, data, errors, validate_all, False)
-
+        # do behavior first in case they modify context values
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
             dotted_name = behavior_schema.__identifier__
             if dotted_name not in data:
@@ -60,6 +57,11 @@ class DeserializeFromJson(object):
             await self.set_schema(
                 behavior_schema, behavior, data, errors,
                 validate_all, True)
+
+        factory = get_cached_factory(self.context.type_name)
+        main_schema = factory.schema
+        await self.set_schema(
+            main_schema, self.context, data, errors, validate_all, False)
 
         if errors and not ignore_errors:
             raise DeserializationError(errors)
@@ -74,6 +76,8 @@ class DeserializeFromJson(object):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
 
         for name, field in get_fields(schema).items():
+            if name in RESERVED_ATTRS:
+                continue
 
             if field.readonly:
                 continue
@@ -118,11 +122,19 @@ class DeserializeFromJson(object):
                     except ValueDeserializationError as e:
                         errors.append({
                             'message': e.message, 'field': name, 'error': e})
-                    except Exception:
+                    except AttributeError:
                         logger.warning(
-                            'Error setting data on field, falling back to setattr',
-                            exc_info=True)
-                        setattr(obj, name, value)
+                            'AttributeError setting data on field', exc_info=True)
+                    except Exception:
+                        if not isinstance(getattr(type(obj), name, None), property):
+                            # we can not set data on properties
+                            logger.warning(
+                                'Error setting data on field, falling back to setattr',
+                                exc_info=True)
+                            setattr(obj, name, value)
+                        else:
+                            logger.warning(
+                                'Error setting data on field', exc_info=True)
             else:
                 if validate_all and f.required and not hasattr(obj, name):
                     errors.append({
