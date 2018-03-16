@@ -8,12 +8,16 @@ from guillotina.interfaces import IApplication
 from guillotina.tests import docker_containers as containers
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
+from unittest import mock
 
 import aiohttp
 import asyncio
 import os
+import psycopg2
 import pytest
 
+
+_dir = os.path.dirname(os.path.realpath(__file__))
 
 IS_TRAVIS = 'TRAVIS' in os.environ
 USE_COCKROACH = 'USE_COCKROACH' in os.environ
@@ -254,3 +258,29 @@ class CockroachStorageAsyncContextManager(object):
 @pytest.fixture(scope='function')
 async def cockroach_storage(postgres, dummy_request, loop):
     return CockroachStorageAsyncContextManager(dummy_request, loop, postgres)
+
+
+@pytest.fixture(scope='function')
+def command_arguments():
+    arguments = mock.MagicMock()
+    arguments.line_profiler = False
+    arguments.monitor = False
+    arguments.profile = False
+    return arguments
+
+
+@pytest.fixture(scope='function')
+def container_command(postgres):
+    settings = get_pg_settings()
+    host = settings['databases'][0]['db']['dsn']['host']
+    port = settings['databases'][0]['db']['dsn']['port']
+    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
+    cur = conn.cursor()
+    cur.execute(open(os.path.join(_dir, "data/objects.sql"), "r").read())
+    cur.execute(open(os.path.join(_dir, "data/blobs.sql"), "r").read())
+    cur.execute('COMMIT;')
+    cur.close()
+    conn.close()
+    return {
+        'settings': settings
+    }
