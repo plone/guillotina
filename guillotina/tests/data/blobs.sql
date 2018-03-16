@@ -58,7 +58,6 @@ CREATE INDEX IF NOT EXISTS blob_zoid ON blobs USING btree (zoid);
 -- Name: blobs blobs_zoid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE objects DROP CONSTRAINT IF EXISTS blobs_zoid_fkey;
 ALTER TABLE ONLY blobs
     ADD CONSTRAINT blobs_zoid_fkey FOREIGN KEY (zoid) REFERENCES objects(zoid) ON DELETE CASCADE;
 

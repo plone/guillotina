@@ -59,6 +59,9 @@ INSERT INTO objects VALUES ('8ab4d9007c8f4323844b627624882db8', 2, 205, 0, false
 -- Name: objects objects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
+ALTER TABLE blobs DROP CONSTRAINT IF EXISTS blobs_zoid_fkey;
+ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_of_fkey;
+ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_parent_id_fkey;
 ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_pkey;
 ALTER TABLE ONLY objects
     ADD CONSTRAINT objects_pkey PRIMARY KEY (zoid);
@@ -117,7 +120,6 @@ CREATE INDEX IF NOT EXISTS object_type ON objects USING btree (type);
 -- Name: objects objects_of_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_of_fkey;
 ALTER TABLE ONLY objects
     ADD CONSTRAINT objects_of_fkey FOREIGN KEY (of) REFERENCES objects(zoid) ON DELETE CASCADE;
 
@@ -127,7 +129,6 @@ ALTER TABLE ONLY objects
 -- Name: objects objects_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_parent_id_fkey;
 ALTER TABLE ONLY objects
     ADD CONSTRAINT objects_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES objects(zoid) ON DELETE CASCADE;
 
