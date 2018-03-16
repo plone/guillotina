@@ -37,7 +37,6 @@ def get_dummy_settings():
     settings = testing.get_settings()
     settings['databases'][0]['db']['storage'] = 'DUMMY'
 
-    settings['databases'][0]['db']['partition'] = 'guillotina.interfaces.IResource'
     settings['databases'][0]['db']['dsn'] = {}
     return settings
 
@@ -46,8 +45,6 @@ def get_pg_settings():
     settings = testing.get_settings()
     settings['databases'][0]['db']['storage'] = 'postgresql'
 
-    settings['databases'][0]['db']['partition'] = \
-        'guillotina.interfaces.IResource'
     settings['databases'][0]['db']['dsn'] = {
         'scheme': 'postgres',
         'dbname': 'guillotina',
