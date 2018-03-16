@@ -278,6 +278,13 @@ def container_command(postgres):
     cur.execute('COMMIT;')
     cur.close()
     conn.close()
-    return {
+    yield {
         'settings': settings
     }
+
+    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
+    cur = conn.cursor()
+    cur.execute('''
+DELETE FROM objects;
+DELETe FROM blobs;
+COMMIT;''')
