@@ -150,10 +150,6 @@ class DefaultPOST(Service):
         id_ = data.get('id', None)
         behaviors = data.get('@behaviors', None)
 
-        if '__acl__' in data:
-            # we don't allow to change the permisions on this patch
-            del data['__acl__']
-
         if not type_:
             return ErrorResponse(
                 'RequiredParam',
@@ -238,13 +234,6 @@ class DefaultPOST(Service):
 class DefaultPATCH(Service):
     async def __call__(self):
         data = await self.get_data()
-
-        if 'id' in data and data['id'] != self.context.id:
-            return ErrorResponse(
-                'DeserializationError',
-                'Not allowed to change id of content.',
-                status=412,
-                reason=error_reasons.ID_NOT_ALLOWED)
 
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():

@@ -1,7 +1,8 @@
 2.4.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to safely PATCH with same payload from GET
+  [vangheem]
 
 
 2.4.6 (2018-03-17)

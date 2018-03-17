@@ -640,3 +640,20 @@ async def test_adapter_exception_handlers(container_requester):
             data='{"foobar": "}')  # bug in json
         assert status == 412
         assert response['reason'] == 'jsonDecodeError'
+
+
+async def test_patch_with_payload_again(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                '@type': 'Item'
+            }))
+        assert not response['title']
+        response['title'] = 'Foobar'
+        patch_resp, status = await requester(
+            'PATCH', f'/db/guillotina/{response["__name__"]}',
+            data=json.dumps(response))
+        response, status = await requester(
+            'GET', f'/db/guillotina/{response["__name__"]}')
+        assert response['title'] == 'Foobar'
