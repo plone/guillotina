@@ -39,13 +39,12 @@ Dependencies
 * postgresql >= 9.6
 
 
-Getting started with development
---------------------------------
+Quickstart
+----------
 
-Using pip:
+We use pip::
 
-    ./bin/pip install requirements.txt
-    ./bin/pip install -e .[test]
+  pip install guillotina
 
 
 Run postgresql
@@ -59,12 +58,13 @@ Download and start the docker container by running::
   make run-postgres
 
 
+
 Run the server
 --------------
 
 To run the server::
 
-    ./bin/guillotina
+    g
 
 
 Then...
@@ -75,16 +75,25 @@ Then...
 Or, better yet, use postman to start playing with API.
 
 
+Getting started with development
+--------------------------------
+
+Using pip::
+
+  ./bin/pip install requirements.txt
+  ./bin/pip install -e .[test]
+
+
 Run tests
 ---------
 
-We're using py.test::
+We're using pytest::
 
-    ./bin/py.test guillotina
+    ./bin/pytest guillotina
 
 and for test coverage::
 
-    ./bin/py.test --cov=guillotina guillotina/
+    ./bin/pytest --cov=guillotina guillotina/
 
 With file watcher...
 
@@ -119,12 +128,9 @@ First, run postgresql::
 Then, run guillotina::
 
     docker run --rm -it \
-        --link=postgres \
-        -p 127.0.0.1:8080:8080 \
-        -v $(echo $PWD):/g \
+        --link=postgres -p 127.0.0.1:8080:8080 \
         guillotina/guillotina \
-        --name g \
-        g -c /g/config.yaml
+        g -c '{"databases": [{"db": {"storage": "postgresql", "dsn": "postgres://guillotina:@postgs/guillotina"}}], "root_user": {"password": "root"}}'
 
 
 This assumes you have a config.yaml in your current working directory
