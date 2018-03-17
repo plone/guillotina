@@ -1,4 +1,4 @@
-2.4.7 (unreleased)
+2.4.7 (2018-03-17)
 ------------------
 
 - Be able to safely PATCH with same payload from GET
