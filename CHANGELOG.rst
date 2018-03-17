@@ -1,7 +1,8 @@
 2.4.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Updated docs
+  [vangheem]
 
 
 2.4.5 (2018-03-15)
@@ -637,14 +638,14 @@
 ------------------
 
 - Make components more pythonic:
-    - guillotina.component.getMultiAdapter -> get_multi_adapter
-    - guillotina.component.getAdapter -> get_adapter
-    - guillotina.component.getUtility -> get_utility
-    - guillotina.component.queryUtility -> query_utility
-    - guillotina.component.getUtilitiesFor -> get_utilities_for
-    - guillotina.component.getAllUtilitiesRegisteredFor -> get_all_utilities_registered_for
-    - guillotina.component.getGlobalSiteManager -> get_global_components
-    - guillotina.component.provideUtility -> provide_utility
+  - guillotina.component.getMultiAdapter -> get_multi_adapter
+  - guillotina.component.getAdapter -> get_adapter
+  - guillotina.component.getUtility -> get_utility
+  - guillotina.component.queryUtility -> query_utility
+  - guillotina.component.getUtilitiesFor -> get_utilities_for
+  - guillotina.component.getAllUtilitiesRegisteredFor -> get_all_utilities_registered_for
+  - guillotina.component.getGlobalSiteManager -> get_global_components
+  - guillotina.component.provideUtility -> provide_utility
   [vangheem]
 
 - Allow passing arguments to component lookup factories with `args=[]` and `kwargs={}` params

@@ -3,12 +3,31 @@ from setuptools import find_packages
 from setuptools import setup
 
 
+long_description = open('README.rst').read() + '\n'
+changelog = open('CHANGELOG.rst').read()
+found = 0
+for line in changelog.splitlines():
+    if len(line) > 15 and line[-1] == ')' and line[-4] == '-':
+        found += 1
+        if found >= 20:
+            break
+    long_description += '\n' + line
+
+
+long_description += '''...
+
+You are seeing a truncated changelog.
+
+You can read the `changelog file <https://github.com/plone/guillotina/blob/master/CHANGELOG.rst>`_
+for a complete list.
+
+'''
+
 setup(
     name='guillotina',
     version=open('VERSION').read().strip(),
     description='asyncio REST API Resource database',  # noqa
-    long_description=(open('README.rst').read() + '\n' +
-                      open('CHANGELOG.rst').read()),
+    long_description=long_description,
     keywords=['asyncio', 'REST', 'Framework', 'transactional'],
     author='Ramon & Asko & Nathan',
     author_email='ramon@plone.org',
