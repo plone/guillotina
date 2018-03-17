@@ -322,6 +322,7 @@ class PGVacuum:
         '''
         conn = await self._storage.open()
         try:
+            clear_conn_statement_cache(conn)
             await conn.execute(DELETE_OBJECT, oid)
         except Exception:
             log.warning('Error deleting trashed object', exc_info=True)

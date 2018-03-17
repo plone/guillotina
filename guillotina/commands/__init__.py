@@ -67,12 +67,18 @@ def get_settings(configuration):
                 settings = yaml.load(config)
         settings['__file__'] = configuration_filename
     else:
-        if 'logged' not in MISSING_SETTINGS:
-            logger.warning('Could not find the configuration file {}. Using default settings.'.format(
-                configuration
-            ))
-        MISSING_SETTINGS['logged'] = True
-        settings = MISSING_SETTINGS.copy()
+        try:
+            settings = json.loads(configuration)
+        except json.decoder.JSONDecodeError:
+            # try with yaml parser too..
+            try:
+                settings = yaml.load(configuration)
+            except yaml.parser.ParserError:
+                if 'logged' not in MISSING_SETTINGS:
+                    logger.warning(f'Could not find the configuration file '
+                                   f'{configuration}. Using default settings.')
+                MISSING_SETTINGS['logged'] = True
+                settings = MISSING_SETTINGS.copy()
     return settings
 
 
@@ -81,20 +87,27 @@ class Command(object):
     profiler = line_profiler = None
     description = ''
     hide = False
+    loop = None
 
-    def __init__(self):
+    def __init__(self, arguments=None):
         '''
         Split out into parts that can be overridden
         '''
         self.setup_fake_request()
-        self.parse_arguments()
+        if arguments is None:
+            self.parse_arguments()
+        else:
+            self.arguments = arguments
 
     def parse_arguments(self):
         parser = self.get_parser()
         self.arguments = parser.parse_known_args()[0]
 
-    def run_command(self):
-        settings = get_settings(self.arguments.configuration)
+    def run_command(self, settings=None, loop=None):
+        if loop is not None:
+            self.loop = loop
+        if settings is None:
+            settings = get_settings(self.arguments.configuration)
         if settings.get('loop_policy'):
             loop_policy = resolve_dotted_name(settings['loop_policy'])
             asyncio.set_event_loop_policy(loop_policy())
@@ -177,7 +190,17 @@ class Command(object):
         login(self.request)
 
     def get_loop(self):
-        return asyncio.get_event_loop()
+        if self.loop is None:
+            try:
+                self.loop = asyncio.get_event_loop()
+            except RuntimeError:
+                # attempt to recover by making new loop
+                self.loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(self.loop)
+        if self.loop.is_closed():
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+        return self.loop
 
     def signal_handler(self, signal, frame):
         sys.exit(0)
