@@ -129,8 +129,8 @@ Then, run guillotina::
 
     docker run --rm -it \
         --link=postgres -p 127.0.0.1:8080:8080 \
-        guillotina/guillotina \
-        g -c '{"databases": [{"db": {"storage": "postgresql", "dsn": "postgres://guillotina:@postgs/guillotina"}}], "root_user": {"password": "root"}}'
+        guillotina/guillotina:latest \
+        g -c '{"databases": [{"db": {"storage": "postgresql", "dsn": "postgres://guillotina:@postgres/guillotina"}}], "root_user": {"password": "root"}}'
 
 
 This assumes you have a config.yaml in your current working directory
