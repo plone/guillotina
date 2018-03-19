@@ -1,4 +1,4 @@
-2.5.2 (unreleased)
+2.5.2 (2018-03-19)
 ------------------
 
 - Fix `@duplicate` endpoint when no destination is provided
