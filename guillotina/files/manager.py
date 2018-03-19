@@ -108,8 +108,11 @@ class FileManager(object):
         else:
             raise HTTPPreconditionFailed(reason='No upload-offset header')
 
-        if offset != self.dm.get('offset'):
-            raise HTTPConflict(reason='Current upload does not match offset')
+        ob_offset = self.dm.get('offset')
+        if offset != ob_offset:
+            raise HTTPConflict(
+                reason=f'Current upload offset({offset}) does not match '
+                       f'object offset {ob_offset}')
 
         read_bytes = await self.file_storage_manager.append(
             self.dm, self._iterate_request_data(), offset)

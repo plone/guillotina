@@ -22,6 +22,7 @@ import time
     provides=IUploadDataManager)
 class DBDataManager:
 
+    _data = None
     _file = None
     _timeout = 15  # how long before a tus upload becomes stale
 
@@ -30,7 +31,6 @@ class DBDataManager:
         self.context = file_storage_manager.context
         self.request = file_storage_manager.request
         self.field = file_storage_manager.field
-        self._data = {}
 
     @property
     def real_context(self):
@@ -134,6 +134,8 @@ class DBDataManager:
         return self._data.get('offset', 0)
 
     def get(self, name, default=None):
+        if self._data is None:
+            return default
         return self._data.get(name, default)
 
 
