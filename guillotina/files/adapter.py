@@ -79,13 +79,13 @@ class DBDataManager:
         if file is None:
             file = self.file_storage_manager.file_class()
         else:
-            cleanup = IFileCleanup(self.context, None)
-            if cleanup is None or cleanup.should_clean(file=file):
-                if getattr(file, '_blob'):
+            if getattr(file, '_blob', None):
+                cleanup = IFileCleanup(self.context, None)
+                if cleanup is None or cleanup.should_clean(file=file):
                     bfile = file._blob.open('r')
                     await bfile.async_del()
                 else:
-                    file._previous_blob = file._blob
+                    file._previous_blob = getattr(file, '_blob', None)
 
         await notify(
             FileBeforeUploadFinishedEvent(self.context, field=self.field,
