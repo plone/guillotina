@@ -59,6 +59,19 @@ class IObjectPermissionsModifiedEvent(interfaces.IObjectEvent):
     """An object permissions has been modified."""
 
 
+class IFileUploadEvent(interfaces.IObjectEvent):
+    '''
+    '''
+
+
+class IFileStartedUpload(interfaces.IObjectEvent):
+    """A file started uploading."""
+
+
+class IFileBeforeFinishUploaded(interfaces.IObjectEvent):
+    """Just before file is getting saved"""
+
+
 class IFileFinishUploaded(interfaces.IObjectEvent):
     """A file has been finish uploaded."""
 

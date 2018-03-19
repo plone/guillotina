@@ -1,10 +1,13 @@
 from .const import MAX_REQUEST_CACHE_SIZE
 from guillotina.exceptions import UnRetryableRequestError
+from guillotina.utils import get_content_path
+from guillotina.utils import to_str
 
 import asyncio
 import base64
 import mimetypes
 import os
+import uuid
 
 
 async def read_request_data(request, chunk_size):
@@ -19,7 +22,9 @@ async def read_request_data(request, chunk_size):
                 # so retrying this request is not supported and we need to throw
                 # another error
                 raise UnRetryableRequestError()
-            data = request._cache_data[request._last_read_pos:request._last_read_pos + chunk_size]
+            start = request._last_read_pos
+            end = request._last_read_pos + chunk_size
+            data = request._cache_data[start:end]
             request._last_read_pos += len(data)
             if request._last_read_pos >= len(request._cache_data):
                 # done reading cache data
@@ -72,3 +77,23 @@ def convert_base64_to_binary(b64data):
         'content_type': content_type,
         'data': data
     }
+
+
+def guess_content_type(content_type, filename):
+    ct = to_str(content_type)
+    if not ct or ct == 'application/octet-stream':
+        if not filename:
+            return 'application/octet-stream'
+        # try guessing content_type
+        ct, _ = mimetypes.guess_type(filename)
+        if ct is None:
+            ct = 'application/octet-stream'
+    return ct
+
+
+def generate_key(request, context):
+    return '{}{}/{}::{}'.format(
+        request._container_id,
+        get_content_path(context),
+        context._p_oid,
+        uuid.uuid4().hex)

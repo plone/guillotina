@@ -70,13 +70,29 @@ async def test_serialize_omit_main_interface_field(dummy_request):
     assert 'file' in result
 
 
-async def test_serialize_cloud_file(dummy_request):
-    from guillotina.test_package import FileContent
+async def test_serialize_cloud_file(dummy_request, dummy_guillotina):
+    request = dummy_request
+    request._txn = mocks.MockTransaction()
+    from guillotina.test_package import FileContent, IFileContent
+    from guillotina.interfaces import IFileManager
     obj = create_content(FileContent)
-    obj.file = DBFile(filename='foobar.json', size=25, md5='foobar')
+    obj.file = DBFile(filename='foobar.json', md5='foobar')
+
+    fm = get_multi_adapter(
+        (obj, request, IFileContent['file'].bind(obj)),
+        IFileManager)
+    await fm.dm.load()
+    await fm.file_storage_manager.start(fm.dm)
+
+    async def _data():
+        yield b'{"foo": "bar"}'
+
+    await fm.file_storage_manager.append(fm.dm, _data(), 0)
+    await fm.file_storage_manager.finish(fm.dm)
+    await fm.dm.finish()
     value = json_compatible(obj.file)
     assert value['filename'] == 'foobar.json'
-    assert value['size'] == 25
+    assert value['size'] == 14
     assert value['md5'] == 'foobar'
 
 
@@ -84,17 +100,18 @@ async def test_deserialize_cloud_file(dummy_request):
     from guillotina.test_package import IFileContent, FileContent
     request = dummy_request  # noqa
     tm = dummy_request._tm
-    await tm.begin(dummy_request)
+    txn = await tm.begin(dummy_request)
     obj = create_content(FileContent)
+    obj._p_jar = txn
     obj.file = None
-    value = await get_adapter(
-        IFileContent['file'], IJSONToValue,
+    await get_adapter(
+        IFileContent['file'].bind(obj), IJSONToValue,
         args=[
             'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
             obj
         ])
-    assert isinstance(value, DBFile)
-    assert value.size == 42
+    assert isinstance(obj.file, DBFile)
+    assert obj.file.size == 42
 
 
 class ITestSchema(Interface):

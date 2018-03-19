@@ -2,18 +2,17 @@ from functools import partial
 from guillotina import configure
 from guillotina.component import get_multi_adapter
 from guillotina.files.utils import convert_base64_to_binary
+from guillotina.files.utils import guess_content_type
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IContentBehavior
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IFileManager
 from guillotina.schema import Object
 from guillotina.schema.fieldproperty import FieldProperty
-from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
 from guillotina.utils import to_str
 from zope.interface import implementer
 
-import mimetypes
 import uuid
 
 
@@ -74,39 +73,30 @@ class BaseCloudFile:
 
         self._size = size
         self._md5 = md5
-        self._data = b''
+        self._current_upload = 0
 
     def guess_content_type(self):
-        ct = to_str(self.content_type)
-        if ct == 'application/octet-stream':
-            # try guessing content_type
-            ct, _ = mimetypes.guess_type(self.filename)
-            if ct is None:
-                ct = 'application/octet-stream'
-        return ct
+        return guess_content_type(self.content_type, self.filename)
 
-    def generate_key(self, request, context):
-        return '{}{}/{}::{}'.format(
-            request._container_id,
-            get_content_path(context),
-            context._p_oid,
-            uuid.uuid4().hex)
+    @property
+    def current_upload(self):
+        return self._current_upload
+
+    @current_upload.setter
+    def current_upload(self, val):
+        self._current_upload = val
 
     def get_actual_size(self):
         return self._current_upload
-
-    def _set_data(self, data):
-        self._data = data
-
-    def _get_data(self):
-        return self._data
-
-    data = property(_get_data, _set_data)
 
     @property
     def uri(self):
         if hasattr(self, '_uri'):
             return self._uri
+
+    @uri.setter
+    def uri(self, val):
+        self._uri = val
 
     @property
     def size(self):
@@ -115,12 +105,20 @@ class BaseCloudFile:
         else:
             return None
 
+    @size.setter
+    def size(self, val):
+        self._size = val
+
     @property
     def md5(self):
         if hasattr(self, '_md5'):
             return self._md5
         else:
             return None
+
+    @md5.setter
+    def md5(self, val):
+        self._md5 = val
 
     @property
     def extension(self):
@@ -131,26 +129,9 @@ class BaseCloudFile:
                 return self.filename.split('.')[-1]
             return None
 
-    async def copy_cloud_file(self, context, new_uri):
-        raise NotImplemented()
-
-    async def rename_cloud_file(self, new_uri):
-        raise NotImplemented()
-
-    async def init_upload(self, context):
-        raise NotImplemented()
-
-    async def append_data(self, data):
-        raise NotImplemented()
-
-    async def finish_upload(self, context):
-        raise NotImplemented()
-
-    async def delete_upload(self, uri=None):
-        raise NotImplemented()
-
-    async def download(self, buf):
-        raise NotImplemented()
+    @extension.setter
+    def extension(self, val):
+        self._extension = val
 
 
 async def _generator(value):
@@ -168,6 +149,5 @@ async def deserialize_cloud_field(field, value, context):
         field = field.bind(context)
     file_manager = get_multi_adapter((context, request, field), IFileManager)
     val = await file_manager.save_file(
-        partial(_generator, value), content_type=value['content_type'],
-        size=len(value['data']))
+        partial(_generator, value), content_type=value['content_type'])
     return val

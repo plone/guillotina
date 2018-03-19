@@ -2,7 +2,9 @@ from guillotina.component.interfaces import IObjectEvent
 from guillotina.interfaces import IBeforeObjectAddedEvent
 from guillotina.interfaces import IBeforeObjectMovedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
+from guillotina.interfaces import IFileBeforeFinishUploaded
 from guillotina.interfaces import IFileFinishUploaded
+from guillotina.interfaces import IFileStartedUpload
 from guillotina.interfaces import INewUserAdded
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectDuplicatedEvent
@@ -25,8 +27,18 @@ class ObjectEvent(object):
         self.data = kwargs
 
 
+@implementer(IFileStartedUpload)
+class FileUploadStartedEvent(ObjectEvent):
+    pass
+
+
 @implementer(IFileFinishUploaded)
 class FileUploadFinishedEvent(ObjectEvent):
+    pass
+
+
+@implementer(IFileBeforeFinishUploaded)
+class FileBeforeUploadFinishedEvent(ObjectEvent):
     pass
 
 

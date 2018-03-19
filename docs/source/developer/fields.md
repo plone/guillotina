@@ -23,6 +23,7 @@ consist of field definitions.
 - guillotina.schema.Time
 - guillotina.fields.PatchField: allow updating value without patching entire value
 - guillotina.fields.BucketListField: optimized storage for very large lists of data
+- guillotina.files.CloudFileField: file field for storing in db or cloud storage
 
 
 ## Patch field
