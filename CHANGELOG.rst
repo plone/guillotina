@@ -1,4 +1,4 @@
-2.5.0 (unreleased)
+2.5.0 (2018-03-19)
 ------------------
 
 - normalize file manager api so we can have more simple integrations with s3/gcloud
