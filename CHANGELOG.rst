@@ -1,4 +1,4 @@
-2.5.3 (unreleased)
+2.5.3 (2018-03-19)
 ------------------
 
 - IFile.content_type should be string, not bytes
