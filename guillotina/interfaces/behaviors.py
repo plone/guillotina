@@ -1,4 +1,5 @@
 from guillotina import schema
+from zope.interface import Attribute
 from zope.interface import Interface
 from zope.interface.interfaces import IInterface
 
@@ -85,6 +86,7 @@ class IBehaviorAdapterFactory(Interface):
 class IContentBehavior(Interface):
     '''
     '''
+    auto_serialize = Attribute('Automatically serialize behavior')
 
 
 class IAsyncBehavior(IContentBehavior):

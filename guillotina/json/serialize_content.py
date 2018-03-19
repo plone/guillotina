@@ -83,6 +83,9 @@ class SerializeToJson(object):
                     (len(included_ifaces) > 0 and dotted_name not in included_ifaces)):
                 # make sure the schema isn't filtered
                 continue
+            if (not getattr(behavior, 'auto_serialize', True) and
+                    dotted_name not in included_ifaces):
+                continue
             if IAsyncBehavior.implementedBy(behavior.__class__):
                 # providedBy not working here?
                 await behavior.load(create=False)

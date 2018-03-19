@@ -115,6 +115,55 @@ async def test_set_dynamic_context_behavior(custom_type_container_requester):
         assert response['guillotina.test_package.ITestContextBehavior']['foobar'] == 'foobar'
 
 
+async def test_auto_serialize_behavior(custom_type_container_requester):
+    async with custom_type_container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Foobar",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+
+        dotted_name = 'guillotina.test_package.ITestNoSerializeBehavior'
+        # We create the behavior
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': dotted_name
+            })
+        )
+        assert status == 200
+
+        # We check that the behavior is not serialized
+        response, status = await requester('GET', '/db/guillotina/item1')
+        assert dotted_name not in response
+
+        # now is should be...
+        response, status = await requester(
+            'GET', f'/db/guillotina/item1?include={dotted_name}')
+        assert dotted_name in response
+
+        # set values on behavior
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1',
+            data=json.dumps({
+                dotted_name: {
+                    'foobar': 'foobar'
+                }
+            })
+        )
+        response, status = await requester(
+            'GET', f'/db/guillotina/item1?include={dotted_name}')
+        assert dotted_name in response
+        assert response[dotted_name]['foobar'] == 'foobar'
+
+
 async def test_create_delete_dynamic_behavior(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(

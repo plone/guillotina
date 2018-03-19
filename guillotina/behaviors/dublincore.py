@@ -77,6 +77,7 @@ class IDublinCore(Interface):
     marker=IMarkerDublinCore,
     for_="guillotina.interfaces.IResource")
 class DublinCore(AnnotationBehavior):
+    auto_serialize = True
 
     title = ContextProperty('title', None)
     creators = ContextProperty('creators', ())

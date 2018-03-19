@@ -11,8 +11,10 @@ _default = object()
 
 
 @implementer(IAsyncBehavior)
-class AnnotationBehavior(object):
+class AnnotationBehavior:
     """A factory that knows how to store data in a separate object."""
+
+    auto_serialize = True
 
     __local__properties__ = []
 
@@ -82,8 +84,9 @@ class AnnotationBehavior(object):
 
 
 @implementer(IContentBehavior)
-class ContextBehavior(object):
+class ContextBehavior:
     """A factory that knows how to store data in a dict in the context."""
+    auto_serialize = True
 
     def __init__(self, context):
         self.__dict__['schema'] = [x for x in self.__implemented__][0]
