@@ -1,4 +1,4 @@
-2.5.4 (unreleased)
+2.5.4 (2018-03-19)
 ------------------
 
 - `save_file` can provide size value
