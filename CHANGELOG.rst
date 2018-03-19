@@ -1,7 +1,8 @@
 2.5.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to not automatically serialize behaviors
+  [vangheem]
 
 
 2.5.0 (2018-03-19)

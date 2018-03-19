@@ -90,6 +90,18 @@ class GContextTestBehavior(ContextBehavior):
     pass
 
 
+class ITestNoSerializeBehavior(Interface):
+    foobar = schema.TextLine()
+
+
+@configure.behavior(
+    title="",
+    provides=ITestNoSerializeBehavior,
+    for_="guillotina.interfaces.IResource")
+class GTestNoSerializeBehavior(ContextBehavior):
+    auto_serialize = False
+
+
 class IFileContent(IItem):
     file = CloudFileField(required=False)
 
