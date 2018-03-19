@@ -1,17 +1,5 @@
---
--- PostgreSQL database dump
---
 
--- Dumped from database version 9.6.6
--- Dumped by pg_dump version 10.1
-
--- Started on 2018-03-16 09:00:53 EDT
-
---
--- TOC entry 185 (class 1259 OID 16385)
--- Name: objects; Type: TABLE; Schema: public; Owner: postgres
---
-
+-- Create tables
 CREATE TABLE IF NOT EXISTS objects (
     zoid character varying(32) NOT NULL,
     tid bigint NOT NULL,
@@ -26,16 +14,18 @@ CREATE TABLE IF NOT EXISTS objects (
     json jsonb,
     state bytea
 );
-
-
 ALTER TABLE objects OWNER TO postgres;
 
---
--- TOC entry 2136 (class 0 OID 16385)
--- Dependencies: 185
--- Data for Name: objects; Type: TABLE DATA; Schema: public; Owner: postgres
---
+CREATE TABLE IF NOT EXISTS blobs (
+    bid character varying(32) NOT NULL,
+    zoid character varying(32) NOT NULL,
+    chunk_index integer NOT NULL,
+    data bytea
+);
+ALTER TABLE blobs OWNER TO postgres;
 
+
+-- add data
 INSERT INTO objects
 SELECT 'DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD', 0, 0, 0, false, NULL, NULL, NULL, NULL, 'TRASH_REF', NULL, NULL
 WHERE
@@ -54,11 +44,8 @@ INSERT INTO objects VALUES ('8128663836da43acb490446f098da1df', 2, 486, 0, true,
 INSERT INTO objects VALUES ('8ab4d9007c8f4323844b627624882db8', 2, 205, 0, false, '8128663836da43acb490446f098da1df', NULL, NULL, '_registry', 'guillotina.registry.Registry', 'null', '\x800495c2000000000000008c136775696c6c6f74696e612e7265676973747279948c0852656769737472799493942981947d94288c0464617461947d94288c346775696c6c6f74696e612e696e74657266616365732e72656769737472792e494c61796572732e6163746976655f6c6179657273942891948c2e6775696c6c6f74696e612e696e74657266616365732e72656769737472792e494164646f6e732e656e61626c6564946808758c026964948c095f7265676973747279948c085f5f6e616d655f5f94680b75622e');
 
 
---
--- TOC entry 2016 (class 2606 OID 16392)
--- Name: objects objects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
+-- update indexes/constraints
+ALTER TABLE blobs DROP CONSTRAINT IF EXISTS blobs_zoid_fkey;
 ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_of_fkey;
 ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_parent_id_fkey;
 ALTER TABLE objects DROP CONSTRAINT IF EXISTS objects_pkey;
@@ -66,74 +53,20 @@ ALTER TABLE ONLY objects
     ADD CONSTRAINT objects_pkey PRIMARY KEY (zoid);
 
 
---
--- TOC entry 2009 (class 1259 OID 16418)
--- Name: object_id; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX IF NOT EXISTS object_id ON objects USING btree (id);
-
-
---
--- TOC entry 2010 (class 1259 OID 16415)
--- Name: object_of; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX IF NOT EXISTS object_of ON objects USING btree (of);
-
-
---
--- TOC entry 2011 (class 1259 OID 16417)
--- Name: object_parent; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX IF NOT EXISTS object_parent ON objects USING btree (parent_id);
-
-
---
--- TOC entry 2012 (class 1259 OID 16416)
--- Name: object_part; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX IF NOT EXISTS object_part ON objects USING btree (part);
-
-
---
--- TOC entry 2013 (class 1259 OID 16414)
--- Name: object_tid; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX IF NOT EXISTS object_tid ON objects USING btree (tid);
-
-
---
--- TOC entry 2014 (class 1259 OID 16419)
--- Name: object_type; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX IF NOT EXISTS object_type ON objects USING btree (type);
-
-
---
--- TOC entry 2017 (class 2606 OID 16393)
--- Name: objects objects_of_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY objects
     ADD CONSTRAINT objects_of_fkey FOREIGN KEY (of) REFERENCES objects(zoid) ON DELETE CASCADE;
-
-
---
--- TOC entry 2018 (class 2606 OID 16398)
--- Name: objects objects_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY objects
     ADD CONSTRAINT objects_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES objects(zoid) ON DELETE CASCADE;
 
 
--- Completed on 2018-03-16 09:00:53 EDT
-
---
--- PostgreSQL database dump complete
---
+CREATE INDEX IF NOT EXISTS blob_bid ON blobs USING btree (bid);
+CREATE INDEX IF NOT EXISTS blob_chunk ON blobs USING btree (chunk_index);
+CREATE INDEX IF NOT EXISTS blob_zoid ON blobs USING btree (zoid);
+ALTER TABLE ONLY blobs
+    ADD CONSTRAINT blobs_zoid_fkey FOREIGN KEY (zoid) REFERENCES objects(zoid) ON DELETE CASCADE;
