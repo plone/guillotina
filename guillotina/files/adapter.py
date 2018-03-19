@@ -119,6 +119,7 @@ class DBDataManager:
         await notify(
             FileUploadFinishedEvent(self.context, field=self.field,
                                     file=file, dm=self))
+        return file
 
     @property
     def content_type(self):

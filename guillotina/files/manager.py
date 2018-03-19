@@ -264,7 +264,7 @@ class FileManager(object):
             size=size
         )
         await self.file_storage_manager.finish(self.dm)
-        await self.dm.finish()
+        return await self.dm.finish()
 
     async def copy(self, to_manager):
         await to_manager.dm.load()

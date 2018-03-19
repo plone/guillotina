@@ -1,7 +1,11 @@
 2.5.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- IFile.content_type should be string, not bytes
+  [vangheem]
+
+- `UploadDataManager.finish()` should return the file object created
+  [vangheem]
 
 
 2.5.2 (2018-03-19)

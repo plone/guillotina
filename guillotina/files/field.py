@@ -60,8 +60,8 @@ class BaseCloudFile:
 
     def __init__(self, content_type='application/octet-stream',
                  filename=None, size=0, md5=None):
-        if not isinstance(content_type, bytes):
-            content_type = content_type.encode('utf8')
+        if isinstance(content_type, bytes):
+            content_type = content_type.decode('utf8')
         self.content_type = content_type
         if filename is not None:
             self.filename = filename

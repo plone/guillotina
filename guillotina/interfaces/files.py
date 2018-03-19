@@ -1,6 +1,4 @@
 from guillotina import schema
-from guillotina.directives import index
-from guillotina.directives import metadata
 from guillotina.schema.interfaces import IObject
 from zope.interface import Interface
 
@@ -136,32 +134,20 @@ class IFileCleanup(Interface):
 
 class IFile(Interface):
 
-    metadata('extension', 'md5', 'content_type', 'filename')
-
-    index('content_type', type='text')
-    content_type = schema.BytesLine(
+    content_type = schema.TextLine(
         title=u'Content Type',
         description=u'The content type identifies the type of data.',
-        default=b'',
+        default='',
         required=False
     )
 
-    index('filename', type='text')
     filename = schema.TextLine(title=u'Filename', required=False, default=None)
 
-    data = schema.Bytes(
-        title=u'Data',
-        description=u'The actual content.',
-        required=False,
-    )
-
-    index('extension', type='text')
     extension = schema.TextLine(
         title='Extension of the file',
         default='',
         required=False)
 
-    index('md5', type='text')
     md5 = schema.TextLine(
         title='MD5',
         default='',
