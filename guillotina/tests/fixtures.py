@@ -272,7 +272,7 @@ def container_command(postgres):
     host = settings['databases'][0]['db']['dsn']['host']
     port = settings['databases'][0]['db']['dsn']['port']
     conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
-    cur = conn.cursor())
+    cur = conn.cursor()
     cur.execute(open(os.path.join(_dir, "data/tables.sql"), "r").read())
     cur.execute('COMMIT;')
     cur.close()
