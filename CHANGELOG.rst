@@ -1,7 +1,8 @@
 2.5.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- `save_file` can provide size value
+  [vangheem]
 
 
 2.5.3 (2018-03-19)

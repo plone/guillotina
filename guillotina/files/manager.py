@@ -40,7 +40,8 @@ class FileManager(object):
         self.dm = get_adapter(
             self.file_storage_manager, IUploadDataManager)
 
-    async def download(self, disposition=None):
+    async def download(self, disposition=None, filename=None, content_type=None,
+                       size=None, **kwargs):
         if disposition is None:
             disposition = self.request.GET.get('disposition', 'attachment')
 
@@ -48,17 +49,17 @@ class FileManager(object):
         cors_renderer = app_settings['cors_renderer'](self.request)
         headers = await cors_renderer.get_headers()
         headers.update({
-            'CONTENT-DISPOSITION': f'{disposition}; filename="%s"' % file.filename
+            'CONTENT-DISPOSITION': f'{disposition}; filename="%s"' % filename or file.filename
         })
 
         download_resp = StreamResponse(headers=headers)
-        download_resp.content_type = file.guess_content_type()
-        if file.size:
-            download_resp.content_length = file.size
+        download_resp.content_type = content_type or file.guess_content_type()
+        if size or file.size:
+            download_resp.content_length = size or file.size
 
         await download_resp.prepare(self.request)
 
-        async for chunk in self.file_storage_manager.iter_data():
+        async for chunk in self.file_storage_manager.iter_data(**kwargs):
             download_resp.write(chunk)
             await download_resp.drain()
         return download_resp
@@ -249,13 +250,14 @@ class FileManager(object):
             yield chunk
 
     async def save_file(self, generator, content_type=None, filename=None,
-                        extension=None):
+                        extension=None, size=None):
         await self.dm.load()
         await self.dm.start()
         await self.dm.update(
             content_type=content_type,
             filename=filename or uuid.uuid4().hex,
-            extension=extension
+            extension=extension,
+            size=size
         )
         await self.file_storage_manager.start(self.dm)
 
