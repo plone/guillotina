@@ -1,4 +1,4 @@
-2.5.1 (unreleased)
+2.5.1 (2018-03-19)
 ------------------
 
 - Be able to not automatically serialize behaviors
