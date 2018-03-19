@@ -43,8 +43,7 @@ class DBDataManager:
             self.context.__uploads__[self.field.__name__] = {}
         self._data = self.context.__uploads__[self.field.__name__]
 
-    async def start(self):
-
+    def protect(self):
         if 'last_activity' in self._data:
             # check for another active upload, fail if we're screwing with
             # someone else
@@ -52,6 +51,9 @@ class DBDataManager:
                 if self.request.headers.get('TUS-OVERRIDE-UPLOAD', '0') != '1':
                     raise HTTPPreconditionFailed(
                         reason='There is already an active tusupload')
+
+    async def start(self):
+        self.protect()
 
         if '_blob' in self._data:
             # clean it
