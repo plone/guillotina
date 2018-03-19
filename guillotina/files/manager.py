@@ -120,15 +120,21 @@ class FileManager(object):
                 reason='Upload size does not match what was provided')
         await self.dm.update(offset=offset + read_bytes)
 
+        headers = {
+            'Upload-Offset': str(self.dm.get_offset()),
+            'Tus-Resumable': '1.0.0',
+            'Access-Control-Expose-Headers': ','.join([
+                'Upload-Offset',
+                'Tus-Resumable',
+                'Tus-Upload-Finished'])
+        }
+
         if self.dm.get('size') and self.dm.get_offset() >= self.dm.get('size'):
             await self.file_storage_manager.finish(self.dm)
             await self.dm.finish()
+            headers['Tus-Upload-Finished'] = '1'
 
-        resp = Response(headers={
-            'Upload-Offset': str(self.dm.get_offset()),
-            'Tus-Resumable': '1.0.0',
-            'Access-Control-Expose-Headers': 'Upload-Offset,Upload-Expires,Tus-Resumable'
-        })
+        resp = Response(headers=headers)
         return resp
 
     async def tus_create(self, *args, **kwargs):
