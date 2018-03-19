@@ -580,10 +580,11 @@ async def move(context, request):
     destination = data.get('destination')
     if destination is None:
         destination_ob = context.__parent__
-    try:
-        destination_ob = await navigate_to(request.container, destination)
-    except KeyError:
-        destination_ob = None
+    else:
+        try:
+            destination_ob = await navigate_to(request.container, destination)
+        except KeyError:
+            destination_ob = None
 
     if destination_ob is None:
         raise PreconditionFailed(context, 'Could not find destination object')

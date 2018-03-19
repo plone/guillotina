@@ -1,3 +1,10 @@
+2.5.2 (unreleased)
+------------------
+
+- Fix `@duplicate` endpoint when no destination is provided
+  [vangheem]
+
+
 2.5.1 (2018-03-19)
 ------------------
 
