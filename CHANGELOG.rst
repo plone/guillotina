@@ -1,4 +1,4 @@
-2.5.5 (unreleased)
+2.5.5 (2018-03-20)
 ------------------
 
 - Fix TUS upload with zero length files
