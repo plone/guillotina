@@ -133,7 +133,7 @@ class FileManager(object):
                 'Tus-Upload-Finished'])
         }
 
-        if self.dm.get('size') and self.dm.get_offset() >= self.dm.get('size'):
+        if self.dm.get('size') is not None and self.dm.get_offset() >= self.dm.get('size'):
             await self.file_storage_manager.finish(self.dm)
             await self.dm.finish()
             headers['Tus-Upload-Finished'] = '1'

@@ -1,7 +1,8 @@
 2.5.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix TUS upload with zero length files
+  [vangheem]
 
 
 2.5.4 (2018-03-19)

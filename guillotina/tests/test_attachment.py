@@ -310,3 +310,65 @@ async def test_tus_unfinished_error(container_requester):
         )
         # override it
         assert status == 201
+
+
+async def test_tus_with_empty_file(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                '@behaviors': ['guillotina.behaviors.attachment.IAttachment'],
+                'id': 'foobar'
+            })
+        )
+        assert status == 201
+
+        response, status = await requester(
+            'OPTIONS',
+            '/db/guillotina/foobar/@tusupload/file')
+        assert status == 200
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/foobar/@tusupload/file',
+            headers={
+                'UPLOAD-LENGTH': '0',
+                'TUS-RESUMABLE': '1.0.0'
+            }
+        )
+        assert status == 201
+
+        response, status = await requester(
+            'HEAD',
+            '/db/guillotina/foobar/@tusupload/file')
+        assert status == 200
+
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/foobar/@tusupload/file',
+            headers={
+                'CONTENT-LENGTH': '0',
+                'TUS-RESUMABLE': '1.0.0',
+                'upload-offset': '0'
+            },
+            data=b''
+        )
+        assert status == 200
+
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/foobar/@download/file'
+        )
+        assert status == 200
+        assert len(response) == 0
+
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('foobar')
+            behavior = IAttachment(obj)
+            await behavior.load()
+            assert behavior.file._blob.chunks == 0
