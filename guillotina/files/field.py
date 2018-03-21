@@ -149,5 +149,6 @@ async def deserialize_cloud_field(field, value, context):
         field = field.bind(context)
     file_manager = get_multi_adapter((context, request, field), IFileManager)
     val = await file_manager.save_file(
-        partial(_generator, value), content_type=value['content_type'])
+        partial(_generator, value), content_type=value['content_type'],
+        size=len(value['data']))
     return val

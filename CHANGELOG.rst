@@ -1,7 +1,8 @@
 2.5.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure to set size when deserializing files from base64
+  [vangheem]
 
 
 2.5.5 (2018-03-20)
