@@ -74,6 +74,7 @@ class cache:
 @implementer(ITransaction)
 class Transaction(object):
     _status = 'empty'
+    _skip_commit = False
 
     def __init__(self, manager, request=None, loop=None):
         self._txn_time = None
@@ -310,9 +311,14 @@ class Transaction(object):
         await self._call_before_commit_hooks()
         self.status = Status.COMMITTING
         try:
-            await self.tpc_commit()
-            # vote will do conflict resolution if there are conflicting writes
-            await self.tpc_vote()
+            if len(self.modified) > 0 or len(self.deleted) > 0 or len(self.added) > 0:
+                # only do the commit steps if we have objects to commit
+                await self.tpc_commit()
+                # vote will do conflict resolution if there are conflicting writes
+                await self.tpc_vote()
+            else:
+                # signal to not worry about not making a transaction here..
+                self._skip_commit = True
             await self.tpc_finish()
         except (ConflictError, TIDConflictError) as ex:
             # this exception should bubble up
