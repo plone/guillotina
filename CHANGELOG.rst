@@ -1,4 +1,4 @@
-2.5.7 (unreleased)
+2.5.7 (2018-03-21)
 ------------------
 
 - Only do commit and voting if we have objects to do it with
