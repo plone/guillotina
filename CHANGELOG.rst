@@ -1,4 +1,4 @@
-2.5.6 (unreleased)
+2.5.6 (2018-03-21)
 ------------------
 
 - Make sure to set size when deserializing files from base64
