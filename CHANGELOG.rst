@@ -1,7 +1,8 @@
 2.5.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Only do commit and voting if we have objects to do it with
+  [vangheem]
 
 
 2.5.6 (2018-03-21)

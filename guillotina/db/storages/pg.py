@@ -691,6 +691,8 @@ class PostgresqlStorage(BaseStorage):
 
     async def get_conflicts(self, txn):
         async with self._lock:
+            if len(txn.modified) == 0:
+                return []
             # use storage lock instead of transaction lock
             if len(txn.modified) < 1000:
                 # if it's too large, we're not going to check on object ids
@@ -704,7 +706,8 @@ class PostgresqlStorage(BaseStorage):
         if transaction._db_txn is not None:
             async with transaction._lock:
                 await transaction._db_txn.commit()
-        elif self._transaction_strategy not in ('none', 'tidonly'):
+        elif (self._transaction_strategy not in ('none', 'tidonly') and
+                not transaction._skip_commit):
             log.warning('Do not have db transaction to commit')
         return transaction._tid
 
