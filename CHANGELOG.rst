@@ -1,4 +1,4 @@
-2.5.8 (unreleased)
+2.5.8 (2018-03-22)
 ------------------
 
 - Fix getting filename for file downloads
