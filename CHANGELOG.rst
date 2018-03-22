@@ -1,4 +1,4 @@
-2.5.9 (unreleased)
+2.5.9 (2018-03-22)
 ------------------
 
 - return 404 when attempting to download file that is missing
