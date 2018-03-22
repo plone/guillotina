@@ -49,7 +49,8 @@ class FileManager(object):
         cors_renderer = app_settings['cors_renderer'](self.request)
         headers = await cors_renderer.get_headers()
         headers.update({
-            'CONTENT-DISPOSITION': f'{disposition}; filename="%s"' % filename or file.filename
+            'CONTENT-DISPOSITION': '{}; filename="{}"'.format(
+                disposition, filename or file.filename)
         })
 
         download_resp = StreamResponse(headers=headers)

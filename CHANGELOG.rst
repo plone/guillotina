@@ -1,7 +1,8 @@
 2.5.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix getting filename for file downloads
+  [vangheem]
 
 
 2.5.7 (2018-03-21)
