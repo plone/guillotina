@@ -1,7 +1,8 @@
 2.5.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- return 404 when attempting to download file that is missing
+  [vangheem]
 
 
 2.5.8 (2018-03-22)

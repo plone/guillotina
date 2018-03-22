@@ -1,6 +1,7 @@
 from .const import CHUNK_SIZE
 from aiohttp.web import StreamResponse
 from aiohttp.web_exceptions import HTTPConflict
+from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_exceptions import HTTPPreconditionFailed
 from guillotina import configure
 from guillotina._settings import app_settings
@@ -46,6 +47,9 @@ class FileManager(object):
             disposition = self.request.GET.get('disposition', 'attachment')
 
         file = self.field.get(self.field.context or self.context)
+        if file is None and filename is None:
+            raise HTTPNotFound(
+                text='File or custom filename required to download')
         cors_renderer = app_settings['cors_renderer'](self.request)
         headers = await cors_renderer.get_headers()
         headers.update({
