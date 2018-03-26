@@ -1,4 +1,4 @@
-2.5.10 (unreleased)
+2.5.10 (2018-03-26)
 -------------------
 
 - Make sure to clear commit hook on tcp begin
