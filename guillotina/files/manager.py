@@ -142,6 +142,8 @@ class FileManager(object):
             await self.file_storage_manager.finish(self.dm)
             await self.dm.finish()
             headers['Tus-Upload-Finished'] = '1'
+        else:
+            await self.dm.save()
 
         resp = Response(headers=headers)
         return resp
@@ -196,6 +198,7 @@ class FileManager(object):
             offset=0)
 
         await self.file_storage_manager.start(self.dm)
+        await self.dm.save()
 
         # Location will need to be adapted on aiohttp 1.1.x
         resp = Response(headers={

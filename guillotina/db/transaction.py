@@ -197,7 +197,6 @@ class Transaction(object):
                 logger.error("Error in after commit hook exec in %s ",
                              hook, exc_info=sys.exc_info())
         self._after_commit = []
-        self._before_commit = []
 
     # BEGIN TXN
     async def tpc_begin(self):
@@ -207,6 +206,9 @@ class Transaction(object):
         """
         self._txn_time = time.time()
         await self._strategy.tpc_begin()
+        # make sure this is reset on retries
+        self._after_commit = []
+        self._before_commit = []
 
     def check_read_only(self):
         if self.request is None:
