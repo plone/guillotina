@@ -73,6 +73,9 @@ class DBDataManager:
         self._data.update(kwargs)
         self.context._p_register()
 
+    async def save(self, **kwargs):
+        pass
+
     async def finish(self, values=None):
         # create file object with new data from finished upload
         file = self.field.get(self.real_context)

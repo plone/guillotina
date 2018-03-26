@@ -1,7 +1,12 @@
 2.5.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure to clear commit hook on tcp begin
+  [vangheem]
+
+- Add save method to upload data manager so saving data can be defered to
+  after commit hook
+  [vangheem]
 
 
 2.5.9 (2018-03-22)
