@@ -1,4 +1,4 @@
-2.5.11 (unreleased)
+2.5.11 (2018-03-28)
 -------------------
 
 - Fix error loading settings
