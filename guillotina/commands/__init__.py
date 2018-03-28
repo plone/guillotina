@@ -54,18 +54,17 @@ MISSING_SETTINGS = {
 
 
 def get_settings(configuration):
-    configuration_filename = configuration
     if configuration == 'config.yaml' and not os.path.exists(configuration):
         # try config.json as well...
-        configuration_filename = 'config.json'
-    if os.path.exists(configuration_filename):
-        with open(configuration_filename, 'r') as config:
-            if configuration_filename.lower().endswith('.json'):
+        configuration = 'config.json'
+    if os.path.exists(configuration):
+        with open(configuration, 'r') as config:
+            if configuration.lower().endswith('.json'):
                 settings = json.load(config)
             else:
                 # should be yaml then...
                 settings = yaml.load(config)
-        settings['__file__'] = configuration_filename
+        settings['__file__'] = configuration
     else:
         try:
             settings = json.loads(configuration)
@@ -74,11 +73,14 @@ def get_settings(configuration):
             try:
                 settings = yaml.load(configuration)
             except yaml.parser.ParserError:
-                if 'logged' not in MISSING_SETTINGS:
-                    logger.warning(f'Could not find the configuration file '
-                                   f'{configuration}. Using default settings.')
-                MISSING_SETTINGS['logged'] = True
-                settings = MISSING_SETTINGS.copy()
+                settings = None
+
+    if settings is None or settings == configuration:
+        if 'logged' not in MISSING_SETTINGS:
+            logger.warning(f'Could not find the configuration file '
+                           f'{configuration}. Using default settings.')
+        MISSING_SETTINGS['logged'] = True
+        settings = MISSING_SETTINGS.copy()
     return settings
 
 

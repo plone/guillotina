@@ -1,7 +1,8 @@
 2.5.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix error loading settings
+  [vangheem]
 
 
 2.5.10 (2018-03-26)
