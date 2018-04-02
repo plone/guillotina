@@ -92,12 +92,9 @@ class TransactionManager(object):
             try:
                 await txn.commit()
             except (ConflictError, TIDConflictError):
-                # # we're okay with ConflictError being handled...
+                # we're okay with ConflictError being handled...
                 txn.status = Status.CONFLICT
                 raise
-            except Exception:
-                logger.error('Error committing transaction {}'.format(txn._tid),
-                             exc_info=True)
             finally:
                 await self._close_txn(txn)
         else:
