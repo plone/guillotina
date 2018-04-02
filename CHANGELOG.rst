@@ -1,4 +1,4 @@
-2.5.12 (unreleased)
+2.5.12 (2018-04-02)
 -------------------
 
 - Do not swallow any exceptions on commit.
