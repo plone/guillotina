@@ -1,4 +1,4 @@
-2.3.37 (unreleased)
+2.3.37 (2018-04-02)
 -------------------
 
 - Do not swallow any exceptions on commit.
