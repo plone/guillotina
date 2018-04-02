@@ -1,7 +1,8 @@
 2.5.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Do not swallow any exceptions on commit.
+  [vangheem]
 
 
 2.5.11 (2018-03-28)
