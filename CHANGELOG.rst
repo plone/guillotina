@@ -1,7 +1,8 @@
 2.3.37 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Do not swallow any exceptions on commit.
+  [vangheem]
 
 
 2.3.36 (2018-03-09)
