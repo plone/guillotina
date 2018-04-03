@@ -1,4 +1,4 @@
-3.0.2 (unreleased)
+3.0.2 (2018-04-03)
 ------------------
 
 - psycopg2 is an optional test dependency
