@@ -1,7 +1,8 @@
 3.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure to clean up manually registered utilities
+  [vangheem]
 
 
 3.0.4 (2018-04-03)

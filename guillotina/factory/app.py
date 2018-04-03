@@ -288,7 +288,12 @@ async def close_utilities(app):
         try:
             root.cancel_async_utility(utility)
         except KeyError:
-            pass
+            # attempt to delete by the provider registration
+            try:
+                iface = [i for i in utility.__providedBy__][-1]
+                root.cancel_async_utility(iface.__identifier__)
+            except (AttributeError, IndexError, KeyError):
+                pass
         if hasattr(utility, 'finalize'):
             await lazy_apply(utility.finalize, app=app)
     for db in root:
