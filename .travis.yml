@@ -1,8 +1,13 @@
 # we want to make sure it is run on trusty where sudo is provided for postgres
 dist: trusty
 language: python
-python: 3.6
+python:
+    - "3.6"
 sudo: required
+env:
+    - DATABASE=DUMMY
+    - DATABASE=postgres
+    - DATABASE=cockroachdb
 
 services:
   - postgresql
@@ -20,15 +25,13 @@ install:
   - pip install Cython==0.27.3
   - pip install -r requirements.txt
   - pip install -e .[test]
-  - pip install flake8
+  - pip install flake8 codecov
   - sleep 5
 script:
   - flake8 guillotina --config=setup.cfg
-  - pytest -s --cov=guillotina -s --tb=native -v --cov-report term-missing guillotina
-  - USE_COCKROACH=true pytest -s --tb=native -v guillotina
+  - pytest -s --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
 after_success:
-  - pip install coveralls
-  - coveralls
+  - codecov
 
 deploy:
   provider: script

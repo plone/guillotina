@@ -16,9 +16,5 @@ todo
 
 - request object
 - events
-- static assets
-- logging
-- command line
 - testing
-- traversal
 - middlewares

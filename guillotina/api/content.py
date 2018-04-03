@@ -736,15 +736,6 @@ async def ids(context, request):
     return await context.async_keys()
 
 
-BATCHED_GET_CHILDREN_KEYS = """
-    SELECT id
-    FROM objects
-    WHERE parent_id = $1::varchar(32)
-    ORDER BY zoid
-    LIMIT $2::int
-    OFFSET $3::int
-    """
-
 @configure.service(
     context=IFolder, method='GET', name="@items",
     permission='guillotina.ViewContent',
@@ -784,14 +775,7 @@ async def items(context, request):
     except Exception:
         page = 1
 
-    # alright, we'll do our own batching now...
-    txn = request._txn
-    conn = await txn.get_connection()
-    result = await conn.fetch(
-        BATCHED_GET_CHILDREN_KEYS,
-        context._p_oid,
-        page_size,
-        (page - 1) * page_size)
+    txn = get_transaction(request)
 
     include = omit = []
     if request.GET.get('include'):
@@ -802,8 +786,8 @@ async def items(context, request):
     security = IInteraction(request)
 
     results = []
-    for record in result:
-        ob = await context.async_get(record['id'])
+    for key in await txn.get_page_of_keys(context._p_oid, page=page, page_size=page_size):
+        ob = await context.async_get(key)
         if not security.check_permission('guillotina.ViewContent', ob):
             continue
         serializer = get_multi_adapter(

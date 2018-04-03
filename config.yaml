@@ -1,15 +1,16 @@
 ---
 databases:
-- db:
+  db:
     storage: postgresql
     transaction_strategy: resolve_readcommitted
-    dsn:
-      scheme: postgres
-      dbname: guillotina
-      user: postgres
-      host: localhost
-      password: ''
-      port: 5432
+    dsn: postgresql://postgres@localhost:5432/guillotina
+    pool_size: 40
+    read_only: false
+storages:
+  storage:
+    storage: postgresql
+    transaction_strategy: resolve
+    dsn: postgresql://postgres@localhost:5432
     pool_size: 40
     read_only: false
 host: 0.0.0.0

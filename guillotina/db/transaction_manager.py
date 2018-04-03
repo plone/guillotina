@@ -29,6 +29,7 @@ class TransactionManager(object):
         self._last_txn = None
         # Pointer to last db connection opened
         self._last_db_conn = None
+        self._hard_cache = {}
 
     async def get_root(self, txn=None):
         if txn is None:

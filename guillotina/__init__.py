@@ -20,7 +20,7 @@ __version__ = pkg_resources.get_distribution('guillotina').version
 logger = glogging.getLogger('guillotina')
 
 
-if os.environ.get('GDEBUG', '').lower() in ('true', 't', '1'):
+if os.environ.get('GDEBUG', '').lower() in ('true', 't', '1'):  # pragma: no cover
     # patches for extra debugging....
     import asyncpg
     import time

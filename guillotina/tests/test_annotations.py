@@ -8,7 +8,7 @@ from guillotina.tests.utils import login
 from guillotina.transactions import managed_transaction
 
 
-async def test_create_annotation(postgres, guillotina_main):
+async def test_create_annotation(db, guillotina_main):
     root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)

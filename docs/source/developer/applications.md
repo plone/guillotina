@@ -6,9 +6,11 @@ Applications are used to provide additional functionality to guillotina.
 
 Some useful addons to use in your own development:
 
-- [pserver.elasticsearch](https://github.com/pyrenees/pserver.elasticsearch): Index content in elastic search
-- [pserver.zodbusers](https://github.com/pyrenees/pserver.zodbusers): Store and authenticate users in the database
-- [pserver.mailer](https://github.com/pyrenees/pserver.mailer): async send mail
+- [guillotina_elasticsearch](https://github.com/guillotinaweb/guillotina_elasticsearch/): Index content in elastic search
+- [guillotina_pgcatalog](https://github.com/guillotinaweb/guillotina_pgcatalog): Index content in postgresql
+- [guillotina_dbusers](https://github.com/guillotinaweb/guillotina_dbusers): Store and authenticate users in the database
+- [guillotina_swagger](https://github.com/guillotinaweb/guillotina_swagger): Automatic swagger support
+- [guillotina_mailer](https://github.com/guillotinaweb/guillotina_mailer): async send mail
 
 
 ## Creating

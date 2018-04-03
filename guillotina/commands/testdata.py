@@ -133,7 +133,7 @@ class TestDataCommand(Command):
 
     async def generate_test_data(self, db):
         # don't slow us down with transactions
-        db._db._storage._transaction_strategy = 'none'
+        db._storage._transaction_strategy = 'none'
 
         tm = self.request._tm = db.get_transaction_manager()
         self.request._db_id = db.id

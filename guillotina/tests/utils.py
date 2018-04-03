@@ -33,7 +33,7 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
     alsoProvides(request, IRequest)
     alsoProvides(request, IDefaultLayer)
     if db is not None:
-        db._db.request = request
+        db.request = request
         request._db_id = db.id
         request._db = db
         request._tm = db.get_transaction_manager()

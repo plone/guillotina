@@ -13,7 +13,8 @@ import os
 import pytest
 
 
-USE_COCKROACH = 'USE_COCKROACH' in os.environ
+DATABASE = os.environ.get('DATABASE', 'DUMMY')
+USE_RDMS = DATABASE != 'DUMMY'
 
 
 async def cleanup(aps):
@@ -26,7 +27,7 @@ async def cleanup(aps):
     conn = txn._db_conn
     await conn.execute("DROP TABLE IF EXISTS objects;")
     await conn.execute("DROP TABLE IF EXISTS blobs;")
-    if not USE_COCKROACH:
+    if DATABASE == 'postgres':
         await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn._db_txn.commit()
     await aps._pool.release(conn)
@@ -41,11 +42,11 @@ async def get_aps(postgres, strategy=None, pool_size=16):
     )
     klass = PostgresqlStorage
     if strategy is None:
-        if USE_COCKROACH:
+        if DATABASE == 'cockroachdb':
             strategy = 'dbresolve_readcommitted'
         else:
             strategy = 'resolve_readcommitted'
-    if USE_COCKROACH:
+    if DATABASE == 'cockroachdb':
         klass = CockroachStorage
         dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
             postgres[0],
@@ -59,11 +60,12 @@ async def get_aps(postgres, strategy=None, pool_size=16):
     return aps
 
 
-async def test_read_obs(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_read_obs(db, dummy_request):
     """Low level test checks that root is not there"""
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -85,11 +87,12 @@ async def test_read_obs(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_restart_connection(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_restart_connection(db, dummy_request):
     """Low level test checks that root is not there"""
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -114,11 +117,12 @@ async def test_restart_connection(postgres, dummy_request):
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not have cascade support")
-async def test_deleting_parent_deletes_children(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
+                    reason="Cockroach does not have cascade support")
+async def test_deleting_parent_deletes_children(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -159,10 +163,11 @@ async def test_deleting_parent_deletes_children(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_create_blob(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_create_blob(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -188,10 +193,11 @@ async def test_create_blob(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_delete_resource_deletes_blob(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_delete_resource_deletes_blob(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -220,12 +226,13 @@ async def test_delete_resource_deletes_blob(postgres, dummy_request):
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support resolve...")
+@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
+                    reason="Cockroach not support resolve...")
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
-        postgres, dummy_request):
+        db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres, 'resolve')
+    aps = await get_aps(db, 'resolve')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -259,11 +266,12 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support resolve...")
-async def test_should_resolve_conflict_error(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
+                    reason="Cockroach not support resolve...")
+async def test_should_resolve_conflict_error(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres, 'resolve')
+    aps = await get_aps(db, 'resolve')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -295,11 +303,12 @@ async def test_should_resolve_conflict_error(postgres, dummy_request):
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support resolve...")
-async def test_should_not_resolve_conflict_error_with_resolve(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
+                    reason="Cockroach not support resolve...")
+async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres, 'resolve')
+    aps = await get_aps(db, 'resolve')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -330,11 +339,12 @@ async def test_should_not_resolve_conflict_error_with_resolve(postgres, dummy_re
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach not support simple...")
-async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
+                    reason="Cockroach not support simple...")
+async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres, 'simple')
+    aps = await get_aps(db, 'simple')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -366,10 +376,11 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(postgres, dum
     await cleanup(aps)
 
 
-async def test_none_strat_allows_trans_commits(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_none_strat_allows_trans_commits(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres, 'none')
+    aps = await get_aps(db, 'none')
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -402,10 +413,11 @@ async def test_none_strat_allows_trans_commits(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_count_total_objects(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_count_total_objects(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -426,10 +438,11 @@ async def test_count_total_objects(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_get_resources_of_type(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_get_resources_of_type(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -454,10 +467,11 @@ async def test_get_resources_of_type(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_get_total_resources_of_type(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_get_total_resources_of_type(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -477,10 +491,11 @@ async def test_get_total_resources_of_type(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_using_gather_with_queries_before_prepare(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_using_gather_with_queries_before_prepare(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -505,10 +520,11 @@ async def test_using_gather_with_queries_before_prepare(postgres, dummy_request)
     await cleanup(aps)
 
 
-async def test_using_gather_with_queries_after_prepare(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_using_gather_with_queries_after_prepare(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
 
     # create object first, commit it...
@@ -536,11 +552,12 @@ async def test_using_gather_with_queries_after_prepare(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_exhausting_pool_size(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_exhausting_pool_size(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     # base aps uses 1 connection from the pool for starting transactions
-    aps = await get_aps(postgres, pool_size=2)
+    aps = await get_aps(db, pool_size=2)
     tm = TransactionManager(aps)
     txn = await tm.begin()
     await txn.get_connection()
@@ -556,11 +573,12 @@ async def test_exhausting_pool_size(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_mismatched_tid_causes_conflict_error(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_mismatched_tid_causes_conflict_error(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     # base aps uses 1 connection from the pool for starting transactions
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -580,11 +598,12 @@ async def test_mismatched_tid_causes_conflict_error(postgres, dummy_request):
     await cleanup(aps)
 
 
-async def test_iterate_keys(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_iterate_keys(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
     # base aps uses 1 connection from the pool for starting transactions
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     txn = await tm.begin()
 
@@ -609,11 +628,12 @@ async def test_iterate_keys(postgres, dummy_request):
     await tm.abort(txn=txn)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not like this test...")
-async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
+                    reason="Cockroach does not like this test...")
+async def test_handles_asyncpg_trying_savepoints(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)
     for conn in tm._storage._pool._queue._queue:
@@ -642,11 +662,12 @@ async def test_handles_asyncpg_trying_savepoints(postgres, dummy_request):
     await cleanup(aps)
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not like this test...")
-async def test_handles_asyncpg_trying_txn_with_manual_txn(postgres, dummy_request):
+@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
+                    reason="Cockroach does not like this test...")
+async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_request):
     request = dummy_request  # noqa so magically get_current_request can find
 
-    aps = await get_aps(postgres)
+    aps = await get_aps(db)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)
     for conn in tm._storage._pool._queue._queue:

@@ -125,6 +125,7 @@ class MockTransactionManager:
         if storage is None:
             storage = MockStorage()
         self._storage = storage
+        self._hard_cache = {}
 
     async def _close_txn(self, *args, **kwargs):
         pass

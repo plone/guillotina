@@ -6,7 +6,7 @@ import os
 import pytest
 
 
-USE_COCKROACH = 'USE_COCKROACH' in os.environ
+DATABASE = os.environ.get('DATABASE', 'DUMMY')
 
 
 def test_run_command(command_arguments):
@@ -27,7 +27,7 @@ async def run(app):
         assert fi.read() == 'foobar'
 
 
-@pytest.mark.skipif(USE_COCKROACH, reason="Cockroach does not have cascade support")
+@pytest.mark.skipif(DATABASE != 'postgres', reason="Cockroach does not have cascade support")
 def test_run_command_with_container(command_arguments, container_command):
     _, filepath = mkstemp(suffix='.py')
     _, filepath2 = mkstemp()
