@@ -1,4 +1,4 @@
-3.0.5 (unreleased)
+3.0.5 (2018-04-03)
 ------------------
 
 - Make sure to clean up manually registered utilities
