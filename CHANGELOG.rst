@@ -1,6 +1,8 @@
-3.0.0a2 (unreleased)
+3.0.1 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Add full support for `DUMMY` and `DUMMY_FILE` databases
+  [vangheem]
 
 
 3.0.0a1 (2017-12-30)
