@@ -1,7 +1,9 @@
 3.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not store request object on transaction manager object to prevent
+  situations where the wrong transaction will get retrieved
+  [vangheem]
 
 
 3.0.5 (2018-04-03)

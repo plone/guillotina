@@ -144,8 +144,6 @@ class Database:
         request._db_write_enabled = True
         tm = request._tm = self.get_transaction_manager()
         txn = await tm.begin(request=request)
-        # for get_current_request magic
-        self.request = request
 
         commit = False
         try:
