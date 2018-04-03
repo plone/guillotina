@@ -41,6 +41,9 @@ class Route:
             matchdict[part_name] = path_parts[idx + 1]
         request.matchdict = matchdict
 
+    def __repr__(self):
+        return '<guillotina.routes.Route {}>'.format(self.raw)
+
 
 def path_to_view_name(path_parts):
     if isinstance(path_parts, str):
