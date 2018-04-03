@@ -107,15 +107,15 @@ def load_service(_context, service):
         str(factory),
         name))
 
-    route = routes.Route(name)
-    factory.__route__ = route
+    if not getattr(factory, '__route__', None):
+        factory.__route__ = routes.Route(name)
 
     component.adapter(
         _context,
         factory=(factory,),
         provides=app_settings['http_methods'][method],
         for_=(content, layer),
-        name=route.view_name
+        name=factory.__route__.view_name
     )
 
     api = app_settings['api_definition']
@@ -383,6 +383,7 @@ def _has_parameters(func, number=2):
 
 class service(_base_decorator):  # noqa: N801
     def __call__(self, func):
+        self.config['module'] = func
         if isinstance(func, type):
             if not hasattr(func, '__call__'):
                 raise ServiceConfigurationError(
@@ -395,12 +396,12 @@ class service(_base_decorator):  # noqa: N801
                     f'{pformat(self.config)}'
                 )
 
-            # it is a class view, we don't need to generate one for it...
-            register_configuration(func, self.config, 'service')
-            if 'allow_access' in self.config:
-                func.__allow_access__ = self.config['allow_access']
-            if 'read_only' in self.config:
-                func.__read_only__ = self.config['read_only']
+            class _View(func):
+                __allow_access__ = self.config.get(
+                    'allow_access', getattr(func, '__allow_access__', False))
+                __route__ = routes.Route(self.config.get('name', ''))
+
+            register_configuration(_View, self.config, 'service')
         else:
             if not _has_parameters(func):
                 raise ServiceConfigurationError(
@@ -417,13 +418,12 @@ class service(_base_decorator):  # noqa: N801
 
             class _View(self.config.get('base', Service)):
                 __allow_access__ = self.config.get('allow_access', False)
-                __read_only__ = self.config.get('read_only', None)
+                __route__ = routes.Route(self.config.get('name', ''))
                 view_func = staticmethod(func)
 
                 async def __call__(self):
                     return await func(self.context, self.request)
 
-            self.config['module'] = func
             register_configuration(_View, self.config, 'service')
         return func
 

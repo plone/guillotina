@@ -1,6 +1,10 @@
 3.0.6 (unreleased)
 ------------------
 
+- Fix registration issue when multiple routes are registered against the
+  same service class
+  [vangheem]
+
 - Do not store request object on transaction manager object to prevent
   situations where the wrong transaction will get retrieved
   [vangheem]
