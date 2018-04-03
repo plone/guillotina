@@ -1,4 +1,4 @@
-3.0.6 (unreleased)
+3.0.6 (2018-04-03)
 ------------------
 
 - Fix registration issue when multiple routes are registered against the
