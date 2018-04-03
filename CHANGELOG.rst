@@ -1,5 +1,4 @@
 3.0.0a2 (unreleased)
---------------------
 
 - Nothing changed yet.
 
@@ -14,6 +13,13 @@
 - Add route support
 
 - Remove traversable views, add support for `prepare` method on class views
+
+
+2.5.12 (2018-04-02)
+-------------------
+
+- Do not swallow any exceptions on commit.
+  [vangheem]
 
 
 2.5.11 (2018-03-28)
