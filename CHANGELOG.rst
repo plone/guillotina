@@ -1,4 +1,4 @@
-3.0.4 (unreleased)
+3.0.4 (2018-04-03)
 ------------------
 
 - Use IPostgresStorage for PG storage
