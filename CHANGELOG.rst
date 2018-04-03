@@ -1,4 +1,4 @@
-3.0.1 (unreleased)
+3.0.1 (2018-04-03)
 ------------------
 
 - Add full support for `DUMMY` and `DUMMY_FILE` databases
