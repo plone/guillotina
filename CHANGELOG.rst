@@ -1,4 +1,4 @@
-3.0.3 (unreleased)
+3.0.3 (2018-04-03)
 ------------------
 
 - Fix tests to be more isolated between runs
