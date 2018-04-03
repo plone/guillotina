@@ -11,7 +11,6 @@ from unittest import mock
 import aiohttp
 import asyncio
 import os
-import psycopg2
 import pytest
 
 
@@ -303,6 +302,7 @@ def command_arguments():
 
 @pytest.fixture(scope='function')
 def container_command(db):
+    import psycopg2
     settings = get_db_settings()
     host = settings['databases']['db']['dsn']['host']
     port = settings['databases']['db']['dsn']['port']
