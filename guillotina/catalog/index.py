@@ -116,6 +116,7 @@ async def add_object(obj, event):
     fut = get_future()
     if fut is None:
         return
+
     search = query_utility(ICatalogUtility)
     if search:
         if IObjectModifiedEvent.providedBy(event):

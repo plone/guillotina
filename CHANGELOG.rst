@@ -1,7 +1,8 @@
 3.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use IPostgresStorage for PG storage
+  [vangheem]
 
 
 3.0.3 (2018-04-03)

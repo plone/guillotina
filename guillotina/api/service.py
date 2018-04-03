@@ -21,6 +21,7 @@ class DownloadService(View):
 
 
 class TraversableFieldService(View):
+    field = None
 
     async def prepare(self):
         # we want have the field

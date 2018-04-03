@@ -1,7 +1,7 @@
 from asyncio import shield
 from guillotina._settings import app_settings
 from guillotina.db import TRASHED_ID
-from guillotina.db.interfaces import IStorage
+from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
@@ -352,7 +352,7 @@ class PGVacuum:
             await asyncio.sleep(0.1)
 
 
-@implementer(IStorage)
+@implementer(IPostgresStorage)
 class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
