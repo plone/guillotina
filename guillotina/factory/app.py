@@ -203,11 +203,6 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
         config.execute_actions()
         config.commit()
 
-    # XXX we clear now to save some memory
-    # it's unclear to me if this is necesary or not but it seems to me that
-    # we don't need things registered in both components AND here.
-    configure.clear()
-
     apply_concrete_behaviors()
 
     # update *after* plugins loaded

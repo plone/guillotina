@@ -56,10 +56,13 @@ def register_configuration_handler(type_, handler):
 
 
 def register_configuration(klass, config, type_):
-    _registered_configurations.append((type_, {
+    value = (type_, {
         'klass': klass,
         'config': config
-    }))
+    })
+    if value not in _registered_configurations:
+        # do not register twice
+        _registered_configurations.append(value)
 
 
 def load_configuration(_context, module_name, _type):

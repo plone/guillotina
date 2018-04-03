@@ -56,6 +56,11 @@ def get_global_components():
     return base
 
 
+def reset():
+    global base
+    base = GlobalComponents('base')
+
+
 def provide_utility(component, provides=None, name=_BLANK):
     base.registerUtility(component, provides, name, event=False)
 

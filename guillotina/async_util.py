@@ -79,15 +79,19 @@ class QueueUtility(object):
                         "Exception on writing execution",
                         exc_info=e)
                     await tm.abort(txn=txn)
-            except (KeyboardInterrupt, MemoryError, SystemExit,
-                    asyncio.CancelledError, GeneratorExit, RuntimeError):
+            except (RuntimeError, SystemExit, GeneratorExit, KeyboardInterrupt,
+                    asyncio.CancelledError, KeyboardInterrupt):
+                # dive, these errors mean we're exit(ing)
                 self._exceptions = True
-                raise
+                return
             except Exception as e:  # noqa
                 self._exceptions = True
                 logger.error('Worker call failed', exc_info=e)
             finally:
-                aiotask_context.set('request', None)
+                try:
+                    aiotask_context.set('request', None)
+                except RuntimeError:
+                    pass
                 if got_obj:
                     try:
                         view.request.execute_futures()

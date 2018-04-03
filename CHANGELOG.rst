@@ -1,7 +1,8 @@
 3.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix tests to be more isolated between runs
+  [vangheem]
 
 
 3.0.2 (2018-04-03)

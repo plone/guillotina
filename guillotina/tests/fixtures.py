@@ -1,5 +1,6 @@
 from guillotina import testing
 from guillotina.component import get_utility
+from guillotina.component import globalregistry
 from guillotina.content import load_cached_schema
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
@@ -170,6 +171,7 @@ async def close_async_tasks(app):
 
 @pytest.fixture(scope='function')
 def dummy_guillotina(loop):
+    globalregistry.reset()
     aioapp = make_app(settings=get_dummy_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
@@ -229,6 +231,7 @@ async def dummy_txn_root(dummy_request):
 
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
+    globalregistry.reset()
     aioapp = make_app(settings=get_db_settings(), loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
