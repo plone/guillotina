@@ -7,4 +7,4 @@ def change_transaction_strategy(strategy='none'):
     root = get_utility(IApplication, name='root')
     for _id, db in root:
         if IDatabase.providedBy(db):
-            db._db._storage._transaction_strategy = strategy
+            db._storage._transaction_strategy = strategy
