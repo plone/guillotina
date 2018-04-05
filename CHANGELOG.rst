@@ -1,4 +1,4 @@
-3.0.7 (unreleased)
+3.0.7 (2018-04-04)
 ------------------
 
 - Fix `change_transaction_strategy` method AttributeError
