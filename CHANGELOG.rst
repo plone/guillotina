@@ -1,7 +1,8 @@
 3.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `change_transaction_strategy` method AttributeError
+  [vangheem]
 
 
 3.0.6 (2018-04-03)
