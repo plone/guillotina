@@ -1,4 +1,4 @@
-3.0.8 (unreleased)
+3.0.8 (2018-04-06)
 ------------------
 
 - Fix security on views were not checked correctly as the configured functions
