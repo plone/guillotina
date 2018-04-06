@@ -432,15 +432,12 @@ class TraversalRouter(AbstractRouter):
         except AttributeError:
             view = None
 
-        if not view and len(tail) > 0:
-            # we should have a view in this case because we are matching routes
-            return
+        if view is None and method == IOPTIONS:
+            view = DefaultOPTIONS(resource, request)
 
-        request.found_view = view
-        request.view_name = view_name
-        request.record('viewfound')
+        # Check security on context to AccessContent unless
+        # is view allows explicit or its OPTIONS
         permission = get_utility(IPermission, name='guillotina.AccessContent')
-
         if not security.check_permission(permission.id, resource):
             # Check if its a CORS call:
             if IOPTIONS != method:
@@ -454,26 +451,31 @@ class TraversalRouter(AbstractRouter):
                         request=request)
                     raise HTTPUnauthorized()
 
-        if view is None:
-            if method == IOPTIONS:
-                view = DefaultOPTIONS(resource, request)
-            else:
-                return
+        if not view and len(tail) > 0:
+            # we should have a view in this case because we are matching routes
+            return
+
+        request.found_view = view
+        request.view_name = view_name
+        request.record('viewfound')
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
         if not security.check_permission(view_permission, view):
-            logger.warning("No access for view {content} with {auths}".format(
-                content=resource,
-                auths=str([x.principal.id
-                           for x in security.participations])),
-                request=request)
-            raise HTTPUnauthorized()
+            if IOPTIONS != method:
+                logger.warning("No access for view {content} with {auths}".format(
+                    content=resource,
+                    auths=str([x.principal.id
+                               for x in security.participations])),
+                    request=request)
+                raise HTTPUnauthorized()
 
         try:
             view.__route__.matches(request, tail or [])
         except (KeyError, IndexError):
             return
+        except AttributeError:
+            pass
 
         if hasattr(view, 'prepare'):
             view = (await view.prepare()) or view
