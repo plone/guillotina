@@ -1,7 +1,13 @@
 3.0.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix security on views were not checked correctly as the configured functions
+  are all the same local class
+  [ramon]
+
+- OPTION method not working due to not beeing registered normally as
+  its a special case for CORS
+  [ramon]
 
 
 3.0.7 (2018-04-04)
@@ -13,14 +19,6 @@
 
 3.0.6 (2018-04-03)
 ------------------
-
-- Fix security on views were not checked correctly as the configured functions
-  are all the same local class
-  [ramon]
-
-- OPTION method not working due to not beeing registered normally as
-  its a special case for CORS
-  [ramon]
 
 - Fix registration issue when multiple routes are registered against the
   same service class
