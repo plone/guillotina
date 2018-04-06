@@ -16,6 +16,18 @@ async def test_get_root(container_requester):
         assert 'ACCESS-CONTROL-ALLOW-HEADERS' in headers
 
 
+async def test_get_endpoint(container_requester):
+    async with container_requester as requester:
+        value, status, headers = await requester.make_request(
+            'OPTIONS', '/db/guillotina/@types', headers={
+                'Origin': 'http://localhost',
+                'Access-Control-Request-Method': 'Get'
+            })
+        assert 'ACCESS-CONTROL-ALLOW-CREDENTIALS' in headers
+        assert 'ACCESS-CONTROL-EXPOSE-HEADERS' in headers
+        assert 'ACCESS-CONTROL-ALLOW-HEADERS' in headers
+
+
 class _CorsTestRenderer(cors.DefaultCorsRenderer):
 
     def __init__(self, request, settings):

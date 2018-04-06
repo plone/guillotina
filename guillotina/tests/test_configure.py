@@ -36,6 +36,33 @@ async def test_register_service(container_requester):
         assert response['foo'] == 'bar'
 
 
+async def test_register_service_permission(container_requester):
+    cur_count = len(configure.get_configurations('guillotina.tests', 'service'))
+
+    class TestService(Service):
+        async def __call__(self):
+            return {
+                "foo": "bar"
+            }
+    configure.permission('guillotina.NoBody', 'Nobody has access')
+    configure.register_configuration(TestService, dict(
+        context=IContainer,
+        name="@foobar2",
+        permission='guillotina.NoBody'
+    ), 'service')
+
+    assert len(configure.get_configurations('guillotina.tests', 'service')) == cur_count + 1  # noqa
+
+    async with container_requester as requester:
+        config = requester.root.app.config
+        configure.load_configuration(
+            config, 'guillotina.tests', 'service')
+        config.execute_actions()
+
+        response, status = await requester('GET', '/db/guillotina/@foobar2')
+        assert status == 401
+
+
 async def test_register_contenttype(container_requester):
     cur_count = len(
         configure.get_configurations('guillotina.tests', 'contenttype'))

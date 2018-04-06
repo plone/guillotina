@@ -9,15 +9,12 @@ from guillotina.security.security_code import role_permission_manager
 from guillotina.utils import get_current_request
 
 
-_view_permissions = {}
-
-
 def protect_view(cls, permission):
-    _view_permissions[cls] = permission
+    cls.__view_permission = permission
 
 
 def get_view_permission(cls):
-    return _view_permissions.get(cls, None)
+    return getattr(cls, '__view_permission', None)
 
 
 def get_roles_with_access_content(obj, request=None):
