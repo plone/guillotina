@@ -500,6 +500,7 @@ async def test_create_content_fields(container_requester):
     async with container_requester as requester:
         response, status = await requester('POST', '/db/guillotina', data=json.dumps({
             '@type': 'Example',
+            'id': 'foobar',
             'categories': [{
                 'label': 'foobar',
                 'number': 5
@@ -512,6 +513,7 @@ async def test_create_content_fields(container_requester):
             'datetime': datetime.utcnow().isoformat()
         }))
         assert status == 201
+        response, status = await requester('GET', '/db/guillotina/foobar')
         assert response['dict_value']['foo'] == 'bar'
         assert len(response['categories']) == 1
         assert response['textline_field'] == 'foobar'
@@ -647,13 +649,14 @@ async def test_patch_with_payload_again(container_requester):
         response, status = await requester(
             'POST', '/db/guillotina',
             data=json.dumps({
-                '@type': 'Item'
+                '@type': 'Item',
+                'id': 'foobar'
             }))
+        response, status = await requester('GET', '/db/guillotina/foobar')
         assert not response['title']
         response['title'] = 'Foobar'
         patch_resp, status = await requester(
-            'PATCH', f'/db/guillotina/{response["__name__"]}',
+            'PATCH', f'/db/guillotina/foobar',
             data=json.dumps(response))
-        response, status = await requester(
-            'GET', f'/db/guillotina/{response["__name__"]}')
+        response, status = await requester('GET', f'/db/guillotina/foobar')
         assert response['title'] == 'Foobar'

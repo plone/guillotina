@@ -1,7 +1,8 @@
 3.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- On content creation, use summary serialization instead of full object serialization
+  [vangheem]
 
 
 3.0.8 (2018-04-06)

@@ -463,12 +463,12 @@ class TraversalRouter(AbstractRouter):
         view_permission = get_view_permission(ViewClass)
         if not security.check_permission(view_permission, view):
             if IOPTIONS != method:
-                logger.warning("No access for view {content} with {auths}".format(
-                    content=resource,
-                    auths=str([x.principal.id
-                               for x in security.participations])),
-                    request=request)
-                raise HTTPUnauthorized()
+                raise HTTPUnauthorized(
+                    reason="You are not authorized to view {content} with {auths}".format(
+                        content=resource,
+                        auths=str([x.principal.id
+                                   for x in security.participations]))
+                )
 
         try:
             view.__route__.matches(request, tail or [])

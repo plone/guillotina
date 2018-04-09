@@ -44,6 +44,7 @@ from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.utils import convert_interfaces_to_schema
@@ -213,7 +214,7 @@ class DefaultPOST(Service):
 
         serializer = query_multi_adapter(
             (obj, self.request),
-            IResourceSerializeToJson
+            IResourceSerializeToJsonSummary
         )
         response = await serializer()
         return Response(response=response, headers=headers, status=201)
