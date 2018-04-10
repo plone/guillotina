@@ -1,6 +1,9 @@
 3.0.9 (unreleased)
 ------------------
 
+- Use unique constraint instead of doing lookups on existing content for inserts
+  [vangheem]
+
 - On content creation, use summary serialization instead of full object serialization
   [vangheem]
 
