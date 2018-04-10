@@ -1,6 +1,7 @@
 from guillotina import glogging
 from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 
@@ -136,7 +137,12 @@ SAVEPOINT cockroach_restart;''')
 
     async def commit(self):
         assert self._status in ('started',)
-        await self._conn.execute(self.commit_statement)
+        try:
+            await self._conn.execute(self.commit_statement)
+        except asyncpg.exceptions.UniqueViolationError as ex:
+            if 'duplicate key value (parent_id,id)' in ex.message:
+                raise ConflictIdOnContainer(ex)
+            raise
         self._status = 'committed'
 
     async def restart(self):
@@ -189,7 +195,8 @@ class CockroachStorage(pg.PostgresqlStorage):
         'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);'
+        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index)',
+        'ALTER TABLE objects ADD UNIQUE (parent_id, id)'
     ]
 
     _db_transaction_factory = CockroachDBTransaction
@@ -248,6 +255,10 @@ class CockroachStorage(pg.PostgresqlStorage):
                     writer.type,         # Guillotina type
                     pickled              # Pickle state)
                 )
+            except asyncpg.exceptions.UniqueViolationError as ex:
+                if 'duplicate key value (parent_id,id)' in ex.detail:
+                    raise ConflictIdOnContainer(ex)
+                raise
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
                     raise ConflictError(

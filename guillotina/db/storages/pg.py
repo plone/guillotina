@@ -5,6 +5,7 @@ from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
 from guillotina.utils import clear_conn_statement_cache
@@ -395,7 +396,8 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
-        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
+        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;',
+        'ALTER TABLE objects ADD UNIQUE (parent_id, id)'
     ]
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
@@ -569,6 +571,10 @@ class PostgresqlStorage(BaseStorage):
                     json,                # JSON catalog
                     pickled              # Pickle state)
                 )
+            except asyncpg.exceptions.UniqueViolationError as ex:
+                if 'Key (parent_id, id)' in ex.detail:
+                    raise ConflictIdOnContainer(ex)
+                raise
             except asyncpg.exceptions.ForeignKeyViolationError:
                 txn.deleted[obj._p_oid] = obj
                 raise TIDConflictError(

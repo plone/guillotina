@@ -18,7 +18,6 @@ from guillotina.component.factory import Factory
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import ObjectLoadedEvent
-from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
@@ -228,10 +227,6 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
     obj.__name__ = obj.id
     for key, value in kw.items():
         setattr(obj, key, value)
-
-    if request is None or 'OVERWRITE' not in request.headers:
-        if await container.async_contains(obj.id):
-            raise ConflictIdOnContainer(str(container), obj.id)
 
     obj.__new_marker__ = True
 

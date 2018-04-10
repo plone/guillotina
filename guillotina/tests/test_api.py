@@ -209,19 +209,6 @@ async def test_create_duplicate_id(container_requester):
             })
         )
         assert status == 409
-        response, status = await requester(
-            'POST',
-            '/db/guillotina/',
-            data=json.dumps({
-                "@type": "Item",
-                "title": "Item1",
-                "id": "item1",
-            }),
-            headers={
-                "OVERWRITE": "TRUE"
-            }
-        )
-        assert status == 201
 
 
 async def test_create_nested_object(container_requester):
