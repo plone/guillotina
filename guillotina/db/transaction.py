@@ -241,7 +241,6 @@ class Transaction(object):
         obj._p_oid = oid
         if new or obj.__new_marker__:
             self.added[oid] = obj
-            obj.__new_marker__ = False
         elif oid not in self.modified and oid not in self.added:
             self.modified[oid] = obj
 
@@ -372,6 +371,7 @@ class Transaction(object):
         await self._strategy.tpc_commit()
         for oid, obj in self.added.items():
             await self._store_object(obj, oid, True)
+            obj.__new_marker__ = False
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():

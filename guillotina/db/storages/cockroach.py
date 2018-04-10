@@ -195,8 +195,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index)',
-        'ALTER TABLE objects ADD UNIQUE (parent_id, id)'
+        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index)'
     ]
 
     _db_transaction_factory = CockroachDBTransaction

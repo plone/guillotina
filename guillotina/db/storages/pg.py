@@ -396,9 +396,10 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
         'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
-        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;',
-        'ALTER TABLE objects ADD UNIQUE (parent_id, id)'
+        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
     ]
+
+    _unique_constraint = 'ALTER TABLE objects ADD CONSTRAINT objects_parent_id_id_key UNIQUE (parent_id, id)'
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
@@ -486,6 +487,14 @@ class PostgresqlStorage(BaseStorage):
             await self.create()
             await self.initialize_tid_statements()
             await self._read_conn.execute(CREATE_TRASH)
+
+        try:
+            await self._read_conn.execute(self._unique_constraint)
+        except asyncpg.exceptions.DuplicateTableError:
+            pass
+        except asyncpg.exceptions.InternalServerError as ex:
+            if 'duplicate constraint name' not in ex.message:
+                raise
 
         self._vacuum = self._vacuum_class(self, loop)
         self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
