@@ -1,7 +1,8 @@
 3.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add new `@get-by-uid` endpoint
+  [vangheem]
 
 
 3.0.8 (2018-04-06)

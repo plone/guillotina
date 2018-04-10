@@ -2,6 +2,7 @@ from aiohttp.web import Request
 from collections import MutableMapping
 from guillotina import glogging
 from guillotina.component import get_utility
+from guillotina.db.reader import reader
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
@@ -405,3 +406,21 @@ def list_or_dict_items(val):
             new_val.extend([(k, v) for k, v in item.items()])
         return new_val
     return [(k, v) for k, v in val.items()]
+
+
+async def get_object_by_oid(oid, txn=None):
+    '''
+    Need to do a reverse lookup of the object to all the parents
+    '''
+    if txn is None:
+        from guillotina.transactions import get_transaction
+        txn = get_transaction()
+    result = txn._manager._hard_cache.get(oid, None)
+    if result is None:
+        result = await txn._get(oid)
+
+    obj = reader(result)
+    obj._p_jar = txn
+    if result['parent_id']:
+        obj.__parent__ = await get_object_by_oid(result['parent_id'], txn)
+    return obj
