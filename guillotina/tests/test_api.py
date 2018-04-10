@@ -657,3 +657,21 @@ async def test_patch_with_payload_again(container_requester):
         response, status = await requester(
             'GET', f'/db/guillotina/{response["__name__"]}')
         assert response['title'] == 'Foobar'
+
+
+async def test_get_by_uid(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                '@type': 'Item',
+                'id': 'foobar'
+            }))
+        uid = response['UID']
+        response, status = await requester(
+            'GET', f'/db/guillotina/foobar/@get-by-uid?uid={uid}')
+        assert status == 200
+
+        response, status = await requester(
+            'GET', f'/db/guillotina/foobar/@get-by-uid?uid=foobar')
+        assert status == 404

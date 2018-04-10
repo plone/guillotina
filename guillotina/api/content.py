@@ -34,9 +34,11 @@ from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IConstrainTypes
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IPermission
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
@@ -50,6 +52,7 @@ from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
+from guillotina.utils import get_object_by_oid
 from guillotina.utils import iter_parents
 from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
@@ -823,3 +826,32 @@ async def addable_types(context, request):
         for type_name, factory in FACTORY_CACHE.items():
             types.append(type_name)
     return types
+
+
+@configure.service(
+    context=IContainer, method='GET', name="@get-by-uid",
+    parameters=[{
+        "name": "uid",
+        "in": "query",
+        "type": "string"
+    }],
+    permission='guillotina.ViewContent',
+    summary="Return an object base on it's UID",
+    responses={
+        "200": {
+            "description": "Successfully returned object"
+        }
+    })
+async def get_by_uid(context, request):
+    try:
+        ob = await get_object_by_oid(request.GET.get('uid'))
+    except (KeyError, AttributeError):
+        ob = None
+    if ob is None:
+        raise HTTPNotFound(text='Object not found')
+
+    permission = get_utility(IPermission, name='guillotina.ViewContent')
+    if not security.check_permission(permission.id, ob):
+        raise HTTPUnauthorized()
+    view = DefaultGET(ob, request)
+    return await view()
