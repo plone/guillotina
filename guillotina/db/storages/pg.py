@@ -2,6 +2,7 @@ from asyncio import shield
 from guillotina._settings import app_settings
 from guillotina.db import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
+from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.exceptions import ConflictError
@@ -10,7 +11,6 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
 from guillotina.utils import clear_conn_statement_cache
 from zope.interface import implementer
-from guillotina.db.oid import MAX_OID_LENGTH
 
 import asyncio
 import asyncpg

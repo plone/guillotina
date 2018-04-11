@@ -43,6 +43,9 @@ def generate_oid(ob):
             # no value in including root as part of this...
             parts.append(get_short_oid(parent._p_oid)[:OID_SPLIT_LENGTH])
         current = current.__parent__
+    parts = parts[::-1]  # reverse it
+    if ob.__of__:
+        parts.append(ob.__of__[:OID_SPLIT_LENGTH])
     short_oid = uuid.uuid4().hex
     if len(parts) > 0:
         oid = '{}{}{}'.format(
