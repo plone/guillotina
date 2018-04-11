@@ -83,8 +83,10 @@ class ResourceFactory(Factory):
         self.allowed_types = allowed_types
 
     @profilable
-    def __call__(self, id, *args, **kw):
+    def __call__(self, id, parent=None, *args, **kw):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
+        if parent is not None:
+            obj.__parent__ = parent
         obj.type_name = self.type_name
         now = datetime.now(tz=_zone)
         obj.creation_date = now
@@ -95,6 +97,7 @@ class ResourceFactory(Factory):
             obj.id = oid.get_short_oid(obj._p_oid)
         else:
             obj.id = id
+        obj.__name__ = obj.id
         apply_markers(obj)
         return obj
 
@@ -221,9 +224,7 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
             raise NotAllowedContentType(str(container), type_)
 
     # We create the object with at least the ID
-    obj = factory(id=id_)
-    obj.__parent__ = container
-    obj.__name__ = obj.id
+    obj = factory(id=id_, parent=container)
     for key, value in kw.items():
         setattr(obj, key, value)
 

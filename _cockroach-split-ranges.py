@@ -28,6 +28,18 @@ async def run():
     print(f'Running SQL: {sql}')
     await conn.execute(sql)
 
+    sql = 'ALTER INDEX objects@object_of SPLIT AT VALUES {};'.format(
+        ', '.join([f"('{k}')" for k in keys])
+    )
+    print(f'Running SQL: {sql}')
+    await conn.execute(sql)
+
+    sql = 'ALTER INDEX objects@object_parent SPLIT AT VALUES {};'.format(
+        ', '.join([f"('{k}')" for k in keys])
+    )
+    print(f'Running SQL: {sql}')
+    await conn.execute(sql)
+
 if __name__ == '__main__':
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(run())
