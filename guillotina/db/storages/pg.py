@@ -10,6 +10,7 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
 from guillotina.utils import clear_conn_statement_cache
 from zope.interface import implementer
+from guillotina.db.oid import MAX_OID_LENGTH
 
 import asyncio
 import asyncpg
@@ -25,47 +26,47 @@ log = logging.getLogger("guillotina.storage")
 
 # we can not use FOR UPDATE or FOR SHARE unfortunately because
 # it can cause deadlocks on the database--we need to resolve them ourselves
-GET_OID = """
+GET_OID = f"""
     SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
     FROM objects
-    WHERE zoid = $1::varchar(32)
+    WHERE zoid = $1::varchar({MAX_OID_LENGTH})
     """
 
-GET_CHILDREN_KEYS = """
+GET_CHILDREN_KEYS = f"""
     SELECT id
     FROM objects
-    WHERE parent_id = $1::varchar(32)
+    WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
     """
 
 GET_ANNOTATIONS_KEYS = f"""
     SELECT id
     FROM objects
-    WHERE of = $1::varchar(32) AND (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
+    WHERE of = $1::varchar({MAX_OID_LENGTH}) AND (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
     """
 
-GET_CHILD = """
+GET_CHILD = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE parent_id = $1::varchar(32) AND id = $2::text
+    WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
     """
 
-GET_CHILDREN_BATCH = """
+GET_CHILDREN_BATCH = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE parent_id = $1::varchar(32) AND id = ANY($2)
+    WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = ANY($2)
     """
 
-EXIST_CHILD = """
+EXIST_CHILD = f"""
     SELECT zoid
     FROM objects
-    WHERE parent_id = $1::varchar(32) AND id = $2::text
+    WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
     """
 
 
-HAS_OBJECT = """
+HAS_OBJECT = f"""
     SELECT zoid
     FROM objects
-    WHERE zoid = $1::varchar(32)
+    WHERE zoid = $1::varchar({MAX_OID_LENGTH})
     """
 
 
@@ -73,7 +74,7 @@ GET_ANNOTATION = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
     WHERE
-        of = $1::varchar(32) AND
+        of = $1::varchar({MAX_OID_LENGTH}) AND
         id = $2::text AND
         (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
     """
@@ -87,11 +88,11 @@ SELECT count(*) FROM rows""".format(txt)
 
 
 # upsert without checking matching tids on updated object
-NAIVE_UPSERT = """
+NAIVE_UPSERT = f"""
 INSERT INTO objects
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
-VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
-        $8::varchar(32), $9::text, $10::text, $11::json, $12::bytea)
+VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean, $6::varchar({MAX_OID_LENGTH}), $7::int,
+        $8::varchar({MAX_OID_LENGTH}), $9::text, $10::text, $11::json, $12::bytea)
 ON CONFLICT (zoid)
 DO UPDATE SET
     tid = EXCLUDED.tid,
@@ -112,22 +113,22 @@ NAIVE_UPSERT = _wrap_return_count(NAIVE_UPSERT)
 
 
 # update without checking matching tids on updated object
-NAIVE_UPDATE = """
+NAIVE_UPDATE = f"""
 UPDATE objects
 SET
     tid = $2::int,
     state_size = $3::int,
     part = $4::int,
     resource = $5::boolean,
-    of = $6::varchar(32),
+    of = $6::varchar({MAX_OID_LENGTH}),
     otid = $7::int,
-    parent_id = $8::varchar(32),
+    parent_id = $8::varchar({MAX_OID_LENGTH}),
     id = $9::text,
     type = $10::text,
     json = $11::json,
     state = $12::bytea
 WHERE
-    zoid = $1::varchar(32)"""
+    zoid = $1::varchar({MAX_OID_LENGTH})"""
 UPDATE = _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int""")
 NAIVE_UPDATE = _wrap_return_count(NAIVE_UPDATE)
 
@@ -136,7 +137,7 @@ NEXT_TID = "SELECT nextval('tid_sequence');"
 MAX_TID = "SELECT last_value FROM tid_sequence;"
 
 
-NUM_CHILDREN = "SELECT count(*) FROM objects WHERE parent_id = $1::varchar(32)"
+NUM_CHILDREN = f"SELECT count(*) FROM objects WHERE parent_id = $1::varchar({MAX_OID_LENGTH})"
 
 
 NUM_ROWS = "SELECT count(*) FROM objects"
@@ -156,10 +157,10 @@ RESOURCES_BY_TYPE = """
     """
 
 
-GET_CHILDREN = """
+GET_CHILDREN = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
     FROM objects
-    WHERE parent_id = $1::VARCHAR(32)
+    WHERE parent_id = $1::VARCHAR({MAX_OID_LENGTH})
     """
 
 
@@ -168,32 +169,33 @@ UPDATE objects
 SET
     parent_id = '{TRASHED_ID}'
 WHERE
-    zoid = $1::varchar(32)
+    zoid = $1::varchar({MAX_OID_LENGTH})
 """
 
 
-INSERT_BLOB_CHUNK = """
+INSERT_BLOB_CHUNK = f"""
     INSERT INTO blobs
     (bid, zoid, chunk_index, data)
-    VALUES ($1::VARCHAR(32), $2::VARCHAR(32), $3::INT, $4::BYTEA)
+    VALUES ($1::VARCHAR({MAX_OID_LENGTH}), $2::VARCHAR({MAX_OID_LENGTH}),
+            $3::INT, $4::BYTEA)
 """
 
 
 READ_BLOB_CHUNKS = """
     SELECT * from blobs
-    WHERE bid = $1::VARCHAR(32)
+    WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
     ORDER BY chunk_index
 """
 
 READ_BLOB_CHUNK = """
     SELECT * from blobs
-    WHERE bid = $1::VARCHAR(32)
+    WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
     AND chunk_index = $2::int
 """
 
 
-DELETE_BLOB = """
-    DELETE FROM blobs WHERE bid = $1::VARCHAR(32);
+DELETE_BLOB = f"""
+    DELETE FROM blobs WHERE bid = $1::VARCHAR({MAX_OID_LENGTH});
 """
 
 
@@ -204,10 +206,10 @@ TXN_CONFLICTS = """
 TXN_CONFLICTS_ON_OIDS = TXN_CONFLICTS + ' AND zoid = ANY($2)'
 
 
-BATCHED_GET_CHILDREN_KEYS = """
+BATCHED_GET_CHILDREN_KEYS = f"""
     SELECT id
     FROM objects
-    WHERE parent_id = $1::varchar(32)
+    WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
     ORDER BY zoid
     LIMIT $2::int
     OFFSET $3::int
@@ -215,7 +217,7 @@ BATCHED_GET_CHILDREN_KEYS = """
 
 DELETE_OBJECT = f"""
 DELETE FROM objects
-WHERE zoid = $1::varchar(32);
+WHERE zoid = $1::varchar({MAX_OID_LENGTH});
 """
 
 GET_TRASHED_OBJECTS = f"""
@@ -365,14 +367,14 @@ class PostgresqlStorage(BaseStorage):
     _vacuum_class = PGVacuum
 
     _object_schema = {
-        'zoid': 'VARCHAR(32) NOT NULL PRIMARY KEY',
+        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL PRIMARY KEY',
         'tid': 'BIGINT NOT NULL',
         'state_size': 'BIGINT NOT NULL',
         'part': 'BIGINT NOT NULL',
         'resource': 'BOOLEAN NOT NULL',
-        'of': 'VARCHAR(32) REFERENCES objects ON DELETE CASCADE',
+        'of': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES objects ON DELETE CASCADE',
         'otid': 'BIGINT',
-        'parent_id': 'VARCHAR(32) REFERENCES objects ON DELETE CASCADE',  # parent oid
+        'parent_id': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES objects ON DELETE CASCADE',  # parent oid
         'id': 'TEXT',
         'type': 'TEXT NOT NULL',
         'json': 'JSONB',
@@ -380,8 +382,8 @@ class PostgresqlStorage(BaseStorage):
     }
 
     _blob_schema = {
-        'bid': 'VARCHAR(32) NOT NULL',
-        'zoid': 'VARCHAR(32) NOT NULL REFERENCES objects ON DELETE CASCADE',
+        'bid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL',
+        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL REFERENCES objects ON DELETE CASCADE',
         'chunk_index': 'INT NOT NULL',
         'data': 'BYTEA'
     }
@@ -495,6 +497,23 @@ class PostgresqlStorage(BaseStorage):
         except asyncpg.exceptions.InternalServerError as ex:
             if 'duplicate constraint name' not in ex.message:
                 raise
+
+        # migrate to larger VARCHAR size...
+        result = await self._read_conn.fetch("""
+select * from information_schema.columns
+where table_name='objects'""")
+        if result[0]['character_maximum_length'] != MAX_OID_LENGTH:
+            log.warn('Migrating VARCHAR key length')
+            await self._read_conn.execute(f'''
+ALTER TABLE objects ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+            await self._read_conn.execute(f'''
+ALTER TABLE objects ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
+            await self._read_conn.execute(f'''
+ALTER TABLE objects ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
+            await self._read_conn.execute(f'''
+ALTER TABLE blobs ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
+            await self._read_conn.execute(f'''
+ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
         self._vacuum = self._vacuum_class(self, loop)
         self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
@@ -803,9 +822,9 @@ class PostgresqlStorage(BaseStorage):
             # if so, create a stub for it here...
             conn = await txn.get_connection()
             async with txn._lock:
-                await conn.execute('''INSERT INTO objects
-                    (zoid, tid, state_size, part, resource, type)
-                    VALUES ($1::varchar(32), -1, 0, 0, TRUE, 'stub')''', oid)
+                await conn.execute(f'''INSERT INTO objects
+(zoid, tid, state_size, part, resource, type)
+VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
         conn = await txn.get_connection()
         async with txn._lock:
             return await conn.execute(

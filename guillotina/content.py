@@ -15,6 +15,7 @@ from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.component.factory import Factory
+from guillotina.db import oid
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import ObjectLoadedEvent
@@ -55,7 +56,6 @@ import guillotina.db.orm.base
 import os
 import pathlib
 import typing
-import uuid
 
 
 _zone = tzutc()  # utz tz is much faster than local tz info
@@ -91,9 +91,8 @@ class ResourceFactory(Factory):
         obj.modification_date = now
         if id is None:
             if obj._p_oid is None:
-                # uuid uses _p_oid...
-                obj._p_oid = uuid.uuid4().hex
-            obj.id = obj._p_oid
+                obj._p_oid = oid.generate_oid(obj)
+            obj.id = oid.get_short_oid(obj._p_oid)
         else:
             obj.id = id
         apply_markers(obj)

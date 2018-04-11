@@ -4,6 +4,7 @@ from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
+from guillotina.db.oid import generate_oid
 from guillotina.db.reader import reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
@@ -20,7 +21,6 @@ import asyncio
 import logging
 import sys
 import time
-import uuid
 
 
 _EMPTY = '__<EMPTY VALUE>__'
@@ -235,7 +235,7 @@ class Transaction(object):
             if new_oid is not None:
                 new = True
             else:
-                new_oid = uuid.uuid4().hex
+                new_oid = generate_oid(obj)
             oid = new_oid
 
         obj._p_oid = oid
