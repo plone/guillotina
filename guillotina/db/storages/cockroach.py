@@ -15,8 +15,9 @@ logger = glogging.getLogger('guillotina')
 NAIVE_UPSERT = f"""
 INSERT INTO objects
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
-VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean, $6::varchar({MAX_OID_LENGTH}), $7::int,
-        $8::varchar({MAX_OID_LENGTH}), $9::text, $10::text, $11::bytea)
+VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
+        $6::varchar({MAX_OID_LENGTH}), $7::int, $8::varchar({MAX_OID_LENGTH}),
+        $9::text, $10::text, $11::bytea)
 ON CONFLICT (zoid)
 DO UPDATE SET
     tid = EXCLUDED.tid,
