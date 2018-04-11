@@ -182,13 +182,13 @@ INSERT_BLOB_CHUNK = f"""
 """
 
 
-READ_BLOB_CHUNKS = """
+READ_BLOB_CHUNKS = f"""
     SELECT * from blobs
     WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
     ORDER BY chunk_index
 """
 
-READ_BLOB_CHUNK = """
+READ_BLOB_CHUNK = f"""
     SELECT * from blobs
     WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
     AND chunk_index = $2::int
