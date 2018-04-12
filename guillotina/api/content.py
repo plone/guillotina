@@ -824,3 +824,18 @@ async def addable_types(context, request):
         for type_name, factory in FACTORY_CACHE.items():
             types.append(type_name)
     return types
+
+
+@configure.service(
+    context=IAsyncContainer, method='GET', name="@invalidate-cache",
+    permission='guillotina.ModifyContent',
+    summary='Invalidate cache of object',
+    responses={
+        "200": {
+            "description": "Successfully invalidated"
+        }
+    })
+async def invalidate_cache(context, request):
+    txn = get_transaction(request)
+    cache_keys = txn._cache.get_cache_keys(context)
+    await txn._cache.delete_all(cache_keys)
