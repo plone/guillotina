@@ -193,7 +193,7 @@ class DefaultPOST(Service):
                 status=412,
                 reason=error_reasons.DESERIALIZATION_FAILED)
 
-        await deserializer(data, validate_all=True)
+        await deserializer(data, validate_all=True, create=True)
 
         # Local Roles assign owner as the creator user
         get_owner = get_utility(IGetOwner)

@@ -15,11 +15,14 @@ async def run():
     count = (await conn.fetch('select count(*) from objects;'))[0][0]
     print(f'{count} total objects')
     keys = []
+    ids = []
     for idx in range(args.segments - 1):
         offset = round((count / args.segments) * (idx + 1))
         print(f'getting offset {offset}')
         keys.append((await conn.fetch(
             f'select zoid from objects order by zoid limit 1 offset {offset};'))[0][0])
+        ids.append((await conn.fetch(
+            f'select id from objects order by id limit 1 offset {offset};'))[0][0])
 
     print(f'splitting on keys: {keys}')
     sql = 'ALTER TABLE objects SPLIT AT VALUES {};'.format(
@@ -36,6 +39,12 @@ async def run():
 
     sql = 'ALTER INDEX objects@object_parent SPLIT AT VALUES {};'.format(
         ', '.join([f"('{k}')" for k in keys])
+    )
+    print(f'Running SQL: {sql}')
+    await conn.execute(sql)
+
+    sql = 'ALTER INDEX objects@object_id SPLIT AT VALUES {};'.format(
+        ', '.join([f"('{k}')" for k in ids])
     )
     print(f'Running SQL: {sql}')
     await conn.execute(sql)

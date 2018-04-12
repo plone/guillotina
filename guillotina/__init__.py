@@ -25,6 +25,7 @@ if os.environ.get('GDEBUG', '').lower() in ('true', 't', '1'):  # pragma: no cov
     import asyncpg
     import time
     original_execute = asyncpg.connection.Connection._do_execute
+    logger.error('RUNNING IN DEBUG MODE')
 
     def _record(query, duration):
         # log each query on the transaction object...
