@@ -827,7 +827,7 @@ async def addable_types(context, request):
 
 
 @configure.service(
-    context=IAsyncContainer, method='GET', name="@invalidate-cache",
+    method='GET', name="@invalidate-cache",
     permission='guillotina.ModifyContent',
     summary='Invalidate cache of object',
     responses={
