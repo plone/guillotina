@@ -215,7 +215,7 @@ class DummyStorage(BaseStorage):
 
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
         children = self.__db[oid]['children']
-        keys = [k for k in sorted(children.keys())]
+        keys = [k for k in sorted(children.values())]
         start = (page - 1) * page_size
         end = start + page_size
         return [self.__db[key]['id'] for key in keys[start:end]]
