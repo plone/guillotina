@@ -3,22 +3,6 @@ from zope.interface.interface import TAGGED_DATA
 import sys
 
 
-class Fieldset(object):
-
-    def __init__(self, __name__, label=None, description=None, fields=None):
-        self.__name__ = __name__
-        self.label = label or __name__
-        self.description = description
-
-        if fields:
-            self.fields = fields
-        else:
-            self.fields = []
-
-    def __repr__(self):
-        return "<Fieldset '%s' of %s>" % (self.__name__, ', '.join(self.fields))
-
-
 class DirectiveClass(type):
     """A Directive is used to apply tagged values to a Schema
     """
@@ -92,18 +76,6 @@ def merged_tagged_value_dict(iface, name):
     return tv
 
 
-class fieldset(MetadataListDirective):  # noqa: N801
-    """Directive used to create fieldsets
-    """
-    key = 'guillotina.directives.fieldsets'
-
-    def factory(self, name, label=None, description=None, fields=None, **kw):
-        fieldset = Fieldset(name, label=label, description=description, fields=fields)  # noqa
-        for (key, value) in kw.items():
-            setattr(fieldset, key, value)
-        return [fieldset]
-
-
 class read_permission(MetadataDictDirective):  # noqa: N801
     """Directive used to set a field read permission
     """
@@ -174,6 +146,6 @@ class index(MetadataDictDirective):  # noqa: N801
         """
         def _func(func):
             kwargs['accessor'] = func
-            cls.apply(*args, **kwargs)
+            cls.apply(*args, **kwargs)  # pylint: disable=E1101
             return func
         return _func
