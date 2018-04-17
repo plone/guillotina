@@ -37,14 +37,11 @@ class NotAllowedContentType(Exception):
 
 class ConflictIdOnContainer(Exception):
 
-    def __init__(self, container, ident):
-        self.container = container
-        self.ident = ident
+    def __init__(self, pg_exc):
+        self.pg_exc = pg_exc
 
     def __repr__(self):
-        return "Conflict ID {ident} on {path}".format(
-            ident=self.ident,
-            path=self.container)
+        return f"Conflict ID {self.pg_exc.detail or self.pg_exc.message}"
 
 
 class UnRetryableRequestError(Exception):

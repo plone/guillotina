@@ -44,6 +44,7 @@ from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.utils import convert_interfaces_to_schema
@@ -192,7 +193,7 @@ class DefaultPOST(Service):
                 status=412,
                 reason=error_reasons.DESERIALIZATION_FAILED)
 
-        await deserializer(data, validate_all=True)
+        await deserializer(data, validate_all=True, create=True)
 
         # Local Roles assign owner as the creator user
         get_owner = get_utility(IGetOwner)
@@ -213,7 +214,7 @@ class DefaultPOST(Service):
 
         serializer = query_multi_adapter(
             (obj, self.request),
-            IResourceSerializeToJson
+            IResourceSerializeToJsonSummary
         )
         response = await serializer()
         return Response(response=response, headers=headers, status=201)
@@ -823,3 +824,18 @@ async def addable_types(context, request):
         for type_name, factory in FACTORY_CACHE.items():
             types.append(type_name)
     return types
+
+
+@configure.service(
+    method='GET', name="@invalidate-cache",
+    permission='guillotina.ModifyContent',
+    summary='Invalidate cache of object',
+    responses={
+        "200": {
+            "description": "Successfully invalidated"
+        }
+    })
+async def invalidate_cache(context, request):
+    txn = get_transaction(request)
+    cache_keys = txn._cache.get_cache_keys(context)
+    await txn._cache.delete_all(cache_keys)

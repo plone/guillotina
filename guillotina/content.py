@@ -15,10 +15,10 @@ from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.component.factory import Factory
+from guillotina.db import oid
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import ObjectLoadedEvent
-from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
@@ -56,7 +56,6 @@ import guillotina.db.orm.base
 import os
 import pathlib
 import typing
-import uuid
 
 
 _zone = tzutc()  # utz tz is much faster than local tz info
@@ -84,19 +83,21 @@ class ResourceFactory(Factory):
         self.allowed_types = allowed_types
 
     @profilable
-    def __call__(self, id, *args, **kw):
+    def __call__(self, id, parent=None, *args, **kw):
         obj = super(ResourceFactory, self).__call__(*args, **kw)
+        if parent is not None:
+            obj.__parent__ = parent
         obj.type_name = self.type_name
         now = datetime.now(tz=_zone)
         obj.creation_date = now
         obj.modification_date = now
         if id is None:
             if obj._p_oid is None:
-                # uuid uses _p_oid...
-                obj._p_oid = uuid.uuid4().hex
-            obj.id = obj._p_oid
+                obj._p_oid = oid.generate_oid(obj)
+            obj.id = oid.get_short_oid(obj._p_oid)
         else:
             obj.id = id
+        obj.__name__ = obj.id
         apply_markers(obj)
         return obj
 
@@ -223,15 +224,9 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
             raise NotAllowedContentType(str(container), type_)
 
     # We create the object with at least the ID
-    obj = factory(id=id_)
-    obj.__parent__ = container
-    obj.__name__ = obj.id
+    obj = factory(id=id_, parent=container)
     for key, value in kw.items():
         setattr(obj, key, value)
-
-    if request is None or 'OVERWRITE' not in request.headers:
-        if await container.async_contains(obj.id):
-            raise ConflictIdOnContainer(str(container), obj.id)
 
     obj.__new_marker__ = True
 

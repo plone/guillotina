@@ -18,4 +18,6 @@ ENV LC_ALL C.UTF-8
 
 # Install buildout
 RUN pip install -r /requirements.txt
-RUN pip install guillotina==$(cat VERSION) || pip install guillotina
+COPY . /app
+RUN pip install /app
+# RUN pip install guillotina==$(cat VERSION) || pip install guillotina

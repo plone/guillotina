@@ -1,6 +1,8 @@
 from guillotina import glogging
+from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages import pg
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 
@@ -10,11 +12,12 @@ import asyncpg
 logger = glogging.getLogger('guillotina')
 
 # upsert without checking matching tids on updated object
-NAIVE_UPSERT = """
+NAIVE_UPSERT = f"""
 INSERT INTO objects
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
-VALUES ($1::varchar(32), $2::int, $3::int, $4::int, $5::boolean, $6::varchar(32), $7::int,
-        $8::varchar(32), $9::text, $10::text, $11::bytea)
+VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
+        $6::varchar({MAX_OID_LENGTH}), $7::int, $8::varchar({MAX_OID_LENGTH}),
+        $9::text, $10::text, $11::bytea)
 ON CONFLICT (zoid)
 DO UPDATE SET
     tid = EXCLUDED.tid,
@@ -31,43 +34,44 @@ RETURNING NOTHING"""
 
 
 # update without checking matching tids on updated object
-UPDATE = """
+UPDATE = f"""
 UPDATE objects
 SET
     tid = $2::int,
     state_size = $3::int,
     part = $4::int,
     resource = $5::boolean,
-    of = $6::varchar(32),
+    of = $6::varchar({MAX_OID_LENGTH}),
     otid = $7::int,
-    parent_id = $8::varchar(32),
+    parent_id = $8::varchar({MAX_OID_LENGTH}),
     id = $9::text,
     type = $10::text,
     state = $11::bytea
 WHERE
-    zoid = $1::varchar(32)
+    zoid = $1::varchar({MAX_OID_LENGTH})
     AND tid = $7::int
 RETURNING tid, otid"""
 
 
 NEXT_TID = """SELECT unique_rowid()"""
 
-DELETE_FROM_BLOBS = """DELETE FROM blobs WHERE zoid = $1::varchar(32) RETURNING NOTHING;"""
+DELETE_FROM_BLOBS = f"""
+    DELETE FROM blobs WHERE zoid = $1::varchar({MAX_OID_LENGTH}) RETURNING NOTHING;"""
 
-DELETE_BY_PARENT_OID = '''DELETE FROM objects
-WHERE parent_id = $1::varchar(32)
+DELETE_BY_PARENT_OID = f'''DELETE FROM objects
+WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
 RETURNING NOTHING;'''
 
-BATCHED_GET_CHILDREN_OIDS = """
+BATCHED_GET_CHILDREN_OIDS = f"""
 SELECT zoid FROM objects
-WHERE parent_id = $1::varchar(32)
+WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
 ORDER BY zoid
 LIMIT $2::int
 OFFSET $3::int;"""
 
 DELETE_OBJECT = f"""
 DELETE FROM objects
-WHERE zoid = $1::varchar(32)
+WHERE zoid = $1::varchar({MAX_OID_LENGTH})
 RETURNING NOTHING;
 """
 
@@ -136,7 +140,12 @@ SAVEPOINT cockroach_restart;''')
 
     async def commit(self):
         assert self._status in ('started',)
-        await self._conn.execute(self.commit_statement)
+        try:
+            await self._conn.execute(self.commit_statement)
+        except asyncpg.exceptions.UniqueViolationError as ex:
+            if 'duplicate key value (parent_id,id)' in ex.message:
+                raise ConflictIdOnContainer(ex)
+            raise
         self._status = 'committed'
 
     async def restart(self):
@@ -172,13 +181,13 @@ class CockroachStorage(pg.PostgresqlStorage):
     _object_schema = pg.PostgresqlStorage._object_schema.copy()
     del _object_schema['json']  # no json db support
     _object_schema.update({
-        'of': 'VARCHAR(32)',
-        'parent_id': 'VARCHAR(32)'
+        'of': f'VARCHAR({MAX_OID_LENGTH})',
+        'parent_id': f'VARCHAR({MAX_OID_LENGTH})'
     })
 
     _blob_schema = pg.PostgresqlStorage._blob_schema.copy()
     _blob_schema.update({
-        'zoid': 'VARCHAR(32) NOT NULL',
+        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL',
     })
 
     _initialize_statements = [
@@ -189,7 +198,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
         'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
         'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);'
+        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index)'
     ]
 
     _db_transaction_factory = CockroachDBTransaction
@@ -248,6 +257,10 @@ class CockroachStorage(pg.PostgresqlStorage):
                     writer.type,         # Guillotina type
                     pickled              # Pickle state)
                 )
+            except asyncpg.exceptions.UniqueViolationError as ex:
+                if 'duplicate key value (parent_id,id)' in ex.detail:
+                    raise ConflictIdOnContainer(ex)
+                raise
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if 'another operation is in progress' in ex.args[0]:
                     raise ConflictError(

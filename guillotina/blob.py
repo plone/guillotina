@@ -1,8 +1,7 @@
+from guillotina.db.oid import generate_oid
 from guillotina.exceptions import BlobChunkNotFound
 from guillotina.transactions import get_transaction
 from io import BytesIO
-
-import uuid
 
 
 class Blob:
@@ -17,7 +16,7 @@ class Blob:
     """
 
     def __init__(self, resource):
-        self.bid = uuid.uuid4().hex
+        self.bid = generate_oid(resource)
         self.resource_zoid = resource._p_oid
         self.size = 0
         self.chunks = 0

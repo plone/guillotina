@@ -130,8 +130,9 @@ class ContainerRequesterAsyncContextManager(object):
         assert status in (200, 404)
 
 
-def create_content(factory=Item, type_name='Item', id=None):
+def create_content(factory=Item, type_name='Item', id=None, parent=None):
     obj = factory()
+    obj.__parent__ = parent
     obj.type_name = type_name
     obj._p_oid = uuid.uuid4().hex
     if id is None:

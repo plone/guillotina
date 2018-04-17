@@ -1,6 +1,7 @@
 from guillotina.db import ROOT_ID
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
+from guillotina.exceptions import ConflictIdOnContainer
 from zope.interface import implementer
 
 import asyncio
@@ -77,6 +78,12 @@ class DummyStorage(BaseStorage):
         if part is None:
             part = 0
         existing = self.__db.get(oid, {})
+        if obj.__new_marker__ and writer.parent_id in self.__db:
+            # look in all the children for object of same id
+            parent = self.__db[writer.parent_id]
+            if writer.id in parent['children']:
+                raise ConflictIdOnContainer(Exception('Duplicate id'))
+
         tobj = {
             'zoid': oid,
             'tid': txn._tid,
@@ -208,7 +215,7 @@ class DummyStorage(BaseStorage):
 
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
         children = self.__db[oid]['children']
-        keys = [k for k in sorted(children.keys())]
+        keys = [k for k in sorted(children.values())]
         start = (page - 1) * page_size
         end = start + page_size
         return [self.__db[key]['id'] for key in keys[start:end]]

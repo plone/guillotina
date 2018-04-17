@@ -6,6 +6,7 @@ from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
+from guillotina.db.transaction import _EMPTY
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.exceptions import DeserializationError
@@ -41,7 +42,7 @@ class DeserializeFromJson(object):
 
         self.permission_cache = {}
 
-    async def __call__(self, data, validate_all=False, ignore_errors=False):
+    async def __call__(self, data, validate_all=False, ignore_errors=False, create=False):
         errors = []
 
         # do behavior first in case they modify context values
@@ -50,6 +51,17 @@ class DeserializeFromJson(object):
             if dotted_name not in data:
                 # syntax {"namespace.IBehavior": {"foo": "bar"}}
                 # we're not even patching this behavior if no iface found in payload
+                if create:
+                    # signal to caching engine to cache no data here so
+                    # we prevent a future lookup
+                    try:
+                        txn = self.context._p_jar
+                        await txn._cache.set(
+                            _EMPTY, container=self.context,
+                            id=behavior.__annotations_data_key__,
+                            variant='annotation')
+                    except AttributeError:
+                        pass
                 continue
             if IAsyncBehavior.implementedBy(behavior.__class__):
                 # providedBy not working here?

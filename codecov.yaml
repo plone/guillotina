@@ -1,0 +1,7 @@
+ignore:
+  - "*/tests/*"
+  - "*/testfiles/*"
+  - "*/examples/*"
+  - "*/documentation/*"
+  - "*/docs/*"
+  - "*/commands/*"

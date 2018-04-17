@@ -5,7 +5,6 @@ from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
-from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
@@ -175,13 +174,12 @@ class TestDataCommand(Command):
             return
         _id = str(page_data['pageid'])
         print(f"{self._count} importing {page_data['title']}")
-        try:
+        obj = await folder.async_get(_id)
+        if obj is None:
             obj = await create_content_in_container(
                 folder, 'Folder', _id, id=_id,
                 creators=('root',), contributors=('root',),
                 title=page_data['title'])
-        except ConflictIdOnContainer:
-            obj = await folder.async_get(_id)
         behavior = IDublinCore(obj)
         await behavior.load(create=True)
         behavior.description = page_data.get('extract', '')
