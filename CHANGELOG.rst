@@ -1,4 +1,4 @@
-3.0.9 (unreleased)
+3.1.0 (unreleased)
 ------------------
 
 - Use unique constraint instead of doing lookups on existing content for inserts
