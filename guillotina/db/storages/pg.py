@@ -255,10 +255,10 @@ class LightweightConnection(asyncpg.connection.Connection):
         )
 
     async def add_listener(self, channel, callback):
-        raise NotImplemented('Does not support listeners')
+        raise NotImplementedError('Does not support listeners')
 
     async def remove_listener(self, channel, callback):
-        raise NotImplemented('Does not support listeners')
+        raise NotImplementedError('Does not support listeners')
 
 
 class PGVacuum:
@@ -699,7 +699,7 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
         if error is not None:
             if retries > 2:
-                raise error
+                raise error  # pylint: disable=E0702
 
             restart = rollback = False
             if isinstance(error, asyncpg.exceptions.InternalServerError):

@@ -821,7 +821,7 @@ async def addable_types(context, request):
     types = constrains and constrains.get_allowed_types()
     if types is None:
         types = []
-        for type_name, factory in FACTORY_CACHE.items():
+        for type_name in FACTORY_CACHE:
             types.append(type_name)
     return types
 

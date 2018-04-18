@@ -371,7 +371,8 @@ class TraversalRouter(AbstractRouter):
         security = get_adapter(request, IInteraction)
 
         if request.method not in app_settings['http_methods']:
-            raise HTTPMethodNotAllowed()
+            raise HTTPMethodNotAllowed(
+                method=request.method, allowed_methods=[k for k in app_settings['http_methods']])
         method = app_settings['http_methods'][request.method]
 
         language = language_negotiation(request)

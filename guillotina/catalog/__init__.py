@@ -11,10 +11,10 @@ from guillotina.utils import get_content_path
 global_roles_for_permission = role_permission_manager.get_roles_for_permission
 
 
-index.apply(IResource, 'uuid', type='keyword')
-index.apply(IResource, 'title')
-index.apply(IResource, 'modification_date', type='date')
-index.apply(IResource, 'creation_date', type='date')
+index.apply(IResource, 'uuid', type='keyword')  # pylint: disable=E1101
+index.apply(IResource, 'title')  # pylint: disable=E1101
+index.apply(IResource, 'modification_date', type='date')  # pylint: disable=E1101
+index.apply(IResource, 'creation_date', type='date')  # pylint: disable=E1101
 
 
 @index.with_accessor(IResource, 'access_roles', type='keyword')

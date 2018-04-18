@@ -59,6 +59,8 @@ class SerializeToJson(object):
         result = {
             '@id': IAbsoluteURL(self.context, self.request)(),
             '@type': self.context.type_name,
+            '@name': self.context.__name__,
+            '@uid': self.context.uuid,
             'parent': parent_summary,
             'creation_date': json_compatible(self.context.creation_date),
             'modification_date': json_compatible(self.context.modification_date),
@@ -196,7 +198,9 @@ class DefaultJSONSummarySerializer(object):
 
         summary = json_compatible({
             '@id': IAbsoluteURL(self.context)(),
+            '@name': self.context.__name__,
             '@type': self.context.type_name,
+            '@uid': self.context.uuid,
             'UID': self.context.uuid
         })
         return summary

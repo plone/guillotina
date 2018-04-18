@@ -161,7 +161,7 @@ def get_all_possible_schemas_for_type(type_name):
         result.add(factory.schema)
     for schema in factory.behaviors or ():
         result.add(schema)
-    for iface, utility in get_utilities_for(IBehavior):
+    for _, utility in get_utilities_for(IBehavior):
         if utility.for_.isEqualOrExtendedBy(factory.schema):
             result.add(utility.interface)
     return [b for b in result]
@@ -251,7 +251,7 @@ async def get_all_behaviors(content, create=False, load=True) -> list:
     for behavior_schema in get_all_behavior_interfaces(content):
         behavior = behavior_schema(content)
         if load:
-            if IAsyncBehavior.implementedBy(behavior.__class__):
+            if IAsyncBehavior.implementedBy(behavior.__class__):  # pylint: disable=E1120
                 # providedBy not working here?
                 await behavior.load(create=create)
         behaviors.append((behavior_schema, behavior))
@@ -494,7 +494,7 @@ class Folder(Resource):
             yield key, value
 
     async def async_values(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
-        async for key, value in self._get_transaction().items(self):
+        async for _, value in self._get_transaction().items(self):
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))
             yield value
