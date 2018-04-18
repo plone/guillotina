@@ -29,12 +29,6 @@ import typing
 
 
 try:
-    from aiohttp.web_server import RequestHandler
-except ImportError:
-    from aiohttp.web import RequestHandler  # noqa
-
-
-try:
     random = random.SystemRandom()
     using_sys_random = True
 except NotImplementedError:
@@ -72,7 +66,7 @@ def get_content_depth(content: IResource) -> int:
     Calculate the depth of a resource object
     """
     depth = 0
-    for parent in iter_parents(content):
+    for _ in iter_parents(content):
         depth += 1
     return depth
 
@@ -129,8 +123,8 @@ def strings_differ(string1: str, string2: str) -> bool:
     return invalid_bits != 0
 
 
-def get_random_string(length: int=30,
-                      allowed_chars: str=string.ascii_letters + string.digits) -> str:
+def get_random_string(length: int = 30,
+                      allowed_chars: str = string.ascii_letters + string.digits) -> str:
     """
     Heavily inspired by Plone/Django
     Returns a securely generated random string.
@@ -162,7 +156,8 @@ def resolve_dotted_name(name: str) -> type:
     return found
 
 
-def get_caller_module(level: int=2, sys: types.ModuleType=sys) -> types.ModuleType:
+def get_caller_module(level: int = 2,
+                      sys: types.ModuleType = sys) -> types.ModuleType:  # pylint: disable=W0621
     """
     Pulled out of pyramid
     """
@@ -173,7 +168,7 @@ def get_caller_module(level: int=2, sys: types.ModuleType=sys) -> types.ModuleTy
 
 
 def resolve_module_path(path: str) -> str:
-    if type(path) is str and path[0] == '.':
+    if isinstance(path, str) and path[0] == '.':
         caller_mod = get_caller_module()
         caller_path = get_module_dotted_name(caller_mod)
         caller_path = '.'.join(caller_path.split('.')[:-path.count('..')])
@@ -267,7 +262,7 @@ async def get_containers(request, transaction_strategy='none'):
             items = {(k, v) async for k, v in db.async_items()}
             await tm.abort(txn=txn)
 
-            for s_id, container in items:
+            for _, container in items:
                 request._txn = txn = await tm.begin(request)
                 tm.request.container = container
                 tm.request._container_id = container.id
@@ -349,7 +344,7 @@ def lazy_apply(func, *call_args, **call_kwargs):
         param = sig.parameters[param_name]
         if param.kind == inspect.Parameter.KEYWORD_ONLY:
             if param.name in call_kwargs:
-                kwargs.append(call_kwargs.pop(param.name))
+                args.append(call_kwargs.pop(param.name))
             continue
         if param.kind == inspect.Parameter.VAR_KEYWORD:
             kwargs.update(call_kwargs)  # this will be the last iteration...
