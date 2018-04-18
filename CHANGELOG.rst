@@ -1,4 +1,4 @@
-3.1.0 (unreleased)
+3.1.0 (2018-04-18)
 ------------------
 
 - Use unique constraint instead of doing lookups on existing content for inserts
