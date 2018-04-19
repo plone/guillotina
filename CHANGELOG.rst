@@ -1,7 +1,8 @@
 3.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix DUMMY_FILE loading error
+  [vangheem]
 
 
 3.1.0 (2018-04-18)

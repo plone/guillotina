@@ -136,7 +136,7 @@ class DeserializeFromJson(object):
                             'message': e.message, 'field': name, 'error': e})
                     except AttributeError:
                         logger.warning(
-                            'AttributeError setting data on field', exc_info=True)
+                            f'AttributeError setting data on field {name}', exc_info=True)
                     except Exception:
                         if not isinstance(getattr(type(obj), name, None), property):
                             # we can not set data on properties
