@@ -5,6 +5,7 @@ from guillotina import configure
 from guillotina import error_reasons
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import DeserializationError
+from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
 from guillotina.exceptions import UnRetryableRequestError
@@ -30,7 +31,7 @@ def exception_handler_factory(reason, name='PreconditionFailed',
     def handler(exc, error='', eid=None):
         data = render_error_response(name, reason, eid)
         if serialize_exc:
-            data['message'] = str(exc)
+            data['message'] = repr(exc)
         return klass(
             text=json.dumps(data),
             headers={
@@ -62,6 +63,11 @@ register_handler_factory(
                               serialize_exc=True, klass=HTTPConflict))
 register_handler_factory(
     DeserializationError,
+    exception_handler_factory(error_reasons.DESERIALIZATION_FAILED,
+                              'DeserializationError',
+                              serialize_exc=True))
+register_handler_factory(
+    InvalidContentType,
     exception_handler_factory(error_reasons.DESERIALIZATION_FAILED,
                               'DeserializationError',
                               serialize_exc=True))
