@@ -1,6 +1,9 @@
 3.1.1 (unreleased)
 ------------------
 
+- Handle invalid type on content creation with 412
+  [vangheem]
+
 - Fix DUMMY_FILE loading error
   [vangheem]
 

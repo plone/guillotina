@@ -5,8 +5,8 @@ from guillotina.interfaces import IForbiddenAttribute
 from guillotina.interfaces import IUnauthorized
 from guillotina.interfaces.exceptions import ISerializableException
 from zope.interface import implementer
-from zope.interface.exceptions import Invalid  # noqa
-from zope.interface.interfaces import ComponentLookupError  # noqa
+from zope.interface.exceptions import Invalid  # noqa pylint: disable=W0611
+from zope.interface.interfaces import ComponentLookupError  # noqa pylint: disable=W0611
 
 import ujson
 
@@ -14,34 +14,48 @@ import ujson
 class NoPermissionToAdd(Exception):
 
     def __init__(self, container, content_type):
+        super().__init__()
         self.container = container
         self.content_type = content_type
 
     def __repr__(self):
-        return "Not permission to add {content_type} on {path}".format(
+        return "Not permission to add {content_type} on {container}".format(
             content_type=self.content_type,
-            path=self.path)
+            container=self.container)
+
+
+class InvalidContentType(Exception):
+    def __init__(self, content_type):
+        super().__init__()
+        self.content_type = content_type
+
+    def __repr__(self):
+        return "Invalid type: {content_type}".format(
+            content_type=self.content_type)
 
 
 class NotAllowedContentType(Exception):
 
     def __init__(self, container, content_type):
+        super().__init__()
         self.container = container
         self.content_type = content_type
 
     def __repr__(self):
-        return "Not allowed {content_type} on {path}".format(
+        return "Not allowed {content_type} on {container}".format(
             content_type=self.content_type,
-            path=self.path)
+            container=self.container)
 
 
 class ConflictIdOnContainer(Exception):
 
     def __init__(self, pg_exc):
+        super().__init__()
         self.pg_exc = pg_exc
 
     def __repr__(self):
-        return f"Conflict ID {self.pg_exc.detail or self.pg_exc.message}"
+        msg = getattr(self.pg_exc, 'detail', None) or getattr(self.pg_exc, 'message', None)
+        return f"Conflict ID {msg}"
 
 
 class UnRetryableRequestError(Exception):
@@ -51,6 +65,7 @@ class UnRetryableRequestError(Exception):
 class PreconditionFailed(Exception):
 
     def __init__(self, container, precondition):
+        super().__init__()
         self.container = container
         self.precondition = precondition
 
@@ -90,6 +105,7 @@ class NoInteraction(Exception):
 class ConflictError(Exception):
 
     def __init__(self, msg='', oid=None, txn=None, old_serial=None, writer=None):
+        super().__init__()
         if oid is not None:
             conflict_summary = self.get_conflict_summary(oid, txn, old_serial, writer)
             msg = f'{msg}.\n{conflict_summary}'
@@ -134,6 +150,7 @@ class ComponentConfigurationError(ValueError, ConfigurationError):
 class ConfigurationConflictError(ConfigurationError):
 
     def __init__(self, conflicts):
+        super().__init__()
         self._conflicts = conflicts
 
     def __str__(self):  # pragma NO COVER
@@ -174,13 +191,14 @@ class DeserializationError(Exception):
     """
 
     def __init__(self, errors):
+        super().__init__()
         self.msg = self.message = 'Error deserializing content'
         self.errors = errors
 
     def __str__(self):
         return '{} ({})'.format(
             self.msg,
-            ujson.dumps(self.json_data()))
+            ujson.dumps(self.json_data()))  # pylint: disable=I1101
 
     def json_data(self):
         errors = []
@@ -200,6 +218,7 @@ class ValueDeserializationError(Exception):
     """
 
     def __init__(self, field, value, msg):
+        super().__init__()
         self.msg = self.message = msg
         self.field = field
         self.value = value
@@ -211,8 +230,7 @@ class QueryParsingError(Exception):
 
 
 class FileNotFoundException(Exception):
-    '''
-    '''
+    pass
 
 
 class InvalidRoute(HTTPNotFound):

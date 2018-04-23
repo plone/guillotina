@@ -19,6 +19,7 @@ from guillotina.db import oid
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import ObjectLoadedEvent
+from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
@@ -51,6 +52,7 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import noLongerProvides
+from zope.interface.interfaces import ComponentLookupError
 
 import guillotina.db.orm.base
 import os
@@ -141,7 +143,10 @@ def get_cached_factory(type_name):
     if type_name in FACTORY_CACHE:
         factory = FACTORY_CACHE[type_name]
     else:
-        factory = get_utility(IResourceFactory, type_name)
+        try:
+            factory = get_utility(IResourceFactory, type_name)
+        except ComponentLookupError:
+            raise InvalidContentType(type_name)
         FACTORY_CACHE[type_name] = factory
     return factory
 

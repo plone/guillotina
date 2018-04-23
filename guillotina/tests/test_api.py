@@ -9,7 +9,7 @@ from zope.interface import Interface
 import json
 
 
-class ITestingRegistry(Interface):
+class ITestingRegistry(Interface):  # pylint: disable=E0239
     enabled = schema.Bool(
         title="Example attribute")
 
@@ -29,7 +29,7 @@ class TestAddon(Addon):
 
 async def test_get_root(container_requester):
     async with container_requester as requester:
-        response, status = await requester('GET', '/')
+        response, _ = await requester('GET', '/')
         assert response['static_directory'] == ['static', 'module_static', 'jsapp_static']
         assert response['databases'] == ['db']
         assert response['static_file'] == ['favicon.ico']
@@ -38,14 +38,14 @@ async def test_get_root(container_requester):
 async def test_get_database(container_requester):
     """Get the database object."""
     async with container_requester as requester:
-        response, status = await requester('GET', '/db')
-        len(response['containers']) == 1
+        response, _ = await requester('GET', '/db')
+        assert len(response['containers']) == 1
 
 
 async def test_get_guillotina(container_requester):
     """Get the root guillotina container."""
     async with container_requester as requester:
-        response, status = await requester('GET', '/db/guillotina')
+        response, _ = await requester('GET', '/db/guillotina')
         assert len(response['items']) == 0
 
 
@@ -80,7 +80,7 @@ async def test_get_registries(container_requester):
 async def test_get_registry_value(container_requester):
     """Check a value from registry."""
     async with container_requester as requester:
-        response, status = await requester(
+        response, _ = await requester(
             'GET',
             '/db/guillotina/@registry/guillotina.interfaces.registry.ILayers.active_layers')
         assert response['value'] == []
@@ -88,7 +88,7 @@ async def test_get_registry_value(container_requester):
 
 async def test_create_content(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -106,10 +106,25 @@ async def test_create_content(container_requester):
             assert obj.title == 'Item1'
 
 
+async def test_create_content_types_does_not_exist(container_requester):
+    async with container_requester as requester:
+        resp, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "ItemTypeThatDoesNotExist",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 412
+        assert resp['message'] == 'Invalid type: ItemTypeThatDoesNotExist'
+
+
 async def test_create_delete_contenttype(container_requester):
     """Create and delete a content type."""
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -119,7 +134,7 @@ async def test_create_delete_contenttype(container_requester):
             })
         )
         assert status == 201
-        response, status = await requester('DELETE', '/db/guillotina/item1')
+        _, status = await requester('DELETE', '/db/guillotina/item1')
         assert status == 200
 
 
@@ -153,7 +168,7 @@ async def test_register_registry(container_requester):
 
 async def test_create_contenttype_with_date(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -164,7 +179,7 @@ async def test_create_contenttype_with_date(container_requester):
         )
         assert status == 201
         date_to_test = "2016-11-30T14:39:07.394273+01:00"
-        response, status = await requester(
+        _, status = await requester(
             'PATCH',
             '/db/guillotina/item1',
             data=json.dumps({
@@ -183,13 +198,13 @@ async def test_create_contenttype_with_date(container_requester):
             from guillotina.behaviors.dublincore import IDublinCore
             behavior = IDublinCore(obj)
             await behavior.load()
-            assert behavior.creation_date.isoformat() == date_to_test
-            assert behavior.expiration_date.isoformat() == date_to_test
+            assert behavior.creation_date.isoformat() == date_to_test  # pylint: disable=E1101
+            assert behavior.expiration_date.isoformat() == date_to_test  # pylint: disable=E1101
 
 
 async def test_create_duplicate_id(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -199,7 +214,7 @@ async def test_create_duplicate_id(container_requester):
             })
         )
         assert status == 201
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -213,7 +228,7 @@ async def test_create_duplicate_id(container_requester):
 
 async def test_create_nested_object(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -234,7 +249,7 @@ async def test_create_nested_object(container_requester):
 
 async def test_get_addons(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'GET', '/db/guillotina/@addons'
         )
         assert status == 200
@@ -242,7 +257,7 @@ async def test_get_addons(container_requester):
 
 async def test_install_invalid_addon_should_give_error(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/@addons',
             data=json.dumps({
@@ -312,7 +327,7 @@ async def test_uninstall_addons(container_requester):
 
 async def test_uninstall_invalid_addon(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'DELETE',
             '/db/guillotina/@addons',
             data=json.dumps({
@@ -321,7 +336,7 @@ async def test_uninstall_invalid_addon(container_requester):
         )
         assert status == 412
 
-        response, status = await requester(
+        _, status = await requester(
             'DELETE',
             '/db/guillotina/@addons',
             data=json.dumps({
@@ -348,7 +363,7 @@ async def test_get_logged_user_info(container_requester):
 
 async def test_not_create_content_with_invalid_id(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -362,7 +377,7 @@ async def test_not_create_content_with_invalid_id(container_requester):
 
 async def test_get_api_def(container_requester):
     async with container_requester as requester:
-        response, status = await requester('GET', '/@apidefinition')
+        _, status = await requester('GET', '/@apidefinition')
         assert status == 200
 
 
@@ -377,7 +392,7 @@ async def test_get_subscribers(container_requester):
 
 async def test_move_content(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -385,7 +400,7 @@ async def test_move_content(container_requester):
                 "id": "container1"
             })
         )
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -393,7 +408,7 @@ async def test_move_content(container_requester):
                 "id": "container2"
             })
         )
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/container1',
             data=json.dumps({
@@ -402,7 +417,7 @@ async def test_move_content(container_requester):
             })
         )
 
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/container1/foobar/@move',
             data=json.dumps({
@@ -410,13 +425,13 @@ async def test_move_content(container_requester):
             })
         )
 
-        response, status = await requester('GET', '/db/guillotina/container2/foobar')
+        _, status = await requester('GET', '/db/guillotina/container2/foobar')
         assert status == 200
-        response, status = await requester('GET', '/db/guillotina/container1/foobar')
+        _, status = await requester('GET', '/db/guillotina/container1/foobar')
         assert status == 404
 
         # move back with new id
-        response, status = await requester(
+        _, status = await requester(
             'POST',
             '/db/guillotina/container2/foobar/@move',
             data=json.dumps({
@@ -425,15 +440,15 @@ async def test_move_content(container_requester):
             })
         )
 
-        response, status = await requester('GET', '/db/guillotina/container1/foobar_new')
+        _, status = await requester('GET', '/db/guillotina/container1/foobar_new')
         assert status == 200
-        response, status = await requester('GET', '/db/guillotina/container2/foobar')
+        _, status = await requester('GET', '/db/guillotina/container2/foobar')
         assert status == 404
 
 
 async def test_duplicate_content(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -441,14 +456,14 @@ async def test_duplicate_content(container_requester):
                 "id": "foobar1"
             })
         )
-        response, status = await requester(
+        await requester(
             'POST',
             '/db/guillotina/foobar1/@duplicate'
         )
-        response, status = await requester('GET', '/db/guillotina/@ids')
+        response, _ = await requester('GET', '/db/guillotina/@ids')
         assert len(response) == 2
 
-        response, status = await requester(
+        await requester(
             'POST',
             '/db/guillotina/foobar1/@duplicate',
             data=json.dumps({
@@ -456,12 +471,12 @@ async def test_duplicate_content(container_requester):
             })
         )
 
-        response, status = await requester('GET', '/db/guillotina/@ids')
+        response, _ = await requester('GET', '/db/guillotina/@ids')
         assert len(response) == 3
         assert 'foobar2' in response
         assert 'foobar1' in response
 
-        response, status = await requester(
+        await requester(
             'POST',
             '/db/guillotina/',
             data=json.dumps({
@@ -469,7 +484,7 @@ async def test_duplicate_content(container_requester):
                 "id": "folder"
             })
         )
-        response, status = await requester(
+        await requester(
             'POST',
             '/db/guillotina/foobar1/@duplicate',
             data=json.dumps({
@@ -478,7 +493,7 @@ async def test_duplicate_content(container_requester):
             })
         )
 
-        response, status = await requester('GET', '/db/guillotina/folder/@ids')
+        response, _ = await requester('GET', '/db/guillotina/folder/@ids')
         assert len(response) == 1
         assert 'foobar' in response
 
@@ -509,9 +524,9 @@ async def test_create_content_fields(container_requester):
 
 async def test_raise_http_exception_works(container_requester):
     async with container_requester as requester:
-        response, status = await requester('POST', '/@raise-http-exception')
+        _, status = await requester('POST', '/@raise-http-exception')
         assert status == 422
-        response, status = await requester('GET', '/@raise-http-exception')
+        _, status = await requester('GET', '/@raise-http-exception')
         assert status == 422
 
 
@@ -525,7 +540,7 @@ async def test_addable_types(container_requester):
 async def test_not_allowed_to_create_container_inside_container(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:
-        response, status = await requester(
+        _, status = await requester(
             'POST', '/db/guillotina',
             data=json.dumps({
                 '@type': 'Container'
@@ -536,17 +551,17 @@ async def test_not_allowed_to_create_container_inside_container(container_reques
 async def test_get_with_include_omit(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:
-        response, status = await requester(
+        response, _ = await requester(
             'POST', '/db/guillotina',
             data=json.dumps({
                 '@type': 'Item',
                 'id': 'foobar'
             }))
-        response, status = await requester('GET', '/db/guillotina/foobar?include=title')
+        response, _ = await requester('GET', '/db/guillotina/foobar?include=title')
         assert 'title' in response
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
 
-        response, status = await requester(
+        response, _ = await requester(
             'GET', '/db/guillotina/foobar?omit=guillotina.behaviors.dublincore.IDublinCore')
         assert 'title' in response
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in response
@@ -555,11 +570,11 @@ async def test_get_with_include_omit(container_requester):
 async def test_return_correct_content_type(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:
-        response, status, headers = await requester.make_request(
+        response, _, headers = await requester.make_request(
             'GET', '/db/guillotina', accept='application/json')
         assert headers['Content-Type'] == 'application/json'
 
-        response, status, headers = await requester.make_request(
+        response, _, headers = await requester.make_request(
             'GET', '/db/guillotina', accept='text/html,*/*')
         # it will convert it to string with html
         assert 'text/html' in headers['Content-Type']
@@ -569,7 +584,7 @@ async def test_return_correct_content_type(container_requester):
 async def test_get_all_permissions(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:
-        response, status = await requester('GET', '/db/guillotina/@all_permissions')
+        _, status = await requester('GET', '/db/guillotina/@all_permissions')
         assert status == 200
 
 
@@ -578,34 +593,34 @@ async def test_items(container_requester):
     async with container_requester as requester:
         # add 20 items
         for _ in range(22):
-            response, status = await requester(
+            response, _ = await requester(
                 'POST', '/db/guillotina',
                 data=json.dumps({
                     '@type': 'Item'
                 }))
-        response, status = await requester('GET', '/db/guillotina/@items?page_size=10')
+        response, _ = await requester('GET', '/db/guillotina/@items?page_size=10')
         assert len(response['items']) == 10
         assert response['total'] == 22
         items = [i['UID'] for i in response['items']]
 
-        response, status = await requester('GET', '/db/guillotina/@items?page_size=10&page=2')
+        response, _ = await requester('GET', '/db/guillotina/@items?page_size=10&page=2')
         assert len(response['items']) == 10
         assert response['total'] == 22
         items.extend([i['UID'] for i in response['items']])
 
-        response, status = await requester('GET', '/db/guillotina/@items?page_size=10&page=3')
+        response, _ = await requester('GET', '/db/guillotina/@items?page_size=10&page=3')
         assert len(response['items']) == 2
         items.extend([i['UID'] for i in response['items']])
 
         # we should have 22 unique uids now
         assert len(set(items)) == 22
 
-        response, status = await requester(
+        response, _ = await requester(
             'GET', '/db/guillotina/@items?omit=guillotina.behaviors.dublincore.IDublinCore')
         item = response['items'][0]
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in item
 
-        response, status = await requester(
+        response, _ = await requester(
             'GET', '/db/guillotina/@items?include=title')
         item = response['items'][0]
         assert 'guillotina.behaviors.dublincore.IDublinCore' not in item
@@ -613,7 +628,7 @@ async def test_items(container_requester):
 
 async def test_debug_headers(container_requester):
     async with container_requester as requester:
-        response, status, headers = await requester.make_request(
+        _, _, headers = await requester.make_request(
             'GET', '/db/guillotina',
             headers={
                 'X-Debug': '1'
@@ -633,17 +648,17 @@ async def test_adapter_exception_handlers(container_requester):
 
 async def test_patch_with_payload_again(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
+        response, _ = await requester(
             'POST', '/db/guillotina',
             data=json.dumps({
                 '@type': 'Item',
                 'id': 'foobar'
             }))
-        response, status = await requester('GET', '/db/guillotina/foobar')
+        response, _ = await requester('GET', '/db/guillotina/foobar')
         assert not response['title']
         response['title'] = 'Foobar'
-        patch_resp, status = await requester(
+        await requester(
             'PATCH', f'/db/guillotina/foobar',
             data=json.dumps(response))
-        response, status = await requester('GET', f'/db/guillotina/foobar')
+        response, _ = await requester('GET', f'/db/guillotina/foobar')
         assert response['title'] == 'Foobar'
