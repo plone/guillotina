@@ -64,7 +64,7 @@ class SerializeToJson(object):
             'parent': parent_summary,
             'creation_date': json_compatible(self.context.creation_date),
             'modification_date': json_compatible(self.context.modification_date),
-            'UID': self.context.uuid,
+            'UID': self.context.uuid  # removed in 4.x
         }
 
         factory = get_cached_factory(self.context.type_name)
@@ -201,6 +201,7 @@ class DefaultJSONSummarySerializer(object):
             '@name': self.context.__name__,
             '@type': self.context.type_name,
             '@uid': self.context.uuid,
-            'UID': self.context.uuid
+            'UID': self.context.uuid,  # removed in 4.x
+            'title': getattr(self.context, 'title', None)
         })
         return summary
