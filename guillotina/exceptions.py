@@ -54,7 +54,8 @@ class ConflictIdOnContainer(Exception):
         self.pg_exc = pg_exc
 
     def __repr__(self):
-        return f"Conflict ID {self.pg_exc.detail or self.pg_exc.message}"
+        msg = getattr(self.pg_exc, 'detail', None) or getattr(self.pg_exc, 'message', None)
+        return f"Conflict ID {msg}"
 
 
 class UnRetryableRequestError(Exception):
@@ -197,7 +198,7 @@ class DeserializationError(Exception):
     def __str__(self):
         return '{} ({})'.format(
             self.msg,
-            ujson.dumps(self.json_data()))  # pylint: disable=E1101
+            ujson.dumps(self.json_data()))  # pylint: disable=I1101
 
     def json_data(self):
         errors = []
