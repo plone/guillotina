@@ -1,6 +1,9 @@
 3.1.1 (unreleased)
 ------------------
 
+- Provide testing annotations
+  [vangheem]
+
 - Handle invalid type on content creation with 412
   [vangheem]
 
@@ -13,10 +16,6 @@
 
 - Use unique constraint instead of doing lookups on existing content for inserts
   [vangheem]
-
-- On content creation, use summary serialization instead of full object serialization
-  [vangheem]
-
 
 3.0.8 (2018-04-06)
 ------------------

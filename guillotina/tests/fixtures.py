@@ -20,6 +20,10 @@ _dir = os.path.dirname(os.path.realpath(__file__))
 IS_TRAVIS = 'TRAVIS' in os.environ
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
 
+annotations = {
+    'testdatabase': DATABASE,
+    'travis': IS_TRAVIS
+}
 
 def base_settings_configurator(settings):
     settings["utilities"].append({
@@ -56,7 +60,7 @@ def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
 
 def get_db_settings():
     settings = testing.get_settings()
-    if DATABASE == 'DUMMY':
+    if annotations['testdatabase'] == 'DUMMY':
         return settings
 
     settings['databases']['db']['storage'] = 'postgresql'
@@ -65,17 +69,17 @@ def get_db_settings():
         'scheme': 'postgres',
         'dbname': 'guillotina',
         'user': 'postgres',
-        'host': getattr(get_db_settings, 'host', 'localhost'),
-        'port': getattr(get_db_settings, 'port', 5432),
+        'host': annotations.get('pg_host', 'localhost'),
+        'port': annotations.get('pg_port', 5432),
         'password': '',
     }
 
     options = dict(
-        host=getattr(get_db_settings, 'host', 'localhost'),
-        port=getattr(get_db_settings, 'port', 5432),
+        host=annotations.get('pg_host', 'localhost'),
+        port=annotations.get('pg_port', 5432),
     )
 
-    if DATABASE == 'cockroachdb':
+    if annotations['testdatabase'] == 'cockroachdb':
         configure_db(
             settings['databases']['db'],
             **options,
@@ -96,28 +100,27 @@ def db():
     """
     detect travis, use travis's postgres; otherwise, use docker
     """
-    if DATABASE == 'DUMMY':
+    if annotations['testdatabase'] == 'DUMMY':
         yield
     else:
         import pytest_docker_fixtures
-        if DATABASE == 'cockroachdb':
+        if annotations['testdatabase'] == 'cockroachdb':
             host, port = pytest_docker_fixtures.cockroach_image.run()
         else:
-            if not IS_TRAVIS:
+            if not annotations['travis']:
                 host, port = pytest_docker_fixtures.pg_image.run()
             else:
                 host = 'localhost'
                 port = 5432
 
-        # mark the function with the actual host
-        setattr(get_db_settings, 'host', host)
-        setattr(get_db_settings, 'port', port)
+        annotations['pg_host'] = host
+        annotations['pg_port'] = port
 
         yield host, port  # provide the fixture value
 
-        if DATABASE == 'cockroachdb':
+        if annotations['testdatabase'] == 'cockroachdb':
             pytest_docker_fixtures.cockroach_image.stop()
-        elif not IS_TRAVIS:
+        elif not annotations['travis']:
             pytest_docker_fixtures.pg_image.stop()
 
 
