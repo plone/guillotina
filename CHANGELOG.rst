@@ -1,4 +1,4 @@
-3.0.9 (unreleased)
+3.0.9 (2018-04-24)
 ------------------
 
 - Provide testing annotations
