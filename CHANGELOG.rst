@@ -1,7 +1,8 @@
 3.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide testing annotations
+  [vangheem]
 
 
 3.0.8 (2018-04-06)
