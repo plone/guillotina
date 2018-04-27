@@ -1,7 +1,8 @@
 3.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Revert DB unique constraint implementation
+  [vangheem]
 
 
 3.1.1 (2018-04-26)
