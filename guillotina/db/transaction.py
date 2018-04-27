@@ -1,10 +1,10 @@
 from collections import OrderedDict
+from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
-from guillotina.db.oid import generate_oid
 from guillotina.db.reader import reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
@@ -235,7 +235,7 @@ class Transaction(object):
             if new_oid is not None:
                 new = True
             else:
-                new_oid = generate_oid(obj)
+                new_oid = app_settings['oid_generator'](obj)
             oid = new_oid
 
         obj._p_oid = oid

@@ -18,6 +18,10 @@ def get_short_oid(oid):
     return oid.split(OID_DELIMITER)[-1]
 
 
+def bw_oid_generator(ob):
+    return uuid.uuid4().hex
+
+
 def generate_oid(ob):
     '''
     We want OIDs that allow keys to organize data where it is logically

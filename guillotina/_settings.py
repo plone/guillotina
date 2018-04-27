@@ -1,4 +1,5 @@
 from guillotina import interfaces
+from guillotina.db.oid import generate_oid
 
 import collections
 
@@ -75,5 +76,6 @@ app_settings = {
     )),
     'cloud_storage': "guillotina.interfaces.IDBFileField",
     "router": "guillotina.traversal.TraversalRouter",
-    'pg_connection_class': 'asyncpg.connection.Connection'
+    'pg_connection_class': 'asyncpg.connection.Connection',
+    'oid_generator': generate_oid
 }
