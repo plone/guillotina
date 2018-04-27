@@ -21,6 +21,7 @@ class DummyStorage(BaseStorage):
 
     _last_transaction = 1
     _transaction_strategy = 'resolve'
+    _supports_unique_constraints = True
 
     _db = None
 

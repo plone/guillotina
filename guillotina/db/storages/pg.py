@@ -402,9 +402,9 @@ class PostgresqlStorage(BaseStorage):
         'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
     ]
 
-    # _unique_constraint = '''ALTER TABLE objects
-    #                         ADD CONSTRAINT objects_parent_id_id_key
-    #                         UNIQUE (parent_id, id)'''
+    _unique_constraint = '''ALTER TABLE objects
+                            ADD CONSTRAINT objects_parent_id_id_key
+                            UNIQUE (parent_id, id)'''
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
@@ -471,6 +471,19 @@ class PostgresqlStorage(BaseStorage):
         self._connection_initialized_on = time.time()
         raise ConflictError('Restarting connection to postgresql')
 
+    async def has_unique_constraint(self):
+        result = await self._read_conn.fetch('''
+SELECT *
+FROM
+    information_schema.table_constraints AS tc
+    JOIN information_schema.key_column_usage AS kcu
+    ON tc.constraint_name = kcu.constraint_name
+    JOIN information_schema.constraint_column_usage AS ccu
+    ON ccu.constraint_name = tc.constraint_name
+WHERE tc.constraint_name = 'objects_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
+''')
+        return len(result) > 0
+
     async def initialize(self, loop=None, **kw):
         self._connection_options = kw
         if loop is None:
@@ -485,21 +498,19 @@ class PostgresqlStorage(BaseStorage):
 
         # shared read connection on all transactions
         self._read_conn = await self.open()
+        if await self.has_unique_constraint():
+            self._supports_unique_constraints = True
+
         try:
             await self.initialize_tid_statements()
             await self._read_conn.execute(CREATE_TRASH)
         except asyncpg.exceptions.UndefinedTableError:
             await self.create()
+            # only available on new databases
+            await self._read_conn.execute(self._unique_constraint)
+            self._supports_unique_constraints = True
             await self.initialize_tid_statements()
             await self._read_conn.execute(CREATE_TRASH)
-
-        # try:
-        #     await self._read_conn.execute(self._unique_constraint)
-        # except asyncpg.exceptions.DuplicateTableError:
-        #     pass
-        # except asyncpg.exceptions.InternalServerError as ex:
-        #     if 'duplicate constraint name' not in ex.message:
-        #         raise
 
         # migrate to larger VARCHAR size...
         result = await self._read_conn.fetch("""

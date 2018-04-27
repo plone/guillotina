@@ -223,6 +223,18 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def get_current_tid(self, txn):
         raise Exception("cockroach does not support voting")
 
+    async def has_unique_constraint(self):
+        try:
+            for result in await self._read_conn.fetch('''SHOW CONSTRAINTS FROM objects;'''):
+                if result['Name'] == 'objects_parent_id_id_key':
+                    return True
+        except asyncpg.exceptions.UndefinedTableError:
+            pass
+        except Exception:
+            logger.warning(
+                'Unknown error attempting to detect constraints installed.', exc_info=True)
+        return False
+
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 

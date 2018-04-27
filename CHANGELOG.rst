@@ -1,9 +1,11 @@
 3.1.3 (unreleased)
 ------------------
 
-- Be able to customize oid generator
+- Use database constraints if supported
   [vangheem]
 
+- Be able to customize oid generator
+  [vangheem]
 
 3.1.2 (2018-04-26)
 ------------------

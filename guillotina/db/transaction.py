@@ -147,6 +147,14 @@ class Transaction(object):
         return self._strategy
 
     @property
+    def manager(self):
+        return self._manager
+
+    @property
+    def storage(self):
+        return self._manager._storage
+
+    @property
     def objects_needing_invalidation(self):
         return self._objects_to_invalidate
 

@@ -234,7 +234,9 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
     for key, value in kw.items():
         setattr(obj, key, value)
 
-    if request is None or 'OVERWRITE' not in request.headers:
+    txn = getattr(container, '_p_jar', None) or get_transaction()
+    if txn is None or not txn.storage.supports_unique_constraints:
+        # need to manually check unique constraints
         if await container.async_contains(obj.id):
             raise ConflictIdOnContainer(f'Duplicate ID: {container} -> {obj.id}')
 
