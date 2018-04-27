@@ -33,7 +33,7 @@ async def test_send_close(container_requester, loop):
                         port=requester.server.port),
                     headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
                 ws.send_str(json.dumps({'op': 'close'}))
-                async for msg in ws:
+                async for msg in ws:  # noqa
                     pass
 
 
