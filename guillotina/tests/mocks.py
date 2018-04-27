@@ -7,6 +7,7 @@ from guillotina.db.interfaces import IWriter
 from zope.interface import implementer
 
 import asyncio
+import uuid
 
 
 class MockDBTransaction:
@@ -66,6 +67,7 @@ class MockStorage:
     _transaction_strategy = 'resolve'
     _cache_strategy = 'dummy'
     _options = {}
+    supports_unique_constraints = False
 
     def __init__(self, transaction_strategy='resolve', cache_strategy='dummy'):
         self._transaction_strategy = transaction_strategy
@@ -136,3 +138,22 @@ class MockTransactionManager:
     async def begin(self, request):
         request._txn = MockTransaction(self)
         return request._txn
+
+
+class FakeConnection:
+
+    def __init__(self):
+        self.containments = {}
+        self.refs = {}
+        self.storage = MockStorage()
+
+    async def contains(self, oid, key):
+        oids = self.containments[oid]
+        return key in [self.refs[oid].id for oid in oids]
+
+    def register(self, ob):
+        ob._p_jar = self
+        ob._p_oid = uuid.uuid4().hex
+        self.refs[ob._p_oid] = ob
+        self.containments[ob._p_oid] = []
+    _p_register = register

@@ -82,26 +82,9 @@ class TestParticipation(object):
         self.interaction = None
 
 
-class FakeConnection(object):
-
-    def __init__(self):
-        self.containments = {}
-        self.refs = {}
-
-    async def contains(self, oid, key):
-        oids = self.containments[oid]
-        return key in [self.refs[oid].id for oid in oids]
-
-    def register(self, ob):
-        ob._p_jar = self
-        ob._p_oid = uuid.uuid4().hex
-        self.refs[ob._p_oid] = ob
-        self.containments[ob._p_oid] = []
-    _p_register = register
-
-
 def _p_register(ob):
     if ob._p_jar is None:
+        from guillotina.tests.mocks import FakeConnection
         conn = FakeConnection()
         conn._p_register(ob)
 
