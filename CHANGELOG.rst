@@ -1,4 +1,4 @@
-3.1.3 (unreleased)
+3.1.3 (2018-04-27)
 ------------------
 
 - Use database constraints if supported
