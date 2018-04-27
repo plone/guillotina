@@ -19,6 +19,7 @@ from guillotina.db import oid
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import ObjectLoadedEvent
+from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -232,6 +233,10 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
     obj = factory(id=id_, parent=container)
     for key, value in kw.items():
         setattr(obj, key, value)
+
+    if request is None or 'OVERWRITE' not in request.headers:
+        if await container.async_contains(obj.id):
+            raise ConflictIdOnContainer(f'Duplicate ID: {container} -> {obj.id}')
 
     obj.__new_marker__ = True
 
