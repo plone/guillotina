@@ -471,6 +471,19 @@ class PostgresqlStorage(BaseStorage):
         self._connection_initialized_on = time.time()
         raise ConflictError('Restarting connection to postgresql')
 
+    async def has_unique_constraint(self):
+        result = await self._read_conn.fetch('''
+SELECT *
+FROM
+    information_schema.table_constraints AS tc
+    JOIN information_schema.key_column_usage AS kcu
+    ON tc.constraint_name = kcu.constraint_name
+    JOIN information_schema.constraint_column_usage AS ccu
+    ON ccu.constraint_name = tc.constraint_name
+WHERE tc.constraint_name = 'objects_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
+''')
+        return len(result) > 0
+
     async def initialize(self, loop=None, **kw):
         self._connection_options = kw
         if loop is None:
@@ -485,18 +498,7 @@ class PostgresqlStorage(BaseStorage):
 
         # shared read connection on all transactions
         self._read_conn = await self.open()
-
-        result = await self._read_conn.fetch('''
-SELECT *
-FROM
-    information_schema.table_constraints AS tc
-    JOIN information_schema.key_column_usage AS kcu
-    ON tc.constraint_name = kcu.constraint_name
-    JOIN information_schema.constraint_column_usage AS ccu
-    ON ccu.constraint_name = tc.constraint_name
-WHERE tc.constraint_name = 'objects_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
-''')
-        if len(result) > 0:
+        if await self.has_unique_constraint():
             self._supports_unique_constraints = True
 
         try:
