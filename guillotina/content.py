@@ -15,6 +15,7 @@ from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.component.factory import Factory
+from guillotina.db import oid
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import ObjectLoadedEvent
