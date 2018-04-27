@@ -1,7 +1,8 @@
 3.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to customize oid generator
+  [vangheem]
 
 
 3.1.2 (2018-04-26)

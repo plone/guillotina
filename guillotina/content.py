@@ -96,7 +96,7 @@ class ResourceFactory(Factory):
         obj.modification_date = now
         if id is None:
             if obj._p_oid is None:
-                obj._p_oid = oid.generate_oid(obj)
+                obj._p_oid = app_settings['oid_generator'](obj)
             obj.id = oid.get_short_oid(obj._p_oid)
         else:
             obj.id = id
