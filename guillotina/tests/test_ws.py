@@ -20,16 +20,8 @@ async def test_hello(container_requester, loop):
                 async for msg in ws:
                     if msg.tp == aiohttp.WSMsgType.text:
                         message = json.loads(msg.data)
-                        if 'op' in message and message['op'] == 'close':
-                            await ws.close()
-                            break  # noqa
-                        else:
-                            assert message == {'value': []}
-                            await ws.close()
-                    elif msg.tp == aiohttp.WSMsgType.closed:
-                        break  # noqa
-                    elif msg.tp == aiohttp.WSMsgType.error:
-                        break  # noqa
+                        assert message == {'value': []}
+                        await ws.close()
                 return {}
 
 
@@ -42,12 +34,7 @@ async def test_send_close(container_requester, loop):
                     headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
                 ws.send_str(json.dumps({'op': 'close'}))
                 async for msg in ws:
-                    if msg.tp == aiohttp.WSMsgType.text:
-                        pass
-                    elif msg.tp == aiohttp.WSMsgType.closed:
-                        break  # noqa
-                    elif msg.tp == aiohttp.WSMsgType.error:
-                        break  # noqa
+                    pass
 
 
 async def test_ws_token(container_requester, loop):
