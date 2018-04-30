@@ -1,4 +1,4 @@
-3.1.4 (unreleased)
+3.1.4 (2018-04-30)
 ------------------
 
 - Fix getting tid for `dbresolve_readcommitted` txn strategy
