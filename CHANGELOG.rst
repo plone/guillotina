@@ -1,7 +1,8 @@
 3.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix getting tid for `dbresolve_readcommitted` txn strategy
+  [vangheem]
 
 
 3.1.3 (2018-04-27)

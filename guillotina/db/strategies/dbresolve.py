@@ -31,6 +31,6 @@ class DBResolveReadCommittedStrategy(DBResolveStrategy):
         pass
 
     async def tpc_commit(self):
-        if self._transaction._tid in (-1, None):
+        if self._transaction._tid in (-1, 1, None):
             await self.retrieve_tid()
         await self._storage.start_transaction(self._transaction)
