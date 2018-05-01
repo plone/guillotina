@@ -1,4 +1,4 @@
-3.1.5 (unreleased)
+3.1.5 (2018-04-30)
 ------------------
 
 - `guillotina.utils.get_containers` does not change
