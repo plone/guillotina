@@ -1,4 +1,4 @@
-3.1.6 (unreleased)
+3.1.6 (2018-04-30)
 ------------------
 
 - Provide asyncio.Lock on transaction manager
