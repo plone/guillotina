@@ -36,13 +36,6 @@ Currently supported database drivers are:
 - `cockroach`
 
 
-### Cockroach
-
-Both PostgreSQL and Cockroach have configurations that are identical; however,
-Cockroach has an additional `isolation_level` configuration which defaults to `snapshot`. See
-https://www.cockroachlabs.com/docs/transactions.html
-
-
 ## Static files
 
 ```yaml

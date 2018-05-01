@@ -2,8 +2,7 @@
   "databases": [{
     "db": {
       "storage": "cockroach",
-      "transaction_strategy": "dbresolve_readcommitted",
-      "isolation_level": "snapshot",
+      "transaction_strategy": "resolve_readcommitted",
       "dsn": "postgresql://root@127.0.0.1:26257/guillotina?sslmode=disable",
       "read_only": false,
       "pool_size": 100

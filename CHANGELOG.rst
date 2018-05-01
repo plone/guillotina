@@ -1,7 +1,9 @@
 3.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- `guillotina.utils.get_containers` does not change
+  transaction strategy anymore.
+  [vangheem]
 
 
 3.1.4 (2018-04-30)
