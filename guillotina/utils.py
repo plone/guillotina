@@ -256,9 +256,10 @@ async def get_containers(request):
             tm = request._tm = db.get_transaction_manager()
             tm.request = request
             request._db_id = _id
-            request._txn = txn = await tm.begin(request)
-            items = {(k, v) async for k, v in db.async_items()}
-            await tm.abort(txn=txn)
+            async with tm.lock:
+                request._txn = txn = await tm.begin(request)
+                items = {(k, v) async for k, v in db.async_items()}
+                await tm.abort(txn=txn)
 
             for _, container in items:
                 request._txn = txn = await tm.begin(request)

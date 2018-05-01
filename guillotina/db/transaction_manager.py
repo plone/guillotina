@@ -10,6 +10,7 @@ from guillotina.profile import profilable
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 
+import asyncio
 import asyncpg
 
 
@@ -30,6 +31,11 @@ class TransactionManager(object):
         # Pointer to last db connection opened
         self._last_db_conn = None
         self._hard_cache = {}
+        self._lock = asyncio.Lock()
+
+    @property
+    def lock(self):
+        return self._lock
 
     async def get_root(self, txn=None):
         if txn is None:

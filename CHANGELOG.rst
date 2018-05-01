@@ -1,7 +1,8 @@
 3.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide asyncio.Lock on transaction manager
+  [vangheem]
 
 
 3.1.5 (2018-04-30)
