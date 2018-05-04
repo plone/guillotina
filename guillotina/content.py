@@ -202,7 +202,8 @@ async def create_content(type_, **kw):
 
 
 @profilable
-async def create_content_in_container(container, type_, id_, request=None, **kw):
+async def create_content_in_container(container, type_, id_, request=None,
+                                      check_security=True, **kw):
     """Utility to create a content.
 
     This method is the one to use to create content.
@@ -210,7 +211,7 @@ async def create_content_in_container(container, type_, id_, request=None, **kw)
     """
     factory = get_cached_factory(type_)
 
-    if factory.add_permission:
+    if check_security and factory.add_permission:
         if factory.add_permission in PERMISSIONS_CACHE:
             permission = PERMISSIONS_CACHE[factory.add_permission]
         else:

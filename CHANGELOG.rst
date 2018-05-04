@@ -1,7 +1,9 @@
 3.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide check_security argument on
+  `guillotina.content.create_content_in_container`
+  [vangheem]
 
 
 3.1.6 (2018-04-30)
