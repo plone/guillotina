@@ -1,4 +1,4 @@
-3.1.7 (unreleased)
+3.1.7 (2018-05-04)
 ------------------
 
 - Provide check_security argument on
