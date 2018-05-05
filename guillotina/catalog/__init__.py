@@ -12,6 +12,7 @@ global_roles_for_permission = role_permission_manager.get_roles_for_permission
 
 
 index.apply(IResource, 'uuid', type='keyword')  # pylint: disable=E1101
+index.apply(IResource, 'type_name', type='keyword')  # pylint: disable=E1101
 index.apply(IResource, 'title')  # pylint: disable=E1101
 index.apply(IResource, 'modification_date', type='date')  # pylint: disable=E1101
 index.apply(IResource, 'creation_date', type='date')  # pylint: disable=E1101

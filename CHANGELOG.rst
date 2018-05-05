@@ -1,7 +1,8 @@
 3.1.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `type_name` index
+  [vangheem]
 
 
 3.1.7 (2018-05-04)
