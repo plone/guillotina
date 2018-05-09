@@ -11,6 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+from collections import namedtuple
 from datetime import date
 from datetime import datetime
 from datetime import time
@@ -575,10 +576,10 @@ def _validate_fields(schema, value, errors=None):
                         # Choice must be bound before validation otherwise
                         # IContextSourceBinder is not iterable in validation
                         bound = attribute.bind(value)
-                        bound.validate(getattr(value, name))
+                        bound.validate(getattr(value, name, None))
                     elif IField.providedBy(attribute):
                         # validate attributes that are fields
-                        attribute.validate(getattr(value, name))
+                        attribute.validate(getattr(value, name, None))
                 except ValidationError as error:
                     errors.append(error)
                 except AttributeError as error:
@@ -603,12 +604,17 @@ class Object(Field):
     def _validate(self, value):
         super(Object, self)._validate(value)
 
-        # schema has to be provided by value
-        if not self.schema.providedBy(value):
-            raise SchemaNotProvided
-
-        # check the value against schema
-        errors = _validate_fields(self.schema, value)
+        if isinstance(value, dict):
+            # Dicts are validated differently
+            valid_type = namedtuple(
+                'temp_validate_type',
+                set(self.schema.names()) & set(value.keys()))
+            # check the value against schema
+            errors = _validate_fields(self.schema, valid_type(**value))
+        else:
+            if not self.schema.providedBy(value):
+                raise SchemaNotProvided
+            errors = _validate_fields(self.schema, value)
         if errors:
             raise WrongContainedType(errors, self.__name__)
 

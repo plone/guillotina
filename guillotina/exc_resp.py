@@ -40,6 +40,18 @@ def exception_handler_factory(reason, name='PreconditionFailed',
     return handler
 
 
+def deserialization_error_handler(exc, error='', eid=None):
+    data = render_error_response(
+        'DeserializationError', error_reasons.DESERIALIZATION_FAILED, eid)
+    data['message'] = repr(exc)
+    data.update(exc.json_data())
+    return HTTPPreconditionFailed(
+        text=json.dumps(data),
+        headers={
+            'Content-Type': 'application/json'
+        })
+
+
 def register_handler_factory(ExceptionKlass, factory):
     configure.adapter(
         for_=ExceptionKlass,
@@ -63,9 +75,8 @@ register_handler_factory(
                               serialize_exc=True, klass=HTTPConflict))
 register_handler_factory(
     DeserializationError,
-    exception_handler_factory(error_reasons.DESERIALIZATION_FAILED,
-                              'DeserializationError',
-                              serialize_exc=True))
+    deserialization_error_handler)
+
 register_handler_factory(
     InvalidContentType,
     exception_handler_factory(error_reasons.DESERIALIZATION_FAILED,

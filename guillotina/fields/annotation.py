@@ -2,11 +2,11 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.annotations import AnnotationData
 from guillotina.component import query_adapter
+from guillotina.exceptions import ValueDeserializationError
+from guillotina.fields.interfaces import IBucketListField
+from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IContentBehavior
-from guillotina.json.exceptions import ValueDeserializationError
-from guillotina.schema.interfaces import IField
-from guillotina.schema.interfaces import IPatchFieldOperation
 from zope.interface import implementer
 
 
@@ -95,10 +95,6 @@ class BucketListValue:
         async for bucket in self.iter_buckets(context):
             for item in bucket['items']:
                 yield item
-
-
-class IBucketListField(IField):
-    pass
 
 
 @implementer(IBucketListField)

@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.behaviors.dynamic import IDynamicFields, IDynamicFieldValues
 from guillotina.behaviors.properties import FunctionProperty
 from guillotina.content import Item
 from guillotina.content import load_cached_schema
@@ -320,3 +321,159 @@ def test_function_property():
     ob = Ob()
     prop.__set__(ob, 'foobar')
     assert prop.__get__(ob, Ob) == 'foobar'
+
+
+async def test_add_dynamic_fields(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                "@type": "Item",
+                "@behaviors": [IDynamicFields.__identifier__],
+                "id": "foobar",
+                IDynamicFields.__identifier__: {
+                    "fields": {
+                        "foobar": {
+                            "title": "Hello field",
+                            "type": "int"
+                        }
+                    }
+                }
+            })
+        )
+        assert status == 201
+
+        resp, _ = await requester(
+            'GET', '/db/guillotina/foobar?include={}'.format(
+                IDynamicFields.__identifier__))
+        assert len(resp[IDynamicFields.__identifier__]['fields']) == 1
+        resp, status = await requester(
+            'GET', '/db/guillotina/foobar/@dynamic-fields')
+        assert status == 200
+        assert 'foobar' in resp
+
+
+async def test_add_dynamic_fields_values(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                "@type": "Item",
+                "@behaviors": [IDynamicFields.__identifier__],
+                "id": "foobar",
+                IDynamicFields.__identifier__: {
+                    "fields": {
+                        "foobar": {
+                            "title": "Hello field",
+                            "type": "integer"
+                        },
+                        "foobar_date": {
+                            "title": "Date field",
+                            "type": "date"
+                        },
+                        "foobar_bool": {
+                            "title": "Bool field",
+                            "type": "boolean"
+                        },
+                        "foobar_float": {
+                            "title": "Float field",
+                            "type": "float"
+                        },
+                        "foobar_keyword": {
+                            "title": "Float field",
+                            "type": "keyword"
+                        }
+                    }
+                }
+            })
+        )
+        assert status == 201
+
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "update",
+                        "value": [{
+                            "key": "foobar",
+                            "value": 5
+                        }, {
+                            "key": "foobar_date",
+                            "value": '1999/01/01'
+                        }, {
+                            "key": "foobar_bool",
+                            "value": False
+                        }, {
+                            "key": "foobar_keyword",
+                            "value": "foobar"
+                        }, {
+                            "key": "foobar_float",
+                            "value": 2.1
+                        }]
+                    }
+                }
+            }))
+        assert status == 204
+        resp, status = await requester(
+            'GET', '/db/guillotina/foobar?include={}'.format(
+                IDynamicFieldValues.__identifier__))
+        values = resp[IDynamicFieldValues.__identifier__]['values']
+        assert values['foobar'] == 5
+        assert values['foobar_date'] == '1999-01-01T00:00:00'
+        assert values['foobar_bool'] is False
+        assert values['foobar_keyword'] == 'foobar'
+        assert isinstance(values['foobar_float'], float)
+        assert int(values['foobar_float']) == 2
+
+
+async def test_add_dynamic_fields_invalid_type(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                "@type": "Item",
+                "@behaviors": [IDynamicFields.__identifier__],
+                "id": "foobar",
+                IDynamicFields.__identifier__: {
+                    "fields": {
+                        "foobar": {
+                            "title": "Hello field",
+                            "type": "int"
+                        }
+                    }
+                }
+            })
+        )
+        assert status == 201
+
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar",
+                            "value": "5"
+                        }
+                    }
+                }
+            }))
+        assert status == 412
+
+        # also for invalid fields
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar-blah",
+                            "value": "5"
+                        }
+                    }
+                }
+            }))
+        assert status == 412
