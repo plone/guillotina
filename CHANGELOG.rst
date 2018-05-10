@@ -1,4 +1,4 @@
-3.2.0 (unreleased)
+3.2.0 (2018-05-10)
 ------------------
 
 - Provide new IDynamicFields and IDynamicFieldValues behaviors
