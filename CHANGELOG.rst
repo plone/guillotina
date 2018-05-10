@@ -1,7 +1,8 @@
 3.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to modify file attributes filename, content_type, md5, extension
+  [vangheem]
 
 
 3.2.0 (2018-05-10)

@@ -138,17 +138,40 @@ async def _generator(value):
     yield value['data']
 
 
+serialize_mappings = {
+    'filename': 'filename',
+    'md5': '_md5',
+    'content_type': 'content_type',
+    'extension': '_extension'
+}
+
+
 @configure.value_deserializer(ICloudFileField)
 async def deserialize_cloud_field(field, value, context):
-    request = get_current_request()
-    value = convert_base64_to_binary(value)
+    data_context = context
     if IContentBehavior.implementedBy(context.__class__):
         field = field.bind(context)
         context = context.context
     else:
         field = field.bind(context)
-    file_manager = get_multi_adapter((context, request, field), IFileManager)
-    val = await file_manager.save_file(
-        partial(_generator, value), content_type=value['content_type'],
-        size=len(value['data']))
-    return val
+
+    if isinstance(value, dict):
+        try:
+            file_ob = field.get(data_context)
+        except AttributeError:
+            return
+        if file_ob:
+            # update file fields
+            for key, item_value in value.items():
+                if key in serialize_mappings:
+                    setattr(file_ob, serialize_mappings[key], item_value)
+            data_context._p_register()
+            return file_ob
+    else:
+        value = convert_base64_to_binary(value)
+        request = get_current_request()
+        file_manager = get_multi_adapter((context, request, field), IFileManager)
+        val = await file_manager.save_file(
+            partial(_generator, value), content_type=value['content_type'],
+            size=len(value['data']))
+        return val
