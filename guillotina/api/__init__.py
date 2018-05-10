@@ -4,6 +4,7 @@ from . import app  # noqa
 from . import behaviors  # noqa
 from . import container  # noqa
 from . import content  # noqa
+from . import dynamic  # noqa
 from . import files  # noqa
 from . import registry  # noqa
 from . import search  # noqa

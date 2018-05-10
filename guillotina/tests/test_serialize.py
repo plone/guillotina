@@ -114,6 +114,11 @@ async def test_deserialize_cloud_file(dummy_request):
     assert obj.file.size == 42
 
 
+class INestFieldSchema(Interface):
+    foo = schema.Text(required=False)
+    bar = schema.Int(required=False)
+
+
 class ITestSchema(Interface):
 
     text = schema.TextLine(required=False)
@@ -150,6 +155,16 @@ class ITestSchema(Interface):
             key_type=schema.Text(),
             value_type=schema.Text()
         ))
+
+    nested_patch = fields.PatchField(schema.Dict(
+        required=False,
+        key_type=schema.Text(),
+        value_type=fields.PatchField(schema.List(
+            value_type=schema.Object(
+                schema=INestFieldSchema
+            )
+        ))
+    ))
 
 
 async def test_deserialize_text(dummy_guillotina):
@@ -467,3 +482,76 @@ def test_default_value_deserialize(dummy_request):
     assert {'text': 'foobar'} == deserialize_value.default_value_converter(ITestSchema, {
         'text': 'foobar'
     }, content)
+
+
+async def test_nested_patch_deserialize(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            "nested_patch": {
+                "op": "assign",
+                "value": {
+                    "key": "foobar",
+                    "value": {
+                        "op": "append",
+                        "value": {
+                            "foo": "bar",
+                            "bar": 1
+                        }
+                    }
+                }
+            }
+        }, errors)
+    assert len(errors) == 0
+    assert len(content.nested_patch) == 1
+    assert content.nested_patch['foobar'][0]['foo'] == 'bar'
+    assert content.nested_patch['foobar'][0]['bar'] == 1
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            "nested_patch": {
+                "op": "assign",
+                "value": {
+                    "key": "foobar",
+                    "value": {
+                        "op": "append",
+                        "value": {
+                            "foo": "bar2",
+                            "bar": 2
+                        }
+                    }
+                }
+            }
+        }, errors)
+    assert len(errors) == 0
+    assert content.nested_patch['foobar'][1]['foo'] == 'bar2'
+    assert content.nested_patch['foobar'][1]['bar'] == 2
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            "nested_patch": {
+                "op": "assign",
+                "value": {
+                    "key": "foobar",
+                    "value": {
+                        "op": "update",
+                        "value": {
+                            "index": 1,
+                            "value": {
+                                "foo": "bar3",
+                                "bar": 3
+                            }
+                        }
+                    }
+                }
+            }
+        }, errors)
+    assert len(errors) == 0
+    assert content.nested_patch['foobar'][1]['foo'] == 'bar3'
+    assert content.nested_patch['foobar'][1]['bar'] == 3
+

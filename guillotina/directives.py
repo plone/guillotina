@@ -130,6 +130,9 @@ class index(MetadataDictDirective):  # noqa: N801
     )
 
     def factory(self, name, **kw):
+        if 'fields' not in kw and 'field' in kw:
+            # be able to specify multiple fields that affect indexing operations
+            kw['fields'] = [kw['field']]
         kw.setdefault('type', 'text')
         if kw.get('type') not in self.allowed_types:
             raise Exception('Invalid index type {}. Avilable types are: {}'.format(

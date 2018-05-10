@@ -1731,7 +1731,7 @@ class ObjectTests(unittest.TestCase):
 
     def test__validate_w_value_providing_schema_but_missing_fields(self):
         from zope.interface import implementer
-        from guillotina.schema.exceptions import SchemaNotFullyImplemented
+        from guillotina.schema.exceptions import RequiredMissing
         from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Text
         schema = self._makeSchema(foo=Text(), bar=Text())
@@ -1747,15 +1747,7 @@ class ObjectTests(unittest.TestCase):
         errors = sorted(errors,
                         key=lambda x: (type(x).__name__, str(x.args[0])))
         err = errors[0]
-        self.assertTrue(isinstance(err, SchemaNotFullyImplemented))
-        nested = err.args[0]
-        self.assertTrue(isinstance(nested, AttributeError))
-        self.assertTrue("'bar'" in str(nested))
-        err = errors[1]
-        self.assertTrue(isinstance(err, SchemaNotFullyImplemented))
-        nested = err.args[0]
-        self.assertTrue(isinstance(nested, AttributeError))
-        self.assertTrue("'foo'" in str(nested))
+        self.assertTrue(isinstance(err, RequiredMissing))
 
     def test__validate_w_value_providing_schema_but_invalid_fields(self):
         from zope.interface import implementer

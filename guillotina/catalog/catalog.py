@@ -163,7 +163,8 @@ class DefaultCatalogDataAdapter(object):
                     # accessors we always reindex since we can't know if updated
                     # from the indexes param--they are "fake" like indexes, not fields
                     if 'accessor' in index_data:
-                        if indexes is None or index_data.get('field') in indexes:
+                        if indexes is None or (
+                                len(set(index_data.get('fields', [])) & set(indexes)) > 0):
                             if not loaded:
                                 await self.load_behavior(behavior)
                                 loaded = True

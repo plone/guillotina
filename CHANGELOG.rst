@@ -1,7 +1,14 @@
-3.1.9 (unreleased)
+3.2.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide new IDynamicFields and IDynamicFieldValues behaviors
+  [vangheem]
+
+- Be able to use PatchField with nested schemas
+  [vangheem]
+
+- Change Object field to work with dicts and JSON schema
+  [vangheem]
 
 
 3.1.8 (2018-05-06)

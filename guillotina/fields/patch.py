@@ -1,50 +1,49 @@
+from collections import namedtuple
 from guillotina import configure
 from guillotina import schema
+from guillotina.component import get_adapter
 from guillotina.component import query_adapter
-from guillotina.json.exceptions import ValueDeserializationError
+from guillotina.exceptions import ValueDeserializationError
+from guillotina.fields.interfaces import IPatchField
+from guillotina.fields.interfaces import IPatchFieldOperation
+from guillotina.interfaces import IJSONToValue
 from guillotina.schema.interfaces import IDict
-from guillotina.schema.interfaces import IField
 from guillotina.schema.interfaces import IList
-from guillotina.schema.interfaces import IPatchFieldOperation
 from zope.interface import implementer
-
-
-class IPatchField(IField):
-    pass
 
 
 @implementer(IPatchField)
 class PatchField(schema.Field):
+
+    operation_type = IPatchFieldOperation
 
     def __init__(self, field, *args, **kwargs):
         self.field = field
         super().__init__(*args, **kwargs)
 
     def set(self, obj, value):
-        self.field.__name__ = self.__name__
         bound_field = self.field.bind(obj)
-        if isinstance(value, dict) and 'op' in value:
-            operation_name = value['op']
-            operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
-            operation(obj, value['value'])
-        else:
-            bound_field.set(obj, value)
+        bound_field.set(obj, value)
         obj._p_register()
 
 
 @configure.value_deserializer(IPatchField)
 def field_converter(field, value, context):
+    field.field.__name__ = field.__name__
     if isinstance(value, dict) and 'op' in value:
         if not isinstance(value, dict):
             raise ValueDeserializationError(field, value, 'Not an object')
         operation_name = value.get('op', 'undefined')
-        operation = query_adapter(field.field, IPatchFieldOperation, name=operation_name)
+        bound_field = field.field.bind(context)
+        operation = query_adapter(
+            bound_field, field.operation_type, name=operation_name)
         if operation is None:
             raise ValueDeserializationError(
                 field, value, f'"{operation_name}" not a valid operation')
         if 'value' not in value:
             raise ValueDeserializationError(
                 field, value, f'Mising value')
+        value = operation(context, value['value'])
     return value
 
 
@@ -58,14 +57,28 @@ class PatchListAppend:
         super().__init__()
         self.field = field
 
+    def get_value(self, value, existing=None, field_type=None):
+        if field_type is None:
+            if self.field.value_type:
+                field_type = self.field.value_type
+        if field_type:
+            field_type.__name__ = self.field.__name__
+            # for sub objects, we need to assign temp object type
+            # to work with json schema correctly
+            valid_type = namedtuple('temp_assign_type', [self.field.__name__])
+            ob = valid_type(**{field_type.__name__: existing})
+            value = get_adapter(
+                field_type, IJSONToValue, args=[value, ob])
+        return value
+
     def __call__(self, context, value):
         if self.field.value_type:
             self.field.value_type.validate(value)
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
             existing = self.field.missing_value or []
-            setattr(context, self.field.__name__, existing)
-        existing.append(value)
+        existing.append(self.get_value(value, None))
+        return existing
 
 
 @configure.adapter(
@@ -77,13 +90,13 @@ class PatchListExtend(PatchListAppend):
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
             existing = self.field.missing_value or []
-            setattr(context, self.field.__name__, existing)
         if not isinstance(value, list):
             raise ValueDeserializationError(self.field, value, 'Not valid list')
         for item in value:
             if self.field.value_type:
                 self.field.value_type.validate(item)
-        existing.extend(value)
+        existing.extend(self.get_value(value, None, field_type=self.field))
+        return existing
 
 
 @configure.adapter(
@@ -92,11 +105,12 @@ class PatchListExtend(PatchListAppend):
     name='del')
 class PatchListRemove(PatchListAppend):
     def __call__(self, context, value):
-        existing = getattr(context, self.field.__name__, None)
+        existing = getattr(context, self.field.__name__, None) or {}
         try:
             del existing[value]
         except IndexError:
             raise ValueDeserializationError(self.field, value, 'Not valid index value')
+        return existing
 
 
 @configure.adapter(
@@ -109,8 +123,13 @@ class PatchListUpdate(PatchListAppend):
             raise ValueDeserializationError(self.field, value, 'Not valid patch value')
         if self.field.value_type:
             self.field.value_type.validate(value['value'])
-        existing = getattr(context, self.field.__name__, None)
-        existing[value['index']] = value['value']
+        existing = getattr(context, self.field.__name__, None) or {}
+        try:
+            existing_item = existing[value['index']]
+        except IndexError:
+            existing_item = None
+        existing[value['index']] = self.get_value(value['value'], existing_item)
+        return existing
 
 
 @configure.adapter(
@@ -130,8 +149,39 @@ class PatchDictSet(PatchListAppend):
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
             existing = self.field.missing_value or {}
-            setattr(context, self.field.__name__, existing)
-        existing[value['key']] = value['value']
+
+        existing_item = existing.get(value['key'])
+        existing[value['key']] = self.get_value(value['value'], existing_item)
+        return existing
+
+
+@configure.adapter(
+    for_=IDict,
+    provides=IPatchFieldOperation,
+    name='update')
+class PatchDictUpdate(PatchListAppend):
+    def __call__(self, context, value):
+        if not isinstance(value, list):
+            raise ValueDeserializationError(
+                self.field, value,
+                f'Invalid type patch data, must be list of updates')
+
+        existing = getattr(context, self.field.__name__, None)
+        if existing is None:
+            existing = self.field.missing_value or {}
+
+        for item in value:
+            if 'key' not in item or 'value' not in item:
+                raise ValueDeserializationError(self.field, value, 'Not valid patch value')
+            if self.field.key_type:
+                self.field.key_type.validate(item['key'])
+            if self.field.value_type:
+                self.field.value_type.validate(item['value'])
+
+            existing_item = existing.get(item['key'])
+            existing[item['key']] = self.get_value(item['value'], existing_item)
+
+        return existing
 
 
 @configure.adapter(
@@ -147,3 +197,4 @@ class PatchDictDel(PatchListAppend):
             del existing[value]
         except (IndexError, KeyError):
             raise ValueDeserializationError(self.field, value, 'Not valid index value')
+        return existing

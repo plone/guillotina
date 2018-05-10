@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.fields.interfaces import IPatchField
 from guillotina.component import get_multi_adapter
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
@@ -55,34 +56,38 @@ class DefaultSchemaFieldSerializer(object):
         self.schema = schema
         self.request = request
 
+    def get_field(self):
+        return self.field
+
     @profilable
     async def __call__(self):
+        field = self.get_field()
         result = {'type': self.field_type}
         # caching the field_attributes here improves performance dramatically
-        if self.field.__class__ in FIELDS_CACHE:
-            field_attributes = FIELDS_CACHE[self.field.__class__].copy()
+        if field.__class__ in FIELDS_CACHE:
+            field_attributes = FIELDS_CACHE[field.__class__].copy()
         else:
             field_attributes = {}
-            for schema in implementedBy(self.field.__class__).flattened():
+            for schema in implementedBy(field.__class__).flattened():
                 field_attributes.update(get_fields(schema))
-            FIELDS_CACHE[self.field.__class__] = field_attributes
+            FIELDS_CACHE[field.__class__] = field_attributes
         for attribute_name in sorted(field_attributes.keys()):
             attribute_field = field_attributes[attribute_name]
             if attribute_name in self.filtered_attributes:
                 continue
 
             element_name = attribute_field.__name__
-            attribute_field = attribute_field.bind(self.field)
+            attribute_field = attribute_field.bind(field)
             force = (element_name in self.forced_fields)
 
-            value = attribute_field.get(self.field)
+            value = attribute_field.get(field)
 
             # For 'default', 'missing_value' etc, we want to validate against
             # the imported field type itself, not the field type of the
             # attribute
             if element_name in self.field_type_attributes or \
                     element_name in self.non_validated_field_type_attributes:
-                attribute_field = self.field
+                attribute_field = field
 
             text = None
             if isinstance(value, bytes):
@@ -91,31 +96,31 @@ class DefaultSchemaFieldSerializer(object):
                 text = value
             elif IField.providedBy(value):
                 serializer = get_multi_adapter(
-                    (value, self.field, self.request),
+                    (value, field, self.request),
                     ISchemaFieldSerializeToJson)
                 text = await serializer()
-            elif value is not None and (force or value != self.field.missing_value):
+                if 'properties' in text:
+                    text = text['properties']
+            elif value is not None and (force or value != field.missing_value):
                 text = json_compatible(value)
-
-            # handle i18n
-            # if isinstance(value, Message):
-            #     child.set(ns('domain', I18N_NAMESPACE), value.domain)
-            #     if not value.default:
-            #         child.set(ns('translate', I18N_NAMESPACE), '')
-            #     else:
-            #         child.set(ns('translate', I18N_NAMESPACE), child.text)
-            #         child.text = converter.toUnicode(value.default)
 
             if text:
                 if attribute_name == 'value_type':
                     attribute_name = 'items'
                 result[attribute_name] = text
-
         if result['type'] == 'object':
-            if IJSONField.providedBy(self.field):
-                result['properties'] = self.field.json_schema
-            else:
-                schema_serializer = get_multi_adapter((self.field.schema, self.request),
+            if IJSONField.providedBy(field):
+                result['properties'] = field.json_schema
+            if IDict.providedBy(field):
+                if field.value_type:
+                    field_serializer = get_multi_adapter(
+                        (field.value_type, self.schema, self.request),
+                        ISchemaFieldSerializeToJson)
+                    result['additionalProperties'] = await field_serializer()
+                else:
+                    result['additionalProperties'] = True
+            elif IObject.providedBy(field):
+                schema_serializer = get_multi_adapter((field.schema, self.request),
                                                       ISchemaSerializeToJson)
                 result['properties'] = await schema_serializer()
         return result
@@ -143,6 +148,21 @@ class DefaultFileSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
     def field_type(self):
+        return 'object'
+
+
+@configure.adapter(
+    for_=(IPatchField, Interface, Interface),
+    provides=ISchemaFieldSerializeToJson)
+class DefaultPatchFieldSchemaFieldSerializer(DefaultSchemaFieldSerializer):
+
+    def get_field(self):
+        return self.field.field
+
+    @property
+    def field_type(self):
+        if ICollection.providedBy(self.field.field):
+            return 'array'
         return 'object'
 
 
@@ -273,7 +293,7 @@ class DefaultDictSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
     def field_type(self):
-        return 'dict'
+        return 'object'
 
 
 @configure.adapter(

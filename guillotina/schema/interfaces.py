@@ -693,16 +693,3 @@ class IJSONField(IField):
         "schema",
         _("The JSON schema string serialization.")
     )
-
-
-class IPatchFieldOperation(Interface):
-
-    def __init__(field):
-        '''
-        Adapter against original field patch is being made on
-        '''
-
-    def __call__(ob, value):
-        '''
-        set the value on the object
-        '''

@@ -14,6 +14,7 @@ from guillotina.schema.interfaces import IField
 from guillotina.schema.interfaces import IFrozenSet
 from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
+from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
 from zope.interface import Interface
@@ -37,7 +38,7 @@ def schema_compatible(value, schema_or_field, context=None):
 
 
 @configure.value_deserializer(Interface)
-def default_value_converter(schema, value, context):
+def default_value_converter(schema, value, context=None):
     if value == {}:
         return {}
 
@@ -52,28 +53,28 @@ def default_value_converter(schema, value, context):
 
 
 @configure.value_deserializer(IJSONField)
-def json_dict_converter(schemafield, value, context):
+def json_dict_converter(schemafield, value, context=None):
     if value == {}:
         return {}
 
     return value
 
 @configure.value_deserializer(for_=IField)
-def default_converter(field, value, context):
+def default_converter(field, value, context=None):
     return value
 
 @configure.value_deserializer(IBool)
-def bool_converter(field, value, context):
+def bool_converter(field, value, context=None):
     return bool(value)
 
 
 @configure.value_deserializer(IFromUnicode)
-def from_unicode_converter(field, value, context):
+def from_unicode_converter(field, value, context=None):
     return field.from_unicode(value)
 
 
 @configure.value_deserializer(IList)
-def list_converter(field, value, context):
+def list_converter(field, value, context=None):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, 'Not an array')
     return [schema_compatible(item, field.value_type, context)
@@ -81,28 +82,28 @@ def list_converter(field, value, context):
 
 
 @configure.value_deserializer(ITuple)
-def tuple_converter(field, value, context):
+def tuple_converter(field, value, context=None):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, 'Not an array')
     return tuple(list_converter(field, value, context))
 
 
 @configure.value_deserializer(ISet)
-def set_converter(field, value, context):
+def set_converter(field, value, context=None):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, 'Not an array')
     return set(list_converter(field, value, context))
 
 
 @configure.value_deserializer(IFrozenSet)
-def frozenset_converter(field, value, context):
+def frozenset_converter(field, value, context=None):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, 'Not an array')
     return frozenset(list_converter(field, value, context))
 
 
 @configure.value_deserializer(IDict)
-def dict_converter(field, value, context):
+def dict_converter(field, value, context=None):
     if value == {}:
         return {}
 
@@ -118,14 +119,21 @@ def dict_converter(field, value, context):
 
 
 @configure.value_deserializer(IDatetime)
-def datetime_converter(field, value, context):
+def datetime_converter(field, value, context=None):
     if not isinstance(value, str):
         raise ValueDeserializationError(field, value, 'Not a string')
     return parse(value)
 
 
 @configure.value_deserializer(IDate)
-def date_converter(field, value, context):
+def date_converter(field, value, context=None):
     if not isinstance(value, str):
         raise ValueDeserializationError(field, value, 'Not a string')
     return datetime.datetime.strptime(value, '%Y-%m-%d').date()
+
+
+@configure.value_deserializer(IObject)
+def object_converter(field, value, context=None):
+    if not isinstance(value, dict):
+        raise ValueDeserializationError(field, value, 'Not an object')
+    return value
