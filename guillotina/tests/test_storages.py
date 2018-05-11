@@ -72,4 +72,4 @@ async def test_get_dsn_from_url():
         'dsn': 'postgresql://root@127.0.0.1:26257?sslmode=disable'
     })
     assert (factory.get_dsn('foobar') ==
-        'postgresql://root@127.0.0.1:26257/foobar?sslmode=disable')
+            'postgresql://root@127.0.0.1:26257/foobar?sslmode=disable')
