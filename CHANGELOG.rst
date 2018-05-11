@@ -1,7 +1,8 @@
 3.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- deserialize value before validation on patch fields
+  [vangheem]
 
 
 3.2.3 (2018-05-11)

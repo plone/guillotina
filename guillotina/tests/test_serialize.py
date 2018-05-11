@@ -3,6 +3,7 @@ from guillotina import fields
 from guillotina import schema
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
+from guillotina.exceptions import ValueDeserializationError
 from guillotina.files.dbfile import DBFile
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IResourceDeserializeFromJson
@@ -320,7 +321,7 @@ async def test_patch_list_field_invalid_type(dummy_request):
 
     assert len(getattr(content, 'patch_list', [])) == 0
     assert len(errors) == 1
-    assert isinstance(errors[0]['error'], WrongType)
+    assert isinstance(errors[0]['error'], ValueDeserializationError)
 
 
 async def test_patch_dict_field_normal_patch(dummy_request):
@@ -554,4 +555,3 @@ async def test_nested_patch_deserialize(dummy_request):
     assert len(errors) == 0
     assert content.nested_patch['foobar'][1]['foo'] == 'bar3'
     assert content.nested_patch['foobar'][1]['bar'] == 3
-
