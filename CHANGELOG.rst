@@ -1,4 +1,4 @@
-3.2.2 (unreleased)
+3.2.2 (2018-05-11)
 ------------------
 
 - Be able to provide comma separated `permissions` param to `@canido`
