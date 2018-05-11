@@ -1,6 +1,9 @@
 3.2.4 (unreleased)
 ------------------
 
+- Fix dynamic storage urls for cockroach
+  [vangheem]
+
 - deserialize value before validation on patch fields
   [vangheem]
 

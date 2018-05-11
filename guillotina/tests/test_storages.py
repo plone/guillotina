@@ -1,4 +1,14 @@
+from guillotina._settings import app_settings
+from guillotina.component import get_adapter
+from guillotina.db.factory import CockroachDatabaseManager
+from guillotina.db.interfaces import IDatabaseManager
+
 import json
+import os
+import pytest
+
+
+DATABASE = os.environ.get('DATABASE', 'DUMMY')
 
 
 async def test_get_storages(container_requester):
@@ -47,3 +57,25 @@ async def test_delete_database(container_requester):
         assert status == 200
         response, status = await requester('GET', '/@storages/db')
         assert 'foobar' not in response['databases']
+
+
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_storage_impl(db, guillotina_main):
+    storages = app_settings['storages']
+    storage_config = storages['db']
+    factory = get_adapter(guillotina_main.root, IDatabaseManager,
+                          name=storage_config['storage'],
+                          args=[storage_config])
+    original_size = len(await factory.get_names())
+    await factory.create('foobar')
+    assert len(await factory.get_names()) == (original_size + 1)
+    await factory.delete('foobar')
+    assert len(await factory.get_names()) == original_size
+
+
+async def test_get_dsn_from_url():
+    factory = CockroachDatabaseManager(None, {
+        'dsn': 'postgresql://root@127.0.0.1:26257?sslmode=disable'
+    })
+    assert (factory.get_dsn('foobar') ==
+            'postgresql://root@127.0.0.1:26257/foobar?sslmode=disable')

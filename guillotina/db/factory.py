@@ -101,10 +101,6 @@ DELETE_DB = '''DROP DATABASE {};'''
     for_=IApplication,  # noqa: N801
     provides=IDatabaseManager,
     name='postgresql')
-@configure.adapter(
-    for_=IApplication,  # noqa: N801
-    provides=IDatabaseManager,
-    name='cockroach')
 class PostgresqlDatabaseManager:
 
     def __init__(self, app: IApplication, storage_config: dict):
@@ -119,7 +115,12 @@ class PostgresqlDatabaseManager:
                 del self.config['dsn']['dbname']
             dsn = _convert_dsn(self.config['dsn'])
         if name is not None:
+            params = None
+            if '?' in dsn:
+                dsn, _, params = dsn.partition('?')
             dsn = dsn.strip('/') + '/' + name
+            if params is not None:
+                dsn += '?' + params
         return dsn
 
     async def get_connection(self, name: str=None) -> asyncpg.connection.Connection:
@@ -166,6 +167,22 @@ WHERE datistemplate = false;''')
                 IDatabaseConfigurationFactory, name=config['storage'])
             self.app[name] = await apply_coroutine(factory, name, config)
         return self.app[name]
+
+
+@configure.adapter(
+    for_=IApplication,  # noqa: N801
+    provides=IDatabaseManager,
+    name='cockroach')
+class CockroachDatabaseManager(PostgresqlDatabaseManager):
+    async def get_names(self) -> list:
+        conn = await self.get_connection()
+        try:
+            result = await conn.fetch('''SHOW DATABASES;''')
+            return [item['Database'] for item in result
+                    if item['Database'] not in ('system', 'pg_catalog',
+                                                'information_schema', 'crdb_internal')]
+        finally:
+            await conn.close()
 
 
 DUMMY_DBS = {
