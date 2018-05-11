@@ -136,4 +136,9 @@ def date_converter(field, value, context=None):
 def object_converter(field, value, context=None):
     if not isinstance(value, dict):
         raise ValueDeserializationError(field, value, 'Not an object')
-    return value
+    result = {}
+    for key, val in value.items():
+        if key in field.schema:
+            f = field.schema[key]
+            result[key] = get_adapter(f, IJSONToValue, args=[val, context])
+    return result

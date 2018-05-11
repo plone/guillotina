@@ -72,12 +72,13 @@ class PatchListAppend:
         return value
 
     def __call__(self, context, value):
+        value = self.get_value(value, None)
         if self.field.value_type:
             self.field.value_type.validate(value)
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
             existing = self.field.missing_value or []
-        existing.append(self.get_value(value, None))
+        existing.append(value)
         return existing
 
 
@@ -92,10 +93,15 @@ class PatchListExtend(PatchListAppend):
             existing = self.field.missing_value or []
         if not isinstance(value, list):
             raise ValueDeserializationError(self.field, value, 'Not valid list')
+
+        values = []
         for item in value:
             if self.field.value_type:
-                self.field.value_type.validate(item)
-        existing.extend(self.get_value(value, None, field_type=self.field))
+                item_value = self.get_value(
+                    item, None, field_type=self.field.value_type)
+                self.field.value_type.validate(item_value)
+                values.append(item_value)
+        existing.extend(values)
         return existing
 
 
@@ -121,14 +127,17 @@ class PatchListUpdate(PatchListAppend):
     def __call__(self, context, value):
         if 'index' not in value or 'value' not in value:
             raise ValueDeserializationError(self.field, value, 'Not valid patch value')
-        if self.field.value_type:
-            self.field.value_type.validate(value['value'])
+
         existing = getattr(context, self.field.__name__, None) or {}
         try:
             existing_item = existing[value['index']]
         except IndexError:
             existing_item = None
-        existing[value['index']] = self.get_value(value['value'], existing_item)
+
+        result_value = self.get_value(value['value'], existing_item)
+        if self.field.value_type:
+            self.field.value_type.validate(result_value)
+        existing[value['index']] = result_value
         return existing
 
 
@@ -141,17 +150,18 @@ class PatchDictSet(PatchListAppend):
         if 'key' not in value or 'value' not in value:
             raise ValueDeserializationError(self.field, value, 'Not valid patch value')
 
-        if self.field.key_type:
-            self.field.key_type.validate(value['key'])
-        if self.field.value_type:
-            self.field.value_type.validate(value['value'])
-
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
             existing = self.field.missing_value or {}
-
         existing_item = existing.get(value['key'])
-        existing[value['key']] = self.get_value(value['value'], existing_item)
+
+        new_value = self.get_value(value['value'], existing_item)
+        if self.field.key_type:
+            self.field.key_type.validate(value['key'])
+        if self.field.value_type:
+            self.field.value_type.validate(new_value)
+
+        existing[value['key']] = new_value
         return existing
 
 
@@ -173,13 +183,15 @@ class PatchDictUpdate(PatchListAppend):
         for item in value:
             if 'key' not in item or 'value' not in item:
                 raise ValueDeserializationError(self.field, value, 'Not valid patch value')
+
+            existing_item = existing.get(item['key'])
+            new_value = self.get_value(item['value'], existing_item)
             if self.field.key_type:
                 self.field.key_type.validate(item['key'])
             if self.field.value_type:
-                self.field.value_type.validate(item['value'])
+                self.field.value_type.validate(new_value)
 
-            existing_item = existing.get(item['key'])
-            existing[item['key']] = self.get_value(item['value'], existing_item)
+            existing[item['key']] = new_value
 
         return existing
 
