@@ -1,4 +1,4 @@
-3.2.3 (unreleased)
+3.2.3 (2018-05-11)
 ------------------
 
 - Authenticated users have access to view root just like
