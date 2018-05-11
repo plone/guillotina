@@ -169,3 +169,15 @@ async def test_canido(container_requester):
             'GET', '/db/guillotina/@canido?permission=guillotina.ViewContent')
         assert status == 200
         assert response
+
+
+async def test_canido_mutliple(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'GET', '/db/guillotina/@canido',
+            params={
+                'permissions': 'guillotina.ViewContent,guillotina.ModifyContent'
+            })
+        assert status == 200
+        assert response['guillotina.ViewContent']
+        assert response['guillotina.ModifyContent']
