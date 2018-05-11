@@ -1,7 +1,9 @@
 3.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Authenticated users have access to view root just like
+  unauthenticated users
+  [vangheem]
 
 
 3.2.2 (2018-05-11)

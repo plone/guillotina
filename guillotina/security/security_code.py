@@ -63,10 +63,10 @@ class PrincipalPermissionManager(SecurityMap):
     """Mappings between principals and permissions."""
 
     def grant_permission_to_principal(
-            self, permission_id, principal_id, check=True):
+            self, permission_id, principal_id, check=True, mode=Allow):
         ''' See the interface IPrincipalPermissionManager '''
 
-        self.add_cell(permission_id, principal_id, Allow)
+        self.add_cell(permission_id, principal_id, mode)
 
     def grant_all_permissions_to_principal(self, principal_id):
         ''' See the interface IPrincipalPermissionManager '''
@@ -114,13 +114,13 @@ principal_permission_manager = PrincipalPermissionManager()
 class RolePermissionManager(SecurityMap):
     """Mappings between roles and permissions."""
 
-    def grant_permission_to_role(self, permission_id, role_id, check=True):
+    def grant_permission_to_role(self, permission_id, role_id, check=True, mode=Allow):
         '''See interface IRolePermissionMap'''
 
         if check:
             check_role(None, role_id)
 
-        self.add_cell(permission_id, role_id, Allow)
+        self.add_cell(permission_id, role_id, mode)
 
     def grant_all_permissions_to_role(self, role_id):
         for permission_id in get_all_permissions(None):
