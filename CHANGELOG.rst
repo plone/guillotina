@@ -1,4 +1,4 @@
-3.2.4 (unreleased)
+3.2.4 (2018-05-11)
 ------------------
 
 - Fix dynamic storage urls for cockroach
