@@ -66,11 +66,11 @@ async def test_storage_impl(db, guillotina_main):
     factory = get_adapter(guillotina_main.root, IDatabaseManager,
                           name=storage_config['storage'],
                           args=[storage_config])
-    assert len(await factory.get_names()) == 0
+    original_size = len(await factory.get_names())
     await factory.create('foobar')
-    assert len(await factory.get_names()) == 1
+    assert len(await factory.get_names()) == (original_size + 1)
     await factory.delete('foobar')
-    assert len(await factory.get_names()) == 0
+    assert len(await factory.get_names()) == original_size
 
 
 async def test_get_dsn_from_url():
