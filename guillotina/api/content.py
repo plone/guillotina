@@ -445,10 +445,16 @@ class SharingPUT(SharingPOST):
         }
     })
 async def can_i_do(context, request):
-    if 'permission' not in request.query:
+    if 'permission' not in request.query and 'permissions' not in request.query:
         raise PreconditionFailed(context, 'No permission param')
-    permission = request.query['permission']
-    return IInteraction(request).check_permission(permission, context)
+    interaction = IInteraction(request)
+    if 'permissions' in request.GET:
+        results = {}
+        for perm in request.GET['permissions'].split(','):
+            results[perm] = interaction.check_permission(perm, context)
+        return results
+    else:
+        return interaction.check_permission(request.GET['permission'], context)
 
 
 @configure.service(
