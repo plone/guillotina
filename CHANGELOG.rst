@@ -1,7 +1,8 @@
 3.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to provide comma separated `permissions` param to `@canido`
+  [vangheem]
 
 
 3.2.1 (2018-05-10)
