@@ -1,4 +1,4 @@
-3.2.5 (unreleased)
+3.2.5 (2018-05-12)
 ------------------
 
 - add IDatabaseManager.exists method to be able to check if db exists
