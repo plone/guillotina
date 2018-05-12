@@ -73,6 +73,20 @@ async def test_storage_impl(db, guillotina_main):
     assert len(await factory.get_names()) == original_size
 
 
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_storage_exists(db, guillotina_main):
+    storages = app_settings['storages']
+    storage_config = storages['db']
+    factory = get_adapter(guillotina_main.root, IDatabaseManager,
+                          name=storage_config['storage'],
+                          args=[storage_config])
+    assert not await factory.exists('foobar')
+    await factory.create('foobar')
+    assert await  factory.exists('foobar')
+    await factory.delete('foobar')
+    assert not await  factory.exists('foobar')
+
+
 async def test_get_dsn_from_url():
     factory = CockroachDatabaseManager(None, {
         'dsn': 'postgresql://root@127.0.0.1:26257?sslmode=disable'

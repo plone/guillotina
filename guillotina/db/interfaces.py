@@ -214,3 +214,8 @@ class IDatabaseManager(Interface):
         '''
         Return storage instance for database
         '''
+
+    async def exists(name: str) -> bool:
+        '''
+        Return whether a db exists or not
+        '''

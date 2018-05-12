@@ -1,7 +1,8 @@
 3.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- add IDatabaseManager.exists method to be able to check if db exists
+  [vangheem]
 
 
 3.2.4 (2018-05-11)

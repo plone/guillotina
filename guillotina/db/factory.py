@@ -168,12 +168,37 @@ WHERE datistemplate = false;''')
             self.app[name] = await apply_coroutine(factory, name, config)
         return self.app[name]
 
+    async def _check_exists(self, conn):
+        '''
+        for pg, a conn is enough to check
+        '''
+        return True
+
+    async def exists(self, name: str) -> bool:
+        conn = None
+        try:
+            conn = await self.get_connection(name)
+            return await self._check_exists(conn)
+        except asyncpg.exceptions.InvalidCatalogNameError:
+            return False
+        finally:
+            if conn is not None:
+                await conn.close()
+
 
 @configure.adapter(
     for_=IApplication,  # noqa: N801
     provides=IDatabaseManager,
     name='cockroach')
 class CockroachDatabaseManager(PostgresqlDatabaseManager):
+
+    async def _check_exists(self, conn):
+        '''
+        cockroach requires us to do a select on the db
+        '''
+        await conn.fetch('''SHOW TABLES;''')  # should raise exception if not db
+        return True
+
     async def get_names(self) -> list:
         conn = await self.get_connection()
         try:
