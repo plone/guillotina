@@ -1,4 +1,4 @@
-3.2.6 (unreleased)
+3.2.6 (2018-05-12)
 ------------------
 
 - Provide IDatabaseManager.exists for dummy db impelementation
