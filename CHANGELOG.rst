@@ -1,7 +1,8 @@
 3.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide IDatabaseManager.exists for dummy db impelementation
+  [vangheem]
 
 
 3.2.5 (2018-05-12)

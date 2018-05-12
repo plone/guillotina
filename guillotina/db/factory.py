@@ -227,6 +227,9 @@ class DummyDatabaseManager:
     async def get_names(self) -> list:
         return DUMMY_DBS.keys()
 
+    async def exists(self, name: str) -> bool:
+        return name in DUMMY_DBS
+
     async def create(self, name: str) -> bool:
         DUMMY_DBS[name] = None
 
