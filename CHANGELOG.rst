@@ -1,7 +1,9 @@
 3.1.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Indexing gathers all data on update instead of
+  overwriting indexed data
+  [vangheem]
 
 
 3.1.8 (2018-05-06)

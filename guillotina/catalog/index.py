@@ -129,7 +129,10 @@ async def add_object(obj, event):
                             indexes.append(behavior_field_name)
                     else:
                         indexes.append(field_name)
-                fut.update[uid] = await search.get_data(obj, indexes)
+                if uid in fut.update:
+                    fut.update[uid].update(await search.get_data(obj, indexes))
+                else:
+                    fut.update[uid] = await search.get_data(obj, indexes)
         else:
             fut.index[uid] = await search.get_data(obj)
 
