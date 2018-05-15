@@ -1,7 +1,9 @@
 3.2.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Indexing gathers all data on update instead of
+  overwriting indexed data
+  [vangheem]
 
 
 3.2.6 (2018-05-12)
