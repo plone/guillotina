@@ -1,4 +1,7 @@
 from guillotina.catalog.utils import get_index_fields
+from guillotina.catalog import index
+from guillotina.events import ObjectModifiedEvent
+from guillotina.event import notify
 from guillotina.catalog.utils import get_metadata_fields
 from guillotina.component import get_adapter
 from guillotina.component import query_utility
@@ -68,6 +71,30 @@ async def test_get_data_uses_indexes_param(dummy_request):
 
     data = await util.get_data(ob)
     assert len(data) > 8
+
+
+async def test_modified_event_gathers_all_index_data(dummy_request):
+    request = dummy_request  # noqa
+    container = await create_content(
+        'Container',
+        id='guillotina',
+        title='Guillotina')
+    container.__name__ = 'guillotina'
+    request.container = container
+    ob = await create_content('Item', id='foobar')
+    ob._p_oid = 'foobar'
+    await notify(ObjectModifiedEvent(ob, payload={
+        'title': '',
+        'id': ''
+    }))
+    fut = index.get_future()
+
+    assert len(fut.update['foobar']) == 4
+
+    await notify(ObjectModifiedEvent(ob, payload={
+        'creation_date': ''
+    }))
+    assert len(fut.update['foobar']) == 5
 
 
 async def test_search_endpoint(container_requester):
