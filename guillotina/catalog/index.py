@@ -1,5 +1,5 @@
 from guillotina import configure
-from guillotina.api.search import AsyncCatalogReindex
+from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IContainer
@@ -10,7 +10,6 @@ from guillotina.interfaces import IObjectMovedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
-from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
 
 
@@ -62,7 +61,8 @@ def get_future():
     return fut
 
 
-@configure.subscriber(for_=(IResource, IObjectPermissionsModifiedEvent))
+@configure.subscriber(
+    for_=(IResource, IObjectPermissionsModifiedEvent), priority=1000)
 async def security_changed(obj, event):
     if IGroupFolder.providedBy(obj):
         # assuming permissions for group are already handled correctly with
@@ -70,15 +70,14 @@ async def security_changed(obj, event):
         return
     # We need to reindex the objects below
     request = get_current_request()
-    request.add_future(
-        obj.id, AsyncCatalogReindex(obj, request, security=True)())
+    reindex_in_future(obj, request, True)
 
 
-@configure.subscriber(for_=(IResource, IObjectMovedEvent))
+@configure.subscriber(
+    for_=(IResource, IObjectMovedEvent), priority=1000)
 def moved_object(obj, event):
     request = get_current_request()
-    request.add_future(
-        obj.id, AsyncCatalogReindex(obj, request, security=True)())
+    reindex_in_future(obj, request, True)
 
 
 @configure.subscriber(for_=(IResource, IObjectRemovedEvent))
@@ -90,21 +89,21 @@ def remove_object(obj, event):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    content_path = get_content_path(obj)
-
     fut = get_future()
     if fut is None:
         return
 
-    fut.remove.append((uid, type_name, content_path))
+    fut.remove.append(obj)
     if uid in fut.index:
         del fut.index[uid]
     if uid in fut.update:
         del fut.update[uid]
 
 
-@configure.subscriber(for_=(IResource, IObjectAddedEvent))
-@configure.subscriber(for_=(IResource, IObjectModifiedEvent))
+@configure.subscriber(
+    for_=(IResource, IObjectAddedEvent), priority=1000)
+@configure.subscriber(
+    for_=(IResource, IObjectModifiedEvent), priority=1000)
 async def add_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
@@ -137,7 +136,8 @@ async def add_object(obj, event):
             fut.index[uid] = await search.get_data(obj)
 
 
-@configure.subscriber(for_=(IContainer, IObjectAddedEvent))
+@configure.subscriber(
+    for_=(IContainer, IObjectAddedEvent), priority=1000)
 async def initialize_catalog(container, event):
     search = query_utility(ICatalogUtility)
     if search:

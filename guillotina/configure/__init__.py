@@ -468,6 +468,10 @@ class adapter(_factory_decorator):  # noqa: N801
 class subscriber(_factory_decorator):  # noqa: N801
     configuration_type = 'subscriber'
 
+    def __call__(self, klass=None):
+        klass.priority = self.config.pop('priority', 100)
+        return super().__call__(klass)
+
 
 class utility(_factory_decorator):  # noqa: N801
     configuration_type = 'utility'

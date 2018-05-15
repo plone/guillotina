@@ -89,8 +89,8 @@ def handle4(x):
 class GlobalRegistry:
     pass
 
-from guillotina.component.globalregistry import GlobalAdapterRegistry
-base = GlobalAdapterRegistry(GlobalRegistry, 'adapters')
+from guillotina.component.globalregistry import GuillotinaAdapterRegistry
+base = GuillotinaAdapterRegistry(GlobalRegistry, 'adapters')
 GlobalRegistry.adapters = base
 def clear_base():
     base.__init__(GlobalRegistry, 'adapters')

@@ -29,22 +29,6 @@ class Test_get_global_components(unittest.TestCase):
 
     def test_gsm_is_singleton(self):
         gsm = self._callFUT()
-        self.assertTrue(self._callFUT() is gsm)
-
-    def test_gsm_pickling(self):
-        from guillotina.component._compat import _pickle
-        gsm = self._callFUT()
-        dumped = _pickle.dumps(gsm)
-        loaded = _pickle.loads(dumped)
-        self.assertTrue(loaded is gsm)
-
-        dumped_utilities = _pickle.dumps(gsm.utilities)
-        loaded_utilities = _pickle.loads(dumped_utilities)
-        self.assertTrue(loaded_utilities is gsm.utilities)
-
-        dumped_adapters = _pickle.dumps(gsm.adapters)
-        loaded_adapters = _pickle.loads(dumped_adapters)
-        self.assertTrue(loaded_adapters is gsm.adapters)
 
 
 class Test_provide_utility(unittest.TestCase):

@@ -71,7 +71,7 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    async def reindex_all_content(self, container, security=False):
+    async def reindex_all_content(self, container, security=False, request=None):
         """ For all content add a queue task that reindex the object
         """
         pass
@@ -86,11 +86,11 @@ class DefaultSearchUtility(object):
         """
         pass
 
-    async def get_data(self, content, indexes=None):
+    async def get_data(self, content, indexes=None, schemas=None):
         data = {}
         adapter = query_adapter(content, ICatalogDataAdapter)
         if adapter:
-            data.update(await adapter(indexes))
+            data.update(await adapter(indexes, schemas))
         return data
 
 
@@ -111,7 +111,8 @@ class DefaultSecurityInfoAdapter(object):
                 getattr(self.content, '__parent__', None), 'uuid', None),
             'access_users': get_principals_with_access_content(self.content),
             'access_roles': get_roles_with_access_content(self.content),
-            'type_name': self.content.type_name
+            'type_name': self.content.type_name,
+            'tid': self.content._p_serial
         }
 
 
@@ -143,13 +144,16 @@ class DefaultCatalogDataAdapter(object):
             # providedBy not working here?
             await behavior.load(create=False)
 
-    async def __call__(self, indexes=None):
+    async def __call__(self, indexes=None, schemas=None):
         # For each type
         values = {
-            'type_name': self.content.type_name
+            'type_name': self.content.type_name,
+            'tid': self.content._p_serial
         }
+        if schemas is None:
+            schemas = iter_schemata(self.content)
 
-        for schema in iter_schemata(self.content):
+        for schema in schemas:
             behavior = schema(self.content)
             loaded = False
             for field_name, index_data in merged_tagged_value_dict(schema, index.key).items():
@@ -163,8 +167,8 @@ class DefaultCatalogDataAdapter(object):
                     # accessors we always reindex since we can't know if updated
                     # from the indexes param--they are "fake" like indexes, not fields
                     if 'accessor' in index_data:
-                        if indexes is None or (
-                                len(set(index_data.get('fields', [])) & set(indexes)) > 0):
+                        if (indexes is None or
+                                (len(set(index_data.get('fields', [])) & set(indexes)) > 0)):
                             if not loaded:
                                 await self.load_behavior(behavior)
                                 loaded = True

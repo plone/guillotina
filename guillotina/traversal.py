@@ -293,11 +293,14 @@ class MatchInfo(BaseMatchInfo):
 
         if not request._view_error:
             request.execute_futures()
+        else:
+            request.execute_futures('failure')
 
         self.debug(request, resp)
 
         request.record('finish')
 
+        request.clear_futures()
         return resp
 
     def get_info(self):

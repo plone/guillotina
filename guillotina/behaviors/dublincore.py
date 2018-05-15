@@ -4,7 +4,7 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
-from guillotina.directives import index
+from guillotina.directives import index_field
 from zope.interface import Interface
 
 
@@ -21,9 +21,9 @@ class IMarkerDublinCore(Interface):
 
 
 class IDublinCore(Interface):
-    index('creators', type='keyword')
-    index('tags', type='keyword')
-    index('contributors', type='keyword')
+    index_field('creators', type='keyword')
+    index_field('tags', type='keyword')
+    index_field('contributors', type='keyword')
 
     title = schema.TextLine(
         title=u'Title',

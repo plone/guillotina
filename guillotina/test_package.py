@@ -1,4 +1,5 @@
 # this is for testing.py, do not import into other modules
+from guillotina.interfaces import IObjectAddedEvent
 from aiohttp.web_exceptions import HTTPUnprocessableEntity
 from guillotina import configure
 from guillotina import schema
@@ -7,7 +8,7 @@ from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.instance import ContextBehavior
 from guillotina.content import Item
 from guillotina.content import Resource
-from guillotina.directives import index
+from guillotina.directives import index_field
 from guillotina.directives import metadata
 from guillotina.files import CloudFileField
 from guillotina.interfaces import IApplication
@@ -33,7 +34,7 @@ class IExample(IResource):
 
     metadata('categories')
 
-    index('categories', type='nested')
+    index_field('categories', type='nested')
     categories = schema.List(
         title='categories',
         default=[],
@@ -112,6 +113,12 @@ class IFileContent(IItem):
         "guillotina.behaviors.dublincore.IDublinCore"
     ])
 class FileContent(Item):
+    pass
+
+
+@configure.subscriber(
+    for_=(IFileContent, IObjectAddedEvent), priority=-1000)
+async def foobar_sub(ob, evt):
     pass
 
 

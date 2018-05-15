@@ -1,6 +1,5 @@
 # load the patch before anything else.
 from guillotina import glogging
-from guillotina import patch  # noqa
 from guillotina._cache import BEHAVIOR_CACHE  # noqa
 from guillotina._cache import FACTORY_CACHE  # noqa
 from guillotina._cache import PERMISSIONS_CACHE  # noqa

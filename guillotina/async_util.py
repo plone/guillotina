@@ -1,37 +1,26 @@
 from datetime import datetime
 from dateutil.tz import tzutc
+from guillotina import configure
 from guillotina import logger
 from guillotina.browser import ErrorResponse
 from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
 from guillotina.db.transaction import Status
+from guillotina.exceptions import ServerClosingException
 from guillotina.exceptions import Unauthorized
+from guillotina.interfaces import IAsyncJobPool
+from guillotina.interfaces import IAsyncUtility  # noqa
+from guillotina.interfaces import IQueueUtility  # noqa
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
-from zope.interface import Interface
+from guillotina.transactions import managed_transaction
 
 import aiotask_context
 import asyncio
+import typing
 
 
 _zone = tzutc()
-
-
-class IAsyncUtility(Interface):
-
-    async def initialize(self):
-        '''
-        Method that is called on startup and used to create task.
-        '''
-
-    async def finalize(self):
-        '''
-        Called to shut down and cleanup the task
-        '''
-
-
-class IQueueUtility(IAsyncUtility):
-    pass
 
 
 class QueueUtility(object):
@@ -126,3 +115,104 @@ class QueueObject(View):
 
     def __lt__(self, view):
         return self.time < view.time
+
+
+class Job:
+
+    def __init__(self, func: typing.Callable[[], typing.Coroutine],
+                 request=None, args=None, kwargs=None):
+        self._func = func
+        self._request = request
+        self._args = args
+        self._kwargs = kwargs
+
+    @property
+    def func(self):
+        return self._func
+
+    async def run(self):
+        try:
+            if self._request:
+                aiotask_context.set('request', self._request)
+                async with managed_transaction(
+                        request=self._request, abort_when_done=True):
+                    await self._func(*self._args or [], **self._kwargs or {})
+            else:
+                # if no request, we do it without transaction
+                await self._func(*self._args or [], **self._kwargs or {})
+        finally:
+            aiotask_context.set('request', None)
+
+
+@configure.utility(provides=IAsyncJobPool)
+class AsyncJobPool:
+
+    def __init__(self, max_size=5):
+        self._loop = None
+        self._running = []
+        self._pending = []
+        self._max_size = max_size
+        self._closing = False
+
+    def get_loop(self):
+        if self._loop is None:
+            self._loop = asyncio.get_event_loop()
+        return self._loop
+
+    @property
+    def num_pending(self):
+        return len(self._pending)
+
+    @property
+    def num_running(self):
+        return len(self._running)
+
+    async def initialize(self, app=None):
+        pass
+
+    async def finalize(self):
+        await self.join()
+
+    def add_job(self, func: typing.Callable[[], typing.Coroutine],
+                request=None, args=None, kwargs=None):
+        if self._closing:
+            raise ServerClosingException('Can not schedule job')
+        job = Job(func, request=request, args=args, kwargs=kwargs)
+        self._pending.insert(0, job)
+        self._schedule()
+        return job
+
+    def _add_job_after_commit(self, status, func, request=None, args=None, kwargs=None):
+        self.add_job(func, request=request, args=args, kwargs=kwargs)
+
+    def add_job_after_commit(self, func: typing.Callable[[], typing.Coroutine],
+                             request=None, args=None, kwargs=None):
+        txn = get_transaction(request)
+        txn.add_after_commit_hook(
+            self._add_job_after_commit,
+            args=[func],
+            kws={
+                'request': request,
+                'args': args,
+                'kwargs': kwargs
+            })
+
+    def _done_callback(self, task):
+        self._running.remove(task)
+        self._schedule()  # see if we can schedule now
+
+    def _schedule(self):
+        '''
+        check if we can schedule a new job
+        '''
+        if len(self._running) < self._max_size and len(self._pending) > 0:
+            job = self._pending.pop()
+            task = self.get_loop().create_task(job.run())
+            task._job = job
+            self._running.append(task)
+            task.add_done_callback(self._done_callback)
+
+    async def join(self):
+        self._closing = True
+        while len(self._running) > 0 or len(self._pending) > 0:
+            await asyncio.sleep(0.1)

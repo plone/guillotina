@@ -4,8 +4,6 @@ from guillotina.component.event import sync_subscribers
 
 async def notify(event):
     """Notify all subscribers of ``event``."""
-    for subscriber in sync_subscribers:
-        subscriber(event)
     for subscriber in async_subscribers:
         await subscriber(event)
 
