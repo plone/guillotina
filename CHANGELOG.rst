@@ -1,4 +1,4 @@
-3.2.7 (unreleased)
+3.2.7 (2018-05-15)
 ------------------
 
 - Indexing gathers all data on update instead of
