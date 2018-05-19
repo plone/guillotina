@@ -92,9 +92,10 @@ class Request(web_request.Request):
             if not asyncio.iscoroutine(fut):
                 fut = fut(*fut_data.get('args') or [], **fut_data.get('kwargs') or {})
             futures.append(fut)
-        task = asyncio.ensure_future(asyncio.gather(*futures))
         self._futures[scope] = {}
-        return task
+        if len(futures) > 0:
+            task = asyncio.ensure_future(asyncio.gather(*futures))
+            return task
 
     def clear_futures(self):
         self._futures = {}

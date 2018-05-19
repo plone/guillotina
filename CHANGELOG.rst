@@ -1,7 +1,9 @@
 3.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- only return task on request.execute_futures if there are futures
+  to run
+  [vangheem]
 
 
 3.3.0 (2018-05-19)
