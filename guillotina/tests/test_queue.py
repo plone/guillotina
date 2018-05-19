@@ -1,4 +1,4 @@
-from guillotina.async_util import IQueueUtility
+from guillotina.async_util import IQueueUtility, IAsyncJobPool
 from guillotina.browser import View
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
@@ -53,3 +53,47 @@ async def test_add_sync_utility(guillotina, loop):
     assert len(var) == 4
 
     app.del_async_utility(QUEUE_UTILITY_CONFIG)
+
+
+class JobRunner:
+
+    def __init__(self):
+        self.done = False
+        self.wait = True
+
+    async def __call__(self, arg1):
+        while self.wait:
+            await asyncio.sleep(0.05)
+        self.done = True
+
+
+async def test_run_jobs(guillotina):
+    pool = get_utility(IAsyncJobPool)
+    job = pool.add_job(JobRunner(), args=['foobar'])
+    assert pool.num_running == 1
+    assert pool.num_pending == 0
+    await asyncio.sleep(0.1)
+    assert pool.num_running == 1
+    job.func.wait = False
+    await asyncio.sleep(0.1)
+    assert pool.num_running == 0
+    assert pool.num_pending == 0
+    assert job.func.done
+
+
+async def test_run_many_jobs(guillotina, dummy_request):
+    pool = get_utility(IAsyncJobPool)
+    jobs = [pool.add_job(JobRunner(), args=['foobar'], request=dummy_request)
+            for _ in range(20)]
+    assert pool.num_running == 5
+    assert pool.num_pending == 15
+
+    for job in jobs:
+        job.func.wait = False
+
+    await asyncio.sleep(0.1)
+    assert pool.num_running == 0
+    assert pool.num_pending == 0
+
+    for job in jobs:
+        assert job.func.done

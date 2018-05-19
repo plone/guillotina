@@ -49,14 +49,20 @@ class Request(web_request.Request):
     def record(self, event_name):
         self._events[event_name] = time.time()
 
-    def add_future(self, name, fut):
-        if self._futures is None:
-            self._futures = {}
-        self._futures[name] = fut
+    def add_future(self, name, fut, scope='', args=None, kwargs=None):
+        if scope not in self._futures:
+            self._futures[scope] = {}
+        self._futures[scope][name] = {
+            'fut': fut,
+            'args': args,
+            'kwargs': kwargs
+        }
 
-    def get_future(self, name):
+    def get_future(self, name, scope=''):
         try:
-            return self._futures[name]
+            if scope not in self._futures:
+                return
+            return self._futures[scope][name]['fut']
         except (AttributeError, KeyError):
             return
 
@@ -73,21 +79,25 @@ class Request(web_request.Request):
         return self._view_error
 
     @profilable
-    def execute_futures(self):
+    def execute_futures(self, scope=''):
         '''
         Should *not* be a coroutine since the deleting of
         the request object causes this to be canceled otherwise.
         '''
-        if self._futures is None:
+        if scope not in self._futures:
             return
         futures = []
-        for fut in self._futures.values():
+        for fut_data in self._futures[scope].values():
+            fut = fut_data['fut']
             if not asyncio.iscoroutine(fut):
-                fut = fut()
+                fut = fut(*fut_data.get('args') or [], **fut_data.get('kwargs') or {})
             futures.append(fut)
         task = asyncio.ensure_future(asyncio.gather(*futures))
-        self._futures = {}
+        self._futures[scope] = {}
         return task
+
+    def clear_futures(self):
+        self._futures = {}
 
     @property
     def uid(self):

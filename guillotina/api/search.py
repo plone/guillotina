@@ -1,6 +1,6 @@
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.async_util import IQueueUtility
+from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
@@ -91,7 +91,7 @@ class CatalogReindex(Service):
         search = query_utility(ICatalogUtility)
         if search is not None:
             await search.reindex_all_content(
-                self.context, self._security_reindex)
+                self.context, self._security_reindex, request=self.request)
         return {}
 
 
@@ -111,10 +111,7 @@ class AsyncCatalogReindex(Service):
         self._security_reindex = security
 
     async def __call__(self):
-        util = query_utility(IQueueUtility)
-        if util:
-            await util.add(CatalogReindex(
-                self.context, self.request, self._security_reindex))
+        reindex_in_future(self.context, self.request, False)
         return {}
 
 

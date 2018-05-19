@@ -1,7 +1,23 @@
-3.2.8 (unreleased)
+3.3.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Change reindexing security to futures, not queue for more
+  consistent performance
+  [vangheem]
+
+- Remove IBeforeObjectAssignedEvent as it wasn't used
+  [vangheem]
+
+- Rename `directives.index` to `directives.index_field`
+  [vangheem]
+
+- Be able to specify priority on `@configure.subscriber`. Lower
+  is higher priority.
+  [vangheem]
+
+- Indexer now sends full object for ICatalogUtility.remove
+  instead of tuple of data
+  [vangheem]
 
 
 3.2.7 (2018-05-15)

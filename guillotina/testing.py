@@ -3,7 +3,6 @@ from guillotina.auth.users import ROOT_USER_ID
 from guillotina.utils import lazy_apply
 
 import base64
-import guillotina.patch  # noqa
 import os
 
 

@@ -102,7 +102,7 @@ class metadata(MetadataListDirective):  # noqa: N801
         return names
 
 
-class index(MetadataDictDirective):  # noqa: N801
+class index_field(MetadataDictDirective):  # noqa: N801
     """
     Directive used to set indexed attributes.
 
@@ -152,3 +152,6 @@ class index(MetadataDictDirective):  # noqa: N801
             cls.apply(*args, **kwargs)  # pylint: disable=E1101
             return func
         return _func
+
+
+index = index_field  # b/w compat

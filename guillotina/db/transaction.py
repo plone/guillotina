@@ -197,8 +197,10 @@ class Transaction(object):
             # The first argument passed to the hook is a Boolean value,
             # true if the commit succeeded, or false if the commit aborted.
             try:
-                await lazy_apply(hook, status, *args, **kws)
-            except:  # noqa
+                result = lazy_apply(hook, status, *args, **kws)
+                if asyncio.iscoroutine(result):
+                    await result
+            except Exception:
                 # We need to catch the exceptions if we want all hooks
                 # to be called
                 logger.error("Error in after commit hook exec in %s ",
@@ -350,7 +352,9 @@ class Transaction(object):
 
     async def _call_before_commit_hooks(self):
         for hook, args, kws in self._before_commit:
-            await lazy_apply(hook, *args, **kws)
+            result = lazy_apply(hook, *args, **kws)
+            if asyncio.iscoroutine(result):
+                await result
         self._before_commit = []
 
     @profilable

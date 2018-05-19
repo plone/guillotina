@@ -238,3 +238,9 @@ class InvalidRoute(HTTPNotFound):
     '''
     The defined route is invalid
     '''
+
+
+class ServerClosingException(Exception):
+    '''
+    Server closing, can not perform action
+    '''

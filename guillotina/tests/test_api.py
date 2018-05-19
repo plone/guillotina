@@ -416,7 +416,6 @@ async def test_move_content(container_requester):
                 "id": "foobar"
             })
         )
-
         _, status = await requester(
             'POST',
             '/db/guillotina/container1/foobar/@move',

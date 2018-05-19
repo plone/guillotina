@@ -16,7 +16,6 @@ from datetime import date
 from datetime import datetime
 from datetime import time
 from datetime import timedelta
-from guillotina.event import sync_notify
 from guillotina.schema._bootstrapfields import Bool
 from guillotina.schema._bootstrapfields import Container  # API import for __init__
 from guillotina.schema._bootstrapfields import Field
@@ -42,7 +41,6 @@ from guillotina.schema.fieldproperty import FieldProperty
 from guillotina.schema.interfaces import IASCII
 from guillotina.schema.interfaces import IASCIILine
 from guillotina.schema.interfaces import IBaseVocabulary
-from guillotina.schema.interfaces import IBeforeObjectAssignedEvent
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IBytes
 from guillotina.schema.interfaces import IBytesLine
@@ -617,27 +615,6 @@ class Object(Field):
             errors = _validate_fields(self.schema, value)
         if errors:
             raise WrongContainedType(errors, self.__name__)
-
-    def set(self, object, value):
-        # Announce that we're going to assign the value to the object.
-        # Motivation: Widgets typically like to take care of policy-specific
-        # actions, like establishing location.
-        event = BeforeObjectAssignedEvent(value, self.__name__, object)
-        sync_notify(event)
-        # The event subscribers are allowed to replace the object, thus we need
-        # to replace our previous value.
-        value = event.object
-        super(Object, self).set(object, value)
-
-
-@implementer(IBeforeObjectAssignedEvent)
-class BeforeObjectAssignedEvent(object):
-    """An object is going to be assigned to an attribute on another object."""
-
-    def __init__(self, object, name, context):
-        self.object = object
-        self.name = name
-        self.context = context
 
 
 @implementer(IDict)
