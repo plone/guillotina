@@ -1,10 +1,4 @@
-3.2.9 (unreleased)
-------------------
-
-- Nothing changed yet.
-
-
-3.2.8 (2018-05-19)
+3.0.0 (unreleased)
 ------------------
 
 - Change reindexing security to futures, not queue for more
