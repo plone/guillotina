@@ -1,4 +1,4 @@
-3.3.1 (unreleased)
+3.3.1 (2018-05-19)
 ------------------
 
 - only return task on request.execute_futures if there are futures
