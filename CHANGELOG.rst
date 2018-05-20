@@ -1,4 +1,4 @@
-3.3.2 (unreleased)
+3.3.2 (2018-05-20)
 ------------------
 
 - Cockroachdb supports cascade and jsonb now
