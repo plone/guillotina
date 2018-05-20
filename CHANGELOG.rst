@@ -1,7 +1,8 @@
 3.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Cockroachdb supports cascade and jsonb now
+  [vangheem]
 
 
 3.3.1 (2018-05-19)
