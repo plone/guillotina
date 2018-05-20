@@ -55,59 +55,6 @@ RETURNING tid, otid"""
 
 NEXT_TID = """SELECT unique_rowid()"""
 
-DELETE_FROM_BLOBS = f"""
-    DELETE FROM blobs WHERE zoid = $1::varchar({MAX_OID_LENGTH}) RETURNING NOTHING;"""
-
-DELETE_BY_PARENT_OID = f'''DELETE FROM objects
-WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
-RETURNING NOTHING;'''
-
-BATCHED_GET_CHILDREN_OIDS = f"""
-SELECT zoid FROM objects
-WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
-ORDER BY zoid
-LIMIT $2::int
-OFFSET $3::int;"""
-
-DELETE_OBJECT = f"""
-DELETE FROM objects
-WHERE zoid = $1::varchar({MAX_OID_LENGTH})
-RETURNING NOTHING;
-"""
-
-
-async def iterate_children(conn, parent_oid, page_size=1000):
-    smt = await conn.prepare(BATCHED_GET_CHILDREN_OIDS)
-    page = 1
-    results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
-    while len(results) > 0:
-        for record in results:
-            yield record['zoid']
-        page += 1
-        results = await smt.fetch(parent_oid, page_size, (page - 1) * page_size)
-
-
-class CockroachVacuum(pg.PGVacuum):
-
-    async def vacuum_children(self, conn, parent_oid):
-        async for child_oid in iterate_children(conn, parent_oid):
-            await self.vacuum_children(conn, child_oid)
-        await conn.execute(DELETE_BY_PARENT_OID, parent_oid)
-        await conn.execute(DELETE_FROM_BLOBS, parent_oid)
-
-    async def vacuum(self, oid):
-        '''
-        Recursively go through objects, deleting children as you find them,
-        checking if they have their own children and so on...
-
-        Once cockroachdb 2.0 is stable, we can remove this custom vacuum implementation.
-        '''
-        conn = await self._storage.open()
-        try:
-            await self.vacuum_children(conn, oid)
-        finally:
-            await self._storage.close(conn)
-
 
 class CockroachDBTransaction:
     '''
@@ -155,7 +102,7 @@ SAVEPOINT cockroach_restart;''')
         assert self._status in ('started',)
         try:
             await self._conn.execute('ROLLBACK;')
-        except asyncpg.exceptions.InternalServerError as ex:
+        except asyncpg.exceptions.InternalServerError:
             # already aborted...
             pass
         self._status = 'rolledback'
@@ -178,33 +125,8 @@ class CockroachStorage(pg.PostgresqlStorage):
           way as postgresql driver with on delete cascade support
     '''
 
-    _object_schema = pg.PostgresqlStorage._object_schema.copy()
-    del _object_schema['json']  # no json db support
-    _object_schema.update({
-        'of': f'VARCHAR({MAX_OID_LENGTH})',
-        'parent_id': f'VARCHAR({MAX_OID_LENGTH})'
-    })
-
-    _blob_schema = pg.PostgresqlStorage._blob_schema.copy()
-    _blob_schema.update({
-        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL',
-    })
-
-    _initialize_statements = [
-        'CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);',
-        'CREATE INDEX IF NOT EXISTS object_of ON objects (of);',
-        'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
-        'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
-        'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
-        'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
-        'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index)'
-    ]
-
     _db_transaction_factory = CockroachDBTransaction
     _vacuum = _vacuum_task = None
-    _isolation_level = 'snapshot'
-    _vacuum_class = CockroachVacuum
 
     def __init__(self, *args, **kwargs):
         transaction_strategy = kwargs.get('transaction_strategy', 'dbresolve_readcommitted')
@@ -287,14 +209,6 @@ class CockroachStorage(pg.PostgresqlStorage):
                     f'be an edge case. This should resolve on request retry.',
                     oid, txn, old_serial, writer)
         await txn._cache.store_object(obj, pickled)
-
-    async def delete(self, txn, oid):
-        # no cascade support, so we push to vacuum
-        async with txn._lock:
-            conn = await txn.get_connection()
-            await conn.execute(DELETE_OBJECT, oid)
-            await conn.execute(DELETE_FROM_BLOBS, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
