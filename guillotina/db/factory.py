@@ -14,7 +14,7 @@ from guillotina.utils import apply_coroutine
 from guillotina.utils import resolve_dotted_name
 
 import asyncpg
-import re
+import string
 
 
 def _get_connection_options(dbconfig):
@@ -93,8 +93,13 @@ async def DummyFileDatabaseConfigurationFactory(key, dbconfig, loop=None):
     return db
 
 
-CREATE_DB = '''CREATE DATABASE {};'''
-DELETE_DB = '''DROP DATABASE {};'''
+CREATE_DB = '''CREATE DATABASE "{}";'''
+DELETE_DB = '''DROP DATABASE "{}";'''
+
+
+def _safe_db_name(name):
+    return ''.join([l for l in name
+                    if l in string.digits + string.ascii_lowercase + '-_'])
 
 
 @configure.adapter(
@@ -140,7 +145,7 @@ WHERE datistemplate = false;''')
     async def create(self, name: str) -> bool:
         conn = await self.get_connection()
         try:
-            await conn.execute(CREATE_DB.format(re.escape(name)))
+            await conn.execute(CREATE_DB.format(_safe_db_name(name)))
             return True
         finally:
             await conn.close()
@@ -153,7 +158,7 @@ WHERE datistemplate = false;''')
 
         conn = await self.get_connection()
         try:
-            await conn.execute(DELETE_DB.format(re.escape(name)))
+            await conn.execute(DELETE_DB.format(_safe_db_name(name)))
             return True
         finally:
             await conn.close()
