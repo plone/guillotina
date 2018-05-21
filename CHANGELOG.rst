@@ -1,4 +1,4 @@
-3.3.4 (unreleased)
+3.3.4 (2018-05-21)
 ------------------
 
 - Make sure we write to a non-shared txn when creating db object
