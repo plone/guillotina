@@ -1,7 +1,8 @@
 3.3.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure we write to a non-shared txn when creating db object
+  [vangheem]
 
 
 3.3.3 (2018-05-21)

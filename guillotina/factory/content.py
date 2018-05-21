@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from guillotina.db.reader import reader
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
@@ -8,6 +9,7 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.db import ROOT_ID
 from guillotina.db.interfaces import IDatabaseManager
+from guillotina.db.interfaces import IWriter
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -112,7 +114,7 @@ class ApplicationRoot(object):
         if key in self._items:
             return self._items[key]
         # check configured storages, see if there is a database registered under this name...
-        for storage_id, config in list_or_dict_items(app_settings['storages']):
+        for _, config in list_or_dict_items(app_settings['storages']):
             factory = get_adapter(self, IDatabaseManager,
                                   name=config['storage'], args=[config])
             if await factory.exists(key):
@@ -143,26 +145,23 @@ class Database:
         request = make_mocked_request('POST', '/')
         request._db_write_enabled = True
         tm = request._tm = self.get_transaction_manager()
-        txn = await tm.begin(request=request)
+        txn = await tm.begin()
 
-        commit = False
         try:
-            assert tm.get(request=request) == txn
-            root = await txn.get(ROOT_ID)
-            if root.__db_id__ is None:
-                root.__db_id__ = self._database_name
-                txn.register(root)
-                commit = True
+            await txn._strategy.retrieve_tid()
+            root = await tm._storage.load(txn, ROOT_ID)
+            if root is not None:
+                root = reader(root)
+                root._p_jar = txn
+                if root.__db_id__ is None:
+                    root.__db_id__ = self._database_name
+                    await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
         except KeyError:
             from guillotina.db.db import Root
             root = Root(self._database_name)
-            txn.register(root, new_oid=ROOT_ID)
-            commit = True
-
-        if commit:
+            await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
+        finally:
             await tm.commit(txn=txn)
-        else:
-            await tm.abort(txn=txn)
 
     async def open(self):
         """Return a database Connection for use by application code.
