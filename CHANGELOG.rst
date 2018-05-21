@@ -1,8 +1,8 @@
 3.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Use exists instead of get_names for dynamic dbs
+  [vangheem]
 
 3.3.2 (2018-05-20)
 ------------------
