@@ -219,7 +219,7 @@ class CockroachStorage(pg.PostgresqlStorage):
                     if ex.sqlstate == '40001':
                         raise RestartCommit(ex.args[0])
         elif self._transaction_strategy not in ('none', 'tidonly'):
-            logger.warning('Do not have db transaction to commit')
+            logger.info('Do not have db transaction to commit')
 
         return transaction._tid
 

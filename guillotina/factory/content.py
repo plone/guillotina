@@ -115,7 +115,7 @@ class ApplicationRoot(object):
         for storage_id, config in list_or_dict_items(app_settings['storages']):
             factory = get_adapter(self, IDatabaseManager,
                                   name=config['storage'], args=[config])
-            if key in await factory.get_names():
+            if await factory.exists(key):
                 return await factory.get_database(key)
 
 
