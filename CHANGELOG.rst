@@ -1,4 +1,4 @@
-3.3.3 (unreleased)
+3.3.3 (2018-05-21)
 ------------------
 
 - Use exists instead of get_names for dynamic dbs
