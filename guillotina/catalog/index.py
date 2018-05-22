@@ -104,7 +104,7 @@ def remove_object(obj, event):
     for_=(IResource, IObjectAddedEvent), priority=1000)
 @configure.subscriber(
     for_=(IResource, IObjectModifiedEvent), priority=1000)
-async def add_object(obj, event):
+async def add_object(obj, event=None, modified=None, payload=None):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
@@ -118,13 +118,17 @@ async def add_object(obj, event):
 
     search = query_utility(ICatalogUtility)
     if search:
-        if IObjectModifiedEvent.providedBy(event):
+        if modified is None:
+            modified = IObjectModifiedEvent.providedBy(event)
+        if payload is None:
+            payload = event and event.payload or {}
+        if modified:
             indexes = []
-            if event.payload and len(event.payload) > 0:
+            if payload and len(payload) > 0:
                 # get a list of potential indexes
-                for field_name in event.payload.keys():
+                for field_name in payload.keys():
                     if '.' in field_name:
-                        for behavior_field_name in event.payload[field_name].keys():
+                        for behavior_field_name in payload[field_name].keys():
                             indexes.append(behavior_field_name)
                     else:
                         indexes.append(field_name)

@@ -123,6 +123,7 @@ class DefaultCatalogDataAdapter(object):
 
     def __init__(self, content):
         self.content = content
+        self.attempts = []  # prevent indexing same data twice
 
     def get_data(self, ob, iface, field_name):
         try:
@@ -158,10 +159,12 @@ class DefaultCatalogDataAdapter(object):
             loaded = False
             for field_name, index_data in merged_tagged_value_dict(schema, index.key).items():
                 index_name = index_data.get('index_name', field_name)
-                if index_name in values:
+                if index_name in values or index_name in self.attempts:
                     # you can override indexers so we do not want to index
                     # the same value more than once
                     continue
+
+                self.attempts.append(index_name)
 
                 try:
                     # accessors we always reindex since we can't know if updated
@@ -198,4 +201,5 @@ class DefaultCatalogDataAdapter(object):
                     values[metadata_name] = self.get_data(behavior, schema, metadata_name)
                 except NoIndexField:
                     pass
+
         return values
