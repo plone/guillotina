@@ -26,6 +26,7 @@ async def get_user_info(context, request):
     result[principal.id] = {
         'roles': principal.roles,
         'groups': principal.groups,
+        'permissions': principal.permissions,
         'properties': principal.properties
     }
     groups.update(principal.groups)

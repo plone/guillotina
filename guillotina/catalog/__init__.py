@@ -18,7 +18,8 @@ directives.index_field.apply(IResource, 'modification_date', type='date')  # pyl
 directives.index_field.apply(IResource, 'creation_date', type='date')  # pylint: disable=E1101
 
 
-@directives.index_field.with_accessor(IResource, 'access_roles', type='keyword')
+@directives.index_field.with_accessor(
+    IResource, 'access_roles', type='keyword', fields=['acl'])
 def get_access_roles(ob):
     roles = get_roles_with_access_content(ob)
     return roles
@@ -29,7 +30,8 @@ def get_id(ob):
     return ob.id
 
 
-@directives.index_field.with_accessor(IResource, 'access_users', type='keyword')
+@directives.index_field.with_accessor(
+    IResource, 'access_users', type='keyword', fields=['acl'])
 def get_access_users(ob):
     # Users that has specific access to the object
     users = get_principals_with_access_content(ob)

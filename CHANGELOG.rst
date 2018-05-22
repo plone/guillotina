@@ -1,7 +1,17 @@
 3.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- specify `acl` field name for access_users and access_roles indexer
+  so we can easily reindex security
+  [vangheem]
+
+
+- prevent running the same indexer multiple times
+  [vangheem]
+
+- be able to manually index object by using
+  `guillotina.catalog.index.add_object(ob, modified=True, payload={})`
+  [vangheem]
 
 
 3.3.4 (2018-05-21)
