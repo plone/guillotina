@@ -256,7 +256,7 @@ class TusPatchFile(UploadFile):
     }))
 class TusOptionsFile(DefaultOPTIONS, UploadFile):
 
-    async def __call__(self):
+    async def render(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
         adapter = get_multi_adapter(
