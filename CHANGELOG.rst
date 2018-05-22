@@ -1,4 +1,4 @@
-3.3.5 (unreleased)
+3.3.5 (2018-05-22)
 ------------------
 
 - specify `acl` field name for access_users and access_roles indexer
