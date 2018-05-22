@@ -13,6 +13,10 @@
   `guillotina.catalog.index.add_object(ob, modified=True, payload={})`
   [vangheem]
 
+- Fix bug in CORS with tus when guillotina was on different domain than
+  web application calling it
+  [vangheem]
+
 
 3.3.4 (2018-05-21)
 ------------------
