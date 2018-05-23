@@ -1,4 +1,4 @@
-3.3.6 (unreleased)
+3.3.6 (2018-05-23)
 ------------------
 
 - async pool should execute futures of request
