@@ -1,7 +1,8 @@
 3.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- async pool should execute futures of request
+  [vangheem]
 
 
 3.3.5 (2018-05-22)
