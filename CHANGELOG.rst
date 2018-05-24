@@ -1,4 +1,4 @@
-3.3.7 (unreleased)
+3.3.7 (2018-05-23)
 ------------------
 
 - async pool should commit when using transaction
