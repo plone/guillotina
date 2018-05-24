@@ -132,12 +132,12 @@ class Job:
 
     async def run(self):
         try:
-            if self._request:
+            if self._request is not None:
                 aiotask_context.set('request', self._request)
                 async with managed_transaction(
-                        request=self._request, abort_when_done=True):
+                        request=self._request, abort_when_done=False):
                     await self._func(*self._args or [], **self._kwargs or {})
-                    self._request.execute_futures()
+                self._request.execute_futures()
             else:
                 # if no request, we do it without transaction
                 await self._func(*self._args or [], **self._kwargs or {})

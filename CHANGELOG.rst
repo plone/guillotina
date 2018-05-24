@@ -1,7 +1,8 @@
 3.3.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- async pool should commit when using transaction
+  [vangheem]
 
 
 3.3.6 (2018-05-23)
