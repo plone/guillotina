@@ -134,7 +134,6 @@ class TestDataCommand(Command):
         tm = self.request._tm = db.get_transaction_manager()
         self.request._db_id = db.id
         tm = db.get_transaction_manager()
-        tm.request = self.request
         self.request._txn = txn = await tm.begin(self.request)
 
         container = await db.async_get(self.arguments.container)

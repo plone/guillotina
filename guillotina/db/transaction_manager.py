@@ -17,21 +17,28 @@ import asyncpg
 logger = glogging.getLogger('guillotina')
 
 
-class TransactionManager(object):
+class TransactionManager:
     """
     Transaction manager for storing the managed transaction in the
     current request object.
     """
 
-    def __init__(self, storage):
+    def __init__(self, storage, db=None):
         # Guillotine Storage
         self._storage = storage
+        self._db = db
         # Pointer to last transaction created
         self._last_txn = None
         # Pointer to last db connection opened
         self._last_db_conn = None
         self._hard_cache = {}
         self._lock = asyncio.Lock()
+
+    @property
+    def db_id(self):
+        if self._db is not None:
+            return self._db.id
+        return 'root'
 
     @property
     def lock(self):

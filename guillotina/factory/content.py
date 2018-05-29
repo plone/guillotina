@@ -179,7 +179,7 @@ class Database:
         New transaction manager for every request
         """
         if self._tm is None:
-            self._tm = TransactionManager(self._storage)
+            self._tm = TransactionManager(self._storage, self)
         return self._tm
 
     @property
