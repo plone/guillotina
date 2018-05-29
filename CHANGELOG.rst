@@ -1,7 +1,14 @@
 3.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add more utilities: `execute`, `safe_unidecode`, `run_async`, `get_object_by_oid`
+  [vangheem]
+
+- Prevent db cache poisening between containers of dynamic databases
+  [vangheem]
+
+- Do not reuse transaction objects with get_containers
+  [vangheem]
 
 
 3.3.7 (2018-05-23)

@@ -122,6 +122,7 @@ class MockStorage:
 
 class MockTransactionManager:
     _storage = None
+    db_id = 'root'
 
     def __init__(self, storage=None):
         if storage is None:

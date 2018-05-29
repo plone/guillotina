@@ -37,7 +37,6 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
         request._db_id = db.id
         request._db = db
         request._tm = db.get_transaction_manager()
-        request._tm.request = request  # so get_current_request can find it...
     return request
 
 

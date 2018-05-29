@@ -361,7 +361,7 @@ class Transaction(object):
     async def _store_object(self, obj, oid, added=False):
         # Modified objects
         if obj._p_jar is not self and obj._p_jar is not None:
-            raise Exception('Invalid reference to txn')
+            raise Exception(f'Invalid reference to txn: {obj}')
 
         # There is no serial
         if added:
@@ -388,7 +388,7 @@ class Transaction(object):
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
             if obj._p_jar is not self and obj._p_jar is not None:
-                raise Exception('Invalid reference to txn')
+                raise Exception(f'Invalid reference to txn: {obj}')
             await self._manager._storage.delete(self, oid)
             self._objects_to_invalidate.append(obj)
 

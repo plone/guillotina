@@ -73,26 +73,6 @@ async def test_get_content_depth(container_requester):
         await request._tm.abort(txn=txn)
 
 
-class TestGetCurrentRequest:
-    async def test_gcr_memory(self):
-        self.request = get_mocked_request()
-
-        count = 0
-        current = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0
-        while True:
-            count += 1
-            utils.get_current_request()
-
-            if count % 1000000 == 0:
-                break
-
-            if count % 100000 == 0:
-                gc.collect()
-                new = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0
-                if new - current > 10:  # memory leak, this shouldn't happen
-                    assert new == current
-
-
 def test_valid_id():
     assert utils.valid_id('FOObar')
     assert utils.valid_id('FooBAR-_-.')
@@ -160,3 +140,45 @@ async def test_get_containers(container_requester):
         request = get_mocked_request(requester.db)
         containers = [c async for c in utils.get_containers(request)]
         assert len(containers) == 1
+
+
+def test_safe_unidecode():
+    assert 'foobar' == utils.safe_unidecode(b'foobar')
+
+
+async def test_object_utils(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+        request = get_mocked_request(requester.db)
+        root = await get_root(request)
+        txn = await request._tm.begin(request)
+        container = await root.async_get('guillotina')
+
+        ob = await utils.get_object_by_oid(response['@uid'], txn)
+        assert ob is not None
+        assert ob._p_oid == response['@uid']
+
+        ob2 = await utils.navigate_to(container, 'item1')
+        assert ob2._p_oid == ob._p_oid
+
+        url = utils.get_object_url(ob, request)
+        assert url.endswith('item1')
+
+        await request._tm.abort(txn=txn)
+
+
+async def test_run_async():
+
+    def _test():
+        return 'foobar'
+
+    assert await utils.run_async(_test) == 'foobar'

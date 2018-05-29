@@ -43,7 +43,7 @@ class BaseCache:
         self._storage._stored += 1
 
     def get_key(self, oid=None, container=None, id=None, variant=None):
-        key = ''
+        key = '-{}'.format(getattr(self._transaction.manager, 'db_id', 'root'))
         if oid is not None:
             key = oid
         elif container is not None:
