@@ -1,4 +1,4 @@
-3.3.8 (unreleased)
+3.3.8 (2018-05-29)
 ------------------
 
 - Add more utilities: `execute`, `safe_unidecode`, `run_async`, `get_object_by_oid`
