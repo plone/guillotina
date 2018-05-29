@@ -5,9 +5,7 @@ from guillotina.tests.utils import create_content
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import get_root
 
-import gc
 import json
-import resource
 
 
 def test_module_resolve_path():
