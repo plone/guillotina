@@ -1,7 +1,8 @@
 3.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix cache key format
+  [vangheem]
 
 
 3.3.8 (2018-05-29)
