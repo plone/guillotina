@@ -45,9 +45,9 @@ class BaseCache:
     def get_key(self, oid=None, container=None, id=None, variant=None):
         key = '{}-'.format(getattr(self._transaction.manager, 'db_id', 'root'))
         if oid is not None:
-            key = oid
+            key += oid
         elif container is not None:
-            key = container._p_oid
+            key += container._p_oid
         if id is not None:
             key += '/' + id
         if variant is not None:

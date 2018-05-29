@@ -1,7 +1,8 @@
 3.3.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Handle missing root object for database
+  [vangheem]
 
 
 3.3.9 (2018-05-29)

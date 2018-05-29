@@ -193,15 +193,21 @@ class Database:
             return self.get_transaction_manager()._last_txn
 
     async def get_root(self):
-        return await self._p_jar.get(ROOT_ID)
+        try:
+            return await self._p_jar.get(ROOT_ID)
+        except KeyError:
+            pass
 
     async def async_get(self, key, suppress_events=False):
         root = await self.get_root()
-        return await root.async_get(key)
+        if root is not None:
+            return await root.async_get(key)
 
     async def async_keys(self):
         root = await self.get_root()
-        return await root._p_jar.keys(root._p_oid)
+        if root is not None:
+            return await root._p_jar.keys(root._p_oid)
+        return []
 
     async def async_set(self, key, value):
         root = await self.get_root()
@@ -213,14 +219,19 @@ class Database:
 
     async def async_items(self):
         root = await self.get_root()
-        async for key, value in root._p_jar.items(root):
-            yield key, value
+        if root is not None:
+            async for key, value in root._p_jar.items(root):
+                yield key, value
 
     async def async_contains(self, key):
         # is there any request active ? -> conn there
         root = await self.get_root()
-        return await apply_coroutine(root._p_jar.contains, root._p_oid, key)
+        if root is not None:
+            return await apply_coroutine(root._p_jar.contains, root._p_oid, key)
+        return False
 
     async def async_len(self):
         root = await self.get_root()
-        return await apply_coroutine(root._p_jar.len, root._p_oid)
+        if root is not None:
+            return await apply_coroutine(root._p_jar.len, root._p_oid)
+        return 0
