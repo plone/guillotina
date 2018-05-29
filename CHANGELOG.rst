@@ -1,4 +1,4 @@
-3.3.9 (unreleased)
+3.3.9 (2018-05-29)
 ------------------
 
 - Fix cache key format
