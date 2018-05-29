@@ -1,4 +1,4 @@
-3.3.10 (unreleased)
+3.3.10 (2018-05-29)
 -------------------
 
 - Handle missing root object for database
