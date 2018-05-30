@@ -107,10 +107,8 @@ def remove_object(obj, event):
         del fut.update[uid]
 
 
-@configure.subscriber(
-    for_=(IResource, IObjectAddedEvent), priority=1000)
-@configure.subscriber(
-    for_=(IResource, IObjectModifiedEvent), priority=1000)
+@configure.subscriber(for_=(IResource, IObjectAddedEvent))
+@configure.subscriber(for_=(IResource, IObjectModifiedEvent))
 async def add_object(obj, event=None, modified=None, payload=None):
     if modified is None:
         modified = IObjectModifiedEvent.providedBy(event)
