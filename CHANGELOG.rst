@@ -1,7 +1,9 @@
 3.3.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Move TRASHED annotation objects check to application logic instead
+  of the query. This helps performance and query planer issue for cockroach
+  [vangheem]
 
 
 3.3.10 (2018-05-29)
