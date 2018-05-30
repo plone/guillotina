@@ -9,7 +9,7 @@ from guillotina.utils import get_content_path
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
+    context=IResource, method='GET', permission='guillotina.RawSearchContent', name='@search',
     summary='Make search request',
     parameters=[{
         "name": "q",
