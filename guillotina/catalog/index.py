@@ -1,7 +1,7 @@
 from guillotina import configure
-from guillotina.interfaces import ISecurityInfo
 from guillotina.catalog.utils import reindex_in_future
-from guillotina.component import query_utility, query_adapter
+from guillotina.component import query_adapter
+from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IGroupFolder
@@ -11,7 +11,9 @@ from guillotina.interfaces import IObjectMovedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
-from guillotina.utils import get_current_request, apply_coroutine
+from guillotina.interfaces import ISecurityInfo
+from guillotina.utils import apply_coroutine
+from guillotina.utils import get_current_request
 
 
 class IndexFuture(object):
