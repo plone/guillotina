@@ -39,9 +39,9 @@ GET_CHILDREN_KEYS = f"""
     """
 
 GET_ANNOTATIONS_KEYS = f"""
-    SELECT id
+    SELECT id, parent_id
     FROM objects
-    WHERE of = $1::varchar({MAX_OID_LENGTH}) AND (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
+    WHERE of = $1::varchar({MAX_OID_LENGTH})'
     """
 
 GET_CHILD = f"""
@@ -71,12 +71,11 @@ HAS_OBJECT = f"""
 
 
 GET_ANNOTATION = f"""
-    SELECT zoid, tid, state_size, resource, type, state, id
+    SELECT zoid, tid, state_size, resource, type, state, id, parent_id
     FROM objects
     WHERE
         of = $1::varchar({MAX_OID_LENGTH}) AND
-        id = $2::text AND
-        (parent_id IS NULL OR parent_id != '{TRASHED_ID}')
+        id = $2::text
     """
 
 def _wrap_return_count(txt):
@@ -820,13 +819,19 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
     async def get_annotation(self, txn, oid, id):
         async with txn._lock:
             result = await self.get_one_row(txn, GET_ANNOTATION, oid, id, prepare=True)
+            if result is not None and result['parent_id'] == TRASHED_ID:
+                result = None
         return result
 
     async def get_annotation_keys(self, txn, oid):
         conn = await txn.get_connection()
         async with txn._lock:
             result = await conn.fetch(GET_ANNOTATIONS_KEYS, oid)
-        return result
+        items = []
+        for item in result:
+            if item['parent_id'] != TRASHED_ID:
+                items.append(item)
+        return items
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         async with txn._lock:
