@@ -1,7 +1,11 @@
 3.3.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Reindex security of group object even if we aren't going to reindex it's children
+  [vangheem]
+
+- Refactor indexing so we can index security, provide `guillotina.catalog.index.index_object` function
+  [vangheem]
 
 
 3.3.11 (2018-05-30)
