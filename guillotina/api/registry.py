@@ -12,6 +12,7 @@ from guillotina.interfaces import IJSONToValue
 from guillotina.json.serialize_value import json_compatible
 from guillotina.schema import get_fields
 from guillotina.utils import import_class
+from guillotina.utils import json_web_response
 from guillotina.utils import resolve_dotted_name
 
 
@@ -45,7 +46,8 @@ class Read(Service):
         self.key = self.request.matchdict['key']
         self.value = self.request.container_settings.get(self.key, _marker)
         if self.value is _marker:
-            raise HTTPNotFound(text=f'{self.key} not in settings')
+            raise json_web_response(
+                HTTPNotFound, reason=f'{self.key} not in settings')
 
     async def __call__(self):
         try:

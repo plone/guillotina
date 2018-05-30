@@ -52,6 +52,7 @@ from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
+from guillotina.utils import json_web_response
 from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
 
@@ -498,12 +499,14 @@ class DefaultOPTIONS(Service):
 
         origin = self.request.headers.get('Origin', None)
         if not origin:
-            raise HTTPNotFound(text='Origin this header is mandatory')
+            raise json_web_response(
+                HTTPNotFound, reason='Origin this header is mandatory')
 
         requested_method = self.getRequestMethod()
         if not requested_method:
-            raise HTTPNotFound(
-                text='Access-Control-Request-Method this header is mandatory')
+            raise json_web_response(
+                HTTPNotFound,
+                reason='Access-Control-Request-Method this header is mandatory')
 
         requested_headers = (
             self.request.headers.get('Access-Control-Request-Headers', ()))
@@ -514,17 +517,19 @@ class DefaultOPTIONS(Service):
         requested_method = requested_method.upper()
         allowed_methods = settings['allow_methods']
         if requested_method not in allowed_methods:
-            raise HTTPMethodNotAllowed(
+            raise json_web_response(
+                HTTPMethodNotAllowed,
                 requested_method, allowed_methods,
-                text='Access-Control-Request-Method Method not allowed')
+                reason='Access-Control-Request-Method Method not allowed')
 
         supported_headers = settings['allow_headers']
         if '*' not in supported_headers and requested_headers:
             supported_headers = [s.lower() for s in supported_headers]
             for h in requested_headers:
                 if not h.lower() in supported_headers:
-                    raise HTTPUnauthorized(
-                        text='Access-Control-Request-Headers Header %s not allowed' % h)
+                    raise json_web_response(
+                        HTTPUnauthorized,
+                        reason='Access-Control-Request-Headers Header %s not allowed' % h)
 
         supported_headers = [] if supported_headers is None else supported_headers
         requested_headers = [] if requested_headers is None else requested_headers

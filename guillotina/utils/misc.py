@@ -16,6 +16,7 @@ import random
 import string
 import time
 import types
+import ujson
 
 
 try:
@@ -211,3 +212,15 @@ def safe_unidecode(val):
         except UnicodeDecodeError:
             pass
     return val.decode('utf-8', errors='replace')
+
+
+def json_web_response(cls, body=None, reason=None,
+                      headers=None, dumps=ujson.dumps, **kwargs):
+    if body is None:
+        body = {}
+    if reason is not None:
+        body['reason'] = reason
+    if headers is None:
+        headers = {}
+    headers['Content-Type'] = 'application/json'
+    return cls(body=dumps(body), headers=headers, **kwargs)
