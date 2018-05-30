@@ -29,13 +29,13 @@ class RootUser(BaseUser):
 
 class GuillotinaUser(BaseUser):
 
-    def __init__(self, request):
-        self.id = 'guillotina'
-        self.request = request
-        self._groups = []
-        self._roles = {}
-        self._permissions = {}
-        self._properties = {}
+    def __init__(self, request=None, user_id='guillotina', groups=None, roles=None,
+                 permissions=None, properties=None):
+        self.id = user_id
+        self._groups = groups or []
+        self._roles = roles or {}
+        self._permissions = permissions or {}
+        self._properties = properties or {}
 
     @property
     def groups(self):

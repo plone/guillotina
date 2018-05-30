@@ -1,7 +1,8 @@
 3.2.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to use and customize GuillotinaUser object without request object
+  [vangheem]
 
 
 3.2.9 (2018-05-30)
