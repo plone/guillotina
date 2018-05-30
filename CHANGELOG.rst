@@ -1,4 +1,4 @@
-3.2.10 (unreleased)
+3.2.10 (2018-05-30)
 -------------------
 
 - Be able to use and customize GuillotinaUser object without request object
