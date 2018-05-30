@@ -1,4 +1,4 @@
-3.3.12 (unreleased)
+3.3.12 (2018-05-30)
 -------------------
 
 - Reindex security of group object even if we aren't going to reindex it's children
