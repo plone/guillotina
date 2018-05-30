@@ -41,7 +41,7 @@ GET_CHILDREN_KEYS = f"""
 GET_ANNOTATIONS_KEYS = f"""
     SELECT id, parent_id
     FROM objects
-    WHERE of = $1::varchar({MAX_OID_LENGTH})'
+    WHERE of = $1::varchar({MAX_OID_LENGTH})
     """
 
 GET_CHILD = f"""
