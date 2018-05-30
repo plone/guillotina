@@ -114,6 +114,8 @@ def remove_object(obj, event):
 async def add_object(obj, event=None, modified=None, payload=None):
     if modified is None:
         modified = IObjectModifiedEvent.providedBy(event)
+    if payload is None and event is not None:
+        payload = event.payload
     indexes = None
     if modified:
         indexes = []
