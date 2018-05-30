@@ -1,5 +1,6 @@
 from guillotina import configure
 from guillotina.catalog.utils import reindex_in_future
+from guillotina.component import query_adapter
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IContainer
@@ -10,6 +11,8 @@ from guillotina.interfaces import IObjectMovedEvent
 from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
+from guillotina.interfaces import ISecurityInfo
+from guillotina.utils import apply_coroutine
 from guillotina.utils import get_current_request
 
 
@@ -65,8 +68,8 @@ def get_future():
     for_=(IResource, IObjectPermissionsModifiedEvent), priority=1000)
 async def security_changed(obj, event):
     if IGroupFolder.providedBy(obj):
-        # assuming permissions for group are already handled correctly with
-        # group:group id principal
+        # assuming permissions for group are already handled correctly with search
+        await index_object(obj, modified=True, security=True)
         return
     # We need to reindex the objects below
     request = get_current_request()
@@ -105,6 +108,26 @@ def remove_object(obj, event):
 @configure.subscriber(
     for_=(IResource, IObjectModifiedEvent), priority=1000)
 async def add_object(obj, event=None, modified=None, payload=None):
+    if modified is None:
+        modified = IObjectModifiedEvent.providedBy(event)
+    if payload is None and event is not None:
+        payload = event.payload
+    indexes = None
+    if modified:
+        indexes = []
+        if payload and len(payload) > 0:
+            # get a list of potential indexes
+            for field_name in payload.keys():
+                if '.' in field_name:
+                    for behavior_field_name in payload[field_name].keys():
+                        indexes.append(behavior_field_name)
+                else:
+                    indexes.append(field_name)
+
+    await index_object(obj, indexes, modified)
+
+
+async def index_object(obj, indexes=None, modified=False, security=False):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
@@ -112,32 +135,30 @@ async def add_object(obj, event=None, modified=None, payload=None):
     if type_name is None or IContainer.providedBy(obj):
         return
 
+    search = query_utility(ICatalogUtility)
+    if search is None:
+        return
+
     fut = get_future()
     if fut is None:
         return
 
-    search = query_utility(ICatalogUtility)
-    if search:
-        if modified is None:
-            modified = IObjectModifiedEvent.providedBy(event)
-        if payload is None:
-            payload = event and event.payload or {}
-        if modified:
-            indexes = []
-            if payload and len(payload) > 0:
-                # get a list of potential indexes
-                for field_name in payload.keys():
-                    if '.' in field_name:
-                        for behavior_field_name in payload[field_name].keys():
-                            indexes.append(behavior_field_name)
-                    else:
-                        indexes.append(field_name)
-                if uid in fut.update:
-                    fut.update[uid].update(await search.get_data(obj, indexes))
-                else:
-                    fut.update[uid] = await search.get_data(obj, indexes)
+    if modified:
+        data = {}
+        if security:
+            adapter = query_adapter(obj, ISecurityInfo)
+            if adapter is not None:
+                data = await apply_coroutine(adapter)
         else:
-            fut.index[uid] = await search.get_data(obj)
+            if indexes is not None and len(indexes) > 0:
+                data = await search.get_data(obj, indexes)
+        if len(data) > 0:
+            if uid in fut.update:
+                fut.update[uid].update(data)
+            else:
+                fut.update[uid] = data
+    else:
+        fut.index[uid] = await search.get_data(obj)
 
 
 @configure.subscriber(
