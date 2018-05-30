@@ -1,4 +1,4 @@
-3.3.11 (unreleased)
+3.3.11 (2018-05-30)
 -------------------
 
 - Move TRASHED annotation objects check to application logic instead
