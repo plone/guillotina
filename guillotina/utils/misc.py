@@ -9,7 +9,6 @@ from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from hashlib import sha256 as sha
 
-import aiohttp
 import aiotask_context
 import asyncio
 import inspect
