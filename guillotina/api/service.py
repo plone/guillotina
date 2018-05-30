@@ -5,6 +5,7 @@ from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IDownloadView
+from guillotina.utils import json_web_response
 from zope.interface import alsoProvides
 
 
@@ -48,7 +49,8 @@ class TraversableFieldService(View):
                     break
         # Check that its a File Field
         if field is None:
-            raise HTTPNotFound(text='No valid name')
+            raise json_web_response(
+                HTTPNotFound, reason='No valid name')
 
         if self.behavior is not None:
             self.field = field.bind(self.behavior)

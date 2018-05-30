@@ -1,7 +1,8 @@
 3.3.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure all responses from the API are json
+  [vangheem]
 
 
 3.3.12 (2018-05-30)

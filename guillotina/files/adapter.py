@@ -13,6 +13,7 @@ from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
+from guillotina.utils import json_web_response
 
 import time
 
@@ -49,7 +50,8 @@ class DBDataManager:
             # someone else
             if (time.time() - self._data['last_activity']) < self._timeout:
                 if self.request.headers.get('TUS-OVERRIDE-UPLOAD', '0') != '1':
-                    raise HTTPPreconditionFailed(
+                    raise json_web_response(
+                        HTTPPreconditionFailed,
                         reason='There is already an active tusupload')
 
     async def start(self):

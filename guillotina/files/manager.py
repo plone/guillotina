@@ -17,6 +17,7 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
 from guillotina.utils import import_class
+from guillotina.utils import json_web_response
 from zope.interface import alsoProvides
 
 import base64
@@ -48,8 +49,9 @@ class FileManager(object):
 
         file = self.field.get(self.field.context or self.context)
         if file is None and filename is None:
-            raise HTTPNotFound(
-                text='File or custom filename required to download')
+            raise json_web_response(
+                HTTPNotFound,
+                reason='File or custom filename required to download')
         cors_renderer = app_settings['cors_renderer'](self.request)
         headers = await cors_renderer.get_headers()
         headers.update({
@@ -112,11 +114,13 @@ class FileManager(object):
         if 'UPLOAD-OFFSET' in self.request.headers:
             offset = int(self.request.headers['UPLOAD-OFFSET'])
         else:
-            raise HTTPPreconditionFailed(reason='No upload-offset header')
+            raise json_web_response(
+                HTTPPreconditionFailed, reason='No upload-offset header')
 
         ob_offset = self.dm.get('offset')
         if offset != ob_offset:
-            raise HTTPConflict(
+            raise json_web_response(
+                HTTPConflict,
                 reason=f'Current upload offset({offset}) does not match '
                        f'object offset {ob_offset}')
 
@@ -125,7 +129,8 @@ class FileManager(object):
 
         if to_upload and read_bytes != to_upload:
             # check length matches if provided
-            raise HTTPPreconditionFailed(
+            raise json_web_response(
+                HTTPPreconditionFailed,
                 reason='Upload size does not match what was provided')
         await self.dm.update(offset=offset + read_bytes)
 
@@ -164,7 +169,8 @@ class FileManager(object):
             size = int(self.request.headers['UPLOAD-LENGTH'])
         else:
             if not deferred_length:
-                raise HTTPPreconditionFailed(reason='We need upload-length header')
+                raise json_web_response(
+                    HTTPPreconditionFailed, reason='We need upload-length header')
 
         if 'UPLOAD-MD5' in self.request.headers:
             md5 = self.request.headers['UPLOAD-MD5']
@@ -173,7 +179,8 @@ class FileManager(object):
             extension = self.request.headers['UPLOAD-EXTENSION']
 
         if 'TUS-RESUMABLE' not in self.request.headers:
-            raise HTTPPreconditionFailed(reason='TUS needs a TUS version')
+            raise json_web_response(
+                HTTPPreconditionFailed, reason='TUS needs a TUS version')
 
         if 'X-UPLOAD-FILENAME' in self.request.headers:
             filename = self.request.headers['X-UPLOAD-FILENAME']
@@ -247,7 +254,8 @@ class FileManager(object):
             self.dm, self._iterate_request_data(), 0)
 
         if read_bytes != size:
-            raise HTTPPreconditionFailed(
+            raise json_web_response(
+                HTTPPreconditionFailed,
                 reason='Upload size does not match what was provided')
 
         await self.file_storage_manager.finish(self.dm)

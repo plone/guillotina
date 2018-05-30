@@ -49,11 +49,10 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-from guillotina.utils import import_class
+from guillotina.utils import import_class, json_web_response
 from zope.interface import alsoProvides
 
 import traceback
-import ujson
 import uuid
 
 
@@ -72,7 +71,7 @@ async def traverse(request, parent, path):
         return parent, path
     try:
         if path[0][0] == '_' or path[0] in ('.', '..'):
-            raise HTTPUnauthorized()
+            raise json_web_response(HTTPUnauthorized)
         if path[0][0] == '@':
             # shortcut
             return parent, path
@@ -366,7 +365,7 @@ class TraversalRouter(AbstractRouter):
             return result
         else:
             await abort(request)
-            return BasicMatchInfo(request, HTTPNotFound())
+            return BasicMatchInfo(request, json_web_response(HTTPNotFound))
 
     @profilable
     async def real_resolve(self, request: IRequest) -> MatchInfo:
@@ -374,8 +373,10 @@ class TraversalRouter(AbstractRouter):
         security = get_adapter(request, IInteraction)
 
         if request.method not in app_settings['http_methods']:
-            raise HTTPMethodNotAllowed(
-                method=request.method, allowed_methods=[k for k in app_settings['http_methods']])
+            raise json_web_response(
+                HTTPMethodNotAllowed,
+                method=request.method,
+                allowed_methods=[k for k in app_settings['http_methods']])
         method = app_settings['http_methods'][request.method]
 
         language = language_negotiation(request)
@@ -397,7 +398,7 @@ class TraversalRouter(AbstractRouter):
             }
             if app_settings.get('debug'):
                 data['traceback'] = traceback.format_exc()
-            raise HTTPBadRequest(text=ujson.dumps(data))
+            raise json_web_response(HTTPBadRequest, data)
 
         request.record('traversed')
 
@@ -406,7 +407,7 @@ class TraversalRouter(AbstractRouter):
         request.tail = tail
 
         if request.resource is None:
-            raise HTTPNotFound(text='Resource not found')
+            raise json_web_response(HTTPNotFound, reason='Resource not found')
 
         if tail and len(tail) > 0:
             # convert match lookups
@@ -453,7 +454,7 @@ class TraversalRouter(AbstractRouter):
                             auths=str([x.principal.id
                                        for x in security.participations])),
                         request=request)
-                    raise HTTPUnauthorized()
+                    raise json_web_response(HTTPUnauthorized)
 
         if not view and len(tail) > 0:
             # we should have a view in this case because we are matching routes
@@ -467,11 +468,14 @@ class TraversalRouter(AbstractRouter):
         view_permission = get_view_permission(ViewClass)
         if not security.check_permission(view_permission, view):
             if IOPTIONS != method:
-                raise HTTPUnauthorized(
-                    reason="You are not authorized to view {content} with {auths}".format(
-                        content=resource,
-                        auths=str([x.principal.id
-                                   for x in security.participations]))
+                raise json_web_response(
+                    HTTPUnauthorized,
+                    {
+                        'reason': "You are not authorized to view",
+                        'content': str(resource),
+                        'principals': str([x.principal.id
+                                          for x in security.participations])
+                    }
                 )
 
         try:

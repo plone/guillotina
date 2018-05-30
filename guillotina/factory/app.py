@@ -24,6 +24,7 @@ from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.interfaces.content import IContentNegotiation
 from guillotina.request import Request
 from guillotina.traversal import TraversalRouter
+from guillotina.utils import json_web_response
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
 from guillotina.utils import loop_apply_coroutine
@@ -99,7 +100,7 @@ class GuillotinaAIOHTTPApplication(web.Application):
                 'Exhausted retry attempts for conflict error on tid: {}'.format(
                     getattr(getattr(request, '_txn', None), '_tid', 'not issued')
                 ))
-            return aiohttp.web_exceptions.HTTPConflict()
+            return json_web_response(aiohttp.web_exceptions.HTTPConflict)
 
     def _make_request(self, message, payload, protocol, writer, task,
                       _cls=Request):
