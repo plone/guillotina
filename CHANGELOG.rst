@@ -1,4 +1,4 @@
-3.2.11 (unreleased)
+3.2.11 (2018-05-31)
 -------------------
 
 - Fix bug in CORS with file upload
