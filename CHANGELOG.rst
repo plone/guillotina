@@ -1,7 +1,8 @@
 3.2.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix bug in CORS with file upload
+  [vangheem]
 
 
 3.2.10 (2018-05-30)
