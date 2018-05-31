@@ -94,7 +94,11 @@ async def test_tus(container_requester):
 
         response, status = await requester(
             'OPTIONS',
-            '/db/guillotina/foobar/@tusupload/file')
+            '/db/guillotina/foobar/@tusupload/file',
+            headers={
+                'Origin': 'http://foobar.com',
+                'Access-Control-Request-Method': 'POST'
+            })
         assert status == 200
 
         response, status = await requester(
@@ -158,7 +162,11 @@ async def test_tus_unknown_size(container_requester):
 
         response, status = await requester(
             'OPTIONS',
-            '/db/guillotina/foobar/@tusupload/file')
+            '/db/guillotina/foobar/@tusupload/file',
+            headers={
+                'Origin': 'http://foobar.com',
+                'Access-Control-Request-Method': 'POST'
+            })
         assert status == 200
 
         response, status = await requester(
@@ -275,7 +283,11 @@ async def test_tus_unfinished_error(container_requester):
 
         response, status = await requester(
             'OPTIONS',
-            '/db/guillotina/foobar/@tusupload/file')
+            '/db/guillotina/foobar/@tusupload/file',
+            headers={
+                'Origin': 'http://foobar.com',
+                'Access-Control-Request-Method': 'POST'
+            })
         assert status == 200
 
         response, status = await requester(
@@ -327,7 +339,11 @@ async def test_tus_with_empty_file(container_requester):
 
         response, status = await requester(
             'OPTIONS',
-            '/db/guillotina/foobar/@tusupload/file')
+            '/db/guillotina/foobar/@tusupload/file',
+            headers={
+                'Origin': 'http://foobar.com',
+                'Access-Control-Request-Method': 'POST'
+            })
         assert status == 200
 
         response, status = await requester(
