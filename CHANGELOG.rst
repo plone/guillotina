@@ -1,4 +1,4 @@
-3.2.12 (unreleased)
+3.2.12 (2018-06-04)
 -------------------
 
 - Fix behavior's use of zope.interface
