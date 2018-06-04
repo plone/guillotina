@@ -1,7 +1,8 @@
 3.2.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix behavior's use of zope.interface
+  [vangheem]
 
 
 3.2.11 (2018-05-31)

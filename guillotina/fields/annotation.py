@@ -154,6 +154,7 @@ class PatchBucketListAppend:
 
     def __init__(self, field):
         super().__init__()
+        self.required = field.required
         self.field = field
 
     def get_existing_value(self, field_context):
