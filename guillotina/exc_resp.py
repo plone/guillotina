@@ -1,6 +1,3 @@
-from aiohttp.web_exceptions import HTTPConflict
-from aiohttp.web_exceptions import HTTPExpectationFailed
-from aiohttp.web_exceptions import HTTPPreconditionFailed
 from guillotina import configure
 from guillotina import error_reasons
 from guillotina.exceptions import ConflictIdOnContainer
@@ -8,8 +5,13 @@ from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
+from guillotina.exceptions import Unauthorized
 from guillotina.exceptions import UnRetryableRequestError
 from guillotina.interfaces import IErrorResponseException
+from guillotina.interfaces import IResponse
+from guillotina.response import HTTPConflict
+from guillotina.response import HTTPExpectationFailed
+from guillotina.response import HTTPPreconditionFailed
 
 import json
 
@@ -32,24 +34,16 @@ def exception_handler_factory(reason, name='PreconditionFailed',
         data = render_error_response(name, reason, eid)
         if serialize_exc:
             data['message'] = repr(exc)
-        return klass(
-            text=json.dumps(data),
-            headers={
-                'Content-Type': 'application/json'
-            })
+        return klass(content=data)
     return handler
 
 
-def deserialization_error_handler(exc, error='', eid=None):
+def deserialization_error_handler(exc, error='', eid=None) -> IResponse:
     data = render_error_response(
         'DeserializationError', error_reasons.DESERIALIZATION_FAILED, eid)
     data['message'] = repr(exc)
     data.update(exc.json_data())
-    return HTTPPreconditionFailed(
-        text=json.dumps(data),
-        headers={
-            'Content-Type': 'application/json'
-        })
+    return HTTPPreconditionFailed(content=data)
 
 
 def register_handler_factory(ExceptionKlass, factory):
@@ -86,4 +80,11 @@ register_handler_factory(
     UnRetryableRequestError,
     exception_handler_factory(error_reasons.UNRETRYALBE_REQUEST,
                               'UnRetryableRequestError',
+                              serialize_exc=True, klass=HTTPExpectationFailed))
+
+
+register_handler_factory(
+    Unauthorized,
+    exception_handler_factory(error_reasons.UNAUTHORIZED,
+                              'Unauthorized',
                               serialize_exc=True, klass=HTTPExpectationFailed))

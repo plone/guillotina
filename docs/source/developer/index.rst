@@ -12,6 +12,7 @@ Contents:
    applications
    addons
    services
+   render
    contenttypes
    behavior
    interfaces

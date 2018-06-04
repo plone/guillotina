@@ -2,12 +2,9 @@ from datetime import datetime
 from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina import logger
-from guillotina.browser import ErrorResponse
-from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
 from guillotina.db.transaction import Status
 from guillotina.exceptions import ServerClosingException
-from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IAsyncUtility  # noqa
 from guillotina.interfaces import IQueueUtility  # noqa
@@ -54,15 +51,8 @@ class QueueUtility(object):
 
                 try:
                     aiotask_context.set('request', view.request)
-                    view_result = await view()
-                    if isinstance(view_result, ErrorResponse):
-                        await tm.commit(txn=txn)
-                    elif isinstance(view_result, UnauthorizedResponse):
-                        await tm.abort(txn=txn)
-                    else:
-                        await tm.commit(txn=txn)
-                except Unauthorized:
-                    await tm.abort(txn=txn)
+                    await view()
+                    await tm.commit(txn=txn)
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",

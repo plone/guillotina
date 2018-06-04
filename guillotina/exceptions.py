@@ -1,9 +1,5 @@
-from aiohttp.web_exceptions import HTTPNotFound
 from guillotina._settings import app_settings
-from guillotina.interfaces import IForbidden
-from guillotina.interfaces import IForbiddenAttribute
 from guillotina.interfaces import IUnauthorized
-from guillotina.interfaces.exceptions import ISerializableException
 from zope.interface import implementer
 from zope.interface.exceptions import Invalid  # noqa pylint: disable=W0611
 from zope.interface.interfaces import ComponentLookupError  # noqa pylint: disable=W0611
@@ -84,18 +80,6 @@ class RequestNotFound(Exception):
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""
-
-
-@implementer(IForbidden)
-class Forbidden(Exception):
-    """A resource cannot be accessed under any circumstances
-    """
-
-
-@implementer(IForbiddenAttribute)
-class ForbiddenAttribute(Forbidden, AttributeError):
-    """An attribute is unavailable because it is forbidden (private)
-    """
 
 
 class NoInteraction(Exception):
@@ -186,7 +170,6 @@ class ResourceLockedTimeout(Exception):
     '''
 
 
-@implementer(ISerializableException)
 class DeserializationError(Exception):
     """An error happened during deserialization of content.
     """
@@ -232,12 +215,6 @@ class QueryParsingError(Exception):
 
 class FileNotFoundException(Exception):
     pass
-
-
-class InvalidRoute(HTTPNotFound):
-    '''
-    The defined route is invalid
-    '''
 
 
 class ServerClosingException(Exception):

@@ -20,7 +20,7 @@ async def test_trns_retries_with_app(dummy_guillotina, dummy_request):
         handle_mock.return_value = f
         handle_mock.side_effect = ConflictError()
         resp = await dummy_guillotina._handle(dummy_request)
-        assert resp.status == 409
+        assert resp.status_code == 409
 
 
 async def test_async_util_started_and_stopped(dummy_guillotina):

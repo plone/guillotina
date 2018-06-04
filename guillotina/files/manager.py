@@ -1,11 +1,7 @@
 from .const import CHUNK_SIZE
 from aiohttp.web import StreamResponse
-from aiohttp.web_exceptions import HTTPConflict
-from aiohttp.web_exceptions import HTTPNotFound
-from aiohttp.web_exceptions import HTTPPreconditionFailed
 from guillotina import configure
 from guillotina._settings import app_settings
-from guillotina.browser import Response
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.files.utils import read_request_data
@@ -16,10 +12,15 @@ from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
+from guillotina.response import HTTPConflict
+from guillotina.response import HTTPNotFound
+from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import Response
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
 import base64
+import posixpath
 import uuid
 
 
@@ -48,8 +49,9 @@ class FileManager(object):
 
         file = self.field.get(self.field.context or self.context)
         if file is None and filename is None:
-            raise HTTPNotFound(
-                text='File or custom filename required to download')
+            raise HTTPNotFound(content={
+                'message': 'File or custom filename required to download'
+            })
         cors_renderer = app_settings['cors_renderer'](self.request)
         headers = await cors_renderer.get_headers()
         headers.update({
@@ -86,8 +88,7 @@ class FileManager(object):
         }
         if self.dm.get('size'):
             head_response['Upload-Length'] = str(self.dm.get('size'))
-        resp = Response(headers=head_response)
-        return resp
+        return {}, 200, head_response
 
     async def _iterate_request_data(self):
         self.request._last_read_pos = 0
@@ -112,21 +113,25 @@ class FileManager(object):
         if 'UPLOAD-OFFSET' in self.request.headers:
             offset = int(self.request.headers['UPLOAD-OFFSET'])
         else:
-            raise HTTPPreconditionFailed(reason='No upload-offset header')
+            raise HTTPPreconditionFailed(content={
+                'reason': 'No upload-offset header'
+            })
 
         ob_offset = self.dm.get('offset')
         if offset != ob_offset:
-            raise HTTPConflict(
-                reason=f'Current upload offset({offset}) does not match '
-                       f'object offset {ob_offset}')
+            raise HTTPConflict(content={
+                'reason': f'Current upload offset({offset}) does not match '
+                          f'object offset {ob_offset}'
+            })
 
         read_bytes = await self.file_storage_manager.append(
             self.dm, self._iterate_request_data(), offset)
 
         if to_upload and read_bytes != to_upload:
             # check length matches if provided
-            raise HTTPPreconditionFailed(
-                reason='Upload size does not match what was provided')
+            raise HTTPPreconditionFailed(content={
+                'reason': 'Upload size does not match what was provided'
+            })
         await self.dm.update(offset=offset + read_bytes)
 
         headers = {
@@ -145,8 +150,7 @@ class FileManager(object):
         else:
             await self.dm.save()
 
-        resp = Response(headers=headers)
-        return resp
+        return {}, 200, headers
 
     async def tus_create(self, *args, **kwargs):
         await self.dm.load()
@@ -164,7 +168,9 @@ class FileManager(object):
             size = int(self.request.headers['UPLOAD-LENGTH'])
         else:
             if not deferred_length:
-                raise HTTPPreconditionFailed(reason='We need upload-length header')
+                raise HTTPPreconditionFailed(content={
+                    'reason': 'We need upload-length header'
+                })
 
         if 'UPLOAD-MD5' in self.request.headers:
             md5 = self.request.headers['UPLOAD-MD5']
@@ -173,7 +179,9 @@ class FileManager(object):
             extension = self.request.headers['UPLOAD-EXTENSION']
 
         if 'TUS-RESUMABLE' not in self.request.headers:
-            raise HTTPPreconditionFailed(reason='TUS needs a TUS version')
+            raise HTTPPreconditionFailed(content={
+                'reason': 'TUS needs a TUS version'
+            })
 
         if 'X-UPLOAD-FILENAME' in self.request.headers:
             filename = self.request.headers['X-UPLOAD-FILENAME']
@@ -200,14 +208,13 @@ class FileManager(object):
         await self.file_storage_manager.start(self.dm)
         await self.dm.save()
 
-        # Location will need to be adapted on aiohttp 1.1.x
-        resp = Response(headers={
-            'Location': IAbsoluteURL(
-                self.context, self.request)() + '/@tusupload/' + self.field.__name__,  # noqa
+        return {}, 201, {
+            'Location': posixpath.join(
+                IAbsoluteURL(self.context, self.request)(),
+                '@tusupload', self.field.__name__),  # noqa
             'Tus-Resumable': '1.0.0',
             'Access-Control-Expose-Headers': 'Location,Tus-Resumable'
-        }, status=201)
-        return resp
+        }
 
     async def upload(self):
         await self.dm.load()
@@ -247,8 +254,9 @@ class FileManager(object):
             self.dm, self._iterate_request_data(), 0)
 
         if read_bytes != size:
-            raise HTTPPreconditionFailed(
-                reason='Upload size does not match what was provided')
+            raise HTTPPreconditionFailed(content={
+                'reason': 'Upload size does not match what was provided'
+            })
 
         await self.file_storage_manager.finish(self.dm)
         await self.dm.finish()

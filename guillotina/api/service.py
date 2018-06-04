@@ -4,8 +4,6 @@ from guillotina.browser import View
 from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IDownloadView
-from zope.interface import alsoProvides
 
 
 class Service(View):
@@ -17,7 +15,6 @@ class DownloadService(View):
 
     def __init__(self, context, request):
         super(DownloadService, self).__init__(context, request)
-        alsoProvides(self, IDownloadView)
 
 
 class TraversableFieldService(View):
@@ -60,10 +57,3 @@ class TraversableFieldService(View):
             # providedBy not working here?
             await self.behavior.load()
         return self
-
-
-class TraversableDownloadService(TraversableFieldService):
-
-    def __init__(self, context, request):
-        super(TraversableDownloadService, self).__init__(context, request)
-        alsoProvides(self, IDownloadView)

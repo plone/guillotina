@@ -1,4 +1,3 @@
-from aiohttp.web_exceptions import HTTPNotFound
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.component import get_multi_adapter
@@ -7,6 +6,7 @@ from guillotina.component import query_utility
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IResourceFactory
+from guillotina.response import HTTPNotFound
 
 
 @configure.service(
@@ -49,7 +49,10 @@ class Read(Service):
         type_name = self.request.matchdict['type_name']
         self.value = query_utility(IResourceFactory, name=type_name)
         if self.value is None:
-            raise HTTPNotFound(text=f'Could not find type {type_name}')
+            raise HTTPNotFound(content={
+                'reason': f'Could not find type {type_name}',
+                'type_name': type_name
+            })
 
     async def __call__(self):
         serializer = get_multi_adapter(

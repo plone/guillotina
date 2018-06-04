@@ -1,0 +1,82 @@
+# Response rendering
+
+Guillotina has a rendering framework to be able to dynamically handle multiple
+request Accept headers.
+
+Out of the box, Guillotina only supports `application/json`, `text/html` and `text/plain`.
+If no acceptable content type is found, Guillotina defaults to sending out
+`application/json`.
+
+
+## Customizing responses
+
+Services can provide simple type values for responses. Ideally anything that can be
+serialized as json(default renderer).
+
+Additionally, services can provide tuple responses to include status code and headers
+to further customize the response.
+
+
+```python
+from guillotina import configure
+from guillotina.interfaces import IResource
+
+@configure.service(
+    context=IResource, name='@custom-status',
+    method='GET', permission='guillotina.Public',
+    allow_access=True)
+async def custom_status(context, request):
+    return {'foo': 'bar'}, 201
+
+
+@configure.service(
+    context=IResource, name='@custom-headers',
+    method='GET', permission='guillotina.Public',
+    allow_access=True)
+async def custom_headers(context, request):
+    return {'foo': 'bar'}, 200, {'X-Foobar', 'foobar'}
+
+```
+
+
+### Response types
+
+Guillotina will automatically transform any response types in the `guillotina.response`
+library.
+
+These response objects should have simple dict values for their content if provided.
+
+
+### Bypassing reponses rendering
+
+If you return any aiohttp based response objects, they will be ignored by the rendering
+framework.
+
+This is useful when streaming data for example and it should not be transformed.
+
+
+### Custom rendering
+
+It's also very easy to provide your own renderer. All we need is to provide an adapter
+in a addon package.
+
+Here is a yaml example:
+
+
+```python
+from guillotina import configure
+from guillotina.interfaces import IView, IRequest, IRenderer
+from guillotina.renderer import Renderer
+import yaml
+
+@configure.adapter(
+    for_=(IView, IRequest),
+    provides=IRenderer, name='application/yaml')
+class RendererYaml(Renderer):
+    content_type = 'application/yaml'
+
+    def get_body(self, value) -> bytes:
+        if value is not None:
+            value = yaml.dump(value)
+            return value.encode('utf-8')
+```

@@ -1,8 +1,5 @@
-from aiohttp.web_exceptions import HTTPNotFound
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.browser import ErrorResponse
-from guillotina.browser import Response
 from guillotina.component import get_adapter
 from guillotina.exceptions import ComponentLookupError
 from guillotina.exceptions import DeserializationError
@@ -10,6 +7,8 @@ from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
 from guillotina.json.serialize_value import json_compatible
+from guillotina.response import ErrorResponse
+from guillotina.response import HTTPNotFound
 from guillotina.schema import get_fields
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
@@ -45,7 +44,9 @@ class Read(Service):
         self.key = self.request.matchdict['key']
         self.value = self.request.container_settings.get(self.key, _marker)
         if self.value is _marker:
-            raise HTTPNotFound(text=f'{self.key} not in settings')
+            raise HTTPNotFound(content={
+                'message': f'{self.key} not in settings'
+            })
 
     async def __call__(self):
         try:
@@ -146,7 +147,7 @@ class Register(Service):
                 # We don't have a value
                 config[key] = initial_values[key]
 
-        return Response(response={}, status=201)
+        return {}, 201
 
 
 @configure.service(
@@ -214,4 +215,4 @@ class Write(Service):
                 exc=e,
                 status=412)
 
-        return Response(response='', status=204)
+        return None, 204

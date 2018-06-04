@@ -1,59 +1,52 @@
 from guillotina import configure
-from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import ILanguage
+from guillotina.interfaces import IRequest
+from guillotina.interfaces import IResource
 
 
-class IEN(ILanguage):
-    pass
+class DefaultLanguage:
+    def __init__(self, request, content):
+        self.request = request
+        self.content = content
 
-
-class IENUS(IEN):
-    pass
-
-
-class ICA(ILanguage):
-    pass
-
-
-class IFI(ILanguage):
-    pass
-
-
-class DefaultLanguage(object):
     def translate(self):
-        return self.context
+        return self.content
 
 
 @configure.adapter(
-    for_=IDefaultLayer,
-    provides=IEN)
+    for_=(IResource, IRequest),
+    provides=ILanguage,
+    name='en')
 class EN(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
 @configure.adapter(
-    for_=IDefaultLayer,
-    provides=ICA)
+    for_=(IResource, IRequest),
+    provides=ILanguage,
+    name='ca')
 class CA(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
 @configure.adapter(
-    for_=IDefaultLayer,
-    provides=IFI)
+    for_=(IResource, IRequest),
+    provides=ILanguage,
+    name='fi')
 class FI(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
 @configure.adapter(
-    for_=IDefaultLayer,
-    provides=IENUS)
+    for_=(IResource, IRequest),
+    provides=ILanguage,
+    name='en-us')
 class ENUS(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
 # This is a dictionary of dictonaries:

@@ -25,3 +25,6 @@
   .. autofunction:: merge_dicts
   .. autofunction:: apply_coroutine
   .. autofunction:: lazy_apply
+
+
+.. automodule:: guillotina.response

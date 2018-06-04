@@ -1,5 +1,4 @@
 from guillotina import configure
-from guillotina.browser import Response
 from guillotina.component import get_multi_adapter
 from guillotina.component import get_utilities_for
 from guillotina.component import query_adapter
@@ -37,12 +36,12 @@ async def default_patch(context, request):
     except ModuleNotFoundError:
         behavior_class = None
     if behavior_class is None:
-        return Response(response={}, status=404)
+        return {}, 404
     factory = get_cached_factory(context.type_name)
     if behavior_class in factory.behaviors:
-        return Response(response={}, status=201)
+        return {}, 201
     if behavior in context.__behaviors__:
-        return Response(response={}, status=201)
+        return {}, 201
     context.add_behavior(behavior)
     return {}
 
@@ -73,9 +72,9 @@ async def default_delete(context, request):
     behavior_class = resolve_dotted_name(behavior)
     if behavior_class is not None:
         if behavior_class in factory.behaviors:
-            return Response(response={}, status=201)
+            return {}, 201
     if behavior not in context.__behaviors__:
-        return Response(response={}, status=201)
+        return {}, 201
     context.remove_behavior(behavior)
     return {}
 

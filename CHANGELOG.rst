@@ -1,7 +1,21 @@
-3.3.13 (unreleased)
--------------------
+4.0.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- `guillotina.browser.Response` moved to `guillotina.response.Response`
+- `guillotina.browser.ErrorResponse` removed
+- `guillotina.browser.UnauthorizedResponse` removed
+- `guillotina.response.Response` no longer supports wrapping aiohttp responses
+- `guillotina.response.Response` can now be raised as an exception
+- return or raised aiohttp responses now bypass guillotina renderer framework
+- raising any Response as an exception aborts current transaction
+- remove `IFrameFormatsJson`
+- remove `IRenderFormats`, `IRendered` is now a named adapter lookup
+- remove `app_settings.renderers` setting. Use the lookups
+- remove `IDownloadView`
+- remove `TraversableDownloadService`
+- remove `IForbiddenAttribute`
+- remove `ISerializableException`
+- remove `IForbidden`
 
 
 3.3.12 (2018-05-30)

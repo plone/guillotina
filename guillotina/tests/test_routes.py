@@ -1,5 +1,5 @@
 from guillotina import routes
-from guillotina.exceptions import InvalidRoute
+from guillotina.response import InvalidRoute
 
 import pytest
 
