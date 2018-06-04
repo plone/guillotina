@@ -49,6 +49,7 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.response import ErrorResponse
+from guillotina.response import Response
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
@@ -218,7 +219,7 @@ class DefaultPOST(Service):
             IResourceSerializeToJsonSummary
         )
         response = await serializer()
-        return response, 201, headers
+        return Response(content=response, status=201, headers=headers)
 
 
 @configure.service(
@@ -254,7 +255,7 @@ class DefaultPATCH(Service):
 
         await notify(ObjectModifiedEvent(self.context, payload=data))
 
-        return None, 204
+        return Response(status=204)
 
 
 @configure.service(
@@ -555,7 +556,7 @@ class DefaultOPTIONS(Service):
             headers.update(resp.headers)
             resp.headers = headers
             return resp
-        return resp, 200, headers
+        return Response(content=resp, headers=headers)
 
 
 @configure.service(

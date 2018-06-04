@@ -1,7 +1,4 @@
 from guillotina import configure
-from guillotina.interfaces import ILanguage
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
 
 
 class DefaultLanguage:
@@ -13,37 +10,25 @@ class DefaultLanguage:
         return self.content
 
 
-@configure.adapter(
-    for_=(IResource, IRequest),
-    provides=ILanguage,
-    name='en')
+@configure.language(name='en')
 class EN(DefaultLanguage):
     '''
     '''
 
 
-@configure.adapter(
-    for_=(IResource, IRequest),
-    provides=ILanguage,
-    name='ca')
+@configure.language(name='ca')
 class CA(DefaultLanguage):
     '''
     '''
 
 
-@configure.adapter(
-    for_=(IResource, IRequest),
-    provides=ILanguage,
-    name='fi')
+@configure.language(name='fi')
 class FI(DefaultLanguage):
     '''
     '''
 
 
-@configure.adapter(
-    for_=(IResource, IRequest),
-    provides=ILanguage,
-    name='en-us')
+@configure.language(name='en-us')
 class ENUS(DefaultLanguage):
     '''
     '''

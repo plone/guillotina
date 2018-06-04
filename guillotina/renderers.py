@@ -5,7 +5,6 @@ from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResponse
-from guillotina.interfaces import IView
 from guillotina.interfaces.security import PermissionSetting
 from guillotina.profile import profilable
 from zope.interface.interface import InterfaceClass
@@ -53,9 +52,6 @@ class Renderer:
         Value can be:
         - Guillotina response object
         - serializable value
-        - tuple of:
-            - json serializable value, status code
-            - json serializable value, status code, headers
         '''
         status = 200
         headers = {}
@@ -63,16 +59,6 @@ class Renderer:
             headers = value.headers
             status = value.status_code or 200
             value = value.content
-        else:
-            # Not a Response object, don't convert
-            if isinstance(value, tuple):
-                # tuple means we are returning more info about the response
-                if len(value) == 2:
-                    value, status = value
-                elif len(value) == 3:
-                    value, status, headers = value
-            else:
-                value = value
 
         headers.update({
             'Content-Type': self.content_type
@@ -82,9 +68,8 @@ class Renderer:
             body=self.get_body(value), status=status, headers=headers)
 
 
-@configure.adapter(
-    for_=(IView, IRequest),
-    provides=IRenderer, name='application/json')
+@configure.renderer(name='application/json')
+@configure.renderer(name='*/*')
 class RendererJson(Renderer):
     content_type = 'application/json'
 
@@ -105,9 +90,8 @@ class StringRenderer(Renderer):
         return value
 
 
-@configure.adapter(
-    for_=(IView, IRequest),
-    provides=IRenderer, name='text/html')
+@configure.renderer(name='text/html')
+@configure.renderer(name='text/*')
 class RendererHtml(Renderer):
     content_type = 'text/html'
 
@@ -118,8 +102,6 @@ class RendererHtml(Renderer):
         return body
 
 
-@configure.adapter(
-    for_=(IView, IRequest),
-    provides=IRenderer, name='text/plain')
+@configure.renderer(name='text/plain')
 class RendererPlain(StringRenderer):
     content_type = 'text/plain'

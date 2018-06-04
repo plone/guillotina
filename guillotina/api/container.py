@@ -14,6 +14,7 @@ from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPNotImplemented
 from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
 
 import posixpath
@@ -128,7 +129,7 @@ class DefaultPOST(Service):
             'Location': posixpath.join(self.request.path, data['id'])
         }
 
-        return resp, 200, headers
+        return Response(content=resp, headers=headers)
 
 
 @configure.service(

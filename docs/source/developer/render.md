@@ -3,9 +3,9 @@
 Guillotina has a rendering framework to be able to dynamically handle multiple
 request Accept headers.
 
-Out of the box, Guillotina only supports `application/json`, `text/html` and `text/plain`.
-If no acceptable content type is found, Guillotina defaults to sending out
-`application/json`.
+Out of the box, Guillotina only supports `application/json`, `text/html` and `text/plain`
+dynamic response types. Streaming and web socket type responses are also supported
+but are not handled by the dyanamic rendering framework.
 
 
 ## Customizing responses
@@ -13,13 +13,13 @@ If no acceptable content type is found, Guillotina defaults to sending out
 Services can provide simple type values for responses. Ideally anything that can be
 serialized as json(default renderer).
 
-Additionally, services can provide tuple responses to include status code and headers
-to further customize the response.
+Additionally, services can provide custom response objects to customize status and header.
 
 
 ```python
 from guillotina import configure
 from guillotina.interfaces import IResource
+from guillotina.response import Response
 
 @configure.service(
     context=IResource, name='@custom-status',
@@ -34,7 +34,7 @@ async def custom_status(context, request):
     method='GET', permission='guillotina.Public',
     allow_access=True)
 async def custom_headers(context, request):
-    return {'foo': 'bar'}, 200, {'X-Foobar', 'foobar'}
+    return Response(content={'foo': 'bar'}, status=200, headers={'X-Foobar', 'foobar'})
 
 ```
 

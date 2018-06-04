@@ -88,7 +88,7 @@ class FileManager(object):
         }
         if self.dm.get('size'):
             head_response['Upload-Length'] = str(self.dm.get('size'))
-        return {}, 200, head_response
+        return Response(headers=head_response)
 
     async def _iterate_request_data(self):
         self.request._last_read_pos = 0
@@ -150,7 +150,7 @@ class FileManager(object):
         else:
             await self.dm.save()
 
-        return {}, 200, headers
+        return Response(headers=headers)
 
     async def tus_create(self, *args, **kwargs):
         await self.dm.load()
@@ -208,13 +208,13 @@ class FileManager(object):
         await self.file_storage_manager.start(self.dm)
         await self.dm.save()
 
-        return {}, 201, {
+        return Response(status=201, headers={
             'Location': posixpath.join(
                 IAbsoluteURL(self.context, self.request)(),
                 '@tusupload', self.field.__name__),  # noqa
             'Tus-Resumable': '1.0.0',
             'Access-Control-Expose-Headers': 'Location,Tus-Resumable'
-        }
+        })
 
     async def upload(self):
         await self.dm.load()

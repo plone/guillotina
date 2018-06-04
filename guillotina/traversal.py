@@ -10,6 +10,7 @@ from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.participation import AnonymousParticipation
+from guillotina.browser import View
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_adapter
@@ -24,14 +25,14 @@ from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IAnnotations
-from guillotina.browser import View
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IErrorResponseException
 from guillotina.interfaces import IInteraction
-from guillotina.interfaces import IOPTIONS, ILanguage
+from guillotina.interfaces import ILanguage
+from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer

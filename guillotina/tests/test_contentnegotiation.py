@@ -9,23 +9,34 @@ class DummyRequest:
         }
 
 
-def test_negotiate_html_accept_header(dummy_guillotina):
+def test_negotiate_html_accept_header():
     cts = get_acceptable_content_types(DummyRequest(
         'text/html,application/xhtml+xml,application/xml;'
         'q=0.9,image/webp,image/apng,*/*;q=0.8'))
-    assert 'text/html' in cts
+    assert cts == ['text/html', 'image/webp', 'image/apng',
+                   'application/xhtml+xml', 'application/xml', '*/*']
 
 
-def test_negotiate_complex_accept_header(dummy_guillotina):
+def test_order_weight_of_content_type_accept():
+    cts = get_acceptable_content_types(DummyRequest(
+        'text/html;q=0.1,application/xhtml+xml,application/xml;'
+        'q=0.9,image/webp,image/apng,*/*;q=0.8'))
+    assert cts == ['image/webp', 'image/apng', 'application/xhtml+xml',
+                   'application/xml', '*/*', 'text/html']
+
+
+def test_negotiate_complex_accept_header():
     cts = get_acceptable_content_types(DummyRequest(
         'application/vnd.google.protobuf;'
         'proto=io.prometheus.client.MetricFamily;'
         'encoding=delimited;q=0.7,text/plain;'
         'version=0.0.4;q=0.3,*/*;q=0.1'))
-    assert 'text/plain' in cts
+    assert cts[0] == 'application/vnd.google.protobuf'
+    assert cts[1] == 'text/plain'
+    assert cts[2] == '*/*'
 
 
-def test_equality_accept_header(dummy_guillotina):
+def test_equality_accept_header():
     cts = get_acceptable_content_types(DummyRequest(
         'text/html,application/xhtml+xml,application/xml;'
         'q=0.9,image/webp,image/apng,*/*;q=0.8'))

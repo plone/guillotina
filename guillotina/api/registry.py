@@ -9,6 +9,7 @@ from guillotina.interfaces import IJSONToValue
 from guillotina.json.serialize_value import json_compatible
 from guillotina.response import ErrorResponse
 from guillotina.response import HTTPNotFound
+from guillotina.response import Response
 from guillotina.schema import get_fields
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
@@ -147,7 +148,7 @@ class Register(Service):
                 # We don't have a value
                 config[key] = initial_values[key]
 
-        return {}, 201
+        return Response(status=201)
 
 
 @configure.service(
@@ -215,4 +216,4 @@ class Write(Service):
                 exc=e,
                 status=412)
 
-        return None, 204
+        return Response(status=204)
