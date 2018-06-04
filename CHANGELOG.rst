@@ -2,7 +2,7 @@
 ------------------
 
 - `guillotina.browser.Response` moved to `guillotina.response.Response`
-- `guillotina.browser.ErrorResponse` removed
+- move `guillotina.browser.ErrorResponse` to `guillotina.response.ErrorResponse`
 - `guillotina.browser.UnauthorizedResponse` removed
 - `guillotina.response.Response` no longer supports wrapping aiohttp responses
 - `guillotina.response.Response` can now be raised as an exception
