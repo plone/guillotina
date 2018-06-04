@@ -57,21 +57,23 @@ This is useful when streaming data for example and it should not be transformed.
 
 ### Custom rendering
 
-It's also very easy to provide your own renderer. All we need is to provide an adapter
-in a addon package.
+It's also very easy to provide your own renderer. All you need to do is provide your
+own renderer class and configure it with the configuration object.
 
 Here is a yaml example:
 
 
 ```python
 from guillotina import configure
-from guillotina.interfaces import IView, IRequest, IRenderer
 from guillotina.renderer import Renderer
 import yaml
 
-@configure.adapter(
-    for_=(IView, IRequest),
-    provides=IRenderer, name='application/yaml')
+# yaml is known to have a lot of different content types, it's okay!
+@configure.renderer(name='text/vnd.yaml')
+@configure.renderer(name='application/yaml')
+@configure.renderer(name='application/x-yaml')
+@configure.renderer(name='text/x-yaml')
+@configure.renderer(name='text/yaml')
 class RendererYaml(Renderer):
     content_type = 'application/yaml'
 
