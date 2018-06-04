@@ -6,7 +6,7 @@
 - `guillotina.browser.UnauthorizedResponse` removed
 - `guillotina.response.Response` no longer supports wrapping aiohttp responses
 - `guillotina.response.Response` can now be raised as an exception
-- return or raised aiohttp responses now bypass guillotina renderer framework
+- returned or raised aiohttp responses now bypass guillotina renderer framework
 - raising any Response as an exception aborts current transaction
 - remove `IFrameFormatsJson`
 - remove `IRenderFormats`, `IRendered` is now a named adapter lookup

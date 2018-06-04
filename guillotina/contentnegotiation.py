@@ -7,8 +7,9 @@ def get_ordered_content_type_value_list(value):
     result = []
     for ct in value.lower().split(','):
         weight = 1.0
-        ct_name = ct.split(';')[0]
+        ct_name = ct.split(';')[0].strip()
         for param in ct.split(';')[1:]:
+            param = param.strip()
             if param.startswith('q='):
                 try:
                     weight = float(param[len('q='):])
