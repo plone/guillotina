@@ -1,7 +1,7 @@
-from guillotina.async_util import IQueueUtility, IAsyncJobPool
+from guillotina.async_util import IAsyncJobPool
+from guillotina.async_util import IQueueUtility
 from guillotina.browser import View
 from guillotina.component import get_utility
-from guillotina.interfaces import IApplication
 from guillotina.tests import utils
 
 import asyncio
@@ -20,16 +20,7 @@ class AsyncMockView(View):
         await self.func(*self.args, **self.kwargs)
 
 
-QUEUE_UTILITY_CONFIG = {
-    "provides": "guillotina.async_util.IQueueUtility",
-    "factory": "guillotina.async_util.QueueUtility",
-    "settings": {}
-}
-
-
 async def test_add_sync_utility(guillotina, loop):
-    app = get_utility(IApplication, name='root')
-    app.add_async_utility(QUEUE_UTILITY_CONFIG, loop)
 
     util = get_utility(IQueueUtility)
     var = []
@@ -51,8 +42,6 @@ async def test_add_sync_utility(guillotina, loop):
     assert 'hola3' in var
     assert 'hola4' in var
     assert len(var) == 4
-
-    app.del_async_utility(QUEUE_UTILITY_CONFIG)
 
 
 class JobRunner:
