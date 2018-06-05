@@ -1,4 +1,4 @@
-4.0.0 (unreleased)
+4.0.0 (2018-06-05)
 ------------------
 
 - `guillotina.browser.Response` moved to `guillotina.response.Response`
