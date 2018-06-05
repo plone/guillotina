@@ -427,7 +427,7 @@ async def test_dates_bucket_list_field(dummy_request):
                 'value': '2018-06-05T12:35:30.865745+00:00'
             }
         }, [])
-
+    assert content.dates_bucket_list.annotations_metadata[0]['len'] == 1
     await deserializer.set_schema(
         ITestSchema, content, {
             'datetime_bucket_list': {
@@ -438,6 +438,7 @@ async def test_dates_bucket_list_field(dummy_request):
                 ]
             }
         }, [])
+    assert content.dates_bucket_list.annotations_metadata[0]['len'] == 3
 
 
 async def test_bucket_list_field(dummy_request):
