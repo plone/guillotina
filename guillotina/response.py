@@ -38,7 +38,7 @@ class Response(Exception):
 
 class ErrorResponse(Response):
     def __init__(self, type, message, *, reason=None, content=None,
-                 headers=None, status=None):
+                 headers=None, status=500):
         if content is None:
             content = {}
         content['error'] = {
