@@ -1,8 +1,6 @@
 from aiohttp import web
 from guillotina import configure
-from guillotina import cors
 from guillotina import glogging
-from guillotina import languages
 from guillotina._settings import app_settings
 from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors import apply_concrete_behaviors
@@ -14,24 +12,21 @@ from guillotina.content import JavaScriptApplication
 from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
-from guillotina.contentnegotiation import ContentNegotiatorUtility
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
-from guillotina.interfaces.content import IContentNegotiation
 from guillotina.request import Request
+from guillotina.response import HTTPConflict
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
 from guillotina.utils import loop_apply_coroutine
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
-from guillotina.writable import check_writable_request
 
-import aiohttp
 import aiotask_context
 import asyncio
 import json
@@ -67,18 +62,6 @@ def load_application(module, root, settings):
     configure.load_all_configurations(root.config, module.__name__)
 
 
-# XXX use this to delay imports for these settings
-_delayed_default_settings = {
-    "languages": {
-        "en": languages.IEN,
-        "en-us": languages.IENUS,
-        "ca": languages.ICA
-    },
-    'cors_renderer': cors.DefaultCorsRenderer,
-    'check_writable_request': check_writable_request
-}
-
-
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
         aiotask_context.set('request', request)
@@ -94,12 +77,13 @@ class GuillotinaAIOHTTPApplication(web.Application):
                     f'{label}, retrying request, tid: {tid}, retries: {retries + 1})',
                     exc_info=True)
                 request._retry_attempt = retries + 1
+                request.clear_futures()
                 return await self._handle(request, retries + 1)
             logger.error(
                 'Exhausted retry attempts for conflict error on tid: {}'.format(
                     getattr(getattr(request, '_txn', None), '_tid', 'not issued')
                 ))
-            return aiohttp.web_exceptions.HTTPConflict()
+            return HTTPConflict()
 
     def _make_request(self, message, payload, protocol, writer, task,
                       _cls=Request):
@@ -124,7 +108,9 @@ _dotted_name_settings = (
     'auth_token_validators',
     'auth_user_identifiers',
     'pg_connection_class',
-    'oid_generator'
+    'oid_generator',
+    'cors_renderer',
+    'check_writable_request'
 )
 
 def optimize_settings(settings):
@@ -147,7 +133,6 @@ def optimize_settings(settings):
 
 
 def make_app(config_file=None, settings=None, loop=None, server_app=None):
-    app_settings.update(_delayed_default_settings)
 
     if loop is None:
         loop = asyncio.get_event_loop()
@@ -171,7 +156,6 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     import guillotina.db.factory
     import guillotina.db.writer
     import guillotina.db.db
-    configure.scan('guillotina.translation')
     configure.scan('guillotina.renderers')
     configure.scan('guillotina.api')
     configure.scan('guillotina.content')
@@ -220,14 +204,6 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     server_app.config = config
 
     optimize_settings(app_settings)
-
-    content_type = ContentNegotiatorUtility(
-        'content_type', app_settings['renderers'].keys())
-    language = ContentNegotiatorUtility(
-        'language', app_settings['languages'].keys())
-
-    provide_utility(content_type, IContentNegotiation, 'content_type')
-    provide_utility(language, IContentNegotiation, 'language')
 
     for key, dbconfig in list_or_dict_items(app_settings['databases']):
         factory = get_utility(

@@ -1,8 +1,6 @@
 from guillotina import configure
 from guillotina.api import content
 from guillotina.api.service import Service
-from guillotina.browser import ErrorResponse
-from guillotina.browser import Response
 from guillotina.component import get_multi_adapter
 from guillotina.content import create_content
 from guillotina.event import notify
@@ -12,7 +10,14 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.response import HTTPConflict
+from guillotina.response import HTTPNotFound
+from guillotina.response import HTTPNotImplemented
+from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
+
+import posixpath
 
 
 @configure.service(
@@ -66,16 +71,14 @@ class DefaultPOST(Service):
     async def __call__(self):
         data = await self.request.json()
         if '@type' not in data or data['@type'] != 'Container':
-            return ErrorResponse(
-                'NotAllowed',
-                'can not create this type %s' % data['@type'],
-                status=401)
+            raise HTTPNotFound(content={
+                'message': 'can not create this type %s' % data['@type']
+            })
 
         if 'id' not in data:
-            return ErrorResponse(
-                'NotAllowed',
-                'We need an id',
-                status=401)
+            raise HTTPPreconditionFailed(content={
+                'message': 'We need an id'
+            })
 
         if not data.get('title'):
             data['title'] = data['id']
@@ -87,10 +90,9 @@ class DefaultPOST(Service):
 
         if value:
             # Already exist
-            return ErrorResponse(
-                'ConflictId',
-                'Container with id already exists',
-                status=409)
+            raise HTTPConflict(content={
+                'message': 'Container with id already exists'
+            })
 
         container = await create_content(
             'Container',
@@ -124,10 +126,10 @@ class DefaultPOST(Service):
             'title': data['title']
         }
         headers = {
-            'Location': self.request.path + data['id']
+            'Location': posixpath.join(self.request.path, data['id'])
         }
 
-        return Response(response=resp, headers=headers)
+        return Response(content=resp, headers=headers)
 
 
 @configure.service(
@@ -143,7 +145,7 @@ class DefaultDELETE(content.DefaultDELETE):
     context=IApplication, method='PUT', permission='guillotina.MountDatabase', ignore=True)
 class NotImplemented(Service):
     async def __call__(self):
-        return ErrorResponse(
-            'NotImplemented',
-            'Function not implemented',
-            status=501)
+        raise HTTPNotImplemented(
+            content={
+                'message': 'Function not implemented'
+            }, status=501)

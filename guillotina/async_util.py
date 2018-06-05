@@ -2,15 +2,12 @@ from datetime import datetime
 from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina import logger
-from guillotina.browser import ErrorResponse
-from guillotina.browser import UnauthorizedResponse
 from guillotina.browser import View
 from guillotina.db.transaction import Status
 from guillotina.exceptions import ServerClosingException
-from guillotina.exceptions import Unauthorized
 from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IAsyncUtility  # noqa
-from guillotina.interfaces import IQueueUtility  # noqa
+from guillotina.interfaces import IQueueUtility
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
 from guillotina.transactions import managed_transaction
@@ -23,12 +20,20 @@ import typing
 _zone = tzutc()
 
 
+@configure.utility(provides=IQueueUtility)
 class QueueUtility(object):
 
-    def __init__(self, settings, loop=None):
-        self._queue = asyncio.Queue(loop=loop)
+    def __init__(self, settings=None, loop=None):
+        self._queue = None
+        self._loop = loop
         self._exceptions = False
         self._total_queued = 0
+
+    @property
+    def queue(self):
+        if self._queue is None:
+            self._queue = asyncio.Queue(loop=self._loop)
+        return self._queue
 
     async def initialize(self, app=None):
         # loop
@@ -36,7 +41,7 @@ class QueueUtility(object):
         while True:
             got_obj = False
             try:
-                view = await self._queue.get()
+                view = await self.queue.get()
                 got_obj = True
                 txn = get_transaction(view.request)
                 tm = get_tm(view.request)
@@ -54,15 +59,8 @@ class QueueUtility(object):
 
                 try:
                     aiotask_context.set('request', view.request)
-                    view_result = await view()
-                    if isinstance(view_result, ErrorResponse):
-                        await tm.commit(txn=txn)
-                    elif isinstance(view_result, UnauthorizedResponse):
-                        await tm.abort(txn=txn)
-                    else:
-                        await tm.commit(txn=txn)
-                except Unauthorized:
-                    await tm.abort(txn=txn)
+                    await view()
+                    await tm.commit(txn=txn)
                 except Exception as e:
                     logger.error(
                         "Exception on writing execution",
@@ -86,7 +84,7 @@ class QueueUtility(object):
                         view.request.execute_futures()
                     except AttributeError:
                         pass
-                    self._queue.task_done()
+                    self.queue.task_done()
 
     @property
     def exceptions(self):
@@ -97,9 +95,9 @@ class QueueUtility(object):
         return self._total_queued
 
     async def add(self, view):
-        await self._queue.put(view)
+        await self.queue.put(view)
         self._total_queued += 1
-        return self._queue.qsize()
+        return self.queue.qsize()
 
     async def finalize(self, app):
         pass

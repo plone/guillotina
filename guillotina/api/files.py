@@ -3,7 +3,6 @@ from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
-from guillotina.api.service import TraversableDownloadService
 from guillotina.api.service import TraversableFieldService
 from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IAsyncBehavior
@@ -97,7 +96,7 @@ class UploadFile(TraversableFieldService):
     context=IResource, method='GET', permission='guillotina.ViewContent',
     name='@download/{field_name}',
     **_traversed_file_doc('Download the content of a file'))
-class DownloadFile(TraversableDownloadService):
+class DownloadFile(TraversableFieldService):
 
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter

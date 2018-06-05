@@ -1,7 +1,7 @@
-from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina.interfaces import IRequest
+from guillotina.response import HTTPUnauthorized
 
 import fnmatch
 

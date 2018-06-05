@@ -1,8 +1,6 @@
 from guillotina import interfaces
 from guillotina.db.oid import generate_oid
 
-import collections
-
 
 app_settings = {
     "debug": False,
@@ -66,16 +64,10 @@ app_settings = {
         "HEAD": interfaces.IHEAD,
         "CONNECT": interfaces.ICONNECT
     },
-    # pass in tuple to force ordering for default provided renderers here
-    # XXX ordering is *required* for some views to work as if no accept
-    # header is provided, it'll default to the first type provided
-    "renderers": collections.OrderedDict((
-        ("application/json", interfaces.IRendererFormatJson),
-        ("text/html", interfaces.IRendererFormatHtml),
-        ("text/plain", interfaces.IRendererFormatPlain)
-    )),
-    'cloud_storage': "guillotina.interfaces.IDBFileField",
+    "cloud_storage": "guillotina.interfaces.IDBFileField",
     "router": "guillotina.traversal.TraversalRouter",
-    'pg_connection_class': 'asyncpg.connection.Connection',
-    'oid_generator': generate_oid
+    "pg_connection_class": "asyncpg.connection.Connection",
+    "oid_generator": generate_oid,
+    "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
+    "check_writable_request": "guillotina.writable.check_writable_request"
 }

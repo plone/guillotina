@@ -11,10 +11,15 @@ from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorSchemaAwareFactory
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IJSONToValue
+from guillotina.interfaces import ILanguage
 from guillotina.interfaces import IPermission
+from guillotina.interfaces import IRenderer
+from guillotina.interfaces import IRequest
+from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IRole
 from guillotina.interfaces import IValueToJson
+from guillotina.interfaces import IView
 from guillotina.security.permission import Permission
 from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
@@ -347,6 +352,9 @@ register_configuration_handler('json_schema_definition', load_json_schema_defini
 # serializers are just adapters
 register_configuration_handler('value_serializer', load_adapter)
 register_configuration_handler('value_deserializer', load_adapter)
+# renderers, languages are just adapters
+register_configuration_handler('renderer', load_adapter)
+register_configuration_handler('language', load_adapter)
 
 
 class _base_decorator(object):  # noqa: N801
@@ -431,11 +439,18 @@ class service(_base_decorator):  # noqa: N801
 class generic_adapter(_base_decorator):  # noqa: N801
     configuration_type = None
     provides = None
+    for_ = None
+    multi = False
 
-    def __init__(self, for_, **config):
-        assert type(for_) not in (list, set, tuple)
-        config['for_'] = for_
-        config['provides'] = self.provides
+    def __init__(self, for_=None, **config):
+        if for_ is not None:
+            config['for_'] = for_
+        if 'provides' not in config and self.provides is not None:
+            config['provides'] = self.provides
+        if 'for_' not in config and self.for_ is not None:
+            config['for_'] = self.for_
+        if not self.multi:
+            assert type(config['for_']) not in (list, set, tuple)
         self.config = config
 
 
@@ -447,6 +462,20 @@ class value_serializer(generic_adapter):  # noqa: N801
 class value_deserializer(generic_adapter):  # noqa: N801
     configuration_type = 'value_deserializer'
     provides = IJSONToValue
+
+
+class renderer(generic_adapter):  # noqa: N801
+    configuration_type = 'renderer'
+    provides = IRenderer
+    for_ = (IView, IRequest)
+    multi = True
+
+
+class language(generic_adapter):  # noqa: N801
+    configuration_type = 'language'
+    provides = ILanguage
+    for_ = (IResource, IRequest)
+    multi = True
 
 
 class contenttype(_base_decorator):  # noqa: N801

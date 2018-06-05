@@ -1,13 +1,15 @@
 from guillotina.component import get_utility
 from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IQueueUtility
+from guillotina.interfaces import IView
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 
+import typing
 import uuid
 
 
-class _ExecuteContext:
+class ExecuteContext:
 
     def __init__(self, func, *args, **kwargs):
         self.func = func
@@ -23,6 +25,9 @@ class _ExecuteContext:
     def after_commit(self, _request=None):
         after_commit(self.func, _request=_request, *self.args, **self.kwargs)
 
+    def before_commit(self, _request=None):
+        before_commit(self.func, _request=_request, *self.args, **self.kwargs)
+
 
 class _GenerateQueueView:
 
@@ -36,29 +41,32 @@ class _GenerateQueueView:
         await self.func(*self.args, **self.kwargs)
 
 
-def in_queue_with_func(func, *args, _request=None, **kwargs):
+def in_queue_with_func(func: typing.Callable, *args,
+                       _request=None, **kwargs) -> ExecuteContext:
     if _request is None:
         _request = get_current_request()
     view = _GenerateQueueView(func, _request, args, kwargs)
     return in_queue(view)
 
 
-def in_queue(view):
+def in_queue(view: IView) -> ExecuteContext:
     util = get_utility(IQueueUtility)
-    return _ExecuteContext(util.add, view)
+    return ExecuteContext(util.add, view)
 
 
-async def __add_to_pool(func, request, args, kwargs):
+async def __add_to_pool(func: typing.Callable, request, args, kwargs):
     # make add_job async
     util = get_utility(IAsyncJobPool)
     util.add_job(func, request=request, args=args, kwargs=kwargs)
 
 
-def in_pool(func, *args, request=None, **kwargs):
-    return _ExecuteContext(__add_to_pool, func, request, args, kwargs)
+def in_pool(func: typing.Callable,
+            *args, request=None, **kwargs) -> ExecuteContext:
+    return ExecuteContext(__add_to_pool, func, request, args, kwargs)
 
 
-def after_request(func, *args, _name=None, _request=None, _scope='', **kwargs):
+def after_request(func: typing.Callable, *args, _name=None,
+                  _request=None, _scope='', **kwargs):
     if _name is None:
         _name = uuid.uuid4().hex
     if _request is not None:
@@ -71,11 +79,12 @@ def after_request(func, *args, _name=None, _request=None, _scope='', **kwargs):
     request.add_future(_name, func, scope=_scope, args=args, kwargs=kwargs)
 
 
-def after_request_failed(func, *args, _name=None, _request=None, **kwargs):
+def after_request_failed(func: typing.Callable, *args,
+                         _name=None, _request=None, **kwargs):
     after_request(func, _name=_name, _request=_request, _scope='failed', *args, **kwargs)
 
 
-def after_commit(func, *args, _request=None, **kwargs):
+def after_commit(func: typing.Callable, *args, _request=None, **kwargs):
     if _request is not None:
         request = _request
     elif 'request' in kwargs:
@@ -87,7 +96,7 @@ def after_commit(func, *args, _request=None, **kwargs):
     txn.add_after_commit_hook(func, args=args, kwargs=kwargs)
 
 
-def before_commit(func, *args, _request=None, **kwargs):
+def before_commit(func: typing.Callable, *args, _request=None, **kwargs):
     if _request is not None:
         request = _request
     elif 'request' in kwargs:

@@ -9,8 +9,6 @@ from guillotina._settings import app_settings
 from guillotina.annotations import AnnotationData
 from guillotina.api.service import Service
 from guillotina.auth.role import local_roles
-from guillotina.browser import ErrorResponse
-from guillotina.browser import Response
 from guillotina.component import get_multi_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
@@ -45,10 +43,13 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
+from guillotina.interfaces import IResponse
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
+from guillotina.response import ErrorResponse
+from guillotina.response import Response
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
@@ -152,7 +153,7 @@ class DefaultPOST(Service):
         behaviors = data.get('@behaviors', None)
 
         if not type_:
-            return ErrorResponse(
+            raise ErrorResponse(
                 'RequiredParam',
                 _("Property '@type' is required"),
                 reason=error_reasons.REQUIRED_PARAM_MISSING,
@@ -163,8 +164,9 @@ class DefaultPOST(Service):
             new_id = None
         else:
             if not isinstance(id_, str) or not valid_id(id_):
-                return ErrorResponse('PreconditionFailed', str('Invalid id'),
-                                     status=412, reason=error_reasons.INVALID_ID)
+                raise ErrorResponse(
+                    'PreconditionFailed', str('Invalid id'),
+                    status=412, reason=error_reasons.INVALID_ID)
             new_id = id_
 
         user = get_authenticated_user_id(self.request)
@@ -217,7 +219,7 @@ class DefaultPOST(Service):
             IResourceSerializeToJsonSummary
         )
         response = await serializer()
-        return Response(response=response, headers=headers, status=201)
+        return Response(content=response, status=201, headers=headers)
 
 
 @configure.service(
@@ -243,7 +245,7 @@ class DefaultPATCH(Service):
         deserializer = query_multi_adapter((self.context, self.request),
                                            IResourceDeserializeFromJson)
         if deserializer is None:
-            return ErrorResponse(
+            raise ErrorResponse(
                 'DeserializationError',
                 'Cannot deserialize type {}'.format(self.context.type_name),
                 status=412,
@@ -253,7 +255,7 @@ class DefaultPATCH(Service):
 
         await notify(ObjectModifiedEvent(self.context, payload=data))
 
-        return Response(response='', status=204)
+        return Response(status=204)
 
 
 @configure.service(
@@ -498,12 +500,15 @@ class DefaultOPTIONS(Service):
 
         origin = self.request.headers.get('Origin', None)
         if not origin:
-            raise HTTPNotFound(text='Origin this header is mandatory')
+            raise HTTPNotFound(content={
+                'message': 'Origin this header is mandatory'
+            })
 
         requested_method = self.getRequestMethod()
         if not requested_method:
-            raise HTTPNotFound(
-                text='Access-Control-Request-Method this header is mandatory')
+            raise HTTPNotFound(content={
+                'text': 'Access-Control-Request-Method this header is mandatory'
+            })
 
         requested_headers = (
             self.request.headers.get('Access-Control-Request-Headers', ()))
@@ -516,15 +521,18 @@ class DefaultOPTIONS(Service):
         if requested_method not in allowed_methods:
             raise HTTPMethodNotAllowed(
                 requested_method, allowed_methods,
-                text='Access-Control-Request-Method Method not allowed')
+                content={
+                    'message': 'Access-Control-Request-Method Method not allowed'
+                })
 
         supported_headers = settings['allow_headers']
         if '*' not in supported_headers and requested_headers:
             supported_headers = [s.lower() for s in supported_headers]
             for h in requested_headers:
                 if not h.lower() in supported_headers:
-                    raise HTTPUnauthorized(
-                        text='Access-Control-Request-Headers Header %s not allowed' % h)
+                    raise HTTPUnauthorized(content={
+                        'text': 'Access-Control-Request-Headers Header %s not allowed' % h
+                    })
 
         supported_headers = [] if supported_headers is None else supported_headers
         requested_headers = [] if requested_headers is None else requested_headers
@@ -544,11 +552,11 @@ class DefaultOPTIONS(Service):
         """Apply CORS on the OPTIONS view."""
         headers = await self.preflight()
         resp = await self.render()
-        if isinstance(resp, Response):
+        if IResponse.providedBy(resp):
             headers.update(resp.headers)
             resp.headers = headers
             return resp
-        return Response(response=resp, headers=headers, status=200)
+        return Response(content=resp, headers=headers)
 
 
 @configure.service(

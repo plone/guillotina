@@ -25,3 +25,17 @@
   .. autofunction:: merge_dicts
   .. autofunction:: apply_coroutine
   .. autofunction:: lazy_apply
+
+
+.. automodule:: guillotina.execute
+
+  .. autofunction:: after_request
+  .. autofunction:: after_request_failed
+  .. autofunction:: after_commit
+  .. autofunction:: before_commit
+  .. autofunction:: in_pool
+  .. autofunction:: in_queue
+  .. autofunction:: in_queue_with_func
+
+  .. autoclass:: ExecuteContext
+     :members: after_request, after_request_failed, after_commit, before_commit

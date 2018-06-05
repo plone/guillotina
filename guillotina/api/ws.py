@@ -6,10 +6,10 @@ from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
-from guillotina.browser import Response
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
+from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
@@ -133,11 +133,14 @@ class WebsocketsView(Service):
             view = (await view.prepare()) or view
 
         view_result = await view()
-        if isinstance(view_result, Response):
-            view_result = view_result.response
+        if IAioHTTPResponse.providedBy(view_result):
+            raise Exception('Do not accept raw aiohttp exceptions in ws')
+        else:
+            from guillotina.traversal import apply_rendering
+            resp = await apply_rendering(view, self.request, view_result)
 
-        # Return the value
-        ws.send_str(ujson.dumps(view_result))
+        # Return the value, body is always encoded
+        ws.send_str(resp.body.decode('utf-8'))
 
         # Wait for possible value
         self.request.execute_futures()

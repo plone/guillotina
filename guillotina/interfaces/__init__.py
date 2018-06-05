@@ -16,7 +16,6 @@ from .content import IAnnotations  # noqa
 from .content import IApplication  # noqa
 from .content import IAsyncContainer  # noqa
 from .content import IContainer  # noqa
-from .content import IContentNegotiation  # noqa
 from .content import IDatabase  # noqa
 from .content import IFolder  # noqa
 from .content import IGetOwner  # noqa
@@ -49,9 +48,8 @@ from .events import IObjectPermissionsViewEvent  # noqa
 from .events import IObjectRemovedEvent  # noqa
 from .events import IObjectVisitedEvent  # noqa
 from .exceptions import IErrorResponseException  # noqa
-from .exceptions import IForbidden  # noqa
-from .exceptions import IForbiddenAttribute  # noqa
-from .exceptions import ISerializableException  # noqa
+from .response import IResponse  # noqa
+from .response import IAioHTTPResponse  # noqa
 from .exceptions import IUnauthorized  # noqa
 from .files import ICloudFileField  # noqa
 from .files import IDBFile  # noqa
@@ -73,11 +71,6 @@ from .json import IValueToJson  # noqa
 from .layer import IDefaultLayer  # noqa
 from .registry import IAddons  # noqa
 from .registry import ILayers  # noqa
-from .renderers import IRendererFormatHtml  # noqa
-from .renderers import IRendererFormatJson  # noqa
-from .renderers import IRendererFormatPlain  # noqa
-from .renderers import IRendererFormatRaw  # noqa
-from .renderers import IRenderFormats  # noqa
 from .security import Allow  # noqa
 from .security import AllowSingle  # noqa
 from .security import Deny  # noqa
@@ -99,7 +92,6 @@ from .security import Unset  # noqa
 from .types import IConstrainTypes  # noqa
 from .views import ICONNECT  # noqa
 from .views import IDELETE  # noqa
-from .views import IDownloadView  # noqa
 from .views import IGET  # noqa
 from .views import IHEAD  # noqa
 from .views import IOPTIONS  # noqa
@@ -139,32 +131,13 @@ class IRequest(Interface):
     pass
 
 
-class IResponse(Interface):
-
-    def __init__(context, request):  # noqa: N805
-        '''
-        '''
-
-
-class IFrameFormats(Interface):
-    pass
-
-
-class IFrameFormatsJson(IFrameFormats):
-    pass
-
-
 class ILanguage(Interface):
     pass
 
 
 # Target interfaces on resolving
 
-class IRendered(Interface):
-    pass
-
-
-class ITranslated(Interface):
+class IRenderer(Interface):
     pass
 
 

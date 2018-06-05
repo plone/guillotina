@@ -1,59 +1,37 @@
 from guillotina import configure
-from guillotina.interfaces import IDefaultLayer
-from guillotina.interfaces import ILanguage
 
 
-class IEN(ILanguage):
-    pass
+class DefaultLanguage:
+    def __init__(self, request, content):
+        self.request = request
+        self.content = content
 
-
-class IENUS(IEN):
-    pass
-
-
-class ICA(ILanguage):
-    pass
-
-
-class IFI(ILanguage):
-    pass
-
-
-class DefaultLanguage(object):
     def translate(self):
-        return self.context
+        return self.content
 
 
-@configure.adapter(
-    for_=IDefaultLayer,
-    provides=IEN)
+@configure.language(name='en')
 class EN(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
-@configure.adapter(
-    for_=IDefaultLayer,
-    provides=ICA)
+@configure.language(name='ca')
 class CA(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
-@configure.adapter(
-    for_=IDefaultLayer,
-    provides=IFI)
+@configure.language(name='fi')
 class FI(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
-@configure.adapter(
-    for_=IDefaultLayer,
-    provides=IENUS)
+@configure.language(name='en-us')
 class ENUS(DefaultLanguage):
-    def __init__(self, content):
-        self.content = content
+    '''
+    '''
 
 
 # This is a dictionary of dictonaries:

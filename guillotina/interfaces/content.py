@@ -221,11 +221,6 @@ class IItem(IResource):
     '''
 
 
-class IContentNegotiation(Interface):
-    '''
-    '''
-
-
 class IAnnotations(Interface):
     '''
     '''

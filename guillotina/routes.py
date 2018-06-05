@@ -1,4 +1,4 @@
-from guillotina.exceptions import InvalidRoute
+from guillotina.response import InvalidRoute
 
 import re
 
@@ -17,8 +17,9 @@ class Route:
                 if not part:
                     continue
                 if URL_MATCH_RE.match(part):
-                    raise InvalidRoute(
-                        reason=f'You are trying to mix non-route urls with routing: {raw_route}')  # noqa
+                    raise InvalidRoute(content={
+                        'reason': f'You are trying to mix non-route urls with routing: {raw_route}'  # noqa
+                    })
             self.view_name = raw_route
         else:
             # only @ provides potential routing
@@ -30,7 +31,9 @@ class Route:
                 if not part:
                     continue
                 if not URL_MATCH_RE.match(part):
-                    raise InvalidRoute(reason=f'The route {raw_route} is invalid')
+                    raise InvalidRoute(content={
+                        'reason': f'The route {raw_route} is invalid'
+                    })
                 self.part_names.append(part.strip('{').strip('}'))
 
     def matches(self, request, path_parts):

@@ -12,10 +12,6 @@ class IView(Interface):
         '''
 
 
-class IDownloadView(IView):
-    pass
-
-
 class IGET(IView):
     pass
 

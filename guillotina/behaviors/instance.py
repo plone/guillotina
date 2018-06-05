@@ -4,7 +4,6 @@ from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IContentBehavior
 from zope.interface import implementer
-from zope.interface.declarations import Provides
 
 
 _default = object()
@@ -26,7 +25,6 @@ class AnnotationBehavior:
         self.__dict__['prefix'] = self.__dict__['schema'].__identifier__ + '.'
         self.__dict__['data'] = {}
         self.__dict__['context'] = context
-        self.__dict__['__provides__'] = Provides(self.__dict__['schema'])
 
         # see if annotations are preloaded...
         annotations_container = IAnnotations(self.__dict__['context'])
@@ -92,7 +90,6 @@ class ContextBehavior:
         self.__dict__['schema'] = [x for x in self.__implemented__][0]
         self.__dict__['prefix'] = self.__dict__['schema'].__identifier__ + '.'
         self.__dict__['context'] = context
-        self.__dict__['__provides__'] = Provides(self.__dict__['schema'])
 
     async def load(self, create=False):
         '''

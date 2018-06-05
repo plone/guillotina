@@ -67,13 +67,6 @@ TESTING_SETTINGS = {
 }
 
 
-QUEUE_UTILITY_CONFIG = {
-    "provides": "guillotina.async_util.IQueueUtility",
-    "factory": "guillotina.async_util.QueueUtility",
-    "settings": {}
-}
-
-
 ADMIN_TOKEN = base64.b64encode(
     '{}:{}'.format(ROOT_USER_ID, TESTING_SETTINGS['root_user']['password']).encode(
         'utf-8')).decode('utf-8')

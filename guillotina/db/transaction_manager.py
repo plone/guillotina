@@ -135,7 +135,10 @@ class TransactionManager:
             self._last_db_conn = None
 
     async def abort(self, request=None, txn=None):
-        return await shield(self._abort(request=request, txn=txn))
+        try:
+            return await shield(self._abort(request=request, txn=txn))
+        except asyncio.CancelledError:
+            pass
 
     async def _abort(self, request=None, txn=None):
         """ Abort the last transaction

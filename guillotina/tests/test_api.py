@@ -571,7 +571,7 @@ async def test_return_correct_content_type(container_requester):
     async with container_requester as requester:
         response, _, headers = await requester.make_request(
             'GET', '/db/guillotina', accept='application/json')
-        assert headers['Content-Type'] == 'application/json'
+        assert 'application/json' in headers['Content-Type']
 
         response, _, headers = await requester.make_request(
             'GET', '/db/guillotina', accept='text/html,*/*')
