@@ -1,6 +1,9 @@
 3.3.13 (unreleased)
 -------------------
 
+- Fix required field on PatchField
+  [vangheem]
+
 - fix deserialization with BucketListField
   [vangheem]
 
