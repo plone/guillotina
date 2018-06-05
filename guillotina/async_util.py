@@ -7,7 +7,7 @@ from guillotina.db.transaction import Status
 from guillotina.exceptions import ServerClosingException
 from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IAsyncUtility  # noqa
-from guillotina.interfaces import IQueueUtility  # noqa
+from guillotina.interfaces import IQueueUtility
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
 from guillotina.transactions import managed_transaction
@@ -20,6 +20,7 @@ import typing
 _zone = tzutc()
 
 
+@configure.utility(provides=IQueueUtility)
 class QueueUtility(object):
 
     def __init__(self, settings, loop=None):

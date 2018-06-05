@@ -16,6 +16,7 @@
 - remove `IForbiddenAttribute`
 - remove `ISerializableException`
 - remove `IForbidden`
+- by default, provide an async queue utility
 
 
 3.3.12 (2018-05-30)

@@ -1,13 +1,13 @@
 from guillotina.component import get_utility
 from guillotina.interfaces import IAsyncJobPool
-from guillotina.interfaces import IQueueUtility
+from guillotina.interfaces import IQueueUtility, IView
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 
 import uuid
 
 
-class _ExecuteContext:
+class ExecuteContext:
 
     def __init__(self, func, *args, **kwargs):
         self.func = func
@@ -22,6 +22,9 @@ class _ExecuteContext:
 
     def after_commit(self, _request=None):
         after_commit(self.func, _request=_request, *self.args, **self.kwargs)
+
+    def before_commit(self, _request=None):
+        before_commit(self.func, _request=_request, *self.args, **self.kwargs)
 
 
 class _GenerateQueueView:
@@ -43,9 +46,9 @@ def in_queue_with_func(func, *args, _request=None, **kwargs):
     return in_queue(view)
 
 
-def in_queue(view):
+def in_queue(view: IView):
     util = get_utility(IQueueUtility)
-    return _ExecuteContext(util.add, view)
+    return ExecuteContext(util.add, view)
 
 
 async def __add_to_pool(func, request, args, kwargs):
@@ -55,7 +58,7 @@ async def __add_to_pool(func, request, args, kwargs):
 
 
 def in_pool(func, *args, request=None, **kwargs):
-    return _ExecuteContext(__add_to_pool, func, request, args, kwargs)
+    return ExecuteContext(__add_to_pool, func, request, args, kwargs)
 
 
 def after_request(func, *args, _name=None, _request=None, _scope='', **kwargs):
