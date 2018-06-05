@@ -19,6 +19,7 @@
 - by default, provide an async queue utility
 - move `guillotina.files.CloudFileField` to `guillotina.fields.CloudFileField`
 - fix deserialization with BucketListField
+- fix required field of PatchField
 
 
 3.3.12 (2018-05-30)
