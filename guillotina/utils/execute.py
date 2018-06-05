@@ -10,6 +10,10 @@ import uuid
 
 
 class ExecuteContext:
+    '''
+    Execution context object to allow you to run the function
+    in different contexts.
+    '''
 
     def __init__(self, func, *args, **kwargs):
         self.func = func
@@ -17,15 +21,37 @@ class ExecuteContext:
         self.kwargs = kwargs
 
     def after_request(self, _name=None, _request=None):
+        '''
+        Execute after the request has successfully finished.
+
+        :param _name: unique identifier to give in case you want to prevent duplicates
+        :param _request: provide request object to prevent request lookup
+        '''
         after_request(self.func, _name=_name, _request=_request, *self.args, **self.kwargs)
 
     def after_request_failed(self, _name=None, _request=None):
+        '''
+        Execute after the request has failed or errored.
+
+        :param _name: unique identifier to give in case you want to prevent duplicates
+        :param _request: provide request object to prevent request lookup
+        '''
         after_request_failed(self.func, _name=_name, _request=_request, *self.args, **self.kwargs)
 
     def after_commit(self, _request=None):
+        '''
+        Execute after we commit to the database.
+
+        :param _request: provide request object to prevent request lookup
+        '''
         after_commit(self.func, _request=_request, *self.args, **self.kwargs)
 
     def before_commit(self, _request=None):
+        '''
+        Execute just before we commit to the database.
+
+        :param _request: provide request object to prevent request lookup
+        '''
         before_commit(self.func, _request=_request, *self.args, **self.kwargs)
 
 
@@ -41,8 +67,18 @@ class _GenerateQueueView:
         await self.func(*self.args, **self.kwargs)
 
 
-def in_queue_with_func(func: typing.Callable, *args,
+def in_queue_with_func(func: typing.Callable[..., typing.Coroutine], *args,
                        _request=None, **kwargs) -> ExecuteContext:
+    '''
+    Execute function in the async queue.
+
+    :param func: function to be queued
+    :param _request: provide request object to prevent request lookup
+    :param args: arguments to call the func with
+    :param kwargs: keyword arguments to call the func with
+
+    :rtype: ExecuteContext
+    '''
     if _request is None:
         _request = get_current_request()
     view = _GenerateQueueView(func, _request, args, kwargs)
@@ -50,23 +86,52 @@ def in_queue_with_func(func: typing.Callable, *args,
 
 
 def in_queue(view: IView) -> ExecuteContext:
+    '''
+    Execute view-type object(context, request) in the async queue.
+
+    :param view: view to be queued
+
+    :rtype: ExecuteContext
+    '''
     util = get_utility(IQueueUtility)
     return ExecuteContext(util.add, view)
 
 
-async def __add_to_pool(func: typing.Callable, request, args, kwargs):
+async def __add_to_pool(func: typing.Callable[..., typing.Coroutine],
+                        request, args, kwargs):
     # make add_job async
     util = get_utility(IAsyncJobPool)
     util.add_job(func, request=request, args=args, kwargs=kwargs)
 
 
-def in_pool(func: typing.Callable,
+def in_pool(func: typing.Callable[..., typing.Coroutine],
             *args, request=None, **kwargs) -> ExecuteContext:
+    '''
+    Execute function in the async pool.
+
+    :param func: function to be queued
+    :param _request: provide request object to prevent request lookup.
+                     Provide if function be wrapped in database transaction.
+    :param args: arguments to call the func with
+    :param kwargs: keyword arguments to call the func with
+
+    :rtype: ExecuteContext
+    '''
     return ExecuteContext(__add_to_pool, func, request, args, kwargs)
 
 
-def after_request(func: typing.Callable, *args, _name=None,
-                  _request=None, _scope='', **kwargs):
+def after_request(func: typing.Callable[..., typing.Coroutine],
+                  *args, _name=None, _request=None, _scope='', **kwargs):
+    '''
+    Execute after the request has successfully finished.
+
+    :param func: function to be queued
+    :param _name: unique identifier to give in case you want to prevent duplicates
+    :param _scope: customize scope of after commit to run for instead of default(successful request)
+    :param _request: provide request object to prevent request lookup
+    :param args: arguments to call the func with
+    :param kwargs: keyword arguments to call the func with
+    '''
     if _name is None:
         _name = uuid.uuid4().hex
     if _request is not None:
@@ -79,12 +144,28 @@ def after_request(func: typing.Callable, *args, _name=None,
     request.add_future(_name, func, scope=_scope, args=args, kwargs=kwargs)
 
 
-def after_request_failed(func: typing.Callable, *args,
-                         _name=None, _request=None, **kwargs):
+def after_request_failed(func: typing.Callable[..., typing.Coroutine],
+                         *args, _name=None, _request=None, **kwargs):
+    '''
+    Execute after the request has failed or errored.
+
+    :param func: function to be queued
+    :param _request: provide request object to prevent request lookup
+    :param args: arguments to call the func with
+    :param kwargs: keyword arguments to call the func with
+    '''
     after_request(func, _name=_name, _request=_request, _scope='failed', *args, **kwargs)
 
 
 def after_commit(func: typing.Callable, *args, _request=None, **kwargs):
+    '''
+    Execute a commit to the database.
+
+    :param func: function to be queued
+    :param _request: provide request object to prevent request lookup
+    :param args: arguments to call the func with
+    :param kwargs: keyword arguments to call the func with
+    '''
     if _request is not None:
         request = _request
     elif 'request' in kwargs:
@@ -96,7 +177,16 @@ def after_commit(func: typing.Callable, *args, _request=None, **kwargs):
     txn.add_after_commit_hook(func, args=args, kwargs=kwargs)
 
 
-def before_commit(func: typing.Callable, *args, _request=None, **kwargs):
+def before_commit(func: typing.Callable[..., typing.Coroutine],
+                  *args, _request=None, **kwargs):
+    '''
+    Execute before a commit to the database.
+
+    :param func: function to be queued
+    :param _request: provide request object to prevent request lookup
+    :param args: arguments to call the func with
+    :param kwargs: keyword arguments to call the func with
+    '''
     if _request is not None:
         request = _request
     elif 'request' in kwargs:

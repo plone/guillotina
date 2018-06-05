@@ -23,6 +23,7 @@ An example of where this is used is for file services: `/db/container/item/@uplo
 
 
 ```python
+from guillotina import configure
 @configure.service(
     method='GET', permission='guillotina.AccessContent',
     name='@match/{foo}/{bar}')

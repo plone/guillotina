@@ -65,7 +65,9 @@ You can define in the service configuration with `allow_acces=True`
 
 
 ```python
-@service(
+from guillotina import configure
+from guillotina.interfaces import IResource
+@configure.service(
     context=IResource, name='@download',
     method='GET', permission='guillotina.Public',
     allow_access=True)

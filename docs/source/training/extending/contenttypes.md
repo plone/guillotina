@@ -44,6 +44,7 @@ a scan call inside your `includeme` function in the `__init__.py` file.
 
 
 ```python
+from guillotina import configure
 configure.scan('guillotina_chat.content')
 ```
 

@@ -8,7 +8,7 @@ from guillotina.content import Item
 from guillotina.content import Resource
 from guillotina.directives import index_field
 from guillotina.directives import metadata
-from guillotina.files import CloudFileField
+from guillotina.fields import CloudFileField
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IItem

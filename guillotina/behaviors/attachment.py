@@ -1,6 +1,6 @@
 from guillotina import configure
 from guillotina.behaviors.instance import AnnotationBehavior
-from guillotina.files import CloudFileField
+from guillotina.fields import CloudFileField
 from zope.interface import Interface
 
 

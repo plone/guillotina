@@ -24,4 +24,5 @@ Contents:
    router
    exceptions
    fields
+   async_utils
    api/index

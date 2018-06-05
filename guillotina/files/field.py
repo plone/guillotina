@@ -7,34 +7,12 @@ from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IContentBehavior
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IFileManager
-from guillotina.schema import Object
 from guillotina.schema.fieldproperty import FieldProperty
 from guillotina.utils import get_current_request
 from guillotina.utils import to_str
 from zope.interface import implementer
 
 import uuid
-
-
-@implementer(ICloudFileField)
-class CloudFileField(Object):
-    """
-    A cloud file hosted file.
-
-    Its configured on config.json with :
-
-    "cloud_storage": "guillotina.interfaces.IS3FileField"
-
-    or
-
-    "cloud_storage": "guillotina_gcloudstorage.interfaces.IGCloudFileField"
-
-    """
-
-    schema = IFile
-
-    def __init__(self, **kw):
-        super(CloudFileField, self).__init__(schema=self.schema, **kw)
 
 
 @configure.value_serializer(for_=IFile)

@@ -8,20 +8,19 @@ This allows us to provide functionality across content types, using specific mar
 If you want to have a shared behavior based on some fields and operations that needs to be shared across different content types, you can define them on a `guillotina.schema` interface:
 
 ```python
-    from zope.interface import Interface
-    from zope.interface import provider
-    from guillotina.schema import Textline
+from zope.interface import Interface
+from guillotina.schema import Textline
 
-    class IMyLovedBehavior(Interface):
-        text = Textline(
-            title=u'Text line field',
-            required=False
-        )
+class IMyLovedBehavior(Interface):
+    text = Textline(
+        title=u'Text line field',
+        required=False
+    )
 
-        text2 = Textline(
-            title=u'Text line field',
-            required=False
-        )
+    text2 = Textline(
+        title=u'Text line field',
+        required=False
+    )
 
 ```
 
@@ -29,8 +28,8 @@ Once you define the schema you can define a specific marker interface that will 
 
 ```python
 
-    class IMarkerBehavior(Interface):
-        """Marker interface for content with attachment."""
+class IMarkerBehavior(Interface):
+    """Marker interface for content with attachment."""
 
 ```
 
@@ -43,11 +42,19 @@ For example, in case you want to have a class that stores the field as content a
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.interfaces import IResource
-from guillotina import configure
+from guillotina import configure, schema
+from zope.interface import Interface
+
+class IMarkerBehavior(Interface):
+    """Marker interface for content with attachment."""
+
+
+class IMyBehavior(Interface):
+    foobar = schema.TextLine()
 
 @configure.behavior(
     title="Attachment",
-    provides=IMyLovedBehavior,
+    provides=IMyBehavior,
     marker=IMarkerBehavior,
     for_=IResource)
 class MyBehavior(AnnotationBehavior):

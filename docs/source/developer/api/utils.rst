@@ -1,5 +1,5 @@
 :mod:`guillotina.utils`
--------------------------
+-----------------------
 
 .. automodule:: guillotina.utils
 
@@ -27,7 +27,10 @@
   .. autofunction:: lazy_apply
 
 
-.. automodule:: guillotina.execute
+:mod:`guillotina.utils.execute`
+-------------------------------
+
+.. automodule:: guillotina.utils.execute
 
   .. autofunction:: after_request
   .. autofunction:: after_request_failed

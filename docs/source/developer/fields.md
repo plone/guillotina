@@ -103,7 +103,7 @@ from guillotina import schema
 
 class IMySchema(Interface):
     values = PatchField(schema.Dict(
-        key_type=schema.Text()
+        key_type=schema.Text(),
         value_type=schema.Text()
     ))
 ```
@@ -138,7 +138,7 @@ Delete:
 
 ```python
 from zope.interface import Interface
-from guillotina.fields import PatchField
+from guillotina.fields import BucketListField
 from guillotina import schema
 
 class IMySchema(Interface):

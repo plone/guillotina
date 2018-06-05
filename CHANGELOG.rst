@@ -17,6 +17,7 @@
 - remove `ISerializableException`
 - remove `IForbidden`
 - by default, provide an async queue utility
+- move `guillotina.files.CloudFileField` to `guillotina.fields.CloudFileField`
 
 
 3.3.12 (2018-05-30)

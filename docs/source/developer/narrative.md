@@ -77,7 +77,8 @@ Then, we want to make sure our content type configuration is getting loaded,
 so add this to your `__init__.py` `includeme` function:
 
 ```python
-    configure.scan('guillotina_todo.content')
+from guillotina import configure
+configure.scan('guillotina_todo.content')
 ```
 
 ## Running

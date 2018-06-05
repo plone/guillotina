@@ -23,6 +23,7 @@ to the database. To do this, just use the `_p_register()` method.
 
 
 ```python
+from guillotina import configure
 @configure.service(
     method='PATCH', name='@dosomething')
 async def matching_service(context, request):
