@@ -1,7 +1,8 @@
 3.3.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- fix deserialization with BucketListField
+  [vangheem]
 
 
 3.3.12 (2018-05-30)

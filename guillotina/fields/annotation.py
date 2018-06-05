@@ -8,6 +8,7 @@ from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IContentBehavior
 from zope.interface import implementer
+from guillotina.fields import patch
 
 
 _default = object()
@@ -150,11 +151,7 @@ def dynamic_list_converter(value):
     for_=IBucketListField,
     provides=IPatchFieldOperation,
     name='append')
-class PatchBucketListAppend:
-
-    def __init__(self, field):
-        super().__init__()
-        self.field = field
+class PatchBucketListAppend(patch.PatchListAppend):
 
     def get_existing_value(self, field_context):
         existing = getattr(field_context, self.field.__name__, None)
@@ -166,6 +163,7 @@ class PatchBucketListAppend:
         return existing
 
     async def __call__(self, field_context, context, value):
+        value = self.get_value(value, None)
         if self.field.value_type:
             self.field.value_type.validate(value)
         existing = self.get_existing_value(field_context)
@@ -181,10 +179,16 @@ class PatchBucketListExtend(PatchBucketListAppend):
         existing = self.get_existing_value(field_context)
         if not isinstance(value, list):
             raise ValueDeserializationError(self.field, value, 'Not valid list')
+
+        values = []
         for item in value:
             if self.field.value_type:
-                self.field.value_type.validate(item)
-        await existing.extend(context, value)
+                item_value = self.get_value(
+                    item, None, field_type=self.field.value_type)
+                self.field.value_type.validate(item_value)
+                values.append(item_value)
+
+        await existing.extend(context, values)
 
 
 @configure.adapter(
