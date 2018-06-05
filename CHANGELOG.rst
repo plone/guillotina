@@ -1,4 +1,4 @@
-3.2.13 (unreleased)
+3.2.13 (2018-06-05)
 -------------------
 
 - fix deserialization with BucketListField
