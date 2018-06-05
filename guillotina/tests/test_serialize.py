@@ -157,6 +157,11 @@ class ITestSchema(Interface):
             value_type=schema.Text()
         ))
 
+    datetime_bucket_list = fields.BucketListField(
+        bucket_len=10, required=False,
+        value_type=schema.Datetime()
+    )
+
     nested_patch = fields.PatchField(schema.Dict(
         required=False,
         key_type=schema.Text(),
@@ -555,3 +560,31 @@ async def test_nested_patch_deserialize(dummy_request):
     assert len(errors) == 0
     assert content.nested_patch['foobar'][1]['foo'] == 'bar3'
     assert content.nested_patch['foobar'][1]['bar'] == 3
+
+
+async def test_dates_bucket_list_field(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    content._p_jar = mocks.MockTransaction()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'datetime_bucket_list': {
+                'op': 'append',
+                'value': '2018-06-05T12:35:30.865745+00:00'
+            }
+        }, [])
+    assert content.datetime_bucket_list.annotations_metadata[0]['len'] == 1
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'datetime_bucket_list': {
+                'op': 'extend',
+                'value': [
+                    '2019-06-05T12:35:30.865745+00:00',
+                    '2020-06-05T12:35:30.865745+00:00'
+                ]
+            }
+        }, [])
+    assert content.datetime_bucket_list.annotations_metadata[0]['len'] == 3
