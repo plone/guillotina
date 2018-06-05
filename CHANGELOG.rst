@@ -1,4 +1,4 @@
-3.3.13 (unreleased)
+3.3.13 (2018-06-05)
 -------------------
 
 - Fix required field on PatchField
