@@ -3,6 +3,7 @@ from aiohttp.web_response import StreamResponse
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IResponse
 from multidict import CIMultiDict
+from typing import Optional
 from zope.interface import classImplements
 from zope.interface import implementer
 
@@ -14,7 +15,7 @@ classImplements(StreamResponse, IAioHTTPResponse)
 @implementer(IResponse)
 class Response(Exception):
 
-    status_code: int
+    status_code: Optional[int] = None
     empty_body = False
     default_content: dict = {}  # noqa
 
@@ -34,7 +35,6 @@ class Response(Exception):
                 if status in (204, 205):
                     self.content = None
                 self.status_code = status
-        assert self.status_code is not None
 
 
 class ErrorResponse(Response):

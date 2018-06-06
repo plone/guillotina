@@ -64,9 +64,9 @@ class BaseObject:
     __parent__: Optional['BaseObject'] = ObjectProperty('_BaseObject__parent', None)  # type: ignore
     __of__: Optional['BaseObject'] = ObjectProperty('_BaseObject__of', None)  # type: ignore
     __name__: Optional[str] = ObjectProperty('_BaseObject__name', None)  # type: ignore
-    __annotations__ = DictDefaultProperty('_BaseObject__annotations')  # type: ignore
     __immutable_cache__: bool = ObjectProperty('_BaseObject__immutable_cache', False)  # type: ignore
     __new_marker__ = ObjectProperty('_BaseObject__new_marker', False)
+    __gannotations__: dict = DictDefaultProperty('_BaseObject__annotations')  # type: ignore
 
     # _p_:  romantic name for persistent related information
     _p_jar = ObjectProperty('_BaseObject__jar', None)

@@ -119,7 +119,7 @@ def test_base_object():
         '__parent__': '_BaseObject__parent',
         '__of__': '_BaseObject__of',
         '__name__': '_BaseObject__name',
-        '__annotations__': '_BaseObject__annotations',
+        '__gannotations__': '_BaseObject__annotations',
         '__immutable_cache__': '_BaseObject__immutable_cache',
         '__new_marker__': '_BaseObject__new_marker',
         '_p_jar': '_BaseObject__jar',

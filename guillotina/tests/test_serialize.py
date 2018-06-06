@@ -480,7 +480,7 @@ async def test_bucket_list_field(dummy_request):
     assert len([b async for b in content.bucket_list.iter_buckets(content)]) == 11
     assert len([i async for i in content.bucket_list.iter_items(content)]) == 101
 
-    assert 'bucketlist-bucket_list0' in content.__annotations__
+    assert 'bucketlist-bucket_list0' in content.__gannotations__
 
 
 def test_default_value_deserialize(dummy_request):
