@@ -1,3 +1,4 @@
+from guillotina.gtypes import ResolvableType
 from zope.interface.interfaces import IInterface
 
 import importlib
@@ -16,16 +17,16 @@ def import_class(import_string: str) -> types.ModuleType:
     return getattr(importlib.import_module(t[0]), t[1], None)
 
 
-def resolve_dotted_name(name: str) -> type:
+def resolve_dotted_name(name: str) -> ResolvableType:
     """
     import the provided dotted name
     """
     if not isinstance(name, str):
         return name  # already an object
-    name = name.split('.')
-    used = name.pop(0)
+    names = name.split('.')
+    used = names.pop(0)
     found = __import__(used)
-    for n in name:
+    for n in names:
         used += '.' + n
         try:
             found = getattr(found, n)
@@ -41,9 +42,9 @@ def get_caller_module(level: int = 2,
     """
     Pulled out of pyramid
     """
-    module_globals = sys._getframe(level).f_globals
+    module_globals = sys._getframe(level).f_globals  # type: ignore
     module_name = module_globals.get('__name__') or '__main__'
-    module = sys.modules[module_name]
+    module = sys.modules[module_name]  # type: ignore
     return module
 
 
@@ -60,7 +61,7 @@ def get_module_dotted_name(ob) -> str:
     return getattr(ob, '__module__', None) or getattr(ob, '__name__', None)
 
 
-def get_dotted_name(ob) -> str:
+def get_dotted_name(ob: ResolvableType) -> str:
     if inspect.isclass(ob) or IInterface.providedBy(ob) or isinstance(ob, types.FunctionType):
         name = ob.__name__
     else:
@@ -72,7 +73,7 @@ def get_dotted_name(ob) -> str:
 get_class_dotted_name = get_dotted_name
 
 
-def resolve_path(file_path) -> pathlib.PosixPath:
+def resolve_path(file_path: str) -> pathlib.Path:
     if ':' in file_path:
         # referencing a module
         dotted_mod_name, _, rel_path = file_path.partition(':')

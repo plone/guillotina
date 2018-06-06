@@ -29,9 +29,6 @@ def reraise(tp, value, tb=None):
     raise value
 
 
-_import_chickens = {}, {}, ('*',)  # dead chickens needed by __import__
-
-
 class ConfigurationContext(object):
     """Mix-in that implements IConfigurationContext
 

@@ -5,6 +5,8 @@ from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
 from guillotina.profile import profilable
+from typing import Dict
+from typing import Optional
 from zope.interface.interface import InterfaceClass
 
 import json
@@ -37,11 +39,13 @@ class GuillotinaJSONEncoder(json.JSONEncoder):
 
 
 class Renderer:
+    content_type: str
+
     def __init__(self, view, request):
         self.view = view
         self.request = request
 
-    def get_body(self, value) -> bytes:
+    def get_body(self, value) -> Optional[bytes]:
         return str(value).encode('utf-8')
 
     @profilable
@@ -52,7 +56,7 @@ class Renderer:
         - serializable value
         '''
         status = 200
-        headers = {}
+        headers: Dict[str, str] = {}
         if IResponse.providedBy(value):
             headers = value.headers
             status = value.status_code or 200
@@ -71,10 +75,11 @@ class Renderer:
 class RendererJson(Renderer):
     content_type = 'application/json'
 
-    def get_body(self, value) -> bytes:
+    def get_body(self, value) -> Optional[bytes]:
         if value is not None:
             value = json.dumps(value, cls=GuillotinaJSONEncoder)
             return value.encode('utf-8')
+        return None
 
 
 class StringRenderer(Renderer):
@@ -93,10 +98,11 @@ class StringRenderer(Renderer):
 class RendererHtml(Renderer):
     content_type = 'text/html'
 
-    def get_body(self, value: IResponse) -> bytes:
+    def get_body(self, value: IResponse) -> Optional[bytes]:
         body = super().get_body(value)
-        if b'<html' not in body:
-            body = b'<html><body>' + body + b'</body></html>'
+        if body is not None:
+            if b'<html' not in body:
+                body = b'<html><body>' + body + b'</body></html>'
         return body
 
 

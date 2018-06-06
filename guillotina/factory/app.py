@@ -31,12 +31,14 @@ import aiotask_context
 import asyncio
 import json
 import logging.config
+from typing import Optional
+from types import ModuleType
 
-
+RSA: Optional[ModuleType] = None
 try:
     from Crypto.PublicKey import RSA
 except ImportError:
-    RSA = None
+    pass
 
 
 logger = glogging.getLogger('guillotina')

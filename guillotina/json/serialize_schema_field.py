@@ -27,7 +27,7 @@ from zope.interface import implementedBy
 from zope.interface import Interface
 
 
-FIELDS_CACHE = {}
+FIELDS_CACHE: dict = {}
 
 
 @configure.adapter(

@@ -19,7 +19,7 @@ class IStorage(Interface):
     interface storage adapters must implement
     '''
 
-    async def finalize():
+    async def finalize():  # type: ignore
         '''
         Run cleanup
         '''
@@ -29,7 +29,7 @@ class IStorage(Interface):
         Initialize database
         '''
 
-    async def remove():
+    async def remove():  # type: ignore
         '''
         Remove database
         '''
@@ -141,17 +141,17 @@ class IPostgresStorage(IStorage):
 
 class ITransactionStrategy(Interface):
 
-    async def tpc_begin():
+    async def tpc_begin():  # type: ignore
         '''
         Begin transaction, should set ._tid on transaction if supports transactions
         '''
 
-    async def tpc_vote():
+    async def tpc_vote():  # type: ignore
         '''
         Returns true if no conflicts, false if conflicts
         '''
 
-    async def tpc_finish():
+    async def tpc_finish():  # type: ignore
         '''
         Finish the transaction, committing transaction
         '''
@@ -163,7 +163,7 @@ class IDBTransactionStrategy(ITransactionStrategy):
 
 class IStorageCache(Interface):
 
-    async def clear():
+    async def clear():  # type: ignore
         '''
         clear cache
         '''
@@ -188,14 +188,14 @@ class IStorageCache(Interface):
         delete list of keys
         '''
 
-    async def close():
+    async def close():  # type: ignore
         '''
         close the cache
         '''
 
 
 class IDatabaseManager(Interface):
-    async def get_names() -> list:
+    async def get_names() -> list:  # type: ignore
         '''
         Return a list of available databases
         '''
@@ -205,7 +205,7 @@ class IDatabaseManager(Interface):
         Create a new database on the storage
         '''
 
-    async def delete(name: str):
+    async def delete(name: str):  # type: ignore
         '''
         Delete database on the storage
         '''

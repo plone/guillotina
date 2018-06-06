@@ -38,9 +38,9 @@ class IContextAwareDefaultFactory(zope.interface.Interface):
         """Returns a default value for the field."""
 
 
-class NO_VALUE(object):
+class _NO_VALUE(object):
     def __repr__(self):
         return '<NO_VALUE>'
 
 
-NO_VALUE = NO_VALUE()
+NO_VALUE = _NO_VALUE()

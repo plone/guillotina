@@ -1,15 +1,18 @@
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.profile import profilable
+from typing import Any
+from typing import Dict
+from typing import Optional
 from zope.interface import implementer
 
 
 class ObjectProperty(object):
 
-    def __init__(self, attribute, default):
+    def __init__(self, attribute: str, default: Any) -> None:
         self.attribute = attribute
         self.default = default
 
-    def __get__(self, inst, klass):
+    def __get__(self, inst, klass) -> Any:
         return object.__getattribute__(inst, self.attribute)
 
     def __set__(self, inst, value):
@@ -20,10 +23,10 @@ class ObjectProperty(object):
 
 
 class DictDefaultProperty(ObjectProperty):
-    def __init__(self, attribute):
+    def __init__(self, attribute: str) -> None:
         self.attribute = attribute
 
-    def __get__(self, inst, klass):
+    def __get__(self, inst, klass) -> Dict:
         val = object.__getattribute__(inst, self.attribute)
         if val is None:
             object.__setattr__(inst, self.attribute, {})
@@ -35,7 +38,7 @@ class DictDefaultProperty(ObjectProperty):
 
 
 @implementer(IBaseObject)
-class BaseObject(object):
+class BaseObject:
     """
     Pure Python implmentation of Persistent base class
     """
@@ -58,11 +61,11 @@ class BaseObject(object):
 
     __slots__ = ('__parent', '__of', '__name', '__annotations', '__immutable_cache',
                  '__new_marker', '__jar', '__oid', '__serial')
-    __parent__ = ObjectProperty('_BaseObject__parent', None)
-    __of__ = ObjectProperty('_BaseObject__of', None)
-    __name__ = ObjectProperty('_BaseObject__name', None)
-    __annotations__ = DictDefaultProperty('_BaseObject__annotations')
-    __immutable_cache__ = ObjectProperty('_BaseObject__immutable_cache', False)
+    __parent__: Optional['BaseObject'] = ObjectProperty('_BaseObject__parent', None)  # type: ignore
+    __of__: Optional['BaseObject'] = ObjectProperty('_BaseObject__of', None)  # type: ignore
+    __name__: Optional[str] = ObjectProperty('_BaseObject__name', None)  # type: ignore
+    __annotations__ = DictDefaultProperty('_BaseObject__annotations')  # type: ignore
+    __immutable_cache__: bool = ObjectProperty('_BaseObject__immutable_cache', False)  # type: ignore
     __new_marker__ = ObjectProperty('_BaseObject__new_marker', False)
 
     # _p_:  romantic name for persistent related information

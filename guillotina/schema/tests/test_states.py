@@ -91,7 +91,7 @@ class StateSelectionTest(unittest.TestCase):
         from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabulary
         schema = self._makeSchema()
-        field = schema.getDescriptionFor("state3")
+        field = schema.getDescriptionFor("state3")  # type: ignore
         bound = field.bind(None)
         self.assertTrue(bound.vocabularyName is None)
         self.assertTrue(verifyObject(IVocabulary, bound.vocabulary))

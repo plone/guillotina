@@ -1,7 +1,8 @@
 4.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement minimal passing mypy compatibility
+  [vangheem]
 
 
 4.0.0 (2018-06-05)

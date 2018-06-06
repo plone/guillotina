@@ -42,7 +42,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne(field)
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
         self.assertEqual(getter.__name__, 'getter')
         self.assertEqual(getter.__doc__, 'get Hmm')
 
@@ -84,7 +84,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne()
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
 
         class Foo(object):
             pass
@@ -95,7 +95,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne()
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
 
         class Foo(object):
             def getter(self):
@@ -107,7 +107,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne()
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
 
         class Foo(object):
             pass
@@ -118,7 +118,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne()
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
 
         class Foo(object):
             pass
@@ -129,7 +129,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne()
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
 
         class Foo(object):
             def getter(self):
@@ -144,7 +144,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne(field)
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
 
         class Foo(object):
             def getter(self):
@@ -156,7 +156,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
         class IFoo(Interface):
             getter = self._makeOne()
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
 
         class Foo(object):
             def getter(self):
@@ -170,7 +170,7 @@ class FieldReadAccessorTests(unittest.TestCase):
         class IFoo(Interface):
             getter = self._makeOne()
 
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
         _called_with = []
 
         class Writer(object):
@@ -193,7 +193,7 @@ class FieldReadAccessorTests(unittest.TestCase):
         class IFoo(Interface):
             getter = self._makeOne()
 
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
         context = object()
         bound = getter.bind(context)
         self.assertEqual(bound.__name__, 'getter')
@@ -229,7 +229,7 @@ class FieldWriteAccessorTests(unittest.TestCase):
         class IFoo(Interface):
             setter = self._makeOne(field)
 
-        setter = IFoo['setter']
+        setter = IFoo['setter']  # type: ignore
         self.assertEqual(setter.__name__, 'setter')
         self.assertEqual(setter.__doc__, 'set Hmm')
 
@@ -261,7 +261,7 @@ class Test_accessors(unittest.TestCase):
         class IFoo(Interface):
             getter, = self._callFUT(field)
 
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
         self.assertEqual(getter.__name__, 'getter')
         self.assertEqual(getter.__doc__, 'get Hmm')
         self.assertEqual(getter.getSignatureString(), '()')
@@ -280,7 +280,7 @@ class Test_accessors(unittest.TestCase):
         class IFoo(Interface):
             getter, setter = self._callFUT(field)
 
-        getter = IFoo['getter']
+        getter = IFoo['getter']  # type: ignore
         self.assertEqual(getter.__name__, 'getter')
         self.assertEqual(getter.getSignatureString(), '()')
         info = getter.getSignatureInfo()
@@ -289,7 +289,7 @@ class Test_accessors(unittest.TestCase):
         self.assertEqual(info['optional'], ())
         self.assertEqual(info['varargs'], None)
         self.assertEqual(info['kwargs'], None)
-        setter = IFoo['setter']
+        setter = IFoo['setter']  # type: ignore
         self.assertEqual(setter.__name__, 'setter')
         self.assertEqual(setter.getSignatureString(), '(newvalue)')
         info = setter.getSignatureInfo()

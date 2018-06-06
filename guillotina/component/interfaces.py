@@ -45,7 +45,7 @@ class IComponentArchitecture(Interface):
     """
     # Site Manager API
 
-    def get_global_components():
+    def get_global_components():  # type: ignore
         """Return the global site manager.
 
         This function should never fail and always return an object that
@@ -231,7 +231,7 @@ class IRegistry(Interface):
     """Object that supports component registry
     """
 
-    def registrations():
+    def registrations():  # type: ignore
         """Return an iterable of component registrations
         """
 
@@ -316,27 +316,20 @@ class IComponentRegistrationConvenience(Interface):
         library modules, as component registration is a configuration
         activity.
         """
+    
 
-
-class IPossibleSite(Interface):
-    """An object that could be a site.
-    """
+class ISite(Interface):
+    """Marker interface to indicate that we have a site"""
 
     def setSiteManager(sitemanager):
         """Sets the site manager for this object.
         """
 
-    def get_component_registry():
+    def get_component_registry():  # type: ignore
         """Returns the site manager contained in this object.
 
         If there isn't a site manager, raise a component lookup.
         """
-
-class ISite(IPossibleSite):
-    """Marker interface to indicate that we have a site"""
-
-class Misused(Exception):
-    """A component is being used (registered) for the wrong interface."""
 
 
 class IFactory(Interface):
@@ -350,7 +343,7 @@ class IFactory(Interface):
         """Return an instance of the objects we're a factory for."""
 
 
-    def get_interfaces():
+    def get_interfaces():  # type: ignore
         """Get the interfaces implemented by the factory
 
         Return the interface(s), as an instance of Implements, that objects

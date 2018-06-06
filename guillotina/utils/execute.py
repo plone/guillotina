@@ -4,6 +4,7 @@ from guillotina.interfaces import IQueueUtility
 from guillotina.interfaces import IView
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
+from zope.interface import implementer
 
 import typing
 import uuid
@@ -55,7 +56,8 @@ class ExecuteContext:
         before_commit(self.func, _request=_request, *self.args, **self.kwargs)
 
 
-class _GenerateQueueView:
+@implementer(IView)
+class GenerateQueueView:
 
     def __init__(self, func, request, args, kwargs):
         self.func = func
@@ -81,11 +83,11 @@ def in_queue_with_func(func: typing.Callable[..., typing.Coroutine], *args,
     '''
     if _request is None:
         _request = get_current_request()
-    view = _GenerateQueueView(func, _request, args, kwargs)
+    view = GenerateQueueView(func, _request, args, kwargs)
     return in_queue(view)
 
 
-def in_queue(view: IView) -> ExecuteContext:
+def in_queue(view: typing.Union[IView, GenerateQueueView]) -> ExecuteContext:
     '''
     Execute view-type object(context, request) in the async queue.
 

@@ -94,15 +94,15 @@ __docformat__ = 'restructuredtext'
 Container
 
 # Fix up bootstrap field types
-Field.title = FieldProperty(IField['title'])
-Field.description = FieldProperty(IField['description'])
-Field.required = FieldProperty(IField['required'])
-Field.readonly = FieldProperty(IField['readonly'])
+Field.title = FieldProperty(IField['title'])  # type: ignore
+Field.description = FieldProperty(IField['description'])  # type: ignore
+Field.required = FieldProperty(IField['required'])  # type: ignore
+Field.readonly = FieldProperty(IField['readonly'])  # type: ignore
 # Default is already taken care of
 classImplements(Field, IField)
 
-MinMaxLen.min_length = FieldProperty(IMinMaxLen['min_length'])
-MinMaxLen.max_length = FieldProperty(IMinMaxLen['max_length'])
+MinMaxLen.min_length = FieldProperty(IMinMaxLen['min_length'])  # type: ignore
+MinMaxLen.max_length = FieldProperty(IMinMaxLen['max_length'])  # type: ignore
 
 classImplements(Text, IText)
 classImplements(TextLine, ITextLine)
@@ -323,9 +323,7 @@ class Choice(Field):
             raise ConstraintNotSatisfied(value, self.__name__)
 
 
-_isuri = r"[a-zA-z0-9+.-]+:"  # scheme
-_isuri += r"\S*$"  # non space (should be pickier)
-_isuri = re.compile(_isuri).match
+_isuri = re.compile(r"[a-zA-z0-9+.-]+:\S*$").match
 
 
 @implementer(IURI, IFromUnicode)
@@ -542,7 +540,7 @@ class FrozenSet(AbstractCollection):
         super(FrozenSet, self).__init__(unique=True, **kw)
 
 
-VALIDATED_VALUES = {}
+VALIDATED_VALUES: dict = {}
 
 
 def _validate_fields(schema, value, errors=None):

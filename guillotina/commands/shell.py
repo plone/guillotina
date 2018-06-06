@@ -63,7 +63,7 @@ class ShellHelpers:
         return self._active_txn
 
 
-class InteractiveEventLoop(asyncio.SelectorEventLoop):
+class InteractiveEventLoop(asyncio.SelectorEventLoop):  # type: ignore
     """Event loop running a python console."""
 
     console_class = Console

@@ -10,7 +10,7 @@ from zope.interface import Interface
     provides=IConstrainTypes)
 class FTIConstrainAllowedTypes:
 
-    def __init__(self, context: Interface):
+    def __init__(self, context: Interface) -> None:
         self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:
@@ -27,7 +27,7 @@ class FTIConstrainAllowedTypes:
         if tn:
             factory = get_cached_factory(tn)
             return factory.allowed_types
-        return None
+        return []
 
 
 @configure.adapter(
@@ -38,7 +38,7 @@ class DatabaseAllowedTypes:
     Can only add containers to databases
     '''
 
-    def __init__(self, context: Interface):
+    def __init__(self, context: Interface) -> None:
         self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:

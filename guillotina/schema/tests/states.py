@@ -91,7 +91,7 @@ class State(object):
         self.title = title
 
 for v, p in _states.items():
-    _states[v] = State(v, p)
+    _states[v] = State(v, p)  # type: ignore
 
 
 class IStateVocabulary(interfaces.IVocabulary):

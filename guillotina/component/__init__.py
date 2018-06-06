@@ -54,4 +54,4 @@ getAdapters = get_adapters
 
 
 moduleProvides(IComponentArchitecture, IComponentRegistrationConvenience)
-__all__ = tuple(IComponentArchitecture)
+__all__ = tuple(IComponentArchitecture)  # type: ignore

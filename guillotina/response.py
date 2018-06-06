@@ -14,9 +14,9 @@ classImplements(StreamResponse, IAioHTTPResponse)
 @implementer(IResponse)
 class Response(Exception):
 
-    status_code = None
+    status_code: int
     empty_body = False
-    default_content = {}
+    default_content: dict = {}  # noqa
 
     def __init__(self, *, content=None, headers=None, status=None):
         if self.empty_body:
@@ -34,6 +34,7 @@ class Response(Exception):
                 if status in (204, 205):
                     self.content = None
                 self.status_code = status
+        assert self.status_code is not None
 
 
 class ErrorResponse(Response):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from docutils import nodes
-from docutils.parsers.rst import directives
+from docutils.parsers.rst import directives  # type: ignore
 from sphinx import addnodes
 from sphinx.directives import CodeBlock
 from sphinxcontrib.httpexample import utils as httpex_utils

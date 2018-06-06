@@ -3,6 +3,7 @@ from collections import OrderedDict
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
+from typing import Dict
 from zope.interface import implementer
 
 import asyncio
@@ -38,7 +39,7 @@ class Request(web_request.Request):
     exc = None
     view_name = None
     found_view = None
-    matchdict = {}
+    matchdict: Dict[str, str] = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

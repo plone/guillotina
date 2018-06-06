@@ -26,42 +26,42 @@ class IMapping(Interface):
     def __setitem__(key, value):  # noqa: N805
         """Set a new item in the mapping."""
 
-    def keys():
+    def keys():  # type: ignore
         """Return the keys of the mapping object.
         """
 
-    def __iter__():
+    def __iter__():  # type: ignore
         """Return an iterator for the keys of the mapping object.
         """
 
-    def values():
+    def values():  # type: ignore
         """Return the values of the mapping object.
         """
 
-    def items():
+    def items():  # type: ignore
         """Return the items of the mapping object.
         """
 
-    def __len__():
+    def __len__():  # type: ignore
         """Return the number of items.
         """
 
-    def iterkeys():
+    def iterkeys():  # type: ignore
         'iterate over keys; equivalent to __iter__'
 
-    def itervalues():
+    def itervalues():  # type: ignore
         'iterate over values'
 
-    def iteritems():
+    def iteritems():  # type: ignore
         'iterate over items'
 
-    def copy():
+    def copy():  # type: ignore
         'return copy of dict'
 
     def has_key(key):  # noqa: N805
         """Tell if a key exists in the mapping; equivalent to __contains__"""
 
-    def clear():
+    def clear():  # type: ignore
         'delete all items'
 
     def update(d):  # noqa: N805
@@ -76,6 +76,6 @@ class IMapping(Interface):
         If key is not found, default is returned if given, otherwise
         KeyError is raised"""
 
-    def popitem():
+    def popitem():  # type: ignore
         """remove and return some (key, value) pair as a
         2-tuple; but raise KeyError if mapping is empty"""

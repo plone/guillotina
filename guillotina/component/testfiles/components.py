@@ -21,7 +21,7 @@ from zope.interface import named
 
 class IAppb(Interface):
     a = Attribute('test attribute')
-    def f(): "test func"
+    def f(): "test func"  # type: ignore
 
 class IApp(IAppb):
     pass
@@ -47,7 +47,7 @@ class Comp(object):
         pass
 
     a = 1
-    def f(): pass
+    def f(): pass  # type: ignore
 
 class Comp2(object):
     def __init__(self, context):

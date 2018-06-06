@@ -45,36 +45,28 @@ class IBaseObject(Interface):
         """)
 
     # Attribute access protocol
-    def __getattribute__(name):
+    def __getattribute__(name):  # type: ignore
         """ Handle activating ghosts before returning an attribute value.
 
         "Special" attributes and '_p_*' attributes don't require activation.
         """
 
-    def __setattr__(name, value):
+    def __setattr__(name, value):  # type: ignore
         """ Handle activating ghosts before setting an attribute value.
 
         "Special" attributes and '_p_*' attributes don't require activation.
         """
 
-    def __delattr__(name):
+    def __delattr__(name):  # type: ignore
         """ Handle activating ghosts before deleting an attribute value.
 
         "Special" attributes and '_p_*' attributes don't require activation.
         """
 
     # Pickling protocol.
-    def __getstate__():
+    def __getstate__():  # type: ignore
         """Get the object data.
 
         The state should not include persistent attributes ("_p_name").
         The result must be picklable.
-        """
-
-    def __setstate__(state):
-        """Set the object data.
-        """
-
-    def __reduce__():
-        """Reduce an object to contituent parts for serialization.
         """

@@ -1,8 +1,10 @@
 from guillotina import interfaces
 from guillotina.db.oid import generate_oid
+from typing import Any
+from typing import Dict
 
 
-app_settings = {
+app_settings: Dict[str, Any] = {
     "debug": False,
     "aiohttp_settings": {},
     "databases": [],

@@ -8,10 +8,10 @@ from guillotina.exceptions import PreconditionFailed
 from guillotina.exceptions import Unauthorized
 from guillotina.exceptions import UnRetryableRequestError
 from guillotina.interfaces import IErrorResponseException
-from guillotina.interfaces import IResponse
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPExpectationFailed
 from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import Response
 
 import json
 
@@ -38,7 +38,7 @@ def exception_handler_factory(reason, name='PreconditionFailed',
     return handler
 
 
-def deserialization_error_handler(exc, error='', eid=None) -> IResponse:
+def deserialization_error_handler(exc, error='', eid=None) -> Response:
     data = render_error_response(
         'DeserializationError', error_reasons.DESERIALIZATION_FAILED, eid)
     data['message'] = repr(exc)

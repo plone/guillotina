@@ -12,6 +12,7 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.utils import apply_coroutine
 from guillotina.utils import resolve_dotted_name
+from typing import List
 
 import asyncpg
 import string
@@ -108,7 +109,7 @@ def _safe_db_name(name):
     name='postgresql')
 class PostgresqlDatabaseManager:
 
-    def __init__(self, app: IApplication, storage_config: dict):
+    def __init__(self, app: IApplication, storage_config: dict) -> None:
         self.app = app
         self.config = storage_config
 
@@ -225,21 +226,23 @@ DUMMY_DBS = {
     name='DUMMY')
 class DummyDatabaseManager:
 
-    def __init__(self, app: IApplication, storage_config: dict):
+    def __init__(self, app: IApplication, storage_config: dict) -> None:
         self.app = app
         self.config = storage_config
 
-    async def get_names(self) -> list:
-        return DUMMY_DBS.keys()
+    async def get_names(self) -> List[str]:
+        return list(DUMMY_DBS.keys())
 
     async def exists(self, name: str) -> bool:
         return name in DUMMY_DBS
 
     async def create(self, name: str) -> bool:
         DUMMY_DBS[name] = None
+        return True
 
     async def delete(self, name: str) -> bool:
         del DUMMY_DBS[name]
+        return True
 
     async def get_database(self, name: str) -> IDatabase:
         if name not in self.app:
