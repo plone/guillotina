@@ -149,8 +149,6 @@ class Field(Attribute):
         self.readonly = readonly
         if constraint is not None:
             self.constraint = constraint
-        else:
-            self.constraint = lambda x: True
         self.default = default
         self.defaultFactory = defaultFactory
 
@@ -160,6 +158,9 @@ class Field(Attribute):
 
         if missing_value is not self.__missing_value_marker:
             self.missing_value = missing_value
+
+    def constraint(self, value):  # type: ignore
+        return True
 
     def bind(self, object):
         clone = self.__class__.__new__(self.__class__)
