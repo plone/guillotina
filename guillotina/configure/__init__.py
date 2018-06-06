@@ -28,9 +28,10 @@ from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
 from pprint import pformat
+from typing import Any
 from typing import Dict
 from typing import Optional
-from typing import Tuple, Any
+from typing import Tuple
 from zope.interface import classImplements
 from zope.interface import Interface
 
