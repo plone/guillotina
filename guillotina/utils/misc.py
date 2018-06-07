@@ -19,7 +19,7 @@ import types
 
 
 try:
-    random = random.SystemRandom()
+    random = random.SystemRandom()  # type: ignore
     using_sys_random = True
 except NotImplementedError:
     using_sys_random = False
@@ -59,7 +59,7 @@ def get_random_string(length: int = 30,
     if not using_sys_random:
         # do our best to get secure random without sysrandom
         seed_value = "%s%s%s" % (random.getstate(), time.time(), RANDOM_SECRET)
-        random.seed(sha(seed_value).digest())
+        random.seed(sha(seed_value.encode('utf-8')).digest())
     return ''.join([random.choice(allowed_chars) for i in range(length)])
 
 

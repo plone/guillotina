@@ -25,10 +25,11 @@ install:
   - pip install Cython==0.27.3
   - pip install -r requirements.txt
   - pip install -e .[test]
-  - pip install flake8 codecov
+  - pip install flake8 codecov mypy
   - sleep 5
 script:
   - flake8 guillotina --config=setup.cfg
+  - mypy guillotina/
   - pytest -s --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
 after_success:
   - codecov

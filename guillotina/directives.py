@@ -1,7 +1,7 @@
 from zope.interface.interface import TAGGED_DATA
 
 import sys
-
+from typing import Any
 
 class DirectiveClass(type):
     """A Directive is used to apply tagged values to a Schema
@@ -31,13 +31,15 @@ class DirectiveClass(type):
         IClass.setTaggedValue(instance.key, tags[instance.key])
         return self
 
-Directive = DirectiveClass('Directive', (), dict(__module__='guillotina.directives',),)  # noqa
+
+Directive: Any = DirectiveClass(
+    'Directive', (), dict(__module__='guillotina.directives',),)
 
 
 class MetadataListDirective(Directive):
     """Store a list value in the tagged value under the key.
     """
-    key = None
+    key: str
 
     def store(self, tags, value):
         tags.setdefault(self.key, []).extend(value)
@@ -58,7 +60,7 @@ def merged_tagged_value_list(schema, name):
 class MetadataDictDirective(Directive):
     """Store a dict value in the tagged value under the key.
     """
-    key = None
+    key: str
 
     def store(self, tags, value):
         tags.setdefault(self.key, {}).update(value)

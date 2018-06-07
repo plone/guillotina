@@ -11,7 +11,7 @@ logger = glogging.getLogger('guillotina')
 
 class DefaultCorsRenderer:
 
-    def __init__(self, request: IRequest):
+    def __init__(self, request: IRequest) -> None:
         self.request = request
 
     async def get_settings(self):

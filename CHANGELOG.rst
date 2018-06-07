@@ -1,7 +1,12 @@
 4.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement minimal passing mypy compatibility
+  [vangheem]
+
+- Rename `BaseObject.__annotations__` to `BaseObject.__gannotations__` to prevent
+  namespace clashes with mypy and other things
+  [vangheem]
 
 
 4.0.0 (2018-06-05)

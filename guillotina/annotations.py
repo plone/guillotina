@@ -34,13 +34,13 @@ class AnnotationsAdapter(object):
         """
         non-async variant
         """
-        annotations = self.obj.__annotations__
+        annotations = self.obj.__gannotations__
         if key in annotations:
             return annotations[key]
         return default
 
     async def async_get(self, key, default=None):
-        annotations = self.obj.__annotations__
+        annotations = self.obj.__gannotations__
         element = annotations.get(key, _marker)
         if element is _marker:
             # Get from DB
@@ -61,7 +61,7 @@ class AnnotationsAdapter(object):
     async def async_set(self, key, value):
         if not isinstance(value, BaseObject):
             raise KeyError('Not a valid object as annotation')
-        annotations = self.obj.__annotations__
+        annotations = self.obj.__gannotations__
         value.id = key  # make sure id is set...
         annotations[key] = value
         value.__of__ = self.obj._p_oid

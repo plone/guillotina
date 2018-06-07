@@ -26,7 +26,7 @@ class IR(Interface):
     pass
 
 class IV(Interface):
-    def index():
+    def index():  # type: ignore
         pass
 
 class IC(Interface): pass

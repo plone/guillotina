@@ -62,11 +62,11 @@ class MockTransaction:
 @implementer(IStorage)
 class MockStorage:
 
-    _cache = {}
+    _cache: dict = {}
     _read_only = False
     _transaction_strategy = 'resolve'
     _cache_strategy = 'dummy'
-    _options = {}
+    _options: dict = {}
     supports_unique_constraints = False
 
     def __init__(self, transaction_strategy='resolve', cache_strategy='dummy'):

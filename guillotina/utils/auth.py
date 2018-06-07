@@ -1,8 +1,9 @@
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRequest
+from typing import Optional
 
 
-def get_authenticated_user(request: IRequest) -> IPrincipal:
+def get_authenticated_user(request: IRequest) -> Optional[IPrincipal]:
     """
     Get the currently authenticated user
     """
@@ -14,10 +15,11 @@ def get_authenticated_user(request: IRequest) -> IPrincipal:
         return None
 
 
-def get_authenticated_user_id(request: IRequest) -> str:
+def get_authenticated_user_id(request: IRequest) -> Optional[str]:
     """
     Get the currently authenticated user id
     """
     user = get_authenticated_user(request)
     if user:
         return user.id
+    return None

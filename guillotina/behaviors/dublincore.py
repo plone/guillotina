@@ -11,9 +11,9 @@ from zope.interface import Interface
 _utc = tzutc()
 
 # never expires
-CEILING_DATE = datetime(*datetime.max.timetuple()[:-2], tzutc())
+CEILING_DATE = datetime(*datetime.max.timetuple()[:-2], tzutc())  # type: ignore
 # always effective
-FLOOR_DATE = datetime(*datetime.min.timetuple()[:-2], tzutc())
+FLOOR_DATE = datetime(*datetime.min.timetuple()[:-2], tzutc())  # type: ignore
 
 
 class IMarkerDublinCore(Interface):

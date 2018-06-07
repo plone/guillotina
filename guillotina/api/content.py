@@ -724,7 +724,7 @@ async def duplicate(context, request):
     # load all annotations for context
     [b for b in await get_all_behaviors(context, load=True)]
     annotations_container = IAnnotations(new_obj)
-    for anno_id, anno_data in context.__annotations__.items():
+    for anno_id, anno_data in context.__gannotations__.items():
         new_anno_data = AnnotationData()
         for key, value in anno_data.items():
             new_anno_data[key] = value

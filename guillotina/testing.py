@@ -1,6 +1,8 @@
 from copy import deepcopy
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.utils import lazy_apply
+from typing import Any
+from typing import Dict
 
 import base64
 import os
@@ -8,7 +10,7 @@ import os
 
 TESTING_PORT = 55001
 
-TESTING_SETTINGS = {
+TESTING_SETTINGS: Dict[str, Any] = {
     "applications": ["guillotina.test_package"],
     "databases": {
         "db": {

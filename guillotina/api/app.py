@@ -41,8 +41,7 @@ async def get_api_definition(context, request):
     permission='guillotina.ReadConfiguration',
     summary='Get all registered subscribers')
 async def get_all_subscribers(context, request):
-    subscribers = {
-    }
+    subscribers = {}
     sm = component.get_global_components()
     for registration in sm.registeredHandlers():
         if len(registration.required) != 2:

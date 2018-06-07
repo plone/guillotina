@@ -26,9 +26,9 @@ class I2(Interface):
     pass
 
 class I3(Interface):
-    def f1(): pass
-    def f2(): pass
-    def f3(): pass
+    def f1(): pass  # type: ignore
+    def f2(): pass  # type: ignore
+    def f3(): pass  # type: ignore
 
 class IS(Interface):
     pass

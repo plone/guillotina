@@ -50,7 +50,7 @@ class FieldReadAccessor(Method):
 
     def __provides__(self):
         return providedBy(self.field) + implementedBy(FieldReadAccessor)
-    __provides__ = property(__provides__)
+    __provides__ = property(__provides__)  # type: ignore
 
     def __init__(self, field):
         self.field = field

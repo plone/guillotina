@@ -6,6 +6,8 @@ from guillotina.configure.behaviors import BehaviorAdapterFactory
 from guillotina.configure.behaviors import BehaviorRegistration
 from guillotina.exceptions import ConfigurationError
 from guillotina.exceptions import ServiceConfigurationError
+from guillotina.gtypes import ConfigurationType
+from guillotina.gtypes import ResolvableType
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IBehaviorSchemaAwareFactory
@@ -26,6 +28,10 @@ from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
 from pprint import pformat
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 from zope.interface import classImplements
 from zope.interface import Interface
 
@@ -34,7 +40,7 @@ import inspect
 import logging
 
 
-_registered_configurations = []
+_registered_configurations: ConfigurationType = []
 # stored as tuple of (type, configuration) so we get keep it in the order
 # it is registered even if you mix types of registrations
 
@@ -60,7 +66,7 @@ def register_configuration_handler(type_, handler):
     _registered_configuration_handlers[type_] = handler
 
 
-def register_configuration(klass, config, type_):
+def register_configuration(klass: ResolvableType, config: Dict[str, Any], type_: str):
     value = (type_, {
         'klass': klass,
         'config': config
@@ -358,7 +364,7 @@ register_configuration_handler('language', load_adapter)
 
 
 class _base_decorator(object):  # noqa: N801
-    configuration_type = ''
+    configuration_type: Optional[str] = None
 
     def __init__(self, **config):
         self.config = config
@@ -437,9 +443,8 @@ class service(_base_decorator):  # noqa: N801
 
 
 class generic_adapter(_base_decorator):  # noqa: N801
-    configuration_type = None
-    provides = None
-    for_ = None
+    provides: Interface = None
+    for_: Optional[Tuple[Interface, ...]] = None
     multi = False
 
     def __init__(self, for_=None, **config):

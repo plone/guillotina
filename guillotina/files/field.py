@@ -33,7 +33,7 @@ def json_converter(value):
 class BaseCloudFile:
     """Base cloud file storage class"""
 
-    filename = FieldProperty(IFile['filename'])
+    filename: str = FieldProperty(IFile['filename'])  # type: ignore
     valid = True
 
     def __init__(self, content_type='application/octet-stream',

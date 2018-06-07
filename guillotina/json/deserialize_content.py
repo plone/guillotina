@@ -163,11 +163,11 @@ class DeserializeFromJson(object):
             validation = [(None, e) for e in invariant_errors]
 
             if len(validation):
-                for e in validation:
+                for error in validation:
                     errors.append({
-                        'message': e[1].doc(),
-                        'field': e[0],
-                        'error': e
+                        'message': error[1].doc(),
+                        'field': error[0],
+                        'error': error
                     })
 
     async def get_value(self, field, obj, value):

@@ -531,7 +531,7 @@ class ISourceQueriables(Interface):
     """A collection of objects for querying sources
     """
 
-    def getQueriables():
+    def getQueriables():  # type: ignore
         """Return an iterable of objects that can be queried
 
         The returned obects should be two-tuples with:
@@ -579,10 +579,10 @@ class IIterableSource(ISource):
     The objects iteration provides must be values from the source.
     """
 
-    def __iter__():
+    def __iter__():  # type: ignore
         """Return an iterator which provides the values from the source."""
 
-    def __len__():
+    def __len__():  # type: ignore
         """Return the number of valid values, or sys.maxint."""
 
 
@@ -594,10 +594,10 @@ class IIterableVocabulary(Interface):
     interface.
     """
 
-    def __iter__():
+    def __iter__():  # type: ignore
         """Return an iterator which provides the terms from the vocabulary."""
 
-    def __len__():
+    def __len__():  # type: ignore
         """Return the number of valid terms, or sys.maxint."""
 
 

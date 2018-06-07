@@ -9,7 +9,7 @@ from Crypto.Hash import SHA256
 from Crypto.Hash import SHA384
 from Crypto.Hash import SHA512
 from Crypto.PublicKey import RSA
-from Crypto.Random import get_random_bytes
+from Crypto.Random import get_random_bytes  # type: ignore
 from Crypto.Signature import PKCS1_v1_5 as PKCS1_v1_5_SIG
 from struct import pack
 from time import time

@@ -49,6 +49,7 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import import_class
+from typing import Optional
 from zope.interface import alsoProvides
 
 import aiohttp
@@ -334,11 +335,11 @@ class TraversalRouter(AbstractRouter):
 
     _root = None
 
-    def __init__(self, root: IApplication=None):
+    def __init__(self, root: IApplication=None) -> None:
         """On traversing aiohttp sets the root object."""
         self.set_root(root)
 
-    def set_root(self, root: IApplication):
+    def set_root(self, root: Optional[IApplication]):
         """Warpper to set the root object."""
         self._root = root
 
@@ -367,13 +368,14 @@ class TraversalRouter(AbstractRouter):
             return BasicMatchInfo(request, response.HTTPNotFound())
 
     @profilable
-    async def real_resolve(self, request: IRequest) -> MatchInfo:
+    async def real_resolve(self, request: IRequest) -> Optional[MatchInfo]:
         """Main function to resolve a request."""
         security = get_adapter(request, IInteraction)
 
         if request.method not in app_settings['http_methods']:
             raise HTTPMethodNotAllowed(
-                method=request.method, allowed_methods=[k for k in app_settings['http_methods']])
+                method=request.method,
+                allowed_methods=[k for k in app_settings['http_methods'].keys()])
         method = app_settings['http_methods'][request.method]
 
         try:
@@ -403,7 +405,9 @@ class TraversalRouter(AbstractRouter):
         request.tail = tail
 
         if request.resource is None:
-            raise HTTPNotFound(text='Resource not found')
+            raise HTTPNotFound(content={
+                "reason": 'Resource not found'
+            })
 
         if tail and len(tail) > 0:
             # convert match lookups
@@ -411,7 +415,7 @@ class TraversalRouter(AbstractRouter):
         elif not tail:
             view_name = ''
         else:
-            return
+            return None
 
         request.record('beforeauthentication')
         await self.apply_authorization(request)
@@ -463,7 +467,7 @@ class TraversalRouter(AbstractRouter):
 
         if not view and len(tail) > 0:
             # we should have a view in this case because we are matching routes
-            return
+            return None
 
         request.found_view = view
         request.view_name = view_name
@@ -485,7 +489,7 @@ class TraversalRouter(AbstractRouter):
         try:
             view.__route__.matches(request, tail or [])
         except (KeyError, IndexError):
-            return
+            return None
         except AttributeError:
             pass
 

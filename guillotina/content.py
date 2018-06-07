@@ -49,6 +49,11 @@ from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
+from typing import AsyncIterator
+from typing import FrozenSet
+from typing import List
+from typing import Optional
+from typing import Tuple
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
@@ -58,7 +63,6 @@ from zope.interface.interfaces import ComponentLookupError
 import guillotina.db.orm.base
 import os
 import pathlib
-import typing
 
 
 _zone = tzutc()  # utz tz is much faster than local tz info
@@ -295,10 +299,10 @@ class Resource(guillotina.db.orm.base.BaseObject):
     Base resource object class
     """
 
-    __behaviors__ = frozenset({})
+    __behaviors__: FrozenSet[str] = frozenset({})
     __acl__ = None
 
-    type_name = None
+    type_name: Optional[str] = None
     creation_date = None
     modification_date = None
     title = None
@@ -310,7 +314,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         """
         return self._p_oid
 
-    def __init__(self, id: str=None):
+    def __init__(self, id: str=None) -> None:
         if id is not None:
             self.__name__ = id
         super(Resource, self).__init__()
@@ -446,7 +450,7 @@ class Folder(Resource):
         """
         return await self._get_transaction().contains(self._p_oid, key)
 
-    async def async_set(self, key: str, value: IResource) -> None:
+    async def async_set(self, key: str, value: Resource) -> None:
         """
         Asynchronously set an object in this folder
         """
@@ -457,7 +461,8 @@ class Folder(Resource):
             value._p_jar = trns
             trns.register(value)
 
-    async def async_get(self, key: str, default=None, suppress_events=False) -> IResource:
+    async def async_get(self, key: str, default=None,
+                        suppress_events=False) -> 'guillotina.response.Response':
         """
         Asynchronously get an object inside this folder
         """
@@ -471,8 +476,9 @@ class Folder(Resource):
             pass
         return default
 
-    async def async_multi_get(self, keys: typing.List[str], default=None,
-                              suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
+    async def async_multi_get(self, keys: List[str], default=None,
+                              suppress_events=False) -> AsyncIterator[
+            Tuple['guillotina.response.Response']]:
         """
         Asynchronously get an object inside this folder
         """
@@ -491,13 +497,14 @@ class Folder(Resource):
         """
         return await self._get_transaction().len(self._p_oid)
 
-    async def async_keys(self) -> typing.List[str]:
+    async def async_keys(self) -> List[str]:
         """
         Asynchronously get the sub object keys in this folder
         """
         return await self._get_transaction().keys(self._p_oid)
 
-    async def async_items(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
+    async def async_items(self, suppress_events=False) -> AsyncIterator[
+            Tuple[str, 'guillotina.response.Response']]:
         """
         Asynchronously iterate through contents of folder
         """
@@ -506,7 +513,8 @@ class Folder(Resource):
                 await notify(ObjectLoadedEvent(value))
             yield key, value
 
-    async def async_values(self, suppress_events=False) -> typing.Iterator[typing.Tuple[str, IResource]]:  # noqa
+    async def async_values(self, suppress_events=False) -> AsyncIterator[
+            Tuple['guillotina.response.Response']]:
         async for _, value in self._get_transaction().items(self):
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))
@@ -545,7 +553,7 @@ class Container(Folder):
 
 @implementer(IStaticFile)
 class StaticFile(object):
-    def __init__(self, file_path: pathlib.Path):
+    def __init__(self, file_path: pathlib.Path) -> None:
         self.file_path = file_path
 
 
@@ -555,7 +563,7 @@ class StaticDirectory(dict):
     Using dict makes this a simple container so traversing works
     """
 
-    def __init__(self, file_path: pathlib.Path, base_path: pathlib.Path=None):
+    def __init__(self, file_path: pathlib.Path, base_path: pathlib.Path=None) -> None:
         self.file_path = file_path
         if base_path is None:
             self.base_path = file_path

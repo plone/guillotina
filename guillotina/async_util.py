@@ -118,7 +118,7 @@ class QueueObject(View):
 class Job:
 
     def __init__(self, func: typing.Callable[[], typing.Coroutine],
-                 request=None, args=None, kwargs=None):
+                 request=None, args=None, kwargs=None) -> None:
         self._func = func
         self._request = request
         self._args = args

@@ -3,6 +3,7 @@ from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IContentBehavior
+from typing import Tuple
 from zope.interface import implementer
 
 
@@ -15,7 +16,7 @@ class AnnotationBehavior:
 
     auto_serialize = True
 
-    __local__properties__ = []
+    __local__properties__: Tuple[str, ...] = ()
 
     # each annotation is stored
     __annotations_data_key__ = 'default'

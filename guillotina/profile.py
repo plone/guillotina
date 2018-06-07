@@ -1,5 +1,5 @@
 
-_profiled_functions = []
+_profiled_functions: list = []
 
 
 def get_profilable_functions():

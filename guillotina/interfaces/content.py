@@ -26,7 +26,7 @@ class IAsyncContainer(Interface):
         asynchronously get subobject
         """
 
-    async def async_keys():
+    async def async_keys():  # type: ignore
         """
         asynchronously get keys for sub objects
         """
@@ -36,12 +36,12 @@ class IAsyncContainer(Interface):
         asynchronously delete sub object
         """
 
-    async def async_items():
+    async def async_items():  # type: ignore
         """
         asynchronously get items
         """
 
-    async def async_len():
+    async def async_len():  # type: ignore
         """
         asynchronously get len
         """
@@ -86,11 +86,11 @@ class IApplication(ITraversable, IAsyncContainer):
 
 
 class IDatabase(ITraversable, IAsyncContainer):
-    def get_transaction_manager():
+    def get_transaction_manager():  # type: ignore
         '''
         '''
 
-    def open():
+    def open():  # type: ignore
         '''
         '''
 

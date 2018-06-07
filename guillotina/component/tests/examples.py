@@ -91,7 +91,7 @@ class GlobalRegistry:
 
 from guillotina.component.globalregistry import GuillotinaAdapterRegistry
 base = GuillotinaAdapterRegistry(GlobalRegistry, 'adapters')
-GlobalRegistry.adapters = base
+GlobalRegistry.adapters = base  # type: ignore
 def clear_base():
     base.__init__(GlobalRegistry, 'adapters')
 
