@@ -212,9 +212,16 @@ class Interaction(object):
         cache = self.cache(parent)
 
         try:
-            cache_prin = cache.prin
+            # We need to caches for first level and Allow Single
+            if level == 'o':
+                cache_prin = cache.prino
+            else:
+                cache_prin = cache.prin
         except AttributeError:
-            cache_prin = cache.prin = {}
+            if level == 'o':
+                cache_prin = cache.prino = {}
+            else:
+                cache_prin = cache.prin = {}
 
         cache_prin_per = cache_prin.get(principal)
         if not cache_prin_per:
@@ -259,9 +266,11 @@ class Interaction(object):
                         level,
                         prinper_map.get_setting(permission, group, None))
                     if prinper is not None:
-                        continue
+                        # Once we conclude we exit
+                        # May happen that first group Deny and second
+                        # allows which will result on Deny for the first
+                        break
             if prinper is not None:
-                cache_prin_per[permission] = prinper
                 return prinper
 
         # Find the permission recursivelly set to a user

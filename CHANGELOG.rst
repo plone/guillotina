@@ -1,3 +1,10 @@
+2.5.13 (unreleased)
+-------------------
+
+- Fix use of AllowSingle when overriding permissions
+  [vangheem]
+
+
 2.5.12 (2018-04-02)
 -------------------
 
