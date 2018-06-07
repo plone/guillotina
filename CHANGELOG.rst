@@ -1,4 +1,4 @@
-4.0.1 (unreleased)
+4.0.1 (2018-06-07)
 ------------------
 
 - Implement minimal passing mypy compatibility
