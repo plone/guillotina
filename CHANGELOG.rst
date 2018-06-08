@@ -1,7 +1,8 @@
 4.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix use of AllowSingle with children overriding the same permission
+  [bloodbare]
 
 
 4.0.1 (2018-06-07)
