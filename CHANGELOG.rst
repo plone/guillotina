@@ -1,4 +1,4 @@
-2.5.13 (unreleased)
+2.5.13 (2018-06-08)
 -------------------
 
 - Fix use of AllowSingle when overriding permissions
