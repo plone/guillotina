@@ -55,7 +55,9 @@ SettingAsBoolean = {
 def level_setting_as_boolean(level, value):
     # We want to check if its allow
     let = SettingAsBoolean[value]
-    return let == level if type(let) is str else let
+    # Never return False on AllowSingle
+    # If level is not o Allow single should not be taken care
+    return level == let or None if type(let) is str else let
 
 
 class CacheEntry:
