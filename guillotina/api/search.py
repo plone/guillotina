@@ -1,3 +1,4 @@
+import json
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.async_util import IQueueUtility
@@ -8,7 +9,7 @@ from guillotina.utils import get_content_path
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
+    context=IResource, method='GET', permission='guillotina.RawSearchContent', name='@search',
     summary='Make search request',
     parameters=[{
         "name": "q",
@@ -27,6 +28,8 @@ from guillotina.utils import get_content_path
     })
 async def search_get(context, request):
     q = request.query.get('q')
+    if q:
+        q = json.loads(q)
     search = query_utility(ICatalogUtility)
     if search is None:
         return {
