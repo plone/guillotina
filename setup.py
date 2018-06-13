@@ -33,10 +33,10 @@ setup(
     author_email='ramon@plone.org',
     classifiers=[
         'License :: OSI Approved :: BSD License',
-        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     url='https://github.com/plone/guillotina',
