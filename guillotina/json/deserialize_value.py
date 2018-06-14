@@ -140,5 +140,8 @@ def object_converter(field, value, context=None):
     for key, val in value.items():
         if key in field.schema:
             f = field.schema[key]
-            result[key] = get_adapter(f, IJSONToValue, args=[val, context])
+            if val is not None:
+                result[key] = get_adapter(f, IJSONToValue, args=[val, context])
+            else:
+                result[key] = None
     return result

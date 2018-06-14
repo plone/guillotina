@@ -1,6 +1,9 @@
 4.0.2 (unreleased)
 ------------------
 
+- Fix nested schema null value deserialization error
+  [vangheem]
+
 - Fix use of AllowSingle with children overriding the same permission
   [bloodbare]
 
