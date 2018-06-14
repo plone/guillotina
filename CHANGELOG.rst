@@ -1,7 +1,8 @@
 3.2.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix nested schema null value deserialization error
+  [vangheem]
 
 
 3.2.13 (2018-06-05)

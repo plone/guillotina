@@ -118,6 +118,7 @@ async def test_deserialize_cloud_file(dummy_request):
 class INestFieldSchema(Interface):
     foo = schema.Text(required=False)
     bar = schema.Int(required=False)
+    foobar_list = schema.List(required=False, value_type=schema.Text())
 
 
 class ITestSchema(Interface):
@@ -507,7 +508,8 @@ async def test_nested_patch_deserialize(dummy_request):
                         "op": "append",
                         "value": {
                             "foo": "bar",
-                            "bar": 1
+                            "bar": 1,
+                            "foobar_list": None
                         }
                     }
                 }
