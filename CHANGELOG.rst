@@ -1,4 +1,4 @@
-3.2.14 (unreleased)
+3.2.14 (2018-06-14)
 -------------------
 
 - Fix nested schema null value deserialization error
