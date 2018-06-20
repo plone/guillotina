@@ -1,6 +1,8 @@
 4.0.2 (unreleased)
 ------------------
 
+- Don't fail on read-only pg
+
 - Fix nested schema null value deserialization error
   [vangheem]
 
