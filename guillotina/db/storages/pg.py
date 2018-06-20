@@ -504,6 +504,9 @@ WHERE tc.constraint_name = 'objects_parent_id_id_key' AND tc.constraint_type = '
         try:
             await self.initialize_tid_statements()
             await self._read_conn.execute(CREATE_TRASH)
+        except asyncpg.exceptions.ReadOnlySQLTransactionError:
+            # Not necessary for read-only pg
+            pass
         except asyncpg.exceptions.UndefinedTableError:
             await self.create()
             # only available on new databases

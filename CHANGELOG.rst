@@ -1,7 +1,7 @@
 3.2.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Don't fail on read-only pg 
 
 
 3.2.14 (2018-06-14)
