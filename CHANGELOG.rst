@@ -1,4 +1,4 @@
-3.2.15 (unreleased)
+3.2.15 (2018-06-20)
 -------------------
 
 - Don't fail on read-only pg 
