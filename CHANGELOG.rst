@@ -1,6 +1,9 @@
 4.0.2 (unreleased)
 ------------------
 
+- Support for extra values on Field properties
+  [bloodbare]
+
 - Don't fail on read-only pg
 
 - Fix nested schema null value deserialization error
