@@ -43,7 +43,7 @@ class IExample(IResource):
             schema=TERM_SCHEMA)
     )
 
-    textline_field = schema.TextLine()
+    textline_field = schema.TextLine(title='kk', widget='testing')
     text_field = schema.Text()
     dict_value = schema.Dict(
         key_type=schema.TextLine(),

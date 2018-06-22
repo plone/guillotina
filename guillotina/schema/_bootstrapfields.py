@@ -107,7 +107,7 @@ class Field(Attribute):
 
     def __init__(self, title='', description='', __name__='',
                  required=True, readonly=False, constraint=None, default=None,
-                 defaultFactory=None, missing_value=__missing_value_marker):
+                 defaultFactory=None, missing_value=__missing_value_marker, **kw):
         """Pass in field values as keyword parameters.
 
 
@@ -155,6 +155,8 @@ class Field(Attribute):
         # Keep track of the order of field definitions
         Field.order += 1
         self.order = Field.order
+
+        self.extra_values = kw
 
         if missing_value is not self.__missing_value_marker:
             self.missing_value = missing_value

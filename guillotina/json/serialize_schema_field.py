@@ -123,6 +123,8 @@ class DefaultSchemaFieldSerializer(object):
                 schema_serializer = get_multi_adapter((field.schema, self.request),
                                                       ISchemaSerializeToJson)
                 result['properties'] = await schema_serializer()
+        if field.extra_values is not None:
+            result.update(field.extra_values)
         return result
 
     @property
