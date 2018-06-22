@@ -1,4 +1,4 @@
-4.0.2 (unreleased)
+4.0.2 (2018-06-22)
 ------------------
 
 - Support for extra values on Field properties
