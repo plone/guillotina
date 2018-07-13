@@ -195,13 +195,14 @@ class Write(Service):
         assert '.' in self.key, 'Registry key must be dotted.iface.name.fieldname'  # noqa
         iface, name = self.key.rsplit('.', 1)
         iface = resolve_dotted_name(iface)
+
         assert iface is not None, 'Must provide valid registry interface'  # noqa
         try:
             field = iface[name]
         except KeyError:
             return ErrorResponse(
                 'DeserializationError',
-                'Invalid field name {}'.format(str(self.field)),
+                'Invalid field name {}'.format(str(name)),
                 status=412)
 
         try:
