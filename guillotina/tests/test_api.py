@@ -14,6 +14,13 @@ class ITestingRegistry(Interface):  # pylint: disable=E0239
         title="Example attribute")
 
 
+class ITestingRegistryUpdated(Interface):  # pylint: disable=E0239
+    enabled = schema.Bool(
+        title="Example attribute")
+    test = schema.Bool(
+        title="Example attribute")
+
+
 @configure.addon(
     name="testaddon",
     title="Test addon")
@@ -164,6 +171,23 @@ async def test_register_registry(container_requester):
             'GET',
             '/db/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.enabled')
         assert {'value': False} == response
+
+        # this emulates a registry update
+        from guillotina.tests import test_api
+        test_api.ITestingRegistry = ITestingRegistryUpdated
+
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.test',
+            data=json.dumps({
+                "value": True
+            })
+        )
+        assert status == 204
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.test')
+        assert {'value': True} == response
 
 
 async def test_create_contenttype_with_date(container_requester):
