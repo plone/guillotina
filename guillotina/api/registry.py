@@ -178,10 +178,8 @@ class Write(Service):
     value = None
 
     async def prepare(self):
-        if self.request.matchdict['dotted_name'] in self.request.container_settings:
-            # we want have the key of the registry
-            self.key = self.request.matchdict['dotted_name']
-            self.value = self.request.container_settings.get(self.key)
+        self.key = self.request.matchdict['dotted_name']
+        self.value = self.request.container_settings.get(self.key)
 
     async def __call__(self):
         if self.key is _marker:
@@ -197,7 +195,15 @@ class Write(Service):
         assert '.' in self.key, 'Registry key must be dotted.iface.name.fieldname'  # noqa
         iface, name = self.key.rsplit('.', 1)
         iface = resolve_dotted_name(iface)
-        field = iface[name]
+
+        assert iface is not None, 'Must provide valid registry interface'  # noqa
+        try:
+            field = iface[name]
+        except KeyError:
+            return ErrorResponse(
+                'DeserializationError',
+                'Invalid field name {}'.format(str(name)),
+                status=412)
 
         try:
             new_value = get_adapter((field), IJSONToValue, args=[value, self.context])
