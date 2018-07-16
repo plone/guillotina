@@ -1,4 +1,4 @@
-3.2.16 (unreleased)
+3.2.16 (2018-07-16)
 -------------------
 
 - Allow patching registry with new shcema fields
