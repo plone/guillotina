@@ -190,7 +190,6 @@ async def test_register_registry(container_requester):
         assert {'value': True} == response
 
 
-
 async def test_create_contenttype_with_date(container_requester):
     async with container_requester as requester:
         _, status = await requester(
