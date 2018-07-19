@@ -77,7 +77,7 @@ class QueueUtility(object):
             finally:
                 try:
                     aiotask_context.set('request', None)
-                except RuntimeError:
+                except (RuntimeError, ValueError):
                     pass
                 if got_obj:
                     try:

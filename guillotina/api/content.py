@@ -112,10 +112,10 @@ class DefaultGET(Service):
             (self.context, self.request),
             IResourceSerializeToJson)
         include = omit = []
-        if self.request.GET.get('include'):
-            include = self.request.GET.get('include').split(',')
-        if self.request.GET.get('omit'):
-            omit = self.request.GET.get('omit').split(',')
+        if self.request.query.get('include'):
+            include = self.request.query.get('include').split(',')
+        if self.request.query.get('omit'):
+            omit = self.request.query.get('omit').split(',')
         try:
             result = await serializer(include=include, omit=omit)
         except TypeError:
@@ -450,13 +450,13 @@ async def can_i_do(context, request):
     if 'permission' not in request.query and 'permissions' not in request.query:
         raise PreconditionFailed(context, 'No permission param')
     interaction = IInteraction(request)
-    if 'permissions' in request.GET:
+    if 'permissions' in request.query:
         results = {}
-        for perm in request.GET['permissions'].split(','):
+        for perm in request.query['permissions'].split(','):
             results[perm] = interaction.check_permission(perm, context)
         return results
     else:
-        return interaction.check_permission(request.GET['permission'], context)
+        return interaction.check_permission(request.query['permission'], context)
 
 
 @configure.service(
@@ -782,21 +782,21 @@ async def ids(context, request):
 async def items(context, request):
 
     try:
-        page_size = int(request.GET['page_size'])
+        page_size = int(request.query['page_size'])
     except Exception:
         page_size = 20
     try:
-        page = int(request.GET['page'])
+        page = int(request.query['page'])
     except Exception:
         page = 1
 
     txn = get_transaction(request)
 
     include = omit = []
-    if request.GET.get('include'):
-        include = request.GET.get('include').split(',')
-    if request.GET.get('omit'):
-        omit = request.GET.get('omit').split(',')
+    if request.query.get('include'):
+        include = request.query.get('include').split(',')
+    if request.query.get('omit'):
+        omit = request.query.get('omit').split(',')
 
     security = IInteraction(request)
 

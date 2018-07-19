@@ -8,7 +8,7 @@ from guillotina.interfaces import IApplication
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from unittest import mock
-
+from aiohttp.test_utils import TestServer
 import aiohttp
 import asyncio
 import os
@@ -158,10 +158,10 @@ class GuillotinaDBRequester(object):
         async with aiohttp.ClientSession(loop=self.loop) as session:
             operation = getattr(session, method.lower(), None)
             async with operation(self.server.make_url(path), **settings) as resp:
-                try:
+                if resp.headers.get('Content-Type') == 'application/json':
                     value = await resp.json()
                     status = resp.status
-                except:  # noqa
+                else:
                     value = await resp.read()
                     status = resp.status
                 return value, status, resp.headers
@@ -246,14 +246,16 @@ def guillotina_main(loop):
 
 
 @pytest.fixture(scope='function')
-async def guillotina(test_server, db, guillotina_main, loop):
-    server = await test_server(guillotina_main)
+def guillotina(db, guillotina_main, loop):
+    server = TestServer(guillotina_main)
+    loop.run_until_complete(server.start_server(loop=loop))
     requester = GuillotinaDBRequester(server=server, loop=loop)
-    return requester
+    yield requester
+    loop.run_until_complete(server.close())
 
 
 @pytest.fixture(scope='function')
-async def container_requester(guillotina):
+def container_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina)
 
 
@@ -293,7 +295,7 @@ class CockroachStorageAsyncContextManager(object):
 
 
 @pytest.fixture(scope='function')
-async def cockroach_storage(db, dummy_request, loop):
+def cockroach_storage(db, dummy_request, loop):
     return CockroachStorageAsyncContextManager(dummy_request, loop, db)
 
 

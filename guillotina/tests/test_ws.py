@@ -1,43 +1,43 @@
 from guillotina.testing import ADMIN_TOKEN
 
-import aiohttp
+import aiohttp, asyncio
 import json
 
 
-async def test_hello(container_requester, loop):
-    async with container_requester as requester:
+async def test_hello(guillotina, container_requester):
+    async with container_requester:
         async with aiohttp.ClientSession() as session:
+            url = guillotina.server.make_url('db/guillotina/@ws')
             async with session.ws_connect(
-                    'ws://localhost:{port}/db/guillotina/@ws'.format(
-                        port=requester.server.port),
+                    url,
                     headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
                 # we should check version
                 sending = {
                     'op': 'GET',
                     'value': '/@registry/guillotina.interfaces.registry.ILayers.active_layers'
                 }
-                ws.send_str(json.dumps(sending))
-                async for msg in ws:
-                    if msg.tp == aiohttp.WSMsgType.text:
-                        message = json.loads(msg.data)
-                        assert message == {'value': []}
-                        await ws.close()
-                return {}
+                await ws.send_str(json.dumps(sending))
+                msg = await ws.receive()
+                assert msg.type == aiohttp.WSMsgType.text
+                message = json.loads(msg.data)
+                assert message == {'value': []}
+                await ws.close()
 
 
-async def test_send_close(container_requester, loop):
-    async with container_requester as requester:
+async def test_send_close(guillotina, container_requester):
+    async with container_requester:
         async with aiohttp.ClientSession() as session:
+            url = guillotina.server.make_url('db/guillotina/@ws')
             async with session.ws_connect(
-                    'ws://localhost:{port}/db/guillotina/@ws'.format(
-                        port=requester.server.port),
+                    url,
                     headers={'AUTHORIZATION': 'Basic %s' % ADMIN_TOKEN}) as ws:
-                ws.send_str(json.dumps({'op': 'close'}))
+
+                await ws.send_str(json.dumps({'op': 'close'}))
                 async for msg in ws:  # noqa
                     pass
 
 
-async def test_ws_token(container_requester, loop):
+async def test_ws_token(container_requester):
     async with container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@wstoken')
         assert status == 200
