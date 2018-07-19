@@ -1,7 +1,7 @@
 4.0.5 (unreleased)
 ------------------
 
-- Fix run_app args
+- Fix run_app args when access_log_format is None
   [vangheem]
 
 
