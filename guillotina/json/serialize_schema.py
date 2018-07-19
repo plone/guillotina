@@ -88,11 +88,11 @@ class DefaultSchemaSerializer(object):
 
     @property
     def name(self):
-        return self.schema.__name__
+        return self.schema.__identifier__
 
     @property
     def invariants(self):
         invariants = []
         for i in self.schema.queryTaggedValue('invariants', []):
-            invariants.append("%s.%s" % (i.__module__, i.__name__))
+            invariants.append("%s.%s" % (i.__module__, i.__identifier__))
         return invariants

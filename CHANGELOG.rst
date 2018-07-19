@@ -1,8 +1,11 @@
 4.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Serialize if a content is folderish
+  [bloodbare]
 
+- Serialize the schema with the full behavior name
+  [bloodbare]
 
 4.0.3 (2018-07-16)
 ------------------
