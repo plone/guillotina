@@ -35,7 +35,9 @@ async def storage_get(context, request):
     storage_id = request.matchdict['storage_id']
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(text=f'Storage {storage_id}')
+        raise HTTPNotFound(content={
+            'reason': f'Storage {storage_id}'
+        })
     factory = get_adapter(context, IDatabaseManager,
                           name=config['storage'], args=[config])
     return {
@@ -52,7 +54,8 @@ async def storage_create_db(context, request):
     storage_id = request.matchdict['storage_id']
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(text=f'Storage {storage_id}')
+        raise HTTPNotFound(content={
+            'reason': f'Storage {storage_id}'})
     factory = get_adapter(context, IDatabaseManager,
                           name=config['storage'], args=[config])
     data = await request.json()
@@ -68,7 +71,8 @@ async def delete_db(context, request):
     storage_id = request.matchdict['storage_id']
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(text=f'Storage {storage_id}')
+        raise HTTPNotFound(content={
+            'reason': f'Storage {storage_id}'})
     factory = get_adapter(context, IDatabaseManager,
                           name=config['storage'], args=[config])
     assert request.matchdict['db_id'] in await factory.get_names()
@@ -82,7 +86,8 @@ async def get_db(context, request):
     storage_id = request.matchdict['storage_id']
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(text=f'Storage {storage_id}')
+        raise HTTPNotFound(content={
+            'reason': f'Storage {storage_id}'})
     factory = get_adapter(context, IDatabaseManager,
                           name=config['storage'], args=[config])
     db_id = request.matchdict['db_id']

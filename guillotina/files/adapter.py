@@ -50,7 +50,9 @@ class DBDataManager:
             if (time.time() - self._data['last_activity']) < self._timeout:
                 if self.request.headers.get('TUS-OVERRIDE-UPLOAD', '0') != '1':
                     raise HTTPPreconditionFailed(
-                        reason='There is already an active tusupload')
+                        content={
+                            'reason': 'There is already an active tusupload'
+                        })
 
     async def start(self):
         self.protect()
