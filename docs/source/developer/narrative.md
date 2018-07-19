@@ -41,9 +41,16 @@ python setup.py develop
 The scaffold produces an initial `config.yaml` configuration file for you.
 
 You can inspect and customize your configuration. Most notable is the database
-configuration. If you want to run a development `postgresql` server, the
-scaffold ships with a `Makefile` that provides a command to run a postgresql
-docker: `make run-postgres`.
+configuration. If you want to run a development `postgresql` server, I
+recommend you use docker:
+
+```bash
+docker run --rm \
+  -e POSTGRES_DB=guillotina \
+  -e POSTGRES_USER=guillotina \
+  -p 127.0.0.1:5432:5432 \
+  --name postgres postgres:9.6
+```
 
 
 ## Creating to do type
@@ -51,7 +58,7 @@ docker: `make run-postgres`.
 Types consist of an interface (schema) using the excellent `zope.interface` package
 and a class that uses that interface.
 
-Create a `content.py` file with the following:
+Create a `guillotina_todo/content.py` file with the following:
 
 ```python
 from guillotina import configure
@@ -94,7 +101,7 @@ guillotina serve -c config.yaml
 
 Create container first:
 
-```
+```bash
 curl -X POST --user root:root \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \

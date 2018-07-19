@@ -102,7 +102,7 @@ class WebsocketsView(Service):
         security = get_adapter(self.request, IInteraction)
         allowed = security.check_permission(permission.id, obj)
         if not allowed:
-            return ws.send_str(ujson.dumps({
+            return await ws.send_str(ujson.dumps({
                 'error': 'Not allowed'
             }))
 
@@ -118,14 +118,14 @@ class WebsocketsView(Service):
             view = None
 
         if view is None:
-            return ws.send_str(ujson.dumps({
+            return await ws.send_str(ujson.dumps({
                 'error': 'Not found'
             }))
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
         if not security.check_permission(view_permission, view):
-            return ws.send_str(ujson.dumps({
+            return await ws.send_str(ujson.dumps({
                 'error': 'No view access'
             }))
 
@@ -140,7 +140,7 @@ class WebsocketsView(Service):
             resp = await apply_rendering(view, self.request, view_result)
 
         # Return the value, body is always encoded
-        ws.send_str(resp.body.decode('utf-8'))
+        await ws.send_str(resp.body.decode('utf-8'))
 
         # Wait for possible value
         self.request.execute_futures()
@@ -152,7 +152,7 @@ class WebsocketsView(Service):
         await ws.prepare(self.request)
 
         async for msg in ws:
-            if msg.tp == aiohttp.WSMsgType.text:
+            if msg.type == aiohttp.WSMsgType.text:
                 message = ujson.loads(msg.data)
                 if message['op'] == 'close':
                     await ws.close()
@@ -169,7 +169,7 @@ class WebsocketsView(Service):
                         await tm.abort(txn=txn)
                 else:
                     await ws.close()
-            elif msg.tp == aiohttp.WSMsgType.error:
+            elif msg.type == aiohttp.WSMsgType.error:
                 logger.debug('ws connection closed with exception {0:s}'
                              .format(ws.exception()))
 

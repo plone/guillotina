@@ -7,6 +7,13 @@
 - Serialize the schema with the full behavior name
   [bloodbare]
 
+- Upgrade to aiohttp > 3 < 4.
+  Notable aiohttp changes:
+    - Response.write is now a coroutine
+    - Response.write should explicitly use write_eof
+    - Websockets send_str is now a coroutine
+  [vangheem]
+
 - Dublin core should not be required
   [bloodbare] 
 

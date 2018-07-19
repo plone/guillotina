@@ -49,7 +49,7 @@ setup(
     package_data={'': ['*.txt', '*.rst', 'guillotina/documentation/meta/*.json']},
     packages=find_packages(),
     install_requires=[
-        'aiohttp>=2.3.6,<2.4.0',
+        'aiohttp>=3.0.0,<4.0.0',
         'jsonschema',
         'python-dateutil',
         'pycrypto',
@@ -70,7 +70,6 @@ setup(
             'backoff',
             'psycopg2',
             'pytest-asyncio>=0.8.0',
-            'pytest-aiohttp',
             'pytest-cov',
             'coverage==4.0.3',
             'pytest-docker-fixtures'
