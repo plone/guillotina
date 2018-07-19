@@ -1,7 +1,8 @@
 4.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix run_app args
+  [vangheem]
 
 
 4.0.4 (2018-07-19)

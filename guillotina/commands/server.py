@@ -42,7 +42,7 @@ class ServerCommand(Command):
         port = arguments.port or settings.get('address', settings.get('port'))
         host = arguments.host or settings.get('host', '0.0.0.0')
         try:
-            web.run_app(app, host=host, port=port, loop=self.get_loop(),
+            web.run_app(app, host=host, port=port,
                         access_log_format=settings.get('access_log_format'))
         except asyncio.CancelledError:
             # server shut down, we're good here.
