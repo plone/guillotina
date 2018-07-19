@@ -60,8 +60,9 @@ class SerializeFactoryToJson(object):
 
             behavior = get_utility(IBehavior, name=schema_serializer.name)
 
-            result['definitions'][schema_serializer.name]['title'] = behavior.title or schema_serializer.short_name
-            result['definitions'][schema_serializer.name]['description'] = behavior.description
+            definition = result['definitions'][schema_serializer.name]
+            definition['title'] = behavior.title or schema_serializer.short_name
+            definition['description'] = behavior.description
 
         return result
 
