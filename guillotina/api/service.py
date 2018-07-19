@@ -1,4 +1,4 @@
-from aiohttp.web_exceptions import HTTPNotFound
+from guillotina.response import HTTPNotFound
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina.browser import View
 from guillotina.component import query_utility
@@ -45,7 +45,8 @@ class TraversableFieldService(View):
                     break
         # Check that its a File Field
         if field is None:
-            raise HTTPNotFound(text='No valid name')
+            raise HTTPNotFound(content={
+                'reason': 'No valid name'})
 
         if self.behavior is not None:
             self.field = field.bind(self.behavior)

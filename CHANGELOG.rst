@@ -1,6 +1,9 @@
 4.0.4 (unreleased)
 ------------------
 
+- Use guillotina response exceptions everywhere so we
+  use built-in CORS
+
 - Serialize if a content is folderish
   [bloodbare]
 

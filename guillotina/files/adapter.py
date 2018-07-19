@@ -1,5 +1,4 @@
 from .dbfile import DBFile
-from aiohttp.web_exceptions import HTTPPreconditionFailed
 from guillotina import configure
 from guillotina.blob import Blob
 from guillotina.event import notify
@@ -13,6 +12,7 @@ from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
+from guillotina.response import HTTPPreconditionFailed
 
 import time
 
@@ -50,7 +50,9 @@ class DBDataManager:
             if (time.time() - self._data['last_activity']) < self._timeout:
                 if self.request.headers.get('TUS-OVERRIDE-UPLOAD', '0') != '1':
                     raise HTTPPreconditionFailed(
-                        reason='There is already an active tusupload')
+                        content={
+                            'reason': 'There is already an active tusupload'
+                        })
 
     async def start(self):
         self.protect()

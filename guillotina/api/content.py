@@ -1,6 +1,3 @@
-from aiohttp.web_exceptions import HTTPMethodNotAllowed
-from aiohttp.web_exceptions import HTTPNotFound
-from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import configure
 from guillotina import error_reasons
 from guillotina import security
@@ -49,6 +46,9 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.response import ErrorResponse
+from guillotina.response import HTTPMethodNotAllowed
+from guillotina.response import HTTPNotFound
+from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
