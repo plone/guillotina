@@ -1,4 +1,4 @@
-4.0.4 (unreleased)
+4.0.4 (2018-07-19)
 ------------------
 
 - Use guillotina response exceptions everywhere so we
