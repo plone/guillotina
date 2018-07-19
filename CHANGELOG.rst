@@ -1,7 +1,12 @@
 4.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Upgrade to aiohttp > 3 < 4.
+  Notable aiohttp changes:
+    - Response.write is now a coroutine
+    - Response.write should explicitly use write_eof
+    - Websockets send_str is now a coroutine
+  [vangheem]
 
 
 4.0.3 (2018-07-16)

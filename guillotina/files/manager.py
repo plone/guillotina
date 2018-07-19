@@ -45,7 +45,7 @@ class FileManager(object):
     async def download(self, disposition=None, filename=None, content_type=None,
                        size=None, **kwargs):
         if disposition is None:
-            disposition = self.request.GET.get('disposition', 'attachment')
+            disposition = self.request.query.get('disposition', 'attachment')
 
         file = self.field.get(self.field.context or self.context)
         if file is None and filename is None:
@@ -67,8 +67,9 @@ class FileManager(object):
         await download_resp.prepare(self.request)
 
         async for chunk in self.file_storage_manager.iter_data(**kwargs):
-            download_resp.write(chunk)
+            await download_resp.write(chunk)
             await download_resp.drain()
+        await download_resp.write_eof()
         return download_resp
 
     async def tus_options(self, *args, **kwargs):

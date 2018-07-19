@@ -56,7 +56,8 @@ class FileGET(DownloadService):
             resp.content_length = len(data)
             await resp.prepare(self.request)
 
-            resp.write(data)
+            await resp.write(data)
+            await resp.write_eof()
             return resp
 
     async def __call__(self):
