@@ -7,6 +7,9 @@
 - Serialize the schema with the full behavior name
   [bloodbare]
 
+- Dublin core should not be required
+  [bloodbare] 
+
 4.0.3 (2018-07-16)
 ------------------
 
