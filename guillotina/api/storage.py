@@ -1,9 +1,9 @@
-from aiohttp.web_exceptions import HTTPNotFound
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.interfaces import IApplication
+from guillotina.response import HTTPNotFound
 from guillotina.utils import list_or_dict_items
 
 import re

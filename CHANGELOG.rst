@@ -1,6 +1,9 @@
 4.0.4 (unreleased)
 ------------------
 
+- Use guillotina response exceptions everywhere so we
+  use built-in CORS
+
 - Upgrade to aiohttp > 3 < 4.
   Notable aiohttp changes:
     - Response.write is now a coroutine

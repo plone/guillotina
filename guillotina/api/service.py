@@ -1,4 +1,4 @@
-from aiohttp.web_exceptions import HTTPNotFound
+from guillotina.response import HTTPNotFound
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina.browser import View
 from guillotina.component import query_utility
