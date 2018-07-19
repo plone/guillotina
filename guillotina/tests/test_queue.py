@@ -26,7 +26,7 @@ async def test_add_sync_utility(guillotina, loop):
     var = []
 
     async def printHi(msg):
-        asyncio.sleep(0.01)
+        await asyncio.sleep(0.01)
         var.append(msg)
 
     request = utils.get_mocked_request(guillotina.db)

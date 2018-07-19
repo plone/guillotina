@@ -4,6 +4,12 @@
 - Use guillotina response exceptions everywhere so we
   use built-in CORS
 
+- Serialize if a content is folderish
+  [bloodbare]
+
+- Serialize the schema with the full behavior name
+  [bloodbare]
+
 - Upgrade to aiohttp > 3 < 4.
   Notable aiohttp changes:
     - Response.write is now a coroutine
@@ -11,6 +17,8 @@
     - Websockets send_str is now a coroutine
   [vangheem]
 
+- Dublin core should not be required
+  [bloodbare] 
 
 4.0.3 (2018-07-16)
 ------------------

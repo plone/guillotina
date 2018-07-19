@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.component import get_multi_adapter
+from guillotina.component import get_utility
 from guillotina.component.interfaces import IFactory
+from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IFactorySerializeToJson
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ISchemaFieldSerializeToJson
@@ -56,6 +58,12 @@ class SerializeFactoryToJson(object):
                 {'$ref': '#/definitions/' + schema_serializer.name},
             result['definitions'][schema_serializer.name] = serialization
 
+            behavior = get_utility(IBehavior, name=schema_serializer.name)
+
+            definition = result['definitions'][schema_serializer.name]
+            definition['title'] = behavior.title or schema_serializer.short_name
+            definition['description'] = behavior.description
+
         return result
 
 
@@ -88,11 +96,15 @@ class DefaultSchemaSerializer(object):
 
     @property
     def name(self):
+        return self.schema.__identifier__
+
+    @property
+    def short_name(self):
         return self.schema.__name__
 
     @property
     def invariants(self):
         invariants = []
         for i in self.schema.queryTaggedValue('invariants', []):
-            invariants.append("%s.%s" % (i.__module__, i.__name__))
+            invariants.append("%s.%s" % (i.__module__, i.__identifier__))
         return invariants
