@@ -1,4 +1,4 @@
-4.0.5 (unreleased)
+4.0.5 (2018-07-19)
 ------------------
 
 - Fix run_app args when access_log_format is None
