@@ -11,7 +11,6 @@ from zope.interface import Interface  # noqa
 import os
 import pkg_resources
 
-
 __version__ = pkg_resources.get_distribution('guillotina').version
 
 

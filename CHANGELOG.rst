@@ -1,7 +1,8 @@
 4.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Updating requirements for py3.7
+  [bloodbare]
 
 
 4.0.6 (2018-07-20)
