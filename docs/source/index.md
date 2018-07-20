@@ -1,5 +1,4 @@
-The Python AsyncIO REST API Framework
-=====================================
+# The Python AsyncIO REST API Framework
 
 (REST Resource Application Server)
 
@@ -21,31 +20,27 @@ Features:
  - Built-in CORS support
 
 
-Getting Started
-===============
+# Getting Started
 
 Are you new to Guillotina? This is the place to start!
 
  - [Quick Tour] of Guillotina gives an overview of the major features in
    Guillotina, covering a little about a lot.
- - For help getting Guillotina set up, try [Installing Guillotina].
- - Need help? Join our [Gitter channel].
+ - For help getting Guillotina set up, try
+   [Installing Guillotina](./installation/installation.html).
+ - Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
 
 
-REST API
-========
+# REST API
 
 
-Developers
-==========
+# Developers
 
 
-Training
-========
+# Training
 
 
-About
-=====
+# About
 
 
 Detailed Documentation

@@ -169,6 +169,8 @@ Document
 - web sockets
 - describe request flow/process
 - debugging/x-debug/etc
+- go through interfaces and see what is not documented
+- go through all settings
 
 
 Organization
