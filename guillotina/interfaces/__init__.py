@@ -20,6 +20,7 @@ from .content import IDatabase  # noqa
 from .content import IFolder  # noqa
 from .content import IGetOwner  # noqa
 from .content import IGroupFolder  # noqa
+from .content import IIDGenerator  # noqa
 from .content import IItem  # noqa
 from .content import IJavaScriptApplication  # noqa
 from .content import ILocation  # noqa

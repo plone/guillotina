@@ -243,3 +243,9 @@ class IGetOwner(Interface):
     '''
     Defines a utility for calculating the owner of a new resource
     '''
+
+
+class IIDGenerator(Interface):
+    '''
+    Generates an id on a POST for the new object
+    '''

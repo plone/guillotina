@@ -1,7 +1,11 @@
 4.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide IIDGenerator interface to customize generating new ids
+  [bloodbare]
+
+- Fix applying cors when errors on traversal
+  [bloodbare]
 
 
 4.0.5 (2018-07-19)

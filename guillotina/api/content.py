@@ -8,6 +8,7 @@ from guillotina.api.service import Service
 from guillotina.auth.role import local_roles
 from guillotina.component import get_multi_adapter
 from guillotina.component import get_utility
+from guillotina.component import query_adapter
 from guillotina.component import query_multi_adapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
@@ -31,6 +32,7 @@ from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
+from guillotina.interfaces import IIDGenerator
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalPermissionMap
@@ -160,8 +162,11 @@ class DefaultPOST(Service):
                 status=412)
 
         # Generate a temporary id if the id is not given
+        new_id = None
         if not id_:
-            new_id = None
+            generator = query_adapter(self.request, IIDGenerator)
+            if generator is not None:
+                new_id = generator(data)
         else:
             if not isinstance(id_, str) or not valid_id(id_):
                 raise ErrorResponse(
