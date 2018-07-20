@@ -1,4 +1,4 @@
-4.0.6 (unreleased)
+4.0.6 (2018-07-20)
 ------------------
 
 - Provide IIDGenerator interface to customize generating new ids
