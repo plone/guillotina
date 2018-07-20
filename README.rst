@@ -140,3 +140,45 @@ Chat
 ----
 
 Join us to talk about Guillotina at https://gitter.im/plone/guillotina
+
+
+Document
+--------
+
+- request/response objects
+- dynamic fields
+- auth integration
+- catalog integration?
+- all API endpoints
+- documentation API coverage?
+- commands?
+- databases
+- files
+- json serialization/deserialization
+- deploying
+- utils
+- async utils
+- cors
+- error handling
+- events
+- profiling
+- renderers
+- routing
+- transactions?
+- all configuration?
+- web sockets
+- describe request flow/process
+- debugging/x-debug/etc
+
+
+Organization
+------------
+
+- summary
+- example
+- first steps
+- rest api explorer
+- developer docs
+- training
+- about
+- awesome guillotina

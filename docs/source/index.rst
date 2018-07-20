@@ -21,6 +21,33 @@ Features:
  - Built-in CORS support
 
 
+Getting Started
+===============
+
+Are you new to Guillotina? This is the place to start!
+
+ - [Quick Tour] of Guillotina gives an overview of the major features in
+   Guillotina, covering a little about a lot.
+ - For help getting Guillotina set up, try [Installing Guillotina].
+ - Need help? Join our [Gitter channel].
+
+
+REST API
+========
+
+
+Developers
+==========
+
+
+Training
+========
+
+
+About
+=====
+
+
 Detailed Documentation
 ======================
 
