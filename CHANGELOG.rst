@@ -1,6 +1,9 @@
 4.0.7 (unreleased)
 ------------------
 
+- Fix interface for layers
+  [bloodbare]
+
 - Updating requirements for py3.7
   [bloodbare]
 
