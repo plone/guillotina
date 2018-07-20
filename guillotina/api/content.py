@@ -161,7 +161,8 @@ class DefaultPOST(Service):
 
         # Generate a temporary id if the id is not given
         if not id_:
-            new_id = None
+            generator = get_adapter(IIDGenerator, self.request, None)
+            new_id = generator(data)
         else:
             if not isinstance(id_, str) or not valid_id(id_):
                 raise ErrorResponse(

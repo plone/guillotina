@@ -320,8 +320,20 @@ class BasicMatchInfo(BaseMatchInfo):
         if IAioHTTPResponse.providedBy(self.resp):
             return self.resp
         else:
-            return await apply_rendering(
+            resp = await apply_rendering(
                 View(None, request), request, self.resp)
+            cors_renderer = app_settings['cors_renderer'](request)
+            try:
+                cors_headers = await cors_renderer.get_headers()
+                cors_headers.update(resp.headers)
+                resp._headers = cors_headers
+                retry_attempts = getattr(request, '_retry_attempt', 0)
+                if retry_attempts > 0:
+                    resp.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
+            except response.Response as exc:
+                resp = exc
+
+            return resp
 
     def get_info(self):
         return {
