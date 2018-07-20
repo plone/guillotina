@@ -153,7 +153,12 @@ class WebsocketsView(Service):
 
         async for msg in ws:
             if msg.type == aiohttp.WSMsgType.text:
-                message = ujson.loads(msg.data)
+                try:
+                    message = ujson.loads(msg.data)
+                except ValueError:
+                    logger.warning('Invalid websocket payload, ignored: {}'.format(
+                        msg.data))
+                    continue
                 if message['op'] == 'close':
                     await ws.close()
                 elif message['op'] == 'GET':
