@@ -219,6 +219,21 @@ async def apply_rendering(view, request, view_result):
     return await renderer(view_result)
 
 
+async def _apply_cors(request, resp):
+    cors_renderer = app_settings['cors_renderer'](request)
+    try:
+        cors_headers = await cors_renderer.get_headers()
+        cors_headers.update(resp.headers)
+        resp._headers = cors_headers
+        retry_attempts = getattr(request, '_retry_attempt', 0)
+        if retry_attempts > 0:
+            resp.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
+    except response.Response as exc:
+        resp = exc
+    request.record('headers')
+    return resp
+
+
 class MatchInfo(BaseMatchInfo):
     """Function that returns from traversal request on aiohttp."""
 
@@ -269,19 +284,7 @@ class MatchInfo(BaseMatchInfo):
         else:
             resp = await apply_rendering(self.view, self.request, view_result)
             request.record('renderer')
-
-            # Apply cors if its needed
-            cors_renderer = app_settings['cors_renderer'](request)
-            try:
-                cors_headers = await cors_renderer.get_headers()
-                cors_headers.update(resp.headers)
-                resp._headers = cors_headers
-                retry_attempts = getattr(request, '_retry_attempt', 0)
-                if retry_attempts > 0:
-                    resp.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
-            except response.Response as exc:
-                resp = exc
-            request.record('headers')
+            resp = await _apply_cors(request, resp)
 
         if not request._view_error:
             request.execute_futures()
@@ -322,17 +325,7 @@ class BasicMatchInfo(BaseMatchInfo):
         else:
             resp = await apply_rendering(
                 View(None, request), request, self.resp)
-            cors_renderer = app_settings['cors_renderer'](request)
-            try:
-                cors_headers = await cors_renderer.get_headers()
-                cors_headers.update(resp.headers)
-                resp._headers = cors_headers
-                retry_attempts = getattr(request, '_retry_attempt', 0)
-                if retry_attempts > 0:
-                    resp.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
-            except response.Response as exc:
-                resp = exc
-
+            resp = await _apply_cors(request, resp)
             return resp
 
     def get_info(self):
