@@ -91,7 +91,7 @@ class WebsocketsView(Service):
 
         if tail and len(tail) > 0:
             # convert match lookups
-            tail = tail.split('?')[0]
+            tail = [element.split('?')[0] for element in tail]
             view_name = routes.path_to_view_name(tail)
         elif not tail:
             view_name = ''
