@@ -170,12 +170,6 @@ Content
 
 
 .. http:gapi::
-   :path_spec: /(db)/(container)/(id)/@ids
-   :path: /db/container/foobar/@ids
-   :basic_auth: root:root
-
-
-.. http:gapi::
    :path_spec: /(db)/(container)/(id)/@invalidate-cache
-   :path: /db/container/foobar/@invalidate-cache
+   :path: /db/container/foobar2/@invalidate-cache
    :basic_auth: root:root
