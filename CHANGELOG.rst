@@ -1,4 +1,4 @@
-4.0.7 (unreleased)
+4.0.7 (2018-07-21)
 ------------------
 
 - Improve and fix docs
