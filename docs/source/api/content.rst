@@ -14,3 +14,7 @@
 
   .. autoclass:: Container
      :members: install
+
+  .. autofunction:: create_content_in_container
+  .. autofunction:: get_all_possible_schemas_for_type
+  .. autofunction:: iter_schemata

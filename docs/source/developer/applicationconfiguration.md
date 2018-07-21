@@ -110,7 +110,7 @@ to those decorators.
 * _role_: ID of role
 
 
-# Overriding Configuration
+## Overriding Configuration
 
 `guillotina` applications can override default `guillotina` configuration.
 
