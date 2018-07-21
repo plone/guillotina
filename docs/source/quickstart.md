@@ -35,7 +35,7 @@ Finally, run the server:
 The server should now be running on http://0.0.0.0:8080
 
 Then, [use Postman](https://www.getpostman.com/), `curl` or whatever tool you
-prefer to interact with the REST API.
+prefer to interact with the [REST API](./rest/index.html).
 
 Modify the configuration in `config.yaml` to customize server setttings.
 
