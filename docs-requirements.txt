@@ -1,6 +1,6 @@
 recommonmark
 # sphinxcontrib-httpexample
 sphinx==1.6.4
-sphinx-guillotina-theme==1.0.3
+sphinx-guillotina-theme==1.0.4
 git+https://github.com/cdevienne/sphinxcontrib-httpexample@inline-response#egg=sphinxcontrib-httpexample
 sphinx-autodoc-typehints
