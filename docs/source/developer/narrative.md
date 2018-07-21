@@ -1,4 +1,4 @@
-# Narrative
+# Getting started
 
 In these narrative docs, we'll go through creating a todo application.
 
