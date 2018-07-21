@@ -33,18 +33,25 @@ What is Guillotina like?
 
 Example configuration:
 
+```eval_rst
 .. literalinclude:: examples/config.yaml
+```
 
 Example service:
 
+```eval_rst
 .. literalinclude:: examples/service.py
+```
 
 Example content type:
 
+```eval_rst
 .. literalinclude:: examples/ct.py
+```
 
 Example usage:
 
+```eval_rst
 .. http:post:: /db/container
 
      Create MyType
@@ -102,3 +109,4 @@ Example usage:
     :statuscode 200: no error
     :statuscode 401: Invalid Auth code
     :statuscode 500: Error processing request
+```
