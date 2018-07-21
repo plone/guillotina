@@ -65,7 +65,6 @@ See [instructions below](#playing-with-those-examples) to play with.
     **Example**
 
     ..  http:example:: curl wget httpie python-requests
-        :response: ./source/examples/created.response
 
         POST /db/container HTTP/1.1
         Accept: application/json
@@ -78,6 +77,10 @@ See [instructions below](#playing-with-those-examples) to play with.
           "id": "foobar",
           "foobar": "foobar"
         }
+
+
+        HTTP/1.1 201 OK
+        Content-Type: application/json
 
     :reqheader Authorization: Required token to authenticate
     :statuscode 201: no error
@@ -92,12 +95,52 @@ See [instructions below](#playing-with-those-examples) to play with.
     **Example**
 
     ..  http:example:: curl wget httpie python-requests
-        :response: ./source/examples/quick-tour/query_mytype.response
 
         GET /db/container/foobar HTTP/1.1
         Accept: application/json
         Host: localhost:8080
         Authorization: Basic cm9vdDpyb290
+
+
+        HTTP/1.1 200 OK
+        Content-Length: 851
+        Content-Type: application/json
+
+        {
+            "@id": "http://localhost:8080/db/container/foobar",
+            "@name": "foobar",
+            "@type": "MyType",
+            "@uid": "e3f|81c5406638bd4a68b89275f739fc18b2",
+            "UID": "e3f|81c5406638bd4a68b89275f739fc18b2",
+            "creation_date": "2018-07-21T13:14:15.245181+00:00",
+            "foobar": "foobar",
+            "guillotina.behaviors.dublincore.IDublinCore": {
+                "contributors": [
+                    "root"
+                ],
+                "creation_date": "2018-07-21T13:14:15.245181+00:00",
+                "creators": [
+                    "root"
+                ],
+                "description": null,
+                "effective_date": null,
+                "expiration_date": null,
+                "modification_date": "2018-07-21T13:14:15.245181+00:00",
+                "publisher": null,
+                "tags": null,
+                "title": null
+            },
+            "is_folderish": false,
+            "modification_date": "2018-07-21T13:14:15.245181+00:00",
+            "parent": {
+                "@id": "http://localhost:8080/db/container",
+                "@name": "container",
+                "@type": "Container",
+                "@uid": "e3f4e401d12843a4a303666da4158458",
+                "UID": "e3f4e401d12843a4a303666da4158458"
+            }
+        }
+
 
 
     :reqheader Authorization: Required token to authenticate
@@ -113,32 +156,47 @@ See [instructions below](#playing-with-those-examples) to play with.
     **Example**
 
     ..  http:example:: curl wget httpie python-requests
-        :response: ./source/examples/quick-tour/query_foobar.response
 
         POST /db/@foobar HTTP/1.1
         Accept: application/json
         Host: localhost:8080
         Authorization: Basic cm9vdDpyb290
 
+
+        HTTP/1.1 201 OK
+        Content-Type: application/json
+
+        { "foo": "bar"}
+
     or
 
     ..  http:example:: curl wget httpie python-requests
-        :response: ./source/examples/quick-tour/query_foobar.response
 
         POST /db/container/@foobar HTTP/1.1
         Accept: application/json
         Host: localhost:8080
         Authorization: Basic cm9vdDpyb290
 
+
+        HTTP/1.1 201 OK
+        Content-Type: application/json
+
+        { "foo": "bar"}
+
     or
 
     ..  http:example:: curl wget httpie python-requests
-        :response: ./source/examples/quick-tour/query_foobar.response
 
         POST /db/container/foobar/@foobar HTTP/1.1
         Accept: application/json
         Host: localhost:8080
         Authorization: Basic cm9vdDpyb290
+
+
+        HTTP/1.1 201 OK
+        Content-Type: application/json
+
+        { "foo": "bar"}
 
 
     :reqheader Authorization: Required token to authenticate
@@ -217,7 +275,6 @@ Now create a container:
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
-    :response: ./source/examples/created.response
 
     POST /db/ HTTP/1.1
     Accept: application/json
@@ -231,6 +288,10 @@ Now create a container:
         "id": "container",
         "description": "Description"
     }
+
+
+    HTTP/1.1 201 OK
+    Content-Type: application/json
 
 ```
 
