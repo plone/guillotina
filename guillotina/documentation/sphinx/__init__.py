@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
-from guillotina import routes
 from aiohttp.test_utils import TestClient
 from aiohttp.test_utils import TestServer
 from base64 import b64encode
-from guillotina.component import query_multi_adapter
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives  # type: ignore
+from guillotina import routes
+from guillotina._settings import app_settings
+from guillotina.component import query_multi_adapter
 from guillotina.content import load_cached_schema
 from guillotina.factory import make_app
 from guillotina.tests.utils import get_mocked_request
 from guillotina.transactions import abort
-from guillotina._settings import app_settings
+from guillotina.traversal import traverse
 from guillotina.utils import get_dotted_name
+from zope.interface import Interface
+
 import asyncio
 import json
 import pkg_resources
-from guillotina.traversal import traverse
+
 
 _server = None
 
@@ -169,7 +172,7 @@ class APICall(Directive):
                         value = value(ob)
                     service_definition[key] = value
             service_definition['context'] = get_dotted_name(
-                raw_service_definition['context'])
+                raw_service_definition.get('context', Interface))
 
         resp_body = None
         if resp.headers.get('content-type') == 'application/json':
