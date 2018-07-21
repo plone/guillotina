@@ -83,7 +83,7 @@ class WebsocketsView(Service):
 
     async def handle_ws_request(self, ws, message):
         method = app_settings['http_methods']['GET']
-        path = tuple(p for p in message['value'].split('/') if p)
+        path = tuple(p for p in message['path'].split('/') if p)
 
         from guillotina.traversal import traverse
         obj, tail = await traverse(self.request, self.request.container, path)
