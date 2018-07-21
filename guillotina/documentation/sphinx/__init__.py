@@ -243,7 +243,11 @@ class APICall(Directive):
         view = docutils.statemachine.StringList(rst_content, '<gapi>')
 
         node = nodes.paragraph()
-        self.state.nested_parse(view, 0, node)
+        try:
+            self.state.nested_parse(view, 0, node)
+        except:
+            import pdb; pdb.set_trace()
+            raise
         return [node]
 
 
