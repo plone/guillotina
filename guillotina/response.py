@@ -19,7 +19,13 @@ class Response(Exception):
     empty_body = False
     default_content: dict = {}  # noqa
 
-    def __init__(self, *, content=None, headers=None, status=None):
+    def __init__(self, *, content: dict=None,
+                 headers: dict=None, status: int=None):
+        '''
+        :param content: content to serialize
+        :param headers: headers to set on response
+        :param status: customize the response status
+        '''
         if self.empty_body:
             self.content = None
         else:
@@ -38,8 +44,15 @@ class Response(Exception):
 
 
 class ErrorResponse(Response):
-    def __init__(self, type, message, *, reason=None, content=None,
-                 headers=None, status=500):
+    def __init__(self, type: str, message: str, *, reason=None,
+                 content: dict=None, headers: dict=None, status: int=500):
+        '''
+        :param type: type of error
+        :param message: error message
+        :param content: provide additional content
+        :param headers: headers to set on response
+        :param status: customize the response status
+        '''
         if content is None:
             content = {}
         content['error'] = {
@@ -101,7 +114,8 @@ class HTTPPartialContent(HTTPSuccessful):
 
 class _HTTPMove(HTTPRedirection):
 
-    def __init__(self, location, *, content=None, headers=None):
+    def __init__(self, location: str, *,
+                 content: dict=None, headers: dict=None):
         if not location:
             raise ValueError("HTTP redirects need a location to redirect to.")
         super().__init__(content=content, headers=headers)
@@ -110,20 +124,38 @@ class _HTTPMove(HTTPRedirection):
 
 
 class HTTPMultipleChoices(_HTTPMove):
+    '''
+    :param location: where to redirect
+    :param headers: additional headers to set
+    '''
+
     status_code = 300
 
 
 class HTTPMovedPermanently(_HTTPMove):
+    '''
+    :param location: where to redirect
+    :param headers: additional headers to set
+    '''
+
     status_code = 301
 
 
 class HTTPFound(_HTTPMove):
+    '''
+    :param location: where to redirect
+    :param headers: additional headers to set
+    '''
     status_code = 302
 
 
 # This one is safe after a POST (the redirected location will be
 # retrieved with GET):
 class HTTPSeeOther(_HTTPMove):
+    '''
+    :param location: where to redirect
+    :param headers: additional headers to set
+    '''
     status_code = 303
 
 
@@ -184,7 +216,14 @@ class InvalidRoute(HTTPNotFound):
 class HTTPMethodNotAllowed(HTTPClientError):
     status_code = 405
 
-    def __init__(self, method, allowed_methods, *, content=None, headers=None):
+    def __init__(self, method: str, allowed_methods: list, *,
+                 content: dict=None, headers: dict=None):
+        '''
+        :param method: method not allowed
+        :param allowed_methods: list of allowed methods
+        :param content: content to serialize
+        :param headers: headers to set on response
+        '''
         allow = ','.join(sorted(allowed_methods))
         super().__init__(content=content, headers=headers)
         self.headers['Allow'] = allow

@@ -77,7 +77,7 @@ The endpoints available around these objects are detailed below:
    :maxdepth: 1
 
    api/content
-   api/request
+   api/response
    api/fields
    api/utils
 ```

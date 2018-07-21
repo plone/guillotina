@@ -80,6 +80,7 @@ setup(
             'sphinxcontrib-httpdomain',
             'sphinxcontrib-httpexample',
             'sphinx-guillotina-theme',
+            'sphinx-autodoc-typehints'
         ],
     },
     entry_points={

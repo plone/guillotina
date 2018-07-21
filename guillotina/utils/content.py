@@ -8,6 +8,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleMap
+from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 
 import string
@@ -20,6 +21,8 @@ logger = glogging.getLogger('guillotina')
 def get_content_path(content: IResource) -> str:
     """
     Generate full path of resource object
+
+    :param content: object to get path from
     """
     parts = []
     parent = getattr(content, '__parent__', None)
@@ -44,6 +47,8 @@ def get_content_depth(content: IResource) -> int:
 def iter_parents(content: IResource) -> typing.Iterator[IResource]:
     """
     Iterate through all the parents of a content object
+
+    :param content: object to get path from
     """
     content = getattr(content, '__parent__', None)
     while content is not None:
@@ -93,7 +98,12 @@ async def get_containers(request):
                     logger.warn('Error aborting transaction', exc_info=True)
 
 
-def get_owners(obj) -> list:
+def get_owners(obj: IResource) -> list:
+    '''
+    Return owners of an object
+
+    :param obj: object to get path from
+    '''
     try:
         prinrole = IPrincipalRoleMap(obj)
     except TypeError:
@@ -109,7 +119,13 @@ def get_owners(obj) -> list:
     return owners
 
 
-async def navigate_to(obj, path):
+async def navigate_to(obj: IResource, path: str):
+    '''
+    Get a sub-object.
+
+    :param obj: object to get path from
+    :param path: relative path to object you want to retrieve
+    '''
     actual = obj
     path_components = path.strip('/').split('/')
     for p in path_components:
@@ -122,7 +138,13 @@ async def navigate_to(obj, path):
     return actual
 
 
-def get_object_url(ob, request=None, **kwargs):
+def get_object_url(ob: IResource, request: IRequest=None, **kwargs) -> str:
+    '''
+    Generate full url of object.
+
+    :param ob: object to get url for
+    :param request: relative path to object you want to retrieve
+    '''
     if request is None:
         request = get_current_request()
     url_adapter = query_multi_adapter((ob, request), IAbsoluteURL)
@@ -130,9 +152,9 @@ def get_object_url(ob, request=None, **kwargs):
         return url_adapter(**kwargs)
 
 
-async def get_object_by_oid(oid, txn=None):
+async def get_object_by_oid(oid: str, txn=None) -> IResource:
     '''
-    Need to do a reverse lookup of the object to all the parents
+    Get an object from an oid
     '''
     if txn is None:
         from guillotina.transactions import get_transaction
