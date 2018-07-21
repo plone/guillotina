@@ -20,7 +20,7 @@ async def test_hello(guillotina, container_requester):
                 msg = await ws.receive()
                 assert msg.type == aiohttp.WSMsgType.text
                 message = json.loads(msg.data)
-                assert message == {'value': []}
+                assert message == {'data': '{"value": []}', 'id': '0'}
                 await ws.close()
 
 
