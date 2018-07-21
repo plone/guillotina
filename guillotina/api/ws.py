@@ -91,8 +91,8 @@ class WebsocketsView(Service):
 
         if tail and len(tail) > 0:
             # convert match lookups
+            tail = tail.split('?')[0]
             view_name = routes.path_to_view_name(tail)
-            view_name = view_name.split('?')[0]
         elif not tail:
             view_name = ''
         else:
@@ -173,15 +173,12 @@ class WebsocketsView(Service):
                     txn = await tm.begin(request=self.request)
                     try:
                         await self.handle_ws_request(ws, message)
-                    except Exception:
-                        await ws.close()
-                        raise
+                    except Exception as _exc:
+                        logger.error('Exception on ws', exc_info=True)
                     finally:
                         # only currently support GET requests which are *never*
                         # supposed to be commits
                         await tm.abort(txn=txn)
-                else:
-                    await ws.close()
             elif msg.type == aiohttp.WSMsgType.error:
                 logger.debug('ws connection closed with exception {0:s}'
                              .format(ws.exception()))
