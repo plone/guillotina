@@ -34,19 +34,19 @@ What is Guillotina like?
 ### Example configuration:
 
 ```eval_rst
-.. literalinclude:: examples/config.yaml
+.. literalinclude:: examples/quick-tour/config.yaml
 ```
 
 ### Example service:
 
 ```eval_rst
-.. literalinclude:: examples/service.py
+.. literalinclude:: examples/quick-tour/service.py
 ```
 
 ### Example content type:
 
 ```eval_rst
-.. literalinclude:: examples/ct.py
+.. literalinclude:: examples/quick-tour/ct.py
 ```
 
 ### Example usage:
@@ -54,15 +54,17 @@ What is Guillotina like?
 ```eval_rst
 .. http:post:: /db/container
 
-     Create MyType
+    Create MyType
 
-     **Example request**
+    **Example**
 
-     .. sourcecode:: http
+    ..  http:example:: curl wget httpie python-requests
+        :response: ./source/examples/quick-tour/create_type.response
 
         POST /db/container HTTP/1.1
         Accept: application/json
         Content-Type: application/json
+        Host: localhost:8080
         Authorization: Basic cm9vdDpyb290
 
         {
@@ -71,39 +73,26 @@ What is Guillotina like?
           "foobar": "foobar"
         }
 
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 201 OK
-        Content-Type: application/json
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 201: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+    :reqheader Authorization: Required token to authenticate
+    :statuscode 201: no error
+    :statuscode 401: Invalid Auth code
+    :statuscode 500: Error processing request
 
 
 .. http:get:: /db/container/foobar/@foobar
 
     Get MyType
 
-    **Example request**
+    **Example**
 
-    .. sourcecode:: http
+    ..  http:example:: curl wget httpie python-requests
+        :response: ./source/examples/quick-tour/create_type.response
 
-       GET /db/container/foobar HTTP/1.1
-       Accept: application/json
-       Authorization: Basic cm9vdDpyb290
+        GET /db/container/foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
 
-    **Example response**
-
-    .. sourcecode:: http
-
-       HTTP/1.1 201 OK
-       Content-Type: application/json
-
-       {"foo": "bar"}
 
     :reqheader Authorization: Required token to authenticate
     :statuscode 200: no error
