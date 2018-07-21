@@ -25,5 +25,7 @@ Contents:
    router
    exceptions
    fields
+   serialize
    async_utils
+   component-architecture
    debugging

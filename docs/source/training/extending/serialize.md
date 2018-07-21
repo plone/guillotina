@@ -4,7 +4,7 @@ Guillotina provides default serializations for content. It provides mechanisms
 for giving full content serialization of interfaces and behaviors as well as
 summary serializations that show in listings.
 
-For customize a serialization for a type, you need to provide a multi adapter
+To customize a serialization on a type, you need to provide a multi adapter
 for the `IResourceSerializeToJsonSummary` or `IResourceSerializeToJson` interfaces.
 
 For our use-case, we want to make sure to include the `creation_date` and

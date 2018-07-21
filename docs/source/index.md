@@ -68,7 +68,9 @@ The endpoints available around these objects are detailed below:
    developer/router
    developer/exceptions
    developer/fields
+   developer/serialize
    developer/async_utils
+   developer/component-architecture
    developer/debugging
 ```
 
