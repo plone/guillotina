@@ -5,6 +5,7 @@ from base64 import b64encode
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives  # type: ignore
+import docutils.statemachine
 from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.component import query_multi_adapter
@@ -20,18 +21,11 @@ import asyncio
 import json
 import pkg_resources
 
-
 _server = None
 
-IGNORED_HEADERS = (
-    'Accept-Encoding',
-    'Connection',
-    'User-Agent',
-    'Date',
-    'Access-Control-Allow-Credentials',
-    'Access-Control-Expose-Headers',
-    'Server'
-)
+IGNORED_HEADERS = ('Accept-Encoding', 'Connection', 'User-Agent', 'Date',
+                   'Access-Control-Allow-Credentials',
+                   'Access-Control-Expose-Headers', 'Server')
 
 
 def get_server():
@@ -40,23 +34,25 @@ def get_server():
         return _server
 
     loop = asyncio.new_event_loop()
-    aioapp = make_app(settings={
-        "applications": ["guillotina.documentation"],
-        "databases": {
-            "db": {
-                "storage": "DUMMY",
-                "dsn": {},
-                "name": "db"
-            }
+    aioapp = make_app(
+        settings={
+            "applications": ["guillotina.documentation"],
+            "databases": {
+                "db": {
+                    "storage": "DUMMY",
+                    "dsn": {},
+                    "name": "db"
+                }
+            },
+            "root_user": {
+                "password": "root"
+            },
+            "jwt": {
+                "secret": "foobar",
+                "algorithm": "HS256"
+            },
         },
-        "root_user": {
-            "password": "root"
-        },
-        "jwt": {
-            "secret": "foobar",
-            "algorithm": "HS256"
-        },
-    }, loop=loop)
+        loop=loop)
     aioapp.config.execute_actions()
     load_cached_schema()
 
@@ -174,6 +170,11 @@ class APICall(Directive):
             service_definition['context'] = get_dotted_name(
                 raw_service_definition.get('context', Interface))
 
+        service_definition.setdefault('description', '')
+        service_definition.setdefault('summary', '')
+        service_definition.setdefault('permission', '')
+        service_definition.setdefault('context', '')
+
         resp_body = None
         if resp.headers.get('content-type') == 'application/json':
             resp_body = loop.run_until_complete(resp.json())
@@ -182,6 +183,7 @@ class APICall(Directive):
             'path_spec': self.options.get('path_spec'),
             'request': {
                 'method': self.options.get('method', 'GET').upper(),
+                'method_lower': self.options.get('method', 'GET').lower(),
                 'path': self.options.get('path') or '/',
                 'headers': _clean_headers(headers),
                 'body': self.options.get('body')
@@ -191,15 +193,37 @@ class APICall(Directive):
                 'headers': _clean_headers(dict(resp.headers)),
                 'body': resp_body
             },
-            'service': service_definition
+            'service': service_definition,
         }
-        content = json.dumps(content)
 
-        content = content.replace(
-            str(server['server'].make_url('')),
-            '[server-url]')
-        node = nodes.paragraph(
-            content, content, classes=['g-api-call'])
+        rst_content = """.. http:{request[method_lower]}:: {request[path]}
+
+    {service[summary]}
+
+    {service[description]}
+
+    - Permission: **{service[permission]}**
+    - Context: **{service[context]}**
+
+    **Example request**
+
+    .. sourcecode:: http
+
+        {request[method]} {request[path]} HTTP/1.1
+        {request[body]}
+
+    **Example response**
+
+    .. sourcecode:: http
+
+        {response[status]}
+        {response[body]}
+
+""".format(**content).split("\n")
+        view = docutils.statemachine.ViewList(rst_content, '<gapi>')
+
+        node = nodes.paragraph()
+        self.state.nested_parse(view, 0, node)
         return [node]
 
 
