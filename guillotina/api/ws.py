@@ -84,7 +84,10 @@ class WebsocketsView(Service):
 
     async def handle_ws_request(self, ws, message):
         method = app_settings['http_methods']['GET']
-        frame_id = message['id']
+        try:
+            frame_id = message['id']
+        except KeyError:
+            frame_id = '0'
 
         parsed = parse.urlparse(message['path'])
         path = tuple(p for p in parsed.path.split('/') if p)
