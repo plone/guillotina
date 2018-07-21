@@ -52,7 +52,7 @@ setup(
         'aiohttp>=3.0.0,<4.0.0',
         'jsonschema',
         'python-dateutil',
-        'pycrypto',
+        'pycryptodome',
         'setuptools',
         'ujson',
         'zope.interface',

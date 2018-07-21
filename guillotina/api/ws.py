@@ -161,7 +161,7 @@ class WebsocketsView(Service):
                     continue
                 if message['op'] == 'close':
                     await ws.close()
-                elif message['op'] == 'GET':
+                elif message['op'].lower() == 'get':
                     txn = await tm.begin(request=self.request)
                     try:
                         await self.handle_ws_request(ws, message)
