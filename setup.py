@@ -73,7 +73,14 @@ setup(
             'pytest-cov',
             'coverage==4.0.3',
             'pytest-docker-fixtures'
-        ]
+        ],
+        'docs': [
+            'sphinx',
+            'recommonmark',
+            'sphinxcontrib-httpdomain',
+            'sphinxcontrib-httpexample',
+            'sphinx-guillotina-theme',
+        ],
     },
     entry_points={
         'console_scripts': [
