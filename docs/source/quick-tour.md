@@ -39,11 +39,15 @@ What is Guillotina like?
 
 ### Example service:
 
+See [instructions below](#playing-with-those-examples) to play with.
+
 ```eval_rst
 .. literalinclude:: examples/quick-tour/service.py
 ```
 
 ### Example content type:
+
+See [instructions below](#playing-with-those-examples) to play with.
 
 ```eval_rst
 .. literalinclude:: examples/quick-tour/ct.py
@@ -51,8 +55,10 @@ What is Guillotina like?
 
 ### Example usage:
 
+See [instructions below](#playing-with-those-examples) to play with.
+
 ```eval_rst
-.. http:post:: /db/container
+.. http:post:: /db/container/
 
     Create MyType
 
@@ -79,14 +85,14 @@ What is Guillotina like?
     :statuscode 500: Error processing request
 
 
-.. http:get:: /db/container/foobar/@foobar
+.. http:get:: /db/container/foobar/
 
     Get MyType
 
     **Example**
 
     ..  http:example:: curl wget httpie python-requests
-        :response: ./source/examples/quick-tour/create_type.response
+        :response: ./source/examples/quick-tour/query_mytype.response
 
         GET /db/container/foobar HTTP/1.1
         Accept: application/json
@@ -98,4 +104,134 @@ What is Guillotina like?
     :statuscode 200: no error
     :statuscode 401: Invalid Auth code
     :statuscode 500: Error processing request
+
+
+.. http:post:: /db/@foobar
+
+    Use foobar service
+
+    **Example**
+
+    ..  http:example:: curl wget httpie python-requests
+        :response: ./source/examples/quick-tour/query_foobar.response
+
+        POST /db/@foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
+
+    or
+
+    ..  http:example:: curl wget httpie python-requests
+        :response: ./source/examples/quick-tour/query_foobar.response
+
+        POST /db/container/@foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
+
+    or
+
+    ..  http:example:: curl wget httpie python-requests
+        :response: ./source/examples/quick-tour/query_foobar.response
+
+        POST /db/container/foobar/@foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
+
+
+    :reqheader Authorization: Required token to authenticate
+    :statuscode 200: no error
+    :statuscode 401: Invalid Auth code
+    :statuscode 500: Error processing request
+
+    You can see that `@foobar` service is available on any endpoints.
 ```
+
+### Playing with those examples
+
+In order to play with those examples you should install guillotina and cookiecutter, let's do that in a python virtualenv:
+
+```
+$ virtualenv .
+$ source ./bin/activate
+$ pip install guillotina cookiecutter
+```
+
+Then use guillotina templates to create an application:
+
+```
+$ ./bin/g create --template=application
+Could not find the configuration file config.json. Using default settings.
+full_name []: My App
+email []: guillotina@myapp.io
+package_name [guillotina_myproject]: myapp
+project_short_description [Guillotina server application python project]:
+Select open_source_license:
+1 - MIT license
+2 - BSD license
+3 - ISC license
+4 - Apache Software License 2.0
+5 - GNU General Public License v3
+6 - Not open source
+Choose from 1, 2, 3, 4, 5, 6 [1]:
+```
+
+You should now have a structure like the following one:
+
+```
+.
+└── myapp
+    ├── README.rst
+    ├── config.yaml
+    ├── myapp
+    │   ├── __init__.py
+    │   ├── api.py
+    │   └── install.py
+    └── setup.py
+```
+
+Now copy [Example content type](#example-content-type) section content in `myapp/myapp/content.py`.
+
+Add `configure.scan('myapp.content')` to `myapp/myapp/__init__.py` `includeme` function.
+
+`@foobar` service is already defined in `myapp/mayapp/api.py`.
+
+Then install `myapp`:
+
+```
+$ pip install -e myapp
+```
+
+Edit `myapp/config.yaml` to fit your needs, especially in term of db configuration.
+
+And run guillotina with:
+
+```
+$ g serve -c myapp/config.yaml
+```
+
+Now create a container:
+
+
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+    :response: ./source/examples/created.response
+
+    POST /db/ HTTP/1.1
+    Accept: application/json
+    Content-Type: application/json
+    Host: localhost:8080
+    Authorization: Basic cm9vdDpyb290
+
+    {
+        "@type": "Container",
+        "title": "Container 1",
+        "id": "container",
+        "description": "Description"
+    }
+
+```
+
+You can now use all above examples.
