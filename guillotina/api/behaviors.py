@@ -25,7 +25,7 @@ from guillotina.utils import resolve_dotted_name
         "200": {
             "description": "Successfully added behavior"
         },
-        "201": {
+        "412": {
             "description": "Behavior already assigned here"
         },
     })
@@ -40,9 +40,9 @@ async def default_patch(context, request):
         return Response(status=404)
     factory = get_cached_factory(context.type_name)
     if behavior_class in factory.behaviors:
-        return Response(status=201)
+        return Response(status=412)
     if behavior in context.__behaviors__:
-        return Response(status=201)
+        return Response(status=412)
     context.add_behavior(behavior)
     return {}
 
@@ -62,7 +62,7 @@ async def default_patch(context, request):
         "200": {
             "description": "Successfully removed behavior"
         },
-        "201": {
+        "412": {
             "description": "Behavior not assigned here"
         },
     })
@@ -73,9 +73,9 @@ async def default_delete(context, request):
     behavior_class = resolve_dotted_name(behavior)
     if behavior_class is not None:
         if behavior_class in factory.behaviors:
-            return Response(status=201)
+            return Response(status=412)
     if behavior not in context.__behaviors__:
-        return Response(status=201)
+        return Response(status=412)
     context.remove_behavior(behavior)
     return {}
 

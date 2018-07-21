@@ -5,7 +5,6 @@ from base64 import b64encode
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives  # type: ignore
-import docutils.statemachine
 from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.component import query_multi_adapter
@@ -18,8 +17,10 @@ from guillotina.utils import get_dotted_name
 from zope.interface import Interface
 
 import asyncio
+import docutils.statemachine
 import json
 import pkg_resources
+
 
 _server = None
 
@@ -171,12 +172,19 @@ class APICall(Directive):
                 self.options['basic_auth'].encode('utf-8')).decode("ascii")
             headers['Authorization'] = 'Basic {}'.format(encoded)
 
-        resp = loop.run_until_complete(self.handle_request(headers))
-        if self.options.get('hidden'):
-            return []
         path = self.options.get('path') or '/'
         ob, tail = loop.run_until_complete(self.get_content(path))
+
+        resp = loop.run_until_complete(self.handle_request(headers))
+        if 'hidden' in self.options:
+            return []
+
         service_definition = {}
+        service_definition.setdefault('description', '')
+        service_definition.setdefault('summary', '')
+        service_definition.setdefault('permission', '')
+        service_definition.setdefault('context', '')
+
         raw_service_definition = self.get_service_definition(ob, tail)
         if raw_service_definition is not None:
             for key, value in raw_service_definition.items():
@@ -188,18 +196,14 @@ class APICall(Directive):
             service_definition['context'] = get_dotted_name(
                 raw_service_definition.get('context', Interface))
 
-        service_definition.setdefault('description', '')
-        service_definition.setdefault('summary', '')
-        service_definition.setdefault('permission', '')
-        service_definition.setdefault('context', '')
-
         resp_body = None
         if resp.headers.get('content-type') == 'application/json':
             resp_body = loop.run_until_complete(resp.json())
             resp_body = _fmt_body(resp_body, 8)
 
         content = {
-            'path_spec': self.options.get('path_spec'),
+            'path_spec': (self.options.get('path_spec') or
+                          self.options.get('method', 'GET').upper()),
             'request': {
                 'method': self.options.get('method', 'GET').upper(),
                 'method_lower': self.options.get('method', 'GET').lower(),
@@ -214,8 +218,7 @@ class APICall(Directive):
             },
             'service': service_definition,
         }
-
-        rst_content = """.. http:{request[method_lower]}:: {request[path]}
+        rst_content = """.. http:{request[method_lower]}:: {path_spec}
 
     {service[summary]}
 
@@ -243,11 +246,7 @@ class APICall(Directive):
         view = docutils.statemachine.StringList(rst_content, '<gapi>')
 
         node = nodes.paragraph()
-        try:
-            self.state.nested_parse(view, 0, node)
-        except:
-            import pdb; pdb.set_trace()
-            raise
+        self.state.nested_parse(view, 0, node)
         return [node]
 
 

@@ -1,6 +1,14 @@
 Item
 ====
 
+.. make sure we have a container
+.. http:gapi::
+   :hidden: yes
+   :method: POST
+   :path: /db
+   :basic_auth: root:root
+   :headers: Content-Type:application/json
+   :body: {"@type": "Container", "id": "container"}
 
 .. http:gapi::
    :path_spec: /(db)/(container)

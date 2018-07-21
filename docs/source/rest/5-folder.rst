@@ -171,23 +171,23 @@ Content
 
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)/@addable-types
-   :path: /db/container/foobar2/@addable-types
+   :path: /db/container/foobar3/@addable-types
    :basic_auth: root:root
 
 
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)/@ids
-   :path: /db/container/foobar2/@ids
+   :path: /db/container/foobar3/@ids
    :basic_auth: root:root
 
 
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)/@items
-   :path: /db/container/foobar2/@items
+   :path: /db/container/foobar3/@items
    :basic_auth: root:root
 
 
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)/@invalidate-cache
-   :path: /db/container/foobar2/@invalidate-cache
+   :path: /db/container/foobar3/@invalidate-cache
    :basic_auth: root:root
