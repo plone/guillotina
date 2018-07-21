@@ -101,11 +101,8 @@ from .views import IPOST  # noqa
 from .views import IPROPFIND  # noqa
 from .views import IPUT  # noqa
 from .views import IView  # noqa
-from guillotina.i18n import MessageFactory
 from zope.interface import Interface
 
-
-_ = MessageFactory('guillotina')
 
 DEFAULT_ADD_PERMISSION = 'guillotina.AddContent'
 DEFAULT_READ_PERMISSION = 'guillotina.ViewContent'

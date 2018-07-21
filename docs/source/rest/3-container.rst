@@ -1,6 +1,18 @@
 Container
 =========
 
+
+.. ignored http call below to make sure we have a container
+
+.. http:gapi::
+   :path: /db
+   :path_spec: /(db)
+   :method: POST
+   :basic_auth: root:root
+   :headers: Content-Type: application/json
+   :body: {"@type": "Container", "id": "container"}
+   :hidden:
+
 .. http:gapi::
    :path_spec: /(db)/(container)
    :path: /db/container

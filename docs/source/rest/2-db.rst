@@ -1,6 +1,14 @@
 Database
 ========
 
+.. ignored http call below to make sure we don't have a container already
+.. http:gapi::
+   :path_spec: /(db)/(container)
+   :path: /db/container
+   :method: DELETE
+   :basic_auth: root:root
+   :hidden:
+
 .. http:gapi::
    :path: /db
    :path_spec: /(db)

@@ -1,4 +1,5 @@
 from aiohttp import web_request
+from typing import Callable, Any, Coroutine
 from collections import OrderedDict
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
@@ -39,18 +40,34 @@ class Request(web_request.Request):
     exc = None
     view_name = None
     found_view = None
-    matchdict: Dict[str, str] = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._futures = {}
         self._events = OrderedDict()
         self._initialized = time.time()
+        #: Dictionary of matched path parameters on request
+        self.matchdict: Dict[str, str] = {}
 
-    def record(self, event_name):
+    def record(self, event_name: str):
+        '''
+        Record event on the request
+
+        :param event_name: name of event
+        '''
         self._events[event_name] = time.time()
 
-    def add_future(self, name, fut, scope='', args=None, kwargs=None):
+    def add_future(self, name: str, fut: Callable[..., Coroutine[Any, Any, Any]],
+                   scope: str='', args=None, kwargs=None):
+        '''
+        Register a future to be executed after the request has finished.
+
+        :param name: name of future
+        :param fut: future to execute after request
+        :param scope: group the futures to execute different groupings together
+        :param args: arguments to execute future with
+        :param kwargs: kwargs to execute future with
+        '''
         if scope not in self._futures:
             self._futures[scope] = {}
         self._futures[scope][name] = {
@@ -59,7 +76,13 @@ class Request(web_request.Request):
             'kwargs': kwargs
         }
 
-    def get_future(self, name, scope=''):
+    def get_future(self, name: str, scope: str=''):
+        '''
+        Get a registered future
+
+        :param name: scoped futures to execute. Leave default for normal behavior
+        :param scope: scope name the future was registered for
+        '''
         try:
             if scope not in self._futures:
                 return
@@ -80,10 +103,11 @@ class Request(web_request.Request):
         return self._view_error
 
     @profilable
-    def execute_futures(self, scope=''):
+    def execute_futures(self, scope: str=''):
         '''
-        Should *not* be a coroutine since the deleting of
-        the request object causes this to be canceled otherwise.
+        Execute all the registered futures in a new task
+
+        :param scope: scoped futures to execute. Leave default for normal behavior
         '''
         if scope not in self._futures:
             return

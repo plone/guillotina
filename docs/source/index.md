@@ -70,13 +70,14 @@ The endpoints available around these objects are detailed below:
    developer/async_utils
 ```
 
-# Programming API
+# Programming API Reference
 
 ```eval_rst
 .. toctree::
    :maxdepth: 1
 
    api/content
+   api/request
    api/response
    api/fields
    api/utils

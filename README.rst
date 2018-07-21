@@ -145,7 +145,6 @@ Join us to talk about Guillotina at https://gitter.im/plone/guillotina
 Document
 --------
 
-- request/response objects
 - dynamic fields
 - auth integration
 - catalog integration?
