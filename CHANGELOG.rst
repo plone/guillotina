@@ -1,6 +1,9 @@
 4.0.7 (unreleased)
 ------------------
 
+- Improve and fix docs
+  [vangheem]
+
 - Fix interface for layers
   [bloodbare]
 
