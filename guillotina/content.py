@@ -210,12 +210,18 @@ async def create_content(type_, **kw) -> IResource:
 
 @profilable
 async def create_content_in_container(
-        container: IAsyncContainer, type_: str, id_: str, request: IRequest=None,
+        parent: IAsyncContainer, type_: str, id_: str, request: IRequest=None,
         check_security=True, **kw) -> IResource:
     """Utility to create a content.
 
     This method is the one to use to create content.
     id_ can be None
+
+    :param parent: where to create content inside of
+    :param type_: content type to create
+    :param id_: id to give content in parent object
+    :param request: <optional>
+    :param check_security: be able to disable security checks
     """
     factory = get_cached_factory(type_)
 
@@ -230,29 +236,29 @@ async def create_content_in_container(
             request = get_current_request()
 
         if permission is not None and \
-                not IInteraction(request).check_permission(permission.id, container):
-            raise NoPermissionToAdd(str(container), type_)
+                not IInteraction(request).check_permission(permission.id, parent):
+            raise NoPermissionToAdd(str(parent), type_)
 
-    constrains = IConstrainTypes(container, None)
+    constrains = IConstrainTypes(parent, None)
     if constrains is not None:
         if not constrains.is_type_allowed(type_):
-            raise NotAllowedContentType(str(container), type_)
+            raise NotAllowedContentType(str(parent), type_)
 
     # We create the object with at least the ID
-    obj = factory(id=id_, parent=container)
+    obj = factory(id=id_, parent=parent)
     for key, value in kw.items():
         setattr(obj, key, value)
 
-    txn = getattr(container, '_p_jar', None) or get_transaction()
+    txn = getattr(parent, '_p_jar', None) or get_transaction()
     if txn is None or not txn.storage.supports_unique_constraints:
         # need to manually check unique constraints
-        if await container.async_contains(obj.id):
+        if await parent.async_contains(obj.id):
             raise ConflictIdOnContainer(f'Duplicate ID: {container} -> {obj.id}')
 
     obj.__new_marker__ = True
 
-    await notify(BeforeObjectAddedEvent(obj, container, id_))
-    await container.async_set(obj.id, obj)
+    await notify(BeforeObjectAddedEvent(obj, parent, id_))
+    await parent.async_set(obj.id, obj)
     return obj
 
 
@@ -451,12 +457,17 @@ class Folder(Resource):
     async def async_contains(self, key: str) -> bool:
         """
         Asynchronously check if key exists inside this folder
+
+        :param key: key of child object to check
         """
         return await self._get_transaction().contains(self._p_oid, key)
 
     async def async_set(self, key: str, value: IResource) -> None:
         """
         Asynchronously set an object in this folder
+
+        :param key: key of child object to set
+        :param value: object to set as child
         """
         value.__parent__ = self
         value.__name__ = key
@@ -469,6 +480,8 @@ class Folder(Resource):
                         suppress_events=False) -> IResource:
         """
         Asynchronously get an object inside this folder
+
+        :param key: key of child object to get
         """
         try:
             val = await self._get_transaction().get_child(self, key)
@@ -484,7 +497,9 @@ class Folder(Resource):
                               suppress_events=False) -> AsyncIterator[
             Tuple[IResource]]:
         """
-        Asynchronously get an object inside this folder
+        Asynchronously get an multiple objects inside this folder
+
+        :param keys: keys of child objects to get
         """
         async for item in self._get_transaction().get_children(self, keys):
             yield item
@@ -492,6 +507,8 @@ class Folder(Resource):
     async def async_del(self, key: str) -> None:
         """
         Asynchronously delete object in the folder
+
+        :param key: key of child objec to delete
         """
         return self._get_transaction().delete(await self.async_get(key))
 

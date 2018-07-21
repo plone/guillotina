@@ -39,6 +39,13 @@ def strings_differ(string1: str, string2: str) -> bool:
 
         http://seb.dbzteam.org/crypto/python-oauth-timing-hmac.pdf
 
+    >>> strings_differ('one', 'one')
+    False
+    >>> strings_differ('one', 'two')
+    True
+
+    :param string1:
+    :param string2:
     """
     if len(string1) != len(string2):
         return True
@@ -55,6 +62,11 @@ def get_random_string(length: int = 30,
     """
     Heavily inspired by Plone/Django
     Returns a securely generated random string.
+
+    >>> get_random_string(length=10)
+
+    :param length:
+    :param allowed_chars:
     """
     if not using_sys_random:
         # do our best to get secure random without sysrandom
@@ -69,7 +81,6 @@ def merge_dicts(d1: dict, d2: dict) -> dict:
     if either mapping has leaves that are non-dicts,
     the second's leaf overwrites the first's.
     """
-    # in Python 2, use .iteritems()!
     for k, v in d1.items():
         if k in d2:
             # this next check is the only difference!
@@ -87,6 +98,17 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     """
     Call a function with the supplied arguments.
     If the result is a coroutine, await it.
+
+    >>> async def foobar(): return 'hi'
+    >>> async def async_foobar(): return 'hi'
+    >>> await apply_coroutine(foobar)
+    'hi'
+    >>> await apply_coroutine(async_foobar)
+    'hi'
+
+    :param func: function to run as coroutiune if one
+    :param *args: args to call function with
+    :param **kwargs: kwargs to call function with
     """
     result = func(*args, **kwargs)
     if asyncio.iscoroutine(result):
@@ -193,14 +215,33 @@ def list_or_dict_items(val):
     return [(k, v) for k, v in val.items()]
 
 
-async def run_async(func, *args, **kwargs):
+async def run_async(func, *args, **kwargs) -> object:
+    '''
+    Run a non-async function in an executor
+
+    >>> async def foobar(): return 'hi'
+    >>> await run_async(foobar)
+    'hi'
+
+    :param func: function to run as coroutiune if one
+    :param *args: args to call function with
+    :param **kwargs: kwargs to call function with
+    '''
     root = get_utility(IApplication, name='root')
     loop = asyncio.get_event_loop()
     func = partial(func, *args, **kwargs)
     return await loop.run_in_executor(root.executor, func)
 
 
-def safe_unidecode(val):
+def safe_unidecode(val: bytes) -> str:
+    '''
+    Convert bytes to a string in a safe way
+
+    >>> safe_unidecode(b'foobar')
+    'foobar'
+
+    :param val: bytes to convert
+    '''
     if isinstance(val, str):
         # already decoded
         return val

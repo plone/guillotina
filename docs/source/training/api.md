@@ -164,7 +164,7 @@ To modify, we use the same endpoint but with a `POST`.
    :path_spec: /(db)/(container)/(content)/@sharing
    :method: POST
    :basic_auth: root:root
-   :body:{
+   :body: {
           "prinperm": [
             {
               "principal": "foobar",

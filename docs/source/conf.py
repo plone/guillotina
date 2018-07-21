@@ -37,6 +37,7 @@ from recommonmark.transform import AutoStructify
 extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
     'sphinxcontrib.httpdomain',
     'sphinxcontrib.httpexample',
     'guillotina.documentation.sphinx',
