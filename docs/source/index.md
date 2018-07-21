@@ -68,7 +68,23 @@ The endpoints available around these objects are detailed below:
    developer/exceptions
    developer/fields
    developer/async_utils
+   developer/debugging
 ```
+
+# Deploying
+
+- [Installing guillotina](./installation/installation.html)
+  is simply done with pip but if you need to run with docker,
+  [we also have you covered](https://hub.docker.com/r/guillotina/guillotina/).
+- Guillotina has an quite a few
+  [configuration options](./installation/configuration.html)
+  you might be curious about.
+- You can also setup
+  [logging configuration](./installation/logging.html).
+- Finally, you may also need to put Guillotina
+  [behind a proxy](./installation/production.html)
+  when you deploy it.
+
 
 # Programming API Reference
 
@@ -96,6 +112,7 @@ The endpoints available around these objects are detailed below:
 
 # About
 
+- [Read about](./installation/about.html) the rich history of the project
 
 ```eval_rst
  .. toctree::
