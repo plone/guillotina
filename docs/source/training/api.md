@@ -31,6 +31,7 @@ To create content, do a `POST` request on a container or folder object.
    :path: /db/container
    :path_spec: /(db)/(container)
    :basic_auth: root:root
+   :method: POST
    :body: {
           "@type": "Item",
           "id": "foobar5"

@@ -41,7 +41,7 @@ class SerializeFactoryToJson(object):
             serializer = get_multi_adapter(
                 (field, factory.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            result['properties'][name] = await serializer()
+            result['properties'][name] = serializer()
 
             invariants = []
             for i in factory.schema.queryTaggedValue('invariants', []):
@@ -53,7 +53,7 @@ class SerializeFactoryToJson(object):
             schema_serializer = get_multi_adapter(
                 (schema, self.request), ISchemaSerializeToJson)
 
-            serialization = await schema_serializer()
+            serialization = schema_serializer()
             result['properties'][schema_serializer.name] = \
                 {'$ref': '#/definitions/' + schema_serializer.name},
             result['definitions'][schema_serializer.name] = serialization
@@ -82,12 +82,12 @@ class DefaultSchemaSerializer(object):
             'invariants': []
         }
 
-    async def __call__(self):
+    def __call__(self):
         for name, field in get_fields_in_order(self.schema):
             serializer = get_multi_adapter(
                 (field, self.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            self.schema_json['properties'][name] = await serializer()
+            self.schema_json['properties'][name] = serializer()
             if field.required:
                 self.schema_json['required'].append(name)
         self.schema_json['invariants'] = self.invariants

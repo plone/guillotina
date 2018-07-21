@@ -45,7 +45,6 @@ class TraversableFieldService(View):
                     break
         # Check that its a File Field
         if field is None:
-            import pdb; pdb.set_trace()
             raise HTTPNotFound(content={
                 'reason': 'No valid name'})
 

@@ -43,7 +43,7 @@ The endpoints available around these objects are detailed below:
    rest/folder
 ```
 
-# Narrative Documentation
+# Narrative Developer Documentation
 
 ```eval_rst
 .. toctree::

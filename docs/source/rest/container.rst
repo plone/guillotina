@@ -100,3 +100,84 @@ Addons
    :basic_auth: root:root
    :body: {"id": "docaddon"}
 
+
+
+Dynamic Fields
+--------------
+
+Dynamic fields are done with the `IDynamicFields` behavior so
+first we add the behavior.
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/@behaviors
+   :path: /db/container/@behaviors
+   :method: PATCH
+   :basic_auth: root:root
+   :body: {"behavior": "guillotina.behaviors.dynamic.IDynamicFields"}
+
+
+Then, we can add a field.
+
+.. http:gapi::
+   :path_spec: /(db)/(container)
+   :path: /db/container
+   :method: PATCH
+   :basic_auth: root:root
+   :body: {
+      "guillotina.behaviors.dynamic.IDynamicFields": {
+         "fields": {
+            "foobar": {
+               "title": "Hello field",
+               "type": "text"
+            }
+         }
+      }}
+
+
+To inspect the dynamic fields available on content
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/@dynamic-fields
+   :path: /db/container/@dynamic-fields
+   :method: GET
+   :basic_auth: root:root
+
+
+
+Update dynamic field values
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/(id)
+   :path: /db/container
+   :method: POST
+   :basic_auth: root:root
+   :body: {
+      "@type": "Item",
+      "id": "foobar-fields",
+      "@behaviors": ["guillotina.behaviors.dynamic.IDynamicFieldValues"]}
+
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/(id)
+   :path: /db/container/foobar-fields
+   :method: PATCH
+   :basic_auth: root:root
+   :body: {
+         "guillotina.behaviors.dynamic.IDynamicFieldValues": {
+            "values": {
+               "op": "update",
+               "value": [{
+                  "key": "foobar",
+                  "value": "value"
+               }]
+            }
+         }
+      }
+
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/(id)
+   :path: /db/container/foobar-fields?include=guillotina.behaviors.dynamic.IDynamicFieldValues
+   :method: GET
+   :basic_auth: root:root
+

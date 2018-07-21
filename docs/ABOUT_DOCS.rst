@@ -14,7 +14,25 @@ we're difficult I guess.
 todo
 ----
 
-- request object
+- auth integration
+- catalog integration?
+- commands?
+- databases
+- files
+- json serialization/deserialization
+- deploying
+- async utils
+- cors
+- error handling
 - events
-- testing
-- middlewares
+- profiling
+- renderers
+- routing
+- transactions?
+- all configuration?
+- web sockets
+- describe request flow/process
+- debugging/x-debug/etc
+- go through interfaces and see what is not documented
+- go through all settings
+- authentication
