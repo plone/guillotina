@@ -31,31 +31,45 @@ Features:
 What is Guillotina like?
 ========================
 
-Example configuration:
+### Example configuration:
 
-.. literalinclude:: examples/config.yaml
+```eval_rst
+.. literalinclude:: examples/quick-tour/config.yaml
+```
 
-Example service:
+### Example service:
 
-.. literalinclude:: examples/service.py
+See [instructions below](#playing-with-those-examples) to play with.
 
-Example content type:
+```eval_rst
+.. literalinclude:: examples/quick-tour/service.py
+```
 
-.. literalinclude:: examples/ct.py
+### Example content type:
 
-Example usage:
+See [instructions below](#playing-with-those-examples) to play with.
 
-.. http:post:: /db/container
+```eval_rst
+.. literalinclude:: examples/quick-tour/ct.py
+```
 
-     Create MyType
+### Example usage:
 
-     **Example request**
+See [instructions below](#playing-with-those-examples) to play with.
 
-     .. sourcecode:: http
+```eval_rst
+.. http:post:: /db/container/
+
+    Create MyType
+
+    **Example**
+
+    ..  http:example:: curl wget httpie python-requests
 
         POST /db/container HTTP/1.1
         Accept: application/json
         Content-Type: application/json
+        Host: localhost:8080
         Authorization: Basic cm9vdDpyb290
 
         {
@@ -64,41 +78,221 @@ Example usage:
           "foobar": "foobar"
         }
 
-     **Example response**
-
-     .. sourcecode:: http
 
         HTTP/1.1 201 OK
         Content-Type: application/json
 
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 201: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+    :reqheader Authorization: Required token to authenticate
+    :statuscode 201: no error
+    :statuscode 401: Invalid Auth code
+    :statuscode 500: Error processing request
 
 
-.. http:get:: /db/container/foobar/@foobar
+.. http:get:: /db/container/foobar/
 
     Get MyType
 
-    **Example request**
+    **Example**
 
-    .. sourcecode:: http
+    ..  http:example:: curl wget httpie python-requests
 
-       GET /db/container/foobar HTTP/1.1
-       Accept: application/json
-       Authorization: Basic cm9vdDpyb290
+        GET /db/container/foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
 
-    **Example response**
 
-    .. sourcecode:: http
+        HTTP/1.1 200 OK
+        Content-Length: 851
+        Content-Type: application/json
 
-       HTTP/1.1 201 OK
-       Content-Type: application/json
+        {
+            "@id": "http://localhost:8080/db/container/foobar",
+            "@name": "foobar",
+            "@type": "MyType",
+            "@uid": "e3f|81c5406638bd4a68b89275f739fc18b2",
+            "UID": "e3f|81c5406638bd4a68b89275f739fc18b2",
+            "creation_date": "2018-07-21T13:14:15.245181+00:00",
+            "foobar": "foobar",
+            "guillotina.behaviors.dublincore.IDublinCore": {
+                "contributors": [
+                    "root"
+                ],
+                "creation_date": "2018-07-21T13:14:15.245181+00:00",
+                "creators": [
+                    "root"
+                ],
+                "description": null,
+                "effective_date": null,
+                "expiration_date": null,
+                "modification_date": "2018-07-21T13:14:15.245181+00:00",
+                "publisher": null,
+                "tags": null,
+                "title": null
+            },
+            "is_folderish": false,
+            "modification_date": "2018-07-21T13:14:15.245181+00:00",
+            "parent": {
+                "@id": "http://localhost:8080/db/container",
+                "@name": "container",
+                "@type": "Container",
+                "@uid": "e3f4e401d12843a4a303666da4158458",
+                "UID": "e3f4e401d12843a4a303666da4158458"
+            }
+        }
 
-       {"foo": "bar"}
+
 
     :reqheader Authorization: Required token to authenticate
     :statuscode 200: no error
     :statuscode 401: Invalid Auth code
     :statuscode 500: Error processing request
+
+
+.. http:post:: /db/@foobar
+
+    Use foobar service
+
+    **Example**
+
+    ..  http:example:: curl wget httpie python-requests
+
+        POST /db/@foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
+
+
+        HTTP/1.1 201 OK
+        Content-Type: application/json
+
+        { "foo": "bar"}
+
+    or
+
+    ..  http:example:: curl wget httpie python-requests
+
+        POST /db/container/@foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
+
+
+        HTTP/1.1 201 OK
+        Content-Type: application/json
+
+        { "foo": "bar"}
+
+    or
+
+    ..  http:example:: curl wget httpie python-requests
+
+        POST /db/container/foobar/@foobar HTTP/1.1
+        Accept: application/json
+        Host: localhost:8080
+        Authorization: Basic cm9vdDpyb290
+
+
+        HTTP/1.1 201 OK
+        Content-Type: application/json
+
+        { "foo": "bar"}
+
+
+    :reqheader Authorization: Required token to authenticate
+    :statuscode 200: no error
+    :statuscode 401: Invalid Auth code
+    :statuscode 500: Error processing request
+
+    You can see that `@foobar` service is available on any endpoints.
+```
+
+### Playing with those examples
+
+In order to play with those examples you should install guillotina and cookiecutter, let's do that in a python virtualenv:
+
+```
+$ virtualenv .
+$ source ./bin/activate
+$ pip install guillotina cookiecutter
+```
+
+Then use guillotina templates to create an application:
+
+```
+$ ./bin/g create --template=application
+Could not find the configuration file config.json. Using default settings.
+full_name []: My App
+email []: guillotina@myapp.io
+package_name [guillotina_myproject]: myapp
+project_short_description [Guillotina server application python project]:
+Select open_source_license:
+1 - MIT license
+2 - BSD license
+3 - ISC license
+4 - Apache Software License 2.0
+5 - GNU General Public License v3
+6 - Not open source
+Choose from 1, 2, 3, 4, 5, 6 [1]:
+```
+
+You should now have a structure like the following one:
+
+```
+.
+└── myapp
+    ├── README.rst
+    ├── config.yaml
+    ├── myapp
+    │   ├── __init__.py
+    │   ├── api.py
+    │   └── install.py
+    └── setup.py
+```
+
+Now copy [Example content type](#example-content-type) section content in `myapp/myapp/content.py`.
+
+Add `configure.scan('myapp.content')` to `myapp/myapp/__init__.py` `includeme` function.
+
+`@foobar` service is already defined in `myapp/mayapp/api.py`.
+
+Then install `myapp`:
+
+```
+$ pip install -e myapp
+```
+
+Edit `myapp/config.yaml` to fit your needs, especially in term of db configuration.
+
+And run guillotina with:
+
+```
+$ g serve -c myapp/config.yaml
+```
+
+Now create a container:
+
+
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/ HTTP/1.1
+    Accept: application/json
+    Content-Type: application/json
+    Host: localhost:8080
+    Authorization: Basic cm9vdDpyb290
+
+    {
+        "@type": "Container",
+        "title": "Container 1",
+        "id": "container",
+        "description": "Description"
+    }
+
+
+    HTTP/1.1 201 OK
+    Content-Type: application/json
+
+```
+
+You can now use all above examples.

@@ -1,6 +1,5 @@
 ---
 applications:
-- guillotina_dbusers
 - myapp
 databases:
 - db:
