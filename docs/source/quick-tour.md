@@ -31,25 +31,25 @@ Features:
 What is Guillotina like?
 ========================
 
-Example configuration:
+### Example configuration:
 
 ```eval_rst
 .. literalinclude:: examples/config.yaml
 ```
 
-Example service:
+### Example service:
 
 ```eval_rst
 .. literalinclude:: examples/service.py
 ```
 
-Example content type:
+### Example content type:
 
 ```eval_rst
 .. literalinclude:: examples/ct.py
 ```
 
-Example usage:
+### Example usage:
 
 ```eval_rst
 .. http:post:: /db/container
