@@ -62,6 +62,7 @@ Let's create one:
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
+    :response: ./source/examples/created.response
 
     POST /db/ HTTP/1.1
     Accept: application/json
@@ -82,6 +83,7 @@ and create content inside the container:
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
+    :response: ./source/examples/created.response
 
     POST /db/guillotina/ HTTP/1.1
     Accept: application/json

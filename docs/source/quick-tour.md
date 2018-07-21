@@ -59,7 +59,7 @@ What is Guillotina like?
     **Example**
 
     ..  http:example:: curl wget httpie python-requests
-        :response: ./source/examples/quick-tour/create_type.response
+        :response: ./source/examples/created.response
 
         POST /db/container HTTP/1.1
         Accept: application/json
