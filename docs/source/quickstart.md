@@ -78,3 +78,101 @@ and create content inside the container:
     "id": "news"
   }' "http://127.0.0.1:8080/db/guillotina/"
 ```
+
+## Retrieving your data
+
+Let's navigating throught your newly created data.
+
+First you can see all your containers using the following, notice that at the moment there's only one named `guillotina`:
+
+```
+curl --user root:root "http://127.0.0.1:8080/db/"
+```
+```
+{
+    "@type": "Database",
+    "containers": [
+        "guillotina"
+    ]
+}
+```
+
+Then you could explore container data using:
+
+```
+curl --user root:root "http://127.0.0.1:8080/db/guillotina"
+```
+```
+{
+    "@id": "http://localhost:8080/db/guillotina",
+    "@name": "guillotina",
+    "@type": "Container",
+    "@uid": "7d9ebe1b2e1044688c83985e9e0a7ef3",
+    "UID": "7d9ebe1b2e1044688c83985e9e0a7ef3",
+    "__behaviors__": [],
+    "__name__": "guillotina",
+    "creation_date": "2018-07-21T09:37:28.125034+00:00",
+    "is_folderish": true,
+    "items": [
+        {
+            "@id": "http://localhost:8080/db/guillotina/news",
+            "@name": "news",
+            "@type": "Item",
+            "@uid": "7d9|11729830722c4e43924df18d21d14bdf",
+            "UID": "7d9|11729830722c4e43924df18d21d14bdf"
+        }
+    ],
+    "length": 1,
+    "modification_date": "2018-07-21T09:37:28.125034+00:00",
+    "parent": {},
+    "title": "Guillotina 1",
+    "type_name": "Container",
+    "uuid": "7d9ebe1b2e1044688c83985e9e0a7ef3"
+}
+```
+
+And finally query a specific content inside the container using:
+
+```
+curl --user root:root "http://127.0.0.1:8080/db/guillotina/news"
+```
+```
+{
+    "@id": "http://localhost:8080/db/guillotina/news",
+    "@name": "news",
+    "@type": "Item",
+    "@uid": "7d9|11729830722c4e43924df18d21d14bdf",
+    "UID": "7d9|11729830722c4e43924df18d21d14bdf",
+    "__behaviors__": [],
+    "__name__": "news",
+    "creation_date": "2018-07-21T09:37:41.863014+00:00",
+    "guillotina.behaviors.dublincore.IDublinCore": {
+        "contributors": [
+            "root"
+        ],
+        "creation_date": "2018-07-21T09:37:41.863014+00:00",
+        "creators": [
+            "root"
+        ],
+        "description": null,
+        "effective_date": null,
+        "expiration_date": null,
+        "modification_date": "2018-07-21T09:37:41.863014+00:00",
+        "publisher": null,
+        "tags": null,
+        "title": "News"
+    },
+    "is_folderish": false,
+    "modification_date": "2018-07-21T09:37:41.863014+00:00",
+    "parent": {
+        "@id": "http://localhost:8080/db/guillotina",
+        "@name": "guillotina",
+        "@type": "Container",
+        "@uid": "7d9ebe1b2e1044688c83985e9e0a7ef3",
+        "UID": "7d9ebe1b2e1044688c83985e9e0a7ef3"
+    },
+    "title": "News",
+    "type_name": "Item",
+    "uuid": "7d9|11729830722c4e43924df18d21d14bdf"
+}
+```
