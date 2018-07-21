@@ -84,6 +84,7 @@ class WebsocketsView(Service):
     async def handle_ws_request(self, ws, message):
         method = app_settings['http_methods']['GET']
         path = tuple(p for p in message['path'].split('/') if p)
+        frame_id = message['id']
 
         from guillotina.traversal import traverse
         obj, tail = await traverse(self.request, self.request.container, path)
@@ -91,6 +92,7 @@ class WebsocketsView(Service):
         if tail and len(tail) > 0:
             # convert match lookups
             view_name = routes.path_to_view_name(tail)
+            view_name = view_name.split('?')[0]
         elif not tail:
             view_name = ''
         else:
@@ -119,14 +121,16 @@ class WebsocketsView(Service):
 
         if view is None:
             return await ws.send_str(ujson.dumps({
-                'error': 'Not found'
+                'error': 'Not found',
+                'id': frame_id
             }))
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
         if not security.check_permission(view_permission, view):
             return await ws.send_str(ujson.dumps({
-                'error': 'No view access'
+                'error': 'No view access',
+                'id': frame_id
             }))
 
         if hasattr(view, 'prepare'):
@@ -140,7 +144,11 @@ class WebsocketsView(Service):
             resp = await apply_rendering(view, self.request, view_result)
 
         # Return the value, body is always encoded
-        await ws.send_str(resp.body.decode('utf-8'))
+        response_object = ujson.dumps({
+            'data': resp.body.decode('utf-8'),
+            'id': frame_id
+        })
+        await ws.send_str(response_object)
 
         # Wait for possible value
         self.request.execute_futures()
