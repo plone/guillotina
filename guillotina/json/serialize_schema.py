@@ -41,7 +41,7 @@ class SerializeFactoryToJson(object):
             serializer = get_multi_adapter(
                 (field, factory.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            result['properties'][name] = serializer()
+            result['properties'][name] = await serializer()
 
             invariants = []
             for i in factory.schema.queryTaggedValue('invariants', []):
@@ -90,7 +90,7 @@ class DefaultSchemaSerializer(object):
             serializer = get_multi_adapter(
                 (field, self.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            self.schema_json['properties'][name] = serializer()
+            self.schema_json['properties'][name] = serializer.serialize()
             if field.required:
                 self.schema_json['required'].append(name)
         self.schema_json['invariants'] = self.invariants
