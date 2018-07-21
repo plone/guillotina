@@ -17,6 +17,21 @@ Are you new to Guillotina? This is the place to start!
 
 # REST API
 
+After you're up and running, primarily, Guillotina provides a REST API to work with
+and it is what you should become the most familiar with.
+
+
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   rest/1-application
+   rest/2-db
+   rest/3-container
+   rest/4-item
+   rest/5-folder
+```
 
 # Developers
 
@@ -27,16 +42,13 @@ Are you new to Guillotina? This is the place to start!
 # About
 
 
-Detailed Documentation
-======================
-
+```eval_rst
  .. toctree::
-    :maxdepth: 2
+    :hidden:
+    :glob:
 
-    about
-    quickstart
-    rest/index
-    installation/index
-    awesome
-    developer/index
-    training/index
+    developer/*
+    installation/*
+    training/*
+    *
+```

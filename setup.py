@@ -29,7 +29,7 @@ setup(
     description='asyncio REST API Resource database',  # noqa
     long_description=long_description,
     keywords=['asyncio', 'REST', 'Framework', 'transactional'],
-    author='Ramon & Asko & Nathan',
+    author='Ramon Navarro Bosch & Nathan Van Gheem',
     author_email='ramon@plone.org',
     classifiers=[
         'License :: OSI Approved :: BSD License',

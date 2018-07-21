@@ -171,6 +171,7 @@ Document
 - debugging/x-debug/etc
 - go through interfaces and see what is not documented
 - go through all settings
+- authentication
 
 
 Organization

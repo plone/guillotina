@@ -7,6 +7,7 @@ URL_MATCH_RE = re.compile('\{[a-zA-Z\_\-]+\}')
 
 
 class Route:
+    service_configuration = None
 
     def __init__(self, raw_route):
         self.raw = raw_route

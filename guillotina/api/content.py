@@ -440,6 +440,7 @@ class SharingPUT(SharingPOST):
 @configure.service(
     context=IResource, method='GET',
     permission='guillotina.AccessContent', name='@canido',
+    summary="Check if user has permissions on context",
     parameters=[{
         "name": "permission",
         "in": "query",
