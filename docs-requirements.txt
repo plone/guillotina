@@ -2,3 +2,4 @@ recommonmark
 sphinxcontrib-httpexample
 sphinx==1.6.4
 sphinx-guillotina-theme==1.0.1
+git+https://github.com/cdevienne/sphinxcontrib-httpexample#egg=sphinxcontrib-httpexample
