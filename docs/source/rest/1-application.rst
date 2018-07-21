@@ -3,7 +3,7 @@ Application
 
 
 .. http:gapi::
-   :path:
+   :path: /
    :basic_auth: root:root
 
 .. http:gapi::
