@@ -27,6 +27,7 @@ from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
+from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
@@ -39,6 +40,7 @@ from guillotina.interfaces import ILayers
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
+from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IStaticDirectory
@@ -51,6 +53,7 @@ from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 from typing import AsyncIterator
 from typing import FrozenSet
+from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -164,7 +167,7 @@ def iter_schemata_for_type(type_name):
         yield schema
 
 
-def get_all_possible_schemas_for_type(type_name):
+def get_all_possible_schemas_for_type(type_name) -> List[Interface]:
     result = set()
     factory = get_cached_factory(type_name)
     if factory.schema is not None:
@@ -177,7 +180,7 @@ def get_all_possible_schemas_for_type(type_name):
     return [b for b in result]
 
 
-def iter_schemata(obj):
+def iter_schemata(obj) -> Iterator[Interface]:
     type_name = obj.type_name
     for schema in iter_schemata_for_type(type_name):
         yield schema
@@ -186,7 +189,7 @@ def iter_schemata(obj):
 
 
 @profilable
-async def create_content(type_, **kw):
+async def create_content(type_, **kw) -> IResource:
     """Utility to create a content.
 
     This method should not be used to add content, just internally.
@@ -206,8 +209,9 @@ async def create_content(type_, **kw):
 
 
 @profilable
-async def create_content_in_container(container, type_, id_, request=None,
-                                      check_security=True, **kw):
+async def create_content_in_container(
+        container: IAsyncContainer, type_: str, id_: str, request: IRequest=None,
+        check_security=True, **kw) -> IResource:
     """Utility to create a content.
 
     This method is the one to use to create content.
@@ -450,7 +454,7 @@ class Folder(Resource):
         """
         return await self._get_transaction().contains(self._p_oid, key)
 
-    async def async_set(self, key: str, value: Resource) -> None:
+    async def async_set(self, key: str, value: IResource) -> None:
         """
         Asynchronously set an object in this folder
         """
@@ -462,7 +466,7 @@ class Folder(Resource):
             trns.register(value)
 
     async def async_get(self, key: str, default=None,
-                        suppress_events=False) -> 'guillotina.response.Response':
+                        suppress_events=False) -> IResource:
         """
         Asynchronously get an object inside this folder
         """
@@ -478,7 +482,7 @@ class Folder(Resource):
 
     async def async_multi_get(self, keys: List[str], default=None,
                               suppress_events=False) -> AsyncIterator[
-            Tuple['guillotina.response.Response']]:
+            Tuple[IResource]]:
         """
         Asynchronously get an object inside this folder
         """
@@ -504,7 +508,7 @@ class Folder(Resource):
         return await self._get_transaction().keys(self._p_oid)
 
     async def async_items(self, suppress_events=False) -> AsyncIterator[
-            Tuple[str, 'guillotina.response.Response']]:
+            Tuple[str, IResource]]:
         """
         Asynchronously iterate through contents of folder
         """
@@ -514,7 +518,7 @@ class Folder(Resource):
             yield key, value
 
     async def async_values(self, suppress_events=False) -> AsyncIterator[
-            Tuple['guillotina.response.Response']]:
+            Tuple[IResource]]:
         async for _, value in self._get_transaction().items(self):
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))

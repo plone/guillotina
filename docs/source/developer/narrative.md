@@ -53,7 +53,7 @@ docker run --rm \
 ```
 
 
-## Creating to do type
+## Creating to-do type
 
 Types consist of an interface (schema) using the excellent `zope.interface` package
 and a class that uses that interface.

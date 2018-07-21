@@ -28,7 +28,7 @@
 
 
 :mod:`guillotina.utils.execute`
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: guillotina.utils.execute
 

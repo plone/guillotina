@@ -48,7 +48,6 @@ The endpoints available around these objects are detailed below:
 ```eval_rst
 .. toctree::
    :maxdepth: 2
-   :glob:
 
    developer/narrative
    developer/security
@@ -72,6 +71,16 @@ The endpoints available around these objects are detailed below:
 ```
 
 # Programming API
+
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+
+   api/content
+   api/request
+   api/fields
+   api/utils
+```
 
 
 # Training

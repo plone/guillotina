@@ -4,7 +4,7 @@
 stored in the database.
 
 
-## Registering a blobs
+## Registering blobs
 
 Blobs must be registered with and stored on a resource object. This is so we
 can do garbage collection on the blobs that were created for resources.
