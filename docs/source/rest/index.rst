@@ -9,5 +9,5 @@ Contents:
    application
    db
    container
-   folder
    item
+   folder

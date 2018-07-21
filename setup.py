@@ -29,7 +29,7 @@ setup(
     description='asyncio REST API Resource database',  # noqa
     long_description=long_description,
     keywords=['asyncio', 'REST', 'Framework', 'transactional'],
-    author='Ramon & Asko & Nathan',
+    author='Ramon Navarro Bosch & Nathan Van Gheem',
     author_email='ramon@plone.org',
     classifiers=[
         'License :: OSI Approved :: BSD License',
@@ -73,7 +73,15 @@ setup(
             'pytest-cov',
             'coverage==4.0.3',
             'pytest-docker-fixtures'
-        ]
+        ],
+        'docs': [
+            'sphinx',
+            'recommonmark',
+            'sphinxcontrib-httpdomain',
+            'sphinxcontrib-httpexample',
+            'sphinx-guillotina-theme',
+            'sphinx-autodoc-typehints'
+        ],
     },
     entry_points={
         'console_scripts': [

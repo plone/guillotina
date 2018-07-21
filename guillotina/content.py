@@ -39,6 +39,7 @@ from guillotina.interfaces import ILayers
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
+from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import IStaticDirectory
@@ -51,6 +52,7 @@ from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 from typing import AsyncIterator
 from typing import FrozenSet
+from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -117,162 +119,6 @@ class ResourceFactory(Factory):
     def __repr__(self):
         return '<{0:s} for {1:s}>'.format(self.__class__.__name__,
                                           self.type_name)
-
-
-def load_cached_schema():
-    for x in get_utilities_for(IResourceFactory):
-        factory = x[1]
-        if factory.type_name not in SCHEMA_CACHE:
-            FACTORY_CACHE[factory.type_name] = factory
-            behaviors_registrations = []
-            for iface in factory.behaviors or ():
-                if Interface.providedBy(iface):
-                    name = iface.__identifier__
-                else:
-                    name = iface
-                behaviors_registrations.append(get_utility(IBehavior, name=name))
-            SCHEMA_CACHE[factory.type_name] = {
-                'behaviors': behaviors_registrations,
-                'schema': factory.schema
-            }
-    for iface, utility in get_utilities_for(IBehavior):
-        if isinstance(iface, str):
-            name = iface
-        elif Interface.providedBy(iface):
-            name = iface.__identifier__
-        if name not in BEHAVIOR_CACHE:
-            BEHAVIOR_CACHE[name] = utility.interface
-
-
-def get_cached_factory(type_name):
-    if type_name in FACTORY_CACHE:
-        factory = FACTORY_CACHE[type_name]
-    else:
-        try:
-            factory = get_utility(IResourceFactory, type_name)
-        except ComponentLookupError:
-            raise InvalidContentType(type_name)
-        FACTORY_CACHE[type_name] = factory
-    return factory
-
-
-def iter_schemata_for_type(type_name):
-    factory = get_cached_factory(type_name)
-    if factory.schema is not None:
-        yield factory.schema
-    for schema in factory.behaviors or ():
-        yield schema
-
-
-def get_all_possible_schemas_for_type(type_name):
-    result = set()
-    factory = get_cached_factory(type_name)
-    if factory.schema is not None:
-        result.add(factory.schema)
-    for schema in factory.behaviors or ():
-        result.add(schema)
-    for _, utility in get_utilities_for(IBehavior):
-        if utility.for_.isEqualOrExtendedBy(factory.schema):
-            result.add(utility.interface)
-    return [b for b in result]
-
-
-def iter_schemata(obj):
-    type_name = obj.type_name
-    for schema in iter_schemata_for_type(type_name):
-        yield schema
-    for schema in obj.__behaviors_schemas__:
-        yield schema
-
-
-@profilable
-async def create_content(type_, **kw):
-    """Utility to create a content.
-
-    This method should not be used to add content, just internally.
-    """
-    factory = get_cached_factory(type_)
-    if 'id' in kw:
-        id_ = kw['id']
-    else:
-        id_ = None
-
-    # We create the object with at least the ID
-    obj = factory(id=id_)
-    for key, value in kw.items():
-        setattr(obj, key, value)
-    obj.__new_marker__ = True
-    return obj
-
-
-@profilable
-async def create_content_in_container(container, type_, id_, request=None,
-                                      check_security=True, **kw):
-    """Utility to create a content.
-
-    This method is the one to use to create content.
-    id_ can be None
-    """
-    factory = get_cached_factory(type_)
-
-    if check_security and factory.add_permission:
-        if factory.add_permission in PERMISSIONS_CACHE:
-            permission = PERMISSIONS_CACHE[factory.add_permission]
-        else:
-            permission = query_utility(IPermission, name=factory.add_permission)
-            PERMISSIONS_CACHE[factory.add_permission] = permission
-
-        if request is None:
-            request = get_current_request()
-
-        if permission is not None and \
-                not IInteraction(request).check_permission(permission.id, container):
-            raise NoPermissionToAdd(str(container), type_)
-
-    constrains = IConstrainTypes(container, None)
-    if constrains is not None:
-        if not constrains.is_type_allowed(type_):
-            raise NotAllowedContentType(str(container), type_)
-
-    # We create the object with at least the ID
-    obj = factory(id=id_, parent=container)
-    for key, value in kw.items():
-        setattr(obj, key, value)
-
-    txn = getattr(container, '_p_jar', None) or get_transaction()
-    if txn is None or not txn.storage.supports_unique_constraints:
-        # need to manually check unique constraints
-        if await container.async_contains(obj.id):
-            raise ConflictIdOnContainer(f'Duplicate ID: {container} -> {obj.id}')
-
-    obj.__new_marker__ = True
-
-    await notify(BeforeObjectAddedEvent(obj, container, id_))
-    await container.async_set(obj.id, obj)
-    return obj
-
-
-def get_all_behavior_interfaces(content) -> list:
-    factory = get_cached_factory(content.type_name)
-    behaviors = []
-    for behavior_schema in factory.behaviors or ():
-        behaviors.append(behavior_schema)
-
-    for dynamic_behavior in content.__behaviors_schemas__:
-        behaviors.append(dynamic_behavior)
-    return behaviors
-
-
-async def get_all_behaviors(content, create=False, load=True) -> list:
-    behaviors = []
-    for behavior_schema in get_all_behavior_interfaces(content):
-        behavior = behavior_schema(content)
-        if load:
-            if IAsyncBehavior.implementedBy(behavior.__class__):  # pylint: disable=E1120
-                # providedBy not working here?
-                await behavior.load(create=create)
-        behaviors.append((behavior_schema, behavior))
-    return behaviors
 
 
 def _default_from_schema(context, schema, fieldname):
@@ -447,12 +293,17 @@ class Folder(Resource):
     async def async_contains(self, key: str) -> bool:
         """
         Asynchronously check if key exists inside this folder
+
+        :param key: key of child object to check
         """
         return await self._get_transaction().contains(self._p_oid, key)
 
     async def async_set(self, key: str, value: Resource) -> None:
         """
         Asynchronously set an object in this folder
+
+        :param key: key of child object to set
+        :param value: object to set as child
         """
         value.__parent__ = self
         value.__name__ = key
@@ -462,9 +313,11 @@ class Folder(Resource):
             trns.register(value)
 
     async def async_get(self, key: str, default=None,
-                        suppress_events=False) -> 'guillotina.response.Response':
+                        suppress_events=False) -> Resource:
         """
         Asynchronously get an object inside this folder
+
+        :param key: key of child object to get
         """
         try:
             val = await self._get_transaction().get_child(self, key)
@@ -478,9 +331,11 @@ class Folder(Resource):
 
     async def async_multi_get(self, keys: List[str], default=None,
                               suppress_events=False) -> AsyncIterator[
-            Tuple['guillotina.response.Response']]:
+            Tuple[Resource]]:
         """
-        Asynchronously get an object inside this folder
+        Asynchronously get an multiple objects inside this folder
+
+        :param keys: keys of child objects to get
         """
         async for item in self._get_transaction().get_children(self, keys):
             yield item
@@ -488,6 +343,8 @@ class Folder(Resource):
     async def async_del(self, key: str) -> None:
         """
         Asynchronously delete object in the folder
+
+        :param key: key of child objec to delete
         """
         return self._get_transaction().delete(await self.async_get(key))
 
@@ -504,7 +361,7 @@ class Folder(Resource):
         return await self._get_transaction().keys(self._p_oid)
 
     async def async_items(self, suppress_events=False) -> AsyncIterator[
-            Tuple[str, 'guillotina.response.Response']]:
+            Tuple[str, Resource]]:
         """
         Asynchronously iterate through contents of folder
         """
@@ -514,7 +371,7 @@ class Folder(Resource):
             yield key, value
 
     async def async_values(self, suppress_events=False) -> AsyncIterator[
-            Tuple['guillotina.response.Response']]:
+            Tuple[Resource]]:
         async for _, value in self._get_transaction().items(self):
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))
@@ -625,3 +482,166 @@ class StaticFileSpecialPermissions(PrincipalPermissionManager):
 @configure.utility(provides=IGetOwner)
 async def default_get_owner(obj, creator):
     return creator
+
+
+def load_cached_schema():
+    for x in get_utilities_for(IResourceFactory):
+        factory = x[1]
+        if factory.type_name not in SCHEMA_CACHE:
+            FACTORY_CACHE[factory.type_name] = factory
+            behaviors_registrations = []
+            for iface in factory.behaviors or ():
+                if Interface.providedBy(iface):
+                    name = iface.__identifier__
+                else:
+                    name = iface
+                behaviors_registrations.append(get_utility(IBehavior, name=name))
+            SCHEMA_CACHE[factory.type_name] = {
+                'behaviors': behaviors_registrations,
+                'schema': factory.schema
+            }
+    for iface, utility in get_utilities_for(IBehavior):
+        if isinstance(iface, str):
+            name = iface
+        elif Interface.providedBy(iface):
+            name = iface.__identifier__
+        if name not in BEHAVIOR_CACHE:
+            BEHAVIOR_CACHE[name] = utility.interface
+
+
+def get_cached_factory(type_name):
+    if type_name in FACTORY_CACHE:
+        factory = FACTORY_CACHE[type_name]
+    else:
+        try:
+            factory = get_utility(IResourceFactory, type_name)
+        except ComponentLookupError:
+            raise InvalidContentType(type_name)
+        FACTORY_CACHE[type_name] = factory
+    return factory
+
+
+def iter_schemata_for_type(type_name):
+    factory = get_cached_factory(type_name)
+    if factory.schema is not None:
+        yield factory.schema
+    for schema in factory.behaviors or ():
+        yield schema
+
+
+def get_all_possible_schemas_for_type(type_name) -> List[Interface]:
+    result = set()
+    factory = get_cached_factory(type_name)
+    if factory.schema is not None:
+        result.add(factory.schema)
+    for schema in factory.behaviors or ():
+        result.add(schema)
+    for _, utility in get_utilities_for(IBehavior):
+        if utility.for_.isEqualOrExtendedBy(factory.schema):
+            result.add(utility.interface)
+    return [b for b in result]
+
+
+def iter_schemata(obj) -> Iterator[Interface]:
+    type_name = obj.type_name
+    for schema in iter_schemata_for_type(type_name):
+        yield schema
+    for schema in obj.__behaviors_schemas__:
+        yield schema
+
+
+@profilable
+async def create_content(type_, **kw) -> IResource:
+    """Utility to create a content.
+
+    This method should not be used to add content, just internally.
+    """
+    factory = get_cached_factory(type_)
+    if 'id' in kw:
+        id_ = kw['id']
+    else:
+        id_ = None
+
+    # We create the object with at least the ID
+    obj = factory(id=id_)
+    for key, value in kw.items():
+        setattr(obj, key, value)
+    obj.__new_marker__ = True
+    return obj
+
+
+@profilable
+async def create_content_in_container(
+        parent: Folder, type_: str, id_: str, request: IRequest=None,
+        check_security=True, **kw) -> Resource:
+    """Utility to create a content.
+
+    This method is the one to use to create content.
+    id_ can be None
+
+    :param parent: where to create content inside of
+    :param type_: content type to create
+    :param id_: id to give content in parent object
+    :param request: <optional>
+    :param check_security: be able to disable security checks
+    """
+    factory = get_cached_factory(type_)
+
+    if check_security and factory.add_permission:
+        if factory.add_permission in PERMISSIONS_CACHE:
+            permission = PERMISSIONS_CACHE[factory.add_permission]
+        else:
+            permission = query_utility(IPermission, name=factory.add_permission)
+            PERMISSIONS_CACHE[factory.add_permission] = permission
+
+        if request is None:
+            request = get_current_request()
+
+        if permission is not None and \
+                not IInteraction(request).check_permission(permission.id, parent):
+            raise NoPermissionToAdd(str(parent), type_)
+
+    constrains = IConstrainTypes(parent, None)
+    if constrains is not None:
+        if not constrains.is_type_allowed(type_):
+            raise NotAllowedContentType(str(parent), type_)
+
+    # We create the object with at least the ID
+    obj = factory(id=id_, parent=parent)
+    for key, value in kw.items():
+        setattr(obj, key, value)
+
+    txn = getattr(parent, '_p_jar', None) or get_transaction()
+    if txn is None or not txn.storage.supports_unique_constraints:
+        # need to manually check unique constraints
+        if await parent.async_contains(obj.id):
+            raise ConflictIdOnContainer(f'Duplicate ID: {parent} -> {obj.id}')
+
+    obj.__new_marker__ = True
+
+    await notify(BeforeObjectAddedEvent(obj, parent, id_))
+    await parent.async_set(obj.id, obj)
+    return obj
+
+
+def get_all_behavior_interfaces(content) -> list:
+    factory = get_cached_factory(content.type_name)
+    behaviors = []
+    for behavior_schema in factory.behaviors or ():
+        behaviors.append(behavior_schema)
+
+    for dynamic_behavior in content.__behaviors_schemas__:
+        behaviors.append(dynamic_behavior)
+    return behaviors
+
+
+async def get_all_behaviors(content, create=False, load=True) -> list:
+    behaviors = []
+    for behavior_schema in get_all_behavior_interfaces(content):
+        behavior = behavior_schema(content)
+        if load:
+            if IAsyncBehavior.implementedBy(behavior.__class__):  # pylint: disable=E1120
+                # providedBy not working here?
+                await behavior.load(create=create)
+        behaviors.append((behavior_schema, behavior))
+    return behaviors

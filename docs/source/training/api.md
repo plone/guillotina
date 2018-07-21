@@ -27,67 +27,25 @@ give a general understanding of how to explore and use the API.
 To create content, do a `POST` request on a container or folder object.
 
 ```eval_rst
-.. http:post:: /db/container
-
-     Create Item
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        POST /db/container HTTP/1.1
-        Accept: application/json
-        Content-Type: application/json
-        Authorization: Basic cm9vdDpyb290
-
-        {
-          "@type": "Item",
-          "id": "foobar"
+.. http:gapi::
+   :hidden:
+   :path: /db/container
+   :basic_auth: root:root
+   :method: POST
+   :body: {
+          "@type": "Container",
+          "id": "container"
         }
 
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 201 OK
-        Content-Type: application/json
-
-        {
-          "@id": "http://localhost:8080/db/container/foobar",
+.. http:gapi::
+   :path: /db/container
+   :path_spec: /(db)/(container)
+   :basic_auth: root:root
+   :method: POST
+   :body: {
           "@type": "Item",
-          "parent": {
-              "@id": "http://localhost:8080/db/container",
-              "@type": "Container"
-          },
-          "creation_date": "2017-10-13T23:34:18.879391-05:00",
-          "modification_date": "2017-10-13T23:34:18.879391-05:00",
-          "UID": "f4ab591f22824404b55b66569f6a7502",
-          "type_name": "Item",
-          "title": null,
-          "__behaviors__": [],
-          "__name__": "foobar",
-          "guillotina.behaviors.dublincore.IDublinCore": {
-              "title": null,
-              "description": null,
-              "creation_date": "2017-10-13T23:34:18.879391-05:00",
-              "modification_date": "2017-10-13T23:34:18.879391-05:00",
-              "effective_date": null,
-              "expiration_date": null,
-              "creators": [
-                  "root"
-              ],
-              "tags": null,
-              "publisher": null,
-              "contributors": [
-                  "root"
-              ]
-          }
+          "id": "foobar5"
         }
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 201: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
 ```
 
 
@@ -96,34 +54,14 @@ To create content, do a `POST` request on a container or folder object.
 To add a dynamic behavior, we use the `@behavior` endpoint.
 
 ```eval_rst
-.. http:patch:: /db/container/foobar/@behaviors
-
-     Add behavior
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        PATCH /db/container/foobar/@behaviors HTTP/1.1
-        Accept: application/json
-        Content-Type: application/json
-        Authorization: Basic cm9vdDpyb290
-
-        {
+.. http:gapi::
+   :path: /db/container/foobar5/@behaviors
+   :path_spec: /(db)/(container)/(content)/@behaviors
+   :method: PATCH
+   :basic_auth: root:root
+   :body: {
           "behavior": "guillotina.behaviors.attachment.IAttachment"
         }
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 201 OK
-        Content-Type: application/json
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 201: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
 ```
 
 
@@ -132,57 +70,22 @@ To add a dynamic behavior, we use the `@behavior` endpoint.
 Simple file uploads can be done with the `@upload` endpoint.
 
 ```eval_rst
-.. http:patch:: /db/container/foobar/@upload/file
-
-     Upload file
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        PATCH /db/container/foobar/@upload/file HTTP/1.1
-        Authorization: Basic cm9vdDpyb290
-
-        <binary data>
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 200: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+.. http:gapi::
+   :path: /db/container/foobar5/@upload/file
+   :path_spec: /(db)/(container)/(content)/@upload/file
+   :method: PATCH
+   :basic_auth: root:root
+   :body: <text data>
 ```
 
 Then, to download the file, use the `@download` endpoint.
 
 ```eval_rst
-.. http:get:: /db/container/foobar/@download/file
-
-     Download file
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        GET /db/container/foobar/@downlaod/file HTTP/1.1
-        Authorization: Basic cm9vdDpyb290
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 200 OK
-        <binary data>
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 200: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+.. http:gapi::
+   :path: /db/container/foobar5/@download/file
+   :path_spec: /(db)/(container)/(content)/@download/file
+   :basic_auth: root:root
+   :body: <text data>
 ```
 
 ## Uploading files with TUS
@@ -195,94 +98,36 @@ resumable uploads.
 First, initialize the TUS upload with a POST
 
 ```eval_rst
-.. http:post:: /db/container/foobar/@tusupload/file
-
-     Upload file
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        POST /db/container/foobar/@tusupload/file HTTP/1.1
-        Authorization: Basic cm9vdDpyb290
-        UPLOAD-LENGTH: 2097152
-        TUS-RESUMABLE: 1
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 200: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+.. http:gapi::
+   :path: /db/container/foobar5/@tusupload/file
+   :path_spec: /(db)/(container)/(content)/@tusupload/file
+   :method: POST
+   :headers: TUS-RESUMABLE:1,UPLOAD-LENGTH:22
+   :basic_auth: root:root
 ```
 
-Next, upload the chunks(here we're doing chunks of 1MB):
+Next, upload the chunks(here we're doing chunks):
 
 ```eval_rst
-.. http:patch:: /db/container/foobar/@tusupload/file
-
-     Upload file
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        PATCH /db/container/foobar/@tusupload/file HTTP/1.1
-        Authorization: Basic cm9vdDpyb290
-        Upload-Offset: 0
-        TUS-RESUMABLE: 1
-        CONTENT-LENGTH: 1048576
-
-        < binary data >
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 200: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+.. http:gapi::
+   :path: /db/container/foobar5/@tusupload/file
+   :path_spec: /(db)/(container)/(content)/@tusupload/file
+   :method: PATCH
+   :headers: TUS-RESUMABLE:1,Upload-Offset:0
+   :basic_auth: root:root
+   :body: <text data>
 ```
 
-And final chunk of 1MB:
+And final chunk:
 
 ```eval_rst
-.. http:patch:: /db/container/foobar/@tusupload/file
-
-     Upload file
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        PATCH /db/container/foobar/@tusupload/file HTTP/1.1
-        Authorization: Basic cm9vdDpyb290
-        Upload-Offset: 1048576
-        TUS-RESUMABLE: 1
-        CONTENT-LENGTH: 1048576
-
-        < binary data >
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 200: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+.. http:gapi::
+   :path: /db/container/foobar5/@tusupload/file
+   :path_spec: /(db)/(container)/(content)/@tusupload/file
+   :method: PATCH
+   :headers: TUS-RESUMABLE:1,Upload-Offset:11
+   :basic_auth: root:root
+   :body: <text data>
 ```
 
 ### Unknown upload size
@@ -315,72 +160,22 @@ To override this, send the `TUS-OVERRIDE-UPLOAD: 1` header.
 The `@sharing` endpoint is available to inspect and modify permissions on an object.
 
 ```eval_rst
-.. http:get:: /db/container/foobar/@sharing
-
-     Get sharing information
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        GET /db/container/foobar/@sharing HTTP/1.1
-        Authorization: Basic cm9vdDpyb290
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 201 OK
-        Content-Type: application/json
-
-        {
-          "local": {
-              "roleperm": {},
-              "prinperm": {},
-              "prinrole": {
-                  "root": {
-                      "guillotina.Owner": "Allow"
-                  }
-              }
-          },
-          "inherit": [
-              {
-                  "@id": "http://localhost:8080/db/container",
-                  "roleperm": {},
-                  "prinperm": {},
-                  "prinrole": {
-                      "root": {
-                          "guillotina.ContainerAdmin": "Allow",
-                          "guillotina.Owner": "Allow"
-                      }
-                  }
-              }
-          ]
-        }
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 200: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
+.. http:gapi::
+   :path: /db/container/foobar5/@sharing
+   :path_spec: /(db)/(container)/(content)/@sharing
+   :basic_auth: root:root
 ```
 
 To modify, we use the same endpoint but with a `POST`.
 
 
 ```eval_rst
-.. http:post:: /db/container/foobar/@sharing
-
-     Add local permissions
-
-     **Example request**
-
-     .. sourcecode:: http
-
-        POST /db/container/foobar/@sharing HTTP/1.1
-        Content-Type: application/json
-        Authorization: Basic cm9vdDpyb290
-
-        {
+.. http:gapi::
+   :path: /db/container/foobar5/@sharing
+   :path_spec: /(db)/(container)/(content)/@sharing
+   :method: POST
+   :basic_auth: root:root
+   :body: {
           "prinperm": [
             {
               "principal": "foobar",
@@ -389,20 +184,6 @@ To modify, we use the same endpoint but with a `POST`.
             }
           ]
         }
-
-     **Example response**
-
-     .. sourcecode:: http
-
-        HTTP/1.1 201 OK
-        Content-Type: application/json
-
-        {}
-
-     :reqheader Authorization: Required token to authenticate
-     :statuscode 200: no error
-     :statuscode 401: Invalid Auth code
-     :statuscode 500: Error processing request
 ```
 
 There are three types of permission settings you can modify:

@@ -196,7 +196,7 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
                 'behavior': 'guillotina.test_package.ITestBehavior'
             })
         )
-        assert status == 201
+        assert status == 412
 
         # test patch invalid...
         response, status = await requester(
@@ -234,7 +234,7 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
                 'behavior': 'guillotina.test_package.ITestBehavior'
             })
         )
-        assert status == 201
+        assert status == 412
 
         # We check that the behavior is there
         response, status = await requester(
@@ -287,7 +287,7 @@ async def test_can_not_delete_concrete_behaviors(custom_type_container_requester
                 'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
-        assert status == 201
+        assert status == 412
 
         # We try to delete the behavior
         response, status = await requester(
@@ -297,7 +297,7 @@ async def test_can_not_delete_concrete_behaviors(custom_type_container_requester
                 'behavior': 'guillotina.behaviors.dublincore.IDublinCore'
             })
         )
-        assert status == 201
+        assert status == 412
 
         # We check that the behavior is still there
         response, status = await requester(

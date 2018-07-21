@@ -51,7 +51,6 @@ app_settings: Dict[str, Any] = {
         'shell': 'guillotina.commands.shell.ShellCommand',
         'testdata': 'guillotina.commands.testdata.TestDataCommand',
         'initialize-db': 'guillotina.commands.initialize_db.DatabaseInitializationCommand',
-        'apigen': 'guillotina.commands.apigen.APIGenCommand',
         'run': 'guillotina.commands.run.RunCommand'
     },
     "json_schema_definitions": {},  # json schemas available to reference in docs

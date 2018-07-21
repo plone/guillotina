@@ -7,6 +7,9 @@
   .. autofunction:: get_content_path
   .. autofunction:: iter_parents
   .. autofunction:: navigate_to
+  .. autofunction:: get_owners
+  .. autofunction:: get_object_url
+  .. autofunction:: get_object_by_oid
 
   .. autofunction:: get_authenticated_user
   .. autofunction:: get_authenticated_user_id
@@ -25,10 +28,11 @@
   .. autofunction:: merge_dicts
   .. autofunction:: apply_coroutine
   .. autofunction:: lazy_apply
+  .. autofunction:: safe_unidecode
 
 
 :mod:`guillotina.utils.execute`
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: guillotina.utils.execute
 

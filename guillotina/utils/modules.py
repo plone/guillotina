@@ -12,6 +12,8 @@ import types
 def import_class(import_string: str) -> types.ModuleType:
     """
     Import class from string
+
+    :param import_string: dotted class name
     """
     t = import_string.rsplit('.', 1)
     return getattr(importlib.import_module(t[0]), t[1], None)
@@ -20,6 +22,11 @@ def import_class(import_string: str) -> types.ModuleType:
 def resolve_dotted_name(name: str) -> ResolvableType:
     """
     import the provided dotted name
+
+    >>> resolve_dotted_name('guillotina.interfaces.IRequest')
+    <InterfaceClass guillotina.interfaces.IRequest>
+
+    :param name: dotted name
     """
     if not isinstance(name, str):
         return name  # already an object
@@ -62,6 +69,11 @@ def get_module_dotted_name(ob) -> str:
 
 
 def get_dotted_name(ob: ResolvableType) -> str:
+    '''
+    Convert a module/class/function to dotted path string
+
+    :param ob: the object you'd like to convert
+    '''
     if inspect.isclass(ob) or IInterface.providedBy(ob) or isinstance(ob, types.FunctionType):
         name = ob.__name__
     else:
@@ -74,6 +86,14 @@ get_class_dotted_name = get_dotted_name
 
 
 def resolve_path(file_path: str) -> pathlib.Path:
+    '''
+    Resolve path to file inside python module
+
+    >>> resolve_path('guillotina:__init__.py')
+    PosixPath('/Users/vangheem/onna/onna-canonical/libsrc/guillotina/guillotina/__init__.py')
+
+    :param file_path: `module:path` string
+    '''
     if ':' in file_path:
         # referencing a module
         dotted_mod_name, _, rel_path = file_path.partition(':')

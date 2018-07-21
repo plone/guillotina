@@ -120,6 +120,8 @@ def load_service(_context, service):
 
     if not getattr(factory, '__route__', None):
         factory.__route__ = routes.Route(name)
+    else:
+        factory.__route__.service_configuration = service_conf
 
     component.adapter(
         _context,

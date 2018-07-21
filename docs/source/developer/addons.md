@@ -37,8 +37,10 @@ class MyAddon(Addon):
 
 ## Layers
 
-Your addon can also install layers for your application to lookup views and adapters
-from:
+A Layer is a marker you install with your add-on, this allows your application 
+to lookup views and adapters (override core functionality) only for the container
+you installed the add-on. 
+
 
 ```python
 

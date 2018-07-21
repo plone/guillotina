@@ -1,5 +1,4 @@
 from guillotina import configure
-from guillotina.response import Response
 from guillotina.component import get_multi_adapter
 from guillotina.component import get_utilities_for
 from guillotina.component import query_adapter
@@ -7,6 +6,7 @@ from guillotina.content import get_cached_factory
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISchemaSerializeToJson
+from guillotina.response import Response
 from guillotina.utils import resolve_dotted_name
 
 
@@ -25,7 +25,7 @@ from guillotina.utils import resolve_dotted_name
         "200": {
             "description": "Successfully added behavior"
         },
-        "201": {
+        "412": {
             "description": "Behavior already assigned here"
         },
     })
@@ -37,12 +37,18 @@ async def default_patch(context, request):
     except ModuleNotFoundError:
         behavior_class = None
     if behavior_class is None:
-        return Response(status=404)
+        return Response(content={
+            'reason': 'Could not find behavior'
+        }, status=404)
     factory = get_cached_factory(context.type_name)
     if behavior_class in factory.behaviors:
-        return Response(status=201)
+        return Response(content={
+            'reason': 'Already in behaviors'
+        }, status=412)
     if behavior in context.__behaviors__:
-        return Response(status=201)
+        return Response(content={
+            'reason': 'Already in behaviors'
+        }, status=412)
     context.add_behavior(behavior)
     return {}
 
@@ -62,7 +68,7 @@ async def default_patch(context, request):
         "200": {
             "description": "Successfully removed behavior"
         },
-        "201": {
+        "412": {
             "description": "Behavior not assigned here"
         },
     })
@@ -73,9 +79,13 @@ async def default_delete(context, request):
     behavior_class = resolve_dotted_name(behavior)
     if behavior_class is not None:
         if behavior_class in factory.behaviors:
-            return Response(status=201)
+            return Response(content={
+                'reason': 'Not not remove this type of behavior'
+            }, status=412)
     if behavior not in context.__behaviors__:
-        return Response(status=201)
+        return Response(content={
+            'reason': 'Not in behaviors'
+        }, status=412)
     context.remove_behavior(behavior)
     return {}
 

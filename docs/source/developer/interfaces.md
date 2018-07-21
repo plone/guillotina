@@ -9,14 +9,6 @@ In the services example, you'll notice the use of `context=IContainer` for the s
 decorator configuration. In that case, it is used to tell `guillotina` that the
 service is only defined for a container object.
 
-## Common interfaces
-
-Interfaces you will be interested in defining services for are:
-
- - `guillotina.interface.IDatabase`: A database contains the container objects
- - `guillotina.interface.IContainer`: Container content object
- - `guillotina.interface.IResource`: Base interface for all content
- - `guillotina.interface.IContainer`: Base interface for content that can contain other content
- - `guillotina.interface.IRegistry`: Registry object interface
- - `guillotina.interface.IDefaultLayer`: Layers are an interface applied to the
-   request object. IDefaultLayer is the base default layer applied to the request object.
+[Read the zope.interface](https://zopeinterface.readthedocs.io/en/latest/)
+docs for more details about the power of designing around around interfaces
+and to learn more about how to use it.

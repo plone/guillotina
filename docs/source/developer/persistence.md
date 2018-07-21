@@ -5,11 +5,8 @@ There are three kinds of objects that are considered on the system:
 
 - Tree objects: objects are resources that implement `guillotina.interfaces.IResource`.
   This object has a `__name__` and a `__parent__` property that indicate the id
-  on the tree and the link to the parent. By themselves they don't have access to\
+  on the tree and the link to the parent. By themselves they don't have access to
   their children, they need to interact with the transaction object to get them.
-- Nested: objects that are linked at some attribute inside the Tree object, this object
-  are serialized with the main object and may lead to conflicts if there are lots
-  of this kind of objects. It can belong to a field that is an object
 - Annotations: objects that are associated with tree objects. These can be
   any type of data. In Guillotina, the main source of annotation objects are
   behaviors.

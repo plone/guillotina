@@ -83,11 +83,14 @@ class DefaultSchemaSerializer(object):
         }
 
     async def __call__(self):
+        return self.serialize()
+
+    def serialize(self):
         for name, field in get_fields_in_order(self.schema):
             serializer = get_multi_adapter(
                 (field, self.schema, self.request),
                 ISchemaFieldSerializeToJson)
-            self.schema_json['properties'][name] = await serializer()
+            self.schema_json['properties'][name] = serializer.serialize()
             if field.required:
                 self.schema_json['required'].append(name)
         self.schema_json['invariants'] = self.invariants

@@ -16,6 +16,7 @@ Contents:
    contenttypes
    behavior
    interfaces
+   events
    commands
    applicationconfiguration
    design
@@ -24,5 +25,7 @@ Contents:
    router
    exceptions
    fields
+   serialize
    async_utils
-   api/index
+   component-architecture
+   debugging

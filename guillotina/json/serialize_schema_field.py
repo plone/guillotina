@@ -61,6 +61,9 @@ class DefaultSchemaFieldSerializer(object):
 
     @profilable
     async def __call__(self):
+        return self.serialize()
+
+    def serialize(self):
         field = self.get_field()
         result = {'type': self.field_type}
         # caching the field_attributes here improves performance dramatically
@@ -98,7 +101,7 @@ class DefaultSchemaFieldSerializer(object):
                 serializer = get_multi_adapter(
                     (value, field, self.request),
                     ISchemaFieldSerializeToJson)
-                text = await serializer()
+                text = serializer.serialize()
                 if 'properties' in text:
                     text = text['properties']
             elif value is not None and (force or value != field.missing_value):
@@ -116,13 +119,13 @@ class DefaultSchemaFieldSerializer(object):
                     field_serializer = get_multi_adapter(
                         (field.value_type, self.schema, self.request),
                         ISchemaFieldSerializeToJson)
-                    result['additionalProperties'] = await field_serializer()
+                    result['additionalProperties'] = field_serializer.serialize()
                 else:
                     result['additionalProperties'] = True
             elif IObject.providedBy(field):
                 schema_serializer = get_multi_adapter((field.schema, self.request),
                                                       ISchemaSerializeToJson)
-                result['properties'] = await schema_serializer()
+                result['properties'] = schema_serializer.serialize()
         if field.extra_values is not None:
             result.update(field.extra_values)
         return result

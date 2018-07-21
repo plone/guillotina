@@ -37,6 +37,7 @@ from recommonmark.transform import AutoStructify
 extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
     'sphinxcontrib.httpdomain',
     'sphinxcontrib.httpexample',
     'guillotina.documentation.sphinx',
@@ -60,8 +61,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Guillotina'
-copyright = '2016, Ramon Navarro Bosch, Asko Soukka & Nathan Van Gheem'
-author = 'Ramon Navarro Bosch, Asko Soukka & Nathan Van Gheem'
+copyright = '2016, Ramon Navarro Bosch & Nathan Van Gheem'
+author = 'Ramon Navarro Bosch & Nathan Van Gheem'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -131,6 +132,7 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = 'guillotina'
+html_use_smartypants = False
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -272,7 +274,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'guillotina.tex', 'guillotina Documentation',
-     'Ramon Navarro Bosch \\& Asko Soukka \\& Nathan Van Gheem', 'manual'),
+     'Ramon Navarro Bosch \\& Nathan Van Gheem', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
