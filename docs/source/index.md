@@ -48,6 +48,13 @@ The endpoints available around these objects are detailed below:
 
 # Training
 
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   training/*
+```
 
 # About
 
