@@ -59,6 +59,7 @@ The endpoints available around these objects are detailed below:
    developer/contenttypes
    developer/behavior
    developer/interfaces
+   developer/events
    developer/commands
    developer/applicationconfiguration
    developer/design

@@ -20,7 +20,6 @@ todo
 - databases
 - json serialization/deserialization
 - cors
-- events
 - profiling
 - renderers
 - routing
@@ -31,3 +30,4 @@ todo
 - go through interfaces and see what is not documented
 - go through all settings
 - authentication
+- component architecture

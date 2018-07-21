@@ -16,6 +16,7 @@ Contents:
    contenttypes
    behavior
    interfaces
+   events
    commands
    applicationconfiguration
    design

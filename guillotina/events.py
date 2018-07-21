@@ -143,11 +143,6 @@ class ObjectPermissionsModifiedEvent(ObjectModifiedEvent):
     """An object has been modified."""
 
 
-@implementer(IFileFinishUploaded)
-class FileFinishUploaded(ObjectEvent):
-    """A file has finish uploading."""
-
-
 @implementer(INewUserAdded)
 class NewUserAdded(object):
     """An object has been created."""
