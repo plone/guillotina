@@ -19,6 +19,7 @@ from guillotina.transactions import get_tm
 import aiohttp
 import time
 import ujson
+from urllib import parse
 
 
 @configure.service(
@@ -83,15 +84,16 @@ class WebsocketsView(Service):
 
     async def handle_ws_request(self, ws, message):
         method = app_settings['http_methods']['GET']
-        path = tuple(p for p in message['path'].split('/') if p)
         frame_id = message['id']
+
+        parsed = parse.urlparse(message['path'])
+        path = tuple(p for p in parsed.path.split('/') if p)
 
         from guillotina.traversal import traverse
         obj, tail = await traverse(self.request, self.request.container, path)
 
         if tail and len(tail) > 0:
             # convert match lookups
-            tail = [element.split('?')[0] for element in tail]
             view_name = routes.path_to_view_name(tail)
         elif not tail:
             view_name = ''
