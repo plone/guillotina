@@ -1,13 +1,13 @@
-Item
-====
+Folder
+======
 
-.. make sure we have a container
+.. ignored http call below to make sure we have a container
 .. http:gapi::
-   :hidden: yes
-   :method: POST
+   :hidden:
    :path: /db
+   :method: POST
    :basic_auth: root:root
-   :headers: Content-Type:application/json
+   :headers: Content-Type: application/json
    :body: {"@type": "Container", "id": "container"}
 
 .. http:gapi::
@@ -16,7 +16,7 @@ Item
    :path: /db/container
    :basic_auth: root:root
    :headers: Content-Type:application/json
-   :body: {"@type": "Item", "id": "foobar"}
+   :body: {"@type": "Folder", "id": "foobar"}
 
 
 .. http:gapi::
@@ -45,12 +45,12 @@ Behaviors
 ---------
 
 .. http:gapi::
-   :path_spec: /(db)/(container)
+   :path_spec:  /(db)/(container)
    :method: POST
    :path: /db/container
    :basic_auth: root:root
    :headers: Content-Type:application/json
-   :body: {"@type": "Item", "id": "foobar"}
+   :body: {"@type": "Folder", "id": "foobar"}
    :hidden: yes
 
 .. http:gapi::
@@ -178,6 +178,24 @@ Content
 
 
 .. http:gapi::
+   :path_spec: /(db)/(container)/(id)/@addable-types
+   :path: /db/container/foobar3/@addable-types
+   :basic_auth: root:root
+
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/(id)/@ids
+   :path: /db/container/foobar3/@ids
+   :basic_auth: root:root
+
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/(id)/@items
+   :path: /db/container/foobar3/@items
+   :basic_auth: root:root
+
+
+.. http:gapi::
    :path_spec: /(db)/(container)/(id)/@invalidate-cache
-   :path: /db/container/foobar2/@invalidate-cache
+   :path: /db/container/foobar3/@invalidate-cache
    :basic_auth: root:root

@@ -36,11 +36,11 @@ The endpoints available around these objects are detailed below:
    :maxdepth: 1
    :glob:
 
-   rest/1-application
-   rest/2-db
-   rest/3-container
-   rest/4-item
-   rest/5-folder
+   rest/application
+   rest/db
+   rest/container
+   rest/item
+   rest/folder
 ```
 
 # Narrative Documentation
