@@ -1,9 +1,10 @@
 from guillotina.behaviors.dublincore import IDublinCore
-from guillotina.json.utils import convert_interface_to_schema
+from guillotina.json.utils import convert_interfaces_to_schema
 
 
 def test_convert_dublin_core():
-    schema = convert_interface_to_schema(IDublinCore)
+    all_schemas = convert_interfaces_to_schema([IDublinCore])
+    schema = all_schemas[IDublinCore.__identifier__]
     assert 'title' in schema
     assert 'creation_date' in schema
     assert 'tags' in schema

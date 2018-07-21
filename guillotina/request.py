@@ -31,10 +31,10 @@ class Request(web_request.Request):
 #    security = None
 
     _db_write_enabled = True
-    _futures = None
+    _futures: dict = {}
     _uid = None
     _view_error = False
-    _events = None
+    _events: dict = {}
 
     application = None
     exc = None
@@ -43,7 +43,7 @@ class Request(web_request.Request):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._futures = {}
+        self._futures: dict = {}
         self._events = OrderedDict()
         self._initialized = time.time()
         #: Dictionary of matched path parameters on request

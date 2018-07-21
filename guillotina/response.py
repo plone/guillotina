@@ -20,7 +20,7 @@ class Response(Exception):
     default_content: dict = {}  # noqa
 
     def __init__(self, *, content: dict=None,
-                 headers: dict=None, status: int=None):
+                 headers: dict=None, status: int=None) -> None:
         '''
         :param content: content to serialize
         :param headers: headers to set on response
@@ -31,9 +31,9 @@ class Response(Exception):
         else:
             self.content = content or self.default_content.copy()
         if headers is None:
-            self.headers = CIMultiDict()
+            self.headers = CIMultiDict()  # type: ignore
         else:
-            self.headers = CIMultiDict(headers)
+            self.headers = CIMultiDict(headers)  # type: ignore
         if status is not None:
             if self.status_code:
                 raise ValueError('Can not customize status code of this type')
@@ -45,7 +45,8 @@ class Response(Exception):
 
 class ErrorResponse(Response):
     def __init__(self, type: str, message: str, *, reason=None,
-                 content: dict=None, headers: dict=None, status: int=500):
+                 content: dict=None, headers: dict=None,
+                 status: int=500) -> None:
         '''
         :param type: type of error
         :param message: error message
@@ -115,7 +116,7 @@ class HTTPPartialContent(HTTPSuccessful):
 class _HTTPMove(HTTPRedirection):
 
     def __init__(self, location: str, *,
-                 content: dict=None, headers: dict=None):
+                 content: dict=None, headers: dict=None) -> None:
         if not location:
             raise ValueError("HTTP redirects need a location to redirect to.")
         super().__init__(content=content, headers=headers)
@@ -217,7 +218,7 @@ class HTTPMethodNotAllowed(HTTPClientError):
     status_code = 405
 
     def __init__(self, method: str, allowed_methods: list, *,
-                 content: dict=None, headers: dict=None):
+                 content: dict=None, headers: dict=None) -> None:
         '''
         :param method: method not allowed
         :param allowed_methods: list of allowed methods

@@ -138,7 +138,9 @@ async def navigate_to(obj: IResource, path: str):
     return actual
 
 
-def get_object_url(ob: IResource, request: IRequest=None, **kwargs) -> str:
+def get_object_url(ob: IResource,
+                   request: IRequest=None,
+                   **kwargs) -> typing.Optional[str]:
     '''
     Generate full url of object.
 
@@ -150,6 +152,7 @@ def get_object_url(ob: IResource, request: IRequest=None, **kwargs) -> str:
     url_adapter = query_multi_adapter((ob, request), IAbsoluteURL)
     if url_adapter is not None:
         return url_adapter(**kwargs)
+    return None
 
 
 async def get_object_by_oid(oid: str, txn=None) -> IResource:

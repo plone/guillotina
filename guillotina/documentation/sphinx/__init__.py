@@ -3,7 +3,7 @@ from aiohttp.test_utils import TestClient
 from aiohttp.test_utils import TestServer
 from base64 import b64encode
 from docutils import nodes
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive  # type: ignore
 from docutils.parsers.rst import directives  # type: ignore
 from guillotina import routes
 from guillotina._settings import app_settings
@@ -80,7 +80,7 @@ def _fmt_body(body, indent):
     if isinstance(body, str):
         try:
             body = json.loads(body)
-        except:
+        except Exception:
             return body
     body = json.dumps(body, indent=4)
     body = ('\n' + ' ' * indent).join(body.split('\n'))
@@ -199,10 +199,12 @@ class APICall(Directive):
         if resp.headers.get('content-type') == 'application/json':
             resp_body = loop.run_until_complete(resp.json())
             resp_body = _fmt_body(resp_body, 8)
+        else:
+            resp_body = loop.run_until_complete(resp.text())
 
         content = {
-            'path_spec': (self.options.get('path_spec')
-                          or self.options.get('method', 'GET').upper()),
+            'path_spec': (self.options.get('path_spec') or
+                          self.options.get('method', 'GET').upper()),
             'request': {
                 'method': self.options.get('method', 'GET').upper(),
                 'method_lower': self.options.get('method', 'GET').lower(),

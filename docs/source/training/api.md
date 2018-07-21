@@ -28,6 +28,16 @@ To create content, do a `POST` request on a container or folder object.
 
 ```eval_rst
 .. http:gapi::
+   :hidden:
+   :path: /db/container
+   :basic_auth: root:root
+   :method: POST
+   :body: {
+          "@type": "Container",
+          "id": "container"
+        }
+
+.. http:gapi::
    :path: /db/container
    :path_spec: /(db)/(container)
    :basic_auth: root:root
@@ -65,7 +75,7 @@ Simple file uploads can be done with the `@upload` endpoint.
    :path_spec: /(db)/(container)/(content)/@upload/file
    :method: PATCH
    :basic_auth: root:root
-   :body: <binary data>
+   :body: <text data>
 ```
 
 Then, to download the file, use the `@download` endpoint.
@@ -75,7 +85,7 @@ Then, to download the file, use the `@download` endpoint.
    :path: /db/container/foobar5/@download/file
    :path_spec: /(db)/(container)/(content)/@download/file
    :basic_auth: root:root
-   :body: <binary data>
+   :body: <text data>
 ```
 
 ## Uploading files with TUS
@@ -92,7 +102,7 @@ First, initialize the TUS upload with a POST
    :path: /db/container/foobar5/@tusupload/file
    :path_spec: /(db)/(container)/(content)/@tusupload/file
    :method: POST
-   :headers: TUS-RESUMABLE:1,UPLOAD-LENGTH:26
+   :headers: TUS-RESUMABLE:1,UPLOAD-LENGTH:22
    :basic_auth: root:root
 ```
 
@@ -105,7 +115,7 @@ Next, upload the chunks(here we're doing chunks):
    :method: PATCH
    :headers: TUS-RESUMABLE:1,Upload-Offset:0
    :basic_auth: root:root
-   :body: <binary data>
+   :body: <text data>
 ```
 
 And final chunk:
@@ -115,9 +125,9 @@ And final chunk:
    :path: /db/container/foobar5/@tusupload/file
    :path_spec: /(db)/(container)/(content)/@tusupload/file
    :method: PATCH
-   :headers: TUS-RESUMABLE:1,Upload-Offset:13
+   :headers: TUS-RESUMABLE:1,Upload-Offset:11
    :basic_auth: root:root
-   :body: <binary data>
+   :body: <text data>
 ```
 
 ### Unknown upload size

@@ -1,13 +1,13 @@
-Item
-====
+Folder
+======
 
-.. make sure we have a container
+.. ignored http call below to make sure we have a container
 .. http:gapi::
-   :hidden: yes
-   :method: POST
+   :hidden:
    :path: /db
+   :method: POST
    :basic_auth: root:root
-   :headers: Content-Type:application/json
+   :headers: Content-Type: application/json
    :body: {"@type": "Container", "id": "container"}
 
 .. http:gapi::
@@ -16,7 +16,8 @@ Item
    :path: /db/container
    :basic_auth: root:root
    :headers: Content-Type:application/json
-   :body: {"@type": "Item", "id": "foobar"}
+   :body: {"@type": "Folder", "id": "foobar"}
+
 
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)
@@ -44,12 +45,12 @@ Behaviors
 ---------
 
 .. http:gapi::
-   :path_spec: /(db)/(container)
+   :path_spec:  /(db)/(container)
    :method: POST
    :path: /db/container
    :basic_auth: root:root
    :headers: Content-Type:application/json
-   :body: {"@type": "Item", "id": "foobar"}
+   :body: {"@type": "Folder", "id": "foobar"}
    :hidden: yes
 
 .. http:gapi::
@@ -77,8 +78,6 @@ Behaviors
 Files
 -----
 
-First, add the `IAttachment` behavior.
-
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)/@behaviors
    :path: /db/container/foobar/@behaviors
@@ -88,7 +87,6 @@ First, add the `IAttachment` behavior.
    :body: {"behavior": "guillotina.behaviors.attachment.IAttachment"}
    :hidden: yes
 
-We have simple `@upload` and `@download` endpoints
 
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)/@upload/(field_name)
@@ -97,44 +95,12 @@ We have simple `@upload` and `@download` endpoints
    :basic_auth: root:root
    :body: foobar data
 
-.. http:gapi::
-   :path_spec: /(db)/(container)/(id)/@download/(field_name)
-   :path: /db/container/foobar/@download/file
-   :basic_auth: root:root
-
-But we also support TUS.
-
-.. http:gapi::
-   :path: /db/container/foobar/@tusupload/file
-   :path_spec: /(db)/(container)/(content)/@tusupload/file
-   :method: POST
-   :headers: TUS-RESUMABLE:1,UPLOAD-LENGTH:22
-   :basic_auth: root:root
-
-
-.. http:gapi::
-   :path: /db/container/foobar/@tusupload/file
-   :path_spec: /(db)/(container)/(content)/@tusupload/file
-   :method: PATCH
-   :headers: TUS-RESUMABLE:1,Upload-Offset:0
-   :basic_auth: root:root
-   :body: <text data>
-
-.. http:gapi::
-   :path: /db/container/foobar/@tusupload/file
-   :path_spec: /(db)/(container)/(content)/@tusupload/file
-   :method: PATCH
-   :headers: TUS-RESUMABLE:1,Upload-Offset:11
-   :basic_auth: root:root
-   :body: <text data>
-
-
-Download again, see what we have.
 
 .. http:gapi::
    :path_spec: /(db)/(container)/(id)/@download/(field_name)
    :path: /db/container/foobar/@download/file
    :basic_auth: root:root
+
 
 Security
 --------
@@ -212,6 +178,24 @@ Content
 
 
 .. http:gapi::
+   :path_spec: /(db)/(container)/(id)/@addable-types
+   :path: /db/container/foobar3/@addable-types
+   :basic_auth: root:root
+
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/(id)/@ids
+   :path: /db/container/foobar3/@ids
+   :basic_auth: root:root
+
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/(id)/@items
+   :path: /db/container/foobar3/@items
+   :basic_auth: root:root
+
+
+.. http:gapi::
    :path_spec: /(db)/(container)/(id)/@invalidate-cache
-   :path: /db/container/foobar2/@invalidate-cache
+   :path: /db/container/foobar3/@invalidate-cache
    :basic_auth: root:root

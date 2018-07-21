@@ -2,7 +2,6 @@ from guillotina.component import get_multi_adapter
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.utils import get_current_request
-from guillotina.utils import get_dotted_name
 
 import logging
 
@@ -21,7 +20,7 @@ def convert_interfaces_to_schema(interfaces):
     for iface in interfaces:
         serializer = get_multi_adapter(
             (iface, request), ISchemaSerializeToJson)
-        properties[get_dotted_name(iface)] = {
+        properties[iface.__identifier__] = {
             "type": "object",
             "properties": serializer()
         }
