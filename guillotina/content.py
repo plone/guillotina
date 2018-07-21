@@ -27,7 +27,6 @@ from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
