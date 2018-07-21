@@ -74,6 +74,24 @@ def _clean_headers(headers):
     return headers
 
 
+def _fmt_body(body, indent):
+    if body is None:
+        return ""
+    if isinstance(body, str):
+        try:
+            body = json.loads(body)
+        except:
+            return body
+    body = json.dumps(body, indent=4)
+    body = ('\n' + ' ' * indent).join(body.split('\n'))
+    return body
+
+
+def _fmt_headers(headers, indent):
+    return ('\n' + ' ' * indent).join(
+        '%s: %s' % (name, headers[name]) for name in sorted(headers))
+
+
 class APICall(Directive):
     """
     Combines sphinxcontrib.httpdomain and sphinxcontrib.httpexample to
@@ -178,6 +196,7 @@ class APICall(Directive):
         resp_body = None
         if resp.headers.get('content-type') == 'application/json':
             resp_body = loop.run_until_complete(resp.json())
+            resp_body = _fmt_body(resp_body, 8)
 
         content = {
             'path_spec': self.options.get('path_spec'),
@@ -185,12 +204,12 @@ class APICall(Directive):
                 'method': self.options.get('method', 'GET').upper(),
                 'method_lower': self.options.get('method', 'GET').lower(),
                 'path': self.options.get('path') or '/',
-                'headers': _clean_headers(headers),
-                'body': self.options.get('body')
+                'headers': _fmt_headers(_clean_headers(headers), 8),
+                'body': _fmt_body(self.options.get('body'), 8)
             },
             'response': {
                 'status': resp.status,
-                'headers': _clean_headers(dict(resp.headers)),
+                'headers': _fmt_headers(_clean_headers(dict(resp.headers)), 8),
                 'body': resp_body
             },
             'service': service_definition,
@@ -205,22 +224,23 @@ class APICall(Directive):
     - Permission: **{service[permission]}**
     - Context: **{service[context]}**
 
-    **Example request**
-
-    .. sourcecode:: http
+    .. http:example:: curl httpie
 
         {request[method]} {request[path]} HTTP/1.1
+        {request[headers]}
+
         {request[body]}
 
-    **Example response**
 
-    .. sourcecode:: http
+        HTTP/1.1 {response[status]} OK
+        {response[headers]}
 
-        {response[status]}
         {response[body]}
 
-""".format(**content).split("\n")
-        view = docutils.statemachine.ViewList(rst_content, '<gapi>')
+"""
+        rst_content = rst_content.format(**content)
+        rst_content = rst_content.split("\n")
+        view = docutils.statemachine.StringList(rst_content, '<gapi>')
 
         node = nodes.paragraph()
         self.state.nested_parse(view, 0, node)
