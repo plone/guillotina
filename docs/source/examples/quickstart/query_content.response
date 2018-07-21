@@ -1,0 +1,41 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "@id": "http://localhost:8080/db/guillotina/news",
+    "@name": "news",
+    "@type": "Item",
+    "@uid": "7d9|11729830722c4e43924df18d21d14bdf",
+    "UID": "7d9|11729830722c4e43924df18d21d14bdf",
+    "__behaviors__": [],
+    "__name__": "news",
+    "creation_date": "2018-07-21T09:37:41.863014+00:00",
+    "guillotina.behaviors.dublincore.IDublinCore": {
+        "contributors": [
+            "root"
+        ],
+        "creation_date": "2018-07-21T09:37:41.863014+00:00",
+        "creators": [
+            "root"
+        ],
+        "description": null,
+        "effective_date": null,
+        "expiration_date": null,
+        "modification_date": "2018-07-21T09:37:41.863014+00:00",
+        "publisher": null,
+        "tags": null,
+        "title": "News"
+    },
+    "is_folderish": false,
+    "modification_date": "2018-07-21T09:37:41.863014+00:00",
+    "parent": {
+        "@id": "http://localhost:8080/db/guillotina",
+        "@name": "guillotina",
+        "@type": "Container",
+        "@uid": "7d9ebe1b2e1044688c83985e9e0a7ef3",
+        "UID": "7d9ebe1b2e1044688c83985e9e0a7ef3"
+    },
+    "title": "News",
+    "type_name": "Item",
+    "uuid": "7d9|11729830722c4e43924df18d21d14bdf"
+}

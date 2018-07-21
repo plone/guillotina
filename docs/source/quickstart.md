@@ -60,23 +60,41 @@ be created inside databases.
 
 Let's create one:
 
-```
-  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
-    "@type": "Container",
-    "title": "Guillotina 1",
-    "id": "guillotina",
-    "description": "Description"
-  }' "http://127.0.0.1:8080/db/"
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/ HTTP/1.1
+    Accept: application/json
+    Content-Type: application/json
+    Host: localhost:8080
+    Authorization: Basic cm9vdDpyb290
+
+    {
+        "@type": "Container",
+        "title": "Guillotina 1",
+        "id": "guillotina",
+        "description": "Description"
+    }
+
 ```
 
 and create content inside the container:
 
-```
-  curl -X POST -H "Accept: application/json" --user root:root -H "Content-Type: application/json" -d '{
-    "@type": "Item",
-    "title": "News",
-    "id": "news"
-  }' "http://127.0.0.1:8080/db/guillotina/"
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/guillotina/ HTTP/1.1
+    Accept: application/json
+    Content-Type: application/json
+    Host: localhost:8080
+    Authorization: Basic cm9vdDpyb290
+
+    {
+        "@type": "Item",
+        "title": "News",
+        "id": "news"
+    }
+
 ```
 
 ## Retrieving your data
@@ -85,94 +103,39 @@ Let's navigating throught your newly created data.
 
 First you can see all your containers using the following, notice that at the moment there's only one named `guillotina`:
 
-```
-curl --user root:root "http://127.0.0.1:8080/db/"
-```
-```
-{
-    "@type": "Database",
-    "containers": [
-        "guillotina"
-    ]
-}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+    :response: ./source/examples/quickstart/query_db.response
+
+    GET /db/ HTTP/1.1
+    Accept: application/json
+    Host: localhost:8080
+    Authorization: Basic cm9vdDpyb290
+
 ```
 
 Then you could explore container data using:
 
-```
-curl --user root:root "http://127.0.0.1:8080/db/guillotina"
-```
-```
-{
-    "@id": "http://localhost:8080/db/guillotina",
-    "@name": "guillotina",
-    "@type": "Container",
-    "@uid": "7d9ebe1b2e1044688c83985e9e0a7ef3",
-    "UID": "7d9ebe1b2e1044688c83985e9e0a7ef3",
-    "__behaviors__": [],
-    "__name__": "guillotina",
-    "creation_date": "2018-07-21T09:37:28.125034+00:00",
-    "is_folderish": true,
-    "items": [
-        {
-            "@id": "http://localhost:8080/db/guillotina/news",
-            "@name": "news",
-            "@type": "Item",
-            "@uid": "7d9|11729830722c4e43924df18d21d14bdf",
-            "UID": "7d9|11729830722c4e43924df18d21d14bdf"
-        }
-    ],
-    "length": 1,
-    "modification_date": "2018-07-21T09:37:28.125034+00:00",
-    "parent": {},
-    "title": "Guillotina 1",
-    "type_name": "Container",
-    "uuid": "7d9ebe1b2e1044688c83985e9e0a7ef3"
-}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+    :response: ./source/examples/quickstart/query_container.response
+
+    GET /db/guillotina HTTP/1.1
+    Accept: application/json
+    Host: localhost:8080
+    Authorization: Basic cm9vdDpyb290
+
 ```
 
 And finally query a specific content inside the container using:
 
-```
-curl --user root:root "http://127.0.0.1:8080/db/guillotina/news"
-```
-```
-{
-    "@id": "http://localhost:8080/db/guillotina/news",
-    "@name": "news",
-    "@type": "Item",
-    "@uid": "7d9|11729830722c4e43924df18d21d14bdf",
-    "UID": "7d9|11729830722c4e43924df18d21d14bdf",
-    "__behaviors__": [],
-    "__name__": "news",
-    "creation_date": "2018-07-21T09:37:41.863014+00:00",
-    "guillotina.behaviors.dublincore.IDublinCore": {
-        "contributors": [
-            "root"
-        ],
-        "creation_date": "2018-07-21T09:37:41.863014+00:00",
-        "creators": [
-            "root"
-        ],
-        "description": null,
-        "effective_date": null,
-        "expiration_date": null,
-        "modification_date": "2018-07-21T09:37:41.863014+00:00",
-        "publisher": null,
-        "tags": null,
-        "title": "News"
-    },
-    "is_folderish": false,
-    "modification_date": "2018-07-21T09:37:41.863014+00:00",
-    "parent": {
-        "@id": "http://localhost:8080/db/guillotina",
-        "@name": "guillotina",
-        "@type": "Container",
-        "@uid": "7d9ebe1b2e1044688c83985e9e0a7ef3",
-        "UID": "7d9ebe1b2e1044688c83985e9e0a7ef3"
-    },
-    "title": "News",
-    "type_name": "Item",
-    "uuid": "7d9|11729830722c4e43924df18d21d14bdf"
-}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+    :response: ./source/examples/quickstart/query_content.response
+
+    GET /db/guillotina/news HTTP/1.1
+    Accept: application/json
+    Host: localhost:8080
+    Authorization: Basic cm9vdDpyb290
+
 ```
