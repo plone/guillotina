@@ -242,6 +242,16 @@ class APICall(Directive):
 
 """
         rst_content = rst_content.format(**content)
+        responses = {
+            code: info['description']
+            for code, info in service_definition.get('responses', {}).items()
+        }
+        responses.setdefault('401',
+                             'You are not authorized to perform the operation')
+        responses.setdefault('404', 'The resource does not exist')
+        for code in sorted(responses):
+            rst_content += ('\n    :statuscode {}: {}'.format(
+                code, responses[code]))
         rst_content = rst_content.split("\n")
         view = docutils.statemachine.StringList(rst_content, '<gapi>')
 
