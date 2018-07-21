@@ -62,7 +62,6 @@ Let's create one:
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
-    :response: ./source/examples/created.response
 
     POST /db/ HTTP/1.1
     Accept: application/json
@@ -77,13 +76,16 @@ Let's create one:
         "description": "Description"
     }
 
+
+    HTTP/1.1 201 OK
+    Content-Type: application/json
+
 ```
 
 and create content inside the container:
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
-    :response: ./source/examples/created.response
 
     POST /db/guillotina/ HTTP/1.1
     Accept: application/json
@@ -97,6 +99,10 @@ and create content inside the container:
         "id": "news"
     }
 
+
+    HTTP/1.1 201 OK
+    Content-Type: application/json
+
 ```
 
 ## Retrieving your data
@@ -107,12 +113,22 @@ First you can see all your containers using the following, notice that at the mo
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
-    :response: ./source/examples/quickstart/query_db.response
 
     GET /db/ HTTP/1.1
     Accept: application/json
     Host: localhost:8080
     Authorization: Basic cm9vdDpyb290
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "@type": "Database",
+        "containers": [
+            "guillotina"
+        ]
+    }
 
 ```
 
@@ -120,12 +136,42 @@ Then you could explore container data using:
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
-    :response: ./source/examples/quickstart/query_container.response
 
     GET /db/guillotina HTTP/1.1
     Accept: application/json
     Host: localhost:8080
     Authorization: Basic cm9vdDpyb290
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "@id": "http://localhost:8080/db/guillotina",
+        "@name": "guillotina",
+        "@type": "Container",
+        "@uid": "7d9ebe1b2e1044688c83985e9e0a7ef3",
+        "UID": "7d9ebe1b2e1044688c83985e9e0a7ef3",
+        "__behaviors__": [],
+        "__name__": "guillotina",
+        "creation_date": "2018-07-21T09:37:28.125034+00:00",
+        "is_folderish": true,
+        "items": [
+            {
+                "@id": "http://localhost:8080/db/guillotina/news",
+                "@name": "news",
+                "@type": "Item",
+                "@uid": "7d9|11729830722c4e43924df18d21d14bdf",
+                "UID": "7d9|11729830722c4e43924df18d21d14bdf"
+            }
+        ],
+        "length": 1,
+        "modification_date": "2018-07-21T09:37:28.125034+00:00",
+        "parent": {},
+        "title": "Guillotina 1",
+        "type_name": "Container",
+        "uuid": "7d9ebe1b2e1044688c83985e9e0a7ef3"
+    }
 
 ```
 
@@ -133,11 +179,53 @@ And finally query a specific content inside the container using:
 
 ```eval_rst
 ..  http:example:: curl wget httpie python-requests
-    :response: ./source/examples/quickstart/query_content.response
 
     GET /db/guillotina/news HTTP/1.1
     Accept: application/json
     Host: localhost:8080
     Authorization: Basic cm9vdDpyb290
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "@id": "http://localhost:8080/db/guillotina/news",
+        "@name": "news",
+        "@type": "Item",
+        "@uid": "7d9|11729830722c4e43924df18d21d14bdf",
+        "UID": "7d9|11729830722c4e43924df18d21d14bdf",
+        "__behaviors__": [],
+        "__name__": "news",
+        "creation_date": "2018-07-21T09:37:41.863014+00:00",
+        "guillotina.behaviors.dublincore.IDublinCore": {
+            "contributors": [
+                "root"
+            ],
+            "creation_date": "2018-07-21T09:37:41.863014+00:00",
+            "creators": [
+                "root"
+            ],
+            "description": null,
+            "effective_date": null,
+            "expiration_date": null,
+            "modification_date": "2018-07-21T09:37:41.863014+00:00",
+            "publisher": null,
+            "tags": null,
+            "title": "News"
+        },
+        "is_folderish": false,
+        "modification_date": "2018-07-21T09:37:41.863014+00:00",
+        "parent": {
+            "@id": "http://localhost:8080/db/guillotina",
+            "@name": "guillotina",
+            "@type": "Container",
+            "@uid": "7d9ebe1b2e1044688c83985e9e0a7ef3",
+            "UID": "7d9ebe1b2e1044688c83985e9e0a7ef3"
+        },
+        "title": "News",
+        "type_name": "Item",
+        "uuid": "7d9|11729830722c4e43924df18d21d14bdf"
+    }
 
 ```
