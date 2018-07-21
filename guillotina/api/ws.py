@@ -89,7 +89,7 @@ class WebsocketsView(Service):
         except KeyError:
             frame_id = '0'
 
-        parsed = parse.urlparse(message['path'])
+        parsed = parse.urlparse(message.get('path', message.get('value')))
         path = tuple(p for p in parsed.path.split('/') if p)
 
         from guillotina.traversal import traverse

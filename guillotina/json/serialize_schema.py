@@ -53,7 +53,7 @@ class SerializeFactoryToJson(object):
             schema_serializer = get_multi_adapter(
                 (schema, self.request), ISchemaSerializeToJson)
 
-            serialization = schema_serializer()
+            serialization = await schema_serializer()
             result['properties'][schema_serializer.name] = \
                 {'$ref': '#/definitions/' + schema_serializer.name},
             result['definitions'][schema_serializer.name] = serialization
@@ -82,7 +82,10 @@ class DefaultSchemaSerializer(object):
             'invariants': []
         }
 
-    def __call__(self):
+    async def __call__(self):
+        return self.serialize()
+
+    def serialize(self):
         for name, field in get_fields_in_order(self.schema):
             serializer = get_multi_adapter(
                 (field, self.schema, self.request),
