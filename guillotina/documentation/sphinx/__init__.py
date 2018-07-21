@@ -21,7 +21,6 @@ import docutils.statemachine
 import json
 import pkg_resources
 
-
 _server = None
 
 IGNORED_HEADERS = ('Accept-Encoding', 'Connection', 'User-Agent', 'Date',
@@ -202,8 +201,8 @@ class APICall(Directive):
             resp_body = _fmt_body(resp_body, 8)
 
         content = {
-            'path_spec': (self.options.get('path_spec') or
-                          self.options.get('method', 'GET').upper()),
+            'path_spec': (self.options.get('path_spec')
+                          or self.options.get('method', 'GET').upper()),
             'request': {
                 'method': self.options.get('method', 'GET').upper(),
                 'method_lower': self.options.get('method', 'GET').lower(),
@@ -216,7 +215,8 @@ class APICall(Directive):
                 'headers': _fmt_headers(_clean_headers(dict(resp.headers)), 8),
                 'body': resp_body
             },
-            'service': service_definition,
+            'service':
+            service_definition,
         }
         rst_content = """.. http:{request[method_lower]}:: {path_spec}
 
@@ -242,6 +242,21 @@ class APICall(Directive):
 
 """
         rst_content = rst_content.format(**content)
+
+        for parameter in service_definition.get('parameters', []):
+            if isinstance(parameter, str):
+                parameter = {'name': parameter, 'type': 'string'}
+            if parameter.get('in', 'query') != 'query':
+                continue
+            parameter.setdefault('description', '')
+            if parameter.get('required'):
+                parameter['description'] += ' (required)'
+            elif parameter.get('default'):
+                parameter['description'] += ' (default: {default})'.format(
+                    **parameter)
+            rst_content += '\n    :query {type} {name}: {description}'.format(
+                **parameter)
+
         responses = {
             code: info['description']
             for code, info in service_definition.get('responses', {}).items()
