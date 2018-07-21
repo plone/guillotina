@@ -43,6 +43,16 @@ def get_component_registry(context=None):
 
 def get_adapter(object, interface=Interface, name=_BLANK, context=None,
                 args=[], kwargs={}):
+    '''
+    Get a registered adapter
+
+    :param object: Object to get adapter for
+    :param interface: What interface should the adapter provide
+    :param name: if it is a named adapter
+    :param args: args to provide the adapter constructor
+    :param kwargs: kwargs to provide the adapter constructor
+    :raises ComponentLookupError:
+    '''
     adapter_ = query_adapter(object, interface=interface, name=name,
                              default=_MISSING, context=context,
                              args=args, kwargs=kwargs)
@@ -54,6 +64,15 @@ def get_adapter(object, interface=Interface, name=_BLANK, context=None,
 
 def query_adapter(object, interface=Interface, name=_BLANK, default=None,
                   context=None, args=[], kwargs={}):
+    '''
+    Get a registered adapter
+
+    :param object: Object to get adapter for
+    :param interface: What interface should the adapter provide
+    :param name: if it is a named adapter
+    :param args: args to provide the adapter constructor
+    :param kwargs: kwargs to provide the adapter constructor
+    '''
     if context is None:
         return adapter_hook(interface, object,
                             name=name, default=default,
@@ -64,6 +83,16 @@ def query_adapter(object, interface=Interface, name=_BLANK, default=None,
 
 def get_multi_adapter(objects, interface=Interface, name=_BLANK, context=None,
                       args=[], kwargs={}):
+    '''
+    Get a registered multi adapter
+
+    :param objects: Objects to get adapter for
+    :param interface: What interface should the adapter provide
+    :param name: if it is a named adapter
+    :param args: args to provide the adapter constructor
+    :param kwargs: kwargs to provide the adapter constructor
+    :raises ComponentLookupError:
+    '''
     adapter_ = query_multi_adapter(
         objects, interface, name, context=context, args=args, kwargs=kwargs)
     if adapter_ is None:
@@ -73,6 +102,15 @@ def get_multi_adapter(objects, interface=Interface, name=_BLANK, context=None,
 
 def query_multi_adapter(objects, interface=Interface, name=_BLANK, default=None,
                         context=None, args=[], kwargs={}):
+    '''
+    Get a registered multi adapter
+
+    :param objects: Objects to get adapter for
+    :param interface: What interface should the adapter provide
+    :param name: if it is a named adapter
+    :param args: args to provide the adapter constructor
+    :param kwargs: kwargs to provide the adapter constructor
+    '''
     try:
         registry = get_component_registry(context)
     except ComponentLookupError:
@@ -91,6 +129,12 @@ def query_multi_adapter(objects, interface=Interface, name=_BLANK, default=None,
 
 
 def get_adapters(objects, provided, context=None):
+    '''
+    Get a registered adapter
+
+    :param objects: Tuple of objects
+    :param provided: What interface should the adapter provide
+    '''
     try:
         registry = get_component_registry(context)
     except ComponentLookupError:
@@ -139,6 +183,13 @@ zope.interface.interface.adapter_hooks.append(adapter_hook)
 # Utility API
 
 def get_utility(interface, name='', context=None):
+    '''
+    Get a registered utility
+
+    :param interface: What interface should the utility provide
+    :param name: if it is a named adapter
+    :raises ComponentLookupError:
+    '''
     utility = query_utility(interface, name, context=context)
     if utility is not None:
         return utility
@@ -146,14 +197,30 @@ def get_utility(interface, name='', context=None):
 
 
 def query_utility(interface, name='', default=None, context=None):
+    '''
+    Get a registered utility
+
+    :param interface: What interface should the utility provide
+    :param name: if it is a named adapter
+    '''
     return get_component_registry(context).queryUtility(interface, name, default)
 
 
 def get_utilities_for(interface, context=None):
+    '''
+    Get utilities registered for interface
+
+    :param interface: What interface should the utility provide
+    '''
     return get_component_registry(context).getUtilitiesFor(interface)
 
 
 def get_all_utilities_registered_for(interface, context=None):
+    '''
+    Get all utilities registered for interface
+
+    :param interface: What interface should the utility provide
+    '''
     return get_component_registry(context).getAllUtilitiesRegisteredFor(interface)
 
 

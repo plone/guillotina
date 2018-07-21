@@ -555,7 +555,13 @@ def grant_all(principal=None, role=None):
         'grant_all')
 
 
-def json_schema_definition(name, schema):
+def json_schema_definition(name: str, schema: dict) -> None:
+    '''
+    Register a json schema definition
+
+    :param name: Name of schema
+    :param schema: schema definition, must be json compatible
+    '''
     register_configuration(
         get_caller_module(),
         dict(name=name, schema=schema),
@@ -646,10 +652,11 @@ def defineRole_directive(_context, id, title, description='', local=True):  # no
     component.utility(_context, IRole, role, name=id)
 
 
-def scan(path):
+def scan(path: str):
     """
-    pyramid's version of scan has a much more advanced resolver that we
-    can look into supporting eventually...
+    Load a module dotted name.
+
+    :param path: dotted name
     """
     path = resolve_module_path(path)
     __import__(path)

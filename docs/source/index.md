@@ -95,11 +95,13 @@ The endpoints available around these objects are detailed below:
 .. toctree::
    :maxdepth: 1
 
+   api/configure
    api/content
    api/request
    api/response
    api/fields
    api/utils
+   api/component
 ```
 
 
