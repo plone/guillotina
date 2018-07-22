@@ -117,20 +117,20 @@ The endpoints available around these objects are detailed below:
 
 # Why Guillotina
 
- - **Performance**: Traditional python web servers limit the number of simultaneous
+ - **Performance**: Traditional Python web servers limit the number of simultaneous
    requests to the number of threads running the server. With AsyncIO, you are
-   able to server many simultaneous requests at the same time.
+   able to serve many more simultaneous requests.
  - **Front-end friendly**: Guillotina is designed to make your
-   JavaScript engineers happy. With things like automatic swagger documentation
-   for endpoints, OOTB CORS and websockets, your front-end team will be happy
-   to work with Guillotina. We speak JSON but can adapt with any Content-Type
+   JavaScript engineers happy. With things like automatic Swagger documentation
+   for endpoints, out of the box CORS and websockets, your front-end team will be happy
+   to work with Guillotina. We speak JSON but can adapt to any content type
    payload request/response bodies.
  - **AsyncIO**: With AsyncIO, websockets are simple. More interestingly, AsyncIO
-   is an ideal match with micro-service architectures.
+   is an ideal match with microservice architectures.
  - **Object model**: Guillotina uses a hierarchial object model. This hierarchy
-   of objects then maps to URLs. The hierarchy model is perfect for managing
+   of objects then maps to URLs and is perfect for managing
    a large number of objects.
- - **Security**: Guillotina has a granular, hierarchial, multi-demensional
+ - **Security**: Guillotina has a granular, hierarchical, multidimensional
    security system that allows you to manage the security of your content
    at a level not available to other frameworks.
  - **Scale**: With integrations like Redis, ElasticSearch and Cockroach, you
