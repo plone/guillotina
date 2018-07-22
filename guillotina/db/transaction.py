@@ -90,9 +90,6 @@ class Transaction(object):
         self.modified = {}
         self.deleted = {}
 
-        # OIDS to invalidate
-        self._objects_to_invalidate = []
-
         # List of (hook, args, kws) tuples added by addBeforeCommitHook().
         self._before_commit = []
 
@@ -153,10 +150,6 @@ class Transaction(object):
     @property
     def storage(self):
         return self._manager._storage
-
-    @property
-    def objects_needing_invalidation(self):
-        return self._objects_to_invalidate
 
     def get_before_commit_hooks(self):
         """ See ITransaction.
@@ -375,7 +368,6 @@ class Transaction(object):
         obj._p_oid = oid
         if obj._p_jar is None:
             obj._p_jar = self
-        self._objects_to_invalidate.append(obj)
 
     @profilable
     async def tpc_commit(self):
@@ -390,7 +382,6 @@ class Transaction(object):
             if obj._p_jar is not self and obj._p_jar is not None:
                 raise Exception(f'Invalid reference to txn: {obj}')
             await self._manager._storage.delete(self, oid)
-            self._objects_to_invalidate.append(obj)
 
     @profilable
     async def tpc_vote(self):
@@ -411,7 +402,6 @@ class Transaction(object):
         self.added = {}
         self.modified = {}
         self.deleted = {}
-        self._objects_to_invalidate = []
         self._db_txn = None
 
     # Inspection
