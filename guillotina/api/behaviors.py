@@ -55,6 +55,30 @@ async def default_patch(context, request):
 
 @configure.service(
     context=IResource, method='DELETE',
+    permission='guillotina.ModifyContent', name='@behaviors/{behavior}',
+    summary="Remove behavior from resource",
+    parameters=[{
+        "name": "behavior",
+        "in": "path",
+        "schema": {
+            "$ref": "#/definitions/Behavior"
+        }
+    }],
+    responses={
+        "200": {
+            "description": "Successfully removed behavior"
+        },
+        "412": {
+            "description": "Behavior not assigned here"
+        },
+    })
+async def default_delete_withparams(context, request):
+    behavior = request.matchdict['behavior']
+    return await delete_behavior(context, behavior)
+
+
+@configure.service(
+    context=IResource, method='DELETE',
     permission='guillotina.ModifyContent', name='@behaviors',
     summary="Remove behavior from resource",
     parameters=[{
@@ -75,6 +99,10 @@ async def default_patch(context, request):
 async def default_delete(context, request):
     data = await request.json()
     behavior = data.get('behavior', None)
+    return await delete_behavior(context, behavior)
+
+
+async def delete_behavior(context, behavior):
     factory = get_cached_factory(context.type_name)
     behavior_class = resolve_dotted_name(behavior)
     if behavior_class is not None:

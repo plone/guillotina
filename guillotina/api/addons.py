@@ -58,8 +58,25 @@ async def install(context, request):
     }])
 async def uninstall(context, request):
     data = await request.json()
-    id_to_install = data.get('id', None)
-    if id_to_install not in app_settings['available_addons']:
+    id_to_uninstall = data.get('id', None)
+    return await uninstall_addon(context, request, id_to_uninstall)
+
+
+@configure.service(
+    context=IContainer, method='DELETE',
+    permission='guillotina.ManageAddons', name='@addons/{addon}',
+    summary='Uninstall an addon from container',
+    parameters=[{
+        "name": "addon",
+        "in": "path",
+    }])
+async def uninstall_path(context, request):
+    id_to_uninstall = request.matchdict['addon']
+    return await uninstall_addon(context, request, id_to_uninstall)
+
+
+async def uninstall_addon(context, request, id_to_uninstall):
+    if id_to_uninstall not in app_settings['available_addons']:
         return ErrorResponse(
             'RequiredParam',
             _("Property 'id' is required to be valid"),
@@ -68,15 +85,15 @@ async def uninstall(context, request):
     registry = request.container_settings
     config = registry.for_interface(IAddons)
 
-    if id_to_install not in config['enabled']:
+    if id_to_uninstall not in config['enabled']:
         return ErrorResponse(
             'Duplicate',
             _("Addon not installed"),
             status=412, reason=error_reasons.NOT_INSTALLED)
 
-    handler = app_settings['available_addons'][id_to_install]['handler']
+    handler = app_settings['available_addons'][id_to_uninstall]['handler']
     await apply_coroutine(handler.uninstall, context, request)
-    config['enabled'] -= {id_to_install}
+    config['enabled'] -= {id_to_uninstall}
 
 
 @configure.service(

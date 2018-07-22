@@ -244,6 +244,37 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
         assert 'guillotina.test_package.ITestBehavior' not in response
 
 
+async def test_delete_dynamic_behavior_url(custom_type_container_requester):
+    async with custom_type_container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Foobar",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        assert status == 201
+
+        # We create the behavior
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'behavior': 'guillotina.test_package.ITestBehavior'
+            })
+        )
+        assert status == 200
+
+        # We delete the behavior
+        response, status = await requester(
+            'DELETE',
+            '/db/guillotina/item1/@behaviors/guillotina.test_package.ITestBehavior'
+        )
+        assert status == 200
+
+
 async def test_get_behaviors(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
