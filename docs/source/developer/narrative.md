@@ -101,59 +101,171 @@ guillotina serve -c config.yaml
 
 Create container first:
 
-```bash
-curl -X POST --user root:root \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -d '{
-  "@type": "Container",
-  "title": "ToDo List",
-  "id": "todo",
-  "description": "My todo list"
-  }' "http://127.0.0.1:8080/db/"
-```
+```eval_rst
+..  http:example:: curl wget httpie python-requests
 
+    POST /db/ HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "@type": "Container",
+        "description": "My todo list",
+        "id": "todo",
+        "title": "ToDo List"
+    }
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Location: /db/todo
+
+    {
+        "@type": "Container",
+        "id": "todo",
+        "title": "ToDo List"
+    }
+
+```
 
 Install your todo list application:
 
-```
-curl -X POST \
-  --user root:root \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -d '{
-  "id": "guillotina_todo"
-  }' "http://127.0.0.1:8080/db/todo/@addons"
-```
+```eval_rst
+..  http:example:: curl wget httpie python-requests
 
+    POST /db/todo/@addons HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "id": "guillotina_todo"
+    }
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "available": [
+            {
+                "id": "guillotina_todo",
+                "title": "Guillotina server application python project"
+            }
+        ],
+        "installed": [
+            "guillotina_todo"
+        ]
+    }
+
+```
 
 Add todo items:
 
-```
-curl -X POST \
-  --user root:root \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -d '{
-  "@type": "ToDo",
-  "text": "Get milk"
-  }' "http://127.0.0.1:8080/db/todo"
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/todo HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "@type": "ToDo",
+        "text": "Get milk"
+    }
+
+
+    HTTP/1.1 201 Created
+    Content-Type: application/json
+    Location: http://localhost:8080/db/todo/385ac34a49bc406f8494600c50b99a85
+
+    {
+        "@id": "http://localhost:8080/db/todo/385ac34a49bc406f8494600c50b99a85",
+        "@name": "385ac34a49bc406f8494600c50b99a85",
+        "@type": "ToDo",
+        "@uid": "5c9|385ac34a49bc406f8494600c50b99a85",
+        "UID": "5c9|385ac34a49bc406f8494600c50b99a85"
+    }
 ```
 
-```
-curl -X POST \
-  --user root:root \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -d '{
-  "@type": "ToDo",
-  "text": "Do laundry"
-  }' "http://127.0.0.1:8080/db/todo"
-```
+```eval_rst
+..  http:example:: curl wget httpie python-requests
 
+    POST /db/todo HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "@type": "ToDo",
+        "text": "Do laundry"
+    }
+
+
+    HTTP/1.1 201 Created
+    Content-Type: application/json
+    Location: http://localhost:8080/db/todo/77332e3153a54924b9b36eb263848826
+
+    {
+        "@id": "http://localhost:8080/db/todo/77332e3153a54924b9b36eb263848826",
+        "@name": "77332e3153a54924b9b36eb263848826",
+        "@type": "ToDo",
+        "@uid": "5c9|77332e3153a54924b9b36eb263848826",
+        "UID": "5c9|77332e3153a54924b9b36eb263848826"
+    }
+```
 
 Get a list of todo items:
 
-```
-curl -H "Accept: application/json" --user root:root "http://127.0.0.1:8080/db/todo"
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    GET /db/todo HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Host: localhost:8080
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "@id": "http://localhost:8080/db/todo",
+        "@name": "todo",
+        "@type": "Container",
+        "@uid": "5c9932350eaf4ff189d7db934222216b",
+        "UID": "5c9932350eaf4ff189d7db934222216b",
+        "__behaviors__": [],
+        "__name__": "todo",
+        "creation_date": "2018-07-21T15:39:11.411162+00:00",
+        "is_folderish": true,
+        "items": [
+            {
+                "@id": "http://localhost:8080/db/todo/385ac34a49bc406f8494600c50b99a85",
+                "@name": "385ac34a49bc406f8494600c50b99a85",
+                "@type": "ToDo",
+                "@uid": "5c9|385ac34a49bc406f8494600c50b99a85",
+                "UID": "5c9|385ac34a49bc406f8494600c50b99a85"
+            },
+            {
+                "@id": "http://localhost:8080/db/todo/77332e3153a54924b9b36eb263848826",
+                "@name": "77332e3153a54924b9b36eb263848826",
+                "@type": "ToDo",
+                "@uid": "5c9|77332e3153a54924b9b36eb263848826",
+                "UID": "5c9|77332e3153a54924b9b36eb263848826"
+            }
+        ],
+        "length": 2,
+        "modification_date": "2018-07-21T15:39:11.411162+00:00",
+        "parent": {},
+        "title": "ToDo List",
+        "type_name": "Container",
+        "uuid": "5c9932350eaf4ff189d7db934222216b"
+    }
 ```
