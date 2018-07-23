@@ -65,6 +65,10 @@ def load_application(module, root, settings):
 
 
 class GuillotinaAIOHTTPApplication(web.Application):
+    def __init__(self, router, middlewares, **kwargs):
+        super().__init__(middlewares=middlewares, **kwargs)
+        self._router = router
+
     async def _handle(self, request, retries=0):
         aiotask_context.set('request', request)
         try:
