@@ -33,3 +33,5 @@ cors:
   allow_credentials: true
   max_age: 3660
 utilities: []
+jsapps:
+  +admin: guillotina:static/executioner

@@ -37,6 +37,8 @@ The server should now be running on http://0.0.0.0:8080
 Then, [use Postman](https://www.getpostman.com/), `curl` or whatever tool you
 prefer to interact with the [REST API](./rest/index.html).
 
+You can also navigate in your Guillotina server with its built-in web admin interface by visiting http://localhost:8080/+admin/.
+
 Modify the configuration in `config.yaml` to customize server setttings.
 
 

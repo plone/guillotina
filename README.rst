@@ -74,6 +74,7 @@ Then...
 
 Or, better yet, use postman to start playing with API.
 
+You can also navigate in your Guillotina server with its built-in web admin interface by visiting http://localhost:8080/+admin/.
 
 Getting started with development
 --------------------------------

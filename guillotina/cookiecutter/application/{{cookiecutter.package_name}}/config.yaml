@@ -37,3 +37,5 @@ cors:
 jwt:
   secret: foobar
   algorithm: HS256
+jsapps:
+  +admin: guillotina:static/executioner

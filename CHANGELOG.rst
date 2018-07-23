@@ -1,4 +1,4 @@
-4.0.8 (unreleased)
+4.1.0 (unreleased)
 ------------------
 
 - Various doc improvements including security section rewrite
@@ -7,6 +7,8 @@
 - Allow DELETE with params on url.
   [jordic]
 
+- Add admin interface as static JS app on http://localhost:8080/+admin/
+  [mathilde-pellerin, ebrehault]
 
 4.0.7 (2018-07-21)
 ------------------
