@@ -6,6 +6,18 @@ from guillotina.interfaces import IResource
 
 
 class Navigator:
+    """
+    Provides a consistent view of the loaded objects, ensuring that only
+    a single instance of each resource path is loaded.
+
+    It is particularly useful when objects that may have been modified or
+    added have to be found by path (something that the :mod:`content` api
+    cannot do).
+
+    :param Transaction txn: A Transaction instance
+    :param Container container: A Container
+    """
+
     def __init__(self, txn, container):
         self.txn = txn
         self.container = container
@@ -19,6 +31,11 @@ class Navigator:
             self.deleted[get_content_path(obj)] = obj
 
     async def get(self, path):
+        """Returns an object from its path.
+
+        If this path was already modified or loaded by Navigator, the same
+        object instance will be returned.
+        """
         if path == '/':
             return self.container
         if path in self.deleted:
@@ -34,6 +51,10 @@ class Navigator:
         return obj
 
     def delete(self, obj: IResource):
+        """Delete an object from the tree
+
+        When using Navigator, this method should be used so that the
+        Navigator can update its index and not return it anymore."""
         path = get_content_path(obj)
         self.deleted[path] = obj
         self.txn.delete(obj)

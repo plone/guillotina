@@ -3,6 +3,10 @@
 
 - Nothing changed yet.
 
+- Add 'Navigator' utility, that provides a path-based index to the already
+  loaded objects.
+  [cdevienne]
+
 
 4.1.0 (2018-07-23)
 ------------------
