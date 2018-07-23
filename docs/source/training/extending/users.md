@@ -24,43 +24,114 @@ value in your `config.yaml` as `guillotina_dbusers` uses that to work.
 After you restart guillotina, you can also install `dbusers`
 into your container using the `@addons` endpoint:
 
-```
-POST /db/container/@addons
-{
-  "id": "dbusers"
-}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/container/@addons HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "id": "dbusers"
+    }
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "available": [
+            {
+                "id": "dbusers",
+                "title": "Guillotina DB Users"
+            },
+            {
+                "id": "application_name",
+                "title": "Your application title"
+            }
+        ],
+        "installed": [
+            "dbusers",
+            "application_name"
+        ]
+    }
 ```
 
 ## Add users
 
 Creating users is just creating a user object.
 
-```
-POST /db/container/users
-{
-  "@type": "User", "username": "foobar", "email": "foo@bar.com", "password": "foobar"
-}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/container/users HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "@type": "User",
+        "email": "bob@domain.io",
+        "password": "secret",
+        "username": "Bob"
+    }
+
+
+    HTTP/1.1 201 Created
+    Content-Type: application/json
+    Location: http://localhost:8080/db/container/users/Bob
+
+    {
+        "@id": "http://localhost:8080/db/container/users/Bob",
+        "@name": "Bob",
+        "@type": "User",
+        "@uid": "6e6|753|05893a69ee6e4f56b540248b5728c4a4",
+        "UID": "6e6|753|05893a69ee6e4f56b540248b5728c4a4"
+    }
 ```
 
 Logging in can be done with the `@login` endpoint which returns a jwt token.
 
-```
-POST /db/container/@login
-{
-  "username": "foobar", "password": "foobar"
-}
-```
+```eval_rst
+..  http:example:: curl wget httpie python-requests
 
+    POST /db/container/@login HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "password": "secret",
+        "username": "Bob"
+    }
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "exp": 1532253747,
+        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzIyNTM3NDcsImlkIjoiQm9iIn0.1-JbNe1xNoHJgPEmJ05oULi4I9OMGBsviWFHnFPvm-I"
+    }
+```
 
 Then, future requests are done with a `Bearer` token with the jwt token. For
 example, to create a conversation with your user:
 
-```
-POST /db/container/conversations
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MDgwMTU0OTcsImlkIjoiZm9vYmFyIn0.vC6HHuLmcf8d1I7RpOTxAeHQDfMRjsOoBS-xH4Q1sdw
-{
-  "@type": "Conversation",
-  "title": "New convo with foobar2",
-  "users": ["foobar", "foobar2"]
-}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/container/conversations/ HTTP/1.1
+    Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzIyNTM3NDcsImlkIjoiQm9iIn0.1-JbNe1xNoHJgPEmJ05oULi4I9OMGBsviWFHnFPvm-I
+    Host: localhost:8080
+
+    {
+      "@type": "Conversation",
+      "title": "New convo with foobar2",
+      "users": ["foobar", "foobar2"]
+    }
 ```

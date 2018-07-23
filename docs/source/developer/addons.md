@@ -69,3 +69,43 @@ class MyAddon(Addon):
             LAYER
         }
 ```
+
+## Installing an addon into a container
+
+Addons can be installed into a container using `@addons` endpoint by providing
+addon name as `id` For example:
+
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/container/@addons HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "id": "myaddon"
+    }
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "available": [
+            {
+                "id": "myaddon",
+                "title": "Guillotina DB Users"
+            },
+            {
+                "id": "application_name",
+                "title": "Your application title"
+            }
+        ],
+        "installed": [
+            "dbusers",
+            "application_name"
+        ]
+    }
+```

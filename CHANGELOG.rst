@@ -1,6 +1,9 @@
 4.0.8 (unreleased)
 ------------------
 
+- Various doc improvements including security section rewrite
+  [WnP]
+
 - Allow DELETE with params on url.
   [jordic]
 
