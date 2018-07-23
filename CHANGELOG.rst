@@ -1,4 +1,4 @@
-4.1.0 (unreleased)
+4.1.0 (2018-07-23)
 ------------------
 
 - Various doc improvements including security section rewrite
