@@ -349,6 +349,25 @@ async def test_uninstall_addons(container_requester):
         assert response is None
 
 
+async def test_uninstall_addons_path(container_requester):
+    id_ = 'testaddon'
+    async with container_requester as requester:
+        await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+
+        response, status = await requester(
+            'DELETE',
+            f'/db/guillotina/@addons/{id_}',
+        )
+        assert status == 200
+        assert response is None
+
+
 async def test_uninstall_invalid_addon(container_requester):
     async with container_requester as requester:
         _, status = await requester(

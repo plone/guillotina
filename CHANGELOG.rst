@@ -1,7 +1,8 @@
 4.0.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allow DELETE with params on url.
+  [jordic]
 
 
 4.0.7 (2018-07-21)
