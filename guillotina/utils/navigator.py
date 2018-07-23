@@ -14,6 +14,11 @@ class Navigator:
     added have to be found by path (something that the :mod:`content` api
     cannot do).
 
+    To keep the Navigator index consistent, all object loadings must be done
+    through its API, meaning the content api should not be used anymore.
+    In case it cannot be avoided, make sure to use the :func:`sync` function
+    before re-using the Navigator.
+
     :param Transaction txn: A Transaction instance
     :param Container container: A Container
     """
@@ -23,11 +28,21 @@ class Navigator:
         self.container = container
         self.index = weakref.WeakValueDictionary()
         self.deleted = {}
-        for obj in txn.added.values():
+
+        self.sync()
+
+    def sync(self):
+        """Resync the index with the transaction
+
+        If some operations may have added, modified or deleted objects that
+        the Navigator does not know, sync() should be called so that the index
+        is up-to-date with the transaction.
+        """
+        for obj in self.txn.added.values():
             self._load_obj(obj)
-        for obj in txn.modified.values():
+        for obj in self.txn.modified.values():
             self._load_obj(obj)
-        for obj in txn.deleted.values():
+        for obj in self.txn.deleted.values():
             self.deleted[get_content_path(obj)] = obj
 
     async def get(self, path):
