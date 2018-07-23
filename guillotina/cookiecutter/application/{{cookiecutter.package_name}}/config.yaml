@@ -38,4 +38,4 @@ jwt:
   secret: foobar
   algorithm: HS256
 jsapps:
-  +admin: static/executioner
+  +admin: guillotina:static/executioner

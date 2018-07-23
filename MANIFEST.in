@@ -24,3 +24,16 @@ include *.txt
 include .coveragerc
 include Makefile
 include buildout-docs.cfg
+include *.md
+include *.yaml
+include *.yml
+include docker_push
+recursive-include docs *.css
+recursive-include docs *.html
+recursive-include docs *.js
+recursive-include docs *.png
+recursive-include docs *.yaml
+recursive-include measures *.yaml
+recursive-include static *.pdf
+recursive-include static *.png
+recursive-include static *.svg

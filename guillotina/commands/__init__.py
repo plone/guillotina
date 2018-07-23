@@ -34,18 +34,12 @@ except ImportError:
 MISSING_SETTINGS = {
     "databases": [{
         "db": {
-            "storage": "postgresql",
-            "dsn": {
-                "scheme": "postgres",
-                "dbname": "guillotina",
-                "user": "guillotina",
-                "host": "localhost",
-                "password": "",
-                "port": 5432
-            },
-            "read_only": False
+            "storage": "DUMMY_FILE"
         }
     }],
+    "jsapps": {
+        "+admin": "guillotina:static/executioner"
+    },
     "port": 8080,
     "root_user": {
         "password": "root"
@@ -77,8 +71,8 @@ def get_settings(configuration):
 
     if settings is None or settings == configuration:
         if 'logged' not in MISSING_SETTINGS:
-            logger.warning(f'Could not find the configuration file '
-                           f'{configuration}. Using default settings.')
+            logger.warning(f'No configuration file found. '
+                           f'Using default settings.')
         MISSING_SETTINGS['logged'] = True
         settings = MISSING_SETTINGS.copy()
     return settings
