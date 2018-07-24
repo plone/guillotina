@@ -30,6 +30,9 @@
   .. autofunction:: lazy_apply
   .. autofunction:: safe_unidecode
 
+  .. autoclass:: Navigator
+    :members:
+
 
 :mod:`guillotina.utils.execute`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

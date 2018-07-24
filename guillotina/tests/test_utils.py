@@ -1,4 +1,5 @@
 from guillotina import utils
+from guillotina.utils.navigator import Navigator
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
@@ -11,7 +12,8 @@ import json
 def test_module_resolve_path():
     assert utils.resolve_module_path('guillotina') == 'guillotina'
     assert utils.resolve_module_path('guillotina.tests') == 'guillotina.tests'
-    assert utils.resolve_module_path('..test_queue') == 'guillotina.tests.test_queue'
+    assert utils.resolve_module_path(
+        '..test_queue') == 'guillotina.tests.test_queue'
     assert utils.resolve_module_path('....api') == 'guillotina.api'
 
 
@@ -20,11 +22,16 @@ class FooBar(object):
 
 
 def test_dotted_name():
-    assert utils.get_dotted_name(FooBar()) == 'guillotina.tests.test_utils.FooBar'
-    assert utils.get_dotted_name(FooBar) == 'guillotina.tests.test_utils.FooBar'
-    assert utils.get_module_dotted_name(FooBar()) == 'guillotina.tests.test_utils'
-    assert utils.get_module_dotted_name(FooBar) == 'guillotina.tests.test_utils'
-    assert utils.get_dotted_name(IResource) == 'guillotina.interfaces.content.IResource'
+    assert utils.get_dotted_name(
+        FooBar()) == 'guillotina.tests.test_utils.FooBar'
+    assert utils.get_dotted_name(
+        FooBar) == 'guillotina.tests.test_utils.FooBar'
+    assert utils.get_module_dotted_name(
+        FooBar()) == 'guillotina.tests.test_utils'
+    assert utils.get_module_dotted_name(
+        FooBar) == 'guillotina.tests.test_utils'
+    assert utils.get_dotted_name(
+        IResource) == 'guillotina.interfaces.content.IResource'
 
 
 async def test_get_content_path(container_requester):
@@ -36,8 +43,7 @@ async def test_get_content_path(container_requester):
                 "@type": "Item",
                 "title": "Item1",
                 "id": "item1"
-            })
-        )
+            }))
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
@@ -58,8 +64,7 @@ async def test_get_content_depth(container_requester):
                 "@type": "Item",
                 "title": "Item1",
                 "id": "item1"
-            })
-        )
+            }))
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
@@ -107,11 +112,17 @@ def _test_some_stars(foo, bar=None, **kwargs):
 def test_lazy_apply():
     assert utils.lazy_apply(_test_empty_func, 'blah', foo='bar')
     assert utils.lazy_apply(_test_some_args, 'foo', 'bar') == ('foo', 'bar')
-    assert utils.lazy_apply(_test_some_args, 'foo', 'bar', 'ldkfks', 'dsflk') == ('foo', 'bar')
-    assert utils.lazy_apply(_test_some_kwargs, 'foo', bar='bar') == ('foo', 'bar')
-    assert utils.lazy_apply(_test_some_kwargs, 'foo', bar='bar', rsdfk='ldskf') == ('foo', 'bar')
-    assert (utils.lazy_apply(_test_some_stars, 'foo', 'blah', bar='bar', another='another') ==
-            ('foo', 'bar', {'another': 'another'}))
+    assert utils.lazy_apply(_test_some_args, 'foo', 'bar', 'ldkfks',
+                            'dsflk') == ('foo', 'bar')
+    assert utils.lazy_apply(
+        _test_some_kwargs, 'foo', bar='bar') == ('foo', 'bar')
+    assert utils.lazy_apply(
+        _test_some_kwargs, 'foo', bar='bar', rsdfk='ldskf') == ('foo', 'bar')
+    assert (utils.lazy_apply(
+        _test_some_stars, 'foo', 'blah', bar='bar',
+        another='another') == ('foo', 'bar', {
+            'another': 'another'
+        }))
 
 
 def test_get_random_string():
@@ -153,8 +164,7 @@ async def test_object_utils(container_requester):
                 "@type": "Item",
                 "title": "Item1",
                 "id": "item1"
-            })
-        )
+            }))
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
@@ -175,8 +185,101 @@ async def test_object_utils(container_requester):
 
 
 async def test_run_async():
-
     def _test():
         return 'foobar'
 
     assert await utils.run_async(_test) == 'foobar'
+
+
+async def test_navigator_preload(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            }))
+        assert status == 201
+        request = get_mocked_request(requester.db)
+        root = await get_root(request)
+        txn = await request._tm.begin(request)
+        container = await root.async_get('guillotina')
+        item1 = await container.async_get('item1')
+        item1.title = "Item1bis"
+        txn.register(item1)
+
+        nav = Navigator(txn, container)
+        item1_bis = await nav.get('/item1')
+
+        assert item1_bis.title == 'Item1bis'
+        assert item1_bis is item1
+
+        await request._tm.abort(txn=txn)
+
+
+async def test_navigator_get(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Folder",
+                "title": "Folder1",
+                "id": "folder1"
+            }))
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/folder1',
+            data=json.dumps({
+                "@type": "Folder",
+                "title": "Folder2",
+                "id": "folder2"
+            }))
+        response, status = await requester(
+            'POST',
+            '/db/guillotina',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item0",
+                "id": "item0"
+            }))
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/folder1',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            }))
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/folder1/folder2',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item2",
+                "id": "item2"
+            }))
+        assert status == 201
+        request = get_mocked_request(requester.db)
+        root = await get_root(request)
+        txn = await request._tm.begin(request)
+        container = await root.async_get('guillotina')
+        item0 = await container.async_get('item0')
+        txn.delete(item0)
+
+        nav = Navigator(txn, container)
+        item1 = await nav.get('/folder1/item1')
+        assert item1.__name__ == 'item1'
+        item1_bis = await nav.get('/folder1/item1')
+        item2 = await nav.get('/folder1/folder2/item2')
+        folder2 = await nav.get('/folder1/folder2')
+        assert item2.__parent__ is folder2
+        assert item1_bis is item1
+
+        nav.delete(item2)
+        assert await nav.get('/folder1/folder2/item2') is None
+        assert await nav.get('/folder1/item0') is None
+
+        await request._tm.abort(txn=txn)

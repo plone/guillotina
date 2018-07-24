@@ -29,3 +29,4 @@ from .modules import import_class  # noqa
 from .modules import resolve_dotted_name  # noqa
 from .modules import resolve_module_path  # noqa
 from .modules import resolve_path  # noqa
+from .navigator import Navigator  # noqa
