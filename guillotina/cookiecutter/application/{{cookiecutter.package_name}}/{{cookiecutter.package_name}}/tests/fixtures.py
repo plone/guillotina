@@ -17,17 +17,18 @@ def base_settings_configurator(settings):
 testing.configure_with(base_settings_configurator)
 
 
-class {{cookiecutter.package_name}}_Requester(ContainerRequesterAsyncContextManager):
+class {{cookiecutter.package_name}}_Requester(ContainerRequesterAsyncContextManager):  # noqa
 
     async def __aenter__(self):
-        try:
-            await super().__aenter__()
-        except:
-            pass
-        resp = await self.requester('POST', '/db/guillotina/@addons', data=json.dumps({
-            'id': '{{cookiecutter.package_name}}'
-        }))
+        await super().__aenter__()
+        resp = await self.requester(
+            'POST', '/db/guillotina/@addons',
+            data=json.dumps({
+                'id': '{{cookiecutter.package_name}}'
+            })
+        )
         return self.requester
+
 
 @pytest.fixture(scope='function')
 async def {{cookiecutter.package_name}}_requester(guillotina, loop):
