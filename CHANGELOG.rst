@@ -1,7 +1,8 @@
 4.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding tests on cookiecutter
+  [bloodbare]
 
 - Add 'Navigator' utility, that provides a path-based index to the already
   loaded objects.
