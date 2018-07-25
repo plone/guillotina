@@ -1,0 +1,114 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title Guillotina
+        meta(name="description" content="Guillotina")
+        meta(name="viewport" content="width=device-width,initial-scale=1")
+        link(href="https://fonts.googleapis.com/css?family=Poppins:300,400,700" rel="stylesheet")
+        link(href="g.css" rel="stylesheet" type="text/css")
+
+    body
+        header#gw-hd.gw-hd
+            h1 
+                img(src="assets/g.svg" alt="Guillotina. The Full Stack Data Framework")
+            a(href="#gw-lv") 
+                img(src="assets/heart.svg" alt="Love")
+
+        main
+            section#gw-sp.gw-sp
+                article
+                    h2 Fast and scalable
+                    p  
+                        <span class="nobr">Out of the box:</span> Scalability/Performance/Asyncio/Micro services
+                article
+                    h2 Simplicity with batteries included
+                    p Just "the right amount of batteries" cors, es, etc
+                article
+                    h2 Extensible
+                    p Securely organized data
+            section#gw-lv.gw-lv
+                header
+                    h2 Love Guillotina
+                article.img-chrono
+                    h3 Performance
+                    p Traditional python web servers limit the number of simultaneous requests to the number of threads running the server. With AsyncIO, you are able to server many simultaneous requests at the same time.
+                article.img-theme
+                    h3 Front-end friendly
+                    p Guillotina is designed to make your JavaScript engineers happy. With things like automatic swagger documentation for endpoints, OOTB CORS and websockets, your front-end team will be happy to work with Guillotina. We speak JSON but can adapt with any Content-Type payload request/response bodies.   
+                article.img-random
+                    h3 AsyncIO
+                    p With AsyncIO, websockets are simple. More interestingly, AsyncIO is an ideal match with micro-service architectures.
+                article.img-nav
+                    h3 Object model
+                    p Guillotina uses a hierarchial object model. This hierarchy of objects then maps to URLs. The hierarchy model is perfect for managing a large number of objects.
+                article.img-security
+                    h3 Security
+                    p Guillotina has a granular, hierarchial, multi-demensional security system that allows you to manage the security of your content at a level not available to other frameworks.
+                article.img-triangle
+                    h3 Scale
+                    p With integrations like Redis, ElasticSearch and Cockroach, you have the tools to scale.
+
+            section#gw-ft.gw-ft 
+                article
+                    h2 Key features
+                    ul
+                        li Traditional python web servers
+                        li Llimit the number of simultaneous requests 
+                        li Has a granular security system 
+                        li Manage the security 
+                        li Not available to other frameworks
+                        li With integrations like Redis
+                        li ElasticSearch and Cockroach
+            section#gw-tr.gw-tr
+                article
+                    h2 Try Guillotina
+                    ol
+                        li  
+                            p First install Guillotina with your terminal
+                            pre 
+                                code pip install Guillotina
+                        li  
+                            p  Just type g <small>(or guillotina)</small> to run it
+                            pre 
+                                code g
+                        li  
+                            p Your browser is ready!
+                            pre.light-bg 
+                                code <span class="light-wd">http://</span>localhost:8080
+                footer
+                    ul
+                        li: a(href="#") Quick start
+                        li: a(href="#") Documentation
+                        li: a(href="#") GitHub
+                        li: a(href="#") Gitter chat
+            section#gw-dt.gw-dt
+                p.note Features explained
+                article
+                    h2 Create a view
+                    p Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    pre 
+                        code
+                            | def read(*parts):
+                            |    # intentionally *not* adding an encoding option to open, See:
+                            |    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
+                            |    with codecs.open(os.path.join(here, *parts), 'r') as fp:
+                            |        return fp.read()
+                article
+                    h2 Create a view
+                    p Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    pre 
+                        code
+                            | def read(*parts):
+                            |    # intentionally *not* adding an encoding option to open, See:
+                            |    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
+                            |    with codecs.open(os.path.join(here, *parts), 'r') as fp:
+                            |        return fp.read()
+                footer
+                    a(href="#") More stuff
+        footer#gw-fo.gw-fo
+            small Supported by the <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Plone-logo.svg/316px-Plone-logo.svg.png" alt="Plone"> foundation    
+
+
+
+        
