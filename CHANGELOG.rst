@@ -1,7 +1,8 @@
 4.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding tests on cookiecutter
+  [bloodbare]
 
 
 4.1.0 (2018-07-23)
