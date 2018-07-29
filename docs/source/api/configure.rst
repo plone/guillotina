@@ -69,6 +69,28 @@
      :param `for_`: Content type this behavior is available for
 
 
+  .. function:: vocabulary(**kwargs)
+
+     Configure vocabulary
+
+     >>> from guillotina import configure
+     >>> @configure.vocabulary(name="myvocab")
+         class MyVocab:
+           def __init__(self, context):
+             self.context = context
+             self.values = range(10)
+           def __iter__(self):
+             return iter([])
+           def __contains__(self, value):
+             return value in self.values
+           def __len__(self):
+             return len(self.values)
+           def getTerm(self, value):
+             return 'value'
+
+     :param name: Reference of the vocabulary to get it
+
+
   .. function:: addon(**kwargs)
 
      Configure addon

@@ -179,7 +179,7 @@ def load_vocabulary(_context, vocabulary):
     klass = vocabulary['klass']
     from guillotina.schema.vocabulary import getVocabularyRegistry
     vocabulary_registry = getVocabularyRegistry()
-    vocabulary_registry.register(conf['name'], klass())
+    vocabulary_registry.register(conf['name'], klass)
 register_configuration_handler('vocabulary', load_vocabulary)  # noqa
 
 

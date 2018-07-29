@@ -6,6 +6,9 @@ from guillotina.schema.vocabulary import getVocabularyRegistry
     name="testvocab")
 class TestVocab:
 
+    def __init__(self, context):
+        self.context = context
+
     def __iter__(self):
         return iter([self.getTerm(x) for x in range(0, 10)])
 
@@ -21,6 +24,7 @@ class TestVocab:
 
 def test_registered_vocabulary(dummy_request):
     vr = getVocabularyRegistry()
-    vocabulary = vr.get('testvocab', None)
+    vocabulary = vr.get(None, 'testvocab')
     assert vocabulary is not None
-    assert vocabulary(0) is 'value'
+    assert 0 in vocabulary
+    assert vocabulary.getTerm(0) is 'value'
