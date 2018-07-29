@@ -174,6 +174,15 @@ def load_contenttype(_context, contenttype):
 register_configuration_handler('contenttype', load_contenttype)  # noqa
 
 
+def load_vocabulary(_context, vocabulary):
+    conf = vocabulary['config']
+    klass = vocabulary['klass']
+    from guillotina.schema.vocabulary import getVocabularyRegistry
+    vocabulary_registry = getVocabularyRegistry()
+    vocabulary_registry.register(conf['name'], klass())
+register_configuration_handler('vocabulary', load_vocabulary)  # noqa
+
+
 def load_behavior(_context, behavior):
     conf = behavior['config']
     klass = resolve_dotted_name(behavior['klass'])
@@ -487,6 +496,10 @@ class language(generic_adapter):  # noqa: N801
 
 class contenttype(_base_decorator):  # noqa: N801
     configuration_type = 'contenttype'
+
+
+class vocabulary(_base_decorator):  # noqa: N801
+    configuration_type = 'vocabulary'
 
 
 class behavior(_factory_decorator):  # noqa: N801
