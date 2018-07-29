@@ -1,6 +1,9 @@
 4.1.1 (unreleased)
 ------------------
 
+- Adding decorator for vocabulary definition
+  [bloodbare]
+
 - Adding tests on cookiecutter
   [bloodbare]
 
