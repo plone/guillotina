@@ -1,4 +1,4 @@
-4.1.1 (unreleased)
+4.1.1 (2018-07-30)
 ------------------
 
 - Adding decorator for vocabulary definition
