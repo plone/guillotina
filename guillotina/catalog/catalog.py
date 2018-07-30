@@ -201,5 +201,4 @@ class DefaultCatalogDataAdapter(object):
                     values[metadata_name] = self.get_data(behavior, schema, metadata_name)
                 except NoIndexField:
                     pass
-
         return values
