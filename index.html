@@ -61,13 +61,82 @@
         <article>
           <h2>Key features</h2>
           <ul>
-            <li>Traditional python web servers</li>
-            <li>Llimit the number of simultaneous requests </li>
-            <li>Has a granular security system </li>
-            <li>Manage the security </li>
-            <li>Not available to other frameworks</li>
-            <li>With integrations like Redis</li>
-            <li>ElasticSearch and Cockroach</li>
+            <li>
+              <h3>Transaction<h3>
+              <p>All operations are managed to be durable and confirmed, conflict resolution policies</p>
+            </li>
+            <li>
+              <h3>Tree</h3>
+              <p>Information is  organized in  a tree of objects</p>
+            </li>
+            <li>
+              <h3>Resources</h3>
+              <p>Objects are resources with schema attributes, annotations, OO inheritance and static/dynamic behaviors</p>
+            </li>
+            <li>
+              <h3>JSON schema/Python</h3>
+              <p>Direct mapping of JSON schemas and python schemas</p>
+            </li>
+            <li>
+              <h3>Security</h3>
+              <p>Full definition of permissions / roles / principals with global and local inheritance on the tree. Allow, Deny, Unset, AllowSingle</p>
+            </li>
+            <li>
+              <h3>CRUD</h3>
+              <p>Dynamic Traversal CRUD HTTP verbs mapping for each resource type and custom endpoints for specific operations</p>
+            </li>
+            <li>
+              <h3>ASYNCIO</h3>
+              <p>All based on asyncio and aiohttp for network integrations with external indexers, db, services</p>
+            </li>
+            <li>
+              <h3>CORS</h3>
+              <p>Cors configured globally and enabled by default</p>
+            </li>
+            <li>
+              <h3>Websocket</h3>
+              <p>Websocket connection to apply operations throw frames. Mapping of REST API on a TCP async channel</p>
+            </li>
+            <li>
+              <h3>TUS</h3>
+              <p>Binary resumable file upload out of the box</p>
+            </li>
+            <li>
+              <h3>Event</h3>
+              <p>Event based system to trigger operations in code</p>
+            </li>
+            <li>
+              <h3>Registry</h3>
+              <p>Configuration registry for each main container</p>
+            </li>
+            <li>
+              <h3>Queue</h3>
+              <p>Operational queue and after response tasks</p>
+            </li>
+            <li>
+              <h3>File Cloud</h3>
+              <p>S3 and Google Cloud Storage file support</p>
+            </li>
+            <li>
+              <h3>Indexing</h3>
+              <p>Elasticsearch and Postgres indexing support</p>
+            </li>
+            <li>
+              <h3>Cache</h3>
+              <p>Redis cache and pubsub support</p>
+            </li>
+            <li>
+              <h3>Swagger</h3>
+              <p>Automatic API documentation generation</p>
+            </li>
+            <li>
+              <h3>Containers</h3>
+              <p>Docker / Kubernetes / Nomad support</p>
+            </li>
+            <li>
+              <h3>MultiDB</h3>
+              <p>PostgreSQL and Cockroach support</p>
+            </li>
           </ul>
         </article>
       </section>
@@ -91,10 +160,9 @@
         </article>
         <footer>
           <ul>
-            <li><a href="#">Quick start</a></li>
-            <li><a href="#">Documentation</a></li>
-            <li><a href="#">GitHub</a></li>
-            <li><a href="#">Gitter chat</a></li>
+            <li><a href="http://guillotina.readthedocs.io/en/latest/">Documentation</a></li>
+            <li><a href="https://github.com/plone/guillotina">GitHub</a></li>
+            <li><a href="https://gitter.im/plone/guillotina">Gitter chat</a></li>
           </ul>
         </footer>
       </section>
@@ -103,22 +171,39 @@
         <article>
           <h2>Create a view</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-          <pre> <code>def read(*parts):
-   # intentionally *not* adding an encoding option to open, See:
-   #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
-   with codecs.open(os.path.join(here, *parts), 'r') as fp:
-       return fp.read()</code></pre>
+          <pre> <code>@configure.service(
+    context=ICustomType, name='@myEndpoint', method='GET',
+    permission='guillotina.AccessContent')
+class MyEndpoint(Service):
+    async def __call__(self):
+        return {
+            'key': 'value'
+        }</code></pre>
         </article>
         <article>
-          <h2>Create a view</h2>
+          <h2>Create a resource type</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-          <pre> <code>def read(*parts):
-   # intentionally *not* adding an encoding option to open, See:
-   #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
-   with codecs.open(os.path.join(here, *parts), 'r') as fp:
-       return fp.read()</code></pre>
+          <pre> <code>from guillotina import configure
+from guillotina.content import Item
+from guillotina.interfaces import IItem
+from guillotina import schema
+
+
+class ICustomType(IItem):
+    foo = schema.Text()
+ 
+
+@configure.contenttype(
+    type_name="CustomType",
+    schema=ICustomType,
+    behaviors=[
+        "guillotina.behaviors.dublincore.IDublinCore",
+        "example.behaviors.ICustomBehavior",
+    ])
+class CustomType(Item):
+    pass</code></pre>
         </article>
-        <footer><a href="#">More stuff</a></footer>
+        <footer><a href="http://guillotina.readthedocs.io/en/latest/training/index.html">More stuff</a></footer>
       </section>
     </main>
     <footer class="gw-fo" id="gw-fo"><small>Supported by the <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Plone-logo.svg/316px-Plone-logo.svg.png" alt="Plone"> foundation    </small></footer>
