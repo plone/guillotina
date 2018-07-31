@@ -45,6 +45,15 @@ a {
 .nobr {
     white-space: nowrap;
 }
+.xsc {
+    @media (min-width:768px) {
+        columns: 2;
+        column-gap: 3rem;
+        & > * {
+            break-inside: avoid;
+        }
+    }
+}
 .gw-hd {
     position: relative;
     padding: 0 0 6rem;
@@ -130,7 +139,7 @@ a {
         color: #252525; 
         margin: 0 0 2rem;  
     }
-    :last-child p {
+    * :last-child p {
         margin: 0;
     } 
     & [class^="img-"] {
