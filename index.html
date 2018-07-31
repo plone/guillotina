@@ -17,15 +17,18 @@
         <article>
           <h2>Fast and scalable</h2>
           <p>
-             <span class="nobr">Out of the box:</span> Scalability/Performance/Asyncio/Micro services</p>
+              Built on AsyncIO, Guillotina scales out of the box by design.
+          </p>
         </article>
         <article>
           <h2>Simplicity with batteries included</h2>
-          <p>Just "the right amount of batteries" cors, es, etc</p>
+          <p>With features like CORS, Websockets and TUS, Guillotina provides just the right amount of "batteries."</p>
         </article>
         <article>
-          <h2>Extensible</h2>
-          <p>Securely organized data</p>
+          <h2>Securely organized data</h2>
+          <p>Guillotina has a granular, hierarchial, multi-demensional
+              security system that allows you to manage the security of your content
+              at a level not available to other frameworks./p>
         </article>
       </section>
       <section class="gw-lv" id="gw-lv">
@@ -54,7 +57,7 @@
         </article>
         <article class="img-triangle">
           <h3>Scale</h3>
-          <p>With integrations like Redis, ElasticSearch and Cockroach, you have the tools to scale.</p>
+          <p>With integrations like Redis, ElasticSearch and CockroachDB, you have the tools to scale.</p>
         </article>
       </section>
       <section class="gw-ft" id="gw-ft"> 
@@ -62,64 +65,69 @@
           <h2>Key features</h2>
           <ul>
             <li>
-              <h3>Transaction<h3>
+              <h3>Transactionsal<h3>
               <p>All operations are managed to be durable and confirmed, conflict resolution policies</p>
             </li>
             <li>
-              <h3>Tree</h3>
-              <p>Information is  organized in  a tree of objects</p>
+              <h3>Content Tree</h3>
+              <p>Think of your file explorer&mdash;all content is organized like a tree.<br />
+                 The content tree maps directly to URLs("foo/bar" -> "http://localhost:8080/db/foo/bar")
+              </p>
             </li>
             <li>
               <h3>Resources</h3>
-              <p>Objects are resources with schema attributes, annotations, OO inheritance and static/dynamic behaviors</p>
+              <p>Objects are resources with schema attributes, annotations,
+                 object oriented inheritance and static/dynamic behaviors</p>
             </li>
             <li>
               <h3>JSON schema/Python</h3>
-              <p>Direct mapping of JSON schemas and python schemas</p>
+              <p>Direct mapping of JSON schemas to python schemas and back again</p>
             </li>
             <li>
-              <h3>Security</h3>
-              <p>Full definition of permissions / roles / principals with global and local inheritance on the tree. Allow, Deny, Unset, AllowSingle</p>
+                <h3>Security</h3>
+                <p>A robust ACL security system of permissions/roles/principals which
+                   cascade down nodes on the content tree</p>
             </li>
             <li>
-              <h3>CRUD</h3>
-              <p>Dynamic Traversal CRUD HTTP verbs mapping for each resource type and custom endpoints for specific operations</p>
+                <h3>CRUD</h3>
+                <p>All content on the tree works with CRUD operations as well as
+                    additional, dynamical endpoints for other operations on the content</p>
             </li>
             <li>
-              <h3>ASYNCIO</h3>
-              <p>All based on asyncio and aiohttp for network integrations with external indexers, db, services</p>
+              <h3>AsyncIO</h3>
+              <p>Based on AsyncIO so we don't block when using ElasticSearch, Redis, etc</p>
             </li>
             <li>
               <h3>CORS</h3>
-              <p>Cors configured globally and enabled by default</p>
+              <p>Configurable CORS out of the box automatically on all endpoints</p>
             </li>
             <li>
-              <h3>Websocket</h3>
-              <p>Websocket connection to apply operations throw frames. Mapping of REST API on a TCP async channel</p>
+                <h3>Websocket</h3>
+                <p>Improve the performance of your frontend with websockets</p>
             </li>
             <li>
               <h3>TUS</h3>
-              <p>Binary resumable file upload out of the box</p>
+              <p>Binary resumable file upload</p>
             </li>
             <li>
               <h3>Event</h3>
-              <p>Event based system to trigger operations in code</p>
+              <p>Event/subscriber based system to trigger operations in code</p>
             </li>
             <li>
               <h3>Registry</h3>
-              <p>Configuration registry for each main container</p>
+              <p>Container configuration registry</p>
             </li>
             <li>
-              <h3>Queue</h3>
-              <p>Operational queue and after response tasks</p>
+              <h3>AsyncIO Queues and Pools</h3>
+              <p>Optimize long-running tasks with built-in queue and pool</p>
             </li>
             <li>
               <h3>File Cloud</h3>
               <p>S3 and Google Cloud Storage file support</p>
             </li>
             <li>
-              <h3>Indexing</h3>
-              <p>Elasticsearch and Postgres indexing support</p>
+              <h3>Search</h3>
+              <p>Elasticsearch and Postgres search catalog</p>
             </li>
             <li>
               <h3>Cache</h3>
@@ -135,7 +143,7 @@
             </li>
             <li>
               <h3>MultiDB</h3>
-              <p>PostgreSQL and Cockroach support</p>
+              <p>PostgreSQL and CockroachDB support</p>
             </li>
           </ul>
         </article>
@@ -146,15 +154,17 @@
           <ol>
             <li> 
               <p>First install Guillotina with your terminal</p>
-              <pre> <code>pip install Guillotina</code></pre>
+              <pre> <code>pip install guillotina</code></pre>
             </li>
             <li> 
               <p> Just type g <small>(or guillotina)</small> to run it</p>
               <pre> <code>g</code></pre>
             </li>
             <li> 
-              <p>Your browser is ready!</p>
+              <p>Your API explorer is ready!</p>
               <pre class="light-bg"> <code><span class="light-wd">http://</span>localhost:8080</code></pre>
+              <p>Or use the built-in admin dashboard</p>
+              <pre class="light-bg"> <code><span class="light-wd">http://</span>localhost:8080/+admin</code></pre>
             </li>
           </ol>
         </article>
@@ -169,20 +179,21 @@
       <section class="gw-dt" id="gw-dt">
         <p class="note">Features explained</p>
         <article>
-          <h2>Create a view</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <h2>Create a service</h2>
+          <p>A service(or view) are just functions that provide an endpoint for content.
+              Return a python dictionary and your content is automatically converted to
+              the correctly using content negotiation on the request.</p>
           <pre> <code>@configure.service(
     context=ICustomType, name='@myEndpoint', method='GET',
     permission='guillotina.AccessContent')
-class MyEndpoint(Service):
-    async def __call__(self):
-        return {
-            'key': 'value'
-        }</code></pre>
+async def my_endpoint(context, request):
+    return {
+        'key': 'value'
+    }</code></pre>
         </article>
         <article>
           <h2>Create a resource type</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <p>Custom types only request a schema and object implementation</p>
           <pre> <code>from guillotina import configure
 from guillotina.content import Item
 from guillotina.interfaces import IItem
