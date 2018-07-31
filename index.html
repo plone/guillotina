@@ -35,115 +35,98 @@
         <header>
           <h2>Love Guillotina</h2>
         </header>
-        <article class="img-chrono">
-          <h3>Performance</h3>
-          <p>Traditional python web servers limit the number of simultaneous requests to the number of threads running the server. With AsyncIO, you are able to server many simultaneous requests at the same time.</p>
-        </article>
-        <article class="img-theme">
-          <h3>Front-end friendly</h3>
-          <p>Guillotina is designed to make your JavaScript engineers happy. With things like automatic swagger documentation for endpoints, OOTB CORS and websockets, your front-end team will be happy to work with Guillotina. We speak JSON but can adapt with any Content-Type payload request/response bodies.   </p>
-        </article>
-        <article class="img-random">
-          <h3>AsyncIO</h3>
-          <p>With AsyncIO, websockets are simple. More interestingly, AsyncIO is an ideal match with micro-service architectures.</p>
-        </article>
-        <article class="img-nav">
-          <h3>Object model</h3>
-          <p>Guillotina uses a hierarchial object model. This hierarchy of objects then maps to URLs. The hierarchy model is perfect for managing a large number of objects.</p>
-        </article>
-        <article class="img-security">
-          <h3>Security</h3>
-          <p>Guillotina has a granular, hierarchial, multi-demensional security system that allows you to manage the security of your content at a level not available to other frameworks.</p>
-        </article>
-        <article class="img-triangle">
-          <h3>Scale</h3>
-          <p>With integrations like Redis, ElasticSearch and CockroachDB, you have the tools to scale.</p>
-        </article>
+        <div class="xsc">
+          <article class="img-chrono">
+            <h3>Performance</h3>
+            <p>Traditional python web servers limit the number of simultaneous requests to the number of threads running the server. With AsyncIO, you are able to server many simultaneous requests at the same time.</p>
+          </article>
+          <article class="img-theme">
+            <h3>Front-end friendly</h3>
+            <p>Guillotina is designed to make your JavaScript engineers happy. With things like automatic swagger documentation for endpoints, OOTB CORS and websockets, your front-end team will be happy to work with Guillotina. We speak JSON but can adapt with any Content-Type payload request/response bodies.   </p>
+          </article>
+          <article class="img-random">
+            <h3>AsyncIO</h3>
+            <p>With AsyncIO, websockets are simple. More interestingly, AsyncIO is an ideal match with micro-service architectures.</p>
+          </article>
+          <article class="img-nav">
+            <h3>Object model</h3>
+            <p>Guillotina uses a hierarchial object model. This hierarchy of objects then maps to URLs. The hierarchy model is perfect for managing a large number of objects.</p>
+          </article>
+          <article class="img-security">
+            <h3>Security</h3>
+            <p>Guillotina has a granular, hierarchial, multi-demensional security system that allows you to manage the security of your content at a level not available to other frameworks.</p>
+          </article>
+          <article class="img-triangle">
+            <h3>Scale</h3>
+            <p>With integrations like Redis, ElasticSearch and CockroachDB, you have the tools to scale.</p>
+          </article>
+        </div>
       </section>
       <section class="gw-ft" id="gw-ft"> 
         <article>
           <h2>Key features</h2>
-          <ul>
+          <ul class="xsc">
             <li>
-              <h3>Transactionsal<h3>
-              <p>All operations are managed to be durable and confirmed, conflict resolution policies</p>
+              <p><strong>Transactionsal</strong>. All operations are managed to be durable and confirmed, conflict resolution policies</p>
             </li>
             <li>
-              <h3>Content Tree</h3>
-              <p>Think of your file explorer&mdash;all content is organized like a tree.<br />
+              <p><strong>Content Tree</strong>. Think of your file explorer&mdash;all content is organized like a tree.
                  The content tree maps directly to URLs("foo/bar" -> "http://localhost:8080/db/foo/bar")
               </p>
             </li>
             <li>
-              <h3>Resources</h3>
-              <p>Objects are resources with schema attributes, annotations,
+              <p><strong>Resources</strong>. Objects are resources with schema attributes, annotations,
                  object oriented inheritance and static/dynamic behaviors</p>
             </li>
             <li>
-              <h3>JSON schema/Python</h3>
-              <p>Direct mapping of JSON schemas to python schemas and back again</p>
+              <p><strong>JSON schema/Python</strong>. Direct mapping of JSON schemas to python schemas and back again</p>
             </li>
             <li>
-                <h3>Security</h3>
-                <p>A robust ACL security system of permissions/roles/principals which
+              <p><strong>Security</strong>. A robust ACL security system of permissions/roles/principals which
                    cascade down nodes on the content tree</p>
             </li>
             <li>
-                <h3>CRUD</h3>
-                <p>All content on the tree works with CRUD operations as well as
+              <p><strong>CRUD</strong>. All content on the tree works with CRUD operations as well as
                     additional, dynamical endpoints for other operations on the content</p>
             </li>
             <li>
-              <h3>AsyncIO</h3>
-              <p>Based on AsyncIO so we don't block when using ElasticSearch, Redis, etc</p>
+              <p><strong>AsyncIO</strong>. Based on AsyncIO so we don't block when using ElasticSearch, Redis, etc</p>
             </li>
             <li>
-              <h3>CORS</h3>
-              <p>Configurable CORS out of the box automatically on all endpoints</p>
+              <p><strong>CORS</strong>. Configurable CORS out of the box automatically on all endpoints</p>
             </li>
             <li>
-                <h3>Websocket</h3>
-                <p>Improve the performance of your frontend with websockets</p>
+                <p><strong>Websocket</strong>. Improve the performance of your frontend with websockets</p>
             </li>
             <li>
-              <h3>TUS</h3>
-              <p>Binary resumable file upload</p>
+              <p><strong>TUS</strong>. Binary resumable file upload</p>
             </li>
             <li>
-              <h3>Event</h3>
-              <p>Event/subscriber based system to trigger operations in code</p>
+              <p><strong>Event</strong>. Event/subscriber based system to trigger operations in code</p>
             </li>
             <li>
-              <h3>Registry</h3>
-              <p>Container configuration registry</p>
+              <p><strong>Registry</strong>. Container configuration registry</p>
             </li>
             <li>
-              <h3>AsyncIO Queues and Pools</h3>
-              <p>Optimize long-running tasks with built-in queue and pool</p>
+              <p><strong>AsyncIO Queues and Pools</strong>. Optimize long-running tasks with built-in queue and pool</p>
             </li>
             <li>
-              <h3>File Cloud</h3>
-              <p>S3 and Google Cloud Storage file support</p>
+              <p><strong>File Cloud</strong>. S3 and Google Cloud Storage file support</p>
             </li>
             <li>
-              <h3>Search</h3>
-              <p>Elasticsearch and Postgres search catalog</p>
+              <p><strong>Search</strong>. Elasticsearch and Postgres search catalog</p>
             </li>
             <li>
-              <h3>Cache</h3>
-              <p>Redis cache and pubsub support</p>
+              <p><strong>Cache</strong>. Redis cache and pubsub support</p>
             </li>
             <li>
-              <h3>Swagger</h3>
-              <p>Automatic API documentation generation</p>
+              <p><strong>Swagger</strong>. Automatic API documentation generation</p>
             </li>
             <li>
-              <h3>Containers</h3>
-              <p>Docker / Kubernetes / Nomad support</p>
+              <p><strong>Containers</strong>. Docker / Kubernetes / Nomad support</p>
             </li>
             <li>
-              <h3>MultiDB</h3>
-              <p>PostgreSQL and CockroachDB support</p>
+              <p><strong>MultiDB</strong>. PostgreSQL and CockroachDB support</p>
             </li>
           </ul>
         </article>
@@ -180,10 +163,10 @@
         <p class="note">Features explained</p>
         <article>
           <h2>Create a service</h2>
-          <p>A service(or view) are just functions that provide an endpoint for content.
+          <p>A service (or view) are just functions that provide an endpoint for content.
               Return a python dictionary and your content is automatically converted to
               the correctly using content negotiation on the request.</p>
-          <pre> <code>@configure.service(
+          <pre><code>@configure.service(
     context=ICustomType, name='@myEndpoint', method='GET',
     permission='guillotina.AccessContent')
 async def my_endpoint(context, request):
@@ -194,7 +177,7 @@ async def my_endpoint(context, request):
         <article>
           <h2>Create a resource type</h2>
           <p>Custom types only request a schema and object implementation</p>
-          <pre> <code>from guillotina import configure
+          <pre><code>from guillotina import configure
 from guillotina.content import Item
 from guillotina.interfaces import IItem
 from guillotina import schema
@@ -217,6 +200,6 @@ class CustomType(Item):
         <footer><a href="http://guillotina.readthedocs.io/en/latest/training/index.html">More stuff</a></footer>
       </section>
     </main>
-    <footer class="gw-fo" id="gw-fo"><small>Supported by the <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Plone-logo.svg/316px-Plone-logo.svg.png" alt="Plone"> foundation    </small></footer>
+    <footer class="gw-fo" id="gw-fo"><small>Supported by the <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Plone-logo.svg/316px-Plone-logo.svg.png" alt="Plone"> foundation</small></footer>
   </body>
 </html>
