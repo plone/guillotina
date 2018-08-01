@@ -163,9 +163,9 @@
         <p class="note">Features explained</p>
         <article>
           <h2>Create a service</h2>
-          <p>A service (or view) are just functions that provide an endpoint for content.
+          <!-- <p>A service (or view) are just functions that provide an endpoint for content.
               Return a python dictionary and your content is automatically converted to
-              the correctly using content negotiation on the request.</p>
+              the correctly using content negotiation on the request.</p> -->
           <pre><code>@configure.service(
     context=ICustomType, name='@myEndpoint', method='GET',
     permission='guillotina.AccessContent')
@@ -176,7 +176,7 @@ async def my_endpoint(context, request):
         </article>
         <article>
           <h2>Create a resource type</h2>
-          <p>Custom types only request a schema and object implementation</p>
+          <!-- <p>Custom types only request a schema and object implementation</p>-->
           <pre><code>from guillotina import configure
 from guillotina.content import Item
 from guillotina.interfaces import IItem
