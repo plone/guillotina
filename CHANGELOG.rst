@@ -1,7 +1,8 @@
 4.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Enabling uploading files with a JSON payload
+  [bloodbare]
 
 
 4.1.1 (2018-07-30)

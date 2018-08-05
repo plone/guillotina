@@ -145,11 +145,15 @@ async def deserialize_cloud_field(field, value, context):
                     setattr(file_ob, serialize_mappings[key], item_value)
             data_context._p_register()
             return file_ob
+
     else:
         value = convert_base64_to_binary(value)
-        request = get_current_request()
-        file_manager = get_multi_adapter((context, request, field), IFileManager)
-        val = await file_manager.save_file(
-            partial(_generator, value), content_type=value['content_type'],
-            size=len(value['data']))
-        return val
+
+    # There is not file and expecting a dict
+    # 'data', 'encoding', 'content-type', 'filename'
+    request = get_current_request()
+    file_manager = get_multi_adapter((context, request, field), IFileManager)
+    val = await file_manager.save_file(
+        partial(_generator, value), content_type=value['content_type'],
+        size=len(value['data']))
+    return val
