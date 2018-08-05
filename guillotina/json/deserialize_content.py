@@ -111,6 +111,7 @@ class DeserializeFromJson(object):
                     continue
 
                 try:
+                    f = f.bind(obj)
                     value = await self.get_value(f, obj, data_value)
                 except ValueError as e:
                     errors.append({

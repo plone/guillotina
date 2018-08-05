@@ -17,6 +17,7 @@ from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
+from guillotina.schema.interfaces import IChoice
 from zope.interface import Interface
 
 import datetime
@@ -66,7 +67,6 @@ def default_converter(field, value, context=None):
 @configure.value_deserializer(IBool)
 def bool_converter(field, value, context=None):
     return bool(value)
-
 
 @configure.value_deserializer(IFromUnicode)
 def from_unicode_converter(field, value, context=None):

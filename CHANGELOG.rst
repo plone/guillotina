@@ -1,6 +1,9 @@
 4.1.2 (unreleased)
 ------------------
 
+- Binding fields to objecst on deserialize to make sure vocabulary is enabled
+  [bloodbare]
+
 - Enabling uploading files with a JSON payload
   [bloodbare]
 

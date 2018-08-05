@@ -390,6 +390,36 @@ async def test_tus_with_empty_file(container_requester):
             assert behavior.file._blob.chunks == 0
 
 
+async def test_update_filename_on_files_on_post(container_requester):
+    async with container_requester as requester:
+        data = 'WFhY' * 1024 + 'WA=='
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                '@behaviors': [IAttachment.__identifier__],
+                'id': 'foobar',
+                IAttachment.__identifier__: {
+                    'file': {
+                        'filename': 'foobar.jpg',
+                        'content-type': 'image/jpeg',
+                        'encoding': 'base64',
+                        'data': data
+                    }
+                }
+            })
+        )
+        assert status == 201
+
+        response, status = await requester('GET', '/db/guillotina/foobar')
+        data = response[IAttachment.__identifier__]['file']
+        assert data['filename'] == 'foobar.jpg'
+        assert data['content_type'] == 'image/jpeg'
+
+        response, status = await requester('GET', '/db/guillotina/foobar/@download/file')
+        assert len(response) == 3073
+
 async def test_update_filename_on_files(container_requester):
     async with container_requester as requester:
         response, status = await requester(
