@@ -67,7 +67,6 @@ def default_converter(field, value, context=None):
 def bool_converter(field, value, context=None):
     return bool(value)
 
-
 @configure.value_deserializer(IFromUnicode)
 def from_unicode_converter(field, value, context=None):
     return field.from_unicode(value)

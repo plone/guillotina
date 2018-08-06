@@ -12,6 +12,7 @@ from guillotina.utils import get_current_request
 from guillotina.utils import to_str
 from zope.interface import implementer
 
+import base64
 import uuid
 
 
@@ -126,6 +127,7 @@ serialize_mappings = {
 
 @configure.value_deserializer(ICloudFileField)
 async def deserialize_cloud_field(field, value, context):
+    # It supports base64 web value or a dict
     data_context = context
     if IContentBehavior.implementedBy(context.__class__):
         field = field.bind(context)
@@ -145,11 +147,18 @@ async def deserialize_cloud_field(field, value, context):
                     setattr(file_ob, serialize_mappings[key], item_value)
             data_context._p_register()
             return file_ob
+        value['data'] = base64.b64decode(value['data'])
     else:
+        # base64 web value
         value = convert_base64_to_binary(value)
-        request = get_current_request()
-        file_manager = get_multi_adapter((context, request, field), IFileManager)
-        val = await file_manager.save_file(
-            partial(_generator, value), content_type=value['content_type'],
-            size=len(value['data']))
-        return val
+
+    # There is not file and expecting a dict
+    # 'data', 'encoding', 'content-type', 'filename'
+    request = get_current_request()
+    file_manager = get_multi_adapter((context, request, field), IFileManager)
+    content_type = value.get('content_type', value.get('content-type'))
+    filename = value.get('filename', None)
+    val = await file_manager.save_file(
+        partial(_generator, value), content_type=content_type,
+        size=len(value['data']), filename=filename)
+    return val
