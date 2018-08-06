@@ -1,4 +1,4 @@
-4.1.2 (unreleased)
+4.1.2 (2018-08-06)
 ------------------
 
 - Binding fields to objecst on deserialize to make sure vocabulary is enabled
