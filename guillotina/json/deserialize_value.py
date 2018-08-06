@@ -17,7 +17,6 @@ from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
-from guillotina.schema.interfaces import IChoice
 from zope.interface import Interface
 
 import datetime
