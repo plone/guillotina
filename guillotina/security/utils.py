@@ -1,11 +1,18 @@
 from guillotina.auth import role
+from guillotina.event import notify
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
+from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRolePermissionMap
+from guillotina.interfaces import IPrincipalPermissionManager
+from guillotina.interfaces import IRolePermissionManager
+from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
+from guillotina.exceptions import PreconditionFailed
+
 from guillotina.utils import get_current_request
 
 
@@ -101,3 +108,69 @@ def settings_for_object(ob):
         for (p, r, s) in settings]
 
     return result
+
+
+PermissionMap = {
+    'prinrole': {
+        'Allow': 'assign_role_to_principal',
+        'Deny': 'remove_role_from_principal',
+        'AllowSingle': 'assign_role_to_principal_no_inherit',
+        'Unset': 'unset_role_for_principal'
+    },
+    'roleperm': {
+        'Allow': 'grant_permission_to_role',
+        'Deny': 'deny_permission_to_role',
+        'AllowSingle': 'grant_permission_to_role_no_inherit',
+        'Unset': 'unset_permission_from_role'
+    },
+    'prinperm': {
+        'Allow': 'grant_permission_to_principal',
+        'Deny': 'deny_permission_to_principal',
+        'AllowSingle': 'grant_permission_to_principal_no_inherit',
+        'Unset': 'unset_permission_for_principal'
+    }
+}
+
+
+async def apply_sharing(context, data):
+    lroles = role.local_roles()
+    for prinrole in data.get('prinrole') or []:
+        setting = prinrole.get('setting')
+        if setting not in PermissionMap['prinrole']:
+            raise PreconditionFailed(
+                context, 'Invalid Type {}'.format(setting))
+        manager = IPrincipalRoleManager(context)
+        operation = PermissionMap['prinrole'][setting]
+        func = getattr(manager, operation)
+        if prinrole['role'] in lroles:
+            changed = True
+            func(prinrole['role'], prinrole['principal'])
+        else:
+            raise PreconditionFailed(
+                context, 'No valid local role')
+
+    for prinperm in data.get('prinperm') or []:
+        setting = prinperm['setting']
+        if setting not in PermissionMap['prinperm']:
+            raise PreconditionFailed(
+                context, 'Invalid Type')
+        manager = IPrincipalPermissionManager(context)
+        operation = PermissionMap['prinperm'][setting]
+        func = getattr(manager, operation)
+        changed = True
+        func(prinperm['permission'], prinperm['principal'])
+
+    for roleperm in data.get('roleperm') or []:
+        setting = roleperm['setting']
+        if setting not in PermissionMap['roleperm']:
+            raise PreconditionFailed(
+                context, 'Invalid Type')
+        manager = IRolePermissionManager(context)
+        operation = PermissionMap['roleperm'][setting]
+        func = getattr(manager, operation)
+        changed = True
+        func(roleperm['permission'], roleperm['role'])
+
+    if changed:
+        context._p_register()  # make sure data is saved
+        await notify(ObjectPermissionsModifiedEvent(context, data))
