@@ -1,4 +1,4 @@
-4.1.3 (unreleased)
+4.1.3 (2018-08-08)
 ------------------
 
 - Split sharing function to be reusable
