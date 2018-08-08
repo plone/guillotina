@@ -1,7 +1,8 @@
 4.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Split sharing function to be reusable
+  [bloodbare]
 
 
 4.1.2 (2018-08-06)

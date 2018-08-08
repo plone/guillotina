@@ -5,7 +5,6 @@ from guillotina._cache import FACTORY_CACHE
 from guillotina._settings import app_settings
 from guillotina.annotations import AnnotationData
 from guillotina.api.service import Service
-from guillotina.auth.role import local_roles
 from guillotina.component import get_multi_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_adapter
@@ -20,7 +19,6 @@ from guillotina.events import ObjectAddedEvent
 from guillotina.events import ObjectDuplicatedEvent
 from guillotina.events import ObjectModifiedEvent
 from guillotina.events import ObjectMovedEvent
-from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
@@ -34,7 +32,6 @@ from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IIDGenerator
 from guillotina.interfaces import IInteraction
-from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
@@ -43,7 +40,6 @@ from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.interfaces import IResponse
-from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
@@ -57,6 +53,7 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
 from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
+from guillotina.security.utils import apply_sharing
 
 
 def get_content_json_schema_responses(content):
@@ -320,28 +317,6 @@ async def all_permissions(context, request):
     return result
 
 
-PermissionMap = {
-    'prinrole': {
-        'Allow': 'assign_role_to_principal',
-        'Deny': 'remove_role_from_principal',
-        'AllowSingle': 'assign_role_to_principal_no_inherit',
-        'Unset': 'unset_role_for_principal'
-    },
-    'roleperm': {
-        'Allow': 'grant_permission_to_role',
-        'Deny': 'deny_permission_to_role',
-        'AllowSingle': 'grant_permission_to_role_no_inherit',
-        'Unset': 'unset_permission_from_role'
-    },
-    'prinperm': {
-        'Allow': 'grant_permission_to_principal',
-        'Deny': 'deny_permission_to_principal',
-        'AllowSingle': 'grant_permission_to_principal_no_inherit',
-        'Unset': 'unset_permission_for_principal'
-    }
-}
-
-
 @configure.service(
     context=IResource, method='POST',
     permission='guillotina.ChangePermissions', name='@sharing',
@@ -364,54 +339,13 @@ class SharingPOST(Service):
         """Change permissions"""
         context = self.context
         request = self.request
-        lroles = local_roles()
         data = await request.json()
         if 'prinrole' not in data and \
                 'roleperm' not in data and \
                 'prinperm' not in data:
             raise PreconditionFailed(
                 self.context, 'prinrole or roleperm or prinperm missing')
-
-        for prinrole in data.get('prinrole') or []:
-            setting = prinrole.get('setting')
-            if setting not in PermissionMap['prinrole']:
-                raise PreconditionFailed(
-                    self.context, 'Invalid Type {}'.format(setting))
-            manager = IPrincipalRoleManager(context)
-            operation = PermissionMap['prinrole'][setting]
-            func = getattr(manager, operation)
-            if prinrole['role'] in lroles:
-                changed = True
-                func(prinrole['role'], prinrole['principal'])
-            else:
-                raise PreconditionFailed(
-                    self.context, 'No valid local role')
-
-        for prinperm in data.get('prinperm') or []:
-            setting = prinperm['setting']
-            if setting not in PermissionMap['prinperm']:
-                raise PreconditionFailed(
-                    self.context, 'Invalid Type')
-            manager = IPrincipalPermissionManager(context)
-            operation = PermissionMap['prinperm'][setting]
-            func = getattr(manager, operation)
-            changed = True
-            func(prinperm['permission'], prinperm['principal'])
-
-        for roleperm in data.get('roleperm') or []:
-            setting = roleperm['setting']
-            if setting not in PermissionMap['roleperm']:
-                raise PreconditionFailed(
-                    self.context, 'Invalid Type')
-            manager = IRolePermissionManager(context)
-            operation = PermissionMap['roleperm'][setting]
-            func = getattr(manager, operation)
-            changed = True
-            func(roleperm['permission'], roleperm['role'])
-
-        if changed:
-            context._p_register()  # make sure data is saved
-            await notify(ObjectPermissionsModifiedEvent(context, data))
+        return await apply_sharing(context, data)
 
 
 @configure.service(
