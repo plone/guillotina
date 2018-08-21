@@ -13,6 +13,8 @@ from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import Invalid
 from guillotina.exceptions import NoInteraction
 from guillotina.exceptions import ValueDeserializationError
+from guillotina.event import notify
+from guillotina.events import FieldPreModifiedEvent
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IJSONToValue
@@ -104,15 +106,14 @@ class DeserializeFromJson(object):
                 data_value = data[name] if name in data else None
                 found = True if name in data else False
 
-            f = schema.get(name)
             if found:
 
                 if not self.check_permission(write_permissions.get(name)):
                     continue
 
                 try:
-                    f = f.bind(obj)
-                    value = await self.get_value(f, obj, data_value)
+                    field = field.bind(obj)
+                    value = await self.get_value(field, obj, data_value)
                 except ValueError as e:
                     errors.append({
                         'message': 'Value error', 'field': name, 'error': e})
@@ -128,6 +129,7 @@ class DeserializeFromJson(object):
                 else:
                     # record object changes for potential future conflict resolution
                     try:
+                        await notify(FieldPreModifiedEvent(field, obj, value))
                         await apply_coroutine(field.set, obj, value)
                     except ValidationError as e:
                         errors.append({
@@ -149,7 +151,7 @@ class DeserializeFromJson(object):
                             logger.warning(
                                 'Error setting data on field', exc_info=True)
             else:
-                if validate_all and f.required and not hasattr(obj, name):
+                if validate_all and field.required and not hasattr(obj, name):
                     errors.append({
                         'message': 'Required parameter', 'field': name,
                         'error': ValueError('Required parameter')})

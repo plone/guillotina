@@ -82,3 +82,7 @@ class INewUserAdded(Interface):
     The user is the id from the user logged in"""
 
     user = Attribute("User id created.")
+
+
+class IFieldPreModified(Interface):
+    """A field is going to be modified"""
