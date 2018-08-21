@@ -14,7 +14,7 @@ from guillotina.exceptions import Invalid
 from guillotina.exceptions import NoInteraction
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.event import notify
-from guillotina.events import FieldPreModifiedEvent
+from guillotina.events import BeforeFieldModified
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IJSONToValue
@@ -129,7 +129,7 @@ class DeserializeFromJson(object):
                 else:
                     # record object changes for potential future conflict resolution
                     try:
-                        await notify(FieldPreModifiedEvent(field, obj, value))
+                        await notify(BeforeFieldModified(field, obj, value))
                         await apply_coroutine(field.set, obj, value)
                     except ValidationError as e:
                         errors.append({
