@@ -1,5 +1,5 @@
 from guillotina.component.interfaces import IObjectEvent
-from guillotina.interfaces import IBeforeFieldModified
+from guillotina.interfaces import IBeforeFieldModifiedEvent
 from guillotina.interfaces import IBeforeObjectAddedEvent
 from guillotina.interfaces import IBeforeObjectMovedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
@@ -152,9 +152,8 @@ class NewUserAdded(object):
         self.user = user
 
 
-@implementer(IBeforeFieldModified)
-class BeforeFieldModified(object):
-    def __init__(self, field, object, value):
+@implementer(IBeforeFieldModifiedEvent)
+class BeforeFieldModifiedEvent(object):
+    def __init__(self, field, value):
         self.field = field
-        self.object = object
         self.value = value
