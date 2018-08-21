@@ -49,6 +49,7 @@ from .events import IObjectPermissionsModifiedEvent  # noqa
 from .events import IObjectPermissionsViewEvent  # noqa
 from .events import IObjectRemovedEvent  # noqa
 from .events import IObjectVisitedEvent  # noqa
+from .events import IFieldPreModified  # noqa
 from .exceptions import IErrorResponseException  # noqa
 from .response import IResponse  # noqa
 from .response import IAioHTTPResponse  # noqa
