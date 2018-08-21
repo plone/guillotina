@@ -84,5 +84,5 @@ class INewUserAdded(Interface):
     user = Attribute("User id created.")
 
 
-class IBeforeFieldModified(Interface):
+class IBeforeFieldModifiedEvent(Interface):
     """A field is going to be modified"""
