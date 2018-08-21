@@ -1,7 +1,8 @@
 4.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- FieldPreModified event to hook before setting a field
+  [bloodbare]
 
 
 4.1.3 (2018-08-08)
