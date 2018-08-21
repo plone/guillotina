@@ -17,7 +17,6 @@ from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectPermissionsViewEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectVisitedEvent
-from guillotina.interfaces import IFieldPreModified
 from zope.interface import implementer
 
 
