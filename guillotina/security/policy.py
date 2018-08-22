@@ -365,10 +365,16 @@ class Interaction(object):
             cache_roles[permission] = roles
             return roles
 
-        roles = self.cached_roles(
-            getattr(parent, '__parent__', None),
-            permission, 'p')
         roleper = IRolePermissionMap(parent, None)
+
+        if roleper is None or roleper.get_inheritance():
+            roles = self.cached_roles(
+                getattr(parent, '__parent__', None),
+                permission, 'p')
+        else:
+            roles = self.cached_roles(
+                None,
+                permission, 'p')
         if roleper:
             roles = roles.copy()
             for role, setting in roleper.get_roles_for_permission(permission):

@@ -208,6 +208,9 @@ class IRolePermissionMap(Interface):  # pylint: disable=E0239
         list is returned.
         """
 
+    def get_inheritance(self):
+        """Returns a boolen if inheritance is blocked"""
+
 
 class IRolePermissionManager(IRolePermissionMap):
     """Management interface for mappings between roles and permissions."""
@@ -227,6 +230,9 @@ class IRolePermissionManager(IRolePermissionMap):
         """Clear the setting of the permission to the role.
         """
 
+    def set_inheritance(self, setting):
+        """Set if inheritance should be checked.
+        """
 
 class IPrincipalPermissionMap(Interface):  # pylint: disable=E0239
     """Mappings between principals and permissions."""

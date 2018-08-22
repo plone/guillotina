@@ -158,6 +158,11 @@ class RolePermissionManager(SecurityMap):
         '''See interface IRolePermissionMap'''
         return self.get_all_cells()
 
+    def get_inheritance(self):
+        return True
+
+    def set_inheritance(self, setting):
+        return
 
 # Permissions are our rows, and roles are our columns
 role_permission_manager = RolePermissionManager()

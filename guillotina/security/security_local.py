@@ -34,9 +34,13 @@ class GuillotinaRolePermissionManager(GuillotinaSecurityMap):
     get_roles_for_permission = GuillotinaSecurityMap.get_row
     get_permissions_for_role = GuillotinaSecurityMap.get_col
     get_roles_and_permissions = GuillotinaSecurityMap.get_all_cells
+    get_inheritance = GuillotinaSecurityMap.get_inherit
 
     def get_setting(self, permission_id, role_id, default=Unset):
         return self.query_cell(permission_id, role_id, default)
+
+    def set_inheritance(self, setting):
+        self.set_inherit(setting)
 
 
 @configure.adapter(

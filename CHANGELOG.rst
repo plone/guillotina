@@ -1,6 +1,9 @@
 4.1.4 (unreleased)
 ------------------
 
+- Option to disable inheritance on role permission relation
+  [bloodbare]
+
 - FieldPreModified event to hook before setting a field
   [bloodbare]
 

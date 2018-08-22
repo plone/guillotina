@@ -11,6 +11,7 @@ class SecurityMap(object):
     def _clear(self):
         self._byrow = {}
         self._bycol = {}
+        self._inherit = False
 
     def __nonzero__(self):
         return bool(self._byrow)
@@ -112,9 +113,11 @@ class GuillotinaSecurityMap(SecurityMap):
         if map is None:
             self._byrow = {}
             self._bycol = {}
+            self._inherit = True
         else:
             self._byrow = map._byrow
             self._bycol = map._bycol
+            self._inherit = map._inherit
         self.map = map
 
     def _changed(self):
@@ -125,6 +128,7 @@ class GuillotinaSecurityMap(SecurityMap):
             map = SecurityMap()
             map._byrow = self._byrow
             map._bycol = self._bycol
+            map._inherit = self._inherit
             self.context.__acl__[self.key] = map
         self.context._p_register()
 
@@ -135,3 +139,10 @@ class GuillotinaSecurityMap(SecurityMap):
     def del_cell(self, rowentry, colentry):
         if super().del_cell(rowentry, colentry):
             self._changed()
+
+    def set_inherit(self, setting):
+        self._inherit = setting
+        self._changed()
+
+    def get_inherit(self):
+        return self._inherit
