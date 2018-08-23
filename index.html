@@ -160,7 +160,30 @@
         </footer>
       </section>
       <section class="gw-dt" id="gw-dt">
-        <p class="note">Features explained</p>
+        <p class="note">Take a look</p>
+	<article>
+	  <h2>Configure</h2>
+	  <p>Configure Guillotina with json or yaml</p>
+	  <pre><code>---
+applications:
+- guillotina_swagger
+- guillotina_dbusers
+- myapp
+databases:
+- db:
+    storage: postgresql
+    dsn:
+      scheme: postgres
+      dbname: guillotina
+      user: postgres
+      host: localhost
+      password: ''
+      port: 5432
+port: 8080
+root_user:
+  password: root
+</code></pre>
+        </article>
         <article>
           <h2>Create a service</h2>
           <!-- <p>A service (or view) are just functions that provide an endpoint for content.
@@ -197,7 +220,22 @@ class ICustomType(IItem):
 class CustomType(Item):
     pass</code></pre>
         </article>
-        <footer><a href="http://guillotina.readthedocs.io/en/latest/training/index.html">More stuff</a></footer>
+	<article>
+          <h2>Define security</h2>
+	  <pre><code>configure.role("guillotina_chat.ConversationParticipant",
+               "Conversation Participant",
+               "Users that are part of a conversation", False)
+configure.grant(
+    permission="guillotina.ViewContent",
+    role="guillotina_chat.ConversationParticipant")
+configure.grant(
+    permission="guillotina.AccessContent",
+    role="guillotina_chat.ConversationParticipant")
+configure.grant(
+    permission="guillotina.AddContent",
+    role="guillotina_chat.ConversationParticipant")</code></pre>
+	</article>
+        <footer><a href="http://guillotina.readthedocs.io/en/latest/training/index.html">Learn more</a></footer>
       </section>
     </main>
     <footer class="gw-fo" id="gw-fo"><small>Supported by the <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Plone-logo.svg/316px-Plone-logo.svg.png" alt="Plone"> foundation</small></footer>
