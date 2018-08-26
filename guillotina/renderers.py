@@ -1,7 +1,6 @@
 from aiohttp.web import Response as aioResponse
 from datetime import datetime
 from guillotina import configure
-from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
 from guillotina.profile import profilable
@@ -49,7 +48,7 @@ class Renderer:
         return str(value).encode('utf-8')
 
     @profilable
-    async def __call__(self, value) -> IAioHTTPResponse:
+    async def __call__(self, value) -> aioResponse:
         '''
         Value can be:
         - Guillotina response object
