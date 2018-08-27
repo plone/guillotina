@@ -1,12 +1,14 @@
+import json
+
 from guillotina import utils
-from guillotina.utils.navigator import Navigator
+from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import get_root
-
-import json
+from guillotina.utils import get_behavior
+from guillotina.utils.navigator import Navigator
 
 
 def test_module_resolve_path():
@@ -281,5 +283,27 @@ async def test_navigator_get(container_requester):
         nav.delete(item2)
         assert await nav.get('/folder1/folder2/item2') is None
         assert await nav.get('/folder1/item0') is None
+
+        await request._tm.abort(txn=txn)
+
+
+async def test_get_behavior(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            }))
+        assert status == 201
+        request = get_mocked_request(requester.db)
+        root = await get_root(request)
+        txn = await request._tm.begin(request)
+        container = await root.async_get('guillotina')
+        item1 = await container.async_get('item1')
+        behavior = await get_behavior(item1, IDublinCore)
+        assert behavior is not None
 
         await request._tm.abort(txn=txn)

@@ -1,7 +1,10 @@
 4.1.4 (unreleased)
 ------------------
 
-- FieldPreModified event to hook before setting a field
+- Add get_behavior utility
+  [vangheem]
+
+- IBeforeFieldModified event to hook before setting a field
   [bloodbare]
 
 
