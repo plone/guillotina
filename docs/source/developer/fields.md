@@ -137,7 +137,7 @@ Delete:
 ### Patch int field
 
 
-`PatchField` can also be used on `Int` field to increment, decrement
+`PatchField` can also be used on `Int` fields to increment, decrement
 or reset their original value.
 
 ```python
@@ -152,7 +152,7 @@ class IMySchema(Interface):
     ))
 ```
 
-The payload to increment the integer field by 3 units would look like:
+The payload to increment `counter` by 3 units would look like:
 
 ```json
 {
@@ -163,11 +163,11 @@ The payload to increment the integer field by 3 units would look like:
 }
 ```
 
-Notice that, at this point, `counter` will be set to 4, because the
-field's default value is 1. If the default would not be set, the
-increment operation assumes a 0 and thus `counter` would be 3.
+Notice that, at this point, `counter` will be set to 4 because its
+default value is 1. If the default would not be set, the increment
+operation assumes a 0, and thus `counter` would be 3.
 
-To decrement the field, the following payload would work likewise:
+Likewise, to decrement the field, the following payload would work:
 
 ```json
 {
@@ -201,8 +201,8 @@ also send the target reset value:
 }
 ```
 
-Notice that a reset operation on a integer without a default value
-will result in the field being set to 0.
+Notice that a reset operation on a integer without a default value is
+equivalent to sending a value of 0.
 
 
 ### Bucket list field
