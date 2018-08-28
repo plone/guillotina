@@ -1,11 +1,14 @@
 from guillotina.auth import role
 from guillotina.event import notify
+from guillotina.interfaces import Deny
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.interfaces import IPrincipalPermissionManager
+from guillotina.interfaces import IInheritPermissionManager
+from guillotina.interfaces import IInheritPermissionMap
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.security.security_code import principal_permission_manager
@@ -60,6 +63,8 @@ def settings_for_object(ob):
     """Analysis tool to show all of the grants to a process
     """
     result = []
+
+    locked_permissions = []
     while ob is not None:
         data = {}
         result.append({getattr(ob, '__name__', None) or '(no name)': data})
@@ -84,7 +89,16 @@ def settings_for_object(ob):
             settings = role_permissions.get_roles_and_permissions()
             data['roleperm'] = [
                 {'permission': p, 'role': r, 'setting': s}
-                for (p, r, s) in settings]
+                for (p, r, s) in settings if p not in locked_permissions]
+
+        inherit_permissions = IInheritPermissionMap(ob)
+        if inherit_permissions is not None:
+            settings = inherit_permissions.get_locked_permissions()
+            data['perminhe'] = []
+            for (p, s) in settings:
+                if s is Deny:
+                    locked_permissions.append(p)
+                data['perminhe'].append({'permission': p, 'setting': s})
 
         ob = getattr(ob, '__parent__', None)
 
@@ -105,12 +119,16 @@ def settings_for_object(ob):
     settings = role_permission_manager.get_roles_and_permissions()
     data['roleperm'] = [
         {'permission': p, 'role': r, 'setting': s}
-        for (p, r, s) in settings]
+        for (p, r, s) in settings if p not in locked_permissions]
 
     return result
 
 
 PermissionMap = {
+    'perminhe': {
+        'Allow': 'allow_inheritance',
+        'Deny': 'deny_inheritance'
+    },
     'prinrole': {
         'Allow': 'assign_role_to_principal',
         'Deny': 'remove_role_from_principal',
@@ -134,6 +152,18 @@ PermissionMap = {
 
 async def apply_sharing(context, data):
     lroles = role.local_roles()
+    changed = False
+    for perminhe in data.get('perminhe') or []:
+        setting = perminhe.get('setting')
+        if setting not in PermissionMap['perminhe']:
+            raise PreconditionFailed(
+                context, 'Invalid Type {}'.format(setting))
+        manager = IInheritPermissionManager(context)
+        operation = PermissionMap['perminhe'][setting]
+        func = getattr(manager, operation)
+        changed = True
+        func(perminhe['permission'])
+
     for prinrole in data.get('prinrole') or []:
         setting = prinrole.get('setting')
         if setting not in PermissionMap['prinrole']:

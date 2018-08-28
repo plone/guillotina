@@ -22,6 +22,7 @@ from guillotina.interfaces import Deny
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
+from guillotina.interfaces import IInheritPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IRolePermissionMap
@@ -365,16 +366,18 @@ class Interaction(object):
             cache_roles[permission] = roles
             return roles
 
-        roleper = IRolePermissionMap(parent, None)
+        perminhe = IInheritPermissionMap(parent, None)
 
-        if roleper is None or roleper.get_inheritance():
+        if perminhe is None or perminhe.get_inheritance(permission) is Allow:
             roles = self.cached_roles(
                 getattr(parent, '__parent__', None),
                 permission, 'p')
         else:
-            roles = self.cached_roles(
-                None,
-                permission, 'p')
+            # We don't apply global permissions also
+            # Its dangerous as may lead to an object who nobody can see
+            roles = dict()
+
+        roleper = IRolePermissionMap(parent, None)
         if roleper:
             roles = roles.copy()
             for role, setting in roleper.get_roles_for_permission(permission):

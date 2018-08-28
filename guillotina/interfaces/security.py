@@ -208,9 +208,6 @@ class IRolePermissionMap(Interface):  # pylint: disable=E0239
         list is returned.
         """
 
-    def get_inheritance(self):
-        """Returns a boolen if inheritance is blocked"""
-
 
 class IRolePermissionManager(IRolePermissionMap):
     """Management interface for mappings between roles and permissions."""
@@ -230,9 +227,6 @@ class IRolePermissionManager(IRolePermissionMap):
         """Clear the setting of the permission to the role.
         """
 
-    def set_inheritance(self, setting):
-        """Set if inheritance should be checked.
-        """
 
 class IPrincipalPermissionMap(Interface):  # pylint: disable=E0239
     """Mappings between principals and permissions."""
@@ -290,6 +284,30 @@ class IPrincipalPermissionManager(IPrincipalPermissionMap):
     def unset_permission_for_principal(self, permission_id, principal_id):  # noqa: N805
         """Remove the permission (either denied or allowed) from the
         principal.
+        """
+
+
+class IInheritPermissionMap(Interface):  # pylint: disable=E0239
+    """Mappings between permissions and inheritance."""
+
+    def get_locked_permissions(self):  # noqa: N805
+        """Returns the list of permissions that are blocked to be inherited
+        """
+
+    def get_inheritance(self, permission_id):  # noqa: N805
+        """Returns a boolen if inheritance is blocked
+        """
+
+
+class IInheritPermissionManager(IInheritPermissionMap):
+    """Management interface for mappings between inheritance and permissions."""
+
+    def deny_inheritance(self, permission_id):
+        """Set inheritance for the permission.
+        """
+
+    def allow_inheritance(self, permission_id):
+        """Unset inheritance for the permission.
         """
 
 
