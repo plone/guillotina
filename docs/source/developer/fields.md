@@ -28,10 +28,10 @@ consist of field definitions.
 
 ## Patch field
 
-Guillotina provides a `PatchField` which allows you to patch values of `List` and
-`Dict` fields without having the original value.
+Guillotina provides a `PatchField` which allows you to patch values of
+`List`, `Dict` and `Int` fields without having the original value.
 
-### Patch list field
+### Patch field list
 
 
 ```python
@@ -129,6 +129,65 @@ Delete:
     "values": {
         "op": "del",
         "value": "foo"
+    }
+}
+```
+
+
+### Patch int field
+
+
+`PatchField` can also be used on `Int` field to increment, decrement
+or reset their original value.
+
+```python
+from zope.interface import Interface
+from guillotina.fields import PatchField
+from guillotina import schema
+
+class IMySchema(Interface):
+    counter = PatchField(schema.Int(
+        title='My Counter',
+        default=1,
+    ))
+```
+
+The payload to increment the integer field by 3 units would look like:
+
+```json
+{
+    "counter": {
+        "op": "inc",
+        "value": 3
+    }
+}
+```
+Notice that, at this point, `counter` will be set to 4.
+
+To decrement the field, the following payload would work:
+```json
+{
+    "counter": {
+        "op": "dec",
+        "value": 4
+    }
+}
+```
+
+To reset it to its default value, you can send the following payload without `value`:
+```json
+{
+    "counter": {
+        "op": "reset"
+    }
+}
+```
+and `counter` will be set to its default value 1. Otherwise, you can also send the target reset value:
+```json
+{
+    "counter": {
+        "op": "reset",
+        "value": 0
     }
 }
 ```
