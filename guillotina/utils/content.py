@@ -1,4 +1,6 @@
-from .misc import get_current_request
+import string
+import typing
+
 from guillotina import glogging
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
@@ -11,8 +13,7 @@ from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 
-import string
-import typing
+from .misc import get_current_request
 
 
 logger = glogging.getLogger('guillotina')
@@ -158,6 +159,10 @@ def get_object_url(ob: IResource,
 async def get_object_by_oid(oid: str, txn=None) -> IResource:
     '''
     Get an object from an oid
+
+    :param oid: Object id of object you need to retreive
+    :param txn: Database transaction object. Will get current
+                transaction is not provided
     '''
     if txn is None:
         from guillotina.transactions import get_transaction
@@ -171,3 +176,18 @@ async def get_object_by_oid(oid: str, txn=None) -> IResource:
     if result['parent_id']:
         obj.__parent__ = await get_object_by_oid(result['parent_id'], txn)
     return obj
+
+
+async def get_behavior(ob, iface, create=False):
+    '''
+    Generate behavior of object.
+
+    :param ob: object to get behavior for
+    :param interface: interface registered for behavior
+    :param create: if behavior data empty, should we create it?
+    '''
+    behavior = iface(ob, None)
+    if behavior is None:
+        return behavior
+    await behavior.load(create=False)
+    return behavior

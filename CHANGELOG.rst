@@ -4,7 +4,10 @@
 - Option to disable inheritance on role permission relation
   [bloodbare]
 
-- FieldPreModified event to hook before setting a field
+- Add get_behavior utility
+  [vangheem]
+
+- IBeforeFieldModified event to hook before setting a field
   [bloodbare]
 
 

@@ -1,6 +1,7 @@
 from .auth import get_authenticated_user  # noqa
 from .auth import get_authenticated_user_id  # noqa
-from .content import get_containers  # noqa; noqa; noqa
+from .content import get_behavior  # noqa
+from .content import get_containers  # noqa
 from .content import get_content_depth  # noqa
 from .content import get_content_path  # noqa
 from .content import get_object_by_oid  # noqa

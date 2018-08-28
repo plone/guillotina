@@ -10,6 +10,7 @@
   .. autofunction:: get_owners
   .. autofunction:: get_object_url
   .. autofunction:: get_object_by_oid
+  .. autofunction:: get_behavior
 
   .. autofunction:: get_authenticated_user
   .. autofunction:: get_authenticated_user_id
