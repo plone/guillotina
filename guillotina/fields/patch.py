@@ -8,6 +8,7 @@ from guillotina.fields.interfaces import IPatchField
 from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.interfaces import IJSONToValue
 from guillotina.schema.interfaces import IDict
+from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IList
 from zope.interface import implementer
 
@@ -41,10 +42,7 @@ def field_converter(field, value, context):
         if operation is None:
             raise ValueDeserializationError(
                 field, value, f'"{operation_name}" not a valid operation')
-        if 'value' not in value:
-            raise ValueDeserializationError(
-                field, value, f'Mising value')
-        value = operation(context, value['value'])
+        value = operation(context, value.get('value'))
     return value
 
 
@@ -211,3 +209,54 @@ class PatchDictDel(PatchListAppend):
         except (IndexError, KeyError):
             raise ValueDeserializationError(self.field, value, 'Not valid index value')
         return existing
+
+
+@configure.adapter(
+    for_=IInt,
+    provides=IPatchFieldOperation,
+    name='inc')
+class PatchIntIncrement:
+    def __init__(self, field):
+        super().__init__()
+        self.field = field
+
+    def __call__(self, context, value):
+        self.field.validate(value)
+        existing = getattr(context, self.field.__name__, None)
+        if existing is None:
+            existing = self.field.default or 0
+        existing = existing + value
+        return existing
+
+
+@configure.adapter(
+    for_=IInt,
+    provides=IPatchFieldOperation,
+    name='dec')
+class PatchIntDec:
+    def __init__(self, field):
+        super().__init__()
+        self.field = field
+
+    def __call__(self, context, value):
+        self.field.validate(value)
+        existing = getattr(context, self.field.__name__, None)
+        if existing is None:
+            existing = self.field.default or 0
+        existing = existing - value
+        return existing
+
+
+@configure.adapter(
+    for_=IInt,
+    provides=IPatchFieldOperation,
+    name='reset')
+class PatchIntReset:
+    def __init__(self, field):
+        super().__init__()
+        self.field = field
+
+    def __call__(self, context, value):
+        if value:
+            self.field.validate(value)
+        return value or self.field.default or 0
