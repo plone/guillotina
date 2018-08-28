@@ -211,15 +211,17 @@ class PatchDictDel(PatchListAppend):
         return existing
 
 
-@configure.adapter(
-    for_=IInt,
-    provides=IPatchFieldOperation,
-    name='inc')
-class PatchIntIncrement:
+class BasePatchIntOperation:
     def __init__(self, field):
         super().__init__()
         self.field = field
 
+
+@configure.adapter(
+    for_=IInt,
+    provides=IPatchFieldOperation,
+    name='inc')
+class PatchIntIncrement(BasePatchIntOperation):
     def __call__(self, context, value):
         self.field.validate(value)
         existing = getattr(context, self.field.__name__, None)
@@ -233,11 +235,7 @@ class PatchIntIncrement:
     for_=IInt,
     provides=IPatchFieldOperation,
     name='dec')
-class PatchIntDec:
-    def __init__(self, field):
-        super().__init__()
-        self.field = field
-
+class PatchIntDecrement(BasePatchIntOperation):
     def __call__(self, context, value):
         self.field.validate(value)
         existing = getattr(context, self.field.__name__, None)
@@ -251,11 +249,7 @@ class PatchIntDec:
     for_=IInt,
     provides=IPatchFieldOperation,
     name='reset')
-class PatchIntReset:
-    def __init__(self, field):
-        super().__init__()
-        self.field = field
-
+class PatchIntReset(BasePatchIntOperation):
     def __call__(self, context, value):
         if value:
             self.field.validate(value)
