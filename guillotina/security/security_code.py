@@ -4,6 +4,7 @@ from guillotina.interfaces import Deny
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IRolePermissionManager
+from guillotina.interfaces import IInheritPermissionManager
 from guillotina.interfaces import Unset
 from guillotina.security.permission import get_all_permissions
 from guillotina.security.securitymap import SecurityMap
@@ -161,3 +162,21 @@ class RolePermissionManager(SecurityMap):
 
 # Permissions are our rows, and roles are our columns
 role_permission_manager = RolePermissionManager()
+
+@implementer(IInheritPermissionManager)
+class InheritPermissionManager(SecurityMap):
+
+    def get_locked_permissions(self):
+        return []
+
+    def get_inheritance(self, permission_id, default=Allow):
+        return default
+
+    def deny_inheritance(self, permission_id):
+        return
+
+    def allow_inheritance(self, permission_id):
+        return
+
+
+inherit_permission_manager = InheritPermissionManager()

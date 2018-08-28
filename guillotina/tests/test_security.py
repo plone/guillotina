@@ -184,6 +184,84 @@ async def test_canido_mutliple(container_requester):
         assert response['guillotina.ModifyContent']
 
 
+async def test_inherit(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                'id': 'testing'
+            }))
+        assert status == 201
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@sharing',
+            data=json.dumps({
+                'prinrole': [{
+                    'principal': 'user1',
+                    'role': 'guillotina.Reader',
+                    'setting': 'Allow'
+                }]
+            }))
+
+        assert status == 200
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/testing/@sharing',
+            data=json.dumps({
+                'perminhe': [{
+                    'permission': 'guillotina.ViewContent',
+                    'setting': 'Deny'
+                }]
+            }))
+        assert status == 200
+
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/testing/@all_permissions')
+        assert status == 200
+
+        request = utils.get_mocked_request(requester.db)
+        container = await utils.get_container(requester, request)
+        content = await container.async_get('testing')
+
+        user = GuillotinaUser(request)
+        user.id = 'user1'
+
+        utils.login(request, user)
+
+        assert request.security.check_permission('guillotina.ViewContent',
+                                                 request.container)
+        assert not request.security.check_permission(
+            'guillotina.ViewContent',
+            content)
+
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/testing')
+        assert status == 401
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/testing/@sharing',
+            data=json.dumps({
+                'roleperm': [{
+                    'permission': 'guillotina.ViewContent',
+                    'role': 'guillotina.Manager',
+                    'setting': 'Allow'
+                }]
+            }))
+        assert status == 200
+
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/testing')
+        assert status == 200
+
+
 async def test_allowsingle(container_requester):
     async with container_requester as requester:
         response, status = await requester(

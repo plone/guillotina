@@ -1,6 +1,9 @@
 4.1.4 (unreleased)
 ------------------
 
+- Option to disable inheritance on role permission relation
+  [bloodbare]
+
 - Add get_behavior utility
   [vangheem]
 

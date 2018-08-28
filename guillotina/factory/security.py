@@ -6,9 +6,29 @@ from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalPermissionManager
+from guillotina.interfaces import IInheritPermissionManager
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.security.security_code import RolePermissionManager
+from guillotina.security.security_code import InheritPermissionManager
+
+
+@configure.adapter(for_=IDatabase, provides=IInheritPermissionManager)
+class DatabaseSpecialInheritPermissions(InheritPermissionManager):
+    """This adapter will allow all inheritance.
+    """
+
+    def __init__(self, db):
+        super().__init__()
+
+
+@configure.adapter(for_=IApplication, provides=IInheritPermissionManager)
+class ApplicationSpecialInheritPermissions(InheritPermissionManager):
+    """This adapter will allow all inheritance
+    """
+
+    def __init__(self, app):
+        super().__init__()
 
 
 @configure.adapter(for_=IDatabase, provides=IPrincipalPermissionManager)

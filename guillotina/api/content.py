@@ -342,7 +342,8 @@ class SharingPOST(Service):
         data = await request.json()
         if 'prinrole' not in data and \
                 'roleperm' not in data and \
-                'prinperm' not in data:
+                'prinperm' not in data and \
+                'perminhe' not in data:
             raise PreconditionFailed(
                 self.context, 'prinrole or roleperm or prinperm missing')
         return await apply_sharing(context, data)

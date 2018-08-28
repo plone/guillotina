@@ -86,6 +86,8 @@ from .security import IPrincipalPermissionMap  # noqa
 from .security import IPrincipalRoleManager  # noqa
 from .security import IPrincipalRoleMap  # noqa
 from .security import IRole  # noqa
+from .security import IInheritPermissionManager  # noqa
+from .security import IInheritPermissionMap  # noqa
 from .security import IRolePermissionManager  # noqa
 from .security import IRolePermissionMap  # noqa
 from .security import ISecurityPolicy  # noqa
@@ -113,6 +115,8 @@ WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
 ACTIVE_LAYERS_KEY = 'guillotina.interfaces.registry.ILayers.active_layers'
 ADDONS_KEY = 'guillotina.registry.IAddons.enabled'
+
+INHERIT_KEY = 'Inheritance'
 
 # Attributes not allowed in deserialization payloads
 RESERVED_ATTRS = (

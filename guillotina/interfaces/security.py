@@ -287,6 +287,30 @@ class IPrincipalPermissionManager(IPrincipalPermissionMap):
         """
 
 
+class IInheritPermissionMap(Interface):  # pylint: disable=E0239
+    """Mappings between permissions and inheritance."""
+
+    def get_locked_permissions(self):  # noqa: N805
+        """Returns the list of permissions that are blocked to be inherited
+        """
+
+    def get_inheritance(self, permission_id):  # noqa: N805
+        """Returns a boolen if inheritance is blocked
+        """
+
+
+class IInheritPermissionManager(IInheritPermissionMap):
+    """Management interface for mappings between inheritance and permissions."""
+
+    def deny_inheritance(self, permission_id):
+        """Set inheritance for the permission.
+        """
+
+    def allow_inheritance(self, permission_id):
+        """Unset inheritance for the permission.
+        """
+
+
 class IGrantInfo(Interface):  # pylint: disable=E0239
     """Get grant info needed for checking access
     """

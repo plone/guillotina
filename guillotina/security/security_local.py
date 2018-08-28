@@ -6,8 +6,10 @@ from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IRolePermissionManager
+from guillotina.interfaces import IInheritPermissionManager
 from guillotina.interfaces import Unset
 from guillotina.security.securitymap import GuillotinaSecurityMap
+from guillotina.interfaces import INHERIT_KEY
 
 
 @configure.adapter(
@@ -37,6 +39,26 @@ class GuillotinaRolePermissionManager(GuillotinaSecurityMap):
 
     def get_setting(self, permission_id, role_id, default=Unset):
         return self.query_cell(permission_id, role_id, default)
+
+
+@configure.adapter(
+    for_=IResource,
+    provides=IInheritPermissionManager)
+class GuillotinaInheritPermissionManager(GuillotinaSecurityMap):
+
+    key = 'perminhe'
+
+    def get_locked_permissions(self):
+        return self.get_col(INHERIT_KEY)
+
+    def get_inheritance(self, permission_id, default=Allow):
+        return self.query_cell(permission_id, INHERIT_KEY, default)
+
+    def deny_inheritance(self, permission_id):
+        self.add_cell(permission_id, INHERIT_KEY, Deny)
+
+    def allow_inheritance(self, permission_id):
+        self.add_cell(permission_id, INHERIT_KEY, Allow)
 
 
 @configure.adapter(
