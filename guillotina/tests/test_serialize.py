@@ -446,7 +446,7 @@ async def test_patch_int_field(dummy_request):
             'patch_int': {
                 'op': 'inc',
                 'value': 3,
-                }
+            }
         }, [])
     assert content.patch_int == 25
 
@@ -456,7 +456,7 @@ async def test_patch_int_field(dummy_request):
             'patch_int': {
                 'op': 'dec',
                 'value': 5,
-                }
+            }
         }, [])
     assert content.patch_int == 20
     await deserializer.set_schema(
@@ -464,7 +464,7 @@ async def test_patch_int_field(dummy_request):
             'patch_int': {
                 'op': 'dec',
                 'value': 25,
-                }
+            }
         }, [])
     assert content.patch_int == -5
 
@@ -483,7 +483,7 @@ async def test_patch_int_field(dummy_request):
             'patch_int': {
                 'op': 'reset',
                 'value': 400,
-                }
+            }
         }, [])
     assert content.patch_int == 400
 
