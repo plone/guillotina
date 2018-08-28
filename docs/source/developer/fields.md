@@ -162,9 +162,13 @@ The payload to increment the integer field by 3 units would look like:
     }
 }
 ```
-Notice that, at this point, `counter` will be set to 4.
 
-To decrement the field, the following payload would work:
+Notice that, at this point, `counter` will be set to 4, because the
+field's default value is 1. If the default would not be set, the
+increment operation assumes a 0 and thus `counter` would be 3.
+
+To decrement the field, the following payload would work likewise:
+
 ```json
 {
     "counter": {
@@ -174,7 +178,9 @@ To decrement the field, the following payload would work:
 }
 ```
 
-To reset it to its default value, you can send the following payload without `value`:
+To reset `counter` to its default value, you can send the following
+payload without `value`:
+
 ```json
 {
     "counter": {
@@ -182,7 +188,10 @@ To reset it to its default value, you can send the following payload without `va
     }
 }
 ```
-and `counter` will be set to its default value 1. Otherwise, you can also send the target reset value:
+
+and `counter` will be set to its default value 1. Otherwise, you can
+also send the target reset value:
+
 ```json
 {
     "counter": {
@@ -191,6 +200,9 @@ and `counter` will be set to its default value 1. Otherwise, you can also send t
     }
 }
 ```
+
+Notice that a reset operation on a integer without a default value
+will result in the field being set to 0.
 
 
 ### Bucket list field
