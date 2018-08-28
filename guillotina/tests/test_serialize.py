@@ -158,6 +158,11 @@ class ITestSchema(Interface):
         required=False,
     )
 
+    patch_int_no_default = fields.PatchField(
+        schema.Int(),
+        required=False,
+    )
+
     bucket_list = fields.BucketListField(
         bucket_len=10, required=False,
         value_type=schema.Dict(
@@ -449,7 +454,23 @@ async def test_patch_int_field(dummy_request):
             }
         }, [])
     assert content.patch_int == 25
+    # Check that increments 1 if no value is passed
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'inc',
+            }
+        }, [])
+    assert content.patch_int == 26
 
+    # Decrements 1 by default
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'dec',
+            }
+        }, [])
+    assert content.patch_int == 25
     # Decrement it
     await deserializer.set_schema(
         ITestSchema, content, {
@@ -459,6 +480,7 @@ async def test_patch_int_field(dummy_request):
             }
         }, [])
     assert content.patch_int == 20
+    # Check that we can have negative integers
     await deserializer.set_schema(
         ITestSchema, content, {
             'patch_int': {
@@ -486,6 +508,34 @@ async def test_patch_int_field(dummy_request):
             }
         }, [])
     assert content.patch_int == 400
+
+    # Check that assumes value as 0 if there is no existing value and
+    # no default value either
+    assert getattr(content, 'patch_int_no_default', None) is None
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int_no_default': {
+                'op': 'inc'
+            }
+        }, [])
+    assert content.patch_int_no_default == 1
+
+    content.patch_int_no_default = None
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int_no_default': {
+                'op': 'dec'
+            }
+        }, [])
+    assert content.patch_int_no_default == -1
+    content.patch_int_no_default = None
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int_no_default': {
+                'op': 'reset'
+            }
+        }, [])
+    assert content.patch_int_no_default == 0
 
 
 async def test_patch_int_field_invalid_type(dummy_request):

@@ -223,12 +223,15 @@ class BasePatchIntOperation:
     name='inc')
 class PatchIntIncrement(BasePatchIntOperation):
     def __call__(self, context, value):
-        self.field.validate(value)
+        if value:
+            self.field.validate(value)
+        # Increment one by default
+        to_increment = value or 1
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
+            # Get default value or assume 0
             existing = self.field.default or 0
-        existing = existing + value
-        return existing
+        return existing + to_increment
 
 
 @configure.adapter(
@@ -237,12 +240,15 @@ class PatchIntIncrement(BasePatchIntOperation):
     name='dec')
 class PatchIntDecrement(BasePatchIntOperation):
     def __call__(self, context, value):
-        self.field.validate(value)
+        if value:
+            self.field.validate(value)
+        # Decrement one by default
+        to_decrement = value or 1
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
+            # Get default value or assume 0
             existing = self.field.default or 0
-        existing = existing - value
-        return existing
+        return existing - to_decrement
 
 
 @configure.adapter(
@@ -251,6 +257,8 @@ class PatchIntDecrement(BasePatchIntOperation):
     name='reset')
 class PatchIntReset(BasePatchIntOperation):
     def __call__(self, context, value):
+        # This will reset to the passed value or to the field's
+        # default (if set) or 0.
         if value:
             self.field.validate(value)
         return value or self.field.default or 0
