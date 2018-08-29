@@ -10,6 +10,7 @@
 - IBeforeFieldModified event to hook before setting a field
   [bloodbare]
 
+- Added PatchField for ints to be used as counters [lferran]
 
 4.1.3 (2018-08-08)
 ------------------
@@ -104,7 +105,7 @@
   [vangheem]
 
 - Dublin core should not be required
-  [bloodbare] 
+  [bloodbare]
 
 4.0.3 (2018-07-16)
 ------------------

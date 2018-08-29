@@ -8,6 +8,7 @@ from guillotina.fields.interfaces import IPatchField
 from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.interfaces import IJSONToValue
 from guillotina.schema.interfaces import IDict
+from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IList
 from zope.interface import implementer
 
@@ -41,10 +42,7 @@ def field_converter(field, value, context):
         if operation is None:
             raise ValueDeserializationError(
                 field, value, f'"{operation_name}" not a valid operation')
-        if 'value' not in value:
-            raise ValueDeserializationError(
-                field, value, f'Mising value')
-        value = operation(context, value['value'])
+        value = operation(context, value.get('value'))
     return value
 
 
@@ -211,3 +209,56 @@ class PatchDictDel(PatchListAppend):
         except (IndexError, KeyError):
             raise ValueDeserializationError(self.field, value, 'Not valid index value')
         return existing
+
+
+class BasePatchIntOperation:
+    def __init__(self, field):
+        super().__init__()
+        self.field = field
+
+
+@configure.adapter(
+    for_=IInt,
+    provides=IPatchFieldOperation,
+    name='inc')
+class PatchIntIncrement(BasePatchIntOperation):
+    def __call__(self, context, value):
+        if value:
+            self.field.validate(value)
+        # Increment one by default
+        to_increment = value or 1
+        existing = getattr(context, self.field.__name__, None)
+        if existing is None:
+            # Get default value or assume 0
+            existing = self.field.default or 0
+        return existing + to_increment
+
+
+@configure.adapter(
+    for_=IInt,
+    provides=IPatchFieldOperation,
+    name='dec')
+class PatchIntDecrement(BasePatchIntOperation):
+    def __call__(self, context, value):
+        if value:
+            self.field.validate(value)
+        # Decrement one by default
+        to_decrement = value or 1
+        existing = getattr(context, self.field.__name__, None)
+        if existing is None:
+            # Get default value or assume 0
+            existing = self.field.default or 0
+        return existing - to_decrement
+
+
+@configure.adapter(
+    for_=IInt,
+    provides=IPatchFieldOperation,
+    name='reset')
+class PatchIntReset(BasePatchIntOperation):
+    def __call__(self, context, value):
+        # This will reset to the passed value or to the field's
+        # default (if set) or 0.
+        if value:
+            self.field.validate(value)
+        return value or self.field.default or 0

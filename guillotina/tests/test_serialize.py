@@ -119,6 +119,7 @@ class INestFieldSchema(Interface):
     foo = schema.Text(required=False)
     bar = schema.Int(required=False)
     foobar_list = schema.List(required=False, value_type=schema.Text())
+    nested_int = fields.PatchField(schema.Int(required=False))
 
 
 class ITestSchema(Interface):
@@ -150,6 +151,18 @@ class ITestSchema(Interface):
         key_type=schema.Text(),
         value_type=schema.Text()
     ), required=False)
+
+    patch_int = fields.PatchField(
+        schema.Int(
+            default=22,
+        ),
+        required=False,
+    )
+
+    patch_int_no_default = fields.PatchField(
+        schema.Int(),
+        required=False,
+    )
 
     bucket_list = fields.BucketListField(
         bucket_len=10, required=False,
@@ -414,6 +427,138 @@ async def test_patch_dict_field_invalid_type(dummy_request):
     assert isinstance(errors[0]['error'], WrongType)
 
 
+async def test_patch_int_field_normal_path(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': 2
+        }, [])
+    assert content.patch_int == 2
+
+
+async def test_patch_int_field(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    # Increment it and check it adds to default value
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'inc',
+                'value': 3,
+            }
+        }, [])
+    assert content.patch_int == 25
+    # Check that increments 1 if no value is passed
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'inc',
+            }
+        }, [])
+    assert content.patch_int == 26
+
+    # Decrements 1 by default
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'dec',
+            }
+        }, [])
+    assert content.patch_int == 25
+    # Decrement it
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'dec',
+                'value': 5,
+            }
+        }, [])
+    assert content.patch_int == 20
+    # Check that we can have negative integers
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'dec',
+                'value': 25,
+            }
+        }, [])
+    assert content.patch_int == -5
+
+    # Reset it to default value if not specified
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'reset'
+            }
+        }, [])
+    assert content.patch_int == 22
+
+    # Reset it to specified value
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int': {
+                'op': 'reset',
+                'value': 400,
+            }
+        }, [])
+    assert content.patch_int == 400
+
+    # Check that assumes value as 0 if there is no existing value and
+    # no default value either
+    assert getattr(content, 'patch_int_no_default', None) is None
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int_no_default': {
+                'op': 'inc'
+            }
+        }, [])
+    assert content.patch_int_no_default == 1
+
+    content.patch_int_no_default = None
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int_no_default': {
+                'op': 'dec'
+            }
+        }, [])
+    assert content.patch_int_no_default == -1
+    content.patch_int_no_default = None
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_int_no_default': {
+                'op': 'reset'
+            }
+        }, [])
+    assert content.patch_int_no_default == 0
+
+
+async def test_patch_int_field_invalid_type(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    for op in ('inc', 'dec', 'reset'):
+        errors = []
+        await deserializer.set_schema(
+            ITestSchema, content, {
+                'patch_int': {
+                    'op': op,
+                    'value': 3.3
+                }
+            }, errors)
+        assert getattr(content, 'patch_int', 0) == 0
+        assert len(errors) == 1
+        assert isinstance(errors[0]['error'], WrongType)
+
+
 async def test_bucket_list_field(dummy_request):
     request = dummy_request  # noqa
     login(request)
@@ -509,7 +654,11 @@ async def test_nested_patch_deserialize(dummy_request):
                         "value": {
                             "foo": "bar",
                             "bar": 1,
-                            "foobar_list": None
+                            "foobar_list": None,
+                            "nested_int": {
+                                "op": "reset",
+                                "value": 5,
+                            }
                         }
                     }
                 }
@@ -519,6 +668,7 @@ async def test_nested_patch_deserialize(dummy_request):
     assert len(content.nested_patch) == 1
     assert content.nested_patch['foobar'][0]['foo'] == 'bar'
     assert content.nested_patch['foobar'][0]['bar'] == 1
+    assert content.nested_patch['foobar'][0]['nested_int'] == 5
 
     await deserializer.set_schema(
         ITestSchema, content, {
@@ -552,7 +702,10 @@ async def test_nested_patch_deserialize(dummy_request):
                             "index": 1,
                             "value": {
                                 "foo": "bar3",
-                                "bar": 3
+                                "bar": 3,
+                                "nested_int": {
+                                    "op": "inc",
+                                }
                             }
                         }
                     }
@@ -562,6 +715,7 @@ async def test_nested_patch_deserialize(dummy_request):
     assert len(errors) == 0
     assert content.nested_patch['foobar'][1]['foo'] == 'bar3'
     assert content.nested_patch['foobar'][1]['bar'] == 3
+    assert content.nested_patch['foobar'][1]['nested_int'] == 1
 
 
 async def test_dates_bucket_list_field(dummy_request):
