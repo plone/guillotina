@@ -1,6 +1,9 @@
 4.1.4 (unreleased)
 ------------------
 
+- Implement default PUT method to be able to replace content
+  [vangheem]
+
 - Option to disable inheritance on role permission relation
   [bloodbare]
 
