@@ -143,7 +143,7 @@ async def test_put_content(container_requester):
             })
         )
         resp, status = await requester('GET', '/db/guillotina/item1')
-        assert resp[IDublinCore.__identifier__]['tags'] == None
+        assert resp[IDublinCore.__identifier__]['tags'] is None
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
