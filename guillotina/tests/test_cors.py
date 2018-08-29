@@ -1,4 +1,8 @@
 from copy import deepcopy
+
+import pytest
+
+from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import cors
 from guillotina._settings import app_settings
 from guillotina.tests.utils import get_mocked_request
@@ -49,6 +53,17 @@ async def test_allow_origin_star():
     })
     headers = await renderer.get_headers()
     assert headers['Access-Control-Allow-Origin'] == '*'
+
+
+async def test_bad_origin():
+    request = get_mocked_request(headers={
+        'Origin': 'http://foobar.com:8080'
+    })
+    renderer = _CorsTestRenderer(request, {
+        'allow_origin': ['localhost']
+    })
+    with pytest.raises(HTTPUnauthorized):
+        await renderer.get_headers()
 
 
 async def test_allow_origin_foobar():
