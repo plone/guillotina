@@ -1,6 +1,9 @@
 4.1.4 (unreleased)
 ------------------
 
+- Fix error on invalid CORS check
+  [vangheem]
+
 - Option to disable inheritance on role permission relation
   [bloodbare]
 
