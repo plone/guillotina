@@ -119,6 +119,7 @@ class INestFieldSchema(Interface):
     foo = schema.Text(required=False)
     bar = schema.Int(required=False)
     foobar_list = schema.List(required=False, value_type=schema.Text())
+    nested_int = fields.PatchField(schema.Int(required=False))
 
 
 class ITestSchema(Interface):
@@ -653,7 +654,11 @@ async def test_nested_patch_deserialize(dummy_request):
                         "value": {
                             "foo": "bar",
                             "bar": 1,
-                            "foobar_list": None
+                            "foobar_list": None,
+                            "nested_int": {
+                                "op": "reset",
+                                "value": 5,
+                            }
                         }
                     }
                 }
@@ -663,6 +668,7 @@ async def test_nested_patch_deserialize(dummy_request):
     assert len(content.nested_patch) == 1
     assert content.nested_patch['foobar'][0]['foo'] == 'bar'
     assert content.nested_patch['foobar'][0]['bar'] == 1
+    assert content.nested_patch['foobar'][0]['nested_int'] == 5
 
     await deserializer.set_schema(
         ITestSchema, content, {
@@ -696,7 +702,10 @@ async def test_nested_patch_deserialize(dummy_request):
                             "index": 1,
                             "value": {
                                 "foo": "bar3",
-                                "bar": 3
+                                "bar": 3,
+                                "nested_int": {
+                                    "op": "inc",
+                                }
                             }
                         }
                     }
@@ -706,6 +715,7 @@ async def test_nested_patch_deserialize(dummy_request):
     assert len(errors) == 0
     assert content.nested_patch['foobar'][1]['foo'] == 'bar3'
     assert content.nested_patch['foobar'][1]['bar'] == 3
+    assert content.nested_patch['foobar'][1]['nested_int'] == 1
 
 
 async def test_dates_bucket_list_field(dummy_request):
