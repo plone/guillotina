@@ -4,7 +4,7 @@ from guillotina.schema.vocabulary import getVocabularyRegistry
 
 @configure.vocabulary(
     name="testvocab")
-class TestVocab:
+class VocabTest:
 
     def __init__(self, context):
         self.context = context

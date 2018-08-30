@@ -4,6 +4,9 @@
 - Implement default PUT method to be able to replace content
   [vangheem]
 
+- Fix error on invalid CORS ch
+  [vangheem]
+
 - Option to disable inheritance on role permission relation
   [bloodbare]
 
