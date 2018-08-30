@@ -1,4 +1,4 @@
-4.1.4 (unreleased)
+4.1.4 (2018-08-29)
 ------------------
 
 - Implement default PUT method to be able to replace content
