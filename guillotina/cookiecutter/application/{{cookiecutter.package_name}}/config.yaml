@@ -27,6 +27,7 @@ cors:
   - DELETE
   - HEAD
   - PATCH
+  - PUT
   - OPTIONS
   allow_headers:
   - "*"

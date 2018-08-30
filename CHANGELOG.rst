@@ -1,7 +1,8 @@
 4.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allow PUT in CORS policy
+  [ebrehault]
 
 
 4.1.4 (2018-08-29)

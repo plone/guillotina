@@ -80,6 +80,7 @@ cors:
     - DELETE
     - HEAD
     - PATCH
+    - PUT
   allow_headers:
     - "*"
   expose_headers:
