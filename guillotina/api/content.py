@@ -12,6 +12,7 @@ from guillotina.component import query_multi_adapter
 from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
 from guillotina.content import get_all_behaviors
+from guillotina.content import get_cached_factory
 from guillotina.event import notify
 from guillotina.events import BeforeObjectMovedEvent
 from guillotina.events import BeforeObjectRemovedEvent
@@ -48,12 +49,12 @@ from guillotina.response import HTTPMethodNotAllowed
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
+from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import iter_parents
 from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
-from guillotina.security.utils import apply_sharing
 
 
 def get_content_json_schema_responses(content):
@@ -258,6 +259,43 @@ class DefaultPATCH(Service):
         await notify(ObjectModifiedEvent(self.context, payload=data))
 
         return Response(status=204)
+
+
+@configure.service(
+    context=IResource, method='PUT', permission='guillotina.ModifyContent',
+    summary='Replace the content of this resource',
+    parameters=patch_content_json_schema_parameters,
+    responses={
+        "200": {
+            "description": "Resource data",
+            "schema": {
+                "$ref": "#/definitions/Resource"
+            }
+        }
+    })
+class DefaultPUT(DefaultPATCH):
+    async def __call__(self):
+        '''
+        PUT means we're completely replacing the content
+        so we need to delete data from existing behaviors
+        and content schemas.
+        Then do the regular patch serialization
+        '''
+        for schema, behavior in await get_all_behaviors(self.context, load=True):
+            try:
+                behavior.data.clear()
+                for local_prop in behavior.__local__properties__:
+                    if local_prop in self.context.__dict__:
+                        del self.context.__dict__[local_prop]
+                behavior._p_register()
+            except AttributeError:
+                pass
+        factory = get_cached_factory(self.context.type_name)
+        if factory.schema is not None:
+            for name in factory.schema.names():
+                if name in self.context.__dict__:
+                    del self.context.__dict__[name]
+        return await super().__call__()
 
 
 @configure.service(

@@ -1,12 +1,15 @@
+import json
 from datetime import datetime
+
+import pytest
+from zope.interface import Interface
+
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
+from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.tests import utils
 from guillotina.transactions import managed_transaction
-from zope.interface import Interface
-
-import json
 
 
 class ITestingRegistry(Interface):  # pylint: disable=E0239
@@ -111,6 +114,45 @@ async def test_create_content(container_requester):
             container = await root.async_get('guillotina')
             obj = await container.async_get('item1')
             assert obj.title == 'Item1'
+
+
+async def test_put_content(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+                IDublinCore.__identifier__: {
+                    "title": "foo",
+                    "description": "bar",
+                    "tags": ["one", "two"]
+                }
+            })
+        )
+        assert status == 201
+        _, status = await requester(
+            'PUT',
+            '/db/guillotina/item1',
+            data=json.dumps({
+                IDublinCore.__identifier__: {
+                    "title": "foobar"
+                }
+            })
+        )
+        resp, status = await requester('GET', '/db/guillotina/item1')
+        assert resp[IDublinCore.__identifier__]['tags'] is None
+
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('item1')
+            assert obj.title == 'foobar'
+            with pytest.raises(AttributeError):
+                obj.description
 
 
 async def test_create_content_types_does_not_exist(container_requester):
