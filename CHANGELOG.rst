@@ -1,4 +1,4 @@
-4.1.5 (unreleased)
+4.1.5 (2018-08-30)
 ------------------
 
 - Allow PUT in CORS policy
