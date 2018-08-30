@@ -4,6 +4,12 @@
 - Allow PUT in CORS policy
   [ebrehault]
 
+- Update admin interface:
+
+  - Use PUT to edit
+  - Preserve path when logging in
+
+  [ebrehault]
 
 4.1.4 (2018-08-29)
 ------------------
