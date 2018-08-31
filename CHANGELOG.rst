@@ -1,4 +1,4 @@
-4.1.6 (unreleased)
+4.1.6 (2018-08-31)
 ------------------
 
 - On PUT, completely delete existing existing behavior objects
