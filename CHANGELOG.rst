@@ -1,7 +1,8 @@
 4.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- On PUT, completely delete existing existing behavior objects
+  [vangheem]
 
 
 4.1.5 (2018-08-30)

@@ -8,6 +8,7 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
 from guillotina.behaviors.dublincore import IDublinCore
+from guillotina.behaviors.attachment import IAttachment
 from guillotina.tests import utils
 from guillotina.transactions import managed_transaction
 
@@ -118,6 +119,7 @@ async def test_create_content(container_requester):
 
 async def test_put_content(container_requester):
     async with container_requester as requester:
+        data = 'WFhY' * 1024 + 'WA=='
         _, status = await requester(
             'POST',
             '/db/guillotina/',
@@ -125,10 +127,19 @@ async def test_put_content(container_requester):
                 "@type": "Item",
                 "title": "Item1",
                 "id": "item1",
+                "@behaviors": [IAttachment.__identifier__],
                 IDublinCore.__identifier__: {
                     "title": "foo",
                     "description": "bar",
                     "tags": ["one", "two"]
+                },
+                IAttachment.__identifier__: {
+                    'file': {
+                        'filename': 'foobar.jpg',
+                        'content-type': 'image/jpeg',
+                        'encoding': 'base64',
+                        'data': data
+                    }
                 }
             })
         )
@@ -137,6 +148,7 @@ async def test_put_content(container_requester):
             'PUT',
             '/db/guillotina/item1',
             data=json.dumps({
+                "@behaviors": [IAttachment.__identifier__],
                 IDublinCore.__identifier__: {
                     "title": "foobar"
                 }
@@ -144,6 +156,7 @@ async def test_put_content(container_requester):
         )
         resp, status = await requester('GET', '/db/guillotina/item1')
         assert resp[IDublinCore.__identifier__]['tags'] is None
+        assert resp[IAttachment.__identifier__]['file'] is None
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)

@@ -78,3 +78,5 @@ class AnnotationsAdapter(object):
         annotation = await self.async_get(key)
         if annotation is not None:
             self.obj._p_jar.delete(annotation)
+            if key in self.obj.__gannotations__:
+                del self.obj.__gannotations__[key]

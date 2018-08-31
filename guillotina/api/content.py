@@ -281,15 +281,19 @@ class DefaultPUT(DefaultPATCH):
         and content schemas.
         Then do the regular patch serialization
         '''
-        for schema, behavior in await get_all_behaviors(self.context, load=True):
+        annotations_container = IAnnotations(self.context)
+        for schema, behavior in await get_all_behaviors(self.context, load=False):
+            if hasattr(behavior, '__annotations_data_key__'):
+                await annotations_container.async_del(behavior.__annotations_data_key__)
             try:
                 behavior.data.clear()
                 for local_prop in behavior.__local__properties__:
                     if local_prop in self.context.__dict__:
                         del self.context.__dict__[local_prop]
-                behavior._p_register()
             except AttributeError:
                 pass
+        self.context.__behaviors__ = frozenset({})
+
         factory = get_cached_factory(self.context.type_name)
         if factory.schema is not None:
             for name in factory.schema.names():
