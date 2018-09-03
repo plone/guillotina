@@ -67,11 +67,11 @@ class SerializeToJson(object):
             '@name': self.context.__name__,
             '@uid': self.context.uuid,
             '@static_behaviors': behaviors,
-            'parent': parent_summary,
-            'is_folderish': IFolder.providedBy(self.context),
+            'parent': parent_summary,  # should be @parent
+            'is_folderish': IFolder.providedBy(self.context),  # eek, should be @folderish?
             'creation_date': json_compatible(self.context.creation_date),
             'modification_date': json_compatible(self.context.modification_date),
-            'UID': self.context.uuid,
+            'UID': self.context.uuid,  # should be removed
         }
 
         main_schema = factory.schema

@@ -1,4 +1,17 @@
+import asyncio
+import inspect
+import logging
 from collections import OrderedDict
+from pprint import pformat
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Tuple
+
+from zope.interface import Interface
+from zope.interface import classImplements
+from zope.interface.interfaces import IInterface
+
 from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.configure import component
@@ -27,17 +40,6 @@ from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
-from pprint import pformat
-from typing import Any
-from typing import Dict
-from typing import Optional
-from typing import Tuple
-from zope.interface import classImplements
-from zope.interface import Interface
-
-import asyncio
-import inspect
-import logging
 
 
 _registered_configurations: ConfigurationType = []
@@ -190,7 +192,15 @@ def load_behavior(_context, behavior):
     klass = resolve_dotted_name(behavior['klass'])
     factory = conf.get('factory') or klass
     real_factory = resolve_dotted_name(factory)
-    schema = resolve_dotted_name(conf['provides'])
+    if IInterface.providedBy(real_factory):
+        # create concret class to register for behavior
+        schema = real_factory
+        from guillotina.behaviors.instance import AnnotationBehavior
+
+        class real_factory(AnnotationBehavior):
+            pass
+    else:
+        schema = resolve_dotted_name(conf['provides'])
     classImplements(real_factory, schema)
 
     name = conf.get('name')
