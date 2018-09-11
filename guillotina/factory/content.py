@@ -32,17 +32,21 @@ logger = logging.getLogger('guillotina')
 class ApplicationRoot(object):
     executor = ThreadPoolExecutor(max_workers=100)
     root_user = None
+    app = None  # set after app configuration is done
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, loop=None):
         self._items = {}
         self._config_file = config_file
         self._async_utilities = {}
+        self._loop = loop
 
     def add_async_utility(self, config, loop=None):
         interface = import_class(config['provides'])
         factory = import_class(config['factory'])
         try:
-            utility_object = lazy_apply(factory, config.get('settings', {}), loop=loop)
+            utility_object = lazy_apply(
+                factory, config.get('settings', {}),
+                loop=loop or self._loop)
         except Exception:
             logger.error('Error initializing utility {}'.format(repr(factory)),
                          exc_info=True)
@@ -50,7 +54,8 @@ class ApplicationRoot(object):
         provide_utility(utility_object, interface)
         if hasattr(utility_object, 'initialize'):
             task = asyncio.ensure_future(
-                lazy_apply(utility_object.initialize, app=self.app), loop=loop)
+                lazy_apply(utility_object.initialize, app=self.app),
+                loop=loop or self._loop)
         else:
             task = None
             logger.warn(f'No initialize method found on {utility_object} object')

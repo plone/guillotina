@@ -148,7 +148,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
         raise Exception('Neither configuration or settings')
 
     # Create root Application
-    root = ApplicationRoot(config_file)
+    root = ApplicationRoot(config_file, loop)
     provide_utility(root, IApplication, 'root')
 
     # Initialize global (threadlocal) ZCA configuration
