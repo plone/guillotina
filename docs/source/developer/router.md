@@ -31,6 +31,15 @@ async def matching_service(context, request):
     return request.matchdict  # will return {'foo': 'foo', 'bar': 'bar'}
 ```
 
+Some caveats need to be considered when mixing in routing:
+
+- matches are only done when traversal misses
+- there are limits to the variability of the route scheme you use. For example
+  `@foobar/{one}/{two}` and `@foobar/one/two` will be converted into the same
+  service registration; however, the former will match against variable paths
+  and the later will only match `@foobar/one/two`. So you might run into
+  restrictions quickly if you're trying to do complex routing.
+
 
 ## Providing your own router
 
