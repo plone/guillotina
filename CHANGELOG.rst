@@ -1,7 +1,8 @@
 4.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure ApplicationRoot knows about the loop it is used with
+  [vangheem]
 
 
 4.1.6 (2018-08-31)
