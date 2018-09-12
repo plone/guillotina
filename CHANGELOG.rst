@@ -1,4 +1,4 @@
-4.1.7 (unreleased)
+4.1.7 (2018-09-12)
 ------------------
 
 - Provide more flexibility for traversal sub-routes
