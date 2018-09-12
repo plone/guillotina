@@ -193,6 +193,7 @@ async def test_route_match_view(container_requester):
         response, status = await requester('GET', '/@match/foo/bar')
         assert response == {
             '__parts': ['@match', 'foo', 'bar'],
+            '@match': '@match',
             'foo': 'foo',
             'bar': 'bar'
         }

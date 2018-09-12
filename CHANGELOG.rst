@@ -1,6 +1,9 @@
 4.1.7 (unreleased)
 ------------------
 
+- Provide more flexibility for traversal sub-routes
+  [vangheem]
+
 - Make sure ApplicationRoot knows about the loop it is used with
   [vangheem]
 
