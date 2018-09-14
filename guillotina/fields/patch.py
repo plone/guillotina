@@ -43,6 +43,8 @@ def field_converter(field, value, context):
             raise ValueDeserializationError(
                 field, value, f'"{operation_name}" not a valid operation')
         value = operation(context, value.get('value'))
+    elif isinstance(value, (dict, list)):
+        value = get_adapter(field.field, IJSONToValue, args=[value, context])
     return value
 
 

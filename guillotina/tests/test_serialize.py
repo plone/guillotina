@@ -186,6 +186,18 @@ class ITestSchema(Interface):
         ))
     ))
 
+    dict_of_obj = schema.Dict(
+        required=False,
+        key_type=schema.Text(),
+        value_type=schema.Object(schema=INestFieldSchema)
+    )
+
+    patch_dict_of_obj = fields.PatchField(schema.Dict(
+        required=False,
+        key_type=schema.Text(),
+        value_type=schema.Object(schema=INestFieldSchema)
+    ))
+
 
 async def test_deserialize_text(dummy_guillotina):
     assert schema_compatible('foobar', ITestSchema['text']) == 'foobar'
@@ -744,3 +756,63 @@ async def test_dates_bucket_list_field(dummy_request):
             }
         }, [])
     assert content.datetime_bucket_list.annotations_metadata[0]['len'] == 3
+
+
+async def test_patchfield_notdefined_field(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            "dict_of_obj": {
+                "key1": {
+                    "foo": "bar",
+                    "bar": 1,
+
+                    # Value not found in schema
+                    "not_defined_field": "arbitrary-value"
+                }
+            },
+            "patch_dict_of_obj": {
+                "key1": {
+                    "foo": "bar",
+                    "bar": 1,
+
+                    # Value not found in schema
+                    "not_defined_field": "arbitrary-value"
+                }
+            }
+        }, errors)
+
+    assert len(errors) == 0
+
+    # 'not_defined_field' is not part of INestFieldSchema so should not serialized and stored
+    assert 'not_defined_field' not in content.dict_of_obj['key1']
+    assert 'not_defined_field' not in content.patch_dict_of_obj['key1']
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            "patch_dict_of_obj": {
+                "op": "assign",
+                "value": {
+                    "key": "key1",
+                    "value": {
+                        "op": "append",
+                        "value": {
+                            "foo": "bar",
+                            "bar": 1,
+
+                            # Value not found in schema
+                            "not_defined_field": "arbitrary-value"
+                        }
+                    }
+                }
+            }
+        }, errors)
+
+    assert len(errors) == 0
+    assert 'not_defined_field' not in content.dict_of_obj['key1']
+    assert 'not_defined_field' not in content.patch_dict_of_obj['key1']
