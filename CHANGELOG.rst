@@ -1,4 +1,4 @@
-4.1.8 (unreleased)
+4.1.8 (2018-09-14)
 ------------------
 
 - Be able to override configuration values with `--override` parameter
