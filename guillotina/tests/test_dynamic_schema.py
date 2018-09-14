@@ -366,7 +366,7 @@ async def test_add_dynamic_fields(container_requester):
                     "fields": {
                         "foobar": {
                             "title": "Hello field",
-                            "type": "int"
+                            "type": "integer"
                         }
                     }
                 }
@@ -470,7 +470,7 @@ async def test_add_dynamic_fields_invalid_type(container_requester):
                     "fields": {
                         "foobar": {
                             "title": "Hello field",
-                            "type": "int"
+                            "type": "integer"
                         }
                     }
                 }
@@ -486,7 +486,38 @@ async def test_add_dynamic_fields_invalid_type(container_requester):
                         "op": "assign",
                         "value": {
                             "key": "foobar",
+                            "value": 5
+                        }
+                    }
+                }
+            }))
+        assert status == 204
+
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar",
                             "value": "5"
+                        }
+                    }
+                }
+            }))
+        assert status == 204
+
+        # for invalid type values
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar",
+                            "value": "not-an-int"
                         }
                     }
                 }

@@ -1,7 +1,8 @@
 4.1.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix IJSONToValue adapter for IPatchField
+  [masipcat]
 
 
 4.1.8 (2018-09-14)
