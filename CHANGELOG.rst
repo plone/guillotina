@@ -1,7 +1,8 @@
 4.1.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to override configuration values with `--override` parameter
+  [vangheem]
 
 
 4.1.7 (2018-09-12)

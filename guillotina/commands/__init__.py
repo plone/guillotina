@@ -47,14 +47,19 @@ MISSING_SETTINGS = {
 }
 
 
-def get_settings(configuration):
+def get_settings(configuration, overrides=None):
     if configuration == 'config.yaml' and not os.path.exists(configuration):
         # try config.json as well...
         configuration = 'config.json'
     if os.path.exists(configuration):
         with open(configuration, 'r') as config:
             if configuration.lower().endswith('.json'):
-                settings = json.load(config)
+                try:
+                    settings = json.load(config)
+                except json.decoder.JSONDecodeError:
+                    logger.warning('Could not parse json configuration {}'.format(
+                        configuration))
+                    raise
             else:
                 # should be yaml then...
                 settings = yaml.load(config)
@@ -66,6 +71,9 @@ def get_settings(configuration):
             # try with yaml parser too..
             try:
                 settings = yaml.load(configuration)
+                # will also parse strings...
+                if isinstance(settings, str):
+                    settings = None
             except yaml.parser.ParserError:
                 settings = None
 
@@ -75,6 +83,18 @@ def get_settings(configuration):
                            f'Using default settings.')
         MISSING_SETTINGS['logged'] = True
         settings = MISSING_SETTINGS.copy()
+
+    for override in overrides or []:
+        if '=' not in override:
+            raise Exception(f'Invalid configuration {override}')
+        name, _, value = override.partition('=')
+        context = settings
+        parts = name.split('.')
+        for part in parts[:-1]:
+            if part not in context:
+                context[part] = {}
+            context = context[part]
+        context[parts[-1]] = value
     return settings
 
 
@@ -103,7 +123,7 @@ class Command(object):
         if loop is not None:
             self.loop = loop
         if settings is None:
-            settings = get_settings(self.arguments.configuration)
+            settings = get_settings(self.arguments.configuration, self.arguments.override)
         if settings.get('loop_policy'):
             loop_policy = resolve_dotted_name(settings['loop_policy'])
             asyncio.set_event_loop_policy(loop_policy())
@@ -227,6 +247,8 @@ class Command(object):
         parser.add_argument('--line-profiler-output',
                             help='Where to store the output of the line profiler data',
                             default=None)
+        parser.add_argument('--override', action='append',
+                            help='Override configuration values')
         parser.set_defaults(debug=False)
         return parser
 

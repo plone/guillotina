@@ -23,6 +23,7 @@ You can provide your own CLI commands for guillotina through a simple interface.
   - `--line-profiler`: use line_profiler `requires line_profiler`
   - `--line-profiler-matcher`: fnmatch of module/function to profile `requires line_profiler`
   - `--line-profiler-output`: to store output in a file `requires line_profiler`
+  - `--override`: Override configuration values, Example: `--override="root_user.password=foobar"`
 - serve:
   - `--host`: host to bind to
   - `--port`: port to bind to

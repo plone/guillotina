@@ -1,9 +1,10 @@
-from guillotina import testing
-from guillotina.commands.run import RunCommand
+import os
 from tempfile import mkstemp
 
-import os
 import pytest
+from guillotina import testing
+from guillotina.commands import get_settings
+from guillotina.commands.run import RunCommand
 
 
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
@@ -43,3 +44,12 @@ async def run(container):
     command.run_command(settings=container_command['settings'])
     with open(filepath2) as fi:
         assert fi.read() == 'foobar'
+
+
+def test_get_settings():
+    settings = get_settings('doesnotexist.json', [
+        'foobar=foobar',
+        'foo.bar=foobar'
+    ])
+    assert settings['foobar'] == 'foobar'
+    assert settings['foo']['bar'] == 'foobar'
