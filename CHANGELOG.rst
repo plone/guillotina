@@ -1,4 +1,4 @@
-4.1.9 (unreleased)
+4.1.9 (2018-09-17)
 ------------------
 
 - Adding annotation support on registry object
