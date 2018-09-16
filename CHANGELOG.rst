@@ -1,6 +1,9 @@
 4.1.9 (unreleased)
 ------------------
 
+- Adding annotation support on registry object
+  [bloodbare]
+
 - Fix IJSONToValue adapter for IPatchField
   [masipcat]
 
