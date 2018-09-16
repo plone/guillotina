@@ -4,6 +4,7 @@ from guillotina.db.orm.base import BaseObject
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IResource
+from guillotina.interfaces import IRegistry
 from zope.interface import implementer
 
 import logging
@@ -20,6 +21,9 @@ class AnnotationData(BaseObject, UserDict):
     """
 
 
+@configure.adapter(
+    for_=IRegistry,
+    provides=IAnnotations)
 @configure.adapter(
     for_=IResource,
     provides=IAnnotations)
