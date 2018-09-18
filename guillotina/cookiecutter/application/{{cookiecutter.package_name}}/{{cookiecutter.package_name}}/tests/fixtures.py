@@ -1,6 +1,4 @@
 from guillotina import testing
-from guillotina.component import get_utility
-from guillotina.interfaces import ICatalogUtility
 from guillotina.tests.fixtures import ContainerRequesterAsyncContextManager
 
 import json
@@ -31,5 +29,5 @@ class {{cookiecutter.package_name}}_Requester(ContainerRequesterAsyncContextMana
 
 
 @pytest.fixture(scope='function')
-async def {{cookiecutter.package_name}}_requester(guillotina, loop):
-    return {{cookiecutter.package_name}}_Requester(guillotina, loop)
+async def {{cookiecutter.package_name}}_requester(guillotina):
+    return {{cookiecutter.package_name}}_Requester(guillotina)

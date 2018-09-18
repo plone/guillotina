@@ -1,7 +1,8 @@
 4.1.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix cookiecutter application template
+  [vangheem]
 
 
 4.1.9 (2018-09-17)
