@@ -1,4 +1,4 @@
-4.1.10 (unreleased)
+4.1.10 (2018-09-19)
 -------------------
 
 - Fixing Bug on Serialize Schema
