@@ -209,7 +209,7 @@ def load_behavior(_context, behavior):
     for_ = resolve_dotted_name(conf.get('for_'))
     marker = resolve_dotted_name(conf.get('marker'))
 
-    if marker is None and real_factory is None:
+    if marker is None:
         marker = schema
 
     if marker is not None and real_factory is None and marker is not schema:

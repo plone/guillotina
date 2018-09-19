@@ -1,6 +1,9 @@
 4.1.12 (unreleased)
 -------------------
 
+- Behaviors by default correctly mark object with schema if no marker provided
+  [vangheem]
+
 - Move static guillotina assets into python package so they can be
   referenced from python dotted paths with `guillotina:static/assets`
   [vangheem]
