@@ -36,3 +36,4 @@ cors:
 utilities: []
 jsapps:
   +admin: guillotina:static/executioner
+  static: guillotina:static/assets
