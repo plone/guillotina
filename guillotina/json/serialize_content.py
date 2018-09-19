@@ -56,7 +56,7 @@ class SerializeToJson(object):
         else:
             parent_summary = {}
 
-        factory = get_cached_factory(self.content.type_name)
+        factory = get_cached_factory(self.context.type_name)
         behaviors = []
         for behavior_schema in factory.behaviors or ():
             behaviors.append(behavior_schema)
