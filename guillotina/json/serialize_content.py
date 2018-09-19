@@ -56,19 +56,23 @@ class SerializeToJson(object):
         else:
             parent_summary = {}
 
+        factory = get_cached_factory(self.context.type_name)
+        behaviors = []
+        for behavior_schema in factory.behaviors or ():
+            behaviors.append(behavior_schema)
+
         result = {
             '@id': IAbsoluteURL(self.context, self.request)(),
             '@type': self.context.type_name,
             '@name': self.context.__name__,
             '@uid': self.context.uuid,
+            '@static_behaviors': behaviors,
             'parent': parent_summary,
             'is_folderish': IFolder.providedBy(self.context),
             'creation_date': json_compatible(self.context.creation_date),
             'modification_date': json_compatible(self.context.modification_date),
             'UID': self.context.uuid,
         }
-
-        factory = get_cached_factory(self.context.type_name)
 
         main_schema = factory.schema
         await self.get_schema(main_schema, self.context, result, False)

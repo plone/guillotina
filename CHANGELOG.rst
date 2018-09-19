@@ -1,6 +1,9 @@
 4.1.10 (unreleased)
 -------------------
 
+- Adding static behaviors on REST serialize
+  [bloodbare]
+
 - Fix cookiecutter application template
   [vangheem]
 
