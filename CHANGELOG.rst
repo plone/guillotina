@@ -1,8 +1,9 @@
 4.1.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Be able to configure behavior directly against a schema instead
+  of needing to define concret behavior
+  [vangheem]
 
 4.1.11 (2018-09-19)
 -------------------
@@ -49,7 +50,6 @@
 
 - Make sure ApplicationRoot knows about the loop it is used with
   [vangheem]
-
 
 4.1.6 (2018-08-31)
 ------------------
