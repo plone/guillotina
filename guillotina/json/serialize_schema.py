@@ -43,10 +43,10 @@ class SerializeFactoryToJson(object):
                 ISchemaFieldSerializeToJson)
             result['properties'][name] = await serializer()
 
-            invariants = []
-            for i in factory.schema.queryTaggedValue('invariants', []):
-                invariants.append("%s.%s" % (i.__module__, i.__name__))
-            result['invariants'] = invariants
+        invariants = []
+        for i in factory.schema.queryTaggedValue('invariants', []):
+            invariants.append("%s.%s" % (i.__module__, i.__name__))
+        result['invariants'] = invariants
 
         # Behavior serialization
         for schema in factory.behaviors or ():
