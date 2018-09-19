@@ -108,7 +108,6 @@ class DownloadFile(TraversableFieldService):
                 (self.context, self.request, self.field), IFileManager)
             return await adapter.download()
         except AttributeError:
-            import pdb; pdb.set_trace()
             # file does not exist
             return HTTPNotFound(content={
                 'reason': 'File does not exist'
