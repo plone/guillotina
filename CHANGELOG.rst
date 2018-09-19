@@ -1,4 +1,4 @@
-4.1.11 (unreleased)
+4.1.11 (2018-09-19)
 -------------------
 
 - Fixing serialization bug
