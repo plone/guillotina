@@ -59,7 +59,7 @@ class SerializeToJson(object):
         factory = get_cached_factory(self.context.type_name)
         behaviors = []
         for behavior_schema in factory.behaviors or ():
-            behaviors.append(behavior_schema)
+            behaviors.append(behavior_schema.__identifier__)
 
         result = {
             '@id': IAbsoluteURL(self.context, self.request)(),

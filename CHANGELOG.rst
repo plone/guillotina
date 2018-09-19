@@ -1,7 +1,8 @@
 4.1.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixing serialization bug
+  [bloodbare]
 
 
 4.1.10 (2018-09-19)

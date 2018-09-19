@@ -108,7 +108,13 @@ async def test_create_content(container_requester):
                 "id": "item1"
             })
         )
+
         assert status == 201
+        _, status = await requester(
+            'GET',
+            '/db/guillotina/item1'
+        )
+        assert _['@static_behaviors'][0] == 'guillotina.behaviors.dublincore.IDublinCore'
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
         async with managed_transaction(request=request, abort_when_done=True):
