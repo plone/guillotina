@@ -47,7 +47,11 @@ class FileManager(object):
         if disposition is None:
             disposition = self.request.query.get('disposition', 'attachment')
 
-        file = self.field.get(self.field.context or self.context)
+        try:
+            file = self.field.get(self.field.context or self.context)
+        except AttributeError:
+            file = None
+
         if file is None and filename is None:
             raise HTTPNotFound(content={
                 'message': 'File or custom filename required to download'

@@ -80,7 +80,11 @@ class DBDataManager:
 
     async def finish(self, values=None):
         # create file object with new data from finished upload
-        file = self.field.get(self.real_context)
+        try:
+            file = self.field.get(self.real_context)
+        except AttributeError:
+            file = None
+
         if file is None:
             file = self.file_storage_manager.file_class()
         else:

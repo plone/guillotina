@@ -139,15 +139,18 @@ async def deserialize_cloud_field(field, value, context):
         try:
             file_ob = field.get(data_context)
         except AttributeError:
-            return
-        if file_ob:
+            file_ob = None
+        if file_ob is not None:
             # update file fields
             for key, item_value in value.items():
                 if key in serialize_mappings:
                     setattr(file_ob, serialize_mappings[key], item_value)
             data_context._p_register()
+        if 'data' in value:
+            value['data'] = base64.b64decode(value['data'])
+        else:
+            # already updated necessary values
             return file_ob
-        value['data'] = base64.b64decode(value['data'])
     else:
         # base64 web value
         value = convert_base64_to_binary(value)
