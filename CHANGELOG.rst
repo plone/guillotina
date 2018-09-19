@@ -1,6 +1,9 @@
 4.1.10 (unreleased)
 -------------------
 
+- Fixing Bug on Serialize Schema
+  [bloodbare]
+
 - Adding static behaviors on REST serialize
   [bloodbare]
 
