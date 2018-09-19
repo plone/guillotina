@@ -66,7 +66,7 @@ class SerializeToJson(object):
             '@type': self.context.type_name,
             '@name': self.context.__name__,
             '@uid': self.context.uuid,
-            '@sb': behaviors,
+            '@static_behaviors': behaviors,
             'parent': parent_summary,
             'is_folderish': IFolder.providedBy(self.context),
             'creation_date': json_compatible(self.context.creation_date),
