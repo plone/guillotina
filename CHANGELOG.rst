@@ -4,6 +4,9 @@
 - Adding static behaviors on REST serialize
   [bloodbare]
 
+- Fix cookiecutter application template
+  [vangheem]
+
 
 4.1.9 (2018-09-17)
 ------------------
