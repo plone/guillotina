@@ -1,6 +1,10 @@
 4.1.12 (unreleased)
 -------------------
 
+- Move static guillotina assets into python package so they can be
+  referenced from python dotted paths with `guillotina:static/assets`
+  [vangheem]
+
 - Be able to configure behavior directly against a schema instead
   of needing to define concret behavior
   [vangheem]
