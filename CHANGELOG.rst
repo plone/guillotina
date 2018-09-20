@@ -1,4 +1,4 @@
-4.1.12 (unreleased)
+4.1.12 (2018-09-20)
 -------------------
 
 - Fix file handling to properly provide 404 responses when no value is set
