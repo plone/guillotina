@@ -1,7 +1,12 @@
 """Main routing traversal class."""
+import traceback
+import uuid
+from contextlib import contextmanager
+from typing import Optional
+
+import aiohttp
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
-from contextlib import contextmanager
 from guillotina import __version__
 from guillotina import error_reasons
 from guillotina import logger
@@ -19,10 +24,14 @@ from guillotina.contentnegotiation import get_acceptable_content_types
 from guillotina.contentnegotiation import get_acceptable_languages
 from guillotina.event import notify
 from guillotina.events import ObjectLoadedEvent
+from guillotina.events import TraversalResourceMissEvent
+from guillotina.events import TraversalRouteMissEvent
+from guillotina.events import TraversalViewMissEvent
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
+from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
@@ -32,7 +41,6 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IErrorResponseException
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import ILanguage
-from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
@@ -49,12 +57,7 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import import_class
-from typing import Optional
 from zope.interface import alsoProvides
-
-import aiohttp
-import traceback
-import uuid
 
 
 async def traverse(request, parent, path):
@@ -410,6 +413,7 @@ class TraversalRouter(AbstractRouter):
         request.tail = tail
 
         if request.resource is None:
+            await notify(TraversalResourceMissEvent(request, tail))
             raise HTTPNotFound(content={
                 "reason": 'Resource not found'
             })
@@ -419,8 +423,6 @@ class TraversalRouter(AbstractRouter):
             view_name = routes.path_to_view_name(tail)
         elif not tail:
             view_name = ''
-        else:
-            return None
 
         request.record('beforeauthentication')
         await self.apply_authorization(request)
@@ -472,6 +474,7 @@ class TraversalRouter(AbstractRouter):
 
         if not view and len(tail) > 0:
             # we should have a view in this case because we are matching routes
+            await notify(TraversalViewMissEvent(request, tail))
             return None
 
         request.found_view = view
@@ -494,6 +497,7 @@ class TraversalRouter(AbstractRouter):
         try:
             view.__route__.matches(request, tail or [])
         except (KeyError, IndexError):
+            await notify(TraversalRouteMissEvent(request, tail))
             return None
         except AttributeError:
             pass

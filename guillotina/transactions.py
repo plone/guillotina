@@ -88,7 +88,7 @@ class managed_transaction:  # noqa: N801
             ob._p_jar = txn
 
     async def __aexit__(self, exc_type, exc, tb):
-        if self.adopt_parent_txn:
+        if self.adopt_parent_txn and self.previous_txn is not None:
             # take on parent's modified, added, deleted objects if necessary
             # before we commit or abort this transaction.
             # this is necessary because inside this block, the outer transaction
@@ -110,7 +110,7 @@ class managed_transaction:  # noqa: N801
         else:
             await self.tm.commit(txn=self.txn)
 
-        if self.adopt_parent_txn:
+        if self.adopt_parent_txn and self.previous_txn is not None:
             # restore transaction ownership of item from adoption done above
             if self.previous_txn != self.txn:
                 # we adopted previously detetected transaction so now

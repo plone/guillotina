@@ -1,8 +1,13 @@
 from guillotina.component.interfaces import IObjectEvent
+from guillotina.interfaces import IApplicationCleanupEvent
+from guillotina.interfaces import IApplicationConfiguredEvent
+from guillotina.interfaces import IApplicationEvent
+from guillotina.interfaces import IApplicationInitializedEvent
 from guillotina.interfaces import IBeforeFieldModifiedEvent
 from guillotina.interfaces import IBeforeObjectAddedEvent
 from guillotina.interfaces import IBeforeObjectMovedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
+from guillotina.interfaces import IDatabaseInitializedEvent
 from guillotina.interfaces import IFileBeforeFinishUploaded
 from guillotina.interfaces import IFileFinishUploaded
 from guillotina.interfaces import IFileStartedUpload
@@ -17,6 +22,10 @@ from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectPermissionsViewEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectVisitedEvent
+from guillotina.interfaces import ITraversalMissEvent
+from guillotina.interfaces import ITraversalResourceMissEvent
+from guillotina.interfaces import ITraversalRouteMissEvent
+from guillotina.interfaces import ITraversalViewMissEvent
 from zope.interface import implementer
 
 
@@ -157,3 +166,55 @@ class BeforeFieldModifiedEvent(object):
     def __init__(self, field, value):
         self.field = field
         self.value = value
+
+
+@implementer(IApplicationEvent)
+class ApplicationEvent:
+
+    def __init__(self, app, loop=None, **kwargs):
+        self.app = app
+        self.loop = loop
+        self.data = kwargs
+
+
+@implementer(IApplicationConfiguredEvent)
+class ApplicationConfiguredEvent(ApplicationEvent):
+    pass
+
+
+@implementer(IApplicationInitializedEvent)
+class ApplicationInitializedEvent(ApplicationEvent):
+    pass
+
+
+@implementer(IApplicationCleanupEvent)
+class ApplicationCleanupEvent(ApplicationEvent):
+    pass
+
+
+@implementer(ITraversalMissEvent)
+class TraversalMissEvent:
+    def __init__(self, request, tail):
+        self.request = request
+        self.tail = tail
+
+
+@implementer(ITraversalResourceMissEvent)
+class TraversalResourceMissEvent(TraversalMissEvent):
+    pass
+
+
+@implementer(ITraversalViewMissEvent)
+class TraversalViewMissEvent(TraversalMissEvent):
+    pass
+
+
+@implementer(ITraversalRouteMissEvent)
+class TraversalRouteMissEvent(TraversalMissEvent):
+    pass
+
+
+@implementer(IDatabaseInitializedEvent)
+class DatabaseInitializedEvent:
+    def __init__(self, database):
+        self.database = database

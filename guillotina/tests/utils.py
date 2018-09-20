@@ -19,7 +19,7 @@ from unittest import mock
 from yarl import URL
 from zope.interface import alsoProvides
 from zope.interface import implementer
-
+import aiotask_context
 import json
 import uuid
 
@@ -88,7 +88,7 @@ def _p_register(ob):
         conn._p_register(ob)
 
 
-class ContainerRequesterAsyncContextManager(object):
+class ContainerRequesterAsyncContextManager:
     def __init__(self, guillotina):
         self.guillotina = guillotina
         self.requester = None
@@ -110,6 +110,27 @@ class ContainerRequesterAsyncContextManager(object):
     async def __aexit__(self, exc_type, exc, tb):
         _, status = await self.requester('DELETE', '/db/guillotina')
         assert status in (200, 404)
+
+
+class wrap_request:
+
+    def __init__(self, request, func=None):
+        self.request = request
+        self.original = aiotask_context.get('request')
+        self.func = func
+
+    async def __aenter__(self):
+        aiotask_context.set('request', self.request)
+        if self.func:
+            if hasattr(self.func, '__aenter__'):
+                return await self.func.__aenter__()
+            else:
+                return await self.func()
+
+    async def __aexit__(self, *args):
+        if self.func and hasattr(self.func, '__aexit__'):
+            return await self.func.__aexit__(*args)
+        aiotask_context.set('request', self.original)
 
 
 def create_content(factory=Item, type_name='Item', id=None, parent=None):

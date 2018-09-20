@@ -86,3 +86,54 @@ class INewUserAdded(Interface):
 
 class IBeforeFieldModifiedEvent(Interface):
     """A field is going to be modified"""
+
+
+class IApplicationEvent(Interface):
+    app = Attribute('Server application object')
+    loop = Attribute('')
+
+
+class IApplicationConfiguredEvent(IApplicationEvent):
+    '''
+    After guillotina has been configured
+    '''
+
+
+class IApplicationInitializedEvent(IApplicationEvent):
+    '''
+    After initialization of static files, keys
+    and async utilities
+    '''
+
+
+class IApplicationCleanupEvent(IApplicationEvent):
+    '''
+    On app cleanup
+    '''
+
+
+class ITraversalMissEvent(Interface):
+    request = Attribute('Request object')
+    tail = Attribute('Unresolvable part of the request path')
+
+
+class ITraversalResourceMissEvent(ITraversalMissEvent):
+    '''
+    When application was not able to resolve requested resource
+    '''
+
+
+class ITraversalViewMissEvent(ITraversalMissEvent):
+    '''
+    When application was not able to resolve requested route for resource
+    '''
+
+
+class ITraversalRouteMissEvent(ITraversalMissEvent):
+    '''
+    When application was not able to resolve requested route for resource
+    '''
+
+
+class IDatabaseInitializedEvent(Interface):
+    database = Attribute('')

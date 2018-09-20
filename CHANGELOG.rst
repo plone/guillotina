@@ -1,6 +1,21 @@
 4.2.0 (unreleased)
 ------------------
+
+- Add new events:
+    - IApplicationCleanupEvent
+    - IApplicationConfiguredEvent
+    - IApplicationInitializedEvent
+    - IDatabaseInitializedEvent
+    - ITraversalMissEvent
+    - ITraversalResourceMissEvent
+    - ITraversalRouteMissEvent
+    - ITraversalViewMissEvent
+
 - upgrade shipped asyncpg version
+  [vangheem]
+
+- Add events for application configuration, request traversal misses
+  and database itialization.
   [vangheem]
 
 - Add `@resolveuid` endpoint
