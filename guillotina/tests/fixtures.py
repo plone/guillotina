@@ -134,15 +134,16 @@ class GuillotinaDBRequester(object):
 
     async def __call__(self, method, path, params=None, data=None, authenticated=True,
                        auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
-                       accept='application/json'):
+                       accept='application/json', allow_redirects=True):
         value, status, headers = await self.make_request(
             method, path, params, data, authenticated,
-            auth_type, headers, token, accept)
+            auth_type, headers, token, accept, allow_redirects=allow_redirects)
         return value, status
 
     async def make_request(self, method, path, params=None, data=None,
                            authenticated=True, auth_type='Basic', headers={},
-                           token=testing.ADMIN_TOKEN, accept='application/json'):
+                           token=testing.ADMIN_TOKEN, accept='application/json',
+                           allow_redirects=True):
         settings = {}
         headers = headers.copy()
         settings['headers'] = headers
@@ -154,6 +155,7 @@ class GuillotinaDBRequester(object):
 
         settings['params'] = params
         settings['data'] = data
+        settings['allow_redirects'] = allow_redirects
 
         async with aiohttp.ClientSession(loop=self.loop) as session:
             operation = getattr(session, method.lower(), None)

@@ -168,6 +168,9 @@ configure.grant(
 configure.grant(
     permission="guillotina.RawSearchContent",
     role="guillotina.ContainerAdmin")
+configure.grant(
+    permission="guillotina.Manage",
+    role="guillotina.Manager")
 
 # ContainerDeleter
 configure.grant(
