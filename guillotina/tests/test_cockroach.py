@@ -40,7 +40,8 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
         txn.delete(folder1)
 
         await tm.commit(txn=txn)
-        while storage._vacuum._queue.qsize() > 0 or storage._vacuum.active:
+        while (storage._vacuum._queue.qsize() > 0 or
+               storage._vacuum._active):
             await asyncio.sleep(0.1)
 
         txn = await tm.begin()

@@ -267,6 +267,7 @@ class PGVacuum:
         self._loop = loop
         self._queue = asyncio.Queue(loop=loop)
         self._closed = False
+        self._active = False
 
     async def initialize(self):
         while not self._closed:
@@ -296,12 +297,14 @@ class PGVacuum:
             oid = None
             try:
                 oid = await self._queue.get()
+                self._active = True
                 await self.vacuum(oid)
             except (concurrent.futures.CancelledError, RuntimeError):
                 raise
             except Exception:
                 log.warning(f'Error vacuuming oid {oid}', exc_info=True)
             finally:
+                self._active = False
                 try:
                     self._queue.task_done()
                 except ValueError:
