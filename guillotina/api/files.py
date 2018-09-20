@@ -1,3 +1,5 @@
+import mimetypes
+
 from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
@@ -10,8 +12,7 @@ from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-
-import mimetypes
+from guillotina.response import HTTPNotFound
 
 
 def _traversed_file_doc(summary, parameters=[], responses={
@@ -102,9 +103,15 @@ class DownloadFile(TraversableFieldService):
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
-        adapter = get_multi_adapter(
-            (self.context, self.request, self.field), IFileManager)
-        return await adapter.download()
+        try:
+            adapter = get_multi_adapter(
+                (self.context, self.request, self.field), IFileManager)
+            return await adapter.download()
+        except AttributeError:
+            # file does not exist
+            return HTTPNotFound(content={
+                'reason': 'File does not exist'
+            })
 
 
 @configure.service(

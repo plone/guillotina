@@ -464,3 +464,23 @@ async def test_update_filename_on_files(container_requester):
         assert data['content_type'] == 'image/jpeg'
         assert data['md5'] == 'foobar'
         assert data['extension'] == 'jpg'
+
+
+async def test_should_fourohfour_with_invalid_fieldname(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                '@behaviors': [IAttachment.__identifier__],
+                'id': 'foobar'
+            })
+        )
+        assert status == 201
+
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/foobar/@download/foobar'
+        )
+        assert status == 404

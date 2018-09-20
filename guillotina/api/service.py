@@ -57,4 +57,5 @@ class TraversableFieldService(View):
                 IAsyncBehavior.implementedBy(self.behavior.__class__)):
             # providedBy not working here?
             await self.behavior.load()
+
         return self

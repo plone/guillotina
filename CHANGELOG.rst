@@ -1,6 +1,9 @@
 4.1.12 (unreleased)
 -------------------
 
+- Fix file handling to properly provide 404 responses when no value is set
+  [vangheem]
+
 - Move static guillotina assets into python package so they can be
   referenced from python dotted paths with `guillotina:static/assets`
   [vangheem]
