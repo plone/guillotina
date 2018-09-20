@@ -765,3 +765,27 @@ async def test_patch_with_payload_again(container_requester):
             data=json.dumps(response))
         response, _ = await requester('GET', f'/db/guillotina/foobar')
         assert response['title'] == 'Foobar'
+
+
+async def test_resolveuid(container_requester):
+    async with container_requester as requester:
+        resp, _ = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item"
+            })
+        )
+
+        uid = resp['@uid']
+        _, status = await requester(
+            'GET', f'/db/guillotina/@resolveuid/{uid}', allow_redirects=False)
+        assert status == 301
+
+
+async def test_invalid_resolveuid(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'GET', f'/db/guillotina/@resolveuid/foobar', allow_redirects=False)
+        assert status == 404

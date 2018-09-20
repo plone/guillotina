@@ -29,6 +29,7 @@ from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IConstrainTypes
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IIDGenerator
@@ -46,12 +47,15 @@ from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.response import ErrorResponse
 from guillotina.response import HTTPMethodNotAllowed
+from guillotina.response import HTTPMovedPermanently
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
+from guillotina.utils import get_object_by_oid
+from guillotina.utils import get_object_url
 from guillotina.utils import iter_parents
 from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
@@ -723,7 +727,7 @@ async def duplicate(context, request):
 
 @configure.service(
     context=IFolder, method='GET', name="@ids",
-    permission='guillotina.ViewContent',
+    permission='guillotina.Manage',
     summary='Return a list of ids in the resource',
     responses={
         "200": {
@@ -736,7 +740,7 @@ async def ids(context, request):
 
 @configure.service(
     context=IFolder, method='GET', name="@items",
-    permission='guillotina.ViewContent',
+    permission='guillotina.Manage',
     summary='Paginated list of sub objects',
     parameters=[{
         "name": "include",
@@ -781,13 +785,9 @@ async def items(context, request):
     if request.query.get('omit'):
         omit = request.query.get('omit').split(',')
 
-    security = IInteraction(request)
-
     results = []
     for key in await txn.get_page_of_keys(context._p_oid, page=page, page_size=page_size):
         ob = await context.async_get(key)
-        if not security.check_permission('guillotina.ViewContent', ob):
-            continue
         serializer = get_multi_adapter(
             (ob, request),
             IResourceSerializeToJson)
@@ -836,3 +836,29 @@ async def invalidate_cache(context, request):
     txn = get_transaction(request)
     cache_keys = txn._cache.get_cache_keys(context)
     await txn._cache.delete_all(cache_keys)
+
+
+@configure.service(
+    method='GET', name="@resolveuid/{uid}", context=IContainer,
+    permission='guillotina.AccessContent',
+    summary='Get content by UID',
+    responses={
+        "200": {
+            "description": "Successful"
+        }
+    })
+async def resolve_uid(context, request):
+    uid = request.matchdict['uid']
+    ob = await get_object_by_oid(uid)
+    if ob is None:
+        return HTTPNotFound(content={
+            'reason': f'Could not find uid: {uid}'
+        })
+    interaction = IInteraction(request)
+    if interaction.check_permission('guillotina.AccessContent', ob):
+        return HTTPMovedPermanently(get_object_url(ob, request))
+    else:
+        # if a user doesn't have access to it, they shouldn't know anything about it
+        return HTTPNotFound(content={
+            'reason': f'Could not find uid: {uid}'
+        })

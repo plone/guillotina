@@ -156,7 +156,7 @@ def get_object_url(ob: IResource,
     return None
 
 
-async def get_object_by_oid(oid: str, txn=None) -> IResource:
+async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
     '''
     Get an object from an oid
 
@@ -169,7 +169,10 @@ async def get_object_by_oid(oid: str, txn=None) -> IResource:
         txn = get_transaction()
     result = txn._manager._hard_cache.get(oid, None)
     if result is None:
-        result = await txn._get(oid)
+        try:
+            result = await txn._get(oid)
+        except KeyError:
+            return None
 
     obj = reader(result)
     obj._p_jar = txn

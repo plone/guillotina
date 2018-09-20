@@ -1,7 +1,18 @@
-4.1.13 (unreleased)
--------------------
+4.2.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Add `@resolveuid` endpoint
+  [vangheem]
+
+- Change `@ids` endpoint permission to `guillotina.Manage`
+  [vangheem]
+
+- Change `@items` endpoint permission to `guillotina.Manage`
+  [vangheem]
+
+- Add `guillotina.Manage` permission which only `guillotina.Managers` roles
+  have by default.
+  [vangheem]
 
 
 4.1.12 (2018-09-20)
