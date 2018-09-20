@@ -1,5 +1,7 @@
 4.2.0 (unreleased)
 ------------------
+- upgrade shipped asyncpg version
+  [vangheem]
 
 - Add `@resolveuid` endpoint
   [vangheem]

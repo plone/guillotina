@@ -266,12 +266,8 @@ class PGVacuum:
         self._storage = storage
         self._loop = loop
         self._queue = asyncio.Queue(loop=loop)
-        self._active = False
         self._closed = False
-
-    @property
-    def active(self):
-        return self._active
+        self._active = False
 
     async def initialize(self):
         while not self._closed:
@@ -280,8 +276,6 @@ class PGVacuum:
             except (concurrent.futures.CancelledError, RuntimeError):
                 # we're okay with the task getting cancelled
                 return
-            finally:
-                self._active = True
 
     async def _initialize(self):
         # get existing trashed objects, push them on the queue...
@@ -317,6 +311,8 @@ class PGVacuum:
                     pass
 
     async def add_to_queue(self, oid):
+        if self._closed:
+            raise Exception('Closing down')
         await self._queue.put(oid)
 
     async def vacuum(self, oid):
@@ -338,21 +334,6 @@ class PGVacuum:
     async def finalize(self):
         self._closed = True
         await self._queue.join()
-        # wait for up to two seconds to finish the task...
-        # it's not long but we don't want to wait for a long time to close either....
-        try:
-            await asyncio.wait_for(self.wait_until_no_longer_active(), 2)
-        except asyncio.TimeoutError:
-            pass
-        except concurrent.futures.CancelledError:
-            # we do not care if it's cancelled... things will get cleaned up
-            # in a future task anyways...
-            pass
-
-    async def wait_until_no_longer_active(self):
-        while self._active:
-            # give it a chance to finish...
-            await asyncio.sleep(0.1)
 
 
 @implementer(IPostgresStorage)
@@ -430,7 +411,10 @@ class PostgresqlStorage(BaseStorage):
             await shield(self._pool.release(self._read_conn))
         except asyncpg.exceptions.InterfaceError:
             pass
-        await self._pool.close()
+        # terminate force closes all these
+        # this step is happening at the end of application shutdown and
+        # connections should not be staying open at this step
+        self._pool.terminate()
 
     async def create(self):
         # Check DB
@@ -451,9 +435,12 @@ class PostgresqlStorage(BaseStorage):
 
         await self.initialize_tid_statements()
 
-    async def restart_connection(self):
+    async def restart_connection(self, timeout=0.1):
         log.error('Connection potentially lost to pg, restarting')
-        await self._pool.close()
+        try:
+            await asyncio.wait_for(self._pool.close(), timeout)
+        except asyncio.TimeoutError:
+            pass
         self._pool.terminate()
         # re-bind, throw conflict error so the request is restarted...
         self._pool = await asyncpg.create_pool(
@@ -565,9 +552,10 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
     async def close(self, con):
         try:
-            await shield(self._pool.release(con))
-        except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError,
-                RuntimeError):
+            await shield(
+                asyncio.wait_for(self._pool.release(con, timeout=1), 1))
+        except (asyncio.CancelledError, RuntimeError, asyncio.TimeoutError,
+                asyncpg.exceptions.ConnectionDoesNotExistError):
             pass
 
     async def load(self, txn, oid):

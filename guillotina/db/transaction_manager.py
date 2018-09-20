@@ -71,7 +71,8 @@ class TransactionManager:
             # re-use txn if possible
             txn = request._txn
             txn.status = Status.ACTIVE
-            if txn._db_conn is not None:
+            if (txn._db_conn is not None and
+                    getattr(txn._db_conn, '_in_use', None) is None):
                 try:
                     await self._close_txn(txn)
                 except Exception:
@@ -127,6 +128,10 @@ class TransactionManager:
                     # ignore, new pool was created so we can not close this conn
                     pass
                 else:
+                    raise
+            except asyncpg.exceptions.InternalClientError:
+                # edge-case where connection is already released
+                if txn._db_conn is not None:
                     raise
             finally:
                 txn._db_conn = None
