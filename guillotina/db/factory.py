@@ -1,4 +1,8 @@
+import string
 from copy import deepcopy
+from typing import List
+
+import asyncpg
 from guillotina import configure
 from guillotina.component import get_utility
 from guillotina.db.interfaces import IDatabaseManager
@@ -6,16 +10,14 @@ from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.dummy import DummyFileStorage
 from guillotina.db.storages.dummy import DummyStorage
 from guillotina.db.storages.pg import PostgresqlStorage
+from guillotina.event import notify
+from guillotina.events import DatabaseInitializedEvent
 from guillotina.factory.content import Database
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.utils import apply_coroutine
 from guillotina.utils import resolve_dotted_name
-from typing import List
-
-import asyncpg
-import string
 
 
 def _get_connection_options(dbconfig):
@@ -172,6 +174,8 @@ WHERE datistemplate = false;''')
             factory = get_utility(
                 IDatabaseConfigurationFactory, name=config['storage'])
             self.app[name] = await apply_coroutine(factory, name, config)
+            await notify(DatabaseInitializedEvent(self.app[name]))
+
         return self.app[name]
 
     async def _check_exists(self, conn):
@@ -250,4 +254,6 @@ class DummyDatabaseManager:
             factory = get_utility(
                 IDatabaseConfigurationFactory, name=config['storage'])
             self.app[name] = await apply_coroutine(factory, name, config)
+            await notify(DatabaseInitializedEvent(self.app[name]))
+
         return self.app[name]

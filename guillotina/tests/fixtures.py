@@ -1,3 +1,10 @@
+import asyncio
+import os
+from unittest import mock
+
+import aiohttp
+import pytest
+from aiohttp.test_utils import TestServer
 from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
@@ -7,12 +14,9 @@ from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
-from unittest import mock
-from aiohttp.test_utils import TestServer
-import aiohttp
-import asyncio
-import os
-import pytest
+from guillotina.tests.utils import login
+from guillotina.tests.utils import wrap_request
+from guillotina.transactions import managed_transaction
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -167,6 +171,14 @@ class GuillotinaDBRequester(object):
                     value = await resp.read()
                     status = resp.status
                 return value, status, resp.headers
+
+    def transaction(self, request=None):
+        if request is None:
+            request = get_mocked_request(self.db)
+        login(request)
+        return wrap_request(
+            request, managed_transaction(
+                request=request, write=True, adopt_parent_txn=True))
 
 
 async def close_async_tasks(app):

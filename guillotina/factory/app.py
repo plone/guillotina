@@ -1,3 +1,10 @@
+import asyncio
+import json
+import logging.config
+from types import ModuleType
+from typing import Optional
+
+import aiotask_context
 from aiohttp import web
 from guillotina import configure
 from guillotina import glogging
@@ -9,9 +16,14 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
-from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
+from guillotina.content import load_cached_schema
+from guillotina.event import notify
+from guillotina.events import ApplicationCleanupEvent
+from guillotina.events import ApplicationConfiguredEvent
+from guillotina.events import ApplicationInitializedEvent
+from guillotina.events import DatabaseInitializedEvent
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.factory.content import ApplicationRoot
@@ -27,12 +39,6 @@ from guillotina.utils import loop_apply_coroutine
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 
-import aiotask_context
-import asyncio
-import json
-import logging.config
-from typing import Optional
-from types import ModuleType
 
 RSA: Optional[ModuleType] = None
 try:
@@ -207,10 +213,15 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     optimize_settings(app_settings)
 
+    loop.run_until_complete(
+        notify(ApplicationConfiguredEvent(server_app, loop)))
+
     for key, dbconfig in list_or_dict_items(app_settings['databases']):
         factory = get_utility(
             IDatabaseConfigurationFactory, name=dbconfig['storage'])
         root[key] = loop_apply_coroutine(loop, factory, key, dbconfig, loop)
+        loop.run_until_complete(
+            notify(DatabaseInitializedEvent(root[key])))
 
     for key, file_path in list_or_dict_items(app_settings['static']):
         path = resolve_path(file_path).resolve()
@@ -250,7 +261,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
         else:
             logger.warn(f'No initialize method found on {utility} object')
 
-    server_app.on_cleanup.append(close_utilities)
+    server_app.on_cleanup.append(cleanup_app)
 
     for util in app_settings['utilities']:
         root.add_async_utility(util, loop=loop)
@@ -258,7 +269,15 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # Load cached Schemas
     load_cached_schema()
 
+    loop.run_until_complete(
+        notify(ApplicationInitializedEvent(server_app, loop)))
+
     return server_app
+
+
+async def cleanup_app(app):
+    await notify(ApplicationCleanupEvent(app))
+    await close_utilities(app)
 
 
 async def close_utilities(app):
