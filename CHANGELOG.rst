@@ -1,7 +1,8 @@
 4.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding logging and renew token endpoint
+  [bloodbare]
 
 
 4.2.0 (2018-09-23)

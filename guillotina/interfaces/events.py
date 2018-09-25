@@ -77,11 +77,25 @@ class IFileFinishUploaded(interfaces.IObjectEvent):
 
 
 class INewUserAdded(Interface):
-    """A new user logged in.
+    """A new user created.
 
     The user is the id from the user logged in"""
 
     user = Attribute("User id created.")
+
+
+class IUserLogin(Interface):
+    """User logged in."""
+
+    user = Attribute("User id logged in.")
+    token = Attribute("Token issued.")
+
+
+class IUserRefreshToken(Interface):
+    """User refreshed token."""
+
+    user = Attribute("User id refreshed.")
+    token = Attribute("Token issued.")
 
 
 class IBeforeFieldModifiedEvent(Interface):
