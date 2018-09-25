@@ -1,4 +1,4 @@
-4.2.1 (unreleased)
+4.2.1 (2018-09-25)
 ------------------
 
 - Adding logging and renew token endpoint
