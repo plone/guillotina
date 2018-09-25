@@ -12,6 +12,8 @@ from guillotina.interfaces import IFileBeforeFinishUploaded
 from guillotina.interfaces import IFileFinishUploaded
 from guillotina.interfaces import IFileStartedUpload
 from guillotina.interfaces import INewUserAdded
+from guillotina.interfaces import IUserLogin
+from guillotina.interfaces import IUserRefreshToken
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectDuplicatedEvent
 from guillotina.interfaces import IObjectLoadedEvent
@@ -159,6 +161,24 @@ class NewUserAdded(object):
 
     def __init__(self, user):
         self.user = user
+
+
+@implementer(IUserLogin)
+class UserLogin(object):
+    """An object has logged in."""
+
+    def __init__(self, user, token):
+        self.user = user
+        self.token = token
+
+
+@implementer(IUserRefreshToken)
+class UserRefreshToken(object):
+    """An object has been created."""
+
+    def __init__(self, user, token):
+        self.user = user
+        self.token = token
 
 
 @implementer(IBeforeFieldModifiedEvent)

@@ -45,6 +45,8 @@ from .events import IFileFinishUploaded  # noqa
 from .events import IFileStartedUpload  # noqa
 from .events import IFileUploadEvent  # noqa
 from .events import INewUserAdded  # noqa
+from .events import IUserLogin  # noqa
+from .events import IUserRefreshToken  # noqa
 from .events import IObjectAddedEvent  # noqa
 from .events import IObjectDuplicatedEvent  # noqa
 from .events import IObjectLoadedEvent  # noqa
