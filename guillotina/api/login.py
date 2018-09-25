@@ -32,6 +32,7 @@ class Login(Service):
                         'basic' not in validator.for_validators):
                     continue
                 user = await validator(self.request).validate(creds)
+                if user is not None: break
 
         if user is None:
             raise HTTPUnauthorized(content={
