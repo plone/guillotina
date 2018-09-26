@@ -1,4 +1,4 @@
-4.2.3 (unreleased)
+4.2.3 (2018-09-26)
 ------------------
 
 - Added cookie support on auth.
