@@ -1,4 +1,4 @@
-4.2.2 (unreleased)
+4.2.2 (2018-09-26)
 ------------------
 
 - Allow value serializers to be coroutines
