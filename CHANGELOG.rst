@@ -1,7 +1,8 @@
 4.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added cookie support on auth.
+  [bloodbare]
 
 
 4.2.2 (2018-09-26)
