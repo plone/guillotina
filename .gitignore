@@ -67,3 +67,5 @@ cov_html
 !.gitkeep
 !.travis.yml
 !/src/*
+dummy_file.db
+dummy_file.db.blobs
