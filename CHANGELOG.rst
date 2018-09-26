@@ -1,7 +1,8 @@
 4.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allow value serializers to be coroutines
+  [vangheem]
 
 
 4.2.1 (2018-09-25)
