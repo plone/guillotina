@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import asyncio
+import logging
+
 from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_multi_adapter
@@ -20,8 +23,6 @@ from guillotina.profile import profilable
 from guillotina.schema import get_fields
 from guillotina.utils import apply_coroutine
 from zope.interface import Interface
-
-import logging
 
 
 logger = logging.getLogger('guillotina')
@@ -138,7 +139,10 @@ class SerializeToJson(object):
             logger.warning(f'Could not find value for schema field'
                            f'({self.field.__name__}), falling back to getattr')
             value = getattr(context, field.__name__, default)
-        return json_compatible(value)
+        result = json_compatible(value)
+        if asyncio.iscoroutine(result):
+            result = await result
+        return result
 
     def check_permission(self, permission_name):
         if permission_name is None:
