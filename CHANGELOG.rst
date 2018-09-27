@@ -1,7 +1,8 @@
 4.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Correctly handle issues when releasing connections back to the pool
+  [vangheem]
 
 
 4.2.3 (2018-09-26)
