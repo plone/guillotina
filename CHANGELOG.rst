@@ -1,4 +1,4 @@
-4.2.4 (unreleased)
+4.2.4 (2018-09-27)
 ------------------
 
 - Correctly handle issues when releasing connections back to the pool
