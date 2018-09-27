@@ -558,6 +558,9 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
                 asyncpg.exceptions.ConnectionDoesNotExistError):
             pass
 
+    async def terminate(self, conn):
+        conn.terminate()
+
     async def load(self, txn, oid):
         async with txn._lock:
             objects = await self.get_one_row(txn, GET_OID, oid)

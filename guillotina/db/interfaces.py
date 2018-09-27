@@ -134,6 +134,16 @@ class IStorage(Interface):
         delete blob
         '''
 
+    async def close(conn):
+        '''
+        close conn object
+        '''
+
+    async def terminate(conn):
+        '''
+        terminate conn object
+        '''
+
 
 class IPostgresStorage(IStorage):
     pass
