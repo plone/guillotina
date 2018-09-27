@@ -1,4 +1,4 @@
-4.2.5 (unreleased)
+4.2.5 (2018-09-27)
 ------------------
 
 - Automatically load dependent applications if defined in base application
