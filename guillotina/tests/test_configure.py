@@ -3,8 +3,11 @@ from guillotina.addons import Addon
 from guillotina.api.service import Service
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
-from guillotina.content import get_all_possible_schemas_for_type
+from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import Item
+from guillotina.content import get_all_possible_schemas_for_type
+from guillotina.factory.app import configure_application
+from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from zope.interface import Interface
@@ -197,3 +200,13 @@ async def test_route_match_view(container_requester):
             'foo': 'foo',
             'bar': 'bar'
         }
+
+
+def test_loading_nested_configuration():
+    root = ApplicationRoot(None, None)
+    config = ConfigurationMachine()
+    root.config = config
+    configured = []
+    configure_application('guillotina.test_package', config, root, {}, configured)
+    assert 'guillotina' in configured
+    assert 'guillotina.test_package' in configured

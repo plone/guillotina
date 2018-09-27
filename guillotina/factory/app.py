@@ -70,6 +70,25 @@ def load_application(module, root, settings):
     configure.load_all_configurations(root.config, module.__name__)
 
 
+def configure_application(module_name, config, root, settings, configured):
+    if module_name in configured:
+        return
+
+    module = resolve_dotted_name(module_name)
+    if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+        # load dependencies if necessary
+        for dependency in module.app_settings.get('applications') or []:
+            if dependency not in configured and module_name != dependency:
+                configure_application(dependency, config, root, settings, configured)
+
+    config.begin(module_name)
+    load_application(module, root, settings)
+    config.execute_actions()
+    config.commit()
+
+    configured.append(module_name)
+
+
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
         aiotask_context.set('request', request)
@@ -190,11 +209,9 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     config.execute_actions()
     config.commit()
 
-    for module_name in settings.get('applications', []):
-        config.begin(module_name)
-        load_application(resolve_dotted_name(module_name), root, settings)
-        config.execute_actions()
-        config.commit()
+    configured = ['guillotina']
+    for module_name in settings.get('applications') or []:
+        configure_application(module_name, config, root, settings, configured)
 
     apply_concrete_behaviors()
 

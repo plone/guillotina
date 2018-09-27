@@ -21,6 +21,11 @@ from zope.interface import Interface
 import json
 
 
+app_settings = {
+    'applications': ['guillotina']
+}
+
+
 TERM_SCHEMA = json.dumps({
     'type': 'object',
     'properties': {

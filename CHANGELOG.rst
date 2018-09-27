@@ -1,7 +1,9 @@
 4.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Automatically load dependent applications if defined in base application
+  app_settings object.
+  [vangheem]
 
 
 4.2.4 (2018-09-27)
