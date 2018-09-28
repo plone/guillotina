@@ -1,7 +1,8 @@
 4.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding support for default value on ContextProperties
+  [bloodbare]
 
 
 4.2.5 (2018-09-27)
