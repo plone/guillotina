@@ -10,7 +10,10 @@ class ContextProperty:
         if inst is None:
             return self
 
-        return getattr(inst.context, self.__name__, self.default)
+        result = getattr(inst.context, self.__name__, self.default)
+        if callable(result):
+            result = result(context=inst.context, name=self.__name__)
+        return result
 
     def __set__(self, inst, value):
         setattr(inst.context, self.__name__, value)
