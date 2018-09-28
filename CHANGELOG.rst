@@ -1,4 +1,4 @@
-4.2.6 (unreleased)
+4.2.6 (2018-09-28)
 ------------------
 
 - Adding support for default value on ContextProperties
