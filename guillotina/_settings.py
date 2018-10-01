@@ -1,7 +1,9 @@
-from guillotina import interfaces
-from guillotina.db.oid import generate_oid
+import copy
 from typing import Any
 from typing import Dict
+
+from guillotina import interfaces
+from guillotina.db.oid import generate_oid
 
 
 app_settings: Dict[str, Any] = {
@@ -72,3 +74,4 @@ app_settings: Dict[str, Any] = {
     "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
     "check_writable_request": "guillotina.writable.check_writable_request"
 }
+default_settings = copy.deepcopy(app_settings)

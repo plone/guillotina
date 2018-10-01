@@ -1,7 +1,17 @@
 4.2.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to set `uid` on object creation
+  [vangheem]
+
+- Provide simple content api
+  [vangheem]
+
+- Fix inheritance going in reverse and affecting parent tasks
+  [vangheem]
+
+- Jupyter notebook compatibility
+  [vangheem]
 
 
 4.2.6 (2018-09-28)

@@ -34,7 +34,7 @@ def get_server():
         return _server
 
     loop = asyncio.new_event_loop()
-    aioapp = make_app(
+    aioapp = loop.run_until_complete(make_app(
         settings={
             "applications": ["guillotina.documentation"],
             "databases": {
@@ -52,7 +52,7 @@ def get_server():
                 "algorithm": "HS256"
             },
         },
-        loop=loop)
+        loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
 

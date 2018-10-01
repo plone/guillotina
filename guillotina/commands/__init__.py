@@ -127,6 +127,7 @@ class Command(object):
         if settings.get('loop_policy'):
             loop_policy = resolve_dotted_name(settings['loop_policy'])
             asyncio.set_event_loop_policy(loop_policy())
+
         app = self.make_app(settings)
 
         if self.arguments.line_profiler:
@@ -223,7 +224,9 @@ class Command(object):
 
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
-        return make_app(settings=settings, loop=self.get_loop())
+        loop = self.get_loop()
+        return loop.run_until_complete(
+            make_app(settings=settings, loop=loop))
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)
