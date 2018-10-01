@@ -72,18 +72,18 @@ class ContentAPI:
         path = resp.headers['Location']
         if path.startswith('http://') or path.startswith('https://'):
             # strip off container prefix
-            container_url = get_object_url(in_, self.request)
-            path = path[len(container_url):]
-        return await navigate_to(in_, path.strip('/'))
+            container_url = get_object_url(in_, self.request)  # type: ignore
+            path = path[len(container_url or ''):]
+        return await navigate_to(in_, path.strip('/'))  # type: ignore
 
     async def get(self, path: str, in_: IResource=None) -> typing.Optional[IResource]:
         await self.get_transaction()
         if in_ is None:
             in_ = self.db
         try:
-            return await navigate_to(in_, path.strip('/'))
+            return await navigate_to(in_, path.strip('/'))  # type: ignore
         except KeyError:
-            pass
+            return None
 
     async def delete(self, ob):
         await self.get_transaction()
