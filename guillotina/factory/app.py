@@ -8,7 +8,8 @@ import aiotask_context
 from aiohttp import web
 from guillotina import configure
 from guillotina import glogging
-from guillotina._settings import app_settings, default_settings
+from guillotina._settings import app_settings
+from guillotina._settings import default_settings
 from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_all_utilities_registered_for
