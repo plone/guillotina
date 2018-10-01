@@ -1,4 +1,4 @@
-4.2.7 (unreleased)
+4.2.7 (2018-10-01)
 ------------------
 
 - Be able to set `uid` on object creation
