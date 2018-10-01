@@ -189,7 +189,8 @@ async def close_async_tasks(app):
 @pytest.fixture(scope='function')
 def dummy_guillotina(loop):
     globalregistry.reset()
-    aioapp = make_app(settings=get_dummy_settings(), loop=loop)
+    aioapp = loop.run_until_complete(
+        make_app(settings=get_dummy_settings(), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
@@ -249,7 +250,8 @@ async def dummy_txn_root(dummy_request):
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
     globalregistry.reset()
-    aioapp = make_app(settings=get_db_settings(), loop=loop)
+    aioapp = loop.run_until_complete(
+        make_app(settings=get_db_settings(), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp

@@ -8,7 +8,7 @@ import aiotask_context
 from aiohttp import web
 from guillotina import configure
 from guillotina import glogging
-from guillotina._settings import app_settings
+from guillotina._settings import app_settings, default_settings
 from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_all_utilities_registered_for
@@ -35,7 +35,6 @@ from guillotina.response import HTTPConflict
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
-from guillotina.utils import loop_apply_coroutine
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 
@@ -159,12 +158,20 @@ def optimize_settings(settings):
             settings[name] = resolve_dotted_name(new_val)
 
 
-def make_app(config_file=None, settings=None, loop=None, server_app=None):
+async def make_app(config_file=None, settings=None, loop=None, server_app=None):
+
+    # reset app_settings
+    app_settings.clear()
+    app_settings.update(default_settings)
 
     if loop is None:
         loop = asyncio.get_event_loop()
 
-    loop.set_task_factory(aiotask_context.task_factory)
+    # chainmap task factory is actually very important
+    # default task factory uses inheritance in a way
+    # that bubbles back down. So it's possible for a sub-task
+    # to clear out the request of the parent task
+    loop.set_task_factory(aiotask_context.chainmap_task_factory)
 
     if config_file is not None:
         with open(config_file, 'r') as config:
@@ -230,15 +237,13 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     optimize_settings(app_settings)
 
-    loop.run_until_complete(
-        notify(ApplicationConfiguredEvent(server_app, loop)))
+    await notify(ApplicationConfiguredEvent(server_app, loop))
 
     for key, dbconfig in list_or_dict_items(app_settings['databases']):
         factory = get_utility(
             IDatabaseConfigurationFactory, name=dbconfig['storage'])
-        root[key] = loop_apply_coroutine(loop, factory, key, dbconfig, loop)
-        loop.run_until_complete(
-            notify(DatabaseInitializedEvent(root[key])))
+        root[key] = await factory(key, dbconfig, loop)
+        await notify(DatabaseInitializedEvent(root[key]))
 
     for key, file_path in list_or_dict_items(app_settings['static']):
         path = resolve_path(file_path).resolve()
@@ -286,8 +291,7 @@ def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # Load cached Schemas
     load_cached_schema()
 
-    loop.run_until_complete(
-        notify(ApplicationInitializedEvent(server_app, loop)))
+    await notify(ApplicationInitializedEvent(server_app, loop))
 
     return server_app
 

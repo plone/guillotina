@@ -620,6 +620,7 @@ async def create_content_in_container(
     obj.__new_marker__ = True
 
     await notify(BeforeObjectAddedEvent(obj, parent, id_))
+
     await parent.async_set(obj.id, obj)
     return obj
 

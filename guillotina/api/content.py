@@ -178,11 +178,18 @@ class DefaultPOST(Service):
 
         user = get_authenticated_user_id(self.request)
 
+        options = {
+            'id': new_id,
+            'creators': (user,),
+            'contributors': (user,)
+        }
+        if 'uid' in data:
+            options['_p_oid'] = data.pop('uid')
+
         # Create object
         try:
             obj = await create_content_in_container(
-                self.context, type_, new_id, id=new_id, creators=(user,),
-                contributors=(user,))
+                self.context, type_, new_id, **options)
         except ValueError as e:
             return ErrorResponse(
                 'CreatingObject',
