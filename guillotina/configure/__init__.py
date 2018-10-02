@@ -289,6 +289,7 @@ def load_addon(_context, addon):
     config = addon['config']
     app_settings['available_addons'][config['name']] = {
         'title': config['title'],
+        'dependencies': config.get('dependencies') or [],
         'handler': addon['klass']
     }
 register_configuration_handler('addon', load_addon)  # noqa

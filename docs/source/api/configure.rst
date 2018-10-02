@@ -98,11 +98,13 @@
      >>> from guillotina import configure
      >>> @configure.addon(
            name="docaddon",
-           title="Doc addon")
+           title="Doc addon",
+           dependencies=["cms"])
          class TestAddon(Addon): pass
 
      :param name: Unique name of addon
      :param title: Title of addon
+     :param dependencies: List of names of dependency addons
 
 
   .. function:: adapter(**kwargs)

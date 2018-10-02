@@ -17,7 +17,8 @@ from guillotina import configure
 
 @configure.addon(
     name="myaddon",
-    title="My addon")
+    title="My addon",
+    dependencies=['cms'])
 class MyAddon(Addon):
 
     @classmethod

@@ -1,3 +1,4 @@
+from guillotina import addons
 from guillotina import configure
 from guillotina import error_reasons
 from guillotina._settings import app_settings
@@ -5,7 +6,6 @@ from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IContainer
 from guillotina.response import ErrorResponse
-from guillotina.utils import apply_coroutine
 
 
 _ = MessageFactory('guillotina')
@@ -39,9 +39,8 @@ async def install(context, request):
             'Duplicate',
             _("Addon already installed"),
             status=412, reason=error_reasons.ALREADY_INSTALLED)
-    handler = app_settings['available_addons'][id_to_install]['handler']
-    await apply_coroutine(handler.install, context, request)
-    config['enabled'] |= {id_to_install}
+
+    await addons.install(context, id_to_install)
     return await get_addons(context, request)
 
 
@@ -91,9 +90,7 @@ async def uninstall_addon(context, request, id_to_uninstall):
             _("Addon not installed"),
             status=412, reason=error_reasons.NOT_INSTALLED)
 
-    handler = app_settings['available_addons'][id_to_uninstall]['handler']
-    await apply_coroutine(handler.uninstall, context, request)
-    config['enabled'] -= {id_to_uninstall}
+    await addons.uninstall(context, id_to_uninstall)
 
 
 @configure.service(
@@ -116,7 +113,8 @@ async def get_addons(context, request):
     for key, addon in app_settings['available_addons'].items():
         result['available'].append({
             'id': key,
-            'title': addon['title']
+            'title': addon['title'],
+            'dependencies': addon['dependencies']
         })
 
     registry = request.container_settings

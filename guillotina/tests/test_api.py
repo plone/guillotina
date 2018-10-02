@@ -38,6 +38,20 @@ class TestAddon(Addon):
         Addon.uninstall(container, request)
 
 
+@configure.addon(
+    name="testaddon-dependson",
+    dependencies=['testaddon'],
+    title="Test addon with dependency")
+class TestAddonDependency(Addon):
+    @classmethod
+    def install(cls, container, request):
+        Addon.install(container, request)
+
+    @classmethod
+    def uninstall(cls, container, request):
+        Addon.uninstall(container, request)
+
+
 async def test_get_root(container_requester):
     async with container_requester as requester:
         response, _ = await requester('GET', '/')
@@ -364,6 +378,21 @@ async def test_install_addons(container_requester):
         )
         assert status == 200
         assert id_ in response['installed']
+
+
+async def test_install_addon_with_dep(container_requester):
+    id_ = 'testaddon-dependson'
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+        assert status == 200
+        assert id_ in response['installed']
+        assert 'testaddon' in response['installed']
 
 
 async def test_install_same_addon_twice_gives_error(container_requester):
