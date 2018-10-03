@@ -1,7 +1,8 @@
 4.2.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to specify dependency addons with `dependencies` configuration param
+  [vangheem]
 
 
 4.2.7 (2018-10-01)
