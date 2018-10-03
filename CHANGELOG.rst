@@ -1,4 +1,4 @@
-4.2.8 (unreleased)
+4.2.8 (2018-10-03)
 ------------------
 
 - Be able to specify dependency addons with `dependencies` configuration param
