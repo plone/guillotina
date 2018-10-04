@@ -98,15 +98,22 @@ class UploadFile(TraversableFieldService):
     context=IResource, method='GET', permission='guillotina.ViewContent',
     name='@download/{field_name}',
     **_traversed_file_doc('Download the content of a file'))
+@configure.service(
+    context=IResource, method='GET', permission='guillotina.ViewContent',
+    name='@download/{field_name}/{filename}',
+    **_traversed_file_doc('Download the content of a file'))
 class DownloadFile(TraversableFieldService):
 
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
+        kwargs = {}
+        if 'filename' in self.request.matchdict:
+            kwargs['filename'] = self.request.matchdict['filename']
         try:
             adapter = get_multi_adapter(
                 (self.context, self.request, self.field), IFileManager)
-            return await adapter.download()
+            return await adapter.download(**kwargs)
         except AttributeError:
             # file does not exist
             return HTTPNotFound(content={

@@ -1,7 +1,8 @@
 4.2.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Also accept filename in `@download` url like `@download/file/foobar.jpg`
+  [vangheem]
 
 
 4.2.8 (2018-10-03)
