@@ -1,7 +1,8 @@
 4.2.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `Access-Control-Allow-Credentials` header value to be `true` instead of `True`
+  [vangheem]
 
 
 4.2.8 (2018-10-03)
