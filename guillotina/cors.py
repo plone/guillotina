@@ -34,7 +34,7 @@ class DefaultCorsRenderer:
         if self.request.headers.get(
                 'Access-Control-Request-Method', None) != 'OPTIONS':
             if settings['allow_credentials']:
-                headers['Access-Control-Allow-Credentials'] = 'True'
+                headers['Access-Control-Allow-Credentials'] = 'true'
             if len(settings['allow_headers']):
                 headers['Access-Control-Expose-Headers'] = ', '.join(
                     settings['allow_headers'])

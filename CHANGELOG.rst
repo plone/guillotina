@@ -4,6 +4,9 @@
 - Also accept filename in `@download` url like `@download/file/foobar.jpg`
   [vangheem]
 
+- Fix `Access-Control-Allow-Credentials` header value to be `true` instead of `True`
+  [vangheem]
+
 
 4.2.8 (2018-10-03)
 ------------------
