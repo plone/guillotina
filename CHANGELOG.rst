@@ -1,4 +1,4 @@
-4.2.9 (unreleased)
+4.2.9 (2018-10-04)
 ------------------
 
 - Also accept filename in `@download` url like `@download/file/foobar.jpg`
