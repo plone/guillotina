@@ -1,15 +1,18 @@
 # -*- encoding: utf-8 -*-
-from guillotina.api.service import Service
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
+
 import jwt
-from guillotina.utils import get_authenticated_user
+from guillotina import app_settings
 from guillotina import configure
+from guillotina.api.service import Service
+from guillotina.auth import authenticate_user
 from guillotina.event import notify
 from guillotina.events import UserLogin
 from guillotina.events import UserRefreshToken
-from guillotina import app_settings
 from guillotina.interfaces import IContainer
 from guillotina.response import HTTPUnauthorized
+from guillotina.utils import get_authenticated_user
 
 
 @configure.service(
@@ -17,7 +20,6 @@ from guillotina.response import HTTPUnauthorized
     permission='guillotina.Public', name='@login',
     summary='Components for a resource', allow_access=True)
 class Login(Service):
-    token_timeout = 60 * 60 * 1
 
     async def __call__(self):
         data = await self.request.json()
@@ -39,13 +41,7 @@ class Login(Service):
                 'text': 'login failed'
             })
 
-        data = {
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(seconds=self.token_timeout),
-            'id': user.id
-        }
-        jwt_token = jwt.encode(data, app_settings['jwt']['secret']).decode('utf-8')
-
+        jwt_token, data = authenticate_user(user.id)
         await notify(UserLogin(user, jwt_token))
 
         return {

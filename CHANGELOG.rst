@@ -1,7 +1,17 @@
 4.2.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add `IPasswordChecker` and `IPasswordHasher` utilities
+  [vangheem]
+
+- make `guillotina.auth.validators.hash_password` more generic
+  [vangheem]
+
+- add `guillotina.auth.validators.check_password`
+  [vangheem]
+
+- make sure to load dependency application commands
+  [vangheem]
 
 
 4.2.9 (2018-10-04)

@@ -262,6 +262,14 @@ class Command(object):
         return ''
 
 
+def load_commands(module_name, commands):
+    module = resolve_dotted_name(module_name)
+    if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+        commands.update(module.app_settings.get('commands', {}))
+        for dependency in module.app_settings.get('applications') or []:
+            load_commands(dependency, commands)
+
+
 def command_runner():
     parser = argparse.ArgumentParser(
         description='Guillotina command runner',
@@ -277,9 +285,7 @@ def command_runner():
     _commands = app_settings['commands'].copy()
     _commands.update(settings.get('commands', {}))
     for module_name in settings.get('applications', []):
-        module = resolve_dotted_name(module_name)
-        if hasattr(module, 'app_settings') and app_settings != module.app_settings:
-            _commands.update(module.app_settings.get('commands', {}))
+        load_commands(module_name, _commands)
 
     if not arguments.command and arguments.help:
         # for other commands, pass through and allow those parsers to print help

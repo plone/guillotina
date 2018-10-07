@@ -412,3 +412,17 @@ class ISecurityPolicy(Interface):  # pylint: disable=E0239
 
         If participation is not None, it is added to the new interaction.
         """
+
+
+class IPasswordHasher(Interface):
+    def __call__(self, pw, salt):
+        '''
+        Return hash of password
+        '''
+
+
+class IPasswordChecker(Interface):
+    def __call__(self, hashed_value, password):
+        '''
+        Return True if password matches hashed_value
+        '''

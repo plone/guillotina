@@ -1,17 +1,40 @@
-from guillotina._settings import app_settings
-from guillotina.auth import find_user
-from guillotina.utils import strings_differ
-
 import hashlib
-import jwt
+import logging
 import uuid
 
+import jwt
+from guillotina import configure
+from guillotina._settings import app_settings
+from guillotina.auth import find_user
+from guillotina.component import get_utility
+from guillotina.component import query_utility
+from guillotina.interfaces import IPasswordChecker
+from guillotina.interfaces import IPasswordHasher
+from guillotina.utils import strings_differ
+
+
+logger = logging.getLogger('guillotina')
 
 class BaseValidator(object):
     for_validators = None
 
     def __init__(self, request):
         self.request = request
+
+
+@configure.utility(provides=IPasswordHasher, name='sha512')
+def sha512_pw_hasher(pw, salt):
+    return hashlib.sha512(pw + salt).hexdigest()
+
+
+@configure.utility(provides=IPasswordChecker, name='sha512')
+def hash_password_checker(token, password):
+    split = token.split(':')
+    if len(split) != 3:
+        return False
+    algorithm = split[0]
+    salt = split[1]
+    return not strings_differ(hash_password(password, salt, algorithm), token)
 
 
 def hash_password(password, salt=None, algorithm='sha512'):
@@ -24,9 +47,21 @@ def hash_password(password, salt=None, algorithm='sha512'):
     if isinstance(password, str):
         password = password.encode('utf-8')
 
-    hash_func = getattr(hashlib, algorithm)
-    hashed_password = hash_func(password + salt).hexdigest()
+    hash_func = get_utility(IPasswordHasher, name=algorithm)
+    hashed_password = hash_func(password, salt)
     return '{}:{}:{}'.format(algorithm, salt.decode('utf-8'), hashed_password)
+
+
+def check_password(token, password):
+    split = token.split(':')
+    if len(split) != 3:
+        return False
+    algorithm = split[0]
+    check_func = query_utility(IPasswordChecker, name=algorithm)
+    if check_func is None:
+        logger.error(f'Could not find password checker for {algorithm}')
+        return False
+    return check_func(token, password)
 
 
 class SaltedHashPasswordValidator(object):
@@ -42,12 +77,7 @@ class SaltedHashPasswordValidator(object):
                 ':' not in user_pw or
                 'token' not in token):
             return
-        split = user.password.split(':')
-        if len(split) != 3:
-            return False
-        algorithm = split[0]
-        salt = split[1]
-        if not strings_differ(hash_password(token['token'], salt, algorithm), user_pw):
+        if check_password(user_pw, token['token']):
             return user
 
 
