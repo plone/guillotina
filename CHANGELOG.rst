@@ -1,7 +1,8 @@
 4.2.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Choice should be serialized as string
+  [bloodbare]
 
 
 4.2.9 (2018-10-04)
