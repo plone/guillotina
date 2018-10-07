@@ -1,4 +1,4 @@
-4.2.10 (unreleased)
+4.2.10 (2018-10-07)
 -------------------
 
 - Choice should be serialized as string
