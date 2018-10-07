@@ -1,3 +1,7 @@
+from datetime import datetime
+from datetime import timedelta
+
+import jwt
 from guillotina._settings import app_settings
 from guillotina.auth import groups  # noqa
 from guillotina.auth.users import ROOT_USER_ID
@@ -26,3 +30,15 @@ async def find_user(request, token):
         user = await identifier(request).get_user(token)
         if user is not None:
             return user
+
+
+def authenticate_user(userid, data=None, timeout=60 * 60 * 1):
+    if data is None:
+        data = {}
+    data.update({
+        'iat': datetime.utcnow(),
+        'exp': datetime.utcnow() + timedelta(seconds=timeout),
+        'id': userid
+    })
+    jwt_token = jwt.encode(data, app_settings['jwt']['secret']).decode('utf-8')
+    return jwt_token, data
