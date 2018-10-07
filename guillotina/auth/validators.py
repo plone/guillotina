@@ -14,10 +14,10 @@ class BaseValidator(object):
         self.request = request
 
 
-hash_functions = {
+hash_functions: dict = {
     'sha512': hashlib.sha512
 }
-check_functions = {
+check_functions: dict = {
 
 }
 
