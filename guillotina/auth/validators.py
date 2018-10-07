@@ -14,6 +14,10 @@ class BaseValidator(object):
         self.request = request
 
 
+hash_functions = {
+    'sha512': hashlib.sha512
+}
+
 def hash_password(password, salt=None, algorithm='sha512'):
     if salt is None:
         salt = uuid.uuid4().hex
@@ -24,9 +28,20 @@ def hash_password(password, salt=None, algorithm='sha512'):
     if isinstance(password, str):
         password = password.encode('utf-8')
 
-    hash_func = getattr(hashlib, algorithm)
-    hashed_password = hash_func(password + salt).hexdigest()
+    hash_func = hash_functions[algorithm]
+    hashed_password = hash_func(password + salt)
+    if hasattr(hashed_password, 'hexdigest'):
+        hashed_password = hashed_password.hexdigest()
     return '{}:{}:{}'.format(algorithm, salt.decode('utf-8'), hashed_password)
+
+
+def check_password(token, user_pw):
+    split = user_pw.split(':')
+    if len(split) != 3:
+        return False
+    algorithm = split[0]
+    salt = split[1]
+    return not strings_differ(hash_password(token, salt, algorithm), user_pw)
 
 
 class SaltedHashPasswordValidator(object):
@@ -42,12 +57,7 @@ class SaltedHashPasswordValidator(object):
                 ':' not in user_pw or
                 'token' not in token):
             return
-        split = user.password.split(':')
-        if len(split) != 3:
-            return False
-        algorithm = split[0]
-        salt = split[1]
-        if not strings_differ(hash_password(token['token'], salt, algorithm), user_pw):
+        if check_password(token['token'], user_pw):
             return user
 
 

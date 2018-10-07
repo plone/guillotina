@@ -59,7 +59,7 @@ class FileManager(object):
         cors_renderer = app_settings['cors_renderer'](self.request)
         headers = await cors_renderer.get_headers()
         headers.update({
-            'CONTENT-DISPOSITION': '{}; filename="{}"'.format(
+            'Content-Disposition': '{}; filename="{}"'.format(
                 disposition, filename or file.filename)
         })
 
