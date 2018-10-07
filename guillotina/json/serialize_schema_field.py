@@ -248,7 +248,7 @@ class DefaultChoiceSchemaFieldSerializer(DefaultSchemaFieldSerializer):
 
     @property
     def field_type(self):
-        return 'array'
+        return 'string'
 
 
 @configure.adapter(

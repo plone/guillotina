@@ -1,6 +1,9 @@
 4.2.10 (unreleased)
 -------------------
 
+- Choice should be serialized as string
+  [bloodbare]
+
 - Add `IPasswordChecker` and `IPasswordHasher` utilities
   [vangheem]
 
