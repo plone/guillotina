@@ -1930,6 +1930,12 @@ class DictTests(unittest.TestCase):
         self.assertEqual(field2.key_type.context, context)
         self.assertEqual(field2.value_type.context, context)
 
+    def test_validate_input_a_list(self):
+        from guillotina.schema.exceptions import WrongType
+        from guillotina.schema import TextLine, List
+        field = self._makeOne(key_type=TextLine(), value_type=List())
+        self.assertRaises(WrongType, field.validate, [{1: 'a', 2: 'b'}])
+
 
 class DummyInstance(object):
     pass
