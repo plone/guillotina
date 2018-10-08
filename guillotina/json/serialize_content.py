@@ -86,14 +86,15 @@ class SerializeToJson(object):
         included_ifaces.extend([name.rsplit('.', 1)[0] for name in self.include
                                 if '.' in name])
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
-            dotted_name = behavior_schema.__identifier__
-            if (dotted_name in self.omit or
-                    (len(included_ifaces) > 0 and dotted_name not in included_ifaces)):
-                # make sure the schema isn't filtered
-                continue
-            if (not getattr(behavior, 'auto_serialize', True) and
-                    dotted_name not in included_ifaces):
-                continue
+            if '*' not in self.include:
+                dotted_name = behavior_schema.__identifier__
+                if (dotted_name in self.omit or
+                        (len(included_ifaces) > 0 and dotted_name not in included_ifaces)):
+                    # make sure the schema isn't filtered
+                    continue
+                if (not getattr(behavior, 'auto_serialize', True) and
+                        dotted_name not in included_ifaces):
+                    continue
             if IAsyncBehavior.implementedBy(behavior.__class__):
                 # providedBy not working here?
                 await behavior.load(create=False)
@@ -115,10 +116,11 @@ class SerializeToJson(object):
                 dotted_name = schema.__identifier__ + '.' + name
             else:
                 dotted_name = name
-            if (dotted_name in self.omit or (
+
+            if ('*' not in self.include and (dotted_name in self.omit or (
                     len(self.include) > 0 and (
                         dotted_name not in self.include and
-                        schema.__identifier__ not in self.include))):
+                        schema.__identifier__ not in self.include)))):
                 # make sure the fields aren't filtered
                 continue
 

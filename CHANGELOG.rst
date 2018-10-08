@@ -1,6 +1,9 @@
 4.2.11 (unreleased)
 -------------------
 
+- Be able to specify `?include=*` to include all behaviors in response
+  [vangheem]
+
 - Be able to specify `data_key` and `auto_serialize` for behavior configuration
   [vangheem]
 
