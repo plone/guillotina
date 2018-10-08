@@ -136,6 +136,10 @@ class ITestSchema(Interface):
         value_type=schema.TextLine(),
         required=False
     )
+    dict_of_lists_as_value = schema.Dict(
+        key_type=schema.TextLine(),
+        value_type=schema.List(value_type=schema.Dict()),
+    )
     datetime = schema.Datetime(required=False)
     date = schema.Date(required=False)
     time = schema.Time(required=False)
@@ -245,6 +249,33 @@ async def test_check_permission_deserialize_content(dummy_request):
         (content, request), IResourceDeserializeFromJson)
     assert deserializer.check_permission('guillotina.ViewContent')
     assert deserializer.check_permission('guillotina.ViewContent')  # with cache
+
+
+async def test_patch_dict_with_list_as_value_field(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+
+    errors = []
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'dict_of_lists_as_value': {
+                'foo': [{'bar': 'fii'}]
+            }
+        }, errors)
+    assert content.dict_of_lists_as_value['foo'] == [{'bar': 'fii'}]
+    assert not errors
+
+    errors = []
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'dict_of_lists_as_value': [{
+                'foo': 'bar'
+            }]
+        }, errors)
+    assert isinstance(errors[0]['error'], ValueDeserializationError)
 
 
 async def test_patch_list_field_normal_patch(dummy_request):
