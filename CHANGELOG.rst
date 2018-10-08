@@ -1,7 +1,8 @@
 4.2.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Workaround to fix aiohttp bug: https://github.com/aio-libs/aiohttp/issues/3335
+  [vangheem]
 
 
 4.2.10 (2018-10-07)
