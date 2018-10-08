@@ -1,7 +1,7 @@
 4.2.11 (unreleased)
 -------------------
 
-- Be able to specify `data_key` for behavior configuration
+- Be able to specify `data_key` and `auto_serialize` for behavior configuration
   [vangheem]
 
 - Workaround to fix aiohttp bug: https://github.com/aio-libs/aiohttp/issues/3335
