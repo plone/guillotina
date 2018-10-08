@@ -1,7 +1,7 @@
 4.2.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to specify `data_key` for behavior configuration
 
 
 4.2.10 (2018-10-07)
