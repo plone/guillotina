@@ -1,4 +1,4 @@
-3.2.17 (unreleased)
+3.2.17 (2018-10-20)
 -------------------
 
 - Be able to override factory for types
