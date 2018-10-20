@@ -172,8 +172,8 @@ class DefaultPOST(Service):
         # Create object
         try:
             obj = await create_content_in_container(
-                self.context, type_, new_id, id=new_id, creators=(user,),
-                contributors=(user,))
+                self.context, type_, new_id,
+                creators=(user,), contributors=(user,))
         except ValueError as e:
             return ErrorResponse(
                 'CreatingObject',

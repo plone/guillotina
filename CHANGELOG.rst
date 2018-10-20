@@ -1,7 +1,11 @@
 3.2.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to override factory for types
+  [vangheem]
+
+- Require pycryptodome instead of pycrypto
+  [vangheem]
 
 
 3.2.16 (2018-07-16)

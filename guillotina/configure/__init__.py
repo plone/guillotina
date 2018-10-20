@@ -140,9 +140,11 @@ def load_contenttype(_context, contenttype):
     if 'schema' in conf:
         classImplements(klass, conf['schema'])
 
-    from guillotina.content import ResourceFactory
+    Factory = resolve_dotted_name(
+        conf.get('factory', 'guillotina.content.ResourceFactory')
+    )
 
-    factory = ResourceFactory(
+    factory = Factory(
         klass,
         title='',
         description='',
