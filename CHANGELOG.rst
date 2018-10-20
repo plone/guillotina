@@ -1,6 +1,9 @@
 4.2.11 (unreleased)
 -------------------
 
+- Be able to override factory for content types
+  [vangheem]
+
 - Workaround to fix aiohttp bug: https://github.com/aio-libs/aiohttp/issues/3335
   [vangheem]
 
