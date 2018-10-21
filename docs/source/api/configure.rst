@@ -48,6 +48,8 @@
      :type allowed_types: list
      :param behaviors: List of behaviors to enable for this type.
      :type behaviors: list
+     :param factory: Dotted name to custom factory to use. See guillotina.content.ResourceFactory for default implementation
+     :type behaviors: str
 
 
   .. function:: behavior(**kwargs)
