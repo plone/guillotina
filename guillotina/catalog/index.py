@@ -119,7 +119,10 @@ async def add_object(obj, event=None, modified=None, payload=None):
             # get a list of potential indexes
             for field_name in payload.keys():
                 if '.' in field_name:
-                    for behavior_field_name in payload[field_name].keys():
+                    value = payload[field_name]
+                    if not isinstance(value, dict):
+                        continue
+                    for behavior_field_name in value.keys():
                         indexes.append(behavior_field_name)
                 else:
                     indexes.append(field_name)

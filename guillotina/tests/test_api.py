@@ -818,3 +818,25 @@ async def test_invalid_resolveuid(container_requester):
         _, status = await requester(
             'GET', f'/db/guillotina/@resolveuid/foobar', allow_redirects=False)
         assert status == 404
+
+
+async def test_do_not_error_with_invalid_payload(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        assert status == 201
+        _, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1',
+            data=json.dumps({
+                "foo.bar.blah": 'foobar'
+            })
+        )
+        assert status == 204

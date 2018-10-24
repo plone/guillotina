@@ -1,6 +1,9 @@
 4.2.11 (unreleased)
 -------------------
 
+- Do not error on indexing with invalid payload
+  [vangheem]
+
 - Be able to override factory for content types
   [vangheem]
 
