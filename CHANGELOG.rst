@@ -1,4 +1,4 @@
-4.2.11 (unreleased)
+4.2.11 (2018-10-30)
 -------------------
 
 - Do not error on indexing with invalid payload
