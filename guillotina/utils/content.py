@@ -192,5 +192,5 @@ async def get_behavior(ob, iface, create=False):
     behavior = iface(ob, None)
     if behavior is None:
         return behavior
-    await behavior.load(create=False)
+    await behavior.load(create=create)
     return behavior

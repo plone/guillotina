@@ -200,7 +200,8 @@ def load_behavior(_context, behavior):
         from guillotina.behaviors.instance import AnnotationBehavior
 
         class real_factory(AnnotationBehavior):
-            pass
+            __annotations_data_key__ = conf.get('data_key', 'default')
+            auto_serialize = conf.get('auto_serialize', True)
     else:
         schema = resolve_dotted_name(conf['provides'])
     classImplements(real_factory, schema)

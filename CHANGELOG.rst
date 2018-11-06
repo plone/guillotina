@@ -1,6 +1,12 @@
 4.2.12 (unreleased)
 -------------------
 
+- Be able to specify `?include=*` to include all behaviors in response
+  [vangheem]
+
+- Be able to specify `data_key` and `auto_serialize` for behavior configuration
+  [vangheem]
+
 - Fixing #374 were required fields were not checked
   [bloodbare]
 
