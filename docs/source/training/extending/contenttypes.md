@@ -11,7 +11,8 @@ from guillotina import configure, content, Interface, schema
 class IConversation(Interface):
 
     users = schema.List(
-        value_type=schema.TextLine()
+        value_type=schema.TextLine(),
+        default=list()
     )
 
 
