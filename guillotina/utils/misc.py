@@ -1,21 +1,21 @@
-from aiohttp.web import Request
-from collections import MutableMapping
-from functools import partial
-from guillotina import glogging
-from guillotina.component import get_utility
-from guillotina.exceptions import RequestNotFound
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IRequest
-from guillotina.profile import profilable
-from hashlib import sha256 as sha
-
-import aiotask_context
 import asyncio
 import inspect
 import random
 import string
 import time
 import types
+from collections import MutableMapping
+from functools import partial
+from hashlib import sha256 as sha
+
+import aiotask_context
+from aiohttp.web import Request
+from guillotina import glogging
+from guillotina.component import get_utility
+from guillotina.exceptions import RequestNotFound
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IRequest
+from guillotina.profile import profilable
 
 
 try:
@@ -196,14 +196,24 @@ def to_str(value):
     return value
 
 
+def deprecated(message):
+    def deprecated_decorator(func):
+        def deprecated_func(*args, **kwargs):
+            if getattr(func, '__warned__', None) is None:
+                logger.warning(
+                    "{}: {}".format(func.__name__, message))
+                func.__warned__ = True
+            return func(*args, **kwargs)
+        return deprecated_func
+    return deprecated_decorator
+
+
+@deprecated('Due to implementation details of asyncpg prepared statement cache '
+            'and invalidation issues, this method is considered harmful as it '
+            'can cause PostgreSQL memory issues. The implementation has been '
+            'removed and the function will be removed in Guillotina 4.3.0')
 def clear_conn_statement_cache(conn):
-    try:
-        conn._con._stmt_cache.clear()
-    except Exception:  # pragma: no cover
-        try:
-            conn._stmt_cache.clear()
-        except Exception:
-            pass
+    pass
 
 
 def list_or_dict_items(val):

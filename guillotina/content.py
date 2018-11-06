@@ -557,10 +557,7 @@ async def create_content(type_, **kw) -> IResource:
     This method should not be used to add content, just internally.
     """
     factory = get_cached_factory(type_)
-    if 'id' in kw:
-        id_ = kw['id']
-    else:
-        id_ = None
+    id_ = kw.pop('id', None)
 
     # We create the object with at least the ID
     obj = factory(id=id_)
@@ -609,6 +606,9 @@ async def create_content_in_container(
     # We create the object with at least the ID
     obj = factory(id=id_, parent=parent)
     for key, value in kw.items():
+        if key == 'id':
+            # the factory sets id
+            continue
         setattr(obj, key, value)
 
     txn = getattr(parent, '_p_jar', None) or get_transaction()

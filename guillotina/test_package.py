@@ -48,13 +48,15 @@ class IExample(IResource):
             schema=TERM_SCHEMA)
     )
 
-    textline_field = schema.TextLine(title='kk', widget='testing')
-    text_field = schema.Text()
+    textline_field = schema.TextLine(
+        title='kk', widget='testing', required=False)
+    text_field = schema.Text(required=False)
     dict_value = schema.Dict(
         key_type=schema.TextLine(),
-        value_type=schema.TextLine()
+        value_type=schema.TextLine(),
+        required=False
     )
-    datetime = schema.Datetime()
+    datetime = schema.Datetime(required=False)
 
 
 @implementer(IExample)

@@ -1,10 +1,43 @@
-4.2.11 (unreleased)
+4.2.12 (unreleased)
 -------------------
 
 - Be able to specify `?include=*` to include all behaviors in response
   [vangheem]
 
 - Be able to specify `data_key` and `auto_serialize` for behavior configuration
+  [vangheem]
+
+- Fixing #374 were required fields were not checked
+  [bloodbare]
+
+- Fix shell command with Python 3.7
+  [vangheem]
+
+- No longer use `utils.clear_conn_statement_cache` as asyncpg does not properly
+  clean up prepared statements when using the clear method.
+  See https://github.com/MagicStack/asyncpg/blob/v0.13.0/asyncpg/connection.py#L1499
+  The `_maybe_gc_stmt` is never called on the statement so they never get
+  cleaned from the database. Due to this implementation, with databases under
+  large enough load, it can cause postgresql to run out of memory.
+  `utils.clear_conn_statement_cache` is now considered a dangerous API method,
+  is marked deprecated, implementation is now emptied and will be removed
+  in the next major version of Guillotina.
+
+  As an alternative, use the connection option of `statement_cache_size: 0` or
+  a very low value for `max_cached_statement_lifetime`.
+
+  This case is only noteworthy when running against very large postgresql databases.
+  In certain cases, PG does a terrible job query planning and pegs CPU.
+  [vangheem]
+
+
+4.2.11 (2018-10-30)
+-------------------
+
+- Do not error on indexing with invalid payload
+  [vangheem]
+
+- Be able to override factory for content types
   [vangheem]
 
 - Workaround to fix aiohttp bug: https://github.com/aio-libs/aiohttp/issues/3335

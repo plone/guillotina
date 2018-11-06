@@ -179,7 +179,6 @@ class DefaultPOST(Service):
         user = get_authenticated_user_id(self.request)
 
         options = {
-            'id': new_id,
             'creators': (user,),
             'contributors': (user,)
         }
