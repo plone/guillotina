@@ -150,7 +150,7 @@ class DeserializeFromJson(object):
                             logger.warning(
                                 'Error setting data on field', exc_info=True)
             else:
-                if validate_all and field.required and (not hasattr(obj, name) or getattr(obj, name) is None):
+                if validate_all and field.required and getattr(obj, name, None) is None:
                     errors.append({
                         'message': 'Required parameter', 'field': name,
                         'error': ValueError('Required parameter')})
