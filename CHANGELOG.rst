@@ -1,6 +1,9 @@
 4.2.12 (unreleased)
 -------------------
 
+- Fixing #374 were required fields were not checked
+  [bloodbare]
+
 - Fix shell command with Python 3.7
   [vangheem]
 

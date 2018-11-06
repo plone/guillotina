@@ -105,7 +105,6 @@ class DeserializeFromJson(object):
             else:
                 data_value = data[name] if name in data else None
                 found = True if name in data else False
-
             if found:
 
                 if not self.check_permission(write_permissions.get(name)):
@@ -151,7 +150,7 @@ class DeserializeFromJson(object):
                             logger.warning(
                                 'Error setting data on field', exc_info=True)
             else:
-                if validate_all and field.required and not hasattr(obj, name):
+                if validate_all and field.required and getattr(obj, name, None) is None:
                     errors.append({
                         'message': 'Required parameter', 'field': name,
                         'error': ValueError('Required parameter')})
