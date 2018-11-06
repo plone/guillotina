@@ -205,7 +205,7 @@ import asyncio
 async def yielding():
     for idx in range(5):
         print(f'Before yield {idx}')
-        yield
+        yield idx
 
 
 async def foobar2():

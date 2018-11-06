@@ -21,3 +21,20 @@ Sample configuration on `nginx`:
         proxy_pass http://api.guillotina.svc.cluster.local:80/;
     }
 ```
+
+
+## Postgresql
+
+With very large databases, Postgresql can get into a state where particular
+prepared statements perform very poorly and they'll start pegging your CPU.
+
+The origin of this problem is related to how asyncpg caches prepared statements.
+
+If you start seeing this problem, it is recommdned to tune the following
+connection configuration options:
+
+- `statement_cache_size`: Setting to `0` is an option
+- `max_cached_statement_lifetime`: Set to extremely low value(2)
+
+
+(Make sure to tune postgresql for your server and dataset size.)

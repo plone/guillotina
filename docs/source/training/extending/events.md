@@ -25,7 +25,7 @@ async def container_added(conversation, event):
         conversation.users.append(user_id)
 
     manager = IPrincipalRoleManager(conversation)
-    for user in conversation.users or []:
+    for user in conversation.users:
         manager.assign_role_to_principal(
             'guillotina_chat.ConversationParticipant', user)
 ```

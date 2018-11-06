@@ -97,11 +97,11 @@ class InteractiveEventLoop(asyncio.SelectorEventLoop):  # type: ignore
         }
         self.console = self.console_class(None, locals=_locals, loop=self)
         coro = self.console.interact(self.banner, stop=True, handle_sigint=True)
-        self.console_task = asyncio.async(coro, loop=self)
+        self.console_task = asyncio.ensure_future(coro, loop=self)
 
     def close(self):
         if self.console_task and not self.is_running():
-            asyncio.Future.cancel(self.console_task)
+            self.console_task.cancel()
         super().close()
 
 
