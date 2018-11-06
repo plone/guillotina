@@ -1,7 +1,8 @@
 4.2.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixing #374 were required fields were not checked
+  [bloodbare]
 
 
 4.2.11 (2018-10-30)
