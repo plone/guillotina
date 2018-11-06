@@ -1,6 +1,9 @@
 4.2.12 (unreleased)
 -------------------
 
+- Fix shell command with Python 3.7
+  [vangheem]
+
 - No longer use `utils.clear_conn_statement_cache` as asyncpg does not properly
   clean up prepared statements when using the clear method.
   See https://github.com/MagicStack/asyncpg/blob/v0.13.0/asyncpg/connection.py#L1499
