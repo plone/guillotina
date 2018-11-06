@@ -71,16 +71,16 @@ Async utilities must implement a `initialize` method and performs the async
 task. In our case, it is creating a queue and waiting to process messages
 in the queue.
 
-For us, we will send messages to registered websockets.
+In this case, we will send messages to registered websockets.
 
-Make sure, like all other configured moduels, to ensure this file is scanned
+Make sure, like all other configured modules, to ensure this file is scanned
 by the packages `__init__.py` file.
 
 ## Sending messages
 
 We'll need to add another event subscriber to the `subscribers.py` file
 in order for the utility to know to send out new messages to registered
-web serveices. So your `utility.py` file will now look like:
+web services.So your `subscribers.py` file will now look like:
 
 ```
 from guillotina import configure
