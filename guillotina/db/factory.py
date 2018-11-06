@@ -29,6 +29,10 @@ def _get_connection_options(dbconfig):
         ssl_context.load_verify_locations(ssl_config['ca'])
         ssl_context.load_cert_chain(ssl_config['cert'], keyfile=ssl_config['key'])
         connection_options['ssl'] = ssl_context
+    for key in ('statement_cache_size', 'max_cached_statement_lifetime',
+                'max_cacheable_statement_size', 'command_timeout'):
+        if key in dbconfig:
+            connection_options[key] = dbconfig[key]
     return connection_options
 
 
