@@ -1,7 +1,8 @@
 4.2.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix shell command with Python 3.7
+  [vangheem]
 
 
 4.2.11 (2018-10-30)
