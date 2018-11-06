@@ -51,4 +51,4 @@ configure.scan('guillotina_chat.content')
 
 ## Test it out
 
-Open up Postman and test creating a conversation and message instead of it.
+Using Postman test your new content types. First create a Conversation, then create a Message inside of it.
