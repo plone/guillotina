@@ -1,4 +1,4 @@
-3.2.18 (unreleased)
+3.2.18 (2018-11-06)
 -------------------
 
 - No longer use `utils.clear_conn_statement_cache` as asyncpg does not properly
