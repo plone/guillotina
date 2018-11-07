@@ -9,7 +9,6 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
-from guillotina.utils import clear_conn_statement_cache
 from zope.interface import implementer
 
 import asyncio
@@ -326,7 +325,6 @@ class PGVacuum:
         '''
         conn = await self._storage.open()
         try:
-            clear_conn_statement_cache(conn)
             await conn.execute(DELETE_OBJECT, oid)
         except Exception:
             log.warning('Error deleting trashed object', exc_info=True)
@@ -558,7 +556,6 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
     async def open(self):
         try:
             conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
-            clear_conn_statement_cache(conn)
             return conn
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:

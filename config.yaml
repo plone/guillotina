@@ -6,6 +6,8 @@ databases:
     dsn: postgresql://postgres@localhost:5432/guillotina
     pool_size: 40
     read_only: false
+    statement_cache_size: 100
+    max_cached_statement_lifetime: 300
 storages:
   storage:
     storage: postgresql
