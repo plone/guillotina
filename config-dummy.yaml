@@ -30,3 +30,5 @@ jsapps:
   +admin: guillotina:static/executioner
 static:
   assets: guillotina:static/assets
+jwt:
+  secret: secret
