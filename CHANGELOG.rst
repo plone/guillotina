@@ -1,4 +1,4 @@
-4.2.12 (unreleased)
+4.2.12 (2018-11-07)
 -------------------
 
 - Be able to specify `?include=*` to include all behaviors in response
