@@ -1,4 +1,4 @@
-4.2.13 (unreleased)
+4.2.13 (2018-11-08)
 -------------------
 
 - Update admin interface:
