@@ -1,7 +1,13 @@
 4.2.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Update admin interface:
+
+  - Support for guillotina.cms
+  - Edit form
+  - Add medium-like richtext editor
+
+  [ebrehault]
 
 
 4.2.12 (2018-11-07)
