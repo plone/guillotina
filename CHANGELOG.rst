@@ -1,7 +1,8 @@
 4.2.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- No automatic async util loaded. BREAKING CHANGE: on addons utils needs to be defined on __init__.py settings
+  [bloodbare]
 
 
 4.2.13 (2018-11-09)

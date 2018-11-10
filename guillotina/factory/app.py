@@ -275,14 +275,14 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # Set router root
     server_app.router.set_root(root)
 
-    for utility in get_all_utilities_registered_for(IAsyncUtility):
-        # In case there is Utilties that are registered
-        if hasattr(utility, 'initialize'):
-            task = asyncio.ensure_future(
-                lazy_apply(utility.initialize, app=server_app), loop=loop)
-            root.add_async_task(utility, task, {})
-        else:
-            logger.warn(f'No initialize method found on {utility} object')
+    # for utility in get_all_utilities_registered_for(IAsyncUtility):
+    #     # In case there is Utilties that are registered
+    #     if hasattr(utility, 'initialize'):
+    #         task = asyncio.ensure_future(
+    #             lazy_apply(utility.initialize, app=server_app), loop=loop)
+    #         root.add_async_task(utility, task, {})
+    #     else:
+    #         logger.warn(f'No initialize method found on {utility} object')
 
     server_app.on_cleanup.append(cleanup_app)
 
