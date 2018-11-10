@@ -54,6 +54,9 @@ The endpoints available around these objects are detailed below:
 
 # Narrative Developer Documentation
 
+After reading quick tour or training section,
+Now you can start hands-on style guide to learn how to use it.
+
 ```eval_rst
 .. toctree::
    :maxdepth: 2
