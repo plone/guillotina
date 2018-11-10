@@ -3,6 +3,9 @@
 
 - Improve Documentation
 
+  - Index page
+  - Security page
+
   [hirokiky]
 
 
