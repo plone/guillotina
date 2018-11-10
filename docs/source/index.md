@@ -7,13 +7,22 @@ Server designed for high-performance, horizontally scaling solutions.
 
 Are you new to Guillotina? This is the place to start!
 
- - [Quick tour of Guillotina](./quick-tour.html) gives an overview of the major features in
-   Guillotina, covering a little about a lot.
- - To learn more, go to the [training section](./training/index.html).
- - For help getting Guillotina set up, try
-   [Installing Guillotina](./installation/installation.html).
- - Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
+[Quick tour of Guillotina](./quick-tour.html) gives an overview of the major features in
+Guillotina, covering a little about a lot.
 
+Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
+
+# Training / Tutorial
+
+To learn more, go to the [training section](./training/index.html).
+You can learn basics and find topics about Guillotina:
+
+```eval_rst
+.. toctree::
+   :maxdepth: 2
+
+   training/index
+```
 
 # REST API
 
@@ -102,17 +111,6 @@ The endpoints available around these objects are detailed below:
    api/fields
    api/utils
    api/component
-```
-
-
-# Training
-
-```eval_rst
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   training/*
 ```
 
 # Why Guillotina
