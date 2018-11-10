@@ -15,6 +15,10 @@
 
   [ebrehault]
 
+- Improve Documentation
+
+  [hirokiky]
+
 
 4.2.12 (2018-11-07)
 -------------------
