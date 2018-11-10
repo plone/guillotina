@@ -1,7 +1,9 @@
 4.2.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improve Documentation
+
+  [hirokiky]
 
 
 4.2.13 (2018-11-09)
