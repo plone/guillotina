@@ -274,20 +274,11 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     # Set router root
     server_app.router.set_root(root)
-
-    # for utility in get_all_utilities_registered_for(IAsyncUtility):
-    #     # In case there is Utilties that are registered
-    #     if hasattr(utility, 'initialize'):
-    #         task = asyncio.ensure_future(
-    #             lazy_apply(utility.initialize, app=server_app), loop=loop)
-    #         root.add_async_task(utility, task, {})
-    #     else:
-    #         logger.warn(f'No initialize method found on {utility} object')
-
     server_app.on_cleanup.append(cleanup_app)
 
-    for util in app_settings['utilities']:
-        root.add_async_utility(util, loop=loop)
+    for key, util in app_settings['utilities'].items():
+        logger.info('Adding ' + key + ' : ' + util['provides'])
+        root.add_async_utility(key, util, loop=loop)
 
     # Load cached Schemas
     load_cached_schema()
@@ -304,18 +295,9 @@ async def cleanup_app(app):
 
 async def close_utilities(app):
     root = get_utility(IApplication, name='root')
-    for utility in get_all_utilities_registered_for(IAsyncUtility):
-        try:
-            root.cancel_async_utility(utility)
-        except KeyError:
-            # attempt to delete by the provider registration
-            try:
-                iface = [i for i in utility.__providedBy__][-1]
-                root.cancel_async_utility(iface.__identifier__)
-            except (AttributeError, IndexError, KeyError):
-                pass
-        if hasattr(utility, 'finalize'):
-            await lazy_apply(utility.finalize, app=app)
+    for key in list(root._async_utilities.keys()):
+        logger.info('Removing ' + key)
+        await root.del_async_utility(key)
     for db in root:
         if IDatabase.providedBy(db[1]):
             await db[1].finalize()

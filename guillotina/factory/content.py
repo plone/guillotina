@@ -40,7 +40,12 @@ class ApplicationRoot(object):
         self._async_utilities = {}
         self._loop = loop
 
-    def add_async_utility(self, config, loop=None):
+    def add_async_utility(self, key, config, loop=None):
+        if key in self._async_utilities:
+            logger.warn(
+                f'Utility already registered {key}')
+            return
+
         interface = import_class(config['provides'])
         factory = import_class(config['factory'])
         try:
@@ -59,7 +64,7 @@ class ApplicationRoot(object):
         else:
             task = None
             logger.warn(f'No initialize method found on {utility_object} object')
-        self.add_async_task(config['provides'], task, config)
+        self.add_async_task(key, task, config)
 
     def add_async_task(self, ident, task, config):
         if ident in self._async_utilities:
@@ -75,15 +80,19 @@ class ApplicationRoot(object):
                 if not self._async_utilities[ident]['task'].done():
                     self._async_utilities[ident]['task'].cancel()
         else:
+            import pdb; pdb.set_trace()
             raise KeyError("Ident does not exist as utility")
 
-    def del_async_utility(self, config):
-        self.cancel_async_utility(config['provides'])
+    async def del_async_utility(self, key):
+        self.cancel_async_utility(key)
+        config = self._async_utilities[key]['config']
         interface = import_class(config['provides'])
         utility = get_utility(interface)
+        if hasattr(utility, 'finalize'):
+            await lazy_apply(utility.finalize, app=self.app)
         gsm = get_global_components()
         gsm.unregisterUtility(utility, provided=interface)
-        del self._async_utilities[config['provides']]
+        del self._async_utilities[key]
 
     def set_root_user(self, user):
         password = user['password']

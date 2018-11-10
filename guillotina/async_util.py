@@ -1,13 +1,12 @@
 from datetime import datetime
 from dateutil.tz import tzutc
-from guillotina import configure
 from guillotina import logger
 from guillotina.browser import View
 from guillotina.db.transaction import Status
 from guillotina.exceptions import ServerClosingException
-from guillotina.interfaces import IAsyncJobPool
+from guillotina.interfaces import IAsyncJobPool  # noqa
 from guillotina.interfaces import IAsyncUtility  # noqa
-from guillotina.interfaces import IQueueUtility
+from guillotina.interfaces import IQueueUtility  # noqa
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
 from guillotina.transactions import managed_transaction
@@ -20,7 +19,6 @@ import typing
 _zone = tzutc()
 
 
-@configure.utility(provides=IQueueUtility)
 class QueueUtility(object):
 
     def __init__(self, settings=None, loop=None):
@@ -143,14 +141,13 @@ class Job:
             aiotask_context.set('request', None)
 
 
-@configure.utility(provides=IAsyncJobPool)
 class AsyncJobPool:
 
-    def __init__(self, max_size=5):
+    def __init__(self, settings={'max_size': 5}, loop=None):
         self._loop = None
         self._running = []
         self._pending = []
-        self._max_size = max_size
+        self._max_size = settings['max_size']
         self._closing = False
 
     def get_loop(self):
@@ -214,4 +211,5 @@ class AsyncJobPool:
     async def join(self):
         self._closing = True
         while len(self._running) > 0 or len(self._pending) > 0:
+            print("pending %d running %d" % (self._pending, self._running))
             await asyncio.sleep(0.1)

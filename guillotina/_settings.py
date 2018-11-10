@@ -17,7 +17,20 @@ app_settings: Dict[str, Any] = {
     "static": {},
     "jsapps": {},
     "default_static_filenames": ['index.html', 'index.htm'],
-    "utilities": [],
+    "utilities": {
+        "guillotina.queue": {
+            "provides": "guillotina.interfaces.IQueueUtility",
+            "factory": "guillotina.async_util.QueueUtility",
+            "settings": {}
+        },
+        "guillotina.jobpool": {
+            "provides": "guillotina.interfaces.IAsyncJobPool",
+            "factory": "guillotina.async_util.AsyncJobPool",
+            "settings": {
+                "max_size": 5
+            }
+        }
+    },
     "store_json": True,
     "root_user": {
         "password": ""
