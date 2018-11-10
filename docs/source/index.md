@@ -138,7 +138,7 @@ The endpoints available around these objects are detailed below:
 
 # About
 
-- [Read about](./installation/about.html) the rich history of the project
+- [Read about](./about.html) the rich history of the project
 
 ```eval_rst
  .. toctree::
