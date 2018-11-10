@@ -211,5 +211,4 @@ class AsyncJobPool:
     async def join(self):
         self._closing = True
         while len(self._running) > 0 or len(self._pending) > 0:
-            print("pending %d running %d" % (self._pending, self._running))
             await asyncio.sleep(0.1)
