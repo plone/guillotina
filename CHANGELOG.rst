@@ -1,7 +1,9 @@
 4.2.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improve Documentation
+
+  [hirokiky]
 
 
 4.2.13 (2018-11-09)
@@ -14,10 +16,6 @@
   - Add medium-like richtext editor
 
   [ebrehault]
-
-- Improve Documentation
-
-  [hirokiky]
 
 
 4.2.12 (2018-11-07)
