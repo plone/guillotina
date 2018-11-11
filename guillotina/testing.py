@@ -53,7 +53,8 @@ TESTING_SETTINGS: Dict[str, Any] = {
         "secret": "foobar",
         "algorithm": "HS256"
     },
-    "utilities": {},
+    "utilities": [],
+    "load_utilities": {},
     "logging": {
         'version': 1,
         'disable_existing_loggers': False,

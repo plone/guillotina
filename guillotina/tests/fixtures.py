@@ -30,7 +30,7 @@ annotations = {
 }
 
 def base_settings_configurator(settings):
-    settings["utilities"]['catalog'] = {
+    settings["load_utilities"]['catalog'] = {
         "provides": "guillotina.interfaces.ICatalogUtility",
         "factory": "guillotina.catalog.catalog.DefaultSearchUtility"
     }
