@@ -10,9 +10,7 @@ from guillotina import configure
 from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina._settings import default_settings
-from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors import apply_concrete_behaviors
-from guillotina.component import get_all_utilities_registered_for
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
@@ -291,6 +289,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 async def cleanup_app(app):
     await notify(ApplicationCleanupEvent(app))
     await close_utilities(app)
+    await close_dbs(app)
 
 
 async def close_utilities(app):
@@ -298,6 +297,9 @@ async def close_utilities(app):
     for key in list(root._async_utilities.keys()):
         logger.info('Removing ' + key)
         await root.del_async_utility(key)
+
+async def close_dbs(app):
+    root = get_utility(IApplication, name='root')
     for db in root:
         if IDatabase.providedBy(db[1]):
             await db[1].finalize()

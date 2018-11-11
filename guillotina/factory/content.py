@@ -80,7 +80,6 @@ class ApplicationRoot(object):
                 if not self._async_utilities[ident]['task'].done():
                     self._async_utilities[ident]['task'].cancel()
         else:
-            import pdb; pdb.set_trace()
             raise KeyError("Ident does not exist as utility")
 
     async def del_async_utility(self, key):
