@@ -1,6 +1,9 @@
 4.2.14 (unreleased)
 -------------------
 
+- Remove Container from available-types
+  [bloodbare]
+
 - No automatic async util loaded. BREAKING CHANGE: on addons utils needs to be defined on __init__.py settings
   [bloodbare]
 
