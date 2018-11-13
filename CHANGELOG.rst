@@ -1,11 +1,17 @@
-4.2.14 (unreleased)
+4.3.0 (unreleased)
 -------------------
 
 - Remove Container from available-types
   [bloodbare]
 
-- No automatic async util loaded. BREAKING CHANGE: on addons utils needs to be defined on __init__.py settings
+- No automatic async util loaded.
   [bloodbare]
+
+  **BREAKING CHANGE**: Async Utilities are not loaded by default so they
+  need to be defined on the package configuration on the merging settings at
+  `__init__.py`. 
+  Utilities are not key mapped, each utility has an id to reflect it.
+  Now config.yaml files only need to define them if you want to overwrite. 
 
 
 4.2.13 (2018-11-09)

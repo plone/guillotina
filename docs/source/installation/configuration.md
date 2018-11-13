@@ -103,8 +103,8 @@ applications:
 ## Async utilities
 
 ```yaml
-utilities:
-  -
+load_utilities:
+  catalog:
     provides: guillotina.interfaces.ICatalogUtility
     factory: guillotina_elasticsearch.utility.ElasticSearchUtility
     settings: {}
