@@ -13,6 +13,13 @@
   Utilities are not key mapped, each utility has an id to reflect it.
   Now config.yaml files only need to define them if you want to overwrite. 
 
+- Improve Documentation
+
+  - Index page
+  - Security page
+
+  [hirokiky]
+
 
 4.2.13 (2018-11-09)
 -------------------

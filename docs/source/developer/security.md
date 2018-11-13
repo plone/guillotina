@@ -393,7 +393,7 @@ id):
         "prinrole": [
             {
                 "principal": "Alice",
-                "Role": "guillotina.Editor",
+                "role": "guillotina.Editor",
                 "setting": "Allow"
             }
         ]
@@ -427,7 +427,7 @@ Let's fix that by giving "guillotina.DeleteContent" permission to
         "roleperm": [
             {
                 "permission": "guillotina.DeleteContent",
-                "Role": "guillotina.Editor",
+                "role": "guillotina.Editor",
                 "setting": "Allow"
             }
         ]
