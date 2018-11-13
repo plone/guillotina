@@ -121,6 +121,9 @@ Now you can start hands-on style guide to learn how to use it.
   [behind a proxy](./installation/production.html)
   when you deploy it.
 
+# Migration
+
+- [< 4.3 to 4.3](./migration/4.3.html)
 
 # Programming API Reference
 

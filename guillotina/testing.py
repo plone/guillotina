@@ -54,6 +54,7 @@ TESTING_SETTINGS: Dict[str, Any] = {
         "algorithm": "HS256"
     },
     "utilities": [],
+    "load_utilities": {},
     "logging": {
         'version': 1,
         'disable_existing_loggers': False,

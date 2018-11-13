@@ -1,0 +1,21 @@
+< 4.3 to 4.3
+============
+
+Moving async utilities to be loaded explicit:
+
+- Check which async utilities you want to use on your addon by default
+
+- Move them to `__init__.py` settings like::
+
+	...
+	app_settings = {
+	    "load_utilities": {
+	        "catalog": {
+	            "provides": "guillotina_elasticsearch.utility.IElasticSearchUtility",  # noqa
+	            "factory": "guillotina_elasticsearch.utility.ElasticSearchUtility",
+	            "settings": {}
+	        }
+	    },
+	...
+
+- Remove any reference to app_settings['utilities'] (that was a list) to app_settings['load_utilities']

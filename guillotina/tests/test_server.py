@@ -25,6 +25,18 @@ async def test_trns_retries_with_app(dummy_guillotina, dummy_request):
 
 async def test_async_util_started_and_stopped(dummy_guillotina):
     util = get_utility(ITestAsyncUtility)
-    assert util.state == 'initialize'
+    util.state == 'init'
+
+    config_utility = {
+        "provides": "guillotina.test_package.ITestAsyncUtility",
+        "factory": "guillotina.test_package.AsyncUtility",
+        "settings": {}
+    }
+    dummy_guillotina.root.add_async_utility('test', config_utility)
+    util2 = get_utility(ITestAsyncUtility)
+    assert util != util2
+    # Let the game start
+    await asyncio.sleep(0.1)
+    assert util2.state == 'initialize'
     await close_utilities(dummy_guillotina)
-    assert util.state == 'finalize'
+    assert util2.state == 'finalize'

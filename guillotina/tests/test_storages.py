@@ -82,9 +82,9 @@ async def test_storage_exists(db, guillotina_main):
                           args=[storage_config])
     assert not await factory.exists('foobar')
     await factory.create('foobar')
-    assert await  factory.exists('foobar')
+    assert await factory.exists('foobar')
     await factory.delete('foobar')
-    assert not await  factory.exists('foobar')
+    assert not await factory.exists('foobar')
 
 
 async def test_get_dsn_from_url():

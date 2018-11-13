@@ -40,6 +40,7 @@ sdist
 /.tox
 cov_html
 .coveralls.yml
+.pytest_cache
 
 #Translations
 *.mo
