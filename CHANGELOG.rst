@@ -1,7 +1,8 @@
 4.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Missing utilities settings should not cause error
+  [vangheem]
 
 
 4.3.0 (2018-11-13)

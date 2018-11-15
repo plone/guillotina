@@ -274,7 +274,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     server_app.router.set_root(root)
     server_app.on_cleanup.append(cleanup_app)
 
-    for util in app_settings['utilities']:
+    for util in app_settings.get('utilities') or []:
         logger.warn('Adding : ' + util['provides'])
         root.add_async_utility(util['provides'], util, loop=loop)
 
