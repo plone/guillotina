@@ -1,4 +1,4 @@
-4.3.1 (unreleased)
+4.3.1 (2018-11-15)
 ------------------
 
 - Missing utilities settings should not cause error
