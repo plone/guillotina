@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fplone%2Fguillotina.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fplone%2Fguillotina?ref=badge_shield)
+
 Introduction
 ============
 
@@ -141,3 +143,6 @@ Chat
 ----
 
 Join us to talk about Guillotina at https://gitter.im/plone/guillotina
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fplone%2Fguillotina.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fplone%2Fguillotina?ref=badge_large)
