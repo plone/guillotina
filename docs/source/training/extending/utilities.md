@@ -60,7 +60,7 @@ class MessageSenderUtility:
                             await ws.send_str(json.dumps(
                                 summary, cls=GuillotinaJSONEncoder))
             except Exception:
-                logger.warn(
+                logger.warning(
                     'Error sending message',
                     exc_info=True)
                 await asyncio.sleep(1)
