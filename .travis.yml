@@ -16,13 +16,16 @@ matrix:
       python: 3.6
       env: DATABASE=cockroachdb
     - name: Python 3.7, Dummy DB
-      python: "3.7"
+      python: 3.7
+      dist: xenial
       env: DATABASE=DUMMY
     - name: Python 3.7, PG 9.6
-      python: "3.7"
+      python: 3.7
+      dist: xenial
       env: DATABASE=postgres
     - name: Python 3.7, Cockroachdb
-      python: "3.7"
+      python: 3.7
+      dist: xenial
       env: DATABASE=cockroachdb
 
 services:
