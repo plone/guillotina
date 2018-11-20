@@ -1,8 +1,8 @@
 4.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Fix MockTransaction test object to have `manager` property
+  [vangheem]
 
 4.3.1 (2018-11-15)
 ------------------
