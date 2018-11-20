@@ -1,5 +1,5 @@
 # we want to make sure it is run on trusty where sudo is provided for postgres
-dist: trusty
+dist: xenial
 language: python
 sudo: required
 addons:
@@ -17,15 +17,12 @@ matrix:
       env: DATABASE=cockroachdb
     - name: Python 3.7, Dummy DB
       python: 3.7
-      dist: xenial
       env: DATABASE=DUMMY
     - name: Python 3.7, PG 9.6
       python: 3.7
-      dist: xenial
       env: DATABASE=postgres
     - name: Python 3.7, Cockroachdb
       python: 3.7
-      dist: xenial
       env: DATABASE=cockroachdb
 
 services:
