@@ -1,4 +1,4 @@
-4.3.2 (unreleased)
+4.3.2 (2018-11-20)
 ------------------
 
 - Fix MockTransaction test object to have `manager` property
