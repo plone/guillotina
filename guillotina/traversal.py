@@ -257,7 +257,7 @@ class MatchInfo(BaseMatchInfo):
                 # guillotina
                 view_result = await self.view()
                 await commit(request, warn=False)
-            except (ConflictError, TIDConflictError) as e:
+            except (ConflictError, TIDConflictError):
                 # bubble this error up
                 raise
             except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:

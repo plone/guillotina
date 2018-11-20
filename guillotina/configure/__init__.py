@@ -89,7 +89,7 @@ def load_all_configurations(_context, module_name):
     for type_, configuration in get_configurations(module_name):
         try:
             _registered_configuration_handlers[type_](_context, configuration)
-        except TypeError as e:
+        except TypeError:
             logger.error('Can not find %s module' % configuration)
             raise
 

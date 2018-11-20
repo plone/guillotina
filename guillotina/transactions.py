@@ -20,7 +20,7 @@ async def commit(request=None, warn=True):
     try:
         request = _safe_get_request(request)
         await get_tm(request).commit(request)
-    except AttributeError as e:
+    except AttributeError:
         if warn:
             logger.warning('Could not locate transaction manager to commit', exc_info=True)
 
