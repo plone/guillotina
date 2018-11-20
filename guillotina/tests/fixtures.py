@@ -115,7 +115,7 @@ def db():
                 host, port = pytest_docker_fixtures.pg_image.run()
             else:
                 host = 'localhost'
-                port = 5432
+                port = int(os.environ.get('PGPORT', 5432))
 
         annotations['pg_host'] = host
         annotations['pg_port'] = port

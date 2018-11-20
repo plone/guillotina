@@ -14,27 +14,35 @@ matrix:
         postgresql: 9.6
     - name: Python 3.6, PG 10.6
       python: 3.6
-      env: DATABASE=postgres
+      env: DATABASE=postgres PGPORT=5433
       addons:
-        postgresql: 10.6
+        postgresql: "10"
+        apt:
+          packages:
+          - postgresql-10
+          - postgresql-client-10
     - name: Python 3.6, Cockroachdb
       python: 3.6
       env: DATABASE=cockroachdb
     - name: Python 3.7, Dummy DB
-      python: 3.7
+      python: "3.7"
       env: DATABASE=DUMMY
     - name: Python 3.7, PG 9.6
-      python: 3.7
+      python: "3.7"
       env: DATABASE=postgres
       addons:
         postgresql: 9.6
     - name: Python 3.7, PG 10.6
-      python: 3.7
-      env: DATABASE=postgres
+      python: "3.7"
+      env: DATABASE=postgres PGPORT=5433
       addons:
-        postgresql: 10.6
+        postgresql: "10"
+        apt:
+          packages:
+          - postgresql-10
+          - postgresql-client-10
     - name: Python 3.7, Cockroachdb
-      python: 3.7
+      python: "3.7"
       env: DATABASE=cockroachdb
 
 services:
