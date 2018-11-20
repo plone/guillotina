@@ -41,7 +41,7 @@ services:
   - postgresql
   - docker
 before_script:
-  - psql -c 'create database guillotina;' -U postgres
+  - psql -c 'create database guillotina;' -U postgres || true
 
 cache:
   directories:
