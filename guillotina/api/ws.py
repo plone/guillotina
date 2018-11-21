@@ -178,7 +178,7 @@ class WebsocketsView(Service):
                     txn = await tm.begin(request=self.request)
                     try:
                         await self.handle_ws_request(ws, message)
-                    except Exception as _exc:
+                    except Exception:
                         logger.error('Exception on ws', exc_info=True)
                     finally:
                         # only currently support GET requests which are *never*
