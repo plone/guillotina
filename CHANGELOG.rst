@@ -1,4 +1,4 @@
-4.3.3 (unreleased)
+4.3.3 (2018-12-03)
 ------------------
 
 - Be able to override configuration with environment variables
