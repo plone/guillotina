@@ -1,7 +1,8 @@
 4.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to override configuration with environment variables
+  [vangheem]
 
 
 4.3.2 (2018-11-20)
