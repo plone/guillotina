@@ -1,3 +1,4 @@
+import json
 import os
 from tempfile import mkstemp
 
@@ -53,3 +54,17 @@ def test_get_settings():
     ])
     assert settings['foobar'] == 'foobar'
     assert settings['foo']['bar'] == 'foobar'
+
+
+def test_get_settings_with_environment_variables():
+    os.environ.update({
+        'G_foobar': 'foobar',
+        'G_foo__bar': 'foobar',
+        'G_foo__bar1__bar2': json.dumps({
+            'foo': 'bar'
+        })
+    })
+    settings = get_settings('doesnotexist.json')
+    assert settings['foobar'] == 'foobar'
+    assert settings['foo']['bar'] == 'foobar'
+    assert settings['foo']['bar1']['bar2'] == {'foo': 'bar'}

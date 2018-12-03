@@ -85,3 +85,20 @@ app_settings = {
     }
 }
 ```
+
+
+## Overridding configuration
+
+First off, you can use the `--override` setting for all commands to provide
+setting overrides in files. For example, `--override="root_user.password=foobar"`.
+
+Additionally, you can override configuration with environment variables. To override
+the root password like above, you would do: `G_root_user__password=foobar`.
+
+You can also override json data structures as well:
+
+```bash
+export G_cors__allow_origin='["http://localhost:8080"]'
+```
+
+Use the double underscore(`__`) to designate nested json structure to assign values.
