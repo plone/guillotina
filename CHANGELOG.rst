@@ -1,7 +1,8 @@
 4.3.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement delete by value for `PatchField(value_type=schema.List())`
+  [vangheem]
 
 
 4.3.3 (2018-12-03)
