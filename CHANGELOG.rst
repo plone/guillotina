@@ -1,4 +1,4 @@
-4.3.4 (unreleased)
+4.3.4 (2018-12-06)
 ------------------
 
 - Check valid generated id
