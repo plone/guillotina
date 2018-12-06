@@ -110,13 +110,28 @@ class PatchListExtend(PatchListAppend):
     for_=IList,
     provides=IPatchFieldOperation,
     name='del')
-class PatchListRemove(PatchListAppend):
+class PatchListDel(PatchListAppend):
     def __call__(self, context, value):
         existing = getattr(context, self.field.__name__, None) or {}
         try:
             del existing[value]
         except IndexError:
             raise ValueDeserializationError(self.field, value, 'Not valid index value')
+        return existing
+
+
+@configure.adapter(
+    for_=IList,
+    provides=IPatchFieldOperation,
+    name='remove')
+class PatchListRemove(PatchListAppend):
+    def __call__(self, context, value):
+        existing = getattr(context, self.field.__name__, None) or {}
+        try:
+            existing.remove(value)
+        except ValueError:
+            raise ValueDeserializationError(
+                self.field, value, '{} not in value'.format(value))
         return existing
 
 

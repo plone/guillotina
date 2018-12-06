@@ -78,6 +78,17 @@ Delete:
 }
 ```
 
+Remove:
+
+```json
+{
+    "values": {
+        "op": "remove",
+        "value": "foobar"
+    }
+}
+```
+
 Update:
 
 ```json
@@ -129,6 +140,23 @@ Delete:
     "values": {
         "op": "del",
         "value": "foo"
+    }
+}
+```
+
+Update:
+
+```json
+{
+    "values": {
+        "op": "update",
+        "value": [{
+            "key": "foo",
+            "value": "bar"
+        }, {
+            "key": "foo2",
+            "value": "bar2"
+        }]
     }
 }
 ```

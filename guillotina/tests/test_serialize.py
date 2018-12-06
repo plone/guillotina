@@ -147,6 +147,10 @@ class ITestSchema(Interface):
         ),
         required=False
     ))
+    patch_list_int = fields.PatchField(schema.List(
+        value_type=schema.Int(),
+        required=False
+    ))
     patch_dict = fields.PatchField(schema.Dict(
         key_type=schema.Text(),
         value_type=schema.Text()
@@ -816,3 +820,37 @@ async def test_patchfield_notdefined_field(dummy_request):
     assert len(errors) == 0
     assert 'not_defined_field' not in content.dict_of_obj['key1']
     assert 'not_defined_field' not in content.patch_dict_of_obj['key1']
+
+
+async def test_delete_by_value_field(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_list_int': [1, 2]
+        }, errors)
+    assert errors == []
+    assert getattr(content, 'patch_list_int', []) == [1, 2]
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_list_int': {
+                'op': 'remove',
+                'value': 2
+            }
+        }, errors)
+    assert errors == []
+    assert getattr(content, 'patch_list_int', []) == [1]
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_list_int': {
+                'op': 'remove',
+                'value': 99
+            }
+        }, errors)
+    assert len(errors) == 1
+    assert errors[0]['field'] == 'patch_list_int'
