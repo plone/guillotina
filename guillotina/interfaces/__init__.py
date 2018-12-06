@@ -84,6 +84,7 @@ from .json import IValueToJson  # noqa
 from .layer import IDefaultLayer  # noqa
 from .rate_limiter import IRateLimitingStateManager  # noqa
 from .rate_limiter import IRateLimitManager  # noqa
+from .rate_limiter import IRateLimit  # noqa
 from .registry import IAddons  # noqa
 from .registry import ILayers  # noqa
 from .response import IAioHTTPResponse  # noqa

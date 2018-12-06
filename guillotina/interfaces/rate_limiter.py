@@ -1,6 +1,10 @@
 from zope.interface import Interface
 
 
+class IRateLimit(Interface):
+    pass
+
+
 class IRateLimitingStateManager(Interface):
     """
     Keeps the state about service requests counts on a per-user basis

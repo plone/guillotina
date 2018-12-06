@@ -8,7 +8,7 @@ from guillotina.interfaces import ILocation
 
 
 @configure.adapter(
-    for_=IView,
+    for_=IRateLimit,
     provides=IRateLimitManager)
 class ServiceRateLimitManager:
     def __init__(self, context):

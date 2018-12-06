@@ -4,8 +4,11 @@ from guillotina.browser import View
 from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IAsyncBehavior
+from guillotina.interfaces import IRateLimit
+from zope.interface import implementer
 
 
+@implementer(IRateLimit)
 class Service(View):
     async def get_data(self):
         return await self.request.json()
