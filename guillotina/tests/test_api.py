@@ -840,3 +840,31 @@ async def test_do_not_error_with_invalid_payload(container_requester):
             })
         )
         assert status == 204
+
+
+async def test_create_content_with_custom_id_does_not_allow_bad_id(container_requester):
+    # using custom id generator in test package
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "bad-id": "sdfkl*&%"
+            })
+        )
+        assert status == 412
+
+
+async def test_create_content_with_uses_good_id(container_requester):
+    # using custom id generator in test package
+    async with container_requester as requester:
+        resp, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "custom-id": "foobar"
+            })
+        )
+        assert 'foobar' == resp['@name']

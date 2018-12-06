@@ -1,6 +1,9 @@
 4.3.4 (unreleased)
 ------------------
 
+- Check valid generated id
+  [vangheem]
+
 - Implement delete by value for `PatchField(value_type=schema.List())`
   [vangheem]
 
