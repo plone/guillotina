@@ -255,8 +255,7 @@ class MatchInfo(BaseMatchInfo):
         if app_settings['check_writable_request'](request):
             try:
                 # Check rate limits on the view
-                rlmgr = query_adapter((self.view, self.view.context),
-                                      IRateLimitManager)
+                rlmgr = query_adapter(self.view, IRateLimitManager)
                 if rlmgr:
                     await rlmgr()
 
@@ -279,8 +278,7 @@ class MatchInfo(BaseMatchInfo):
         else:
             try:
                 # Check rate limits on the view
-                import pdb; pdb.set_trace()
-                rlmgr = query_adapter((self.view, self.view.context), IRateLimitManager)
+                rlmgr = query_adapter(self.view, IRateLimitManager)
                 if rlmgr:
                     await rlmgr()
 
