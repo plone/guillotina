@@ -1,4 +1,6 @@
 # this is for testing.py, do not import into other modules
+import json
+
 from guillotina import configure
 from guillotina import schema
 from guillotina.async_util import IAsyncUtility
@@ -11,14 +13,13 @@ from guillotina.directives import metadata
 from guillotina.fields import CloudFileField
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IIDGenerator
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IResource
 from guillotina.response import HTTPUnprocessableEntity
-from zope.interface import implementer
 from zope.interface import Interface
-
-import json
+from zope.interface import implementer
 
 
 app_settings = {
@@ -170,3 +171,23 @@ class AsyncUtility:
     name='@match/{foo}/{bar}')
 async def matching_service(context, request):
     return request.matchdict
+
+
+@configure.adapter(
+    for_=Interface,
+    provides=IIDGenerator)
+class IDGenerator(object):
+    """
+    Test id generator
+    """
+
+    def __init__(self, request):
+        self.request = request
+
+    def __call__(self, data):
+
+        if 'bad-id' in data:
+            return data['bad-id']
+
+        if 'custom-id' in data:
+            return data['custom-id']
