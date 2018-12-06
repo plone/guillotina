@@ -46,6 +46,10 @@ app_settings: Dict[str, Any] = {
         "guillotina.auth.validators.JWTValidator"
     ],
     "default_permission": 'guillotina.AccessContent',
+    "rate_limiter": {
+        "default_limits": None,
+        "state_manager": "memory",
+    },
     "available_addons": {},
     "api_definition": {},
     "cors": {

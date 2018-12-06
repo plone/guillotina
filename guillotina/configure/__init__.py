@@ -109,7 +109,7 @@ def load_service(_context, service):
     protect_view(factory, permission)
 
     rate_limits = service_conf.get(
-        'rate_limits', app_settings.get('default_rate_limits', None))
+        'rate_limits', app_settings.get('rate_limiter', {}).get('default_limits', None))
 
     rate_limit_view(factory, rate_limits)
 
