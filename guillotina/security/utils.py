@@ -27,6 +27,14 @@ def get_view_permission(cls):
     return getattr(cls, '__view_permission', None)
 
 
+def rate_limit_view(cls, rate_limits):
+    cls.__rate_limits = rate_limits
+
+
+def get_view_rate_limits(cls):
+    return getattr(cls, '__rate_limits', None)
+
+
 def get_roles_with_access_content(obj, request=None):
     """ Return the roles that has access to the content that are global roles"""
     if obj is None:

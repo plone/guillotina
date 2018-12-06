@@ -97,14 +97,21 @@ def load_all_configurations(_context, module_name):
 def load_service(_context, service):
     # prevent circular import
     from guillotina.security.utils import protect_view
+    from guillotina.security.utils import rate_limit_view
 
     service_conf = service['config']
+
     factory = resolve_dotted_name(service['klass'])
 
     permission = service_conf.get(
         'permission', app_settings.get('default_permission', None))
 
     protect_view(factory, permission)
+
+    rate_limits = service_conf.get(
+        'rate_limits', app_settings.get('default_rate_limits', None))
+
+    rate_limit_view(factory, rate_limits)
 
     method = service_conf.get('method', 'GET')
     default_layer = resolve_dotted_name(
