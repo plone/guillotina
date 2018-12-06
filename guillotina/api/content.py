@@ -169,7 +169,7 @@ class DefaultPOST(Service):
             generator = query_adapter(self.request, IIDGenerator)
             if generator is not None:
                 new_id = generator(data)
-                if not valid_id(new_id):
+                if isinstance(new_id, str) and not valid_id(new_id):
                     raise ErrorResponse(
                         'PreconditionFailed', 'Invalid id: {}'.format(new_id),
                         status=412, reason=error_reasons.INVALID_ID)
