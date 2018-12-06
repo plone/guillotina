@@ -41,7 +41,6 @@ class View(object):
         return self.context
 
     async def __call__(self):
-        import pdb; pdb.set_trace()
         return {
             'context': str(self.context),
             'path': '/'.join(get_physical_path(self.context))

@@ -3,29 +3,32 @@ from zope.interface import Interface
 
 class IRateLimitingStateManager(Interface):
     """
-    Keeps the state about service requests rate
+    Keeps the state about service requests counts on a per-user basis
     """
-    async def increment(self, key):
+    async def increment(self, user, key):
         """Increments the request counter for the service key
         """
         pass
 
-    async def get_count(self, key):
+    async def get_count(self, user, key):
         """Gets the current request counter for the service key
         """
         pass
 
-    async def expire_after(self, key, ttl):
+    async def expire_after(self, user, key, ttl):
         """Schedules the counter reset for a key after the specified ttl
         """
         pass
 
-    async def get_remaining_time(self, key):
+    async def get_remaining_time(self, user, key):
         """Gets the remaining time until the counter is reset
         """
         pass
 
-    async def get_all_counts(self):
-        """Returns the counters for all registered keys
+
+class IRateLimitManager(Interface):
+    async def __call__(self):
+        """This method should handle all rate limiting logic for a specific
+        context
         """
         pass

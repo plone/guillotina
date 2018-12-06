@@ -47,6 +47,7 @@ from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ITraversable
+from guillotina.interfaces import IRateLimitManager
 from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.response import HTTPBadRequest
@@ -253,6 +254,12 @@ class MatchInfo(BaseMatchInfo):
         request.record('viewrender')
         if app_settings['check_writable_request'](request):
             try:
+                # Check rate limits on the view
+                rlmgr = query_adapter((self.view, self.view.context),
+                                      IRateLimitManager)
+                if rlmgr:
+                    await rlmgr()
+
                 # We try to avoid collisions on the same instance of
                 # guillotina
                 view_result = await self.view()
@@ -271,6 +278,12 @@ class MatchInfo(BaseMatchInfo):
                 request._view_error = True
         else:
             try:
+                # Check rate limits on the view
+                import pdb; pdb.set_trace()
+                rlmgr = query_adapter((self.view, self.view.context), IRateLimitManager)
+                if rlmgr:
+                    await rlmgr()
+
                 view_result = await self.view()
             except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
                 view_result = exc

@@ -71,7 +71,6 @@ async def test_register_service_rate_limits(container_requester):
 
     class TestService(Service):
         async def __call__(self):
-            ep = await super().__call__()
             return {
                 "foo": "bar"
             }
@@ -80,7 +79,10 @@ async def test_register_service_rate_limits(container_requester):
         context=IContainer,
         name="@foobar3",
         permission='guillotina.ViewContent',
-        rate_limits={'seconds': 5, 'hits': 2},
+        rate_limits={
+            'seconds': 5,
+            'hits': 2,
+        },
     ), 'service')
 
     assert len(configure.get_configurations('guillotina.tests', 'service')) == cur_count + 1  # noqa

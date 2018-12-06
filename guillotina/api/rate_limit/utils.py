@@ -16,7 +16,7 @@ class Timer:
 
     @property
     def remaining(self):
-        if not self.start_time:
+        if not self._start_time:
             return self._timeout
         return max((time.time() - self._start_time) - self._timeout, 0)
 
