@@ -1,7 +1,7 @@
 4.3.5 (unreleased)
 ------------------
 
-- Added after traversal event and emit it [lferran]
+- Added before render view event [lferran]
 
 4.3.4 (2018-12-06)
 ------------------
