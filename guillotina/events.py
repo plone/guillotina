@@ -7,6 +7,7 @@ from guillotina.interfaces import IBeforeFieldModifiedEvent
 from guillotina.interfaces import IBeforeObjectAddedEvent
 from guillotina.interfaces import IBeforeObjectMovedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
+from guillotina.interfaces import IBeforeRenderViewEvent
 from guillotina.interfaces import IDatabaseInitializedEvent
 from guillotina.interfaces import IFileBeforeFinishUploaded
 from guillotina.interfaces import IFileFinishUploaded
@@ -70,6 +71,11 @@ class ObjectLocationEvent(ObjectEvent):
 @implementer(IObjectMovedEvent)
 class ObjectMovedEvent(ObjectLocationEvent):
     """An object has been moved"""
+
+
+@implementer(IBeforeRenderView)
+class BeforeRenderView(ObjectEvent):
+    pass
 
 
 @implementer(IBeforeObjectMovedEvent)

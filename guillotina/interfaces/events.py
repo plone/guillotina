@@ -153,7 +153,6 @@ class IDatabaseInitializedEvent(Interface):
     database = Attribute('')
 
 
-class IAfterTraversalEvent(Interface):
-    '''When the traversal has been completed, but the request has not
-    been handled yet.
+class IBeforeRenderViewEvent(Interface):
+    '''Right before the view gets rendered
     '''

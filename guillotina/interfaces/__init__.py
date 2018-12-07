@@ -32,7 +32,6 @@ from .content import IResourceFactory  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
-from .events import IAfterTraversalEvent  # noqa
 from .events import IApplicationCleanupEvent  # noqa
 from .events import IApplicationConfiguredEvent  # noqa
 from .events import IApplicationEvent  # noqa
@@ -41,6 +40,7 @@ from .events import IBeforeFieldModifiedEvent  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
 from .events import IBeforeObjectMovedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
+from .events import IBeforeRenderViewEvent  # noqa
 from .events import IDatabaseInitializedEvent  # noqa
 from .events import IFileBeforeFinishUploaded  # noqa
 from .events import IFileFinishUploaded  # noqa

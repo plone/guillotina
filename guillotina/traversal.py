@@ -23,6 +23,7 @@ from guillotina.component import query_multi_adapter
 from guillotina.contentnegotiation import get_acceptable_content_types
 from guillotina.contentnegotiation import get_acceptable_languages
 from guillotina.event import notify
+from guillotina.events import BeforeRenderViewEvent
 from guillotina.events import ObjectLoadedEvent
 from guillotina.events import TraversalResourceMissEvent
 from guillotina.events import TraversalRouteMissEvent
@@ -250,6 +251,7 @@ class MatchInfo(BaseMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
+        await notify(BeforeRenderViewEvent(request))
         request.record('viewrender')
         if app_settings['check_writable_request'](request):
             try:
@@ -516,9 +518,7 @@ class TraversalRouter(AbstractRouter):
         """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
-        result = await traverse(request, root, path)
-        await notify(IAfterTraversalEvent)
-        return result
+        return await traverse(request, root, path)
 
     @profilable
     async def apply_authorization(self, request: IRequest):
