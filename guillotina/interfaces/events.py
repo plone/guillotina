@@ -151,3 +151,9 @@ class ITraversalRouteMissEvent(ITraversalMissEvent):
 
 class IDatabaseInitializedEvent(Interface):
     database = Attribute('')
+
+
+class IAfterTraversalEvent(Interface):
+    '''When the traversal has been completed, but the request has not
+    been handled yet.
+    '''

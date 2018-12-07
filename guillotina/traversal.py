@@ -516,7 +516,9 @@ class TraversalRouter(AbstractRouter):
         """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
-        return await traverse(request, root, path)
+        result = await traverse(request, root, path)
+        await notify(IAfterTraversalEvent)
+        return result
 
     @profilable
     async def apply_authorization(self, request: IRequest):

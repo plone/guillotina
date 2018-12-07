@@ -1,8 +1,7 @@
 4.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Added after traversal event and emit it [lferran]
 
 4.3.4 (2018-12-06)
 ------------------
@@ -45,9 +44,9 @@
 
   **BREAKING CHANGE**: Async Utilities are not loaded by default so they
   need to be defined on the package configuration on the merging settings at
-  `__init__.py`. 
+  `__init__.py`.
   Utilities are not key mapped, each utility has an id to reflect it.
-  Now config.yaml files only need to define them if you want to overwrite. 
+  Now config.yaml files only need to define them if you want to overwrite.
 
 - Improve Documentation
 
