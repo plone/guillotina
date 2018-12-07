@@ -251,7 +251,7 @@ class MatchInfo(BaseMatchInfo):
     async def handler(self, request):
         """Main handler function for aiohttp."""
         request._view_error = False
-        await notify(BeforeRenderViewEvent(request))
+        await notify(BeforeRenderViewEvent(request, self.view))
         request.record('viewrender')
         if app_settings['check_writable_request'](request):
             try:

@@ -74,8 +74,10 @@ class ObjectMovedEvent(ObjectLocationEvent):
 
 
 @implementer(IBeforeRenderViewEvent)
-class BeforeRenderViewEvent(ObjectEvent):
-    pass
+class BeforeRenderViewEvent:
+    def __init__(self, request, view):
+        self.request = request
+        self.view = view
 
 
 @implementer(IBeforeObjectMovedEvent)
