@@ -73,8 +73,8 @@ class ObjectMovedEvent(ObjectLocationEvent):
     """An object has been moved"""
 
 
-@implementer(IBeforeRenderView)
-class BeforeRenderView(ObjectEvent):
+@implementer(IBeforeRenderViewEvent)
+class BeforeRenderViewEvent(ObjectEvent):
     pass
 
 
