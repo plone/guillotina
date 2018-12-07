@@ -40,6 +40,7 @@ from .events import IBeforeFieldModifiedEvent  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
 from .events import IBeforeObjectMovedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
+from .events import IBeforeRenderViewEvent  # noqa
 from .events import IDatabaseInitializedEvent  # noqa
 from .events import IFileBeforeFinishUploaded  # noqa
 from .events import IFileFinishUploaded  # noqa

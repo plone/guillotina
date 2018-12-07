@@ -151,3 +151,8 @@ class ITraversalRouteMissEvent(ITraversalMissEvent):
 
 class IDatabaseInitializedEvent(Interface):
     database = Attribute('')
+
+
+class IBeforeRenderViewEvent(Interface):
+    '''Right before the view gets rendered
+    '''
