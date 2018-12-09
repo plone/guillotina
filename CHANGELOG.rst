@@ -1,4 +1,4 @@
-4.3.5 (unreleased)
+4.3.5 (2018-12-09)
 ------------------
 
 - Added before render view event [lferran]
