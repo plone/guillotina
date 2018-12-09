@@ -484,3 +484,50 @@ async def test_should_fourohfour_with_invalid_fieldname(container_requester):
             '/db/guillotina/foobar/@download/foobar'
         )
         assert status == 404
+
+
+async def test_file_head(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                '@behaviors': [IAttachment.__identifier__],
+                'id': 'foobar'
+            })
+        )
+        assert status == 201
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/foobar/@upload/file',
+            data=b'X' * 1024 * 1024 * 4,
+            headers={
+                'x-upload-size': str(1024 * 1024 * 4)
+            }
+        )
+        assert status == 200
+
+        response, status, headers = await requester.make_request(
+            'HEAD', '/db/guillotina/foobar/@download/file')
+        assert status == 200
+        assert headers['Content-Length'] == str(1024 * 1024 * 4)
+        assert headers['Content-Type'] == 'application/octet-stream'
+
+
+async def test_file_head_not_found(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                '@behaviors': [IAttachment.__identifier__],
+                'id': 'foobar'
+            })
+        )
+        assert status == 201
+
+        response, status, headers = await requester.make_request(
+            'HEAD', '/db/guillotina/foobar/@download/file', accept='application/json')
+        assert status == 404

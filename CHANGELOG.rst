@@ -1,11 +1,18 @@
 4.3.6 (unreleased)
 ------------------
 
-- Fix Resource.__getattr__() for empty fields with default values
-  [masipcat]
+New:
+
+- Implement HEAD for `@download` endpoint
+  [vangheem]
 
 - Adding the option to define the reader for annotations
   [bloodbare]
+
+Fixes:
+
+- Fix Resource.__getattr__() for empty fields with default values
+  [masipcat]
 
 
 4.3.5 (2018-12-09)

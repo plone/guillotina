@@ -104,6 +104,9 @@ class UploadFile(TraversableFieldService):
     **_traversed_file_doc('Download the content of a file'))
 class DownloadFile(TraversableFieldService):
 
+    async def handle(self, adapter, kwargs):
+        return await adapter.download(**kwargs)
+
     async def __call__(self):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
@@ -113,12 +116,24 @@ class DownloadFile(TraversableFieldService):
         try:
             adapter = get_multi_adapter(
                 (self.context, self.request, self.field), IFileManager)
-            return await adapter.download(**kwargs)
+            return await self.handle(adapter, kwargs)
         except AttributeError:
             # file does not exist
             return HTTPNotFound(content={
                 'reason': 'File does not exist'
             })
+
+
+@configure.service(
+    context=IResource, method='HEAD', permission='guillotina.ViewContent',
+    name='@download/{field_name}')
+@configure.service(
+    context=IResource, method='HEAD', permission='guillotina.ViewContent',
+    name='@download/{field_name}/{filename}')
+class HeadFile(DownloadFile):
+
+    async def handle(self, adapter, kwargs):
+        return await adapter.head(**kwargs)
 
 
 @configure.service(
