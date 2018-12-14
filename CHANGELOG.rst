@@ -1,8 +1,10 @@
 4.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Be able to have dynamic storage with prefixed table names
+  so all dynamic storage dbs are on the same pg database. This managed_transaction
+  can share connections between dynamic storages.
+  [vangheem]
 
 4.3.5 (2018-12-09)
 ------------------

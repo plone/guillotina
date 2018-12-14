@@ -37,6 +37,17 @@ async def test_create_database(container_requester):
         await requester('DELETE', '/@storages/db/foobar')
 
 
+async def test_create_prefixed_database(container_requester):
+    async with container_requester as requester:
+        response, status = await requester('POST', '/@storages/db-prefix', data=json.dumps({
+            'name': 'foobar'
+        }))
+        assert status == 200
+        response, status = await requester('GET', '/@storages/db')
+        assert 'foobar' in response['databases']
+        await requester('DELETE', '/@storages/db-prefix/foobar')
+
+
 async def test_get_database(container_requester):
     async with container_requester as requester:
         await requester('POST', '/@storages/db', data=json.dumps({
@@ -56,6 +67,17 @@ async def test_delete_database(container_requester):
         response, status = await requester('DELETE', '/@storages/db/foobar')
         assert status == 200
         response, status = await requester('GET', '/@storages/db')
+        assert 'foobar' not in response['databases']
+
+
+async def test_delete_prefix_database(container_requester):
+    async with container_requester as requester:
+        await requester('POST', '/@storages/db-prefix', data=json.dumps({
+            'name': 'foobar'
+        }))
+        response, status = await requester('DELETE', '/@storages/db-prefix/foobar')
+        assert status == 200
+        response, status = await requester('GET', '/@storages/db-prefix')
         assert 'foobar' not in response['databases']
 
 

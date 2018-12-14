@@ -147,8 +147,10 @@ class CockroachStorage(pg.PostgresqlStorage):
 
     async def has_unique_constraint(self):
         try:
-            for result in await self._read_conn.fetch('''SHOW CONSTRAINTS FROM objects;'''):
-                if result['Name'] == 'objects_parent_id_id_key':
+            table_name = self.get_table_name('objects')
+            for result in await self._read_conn.fetch(
+                    self.format_sql('''SHOW CONSTRAINTS FROM [objects];''')):
+                if result['Name'] == '{}_parent_id_id_key'.format(table_name):
                     return True
         except asyncpg.exceptions.UndefinedTableError:
             pass
@@ -178,7 +180,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         async with txn._lock:
             try:
                 result = await conn.fetch(
-                    statement_sql,
+                    self.format_sql(statement_sql),
                     oid,                 # The OID of the object
                     txn._tid,            # Our TID
                     len(pickled),        # Len of the object

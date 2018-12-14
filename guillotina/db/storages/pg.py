@@ -282,7 +282,8 @@ class PGVacuum:
         conn = None
         try:
             conn = await self._storage.open()
-            for record in await conn.fetch(GET_TRASHED_OBJECTS):
+            for record in await conn.fetch(
+                    self._storage.format_sql(GET_TRASHED_OBJECTS)):
                 self._queue.put_nowait(record['zoid'])
         except concurrent.futures.TimeoutError:
             log.info('Timed out connecting to storage')
@@ -320,7 +321,8 @@ class PGVacuum:
         '''
         conn = await self._storage.open()
         try:
-            await conn.execute(DELETE_OBJECT, oid)
+            await conn.execute(
+                self._storage.format_sql(DELETE_OBJECT), oid)
         except Exception:
             log.warning('Error deleting trashed object', exc_info=True)
         finally:
@@ -351,9 +353,9 @@ class PostgresqlStorage(BaseStorage):
         'state_size': 'BIGINT NOT NULL',
         'part': 'BIGINT NOT NULL',
         'resource': 'BOOLEAN NOT NULL',
-        'of': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES objects ON DELETE CASCADE',
+        'of': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES [objects] ON DELETE CASCADE',
         'otid': 'BIGINT',
-        'parent_id': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES objects ON DELETE CASCADE',  # parent oid
+        'parent_id': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES [objects] ON DELETE CASCADE',  # parent oid
         'id': 'TEXT',
         'type': 'TEXT NOT NULL',
         'json': 'JSONB',
@@ -362,31 +364,39 @@ class PostgresqlStorage(BaseStorage):
 
     _blob_schema = {
         'bid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL',
-        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL REFERENCES objects ON DELETE CASCADE',
+        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL REFERENCES [objects] ON DELETE CASCADE',
         'chunk_index': 'INT NOT NULL',
         'data': 'BYTEA'
     }
 
     _initialize_statements = [
-        'CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);',
-        'CREATE INDEX IF NOT EXISTS object_of ON objects (of);',
-        'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
-        'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
-        'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
-        'CREATE INDEX IF NOT EXISTS object_type ON objects (type);',
-        'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
-        'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
+        'CREATE INDEX IF NOT EXISTS [object]_tid ON [objects] (tid);',
+        'CREATE INDEX IF NOT EXISTS [object]_of ON [objects] (of);',
+        'CREATE INDEX IF NOT EXISTS [object]_part ON [objects] (part);',
+        'CREATE INDEX IF NOT EXISTS [object]_parent ON [objects] (parent_id);',
+        'CREATE INDEX IF NOT EXISTS [object]_id ON [objects] (id);',
+        'CREATE INDEX IF NOT EXISTS [object]_type ON [objects] (type);',
+        'CREATE INDEX IF NOT EXISTS [blob]_bid ON [blobs] (bid);',
+        'CREATE INDEX IF NOT EXISTS [blob]_zoid ON [blobs] (zoid);',
+        'CREATE INDEX IF NOT EXISTS [blob]_chunk ON [blobs] (chunk_index);',
         'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
     ]
 
-    _unique_constraint = '''ALTER TABLE objects
-                            ADD CONSTRAINT objects_parent_id_id_key
+    _unique_constraint = '''ALTER TABLE [objects]
+                            ADD CONSTRAINT [objects]_parent_id_id_key
                             UNIQUE (parent_id, id)'''
+
+    _sql_replacements = {
+        '[objects]': '{0}objects',
+        '[object]': '{0}object',
+        '[blobs]': '{0}blobs',
+        '[blob]': '{0}blob',
+    }
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
-                 conn_acquire_timeout=20, cache_strategy='dummy', **options):
+                 conn_acquire_timeout=20, cache_strategy='dummy',
+                 table_prefix=None, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
             cache_strategy=cache_strategy)
@@ -401,6 +411,15 @@ class PostgresqlStorage(BaseStorage):
         self._options = options
         self._connection_options = {}
         self._connection_initialized_on = time.time()
+        self._table_prefix = table_prefix
+
+    def format_sql(self, sql_text):
+        for repl, val in self._sql_replacements.items():
+            sql_text = sql_text.replace(repl, val.format(self._table_prefix or ''))
+        return sql_text
+
+    def get_table_name(self, name):
+        return '{0}{1}'.format(self._table_prefix or '', name)
 
     async def finalize(self):
         await self._vacuum.finalize()
@@ -418,15 +437,17 @@ class PostgresqlStorage(BaseStorage):
         # Check DB
         log.info('Creating initial database objects')
         statements = [
-            get_table_definition('objects', self._object_schema),
-            get_table_definition('blobs', self._blob_schema,
-                                 primary_keys=('bid', 'zoid', 'chunk_index'))
+            get_table_definition(
+                self.get_table_name('objects'), self._object_schema),
+            get_table_definition(
+                self.get_table_name('blobs'), self._blob_schema,
+                primary_keys=('bid', 'zoid', 'chunk_index'))
         ]
         statements.extend(self._initialize_statements)
 
         for statement in statements:
             try:
-                await self._read_conn.execute(statement)
+                await self._read_conn.execute(self.format_sql(statement))
             except asyncpg.exceptions.UniqueViolationError:
                 # this is okay on creation, means 2 getting created at same time
                 pass
@@ -456,7 +477,7 @@ class PostgresqlStorage(BaseStorage):
         raise ConflictError('Restarting connection to postgresql')
 
     async def has_unique_constraint(self):
-        result = await self._read_conn.fetch('''
+        result = await self._read_conn.fetch(self.format_sql('''
 SELECT *
 FROM
     information_schema.table_constraints AS tc
@@ -464,8 +485,8 @@ FROM
     ON tc.constraint_name = kcu.constraint_name
     JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
-WHERE tc.constraint_name = 'objects_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
-''')
+WHERE tc.constraint_name = '[objects]_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
+'''))
         return len(result) > 0
 
     async def initialize(self, loop=None, **kw):
@@ -487,34 +508,37 @@ WHERE tc.constraint_name = 'objects_parent_id_id_key' AND tc.constraint_type = '
 
         try:
             await self.initialize_tid_statements()
-            await self._read_conn.execute(CREATE_TRASH)
+            await self._read_conn.execute(self.format_sql(CREATE_TRASH))
         except asyncpg.exceptions.ReadOnlySQLTransactionError:
             # Not necessary for read-only pg
             pass
         except asyncpg.exceptions.UndefinedTableError:
             await self.create()
             # only available on new databases
-            await self._read_conn.execute(self._unique_constraint)
+            await self._read_conn.execute(
+                self.format_sql(self._unique_constraint))
             self._supports_unique_constraints = True
             await self.initialize_tid_statements()
-            await self._read_conn.execute(CREATE_TRASH)
+            await self._read_conn.execute(
+                self.format_sql(CREATE_TRASH))
 
         # migrate to larger VARCHAR size...
-        result = await self._read_conn.fetch("""
+        result = await self._read_conn.fetch(
+            self.format_sql("""
 select * from information_schema.columns
-where table_name='objects'""")
+where table_name='[objects]'"""))
         if result[0]['character_maximum_length'] != MAX_OID_LENGTH:
             log.warn('Migrating VARCHAR key length')
-            await self._read_conn.execute(f'''
-ALTER TABLE objects ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
-ALTER TABLE objects ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
-ALTER TABLE objects ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
-ALTER TABLE blobs ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
-ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+            await self._read_conn.execute(self.format_sql(f'''
+ALTER TABLE [objects] ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})'''))
+            await self._read_conn.execute(self.format_sql(f'''
+ALTER TABLE [objects] ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})'''))
+            await self._read_conn.execute(self.format_sql(f'''
+ALTER TABLE [objects] ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})'''))
+            await self._read_conn.execute(self.format_sql(f'''
+ALTER TABLE [blobs] ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})'''))
+            await self._read_conn.execute(self.format_sql(f'''
+ALTER TABLE [blobs] ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})'''))
 
         self._vacuum = self._vacuum_class(self, loop)
         self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
@@ -536,8 +560,10 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
     async def remove(self):
         """Reset the tables"""
         async with self._pool.acquire() as conn:
-            await conn.execute("DROP TABLE IF EXISTS blobs;")
-            await conn.execute("DROP TABLE IF EXISTS objects;")
+            await conn.execute(
+                self.format_sql("DROP TABLE IF EXISTS [blobs];"))
+            await conn.execute(
+                self.format_sql("DROP TABLE IF EXISTS [objects];"))
 
     async def open(self):
         try:
@@ -560,7 +586,8 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
     async def load(self, txn, oid):
         async with txn._lock:
-            objects = await self.get_one_row(txn, GET_OID, oid)
+            objects = await self.get_one_row(
+                txn, self.format_sql(GET_OID), oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -589,7 +616,7 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
         async with txn._lock:
             try:
                 result = await conn.fetch(
-                    statement_sql,
+                    self.format_sql(statement_sql),
                     oid,                 # The OID of the object
                     txn._tid,            # Our TID
                     len(pickled),        # Len of the object
@@ -642,7 +669,7 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
         conn = await txn.get_connection()
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
-            await conn.execute(TRASH_PARENT_ID, oid)
+            await conn.execute(self.format_sql(TRASH_PARENT_ID), oid)
         txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
@@ -736,9 +763,10 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
                 # if it's too large, we're not going to check on object ids
                 modified_oids = [k for k in txn.modified.keys()]
                 return await self._read_conn.fetch(
-                    TXN_CONFLICTS_ON_OIDS, txn._tid, modified_oids)
+                    self.format_sql(TXN_CONFLICTS_ON_OIDS), txn._tid, modified_oids)
             else:
-                return await self._read_conn.fetch(TXN_CONFLICTS, txn._tid)
+                return await self._read_conn.fetch(
+                    self.format_sql(TXN_CONFLICTS), txn._tid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
@@ -766,29 +794,34 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
         conn = await txn.get_connection()
         keys = []
         for record in await conn.fetch(
-                BATCHED_GET_CHILDREN_KEYS, oid, page_size, (page - 1) * page_size):
+                self.format_sql(BATCHED_GET_CHILDREN_KEYS),
+                oid, page_size, (page - 1) * page_size):
             keys.append(record['id'])
         return keys
 
     async def keys(self, txn, oid):
         conn = await txn.get_connection()
         async with txn._lock:
-            result = await conn.fetch(GET_CHILDREN_KEYS, oid)
+            result = await conn.fetch(
+                self.format_sql(GET_CHILDREN_KEYS), oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
         async with txn._lock:
-            result = await self.get_one_row(txn, GET_CHILD, parent_oid, id)
+            result = await self.get_one_row(
+                txn, self.format_sql(GET_CHILD), parent_oid, id)
         return result
 
     async def get_children(self, txn, parent_oid, ids):
         conn = await txn.get_connection()
         async with txn._lock:
-            return await conn.fetch(GET_CHILDREN_BATCH, parent_oid, ids)
+            return await conn.fetch(
+                self.format_sql(GET_CHILDREN_BATCH), parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
         async with txn._lock:
-            result = await self.get_one_row(txn, EXIST_CHILD, parent_oid, id)
+            result = await self.get_one_row(
+                txn, self.format_sql(EXIST_CHILD), parent_oid, id)
         if result is None:
             return False
         else:
@@ -797,19 +830,21 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
     async def len(self, txn, oid):
         conn = await txn.get_connection()
         async with txn._lock:
-            result = await conn.fetchval(NUM_CHILDREN, oid)
+            result = await conn.fetchval(
+                self.format_sql(NUM_CHILDREN), oid)
         return result
 
     async def items(self, txn, oid):
         conn = await txn.get_connection()
-        async for record in conn.cursor(GET_CHILDREN, oid):
+        async for record in conn.cursor(self.format_sql(GET_CHILDREN), oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
     async def get_annotation(self, txn, oid, id):
         async with txn._lock:
-            result = await self.get_one_row(txn, GET_ANNOTATION, oid, id, prepare=True)
+            result = await self.get_one_row(
+                txn, self.format_sql(GET_ANNOTATION), oid, id, prepare=True)
             if result is not None and result['parent_id'] == TRASHED_ID:
                 result = None
         return result
@@ -817,7 +852,8 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
     async def get_annotation_keys(self, txn, oid):
         conn = await txn.get_connection()
         async with txn._lock:
-            result = await conn.fetch(GET_ANNOTATIONS_KEYS, oid)
+            result = await conn.fetch(
+                self.format_sql(GET_ANNOTATIONS_KEYS), oid)
         items = []
         for item in result:
             if item['parent_id'] != TRASHED_ID:
@@ -826,23 +862,25 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         async with txn._lock:
-            result = await self.get_one_row(txn, HAS_OBJECT, oid)
+            result = await self.get_one_row(
+                txn, self.format_sql(HAS_OBJECT), oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
             conn = await txn.get_connection()
             async with txn._lock:
-                await conn.execute(f'''INSERT INTO objects
+                await conn.execute(self.format_sql(f'''INSERT INTO objects
 (zoid, tid, state_size, part, resource, type)
-VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
+VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')'''), oid)
         conn = await txn.get_connection()
         async with txn._lock:
             return await conn.execute(
-                INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
+                self.format_sql(INSERT_BLOB_CHUNK), bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         async with txn._lock:
-            return await self.get_one_row(txn, READ_BLOB_CHUNK, bid, chunk)
+            return await self.get_one_row(
+                txn, self.format_sql(READ_BLOB_CHUNK), bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
         conn = await txn.get_connection()
@@ -854,24 +892,25 @@ VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
     async def del_blob(self, txn, bid):
         conn = await txn.get_connection()
         async with txn._lock:
-            await conn.execute(DELETE_BLOB, bid)
+            await conn.execute(self.format_sql(DELETE_BLOB), bid)
 
     async def get_total_number_of_objects(self, txn):
         conn = await txn.get_connection()
         async with txn._lock:
-            result = await conn.fetchval(NUM_ROWS)
+            result = await conn.fetchval(self.format_sql(NUM_ROWS))
         return result
 
     async def get_total_number_of_resources(self, txn):
         conn = await txn.get_connection()
         async with txn._lock:
-            result = await conn.fetchval(NUM_RESOURCES)
+            result = await conn.fetchval(self.format_sql(NUM_RESOURCES))
         return result
 
     async def get_total_resources_of_type(self, txn, type_):
         conn = await txn.get_connection()
         async with txn._lock:
-            result = await conn.fetchval(NUM_RESOURCES_BY_TYPE, type_)
+            result = await conn.fetchval(
+                self.format_sql(NUM_RESOURCES_BY_TYPE), type_)
         return result
 
     # Massive treatment without security
@@ -880,6 +919,7 @@ VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
         async with txn._lock:
             keys = []
             for record in await conn.fetch(
-                    RESOURCES_BY_TYPE, type_, page_size, (page - 1) * page_size):
+                    self.format_sql(RESOURCES_BY_TYPE),
+                    type_, page_size, (page - 1) * page_size):
                 keys.append(record)
             return keys

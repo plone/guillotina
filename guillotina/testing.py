@@ -22,6 +22,11 @@ TESTING_SETTINGS: Dict[str, Any] = {
         "db": {
             "storage": "DUMMY",
             "name": "guillotina"
+        },
+        "db-prefix": {
+            "storage": "postgres",
+            "name": "guillotina",
+            "mode": "table_prefix"
         }
     },
     "port": TESTING_PORT,

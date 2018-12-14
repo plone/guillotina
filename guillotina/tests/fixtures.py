@@ -93,9 +93,14 @@ def get_db_settings():
             settings['storages']['db'], **options,
             user='root',
             storage='cockroach')
+        configure_db(
+            settings['storages']['db-prefix'], **options,
+            user='root',
+            storage='cockroach')
     else:
         configure_db(settings['databases']['db'], **options)
         configure_db(settings['storages']['db'], **options)
+        configure_db(settings['storages']['db-prefix'], **options)
     return settings
 
 

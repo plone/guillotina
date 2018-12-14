@@ -119,7 +119,13 @@ class PostgresqlDatabaseManager:
         self.app = app
         self.config = storage_config
 
+    @property
+    def prefix_mode(self):
+        return self.config.get('mode') == 'table_prefix'
+
     def get_dsn(self, name: str=None) -> str:
+        if self.prefix_mode:
+            return self.config['dsn']
         if isinstance(self.config['dsn'], str):
             dsn = self.config['dsn']
         else:
@@ -142,21 +148,36 @@ class PostgresqlDatabaseManager:
 
     async def get_names(self) -> list:
         conn = await self.get_connection()
+        if self.prefix_mode:
+            try:
+                result = await conn.fetch('''
+    SELECT table_name FROM information_schema.tables WHERE table_schema='public'
+    ''')
+                return [
+                    item['table_name'].replace('_objects', '') for item in result
+                    if item['table_name'].endswith('_objects')]
+            finally:
+                await conn.close()
+            return []
         try:
             result = await conn.fetch('''SELECT datname FROM pg_database
 WHERE datistemplate = false;''')
             return [item['datname'] for item in result]
         finally:
             await conn.close()
+        return []
 
     async def create(self, name: str) -> bool:
-        conn = await self.get_connection()
-        try:
-            await conn.execute(CREATE_DB.format(_safe_db_name(name)))
+        if not self.prefix_mode:
+            conn = await self.get_connection()
+            try:
+                await conn.execute(CREATE_DB.format(_safe_db_name(name)))
+                return True
+            finally:
+                await conn.close()
+            return False
+        else:
             return True
-        finally:
-            await conn.close()
-        return False
 
     async def delete(self, name: str) -> bool:
         if name in self.app:
@@ -164,6 +185,17 @@ WHERE datistemplate = false;''')
             del self.app[name]
 
         conn = await self.get_connection()
+
+        if self.prefix_mode:
+            try:
+                for table_name in ('blobs', 'objects'):
+                    await conn.execute(
+                        'DROP TABLE {}_{}'.format(name, table_name))
+                    return True
+            finally:
+                await conn.close()
+            return False
+
         try:
             await conn.execute(DELETE_DB.format(_safe_db_name(name)))
             return True
@@ -175,6 +207,8 @@ WHERE datistemplate = false;''')
         if name not in self.app:
             config = deepcopy(self.config)
             config['dsn'] = self.get_dsn(name)
+            if self.prefix_mode:
+                config['table_prefix'] = name + '_'
             factory = get_utility(
                 IDatabaseConfigurationFactory, name=config['storage'])
             self.app[name] = await apply_coroutine(factory, name, config)
@@ -215,6 +249,15 @@ class CockroachDatabaseManager(PostgresqlDatabaseManager):
 
     async def get_names(self) -> list:
         conn = await self.get_connection()
+        if self.prefix_mode:
+            try:
+                result = await conn.fetch('''SHOW TABLES''')
+                return [
+                    item['table_name'].replace('_objects', '') for item in result
+                    if item['table_name'].endswith('_objects')]
+            finally:
+                await conn.close()
+            return []
         try:
             result = await conn.fetch('''SHOW DATABASES;''')
             return [item['Database'] for item in result
