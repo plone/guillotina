@@ -115,6 +115,8 @@ def _safe_db_name(name):
     name='postgresql')
 class PostgresqlDatabaseManager:
 
+    _pools = {}
+
     def __init__(self, app: IApplication, storage_config: dict) -> None:
         self.app = app
         self.config = storage_config
@@ -125,7 +127,10 @@ class PostgresqlDatabaseManager:
 
     def get_dsn(self, name: str=None) -> str:
         if self.prefix_mode:
-            return self.config['dsn']
+            if isinstance(self.config['dsn'], str):
+                return self.config['dsn']
+            else:
+                return _convert_dsn(self.config['dsn'])
         if isinstance(self.config['dsn'], str):
             dsn = self.config['dsn']
         else:
@@ -177,7 +182,8 @@ WHERE datistemplate = false;''')
                 await conn.close()
             return False
         else:
-            return True
+            db = await self.get_database(name)
+            return db is not None
 
     async def delete(self, name: str) -> bool:
         if name in self.app:
@@ -209,9 +215,17 @@ WHERE datistemplate = false;''')
             config['dsn'] = self.get_dsn(name)
             if self.prefix_mode:
                 config['table_prefix'] = name + '_'
+            if self.config['storage_id'] in self._pools:
+                config['pool'] = self._pools[self.config['storage_id']]
             factory = get_utility(
                 IDatabaseConfigurationFactory, name=config['storage'])
             self.app[name] = await apply_coroutine(factory, name, config)
+
+            if self.config['storage_id'] not in self._pools:
+                storage = self.app[name].storage
+                self._pools[self.config['storage_id']] = await storage.get_pool(
+                    **_get_connection_options(self.config)
+                )
             await notify(DatabaseInitializedEvent(self.app[name]))
 
         return self.app[name]

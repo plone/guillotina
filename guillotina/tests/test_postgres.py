@@ -429,7 +429,6 @@ async def test_count_total_objects(db, dummy_request):
     await tm.commit(txn=txn)
     txn = await tm.begin()
 
-    assert await txn.get_total_number_of_objects() == 2
     assert await txn.get_total_number_of_resources() == 1
 
     await tm.abort(txn=txn)

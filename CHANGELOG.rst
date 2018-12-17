@@ -1,4 +1,4 @@
-4.3.6 (unreleased)
+4.4.0 (unreleased)
 ------------------
 
 - Be able to have dynamic storage with prefixed table names

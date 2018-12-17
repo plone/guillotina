@@ -37,13 +37,14 @@ async def test_create_database(container_requester):
         await requester('DELETE', '/@storages/db/foobar')
 
 
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
 async def test_create_prefixed_database(container_requester):
     async with container_requester as requester:
         response, status = await requester('POST', '/@storages/db-prefix', data=json.dumps({
             'name': 'foobar'
         }))
         assert status == 200
-        response, status = await requester('GET', '/@storages/db')
+        response, status = await requester('GET', '/@storages/db-prefix')
         assert 'foobar' in response['databases']
         await requester('DELETE', '/@storages/db-prefix/foobar')
 
@@ -70,6 +71,7 @@ async def test_delete_database(container_requester):
         assert 'foobar' not in response['databases']
 
 
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
 async def test_delete_prefix_database(container_requester):
     async with container_requester as requester:
         await requester('POST', '/@storages/db-prefix', data=json.dumps({

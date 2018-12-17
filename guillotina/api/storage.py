@@ -25,6 +25,7 @@ async def storages_get(context, request):
 def _get_storage_config(storage_id):
     for key, dbconfig in list_or_dict_items(app_settings['storages']):
         if key == storage_id:
+            dbconfig['storage_id'] = storage_id
             return dbconfig
 
 

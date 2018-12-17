@@ -101,9 +101,6 @@ class BaseStorage:
     async def del_blob(self, txn, bid):
         raise NotImplemented()  # pragma: no cover
 
-    async def get_total_number_of_objects(self, txn):
-        raise NotImplemented()  # pragma: no cover
-
     async def get_total_number_of_resources(self, txn):
         raise NotImplemented()  # pragma: no cover
 

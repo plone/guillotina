@@ -27,51 +27,51 @@ log = logging.getLogger("guillotina.storage")
 # it can cause deadlocks on the database--we need to resolve them ourselves
 GET_OID = f"""
     SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
-    FROM objects
+    FROM [objects]
     WHERE zoid = $1::varchar({MAX_OID_LENGTH})
     """
 
 GET_CHILDREN_KEYS = f"""
     SELECT id
-    FROM objects
+    FROM [objects]
     WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
     """
 
 GET_ANNOTATIONS_KEYS = f"""
     SELECT id, parent_id
-    FROM objects
+    FROM [objects]
     WHERE of = $1::varchar({MAX_OID_LENGTH})
     """
 
 GET_CHILD = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
+    FROM [objects]
     WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
     """
 
 GET_CHILDREN_BATCH = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
+    FROM [objects]
     WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = ANY($2)
     """
 
 EXIST_CHILD = f"""
     SELECT zoid
-    FROM objects
+    FROM [objects]
     WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
     """
 
 
 HAS_OBJECT = f"""
     SELECT zoid
-    FROM objects
+    FROM [objects]
     WHERE zoid = $1::varchar({MAX_OID_LENGTH})
     """
 
 
 GET_ANNOTATION = f"""
     SELECT zoid, tid, state_size, resource, type, state, id, parent_id
-    FROM objects
+    FROM [objects]
     WHERE
         of = $1::varchar({MAX_OID_LENGTH}) AND
         id = $2::text
@@ -87,7 +87,7 @@ SELECT count(*) FROM rows""".format(txt)
 
 # upsert without checking matching tids on updated object
 NAIVE_UPSERT = f"""
-INSERT INTO objects
+INSERT INTO [objects]
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
 VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
         $6::varchar({MAX_OID_LENGTH}), $7::int, $8::varchar({MAX_OID_LENGTH}),
@@ -113,7 +113,7 @@ NAIVE_UPSERT = _wrap_return_count(NAIVE_UPSERT)
 
 # update without checking matching tids on updated object
 NAIVE_UPDATE = f"""
-UPDATE objects
+UPDATE [objects]
 SET
     tid = $2::int,
     state_size = $3::int,
@@ -136,19 +136,19 @@ NEXT_TID = "SELECT nextval('tid_sequence');"
 MAX_TID = "SELECT last_value FROM tid_sequence;"
 
 
-NUM_CHILDREN = f"SELECT count(*) FROM objects WHERE parent_id = $1::varchar({MAX_OID_LENGTH})"
+NUM_CHILDREN = f"SELECT count(*) FROM [objects] WHERE parent_id = $1::varchar({MAX_OID_LENGTH})"
 
 
-NUM_ROWS = "SELECT count(*) FROM objects"
+NUM_ROWS = "SELECT count(*) FROM [objects]"
 
 
-NUM_RESOURCES = "SELECT count(*) FROM objects WHERE resource is TRUE"
+NUM_RESOURCES = "SELECT count(*) FROM [objects] WHERE resource is TRUE"
 
-NUM_RESOURCES_BY_TYPE = "SELECT count(*) FROM objects WHERE type=$1::TEXT"
+NUM_RESOURCES_BY_TYPE = "SELECT count(*) FROM [objects] WHERE type=$1::TEXT"
 
 RESOURCES_BY_TYPE = """
     SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
+    FROM [objects]
     WHERE type=$1::TEXT
     ORDER BY zoid
     LIMIT $2::int
@@ -158,13 +158,13 @@ RESOURCES_BY_TYPE = """
 
 GET_CHILDREN = f"""
     SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
+    FROM [objects]
     WHERE parent_id = $1::VARCHAR({MAX_OID_LENGTH})
     """
 
 
 TRASH_PARENT_ID = f"""
-UPDATE objects
+UPDATE [objects]
 SET
     parent_id = '{TRASHED_ID}'
 WHERE
@@ -173,7 +173,7 @@ WHERE
 
 
 INSERT_BLOB_CHUNK = f"""
-    INSERT INTO blobs
+    INSERT INTO [blobs]
     (bid, zoid, chunk_index, data)
     VALUES ($1::VARCHAR({MAX_OID_LENGTH}), $2::VARCHAR({MAX_OID_LENGTH}),
             $3::INT, $4::BYTEA)
@@ -181,33 +181,33 @@ INSERT_BLOB_CHUNK = f"""
 
 
 READ_BLOB_CHUNKS = f"""
-    SELECT * from blobs
+    SELECT * from [blobs]
     WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
     ORDER BY chunk_index
 """
 
 READ_BLOB_CHUNK = f"""
-    SELECT * from blobs
+    SELECT * from [blobs]
     WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
     AND chunk_index = $2::int
 """
 
 
 DELETE_BLOB = f"""
-    DELETE FROM blobs WHERE bid = $1::VARCHAR({MAX_OID_LENGTH});
+    DELETE FROM [blobs] WHERE bid = $1::VARCHAR({MAX_OID_LENGTH});
 """
 
 
 TXN_CONFLICTS = """
     SELECT zoid, tid, state_size, resource, type, id
-    FROM objects
+    FROM [objects]
     WHERE tid > $1"""
 TXN_CONFLICTS_ON_OIDS = TXN_CONFLICTS + ' AND zoid = ANY($2)'
 
 
 BATCHED_GET_CHILDREN_KEYS = f"""
     SELECT id
-    FROM objects
+    FROM [objects]
     WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
     ORDER BY zoid
     LIMIT $2::int
@@ -215,18 +215,18 @@ BATCHED_GET_CHILDREN_KEYS = f"""
     """
 
 DELETE_OBJECT = f"""
-DELETE FROM objects
+DELETE FROM [objects]
 WHERE zoid = $1::varchar({MAX_OID_LENGTH});
 """
 
 GET_TRASHED_OBJECTS = f"""
-SELECT zoid from objects where parent_id = '{TRASHED_ID}';
+SELECT zoid from [objects] where parent_id = '{TRASHED_ID}';
 """
 
 CREATE_TRASH = f'''
-INSERT INTO objects (zoid, tid, state_size, part, resource, type)
+INSERT INTO [objects] (zoid, tid, state_size, part, resource, type)
 SELECT '{TRASHED_ID}', 0, 0, 0, FALSE, 'TRASH_REF'
-WHERE NOT EXISTS (SELECT * FROM objects WHERE zoid = '{TRASHED_ID}')
+WHERE NOT EXISTS (SELECT * FROM [objects] WHERE zoid = '{TRASHED_ID}')
 RETURNING id;
 '''
 
@@ -396,11 +396,12 @@ class PostgresqlStorage(BaseStorage):
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
                  conn_acquire_timeout=20, cache_strategy='dummy',
-                 table_prefix=None, **options):
+                 table_prefix=None, pool=None, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
             cache_strategy=cache_strategy)
         self._dsn = dsn
+        self._pool = pool
         self._pool_size = pool_size
         self._partition_class = partition
         self._read_only = read_only
@@ -415,7 +416,8 @@ class PostgresqlStorage(BaseStorage):
 
     def format_sql(self, sql_text):
         for repl, val in self._sql_replacements.items():
-            sql_text = sql_text.replace(repl, val.format(self._table_prefix or ''))
+            sql_text = sql_text.replace(
+                repl, val.format(self._table_prefix or ''))
         return sql_text
 
     def get_table_name(self, name):
@@ -447,7 +449,9 @@ class PostgresqlStorage(BaseStorage):
 
         for statement in statements:
             try:
-                await self._read_conn.execute(self.format_sql(statement))
+                sql = self.format_sql(statement)
+                print(sql)
+                await self._read_conn.execute(sql)
             except asyncpg.exceptions.UniqueViolationError:
                 # this is okay on creation, means 2 getting created at same time
                 pass
@@ -489,17 +493,22 @@ WHERE tc.constraint_name = '[objects]_parent_id_id_key' AND tc.constraint_type =
 '''))
         return len(result) > 0
 
+    async def get_pool(self, loop=None, **kw):
+        if self._pool is None:
+            self._pool = await asyncpg.create_pool(
+                dsn=self._dsn,
+                max_size=self._pool_size,
+                min_size=2,
+                connection_class=app_settings['pg_connection_class'],
+                loop=loop,
+                **kw)
+        return self._pool
+
     async def initialize(self, loop=None, **kw):
         self._connection_options = kw
         if loop is None:
             loop = asyncio.get_event_loop()
-        self._pool = await asyncpg.create_pool(
-            dsn=self._dsn,
-            max_size=self._pool_size,
-            min_size=2,
-            connection_class=app_settings['pg_connection_class'],
-            loop=loop,
-            **kw)
+        await self.get_pool(loop, **kw)
 
         # shared read connection on all transactions
         self._read_conn = await self.open()
@@ -527,7 +536,7 @@ WHERE tc.constraint_name = '[objects]_parent_id_id_key' AND tc.constraint_type =
             self.format_sql("""
 select * from information_schema.columns
 where table_name='[objects]'"""))
-        if result[0]['character_maximum_length'] != MAX_OID_LENGTH:
+        if len(result) > 0 and result[0]['character_maximum_length'] != MAX_OID_LENGTH:
             log.warn('Migrating VARCHAR key length')
             await self._read_conn.execute(self.format_sql(f'''
 ALTER TABLE [objects] ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})'''))
@@ -869,7 +878,7 @@ ALTER TABLE [blobs] ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})'''))
             # if so, create a stub for it here...
             conn = await txn.get_connection()
             async with txn._lock:
-                await conn.execute(self.format_sql(f'''INSERT INTO objects
+                await conn.execute(self.format_sql(f'''INSERT INTO [objects]
 (zoid, tid, state_size, part, resource, type)
 VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')'''), oid)
         conn = await txn.get_connection()

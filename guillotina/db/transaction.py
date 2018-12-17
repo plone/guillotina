@@ -526,9 +526,6 @@ class Transaction(object):
     async def read_blob_chunks(self, bid):
         return await self._manager._storage.read_blob_chunks(self, bid)
 
-    async def get_total_number_of_objects(self):
-        return await self._manager._storage.get_total_number_of_objects(self)
-
     async def get_total_number_of_resources(self):
         return await self._manager._storage.get_total_number_of_resources(self)
 
