@@ -4,6 +4,9 @@
 - Fix Resource.__getattr__() for empty fields with default values
   [masipcat]
 
+- Adding the option to define the reader for annotations
+  [bloodbare]
+
 
 4.3.5 (2018-12-09)
 ------------------
