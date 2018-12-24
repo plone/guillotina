@@ -25,7 +25,7 @@ class ICustomContentType(IItem):
         key_type=TextLine(),
         value_type=TextLine(),
         required=False,
-        default={}
+        defaultFactory=dict
     )
 
 
@@ -165,6 +165,6 @@ async def test_getattr_set_default(container_requester):
     images1 = custom_content.images
     images2 = custom_content.images
 
-    # Assert that obj.__getattr__() returns same instance for empty fields with
-    # default value
+    # Assert that obj.__getattr__() returns always same instance of default value
+    # for empty fields
     assert id(images1) == id(images2)

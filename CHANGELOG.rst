@@ -1,7 +1,8 @@
 4.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix Resource.__getattr__() for empty fields with default values
+  [masipcat]
 
 
 4.3.5 (2018-12-09)
