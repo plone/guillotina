@@ -9,11 +9,32 @@ from guillotina.content import load_cached_schema
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IItem
 from guillotina.interfaces.types import IConstrainTypes
+from guillotina.schema import Dict
+from guillotina.schema import TextLine
 from guillotina.tests import utils
 
 import pickle
 import pytest
+
+
+class ICustomContentType(IItem):
+
+    images = Dict(
+        key_type=TextLine(),
+        value_type=TextLine(),
+        required=False,
+        defaultFactory=dict
+    )
+
+
+@configure.contenttype(
+    type_name="CustomContentType",
+    schema=ICustomContentType
+)
+class CustomContentType(Item):
+    pass
 
 
 @pytest.mark.usefixtures("dummy_request")
@@ -136,3 +157,16 @@ def test_base_object():
         assert getattr(new_item, name) != 'foobar'
         assert name not in item.__dict__
         assert attr not in item.__dict__
+
+
+async def test_getattr_set_default(container_requester):
+    custom_content = await create_content('CustomContentType')
+
+    images1 = custom_content.images
+    images2 = custom_content.images
+
+    assert isinstance(images1, dict)
+
+    # Assert that obj.__getattr__() returns always same instance of default value
+    # for empty fields
+    assert id(images1) == id(images2)

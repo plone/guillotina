@@ -261,6 +261,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             name
         )
         if value is not _marker:
+            setattr(self, name, value)
             return value
         raise AttributeError(name)
 
