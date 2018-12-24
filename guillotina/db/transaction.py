@@ -5,7 +5,7 @@ from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
-from guillotina.db.reader import reader
+from guillotina.db.reader import reader as default_reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RequestNotFound
@@ -288,7 +288,7 @@ class Transaction(object):
         if result is None:
             result = await self._get(oid)
 
-        obj = reader(result)
+        obj = default_reader(result)
         obj._p_jar = self
         if obj.__immutable_cache__:
             # ttl of zero means we want to provide a hard cache here
@@ -427,7 +427,7 @@ class Transaction(object):
         return self._fill_object(result, parent)
 
     def _fill_object(self, item, parent):
-        obj = reader(item)
+        obj = default_reader(item)
         obj.__parent__ = parent
         obj._p_jar = self
         return obj
@@ -499,11 +499,14 @@ class Transaction(object):
         return result
 
     @profilable
-    async def get_annotation(self, base_obj, id):
+    async def get_annotation(self, base_obj, id, reader=None):
         result = await self._get_annotation(base_obj, id)
         if result == _EMPTY:
             raise KeyError(id)
-        obj = reader(result)
+        if reader is None:
+            obj = default_reader(result)
+        else:
+            obj = reader(result)
         obj.__of__ = base_obj._p_oid
         obj._p_jar = self
         return obj

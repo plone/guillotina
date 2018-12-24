@@ -43,14 +43,14 @@ class AnnotationsAdapter(object):
             return annotations[key]
         return default
 
-    async def async_get(self, key, default=None):
+    async def async_get(self, key, default=None, reader=None):
         annotations = self.obj.__gannotations__
         element = annotations.get(key, _marker)
         if element is _marker:
             # Get from DB
             if self.obj._p_jar is not None:
                 try:
-                    obj = await self.obj._p_jar.get_annotation(self.obj, key)
+                    obj = await self.obj._p_jar.get_annotation(self.obj, key, reader=reader)
                 except KeyError:
                     obj = None
                 if obj is not None:
