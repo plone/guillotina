@@ -165,6 +165,8 @@ async def test_getattr_set_default(container_requester):
     images1 = custom_content.images
     images2 = custom_content.images
 
+    assert isinstance(images1, dict)
+
     # Assert that obj.__getattr__() returns always same instance of default value
     # for empty fields
     assert id(images1) == id(images2)
