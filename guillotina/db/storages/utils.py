@@ -9,3 +9,22 @@ def get_table_definition(name, schema, primary_keys=[]):
         ',\n'.join('{} {}'.format(c, d) for c, d in schema.items()),
         pk
     )
+
+
+_statements = {}
+
+def register_sql(name, sql):
+    _statements[name] = sql
+
+
+class SQLStatements:
+
+    def __init__(self):
+        self._cached = {}
+
+    def get(self, name, table_name):
+        if name in self._cached:
+            return self._cached[name]
+        sql = _statements[name].format(table_name=table_name)
+        self._cached[name] = sql
+        return sql

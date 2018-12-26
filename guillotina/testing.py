@@ -16,6 +16,12 @@ TESTING_SETTINGS: Dict[str, Any] = {
         "db": {
             "storage": "DUMMY",
             "name": "guillotina"
+        },
+        "db-custom": {
+            "storage": "DUMMY",
+            "name": "guillotina",
+            "objects_table_name": "foobar",
+            "blobs_table_name": "foobar_blobs"
         }
     },
     "storages": {
