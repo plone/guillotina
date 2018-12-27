@@ -1,19 +1,19 @@
+import asyncpg
 from guillotina import glogging
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages import pg
+from guillotina.db.storages.utils import register_sql
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 
-import asyncpg
-
 
 logger = glogging.getLogger('guillotina')
 
 # upsert without checking matching tids on updated object
-NAIVE_UPSERT = f"""
-INSERT INTO objects
+register_sql('CR_NAIVE_UPSERT', f"""
+INSERT INTO {{table_name}}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
 VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
         $6::varchar({MAX_OID_LENGTH}), $7::int, $8::varchar({MAX_OID_LENGTH}),
@@ -30,12 +30,12 @@ DO UPDATE SET
     id = EXCLUDED.id,
     type = EXCLUDED.type,
     state = EXCLUDED.state
-RETURNING NOTHING"""
+RETURNING NOTHING""")
 
 
 # update without checking matching tids on updated object
-UPDATE = f"""
-UPDATE objects
+register_sql('CR_UPDATE', f"""
+UPDATE {{table_name}}
 SET
     tid = $2::int,
     state_size = $3::int,
@@ -50,7 +50,7 @@ SET
 WHERE
     zoid = $1::varchar({MAX_OID_LENGTH})
     AND tid = $7::int
-RETURNING tid, otid"""
+RETURNING tid, otid""")
 
 
 NEXT_TID = """SELECT unique_rowid()"""
@@ -147,8 +147,9 @@ class CockroachStorage(pg.PostgresqlStorage):
 
     async def has_unique_constraint(self):
         try:
-            for result in await self._read_conn.fetch('''SHOW CONSTRAINTS FROM objects;'''):
-                if result['Name'] == 'objects_parent_id_id_key':
+            for result in await self._read_conn.fetch(
+                    '''SHOW CONSTRAINTS FROM {};'''.format(self._objects_table_name)):
+                if result['Name'] == '{}_parent_id_id_key'.format(self._objects_table_name):
                     return True
         except asyncpg.exceptions.UndefinedTableError:
             pass
@@ -167,11 +168,11 @@ class CockroachStorage(pg.PostgresqlStorage):
         if part is None:
             part = 0
 
-        statement_sql = NAIVE_UPSERT
+        statement_sql = self._sql.get('CR_NAIVE_UPSERT', self._objects_table_name)
         update = False
         if not obj.__new_marker__ and obj._p_serial is not None:
             # we should be confident this is an object update
-            statement_sql = UPDATE
+            statement_sql = self._sql.get('CR_UPDATE', self._objects_table_name)
             update = True
 
         conn = await txn.get_connection()

@@ -25,6 +25,7 @@ async def storages_get(context, request):
 def _get_storage_config(storage_id):
     for key, dbconfig in list_or_dict_items(app_settings['storages']):
         if key == storage_id:
+            dbconfig['storage_id'] = storage_id
             return dbconfig
 
 
@@ -38,8 +39,9 @@ async def storage_get(context, request):
         raise HTTPNotFound(content={
             'reason': f'Storage {storage_id}'
         })
+    manager = config.get('type', config['storage'])
     factory = get_adapter(context, IDatabaseManager,
-                          name=config['storage'], args=[config])
+                          name=manager, args=[config])
     return {
         'id': storage_id,
         'type': config['storage'],
@@ -56,8 +58,9 @@ async def storage_create_db(context, request):
     if config is None:
         raise HTTPNotFound(content={
             'reason': f'Storage {storage_id}'})
+    manager = config.get('type', config['storage'])
     factory = get_adapter(context, IDatabaseManager,
-                          name=config['storage'], args=[config])
+                          name=manager, args=[config])
     data = await request.json()
     name = data['name']
     assert name == re.escape(name)
@@ -73,8 +76,9 @@ async def delete_db(context, request):
     if config is None:
         raise HTTPNotFound(content={
             'reason': f'Storage {storage_id}'})
+    manager = config.get('type', config['storage'])
     factory = get_adapter(context, IDatabaseManager,
-                          name=config['storage'], args=[config])
+                          name=manager, args=[config])
     assert request.matchdict['db_id'] in await factory.get_names()
     await factory.delete(request.matchdict['db_id'])
 
@@ -88,8 +92,9 @@ async def get_db(context, request):
     if config is None:
         raise HTTPNotFound(content={
             'reason': f'Storage {storage_id}'})
+    manager = config.get('type', config['storage'])
     factory = get_adapter(context, IDatabaseManager,
-                          name=config['storage'], args=[config])
+                          name=manager, args=[config])
     db_id = request.matchdict['db_id']
     db = await factory.get_database(db_id)
     return {

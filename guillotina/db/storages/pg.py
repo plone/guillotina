@@ -1,23 +1,25 @@
+import asyncio
+import concurrent
+import logging
+import time
 from asyncio import shield
+
+import asyncpg
+import asyncpg.connection
+import ujson
 from guillotina._settings import app_settings
 from guillotina.db import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages.base import BaseStorage
+from guillotina.db.storages.utils import SQLStatements
 from guillotina.db.storages.utils import get_table_definition
+from guillotina.db.storages.utils import register_sql
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
 from zope.interface import implementer
-
-import asyncio
-import asyncpg
-import asyncpg.connection
-import concurrent
-import logging
-import time
-import ujson
 
 
 log = logging.getLogger("guillotina.storage")
@@ -25,57 +27,58 @@ log = logging.getLogger("guillotina.storage")
 
 # we can not use FOR UPDATE or FOR SHARE unfortunately because
 # it can cause deadlocks on the database--we need to resolve them ourselves
-GET_OID = f"""
-    SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
-    FROM objects
-    WHERE zoid = $1::varchar({MAX_OID_LENGTH})
-    """
+register_sql('GET_OID', f"""
+SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
+FROM {{table_name}}
+WHERE zoid = $1::varchar({MAX_OID_LENGTH})
+""")
 
-GET_CHILDREN_KEYS = f"""
-    SELECT id
-    FROM objects
-    WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
-    """
-
-GET_ANNOTATIONS_KEYS = f"""
-    SELECT id, parent_id
-    FROM objects
-    WHERE of = $1::varchar({MAX_OID_LENGTH})
-    """
-
-GET_CHILD = f"""
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
-    """
-
-GET_CHILDREN_BATCH = f"""
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = ANY($2)
-    """
-
-EXIST_CHILD = f"""
-    SELECT zoid
-    FROM objects
-    WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
-    """
+register_sql('GET_CHILDREN_KEYS', f"""
+SELECT id
+FROM {{table_name}}
+WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
+""")
 
 
-HAS_OBJECT = f"""
-    SELECT zoid
-    FROM objects
-    WHERE zoid = $1::varchar({MAX_OID_LENGTH})
-    """
+register_sql('GET_ANNOTATIONS_KEYS', f"""
+SELECT id, parent_id
+FROM {{table_name}}
+WHERE of = $1::varchar({MAX_OID_LENGTH})
+""")
+
+register_sql('GET_CHILD', f"""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {{table_name}}
+WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
+""")
+
+register_sql('GET_CHILDREN_BATCH', f"""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {{table_name}}
+WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = ANY($2)
+""")
+
+register_sql('EXIST_CHILD', f"""
+SELECT zoid
+FROM {{table_name}}
+WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
+""")
 
 
-GET_ANNOTATION = f"""
-    SELECT zoid, tid, state_size, resource, type, state, id, parent_id
-    FROM objects
-    WHERE
-        of = $1::varchar({MAX_OID_LENGTH}) AND
-        id = $2::text
-    """
+register_sql('HAS_OBJECT', f"""
+SELECT zoid
+FROM {{table_name}}
+WHERE zoid = $1::varchar({MAX_OID_LENGTH})
+""")
+
+
+register_sql('GET_ANNOTATION', f"""
+SELECT zoid, tid, state_size, resource, type, state, id, parent_id
+FROM {{table_name}}
+WHERE
+    of = $1::varchar({MAX_OID_LENGTH}) AND
+    id = $2::text
+""")
 
 def _wrap_return_count(txt):
     return """WITH rows AS (
@@ -87,7 +90,7 @@ SELECT count(*) FROM rows""".format(txt)
 
 # upsert without checking matching tids on updated object
 NAIVE_UPSERT = f"""
-INSERT INTO objects
+INSERT INTO {{table_name}}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
 VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
         $6::varchar({MAX_OID_LENGTH}), $7::int, $8::varchar({MAX_OID_LENGTH}),
@@ -105,15 +108,15 @@ DO UPDATE SET
     type = EXCLUDED.type,
     json = EXCLUDED.json,
     state = EXCLUDED.state"""
-UPSERT = _wrap_return_count(NAIVE_UPSERT + """
-    WHERE
-        tid = EXCLUDED.otid""")
-NAIVE_UPSERT = _wrap_return_count(NAIVE_UPSERT)
+register_sql('UPSERT', _wrap_return_count(NAIVE_UPSERT + """
+WHERE
+    tid = EXCLUDED.otid"""))
+register_sql('NAIVE_UPSERT', _wrap_return_count(NAIVE_UPSERT))
 
 
 # update without checking matching tids on updated object
 NAIVE_UPDATE = f"""
-UPDATE objects
+UPDATE {{table_name}}
 SET
     tid = $2::int,
     state_size = $3::int,
@@ -128,107 +131,108 @@ SET
     state = $12::bytea
 WHERE
     zoid = $1::varchar({MAX_OID_LENGTH})"""
-UPDATE = _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int""")
-NAIVE_UPDATE = _wrap_return_count(NAIVE_UPDATE)
+register_sql(
+    'UPDATE', _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int"""))
+register_sql('NAIVE_UPDATE', _wrap_return_count(NAIVE_UPDATE))
 
 
 NEXT_TID = "SELECT nextval('tid_sequence');"
 MAX_TID = "SELECT last_value FROM tid_sequence;"
 
 
-NUM_CHILDREN = f"SELECT count(*) FROM objects WHERE parent_id = $1::varchar({MAX_OID_LENGTH})"
+register_sql(
+    'NUM_CHILDREN',
+    f"SELECT count(*) FROM {{table_name}} WHERE parent_id = $1::varchar({MAX_OID_LENGTH})")
 
 
-NUM_ROWS = "SELECT count(*) FROM objects"
+register_sql('NUM_ROWS', "SELECT count(*) FROM {table_name}")
 
 
-NUM_RESOURCES = "SELECT count(*) FROM objects WHERE resource is TRUE"
+register_sql('NUM_RESOURCES', "SELECT count(*) FROM {table_name} WHERE resource is TRUE")
 
-NUM_RESOURCES_BY_TYPE = "SELECT count(*) FROM objects WHERE type=$1::TEXT"
+register_sql(
+    'NUM_RESOURCES_BY_TYPE',
+    "SELECT count(*) FROM {table_name} WHERE type=$1::TEXT")
 
-RESOURCES_BY_TYPE = """
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE type=$1::TEXT
-    ORDER BY zoid
-    LIMIT $2::int
-    OFFSET $3::int
-    """
-
-
-GET_CHILDREN = f"""
-    SELECT zoid, tid, state_size, resource, type, state, id
-    FROM objects
-    WHERE parent_id = $1::VARCHAR({MAX_OID_LENGTH})
-    """
+register_sql('RESOURCES_BY_TYPE', """
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {table_name}
+WHERE type=$1::TEXT
+ORDER BY zoid
+LIMIT $2::int
+OFFSET $3::int
+""")
 
 
-TRASH_PARENT_ID = f"""
-UPDATE objects
+register_sql('GET_CHILDREN', f"""
+SELECT zoid, tid, state_size, resource, type, state, id
+FROM {{table_name}}
+WHERE parent_id = $1::VARCHAR({MAX_OID_LENGTH})
+""")
+
+
+register_sql('TRASH_PARENT_ID', f"""
+UPDATE {{table_name}}
 SET
     parent_id = '{TRASHED_ID}'
 WHERE
     zoid = $1::varchar({MAX_OID_LENGTH})
-"""
+""")
 
 
-INSERT_BLOB_CHUNK = f"""
-    INSERT INTO blobs
-    (bid, zoid, chunk_index, data)
-    VALUES ($1::VARCHAR({MAX_OID_LENGTH}), $2::VARCHAR({MAX_OID_LENGTH}),
-            $3::INT, $4::BYTEA)
-"""
+register_sql('INSERT_BLOB_CHUNK', f"""
+INSERT INTO {{table_name}}
+(bid, zoid, chunk_index, data)
+VALUES ($1::VARCHAR({MAX_OID_LENGTH}), $2::VARCHAR({MAX_OID_LENGTH}),
+        $3::INT, $4::BYTEA)
+""")
 
 
-READ_BLOB_CHUNKS = f"""
-    SELECT * from blobs
-    WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
-    ORDER BY chunk_index
-"""
-
-READ_BLOB_CHUNK = f"""
-    SELECT * from blobs
-    WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
-    AND chunk_index = $2::int
-"""
+register_sql('READ_BLOB_CHUNK', f"""
+SELECT * from {{table_name}}
+WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
+AND chunk_index = $2::int
+""")
 
 
-DELETE_BLOB = f"""
-    DELETE FROM blobs WHERE bid = $1::VARCHAR({MAX_OID_LENGTH});
-"""
+register_sql('DELETE_BLOB', f"""
+DELETE FROM {{table_name}} WHERE bid = $1::VARCHAR({MAX_OID_LENGTH});
+""")
 
 
 TXN_CONFLICTS = """
     SELECT zoid, tid, state_size, resource, type, id
-    FROM objects
+    FROM {table_name}
     WHERE tid > $1"""
-TXN_CONFLICTS_ON_OIDS = TXN_CONFLICTS + ' AND zoid = ANY($2)'
+register_sql('TXN_CONFLICTS', TXN_CONFLICTS)
+
+register_sql('TXN_CONFLICTS_ON_OIDS', TXN_CONFLICTS + ' AND zoid = ANY($2)')
 
 
-BATCHED_GET_CHILDREN_KEYS = f"""
-    SELECT id
-    FROM objects
-    WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
-    ORDER BY zoid
-    LIMIT $2::int
-    OFFSET $3::int
-    """
+register_sql('BATCHED_GET_CHILDREN_KEYS', f"""
+SELECT id
+FROM {{table_name}}
+WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
+ORDER BY zoid
+LIMIT $2::int
+OFFSET $3::int
+""")
 
-DELETE_OBJECT = f"""
-DELETE FROM objects
+register_sql('DELETE_OBJECT', f"""
+DELETE FROM {{table_name}}
 WHERE zoid = $1::varchar({MAX_OID_LENGTH});
-"""
+""")
 
-GET_TRASHED_OBJECTS = f"""
-SELECT zoid from objects where parent_id = '{TRASHED_ID}';
-"""
+register_sql('GET_TRASHED_OBJECTS', f"""
+SELECT zoid from {{table_name}} where parent_id = '{TRASHED_ID}';
+""")
 
-CREATE_TRASH = f'''
-INSERT INTO objects (zoid, tid, state_size, part, resource, type)
+register_sql('CREATE_TRASH', f'''
+INSERT INTO {{table_name}} (zoid, tid, state_size, part, resource, type)
 SELECT '{TRASHED_ID}', 0, 0, 0, FALSE, 'TRASH_REF'
-WHERE NOT EXISTS (SELECT * FROM objects WHERE zoid = '{TRASHED_ID}')
+WHERE NOT EXISTS (SELECT * FROM {{table_name}} WHERE zoid = '{TRASHED_ID}')
 RETURNING id;
-'''
+''')
 
 
 # how long to wait before trying to recover bad connections
@@ -282,7 +286,9 @@ class PGVacuum:
         conn = None
         try:
             conn = await self._storage.open()
-            for record in await conn.fetch(GET_TRASHED_OBJECTS):
+            sql = self._storage._sql.get(
+                'GET_TRASHED_OBJECTS', self._storage._objects_table_name)
+            for record in await conn.fetch(sql):
                 self._queue.put_nowait(record['zoid'])
         except concurrent.futures.TimeoutError:
             log.info('Timed out connecting to storage')
@@ -319,8 +325,10 @@ class PGVacuum:
         DELETED objects has parent id changed to the trashed ob for the oid...
         '''
         conn = await self._storage.open()
+        sql = self._storage._sql.get(
+            'DELETE_OBJECT', self._storage._objects_table_name)
         try:
-            await conn.execute(DELETE_OBJECT, oid)
+            await conn.execute(sql, oid)
         except Exception:
             log.warning('Error deleting trashed object', exc_info=True)
         finally:
@@ -344,6 +352,8 @@ class PostgresqlStorage(BaseStorage):
     _pool = None
     _large_record_size = 1 << 24
     _vacuum_class = PGVacuum
+    _objects_table_name = 'objects'
+    _blobs_table_name = 'blobs'
 
     _object_schema = {
         'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL PRIMARY KEY',
@@ -351,9 +361,9 @@ class PostgresqlStorage(BaseStorage):
         'state_size': 'BIGINT NOT NULL',
         'part': 'BIGINT NOT NULL',
         'resource': 'BOOLEAN NOT NULL',
-        'of': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES objects ON DELETE CASCADE',
+        'of': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES {{objects_table_name}} ON DELETE CASCADE',
         'otid': 'BIGINT',
-        'parent_id': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES objects ON DELETE CASCADE',  # parent oid
+        'parent_id': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES {{objects_table_name}} ON DELETE CASCADE',  # noqa
         'id': 'TEXT',
         'type': 'TEXT NOT NULL',
         'json': 'JSONB',
@@ -362,31 +372,32 @@ class PostgresqlStorage(BaseStorage):
 
     _blob_schema = {
         'bid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL',
-        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL REFERENCES objects ON DELETE CASCADE',
+        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL REFERENCES {{objects_table_name}} ON DELETE CASCADE',
         'chunk_index': 'INT NOT NULL',
         'data': 'BYTEA'
     }
 
     _initialize_statements = [
-        'CREATE INDEX IF NOT EXISTS object_tid ON objects (tid);',
-        'CREATE INDEX IF NOT EXISTS object_of ON objects (of);',
-        'CREATE INDEX IF NOT EXISTS object_part ON objects (part);',
-        'CREATE INDEX IF NOT EXISTS object_parent ON objects (parent_id);',
-        'CREATE INDEX IF NOT EXISTS object_id ON objects (id);',
-        'CREATE INDEX IF NOT EXISTS object_type ON objects (type);',
-        'CREATE INDEX IF NOT EXISTS blob_bid ON blobs (bid);',
-        'CREATE INDEX IF NOT EXISTS blob_zoid ON blobs (zoid);',
-        'CREATE INDEX IF NOT EXISTS blob_chunk ON blobs (chunk_index);',
+        'CREATE INDEX IF NOT EXISTS {object_table_name}_tid ON {objects_table_name} (tid);',
+        'CREATE INDEX IF NOT EXISTS {object_table_name}_of ON {objects_table_name} (of);',
+        'CREATE INDEX IF NOT EXISTS {object_table_name}_part ON {objects_table_name} (part);',
+        'CREATE INDEX IF NOT EXISTS {object_table_name}_parent ON {objects_table_name} (parent_id);',
+        'CREATE INDEX IF NOT EXISTS {object_table_name}_id ON {objects_table_name} (id);',
+        'CREATE INDEX IF NOT EXISTS {object_table_name}_type ON {objects_table_name} (type);',
+        'CREATE INDEX IF NOT EXISTS {blob_table_name}_bid ON {blobs_table_name} (bid);',
+        'CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);',
+        'CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);',
         'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
     ]
 
-    _unique_constraint = '''ALTER TABLE objects
-                            ADD CONSTRAINT objects_parent_id_id_key
+    _unique_constraint = '''ALTER TABLE {objects_table_name}
+                            ADD CONSTRAINT {objects_table_name}_parent_id_id_key
                             UNIQUE (parent_id, id)'''
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
-                 conn_acquire_timeout=20, cache_strategy='dummy', **options):
+                 conn_acquire_timeout=20, cache_strategy='dummy',
+                 objects_table_name='objects', blobs_table_name='blobs', **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
             cache_strategy=cache_strategy)
@@ -401,30 +412,47 @@ class PostgresqlStorage(BaseStorage):
         self._options = options
         self._connection_options = {}
         self._connection_initialized_on = time.time()
+        self._objects_table_name = objects_table_name
+        self._blobs_table_name = blobs_table_name
+        self._sql = SQLStatements()
 
     async def finalize(self):
         await self._vacuum.finalize()
         self._vacuum_task.cancel()
+        pool = await self.get_pool()
         try:
-            await shield(self._pool.release(self._read_conn))
+            await shield(pool.release(self._read_conn))
         except asyncpg.exceptions.InterfaceError:
             pass
         # terminate force closes all these
         # this step is happening at the end of application shutdown and
         # connections should not be staying open at this step
-        self._pool.terminate()
+        pool.terminate()
 
     async def create(self):
         # Check DB
         log.info('Creating initial database objects')
         statements = [
-            get_table_definition('objects', self._object_schema),
-            get_table_definition('blobs', self._blob_schema,
+            get_table_definition(self._objects_table_name, self._object_schema),
+            get_table_definition(self._blobs_table_name, self._blob_schema,
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
         ]
         statements.extend(self._initialize_statements)
 
         for statement in statements:
+            otable_name = self._objects_table_name
+            if otable_name == 'objects':
+                otable_name = 'object'
+            btable_name = self._blobs_table_name
+            if btable_name == 'blobs':
+                btable_name = 'blob'
+            statement = statement.format(
+                objects_table_name=self._objects_table_name,
+                blobs_table_name=self._blobs_table_name,
+                # singular, index names
+                object_table_name=otable_name,
+                blob_table_name=btable_name,
+            )
             try:
                 await self._read_conn.execute(statement)
             except asyncpg.exceptions.UniqueViolationError:
@@ -435,11 +463,12 @@ class PostgresqlStorage(BaseStorage):
 
     async def restart_connection(self, timeout=0.1):
         log.error('Connection potentially lost to pg, restarting')
+        pool = await self.get_pool()
         try:
-            await asyncio.wait_for(self._pool.close(), timeout)
+            await asyncio.wait_for(pool.close(), timeout)
         except asyncio.TimeoutError:
             pass
-        self._pool.terminate()
+        pool.terminate()
         # re-bind, throw conflict error so the request is restarted...
         self._pool = await asyncpg.create_pool(
             dsn=self._dsn,
@@ -464,57 +493,54 @@ FROM
     ON tc.constraint_name = kcu.constraint_name
     JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
-WHERE tc.constraint_name = 'objects_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
-''')
+WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
+'''.format(self._objects_table_name))
         return len(result) > 0
 
     async def initialize(self, loop=None, **kw):
         self._connection_options = kw
         if loop is None:
             loop = asyncio.get_event_loop()
-        self._pool = await asyncpg.create_pool(
-            dsn=self._dsn,
-            max_size=self._pool_size,
-            min_size=2,
-            connection_class=app_settings['pg_connection_class'],
-            loop=loop,
-            **kw)
+        await self.get_pool(loop)  # initialize
 
         # shared read connection on all transactions
         self._read_conn = await self.open()
         if await self.has_unique_constraint():
             self._supports_unique_constraints = True
 
+        trash_sql = self._sql.get('CREATE_TRASH', self._objects_table_name)
         try:
             await self.initialize_tid_statements()
-            await self._read_conn.execute(CREATE_TRASH)
+            await self._read_conn.execute(trash_sql)
         except asyncpg.exceptions.ReadOnlySQLTransactionError:
             # Not necessary for read-only pg
             pass
         except asyncpg.exceptions.UndefinedTableError:
             await self.create()
             # only available on new databases
-            await self._read_conn.execute(self._unique_constraint)
+            await self._read_conn.execute(self._unique_constraint.format(
+                objects_table_name=self._objects_table_name
+            ))
             self._supports_unique_constraints = True
             await self.initialize_tid_statements()
-            await self._read_conn.execute(CREATE_TRASH)
+            await self._read_conn.execute(trash_sql)
 
         # migrate to larger VARCHAR size...
         result = await self._read_conn.fetch("""
 select * from information_schema.columns
-where table_name='objects'""")
-        if result[0]['character_maximum_length'] != MAX_OID_LENGTH:
+where table_name='{}'""".format(self._objects_table_name))
+        if len(result) > 0 and result[0]['character_maximum_length'] != MAX_OID_LENGTH:
             log.warn('Migrating VARCHAR key length')
             await self._read_conn.execute(f'''
-ALTER TABLE objects ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+ALTER TABLE {self._objects_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
             await self._read_conn.execute(f'''
-ALTER TABLE objects ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
+ALTER TABLE {self._objects_table_name} ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
             await self._read_conn.execute(f'''
-ALTER TABLE objects ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
+ALTER TABLE {self._objects_table_name} ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
             await self._read_conn.execute(f'''
-ALTER TABLE blobs ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
+ALTER TABLE {self._blobs_table_name} ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
             await self._read_conn.execute(f'''
-ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
         self._vacuum = self._vacuum_class(self, loop)
         self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
@@ -529,19 +555,31 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
         self._vacuum_task.add_done_callback(vacuum_done)
         self._connection_initialized_on = time.time()
 
+    async def get_pool(self, loop=None, **kw):
+        if self._pool is None:
+            self._pool = await asyncpg.create_pool(
+                dsn=self._dsn,
+                max_size=self._pool_size,
+                min_size=2,
+                connection_class=app_settings['pg_connection_class'],
+                loop=loop,
+                **kw)
+        return self._pool
+
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
         self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
 
     async def remove(self):
         """Reset the tables"""
-        async with self._pool.acquire() as conn:
-            await conn.execute("DROP TABLE IF EXISTS blobs;")
-            await conn.execute("DROP TABLE IF EXISTS objects;")
+        async with (await self.get_pool()).acquire() as conn:
+            await conn.execute("DROP TABLE IF EXISTS {};".format(self._blobs_table_name))
+            await conn.execute("DROP TABLE IF EXISTS {};".format(self._objects_table_name))
 
     async def open(self):
+        pool = await self.get_pool()
         try:
-            conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+            conn = await pool.acquire(timeout=self._conn_acquire_timeout)
             return conn
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:
@@ -550,7 +588,7 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
     async def close(self, con):
         try:
             await shield(
-                asyncio.wait_for(self._pool.release(con, timeout=1), 1))
+                asyncio.wait_for((await self.get_pool()).release(con, timeout=1), 1))
         except (asyncio.CancelledError, RuntimeError, asyncio.TimeoutError,
                 asyncpg.exceptions.ConnectionDoesNotExistError):
             pass
@@ -559,8 +597,9 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
         conn.terminate()
 
     async def load(self, txn, oid):
+        sql = self._sql.get('GET_OID', self._objects_table_name)
         async with txn._lock:
-            objects = await self.get_one_row(txn, GET_OID, oid)
+            objects = await self.get_one_row(txn, sql, oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -579,10 +618,10 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
             part = 0
 
         update = False
-        statement_sql = NAIVE_UPSERT
+        statement_sql = self._sql.get('NAIVE_UPSERT', self._objects_table_name)
         if not obj.__new_marker__ and obj._p_serial is not None:
             # we should be confident this is an object update
-            statement_sql = UPDATE
+            statement_sql = self._sql.get('UPDATE', self._objects_table_name)
             update = True
 
         conn = await txn.get_connection()
@@ -640,9 +679,10 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
     async def delete(self, txn, oid):
         conn = await txn.get_connection()
+        sql = self._sql.get('TRASH_PARENT_ID', self._objects_table_name)
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
-            await conn.execute(TRASH_PARENT_ID, oid)
+            await conn.execute(sql, oid)
         txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
@@ -735,10 +775,12 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
             if len(txn.modified) < 1000:
                 # if it's too large, we're not going to check on object ids
                 modified_oids = [k for k in txn.modified.keys()]
+                sql = self._sql.get('TXN_CONFLICTS_ON_OIDS', self._objects_table_name)
                 return await self._read_conn.fetch(
-                    TXN_CONFLICTS_ON_OIDS, txn._tid, modified_oids)
+                    sql, txn._tid, modified_oids)
             else:
-                return await self._read_conn.fetch(TXN_CONFLICTS, txn._tid)
+                sql = self._sql.get('TXN_CONFLICTS', self._objects_table_name)
+                return await self._read_conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
@@ -765,30 +807,35 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
         conn = await txn.get_connection()
         keys = []
+        sql = self._sql.get('BATCHED_GET_CHILDREN_KEYS', self._objects_table_name)
         for record in await conn.fetch(
-                BATCHED_GET_CHILDREN_KEYS, oid, page_size, (page - 1) * page_size):
+                sql, oid, page_size, (page - 1) * page_size):
             keys.append(record['id'])
         return keys
 
     async def keys(self, txn, oid):
         conn = await txn.get_connection()
+        sql = self._sql.get('GET_CHILDREN_KEYS', self._objects_table_name)
         async with txn._lock:
-            result = await conn.fetch(GET_CHILDREN_KEYS, oid)
+            result = await conn.fetch(sql, oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
+        sql = self._sql.get('GET_CHILD', self._objects_table_name)
         async with txn._lock:
-            result = await self.get_one_row(txn, GET_CHILD, parent_oid, id)
+            result = await self.get_one_row(txn, sql, parent_oid, id)
         return result
 
     async def get_children(self, txn, parent_oid, ids):
         conn = await txn.get_connection()
+        sql = self._sql.get('GET_CHILDREN_BATCH', self._objects_table_name)
         async with txn._lock:
-            return await conn.fetch(GET_CHILDREN_BATCH, parent_oid, ids)
+            return await conn.fetch(sql, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
+        sql = self._sql.get('EXIST_CHILD', self._objects_table_name)
         async with txn._lock:
-            result = await self.get_one_row(txn, EXIST_CHILD, parent_oid, id)
+            result = await self.get_one_row(txn, sql, parent_oid, id)
         if result is None:
             return False
         else:
@@ -796,28 +843,32 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
     async def len(self, txn, oid):
         conn = await txn.get_connection()
+        sql = self._sql.get('NUM_CHILDREN', self._objects_table_name)
         async with txn._lock:
-            result = await conn.fetchval(NUM_CHILDREN, oid)
+            result = await conn.fetchval(sql, oid)
         return result
 
     async def items(self, txn, oid):
         conn = await txn.get_connection()
-        async for record in conn.cursor(GET_CHILDREN, oid):
+        sql = self._sql.get('GET_CHILDREN', self._objects_table_name)
+        async for record in conn.cursor(sql, oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
     async def get_annotation(self, txn, oid, id):
+        sql = self._sql.get('GET_ANNOTATION', self._objects_table_name)
         async with txn._lock:
-            result = await self.get_one_row(txn, GET_ANNOTATION, oid, id, prepare=True)
+            result = await self.get_one_row(txn, sql, oid, id, prepare=True)
             if result is not None and result['parent_id'] == TRASHED_ID:
                 result = None
         return result
 
     async def get_annotation_keys(self, txn, oid):
         conn = await txn.get_connection()
+        sql = self._sql.get('GET_ANNOTATIONS_KEYS', self._objects_table_name)
         async with txn._lock:
-            result = await conn.fetch(GET_ANNOTATIONS_KEYS, oid)
+            result = await conn.fetch(sql, oid)
         items = []
         for item in result:
             if item['parent_id'] != TRASHED_ID:
@@ -825,24 +876,27 @@ ALTER TABLE blobs ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
         return items
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
+        sql = self._sql.get('HAS_OBJECT', self._objects_table_name)
         async with txn._lock:
-            result = await self.get_one_row(txn, HAS_OBJECT, oid)
+            result = await self.get_one_row(txn, sql, oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
             conn = await txn.get_connection()
             async with txn._lock:
-                await conn.execute(f'''INSERT INTO objects
+                await conn.execute(f'''INSERT INTO {self._objects_table_name}
 (zoid, tid, state_size, part, resource, type)
 VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
         conn = await txn.get_connection()
+        sql = self._sql.get('INSERT_BLOB_CHUNK', self._blobs_table_name)
         async with txn._lock:
             return await conn.execute(
-                INSERT_BLOB_CHUNK, bid, oid, chunk_index, data)
+                sql, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
+        sql = self._sql.get('READ_BLOB_CHUNK', self._blobs_table_name)
         async with txn._lock:
-            return await self.get_one_row(txn, READ_BLOB_CHUNK, bid, chunk)
+            return await self.get_one_row(txn, sql, bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
         conn = await txn.get_connection()
@@ -853,25 +907,29 @@ VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
 
     async def del_blob(self, txn, bid):
         conn = await txn.get_connection()
+        sql = self._sql.get('DELETE_BLOB', self._blobs_table_name)
         async with txn._lock:
-            await conn.execute(DELETE_BLOB, bid)
+            await conn.execute(sql, bid)
 
     async def get_total_number_of_objects(self, txn):
         conn = await txn.get_connection()
+        sql = self._sql.get('NUM_ROWS', self._objects_table_name)
         async with txn._lock:
-            result = await conn.fetchval(NUM_ROWS)
+            result = await conn.fetchval(sql)
         return result
 
     async def get_total_number_of_resources(self, txn):
         conn = await txn.get_connection()
+        sql = self._sql.get('NUM_RESOURCES', self._objects_table_name)
         async with txn._lock:
-            result = await conn.fetchval(NUM_RESOURCES)
+            result = await conn.fetchval(sql)
         return result
 
     async def get_total_resources_of_type(self, txn, type_):
         conn = await txn.get_connection()
+        sql = self._sql.get('NUM_RESOURCES_BY_TYPE', self._objects_table_name)
         async with txn._lock:
-            result = await conn.fetchval(NUM_RESOURCES_BY_TYPE, type_)
+            result = await conn.fetchval(sql, type_)
         return result
 
     # Massive treatment without security
@@ -879,7 +937,8 @@ VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
         conn = await txn.get_connection()
         async with txn._lock:
             keys = []
+            sql = self._sql.get('RESOURCES_BY_TYPE', self._objects_table_name)
             for record in await conn.fetch(
-                    RESOURCES_BY_TYPE, type_, page_size, (page - 1) * page_size):
+                    sql, type_, page_size, (page - 1) * page_size):
                 keys.append(record)
             return keys

@@ -128,8 +128,9 @@ class ApplicationRoot(object):
             return self._items[key]
         # check configured storages, see if there is a database registered under this name...
         for _, config in list_or_dict_items(app_settings['storages']):
+            manager = config.get('type', config['storage'])
             factory = get_adapter(self, IDatabaseManager,
-                                  name=config['storage'], args=[config])
+                                  name=manager, args=[config])
             if await factory.exists(key):
                 return await factory.get_database(key)
 

@@ -1,9 +1,13 @@
-4.3.6 (unreleased)
+4.4.0 (unreleased)
 ------------------
 
 New:
 
 - Implement HEAD for `@download` endpoint
+  [vangheem]
+
+- Be able to customize the table names used with `objects_table_name` and
+  `blobs_table_name` database configuration options.
   [vangheem]
 
 - Adding the option to define the reader for annotations
