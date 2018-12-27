@@ -36,6 +36,16 @@ Currently supported database drivers are:
 - `cockroach`
 
 
+### Database configuration options
+
+- `pool_size`: Size of connection pool. (defaults to `13`)
+- `transaction_strategy`: Connection strategy to use. See `Transaction strategy`_ for details. (defaults to `resolve_readcommitted`)
+- `conn_acquire_timeout`: How long to wait for connection to be freed up from pool. (defaults to `20`)
+- `cache_strategy`: If you have something like guillotina_rediscache installed, you can configure here. (defaults to `dummy`)
+- `objects_table_name`: Table name to store object data. (defaults to `objects`)
+- `blobs_table_name`: Table name to store blob data. (defaults to `blobs`)
+
+
 ## Static files
 
 ```yaml

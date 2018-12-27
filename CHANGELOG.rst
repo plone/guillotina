@@ -1,5 +1,9 @@
-4.3.6 (unreleased)
+4.4.0 (unreleased)
 ------------------
+
+- Be able to customize the table names used with `objects_table_name` and
+  `blobs_table_name` database configuration options.
+  [vangheem]
 
 - Fix Resource.__getattr__() for empty fields with default values
   [masipcat]
