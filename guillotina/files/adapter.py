@@ -173,6 +173,13 @@ class DBFileStorageManagerAdapter:
         self.request = request
         self.field = field
 
+    def exists(self):
+        try:
+            file = self.field.get(self.field.context or self.context)
+        except AttributeError:
+            file = None
+        return file is not None and file.size > 0
+
     async def start(self, dm):
         blob = Blob(self.context)
         await dm.update(_blob=blob)

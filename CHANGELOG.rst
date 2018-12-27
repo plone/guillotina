@@ -1,15 +1,22 @@
 4.4.0 (unreleased)
 ------------------
 
+New:
+
+- Implement HEAD for `@download` endpoint
+  [vangheem]
+
 - Be able to customize the table names used with `objects_table_name` and
   `blobs_table_name` database configuration options.
   [vangheem]
 
-- Fix Resource.__getattr__() for empty fields with default values
-  [masipcat]
-
 - Adding the option to define the reader for annotations
   [bloodbare]
+
+Fixes:
+
+- Fix Resource.__getattr__() for empty fields with default values
+  [masipcat]
 
 
 4.3.5 (2018-12-09)

@@ -1,4 +1,7 @@
-from .const import CHUNK_SIZE
+import base64
+import posixpath
+import uuid
+
 from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
@@ -16,12 +19,11 @@ from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
+from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
-import base64
-import posixpath
-import uuid
+from .const import CHUNK_SIZE
 
 
 @configure.adapter(
@@ -42,8 +44,8 @@ class FileManager(object):
         self.dm = get_adapter(
             self.file_storage_manager, IUploadDataManager)
 
-    async def download(self, disposition=None, filename=None, content_type=None,
-                       size=None, **kwargs):
+    async def prepare_download(self, disposition=None, filename=None,
+                               content_type=None, size=None, **kwargs):
         if disposition is None:
             disposition = self.request.query.get('disposition', 'attachment')
 
@@ -69,7 +71,26 @@ class FileManager(object):
             download_resp.content_length = size or file.size
 
         await download_resp.prepare(self.request)
+        return download_resp
 
+    async def head(self, disposition=None, filename=None, content_type=None,
+                   size=None, **kwargs):
+        download_resp = await self.prepare_download(
+            disposition, filename, content_type, size, **kwargs)
+        if hasattr(self.file_storage_manager, 'exists'):
+            # does not need to implement but can be a way to verify
+            # file exists on cloud platform still
+            if not await apply_coroutine(self.file_storage_manager.exists):
+                raise HTTPNotFound(content={
+                    'message': 'File object does not exist'
+                })
+        await download_resp.write_eof()
+        return download_resp
+
+    async def download(self, disposition=None, filename=None, content_type=None,
+                       size=None, **kwargs):
+        download_resp = await self.prepare_download(
+            disposition, filename, content_type, size, **kwargs)
         async for chunk in self.file_storage_manager.iter_data(**kwargs):
             await download_resp.write(chunk)
             await download_resp.drain()
