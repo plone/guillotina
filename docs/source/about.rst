@@ -77,9 +77,9 @@ style of publishing objects to URLs to build a framework and CMS around.
 An Object Graph: The guillotina datastore.
 ------------------------------------------
 
-At the beginging there is the notiion of Content-Type. A content type, it's just
+At the beginging there is the notion of Content-Type. A content type, it's just
 a python interface (A class) that describes an object. Every object could be stored
-on the db. And every objet, could have child objects related to them. Something like:
+on the db. And every object, could have child objects related to them. Something like:
 
 /user@account/
 /user@account/preferences
@@ -92,14 +92,14 @@ on the db. And every objet, could have child objects related to them. Something 
 Allows us to better express content relations, and this is where guillotina shines, because
 it offers an automatic REST API over them.
 
-For exeample you can do a PATCH request over /user@account/preferences, to update, them or
+For example you can do a PATCH request over /user@account/preferences, to update, them or
 you can POST an item over the /user@account/todos with the necessry payload to create new
 todo posts lists, or you can just do a DELETE request
 to /user@account/todos/todos_list1/todo_item3 to remove a todo list item.
 
 That's the main foundation of guillotina, and also one of the most powerful concepts,
 the permission system, is based on this. As an example, at /user@account path, only the user
-is allowed to access it.. All child objects inherit this permission, anyone else than the owner could
+is allowed to access it. All child objects inherit this permission, anyone else than the owner could
 access them, but if at some point, we add new readers to an item (a todo list) will give access to
 other users.
 
@@ -140,5 +140,5 @@ What it isn't
 - Guillotina is not a re-implementation of Plone
 - Guillotina does not implement all the features and APIs of Plone
 
-It could some day with the `guillotina_cms` package but replacement of Plone is
+It could come some day with the `guillotina_cms` package but replacement of Plone is
 not the goal of Guillotina.
