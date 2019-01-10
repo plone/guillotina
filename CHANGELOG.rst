@@ -1,4 +1,4 @@
-4.4.2 (unreleased)
+4.4.2 (2019-01-10)
 ------------------
 
 - Option to add different type of containers.
