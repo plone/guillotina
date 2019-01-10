@@ -1,4 +1,4 @@
-4.4.1 (unreleased)
+4.4.1 (2019-01-09)
 ------------------
 
 - Postgresql storage accepts pool arguments
