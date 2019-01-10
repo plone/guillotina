@@ -1,7 +1,8 @@
 4.4.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Option to add different type of containers.
+  [bloodbare]
 
 
 4.4.1 (2019-01-09)
