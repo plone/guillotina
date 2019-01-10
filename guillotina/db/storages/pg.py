@@ -395,7 +395,7 @@ class PostgresqlStorage(BaseStorage):
                             UNIQUE (parent_id, id)'''
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
-                 pool_size=13, transaction_strategy='resolve_readcommitted',
+                 pool_size=13, pool=None, transaction_strategy='resolve_readcommitted',
                  conn_acquire_timeout=20, cache_strategy='dummy',
                  objects_table_name='objects', blobs_table_name='blobs', **options):
         super(PostgresqlStorage, self).__init__(
@@ -403,6 +403,7 @@ class PostgresqlStorage(BaseStorage):
             cache_strategy=cache_strategy)
         self._dsn = dsn
         self._pool_size = pool_size
+        self._pool = pool
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name

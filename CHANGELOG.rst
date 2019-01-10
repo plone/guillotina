@@ -1,7 +1,8 @@
 4.4.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Postgresql storage accepts pool arguments
+  [vangheem]
 
 
 4.4.0 (2018-12-27)
