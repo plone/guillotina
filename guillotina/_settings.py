@@ -17,6 +17,7 @@ app_settings: Dict[str, Any] = {
     "static": {},
     "jsapps": {},
     "default_static_filenames": ['index.html', 'index.htm'],
+    "container_types": ['Container'],
     "load_utilities": {
         "guillotina.queue": {
             "provides": "guillotina.interfaces.IQueueUtility",

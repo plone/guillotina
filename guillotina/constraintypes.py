@@ -1,3 +1,4 @@
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.content import get_cached_factory
 from guillotina.interfaces import IConstrainTypes
@@ -14,7 +15,7 @@ class FTIConstrainAllowedTypes:
         self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:
-        if type_id == 'Container':
+        if type_id in app_settings['container_types']:
             return False
         allowed = self.get_allowed_types()
         if allowed is None:
@@ -42,7 +43,7 @@ class DatabaseAllowedTypes:
         self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:
-        return type_id == 'Container'
+        return type_id in app_settings['container_types']
 
     def get_allowed_types(self) -> list:
-        return ['Container']
+        return app_settings['container_types']

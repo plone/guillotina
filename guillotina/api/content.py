@@ -830,8 +830,8 @@ async def addable_types(context, request):
         types = []
         for type_name in FACTORY_CACHE:
             types.append(type_name)
-    if 'Container' in types:
-        types.remove('Container')
+    app_settings['container_types']
+    types = [item for item in types if item not in app_settings['container_types']]
     return types
 
 
