@@ -1,4 +1,4 @@
-4.4.3 (unreleased)
+4.4.3 (2019-01-11)
 ------------------
 
 - Implement `db.storage.spg.PGConnectionManager` class to allow
