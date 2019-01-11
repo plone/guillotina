@@ -342,14 +342,92 @@ class PGVacuum:
         await self._queue.join()
 
 
+class PGConnectionManager:
+    '''
+    class to manage pool of connections
+    '''
+
+    def __init__(self, dsn=None, pool_size=13, connection_options=None,
+                 conn_acquire_timeout=20):
+        self._dsn = dsn
+        self._pool_size = pool_size
+        self._pool = None
+        self._read_conn = None
+        self._connection_options = connection_options or {}
+        self._conn_acquire_timeout = conn_acquire_timeout
+        self._lock = asyncio.Lock()
+
+    @property
+    def read_conn(self):
+        return self._read_conn
+
+    @property
+    def pool(self):
+        return self._pool
+
+    async def close(self):
+        async with self._lock:
+            if self._pool is None:
+                # nothing to close
+                return
+            try:
+                await shield(self._pool.release(self._read_conn))
+            except asyncpg.exceptions.InterfaceError:
+                pass
+            # terminate force closes all these
+            # this step is happening at the end of application shutdown and
+            # connections should not be staying open at this step
+            self._pool.terminate()
+            self._pool = self._read_conn = None
+
+    async def initialize(self, loop=None, **kw):
+        async with self._lock:
+            if self._pool is not None:
+                # nothing to open
+                return
+            self._connection_options = kw
+            if loop is None:
+                loop = asyncio.get_event_loop()
+            self._pool = await asyncpg.create_pool(
+                dsn=self._dsn,
+                max_size=self._pool_size,
+                min_size=2,
+                connection_class=app_settings['pg_connection_class'],
+                loop=loop,
+                **kw)
+
+            # shared read connection on all transactions
+            self._read_conn = await self._pool.acquire(
+                timeout=self._conn_acquire_timeout)
+
+    async def restart(self, timeout=2):
+        async with self._lock:
+            if self._pool is not None:
+                try:
+                    await asyncio.wait_for(self._pool.close(), timeout)
+                except asyncio.TimeoutError:
+                    pass
+                self._pool.terminate()
+
+            # re-bind, throw conflict error so the request is restarted...
+            self._pool = await asyncpg.create_pool(
+                dsn=self._dsn,
+                max_size=self._pool_size,
+                min_size=2,
+                connection_class=app_settings['pg_connection_class'],
+                **self._connection_options)
+
+            # shared read connection on all transactions
+            self._read_conn = await self._pool.acquire(
+                timeout=self._conn_acquire_timeout)
+
+
 @implementer(IPostgresStorage)
 class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
 
     _dsn = None
     _partition_class = None
-    _pool_size = None
-    _pool = None
     _large_record_size = 1 << 24
     _vacuum_class = PGVacuum
     _objects_table_name = 'objects'
@@ -395,19 +473,18 @@ class PostgresqlStorage(BaseStorage):
                             UNIQUE (parent_id, id)'''
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
-                 pool_size=13, pool=None, transaction_strategy='resolve_readcommitted',
+                 pool_size=13, transaction_strategy='resolve_readcommitted',
                  conn_acquire_timeout=20, cache_strategy='dummy',
-                 objects_table_name='objects', blobs_table_name='blobs', **options):
+                 objects_table_name='objects', blobs_table_name='blobs',
+                 connection_manager=None, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
             cache_strategy=cache_strategy)
         self._dsn = dsn
         self._pool_size = pool_size
-        self._pool = pool
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
-        self._read_conn = None
         self._lock = asyncio.Lock()
         self._conn_acquire_timeout = conn_acquire_timeout
         self._options = options
@@ -416,19 +493,24 @@ class PostgresqlStorage(BaseStorage):
         self._objects_table_name = objects_table_name
         self._blobs_table_name = blobs_table_name
         self._sql = SQLStatements()
+        self._connection_manager = connection_manager
 
     async def finalize(self):
         await self._vacuum.finalize()
         self._vacuum_task.cancel()
-        pool = await self.get_pool()
-        try:
-            await shield(pool.release(self._read_conn))
-        except asyncpg.exceptions.InterfaceError:
-            pass
-        # terminate force closes all these
-        # this step is happening at the end of application shutdown and
-        # connections should not be staying open at this step
-        pool.terminate()
+        await self._connection_manager.close()
+
+    @property
+    def read_conn(self):
+        return self._connection_manager.read_conn
+
+    @property
+    def pool(self):
+        return self._connection_manager.pool
+
+    @property
+    def connection_manager(self):
+        return self._connection_manager
 
     async def create(self):
         # Check DB
@@ -455,7 +537,7 @@ class PostgresqlStorage(BaseStorage):
                 blob_table_name=btable_name,
             )
             try:
-                await self._read_conn.execute(statement)
+                await self.read_conn.execute(statement)
             except asyncpg.exceptions.UniqueViolationError:
                 # this is okay on creation, means 2 getting created at same time
                 pass
@@ -464,29 +546,13 @@ class PostgresqlStorage(BaseStorage):
 
     async def restart_connection(self, timeout=0.1):
         log.error('Connection potentially lost to pg, restarting')
-        pool = await self.get_pool()
-        try:
-            await asyncio.wait_for(pool.close(), timeout)
-        except asyncio.TimeoutError:
-            pass
-        pool.terminate()
-        # re-bind, throw conflict error so the request is restarted...
-        self._pool = await asyncpg.create_pool(
-            dsn=self._dsn,
-            max_size=self._pool_size,
-            min_size=2,
-            loop=self._pool._loop,
-            connection_class=app_settings['pg_connection_class'],
-            **self._connection_options)
-
-        # shared read connection on all transactions
-        self._read_conn = await self.open()
+        await self._connection_manager.restart()
         await self.initialize_tid_statements()
         self._connection_initialized_on = time.time()
         raise ConflictError('Restarting connection to postgresql')
 
     async def has_unique_constraint(self):
-        result = await self._read_conn.fetch('''
+        result = await self.read_conn.fetch('''
 SELECT *
 FROM
     information_schema.table_constraints AS tc
@@ -500,47 +566,48 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
 
     async def initialize(self, loop=None, **kw):
         self._connection_options = kw
-        if loop is None:
-            loop = asyncio.get_event_loop()
-        await self.get_pool(loop)  # initialize
+        if self._connection_manager is None:
+            self._connection_manager = PGConnectionManager(
+                dsn=self._dsn, pool_size=self._pool_size,
+                connection_options=self._connection_options,
+                conn_acquire_timeout=self._conn_acquire_timeout)
+            await self._connection_manager.initialize(loop, **kw)
 
-        # shared read connection on all transactions
-        self._read_conn = await self.open()
         if await self.has_unique_constraint():
             self._supports_unique_constraints = True
 
         trash_sql = self._sql.get('CREATE_TRASH', self._objects_table_name)
         try:
             await self.initialize_tid_statements()
-            await self._read_conn.execute(trash_sql)
+            await self.read_conn.execute(trash_sql)
         except asyncpg.exceptions.ReadOnlySQLTransactionError:
             # Not necessary for read-only pg
             pass
         except asyncpg.exceptions.UndefinedTableError:
             await self.create()
             # only available on new databases
-            await self._read_conn.execute(self._unique_constraint.format(
+            await self.read_conn.execute(self._unique_constraint.format(
                 objects_table_name=self._objects_table_name
             ))
             self._supports_unique_constraints = True
             await self.initialize_tid_statements()
-            await self._read_conn.execute(trash_sql)
+            await self.read_conn.execute(trash_sql)
 
         # migrate to larger VARCHAR size...
-        result = await self._read_conn.fetch("""
+        result = await self.read_conn.fetch("""
 select * from information_schema.columns
 where table_name='{}'""".format(self._objects_table_name))
         if len(result) > 0 and result[0]['character_maximum_length'] != MAX_OID_LENGTH:
             log.warn('Migrating VARCHAR key length')
-            await self._read_conn.execute(f'''
+            await self.read_conn.execute(f'''
 ALTER TABLE {self._objects_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
+            await self.read_conn.execute(f'''
 ALTER TABLE {self._objects_table_name} ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
+            await self.read_conn.execute(f'''
 ALTER TABLE {self._objects_table_name} ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
+            await self.read_conn.execute(f'''
 ALTER TABLE {self._blobs_table_name} ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
-            await self._read_conn.execute(f'''
+            await self.read_conn.execute(f'''
 ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
         self._vacuum = self._vacuum_class(self, loop)
@@ -556,31 +623,19 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
         self._vacuum_task.add_done_callback(vacuum_done)
         self._connection_initialized_on = time.time()
 
-    async def get_pool(self, loop=None, **kw):
-        if self._pool is None:
-            self._pool = await asyncpg.create_pool(
-                dsn=self._dsn,
-                max_size=self._pool_size,
-                min_size=2,
-                connection_class=app_settings['pg_connection_class'],
-                loop=loop,
-                **kw)
-        return self._pool
-
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
-        self._stmt_max_tid = await self._read_conn.prepare(MAX_TID)
+        self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
+        self._stmt_max_tid = await self.read_conn.prepare(MAX_TID)
 
     async def remove(self):
         """Reset the tables"""
-        async with (await self.get_pool()).acquire() as conn:
+        async with self.pool.acquire() as conn:
             await conn.execute("DROP TABLE IF EXISTS {};".format(self._blobs_table_name))
             await conn.execute("DROP TABLE IF EXISTS {};".format(self._objects_table_name))
 
     async def open(self):
-        pool = await self.get_pool()
         try:
-            conn = await pool.acquire(timeout=self._conn_acquire_timeout)
+            conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
             return conn
         except asyncpg.exceptions.InterfaceError as ex:
             async with self._lock:
@@ -589,7 +644,7 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
     async def close(self, con):
         try:
             await shield(
-                asyncio.wait_for((await self.get_pool()).release(con, timeout=1), 1))
+                asyncio.wait_for(self.pool.release(con, timeout=1), 1))
         except (asyncio.CancelledError, RuntimeError, asyncio.TimeoutError,
                 asyncpg.exceptions.ConnectionDoesNotExistError):
             pass
@@ -777,11 +832,11 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
                 # if it's too large, we're not going to check on object ids
                 modified_oids = [k for k in txn.modified.keys()]
                 sql = self._sql.get('TXN_CONFLICTS_ON_OIDS', self._objects_table_name)
-                return await self._read_conn.fetch(
+                return await self.read_conn.fetch(
                     sql, txn._tid, modified_oids)
             else:
                 sql = self._sql.get('TXN_CONFLICTS', self._objects_table_name)
-                return await self._read_conn.fetch(sql, txn._tid)
+                return await self.read_conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
         if transaction._db_txn is not None:
