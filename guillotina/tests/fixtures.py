@@ -312,7 +312,7 @@ class CockroachStorageAsyncContextManager(object):
             conn.execute("DROP DATABASE IF EXISTS guillotina;"))
         await _bomb_shelter(
             conn.execute("CREATE DATABASE guillotina;"))
-        await self.storage._pool.release(conn)
+        await self.storage.pool.release(conn)
         await self.storage.finalize()
 
 
