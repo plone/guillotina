@@ -356,6 +356,7 @@ class PGConnectionManager:
         self._connection_options = connection_options or {}
         self._conn_acquire_timeout = conn_acquire_timeout
         self._lock = asyncio.Lock()
+        self._closable = True
 
     @property
     def read_conn(self):
@@ -370,6 +371,10 @@ class PGConnectionManager:
             if self._pool is None:
                 # nothing to close
                 return
+            if not self._closable:
+                # prevent closing
+                return
+
             try:
                 await shield(self._pool.release(self._read_conn))
             except asyncpg.exceptions.InterfaceError:

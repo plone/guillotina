@@ -1,7 +1,8 @@
 4.4.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to prevent closing database connection pools
+  [vangheem]
 
 
 4.4.3 (2019-01-11)
