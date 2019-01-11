@@ -1,7 +1,8 @@
 4.4.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allow to login on IApplication.
+  [bloodbare]
 
 
 4.4.4 (2019-01-11)

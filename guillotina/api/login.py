@@ -11,12 +11,17 @@ from guillotina.event import notify
 from guillotina.events import UserLogin
 from guillotina.events import UserRefreshToken
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IApplication
 from guillotina.response import HTTPUnauthorized
 from guillotina.utils import get_authenticated_user
 
 
 @configure.service(
     context=IContainer, method='POST',
+    permission='guillotina.Public', name='@login',
+    summary='Components for a resource', allow_access=True)
+@configure.service(
+    context=IApplication, method='POST',
     permission='guillotina.Public', name='@login',
     summary='Components for a resource', allow_access=True)
 class Login(Service):
@@ -52,6 +57,10 @@ class Login(Service):
 
 @configure.service(
     context=IContainer, method='POST',
+    permission='guillotina.AccessContent', name='@login-renew',
+    summary='Refresh to a new token')
+@configure.service(
+    context=IApplication, method='POST',
     permission='guillotina.AccessContent', name='@login-renew',
     summary='Refresh to a new token')
 class Refresh(Service):
