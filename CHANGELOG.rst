@@ -1,4 +1,4 @@
-4.4.5 (unreleased)
+4.4.5 (2019-01-11)
 ------------------
 
 - Allow to login on IApplication.
