@@ -1,4 +1,4 @@
-4.4.4 (unreleased)
+4.4.4 (2019-01-11)
 ------------------
 
 - Be able to prevent closing database connection pools
