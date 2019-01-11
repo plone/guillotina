@@ -1,7 +1,8 @@
 4.4.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement multi attachments
+  [masipcat]
 
 
 4.4.4 (2019-01-11)
