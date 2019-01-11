@@ -30,7 +30,7 @@ async def cleanup(aps):
     if DATABASE == 'postgres':
         await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn._db_txn.commit()
-    await aps._pool.release(conn)
+    await aps.pool.release(conn)
     await aps.create()
     await aps.finalize()
 
@@ -636,7 +636,7 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_request):
     aps = await get_aps(db)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)
-    for conn in tm._storage._pool._queue._queue:
+    for conn in tm._storage.pool._queue._queue:
         if conn._con is None:
             await conn.connect()
         conn._con._top_xact = asyncpg.transaction.Transaction(
@@ -670,7 +670,7 @@ async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_request):
     aps = await get_aps(db)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)
-    for conn in tm._storage._pool._queue._queue:
+    for conn in tm._storage.pool._queue._queue:
         if conn._con is None:
             await conn.connect()
         await conn._con.execute('BEGIN;')

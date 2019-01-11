@@ -1,7 +1,10 @@
 4.4.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement `db.storage.spg.PGConnectionManager` class to allow
+  safely sharing pool and read connections between multiple
+  storages.
+  [vangheem]
 
 
 4.4.2 (2019-01-10)

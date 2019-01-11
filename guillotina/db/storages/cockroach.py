@@ -140,14 +140,14 @@ class CockroachStorage(pg.PostgresqlStorage):
         super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
+        self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
 
     async def get_current_tid(self, txn):
         raise Exception("cockroach does not support voting")
 
     async def has_unique_constraint(self):
         try:
-            for result in await self._read_conn.fetch(
+            for result in await self.read_conn.fetch(
                     '''SHOW CONSTRAINTS FROM {};'''.format(self._objects_table_name)):
                 if result['Name'] == '{}_parent_id_id_key'.format(self._objects_table_name):
                     return True
