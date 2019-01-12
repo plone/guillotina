@@ -353,21 +353,12 @@ class TraversalRouter(AbstractRouter):
         """Warpper to set the root object."""
         self._root = root
 
-    def munge_request(self, req):
-        for hdr in ('X-Forwarded-Proto', 'X-Forwarded-Scheme',):
-            forwarded_proto = req.headers.get(hdr, None)
-            if forwarded_proto:
-                req = req.clone(scheme=forwarded_proto)
-                break
-        return req
-
     async def resolve(self, request: IRequest) -> BaseMatchInfo:
         '''
         Resolve a request
         '''
         # prevent: https://github.com/aio-libs/aiohttp/issues/3335
         request.url
-        request = self.munge_request(request)
 
         request.record('start')
         result = None
