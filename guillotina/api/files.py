@@ -80,6 +80,10 @@ class DirectoryGET(FileGET):
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
     name='@upload/{field_name}',
     **_traversed_file_doc('Update the content of a file'))
+@configure.service(
+    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
+    name='@upload/{field_name}/{filename}',
+    **_traversed_file_doc('Update the content of a file'))
 class UploadFile(TraversableFieldService):
 
     async def __call__(self):

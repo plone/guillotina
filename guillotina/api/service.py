@@ -4,6 +4,34 @@ from guillotina.browser import View
 from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
 from guillotina.interfaces import IAsyncBehavior
+from guillotina.fields import CloudFileField
+from guillotina.schema import Dict
+
+
+class DictFieldProxy():
+
+    def __init__(self, key, context, field_name):
+        self.__key = key
+        self.__context = context
+        self.__field_name = field_name
+
+    def __getattribute__(self, name):
+        if name.startswith('_DictFieldProxy'):  # local attribute
+            return super().__getattribute__(name)
+
+        if name == self.__field_name:
+            return getattr(self.__context, name).get(self.__key)
+        else:
+            return getattr(self.__context, name)
+
+    def __setattr__(self, name, value):
+        if name.startswith('_DictFieldProxy'):
+            return super().__setattr__(name, value)
+
+        if name == self.__field_name:
+            getattr(self.__context, name)[self.__key] = value
+        else:
+            setattr(self.__context, name, value)
 
 
 class Service(View):
@@ -43,19 +71,33 @@ class TraversableFieldService(View):
                     field = behavior_schema[name]
                     self.behavior = behavior_schema(self.context)
                     break
+
         # Check that its a File Field
         if field is None:
             raise HTTPNotFound(content={
                 'reason': 'No valid name'})
 
         if self.behavior is not None:
-            self.field = field.bind(self.behavior)
+            ctx = self.behavior
         else:
-            self.field = field.bind(self.context)
+            ctx = self.context
 
         if (self.behavior is not None and
                 IAsyncBehavior.implementedBy(self.behavior.__class__)):
             # providedBy not working here?
             await self.behavior.load()
+
+        if type(field) == Dict:
+            key = self.request.matchdict['filename']
+            self.field = CloudFileField(__name__=name).bind(
+                DictFieldProxy(key, ctx, name)
+            )
+
+        elif type(field) == CloudFileField:
+            self.field = field.bind(ctx)
+
+        if self.field is None:
+            raise HTTPNotFound(content={
+                'reason': 'No valid name'})
 
         return self

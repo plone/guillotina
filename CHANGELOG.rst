@@ -7,6 +7,8 @@
 4.4.5 (2019-01-11)
 ------------------
 
+- Implement multi attachments
+  [masipcat]
 - Allow to login on IApplication.
   [bloodbare]
 
