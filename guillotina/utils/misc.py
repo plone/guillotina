@@ -262,3 +262,25 @@ def safe_unidecode(val: bytes) -> str:
         except UnicodeDecodeError:
             pass
     return val.decode('utf-8', errors='replace')
+
+
+def get_url(req, path):
+    '''
+    Return calculated url from a request object taking
+    into account X-VirtualHost-Monster header
+    '''
+    if 'X-VirtualHost-Monster' in req.headers:
+        virtualhost = req.headers['X-VirtualHost-Monster']
+    else:
+        virtualhost = None
+
+    if virtualhost:
+        return '{}/{}'.format(virtualhost.rstrip('/'), path.strip('/'))
+    else:
+        url = req.url.with_path(path)
+        for hdr in ('X-Forwarded-Proto', 'X-Forwarded-Scheme',):
+            forwarded_proto = req.headers.get(hdr, None)
+            if forwarded_proto:
+                url = url.with_scheme(forwarded_proto)
+                break
+        return str(url)
