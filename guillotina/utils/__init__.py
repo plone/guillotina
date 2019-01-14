@@ -14,6 +14,7 @@ from .misc import apply_coroutine  # noqa
 from .misc import clear_conn_statement_cache  # noqa
 from .misc import get_current_request  # noqa
 from .misc import get_random_string  # noqa
+from .misc import get_url  # noqa
 from .misc import lazy_apply  # noqa
 from .misc import list_or_dict_items  # noqa
 from .misc import loop_apply_coroutine  # noqa

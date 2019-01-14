@@ -1,14 +1,20 @@
 4.4.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- provide `guillotina.utils.get_url` function that pays attention
+  to `X-VirtualHost-Monster` header
+  [vangheem]
+
+- Take `X-Forwarded-Proto` into account for request url
+  [vangheem]
+
+- Implement multi attachments
+  [masipcat]
 
 
 4.4.5 (2019-01-11)
 ------------------
 
-- Implement multi attachments
-  [masipcat]
 - Allow to login on IApplication.
   [bloodbare]
 
