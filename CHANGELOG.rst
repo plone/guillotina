@@ -1,6 +1,9 @@
 4.4.6 (unreleased)
 ------------------
 
+- Fix getting binding file field for cloud files
+  [vangheem]
+
 - provide `guillotina.utils.get_url` function that pays attention
   to `X-VirtualHost-Monster` header
   [vangheem]

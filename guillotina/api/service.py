@@ -1,10 +1,11 @@
-from guillotina.response import HTTPNotFound
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina.browser import View
 from guillotina.component import query_utility
 from guillotina.component.interfaces import IFactory
-from guillotina.interfaces import IAsyncBehavior
 from guillotina.fields import CloudFileField
+from guillotina.interfaces import IAsyncBehavior
+from guillotina.interfaces import ICloudFileField
+from guillotina.response import HTTPNotFound
 from guillotina.schema import Dict
 
 
@@ -92,8 +93,7 @@ class TraversableFieldService(View):
             self.field = CloudFileField(__name__=name).bind(
                 DictFieldProxy(key, ctx, name)
             )
-
-        elif type(field) == CloudFileField:
+        elif ICloudFileField.providedBy(field):
             self.field = field.bind(ctx)
 
         if self.field is None:
