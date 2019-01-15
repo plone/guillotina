@@ -1,4 +1,4 @@
-4.4.6 (unreleased)
+4.4.6 (2019-01-15)
 ------------------
 
 - Fix getting binding file field for cloud files
