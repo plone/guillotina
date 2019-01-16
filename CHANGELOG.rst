@@ -1,7 +1,9 @@
 4.4.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Defer preparing download response so http exceptions are
+  handle correctly
+  [vangheem]
 
 
 4.4.6 (2019-01-15)

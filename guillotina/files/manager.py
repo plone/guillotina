@@ -75,8 +75,6 @@ class FileManager(object):
 
     async def head(self, disposition=None, filename=None, content_type=None,
                    size=None, **kwargs):
-        download_resp = await self.prepare_download(
-            disposition, filename, content_type, size, **kwargs)
         if hasattr(self.file_storage_manager, 'exists'):
             # does not need to implement but can be a way to verify
             # file exists on cloud platform still
@@ -84,14 +82,20 @@ class FileManager(object):
                 raise HTTPNotFound(content={
                     'message': 'File object does not exist'
                 })
+        download_resp = await self.prepare_download(
+            disposition, filename, content_type, size, **kwargs)
         await download_resp.write_eof()
         return download_resp
 
     async def download(self, disposition=None, filename=None, content_type=None,
                        size=None, **kwargs):
-        download_resp = await self.prepare_download(
-            disposition, filename, content_type, size, **kwargs)
+        download_resp = None
         async for chunk in self.file_storage_manager.iter_data(**kwargs):
+            if download_resp is None:
+                # defer to make sure we http exception handling
+                # before data starts streaming works properly
+                await self.prepare_download(
+                    disposition, filename, content_type, size, **kwargs)
             await download_resp.write(chunk)
             await download_resp.drain()
         await download_resp.write_eof()
