@@ -1,4 +1,4 @@
-4.4.9 (unreleased)
+4.4.9 (2019-01-15)
 ------------------
 
 - Handle if no data to iterate on for downloads
