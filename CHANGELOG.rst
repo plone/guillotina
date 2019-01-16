@@ -1,4 +1,4 @@
-4.4.7 (unreleased)
+4.4.7 (2019-01-15)
 ------------------
 
 - Defer preparing download response so http exceptions are
