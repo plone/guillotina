@@ -1,7 +1,8 @@
 4.4.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle if no data to iterate on for downloads
+  [vangheem]
 
 
 4.4.8 (2019-01-15)

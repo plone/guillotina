@@ -98,6 +98,10 @@ class FileManager(object):
                     disposition, filename, content_type, size, **kwargs)
             await download_resp.write(chunk)
             await download_resp.drain()
+        if download_resp is None:
+            # deferred
+            download_resp = await self.prepare_download(
+                disposition, filename, content_type, size, **kwargs)
         await download_resp.write_eof()
         return download_resp
 
