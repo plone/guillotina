@@ -1,7 +1,8 @@
 4.4.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix release
+  [vangheem]
 
 
 4.4.7 (2019-01-15)

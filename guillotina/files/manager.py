@@ -94,7 +94,7 @@ class FileManager(object):
             if download_resp is None:
                 # defer to make sure we http exception handling
                 # before data starts streaming works properly
-                await self.prepare_download(
+                download_resp = await self.prepare_download(
                     disposition, filename, content_type, size, **kwargs)
             await download_resp.write(chunk)
             await download_resp.drain()
