@@ -17,3 +17,4 @@ six==1.11.0
 ujson==1.35
 yarl==1.2.6
 zope.interface==4.4.3
+gunicorn==19.9.0
