@@ -1,7 +1,8 @@
 4.4.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- postgresql storage needs to share connection lock
+  [vangheem]
 
 
 4.4.9 (2019-01-15)

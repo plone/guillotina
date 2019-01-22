@@ -365,6 +365,10 @@ class PGConnectionManager:
     @property
     def pool(self):
         return self._pool
+    
+    @property
+    def lock(self):
+        return self._lock
 
     async def close(self):
         async with self._lock:
@@ -490,7 +494,6 @@ class PostgresqlStorage(BaseStorage):
         self._partition_class = partition
         self._read_only = read_only
         self.__name__ = name
-        self._lock = asyncio.Lock()
         self._conn_acquire_timeout = conn_acquire_timeout
         self._options = options
         self._connection_options = {}
@@ -516,6 +519,10 @@ class PostgresqlStorage(BaseStorage):
     @property
     def connection_manager(self):
         return self._connection_manager
+
+    @property
+    def lock(self):
+        return self._connection_manager.lock
 
     async def create(self):
         # Check DB
@@ -643,7 +650,7 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
             conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
             return conn
         except asyncpg.exceptions.InterfaceError as ex:
-            async with self._lock:
+            async with self.lock:
                 await self._check_bad_connection(ex)
 
     async def close(self, con):
@@ -754,7 +761,7 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
                 return await self.restart_connection()
 
     async def get_next_tid(self, txn):
-        async with self._lock:
+        async with self.lock:
             # we do not use transaction lock here but a storage lock because
             # a storage object has a shard conn for reads
             try:
@@ -764,7 +771,7 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
                 raise
 
     async def get_current_tid(self, txn):
-        async with self._lock:
+        async with self.lock:
             # again, use storage lock here instead of trns lock
             return await self._stmt_max_tid.fetchval()
 
@@ -791,7 +798,7 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
             try:
                 txn._db_txn = self._db_transaction_factory(txn)
             except asyncpg.exceptions.InterfaceError as ex:
-                async with self._lock:
+                async with self.lock:
                     await self._check_bad_connection(ex)
                 raise
             try:
@@ -829,7 +836,7 @@ ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LEN
                 return await self.start_transaction(txn, retries + 1)
 
     async def get_conflicts(self, txn):
-        async with self._lock:
+        async with self.lock:
             if len(txn.modified) == 0:
                 return []
             # use storage lock instead of transaction lock
