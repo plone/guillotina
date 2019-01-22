@@ -410,25 +410,25 @@ class PGConnectionManager:
                 timeout=self._conn_acquire_timeout)
 
     async def restart(self, timeout=2):
-        async with self._lock:
-            if self._pool is not None:
-                try:
-                    await asyncio.wait_for(self._pool.close(), timeout)
-                except asyncio.TimeoutError:
-                    pass
-                self._pool.terminate()
+        # needs to be used with lock
+        if self._pool is not None:
+            try:
+                await asyncio.wait_for(self._pool.close(), timeout)
+            except asyncio.TimeoutError:
+                pass
+            self._pool.terminate()
 
-            # re-bind, throw conflict error so the request is restarted...
-            self._pool = await asyncpg.create_pool(
-                dsn=self._dsn,
-                max_size=self._pool_size,
-                min_size=2,
-                connection_class=app_settings['pg_connection_class'],
-                **self._connection_options)
+        # re-bind, throw conflict error so the request is restarted...
+        self._pool = await asyncpg.create_pool(
+            dsn=self._dsn,
+            max_size=self._pool_size,
+            min_size=2,
+            connection_class=app_settings['pg_connection_class'],
+            **self._connection_options)
 
-            # shared read connection on all transactions
-            self._read_conn = await self._pool.acquire(
-                timeout=self._conn_acquire_timeout)
+        # shared read connection on all transactions
+        self._read_conn = await self._pool.acquire(
+            timeout=self._conn_acquire_timeout)
 
 
 @implementer(IPostgresStorage)
@@ -585,55 +585,56 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
                 conn_acquire_timeout=self._conn_acquire_timeout)
             await self._connection_manager.initialize(loop, **kw)
 
-        if await self.has_unique_constraint():
-            self._supports_unique_constraints = True
+        async with self.lock:
+            if await self.has_unique_constraint():
+                self._supports_unique_constraints = True
 
-        trash_sql = self._sql.get('CREATE_TRASH', self._objects_table_name)
-        try:
-            await self.initialize_tid_statements()
-            await self.read_conn.execute(trash_sql)
-        except asyncpg.exceptions.ReadOnlySQLTransactionError:
-            # Not necessary for read-only pg
-            pass
-        except asyncpg.exceptions.UndefinedTableError:
-            await self.create()
-            # only available on new databases
-            await self.read_conn.execute(self._unique_constraint.format(
-                objects_table_name=self._objects_table_name
-            ))
-            self._supports_unique_constraints = True
-            await self.initialize_tid_statements()
-            await self.read_conn.execute(trash_sql)
+            trash_sql = self._sql.get('CREATE_TRASH', self._objects_table_name)
+            try:
+                await self.initialize_tid_statements()
+                await self.read_conn.execute(trash_sql)
+            except asyncpg.exceptions.ReadOnlySQLTransactionError:
+                # Not necessary for read-only pg
+                pass
+            except asyncpg.exceptions.UndefinedTableError:
+                await self.create()
+                # only available on new databases
+                await self.read_conn.execute(self._unique_constraint.format(
+                    objects_table_name=self._objects_table_name
+                ))
+                self._supports_unique_constraints = True
+                await self.initialize_tid_statements()
+                await self.read_conn.execute(trash_sql)
 
-        # migrate to larger VARCHAR size...
-        result = await self.read_conn.fetch("""
-select * from information_schema.columns
-where table_name='{}'""".format(self._objects_table_name))
-        if len(result) > 0 and result[0]['character_maximum_length'] != MAX_OID_LENGTH:
-            log.warn('Migrating VARCHAR key length')
-            await self.read_conn.execute(f'''
-ALTER TABLE {self._objects_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
-            await self.read_conn.execute(f'''
-ALTER TABLE {self._objects_table_name} ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
-            await self.read_conn.execute(f'''
-ALTER TABLE {self._objects_table_name} ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
-            await self.read_conn.execute(f'''
-ALTER TABLE {self._blobs_table_name} ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
-            await self.read_conn.execute(f'''
-ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+            # migrate to larger VARCHAR size...
+            result = await self.read_conn.fetch("""
+    select * from information_schema.columns
+    where table_name='{}'""".format(self._objects_table_name))
+            if len(result) > 0 and result[0]['character_maximum_length'] != MAX_OID_LENGTH:
+                log.warn('Migrating VARCHAR key length')
+                await self.read_conn.execute(f'''
+    ALTER TABLE {self._objects_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+                await self.read_conn.execute(f'''
+    ALTER TABLE {self._objects_table_name} ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
+                await self.read_conn.execute(f'''
+    ALTER TABLE {self._objects_table_name} ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
+                await self.read_conn.execute(f'''
+    ALTER TABLE {self._blobs_table_name} ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
+                await self.read_conn.execute(f'''
+    ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
 
-        self._vacuum = self._vacuum_class(self, loop)
-        self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
+            self._vacuum = self._vacuum_class(self, loop)
+            self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
 
-        def vacuum_done(task):
-            if self._vacuum._closed:
-                # if it's closed, we know this is expected
-                return
-            log.warning('Vacuum pg task ended. This should not happen. '
-                        'No database vacuuming will be done here anymore.')
+            def vacuum_done(task):
+                if self._vacuum._closed:
+                    # if it's closed, we know this is expected
+                    return
+                log.warning('Vacuum pg task ended. This should not happen. '
+                            'No database vacuuming will be done here anymore.')
 
-        self._vacuum_task.add_done_callback(vacuum_done)
-        self._connection_initialized_on = time.time()
+            self._vacuum_task.add_done_callback(vacuum_done)
+            self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
         self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
