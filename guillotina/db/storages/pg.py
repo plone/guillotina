@@ -365,7 +365,7 @@ class PGConnectionManager:
     @property
     def pool(self):
         return self._pool
-    
+
     @property
     def lock(self):
         return self._lock
