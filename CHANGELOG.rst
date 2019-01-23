@@ -1,4 +1,4 @@
-4.4.10 (unreleased)
+4.4.10 (2019-01-23)
 -------------------
 
 - postgresql storage needs to share connection lock
