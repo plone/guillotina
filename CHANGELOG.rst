@@ -1,6 +1,9 @@
 4.4.11 (unreleased)
 -------------------
 
+- Allowing to get user information of application
+  [bloodbare]
+
 - Fixing SQL creation function
   [bloodbare]
 
