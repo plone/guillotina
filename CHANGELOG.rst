@@ -1,7 +1,8 @@
 4.4.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixing SQL creation function
+  [bloodbare]
 
 
 4.4.10 (2019-01-23)
