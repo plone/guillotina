@@ -77,9 +77,9 @@ style of publishing objects to URLs to build a framework and CMS around.
 An Object Graph: The guillotina datastore.
 ------------------------------------------
 
-At the beginging there is the notiion of Content-Type. A content type, it's just
+At the beginning there is the notion of Content-Type. A content type, it's just
 a python interface (A class) that describes an object. Every object could be stored
-on the db. And every objet, could have child objects related to them. Something like:
+on the db. And every object, could have child objects related to them. Something like:
 
 /user@account/
 /user@account/preferences
@@ -92,8 +92,8 @@ on the db. And every objet, could have child objects related to them. Something 
 Allows us to better express content relations, and this is where guillotina shines, because
 it offers an automatic REST API over them.
 
-For exeample you can do a PATCH request over /user@account/preferences, to update, them or
-you can POST an item over the /user@account/todos with the necessry payload to create new
+For example you can do a PATCH request over /user@account/preferences, to update, them or
+you can POST an item over the /user@account/todos with the necessary payload to create new
 todo posts lists, or you can just do a DELETE request
 to /user@account/todos/todos_list1/todo_item3 to remove a todo list item.
 

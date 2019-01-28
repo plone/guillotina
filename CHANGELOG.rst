@@ -1,3 +1,7 @@
+(2019-01-29)
+-------------------
+fix typos in documentation
+
 4.4.10 (unreleased)
 -------------------
 
