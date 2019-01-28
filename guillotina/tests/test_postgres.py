@@ -125,19 +125,24 @@ async def test_restart_connection_pg(db, dummy_request):
     aps = await get_aps(db)
     tm = TransactionManager(aps)
 
-    # Check 'read_conn' works
+    # Test it works
     await tm._storage.get_next_tid(Mock())
 
-    # Simulate connection closed
-    tm._storage._connection_manager._read_conn.terminate()
+    # Simulate connection was initialized a long time ago
+    tm._storage._connection_initialized_on = 0
 
-    # Don't know why we need this line but without this sleep fails
-    await asyncio.sleep(1)
+    async def fetchval_conn_closed():
+        raise asyncpg.exceptions.InterfaceError(
+            'cannot call PreparedStatement.fetchval(): the underlying connection is closed'
+        )
+
+    # Simulate underlying connection is closed
+    tm._storage._stmt_next_tid = Mock(**{'fetchval': fetchval_conn_closed})
 
     with pytest.raises(ConflictError):
         await tm._storage.get_next_tid(Mock())
 
-    # Try again (connection should be restarted)
+    # Test works again
     await tm._storage.get_next_tid(Mock())
 
     await aps.remove()
