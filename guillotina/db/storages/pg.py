@@ -235,6 +235,20 @@ RETURNING id;
 ''')
 
 
+def restart_conn_on_exception(f):
+    async def decorator(self: 'PostgresqlStorage', *args, **kwargs):
+        try:
+            return await f(self, *args, **kwargs)
+        except asyncpg.exceptions.PostgresConnectionError as ex:
+            await self._check_bad_connection(ex)
+            raise
+        except asyncpg.exceptions.InterfaceError as ex:
+            await self._check_bad_connection(ex)
+            raise
+
+    return decorator
+
+
 # how long to wait before trying to recover bad connections
 BAD_CONNECTION_RESTART_DELAY = 0.25
 
@@ -646,13 +660,10 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             await conn.execute("DROP TABLE IF EXISTS {};".format(self._blobs_table_name))
             await conn.execute("DROP TABLE IF EXISTS {};".format(self._objects_table_name))
 
+    @restart_conn_on_exception
     async def open(self):
-        try:
-            conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
-            return conn
-        except asyncpg.exceptions.InterfaceError as ex:
-            async with self.lock:
-                await self._check_bad_connection(ex)
+        conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
+        return conn
 
     async def close(self, con):
         try:
@@ -755,29 +766,22 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
-        for err in ('connection is closed', 'pool is closed', 'connection was closed'):
-            if err in str(ex):
-                if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
-                    # we need to make sure we aren't calling this over and over again
-                    return await self.restart_connection()
-
-    async def get_next_tid(self, txn):
         async with self.lock:
             # we do not use transaction lock here but a storage lock because
             # a storage object has a shard conn for reads
-            try:
-                return await self._stmt_next_tid.fetchval()
-            except asyncpg.exceptions.PostgresConnectionError as ex:
-                await self._check_bad_connection(ex)
-                raise
-            except asyncpg.exceptions.InterfaceError as ex:
-                await self._check_bad_connection(ex)
-                raise
+            for err in ('connection is closed', 'pool is closed', 'connection was closed'):
+                if err in str(ex):
+                    if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
+                        # we need to make sure we aren't calling this over and over again
+                        return await self.restart_connection()
 
+    @restart_conn_on_exception
+    async def get_next_tid(self, txn):
+        return await self._stmt_next_tid.fetchval()
+
+    @restart_conn_on_exception
     async def get_current_tid(self, txn):
-        async with self.lock:
-            # again, use storage lock here instead of trns lock
-            return await self._stmt_max_tid.fetchval()
+        return await self._stmt_max_tid.fetchval()
 
     async def get_one_row(self, txn, sql, *args, prepare=False):
         conn = await txn.get_connection()
@@ -789,7 +793,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         else:
             return await conn.fetchrow(sql, *args)
 
-    def _db_transaction_factory(self, txn):
+    @restart_conn_on_exception
+    async def _db_transaction_factory(self, txn):
         # make sure asycpg knows this is a new transaction
         if txn._db_conn._con is not None:
             txn._db_conn._con._top_xact = None
@@ -799,12 +804,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         error = None
         conn = await txn.get_connection()
         async with txn._lock:
-            try:
-                txn._db_txn = self._db_transaction_factory(txn)
-            except asyncpg.exceptions.InterfaceError as ex:
-                async with self.lock:
-                    await self._check_bad_connection(ex)
-                raise
+            txn._db_txn = await self._db_transaction_factory(txn)
+
             try:
                 await txn._db_txn.start()
                 return
