@@ -239,10 +239,8 @@ def restart_conn_on_exception(f):
     async def decorator(self: 'PostgresqlStorage', *args, **kwargs):
         try:
             return await f(self, *args, **kwargs)
-        except asyncpg.exceptions.PostgresConnectionError as ex:
-            await self._check_bad_connection(ex)
-            raise
-        except asyncpg.exceptions.InterfaceError as ex:
+        except (asyncpg.exceptions.PostgresConnectionError,
+                asyncpg.exceptions.InterfaceError) as ex:
             await self._check_bad_connection(ex)
             raise
 

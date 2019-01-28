@@ -5,6 +5,7 @@ from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
+from unittest.mock import Mock
 
 import asyncio
 import asyncpg
@@ -112,6 +113,32 @@ async def test_restart_connection(db, dummy_request):
 
     assert ob2._p_oid == ob._p_oid
     await tm.commit(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_restart_connection_pg(db, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps(db)
+    tm = TransactionManager(aps)
+
+    # Check 'read_conn' works
+    await tm._storage.get_next_tid(Mock())
+
+    # Simulate connection closed
+    tm._storage._connection_manager._read_conn.terminate()
+
+    # Don't know why we need this line but without this sleep fails
+    await asyncio.sleep(1)
+
+    with pytest.raises(ConflictError):
+        await tm._storage.get_next_tid(Mock())
+
+    # Try again (connection should be restarted)
+    await tm._storage.get_next_tid(Mock())
 
     await aps.remove()
     await cleanup(aps)
