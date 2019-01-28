@@ -1,11 +1,18 @@
 (2019-01-29)
 -------------------
-fix typos in documentation
+-fix typos in documentation
 
 4.4.10 (unreleased)
 -------------------
 
 - Nothing changed yet.
+
+
+4.4.10 (2019-01-23)
+-------------------
+
+- postgresql storage needs to share connection lock
+  [vangheem]
 
 
 4.4.9 (2019-01-15)
