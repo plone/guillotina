@@ -755,11 +755,11 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
-        if str(ex) in ('cannot perform operation: connection is closed',
-                       'connection is closed', 'pool is closed'):
-            if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
-                # we need to make sure we aren't calling this over and over again
-                return await self.restart_connection()
+        for err in ('connection is closed', 'pool is closed', 'connection was closed'):
+            if err in str(ex):
+                if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
+                    # we need to make sure we aren't calling this over and over again
+                    return await self.restart_connection()
 
     async def get_next_tid(self, txn):
         async with self.lock:
@@ -767,6 +767,9 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             # a storage object has a shard conn for reads
             try:
                 return await self._stmt_next_tid.fetchval()
+            except asyncpg.exceptions.PostgresConnectionError as ex:
+                await self._check_bad_connection(ex)
+                raise
             except asyncpg.exceptions.InterfaceError as ex:
                 await self._check_bad_connection(ex)
                 raise
