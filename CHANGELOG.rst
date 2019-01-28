@@ -1,7 +1,8 @@
 4.4.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improved PostgresqlStorage._check_bad_connection()
+  [masipcat]
 
 
 4.4.10 (2019-01-23)
