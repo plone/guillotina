@@ -791,18 +791,21 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         else:
             return await conn.fetchrow(sql, *args)
 
-    @restart_conn_on_exception
-    async def _db_transaction_factory(self, txn):
+    def _db_transaction_factory(self, txn):
         # make sure asycpg knows this is a new transaction
         if txn._db_conn._con is not None:
             txn._db_conn._con._top_xact = None
         return txn._db_conn.transaction(readonly=txn._manager._storage._read_only)
 
+    @restart_conn_on_exception
+    async def _async_db_transaction_factory(self, txn):
+        return self._db_transaction_factory(txn)
+
     async def start_transaction(self, txn, retries=0):
         error = None
         conn = await txn.get_connection()
         async with txn._lock:
-            txn._db_txn = await self._db_transaction_factory(txn)
+            txn._db_txn = await self._async_db_transaction_factory(txn)
 
             try:
                 await txn._db_txn.start()
