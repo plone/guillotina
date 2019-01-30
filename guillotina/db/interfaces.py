@@ -1,4 +1,5 @@
-from guillotina.interfaces import IDatabase, ICatalogDataAdapter
+from guillotina.interfaces import ICatalogDataAdapter
+from guillotina.interfaces import IDatabase
 from zope.interface import Interface
 
 
