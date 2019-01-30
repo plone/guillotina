@@ -147,9 +147,9 @@ RESERVED_ATTRS = (
 )
 
 class IRequest(Interface):
-    container = Attribute()
-    _container_id = Attribute()
-    container_settings = Attribute()
+    container = Attribute('current container')
+    _container_id = Attribute('id of current container')
+    container_settings = Attribute('container settings')
 
 
 class ILanguage(Interface):
