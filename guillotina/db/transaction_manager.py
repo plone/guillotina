@@ -106,12 +106,14 @@ class TransactionManager:
         if txn is not None:
             try:
                 await txn.commit()
+                await self._close_txn(txn)
             except (ConflictError, TIDConflictError):
                 # we're okay with ConflictError being handled...
                 txn.status = Status.CONFLICT
-                raise
-            finally:
                 await self._close_txn(txn)
+                raise
+            except Exception:
+                raise
         else:
             await self._close_txn(txn)
 
