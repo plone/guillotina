@@ -126,14 +126,14 @@ Now you can start hands-on style guide to learn how to use it.
 
 ```eval_rst
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    api/index
 ```
 
 ```eval_rst
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    migration/index
 ```

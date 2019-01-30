@@ -14,15 +14,15 @@ The training doc has a great introduction on
 
 Serialization interfaces:
 
-- :class:`~guillotina.interfaces.IResourceSerializeToJson`: Provides full content
-- :class:`~guillotina.interfaces.IResourceSerializeToJsonSummary`: Summary of content
-- :class:`~guillotina.interfaces.IFactorySerializeToJson`: Information on conten type
-- :class:`~guillotina.interfaces.ISchemaSerializeToJson`: Serialize full schema
-- :class:`~guillotina.interfaces.ISchemaFieldSerializeToJson`: Feild of a schema
-- :class:`~guillotina.interfaces.ICatalogDataAdapter`: Searchable data(for adapters like elasticsearch)
-- :class:`~guillotina.interfaces.ISecurityInfo`: minimal data used for changes
+- `guillotina.interfaces.IResourceSerializeToJson`: Provides full content
+- `guillotina.interfaces.IResourceSerializeToJsonSummary`: Summary of content
+- `guillotina.interfaces.IFactorySerializeToJson`: Information on conten type
+- `guillotina.interfaces.ISchemaSerializeToJson`: Serialize full schema
+- `guillotina.interfaces.ISchemaFieldSerializeToJson`: Feild of a schema
+- `guillotina.interfaces.ICatalogDataAdapter`: Searchable data(for adapters like elasticsearch)
+- `guillotina.interfaces.ISecurityInfo`: minimal data used for changes
   to security of object required by catalog adapters.
-- :class:`~guillotina.db.interfaces.IJSONDBSerializer`: Content serialized to db
+- `guillotina.db.interfaces.IJSONDBSerializer`: Content serialized to db
   in addition to pickled data. Used with the JSONB field in postgresql.
   By default this is the same as `ICatalogDataAdapter`.
 
