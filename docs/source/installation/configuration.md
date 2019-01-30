@@ -156,7 +156,7 @@ jwt:
 
 - `port` (number): Port to bind to. _defaults to `8080`_
 - `access_log_format` (string): Customize access log format for aiohttp. _defaults to `None`_
-- `store_json` (boolean): Serialize object into json field in database. _defaults to `true`_
+- `store_json` (boolean): Serialize object into json field in database. _defaults to `false`_
 - `host` (string): Where to host the server. _defaults to `"0.0.0.0"`_
 - `port` (number): Port to bind to. _defaults to `8080`_
 - `conflict_retry_attempts` (number): Number of times to retry database conflict errors. _defaults to `3`_

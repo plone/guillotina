@@ -107,8 +107,8 @@ async def apply_coroutine(func: types.FunctionType, *args, **kwargs) -> object:
     'hi'
 
     :param func: function to run as coroutiune if one
-    :param *args: args to call function with
-    :param **kwargs: kwargs to call function with
+    :param \\*args: args to call function with
+    :param \\**kwargs: kwargs to call function with
     """
     result = func(*args, **kwargs)
     if asyncio.iscoroutine(result):

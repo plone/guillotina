@@ -1,11 +1,15 @@
-from guillotina.catalog.utils import get_index_fields
+import json
+import os
+
+import pytest
 from guillotina.catalog import index
-from guillotina.events import ObjectModifiedEvent
-from guillotina.event import notify
+from guillotina.catalog.utils import get_index_fields
 from guillotina.catalog.utils import get_metadata_fields
 from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import create_content
+from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import ISecurityInfo
@@ -127,3 +131,41 @@ async def test_create_catalog(container_requester):
         assert status == 200
         response, status = await requester('DELETE', '/db/guillotina/@catalog')
         assert status == 200
+
+
+@pytest.mark.skipif(os.environ.get('DATABASE', 'DUMMY') in ('cockroachdb', 'DUMMY'),
+                    reason='Not for dummy db')
+async def test_query_stored_json(container_requester):
+    async with container_requester as requester:
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+            })
+        )
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item2",
+                "id": "item2",
+            })
+        )
+
+        conn = requester.db.storage.read_conn
+        result = await conn.fetch('''
+select json from objects
+where json->>'type_name' = 'Item'
+order by json->>'id'
+''')
+        assert len(result) == 2
+        assert json.loads(result[0]['json'])['id'] == 'item1'
+        assert json.loads(result[1]['json'])['id'] == 'item2'
+
+        result = await conn.fetch('''
+select json from objects
+where json->>'id' = 'item1'
+''')
+        assert len(result) == 1

@@ -1,13 +1,23 @@
+import pickle
+
 from guillotina import configure
 from guillotina._settings import app_settings
+from guillotina.catalog.catalog import DefaultCatalogDataAdapter
 from guillotina.component import query_adapter
+from guillotina.db.interfaces import IJSONDBSerializer
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IResource
 from guillotina.utils import get_dotted_name
 
-import pickle
+
+@configure.adapter(
+    for_=IResource,
+    provides=IJSONDBSerializer)
+class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
+    '''
+    Default serializer just serializer catalog data
+    '''
 
 
 @configure.adapter(
@@ -68,8 +78,8 @@ class ResourceWriter(Writer):
             return get_dotted_name(self._obj)
 
     async def get_json(self):
-        if not app_settings.get('store_json', True):
+        if not app_settings.get('store_json', False):
             return {}
-        adapter = query_adapter(self._obj, ICatalogDataAdapter)
+        adapter = query_adapter(self._obj, IJSONDBSerializer)
         if adapter is not None:
             return await adapter()
