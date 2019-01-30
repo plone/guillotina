@@ -32,7 +32,7 @@ app_settings: Dict[str, Any] = {
             }
         }
     },
-    "store_json": True,
+    "store_json": False,
     "root_user": {
         "password": ""
     },

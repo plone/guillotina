@@ -78,7 +78,7 @@ class ResourceWriter(Writer):
             return get_dotted_name(self._obj)
 
     async def get_json(self):
-        if not app_settings.get('store_json', True):
+        if not app_settings.get('store_json', False):
             return {}
         adapter = query_adapter(self._obj, IJSONDBSerializer)
         if adapter is not None:

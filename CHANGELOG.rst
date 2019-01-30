@@ -1,9 +1,13 @@
 
-4.4.11 (unreleased)
--------------------
+4.5.0 (unreleased)
+------------------
 
-- Provide ICatalogDataAdapter to be able to override json
-  stored in posgresql to be different than what is serialized
+- By default, do not serialize json data to postgresql anymore. If you were
+  depending on `store_json` default to be `true`, you need to update
+  [vangheem]
+
+- Provide `guillotina.db.interfaces.IJSONDBSerializer` to be able to
+  override json stored in posgresql to be different than what is serialized
   in catalog/elasticsearch/etc
   [vangheem]
 
