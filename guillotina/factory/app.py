@@ -164,7 +164,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     :param config_file: path to configuration file to load
     :param settings: dictionary of settings
     :param loop: if not using with default event loop
-    :param settings: provide your own aiohttp application 
+    :param settings: provide your own aiohttp application
     '''
     # reset app_settings
     app_settings.clear()
