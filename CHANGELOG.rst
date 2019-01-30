@@ -1,5 +1,5 @@
 
-4.5.0 (unreleased)
+4.5.0 (2019-01-30)
 ------------------
 
 - By default, do not serialize json data to postgresql anymore. If you were
