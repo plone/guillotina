@@ -133,7 +133,7 @@ async def test_create_catalog(container_requester):
         assert status == 200
 
 
-@pytest.mark.skipif(os.environ.get('DATABASE', 'DUMMY') == 'DUMMY',
+@pytest.mark.skipif(os.environ.get('DATABASE', 'DUMMY') in ('cockroachdb', 'DUMMY'),
                     reason='Not for dummy db')
 async def test_query_stored_json(container_requester):
     async with container_requester as requester:
