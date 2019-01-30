@@ -147,7 +147,6 @@ class Resource(guillotina.db.orm.base.BaseObject):
 
     __behaviors__: FrozenSet[str] = frozenset({})
     __acl__ = None
-    __parent__: Optional['Folder'] = None
 
     type_name: Optional[str] = None
     creation_date = None
