@@ -35,11 +35,12 @@ class Login(Service):
         }
 
         for validator in app_settings['auth_token_validators']:
-                if (validator.for_validators is not None and
-                        'basic' not in validator.for_validators):
-                    continue
-                user = await validator(self.request).validate(creds)
-                if user is not None: break
+            if (validator.for_validators is not None and
+                    'basic' not in validator.for_validators):
+                continue
+            user = await validator(self.request).validate(creds)
+            if user is not None:
+                break
 
         if user is None:
             raise HTTPUnauthorized(content={

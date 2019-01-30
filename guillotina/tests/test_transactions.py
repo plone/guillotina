@@ -17,7 +17,7 @@ async def test_tid_created_for_writes(dummy_request, loop):
     tm = mocks.MockTransactionManager()
     trns = Transaction(tm, dummy_request, loop=loop)
     await trns.tpc_begin()
-    assert trns._tid is 1
+    assert trns._tid == 1
 
 
 async def test_managed_transaction_with_adoption(container_requester):
