@@ -5,6 +5,7 @@ from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
+from unittest.mock import Mock
 
 import asyncio
 import asyncpg
@@ -112,6 +113,37 @@ async def test_restart_connection(db, dummy_request):
 
     assert ob2._p_oid == ob._p_oid
     await tm.commit(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_restart_connection_pg(db, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps(db)
+    tm = TransactionManager(aps)
+
+    # Test it works
+    await tm._storage.get_next_tid(Mock())
+
+    # Simulate connection was initialized a long time ago
+    tm._storage._connection_initialized_on = 0
+
+    async def fetchval_conn_closed():
+        raise asyncpg.exceptions.InterfaceError(
+            'cannot call PreparedStatement.fetchval(): the underlying connection is closed'
+        )
+
+    # Simulate underlying connection is closed
+    tm._storage._stmt_next_tid = Mock(**{'fetchval': fetchval_conn_closed})
+
+    with pytest.raises(ConflictError):
+        await tm._storage.get_next_tid(Mock())
+
+    # Test works again
+    await tm._storage.get_next_tid(Mock())
 
     await aps.remove()
     await cleanup(aps)
