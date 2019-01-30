@@ -20,8 +20,6 @@ from zope.interface import alsoProvides
 
 class ContentAPI:
 
-    db = tm = request = None
-
     def __init__(self, db):
         self.db = db
         self.tm = db.get_transaction_manager()
