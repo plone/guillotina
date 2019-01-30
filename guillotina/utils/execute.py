@@ -76,8 +76,8 @@ def in_queue_with_func(func: Callable[..., Coroutine[Any, Any, Any]], *args,
 
     :param func: function to be queued
     :param _request: provide request object to prevent request lookup
-    :param args: arguments to call the func with
-    :param kwargs: keyword arguments to call the func with
+    :param \\*args: arguments to call the func with
+    :param \\**kwargs: keyword arguments to call the func with
 
     :rtype: ExecuteContext
     '''
@@ -114,8 +114,8 @@ def in_pool(func: Callable[..., Coroutine[Any, Any, Any]],
     :param func: function to be queued
     :param _request: provide request object to prevent request lookup.
                      Provide if function be wrapped in database transaction.
-    :param args: arguments to call the func with
-    :param kwargs: keyword arguments to call the func with
+    :param \\*args: arguments to call the func with
+    :param \\**kwargs: keyword arguments to call the func with
 
     :rtype: ExecuteContext
     '''
@@ -131,8 +131,8 @@ def after_request(func: Callable[..., Coroutine[Any, Any, Any]],
     :param _name: unique identifier to give in case you want to prevent duplicates
     :param _scope: customize scope of after commit to run for instead of default(successful request)
     :param _request: provide request object to prevent request lookup
-    :param *args: arguments to call the func with
-    :param **kwargs: keyword arguments to call the func with
+    :param \\*args: arguments to call the func with
+    :param \\**kwargs: keyword arguments to call the func with
     '''
     if _name is None:
         _name = uuid.uuid4().hex
@@ -153,8 +153,8 @@ def after_request_failed(func: Callable[..., Coroutine[Any, Any, Any]],
 
     :param func: function to be queued
     :param _request: provide request object to prevent request lookup
-    :param args: arguments to call the func with
-    :param kwargs: keyword arguments to call the func with
+    :param \\*args: arguments to call the func with
+    :param \\**kwargs: keyword arguments to call the func with
     '''
     after_request(func, _name=_name, _request=_request, _scope='failed', *args, **kwargs)
 
@@ -165,8 +165,8 @@ def after_commit(func: Callable, *args, _request=None, **kwargs):
 
     :param func: function to be queued
     :param _request: provide request object to prevent request lookup
-    :param args: arguments to call the func with
-    :param kwargs: keyword arguments to call the func with
+    :param \\*args: arguments to call the func with
+    :param \\**kwargs: keyword arguments to call the func with
     '''
     if _request is not None:
         request = _request
@@ -186,8 +186,8 @@ def before_commit(func: Callable[..., Coroutine[Any, Any, Any]],
 
     :param func: function to be queued
     :param _request: provide request object to prevent request lookup
-    :param args: arguments to call the func with
-    :param kwargs: keyword arguments to call the func with
+    :param \\*args: arguments to call the func with
+    :param \\**kwargs: keyword arguments to call the func with
     '''
     if _request is not None:
         request = _request

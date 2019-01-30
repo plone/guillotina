@@ -158,7 +158,14 @@ def optimize_settings(settings):
 
 
 async def make_app(config_file=None, settings=None, loop=None, server_app=None):
+    '''
+    Make application from configuration
 
+    :param config_file: path to configuration file to load
+    :param settings: dictionary of settings
+    :param loop: if not using with default event loop
+    :param settings: provide your own aiohttp application 
+    '''
     # reset app_settings
     app_settings.clear()
     app_settings.update(default_settings)

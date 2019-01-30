@@ -121,23 +121,21 @@ Now you can start hands-on style guide to learn how to use it.
   [behind a proxy](./installation/production.html)
   when you deploy it.
 
-# Migration
 
-- [< 4.3 to 4.3](./migration/4.3.html)
-
-# Programming API Reference
+# References
 
 ```eval_rst
 .. toctree::
    :maxdepth: 1
 
-   api/configure
-   api/content
-   api/request
-   api/response
-   api/fields
-   api/utils
-   api/component
+   api/index
+```
+
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+
+   migration/index
 ```
 
 # About

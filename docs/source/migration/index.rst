@@ -1,6 +1,8 @@
 Migration Reference
 ===================
 
+.. _migration:
+
 Contents:
 
 .. toctree::

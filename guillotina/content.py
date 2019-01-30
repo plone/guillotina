@@ -146,7 +146,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
     """
 
     __behaviors__: FrozenSet[str] = frozenset({})
-    __acl__ = None
+    __acl__ = __parent__ = None
 
     type_name: Optional[str] = None
     creation_date = None
@@ -575,7 +575,7 @@ async def create_content_in_container(
     """Utility to create a content.
 
     This method is the one to use to create content.
-    id_ can be None
+    `id_` can be None
 
     :param parent: where to create content inside of
     :param type_: content type to create
