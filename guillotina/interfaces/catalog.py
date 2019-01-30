@@ -49,7 +49,17 @@ class ICatalogDataAdapter(Interface):
     '''
     '''
 
+    async def __call__(indexes=None, schemas=None):
+        '''
+        Return a dictionary of [index name, value]
+        '''
+
 
 class ISecurityInfo(Interface):
     '''
     '''
+
+    async def __call__(indexes=None, schemas=None):
+        '''
+        Return a dictionary of [index name, value]
+        '''

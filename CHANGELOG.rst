@@ -2,6 +2,11 @@
 4.4.11 (unreleased)
 -------------------
 
+- Provide ICatalogDataAdapter to be able to override json
+  stored in posgresql to be different than what is serialized
+  in catalog/elasticsearch/etc
+  [vangheem]
+
 - Improved PostgresqlStorage._check_bad_connection()
   [masipcat]
 

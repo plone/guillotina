@@ -1,4 +1,4 @@
-from guillotina.interfaces import IDatabase
+from guillotina.interfaces import IDatabase, ICatalogDataAdapter
 from zope.interface import Interface
 
 
@@ -229,3 +229,8 @@ class IDatabaseManager(Interface):
         '''
         Return whether a db exists or not
         '''
+
+
+class IJSONDBSerializer(ICatalogDataAdapter):
+    '''
+    '''
