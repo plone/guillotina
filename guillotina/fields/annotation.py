@@ -68,6 +68,17 @@ class BucketListValue:
             total += metadata.get('len', 0)
         return total
 
+    async def get(self, context, bucket_index, item_index):
+        annotation = await self.get_annotation(
+            context, bucket_index, create=False)
+        if annotation is None:
+            return
+
+        try:
+            return annotation['items'][item_index]
+        except IndexError:
+            pass
+
     async def remove(self, context, bucket_index, item_index):
         annotation = await self.get_annotation(
             context, bucket_index, create=False)

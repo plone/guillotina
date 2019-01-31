@@ -2,7 +2,8 @@
 4.5.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `get` method to `BucketListValue` class
+  [vangheem]
 
 
 4.5.2 (2019-01-31)
