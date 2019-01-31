@@ -1,5 +1,5 @@
 
-4.5.3 (unreleased)
+4.5.3 (2019-01-31)
 ------------------
 
 - Add `get` method to `BucketListValue` class
