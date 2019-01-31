@@ -1,5 +1,5 @@
 
-4.5.2 (unreleased)
+4.5.2 (2019-01-31)
 ------------------
 
 - Reusage of jwt decode
