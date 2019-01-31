@@ -1,5 +1,6 @@
 import asyncpg
 from guillotina import glogging
+from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages import pg
 from guillotina.db.storages.utils import register_sql
@@ -7,6 +8,7 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
+from zope.interface import implementer
 
 
 logger = glogging.getLogger('guillotina')
@@ -108,6 +110,7 @@ SAVEPOINT cockroach_restart;''')
         self._status = 'rolledback'
 
 
+@implementer(ICockroachStorage)
 class CockroachStorage(pg.PostgresqlStorage):
     '''
     Differences that we use from postgresql:

@@ -764,22 +764,24 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
-        async with self.lock:
-            # we do not use transaction lock here but a storage lock because
-            # a storage object has a shard conn for reads
-            for err in ('connection is closed', 'pool is closed', 'connection was closed'):
-                if err in str(ex):
-                    if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
-                        # we need to make sure we aren't calling this over and over again
+        # we do not use transaction lock here but a storage lock because
+        # a storage object has a shard conn for reads
+        for err in ('connection is closed', 'pool is closed', 'connection was closed'):
+            if err in str(ex):
+                if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
+                    # we need to make sure we aren't calling this over and over again
+                    async with self.lock:
                         return await self.restart_connection()
 
     @restart_conn_on_exception
     async def get_next_tid(self, txn):
-        return await self._stmt_next_tid.fetchval()
+        async with self.lock:
+            return await self._stmt_next_tid.fetchval()
 
     @restart_conn_on_exception
     async def get_current_tid(self, txn):
-        return await self._stmt_max_tid.fetchval()
+        async with self.lock:
+            return await self._stmt_max_tid.fetchval()
 
     async def get_one_row(self, txn, sql, *args, prepare=False):
         conn = await txn.get_connection()
