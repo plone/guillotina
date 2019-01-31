@@ -1,5 +1,5 @@
 
-4.5.1 (unreleased)
+4.5.1 (2019-01-30)
 ------------------
 
 - Fix read connection lock regression
