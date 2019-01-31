@@ -150,6 +150,10 @@ class IPostgresStorage(IStorage):
     pass
 
 
+class ICockroachStorage(IStorage):
+    pass
+
+
 class ITransactionStrategy(Interface):
 
     async def tpc_begin():  # type: ignore
