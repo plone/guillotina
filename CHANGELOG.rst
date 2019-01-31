@@ -2,7 +2,8 @@
 4.5.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Reusage of jwt decode
+  [bloodbare]
 
 
 4.5.1 (2019-01-30)
