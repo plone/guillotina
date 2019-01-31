@@ -2,7 +2,8 @@
 4.5.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix read connection lock regression
+  [vangheem]
 
 
 4.5.0 (2019-01-30)
