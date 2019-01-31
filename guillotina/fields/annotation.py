@@ -74,7 +74,10 @@ class BucketListValue:
         if annotation is None:
             return
 
-        return annotation['items'][item_index]
+        try:
+            return annotation['items'][item_index]
+        except IndexError:
+            pass
 
     async def remove(self, context, bucket_index, item_index):
         annotation = await self.get_annotation(

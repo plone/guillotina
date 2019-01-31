@@ -1,6 +1,4 @@
 from datetime import datetime
-
-import pytest
 from guillotina import fields
 from guillotina import schema
 from guillotina.component import get_adapter
@@ -599,8 +597,8 @@ async def test_bucket_list_field(dummy_request):
         'key': 'foo',
         'value': 'bar'
     }
-    with pytest.raises(IndexError):
-        assert await content.bucket_list.get(content, 0, 1) is None
+    assert await content.bucket_list.get(content, 0, 1) is None
+    assert await content.bucket_list.get(content, 1, 0) is None
 
     for _ in range(100):
         await deserializer.set_schema(
