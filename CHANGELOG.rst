@@ -2,6 +2,9 @@
 4.5.5 (unreleased)
 ------------------
 
+- Adding = to valid chars.
+  [bloodbare]
+
 - Allowing to get user information of application
   [bloodbare]
 
