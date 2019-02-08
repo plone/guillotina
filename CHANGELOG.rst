@@ -2,7 +2,11 @@
 4.5.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allowing to get user information of application
+  [bloodbare]
+
+- Fixing SQL creation function
+  [bloodbare]
 
 
 4.5.4 (2019-02-07)
