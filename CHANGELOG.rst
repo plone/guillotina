@@ -1,5 +1,5 @@
 
-4.5.4 (unreleased)
+4.5.4 (2019-02-07)
 ------------------
 
 - Fix serialization of json field to work with swagger
