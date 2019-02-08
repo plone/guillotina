@@ -2,7 +2,8 @@
 4.5.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix serialization of json field to work with swagger
+  [vangheem]
 
 
 4.5.3 (2019-01-31)
