@@ -2,7 +2,8 @@
 4.5.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding = to valid chars.
+  [bloodbare]
 
 
 4.5.3 (2019-01-31)
