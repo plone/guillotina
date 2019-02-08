@@ -1,9 +1,22 @@
 
-4.5.4 (unreleased)
+4.5.5 (unreleased)
 ------------------
 
 - Adding = to valid chars.
   [bloodbare]
+
+- Allowing to get user information of application
+  [bloodbare]
+
+- Fixing SQL creation function
+  [bloodbare]
+
+
+4.5.4 (2019-02-07)
+------------------
+
+- Fix serialization of json field to work with swagger
+  [vangheem]
 
 
 4.5.3 (2019-01-31)

@@ -20,8 +20,5 @@ def convert_interfaces_to_schema(interfaces):
     for iface in interfaces:
         serializer = get_multi_adapter(
             (iface, request), ISchemaSerializeToJson)
-        properties[iface.__identifier__] = {
-            "type": "object",
-            "properties": serializer.serialize()
-        }
+        properties[iface.__identifier__] = serializer.serialize()
     return properties
