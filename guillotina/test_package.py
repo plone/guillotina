@@ -70,8 +70,6 @@ class IExample(IResource):
 configure.permission('example.MyPermission', 'example permission')
 
 
-
-
 @implementer(IExample)
 class Example(Resource):
     pass
