@@ -720,6 +720,33 @@ async def test_get_all_permissions(container_requester):
         assert status == 200
 
 
+async def test_patching_write_protected_field_without_permission_should_return_401(container_requester):
+    async with container_requester as requester:
+        resp, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Example',
+                'title': 'Item1',
+                'id': 'item1',
+                'categories': [{
+                    'label': 'term1',
+                    'number': 1.0
+                }, {
+                    'label': 'term2',
+                    'number': 2.0
+                }]
+            })
+        )
+        assert status == 201
+
+        # Patching write protected field
+        _, status = await requester('PATCH', '/db/guillotina/item1', data=json.dumps({
+            'write_protected': 'does it work?'
+        }))
+        assert status == 401
+
+
 async def test_items(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:

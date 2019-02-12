@@ -10,6 +10,7 @@ from guillotina.content import Item
 from guillotina.content import Resource
 from guillotina.directives import index_field
 from guillotina.directives import metadata
+from guillotina.directives import write_permission
 from guillotina.fields import CloudFileField
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
@@ -58,6 +59,17 @@ class IExample(IResource):
         required=False
     )
     datetime = schema.Datetime(required=False)
+
+    write_permission(write_protected='example.MyPermission')
+    write_protected = schema.TextLine(
+        title='Write protected field',
+        required=False,
+    )
+
+
+configure.permission('example.MyPermission', 'example permission')
+
+
 
 
 @implementer(IExample)
