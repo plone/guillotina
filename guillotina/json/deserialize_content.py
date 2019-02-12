@@ -12,6 +12,7 @@ from guillotina.directives import write_permission
 from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import Invalid
 from guillotina.exceptions import NoInteraction
+from guillotina.exceptions import Unauthorized
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.event import notify
 from guillotina.events import BeforeFieldModifiedEvent
@@ -108,7 +109,7 @@ class DeserializeFromJson(object):
             if found:
 
                 if not self.check_permission(write_permissions.get(name)):
-                    continue
+                    raise Unauthorized('Write permission not allowed')
 
                 try:
                     field = field.bind(obj)
