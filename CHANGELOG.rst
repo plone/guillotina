@@ -1,6 +1,8 @@
-
 4.5.5 (unreleased)
 ------------------
+
+- Bugfix: Raise HTTPUnauthorized if trying to modify a write_protected
+  field [lferran]
 
 - Adding = to valid chars.
   [bloodbare]
