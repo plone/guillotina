@@ -1,4 +1,4 @@
-4.5.5 (unreleased)
+4.5.5 (2019-02-15)
 ------------------
 
 - Fix losing startup command setting hints after application configuration
