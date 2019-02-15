@@ -122,6 +122,7 @@ class FileManager(object):
         }
         if self.dm.get('size'):
             head_response['Upload-Length'] = str(self.dm.get('size'))
+            head_response['Access-Control-Expose-Headers'] += ',Upload-Length'
         return Response(headers=head_response)
 
     async def _iterate_request_data(self):
