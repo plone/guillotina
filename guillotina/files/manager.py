@@ -242,10 +242,18 @@ class FileManager(object):
         await self.file_storage_manager.start(self.dm)
         await self.dm.save()
 
-        return Response(status=201, headers={
-            'Location': posixpath.join(
+        if 'filename' in self.request.matchdict:
+            location = posixpath.join(
                 IAbsoluteURL(self.context, self.request)(),
-                '@tusupload', self.field.__name__),  # noqa
+                '@tusupload', self.field.__name__,
+                self.request.matchdict['filename'])
+        else:
+            location = posixpath.join(
+                IAbsoluteURL(self.context, self.request)(),
+                '@tusupload', self.field.__name__)
+
+        return Response(status=201, headers={
+            'Location': location,  # noqa
             'Tus-Resumable': '1.0.0',
             'Access-Control-Expose-Headers': 'Location,Tus-Resumable'
         })

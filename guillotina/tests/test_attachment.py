@@ -205,6 +205,74 @@ async def test_tus(container_requester):
             assert behavior.file._blob.chunks == 10
 
 
+async def test_tus_multi(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                '@type': 'Item',
+                '@behaviors': [IMultiAttachment.__identifier__],
+                'id': 'foobar'
+            })
+        )
+        assert status == 201
+
+        response, status = await requester(
+            'OPTIONS',
+            '/db/guillotina/foobar/@tusupload/files/file',
+            headers={
+                'Origin': 'http://foobar.com',
+                'Access-Control-Request-Method': 'POST'
+            })
+        assert status == 200
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/foobar/@tusupload/files/file',
+            headers={
+                'UPLOAD-LENGTH': str(1024 * 1024 * 10),
+                'TUS-RESUMABLE': '1.0.0'
+            }
+        )
+        assert status == 201
+
+        response, status = await requester(
+            'HEAD',
+            '/db/guillotina/foobar/@tusupload/files/file')
+        assert status == 200
+
+        for idx in range(10):
+            # 10, 1mb chunks
+            response, status = await requester(
+                'PATCH',
+                '/db/guillotina/foobar/@tusupload/files/file',
+                headers={
+                    'CONTENT-LENGTH': str(1024 * 1024 * 1),
+                    'TUS-RESUMABLE': '1.0.0',
+                    'upload-offset': str(1024 * 1024 * idx)
+                },
+                data=b'X' * 1024 * 1024 * 1
+            )
+            assert status == 200
+
+        response, status = await requester(
+            'GET',
+            '/db/guillotina/foobar/@download/files/file'
+        )
+        assert status == 200
+        assert len(response) == (1024 * 1024 * 10)
+
+        request = utils.get_mocked_request(requester.db)
+        root = await utils.get_root(request)
+        async with managed_transaction(request=request, abort_when_done=True):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('foobar')
+            behavior = IMultiAttachment(obj)
+            await behavior.load()
+            assert behavior.files['file']._blob.chunks == 10
+
+
 async def test_tus_unknown_size(container_requester):
     async with container_requester as requester:
         response, status = await requester(

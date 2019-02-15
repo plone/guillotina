@@ -1,6 +1,12 @@
 4.5.5 (unreleased)
 ------------------
 
+- Support tus upload for multifile field
+  [bloodbare]
+
+- Ws token on application
+  [bloodbare]
+
 - Bugfix: Raise HTTPUnauthorized if trying to modify a write_protected
   field [lferran]
 
