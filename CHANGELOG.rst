@@ -1,6 +1,9 @@
 4.5.5 (unreleased)
 ------------------
 
+- Fix losing startup command setting hints after application configuration
+  [vangheem]
+
 - Be able to provide additional metadata for dynamic fields
   [vangheem]
 

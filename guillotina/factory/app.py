@@ -167,7 +167,13 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     :param settings: provide your own aiohttp application
     '''
     # reset app_settings
+    startup_vars = {}
+    for key in app_settings.keys():
+        if key[0] == '_':
+            startup_vars[key] = app_settings[key]
+
     app_settings.clear()
+    app_settings.update(startup_vars)
     app_settings.update(default_settings)
 
     if loop is None:
