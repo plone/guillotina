@@ -1,3 +1,5 @@
+import json
+
 from guillotina import configure
 from guillotina import fields
 from guillotina import schema
@@ -13,9 +15,17 @@ def get_all_fields(content):
         if IDynamicFields.__identifier__ in content.__behaviors__:
             behavior = IDynamicFields(content)
             for field_name, data in (behavior.fields or {}).items():
-                if field_name not in _fields:
-                    _fields[field_name] = data
+                if field_name in _fields:
+                    continue
+                _fields[field_name] = {
+                    'title': data.get('title'),
+                    'description': data.get('description'),
+                    'type': data.get('type'),
+                    'required': data.get('required', False),
+                    'meta': data.get('meta') or {},
+                }
         content = content.__parent__
+
     return _fields
 
 
@@ -32,9 +42,22 @@ def find_field(content, name):
 
 
 class IFieldType(Interface):
-    title = schema.Text()
+    title = schema.Text(required=False)
+    description = schema.Text(required=False)
     type = schema.Choice(
         values=['date', 'integer', 'text', 'float', 'keyword', 'boolean']
+    )
+    required = schema.Bool(
+        default=False,
+        required=False
+    )
+    meta = schema.JSONField(
+        title="Additional information on field",
+        required=False,
+        schema=json.dumps({
+            'type': 'object',
+            'properties': {}
+        })
     )
 
 

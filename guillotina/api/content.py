@@ -49,6 +49,7 @@ from guillotina.response import ErrorResponse
 from guillotina.response import HTTPMethodNotAllowed
 from guillotina.response import HTTPMovedPermanently
 from guillotina.response import HTTPNotFound
+from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 from guillotina.security.utils import apply_sharing
@@ -59,6 +60,7 @@ from guillotina.utils import get_object_url
 from guillotina.utils import iter_parents
 from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
+from guillotina.exceptions import ComponentLookupError
 
 
 def get_content_json_schema_responses(content):
@@ -257,7 +259,13 @@ class DefaultPATCH(Service):
 
         behaviors = data.get('@behaviors', None)
         for behavior in behaviors or ():
-            self.context.add_behavior(behavior)
+            try:
+                self.context.add_behavior(behavior)
+            except (TypeError, ComponentLookupError):
+                return HTTPPreconditionFailed(content={
+                    'message': f'{behavior} is not a valid behavior',
+                    'behavior': behavior
+                })
 
         deserializer = query_multi_adapter((self.context, self.request),
                                            IResourceDeserializeFromJson)
