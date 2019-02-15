@@ -1,6 +1,9 @@
 4.5.5 (unreleased)
 ------------------
 
+- Be able to provide additional metadata for dynamic fields
+  [vangheem]
+
 - Bugfix: Raise HTTPUnauthorized if trying to modify a write_protected
   field [lferran]
 
