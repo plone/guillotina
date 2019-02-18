@@ -1,4 +1,4 @@
-4.5.5 (unreleased)
+4.5.6 (unreleased)
 ------------------
 
 - Fix CORS on tus
@@ -9,6 +9,16 @@
 
 - Ws token on application
   [bloodbare]
+
+
+4.5.5 (2019-02-15)
+------------------
+
+- Fix losing startup command setting hints after application configuration
+  [vangheem]
+
+- Be able to provide additional metadata for dynamic fields
+  [vangheem]
 
 - Bugfix: Raise HTTPUnauthorized if trying to modify a write_protected
   field [lferran]
