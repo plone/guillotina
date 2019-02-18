@@ -13,7 +13,7 @@ from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import SQLStatements
-from guillotina.db.storages.utils import get_index_name
+from guillotina.db.storages.utils import clear_table_name
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.db.storages.utils import register_sql
 from guillotina.exceptions import ConflictError
@@ -491,7 +491,7 @@ class PostgresqlStorage(BaseStorage):
     ]
 
     _unique_constraint = '''ALTER TABLE {objects_table_name}
-                            ADD CONSTRAINT {objects_table_name}_parent_id_id_key
+                            ADD CONSTRAINT {constraint_name}_parent_id_id_key
                             UNIQUE (parent_id, id)'''
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
@@ -555,10 +555,10 @@ class PostgresqlStorage(BaseStorage):
         statements.extend(self._initialize_statements)
 
         for statement in statements:
-            otable_name = get_index_name(self._objects_table_name)
+            otable_name = clear_table_name(self._objects_table_name)
             if otable_name == 'objects':
                 otable_name = 'object'
-            btable_name = get_index_name(self._blobs_table_name)
+            btable_name = clear_table_name(self._blobs_table_name)
             if btable_name == 'blobs':
                 btable_name = 'blob'
             statement = statement.format(
@@ -593,7 +593,7 @@ FROM
     JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
 WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
-'''.format(get_index_name(self._objects_table_name)))
+'''.format(clear_table_name(self._objects_table_name)))
         return len(result) > 0
 
     async def initialize(self, loop=None, **kw):
@@ -620,7 +620,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
                 await self.create()
                 # only available on new databases
                 await self.read_conn.execute(self._unique_constraint.format(
-                    objects_table_name=self._objects_table_name
+                    objects_table_name=self._objects_table_name,
+                    constraint_name=clear_table_name(self._objects_table_name)
                 ))
                 self._supports_unique_constraints = True
                 await self.initialize_tid_statements()
