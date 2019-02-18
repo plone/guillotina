@@ -1,9 +1,16 @@
+def get_index_name(table_name):
+    if '.' in table_name:
+        _, table_name = table_name.split(".", 1)  # i.e.: 'public.objects' -> 'objects'
+    return table_name
 
 
 def get_table_definition(name, schema, primary_keys=[]):
     pk = ''
     if len(primary_keys) > 0:
-        pk = ', CONSTRAINT pk_{} PRIMARY KEY({})'.format(name, ', '.join(primary_keys))
+        pk = ', CONSTRAINT pk_{} PRIMARY KEY({})'.format(
+            get_index_name(name),
+            ', '.join(primary_keys)
+        )
     return "CREATE TABLE IF NOT EXISTS {} ({}{});".format(
         name,
         ',\n'.join('{} {}'.format(c, d) for c, d in schema.items()),
