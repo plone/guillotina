@@ -1,7 +1,14 @@
 4.5.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix CORS on tus
+  [bloodbare]
+
+- Support tus upload for multifile field
+  [bloodbare]
+
+- Ws token on application
+  [bloodbare]
 
 
 4.5.5 (2019-02-15)

@@ -36,6 +36,38 @@ def _traversed_file_doc(summary, parameters=[], responses={
     }
 
 
+TUS_PARAMETERS = [{
+    "name": "Upload-Offset",
+    "in": "headers",
+    "type": "integer",
+    "required": True
+}, {
+    "name": "UPLOAD-LENGTH",
+    "in": "headers",
+    "type": "integer",
+    "required": True
+}, {
+    "name": "UPLOAD-MD5",
+    "in": "headers",
+    "type": "string",
+    "required": False
+}, {
+    "name": "UPLOAD-EXTENSION",
+    "in": "headers",
+    "type": "string",
+    "required": False
+}, {
+    "name": "TUS-RESUMABLE",
+    "in": "headers",
+    "type": "string",
+    "required": True
+}, {
+    "name": "UPLOAD-METADATA",
+    "in": "headers",
+    "type": "string",
+    "required": False
+}]
+
 # Static File
 @configure.service(
     context=IStaticFile, method='GET', permission='guillotina.AccessContent')
@@ -143,37 +175,26 @@ class HeadFile(DownloadFile):
 @configure.service(
     context=IResource, method='POST', permission='guillotina.ModifyContent',
     name='@tusupload/{field_name}',
-    **_traversed_file_doc('TUS endpoint', parameters=[{
-        "name": "Upload-Offset",
-        "in": "headers",
-        "type": "integer",
-        "required": True
-    }, {
-        "name": "UPLOAD-LENGTH",
-        "in": "headers",
-        "type": "integer",
-        "required": True
-    }, {
-        "name": "UPLOAD-MD5",
-        "in": "headers",
-        "type": "string",
-        "required": False
-    }, {
-        "name": "UPLOAD-EXTENSION",
-        "in": "headers",
-        "type": "string",
-        "required": False
-    }, {
-        "name": "TUS-RESUMABLE",
-        "in": "headers",
-        "type": "string",
-        "required": True
-    }, {
-        "name": "UPLOAD-METADATA",
-        "in": "headers",
-        "type": "string",
-        "required": False
-    }], responses={
+    **_traversed_file_doc('TUS endpoint', parameters=TUS_PARAMETERS, responses={
+        '204': {
+            'description': 'Successfully patched data',
+            'headers': {
+                'Location': {
+                    'type': 'string'
+                },
+                'Tus-Resumable': {
+                    'type': 'string'
+                },
+                'Access-Control-Expose-Headers': {
+                    'type': 'string'
+                }
+            }
+        }
+    }))
+@configure.service(
+    context=IResource, method='POST', permission='guillotina.ModifyContent',
+    name='@tusupload/{field_name}/{filename}',
+    **_traversed_file_doc('TUS endpoint', parameters=TUS_PARAMETERS, responses={
         '204': {
             'description': 'Successfully patched data',
             'headers': {
@@ -203,6 +224,25 @@ class TusCreateFile(UploadFile):
         return await adapter.tus_create()
 
 
+@configure.service(
+    context=IResource, method='HEAD', permission='guillotina.ModifyContent',
+    name='@tusupload/{field_name}/{filename}',
+    **_traversed_file_doc('TUS endpoint', responses={
+        '200': {
+            'description': 'Successfully patched data',
+            'headers': {
+                'Upload-Offset': {
+                    'type': 'integer'
+                },
+                'Tus-Resumable': {
+                    'type': 'string'
+                },
+                'Access-Control-Expose-Headers': {
+                    'type': 'string'
+                }
+            }
+        }
+    }))
 @configure.service(
     context=IResource, method='HEAD', permission='guillotina.ModifyContent',
     name='@tusupload/{field_name}',
@@ -255,6 +295,29 @@ class TusHeadFile(UploadFile):
             }
         }
     }))
+@configure.service(
+    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
+    name='@tusupload/{field_name}/{filename}',
+    **_traversed_file_doc('TUS endpoint', parameters=[{
+        "name": "Upload-Offset",
+        "in": "headers",
+        "type": "integer",
+        "required": True
+    }, {
+        "name": "CONTENT-LENGTH",
+        "in": "headers",
+        "type": "integer",
+        "required": True
+    }], responses={
+        '204': {
+            'description': 'Successfully patched data',
+            'headers': {
+                'Upload-Offset': {
+                    'type': 'integer'
+                }
+            }
+        }
+    }))
 class TusPatchFile(UploadFile):
 
     async def __call__(self):
@@ -268,6 +331,28 @@ class TusPatchFile(UploadFile):
 @configure.service(
     context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight',
     name='@tusupload/{field_name}',
+    **_traversed_file_doc('TUS endpoint', responses={
+        '200': {
+            'description': 'Successfully returned tus info',
+            'headers': {
+                'Tus-Version': {
+                    'type': 'string'
+                },
+                'Tus-Resumable': {
+                    'type': 'string'
+                },
+                'Tus-Max-Size': {
+                    'type': 'integer'
+                },
+                'Tus-Extension': {
+                    'type': 'string'
+                }
+            }
+        }
+    }))
+@configure.service(
+    context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight',
+    name='@tusupload/{field_name}/{filename}',
     **_traversed_file_doc('TUS endpoint', responses={
         '200': {
             'description': 'Successfully returned tus info',
