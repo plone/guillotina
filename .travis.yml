@@ -21,6 +21,11 @@ matrix:
     - name: Python 3.7, PG 9.6
       python: 3.7
       env: DATABASE=postgres
+    - name: Python 3.7, PG 9.6
+      python: 3.7
+      env:
+       - DATABASE=postgres
+       - DB_SCHEMA=custom
     - name: Python 3.7, Cockroachdb
       python: 3.7
       env: DATABASE=cockroachdb

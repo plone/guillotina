@@ -23,9 +23,11 @@ _dir = os.path.dirname(os.path.realpath(__file__))
 
 IS_TRAVIS = 'TRAVIS' in os.environ
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
+DB_SCHEMA = os.environ.get('DB_SCHEMA', 'public')
 
 annotations = {
     'testdatabase': DATABASE,
+    'test_dbschema': DB_SCHEMA,
     'travis': IS_TRAVIS
 }
 
@@ -68,6 +70,7 @@ def get_db_settings():
         return settings
 
     settings['databases']['db']['storage'] = 'postgresql'
+    settings['databases']['db']['db_schema'] = annotations['test_dbschema']
 
     settings['databases']['db']['dsn'] = {
         'scheme': 'postgres',
