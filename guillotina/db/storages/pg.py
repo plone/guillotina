@@ -544,7 +544,7 @@ class PostgresqlStorage(BaseStorage):
 
         statements = []
 
-        if self._db_schema:
+        if self._db_schema and self._db_schema != 'public':
             statements.extend([f'CREATE SCHEMA IF NOT EXISTS {self._db_schema}'])
 
         statements.extend([
