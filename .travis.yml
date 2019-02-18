@@ -21,7 +21,7 @@ matrix:
     - name: Python 3.7, PG 9.6
       python: 3.7
       env: DATABASE=postgres
-    - name: Python 3.7, PG 9.6
+    - name: Python 3.7, PG 9.6 (db_schema: custom)
       python: 3.7
       env:
        - DATABASE=postgres
