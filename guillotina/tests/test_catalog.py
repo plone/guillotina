@@ -8,7 +8,6 @@ from guillotina.catalog.utils import get_metadata_fields
 from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import create_content
-from guillotina.db.storages.utils import clear_table_name
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import ICatalogDataAdapter
