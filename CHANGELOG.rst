@@ -1,7 +1,8 @@
 4.5.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add 'db_schema' to postgresql storage config
+  [masipcat]
 
 
 4.5.5 (2019-02-15)
