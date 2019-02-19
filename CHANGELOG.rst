@@ -1,8 +1,21 @@
-4.5.6 (unreleased)
+4.5.7 (unreleased)
 ------------------
 
 - Add 'db_schema' to postgresql storage config
   [masipcat]
+
+
+4.5.6 (2019-02-18)
+------------------
+
+- Fix CORS on tus
+  [bloodbare]
+
+- Support tus upload for multifile field
+  [bloodbare]
+
+- Ws token on application
+  [bloodbare]
 
 
 4.5.5 (2019-02-15)

@@ -11,6 +11,7 @@ from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IApplication
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.security.utils import get_view_permission
@@ -24,6 +25,23 @@ from urllib import parse
 
 @configure.service(
     context=IContainer, method='GET',
+    permission='guillotina.AccessContent', name='@wstoken',
+    summary='Return a web socket token',
+    responses={
+        "200": {
+            "description": "The new token",
+            "schema": {
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "required": True
+                    }
+                }
+            }
+        }
+    })
+@configure.service(
+    context=IApplication, method='GET',
     permission='guillotina.AccessContent', name='@wstoken',
     summary='Return a web socket token',
     responses={
