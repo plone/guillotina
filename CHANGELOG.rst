@@ -1,7 +1,11 @@
 4.5.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix HEAD tus
+  [bloodbare]
+
+- Define option to not purge DB on deletes
+  [bloodbare]
 
 
 4.5.6 (2019-02-18)
