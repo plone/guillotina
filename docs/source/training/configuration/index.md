@@ -1,5 +1,13 @@
 # Configuration
 
+```eval_rst
+.. toctree::
+   :maxdepth: 2
+
+   .
+   advanced
+```
+
 You may have wondered how running `g` command without any configuration and
 options knew to connect and configure the database. Well, it's only because
 we provide default settings in our application and documentation to make
@@ -13,12 +21,34 @@ system.
 
 Guillotina provides a command to bootstrap a configuration file for you.
 
+```eval_rst
+.. warning::
+   You need to install cookiecutter in order to use templates:
+    
+    pip install cookiecutter
+```
+
 ```
 g create --template=configuration
 ```
 
 This will produce a `config.yaml` file in your current path. Inspect the file
 to see what some of the default configuration options are.
+
+## Database configuration
+
+The example config.yaml file that is produced provides a sample for PostgreSQL, so before we continue,
+we'll need to run a postgresql server for Guillotina to use.
+
+```
+docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:9.6
+```
+
+```eval_rst
+.. note::
+   This particular docker run command produces a volatile database. Stopping and
+   starting it again will cause you to lose any data you pushed into it.
+```
 
 ## Modifying configuration
 

@@ -18,4 +18,4 @@ have up-to-date versions of all these ready.
 
 **References**
 
-  - [About Guillotina](../../about)
+  - [About Guillotina](../../about.html)

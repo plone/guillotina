@@ -141,3 +141,51 @@ Chat
 ----
 
 Join us to talk about Guillotina at https://gitter.im/plone/guillotina
+
+
+
+Video series:
+- 1: Guillotina: Introduction
+  - installation
+  - configuration basics
+  - basics with interacting with API
+  - installing apps
+- 2: Guillotina: Configuration
+  - databases
+  - applications
+  - configuration precedence
+  - commands
+- 3: Guillotina: REST API
+  - swagger
+  - understanding the dynamic API
+  - CRUD
+  - Sharing
+- 4: Extending
+  - Behaviors
+    - Defining
+    - Editing
+    - Annotations
+  - Object persistence layer
+    - How it works
+    - What is the objective
+    - How it works with asyncio
+  - Content Types
+  - Fields
+  - Search integration
+    - Interfaces to implementation(ES)
+    - Security changes
+  - Async utilities
+  - Serialization
+  - Custom commands
+- 5: Advanced topics
+  - Transactions
+    - How they work
+    - What compromises were made in implementation
+  - Path resolution
+  - Request life cycle
+  - Component architecture
+  - Application configuration
+  - Roles and Permissions
+  - Subscribers (questions about when an obj change is committed, pre/post commit hooks…)
+  - Traversal/View lookups/path resolution: how it works and how expensive or not some lookups are
+- 6: Building a chat application

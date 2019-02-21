@@ -6,6 +6,12 @@ To extend Guillotina, we need to write a Python package.
 
 Let's start by using the cookiecutter to bootstrap an application for us.
 
+```eval_rst
+.. warning::
+   You need to install cookiecutter in order to use templates:
+    
+    pip install cookiecutter
+```
 
 ```
 g create --template=application

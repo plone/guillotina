@@ -70,3 +70,6 @@ cov_html
 !/src/*
 dummy_file.db
 dummy_file.db.blobs
+
+.mypy_cache/
+.python-version

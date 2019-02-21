@@ -15,7 +15,7 @@ Contents:
    introduction
    installation
    running
-   configuration
+   configuration/index
    api
    asyncio
    extending/index
