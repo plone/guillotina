@@ -9,6 +9,7 @@ from guillotina.commands.run import RunCommand
 
 
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
+DB_SCHEMA = os.environ.get('DB_SCHEMA', 'public')
 
 
 def test_run_command(command_arguments):
@@ -30,6 +31,7 @@ async def run(app):
 
 
 @pytest.mark.skipif(DATABASE != 'postgres', reason="Cockroach does not have cascade support")
+@pytest.mark.skipif(DB_SCHEMA != 'public', reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_command_with_container(command_arguments, container_command):
     _, filepath = mkstemp(suffix='.py')
     _, filepath2 = mkstemp()

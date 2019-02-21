@@ -13,6 +13,7 @@ from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import SQLStatements
+from guillotina.db.storages.utils import clear_table_name
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.db.storages.utils import register_sql
 from guillotina.exceptions import ConflictError
@@ -490,12 +491,12 @@ class PostgresqlStorage(BaseStorage):
     ]
 
     _unique_constraint = '''ALTER TABLE {objects_table_name}
-                            ADD CONSTRAINT {objects_table_name}_parent_id_id_key
+                            ADD CONSTRAINT {constraint_name}_parent_id_id_key
                             UNIQUE (parent_id, id)'''
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
-                 conn_acquire_timeout=20, cache_strategy='dummy',
+                 conn_acquire_timeout=20, cache_strategy='dummy', db_schema='public',
                  objects_table_name='objects', blobs_table_name='blobs',
                  connection_manager=None, **options):
         super(PostgresqlStorage, self).__init__(
@@ -510,8 +511,9 @@ class PostgresqlStorage(BaseStorage):
         self._options = options
         self._connection_options = {}
         self._connection_initialized_on = time.time()
-        self._objects_table_name = objects_table_name
-        self._blobs_table_name = blobs_table_name
+        self._db_schema = db_schema
+        self._objects_table_name = f'{db_schema}.{objects_table_name}'
+        self._blobs_table_name = f'{db_schema}.{blobs_table_name}'
         self._sql = SQLStatements()
         self._connection_manager = connection_manager
 
@@ -539,18 +541,24 @@ class PostgresqlStorage(BaseStorage):
     async def create(self):
         # Check DB
         log.info('Creating initial database objects')
-        statements = [
+
+        statements = []
+
+        if self._db_schema and self._db_schema != 'public':
+            statements.extend([f'CREATE SCHEMA IF NOT EXISTS {self._db_schema}'])
+
+        statements.extend([
             get_table_definition(self._objects_table_name, self._object_schema),
             get_table_definition(self._blobs_table_name, self._blob_schema,
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
-        ]
+        ])
         statements.extend(self._initialize_statements)
 
         for statement in statements:
-            otable_name = self._objects_table_name
+            otable_name = clear_table_name(self._objects_table_name)
             if otable_name == 'objects':
                 otable_name = 'object'
-            btable_name = self._blobs_table_name
+            btable_name = clear_table_name(self._blobs_table_name)
             if btable_name == 'blobs':
                 btable_name = 'blob'
             statement = statement.format(
@@ -585,7 +593,7 @@ FROM
     JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
 WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
-'''.format(self._objects_table_name))
+'''.format(clear_table_name(self._objects_table_name)))
         return len(result) > 0
 
     async def initialize(self, loop=None, **kw):
@@ -612,7 +620,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
                 await self.create()
                 # only available on new databases
                 await self.read_conn.execute(self._unique_constraint.format(
-                    objects_table_name=self._objects_table_name
+                    objects_table_name=self._objects_table_name,
+                    constraint_name=clear_table_name(self._objects_table_name)
                 ))
                 self._supports_unique_constraints = True
                 await self.initialize_tid_statements()
