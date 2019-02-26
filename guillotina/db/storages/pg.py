@@ -617,7 +617,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             except asyncpg.exceptions.ReadOnlySQLTransactionError:
                 # Not necessary for read-only pg
                 pass
-            except asyncpg.exceptions.UndefinedTableError:
+            except (asyncpg.exceptions.UndefinedTableError,
+                    asyncpg.exceptions.InvalidSchemaNameError):
                 await self.create()
                 # only available on new databases
                 await self.read_conn.execute(self._unique_constraint.format(
