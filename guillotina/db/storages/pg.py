@@ -137,8 +137,8 @@ register_sql(
 register_sql('NAIVE_UPDATE', _wrap_return_count(NAIVE_UPDATE))
 
 
-NEXT_TID = "SELECT nextval('tid_sequence');"
-MAX_TID = "SELECT last_value FROM tid_sequence;"
+NEXT_TID = "SELECT nextval('{schema}.tid_sequence');"
+MAX_TID = "SELECT last_value FROM {schema}.tid_sequence;"
 
 
 register_sql(
@@ -487,7 +487,7 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_bid ON {blobs_table_name} (bid);',
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);',
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);',
-        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
+        'CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;'
     ]
 
     _unique_constraint = '''ALTER TABLE {objects_table_name}
@@ -567,6 +567,7 @@ class PostgresqlStorage(BaseStorage):
                 # singular, index names
                 object_table_name=otable_name,
                 blob_table_name=btable_name,
+                schema=self._db_schema
             )
             try:
                 await self.read_conn.execute(statement)
@@ -616,7 +617,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             except asyncpg.exceptions.ReadOnlySQLTransactionError:
                 # Not necessary for read-only pg
                 pass
-            except asyncpg.exceptions.UndefinedTableError:
+            except (asyncpg.exceptions.UndefinedTableError,
+                    asyncpg.exceptions.InvalidSchemaNameError):
                 await self.create()
                 # only available on new databases
                 await self.read_conn.execute(self._unique_constraint.format(
@@ -658,8 +660,10 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
-        self._stmt_max_tid = await self.read_conn.prepare(MAX_TID)
+        self._stmt_next_tid = await self.read_conn.prepare(
+            NEXT_TID.format(schema=self._db_schema))
+        self._stmt_max_tid = await self.read_conn.prepare(
+            MAX_TID.format(schema=self._db_schema))
 
     async def remove(self):
         """Reset the tables"""

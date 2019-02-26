@@ -1,6 +1,8 @@
 4.5.7 (unreleased)
 ------------------
 
+- Missing 'db_schema' in 'tid_sequence' table
+  [masipcat]
 - Add 'db_schema' to postgresql storage config
   [masipcat]
 
