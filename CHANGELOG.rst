@@ -1,6 +1,8 @@
 4.5.7 (unreleased)
 ------------------
 
+- Fix `GuillotinaDBRequester.make_request()` not decoding json responses
+  [masipcat]
 - Missing 'db_schema' in 'tid_sequence' table
   [masipcat]
 - Add 'db_schema' to postgresql storage config
