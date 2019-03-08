@@ -1,10 +1,20 @@
 4.5.7 (unreleased)
 ------------------
 
+- Introduce `UnionField` schema type to allow fields to be one of multiple
+  types of fields.
+  [vangheem]
+
+- Fix dynamic field keyword values to work with single or array values. This helps
+  integration with elasticsearch.
+  [vangheem]
+
 - Fix `GuillotinaDBRequester.make_request()` not decoding json responses
   [masipcat]
+
 - Missing 'db_schema' in 'tid_sequence' table
   [masipcat]
+
 - Add 'db_schema' to postgresql storage config
   [masipcat]
 

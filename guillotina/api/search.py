@@ -3,12 +3,13 @@ from guillotina.api.service import Service
 from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
 from guillotina.utils import get_content_path
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
+    context=IContainer, method='GET', permission='guillotina.SearchContent', name='@search',
     summary='Make search request',
     parameters=[{
         "name": "q",
@@ -41,7 +42,7 @@ async def search_get(context, request):
 
 
 @configure.service(
-    context=IResource, method='POST',
+    context=IContainer, method='POST',
     permission='guillotina.RawSearchContent', name='@search',
     summary='Make a complex search query',
     parameters=[{
@@ -116,7 +117,7 @@ class AsyncCatalogReindex(Service):
 
 
 @configure.service(
-    context=IResource, method='POST',
+    context=IContainer, method='POST',
     permission='guillotina.ManageCatalog', name='@catalog',
     summary='Initialize catalog',
     responses={
@@ -131,7 +132,7 @@ async def catalog_post(context, request):
 
 
 @configure.service(
-    context=IResource, method='DELETE',
+    context=IContainer, method='DELETE',
     permission='guillotina.ManageCatalog', name='@catalog',
     summary='Delete search catalog',
     responses={
