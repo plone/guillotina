@@ -1,4 +1,4 @@
-4.5.7 (unreleased)
+4.5.7 (2019-03-08)
 ------------------
 
 - Introduce `UnionField` schema type to allow fields to be one of multiple
