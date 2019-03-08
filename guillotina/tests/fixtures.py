@@ -4,6 +4,7 @@ from unittest import mock
 
 import aiohttp
 import pytest
+from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
 from guillotina import testing
 from guillotina.component import get_utility
@@ -173,12 +174,12 @@ class GuillotinaDBRequester(object):
         async with aiohttp.ClientSession(loop=self.loop) as session:
             operation = getattr(session, method.lower(), None)
             async with operation(self.server.make_url(path), **settings) as resp:
-                if resp.headers.get('Content-Type') == 'application/json':
+                try:
                     value = await resp.json()
-                    status = resp.status
-                else:
+                except ContentTypeError:
                     value = await resp.read()
-                    status = resp.status
+
+                status = resp.status
                 return value, status, resp.headers
 
     def transaction(self, request=None):
