@@ -1,7 +1,8 @@
 4.5.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add code owners
+  [bloodbare]
 
 
 4.5.7 (2019-03-08)
