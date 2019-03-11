@@ -16,6 +16,7 @@ which seem most useful.
    component
    utils
    factory
+   transactions
 
 
-.. consider adding schema, security, transactions, auth, blob, directives
+.. consider adding schema, security, auth, blob, directives

@@ -1,7 +1,8 @@
 4.5.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Run `request.execute_futures` with managed_transaction context manager
+  [vangheem]
 
 
 4.5.7 (2019-03-08)

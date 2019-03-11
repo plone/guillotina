@@ -17,6 +17,11 @@ def _safe_get_request(request):
 
 
 async def commit(request=None, warn=True):
+    '''
+    Commit the current active transaction.
+
+    :param request: request object transaction is connected to
+    '''
     tm = None
     try:
         request = _safe_get_request(request)
@@ -29,6 +34,11 @@ async def commit(request=None, warn=True):
         await tm.commit(request)
 
 async def abort(request=None):
+    '''
+    Abort the current active transaction.
+
+    :param request: request object transaction is connected to
+    '''
     tm = None
     try:
         tm = get_tm(request)
@@ -49,7 +59,7 @@ def get_tm(request=None):
 
     Example::
 
-        with get_tm(request) as txn:  # begin transaction txn
+        with get_tm(request).transaction() as txn:  # begin transaction txn
 
             # do something
 
@@ -60,13 +70,34 @@ def get_tm(request=None):
 
 
 def get_transaction(request=None):
+    '''
+    Return the current active transaction.
+
+    :param request: request object transaction is connected to
+
+    '''
     req = _safe_get_request(request)
     return req._tm.get(req)
 
 
 class managed_transaction:  # noqa: N801
+    '''
+    Execute a transaction as async context manager and
+    automatically close connection after done.
+
+    >>> async with managed_transaction() as txn:
+    >>>   pass
+
+    :param request: request object to connect transaction with
+    :param tm: transaction manager to retrieve transaction from
+    :param write: Does this write to database? (defaults to false)
+    :param abort_when_done: Abort transaction when done (defaults to false)
+    :param adopt_parent_txn: If this is a sub-transaction, use parent's registered objects
+    :param execute_futures: Execute registered futures with transaction after done (defaults to true)
+    '''
+
     def __init__(self, request=None, tm=None, write=False, abort_when_done=False,
-                 adopt_parent_txn=False):
+                 adopt_parent_txn=False, execute_futures=True):
         self.request = _safe_get_request(request)
         if tm is None:
             tm = request._tm
@@ -75,6 +106,7 @@ class managed_transaction:  # noqa: N801
         self.abort_when_done = abort_when_done
         self.previous_txn = self.txn = self.previous_write_setting = None
         self.adopt_parent_txn = adopt_parent_txn
+        self.execute_futures = execute_futures
         self.adopted = []
 
     async def __aenter__(self):
@@ -135,3 +167,6 @@ class managed_transaction:  # noqa: N801
                 self.request._txn = self.previous_txn
             if self.previous_write_setting is not None:
                 self.request._db_write_enabled = self.previous_write_setting
+
+        if self.request is not None:
+            self.request.execute_futures()

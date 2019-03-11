@@ -7,6 +7,7 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
+from guillotina.transactions import managed_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_current_request
 
@@ -174,3 +175,6 @@ class TransactionManager:
         if request is None:
             return self._last_txn
         return request._txn
+
+    def transaction(self, **kwargs):
+        return managed_transaction(tm=self, **kwargs)
