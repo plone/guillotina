@@ -11,6 +11,7 @@ from guillotina.interfaces import IErrorResponseException
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPExpectationFailed
 from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 
 import json
@@ -87,4 +88,4 @@ register_handler_factory(
     Unauthorized,
     exception_handler_factory(error_reasons.UNAUTHORIZED,
                               'Unauthorized',
-                              serialize_exc=True, klass=HTTPExpectationFailed))
+                              serialize_exc=True, klass=HTTPUnauthorized))

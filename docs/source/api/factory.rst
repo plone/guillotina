@@ -1,7 +1,6 @@
 :mod:`guillotina.factory`
 -------------------------
 
-.. automodule:: guillotina.factory
+.. automodule:: guillotina.factory.app
+
   .. autofunction:: make_app
-  .. autofunction:: configure_application
-  .. autofunction:: load_application

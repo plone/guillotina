@@ -4,6 +4,7 @@ from unittest import mock
 
 import aiohttp
 import pytest
+from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
 from guillotina import testing
 from guillotina.component import get_utility
@@ -23,9 +24,11 @@ _dir = os.path.dirname(os.path.realpath(__file__))
 
 IS_TRAVIS = 'TRAVIS' in os.environ
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
+DB_SCHEMA = os.environ.get('DB_SCHEMA', 'public')
 
 annotations = {
     'testdatabase': DATABASE,
+    'test_dbschema': DB_SCHEMA,
     'travis': IS_TRAVIS
 }
 
@@ -68,6 +71,7 @@ def get_db_settings():
         return settings
 
     settings['databases']['db']['storage'] = 'postgresql'
+    settings['databases']['db']['db_schema'] = annotations['test_dbschema']
 
     settings['databases']['db']['dsn'] = {
         'scheme': 'postgres',
@@ -170,12 +174,12 @@ class GuillotinaDBRequester(object):
         async with aiohttp.ClientSession(loop=self.loop) as session:
             operation = getattr(session, method.lower(), None)
             async with operation(self.server.make_url(path), **settings) as resp:
-                if resp.headers.get('Content-Type') == 'application/json':
+                try:
                     value = await resp.json()
-                    status = resp.status
-                else:
+                except ContentTypeError:
                     value = await resp.read()
-                    status = resp.status
+
+                status = resp.status
                 return value, status, resp.headers
 
     def transaction(self, request=None):
@@ -312,7 +316,7 @@ class CockroachStorageAsyncContextManager(object):
             conn.execute("DROP DATABASE IF EXISTS guillotina;"))
         await _bomb_shelter(
             conn.execute("CREATE DATABASE guillotina;"))
-        await self.storage._pool.release(conn)
+        await self.storage.pool.release(conn)
         await self.storage.finalize()
 
 

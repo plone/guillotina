@@ -1,3 +1,4 @@
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.api import content
 from guillotina.api.service import Service
@@ -70,7 +71,7 @@ class DefaultPOST(Service):
 
     async def __call__(self):
         data = await self.request.json()
-        if '@type' not in data or data['@type'] != 'Container':
+        if '@type' not in data or data['@type'] not in app_settings['container_types']:
             raise HTTPNotFound(content={
                 'message': 'can not create this type %s' % data['@type']
             })
@@ -95,7 +96,7 @@ class DefaultPOST(Service):
             })
 
         container = await create_content(
-            'Container',
+            data['@type'],
             id=data['id'],
             title=data['title'],
             description=data['description'])
@@ -121,7 +122,7 @@ class DefaultPOST(Service):
                                       payload=data))
 
         resp = {
-            '@type': 'Container',
+            '@type': data['@type'],
             'id': data['id'],
             'title': data['title']
         }

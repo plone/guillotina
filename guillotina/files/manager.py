@@ -75,8 +75,6 @@ class FileManager(object):
 
     async def head(self, disposition=None, filename=None, content_type=None,
                    size=None, **kwargs):
-        download_resp = await self.prepare_download(
-            disposition, filename, content_type, size, **kwargs)
         if hasattr(self.file_storage_manager, 'exists'):
             # does not need to implement but can be a way to verify
             # file exists on cloud platform still
@@ -84,16 +82,26 @@ class FileManager(object):
                 raise HTTPNotFound(content={
                     'message': 'File object does not exist'
                 })
+        download_resp = await self.prepare_download(
+            disposition, filename, content_type, size, **kwargs)
         await download_resp.write_eof()
         return download_resp
 
     async def download(self, disposition=None, filename=None, content_type=None,
                        size=None, **kwargs):
-        download_resp = await self.prepare_download(
-            disposition, filename, content_type, size, **kwargs)
+        download_resp = None
         async for chunk in self.file_storage_manager.iter_data(**kwargs):
+            if download_resp is None:
+                # defer to make sure we http exception handling
+                # before data starts streaming works properly
+                download_resp = await self.prepare_download(
+                    disposition, filename, content_type, size, **kwargs)
             await download_resp.write(chunk)
             await download_resp.drain()
+        if download_resp is None:
+            # deferred
+            download_resp = await self.prepare_download(
+                disposition, filename, content_type, size, **kwargs)
         await download_resp.write_eof()
         return download_resp
 
@@ -114,6 +122,7 @@ class FileManager(object):
         }
         if self.dm.get('size'):
             head_response['Upload-Length'] = str(self.dm.get('size'))
+            head_response['Access-Control-Expose-Headers'] += ',Upload-Length'
         return Response(headers=head_response)
 
     async def _iterate_request_data(self):
@@ -234,10 +243,18 @@ class FileManager(object):
         await self.file_storage_manager.start(self.dm)
         await self.dm.save()
 
-        return Response(status=201, headers={
-            'Location': posixpath.join(
+        if 'filename' in self.request.matchdict:
+            location = posixpath.join(
                 IAbsoluteURL(self.context, self.request)(),
-                '@tusupload', self.field.__name__),  # noqa
+                '@tusupload', self.field.__name__,
+                self.request.matchdict['filename'])
+        else:
+            location = posixpath.join(
+                IAbsoluteURL(self.context, self.request)(),
+                '@tusupload', self.field.__name__)
+
+        return Response(status=201, headers={
+            'Location': location,  # noqa
             'Tus-Resumable': '1.0.0',
             'Access-Control-Expose-Headers': 'Location,Tus-Resumable'
         })

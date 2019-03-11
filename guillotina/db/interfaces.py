@@ -1,3 +1,4 @@
+from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
 from zope.interface import Interface
 
@@ -149,6 +150,10 @@ class IPostgresStorage(IStorage):
     pass
 
 
+class ICockroachStorage(IStorage):
+    pass
+
+
 class ITransactionStrategy(Interface):
 
     async def tpc_begin():  # type: ignore
@@ -229,3 +234,8 @@ class IDatabaseManager(Interface):
         '''
         Return whether a db exists or not
         '''
+
+
+class IJSONDBSerializer(ICatalogDataAdapter):
+    '''
+    '''

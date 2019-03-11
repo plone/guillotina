@@ -1,7 +1,7 @@
 Cython==0.27.3
 aiotask_context==0.5.0
 aioconsole
-aiohttp
+aiohttp<3.5.0,>=3.0.0
 async-timeout==3.0.0
 asyncpg==0.17.0
 cffi==1.11.1

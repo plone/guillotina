@@ -1,7 +1,193 @@
-4.4.1 (unreleased)
+4.5.8 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+4.5.7 (2019-03-08)
+------------------
+
+- Introduce `UnionField` schema type to allow fields to be one of multiple
+  types of fields.
+  [vangheem]
+
+- Fix dynamic field keyword values to work with single or array values. This helps
+  integration with elasticsearch.
+  [vangheem]
+
+- Fix `GuillotinaDBRequester.make_request()` not decoding json responses
+  [masipcat]
+
+- Missing 'db_schema' in 'tid_sequence' table
+  [masipcat]
+
+- Add 'db_schema' to postgresql storage config
+  [masipcat]
+
+
+4.5.6 (2019-02-18)
+------------------
+
+- Fix CORS on tus
+  [bloodbare]
+
+- Support tus upload for multifile field
+  [bloodbare]
+
+- Ws token on application
+  [bloodbare]
+
+
+4.5.5 (2019-02-15)
+------------------
+
+- Fix losing startup command setting hints after application configuration
+  [vangheem]
+
+- Be able to provide additional metadata for dynamic fields
+  [vangheem]
+
+- Bugfix: Raise HTTPUnauthorized if trying to modify a write_protected
+  field [lferran]
+
+- Adding = to valid chars.
+  [bloodbare]
+
+- Allowing to get user information of application
+  [bloodbare]
+
+- Fixing SQL creation function
+  [bloodbare]
+
+
+4.5.4 (2019-02-07)
+------------------
+
+- Fix serialization of json field to work with swagger
+  [vangheem]
+
+
+4.5.3 (2019-01-31)
+------------------
+
+- Add `get` method to `BucketListValue` class
+  [vangheem]
+
+
+4.5.2 (2019-01-31)
+------------------
+
+- Reusage of jwt decode
+  [bloodbare]
+
+
+4.5.1 (2019-01-30)
+------------------
+
+- Fix read connection lock regression
+  [vangheem]
+
+
+4.5.0 (2019-01-30)
+------------------
+
+- By default, do not serialize json data to postgresql anymore. If you were
+  depending on `store_json` default to be `true`, you need to update
+  [vangheem]
+
+- Provide `guillotina.db.interfaces.IJSONDBSerializer` to be able to
+  override json stored in posgresql to be different than what is serialized
+  in catalog/elasticsearch/etc
+  [vangheem]
+
+- Improved PostgresqlStorage._check_bad_connection()
+  [masipcat]
+
+-fix typos in documentation
+
+
+
+4.4.10 (2019-01-23)
+-------------------
+
+- postgresql storage needs to share connection lock
+  [vangheem]
+
+
+4.4.9 (2019-01-15)
+------------------
+
+- Handle if no data to iterate on for downloads
+  [vangheem]
+
+
+4.4.8 (2019-01-15)
+------------------
+
+- Fix release
+  [vangheem]
+
+
+4.4.7 (2019-01-15)
+------------------
+
+- Defer preparing download response so http exceptions are
+  handle correctly
+  [vangheem]
+
+
+4.4.6 (2019-01-15)
+------------------
+
+- Fix getting binding file field for cloud files
+  [vangheem]
+
+- provide `guillotina.utils.get_url` function that pays attention
+  to `X-VirtualHost-Monster` header
+  [vangheem]
+
+- Take `X-Forwarded-Proto` into account for request url
+  [vangheem]
+
+- Implement multi attachments
+  [masipcat]
+
+
+4.4.5 (2019-01-11)
+------------------
+
+- Allow to login on IApplication.
+  [bloodbare]
+
+
+4.4.4 (2019-01-11)
+------------------
+
+- Be able to prevent closing database connection pools
+  [vangheem]
+
+
+4.4.3 (2019-01-11)
+------------------
+
+- Implement `db.storage.spg.PGConnectionManager` class to allow
+  safely sharing pool and read connections between multiple
+  storages.
+  [vangheem]
+
+
+4.4.2 (2019-01-10)
+------------------
+
+- Option to add different type of containers.
+  [bloodbare]
+
+
+4.4.1 (2019-01-09)
+------------------
+
+- Postgresql storage accepts pool arguments
+  [vangheem]
 
 
 4.4.0 (2018-12-27)

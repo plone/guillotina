@@ -113,7 +113,7 @@ class DefaultSchemaFieldSerializer(object):
                 result[attribute_name] = text
         if result['type'] == 'object':
             if IJSONField.providedBy(field):
-                result['properties'] = field.json_schema
+                result.update(field.json_schema)
             if IDict.providedBy(field):
                 if field.value_type:
                     field_serializer = get_multi_adapter(

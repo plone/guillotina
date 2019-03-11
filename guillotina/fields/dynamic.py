@@ -38,7 +38,12 @@ class IDynamicType(Interface):
     integer = schema.Int(required=False)
     float = schema.Float(required=False)
     boolean = schema.Bool(required=False)
-    keyword = schema.Text(required=False)
+    keyword = schema.UnionField(
+        schema.List(
+            required=False,
+            value_type=schema.Text()),
+        schema.Text(required=False),
+        required=False)
 
 
 def _validate_field(field, context, value):

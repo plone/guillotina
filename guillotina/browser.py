@@ -6,6 +6,7 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IView
 from guillotina.utils import get_current_request
+from guillotina.utils import get_url
 from zope.interface import implementer
 
 
@@ -65,24 +66,12 @@ class Absolute_URL(object):
         else:
             path = '/'.join(get_physical_path(self.context))
 
-        if 'X-VirtualHost-Monster' in self.request.headers:
-            virtualhost = self.request.headers['X-VirtualHost-Monster']
-        else:
-            virtualhost = None
-
         if container_url:
             return path
         elif relative:
             return '/' + self.request._db_id + path
-        elif virtualhost:
-            return virtualhost + self.request._db_id + path
         else:
-            if 'X-Forwarded-Proto' in self.request.headers:
-                scheme = self.request.headers['X-Forwarded-Proto']
-            else:
-                scheme = self.request.scheme
-            return scheme + '://' + (self.request.host or 'localhost') + '/' +\
-                self.request._db_id + path
+            return get_url(self.request, self.request._db_id + path)
 
 
 @configure.adapter(

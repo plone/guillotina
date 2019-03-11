@@ -27,4 +27,4 @@ def test_registered_vocabulary(dummy_request):
     vocabulary = vr.get(None, 'testvocab')
     assert vocabulary is not None
     assert 0 in vocabulary
-    assert vocabulary.getTerm(0) is 'value'
+    assert vocabulary.getTerm(0) == 'value'

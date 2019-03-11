@@ -57,7 +57,7 @@ def iter_parents(content: IResource) -> typing.Iterator[IResource]:
         content = getattr(content, '__parent__', None)
 
 
-_valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+ '
+_valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+ ='
 
 
 def valid_id(_id):

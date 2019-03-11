@@ -1,4 +1,5 @@
 # zope.interface convenience imports
+from zope.interface import Attribute
 from zope.interface import Interface
 
 from .async_util import IAsyncJobPool  # noqa
@@ -146,7 +147,9 @@ RESERVED_ATTRS = (
 )
 
 class IRequest(Interface):
-    pass
+    container = Attribute('current container')
+    _container_id = Attribute('id of current container')
+    container_settings = Attribute('container settings')
 
 
 class ILanguage(Interface):

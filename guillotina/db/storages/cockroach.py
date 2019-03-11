@@ -1,5 +1,6 @@
 import asyncpg
 from guillotina import glogging
+from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages import pg
 from guillotina.db.storages.utils import register_sql
@@ -7,6 +8,7 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
+from zope.interface import implementer
 
 
 logger = glogging.getLogger('guillotina')
@@ -108,6 +110,7 @@ SAVEPOINT cockroach_restart;''')
         self._status = 'rolledback'
 
 
+@implementer(ICockroachStorage)
 class CockroachStorage(pg.PostgresqlStorage):
     '''
     Differences that we use from postgresql:
@@ -140,14 +143,14 @@ class CockroachStorage(pg.PostgresqlStorage):
         super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self._read_conn.prepare(NEXT_TID)
+        self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
 
     async def get_current_tid(self, txn):
         raise Exception("cockroach does not support voting")
 
     async def has_unique_constraint(self):
         try:
-            for result in await self._read_conn.fetch(
+            for result in await self.read_conn.fetch(
                     '''SHOW CONSTRAINTS FROM {};'''.format(self._objects_table_name)):
                 if result['Name'] == '{}_parent_id_id_key'.format(self._objects_table_name):
                     return True

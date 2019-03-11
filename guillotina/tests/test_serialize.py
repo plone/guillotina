@@ -593,6 +593,12 @@ async def test_bucket_list_field(dummy_request):
             }
         }, [])
     assert content.bucket_list.annotations_metadata[0]['len'] == 1
+    assert await content.bucket_list.get(content, 0, 0) == {
+        'key': 'foo',
+        'value': 'bar'
+    }
+    assert await content.bucket_list.get(content, 0, 1) is None
+    assert await content.bucket_list.get(content, 1, 0) is None
 
     for _ in range(100):
         await deserializer.set_schema(
