@@ -1,6 +1,9 @@
 4.5.8 (unreleased)
 ------------------
 
+- Run `request.execute_futures` with managed_transaction context manager
+  [vangheem]
+
 - Add code owners
   [bloodbare]
 

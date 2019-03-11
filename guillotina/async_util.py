@@ -133,7 +133,6 @@ class Job:
                 async with managed_transaction(
                         request=self._request, abort_when_done=False):
                     await self._func(*self._args or [], **self._kwargs or {})
-                self._request.execute_futures()
             else:
                 # if no request, we do it without transaction
                 await self._func(*self._args or [], **self._kwargs or {})
