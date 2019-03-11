@@ -168,5 +168,5 @@ class managed_transaction:  # noqa: N801
             if self.previous_write_setting is not None:
                 self.request._db_write_enabled = self.previous_write_setting
 
-        if self.request is not None:
+        if self.request is not None and self.execute_futures:
             self.request.execute_futures()
