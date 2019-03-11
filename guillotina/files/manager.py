@@ -123,7 +123,7 @@ class FileManager(object):
         if self.dm.get('size'):
             head_response['Upload-Length'] = str(self.dm.get('size'))
         else:
-            head_response['Upload-Length'] = 0
+            head_response['Upload-Length'] = '0'
         return Response(headers=head_response)
 
     async def _iterate_request_data(self):
