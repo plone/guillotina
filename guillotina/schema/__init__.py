@@ -49,6 +49,7 @@ from guillotina.schema._field import TextLine
 from guillotina.schema._field import Time
 from guillotina.schema._field import Timedelta
 from guillotina.schema._field import Tuple
+from guillotina.schema._field import UnionField
 from guillotina.schema._field import URI
 from guillotina.schema._schema import get_fields
 from guillotina.schema._schema import get_fields_in_order
@@ -67,7 +68,7 @@ getFieldsInOrder = get_fields_in_order  # b/w
 ASCII, ASCIILine, Bool, Bytes, BytesLine, Choice, Container, Date, Datetime
 Decimal, Dict, DottedName, Field, Float, FrozenSet, Id, Int, InterfaceField
 Iterable, List, MinMaxLen, NativeString, NativeStringLine, Object, Orderable
-Password, Set, SourceText, Text, TextLine, Time, Timedelta, Tuple, URI
+Password, Set, SourceText, Text, TextLine, Time, Timedelta, Tuple, URI, UnionField
 get_fields, get_fields_in_order, getFieldNames, getFieldNamesInOrder,
 getValidationErrors, getSchemaValidationErrors, JSONField
 accessors

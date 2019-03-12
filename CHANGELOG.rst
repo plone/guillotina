@@ -1,4 +1,4 @@
-4.5.7 (unreleased)
+4.5.8 (unreleased)
 ------------------
 
 - Fix HEAD tus
@@ -6,6 +6,33 @@
 
 - Define option to not purge DB on deletes
   [bloodbare]
+
+- Run `request.execute_futures` with managed_transaction context manager
+  [vangheem]
+
+- Add code owners
+  [bloodbare]
+
+
+4.5.7 (2019-03-08)
+------------------
+
+- Introduce `UnionField` schema type to allow fields to be one of multiple
+  types of fields.
+  [vangheem]
+
+- Fix dynamic field keyword values to work with single or array values. This helps
+  integration with elasticsearch.
+  [vangheem]
+
+- Fix `GuillotinaDBRequester.make_request()` not decoding json responses
+  [masipcat]
+
+- Missing 'db_schema' in 'tid_sequence' table
+  [masipcat]
+
+- Add 'db_schema' to postgresql storage config
+  [masipcat]
 
 
 4.5.6 (2019-02-18)

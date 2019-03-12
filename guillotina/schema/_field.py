@@ -58,7 +58,7 @@ from guillotina.schema.interfaces import IFrozenSet
 from guillotina.schema.interfaces import IId
 from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IInterfaceField
-from guillotina.schema.interfaces import IJSONField
+from guillotina.schema.interfaces import IJSONField, IUnionField
 from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IMinMaxLen
 from guillotina.schema.interfaces import IObject
@@ -685,3 +685,35 @@ class JSONField(Field):
             jsonschema.validate(value, self.json_schema)
         except jsonschema.ValidationError as e:
             raise WrongContainedType(e.message, self.__name__)
+
+
+@implementer(IUnionField)
+class UnionField(Field):
+    __doc__ = IUnionField.__doc__
+
+    def __init__(self, *fields, **kw):
+        self.fields = fields
+        super().__init__(**kw)
+
+    def bind(self, object):
+        clone = super().bind(object)
+        bound_fields = []
+        for field in self.fields:
+            bound_fields.append(field.bind(object))
+        clone.fields = bound_fields
+        return clone
+
+    def validate(self, value):
+        errors = []
+        for field in self.fields:
+            try:
+                field.validate(value)
+                return field
+            except ValidationError as error:
+                errors.append(error)
+        else:
+            raise WrongContainedType(errors, self.__name__)
+
+    def set(self, object, value):
+        field = self.validate(value)
+        field.set(object, value)

@@ -675,3 +675,11 @@ class IJSONField(IField):
         "schema",
         _("The JSON schema string serialization.")
     )
+
+
+class IUnionField(IField):
+    '''
+    A field that can be one of multiple types.
+
+    This is sort of to mirror mypy's union type hint
+    '''

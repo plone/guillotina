@@ -1931,6 +1931,47 @@ class DictTests(unittest.TestCase):
         self.assertEqual(field2.value_type.context, context)
 
 
+class UnionFieldTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from guillotina.schema._field import UnionField
+        return UnionField
+
+    def _makeOne(self, *args, **kw):
+        from guillotina.schema._field import Text
+        from guillotina.schema._field import Int
+        from guillotina.schema._field import List
+        return self._getTargetClass()(
+            Text(**kw),
+            Int(**kw),
+            List(**kw),
+            *args, **kw)
+
+    def test_class_conforms_to_IUnionField(self):
+        from zope.interface.verify import verifyClass
+        from guillotina.schema.interfaces import IUnionField
+        verifyClass(IUnionField, self._getTargetClass())
+
+    def test_instance_conforms_to_IUnionField(self):
+        from zope.interface.verify import verifyObject
+        from guillotina.schema.interfaces import IUnionField
+        verifyObject(IUnionField, self._makeOne())
+
+    def test_validate_wrong_types(self):
+        from guillotina.schema.exceptions import WrongContainedType
+        field = self._makeOne()
+        self.assertRaises(WrongContainedType, field.validate, ('',))
+        self.assertRaises(WrongContainedType, field.validate, 1.2)
+        self.assertRaises(WrongContainedType, field.validate, b'')
+        self.assertRaises(WrongContainedType, field.validate, set())
+        self.assertRaises(WrongContainedType, field.validate, {})
+        self.assertRaises(WrongContainedType, field.validate, object())
+
+    def test_validate_w_invalid_default(self):
+        from guillotina.schema.exceptions import ValidationError
+        self.assertRaises(ValidationError, self._makeOne, default=1.2)
+
+
 class DummyInstance(object):
     pass
 

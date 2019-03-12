@@ -99,7 +99,7 @@ to /user@account/todos/todos_list1/todo_item3 to remove a todo list item.
 
 That's the main foundation of guillotina, and also one of the most powerful concepts,
 the permission system, is based on this. As an example, at /user@account path, only the user
-is allowed to access it.. All child objects inherit this permission, anyone else than the owner could
+is allowed to access it. All child objects inherit this permission, anyone else than the owner could
 access them, but if at some point, we add new readers to an item (a todo list) will give access to
 other users.
 
@@ -140,5 +140,5 @@ What it isn't
 - Guillotina is not a re-implementation of Plone
 - Guillotina does not implement all the features and APIs of Plone
 
-It could some day with the `guillotina_cms` package but replacement of Plone is
+It could come some day with the `guillotina_cms` package but replacement of Plone is
 not the goal of Guillotina.

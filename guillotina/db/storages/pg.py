@@ -13,6 +13,7 @@ from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import SQLStatements
+from guillotina.db.storages.utils import clear_table_name
 from guillotina.db.storages.utils import get_table_definition
 from guillotina.db.storages.utils import register_sql
 from guillotina.exceptions import ConflictError
@@ -136,8 +137,8 @@ register_sql(
 register_sql('NAIVE_UPDATE', _wrap_return_count(NAIVE_UPDATE))
 
 
-NEXT_TID = "SELECT nextval('tid_sequence');"
-MAX_TID = "SELECT last_value FROM tid_sequence;"
+NEXT_TID = "SELECT nextval('{schema}.tid_sequence');"
+MAX_TID = "SELECT last_value FROM {schema}.tid_sequence;"
 
 
 register_sql(
@@ -486,16 +487,16 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_bid ON {blobs_table_name} (bid);',
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);',
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);',
-        'CREATE SEQUENCE IF NOT EXISTS tid_sequence;'
+        'CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;'
     ]
 
     _unique_constraint = '''ALTER TABLE {objects_table_name}
-                            ADD CONSTRAINT {objects_table_name}_parent_id_id_key
+                            ADD CONSTRAINT {constraint_name}_parent_id_id_key
                             UNIQUE (parent_id, id)'''
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
-                 conn_acquire_timeout=20, cache_strategy='dummy',
+                 conn_acquire_timeout=20, cache_strategy='dummy', db_schema='public',
                  objects_table_name='objects', blobs_table_name='blobs',
                  connection_manager=None, autovacuum=True, **options):
         super(PostgresqlStorage, self).__init__(
@@ -510,8 +511,9 @@ class PostgresqlStorage(BaseStorage):
         self._options = options
         self._connection_options = {}
         self._connection_initialized_on = time.time()
-        self._objects_table_name = objects_table_name
-        self._blobs_table_name = blobs_table_name
+        self._db_schema = db_schema
+        self._objects_table_name = f'{db_schema}.{objects_table_name}'
+        self._blobs_table_name = f'{db_schema}.{blobs_table_name}'
         self._sql = SQLStatements()
         self._connection_manager = connection_manager
         self._autovacuum = autovacuum
@@ -540,18 +542,24 @@ class PostgresqlStorage(BaseStorage):
     async def create(self):
         # Check DB
         log.info('Creating initial database objects')
-        statements = [
+
+        statements = []
+
+        if self._db_schema and self._db_schema != 'public':
+            statements.extend([f'CREATE SCHEMA IF NOT EXISTS {self._db_schema}'])
+
+        statements.extend([
             get_table_definition(self._objects_table_name, self._object_schema),
             get_table_definition(self._blobs_table_name, self._blob_schema,
                                  primary_keys=('bid', 'zoid', 'chunk_index'))
-        ]
+        ])
         statements.extend(self._initialize_statements)
 
         for statement in statements:
-            otable_name = self._objects_table_name
+            otable_name = clear_table_name(self._objects_table_name)
             if otable_name == 'objects':
                 otable_name = 'object'
-            btable_name = self._blobs_table_name
+            btable_name = clear_table_name(self._blobs_table_name)
             if btable_name == 'blobs':
                 btable_name = 'blob'
             statement = statement.format(
@@ -560,6 +568,7 @@ class PostgresqlStorage(BaseStorage):
                 # singular, index names
                 object_table_name=otable_name,
                 blob_table_name=btable_name,
+                schema=self._db_schema
             )
             try:
                 await self.read_conn.execute(statement)
@@ -586,7 +595,7 @@ FROM
     JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
 WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
-'''.format(self._objects_table_name))
+'''.format(clear_table_name(self._objects_table_name)))
         return len(result) > 0
 
     async def initialize(self, loop=None, **kw):
@@ -609,11 +618,13 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             except asyncpg.exceptions.ReadOnlySQLTransactionError:
                 # Not necessary for read-only pg
                 pass
-            except asyncpg.exceptions.UndefinedTableError:
+            except (asyncpg.exceptions.UndefinedTableError,
+                    asyncpg.exceptions.InvalidSchemaNameError):
                 await self.create()
                 # only available on new databases
                 await self.read_conn.execute(self._unique_constraint.format(
-                    objects_table_name=self._objects_table_name
+                    objects_table_name=self._objects_table_name,
+                    constraint_name=clear_table_name(self._objects_table_name)
                 ))
                 self._supports_unique_constraints = True
                 await self.initialize_tid_statements()
@@ -650,8 +661,10 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
-        self._stmt_max_tid = await self.read_conn.prepare(MAX_TID)
+        self._stmt_next_tid = await self.read_conn.prepare(
+            NEXT_TID.format(schema=self._db_schema))
+        self._stmt_max_tid = await self.read_conn.prepare(
+            MAX_TID.format(schema=self._db_schema))
 
     async def remove(self):
         """Reset the tables"""

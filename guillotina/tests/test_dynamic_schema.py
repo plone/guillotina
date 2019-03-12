@@ -539,3 +539,71 @@ async def test_add_dynamic_fields_invalid_type(container_requester):
                 }
             }))
         assert status == 412
+
+
+async def test_dynamic_fields_keyword_multi(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                "@type": "Item",
+                "@behaviors": [IDynamicFields.__identifier__],
+                "id": "foobar",
+                IDynamicFields.__identifier__: {
+                    "fields": {
+                        "foobar": {
+                            "title": "Hello field",
+                            "type": "keyword"
+                        }
+                    }
+                }
+            })
+        )
+        assert status == 201
+
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar",
+                            "value": ["foo", "bar"]
+                        }
+                    }
+                }
+            }))
+        assert status == 204
+
+        # or, set single value
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar",
+                            "value": "foo"
+                        }
+                    }
+                }
+            }))
+        assert status == 204
+
+        # test, int is not allowed still
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar",
+                            "value": 5
+                        }
+                    }
+                }
+            }))
+        assert status == 412
