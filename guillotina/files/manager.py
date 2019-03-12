@@ -118,11 +118,12 @@ class FileManager(object):
         head_response = {
             'Upload-Offset': str(self.dm.get_offset()),
             'Tus-Resumable': '1.0.0',
-            'Access-Control-Expose-Headers': 'Upload-Offset,Tus-Resumable'
+            'Access-Control-Expose-Headers': 'Upload-Offset,Tus-Resumable,Upload-Length'
         }
         if self.dm.get('size'):
             head_response['Upload-Length'] = str(self.dm.get('size'))
-            head_response['Access-Control-Expose-Headers'] += ',Upload-Length'
+        else:
+            head_response['Upload-Length'] = '0'
         return Response(headers=head_response)
 
     async def _iterate_request_data(self):

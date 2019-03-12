@@ -1,6 +1,12 @@
 4.5.8 (unreleased)
 ------------------
 
+- Fix HEAD tus
+  [bloodbare]
+
+- Define option to not purge DB on deletes
+  [bloodbare]
+
 - Run `request.execute_futures` with managed_transaction context manager
   [vangheem]
 

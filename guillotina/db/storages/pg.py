@@ -498,7 +498,7 @@ class PostgresqlStorage(BaseStorage):
                  pool_size=13, transaction_strategy='resolve_readcommitted',
                  conn_acquire_timeout=20, cache_strategy='dummy', db_schema='public',
                  objects_table_name='objects', blobs_table_name='blobs',
-                 connection_manager=None, **options):
+                 connection_manager=None, autovacuum=True, **options):
         super(PostgresqlStorage, self).__init__(
             read_only, transaction_strategy=transaction_strategy,
             cache_strategy=cache_strategy)
@@ -516,6 +516,7 @@ class PostgresqlStorage(BaseStorage):
         self._blobs_table_name = f'{db_schema}.{blobs_table_name}'
         self._sql = SQLStatements()
         self._connection_manager = connection_manager
+        self._autovacuum = autovacuum
 
     async def finalize(self):
         await self._vacuum.finalize()
@@ -774,7 +775,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
             await conn.execute(sql, oid)
-        txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
+        if self._autovacuum:
+            txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def _check_bad_connection(self, ex):
         # we do not use transaction lock here but a storage lock because
