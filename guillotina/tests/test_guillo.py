@@ -12,7 +12,7 @@ async def test_get_the_root(guillotina):
 
 async def test_get_db(guillotina):
     response, status = await guillotina('GET', '/db')
-    assert response['containers'] == []
+    assert 'containers' in response
 
 
 async def test_get_container(container_requester):

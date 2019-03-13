@@ -1,6 +1,15 @@
 4.5.8 (unreleased)
 ------------------
 
+- Fix memory leak in security policy lookups
+  [vangheem]
+
+- Introduce migrate command
+  [vangheem]
+
+- Add vacuum command
+  [vangheem]
+
 - Fix HEAD tus
   [bloodbare]
 

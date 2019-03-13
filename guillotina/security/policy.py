@@ -155,12 +155,12 @@ class Interaction(object):
         return False
 
     def cache(self, parent):
-        cache = self._cache.get(id(parent))
-        if cache:
-            cache = cache[0]
-        else:
+        serial = getattr(parent, '_p_serial', '')
+        cache_key = f'{id(parent)}-{serial}'
+        cache = self._cache.get(cache_key)
+        if cache is None:
             cache = CacheEntry()
-            self._cache[id(parent)] = cache, parent
+            self._cache[cache_key] = cache
         return cache
 
     @profilable

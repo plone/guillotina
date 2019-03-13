@@ -84,6 +84,7 @@ from .json import ISchemaFieldSerializeToJson  # noqa
 from .json import ISchemaSerializeToJson  # noqa
 from .json import IValueToJson  # noqa
 from .layer import IDefaultLayer  # noqa
+from .migration import IMigration  # noqa
 from .registry import IAddons  # noqa
 from .registry import ILayers  # noqa
 from .response import IAioHTTPResponse  # noqa

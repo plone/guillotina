@@ -67,7 +67,9 @@ app_settings: Dict[str, Any] = {
         'shell': 'guillotina.commands.shell.ShellCommand',
         'testdata': 'guillotina.commands.testdata.TestDataCommand',
         'initialize-db': 'guillotina.commands.initialize_db.DatabaseInitializationCommand',
-        'run': 'guillotina.commands.run.RunCommand'
+        'run': 'guillotina.commands.run.RunCommand',
+        'dbvacuum': 'guillotina.commands.vacuum.VacuumCommand',
+        'migrate': 'guillotina.commands.migrate.MigrateCommand'
     },
     "json_schema_definitions": {},  # json schemas available to reference in docs
     "default_layer": interfaces.IDefaultLayer,

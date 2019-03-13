@@ -112,3 +112,6 @@ class BaseStorage:
 
     async def _get_page_resources_of_type(self, txn, type_, page, page_size):
         raise NotImplemented()  # pragma: no cover
+
+    async def vacuum(self):
+        raise NotImplemented()  # pragma: no cover

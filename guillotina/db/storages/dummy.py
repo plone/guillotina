@@ -225,6 +225,11 @@ class DummyStorage(BaseStorage):
         end = start + page_size
         return [self._db[key]['id'] for key in keys[start:end]]
 
+    async def vacuum(self):
+        '''
+        nothing to vacuum in this implementation
+        '''
+
 
 @implementer(IStorage)
 class DummyFileStorage(DummyStorage):  # pragma: no cover
