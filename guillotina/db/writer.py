@@ -21,7 +21,7 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
     '''
 
     def get_container_id(self):
-        ob = self.context
+        ob = self.content
         while getattr(ob, '__parent__', None) and not IContainer.providedBy(ob):
             ob = ob.__parent__
         if IContainer.providedBy(ob):
