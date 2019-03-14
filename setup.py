@@ -72,7 +72,8 @@ setup(
             'pytest-asyncio>=0.8.0,<0.10.0',
             'pytest-cov<=2.6.0',
             'coverage>=4.0.3',
-            'pytest-docker-fixtures'
+            'pytest-docker-fixtures',
+            'pytest-rerunfailures'
         ],
         'docs': [
             'sphinx',
