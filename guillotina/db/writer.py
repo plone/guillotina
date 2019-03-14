@@ -27,7 +27,7 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
         if IContainer.providedBy(ob):
             return ob.__name__
 
-    async def __init__(self):
+    async def __call__(self):
         data = await super().__call__()
         data['container_id'] = self.get_container_id()
         return data
