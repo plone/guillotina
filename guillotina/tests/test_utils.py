@@ -150,7 +150,7 @@ async def test_get_containers(container_requester):
     async with container_requester as requester:
         request = get_mocked_request(requester.db)
         containers = [c async for c in utils.get_containers(request)]
-        assert len(containers) == 1
+        assert len(containers) > 0
 
 
 def test_safe_unidecode():
