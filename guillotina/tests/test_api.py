@@ -56,7 +56,7 @@ async def test_get_root(container_requester):
     async with container_requester as requester:
         response, _ = await requester('GET', '/')
         assert response['static_directory'] == ['static', 'module_static', 'jsapp_static']
-        assert response['databases'] == ['db', 'db-custom']
+        assert response['databases'] == ['db', 'db-custom', 'guillotina']
         assert response['static_file'] == ['favicon.ico']
 
 
