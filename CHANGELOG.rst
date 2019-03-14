@@ -1,6 +1,9 @@
 4.5.8 (unreleased)
 ------------------
 
+- Add `container_id` index field
+  [vangheem]
+
 - Fix memory leak in security policy lookups
   [vangheem]
 
