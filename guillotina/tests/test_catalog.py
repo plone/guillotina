@@ -161,6 +161,7 @@ select json from {0}
 where json->>'type_name' = 'Item' AND parent_id != '{1}'
 order by json->>'id'
 '''.format(requester.db.storage._objects_table_name, TRASHED_ID))
+        print(f'{result}')
         assert len(result) == 2
         assert json.loads(result[0]['json'])['id'] == 'item1'
         assert json.loads(result[1]['json'])['id'] == 'item2'
