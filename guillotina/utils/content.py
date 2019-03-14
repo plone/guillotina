@@ -200,11 +200,9 @@ async def get_behavior(ob, iface, create=False):
     return behavior
 
 
-async def iter_databases(app=None):
-    if app is None:
+async def iter_databases(root=None):
+    if root is None:
         root = get_utility(IApplication, name='root')
-    else:
-        root = app.root
 
     loaded = []
 
