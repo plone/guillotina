@@ -7,6 +7,7 @@ from guillotina.component import query_adapter
 from guillotina.db.interfaces import IJSONDBSerializer
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
 from guillotina.utils import get_dotted_name
 
@@ -18,6 +19,18 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
     '''
     Default serializer just serializer catalog data
     '''
+
+    def get_parent_id(self):
+        ob = self.context
+        while getattr(ob, '__parent__', None) and not IContainer.providedBy(ob):
+            ob = ob.__parent__
+        if IContainer.providedBy(ob):
+            return ob.__name__
+
+    async def __init__(self):
+        data = await super().__call__()
+        data['parent_id'] = self.get_parent_id()
+        return data
 
 
 @configure.adapter(

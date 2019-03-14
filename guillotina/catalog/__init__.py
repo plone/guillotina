@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from guillotina import directives
-from guillotina.exceptions import NoIndexField
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
 from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
@@ -60,13 +58,3 @@ def get_parent_uuid(ob):
 @directives.index_field.with_accessor(IResource, 'tid', type='keyword')
 def get_tid(ob):
     return ob._p_serial
-
-
-@directives.index_field.with_accessor(
-    IResource, 'container_id', type='keyword')
-def get_container_id(ob):
-    while getattr(ob, '__parent__', None) and not IContainer.providedBy(ob):
-        ob = ob.__parent__
-    if IContainer.providedBy(ob):
-        return ob.__name__
-    raise NoIndexField
