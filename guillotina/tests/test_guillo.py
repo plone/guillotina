@@ -6,7 +6,8 @@ import json
 async def test_get_the_root(guillotina):
     response, status = await guillotina('GET', '/')
     assert response['static_directory'] == ['static', 'module_static', 'jsapp_static']
-    assert response['databases'] == ['db', 'db-custom', 'guillotina']
+    assert 'db' in response['databases']
+    assert 'db-custom' in response['databases']
     assert response['static_file'] == ['favicon.ico']
 
 
