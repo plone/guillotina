@@ -20,7 +20,7 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
     Default serializer just serializer catalog data
     '''
 
-    def get_parent_id(self):
+    def get_container_id(self):
         ob = self.context
         while getattr(ob, '__parent__', None) and not IContainer.providedBy(ob):
             ob = ob.__parent__
@@ -29,7 +29,7 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
 
     async def __init__(self):
         data = await super().__call__()
-        data['parent_id'] = self.get_parent_id()
+        data['container_id'] = self.get_container_id()
         return data
 
 
