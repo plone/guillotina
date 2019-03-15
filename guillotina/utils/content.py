@@ -2,8 +2,11 @@ import string
 import typing
 
 from guillotina import glogging
+from guillotina._settings import app_settings
+from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
+from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.reader import reader
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IApplication
@@ -14,6 +17,7 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 
 from .misc import get_current_request
+from .misc import list_or_dict_items
 
 
 logger = glogging.getLogger('guillotina')
@@ -194,3 +198,34 @@ async def get_behavior(ob, iface, create=False):
         return behavior
     await behavior.load(create=create)
     return behavior
+
+
+async def iter_databases(root=None):
+    if root is None:
+        root = get_utility(IApplication, name='root')
+
+    loaded = []
+
+    root = get_utility(IApplication, name='root')
+    for _, db in root:
+        if IDatabase.providedBy(db):
+            yield db
+            loaded.append(db.id)
+
+    last_checked = None
+
+    while last_checked is None or set(last_checked) != set(loaded):
+        # we need to continue checking until we're sure there aren't any
+        # new storage objects that have been added since we started
+        last_checked = loaded[:]
+
+        # from all dynamic storages
+        for _, config in list_or_dict_items(app_settings['storages']):
+            ctype = config.get('type', config['storage'])
+            factory = get_adapter(root, IDatabaseManager, name=ctype, args=[config])
+            for db_name in await factory.get_names():
+                if db_name in loaded:
+                    continue
+                db = await factory.get_database(db_name)
+                loaded.append(db.id)
+                yield db

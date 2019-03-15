@@ -7,6 +7,7 @@ from .content import get_content_path  # noqa
 from .content import get_object_by_oid  # noqa
 from .content import get_object_url  # noqa
 from .content import get_owners  # noqa
+from .content import iter_databases  # noqa
 from .content import iter_parents  # noqa
 from .content import navigate_to  # noqa
 from .content import valid_id  # noqa

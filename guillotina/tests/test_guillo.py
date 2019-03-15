@@ -6,13 +6,14 @@ import json
 async def test_get_the_root(guillotina):
     response, status = await guillotina('GET', '/')
     assert response['static_directory'] == ['static', 'module_static', 'jsapp_static']
-    assert response['databases'] == ['db', 'db-custom']
+    assert 'db' in response['databases']
+    assert 'db-custom' in response['databases']
     assert response['static_file'] == ['favicon.ico']
 
 
 async def test_get_db(guillotina):
     response, status = await guillotina('GET', '/db')
-    assert response['containers'] == []
+    assert 'containers' in response
 
 
 async def test_get_container(container_requester):

@@ -39,6 +39,8 @@ class ContentAPI:
 
     async def __aexit__(self, *args):
         aiotask_context.set('request', self._existing_request)
+        # make sure to close out connection
+        await self.abort()
 
     async def use_container(self, container: IResource):
         self.request.container = container
@@ -96,6 +98,7 @@ class ContentAPI:
             return
         await self.tm.commit(txn=self._active_txn)
         self.request.execute_futures()
+        self._active_txn = None
         await self.get_transaction()
 
     async def abort(self):

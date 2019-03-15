@@ -10,6 +10,10 @@ from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
 from guillotina.content import load_cached_schema
+from guillotina.db import ROOT_ID
+from guillotina.db import TRASHED_ID
+from guillotina.db.interfaces import ICockroachStorage
+from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
@@ -18,6 +22,7 @@ from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
 from guillotina.tests.utils import wrap_request
 from guillotina.transactions import managed_transaction
+from guillotina.utils import iter_databases
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -257,6 +262,18 @@ async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
 
 
+async def _clear_dbs(root):
+    # make sure to completely clear db before carrying on...
+    async for db in iter_databases(root):
+        storage = db.storage
+        if IPostgresStorage.providedBy(storage) or ICockroachStorage.providedBy(storage):
+            async with storage.pool.acquire() as conn:
+                await conn.execute('''
+DELETE from {}
+WHERE zoid != '{}' AND zoid != '{}'
+'''.format(storage._objects_table_name, ROOT_ID, TRASHED_ID))
+
+
 @pytest.fixture(scope='function')
 def guillotina_main(loop):
     globalregistry.reset()
@@ -264,6 +281,9 @@ def guillotina_main(loop):
         make_app(settings=get_db_settings(), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
+
+    loop.run_until_complete(_clear_dbs(aioapp.root))
+
     yield aioapp
     try:
         loop.run_until_complete(close_async_tasks(aioapp))

@@ -5,7 +5,9 @@ from tempfile import mkstemp
 import pytest
 from guillotina import testing
 from guillotina.commands import get_settings
+from guillotina.commands.migrate import MigrateCommand
 from guillotina.commands.run import RunCommand
+from guillotina.commands.vacuum import VacuumCommand
 
 
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
@@ -30,8 +32,9 @@ async def run(app):
         assert fi.read() == 'foobar'
 
 
-@pytest.mark.skipif(DATABASE != 'postgres', reason="Cockroach does not have cascade support")
-@pytest.mark.skipif(DB_SCHEMA != 'public', reason="Fixture 'container_command' does not support 'db_schema'")
+@pytest.mark.skipif(DATABASE != 'postgres', reason="Only works with pg")
+@pytest.mark.skipif(DB_SCHEMA != 'public',
+                    reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_command_with_container(command_arguments, container_command):
     _, filepath = mkstemp(suffix='.py')
     _, filepath2 = mkstemp()
@@ -47,6 +50,22 @@ async def run(container):
     command.run_command(settings=container_command['settings'])
     with open(filepath2) as fi:
         assert fi.read() == 'foobar'
+
+
+@pytest.mark.skipif(DATABASE != 'postgres', reason="Only works with pg")
+@pytest.mark.skipif(DB_SCHEMA != 'public',
+                    reason="Fixture 'container_command' does not support 'db_schema'")
+def test_run_vacuum_with_container(command_arguments, container_command):
+    command = VacuumCommand(command_arguments)
+    command.run_command(settings=container_command['settings'])
+
+
+@pytest.mark.skipif(DATABASE != 'postgres', reason="Only works with pg")
+@pytest.mark.skipif(DB_SCHEMA != 'public',
+                    reason="Fixture 'container_command' does not support 'db_schema'")
+def test_run_migration(command_arguments, container_command):
+    command = MigrateCommand(command_arguments)
+    command.run_command(settings=container_command['settings'])
 
 
 def test_get_settings():

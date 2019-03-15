@@ -1,6 +1,18 @@
 4.5.8 (unreleased)
 ------------------
 
+- Add `container_id` to jsonb data
+  [vangheem]
+
+- Fix memory leak in security policy lookups
+  [vangheem]
+
+- Introduce migrate command
+  [vangheem]
+
+- Add vacuum command
+  [vangheem]
+
 - Fix HEAD tus
   [bloodbare]
 

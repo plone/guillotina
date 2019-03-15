@@ -36,7 +36,7 @@ async def cleanup(aps):
     await aps.finalize()
 
 
-async def get_aps(postgres, strategy=None, pool_size=16):
+async def get_aps(postgres, strategy=None, pool_size=16, autovacuum=True):
     dsn = "postgres://postgres:@{}:{}/guillotina".format(
         postgres[0],
         postgres[1],
@@ -56,7 +56,8 @@ async def get_aps(postgres, strategy=None, pool_size=16):
     aps = klass(
         dsn=dsn, name='db',
         transaction_strategy=strategy, pool_size=pool_size,
-        conn_acquire_timeout=0.1)
+        conn_acquire_timeout=0.1,
+        autovacuum=autovacuum)
     await aps.initialize()
     return aps
 
@@ -722,6 +723,48 @@ async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_request):
 
     assert ob2._p_oid == ob._p_oid
     await tm.commit(txn=txn)
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+@pytest.mark.skipif(DATABASE in ('DUMMY',), reason='only for rdms')
+async def test_vacuum_objects(db, dummy_request):
+    request = dummy_request  # noqa so magically get_current_request can find
+
+    aps = await get_aps(db, autovacuum=False)
+    tm = TransactionManager(aps)
+
+    # create objects first, commit it...
+    txn = await tm.begin()
+
+    ob1 = create_content()
+    ob2 = create_content()
+    txn.register(ob1)
+    txn.register(ob2)
+
+    await tm.commit(txn=txn)
+
+    txn = await tm.begin()
+    txn.delete(ob1)
+    assert len(txn.deleted) == 1
+    await tm.commit(txn=txn)
+
+    async with aps.pool.acquire() as conn:
+        result = await conn.fetch(
+            "select * from objects where zoid=$1;", ob1._p_oid)
+        assert len(result) == 1
+        # deferenced
+        assert result[0]['parent_id'] == 'D' * 32
+
+    await aps.vacuum()
+
+    await asyncio.sleep(0.1)
+
+    async with aps.pool.acquire() as conn:
+        result = await conn.fetch(
+            "select * from objects where zoid=$1;", ob1._p_oid)
+        assert len(result) == 0
 
     await aps.remove()
     await cleanup(aps)

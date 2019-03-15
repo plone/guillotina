@@ -65,14 +65,15 @@ setup(
     ],
     extras_require={
         'test': [
-            'pytest<=3.1.0',
+            'pytest>=3.8.0',
             'docker',
             'backoff',
             'psycopg2',
-            'pytest-asyncio>=0.8.0,<0.10.0',
-            'pytest-cov<=2.6.0',
+            'pytest-asyncio>=0.10.0',
+            'pytest-cov',
             'coverage>=4.0.3',
-            'pytest-docker-fixtures'
+            'pytest-docker-fixtures',
+            'pytest-rerunfailures'
         ],
         'docs': [
             'sphinx',

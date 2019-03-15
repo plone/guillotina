@@ -14,8 +14,8 @@ pytestmark = pytest.mark.skipif(
 
 async def test_creates_vacuum_task(cockroach_storage):
     async with cockroach_storage as storage:
-        assert storage._vacuum is not None
-        assert storage._vacuum_task is not None
+        assert storage.connection_manager._vacuum is not None
+        assert storage.connection_manager._vacuum_task is not None
 
 
 async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
@@ -40,9 +40,7 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
         txn.delete(folder1)
 
         await tm.commit(txn=txn)
-        while (storage._vacuum._queue.qsize() > 0 or
-               storage._vacuum._active):
-            await asyncio.sleep(0.1)
+        await storage.vacuum()
 
         txn = await tm.begin()
         with pytest.raises(KeyError):

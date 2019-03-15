@@ -278,12 +278,13 @@ class LightweightConnection(asyncpg.connection.Connection):
 
 class PGVacuum:
 
-    def __init__(self, storage, loop):
-        self._storage = storage
+    def __init__(self, manager, loop):
+        self._manager = manager
         self._loop = loop
         self._queue = asyncio.Queue(loop=loop)
         self._closed = False
         self._active = False
+        self._sql = SQLStatements()
 
     async def initialize(self):
         while not self._closed:
@@ -294,29 +295,12 @@ class PGVacuum:
                 return
 
     async def _initialize(self):
-        # get existing trashed objects, push them on the queue...
-        # there might be contention, but that is okay
-        conn = None
-        try:
-            conn = await self._storage.open()
-            sql = self._storage._sql.get(
-                'GET_TRASHED_OBJECTS', self._storage._objects_table_name)
-            for record in await conn.fetch(sql):
-                self._queue.put_nowait(record['zoid'])
-        except concurrent.futures.TimeoutError:
-            log.info('Timed out connecting to storage')
-        except Exception:
-            log.warning('Error deleting trashed object', exc_info=True)
-        finally:
-            if conn is not None:
-                await self._storage.close(conn)
-
         while not self._closed:
             oid = None
             try:
-                oid = await self._queue.get()
+                oid, table_name = await self._queue.get()
                 self._active = True
-                await self.vacuum(oid)
+                await shield(self.vacuum(oid, table_name))
             except (concurrent.futures.CancelledError, RuntimeError):
                 raise
             except Exception:
@@ -328,31 +312,49 @@ class PGVacuum:
                 except ValueError:
                     pass
 
-    async def add_to_queue(self, oid):
+    async def run(self, table_name):
+        '''
+        get existing trashed objects, push them on the queue...
+        there might be contention, but that is okay
+        '''
+        async with self._manager.pool.acquire(
+                timeout=self._manager._conn_acquire_timeout) as conn:
+            try:
+                sql = self._sql.get('GET_TRASHED_OBJECTS', table_name)
+                for record in await conn.fetch(sql):
+                    self._queue.put_nowait((record['zoid'], table_name))
+            except concurrent.futures.TimeoutError:
+                log.info('Timed out connecting to storage')
+            except Exception:
+                log.warning('Error deleting trashed object', exc_info=True)
+
+    async def add_to_queue(self, oid, table_name):
         if self._closed:
             raise Exception('Closing down')
-        await self._queue.put(oid)
+        await self._queue.put((oid, table_name))
 
-    async def vacuum(self, oid):
+    async def vacuum(self, oid, table_name):
         '''
         DELETED objects has parent id changed to the trashed ob for the oid...
         '''
-        conn = await self._storage.open()
-        sql = self._storage._sql.get(
-            'DELETE_OBJECT', self._storage._objects_table_name)
-        try:
-            await conn.execute(sql, oid)
-        except Exception:
-            log.warning('Error deleting trashed object', exc_info=True)
-        finally:
+        async with self._manager.pool.acquire(
+                timeout=self._manager._conn_acquire_timeout) as conn:
+            sql = self._sql.get('DELETE_OBJECT', table_name)
             try:
-                await self._storage.close(conn)
-            except asyncpg.exceptions.ConnectionDoesNotExistError:
-                pass
+                await conn.execute(sql, oid)
+            except Exception:
+                log.warning('Error deleting trashed object', exc_info=True)
 
     async def finalize(self):
         self._closed = True
-        await self._queue.join()
+        try:
+            await asyncio.wait_for(self._queue.join(), 2)
+        except asyncio.TimeoutError:
+            pass
+
+    @property
+    def size(self):
+        return self._queue.qsize()
 
 
 class PGConnectionManager:
@@ -361,7 +363,7 @@ class PGConnectionManager:
     '''
 
     def __init__(self, dsn=None, pool_size=13, connection_options=None,
-                 conn_acquire_timeout=20):
+                 conn_acquire_timeout=20, vacuum_class=PGVacuum):
         self._dsn = dsn
         self._pool_size = pool_size
         self._pool = None
@@ -370,6 +372,13 @@ class PGConnectionManager:
         self._conn_acquire_timeout = conn_acquire_timeout
         self._lock = asyncio.Lock()
         self._closable = True
+        self._vacuum = None
+        self._vacuum_task = None
+        self._vacuum_class = vacuum_class
+
+    @property
+    def vacuum(self):
+        return self._vacuum
 
     @property
     def read_conn(self):
@@ -391,6 +400,11 @@ class PGConnectionManager:
             if not self._closable:
                 # prevent closing
                 return
+
+            if self._vacuum is not None:
+                await self._vacuum.finalize()
+                self._vacuum_task.cancel()
+                self._vacuum = self._vacuum_task = None
 
             try:
                 await shield(self._pool.release(self._read_conn))
@@ -421,6 +435,9 @@ class PGConnectionManager:
             # shared read connection on all transactions
             self._read_conn = await self._pool.acquire(
                 timeout=self._conn_acquire_timeout)
+
+            self._vacuum = self._vacuum_class(self, loop)
+            self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
 
     async def restart(self, timeout=2):
         # needs to be used with lock
@@ -490,9 +507,9 @@ class PostgresqlStorage(BaseStorage):
         'CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;'
     ]
 
-    _unique_constraint = '''ALTER TABLE {objects_table_name}
-                            ADD CONSTRAINT {constraint_name}_parent_id_id_key
-                            UNIQUE (parent_id, id)'''
+    _unique_constraint = """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_parent_id_id_key
+                            ON {objects_table_name} (parent_id, id)
+                            WHERE parent_id != '{TRASHED_ID}'"""
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
@@ -519,8 +536,6 @@ class PostgresqlStorage(BaseStorage):
         self._autovacuum = autovacuum
 
     async def finalize(self):
-        await self._vacuum.finalize()
-        self._vacuum_task.cancel()
         await self._connection_manager.close()
 
     @property
@@ -538,6 +553,11 @@ class PostgresqlStorage(BaseStorage):
     @property
     def lock(self):
         return self._connection_manager.lock
+
+    async def vacuum(self):
+        await self.connection_manager.vacuum.run(self._objects_table_name)
+        while self.connection_manager.vacuum.size > 0:
+            await asyncio.sleep(0.1)
 
     async def create(self):
         # Check DB
@@ -586,16 +606,11 @@ class PostgresqlStorage(BaseStorage):
         raise ConflictError('Restarting connection to postgresql')
 
     async def has_unique_constraint(self):
+        table_name = clear_table_name(self._objects_table_name)
         result = await self.read_conn.fetch('''
-SELECT *
-FROM
-    information_schema.table_constraints AS tc
-    JOIN information_schema.key_column_usage AS kcu
-    ON tc.constraint_name = kcu.constraint_name
-    JOIN information_schema.constraint_column_usage AS ccu
-    ON ccu.constraint_name = tc.constraint_name
-WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQUE'
-'''.format(clear_table_name(self._objects_table_name)))
+SELECT * FROM pg_indexes
+WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
+'''.format(table_name, table_name))
         return len(result) > 0
 
     async def initialize(self, loop=None, **kw):
@@ -604,7 +619,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
             self._connection_manager = PGConnectionManager(
                 dsn=self._dsn, pool_size=self._pool_size,
                 connection_options=self._connection_options,
-                conn_acquire_timeout=self._conn_acquire_timeout)
+                conn_acquire_timeout=self._conn_acquire_timeout,
+                vacuum_class=self._vacuum_class)
             await self._connection_manager.initialize(loop, **kw)
 
         async with self.lock:
@@ -624,7 +640,8 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
                 # only available on new databases
                 await self.read_conn.execute(self._unique_constraint.format(
                     objects_table_name=self._objects_table_name,
-                    constraint_name=clear_table_name(self._objects_table_name)
+                    constraint_name=clear_table_name(self._objects_table_name),
+                    TRASHED_ID=TRASHED_ID
                 ))
                 self._supports_unique_constraints = True
                 await self.initialize_tid_statements()
@@ -646,18 +663,6 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
     ALTER TABLE {self._blobs_table_name} ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
                 await self.read_conn.execute(f'''
     ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
-
-            self._vacuum = self._vacuum_class(self, loop)
-            self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
-
-            def vacuum_done(task):
-                if self._vacuum._closed:
-                    # if it's closed, we know this is expected
-                    return
-                log.warning('Vacuum pg task ended. This should not happen. '
-                            'No database vacuuming will be done here anymore.')
-
-            self._vacuum_task.add_done_callback(vacuum_done)
             self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
@@ -767,14 +772,20 @@ WHERE tc.constraint_name = '{}_parent_id_id_key' AND tc.constraint_type = 'UNIQU
         await txn._cache.store_object(obj, pickled)
 
     async def _txn_oid_commit_hook(self, status, oid):
-        await self._vacuum.add_to_queue(oid)
+        await self._connection_manager._vacuum.add_to_queue(oid, self._objects_table_name)
 
     async def delete(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get('TRASH_PARENT_ID', self._objects_table_name)
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
-            await conn.execute(sql, oid)
+            try:
+                await conn.execute(sql, oid)
+            except asyncpg.exceptions.UniqueViolationError:
+                # we already have ob with id, it has not been vacuumed yet,
+                # fallback.
+                sql = self._sql.get('DELETE_OBJECT', self._objects_table_name)
+                await conn.execute(sql, oid)
         if self._autovacuum:
             txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
