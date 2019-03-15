@@ -1,4 +1,4 @@
-4.5.8 (unreleased)
+4.5.8 (2019-03-15)
 ------------------
 
 - Add `container_id` to jsonb data
