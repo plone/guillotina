@@ -1,7 +1,8 @@
 4.5.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement "del" operation for dynamic field values
+  [vangheem]
 
 
 4.5.8 (2019-03-15)

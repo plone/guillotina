@@ -607,3 +607,52 @@ async def test_dynamic_fields_keyword_multi(container_requester):
                 }
             }))
         assert status == 412
+
+
+async def test_del_dynamic_field_value(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina',
+            data=json.dumps({
+                "@type": "Item",
+                "@behaviors": [IDynamicFields.__identifier__],
+                "id": "foobar",
+                IDynamicFields.__identifier__: {
+                    "fields": {
+                        "foobar": {
+                            "title": "Hello field",
+                            "type": "keyword"
+                        }
+                    }
+                }
+            })
+        )
+        assert status == 201
+
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "assign",
+                        "value": {
+                            "key": "foobar",
+                            "value": ["foo", "bar"]
+                        }
+                    }
+                }
+            }))
+        assert status == 204
+
+        # test, int is not allowed still
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/foobar', data=json.dumps({
+                "@behaviors": [IDynamicFieldValues.__identifier__],
+                IDynamicFieldValues.__identifier__: {
+                    "values": {
+                        "op": "del",
+                        "value": "foobar"
+                    }
+                }
+            }))
+        assert status == 204
