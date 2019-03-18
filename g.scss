@@ -116,6 +116,10 @@ a {
     & p {
         color: #fff;   
     }
+    & ul {
+        font-weight: 300;
+        color: #fff;
+    }
     :last-child p {
         margin: 0;
     } 
@@ -154,12 +158,30 @@ a {
             margin-left: -3rem;
         }
     }
-    & .img-chrono::before   { mask-image: url(assets/chrono.svg); }
-    & .img-theme::before    { mask-image: url(assets/theme.svg); }
-    & .img-random::before   { mask-image: url(assets/random.svg); }
-    & .img-nav::before      { mask-image: url(assets/nav.svg); }
-    & .img-security::before { mask-image: url(assets/security.svg); }
-    & .img-triangle::before { mask-image: url(assets/triangle.svg); }
+    & .img-chrono::before   {
+        mask-image: url(assets/chrono.svg);
+        -webkit-mask-image: url(assets/chrono.svg);
+    }
+    & .img-theme::before    {
+        mask-image: url(assets/theme.svg);
+        -webkit-mask-image: url(assets/theme.svg);
+    }
+    & .img-random::before   {
+        mask-image: url(assets/random.svg);
+        -webkit-mask-image: url(assets/random.svg);
+    }
+    & .img-nav::before      {
+        mask-image: url(assets/nav.svg);
+        -webkit-mask-image: url(assets/nav.svg);
+    }
+    & .img-security::before {
+        mask-image: url(assets/security.svg);
+        -webkit-mask-image: url(assets/security.svg);
+    }
+    & .img-triangle::before {
+        mask-image: url(assets/triangl.svg);
+        -webkit-mask-image: url(assets/triangl.svg);
+    }
 }
 
 .gw-ft {
@@ -318,5 +340,25 @@ a {
         vertical-align: sub;
         line-height: 0;
         margin-left: .125rem;
+    }
+    ul {
+        display: flex;
+        list-style: none;
+    }
+    li {
+        padding: 10px;
+    }
+}
+
+.secondary {
+    .gw-hd {
+        height: 260px;
+        min-height: none;
+        h1 {
+            text-align: center;
+            display: block;
+            height: 40px;
+            margin-bottom: 0;
+        }
     }
 }
