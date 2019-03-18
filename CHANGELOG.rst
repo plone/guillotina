@@ -1,4 +1,4 @@
-4.5.9 (unreleased)
+4.5.9 (2019-03-18)
 ------------------
 
 - Implement "del" operation for dynamic field values
