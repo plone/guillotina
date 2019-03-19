@@ -9,7 +9,6 @@ messages to logged in users.
 Create a `utility.py` file and put the following code in it.
 
 ```python
-from guillotina import configure
 from guillotina.async_util import IAsyncUtility
 from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IResourceSerializeToJsonSummary
@@ -27,7 +26,6 @@ class IMessageSender(IAsyncUtility):
     pass
 
 
-@configure.utility(provides=IMessageSender)
 class MessageSenderUtility:
 
     def __init__(self, settings=None, loop=None):
@@ -75,6 +73,20 @@ In this case, we will send messages to registered websockets.
 
 Make sure, like all other configured modules, to ensure this file is scanned
 by the packages `__init__.py` file.
+
+Additionally, async utilities need to also be configured in `__init__.py`:
+
+```python
+app_settings = {
+    "load_utilities": {
+        "guillotina_chat.message_sender": {
+            "provides": "guillotina_chat.utility.IMessageSender",
+            "factory": "guillotina_chat.utility.MessageSenderUtility",
+            "settings": {}
+        },
+    }
+}
+```
 
 ## Sending messages
 
