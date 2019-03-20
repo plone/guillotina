@@ -1,8 +1,10 @@
-from guillotina import jose
+from jwcrypto import jwe
 from guillotina._settings import app_settings
 
 import base64
 import logging
+import json
+import time
 
 
 logger = logging.getLogger('guillotina')
@@ -45,21 +47,26 @@ class WSTokenAuthPolicy(BasePolicy):
         if 'ws_token' in request.query:
             jwt_token = request.query['ws_token'].encode('utf-8')
             try:
-                jwt = jose.decrypt(
-                    jose.deserialize_compact(jwt_token), app_settings['rsa']['priv'])
-            except jose.Expired:
-                # expired token
-                logger.warn(f'Expired token {jwt_token}', exc_info=True)
+                jwetoken = jwe.JWE()
+                jwetoken.deserialize(jwt_token.decode('utf-8'))
+                jwetoken.decrypt(app_settings['jwk'])
+                payload = jwetoken.payload
+            except jwe.InvalidJWEOperation:
+                logger.warn(f'Invalid operation', exc_info=True)
                 return
-            except jose.Error:
+            except jwe.InvalidJWEData:
                 logger.warn(f'Error decrypting JWT token', exc_info=True)
+                return
+            json_payload = json.loads(payload)
+            if json_payload['exp'] <= int(time.time()):
+                logger.warn(f'Expired token {jwt_token}', exc_info=True)
                 return
             data = {
                 'type': 'wstoken',
-                'token': jwt.claims['token']
+                'token': json_payload['token']
             }
-            if 'id' in jwt.claims:
-                data['id'] = jwt.claims['id']
+            if 'id' in json_payload:
+                data['id'] = json_payload['id']
             return data
 
 
