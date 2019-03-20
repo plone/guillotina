@@ -1,7 +1,8 @@
-4.5.10 (unreleased)
--------------------
+4.6.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Remove support for jose/jwe
+  [vangheem]
 
 
 4.5.9 (2019-03-18)

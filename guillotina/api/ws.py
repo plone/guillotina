@@ -1,6 +1,5 @@
 from aiohttp import web
 from guillotina import configure
-from guillotina import jose
 from guillotina import logger
 from guillotina import routes
 from guillotina._settings import app_settings
@@ -18,7 +17,6 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
 
 import aiohttp
-import time
 import ujson
 from urllib import parse
 
@@ -58,39 +56,27 @@ from urllib import parse
         }
     })
 class WebsocketGetToken(Service):
-    _websockets_ttl = 60
-
-    def generate_websocket_token(self, real_token, data={}):
-        claims = {
-            'iat': int(time.time()),
-            'exp': int(time.time() + self._websockets_ttl),
-            'token': real_token
-        }
-        claims.update(data)
-        jwe = jose.encrypt(claims, app_settings['rsa']['priv'])
-        token = jose.serialize_compact(jwe)
-        return token.decode('utf-8')
 
     async def __call__(self):
         # Get token
         header_auth = self.request.headers.get('AUTHORIZATION')
-        token = None
-        data = {}
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(' ')
             if schema.lower() == 'basic':
                 # special case, we need to hash passwd here...
                 policy = BasicAuthPolicy(self.request)
                 extracted = await policy.extract_token(header_auth)
-                data['id'] = extracted['id']
+                # XXX what do we do here?
+                auth_type = extracted['type']
+                auth_id = extracted['id']
                 token = extracted['token']
             elif schema.lower() == 'bearer':
                 token = encoded_token
+                auth_type = 'bearer'
+                auth_id = ''
 
-        # Create ws token
-        new_token = self.generate_websocket_token(token, data)
         return {
-            "token": new_token
+            "token": '{}::{}::{}'.format(token, auth_type, auth_id)
         }
 
 

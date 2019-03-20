@@ -1,8 +1,6 @@
 import asyncio
 import json
 import logging.config
-from types import ModuleType
-from typing import Optional
 
 import aiotask_context
 from aiohttp import web
@@ -36,13 +34,6 @@ from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
-
-
-RSA: Optional[ModuleType] = None
-try:
-    from Crypto.PublicKey import RSA
-except ImportError:
-    pass
 
 
 logger = glogging.getLogger('guillotina')
@@ -274,15 +265,6 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
         root[key] = JavaScriptApplication(path)
 
     root.set_root_user(app_settings['root_user'])
-
-    if RSA is not None and not app_settings.get('rsa'):
-        key = RSA.generate(2048)
-        pub_jwk = {'k': key.publickey().exportKey('PEM')}
-        priv_jwk = {'k': key.exportKey('PEM')}
-        app_settings['rsa'] = {
-            'pub': pub_jwk,
-            'priv': priv_jwk
-        }
 
     # Set router root
     server_app.router.set_root(root)
