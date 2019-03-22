@@ -1,7 +1,8 @@
 4.5.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix jwe implementation
+  [bloodbare]
 
 
 4.5.9 (2019-03-18)

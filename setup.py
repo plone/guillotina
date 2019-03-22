@@ -53,6 +53,7 @@ setup(
         'jsonschema',
         'python-dateutil',
         'pycryptodome',
+        'jwcrypto',
         'setuptools',
         'ujson',
         'zope.interface',

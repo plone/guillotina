@@ -1,8 +1,6 @@
 import asyncio
 import json
 import logging.config
-from types import ModuleType
-from typing import Optional
 
 import aiotask_context
 from aiohttp import web
@@ -37,10 +35,8 @@ from guillotina.utils import list_or_dict_items
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 
-
-RSA: Optional[ModuleType] = None
 try:
-    from Crypto.PublicKey import RSA
+    from jwcrypto import jwk
 except ImportError:
     pass
 
@@ -275,14 +271,15 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     root.set_root_user(app_settings['root_user'])
 
-    if RSA is not None and not app_settings.get('rsa'):
-        key = RSA.generate(2048)
-        pub_jwk = {'k': key.publickey().exportKey('PEM')}
-        priv_jwk = {'k': key.exportKey('PEM')}
-        app_settings['rsa'] = {
-            'pub': pub_jwk,
-            'priv': priv_jwk
-        }
+    if jwk is not None and not app_settings.get('jwk'):
+        key = jwk.JWK.generate(kty='oct', size=256)
+        app_settings['jwk'] = key
+    elif jwk is not None and app_settings.get('jwk') and\
+            app_settings.get('jwk').get('k') and\
+            app_settings.get('jwk').get('kty'):
+        key = jwk.JWK.from_json(json.dumps(app_settings.get('jwk')))
+        app_settings['jwk'] = key
+        # {"k":"QqzzWH1tYqQO48IDvW7VH7gvJz89Ita7G6APhV-uLMo","kty":"oct"}
 
     # Set router root
     server_app.router.set_root(root)
