@@ -1,6 +1,9 @@
 4.5.10 (unreleased)
 -------------------
 
+- Fix jwt implementation to use customized algorithm for encoding
+  [vangheem]
+
 - Fix jwe implementation
   [bloodbare]
 

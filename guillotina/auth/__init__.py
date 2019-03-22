@@ -40,5 +40,7 @@ def authenticate_user(userid, data=None, timeout=60 * 60 * 1):
         'exp': datetime.utcnow() + timedelta(seconds=timeout),
         'id': userid
     })
-    jwt_token = jwt.encode(data, app_settings['jwt']['secret']).decode('utf-8')
+    jwt_token = jwt.encode(
+        data, app_settings['jwt']['secret'],
+        algorithm=app_settings['jwt']['algorithm']).decode('utf-8')
     return jwt_token, data

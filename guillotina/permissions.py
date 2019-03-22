@@ -36,6 +36,7 @@ configure.permission('guillotina.ManageCatalog', 'Manage catalog')
 
 configure.permission('guillotina.GetAPIDefinition', 'Get the API definition')
 configure.permission('guillotina.Public', 'Public access to content')
+configure.permission('guillotina.WebSocket', 'Access to websocket')
 
 
 configure.role("guillotina.Anonymous", "Everybody",
@@ -72,6 +73,10 @@ configure.grant(
     role="guillotina.Authenticated")
 configure.grant(
     permission="guillotina.Public",
+    role="guillotina.Authenticated")
+
+configure.grant(
+    permission="guillotina.UseWebSockets",
     role="guillotina.Authenticated")
 
 # Reader
