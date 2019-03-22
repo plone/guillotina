@@ -37,8 +37,6 @@ from guillotina.utils import list_or_dict_items
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 
-
-jwk: Optional[ModuleType] = None
 try:
     from jwcrypto import jwk
 except ImportError:
@@ -284,7 +282,6 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
         key = jwk.JWK.from_json(json.dumps(app_settings.get('jwk')))
         app_settings['jwk'] = key
         # {"k":"QqzzWH1tYqQO48IDvW7VH7gvJz89Ita7G6APhV-uLMo","kty":"oct"}
-
 
     # Set router root
     server_app.router.set_root(root)
