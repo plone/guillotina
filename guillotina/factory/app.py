@@ -1,8 +1,6 @@
 import asyncio
 import json
 import logging.config
-from types import ModuleType
-from typing import Optional
 
 import aiotask_context
 from aiohttp import web
