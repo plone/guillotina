@@ -1,6 +1,7 @@
 from aiohttp import web
 from guillotina import configure
-from guillotina import jose
+from jwcrypto import jwe
+from jwcrypto.common import json_encode
 from guillotina import logger
 from guillotina import routes
 from guillotina._settings import app_settings
@@ -67,9 +68,15 @@ class WebsocketGetToken(Service):
             'token': real_token
         }
         claims.update(data)
-        jwe = jose.encrypt(claims, app_settings['rsa']['priv'])
-        token = jose.serialize_compact(jwe)
-        return token.decode('utf-8')
+        payload = ujson.dumps(claims)
+        jwetoken = jwe.JWE(
+            payload.encode('utf-8'),
+            json_encode({
+                "alg": "A256KW",
+                "enc": "A256CBC-HS512"}))
+        jwetoken.add_recipient(app_settings['jwk'])
+        token = jwetoken.serialize(compact=True)
+        return token
 
     async def __call__(self):
         # Get token

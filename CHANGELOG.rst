@@ -4,6 +4,9 @@
 - Fix jwt implementation to use customized algorithm for encoding
   [vangheem]
 
+- Fix jwe implementation
+  [bloodbare]
+
 
 4.5.9 (2019-03-18)
 ------------------
