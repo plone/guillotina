@@ -25,7 +25,7 @@ from urllib import parse
 
 @configure.service(
     context=IContainer, method='GET',
-    permission='guillotina.AccessContent', name='@wstoken',
+    permission='guillotina.UseWebSockets', name='@wstoken',
     summary='Return a web socket token',
     responses={
         "200": {
@@ -42,7 +42,7 @@ from urllib import parse
     })
 @configure.service(
     context=IApplication, method='GET',
-    permission='guillotina.AccessContent', name='@wstoken',
+    permission='guillotina.UseWebSockets', name='@wstoken',
     summary='Return a web socket token',
     responses={
         "200": {

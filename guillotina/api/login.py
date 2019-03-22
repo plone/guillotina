@@ -74,7 +74,9 @@ class Refresh(Service):
             'exp': datetime.utcnow() + timedelta(seconds=self.token_timeout),
             'id': user.id
         }
-        jwt_token = jwt.encode(data, app_settings['jwt']['secret']).decode('utf-8')
+        jwt_token = jwt.encode(
+            data, app_settings['jwt']['secret'],
+            algorithm=app_settings['jwt']['algorithm']).decode('utf-8')
 
         await notify(UserRefreshToken(user, jwt_token))
 
