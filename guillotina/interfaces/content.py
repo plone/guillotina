@@ -93,7 +93,7 @@ class IApplication(ITraversable, IAsyncContainer):
         '''
         Get db or resource
         '''
-    
+
     def __setitem__(key, value):
         '''
         Set db or resource value
