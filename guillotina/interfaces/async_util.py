@@ -3,12 +3,12 @@ from zope.interface import Interface
 
 class IAsyncUtility(Interface):
 
-    async def initialize(self):
+    async def initialize():
         '''
         Method that is called on startup and used to create task.
         '''
 
-    async def finalize(self):
+    async def finalize():
         '''
         Called to shut down and cleanup the task
         '''

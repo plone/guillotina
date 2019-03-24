@@ -54,7 +54,7 @@ class GuillotinaAdapterRegistry(AdapterRegistry):
     """
     Customized adapter registry for async
     """
-    _delegated = AdapterRegistry._delegated + ('asubscribers',)
+    _delegated = AdapterRegistry._delegated + ('asubscribers',)  # type: ignore
     LookupClass = GuillotinaAdapterLookup
 
     def __init__(self, parent, name):

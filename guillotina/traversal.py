@@ -2,7 +2,9 @@
 import traceback
 import uuid
 from contextlib import contextmanager
+from typing import List
 from typing import Optional
+from typing import Tuple
 
 import aiohttp
 from aiohttp.abc import AbstractMatchInfo
@@ -514,7 +516,7 @@ class TraversalRouter(AbstractRouter):
 
         return MatchInfo(resource, request, view)
 
-    async def traverse(self, request: IRequest) -> IResource:
+    async def traverse(self, request: IRequest) -> Tuple[IResource, List[str]]:
         """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
@@ -523,7 +525,7 @@ class TraversalRouter(AbstractRouter):
     @profilable
     async def apply_authorization(self, request: IRequest):
         # User participation
-        participation = IParticipation(request)
+        participation = get_adapter(request, IParticipation)
         # Lets extract the user from the request
         await participation()
         if participation.principal is not None:

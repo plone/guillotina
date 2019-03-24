@@ -43,7 +43,7 @@ install:
   - pip install Cython==0.27.3
   - pip install -r requirements.txt
   - pip install -e .[test]
-  - pip install flake8==3.7.1 codecov mypy==0.650
+  - pip install flake8==3.7.1 codecov mypy==0.650 mypy-zope
   - sleep 5
 script:
   - flake8 guillotina --config=setup.cfg

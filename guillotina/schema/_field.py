@@ -135,7 +135,7 @@ class Bytes(MinMaxLen, Field):
 NativeString = Text
 
 
-@implementer(IASCII)
+@implementer(IASCII)  # type: ignore
 class ASCII(NativeString):
     __doc__ = IASCII.__doc__
 
@@ -159,7 +159,7 @@ class BytesLine(Bytes):
 NativeStringLine = TextLine
 
 
-@implementer(IASCIILine)
+@implementer(IASCIILine)  # type: ignore
 class ASCIILine(ASCII):
     __doc__ = IASCIILine.__doc__
 
@@ -326,7 +326,7 @@ class Choice(Field):
 _isuri = re.compile(r"[a-zA-z0-9+.-]+:\S*$").match
 
 
-@implementer(IURI, IFromUnicode)
+@implementer(IURI, IFromUnicode)  # type: ignore
 class URI(NativeStringLine):
     """URI schema field
     """
@@ -353,7 +353,7 @@ _isdotted = re.compile(
     r"$").match
 
 
-@implementer(IDottedName)
+@implementer(IDottedName)  # type: ignore
 class DottedName(NativeStringLine):
     """Dotted name field.
 
@@ -395,7 +395,7 @@ class DottedName(NativeStringLine):
         return v
 
 
-@implementer(IId, IFromUnicode)
+@implementer(IId, IFromUnicode)  # type: ignore
 class Id(NativeStringLine):
     """Id field
 

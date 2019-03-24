@@ -3,7 +3,7 @@ from guillotina.interfaces import IInteraction
 from guillotina.utils import get_current_request
 
 
-class SecurityMap(object):
+class SecurityMap:
 
     def __init__(self):
         self._clear()

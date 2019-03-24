@@ -151,7 +151,20 @@ class IRequest(Interface):
     container = Attribute('current container')
     _container_id = Attribute('id of current container')
     container_settings = Attribute('container settings')
+    security = Attribute('cached IInteraction lookup')
+    url = Attribute('')
+    path = Attribute('')
+    method = Attribute('')
+    resource = Attribute('traversed resource')
+    tail = Attribute('')
+    exc = Attribute('')
+    found_view = Attribute('')
+    view_name = Attribute('')
 
+    def record(event_name) -> None:
+        '''
+        record request event
+        '''
 
 class ILanguage(Interface):
     pass

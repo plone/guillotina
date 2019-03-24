@@ -206,7 +206,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         if isinstance(iface, str):
             name = iface
         elif Interface.providedBy(iface):
-            name = iface.__identifier__
+            name = iface.__identifier__  # type: ignore
         else:
             raise AttributeError('Cant identify Interface')
         behavior_registration = get_utility(IBehavior, name=name)
@@ -226,7 +226,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         if isinstance(iface, str):
             name = iface
         elif Interface.providedBy(iface):
-            name = iface.__identifier__
+            name = iface.__identifier__  # type: ignore
         behavior_registration = get_utility(IBehavior, name=name)
         if (behavior_registration is not None and
                 behavior_registration.marker is not None):
