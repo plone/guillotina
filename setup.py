@@ -61,7 +61,7 @@ setup(
         'pyjwt',
         'asyncpg',
         'cffi',
-        'PyYAML',
+        'PyYAML>=5.1',
         'aiotask_context'
     ],
     extras_require={

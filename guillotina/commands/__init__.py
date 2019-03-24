@@ -62,7 +62,7 @@ def get_settings(configuration, overrides=None):
                     raise
             else:
                 # should be yaml then...
-                settings = yaml.load(config)
+                settings = yaml.load(config, Loader=yaml.FullLoader)
         settings['__file__'] = configuration
     else:
         try:
@@ -70,7 +70,7 @@ def get_settings(configuration, overrides=None):
         except json.decoder.JSONDecodeError:
             # try with yaml parser too..
             try:
-                settings = yaml.load(configuration)
+                settings = yaml.load(configuration, Loader=yaml.FullLoader)
                 # will also parse strings...
                 if isinstance(settings, str):
                     settings = None

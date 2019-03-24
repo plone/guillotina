@@ -13,7 +13,7 @@ async def test_contentapi_create(db, guillotina_main):
         await api.delete(container)
 
 
-@pytest.mark.flaky(reruns=3)
+@pytest.mark.flaky(reruns=5)
 async def test_contentapi_delete(db, guillotina_main):
     async with ContentAPI(guillotina_main.root['db']) as api:
         container = await api.create({'@type': 'Container', 'id': 'foobar'})
