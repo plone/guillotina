@@ -299,7 +299,7 @@ register_configuration_handler('addon', load_addon)  # noqa
 
 
 def _component_conf(conf):
-    if type(conf['for_']) not in (tuple, set, list):
+    if not isinstance(conf['for_'], (tuple, set, list)):
         conf['for_'] = (conf['for_'],)
 
 
@@ -482,7 +482,7 @@ class generic_adapter(_base_decorator):  # noqa: N801
         if 'for_' not in config and self.for_ is not None:
             config['for_'] = self.for_
         if not self.multi:
-            assert type(config['for_']) not in (list, set, tuple)
+            assert not isinstance(config['for_'], (list, set, tuple))
         self.config = config
 
 
