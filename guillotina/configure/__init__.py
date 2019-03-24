@@ -436,10 +436,13 @@ class service(_base_decorator):  # noqa: N801
                     f'Service __call__ method must be async: {func.__call__}\n'
                     f'{pformat(self.config)}'
                 )
-            func.__allow_access__ = self.config.get(
+            # create new class with customizations
+            klass = type(func.__name__, (func,), dict(func.__dict__))
+            klass.__module__ = func.__module__
+            klass.__allow_access__ = self.config.get(
                 'allow_access', getattr(func, '__allow_access__', False))
-            func.__route__ = routes.Route(self.config.get('name', ''))
-            register_configuration(func, self.config, 'service')
+            klass.__route__ = routes.Route(self.config.get('name', ''))
+            register_configuration(klass, self.config, 'service')
         else:
             if not _has_parameters(func):
                 raise ServiceConfigurationError(
