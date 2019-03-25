@@ -84,6 +84,26 @@ class IApplication(ITraversable, IAsyncContainer):
     '''
     '''
 
+    def __contains__(key) -> bool:
+        '''
+        If contains the resource
+        '''
+
+    def __getitem__(key):
+        '''
+        Get db or resource
+        '''
+
+    def __setitem__(key, value):
+        '''
+        Set db or resource value
+        '''
+
+    def __delitem__(key):
+        '''
+        Delete resource
+        '''
+
 
 class IDatabase(ITraversable, IAsyncContainer):
     def get_transaction_manager():  # type: ignore
@@ -141,6 +161,7 @@ class ILocation(Interface):
 
 class IResource(ILocation):
 
+    id = Attribute('')
     type_name = guillotina.schema.TextLine(readonly=True)
 
     title = guillotina.schema.TextLine(
@@ -224,6 +245,11 @@ class IItem(IResource):
 class IAnnotations(Interface):
     '''
     '''
+
+    async def async_get(name):
+        '''
+        Get annotation
+        '''
 
 
 class IAnnotationData(Interface):

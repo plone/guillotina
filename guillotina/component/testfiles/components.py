@@ -65,6 +65,6 @@ class Comp4(object):
         self.context = context
 
 comp = Comp()
-comp4 = Comp4()
+comp4 = Comp4()  # type: ignore
 
 content = Content()

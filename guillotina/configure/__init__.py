@@ -299,7 +299,7 @@ register_configuration_handler('addon', load_addon)  # noqa
 
 
 def _component_conf(conf):
-    if type(conf['for_']) not in (tuple, set, list):
+    if not isinstance(conf['for_'], (tuple, set, list)):
         conf['for_'] = (conf['for_'],)
 
 
@@ -436,13 +436,13 @@ class service(_base_decorator):  # noqa: N801
                     f'Service __call__ method must be async: {func.__call__}\n'
                     f'{pformat(self.config)}'
                 )
-
-            class _View(func):
-                __allow_access__ = self.config.get(
-                    'allow_access', getattr(func, '__allow_access__', False))
-                __route__ = routes.Route(self.config.get('name', ''))
-
-            register_configuration(_View, self.config, 'service')
+            # create new class with customizations
+            klass = type(func.__name__, (func,), dict(func.__dict__))
+            klass.__module__ = func.__module__
+            klass.__allow_access__ = self.config.get(
+                'allow_access', getattr(func, '__allow_access__', False))
+            klass.__route__ = routes.Route(self.config.get('name', ''))
+            register_configuration(klass, self.config, 'service')
         else:
             if not _has_parameters(func):
                 raise ServiceConfigurationError(
@@ -470,8 +470,8 @@ class service(_base_decorator):  # noqa: N801
 
 
 class generic_adapter(_base_decorator):  # noqa: N801
-    provides: Interface = None
-    for_: Optional[Tuple[Interface, ...]] = None
+    provides: Optional[IInterface] = None
+    for_: Optional[Tuple[IInterface, ...]] = None
     multi = False
 
     def __init__(self, for_=None, **config):
@@ -482,31 +482,31 @@ class generic_adapter(_base_decorator):  # noqa: N801
         if 'for_' not in config and self.for_ is not None:
             config['for_'] = self.for_
         if not self.multi:
-            assert type(config['for_']) not in (list, set, tuple)
+            assert not isinstance(config['for_'], (list, set, tuple))
         self.config = config
 
 
 class value_serializer(generic_adapter):  # noqa: N801
     configuration_type = 'value_serializer'
-    provides = IValueToJson
+    provides = IValueToJson  # type: ignore
 
 
 class value_deserializer(generic_adapter):  # noqa: N801
     configuration_type = 'value_deserializer'
-    provides = IJSONToValue
+    provides = IJSONToValue  # type: ignore
 
 
 class renderer(generic_adapter):  # noqa: N801
     configuration_type = 'renderer'
-    provides = IRenderer
-    for_ = (IView, IRequest)
+    provides = IRenderer  # type: ignore
+    for_ = (IView, IRequest)  # type: ignore
     multi = True
 
 
 class language(generic_adapter):  # noqa: N801
     configuration_type = 'language'
-    provides = ILanguage
-    for_ = (IResource, IRequest)
+    provides = ILanguage  # type: ignore
+    for_ = (IResource, IRequest)  # type: ignore
     multi = True
 
 

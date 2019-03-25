@@ -1,10 +1,11 @@
 from guillotina.auth.role import check_role
 from guillotina.interfaces import Allow
+from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
+from guillotina.interfaces import IInheritPermissionManager
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IRolePermissionManager
-from guillotina.interfaces import IInheritPermissionManager
 from guillotina.interfaces import Unset
 from guillotina.security.permission import get_all_permissions
 from guillotina.security.securitymap import SecurityMap
@@ -22,6 +23,11 @@ class PrincipalRoleManager(SecurityMap):
             check_role(None, role_id)
 
         self.add_cell(role_id, principal_id, Allow)
+
+    def assign_role_to_principal_no_inherit(self, role_id, principal_id, check=True):
+        if check:
+            check_role(None, role_id)
+        self.add_cell(role_id, principal_id, AllowSingle)
 
     def remove_role_from_principal(self, role_id, principal_id, check=True):
         ''' See the interface IPrincipalRoleManager '''
@@ -106,6 +112,10 @@ class PrincipalPermissionManager(SecurityMap):
         ''' See the interface IPrincipalPermissionManager '''
         return self.get_all_cells()
 
+    def grant_permission_to_principal_no_inherit(
+            self, permission_id, principal_id):
+        self.add_cell(permission_id, principal_id, AllowSingle)
+
 
 # Permissions are our rows, and principals are our columns
 principal_permission_manager = PrincipalPermissionManager()
@@ -158,6 +168,9 @@ class RolePermissionManager(SecurityMap):
     def get_roles_and_permissions(self):
         '''See interface IRolePermissionMap'''
         return self.get_all_cells()
+
+    def grant_permission_to_role_no_inherit(self, permission_id, role_id):
+        self.add_cell(permission_id, role_id, AllowSingle)
 
 
 # Permissions are our rows, and roles are our columns

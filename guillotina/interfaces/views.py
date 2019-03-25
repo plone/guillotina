@@ -7,7 +7,7 @@ class IView(Interface):
         '''
         '''
 
-    async def __call__(self):
+    async def __call__():
         '''
         '''
 

@@ -24,7 +24,7 @@ import sys
 _marker = object()
 
 
-@interface.implementer(interfaces.IFieldUpdatedEvent)
+@interface.implementer(interfaces.IFieldUpdatedEvent)  # type: ignore
 class FieldUpdatedEvent(object):
 
     def __init__(self, inst, field, old_value, new_value):

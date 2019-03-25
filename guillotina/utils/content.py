@@ -10,6 +10,7 @@ from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.reader import reader
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleMap
@@ -124,7 +125,7 @@ def get_owners(obj: IResource) -> list:
     return owners
 
 
-async def navigate_to(obj: IResource, path: str):
+async def navigate_to(obj: IAsyncContainer, path: str):
     '''
     Get a sub-object.
 

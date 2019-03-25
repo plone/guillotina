@@ -8,10 +8,10 @@ _ = MessageFactory('guillotina')
 class IResourceSerializeToJson(Interface):
     """Adapter to serialize a Resource into a JSON object."""
 
-    def __init__(self, context, request):
+    def __init__(context, request):
         """Adapt context and request."""
 
-    def __call__(self):
+    def __call__():
         """Return the json."""
 
 
@@ -22,10 +22,10 @@ class IResourceSerializeToJsonSummary(Interface):
     contains only the most basic information.
     """
 
-    def __init__(self, context, request):
+    def __init__(context, request):
         """Adapt context and request."""
 
-    def __call__(self):
+    def __call__():
         """Return the json."""
 
 
@@ -36,10 +36,10 @@ class IFactorySerializeToJson(Interface):
     into JSON compatible python data.
     """
 
-    def __init__(self, factory, request):
+    def __init__(factory, request):
         """Adapt field, factory and request."""
 
-    def __call__(self):
+    def __call__():
         """Return JSON compatible python data."""
 
 
@@ -50,20 +50,20 @@ class ISchemaSerializeToJson(Interface):
     into JSON compatible python data.
     """
 
-    def __init__(self, schema, request):
+    def __init__(schema, request):
         """Adapt field, schema and request."""
 
-    def __call__(self):
+    def __call__():
         """Return JSON compatible python data."""
 
 
 class ISchemaFieldSerializeToJson(Interface):
     """Serialize a schema field in JSON."""
 
-    def __init__(self, field, schema, request):
+    def __init__(field, schema, request):
         """Adapt field, schema and request."""
 
-    def __call__(self):
+    def __call__():
         """Return JSON compatible python data."""
 
 

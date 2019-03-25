@@ -13,29 +13,32 @@
 ##############################################################################
 # flake8: noqa
 import unittest
+from zope.interface.interface import InterfaceClass
 
 
 def _makeSchema():
     from zope.interface import Interface
     from guillotina.schema import Bytes
 
-    class ISchemaTest(Interface):
-        title = Bytes(
-            title="Title",
-            description="Title",
-            default=b"",
-            required=True)
-        description = Bytes(
-            title="Description",
-            description="Description",
-            default=b"",
-            required=True)
-        spam = Bytes(
-            title="Spam",
-            description="Spam",
-            default=b"",
-            required=True)
-    return ISchemaTest
+    return InterfaceClass(
+        'ISchemaTest', (Interface,), {
+            'title': Bytes(
+                title="Title",
+                description="Title",
+                default=b"",
+                required=True),
+            'description': Bytes(
+                title="Description",
+                description="Description",
+                default=b"",
+                required=True),
+            'spam': Bytes(
+                title="Spam",
+                description="Spam",
+                default=b"",
+                required=True)
+        }, '', 'guillotina.schema.tests.test_schema'
+    )
 
 
 def _makeDerivedSchema(base=None):
@@ -43,13 +46,14 @@ def _makeDerivedSchema(base=None):
     if base is None:
         base = _makeSchema()
 
-    class ISchemaTestSubclass(base):
-        foo = Bytes(
-            title='Foo',
-            description='Fooness',
-            default=b"",
-            required=False)
-    return ISchemaTestSubclass
+    return InterfaceClass(
+        'ISchemaTestSubclass', (base,), {
+            'foo': Bytes(
+                title='Foo',
+                description='Fooness',
+                default=b"",
+                required=False)
+        }, '', 'guillotina.schema.tests.test_schema')
 
 
 class Test_get_fields(unittest.TestCase):
