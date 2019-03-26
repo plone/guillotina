@@ -170,3 +170,10 @@ async def test_getattr_set_default(container_requester):
     # Assert that obj.__getattr__() returns always same instance of default value
     # for empty fields
     assert id(images1) == id(images2)
+
+
+async def test_getattr_default_factory(container_requester):
+    custom_content = await create_content('Example')
+
+    assert custom_content.default_factory_test == 'foobar'
+    assert custom_content.context_default_factory_test == 'foobar'
