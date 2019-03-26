@@ -156,7 +156,9 @@ class CockroachStorage(pg.PostgresqlStorage):
         try:
             for result in await self.read_conn.fetch(
                     '''SHOW CONSTRAINTS FROM {};'''.format(self._objects_table_name)):
-                if result['Name'] == '{}_parent_id_id_key'.format(self._objects_table_name):
+                result = dict(result)
+                c_name = result.get('Name', result.get('constraint_name'))
+                if c_name == '{}_parent_id_id_key'.format(self._objects_table_name):
                     return True
         except asyncpg.exceptions.UndefinedTableError:
             pass
