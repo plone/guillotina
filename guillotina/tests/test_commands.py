@@ -8,6 +8,9 @@ from guillotina.commands import get_settings
 from guillotina.commands.migrate import MigrateCommand
 from guillotina.commands.run import RunCommand
 from guillotina.commands.vacuum import VacuumCommand
+from guillotina.commands.crypto import CryptoCommand
+import io
+from contextlib import redirect_stdout
 
 
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
@@ -89,3 +92,17 @@ def test_get_settings_with_environment_variables():
     assert settings['foobar'] == 'foobar'
     assert settings['foo']['bar'] == 'foobar'
     assert settings['foo']['bar1']['bar2'] == {'foo': 'bar'}
+
+
+def test_gen_key_command(command_arguments):
+    command_arguments.key_type = 'oct'
+    command_arguments.key_size = 256
+    command = CryptoCommand(command_arguments)
+    settings = testing.get_settings()
+    f = io.StringIO()
+    with redirect_stdout(f):
+        command.run_command(settings=settings)
+    out = f.getvalue()
+    key = json.loads(out)
+    assert 'k' in key
+    assert 'kty' in key

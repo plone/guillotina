@@ -1,4 +1,5 @@
 ---
+debug: true
 databases:
   db:
     storage: postgresql

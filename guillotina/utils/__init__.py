@@ -11,8 +11,9 @@ from .content import iter_databases  # noqa
 from .content import iter_parents  # noqa
 from .content import navigate_to  # noqa
 from .content import valid_id  # noqa
+from .crypto import get_jwk_key  # noqa
+from .crypto import secure_passphrase  # noqa
 from .misc import apply_coroutine  # noqa
-from .misc import clear_conn_statement_cache  # noqa
 from .misc import get_current_request  # noqa
 from .misc import get_random_string  # noqa
 from .misc import get_url  # noqa
