@@ -217,9 +217,10 @@ class CockroachDatabaseManager(PostgresqlDatabaseManager):
         conn = await self.get_connection()
         try:
             result = await conn.fetch('''SHOW DATABASES;''')
-            return [item['Database'] for item in result
-                    if item['Database'] not in ('system', 'pg_catalog',
-                                                'information_schema', 'crdb_internal')]
+            return [item.get('Database', item.get('database_name')) for item in result
+                    if item.get('Database', item.get('database_name')) not in (
+                        'defaultdb', 'system', 'pg_catalog',
+                        'information_schema', 'crdb_internal')]
         finally:
             await conn.close()
 
