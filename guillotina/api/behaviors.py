@@ -108,7 +108,7 @@ async def delete_behavior(context, behavior):
     if behavior_class is not None:
         if behavior_class in factory.behaviors:
             return Response(content={
-                'reason': 'Not not remove this type of behavior'
+                'reason': 'Behaviors defined on this type must be present and cannot be dynamically removed'
             }, status=412)
     if behavior not in context.__behaviors__:
         return Response(content={
