@@ -1,6 +1,17 @@
 4.5.10 (unreleased)
 -------------------
 
+Fixes:
+
+- Fix to work with cockroach db >= 2.1
+  [vangheem]
+
+- Fix use of default factory for default value on content
+  [vangheem]
+
+
+New:
+
 - Provide warning when using insecure jwt secret in production
   [vangheem]
 
@@ -8,16 +19,7 @@
   and jwt secrets
   [vangheem]
 
-- Remove `utils.clear_conn_statement_cache`
-  [vangheem]
-
 - Give warning when generating jwk key
-  [vangheem]
-
-- Lazy load dynamically generated jwk key
-  [vangheem]
-
-- Fix use of default factory for default value on content
   [vangheem]
 
 - Fix jwt implementation to use customized algorithm for encoding
@@ -28,6 +30,14 @@
 
 - Fix error message when trying to delete a concrete behavior
   [marcus29200]
+
+Changes:
+
+- Remove `utils.clear_conn_statement_cache`
+  [vangheem]
+
+- Lazy load dynamically generated jwk key
+  [vangheem]
 
 
 4.5.9 (2019-03-18)
