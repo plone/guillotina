@@ -307,3 +307,10 @@ async def test_get_behavior(container_requester):
         assert behavior is not None
 
         await request._tm.abort(txn=txn)
+
+
+def test_bad_passphrase():
+    assert utils.secure_passphrase('foobar agian something good here!')
+    assert not utils.secure_passphrase('secret')
+    assert not utils.secure_passphrase('secret123')
+    assert not utils.secure_passphrase('DKK@7328*!&@@')

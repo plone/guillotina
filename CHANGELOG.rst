@@ -1,6 +1,22 @@
 4.5.10 (unreleased)
 -------------------
 
+- Provide warning when using insecure jwt secret in production
+  [vangheem]
+
+- Provide new `gen-key` for generating secure jwk keys
+  and jwt secrets
+  [vangheem]
+
+- Remove `utils.clear_conn_statement_cache`
+  [vangheem]
+
+- Give warning when generating jwk key
+  [vangheem]
+
+- Lazy load dynamically generated jwk key
+  [vangheem]
+
 - Fix jwt implementation to use customized algorithm for encoding
   [vangheem]
 

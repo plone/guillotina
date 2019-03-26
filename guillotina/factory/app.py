@@ -34,11 +34,8 @@ from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
-
-try:
-    from jwcrypto import jwk
-except ImportError:
-    pass
+from guillotina.utils import secure_passphrase
+from jwcrypto import jwk
 
 
 logger = glogging.getLogger('guillotina')
@@ -271,15 +268,26 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     root.set_root_user(app_settings['root_user'])
 
-    if jwk is not None and not app_settings.get('jwk'):
-        key = jwk.JWK.generate(kty='oct', size=256)
-        app_settings['jwk'] = key
-    elif jwk is not None and app_settings.get('jwk') and\
+    if app_settings.get('jwk') and\
             app_settings.get('jwk').get('k') and\
             app_settings.get('jwk').get('kty'):
         key = jwk.JWK.from_json(json.dumps(app_settings.get('jwk')))
         app_settings['jwk'] = key
         # {"k":"QqzzWH1tYqQO48IDvW7VH7gvJz89Ita7G6APhV-uLMo","kty":"oct"}
+
+    if not app_settings.get('debug') and app_settings['jwt'].get('secret'):
+        # validate secret
+        secret = app_settings['jwt']['secret']
+        if secret == 'secret':
+            logger.warning(
+                'You are using a very insecure secret key in production mode. '
+                'It is strongly advised that you provide a better value for '
+                '`jwt.secret` in your config.')
+        elif not secure_passphrase(app_settings['jwt']['secret']):
+            logger.warning(
+                'You are using a insecure secret key in production mode. '
+                'It is recommended that you provide a more complex value for '
+                '`jwt.secret` in your config.')
 
     # Set router root
     server_app.router.set_root(root)

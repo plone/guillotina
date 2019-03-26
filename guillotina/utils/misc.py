@@ -208,14 +208,6 @@ def deprecated(message):
     return deprecated_decorator
 
 
-@deprecated('Due to implementation details of asyncpg prepared statement cache '
-            'and invalidation issues, this method is considered harmful as it '
-            'can cause PostgreSQL memory issues. The implementation has been '
-            'removed and the function will be removed in Guillotina 4.3.0')
-def clear_conn_statement_cache(conn):
-    pass
-
-
 def list_or_dict_items(val):
     if isinstance(val, list):
         new_val = []

@@ -1,7 +1,10 @@
+import time
+from urllib import parse
+
+import aiohttp
+import ujson
 from aiohttp import web
 from guillotina import configure
-from jwcrypto import jwe
-from jwcrypto.common import json_encode
 from guillotina import logger
 from guillotina import routes
 from guillotina._settings import app_settings
@@ -11,17 +14,15 @@ from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.interfaces import IAioHTTPResponse
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
-
-import aiohttp
-import time
-import ujson
-from urllib import parse
+from guillotina.utils import get_jwk_key
+from jwcrypto import jwe
+from jwcrypto.common import json_encode
 
 
 @configure.service(
@@ -74,7 +75,7 @@ class WebsocketGetToken(Service):
             json_encode({
                 "alg": "A256KW",
                 "enc": "A256CBC-HS512"}))
-        jwetoken.add_recipient(app_settings['jwk'])
+        jwetoken.add_recipient(get_jwk_key())
         token = jwetoken.serialize(compact=True)
         return token
 

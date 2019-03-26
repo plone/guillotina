@@ -1,10 +1,10 @@
-from jwcrypto import jwe
-from guillotina._settings import app_settings
-
 import base64
-import logging
 import json
+import logging
 import time
+
+from guillotina.utils import get_jwk_key
+from jwcrypto import jwe
 
 
 logger = logging.getLogger('guillotina')
@@ -49,7 +49,7 @@ class WSTokenAuthPolicy(BasePolicy):
             try:
                 jwetoken = jwe.JWE()
                 jwetoken.deserialize(jwt_token.decode('utf-8'))
-                jwetoken.decrypt(app_settings['jwk'])
+                jwetoken.decrypt(get_jwk_key())
                 payload = jwetoken.payload
             except jwe.InvalidJWEOperation:
                 logger.warn(f'Invalid operation', exc_info=True)
