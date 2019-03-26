@@ -1,5 +1,6 @@
 # this is for testing.py, do not import into other modules
 import json
+from guillotina.schema.interfaces import IContextAwareDefaultFactory
 
 from guillotina import configure
 from guillotina import schema
@@ -37,6 +38,13 @@ TERM_SCHEMA = json.dumps({
 })
 
 
+@implementer(IContextAwareDefaultFactory)
+class ContextDefaultFactory:
+
+    def __call__(self, context):
+        return 'foobar'
+
+
 class IExample(IResource):
 
     metadata('categories')
@@ -64,6 +72,14 @@ class IExample(IResource):
     write_protected = schema.TextLine(
         title='Write protected field',
         required=False,
+    )
+
+    default_factory_test = schema.Text(
+        defaultFactory=lambda: 'foobar'
+    )
+
+    context_default_factory_test = schema.Text(
+        defaultFactory=ContextDefaultFactory()
     )
 
 

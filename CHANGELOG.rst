@@ -1,6 +1,9 @@
 4.5.10 (unreleased)
 -------------------
 
+- Fix use of default factory for default value on content
+  [vangheem]
+
 - Fix jwt implementation to use customized algorithm for encoding
   [vangheem]
 

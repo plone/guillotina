@@ -129,11 +129,12 @@ def _default_from_schema(context, schema, fieldname):
     field = schema.get(fieldname, None)
     if field is None:
         return _marker
-    if IContextAwareDefaultFactory.providedBy(
-            getattr(field, 'defaultFactory', None)
-    ):
-        bound = field.bind(context)
-        return deepcopy(bound.default)
+    df = getattr(field, 'defaultFactory', None)
+    if df is not None:
+        if IContextAwareDefaultFactory.providedBy(df):
+            return deepcopy(field.defaultFactory(context))
+        else:
+            return deepcopy(field.defaultFactory())
     else:
         return deepcopy(field.default)
     return _marker
