@@ -7,6 +7,9 @@
 - Fix jwe implementation
   [bloodbare]
 
+- Fix error message when trying to delete a concrete behavior
+  [marcus29200]
+
 
 4.5.9 (2019-03-18)
 ------------------
