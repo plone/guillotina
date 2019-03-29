@@ -161,7 +161,12 @@ class ILocation(Interface):
 
 class IResource(ILocation):
 
+    __acl__ = Attribute('')
+    __gannotations__ = Attribute('')
+
     id = Attribute('')
+    creators = Attribute('')
+    contributors = Attribute('')
     type_name = guillotina.schema.TextLine(readonly=True)
 
     title = guillotina.schema.TextLine(
@@ -194,6 +199,11 @@ class IResource(ILocation):
         default=frozenset({}),
         readonly=True
     )
+
+    def _p_register():
+        '''
+        Register object
+        '''
 
 
 class IResourceFactory(IFactory):
@@ -249,6 +259,11 @@ class IAnnotations(Interface):
     async def async_get(name):
         '''
         Get annotation
+        '''
+
+    async def async_set(name, value):
+        '''
+        Set annotation
         '''
 
 

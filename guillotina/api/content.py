@@ -3,7 +3,6 @@ from guillotina import error_reasons
 from guillotina import security
 from guillotina._cache import FACTORY_CACHE
 from guillotina._settings import app_settings
-from guillotina.annotations import AnnotationData
 from guillotina.api.service import Service
 from guillotina.component import get_multi_adapter
 from guillotina.component import get_utility
@@ -13,16 +12,15 @@ from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
+from guillotina import content
 from guillotina.event import notify
-from guillotina.events import BeforeObjectMovedEvent
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
-from guillotina.events import ObjectDuplicatedEvent
 from guillotina.events import ObjectModifiedEvent
-from guillotina.events import ObjectMovedEvent
 from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
+from guillotina.exceptions import ComponentLookupError
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAbsoluteURL
@@ -58,9 +56,7 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_object_by_oid
 from guillotina.utils import get_object_url
 from guillotina.utils import iter_parents
-from guillotina.utils import navigate_to
 from guillotina.utils import valid_id
-from guillotina.exceptions import ComponentLookupError
 
 
 def get_content_json_schema_responses(content):
@@ -597,53 +593,15 @@ async def move(context, request):
         data = await request.json()
     except Exception:
         data = {}
-    destination = data.get('destination')
-    if destination is None:
-        destination_ob = context.__parent__
-    else:
-        try:
-            destination_ob = await navigate_to(request.container, destination)
-        except KeyError:
-            destination_ob = None
 
-    if destination_ob is None:
-        raise PreconditionFailed(context, 'Could not find destination object')
-    old_id = context.id
-    if 'new_id' in data:
-        new_id = data['new_id']
-        context.id = context.__name__ = new_id
-    else:
-        new_id = context.id
-
-    security = IInteraction(request)
-    if not security.check_permission('guillotina.AddContent', destination_ob):
-        raise PreconditionFailed(
-            context, 'You do not have permission to add content to the '
-                     'destination object')
-
-    if await destination_ob.async_contains(new_id):
-        raise PreconditionFailed(
-            context, f'Destination already has object with the id {new_id}')
-
-    original_parent = context.__parent__
-
-    txn = get_transaction(request)
-    cache_keys = txn._cache.get_cache_keys(context, 'deleted')
-
-    data['id'] = new_id
-    await notify(
-        BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,
-                               new_id, payload=data))
-
-    context.__parent__ = destination_ob
-    context._p_register()
-
-    await notify(
-        ObjectMovedEvent(context, original_parent, old_id, destination_ob,
-                         new_id, payload=data))
-
-    cache_keys += txn._cache.get_cache_keys(context, 'added')
-    await txn._cache.delete_all(cache_keys)
+    try:
+        await content.move(context, **data)
+    except TypeError:
+        raise ErrorResponse(
+            'RequiredParam',
+            _("Invalid params"),
+            reason=error_reasons.REQUIRED_PARAM_MISSING,
+            status=412)
 
     absolute_url = query_multi_adapter((context, request), IAbsoluteURL)
     return {
@@ -684,60 +642,15 @@ async def duplicate(context, request):
         data = await request.json()
     except Exception:
         data = {}
-    destination = data.get('destination')
-    if destination is not None:
-        destination_ob = await navigate_to(request.container, destination)
-        if destination_ob is None:
-            raise PreconditionFailed(
-                context, 'Could not find destination object',)
-    else:
-        destination_ob = context.__parent__
 
-    security = IInteraction(request)
-    if not security.check_permission('guillotina.AddContent', destination_ob):
-        raise PreconditionFailed(
-            context, 'You do not have permission to add content to '
-                     'the destination object',)
-
-    if 'new_id' in data:
-        new_id = data['new_id']
-        if await destination_ob.async_contains(new_id):
-            raise PreconditionFailed(
-                context, f'Destination already has object with the id {new_id}')
-    else:
-        count = 1
-        new_id = f'{context.id}-duplicate-{count}'
-        while await destination_ob.async_contains(new_id):
-            count += 1
-            new_id = f'{context.id}-duplicate-{count}'
-
-    new_obj = await create_content_in_container(
-        destination_ob, context.type_name, new_id, id=new_id,
-        creators=context.creators, contributors=context.contributors)
-
-    for key in context.__dict__.keys():
-        if key.startswith('__') or key.startswith('_BaseObject'):
-            continue
-        if key in ('id',):
-            continue
-        new_obj.__dict__[key] = context.__dict__[key]
-    new_obj.__acl__ = context.__acl__
-    for behavior in context.__behaviors__:
-        new_obj.add_behavior(behavior)
-
-    # need to copy annotation data as well...
-    # load all annotations for context
-    [b for b in await get_all_behaviors(context, load=True)]
-    annotations_container = IAnnotations(new_obj)
-    for anno_id, anno_data in context.__gannotations__.items():
-        new_anno_data = AnnotationData()
-        for key, value in anno_data.items():
-            new_anno_data[key] = value
-        await annotations_container.async_set(anno_id, new_anno_data)
-
-    data['id'] = new_id
-    await notify(
-        ObjectDuplicatedEvent(new_obj, context, destination_ob, new_id, payload=data))
+    try:
+        new_obj = await content.duplicate(context, **data)
+    except TypeError:
+        raise ErrorResponse(
+            'RequiredParam',
+            _("Invalid params"),
+            reason=error_reasons.REQUIRED_PARAM_MISSING,
+            status=412)
 
     get = DefaultGET(new_obj, request)
     return await get()
