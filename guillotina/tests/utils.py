@@ -6,6 +6,7 @@ from aiohttp.http import HttpVersion
 from aiohttp.http import RawRequestMessage
 from aiohttp.web import UrlMappingMatchInfo
 from contextlib import contextmanager
+from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.behaviors import apply_markers
 from guillotina.content import Item
@@ -19,6 +20,7 @@ from unittest import mock
 from yarl import URL
 from zope.interface import alsoProvides
 from zope.interface import implementer
+
 import aiotask_context
 import json
 import uuid
@@ -100,6 +102,8 @@ class ContainerRequesterAsyncContextManager:
         self.requester = await self.get_requester()
         resp, status = await self.requester('POST', '/db', data=json.dumps({
             "@type": "Container",
+            # to be able to register for tests
+            "@addons": app_settings.get('__test_addons__') or [],
             "title": "Guillotina Container",
             "id": "guillotina",
             "description": "Description Guillotina Container"

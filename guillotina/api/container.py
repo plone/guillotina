@@ -1,16 +1,22 @@
+from guillotina import addons
 from guillotina import app_settings
 from guillotina import configure
+from guillotina import error_reasons
 from guillotina.api import content
 from guillotina.api.service import Service
+from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.content import create_content
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
+from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.registry import REGISTRY_DATA_KEY
+from guillotina.response import ErrorResponse
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPNotImplemented
@@ -55,7 +61,12 @@ class DefaultGET(Service):
         "name": "body",
         "in": "body",
         "schema": {
-            "$ref": "#/definitions/BaseResource"
+            "$ref": "#/definitions/BaseResource",
+            "properties": {
+                "@addons": {
+                    "type": "string"
+                }
+            }
         }
     }],
     responses={
@@ -114,9 +125,18 @@ class DefaultPOST(Service):
 
         # Local Roles assign owner as the creator user
         roleperm = IPrincipalRoleManager(container)
-        roleperm.assign_role_to_principal(
-            'guillotina.Owner',
-            user)
+        roleperm.assign_role_to_principal('guillotina.Owner', user)
+
+        annotations_container = get_adapter(container, IAnnotations)
+        self.request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
+
+        for addon in data.get('@addons') or []:
+            if addon not in app_settings['available_addons']:
+                return ErrorResponse(
+                    'RequiredParam',
+                    "Property '@addons' must refer to a valid addon",
+                    status=412, reason=error_reasons.INVALID_ID)
+            await addons.install(container, addon)
 
         await notify(ObjectAddedEvent(container, self.context, container.__name__,
                                       payload=data))
