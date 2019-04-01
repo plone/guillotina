@@ -124,8 +124,6 @@ async def test_create_container_with_addons(container_requester):
             })
         )
 
-        assert status == 201
-
         response, status = await requester(
             'GET', '/db/foobar/@addons')
         assert status == 200
