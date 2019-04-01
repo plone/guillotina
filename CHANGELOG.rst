@@ -1,4 +1,4 @@
-4.5.11 (unreleased)
+4.5.11 (2019-04-01)
 -------------------
 
 - Provide utilities for move and duplicate
