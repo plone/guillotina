@@ -1,7 +1,8 @@
 4.5.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide utilities for move and duplicate
+  [vangheem]
 
 
 4.5.10 (2019-03-28)

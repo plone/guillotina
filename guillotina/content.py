@@ -7,6 +7,7 @@ from guillotina._cache import FACTORY_CACHE
 from guillotina._cache import PERMISSIONS_CACHE
 from guillotina._cache import SCHEMA_CACHE
 from guillotina._settings import app_settings
+from guillotina.annotations import AnnotationData
 from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.behaviors import apply_markers
@@ -18,11 +19,15 @@ from guillotina.component.factory import Factory
 from guillotina.db import oid
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
+from guillotina.events import BeforeObjectMovedEvent
+from guillotina.events import ObjectDuplicatedEvent
 from guillotina.events import ObjectLoadedEvent
+from guillotina.events import ObjectMovedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
+from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
@@ -50,12 +55,14 @@ from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
+from guillotina.utils import navigate_to
 from typing import AsyncIterator
 from typing import FrozenSet
 from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Tuple
+from typing import Union
 from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.interface import Interface
@@ -648,3 +655,132 @@ async def get_all_behaviors(content, create=False, load=True) -> list:
                 await behavior.load(create=create)
         behaviors.append((behavior_schema, behavior))
     return behaviors
+
+
+async def duplicate(context: IResource,
+                    destination: Union[IResource, str]=None,
+                    new_id: str=None, check_permission: bool=True) -> IResource:
+    if destination is not None:
+        if isinstance(destination, str):
+            request = get_current_request()
+            destination_ob = await navigate_to(request.container, destination)
+        else:
+            destination_ob = destination
+
+        if destination_ob is None:
+            raise PreconditionFailed(
+                context, 'Could not find destination object',)
+    else:
+        destination_ob = context.__parent__
+
+    if check_permission:
+        request = get_current_request()
+        security = IInteraction(request)
+        if not security.check_permission('guillotina.AddContent', destination_ob):
+            raise PreconditionFailed(
+                context, 'You do not have permission to add content to '
+                         'the destination object',)
+
+    if new_id is not None:
+        if await destination_ob.async_contains(new_id):
+            raise PreconditionFailed(
+                context, f'Destination already has object with the id {new_id}')
+    else:
+        count = 1
+        new_id = f'{context.id}-duplicate-{count}'
+        while await destination_ob.async_contains(new_id):
+            count += 1
+            new_id = f'{context.id}-duplicate-{count}'
+
+    from guillotina.content import create_content_in_container
+    new_obj = await create_content_in_container(
+        destination_ob, context.type_name, new_id, id=new_id,
+        creators=context.creators, contributors=context.contributors)
+
+    for key in context.__dict__.keys():
+        if key.startswith('__') or key.startswith('_BaseObject'):
+            continue
+        if key in ('id',):
+            continue
+        new_obj.__dict__[key] = context.__dict__[key]
+    new_obj.__acl__ = context.__acl__
+    for behavior in context.__behaviors__:
+        new_obj.add_behavior(behavior)
+
+    # need to copy annotation data as well...
+    # load all annotations for context
+    [b for b in await get_all_behaviors(context, load=True)]
+    annotations_container = IAnnotations(new_obj)
+    for anno_id, anno_data in context.__gannotations__.items():
+        new_anno_data = AnnotationData()
+        for key, value in anno_data.items():
+            new_anno_data[key] = value
+        await annotations_container.async_set(anno_id, new_anno_data)
+
+    await notify(
+        ObjectDuplicatedEvent(new_obj, context, destination_ob, new_id, payload={
+            'id': new_id,
+            'destination': destination,
+        }))
+    return new_obj
+
+
+async def move(context: IResource,
+               destination: Union[IResource, str]=None,
+               new_id: str=None, check_permission: bool=True) -> None:
+    if destination is None:
+        destination_ob = context.__parent__
+    else:
+        if isinstance(destination, str):
+            request = get_current_request()
+            try:
+                destination_ob = await navigate_to(request.container, destination)
+            except KeyError:
+                destination_ob = None
+        else:
+            destination_ob = destination
+
+    if destination_ob is None:
+        raise PreconditionFailed(context, 'Could not find destination object')
+    old_id = context.id
+    if new_id is not None:
+        context.id = context.__name__ = new_id
+    else:
+        new_id = context.id
+
+    if check_permission:
+        request = get_current_request()
+        security = IInteraction(request)
+        if not security.check_permission('guillotina.AddContent', destination_ob):
+            raise PreconditionFailed(
+                context, 'You do not have permission to add content to the '
+                         'destination object')
+
+    if await destination_ob.async_contains(new_id):
+        raise PreconditionFailed(
+            context, f'Destination already has object with the id {new_id}')
+
+    original_parent = context.__parent__
+
+    txn = get_transaction(request)
+    cache_keys = txn._cache.get_cache_keys(context, 'deleted')
+
+    await notify(
+        BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,
+                               new_id, payload={
+                                   'id': new_id,
+                                   'destination': destination
+                               }))
+
+    context.__parent__ = destination_ob
+    context._p_register()
+
+    await notify(
+        ObjectMovedEvent(context, original_parent, old_id, destination_ob,
+                         new_id, payload={
+                             'id': new_id,
+                             'destination': destination
+                         }))
+
+    cache_keys += txn._cache.get_cache_keys(context, 'added')
+    await txn._cache.delete_all(cache_keys)
