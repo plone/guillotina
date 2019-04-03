@@ -101,3 +101,15 @@ Created objects set the `guillotina.Owner` role to the user who created it.
 There is a `root` user who has permissions to all containers:
 
 DB/APP permissions are defined on factory/content.py
+
+The definition of the `root` user can be found on
+auth/users.py. Notice how it is assigned to the `"Managers"` group by
+default, which in turn has the following hardcoded roles:
+
+ * guillotina.ContainerAdmin
+ * guillotina.ContainerDeleter
+ * guillotina.Owner
+ * guillotina.Member
+ * guillotina.Manager
+
+Thus, these are the default roles for the `root` user.

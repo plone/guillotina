@@ -4,6 +4,9 @@
 - Be able to create container with array of `@addons`.
   [vangheem]
 
+- Fix Command.__run() not waiting for all aio tasks to finish
+  [masipcat]
+
 
 4.5.11 (2019-04-01)
 -------------------
