@@ -1,7 +1,8 @@
 4.5.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to create container with array of `@addons`.
+  [vangheem]
 
 
 4.5.11 (2019-04-01)
