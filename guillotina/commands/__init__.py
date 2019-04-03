@@ -212,7 +212,7 @@ class Command(object):
                 try:
                     await asyncio.wait_for(asyncio.shield(task), 1)
                 except asyncio.TimeoutError:
-                    pass
+                    logger.warning(f'Timeout for {task._coro.__qualname__}')
             except (AttributeError, KeyError):
                 pass
 
