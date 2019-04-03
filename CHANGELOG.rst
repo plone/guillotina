@@ -1,7 +1,8 @@
 4.5.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix Command.__run() not waiting for all aio tasks to finish
+  [masipcat]
 
 
 4.5.11 (2019-04-01)
