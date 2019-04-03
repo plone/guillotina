@@ -208,13 +208,11 @@ class Command(object):
             if task.done():
                 continue
             try:
-                if task._coro.__qualname__ in ('Pool.release',):
-                    # put known tasks that should be waited on here...
-                    logger.info(f'Waiting for {task._coro.__qualname__} to finish')
-                    try:
-                        await asyncio.wait_for(asyncio.shield(task), 1)
-                    except asyncio.TimeoutError:
-                        pass
+                logger.info(f'Waiting for {task._coro.__qualname__} to finish')
+                try:
+                    await asyncio.wait_for(asyncio.shield(task), 1)
+                except asyncio.TimeoutError:
+                    pass
             except (AttributeError, KeyError):
                 pass
 
