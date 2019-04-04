@@ -1,11 +1,10 @@
-FROM python:3.6.3-slim
+FROM python:3.7.3-slim
 MAINTAINER Plone Community
 
-# Update packages
-RUN apt-get update -y
-
 # Install Python Setuptools
-RUN apt-get install -y locales git-core gcc g++ netcat libxml2-dev libxslt-dev libz-dev
+RUN apt-get update -y && \
+    apt-get install -y locales git-core gcc g++ netcat libxml2-dev \
+    libxslt-dev libz-dev python3-dev
 
 RUN mkdir /app
 
