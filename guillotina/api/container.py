@@ -15,7 +15,6 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
-from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.response import ErrorResponse
@@ -25,7 +24,6 @@ from guillotina.response import HTTPNotImplemented
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
-from typing import List
 from typing import Optional
 
 import posixpath
@@ -174,7 +172,7 @@ class DefaultPOST(Service):
             'title': data['title']
         }
         headers = {
-            'Location': posixpath.join(self.request.path, data['id'])
+            'Location': posixpath.join(self.request.path, container.id)
         }
 
         return Response(content=resp, headers=headers)
