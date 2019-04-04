@@ -1,7 +1,8 @@
 4.5.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix docker build
+  [vangheem]
 
 
 4.5.12 (2019-04-03)
