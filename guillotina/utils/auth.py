@@ -1,14 +1,17 @@
+from .misc import get_current_request
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRequest
 from typing import Optional
 
 
-def get_authenticated_user(request: IRequest) -> Optional[IPrincipal]:
+def get_authenticated_user(request: Optional[IRequest] = None) -> Optional[IPrincipal]:
     """
     Get the currently authenticated user
 
     :param request: request the user is authenticated against
     """
+    if request is None:
+        request = get_current_request()
     if (hasattr(request, 'security') and
             hasattr(request.security, 'participations') and
             len(request.security.participations) > 0):
@@ -17,7 +20,7 @@ def get_authenticated_user(request: IRequest) -> Optional[IPrincipal]:
         return None
 
 
-def get_authenticated_user_id(request: IRequest) -> Optional[str]:
+def get_authenticated_user_id(request: Optional[IRequest] = None) -> Optional[str]:
     """
     Get the currently authenticated user id
 
