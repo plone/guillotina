@@ -1,6 +1,9 @@
 4.5.13 (unreleased)
 -------------------
 
+- Provide `api.container.create_container` function
+  [vangheem]
+
 - Fix docker build
   [vangheem]
 
