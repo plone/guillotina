@@ -1,4 +1,4 @@
-4.5.12 (unreleased)
+4.5.12 (2019-04-03)
 -------------------
 
 - Be able to create container with array of `@addons`.
