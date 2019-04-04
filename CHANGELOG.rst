@@ -1,4 +1,4 @@
-4.5.13 (unreleased)
+4.5.13 (2019-04-04)
 -------------------
 
 - Provide `api.container.create_container` function
