@@ -1,14 +1,16 @@
-import json
-
 from guillotina import utils
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import create_content
+from guillotina.tests.utils import get_db
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import get_root
+from guillotina.tests.utils import login
 from guillotina.utils import get_behavior
 from guillotina.utils.navigator import Navigator
+
+import json
 
 
 def test_module_resolve_path():
@@ -93,6 +95,13 @@ def test_get_owners(dummy_guillotina):
     assert utils.get_owners(content) == ['foobar']
     roleperm.assign_role_to_principal('guillotina.Owner', 'foobar2')
     assert utils.get_owners(content) == ['foobar', 'foobar2']
+
+
+def test_get_authenticated_user_without_request(dummy_guillotina):
+    db = get_db(dummy_guillotina, 'db')
+    request = get_mocked_request(db)
+    login(request)
+    assert utils.get_authenticated_user() is not None
 
 
 def _test_empty_func():

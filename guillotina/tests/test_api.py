@@ -130,6 +130,20 @@ async def test_create_container_with_addons(container_requester):
         assert 'testaddon' in response['installed']
 
 
+async def test_create_container_with_bad_addons(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db',
+            data=json.dumps({
+                "@type": "Container",
+                "@addons": ['testaddoninvalid'],
+                "title": "foobar",
+                "id": "foobar",
+            })
+        )
+        assert status == 412
+
+
 async def test_create_content(container_requester):
     async with container_requester as requester:
         _, status = await requester(
