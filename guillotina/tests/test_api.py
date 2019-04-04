@@ -112,6 +112,24 @@ async def test_get_registry_value(container_requester):
         assert response['value'] == []
 
 
+async def test_create_container_with_addons(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db',
+            data=json.dumps({
+                "@type": "Container",
+                "@addons": ['testaddon'],
+                "title": "foobar",
+                "id": "foobar",
+            })
+        )
+
+        response, status = await requester(
+            'GET', '/db/foobar/@addons')
+        assert status == 200
+        assert 'testaddon' in response['installed']
+
+
 async def test_create_content(container_requester):
     async with container_requester as requester:
         _, status = await requester(

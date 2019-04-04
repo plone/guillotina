@@ -1,6 +1,9 @@
 4.5.12 (unreleased)
 -------------------
 
+- Be able to create container with array of `@addons`.
+  [vangheem]
+
 - Fix Command.__run() not waiting for all aio tasks to finish
   [masipcat]
 
