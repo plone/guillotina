@@ -23,6 +23,7 @@ from guillotina.response import HTTPNotImplemented
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
+from typing import Optional
 
 import posixpath
 
@@ -51,6 +52,34 @@ class DefaultGET(Service):
             (self.context, self.request),
             IResourceSerializeToJson)
         return await serializer()
+
+
+async def create_container(parent: IDatabase, container_id: str,
+                           container_type: str='Container',
+                           owner_id: Optional[str]=None,
+                           emit_events: bool=True, **data):
+    container = await create_content(
+        container_type, id=container_id,
+        **data)
+
+    # Special case we don't want the parent pointer
+    container.__name__ = container_id
+
+    await parent.async_set(container_id, container)
+    await container.install()
+
+    # Local Roles assign owner as the creator user
+    if owner_id is not None:
+        roleperm = IPrincipalRoleManager(container)
+        roleperm.assign_role_to_principal('guillotina.Owner', owner_id)
+
+    if emit_events:
+        await notify(ObjectAddedEvent(
+            container, parent, container.__name__, payload={
+                'id': container.id,
+                **data
+            }))
+    return container
 
 
 @configure.service(
@@ -106,48 +135,37 @@ class DefaultPOST(Service):
                 'message': 'Container with id already exists'
             })
 
-        container = await create_content(
-            data['@type'],
-            id=data['id'],
-            title=data['title'],
-            description=data['description'])
-
-        # Special case we don't want the parent pointer
-        container.__name__ = data['id']
-
-        await self.context.async_set(data['id'], container)
-        await container.install()
-
-        self.request._container_id = container.__name__
-        self.request.container = container
-
-        user = get_authenticated_user_id(self.request)
-
-        # Local Roles assign owner as the creator user
-        roleperm = IPrincipalRoleManager(container)
-        roleperm.assign_role_to_principal('guillotina.Owner', user)
-
-        annotations_container = get_adapter(container, IAnnotations)
-        self.request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
-
-        for addon in data.get('@addons') or []:
+        install_addons = data.pop('@addons', None) or []
+        for addon in install_addons:
+            # validate addon list
             if addon not in app_settings['available_addons']:
                 return ErrorResponse(
                     'RequiredParam',
                     "Property '@addons' must refer to a valid addon",
                     status=412, reason=error_reasons.INVALID_ID)
+
+        owner_id = get_authenticated_user_id(self.request)
+
+        container = await create_container(
+            self.context, data.pop('id'),
+            container_type=data.pop('@type'),
+            owner_id=owner_id, **data)
+        self.request._container_id = container.__name__
+        self.request.container = container
+
+        annotations_container = get_adapter(container, IAnnotations)
+        self.request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
+
+        for addon in install_addons:
             await addons.install(container, addon)
 
-        await notify(ObjectAddedEvent(container, self.context, container.__name__,
-                                      payload=data))
-
         resp = {
-            '@type': data['@type'],
-            'id': data['id'],
+            '@type': container.type_name,
+            'id': container.id,
             'title': data['title']
         }
         headers = {
-            'Location': posixpath.join(self.request.path, data['id'])
+            'Location': posixpath.join(self.request.path, container.id)
         }
 
         return Response(content=resp, headers=headers)

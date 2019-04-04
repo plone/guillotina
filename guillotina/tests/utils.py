@@ -26,6 +26,10 @@ import json
 import uuid
 
 
+def get_db(app, db_id):
+    return app.root[db_id]
+
+
 def get_mocked_request(db=None, method='POST', path='/', headers={}):
     request = make_mocked_request(method, path, headers=headers)
     request._futures = {}
@@ -49,19 +53,20 @@ def login(request, user=RootUser('foobar')):
     request._cache_groups = {}
 
 
-async def get_root(request):
-    async with managed_transaction(request=request):
-        return await request._tm.get_root()
+async def get_root(request=None, tm=None):
+    async with managed_transaction(request=request, tm=tm) as txn:
+        return await txn.manager.get_root()
 
 
-async def get_container(requester=None, request=None):
-    if request is None:
+async def get_container(requester=None, request=None, tm=None):
+    if request is None and requester is not None:
         request = get_mocked_request(requester.db)
-    root = await get_root(request)
-    async with managed_transaction(request=request):
+    root = await get_root(request, tm)
+    async with managed_transaction(request=request, tm=tm):
         container = await root.async_get('guillotina')
-        request._container_id = container.id
-        request.container = container
+        if request is not None:
+            request._container_id = container.id
+            request.container = container
         return container
 
 
