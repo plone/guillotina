@@ -9,7 +9,6 @@ from guillotina.component import get_multi_adapter
 from guillotina.content import create_content
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
-from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
