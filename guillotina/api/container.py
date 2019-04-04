@@ -69,16 +69,10 @@ async def create_container(parent: IDatabase, container_id: str,
     await parent.async_set(container_id, container)
     await container.install()
 
-    if owner_id is None:
-        try:
-            owner_id = get_authenticated_user_id()
-        except RequestNotFound:
-            # fallback to root user as the owner
-            owner_id = 'root'
-
     # Local Roles assign owner as the creator user
-    roleperm = IPrincipalRoleManager(container)
-    roleperm.assign_role_to_principal('guillotina.Owner', owner_id)
+    if owner_id is not None:
+        roleperm = IPrincipalRoleManager(container)
+        roleperm.assign_role_to_principal('guillotina.Owner', owner_id)
 
     if emit_events:
         await notify(ObjectAddedEvent(
@@ -151,12 +145,12 @@ class DefaultPOST(Service):
                     "Property '@addons' must refer to a valid addon",
                     status=412, reason=error_reasons.INVALID_ID)
 
+        owner_id = get_authenticated_user_id(self.request)
+
         container = await create_container(
             self.context, data.pop('id'),
             container_type=data.pop('@type'),
-            request=self.request,
-            installed_addons=data.pop('@addons', []) or [],
-            **data)
+            owner_id=owner_id, **data)
         self.request._container_id = container.__name__
         self.request.container = container
 
