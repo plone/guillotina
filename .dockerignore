@@ -4,3 +4,9 @@ include/*
 build/*
 eggs/*
 parts/*
+docs/*
+LICENSE
+docker-compose.yml
+CODEOWNERS
+docker_push
+Makefile

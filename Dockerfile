@@ -1,5 +1,12 @@
 FROM python:3.7.3-slim
-MAINTAINER Plone Community
+
+LABEL name="Guillotina" \
+    description="The Python AsyncIO REST API Framework" \
+    maintainer="Plone Community"
+
+ENV LANG C.UTF-8
+ENV LANGUAGE C.UTF-8
+ENV LC_ALL C.UTF-8
 
 # Install Python Setuptools
 RUN apt-get update -y && \
@@ -10,10 +17,6 @@ RUN mkdir /app
 
 COPY requirements.txt /requirements.txt
 COPY VERSION /VERSION
-
-ENV LANG C.UTF-8
-ENV LANGUAGE C.UTF-8
-ENV LC_ALL C.UTF-8
 
 # Install buildout
 RUN pip install -r /requirements.txt
