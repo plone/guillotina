@@ -1,0 +1,781 @@
+CHANGELOG
+=========
+
+
+2.5.12 (2018-04-02)
+-------------------
+
+- Do not swallow any exceptions on commit.
+  [vangheem]
+
+
+2.5.11 (2018-03-28)
+-------------------
+
+- Fix error loading settings
+  [vangheem]
+
+
+2.5.10 (2018-03-26)
+-------------------
+
+- Make sure to clear commit hook on tcp begin
+  [vangheem]
+
+- Add save method to upload data manager so saving data can be defered to
+  after commit hook
+  [vangheem]
+
+
+2.5.9 (2018-03-22)
+------------------
+
+- return 404 when attempting to download file that is missing
+  [vangheem]
+
+
+2.5.8 (2018-03-22)
+------------------
+
+- Fix getting filename for file downloads
+  [vangheem]
+
+
+2.5.7 (2018-03-21)
+------------------
+
+- Only do commit and voting if we have objects to do it with
+  [vangheem]
+
+
+2.5.6 (2018-03-21)
+------------------
+
+- Make sure to set size when deserializing files from base64
+  [vangheem]
+
+
+2.5.5 (2018-03-20)
+------------------
+
+- Fix TUS upload with zero length files
+  [vangheem]
+
+
+2.5.4 (2018-03-19)
+------------------
+
+- `save_file` can provide size value
+  [vangheem]
+
+
+2.5.3 (2018-03-19)
+------------------
+
+- IFile.content_type should be string, not bytes
+  [vangheem]
+
+- `UploadDataManager.finish()` should return the file object created
+  [vangheem]
+
+
+2.5.2 (2018-03-19)
+------------------
+
+- Fix `@duplicate` endpoint when no destination is provided
+  [vangheem]
+
+
+2.5.1 (2018-03-19)
+------------------
+
+- Be able to not automatically serialize behaviors
+  [vangheem]
+
+
+2.5.0 (2018-03-19)
+------------------
+
+- normalize file manager api so we can have more simple integrations with s3/gcloud
+  [vangheem]
+
+
+2.4.7 (2018-03-17)
+------------------
+
+- Be able to safely PATCH with same payload from GET
+  [vangheem]
+
+
+2.4.6 (2018-03-17)
+------------------
+
+- Updated docs
+  [vangheem]
+
+
+2.4.5 (2018-03-15)
+------------------
+
+- `BucketListValue.iter_buckets` returns annotation object
+  [vangheem]
+
+
+2.4.4 (2018-03-15)
+------------------
+
+- fix `BucketListValue.iter_buckets` to correctly load uncached annotations
+  from database
+  [vangheem]
+
+
+2.4.3 (2018-03-14)
+------------------
+
+- New `PatchField`
+  [vangheem]
+
+- New `BucketListField`
+  [vangheem]
+
+
+2.4.2 (2018-03-14)
+------------------
+
+- Be able to provide `index_name` for index directive to rename index name
+  to use for catalog data
+  [vangheem]
+
+
+2.4.1 (2018-03-14)
+------------------
+
+- Provide utils.clear_conn_statement_cache
+  [vangheem]
+
+
+2.4.0 (2018-03-10)
+------------------
+
+- Rename `guillotina.async` to `guillotina.async_util` to fix Python 3.7 compatibility
+  [vangheem]
+
+
+2.3.35 (2018-03-09)
+-------------------
+
+- More error handling
+  [vangheem]
+
+
+2.3.34 (2018-03-07)
+-------------------
+
+- Be able to provide custom responses for unhandled exceptions
+  [vangheem]
+
+
+2.3.33 (2018-03-03)
+-------------------
+
+- Bump
+
+
+2.3.32 (2018-03-03)
+-------------------
+
+- Disable statement cache on guillotina
+  [vangheem]
+
+
+2.3.31 (2018-03-02)
+-------------------
+
+- Normalize status codes to not use generate 400 all the time
+  [vangheem]
+
+
+2.3.30 (2018-03-01)
+-------------------
+
+- Store record of previous file data on upload
+  [vangheem]
+
+
+2.3.29 (2018-03-01)
+-------------------
+
+- bump
+
+
+2.3.28 (2018-03-01)
+-------------------
+
+- Send file upload finished event
+  [vangheem]
+
+- Use lazy_apply when calling commit hooks
+  [vangheem]
+
+
+2.3.27 (2018-02-23)
+-------------------
+
+- Upgrade asyncpg, do not clear statement cache after every connection open
+  [vangheem]
+
+
+2.3.26 (2018-02-21)
+-------------------
+
+- IFileCleanup accepts kwargs
+  [vangheem]
+
+
+2.3.25 (2018-02-20)
+-------------------
+
+- Allow indexer accessors to be async
+  [vangheem]
+
+
+2.3.24 (2018-02-20)
+-------------------
+
+- Add IFileCleanup adapter to be able to customize if old cloud files are cleaned
+  [vangheem]
+
+- Add a serializer for IDecimal fields
+  [cdevienne]
+
+
+2.3.23 (2018-02-16)
+-------------------
+
+- Make sure id when creating content is string
+  [vangheem]
+
+
+2.3.22 (2018-02-15)
+-------------------
+
+- Change log level of conflict errors
+  [vangheem]
+
+
+2.3.21 (2018-02-07)
+-------------------
+
+- Add Server header
+  [vangheem]
+
+
+2.3.20 (2018-02-07)
+-------------------
+
+- ValueError does not have a `message` attribute
+  [vangheem]
+
+
+2.3.19 (2018-02-06)
+-------------------
+
+- Make sure to check field permissions correctly
+  [vangheem]
+
+- Make sure to get connection object correctly with `@items` endpoint
+  [vangheem]
+
+
+2.3.18 (2018-02-05)
+-------------------
+
+- lazy create connection
+  [vangheem]
+
+- Use __slots__ for BaseObject
+  [vangheem]
+
+
+2.3.17 (2018-01-22)
+-------------------
+
+- Be able to customize loop policy with `loop_policy` app setting
+  [vangheem]
+
+
+2.3.16 (2018-01-19)
+-------------------
+
+- Use correct connection object when getting children from database
+  [vangheem]
+
+
+2.3.15 (2018-01-18)
+-------------------
+
+- Clear pg statement cache before each query to fix bug
+  [vangheem]
+
+
+2.3.14 (2018-01-18)
+-------------------
+
+- Add debugging for queries
+  [vangheem]
+
+
+2.3.13 (2018-01-17)
+-------------------
+
+- Record before authentication timing for request object
+  [vangheem]
+
+
+2.3.12 (2018-01-17)
+-------------------
+
+- Keep a counter of hits, misses and stored on the db object
+  [vangheem]
+
+
+2.3.11 (2018-01-15)
+-------------------
+
+- Add `Item.async_multi_get` method to get batches of objects in a scalable way
+  [vangheem]
+
+
+2.3.10 (2018-01-12)
+-------------------
+
+- Be able to proactively fill cache
+  [vangheem]
+
+- Be able to send `X-Debug` header to get stats on the request timings
+  [vangheem]
+
+- Be able to customize the pg connection class with pg_connection_class
+  config option.
+  [vangheem]
+
+
+2.3.9 (2018-01-11)
+------------------
+
+- Do not manually return the response object in traversal, let aiohttp handle it.
+  This should fix cases where response were being held open that shouldn't be.
+  [vangheem]
+
+- Add `guillotina.commands.utils.change_transaction_strategy` to be able to
+  override transactions strategies in commands
+  [vangheem]
+
+
+2.3.8 (2018-01-11)
+------------------
+
+- Make sure `utils.get_containers` works with transaction being manipulated
+  by the consumer of the async generator
+  [vangheem]
+
+
+2.3.7 (2018-01-11)
+------------------
+
+- Add `__run_command__` in app_settings to record what the current guillotina
+  was started with.
+  [vangheem]
+
+
+2.3.6 (2018-01-10)
+------------------
+
+- Log access denied with info instead of warning
+  [vangheem]
+
+
+2.3.5 (2018-01-10)
+------------------
+
+- Do not allow overriding transaction strategy in `utils.get_containers`
+  [vangheem]
+
+
+2.3.4 (2018-01-10)
+------------------
+
+- Do not allow `@` in ids
+  [vangheem]
+
+- Provide new `@items` endpoint
+  [vangheem]
+
+
+2.3.3 (2018-01-08)
+------------------
+
+- Make sure `_p_jar` on database object defaults to _last_txn
+  [vangheem]
+
+
+2.3.2 (2018-01-08)
+------------------
+
+- Fix potential connection leak with `utils.get_containers`
+  [vangheem]
+
+- Make sure `_p_jar` on database object finds the right connection
+  [vangheem]
+
+- Make sure the `text/html` renderer wraps content in html tags
+  [vangheem]
+
+
+2.3.1 (2017-12-29)
+------------------
+
+- Fix scheduling async tasks with after commit hooks
+  [vangheem]
+
+
+2.3.0 (2017-12-29)
+------------------
+
+- Rename `novote` strategy to `dbresolve`
+
+- Fix cockroach db transactional support
+  [vangheem]
+
+- Implement `dbresolve_readcommitted` and `resolve_readcommitted` transaction
+  strategies
+
+
+2.2.6 (2017-12-28)
+------------------
+
+- Log unhandled exception responses
+  [vangheem]
+
+
+2.2.5 (2017-12-28)
+------------------
+
+- Fix behaviors for duplicated objects
+  [vangheem]
+
+
+2.2.4 (2017-12-19)
+------------------
+
+- `get_containers` now clears the `request.container_settings` value
+  [vangheem]
+
+
+2.2.3 (2017-12-18)
+------------------
+
+
+- Make sure to use `_p_register` on context behaviors and registering new behaviors
+  [vangheem]
+
+
+2.2.2 (2017-12-18)
+------------------
+
+- Fix `__delete__` on base object properties
+  [vangheem]
+
+
+2.2.1 (2017-12-18)
+------------------
+
+- Fix ws token to work with basic auth
+  [vangheem]
+
+- Cleanup unused undocumented code: `traversal.do_traverse`,
+  `traversal.subrequest`, `testing.GuillotinaRequester`, `testing.AsyncMockView`,
+  `utils.get_caller_package`, `utils.apply_cors`
+  [vangheem]
+
+- Add `@addable-types` endpoint
+  [vangheem]
+
+- Do not allow to add containers inside containers
+  [vangheem]
+
+
+2.2.0 (2017-12-15)
+------------------
+
+- Improve performance of pickle/unpickle from db
+  [vangheem]
+
+- Pre-calculate registered behavior implementations to improve object creation
+  performance. Previously registered behaviors were dynamically provided with
+  `alsoProvides`.
+  [vangheem]
+
+- Remove `guillotina.interfaces.IFormFieldProvider` as it was not implemented
+  [vangheem]
+
+- Remove `guillotina.framing` module since it wasn't used and any implemenation
+  like it should be in another module
+  [vangheem]
+
+- Use UTC timezones everywhere. Local timezones are performance impacting.
+  [vangheem]
+
+- Be able to profile all commands instead of just the `serve` command
+  [vangheem]
+
+
+2.1.19 (2017-12-08)
+-------------------
+
+- Properly use super() for security map classes so things can be overridden
+  with custom permission adapters.
+  [vangheem]
+
+
+2.1.18 (2017-12-06)
+-------------------
+
+- get_owners will lookup to parent object for owner.
+  [vangheem]
+
+- if IGetOwner returns none, no owner will be set on object
+  [vangheem]
+
+
+2.1.17 (2017-12-06)
+-------------------
+
+- Fix getting sharing information for database objects
+  [vangheem]
+
+
+2.1.16 (2017-12-06)
+-------------------
+
+- Fix compatibility with aiohttp 2.3.6
+  [vangheem]
+
+
+2.1.15 (2017-12-06)
+-------------------
+
+- Provide security cache implementation
+  [vangheem]
+
+- In case there is no method raise an error
+  [ramon]
+
+
+2.1.14 (2017-11-30)
+-------------------
+
+- Improve performance of json schema serialization
+  [vangheem]
+
+
+2.1.13 (2017-11-29)
+-------------------
+
+- Fix ContextBehavior implementation to get data correctly from object
+  [vangheem]
+
+
+2.1.12 (2017-11-28)
+-------------------
+
+- Handle restart transaction error from cockroach on retrieving data from db
+  [vangheem]
+
+
+2.1.11 (2017-11-22)
+-------------------
+
+- Set task request for async utility
+  [vangheem]
+
+
+2.1.10 (2017-11-21)
+-------------------
+
+- Raising aiohttp http exception is handled correctly in publisher
+  [vangheem]
+
+
+2.1.9 (2017-11-21)
+------------------
+
+- Fix dockers test infrastructure to not conflict with multiple tests running
+  at the same time.
+  [vangheem]
+
+
+2.1.8 (2017-11-21)
+------------------
+
+- Adding X-Forwarded-Proto in order to allow https rewrite of absolute url
+  [ramon]
+
+- Adding PROPFIND HTTP Verb
+  [ramon]
+
+- Be able to provide a custom router using the `router` setting
+  [vangheem]
+
+
+2.1.7 (2017-11-15)
+------------------
+
+- Add `id` index
+  [vangheem]
+
+
+2.1.6 (2017-11-15)
+------------------
+
+- Make sure to abort all error responses
+  [vangheem]
+
+
+2.1.5 (2017-11-14)
+------------------
+
+- Track timing of various parts of request. Helps with providing metrics
+  [vangheem]
+
+
+2.1.4 (2017-11-14)
+------------------
+
+- Be able to provide request.uid value from request header `X-FORWARDED-REQUEST-UID`.
+  [vangheem]
+
+
+2.1.3 (2017-11-10)
+------------------
+
+- Implement copy_cloud_file on DBFile
+  [vangheem]
+
+
+2.1.2 (2017-11-08)
+------------------
+
+- Handle CancelledError on server close
+  [vangheem]
+
+
+2.1.1 (2017-11-08)
+------------------
+
+- Clean up async tasks better
+  [vangheem]
+
+
+2.1.0 (2017-11-07)
+------------------
+
+- Remove use of buildout for development/travis
+  [vangheem]
+
+- Upgrade to aiohttp > 2.3.0
+  [vangheem]
+
+- Fix iter_data method for DBFile(no uri attribute)
+  [vangheem]
+
+- Verify service method signatures when configuration is loaded
+  [vangheem]
+
+
+2.0.6 (2017-11-06)
+------------------
+
+- Use adapter lookup correctly for value serializer
+  [vangheem]
+
+
+2.0.5 (2017-11-06)
+------------------
+
+- Do not do async suscribers in a gather since we can lose get_current_request context
+  [vangheem]
+
+
+2.0.4 (2017-11-06)
+------------------
+
+- Fix MockTransaction implementation
+  [vangheem]
+
+
+2.0.3 (2017-11-06)
+------------------
+
+- Provide correct signature for default value converter
+  [vangheem]
+
+
+2.0.2 (2017-11-06)
+------------------
+
+- Handle missing component lookups more correctly for factories that return None
+  for the value.
+  [vangheem]
+
+
+2.0.1 (2017-11-06)
+------------------
+
+- DeserializationError and ValueDeserializationError should implement message
+  attribute
+  [vangheem]
+
+
+2.0.0 (2017-11-06)
+------------------
+
+- Make components more pythonic:
+  - guillotina.component.getMultiAdapter -> get_multi_adapter
+  - guillotina.component.getAdapter -> get_adapter
+  - guillotina.component.getUtility -> get_utility
+  - guillotina.component.queryUtility -> query_utility
+  - guillotina.component.getUtilitiesFor -> get_utilities_for
+  - guillotina.component.getAllUtilitiesRegisteredFor -> get_all_utilities_registered_for
+  - guillotina.component.getGlobalSiteManager -> get_global_components
+  - guillotina.component.provideUtility -> provide_utility
+  [vangheem]
+
+- Allow passing arguments to component lookup factories with `args=[]` and `kwargs={}` params
+  [vangheem]
+
+- Optimize serialization framework to use less and faster adapter lookups
+  [vangheem]
+
+- Added `guillotina.profile.profilable` decorator to be able to tell line_profiler
+  what functions to profile.
+
+- Integrate line_profiler with `--line-profiler`, `--line-profiler-matcher="*foobar*"`
+  and `--line-profiler-output`.
+  [vangheem]
+
+- Pre-render resolve_dotted_name on authentication plugins
+  [vangheem]
+
+- Implement aiotask_context for request object lookup
+  [vangheem]
+
+- Add `@configure.value_deserializer` and `@configure.value_serializer`
+  configurators
+  [vangheem]
+
+- Remove transform framework
+  [vangheem]
+
+- Remove RichText since it was not used and didn't make much sense
+  [vangheem]

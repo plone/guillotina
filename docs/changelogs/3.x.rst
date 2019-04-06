@@ -1,0 +1,348 @@
+CHANGELOG
+=========
+
+
+3.3.12 (2018-05-30)
+-------------------
+
+- Reindex security of group object even if we aren't going to reindex it's children
+  [vangheem]
+
+- Refactor indexing so we can index security, provide `guillotina.catalog.index.index_object` function
+  [vangheem]
+
+
+3.3.11 (2018-05-30)
+-------------------
+
+- Move TRASHED annotation objects check to application logic instead
+  of the query. This helps performance and query planer issue for cockroach
+  [vangheem]
+
+
+3.3.10 (2018-05-29)
+-------------------
+
+- Handle missing root object for database
+  [vangheem]
+
+
+3.3.9 (2018-05-29)
+------------------
+
+- Fix cache key format
+  [vangheem]
+
+
+3.3.8 (2018-05-29)
+------------------
+
+- Add more utilities: `execute`, `safe_unidecode`, `run_async`, `get_object_by_oid`
+  [vangheem]
+
+- Prevent db cache poisening between containers of dynamic databases
+  [vangheem]
+
+- Do not reuse transaction objects with get_containers
+  [vangheem]
+
+
+3.3.7 (2018-05-23)
+------------------
+
+- async pool should commit when using transaction
+  [vangheem]
+
+
+3.3.6 (2018-05-23)
+------------------
+
+- async pool should execute futures of request
+  [vangheem]
+
+
+3.3.5 (2018-05-22)
+------------------
+
+- specify `acl` field name for access_users and access_roles indexer
+  so we can easily reindex security
+  [vangheem]
+
+
+- prevent running the same indexer multiple times
+  [vangheem]
+
+- be able to manually index object by using
+  `guillotina.catalog.index.add_object(ob, modified=True, payload={})`
+  [vangheem]
+
+- Fix bug in CORS with tus when guillotina was on different domain than
+  web application calling it
+  [vangheem]
+
+
+3.3.4 (2018-05-21)
+------------------
+
+- Make sure we write to a non-shared txn when creating db object
+  [vangheem]
+
+
+3.3.3 (2018-05-21)
+------------------
+
+- Use exists instead of get_names for dynamic dbs
+  [vangheem]
+
+3.3.2 (2018-05-20)
+------------------
+
+- Cockroachdb supports cascade and jsonb now
+  [vangheem]
+
+
+3.3.1 (2018-05-19)
+------------------
+
+- only return task on request.execute_futures if there are futures
+  to run
+  [vangheem]
+
+
+3.3.0 (2018-05-19)
+------------------
+
+- Change reindexing security to futures, not queue for more
+  consistent performance
+  [vangheem]
+
+- Remove IBeforeObjectAssignedEvent as it wasn't used
+  [vangheem]
+
+- Rename `directives.index` to `directives.index_field`
+  [vangheem]
+
+- Be able to specify priority on `@configure.subscriber`. Lower
+  is higher priority.
+  [vangheem]
+
+- Indexer now sends full object for ICatalogUtility.remove
+  instead of tuple of data
+  [vangheem]
+
+
+3.2.7 (2018-05-15)
+------------------
+
+- Indexing gathers all data on update instead of
+  overwriting indexed data
+  [vangheem]
+
+
+3.2.6 (2018-05-12)
+------------------
+
+- Provide IDatabaseManager.exists for dummy db impelementation
+  [vangheem]
+
+
+3.2.5 (2018-05-12)
+------------------
+
+- add IDatabaseManager.exists method to be able to check if db exists
+  [vangheem]
+
+
+3.2.4 (2018-05-11)
+------------------
+
+- Fix dynamic storage urls for cockroach
+  [vangheem]
+
+- deserialize value before validation on patch fields
+  [vangheem]
+
+
+3.2.3 (2018-05-11)
+------------------
+
+- Authenticated users have access to view root just like
+  unauthenticated users
+  [vangheem]
+
+
+3.2.2 (2018-05-11)
+------------------
+
+- Be able to provide comma separated `permissions` param to `@canido`
+  [vangheem]
+
+
+3.2.1 (2018-05-10)
+------------------
+
+- Be able to modify file attributes filename, content_type, md5, extension
+  [vangheem]
+
+
+3.2.0 (2018-05-10)
+------------------
+
+- Provide new IDynamicFields and IDynamicFieldValues behaviors
+  [vangheem]
+
+- Be able to use PatchField with nested schemas
+  [vangheem]
+
+- Change Object field to work with dicts and JSON schema
+  [vangheem]
+
+
+3.1.8 (2018-05-06)
+------------------
+
+- Add `type_name` index
+  [vangheem]
+
+
+3.1.7 (2018-05-04)
+------------------
+
+- Provide check_security argument on
+  `guillotina.content.create_content_in_container`
+  [vangheem]
+
+
+3.1.6 (2018-04-30)
+------------------
+
+- Provide asyncio.Lock on transaction manager
+  [vangheem]
+
+
+3.1.5 (2018-04-30)
+------------------
+
+- `guillotina.utils.get_containers` does not change
+  transaction strategy anymore.
+  [vangheem]
+
+
+3.1.4 (2018-04-30)
+------------------
+
+- Fix getting tid for `dbresolve_readcommitted` txn strategy
+  [vangheem]
+
+
+3.1.3 (2018-04-27)
+------------------
+
+- Use database constraints if supported
+  [vangheem]
+
+- Be able to customize oid generator
+  [vangheem]
+
+3.1.2 (2018-04-26)
+------------------
+
+- Revert DB unique constraint implementation
+  [vangheem]
+
+
+3.1.1 (2018-04-26)
+------------------
+
+- Provide testing annotations
+  [vangheem]
+
+- Handle invalid type on content creation with 412
+  [vangheem]
+
+- Fix DUMMY_FILE loading error
+  [vangheem]
+
+
+3.1.0 (2018-04-18)
+------------------
+
+- Use unique constraint instead of doing lookups on existing content for inserts
+  [vangheem]
+
+3.0.8 (2018-04-06)
+------------------
+
+- Fix security on views were not checked correctly as the configured functions
+  are all the same local class
+  [ramon]
+
+- OPTION method not working due to not beeing registered normally as
+  its a special case for CORS
+  [ramon]
+
+
+3.0.7 (2018-04-04)
+------------------
+
+- Fix `change_transaction_strategy` method AttributeError
+  [vangheem]
+
+
+3.0.6 (2018-04-03)
+------------------
+
+- Fix registration issue when multiple routes are registered against the
+  same service class
+  [vangheem]
+
+- Do not store request object on transaction manager object to prevent
+  situations where the wrong transaction will get retrieved
+  [vangheem]
+
+
+3.0.5 (2018-04-03)
+------------------
+
+- Make sure to clean up manually registered utilities
+  [vangheem]
+
+
+3.0.4 (2018-04-03)
+------------------
+
+- Use IPostgresStorage for PG storage
+  [vangheem]
+
+
+3.0.3 (2018-04-03)
+------------------
+
+- Fix tests to be more isolated between runs
+  [vangheem]
+
+
+3.0.2 (2018-04-03)
+------------------
+
+- psycopg2 is an optional test dependency
+  [vangheem]
+
+
+3.0.1 (2018-04-03)
+------------------
+
+- Add full support for `DUMMY` and `DUMMY_FILE` databases
+  [vangheem]
+
+
+3.0.0a1 (2017-12-30)
+--------------------
+
+- Fix issue with multiple databases mounted
+
+- Add support for dynamic database mappings
+
+- Add route support
+
+- Remove traversable views, add support for `prepare` method on class views
