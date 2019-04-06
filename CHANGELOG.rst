@@ -1,7 +1,8 @@
 { (unreleased)
 --------------
 
-- Nothing changed yet.
+- Start to improve the docker setup
+  [svx]
 
 
 4.5.13 (2019-04-04)
