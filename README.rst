@@ -76,6 +76,14 @@ Or, better yet, use postman to start playing with API.
 
 You can also navigate in your Guillotina server with its built-in web admin interface by visiting http://localhost:8080/+admin/.
 
+Deploy on Heroku
+----------------
+
+Read more `Guillotina-Heroku <https://github.com/guillotinaweb/guillotina-heroku>`_.
+
+.. image:: https://www.herokucdn.com/deploy/button.svg
+   :target: https://www.heroku.com/deploy?template=https://github.com/guillotinaweb/guillotina-heroku
+
 Getting started with development
 --------------------------------
 
