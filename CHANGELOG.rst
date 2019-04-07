@@ -4,6 +4,9 @@ CHANGELOG
 (unreleased)
 ------------
 
+- Added Heroku deploy button
+  [karannaoh]
+
 - Start to improve the docker setup
   [svx]
 
