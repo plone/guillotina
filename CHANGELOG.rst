@@ -1,8 +1,11 @@
 CHANGELOG
 =========
 
-(unreleased)
-------------
+4.6.0 (unreleased)
+------------------
+
+- Remove dependency on aioconsole and move to `ipython` for shell support
+  [vangheem]
 
 - Added Heroku deploy button
   [karannaoh]

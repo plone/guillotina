@@ -57,7 +57,6 @@ setup(
         'setuptools',
         'ujson',
         'zope.interface',
-        'aioconsole',
         'pyjwt',
         'asyncpg',
         'cffi',
