@@ -1,9 +1,5 @@
-import asyncio
-import json
-import logging.config
-
-import aiotask_context
 from aiohttp import web
+from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
 from guillotina._settings import app_settings
@@ -13,9 +9,9 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
+from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
-from guillotina.content import load_cached_schema
 from guillotina.event import notify
 from guillotina.events import ApplicationCleanupEvent
 from guillotina.events import ApplicationConfiguredEvent
@@ -36,6 +32,11 @@ from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 from guillotina.utils import secure_passphrase
 from jwcrypto import jwk
+
+import aiotask_context
+import asyncio
+import json
+import logging.config
 
 
 logger = glogging.getLogger('guillotina')
@@ -203,7 +204,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     app_settings.clear()
     app_settings.update(startup_vars)
-    app_settings.update(default_settings)
+    app_settings.update(deepcopy(default_settings))
 
     if loop is None:
         loop = asyncio.get_event_loop()
