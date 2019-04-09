@@ -6,7 +6,7 @@ from guillotina.component import query_multi_adapter
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import Item
 from guillotina.content import get_all_possible_schemas_for_type
-from guillotina.factory.app import configure_application
+from guillotina.factory.app import configure_application, ApplicationConfigurator
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
@@ -210,3 +210,28 @@ def test_loading_nested_configuration():
     configure_application('guillotina.test_package', config, root, {}, configured)
     assert 'guillotina' in configured
     assert 'guillotina.test_package' in configured
+
+
+def test_loading_configuration_does_not_load_subpackage_definition():
+    import guillotina
+    import guillotina.test_package  # make sure configuration is read
+    root = ApplicationRoot(None, None)
+    config = ConfigurationMachine()
+    root.config = config
+    app_configurator = ApplicationConfigurator(
+        ['guillotina', 'guillotina.test_package'],
+        config, root, {}
+    )
+
+    loaded = app_configurator.load_application(guillotina)
+    # it should not load sub package configuration
+    for _type, configuration in loaded:
+        assert 'guillotina.test_package' != getattr(
+            configuration.get('klass'), '__module__', None)
+
+    loaded = app_configurator.load_application(guillotina.test_package)
+    assert len(loaded) > 0
+    # it should not load sub package configuration
+    for _type, configuration in loaded:
+        assert 'guillotina' != getattr(
+            configuration.get('klass'), '__module__', None)

@@ -51,16 +51,23 @@ _registered_configuration_handlers = {}
 logger = logging.getLogger('guillotina')
 
 
-def get_configurations(module_name, type_=None):
+def get_configurations(module_name, type_=None, excluded=None):
     results = []
     for reg_type, registration in _registered_configurations:
         if type_ is not None and reg_type != type_:
             continue
         config = registration['config']
         module = config.get('module', registration.get('klass'))
-        if (get_module_dotted_name(
-                resolve_dotted_name(module)) + '.').startswith(module_name + '.'):
-            results.append((reg_type, registration))
+        normalized_name = get_module_dotted_name(resolve_dotted_name(module))
+
+        if (normalized_name + '.').startswith(module_name + '.'):
+            valid = True
+            for excluded_module in excluded or []:
+                if (normalized_name + '.').startswith(excluded_module + '.'):
+                    valid = False
+                    break
+            if valid:
+                results.append((reg_type, registration))
     return results
 
 
@@ -85,13 +92,15 @@ def load_configuration(_context, module_name, _type):
         _registered_configuration_handlers[_type](_context, configuration)
 
 
-def load_all_configurations(_context, module_name):
-    for type_, configuration in get_configurations(module_name):
+def load_all_configurations(_context, module_name, excluded=None):
+    configurations = get_configurations(module_name, excluded=excluded)
+    for type_, configuration in configurations:
         try:
             _registered_configuration_handlers[type_](_context, configuration)
         except TypeError:
             logger.error('Can not find %s module' % configuration)
             raise
+    return configurations
 
 
 def load_service(_context, service):
