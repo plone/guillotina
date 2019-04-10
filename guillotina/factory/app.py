@@ -1,9 +1,5 @@
-import asyncio
-import json
-import logging.config
-
-import aiotask_context
 from aiohttp import web
+from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
 from guillotina._settings import app_settings
@@ -13,9 +9,9 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
+from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
-from guillotina.content import load_cached_schema
 from guillotina.event import notify
 from guillotina.events import ApplicationCleanupEvent
 from guillotina.events import ApplicationConfiguredEvent
@@ -37,6 +33,11 @@ from guillotina.utils import resolve_path
 from guillotina.utils import secure_passphrase
 from jwcrypto import jwk
 
+import aiotask_context
+import asyncio
+import json
+import logging.config
+
 
 logger = glogging.getLogger('guillotina')
 
@@ -50,34 +51,70 @@ def update_app_settings(settings):
             app_settings[key] = value
 
 
-def load_application(module, root, settings):
-    # includeme function
-    if hasattr(module, 'includeme'):
-        lazy_apply(module.includeme, root, settings)
-    # app_settings
-    if hasattr(module, 'app_settings') and app_settings != module.app_settings:
-        update_app_settings(module.app_settings)
-    # services
-    configure.load_all_configurations(root.config, module.__name__)
+class ApplicationConfigurator:
+
+    def __init__(self, applications, config, root, settings, configured=None):
+        if configured is None:
+            configured = []
+        # remove duplicates
+        self.applications = list(dict.fromkeys(applications))
+        self.configured = configured
+        self.config = config
+        self.root = root
+        self.settings = settings
+
+    def load_application(self, module):
+        # includeme function
+        if hasattr(module, 'includeme'):
+            lazy_apply(module.includeme, self.root, self.settings)
+        # app_settings
+        if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+            update_app_settings(module.app_settings)
+
+        # exclude configuration from sub packages that are registered
+        # as applications
+        excluded_modules = [
+            module_name for module_name in
+            set(self.applications) - set([module.__name__])
+            if not module.__name__.startswith(module_name)]
+
+        # services
+        return configure.load_all_configurations(
+            self.root.config, module.__name__, excluded_modules)
+
+    def configure_application(self, module_name):
+        if module_name in self.configured:
+            return
+
+        module = resolve_dotted_name(module_name)
+        if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+            # load dependencies if necessary
+            for dependency in module.app_settings.get('applications') or []:
+                if dependency not in self.configured and module_name != dependency:
+                    self.configure_application(dependency)
+
+        self.config.begin(module_name)
+        self.load_application(module)
+        self.config.execute_actions()
+        self.config.commit()
+
+        self.configured.append(module_name)
+
+    def configure_all_applications(self):
+        for module_name in self.applications:
+            self.configure_application(module_name)
 
 
 def configure_application(module_name, config, root, settings, configured):
-    if module_name in configured:
-        return
+    app_configurator = ApplicationConfigurator(
+        [module_name], config, root, settings, configured)
+    app_configurator.configure_application(module_name)
 
-    module = resolve_dotted_name(module_name)
-    if hasattr(module, 'app_settings') and app_settings != module.app_settings:
-        # load dependencies if necessary
-        for dependency in module.app_settings.get('applications') or []:
-            if dependency not in configured and module_name != dependency:
-                configure_application(dependency, config, root, settings, configured)
 
-    config.begin(module_name)
-    load_application(module, root, settings)
-    config.execute_actions()
-    config.commit()
-
-    configured.append(module_name)
+def load_application(module, root, settings):
+    app_configurator = ApplicationConfigurator(
+        [module.__name__], None, root, settings)
+    app_configurator.load_application(module)
 
 
 class GuillotinaAIOHTTPApplication(web.Application):
@@ -167,7 +204,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     app_settings.clear()
     app_settings.update(startup_vars)
-    app_settings.update(default_settings)
+    app_settings.update(deepcopy(default_settings))
 
     if loop is None:
         loop = asyncio.get_event_loop()
@@ -191,10 +228,11 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # Initialize global (threadlocal) ZCA configuration
     config = root.config = ConfigurationMachine()
 
-    import guillotina
-    import guillotina.db.factory
-    import guillotina.db.writer
-    import guillotina.db.db
+    app_configurator = ApplicationConfigurator(
+        settings.get('applications') or [],
+        config, root, settings
+    )
+
     configure.scan('guillotina.renderers')
     configure.scan('guillotina.api')
     configure.scan('guillotina.content')
@@ -215,16 +253,15 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.subscribers')
     configure.scan('guillotina.db.strategies')
     configure.scan('guillotina.db.cache')
+    configure.scan('guillotina.db.writer')
+    configure.scan('guillotina.db.factory')
     configure.scan('guillotina.exc_resp')
     configure.scan('guillotina.fields')
     configure.scan('guillotina.migrations')
-    load_application(guillotina, root, settings)
-    config.execute_actions()
-    config.commit()
 
-    configured = ['guillotina']
-    for module_name in settings.get('applications') or []:
-        configure_application(module_name, config, root, settings, configured)
+    # always load guillotina
+    app_configurator.configure_application('guillotina')
+    app_configurator.configure_all_applications()
 
     apply_concrete_behaviors()
 

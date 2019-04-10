@@ -4,6 +4,14 @@ CHANGELOG
 4.6.0 (unreleased)
 ------------------
 
+Fixes:
+
+- Fix potential configuration conflict errors when sub-packages are used
+  as unique applications
+  [vangheem]
+
+New:
+
 - Remove dependency on aioconsole and move to `ipython` for shell support
   [vangheem]
 
