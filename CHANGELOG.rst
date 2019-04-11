@@ -4,7 +4,9 @@ CHANGELOG
 4.6.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- check for trashed parent id with `get_object_by_oid` to make sure object
+  has not been tombstoned for deletion.
+  [vangheem]
 
 
 4.6.0 (2019-04-09)

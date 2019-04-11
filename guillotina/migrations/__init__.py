@@ -1,5 +1,5 @@
 from guillotina import configure
-from guillotina.db import TRASHED_ID
+from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.utils import clear_table_name
 from guillotina.interfaces import IMigration

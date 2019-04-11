@@ -7,7 +7,7 @@ from guillotina.component import get_adapter
 from guillotina.component import get_global_components
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
-from guillotina.db import ROOT_ID
+from guillotina.const import ROOT_ID
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.interfaces import IWriter
 from guillotina.db.transaction_manager import TransactionManager
