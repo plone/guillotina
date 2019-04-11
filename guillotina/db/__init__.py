@@ -1,5 +1,2 @@
-# base root object
-ROOT_ID = '0' * 32
-
-# object to reassign parent id to when you are deleting
-TRASHED_ID = 'D' * 32
+from guillotina.const import ROOT_ID  # noqa b/w compat import
+from guillotina.const import TRASHED_ID  # noqa b/w compat import
