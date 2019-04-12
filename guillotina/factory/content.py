@@ -138,7 +138,7 @@ class ApplicationRoot(object):
 @implementer(IDatabase)
 class Database:
 
-    def __init__(self, key, storage):
+    def __init__(self, key, storage, klass=TransactionManager):
         """
         Create an object database.
 
@@ -147,6 +147,7 @@ class Database:
         self._storage = storage
         self.id = self._database_name = key
         self._tm = None
+        self.transaction_klass = klass
 
     @property
     def storage(self):
@@ -193,7 +194,7 @@ class Database:
         New transaction manager for every request
         """
         if self._tm is None:
-            self._tm = TransactionManager(self._storage, self)
+            self._tm = self.transaction_klass(self._storage, self)
         return self._tm
 
     @property

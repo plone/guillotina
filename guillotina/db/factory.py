@@ -10,6 +10,7 @@ from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.dummy import DummyFileStorage
 from guillotina.db.storages.dummy import DummyStorage
 from guillotina.db.storages.pg import PostgresqlStorage
+from guillotina.db.transaction_manager import TransactionManager
 from guillotina.event import notify
 from guillotina.events import DatabaseInitializedEvent
 from guillotina.factory.content import Database
@@ -68,7 +69,12 @@ async def _PGConfigurationFactory(key, dbconfig, loop=None,
         await aps.initialize(loop=loop, **connection_options)
     else:
         await aps.initialize(**connection_options)
-    db = Database(key, aps)
+
+    if 'transaction_manager' in dbconfig:
+        transaction_manager = resolve_dotted_name(dbconfig['transaction_manager'])
+    else:
+        transaction_manager = TransactionManager
+    db = Database(key, aps, transaction_manager)
     await db.initialize()
     return db
 

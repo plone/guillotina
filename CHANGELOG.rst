@@ -4,7 +4,8 @@ CHANGELOG
 4.6.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- enable the option to define specific transaction manager for each database
+  [bloodbare]
 
 
 4.6.1 (2019-04-12)
