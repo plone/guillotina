@@ -4,7 +4,8 @@ CHANGELOG
 4.6.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Do not allow bad logging config cause guillotina to fail to start
+  [vangheem]
 
 
 4.6.0 (2019-04-09)
