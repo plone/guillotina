@@ -10,8 +10,8 @@ from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
 from guillotina.content import load_cached_schema
-from guillotina.db import ROOT_ID
-from guillotina.db import TRASHED_ID
+from guillotina.const import ROOT_ID
+from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.cockroach import CockroachStorage

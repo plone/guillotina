@@ -4,6 +4,10 @@ CHANGELOG
 4.6.1 (unreleased)
 ------------------
 
+- check for trashed parent id with `get_object_by_oid` to make sure object
+  has not been tombstoned for deletion.
+  [vangheem]
+
 - Do not allow bad logging config cause guillotina to fail to start
   [vangheem]
 

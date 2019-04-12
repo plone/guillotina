@@ -6,6 +6,7 @@ from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
+from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.reader import reader
 from guillotina.interfaces import IAbsoluteURL
@@ -178,6 +179,9 @@ async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
             result = await txn._get(oid)
         except KeyError:
             return None
+
+    if result['parent_id'] == TRASHED_ID:
+        return None
 
     obj = reader(result)
     obj._p_jar = txn

@@ -8,7 +8,7 @@ import asyncpg
 import asyncpg.connection
 import ujson
 from guillotina._settings import app_settings
-from guillotina.db import TRASHED_ID
+from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.oid import MAX_OID_LENGTH
 from guillotina.db.storages.base import BaseStorage
