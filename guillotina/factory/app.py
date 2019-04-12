@@ -269,7 +269,10 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     update_app_settings(settings)
 
     if 'logging' in app_settings:
-        logging.config.dictConfig(app_settings['logging'])
+        try:
+            logging.config.dictConfig(app_settings['logging'])
+        except Exception:
+            logger.error('Could not setup logging configuration', exc_info=True)
 
     # Make and initialize aiohttp app
     if server_app is None:
