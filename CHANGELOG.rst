@@ -8,6 +8,9 @@ CHANGELOG
   has not been tombstoned for deletion.
   [vangheem]
 
+- Do not allow bad logging config cause guillotina to fail to start
+  [vangheem]
+
 
 4.6.0 (2019-04-09)
 ------------------
