@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.6.1 (unreleased)
+4.6.1 (2019-04-12)
 ------------------
 
 - check for trashed parent id with `get_object_by_oid` to make sure object
