@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.6.2 (unreleased)
+4.6.2 (2019-04-12)
 ------------------
 
 - enable the option to define specific transaction manager for each database
