@@ -61,7 +61,9 @@ class MyService(Service):
 
 ### I want that my service is accessible no matter the content
 
-You can define in the service configuration with `allow_acces=True`
+You can define in the service configuration with `allow_access=True`
+which tells the security checker to ignore checking for the default
+permission `guillotina.AccessContent`.
 
 
 ```python
