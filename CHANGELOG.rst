@@ -4,6 +4,9 @@ CHANGELOG
 4.6.3 (unreleased)
 ------------------
 
+- Util function to get a database object
+  [bloodbare]
+
 - PyYaml 5.1 upgrade version
   [bloodbare]
 
