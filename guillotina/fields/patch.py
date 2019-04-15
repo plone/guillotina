@@ -11,6 +11,7 @@ from guillotina.schema.interfaces import IDict
 from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IList
 from zope.interface import implementer
+from guillotina.utils import apply_coroutine
 
 
 @implementer(IPatchField)
@@ -23,9 +24,9 @@ class PatchField(schema.Field):
         super().__init__(*args, **kwargs)
         self.required = field.required
 
-    def set(self, obj, value):
+    async def set(self, obj, value):
         bound_field = self.field.bind(obj)
-        bound_field.set(obj, value)
+        await apply_coroutine(bound_field.set, obj, value)
         obj._p_register()
 
 

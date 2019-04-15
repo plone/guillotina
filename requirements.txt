@@ -11,7 +11,7 @@ pycparser==2.18
 pycryptodome==3.6.6
 PyJWT==1.6.0
 python-dateutil==2.6.1
--f git+https://github.com/yaml/pyyaml.git
+PyYaml==5.1
 six==1.11.0
 ujson==1.35
 yarl==1.2.6
