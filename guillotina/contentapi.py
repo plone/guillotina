@@ -8,25 +8,43 @@ from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IResource
+from guillotina.interfaces import IParticipation
+from guillotina.security.policy import Interaction
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import login
 from guillotina.utils import get_current_request
 from guillotina.utils import get_object_url
 from guillotina.utils import import_class
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
 
+from guillotina.auth.users import RootUser
+
+
+async def login(request, user):
+    request.security = Interaction(request)
+    request._cache_user = user
+    participation = IParticipation(request)
+    await participation()
+    request.security.add(participation)
+    request.security.invalidate_cache()
+    request._cache_groups = {}
+
+def logout(request):
+    request.security = None
+    request._cache_groups = {}
+    request._cache_user = None
+
 
 class ContentAPI:
 
-    def __init__(self, db):
+    def __init__(self, db, user=RootUser('root')):
         self.db = db
         self.tm = db.get_transaction_manager()
         self.request = get_mocked_request()
+        self.user = user
         self.request._tm = self.tm
         self.request._db_id = db.id
-        login(self.request)
         self._active_txn = None
 
     async def __aenter__(self):
@@ -35,9 +53,11 @@ class ContentAPI:
         except RequestNotFound:
             self._existing_request = None
         aiotask_context.set('request', self.request)
+        await login(self.request, self.user)
         return self
 
     async def __aexit__(self, *args):
+        logout(self.request)
         aiotask_context.set('request', self._existing_request)
         # make sure to close out connection
         await self.abort()

@@ -4,6 +4,9 @@ CHANGELOG
 4.6.3 (unreleased)
 ------------------
 
+- Proper ContentAPI login to define user
+  [bloodbare]
+
 - PyYaml 5.1 upgrade version
   [bloodbare]
 
