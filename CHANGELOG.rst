@@ -4,6 +4,9 @@ CHANGELOG
 4.6.3 (unreleased)
 ------------------
 
+- Proper ContentAPI login to define user
+  [bloodbare]
+
 - Util function to get a database object
   [bloodbare]
 
