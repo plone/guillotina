@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.6.3 (unreleased)
+4.6.3 (2019-04-16)
 ------------------
 
 - Proper ContentAPI login to define user
