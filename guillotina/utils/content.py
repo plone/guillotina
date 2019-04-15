@@ -244,11 +244,12 @@ async def get_database(db_id, root=None):
         if IDatabase.providedBy(db):
             return db
 
-    if db_id in app_settings['storages']:
-        config = app_settings['storages'][db_id]
+    for _, config in list_or_dict_items(app_settings['storages']):
         ctype = config.get('type', config['storage'])
         factory = get_adapter(root, IDatabaseManager, name=ctype, args=[config])
-        db = await factory.get_database(db_id)
-        return db
+        for db_name in await factory.get_names():
+            if db_name != db_id:
+                continue
+            return await factory.get_database(db_name)
 
     return None
