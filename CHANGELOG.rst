@@ -4,8 +4,11 @@ CHANGELOG
 4.6.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- PyYaml 5.1 upgrade version
+  [bloodbare]
 
+- Add async feature on patch operation set
+  [bloodbare]
 
 4.6.2 (2019-04-12)
 ------------------
