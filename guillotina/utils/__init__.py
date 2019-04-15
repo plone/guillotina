@@ -4,6 +4,7 @@ from .content import get_behavior  # noqa
 from .content import get_containers  # noqa
 from .content import get_content_depth  # noqa
 from .content import get_content_path  # noqa
+from .content import get_database  # noqa
 from .content import get_object_by_oid  # noqa
 from .content import get_object_url  # noqa
 from .content import get_owners  # noqa
