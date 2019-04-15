@@ -20,7 +20,7 @@ class AsyncMockView(View):
         await self.func(*self.args, **self.kwargs)
 
 
-async def test_add_sync_utility(guillotina, loop):
+async def test_add_sync_utility(guillotina, guillotina_async_utils, loop):
 
     util = get_utility(IQueueUtility)
     var = []
@@ -56,7 +56,7 @@ class JobRunner:
         self.done = True
 
 
-async def test_run_jobs(guillotina):
+async def test_run_jobs(guillotina, guillotina_async_utils):
     pool = get_utility(IAsyncJobPool)
     job = pool.add_job(JobRunner(), args=['foobar'])
     assert pool.num_running == 1

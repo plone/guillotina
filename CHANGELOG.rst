@@ -4,6 +4,9 @@ CHANGELOG
 4.6.3 (unreleased)
 ------------------
 
+- Better support for testing async utils
+  [bloodbare]
+
 - Proper ContentAPI login to define user
   [bloodbare]
 

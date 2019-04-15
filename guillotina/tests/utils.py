@@ -21,6 +21,7 @@ from yarl import URL
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
+
 import aiotask_context
 import json
 import uuid
@@ -100,11 +101,20 @@ class ContainerRequesterAsyncContextManager:
         self.guillotina = guillotina
         self.requester = None
 
+    async def start_utils(self):
+        from guillotina.factory.app import start_utilities
+        await start_utilities(self.guillotina.root, self.guillotina.loop)
+
+    async def stop_utils(self):
+        from guillotina.factory.app import close_utilities
+        await close_utilities(None)
+
     async def get_requester(self):
         return self.guillotina
 
     async def __aenter__(self):
         self.requester = await self.get_requester()
+        await self.start_utils()
         resp, status = await self.requester('POST', '/db', data=json.dumps({
             "@type": "Container",
             # to be able to register for tests
@@ -117,6 +127,7 @@ class ContainerRequesterAsyncContextManager:
         return self.requester
 
     async def __aexit__(self, exc_type, exc, tb):
+        await self.stop_utils()
         _, status = await self.requester('DELETE', '/db/guillotina')
         assert status in (200, 404)
 

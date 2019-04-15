@@ -16,6 +16,8 @@ from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
+from guillotina.factory.app import start_utilities
+from guillotina.factory.app import close_utilities
 from guillotina.interfaces import IApplication
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
@@ -278,7 +280,7 @@ WHERE zoid != '{}' AND zoid != '{}'
 def guillotina_main(loop):
     globalregistry.reset()
     aioapp = loop.run_until_complete(
-        make_app(settings=get_db_settings(), loop=loop))
+        make_app(settings=get_db_settings(), loop=loop, start_utils=False))
     aioapp.config.execute_actions()
     load_cached_schema()
 
@@ -298,6 +300,13 @@ def guillotina(db, guillotina_main, loop):
     requester = GuillotinaDBRequester(server=server, loop=loop)
     yield requester
     loop.run_until_complete(server.close())
+
+
+@pytest.fixture(scope='function')
+async def guillotina_async_utils(db, guillotina_main, loop):
+    await start_utilities(guillotina_main.root, loop)
+    yield
+    await close_utilities(None)
 
 
 @pytest.fixture(scope='function')

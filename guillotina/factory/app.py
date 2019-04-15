@@ -187,7 +187,7 @@ def optimize_settings(settings):
             settings[name] = resolve_dotted_name(new_val)
 
 
-async def make_app(config_file=None, settings=None, loop=None, server_app=None):
+async def make_app(config_file=None, settings=None, loop=None, server_app=None, start_utils=True):
     '''
     Make application from configuration
 
@@ -333,13 +333,8 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     server_app.router.set_root(root)
     server_app.on_cleanup.append(cleanup_app)
 
-    for util in app_settings.get('utilities') or []:
-        logger.warn('Adding : ' + util['provides'])
-        root.add_async_utility(util['provides'], util, loop=loop)
-
-    for key, util in app_settings['load_utilities'].items():
-        logger.info('Adding ' + key + ' : ' + util['provides'])
-        root.add_async_utility(key, util, loop=loop)
+    if start_utils:
+        await start_utilities(root, loop)
 
     # Load cached Schemas
     load_cached_schema()
@@ -347,6 +342,16 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     await notify(ApplicationInitializedEvent(server_app, loop))
 
     return server_app
+
+
+async def start_utilities(root, loop):
+    for util in app_settings.get('utilities') or []:
+        logger.warn('Adding : ' + util['provides'])
+        root.add_async_utility(util['provides'], util, loop=loop)
+
+    for key, util in app_settings['load_utilities'].items():
+        logger.info('Adding ' + key + ' : ' + util['provides'])
+        root.add_async_utility(key, util, loop=loop)
 
 
 async def cleanup_app(app):
