@@ -2,6 +2,7 @@ from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.db.factory import CockroachDatabaseManager
 from guillotina.db.interfaces import IDatabaseManager
+from guillotina.utils import get_database
 
 import json
 import os
@@ -93,3 +94,20 @@ async def test_get_dsn_from_url():
     })
     assert (factory.get_dsn('foobar') ==
             'postgresql://root@127.0.0.1:26257/foobar?sslmode=disable')
+
+
+async def test_get_internal_database(db, guillotina_main):
+    db_obj = await get_database('db')
+    assert db_obj.id == 'db'
+
+
+@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+async def test_get_internal_dyn_database(db, guillotina_main):
+    storages = app_settings['storages']
+    storage_config = storages['db']
+    factory = get_adapter(guillotina_main.root, IDatabaseManager,
+                          name=storage_config['storage'],
+                          args=[storage_config])
+    await factory.create('foobar')
+    db_obj = await get_database('foobar')
+    assert db_obj.id == 'foobar'

@@ -7,6 +7,9 @@ CHANGELOG
 - Proper ContentAPI login to define user
   [bloodbare]
 
+- Util function to get a database object
+  [bloodbare]
+
 - PyYaml 5.1 upgrade version
   [bloodbare]
 

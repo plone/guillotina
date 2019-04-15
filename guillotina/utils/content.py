@@ -211,7 +211,6 @@ async def iter_databases(root=None):
 
     loaded = []
 
-    root = get_utility(IApplication, name='root')
     for _, db in root:
         if IDatabase.providedBy(db):
             yield db
@@ -234,3 +233,22 @@ async def iter_databases(root=None):
                 db = await factory.get_database(db_name)
                 loaded.append(db.id)
                 yield db
+
+
+async def get_database(db_id, root=None):
+    if root is None:
+        root = get_utility(IApplication, name='root')
+
+    if db_id in root:
+        db = root[db_id]
+        if IDatabase.providedBy(db):
+            return db
+
+    for _, config in list_or_dict_items(app_settings['storages']):
+        ctype = config.get('type', config['storage'])
+        factory = get_adapter(root, IDatabaseManager, name=ctype, args=[config])
+        databases = await factory.get_names()
+        if db_id in databases:
+            return await factory.get_database(db_id)
+
+    return None
