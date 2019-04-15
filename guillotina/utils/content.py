@@ -247,9 +247,8 @@ async def get_database(db_id, root=None):
     for _, config in list_or_dict_items(app_settings['storages']):
         ctype = config.get('type', config['storage'])
         factory = get_adapter(root, IDatabaseManager, name=ctype, args=[config])
-        for db_name in await factory.get_names():
-            if db_name != db_id:
-                continue
-            return await factory.get_database(db_name)
+        databases = await factory.get_names()
+        if db_id in databases:
+            return await factory.get_database(db_id)
 
     return None
