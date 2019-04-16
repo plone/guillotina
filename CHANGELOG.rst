@@ -1,3 +1,12 @@
+CHANGELOG
+=========
+
+Backports
+---------
+
+- Remove `IBeforeFieldModified` event and replace with `IBeforeObjectModifiedEvent`
+  [vangheem]
+
 4.5.9 (2019-03-18)
 ------------------
 
