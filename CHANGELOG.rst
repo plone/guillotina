@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.0 (unreleased)
+4.7.0 (2019-04-16)
 ------------------
 
 - Remove `IBeforeFieldModified` event and replace with `IBeforeObjectModifiedEvent`
