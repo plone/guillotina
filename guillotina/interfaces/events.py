@@ -3,6 +3,12 @@ from zope.interface import Interface
 from zope.interface import interfaces
 
 
+class IBeforeObjectModifiedEvent(interfaces.IObjectEvent):
+    '''
+    Before an object has been modified
+    '''
+
+
 class IObjectModifiedEvent(interfaces.IObjectEvent):
     """An object has been modified"""
 
@@ -96,10 +102,6 @@ class IUserRefreshToken(Interface):
 
     user = Attribute("User id refreshed.")
     token = Attribute("Token issued.")
-
-
-class IBeforeFieldModifiedEvent(Interface):
-    """A field is going to be modified"""
 
 
 class IApplicationEvent(Interface):

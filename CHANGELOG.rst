@@ -1,10 +1,11 @@
 CHANGELOG
 =========
 
-4.6.4 (unreleased)
+4.7.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Remove `IBeforeFieldModified` event and replace with `IBeforeObjectModifiedEvent`
+  [vangheem]
 
 
 4.6.3 (2019-04-16)

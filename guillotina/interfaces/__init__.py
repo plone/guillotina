@@ -1,7 +1,4 @@
 # zope.interface convenience imports
-from zope.interface import Attribute
-from zope.interface import Interface
-
 from .async_util import IAsyncJobPool  # noqa
 from .async_util import IAsyncUtility  # noqa
 from .async_util import IQueueUtility  # noqa
@@ -37,8 +34,8 @@ from .events import IApplicationCleanupEvent  # noqa
 from .events import IApplicationConfiguredEvent  # noqa
 from .events import IApplicationEvent  # noqa
 from .events import IApplicationInitializedEvent  # noqa
-from .events import IBeforeFieldModifiedEvent  # noqa
 from .events import IBeforeObjectAddedEvent  # noqa
+from .events import IBeforeObjectModifiedEvent  # noqa
 from .events import IBeforeObjectMovedEvent  # noqa
 from .events import IBeforeObjectRemovedEvent  # noqa
 from .events import IBeforeRenderViewEvent  # noqa
@@ -122,6 +119,8 @@ from .views import IPOST  # noqa
 from .views import IPROPFIND  # noqa
 from .views import IPUT  # noqa
 from .views import IView  # noqa
+from zope.interface import Attribute
+from zope.interface import Interface
 
 
 DEFAULT_ADD_PERMISSION = 'guillotina.AddContent'

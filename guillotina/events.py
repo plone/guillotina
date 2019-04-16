@@ -3,8 +3,8 @@ from guillotina.interfaces import IApplicationCleanupEvent
 from guillotina.interfaces import IApplicationConfiguredEvent
 from guillotina.interfaces import IApplicationEvent
 from guillotina.interfaces import IApplicationInitializedEvent
-from guillotina.interfaces import IBeforeFieldModifiedEvent
 from guillotina.interfaces import IBeforeObjectAddedEvent
+from guillotina.interfaces import IBeforeObjectModifiedEvent
 from guillotina.interfaces import IBeforeObjectMovedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
 from guillotina.interfaces import IBeforeRenderViewEvent
@@ -13,8 +13,6 @@ from guillotina.interfaces import IFileBeforeFinishUploaded
 from guillotina.interfaces import IFileFinishUploaded
 from guillotina.interfaces import IFileStartedUpload
 from guillotina.interfaces import INewUserAdded
-from guillotina.interfaces import IUserLogin
-from guillotina.interfaces import IUserRefreshToken
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectDuplicatedEvent
 from guillotina.interfaces import IObjectLoadedEvent
@@ -29,6 +27,8 @@ from guillotina.interfaces import ITraversalMissEvent
 from guillotina.interfaces import ITraversalResourceMissEvent
 from guillotina.interfaces import ITraversalRouteMissEvent
 from guillotina.interfaces import ITraversalViewMissEvent
+from guillotina.interfaces import IUserLogin
+from guillotina.interfaces import IUserRefreshToken
 from zope.interface import implementer
 
 
@@ -135,6 +135,14 @@ class BeforeObjectRemovedEvent(BaseObjectRemovedEvent):
     pass
 
 
+@implementer(IBeforeObjectModifiedEvent)
+class BeforeObjectModifiedEvent(object):
+
+    def __init__(self, object, payload={}):
+        self.object = object
+        self.payload = payload
+
+
 @implementer(IObjectModifiedEvent)
 class ObjectModifiedEvent(object):
 
@@ -187,13 +195,6 @@ class UserRefreshToken(object):
     def __init__(self, user, token):
         self.user = user
         self.token = token
-
-
-@implementer(IBeforeFieldModifiedEvent)
-class BeforeFieldModifiedEvent(object):
-    def __init__(self, field, value):
-        self.field = field
-        self.value = value
 
 
 @implementer(IApplicationEvent)
