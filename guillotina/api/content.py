@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina import content
 from guillotina import error_reasons
 from guillotina import security
 from guillotina._cache import FACTORY_CACHE
@@ -12,8 +13,8 @@ from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
-from guillotina import content
 from guillotina.event import notify
+from guillotina.events import BeforeObjectModifiedEvent
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
 from guillotina.events import ObjectModifiedEvent
@@ -271,6 +272,8 @@ class DefaultPATCH(Service):
                 'Cannot deserialize type {}'.format(self.context.type_name),
                 status=412,
                 reason=error_reasons.DESERIALIZATION_FAILED)
+
+        await notify(BeforeObjectModifiedEvent(self.context, payload=data))
 
         await deserializer(data)
 
