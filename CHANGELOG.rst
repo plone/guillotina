@@ -8,6 +8,9 @@ CHANGELOG
   indexing data
   [vangheem]
 
+- Provide `connection_settings` on the request object with `tests.utils.get_container`
+  [vangheem]
+
 
 4.7.1 (2019-04-26)
 ------------------

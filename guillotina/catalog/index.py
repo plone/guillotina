@@ -63,7 +63,7 @@ class RequestIndexer:
         if uid in self.update:
             del self.update[uid]
 
-    def add(self, obj, indexes=None, modified=False, security=False):
+    async def add(self, obj, indexes=None, modified=False, security=False):
         uid = obj.uuid
         if modified:
             data = {}
@@ -186,7 +186,7 @@ async def index_object(obj, indexes=None, modified=False, security=False):
     if fut is None:
         return
 
-    fut.add(obj, indexes, modified, security)
+    await fut.add(obj, indexes, modified, security)
 
 
 @configure.subscriber(
