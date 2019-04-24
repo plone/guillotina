@@ -55,7 +55,7 @@ class RequestIndexer:
     def reindex_security(self, obj):
         reindex_in_future(obj, self.request, True)
 
-    def remove(self, obj):
+    def remove_object(self, obj):
         self.remove.append(obj)
         uid = obj.uuid
         if uid in self.index:
@@ -63,7 +63,7 @@ class RequestIndexer:
         if uid in self.update:
             del self.update[uid]
 
-    async def add(self, obj, indexes=None, modified=False, security=False):
+    async def add_object(self, obj, indexes=None, modified=False, security=False):
         uid = obj.uuid
         if modified:
             data = {}
@@ -144,7 +144,7 @@ def remove_object(obj, event):
     fut = get_request_indexer()
     if fut is None:
         return
-    fut.remove(obj)
+    fut.remove_object(obj)
 
 
 @configure.subscriber(
@@ -186,7 +186,7 @@ async def index_object(obj, indexes=None, modified=False, security=False):
     if fut is None:
         return
 
-    await fut.add(obj, indexes, modified, security)
+    await fut.add_object(obj, indexes, modified, security)
 
 
 @configure.subscriber(
