@@ -4,7 +4,8 @@ CHANGELOG
 4.7.2 (unreleased)
 ------------------
 
-- Provide `connection_settings` on the request object with `tests.utils.get_container`
+- Provide `request_indexer` setting to be able to override how we handle
+  indexing data
   [vangheem]
 
 

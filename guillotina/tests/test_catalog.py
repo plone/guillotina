@@ -91,7 +91,7 @@ async def test_modified_event_gathers_all_index_data(dummy_request):
         'title': '',
         'id': ''
     }))
-    fut = index.get_future()
+    fut = index.get_request_indexer()
 
     assert len(fut.update['foobar']) == 5
 
