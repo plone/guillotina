@@ -30,8 +30,8 @@ class RequestIndexer:
     def get(self, request):
         return request.get_future('indexer')
 
-    def register(self, request):
-        request.add_future('indexer', self)
+    def register(self):
+        self.request.add_future('indexer', self)
 
     async def __call__(self):
         if self.request.view_error:
