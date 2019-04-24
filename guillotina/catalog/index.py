@@ -52,10 +52,11 @@ class RequestIndexer:
         self.update = {}
         self.remove = []
 
-    def reindex_security(self, obj):
+    async def reindex_security(self, obj):
         reindex_in_future(obj, self.request, True)
+    index_object_move = reindex_security
 
-    def remove_object(self, obj):
+    async def remove_object(self, obj):
         self.remove.append(obj)
         uid = obj.uuid
         if uid in self.index:
@@ -120,18 +121,18 @@ async def security_changed(obj, event):
         await index_object(obj, modified=True, security=True)
         return
     fut = get_request_indexer()
-    fut.reindex_security(obj)
+    await fut.reindex_security(obj)
 
 
 @configure.subscriber(
     for_=(IResource, IObjectMovedEvent), priority=1000)
-def moved_object(obj, event):
+async def moved_object(obj, event):
     fut = get_request_indexer()
-    fut.reindex_security(obj)
+    await fut.index_object_move(obj)
 
 
 @configure.subscriber(for_=(IResource, IObjectRemovedEvent))
-def remove_object(obj, event):
+async def remove_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
@@ -142,7 +143,7 @@ def remove_object(obj, event):
     fut = get_request_indexer()
     if fut is None:
         return
-    fut.remove_object(obj)
+    await fut.remove_object(obj)
 
 
 @configure.subscriber(
