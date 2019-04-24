@@ -65,6 +65,7 @@ class RequestIndexer:
 
     async def add_object(self, obj, indexes=None, modified=False, security=False):
         uid = obj.uuid
+        search = query_utility(ICatalogUtility)
         if modified:
             data = {}
             if security:
@@ -73,9 +74,6 @@ class RequestIndexer:
                     data = await apply_coroutine(adapter)
             else:
                 if indexes is not None and len(indexes) > 0:
-                    search = query_utility(ICatalogUtility)
-                    if search is None:
-                        return
                     data = await search.get_data(obj, indexes)
             if len(data) > 0:
                 if uid in self.update:
