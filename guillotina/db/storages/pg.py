@@ -505,11 +505,12 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);',
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);',
         'CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;'
+        'ALTER TABLE {objects_table_name} ADD CONSTRAINT {object_table_name}_parent_id_zoid_check CHECK (parent_id != zoid) NOT VALID;'
     ]
 
     _unique_constraint = """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_parent_id_id_key
                             ON {objects_table_name} (parent_id, id)
-                            WHERE parent_id != '{TRASHED_ID}' AND parent_id != zoid"""
+                            WHERE parent_id != '{TRASHED_ID}'"""
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
