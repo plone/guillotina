@@ -505,7 +505,7 @@ class PostgresqlStorage(BaseStorage):
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);',
         'CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);',
         'CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;'
-        'ALTER TABLE {objects_table_name} ADD CONSTRAINT {object_table_name}_parent_id_zoid_check CHECK (parent_id != zoid) NOT VALID;'
+        'ALTER TABLE {objects_table_name} ADD CONSTRAINT {object_table_name}_parent_id_zoid_check CHECK (parent_id != zoid) NOT VALID;'  # noqa
     ]
 
     _unique_constraint = """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_parent_id_id_key
