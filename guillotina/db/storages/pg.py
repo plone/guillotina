@@ -509,7 +509,7 @@ class PostgresqlStorage(BaseStorage):
 
     _unique_constraint = """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_parent_id_id_key
                             ON {objects_table_name} (parent_id, id)
-                            WHERE parent_id != '{TRASHED_ID}'"""
+                            WHERE parent_id != '{TRASHED_ID}' AND parent_id != zoid"""
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
