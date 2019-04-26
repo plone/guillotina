@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.4 (unreleased)
+4.7.4 (2019-04-26)
 ------------------
 
 - use execute utility for index future
