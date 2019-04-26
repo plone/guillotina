@@ -4,7 +4,11 @@ CHANGELOG
 4.7.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update postgresql constraint to also not allow having parent id same as zoid
+  [vangheem]
+
+- Do not allow moving content into itself
+  [vangheem]
 
 
 4.7.0 (2019-04-16)

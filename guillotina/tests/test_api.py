@@ -611,6 +611,38 @@ async def test_move_content(container_requester):
         assert status == 404
 
 
+async def test_not_allowed_move_to_same_parent(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Folder",
+                "id": "folder"
+            })
+        )
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/folder/@move',
+            data=json.dumps({
+                "destination": "/"
+            })
+        )
+        assert status == 412
+
+
+async def test_not_allowed_move_to_self(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/@move',
+            data=json.dumps({
+                "destination": "/"
+            })
+        )
+        assert status == 412
+
+
 async def test_duplicate_content(container_requester):
     async with container_requester as requester:
         await requester(

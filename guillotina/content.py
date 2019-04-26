@@ -742,6 +742,11 @@ async def move(context: IResource,
 
     if destination_ob is None:
         raise PreconditionFailed(context, 'Could not find destination object')
+    if destination_ob._p_oid == context._p_oid:
+        raise PreconditionFailed(context, 'You can not move object to itself')
+    if destination_ob._p_oid == context.__parent__._p_oid:
+        raise PreconditionFailed(context, 'Object already belongs to this parent')
+
     old_id = context.id
     if new_id is not None:
         context.id = context.__name__ = new_id

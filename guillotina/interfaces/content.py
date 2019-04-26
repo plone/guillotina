@@ -163,6 +163,7 @@ class IResource(ILocation):
 
     __acl__ = Attribute('')
     __gannotations__ = Attribute('')
+    _p_oid = Attribute('database object unique id')
 
     id = Attribute('')
     creators = Attribute('')
