@@ -4,7 +4,7 @@ CHANGELOG
 4.7.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- use execute utility for index future
 
 
 4.7.3 (2019-04-26)
