@@ -89,6 +89,7 @@ app_settings: Dict[str, Any] = {
     "pg_connection_class": "asyncpg.connection.Connection",
     "oid_generator": generate_oid,
     "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
-    "check_writable_request": "guillotina.writable.check_writable_request"
+    "check_writable_request": "guillotina.writable.check_writable_request",
+    "request_indexer": "guillotina.catalog.index.RequestIndexer"
 }
 default_settings = copy.deepcopy(app_settings)

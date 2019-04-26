@@ -165,7 +165,8 @@ _dotted_name_settings = (
     'pg_connection_class',
     'oid_generator',
     'cors_renderer',
-    'check_writable_request'
+    'check_writable_request',
+    'request_indexer'
 )
 
 def optimize_settings(settings):

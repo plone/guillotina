@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina._settings import app_settings
 from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_adapter
 from guillotina.component import query_utility
@@ -16,7 +17,7 @@ from guillotina.utils import apply_coroutine
 from guillotina.utils import get_current_request
 
 
-class IndexFuture(object):
+class RequestIndexer:
 
     def __init__(self, container, request):
         self.remove = []
@@ -24,6 +25,13 @@ class IndexFuture(object):
         self.update = {}
         self.container = container
         self.request = request
+
+    @classmethod
+    def get(self, request):
+        return request.get_future('indexer')
+
+    def register(self):
+        self.request.add_future('indexer', self)
 
     async def __call__(self):
         if self.request.view_error:
@@ -44,8 +52,44 @@ class IndexFuture(object):
         self.update = {}
         self.remove = []
 
+    async def reindex_security(self, obj):
+        reindex_in_future(obj, self.request, True)
+    index_object_move = reindex_security
 
-def get_future():
+    async def remove_object(self, obj):
+        self.remove.append(obj)
+        uid = obj.uuid
+        if uid in self.index:
+            del self.index[uid]
+        if uid in self.update:
+            del self.update[uid]
+
+    async def add_object(self, obj, indexes=None, modified=False, security=False):
+        uid = obj.uuid
+        search = query_utility(ICatalogUtility)
+        if modified:
+            data = {}
+            if security:
+                adapter = query_adapter(obj, ISecurityInfo)
+                if adapter is not None:
+                    data = await apply_coroutine(adapter)
+            else:
+                if indexes is not None and len(indexes) > 0:
+                    data = await search.get_data(obj, indexes)
+            if len(data) > 0:
+                if uid in self.update:
+                    self.update[uid].update(data)
+                else:
+                    self.update[uid] = data
+        else:
+            self.index[uid] = await search.get_data(obj)
+
+
+# b/w compat
+IndexFuture = RequestIndexer
+
+
+def get_request_indexer():
 
     request = get_current_request()
     try:
@@ -57,11 +101,16 @@ def get_future():
     if not search:
         return  # no search configured
 
-    fut = request.get_future('indexer')
-    if fut is None:
-        fut = IndexFuture(container, request)
-        request.add_future('indexer', fut)
-    return fut
+    klass = app_settings['request_indexer']
+    indexer = klass.get(request)
+    if indexer is None:
+        indexer = klass(container, request)
+        indexer.register()
+    return indexer
+
+
+# b/w compat
+get_future = get_request_indexer
 
 
 @configure.subscriber(
@@ -71,20 +120,19 @@ async def security_changed(obj, event):
         # assuming permissions for group are already handled correctly with search
         await index_object(obj, modified=True, security=True)
         return
-    # We need to reindex the objects below
-    request = get_current_request()
-    reindex_in_future(obj, request, True)
+    fut = get_request_indexer()
+    await fut.reindex_security(obj)
 
 
 @configure.subscriber(
     for_=(IResource, IObjectMovedEvent), priority=1000)
-def moved_object(obj, event):
-    request = get_current_request()
-    reindex_in_future(obj, request, True)
+async def moved_object(obj, event):
+    fut = get_request_indexer()
+    await fut.index_object_move(obj)
 
 
 @configure.subscriber(for_=(IResource, IObjectRemovedEvent))
-def remove_object(obj, event):
+async def remove_object(obj, event):
     uid = getattr(obj, 'uuid', None)
     if uid is None:
         return
@@ -92,15 +140,10 @@ def remove_object(obj, event):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    fut = get_future()
+    fut = get_request_indexer()
     if fut is None:
         return
-
-    fut.remove.append(obj)
-    if uid in fut.index:
-        del fut.index[uid]
-    if uid in fut.update:
-        del fut.update[uid]
+    await fut.remove_object(obj)
 
 
 @configure.subscriber(
@@ -138,30 +181,11 @@ async def index_object(obj, indexes=None, modified=False, security=False):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    search = query_utility(ICatalogUtility)
-    if search is None:
-        return
-
-    fut = get_future()
+    fut = get_request_indexer()
     if fut is None:
         return
 
-    if modified:
-        data = {}
-        if security:
-            adapter = query_adapter(obj, ISecurityInfo)
-            if adapter is not None:
-                data = await apply_coroutine(adapter)
-        else:
-            if indexes is not None and len(indexes) > 0:
-                data = await search.get_data(obj, indexes)
-        if len(data) > 0:
-            if uid in fut.update:
-                fut.update[uid].update(data)
-            else:
-                fut.update[uid] = data
-    else:
-        fut.index[uid] = await search.get_data(obj)
+    await fut.add_object(obj, indexes, modified, security)
 
 
 @configure.subscriber(

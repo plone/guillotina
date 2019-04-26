@@ -45,7 +45,7 @@ def get_roles_with_access_content(obj, request=None):
 
 def get_principals_with_access_content(obj, request=None):
     if obj is None:
-        return {}
+        return []
     if request is None:
         request = get_current_request()
     interaction = IInteraction(request)
