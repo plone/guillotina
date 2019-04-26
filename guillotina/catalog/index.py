@@ -121,14 +121,16 @@ async def security_changed(obj, event):
         await index_object(obj, modified=True, security=True)
         return
     fut = get_request_indexer()
-    await fut.reindex_security(obj)
+    if fut is not None:
+        await fut.reindex_security(obj)
 
 
 @configure.subscriber(
     for_=(IResource, IObjectMovedEvent), priority=1000)
 async def moved_object(obj, event):
     fut = get_request_indexer()
-    await fut.index_object_move(obj)
+    if fut is not None:
+        await fut.index_object_move(obj)
 
 
 @configure.subscriber(for_=(IResource, IObjectRemovedEvent))

@@ -4,7 +4,8 @@ CHANGELOG
 4.7.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix missing indexer
+  [vangheem]
 
 
 4.7.2 (2019-04-26)
