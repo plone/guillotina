@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.3 (unreleased)
+4.7.3 (2019-04-26)
 ------------------
 
 - Fix missing indexer
