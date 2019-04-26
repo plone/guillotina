@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.2 (unreleased)
+4.7.2 (2019-04-26)
 ------------------
 
 - Provide `request_indexer` setting to be able to override how we handle
