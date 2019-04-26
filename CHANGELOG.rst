@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.1 (unreleased)
+4.7.1 (2019-04-26)
 ------------------
 
 - Update postgresql constraint to also not allow having parent id same as zoid
