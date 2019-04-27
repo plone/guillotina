@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.5 (unreleased)
+4.7.5 (2019-04-27)
 ------------------
 
 - Fix command cleanup procedure to correctly cleanup asyncio tasks for commands
