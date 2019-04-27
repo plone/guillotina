@@ -185,7 +185,7 @@ class Command(object):
             # Blocking call which returns when finished
             loop = asyncio.get_event_loop()
             loop.run_until_complete(self.run(self.arguments, settings, app))
-            loop.run_until_complete(self.wait_for_tasks())
+            loop.run_until_complete(self.cleanup(app))
             loop.close()
         else:
             self.run(self.arguments, settings, app)
@@ -203,9 +203,16 @@ class Command(object):
             else:
                 self.line_profiler.print_stats()
 
-    async def wait_for_tasks(self):
+    async def cleanup(self, app):
+        try:
+            app.freeze()
+            await app.on_cleanup.send(app)
+        except Exception:
+            logger.warning('Unhandled error cleanup tasks', exc_info=True)
         for task in asyncio.Task.all_tasks():
             if task.done():
+                continue
+            if 'cleanup' in task._coro.__qualname__:
                 continue
             try:
                 logger.info(f'Waiting for {task._coro.__qualname__} to finish')
