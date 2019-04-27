@@ -4,7 +4,8 @@ CHANGELOG
 4.7.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix command cleanup procedure to correctly cleanup asyncio tasks for commands
+  [vangheem]
 
 
 4.7.4 (2019-04-26)
