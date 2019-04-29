@@ -4,7 +4,8 @@ CHANGELOG
 4.7.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Provide `connection_settings` on the request object with `tests.utils.get_container`
+  [vangheem]
 
 
 4.7.5 (2019-04-27)
