@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.6 (unreleased)
+4.7.6 (2019-04-28)
 ------------------
 
 - Provide `connection_settings` on the request object with `tests.utils.get_container`
