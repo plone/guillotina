@@ -4,7 +4,8 @@ CHANGELOG
 4.7.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix json schema definitions and provide `get_schema_validator` utility
+  [vangheem]
 
 
 4.7.6 (2019-04-28)
