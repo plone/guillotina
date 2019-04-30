@@ -4,7 +4,9 @@ CHANGELOG
 4.7.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `managed_transaction` context manager to correctly adopt parent transaction
+  along with new transaction objects
+  [vangheem]
 
 
 4.7.6 (2019-04-28)
