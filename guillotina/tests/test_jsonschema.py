@@ -29,3 +29,8 @@ def test_get_json_schema_validator(dummy_guillotina):
             'role': 'foobar',
             'setting': 'Foobar'
         })
+
+
+def test_get_json_schema_validator_caches(dummy_guillotina):
+    validator = get_schema_validator('PrincipalRole')
+    assert id(validator) == id(get_schema_validator('PrincipalRole'))
