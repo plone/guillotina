@@ -18,6 +18,7 @@ import random
 import string
 import time
 import types
+import typing
 
 try:
     random = random.SystemRandom()  # type: ignore
@@ -279,7 +280,8 @@ def get_url(req, path):
         return str(url)
 
 
-_cached_jsonschema_validators = {}
+_cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}
+
 
 def get_schema_validator(schema_name: str):
     '''
