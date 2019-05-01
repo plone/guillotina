@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.7 (unreleased)
+4.7.7 (2019-05-01)
 ------------------
 
 - Fix json schema definitions and provide `get_schema_validator` utility
