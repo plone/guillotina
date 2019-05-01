@@ -6,14 +6,13 @@ configure.json_schema_definition('Addon', {
     "title": "Addon data",
     "properties": {
         "id": {
-            "type": "string",
-            "required": True
+            "type": "string"
         },
         "title": {
-            "type": "string",
-            "required": False
+            "type": "string"
         }
-    }
+    },
+    'required': ['id']
 })
 
 
@@ -70,10 +69,10 @@ configure.json_schema_definition('Behavior', {
     "properties": {
         "behavior": {
             "type": "string",
-            "title": "Dotted name to interface",
-            "required": True
+            "title": "Dotted name to interface"
         }
-    }
+    },
+    'required': ['behavior']
 })
 
 configure.json_schema_definition('BehaviorsResponse', {
@@ -110,18 +109,16 @@ configure.json_schema_definition('BaseResource', {
     "title": "Base resource data",
     "properties": {
         "id": {
-            "type": "string",
-            "required": True
+            "type": "string"
         },
         "@type": {
-            "type": "string",
-            "required": True
+            "type": "string"
         },
         "title": {
-            "type": "string",
-            "required": True
+            "type": "string"
         }
-    }
+    },
+    'required': ['id']
 })
 
 
@@ -130,8 +127,7 @@ configure.json_schema_definition('WritableResource', {
     "title": "Writable resource data",
     "properties": {
         "title": {
-            "type": "string",
-            "required": True
+            "type": "string"
         }
     }
 })
@@ -153,14 +149,13 @@ configure.json_schema_definition('Resource', {
     "allOf": [
         {"$ref": "#/definitions/WritableResource"},
         {
+            "type": "object",
             "properties": {
                 "@id": {
-                    "type": "string",
-                    "required": True
+                    "type": "string"
                 },
                 "@type": {
-                    "type": "string",
-                    "required": True
+                    "type": "string"
                 },
                 "parent": {
                     "type": "object",
@@ -173,10 +168,10 @@ configure.json_schema_definition('Resource', {
                                 "type": "string"
                             }
                         }
-                    },
-                    "required": False
+                    }
                 }
-            }
+            },
+            'required': ['@id', '@type']
         }
     ]
 })
@@ -210,7 +205,6 @@ configure.json_schema_definition('ACL', {
     "properties": {
         "@id": {
             "type": "string",
-            "required": False
         },
         "roleperm": {
             "type": "object"
@@ -254,17 +248,15 @@ configure.json_schema_definition('PrincipalRole', {
     "properties": {
         "principal": {
             "type": "string",
-            "required": True
         },
         "role": {
             "type": "string",
-            "required": True
         },
         "setting": {
             "enum": ["Allow", "Deny", "AllowSingle", "Unset"],
-            "required": True
         }
-    }
+    },
+    'required': ['principal', 'role', 'setting']
 })
 
 
@@ -273,18 +265,16 @@ configure.json_schema_definition('PrincipalPermission', {
     "title": "Permission assigned to principal",
     "properties": {
         "principal": {
-            "type": "string",
-            "required": True
+            "type": "string"
         },
         "permission": {
-            "type": "string",
-            "required": True
+            "type": "string"
         },
         "setting": {
-            "enum": ["Allow", "Deny", "AllowSingle", "Unset"],
-            "required": True
+            "enum": ["Allow", "Deny", "AllowSingle", "Unset"]
         }
-    }
+    },
+    'required': ['principal', 'permission', 'setting']
 })
 
 
@@ -294,17 +284,15 @@ configure.json_schema_definition('RolePermission', {
     "properties": {
         "permission": {
             "type": "string",
-            "required": True
         },
         "role": {
             "type": "string",
-            "required": True
         },
         "setting": {
             "enum": ["Allow", "Deny", "AllowSingle", "Unset"],
-            "required": True
         }
-    }
+    },
+    'required': ['role', 'permission', 'setting']
 })
 
 
@@ -320,7 +308,6 @@ configure.json_schema_definition('Permissions', {
                     "$ref": "#/definitions/PrincipalPermission"
                 }
             },
-            "required": False
         },
         "prinrole": {
             "type": "array",
@@ -330,7 +317,6 @@ configure.json_schema_definition('Permissions', {
                     "$ref": "#/definitions/PrincipalRole"
                 }
             },
-            "required": False
         },
         "roleperm": {
             "type": "array",
@@ -339,8 +325,7 @@ configure.json_schema_definition('Permissions', {
                 "schema": {
                     "$ref": "#/definitions/RolePermission"
                 },
-            },
-            "required": False
+            }
         }
     }
 })
@@ -379,12 +364,11 @@ configure.json_schema_definition('SearchResults', {
                 "schema": {
                     "$ref": "#/definitions/SearchResult"
                 }
-            },
-            "required": True
+            }
         },
         "items_count": {
-            "type": "integer",
-            "required": False
+            "type": "integer"
         }
-    }
+    },
+    'required': ['member']
 })

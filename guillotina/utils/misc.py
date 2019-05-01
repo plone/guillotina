@@ -1,22 +1,24 @@
-import asyncio
-import inspect
-import random
-import string
-import time
-import types
+from aiohttp.web import Request
 from collections import MutableMapping
 from functools import partial
-from hashlib import sha256 as sha
-
-import aiotask_context
-from aiohttp.web import Request
 from guillotina import glogging
+from guillotina._settings import app_settings
 from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
+from hashlib import sha256 as sha
 
+import aiotask_context
+import asyncio
+import inspect
+import jsonschema.validators
+import random
+import string
+import time
+import types
+import typing
 
 try:
     random = random.SystemRandom()  # type: ignore
@@ -276,3 +278,26 @@ def get_url(req, path):
                 url = url.with_scheme(forwarded_proto)
                 break
         return str(url)
+
+
+_cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}
+
+
+def get_schema_validator(schema_name: str):
+    '''
+    Get a json schema validator by the definition name
+
+    :param schema_name: Name of the json schema type
+    '''
+    if schema_name in _cached_jsonschema_validators:
+        return _cached_jsonschema_validators[schema_name]
+
+    schema = {
+        **app_settings['json_schema_definitions'][schema_name],
+        'definitions': app_settings['json_schema_definitions']
+    }
+    jsonschema_validator = jsonschema.validators.validator_for(schema)
+    jsonschema_validator.check_schema(schema)
+    val = jsonschema_validator(schema)
+    _cached_jsonschema_validators[schema_name] = val
+    return val

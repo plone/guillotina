@@ -4,6 +4,9 @@ CHANGELOG
 4.7.7 (unreleased)
 ------------------
 
+- Fix json schema definitions and provide `get_schema_validator` utility
+  [vangheem]
+
 - Fix `managed_transaction` context manager to correctly adopt parent transaction
   along with new transaction objects
   [vangheem]
