@@ -133,13 +133,19 @@ class managed_transaction:  # noqa: N801
             # where, we we're adopted those objects with this transaction
             if self.previous_txn != self.txn:
                 # try adopting currently registered objects
-                self.txn.modified = self.previous_txn.modified
-                self.txn.deleted = self.previous_txn.deleted
-                self.txn.added = self.previous_txn.added
+                self.txn.modified = {
+                    **self.previous_txn.modified,
+                    **self.txn.modified}
+                self.txn.deleted = {
+                    **self.previous_txn.deleted,
+                    **self.txn.deleted}
+                self.txn.added = {
+                    **self.previous_txn.added,
+                    **self.txn.added}
 
-                self.adopt_objects(self.txn.modified, self.txn)
-                self.adopt_objects(self.txn.deleted, self.txn)
-                self.adopt_objects(self.txn.added, self.txn)
+                self.adopt_objects(self.previous_txn.modified, self.txn)
+                self.adopt_objects(self.previous_txn.deleted, self.txn)
+                self.adopt_objects(self.previous_txn.added, self.txn)
 
         if self.abort_when_done:
             await self.tm.abort(txn=self.txn)
