@@ -37,6 +37,7 @@ configure.permission('guillotina.ManageCatalog', 'Manage catalog')
 configure.permission('guillotina.GetAPIDefinition', 'Get the API definition')
 configure.permission('guillotina.Public', 'Public access to content')
 configure.permission('guillotina.WebSocket', 'Access to websocket')
+configure.permission('guillotina.UploadFile', 'Ability to upload files on content')
 
 
 configure.role("guillotina.Anonymous", "Everybody",
@@ -123,12 +124,14 @@ configure.grant(
 configure.grant(
     permission="guillotina.ChangePermissions",
     role="guillotina.Owner")
-
 configure.grant(
     permission="guillotina.SeePermissions",
     role="guillotina.Owner")
 configure.grant(
     permission="guillotina.ReindexContent",
+    role="guillotina.Owner")
+configure.grant(
+    permission="guillotina.UploadFile",
     role="guillotina.Owner")
 
 #  Editor
@@ -149,6 +152,9 @@ configure.grant(
     role="guillotina.Editor")
 configure.grant(
     permission="guillotina.ReindexContent",
+    role="guillotina.Editor")
+configure.grant(
+    permission="guillotina.UploadFile",
     role="guillotina.Editor")
 
 # ContainerAdmin

@@ -109,11 +109,11 @@ class DirectoryGET(FileGET):
 
 # Field File
 @configure.service(
-    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
+    context=IResource, method='PATCH', permission='guillotina.UploadFile',
     name='@upload/{field_name}',
     **_traversed_file_doc('Update the content of a file'))
 @configure.service(
-    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
+    context=IResource, method='PATCH', permission='guillotina.UploadFile',
     name='@upload/{field_name}/{filename}',
     **_traversed_file_doc('Update the content of a file'))
 class UploadFile(TraversableFieldService):
@@ -173,7 +173,7 @@ class HeadFile(DownloadFile):
 
 
 @configure.service(
-    context=IResource, method='POST', permission='guillotina.ModifyContent',
+    context=IResource, method='POST', permission='guillotina.UploadFile',
     name='@tusupload/{field_name}',
     **_traversed_file_doc('TUS endpoint', parameters=TUS_PARAMETERS, responses={
         '204': {
@@ -192,7 +192,7 @@ class HeadFile(DownloadFile):
         }
     }))
 @configure.service(
-    context=IResource, method='POST', permission='guillotina.ModifyContent',
+    context=IResource, method='POST', permission='guillotina.UploadFile',
     name='@tusupload/{field_name}/{filename}',
     **_traversed_file_doc('TUS endpoint', parameters=TUS_PARAMETERS, responses={
         '204': {
@@ -225,7 +225,7 @@ class TusCreateFile(UploadFile):
 
 
 @configure.service(
-    context=IResource, method='HEAD', permission='guillotina.ModifyContent',
+    context=IResource, method='HEAD', permission='guillotina.UploadFile',
     name='@tusupload/{field_name}/{filename}',
     **_traversed_file_doc('TUS endpoint', responses={
         '200': {
@@ -244,7 +244,7 @@ class TusCreateFile(UploadFile):
         }
     }))
 @configure.service(
-    context=IResource, method='HEAD', permission='guillotina.ModifyContent',
+    context=IResource, method='HEAD', permission='guillotina.UploadFile',
     name='@tusupload/{field_name}',
     **_traversed_file_doc('TUS endpoint', responses={
         '200': {
@@ -273,7 +273,7 @@ class TusHeadFile(UploadFile):
 
 
 @configure.service(
-    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
+    context=IResource, method='PATCH', permission='guillotina.UploadFile',
     name='@tusupload/{field_name}',
     **_traversed_file_doc('TUS endpoint', parameters=[{
         "name": "Upload-Offset",
@@ -296,7 +296,7 @@ class TusHeadFile(UploadFile):
         }
     }))
 @configure.service(
-    context=IResource, method='PATCH', permission='guillotina.ModifyContent',
+    context=IResource, method='PATCH', permission='guillotina.UploadFile',
     name='@tusupload/{field_name}/{filename}',
     **_traversed_file_doc('TUS endpoint', parameters=[{
         "name": "Upload-Offset",
