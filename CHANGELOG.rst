@@ -4,7 +4,7 @@ CHANGELOG
 4.7.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use specific permission to upload files on content [lferran]
 
 
 4.7.7 (2019-05-01)
