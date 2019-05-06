@@ -463,7 +463,7 @@ async def test_allowsingle2(container_requester):
             'guillotina.ViewContent', test2)
 
 
-async def test_cached_access_roles_poisening(dummy_guillotina):
+async def test_cached_access_roles(dummy_guillotina):
     db = get_db(dummy_guillotina, 'db')
     tm = db.get_transaction_manager()
     request = get_mocked_request(db)

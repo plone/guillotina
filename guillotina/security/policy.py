@@ -20,9 +20,9 @@ from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IGroups
+from guillotina.interfaces import IInheritPermissionMap
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
-from guillotina.interfaces import IInheritPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IRolePermissionMap
@@ -35,6 +35,7 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.utils import get_current_request
+from lru import LRU
 from zope.interface import implementer
 from zope.interface import provider
 
@@ -87,7 +88,7 @@ class Interaction(object):
 
     def __init__(self, request=None):
         self.participations = []
-        self._cache = {}
+        self._cache = LRU(100)
         self.principal = None
 
         if request is not None:

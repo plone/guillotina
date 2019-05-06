@@ -4,6 +4,9 @@ CHANGELOG
 4.7.8 (unreleased)
 ------------------
 
+- Fix potential memory leak in security lookup cache
+  [vangheem]
+
 - Fix security policy cache lookup to distinguish between types of cached
   decisions for parent vs top level object
   [vangheem]
