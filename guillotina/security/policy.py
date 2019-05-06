@@ -20,9 +20,9 @@ from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IGroups
+from guillotina.interfaces import IInheritPermissionMap
 from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
-from guillotina.interfaces import IInheritPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IRolePermissionMap
@@ -35,6 +35,7 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.utils import get_current_request
+from lru import LRU
 from zope.interface import implementer
 from zope.interface import provider
 
@@ -87,7 +88,7 @@ class Interaction(object):
 
     def __init__(self, request=None):
         self.participations = []
-        self._cache = {}
+        self._cache = LRU(1000)
         self.principal = None
 
         if request is not None:
@@ -111,7 +112,7 @@ class Interaction(object):
         participation.interaction = None
 
     def invalidate_cache(self):
-        self._cache = {}
+        self._cache.clear()
 
     @profilable
     def check_permission(self, permission, obj):
@@ -154,9 +155,10 @@ class Interaction(object):
 
         return False
 
-    def cache(self, parent):
+    def cache(self, parent, level=''):
         serial = getattr(parent, '_p_serial', '')
-        cache_key = f'{id(parent)}-{serial}'
+        oid = getattr(parent, '_p_oid', '')
+        cache_key = f'{id(parent)}-{oid}-{serial}-{level}'
         cache = self._cache.get(cache_key)
         if cache is None:
             cache = CacheEntry()
@@ -212,7 +214,7 @@ class Interaction(object):
     def cached_principal_permission(
             self, parent, principal, groups, permission, level):
         # Compute the permission, if any, for the principal.
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
 
         try:
             # We need to caches for first level and Allow Single
@@ -299,7 +301,7 @@ class Interaction(object):
 
     def cached_principal_roles(self, parent, principal, groups, level):
         # Redefine it to get global roles
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
         try:
             cache_principal_roles = cache.principal_roles
         except AttributeError:
@@ -348,7 +350,7 @@ class Interaction(object):
 
         Global + Local + Code
         """
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
         try:
             cache_roles = cache.roles
         except AttributeError:
@@ -398,7 +400,7 @@ class Interaction(object):
 
         Global + Local + Code
         """
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
         try:
             cache_principals = cache.principals
         except AttributeError:

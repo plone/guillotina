@@ -61,7 +61,8 @@ setup(
         'asyncpg',
         'cffi',
         'PyYAML>=5.1',
-        'aiotask_context'
+        'aiotask_context',
+        'lru-dict'
     ],
     extras_require={
         'test': [
