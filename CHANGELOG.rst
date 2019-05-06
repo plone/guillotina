@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.7.8 (unreleased)
+4.7.8 (2019-05-06)
 ------------------
 
 - Fix potential memory leak in security lookup cache
