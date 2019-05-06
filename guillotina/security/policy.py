@@ -112,7 +112,7 @@ class Interaction(object):
         participation.interaction = None
 
     def invalidate_cache(self):
-        self._cache = {}
+        self._cache.clear()
 
     @profilable
     def check_permission(self, permission, obj):
