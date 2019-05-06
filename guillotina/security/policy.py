@@ -88,7 +88,7 @@ class Interaction(object):
 
     def __init__(self, request=None):
         self.participations = []
-        self._cache = LRU(100)
+        self._cache = LRU(1000)
         self.principal = None
 
         if request is not None:
