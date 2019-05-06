@@ -156,7 +156,8 @@ class Interaction(object):
 
     def cache(self, parent, level=''):
         serial = getattr(parent, '_p_serial', '')
-        cache_key = f'{id(parent)}-{serial}-{level}'
+        oid = getattr(parent, '_p_oid', '')
+        cache_key = f'{id(parent)}-{oid}-{serial}-{level}'
         cache = self._cache.get(cache_key)
         if cache is None:
             cache = CacheEntry()
