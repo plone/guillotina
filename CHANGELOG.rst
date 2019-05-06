@@ -4,7 +4,9 @@ CHANGELOG
 4.7.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix security policy cache lookup to distinguish between types of cached
+  decisions for parent vs top level object
+  [vangheem]
 
 
 4.7.7 (2019-05-01)

@@ -154,7 +154,7 @@ class Interaction(object):
 
         return False
 
-    def cache(self, parent):
+    def cache(self, parent, level=''):
         serial = getattr(parent, '_p_serial', '')
         cache_key = f'{id(parent)}-{serial}'
         cache = self._cache.get(cache_key)
@@ -212,7 +212,7 @@ class Interaction(object):
     def cached_principal_permission(
             self, parent, principal, groups, permission, level):
         # Compute the permission, if any, for the principal.
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
 
         try:
             # We need to caches for first level and Allow Single
@@ -299,7 +299,7 @@ class Interaction(object):
 
     def cached_principal_roles(self, parent, principal, groups, level):
         # Redefine it to get global roles
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
         try:
             cache_principal_roles = cache.principal_roles
         except AttributeError:
@@ -348,7 +348,7 @@ class Interaction(object):
 
         Global + Local + Code
         """
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
         try:
             cache_roles = cache.roles
         except AttributeError:
@@ -398,7 +398,7 @@ class Interaction(object):
 
         Global + Local + Code
         """
-        cache = self.cache(parent)
+        cache = self.cache(parent, level)
         try:
             cache_principals = cache.principals
         except AttributeError:
