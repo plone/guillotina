@@ -195,7 +195,7 @@ async def test_object_utils(container_requester):
         await request._tm.abort(txn=txn)
 
 
-async def test_get_deleted(container_requester):
+async def test_get_child_from_deleted(container_requester):
     async with container_requester as requester:
         response, status = await requester(
             'POST',
