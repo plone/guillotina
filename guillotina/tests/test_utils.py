@@ -195,6 +195,47 @@ async def test_object_utils(container_requester):
         await request._tm.abort(txn=txn)
 
 
+async def test_get_deleted(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Folder",
+                "id": "folder",
+                "title": "folder",
+            }))
+        assert status == 201
+
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/folder',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item",
+                "title": "item",
+            }))
+        assert status == 201
+
+        # child item oid
+        oid = response['UID']
+
+        response, status = await requester('DELETE', '/db/guillotina/folder')
+        assert status == 200
+
+        request = get_mocked_request(requester.db)
+        txn = await request._tm.begin(request)
+
+        ob = await utils.get_object_by_oid(oid, txn)
+
+        # ++++++++++++++++++++++++++++++++++++++++++++++++
+        # FIXME
+        assert ob is None
+        # ++++++++++++++++++++++++++++++++++++++++++++++++
+
+        await request._tm.abort(txn=txn)
+
+
 async def test_run_async():
     def _test():
         return 'foobar'
