@@ -1,10 +1,12 @@
 CHANGELOG
 =========
 
-4.7.9 (unreleased)
+4.8.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- `get_object_by_oid` now raises KeyError since it provided unsafe behavior
+  when used with tombstoned objects
+  [vangheem]
 
 
 4.7.8 (2019-05-06)

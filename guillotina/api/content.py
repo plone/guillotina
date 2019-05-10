@@ -785,8 +785,9 @@ async def invalidate_cache(context, request):
     })
 async def resolve_uid(context, request):
     uid = request.matchdict['uid']
-    ob = await get_object_by_oid(uid)
-    if ob is None:
+    try:
+        ob = await get_object_by_oid(uid)
+    except KeyError:
         return HTTPNotFound(content={
             'reason': f'Could not find uid: {uid}'
         })
