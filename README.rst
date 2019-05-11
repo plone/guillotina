@@ -87,9 +87,12 @@ Read more `Guillotina-Heroku <https://github.com/guillotinaweb/guillotina-heroku
 Getting started with development
 --------------------------------
 
-Using pip::
+Using pip(requires python > 3.6)::
 
-  ./bin/pip install requirements.txt
+  git clone git@github.com:plone/guillotina.git
+  cd guillotina
+  python -m venv .
+  ./bin/pip install -r requirements.txt
   ./bin/pip install -e .[test]
 
 
