@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.0 (unreleased)
+4.8.0 (2019-05-13)
 ------------------
 
 - `get_object_by_oid` now raises KeyError since it provided unsafe behavior
