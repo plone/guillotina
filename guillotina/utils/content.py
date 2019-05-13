@@ -175,13 +175,10 @@ async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
         txn = get_transaction()
     result = txn._manager._hard_cache.get(oid, None)
     if result is None:
-        try:
-            result = await txn._get(oid)
-        except KeyError:
-            return None
+        result = await txn._get(oid)
 
     if result['parent_id'] == TRASHED_ID:
-        return None
+        raise KeyError(oid)
 
     obj = reader(result)
     obj._p_jar = txn
