@@ -37,7 +37,9 @@ def get_roles_with_access_content(obj, request=None):
     roles = interaction.cached_roles(obj, 'guillotina.AccessContent', 'o')
     result = []
     all_roles = role.global_roles() + role.local_roles()
-    for r in roles.keys():
+    for r, v in roles.items():
+        if v != 1:
+            continue
         if r in all_roles:
             result.append(r)
     return result
@@ -52,7 +54,9 @@ def get_principals_with_access_content(obj, request=None):
     roles = interaction.cached_roles(obj, 'guillotina.AccessContent', 'o')
     result = []
     all_roles = role.global_roles() + role.local_roles()
-    for r in roles.keys():
+    for r, v in roles.items():
+        if v != 1:
+            continue
         if r in all_roles:
             result.append(r)
     users = interaction.cached_principals(obj, result, 'guillotina.AccessContent', 'o')

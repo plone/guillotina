@@ -39,6 +39,8 @@ from lru import LRU
 from zope.interface import implementer
 from zope.interface import provider
 
+import warnings
+
 
 code_principal_permission_setting = principal_permission_manager.get_setting
 code_roles_for_permission = role_permission_manager.get_roles_for_permission
@@ -202,8 +204,19 @@ class Interaction(object):
             # Get the roles from the user
             prin_roles = self.cached_principal_roles(
                 parent, principal, groups, 'o')
-            for role, setting in prin_roles.items():
-                if setting and (role in roles):
+            # first go through denials to make sure they are allowed
+            for role, setting in roles.items():
+                if setting != 0:
+                    continue
+                if prin_roles.get(role):
+                    cache_decision_prin[permission] = decision = False
+                    return decision
+
+            # then, go through granted roles
+            for role, setting in roles.items():
+                if setting != 1:
+                    continue
+                if prin_roles.get(role):
                     cache_decision_prin[permission] = decision = True
                     return decision
 
@@ -295,8 +308,11 @@ class Interaction(object):
         roles['guillotina.Anonymous'] = True  # Everybody has Anonymous
 
         # First the global roles from user + group
-        groles = self._global_roles_for(principal)
-        roles.update(groles)
+        for role, setting in self._global_roles_for(principal).items():
+            try:
+                roles[role] = SettingAsBoolean[setting]
+            except KeyError:
+                warnings.warn(f"Invalid role settings used {role}: {setting}")
         return roles
 
     def cached_principal_roles(self, parent, principal, groups, level):
@@ -387,8 +403,8 @@ class Interaction(object):
                     roles[role] = 1
                 elif setting is AllowSingle and level == 'o':
                     roles[role] = 1
-                elif setting is Deny and role in roles:
-                    del roles[role]
+                elif setting is Deny:
+                    roles[role] = 0
 
         if level != 'o':
             # Only cache on non 1rst level queries needs new way

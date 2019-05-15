@@ -485,3 +485,39 @@ async def test_cached_access_roles(dummy_guillotina):
 
             roles = interaction.cached_roles(folder, 'guillotina.AccessContent', 'o')
             assert roles.get('guillotina.ContainerCreator') == 1
+
+
+async def test_deny_permission_to_role_do_not_clash(dummy_guillotina):
+    db = get_db(dummy_guillotina, 'db')
+    tm = db.get_transaction_manager()
+    request = get_mocked_request(db)
+    async with wrap_request(request):
+        utils.login(request)
+        async with tm.transaction():
+            root_ob = await tm.get_root()
+            container = await create_container(root_ob, 'test-container')
+            folder = await create_content_in_container(container, 'Folder', 'foobar')
+            item = await create_content_in_container(folder, 'Item', 'foobar')
+
+            container_manager = IRolePermissionManager(container)
+            container_manager.grant_permission_to_role(
+                'guillotina.ModifyContent', 'guillotina.Member')
+
+            folder_manager = IRolePermissionManager(folder)
+            folder_manager.grant_permission_to_role(
+                'guillotina.DeleteContent', 'guillotina.Member')
+            folder_manager.deny_permission_to_role(
+                'guillotina.ModifyContent', 'guillotina.Member')
+
+            item_manager = IRolePermissionManager(item)
+            item_manager.deny_permission_to_role(
+                'guillotina.DeleteContent', 'guillotina.Anonymous')
+            item_manager.grant_permission_to_role(
+                'guillotina.ModifyContent', 'guillotina.Anonymous')
+
+            interaction = IInteraction(request)
+            assert interaction.check_permission('guillotina.DeleteContent', folder)
+            assert not interaction.check_permission('guillotina.DeleteContent', item)
+
+            assert not interaction.check_permission('guillotina.ModifyContent', folder)
+            assert interaction.check_permission('guillotina.ModifyContent', item)

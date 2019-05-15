@@ -1,5 +1,6 @@
 from guillotina import configure
 from guillotina.auth.users import GuillotinaUser
+from guillotina.interfaces import Allow
 from guillotina.interfaces import IGroups
 from guillotina.utils import get_current_request
 
@@ -11,11 +12,11 @@ class GuillotinaGroup(GuillotinaUser):
 
         if ident == 'Managers':
             # Special Case its a Root Manager user
-            self._roles['guillotina.ContainerAdmin'] = 1
-            self._roles['guillotina.ContainerDeleter'] = 1
-            self._roles['guillotina.Owner'] = 1
-            self._roles['guillotina.Member'] = 1
-            self._roles['guillotina.Manager'] = 1
+            self._roles['guillotina.ContainerAdmin'] = Allow
+            self._roles['guillotina.ContainerDeleter'] = Allow
+            self._roles['guillotina.Owner'] = Allow
+            self._roles['guillotina.Member'] = Allow
+            self._roles['guillotina.Manager'] = Allow
 
 
 @configure.utility(provides=IGroups)

@@ -29,7 +29,7 @@ class GuillotinaParticipation(object):
                 self.request._cache_user = user
                 self.principal = user
                 if hasattr(user, 'roles') and 'guillotina.Authenticated' not in user.roles:
-                    user.roles['guillotina.Authenticated'] = 1
+                    user.roles['guillotina.Authenticated'] = Allow
         else:
             self.principal = getattr(self.request, '_cache_user', None)
         self.interaction = None
