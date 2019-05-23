@@ -1792,6 +1792,29 @@ class ObjectTests(unittest.TestCase):
         objf = self._makeOne(schema)
         objf.validate(OK())  # doesn't raise
 
+    def test__validate_interface_inheritance(self):
+        from guillotina.schema import Int, Object
+        from zope.interface import implementer
+        from zope.interface import Interface
+
+        class IFoo(Interface):
+            foo=Int()
+
+        class IBar(Interface):
+            bar=Int()
+
+        class IFooBar(IFoo, IBar):
+            pass
+
+        IContentType = self._makeSchema(foobar=Object(schema=IFooBar))
+
+        @implementer(IContentType)
+        class OK(object):
+            foobar = {"foo": 1, "bar": 2}
+
+        objf = self._makeOne(IContentType)
+        objf.validate(OK())  # doesn't raise
+
     def test_validate_w_cycles(self):
         IUnit, Person, Unit = self._makeCycles()
         field = self._makeOne(schema=IUnit)
