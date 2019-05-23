@@ -4,7 +4,8 @@ CHANGELOG
 4.8.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Support zope.Interface inheritance in schema.Object
+  [masipcat]
 
 
 4.8.0 (2019-05-13)
