@@ -604,7 +604,7 @@ class Object(Field):
             # Dicts are validated differently
             valid_type = namedtuple(
                 'temp_validate_type',
-                set(self.schema.names()) & set(value.keys()))
+                set(self.schema.names(all=True)) & set(value.keys()))
             # check the value against schema
             errors = _validate_fields(self.schema, valid_type(**value))
         else:
