@@ -11,6 +11,7 @@ You can provide your own CLI commands for guillotina through a simple interface.
 * `initialize-db`: databases are automatically initialized; however, you can use this command to manually do it
 * `testdata`: populate the database with test data from wikipedia
 * `run`: run a python script. The file must have a function `async def run(container):`
+* `gen-key`: generate cryptographic key for jwt, jwk
 
 
 ## Command Options

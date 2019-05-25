@@ -1,3 +1,7 @@
+import os
+
+import pytest
+
 from guillotina.annotations import AnnotationData
 from guillotina.component import get_utility
 from guillotina.content import create_content_in_container
@@ -8,6 +12,8 @@ from guillotina.tests.utils import login
 from guillotina.transactions import managed_transaction
 
 
+pytest.mark.skipif(os.environ.get('DATABASE') == 'cockroachdb',
+                   reason="Flaky cockroachdb test")
 async def test_create_annotation(db, guillotina_main):
     root = get_utility(IApplication, name='root')
     db = root['db']

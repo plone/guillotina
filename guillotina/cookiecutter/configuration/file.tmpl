@@ -1,14 +1,8 @@
 ---
 databases:
-- db:
+  db:
     storage: postgresql
-    dsn:
-      scheme: postgres
-      dbname: guillotina
-      user: guillotina
-      host: localhost
-      password:
-      port: 5432
+    dsn: postgresql://postgres@localhost:5432/guillotina
     read_only: false
 host: 127.0.0.1
 port: 8080

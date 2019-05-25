@@ -36,9 +36,11 @@ from jwcrypto import jwk
 import aiotask_context
 import asyncio
 import json
+import logging
 import logging.config
 
 
+app_logger = logging.getLogger('guillotina')
 logger = glogging.getLogger('guillotina')
 
 
@@ -273,7 +275,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
         try:
             logging.config.dictConfig(app_settings['logging'])
         except Exception:
-            logger.error('Could not setup logging configuration', exc_info=True)
+            app_logger.error('Could not setup logging configuration', exc_info=True)
 
     # Make and initialize aiohttp app
     if server_app is None:
@@ -320,12 +322,12 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
         # validate secret
         secret = app_settings['jwt']['secret']
         if secret == 'secret':
-            logger.warning(
+            app_logger.warning(
                 'You are using a very insecure secret key in production mode. '
                 'It is strongly advised that you provide a better value for '
                 '`jwt.secret` in your config.')
         elif not secure_passphrase(app_settings['jwt']['secret']):
-            logger.warning(
+            app_logger.warning(
                 'You are using a insecure secret key in production mode. '
                 'It is recommended that you provide a more complex value for '
                 '`jwt.secret` in your config.')
@@ -335,11 +337,11 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     server_app.on_cleanup.append(cleanup_app)
 
     for util in app_settings.get('utilities') or []:
-        logger.warn('Adding : ' + util['provides'])
+        app_logger.warning('Adding : ' + util['provides'])
         root.add_async_utility(util['provides'], util, loop=loop)
 
     for key, util in app_settings['load_utilities'].items():
-        logger.info('Adding ' + key + ' : ' + util['provides'])
+        app_logger.info('Adding ' + key + ' : ' + util['provides'])
         root.add_async_utility(key, util, loop=loop)
 
     # Load cached Schemas
@@ -359,7 +361,7 @@ async def cleanup_app(app):
 async def close_utilities(app):
     root = get_utility(IApplication, name='root')
     for key in list(root._async_utilities.keys()):
-        logger.info('Removing ' + key)
+        app_logger.info('Removing ' + key)
         await root.del_async_utility(key)
 
 async def close_dbs(app):

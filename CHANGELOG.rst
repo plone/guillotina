@@ -4,6 +4,9 @@ CHANGELOG
 4.8.1 (unreleased)
 ------------------
 
+- Improve startup speed by not using glogger for startup code
+  [vangheem]
+
 - Support zope.Interface inheritance in schema.Object
   [masipcat]
 

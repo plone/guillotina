@@ -138,17 +138,25 @@ Now you can start hands-on style guide to learn how to use it.
    migration/index
 ```
 
+```eval_rst
+.. toctree::
+   :maxdepth: 2
+
+   installation/index
+```
+
+
 # About
 
 - [Read about](./about.html) the rich history of the project
 
 ```eval_rst
- .. toctree::
-    :hidden:
-    :glob:
+.. toctree::
+   :hidden:
+   :glob:
 
-    developer/*
-    installation/*
-    training/*
-    *
+   developer/*
+   installation/*
+   training/*
+   *
 ```
