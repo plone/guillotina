@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.1 (unreleased)
+4.8.1 (2019-05-25)
 ------------------
 
 - Improve startup speed by not using glogger for startup code
