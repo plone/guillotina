@@ -186,13 +186,13 @@ def make_mocked_request(method, path, headers=None, *,
     if version < HttpVersion(1, 1):
         closing = True
 
-    if headers:
-        headers = CIMultiDict(headers)
-        raw_hdrs = tuple(
-            (k.encode('utf-8'), v.encode('utf-8')) for k, v in headers.items())
-    else:
-        headers = CIMultiDict()
-        raw_hdrs = ()
+    if headers is None:
+        headers = {}
+    if 'Host' not in headers:
+        headers['Host'] = 'localhost'
+    headers = CIMultiDict(headers)
+    raw_hdrs = tuple(
+        (k.encode('utf-8'), v.encode('utf-8')) for k, v in headers.items())
 
     chunked = 'chunked' in headers.get(hdrs.TRANSFER_ENCODING, '').lower()
 
