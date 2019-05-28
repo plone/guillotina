@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.3 (unreleased)
+4.8.2 (2019-05-28)
 ------------------
 
 - Fix bug where non-async object subscribers were getting called twice
