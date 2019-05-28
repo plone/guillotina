@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+4.8.3 (unreleased)
+------------------
+
+- Fix bug where non-async object subscribers were getting called twice
+  [vangheem]
+
 4.8.2 (unreleased)
 ------------------
 

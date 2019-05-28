@@ -1,7 +1,6 @@
 from datetime import datetime
 from dateutil.tz import tzutc
 from guillotina import configure
-from guillotina.component._api import subscribers as component_subscribers
 from guillotina.component._api import get_component_registry
 from guillotina.component.interfaces import ComponentLookupError
 from guillotina.component.interfaces import IObjectEvent
@@ -28,6 +27,4 @@ async def object_event_notify(event):
         # Oh blast, no site manager. This should *never* happen!
         return []
 
-    # sync subscribers
-    component_subscribers((event.object, event), None)
     return await sitemanager.adapters.asubscribers((event.object, event), None)
