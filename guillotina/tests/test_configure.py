@@ -4,12 +4,17 @@ from guillotina.api.service import Service
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.configure.config import ConfigurationMachine
-from guillotina.content import Item
 from guillotina.content import get_all_possible_schemas_for_type
-from guillotina.factory.app import configure_application, ApplicationConfigurator
+from guillotina.content import Item
+from guillotina.event import notify
+from guillotina.events import ObjectAddedEvent
+from guillotina.factory.app import ApplicationConfigurator
+from guillotina.factory.app import configure_application
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.tests.utils import create_content
+from guillotina.tests.utils import wrap_request
 from zope.interface import Interface
 
 
@@ -235,3 +240,12 @@ def test_loading_configuration_does_not_load_subpackage_definition():
     for _type, configuration in loaded:
         assert 'guillotina' != getattr(
             configuration.get('klass'), '__module__', None)
+
+
+async def test_sync_subscribers_only_called_once(dummy_guillotina, dummy_request):
+    parent = create_content()
+    ob = create_content(parent=parent)
+    event = ObjectAddedEvent(ob, parent, ob.__name__, payload={})
+    async with wrap_request(dummy_request):
+        await notify(event)
+    assert event.called == 1

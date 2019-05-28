@@ -156,6 +156,14 @@ async def foobar_sub(ob, evt):
     pass
 
 
+@configure.subscriber(
+    for_=(IResource, IObjectAddedEvent), priority=-1000)
+def sync_foobar_sub(ob, evt):
+    if not hasattr(evt, 'called'):
+        evt.called = 0
+    evt.called += 1
+
+
 configure.register_configuration(Example, dict(
     context=IContainer,
     schema=IExample,
