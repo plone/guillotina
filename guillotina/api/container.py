@@ -24,7 +24,10 @@ from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
 from typing import Optional
+from guillotina.utils import get_schema_validator
 
+
+import jsonschema
 import posixpath
 
 
@@ -110,65 +113,78 @@ class DefaultPOST(Service):
     """Create a new Container for DB Mounting Points."""
 
     async def __call__(self):
-        data = await self.request.json()
-        if '@type' not in data or data['@type'] not in app_settings['container_types']:
-            raise HTTPNotFound(content={
-                'message': 'can not create this type %s' % data['@type']
-            })
+        validator = get_schema_validator('BaseResource')
+        try:
+            data = await self.request.json()
+            validator.validate(data)
+            if '@type' not in data or data['@type'] not in app_settings['container_types']:
+                raise HTTPNotFound(content={
+                    'message': 'can not create this type %s' % data['@type']
+                })
 
-        if 'id' not in data:
+            if 'id' not in data:
+                raise HTTPPreconditionFailed(content={
+                    'message': 'We need an id'
+                })
+
+            if not data.get('title'):
+                data['title'] = data['id']
+
+            if 'description' not in data:
+                data['description'] = ''
+
+            value = await self.context.async_contains(data['id'])
+
+            if value:
+                # Already exist
+                raise HTTPConflict(content={
+                    'message': 'Container with id already exists'
+                })
+
+            install_addons = data.pop('@addons', None) or []
+            for addon in install_addons:
+                # validate addon list
+                if addon not in app_settings['available_addons']:
+                    return ErrorResponse(
+                        'RequiredParam',
+                        "Property '@addons' must refer to a valid addon",
+                        status=412, reason=error_reasons.INVALID_ID)
+
+            owner_id = get_authenticated_user_id(self.request)
+
+            container = await create_container(
+                self.context, data.pop('id'),
+                container_type=data.pop('@type'),
+                owner_id=owner_id, **data)
+            self.request._container_id = container.__name__
+            self.request.container = container
+
+            annotations_container = get_adapter(container, IAnnotations)
+            self.request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
+
+            for addon in install_addons:
+                await addons.install(container, addon)
+
+            resp = {
+                '@type': container.type_name,
+                'id': container.id,
+                'title': data['title']
+            }
+            headers = {
+                'Location': posixpath.join(self.request.path, container.id)
+            }
+
+            return Response(content=resp, headers=headers)
+        except jsonschema.exceptions.ValidationError as e:
             raise HTTPPreconditionFailed(content={
-                'message': 'We need an id'
-            })
-
-        if not data.get('title'):
-            data['title'] = data['id']
-
-        if 'description' not in data:
-            data['description'] = ''
-
-        value = await self.context.async_contains(data['id'])
-
-        if value:
-            # Already exist
-            raise HTTPConflict(content={
-                'message': 'Container with id already exists'
-            })
-
-        install_addons = data.pop('@addons', None) or []
-        for addon in install_addons:
-            # validate addon list
-            if addon not in app_settings['available_addons']:
-                return ErrorResponse(
-                    'RequiredParam',
-                    "Property '@addons' must refer to a valid addon",
-                    status=412, reason=error_reasons.INVALID_ID)
-
-        owner_id = get_authenticated_user_id(self.request)
-
-        container = await create_container(
-            self.context, data.pop('id'),
-            container_type=data.pop('@type'),
-            owner_id=owner_id, **data)
-        self.request._container_id = container.__name__
-        self.request.container = container
-
-        annotations_container = get_adapter(container, IAnnotations)
-        self.request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
-
-        for addon in install_addons:
-            await addons.install(container, addon)
-
-        resp = {
-            '@type': container.type_name,
-            'id': container.id,
-            'title': data['title']
-        }
-        headers = {
-            'Location': posixpath.join(self.request.path, container.id)
-        }
-
-        return Response(content=resp, headers=headers)
+            'reason': 'json schema validation error',
+            'message': e.message,
+            'validator': e.validator,
+            'validator_value': e.validator_value,
+            'path': [i for i in e.path],
+            'schema_path': [i for i in e.schema_path],
+            "schema": app_settings['json_schema_definitions']['BaseResource']
+        })
 
 
 @configure.service(

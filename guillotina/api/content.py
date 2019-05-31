@@ -58,6 +58,11 @@ from guillotina.utils import get_object_by_oid
 from guillotina.utils import get_object_url
 from guillotina.utils import iter_parents
 from guillotina.utils import valid_id
+from guillotina.utils import get_schema_validator
+
+
+import jsonschema
+
 
 
 def get_content_json_schema_responses(content):
@@ -402,14 +407,27 @@ class SharingPOST(Service):
         """Change permissions"""
         context = self.context
         request = self.request
-        data = await request.json()
-        if 'prinrole' not in data and \
-                'roleperm' not in data and \
-                'prinperm' not in data and \
-                'perminhe' not in data:
-            raise PreconditionFailed(
-                self.context, 'prinrole or roleperm or prinperm missing')
-        return await apply_sharing(context, data)
+        validator = get_schema_validator('Permissions')
+        try:
+            data = await request.json()
+            validator.validate(data)
+            if 'prinrole' not in data and \
+                    'roleperm' not in data and \
+                    'prinperm' not in data and \
+                    'perminhe' not in data:
+                raise PreconditionFailed(
+                    self.context, 'prinrole or roleperm or prinperm missing')
+            return await apply_sharing(context, data)
+        except jsonschema.exceptions.ValidationError as e:
+            raise HTTPPreconditionFailed(content={
+            'reason': 'json schema validation error',
+            'message': e.message,
+            'validator': e.validator,
+            'validator_value': e.validator_value,
+            'path': [i for i in e.path],
+            'schema_path': [i for i in e.schema_path],
+            "schema": app_settings['json_schema_definitions']['Permissions']
+        })
 
 
 @configure.service(

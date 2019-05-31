@@ -4,7 +4,7 @@ CHANGELOG
 4.8.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- json schema validation
 
 
 4.8.2 (2019-05-28)

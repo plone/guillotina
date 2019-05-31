@@ -6,7 +6,11 @@ from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IContainer
 from guillotina.response import ErrorResponse
+from guillotina.utils import get_schema_validator
+from guillotina.response import HTTPPreconditionFailed
 
+
+import jsonschema
 
 _ = MessageFactory('guillotina')
 
@@ -23,25 +27,40 @@ _ = MessageFactory('guillotina')
         }
     }])
 async def install(context, request):
-    data = await request.json()
-    id_to_install = data.get('id', None)
-    if id_to_install not in app_settings['available_addons']:
-        return ErrorResponse(
-            'RequiredParam',
-            _("Property 'id' is required to be valid"),
-            status=412, reason=error_reasons.INVALID_ID)
+    validator = get_schema_validator('Addon')
+    try:
+        data = await request.json()
+        validator.validate(data)
+        id_to_install = data.get('id', None)
+        
+        if id_to_install not in app_settings['available_addons']:
+            return ErrorResponse(
+                'RequiredParam',
+                _("Property 'id' is required to be valid"),
+                status=412, reason=error_reasons.INVALID_ID)
 
-    registry = request.container_settings
-    config = registry.for_interface(IAddons)
+        registry = request.container_settings
+        config = registry.for_interface(IAddons)
 
-    if id_to_install in config['enabled']:
-        return ErrorResponse(
-            'Duplicate',
-            _("Addon already installed"),
-            status=412, reason=error_reasons.ALREADY_INSTALLED)
+        if id_to_install in config['enabled']:
+            return ErrorResponse(
+                'Duplicate',
+                _("Addon already installed"),
+                status=412, reason=error_reasons.ALREADY_INSTALLED)
 
-    await addons.install(context, id_to_install)
-    return await get_addons(context, request)
+        await addons.install(context, id_to_install)
+        return await get_addons(context, request)
+    except jsonschema.exceptions.ValidationError as e:
+        raise HTTPPreconditionFailed(content={
+            'reason': 'json schema validation error',
+            'message': e.message,
+            'validator': e.validator,
+            'validator_value': e.validator_value,
+            'path': [i for i in e.path],
+            'schema_path': [i for i in e.schema_path],
+            "schema": app_settings['json_schema_definitions']['Addon']
+        })
+
 
 
 @configure.service(
@@ -56,9 +75,22 @@ async def install(context, request):
         }
     }])
 async def uninstall(context, request):
-    data = await request.json()
-    id_to_uninstall = data.get('id', None)
-    return await uninstall_addon(context, request, id_to_uninstall)
+    validator = get_schema_validator('Addon')
+    try:
+        data = await request.json()
+        validator.validate(data)
+        id_to_uninstall = data.get('id', None)
+        return await uninstall_addon(context, request, id_to_uninstall)
+    except jsonschema.exceptions.ValidationError as e:
+        raise HTTPPreconditionFailed(content={
+            'reason': 'json schema validation error',
+            'message': e.message,
+            'validator': e.validator,
+            'validator_value': e.validator_value,
+            'path': [i for i in e.path],
+            'schema_path': [i for i in e.schema_path],
+            "schema": app_settings['json_schema_definitions']['Addon']
+        })
 
 
 @configure.service(

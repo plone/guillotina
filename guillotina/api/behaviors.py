@@ -8,7 +8,11 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import ISchemaSerializeToJson
 from guillotina.response import Response
 from guillotina.utils import resolve_dotted_name
+from guillotina.utils import get_schema_validator
+from guillotina.response import HTTPPreconditionFailed
+from guillotina._settings import app_settings
 
+import jsonschema
 
 @configure.service(
     context=IResource, method='PATCH',
@@ -30,27 +34,40 @@ from guillotina.utils import resolve_dotted_name
         },
     })
 async def default_patch(context, request):
-    data = await request.json()
-    behavior = data.get('behavior', None)
+    validator = get_schema_validator('Behavior')
     try:
-        behavior_class = resolve_dotted_name(behavior)
-    except ModuleNotFoundError:
-        behavior_class = None
-    if behavior_class is None:
-        return Response(content={
-            'reason': 'Could not find behavior'
-        }, status=404)
-    factory = get_cached_factory(context.type_name)
-    if behavior_class in factory.behaviors:
-        return Response(content={
-            'reason': 'Already in behaviors'
-        }, status=412)
-    if behavior in context.__behaviors__:
-        return Response(content={
-            'reason': 'Already in behaviors'
-        }, status=412)
-    context.add_behavior(behavior)
-    return {}
+        data = await request.json()
+        validator.validate(data)
+        behavior = data.get('behavior', None)
+        try:
+            behavior_class = resolve_dotted_name(behavior)
+        except ModuleNotFoundError:
+            behavior_class = None
+        if behavior_class is None:
+            return Response(content={
+                'reason': 'Could not find behavior'
+            }, status=404)
+        factory = get_cached_factory(context.type_name)
+        if behavior_class in factory.behaviors:
+            return Response(content={
+                'reason': 'Already in behaviors'
+            }, status=412)
+        if behavior in context.__behaviors__:
+            return Response(content={
+                'reason': 'Already in behaviors'
+            }, status=412)
+        context.add_behavior(behavior)
+        return {}
+    except jsonschema.exceptions.ValidationError as e:
+        raise HTTPPreconditionFailed(content={
+            'reason': 'json schema validation error',
+            'message': e.message,
+            'validator': e.validator,
+            'validator_value': e.validator_value,
+            'path': [i for i in e.path],
+            'schema_path': [i for i in e.schema_path],
+            "schema": app_settings['json_schema_definitions']['Behavior']
+        })
 
 
 @configure.service(
@@ -97,9 +114,22 @@ async def default_delete_withparams(context, request):
         },
     })
 async def default_delete(context, request):
-    data = await request.json()
-    behavior = data.get('behavior', None)
-    return await delete_behavior(context, behavior)
+    validator = get_schema_validator('Behavior')
+    try:
+        data = await request.json()
+        validator.validate(data)
+        behavior = data.get('behavior', None)
+        return await delete_behavior(context, behavior)
+    except jsonschema.exceptions.ValidationError as e:
+        raise HTTPPreconditionFailed(content={
+            'reason': 'json schema validation error',
+            'message': e.message,
+            'validator': e.validator,
+            'validator_value': e.validator_value,
+            'path': [i for i in e.path],
+            'schema_path': [i for i in e.schema_path],
+            "schema": app_settings['json_schema_definitions']['Behavior']
+        })
 
 
 async def delete_behavior(context, behavior):
