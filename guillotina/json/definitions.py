@@ -372,3 +372,30 @@ configure.json_schema_definition('SearchResults', {
     },
     'required': ['member']
 })
+
+
+configure.json_schema_definition('Registry', {
+    "type": "object",
+    "title": "Registry",
+    "properties":{
+        "interface": {
+          "type": "string"
+        },
+        "initial_values": {
+            "type": "object"
+        }
+    },
+    'required': ['properties']
+})
+
+
+configure.json_schema_definition('UpdateRegistry', {
+    "type": "object",
+    "title": "Update registry",
+    "properties":{
+       "value": {
+          "type": "any"
+        }
+    },
+    'required': ['value']
+})

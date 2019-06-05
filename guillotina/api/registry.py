@@ -98,16 +98,7 @@ async def get_registry(context, request):
         "in": "body",
         "type": "object",
         "schema": {
-            "properties": {
-                "interface": {
-                    "type": "string",
-                    "required": True
-                },
-                "initial_values": {
-                    "type": "object",
-                    "required": False
-                }
-            }
+            "$ref": "#/definitions/Registry"
         }
     }],
     responses={
@@ -160,12 +151,7 @@ class Register(Service):
         "in": "body",
         "type": "object",
         "schema": {
-            "properties": {
-                "value": {
-                    "type": "any",
-                    'required': True
-                }
-            }
+            "$ref": "#/definitions/UpdateRegistry"
         }
     },
     responses={
