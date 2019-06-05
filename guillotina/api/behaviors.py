@@ -18,7 +18,7 @@ from guillotina.utils import resolve_dotted_name
         "name": "body",
         "in": "body",
         "schema": {
-            "$ref": "#/definitions/Behavior"
+            "$ref": "#/components/schemas/Behavior"
         }
     }],
     responses={
@@ -61,7 +61,7 @@ async def default_patch(context, request):
         "name": "behavior",
         "in": "path",
         "schema": {
-            "$ref": "#/definitions/Behavior"
+            "$ref": "#/components/schemas/Behavior"
         }
     }],
     responses={
@@ -85,7 +85,7 @@ async def default_delete_withparams(context, request):
         "name": "body",
         "in": "body",
         "schema": {
-            "$ref": "#/definitions/Behavior"
+            "$ref": "#/components/schemas/Behavior"
         }
     }],
     responses={
@@ -126,7 +126,7 @@ async def delete_behavior(context, behavior):
         "200": {
             "description": "A listing of behaviors for content",
             "schema": {
-                "$ref": "#/definitions/BehaviorsResponse"
+                "$ref": "#/components/schemas/BehaviorsResponse"
             }
         }
     })

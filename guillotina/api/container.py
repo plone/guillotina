@@ -92,7 +92,7 @@ async def create_container(parent: IDatabase, container_id: str,
         "name": "body",
         "in": "body",
         "schema": {
-            "$ref": "#/definitions/BaseResource",
+            "$ref": "#/components/schemas/BaseResource",
             "properties": {
                 "@addons": {
                     "type": "string"
@@ -104,7 +104,7 @@ async def create_container(parent: IDatabase, container_id: str,
         "200": {
             "description": "Container result",
             "schema": {
-                "$ref": "#/definitions/BaseResource"
+                "$ref": "#/components/schemas/BaseResource"
             }
         }
     })

@@ -55,7 +55,7 @@ class SerializeFactoryToJson(object):
 
             serialization = await schema_serializer()
             result['properties'][schema_serializer.name] = \
-                {'$ref': '#/definitions/' + schema_serializer.name},
+                {'$ref': '#/components/schemas/' + schema_serializer.name},
             result['definitions'][schema_serializer.name] = serialization
 
             behavior = get_utility(IBehavior, name=schema_serializer.name)

@@ -31,7 +31,7 @@ async def _search(context, request, query):
             "description": "Search results",
             "type": "object",
             "schema": {
-                "$ref": "#/definitions/SearchResults"
+                "$ref": "#/components/schemas/SearchResults"
             }
         }
     })
@@ -56,7 +56,7 @@ async def search_get(context, request):
             "description": "Search results",
             "type": "object",
             "schema": {
-                "$ref": "#/definitions/SearchResults"
+                "$ref": "#/components/schemas/SearchResults"
             }
         }
     })

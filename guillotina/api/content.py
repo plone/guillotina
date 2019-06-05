@@ -64,7 +64,7 @@ def get_content_json_schema_responses(content):
             "description": "Resource data",
             "schema": {
                 "allOf": [
-                    {"$ref": "#/definitions/ResourceFolder"},
+                    {"$ref": "#/components/schemas/ResourceFolder"},
                     {"properties": convert_interfaces_to_schema(
                         get_all_behavior_interfaces(content))}
                 ]
@@ -79,7 +79,7 @@ def patch_content_json_schema_parameters(content):
         "in": "body",
         "schema": {
             "allOf": [
-                {"$ref": "#/definitions/WritableResource"},
+                {"$ref": "#/components/schemas/WritableResource"},
                 {"properties": convert_interfaces_to_schema(
                     get_all_behavior_interfaces(content))}
             ]
@@ -132,14 +132,14 @@ class DefaultGET(Service):
         "name": "body",
         "in": "body",
         "schema": {
-            "$ref": "#/definitions/AddableResource"
+            "$ref": "#/components/schemas/AddableResource"
         }
     }],
     responses={
         "200": {
             "description": "Resource data",
             "schema": {
-                "$ref": "#/definitions/ResourceFolder"
+                "$ref": "#/components/schemas/ResourceFolder"
             }
         }
     })
@@ -242,7 +242,7 @@ class DefaultPOST(Service):
         "200": {
             "description": "Resource data",
             "schema": {
-                "$ref": "#/definitions/Resource"
+                "$ref": "#/components/schemas/Resource"
             }
         }
     })
@@ -286,7 +286,7 @@ class DefaultPATCH(Service):
         "200": {
             "description": "Resource data",
             "schema": {
-                "$ref": "#/definitions/Resource"
+                "$ref": "#/components/schemas/Resource"
             }
         }
     })
@@ -329,7 +329,7 @@ class DefaultPUT(DefaultPATCH):
         "200": {
             "description": "All the sharing defined on this resource",
             "schema": {
-                "$ref": "#/definitions/ResourceACL"
+                "$ref": "#/components/schemas/ResourceACL"
             }
         }
     })
@@ -368,7 +368,7 @@ async def sharing_get(context, request):
         "200": {
             "description": "All the permissions defined on this resource",
             "schema": {
-                "$ref": "#/definitions/AllPermissions"
+                "$ref": "#/components/schemas/AllPermissions"
             }
         }
     })
@@ -387,7 +387,7 @@ async def all_permissions(context, request):
         "in": "body",
         "type": "object",
         "schema": {
-            "$ref": "#/definitions/Permissions"
+            "$ref": "#/components/schemas/Permissions"
         }
     }],
     responses={
@@ -419,7 +419,7 @@ class SharingPOST(Service):
         "in": "body",
         "type": "object",
         "schema": {
-            "$ref": "#/definitions/Permissions"
+            "$ref": "#/components/schemas/Permissions"
         }
     }],
     responses={
