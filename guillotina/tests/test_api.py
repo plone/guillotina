@@ -130,6 +130,19 @@ async def test_create_container_with_addons(container_requester):
         assert 'testaddon' in response['installed']
 
 
+async def test_create_container_schemavalidation(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db',
+            data=json.dumps({
+                "@type": "Container",
+                "title": "foobar",
+                "i": "foobar"
+            })
+        )
+        assert status == 412
+
+
 async def test_create_container_with_bad_addons(container_requester):
     async with container_requester as requester:
         _, status = await requester(
@@ -483,6 +496,27 @@ async def test_uninstall_addons(container_requester):
         )
         assert status == 200
         assert response is None
+
+
+async def test_uninstall_addons_schema_validation(container_requester):
+    id_ = 'testaddon'
+    async with container_requester as requester:
+        await requester(
+            'POST',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "id": id_
+            })
+        )
+
+        _, status = await requester(
+            'DELETE',
+            '/db/guillotina/@addons',
+            data=json.dumps({
+                "i": id_
+            })
+        )
+        assert status == 412
 
 
 async def test_uninstall_addons_path(container_requester):
