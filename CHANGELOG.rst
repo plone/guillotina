@@ -4,15 +4,16 @@ CHANGELOG
 4.8.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
-
-4.8.3 (2019-06-06)
-------------------
+- Fix aiohttp startup bug
+  [vangheem]
 
 - propagate unique violation errors on deletion as they should not happen
   anymore unless db hasn't been migrated
   [vangheem]
+
+
+4.8.3 (2019-06-06)
+------------------
 
 - Upgrade to aiohttp 3.5.0
   [vangheem]
