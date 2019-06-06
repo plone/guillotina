@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.3 (unreleased)
+4.8.3 (2019-06-06)
 ------------------
 
 - Upgrade to aiohttp 3.5.0
