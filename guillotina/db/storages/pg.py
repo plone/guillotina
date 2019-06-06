@@ -780,13 +780,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         sql = self._sql.get('TRASH_PARENT_ID', self._objects_table_name)
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
-            try:
-                await conn.execute(sql, oid)
-            except asyncpg.exceptions.UniqueViolationError:
-                # we already have ob with id, it has not been vacuumed yet,
-                # fallback.
-                sql = self._sql.get('DELETE_OBJECT', self._objects_table_name)
-                await conn.execute(sql, oid)
+            await conn.execute(sql, oid)
         if self._autovacuum:
             txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
