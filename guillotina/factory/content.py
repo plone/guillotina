@@ -1,5 +1,4 @@
 from concurrent.futures import ThreadPoolExecutor
-from guillotina.db.reader import reader
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
@@ -10,6 +9,7 @@ from guillotina.component import provide_utility
 from guillotina.const import ROOT_ID
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.interfaces import IWriter
+from guillotina.db.reader import reader
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -19,6 +19,7 @@ from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
+from zope.interface import alsoProvides
 from zope.interface import implementer
 
 import asyncio
@@ -56,6 +57,7 @@ class ApplicationRoot(object):
             logger.error('Error initializing utility {}'.format(repr(factory)),
                          exc_info=True)
             raise
+        alsoProvides(utility_object, interface)
         provide_utility(utility_object, interface)
         if hasattr(utility_object, 'initialize'):
             task = asyncio.ensure_future(
