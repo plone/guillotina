@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.4 (unreleased)
+4.8.4 (2019-06-06)
 ------------------
 
 - Fix aiohttp startup bug
