@@ -4,7 +4,8 @@ CHANGELOG
 4.8.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Upgrade to aiohttp 3.5.0
+  [vangheem]
 
 
 4.8.2 (2019-05-28)

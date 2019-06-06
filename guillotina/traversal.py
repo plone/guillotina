@@ -355,7 +355,7 @@ class TraversalRouter(AbstractRouter):
         """Warpper to set the root object."""
         self._root = root
 
-    async def resolve(self, request: IRequest) -> BaseMatchInfo:
+    async def resolve(self, request: IRequest) -> BaseMatchInfo:  # type: ignore
         '''
         Resolve a request
         '''
