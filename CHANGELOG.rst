@@ -4,6 +4,10 @@ CHANGELOG
 4.8.3 (unreleased)
 ------------------
 
+- propagate unique violation errors on deletion as they should not happen
+  anymore unless db hasn't been migrated
+  [vangheem]
+
 - Upgrade to aiohttp 3.5.0
   [vangheem]
 
