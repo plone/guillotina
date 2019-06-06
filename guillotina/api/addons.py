@@ -32,7 +32,7 @@ async def install(context, request):
         data = await request.json()
         validator.validate(data)
         id_to_install = data.get('id', None)
-        
+
         if id_to_install not in app_settings['available_addons']:
             return ErrorResponse(
                 'RequiredParam',
@@ -60,7 +60,6 @@ async def install(context, request):
             'schema_path': [i for i in e.schema_path],
             "schema": app_settings['json_schema_definitions']['Addon']
         })
-
 
 
 @configure.service(

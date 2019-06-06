@@ -177,14 +177,14 @@ class DefaultPOST(Service):
             return Response(content=resp, headers=headers)
         except jsonschema.exceptions.ValidationError as e:
             raise HTTPPreconditionFailed(content={
-            'reason': 'json schema validation error',
-            'message': e.message,
-            'validator': e.validator,
-            'validator_value': e.validator_value,
-            'path': [i for i in e.path],
-            'schema_path': [i for i in e.schema_path],
-            "schema": app_settings['json_schema_definitions']['BaseResource']
-        })
+                'reason': 'json schema validation error',
+                'message': e.message,
+                'validator': e.validator,
+                'validator_value': e.validator_value,
+                'path': [i for i in e.path],
+                'schema_path': [i for i in e.schema_path],
+                "schema": app_settings['json_schema_definitions']['BaseResource']
+            })
 
 
 @configure.service(

@@ -13,7 +13,11 @@ from guillotina.response import Response
 from guillotina.schema import get_fields
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
+from guillotina.utils import get_schema_validator
+from guillotina._settings import app_settings
+from guillotina.response import HTTPPreconditionFailed
 
+import jsonschema
 
 _ = MessageFactory('guillotina')
 
@@ -116,30 +120,42 @@ class Register(Service):
                 'BadRequest',
                 _("Not in a container request"),
                 status=412)
+        try:
+            data = await self.request.json()
+            validator = get_schema_validator('Registry')
+            validator.validate(data)
+            interface = data.get('interface', None)
+            initial_values = data.get('initial_values', {})
+            if interface is None:
+                return ErrorResponse(
+                    'InvalidRequest',
+                    'Non existent Interface',
+                    status=412)
 
-        data = await self.request.json()
-        interface = data.get('interface', None)
-        initial_values = data.get('initial_values', {})
-        if interface is None:
-            return ErrorResponse(
-                'InvalidRequest',
-                'Non existent Interface',
-                status=412)
+            registry = self.request.container_settings
+            iObject = import_class(interface)
+            registry.register_interface(iObject)
+            config = registry.for_interface(iObject)
 
-        registry = self.request.container_settings
-        iObject = import_class(interface)
-        registry.register_interface(iObject)
-        config = registry.for_interface(iObject)
+            # Initialize values
+            # If its defined on the guillotina.schema default will not be overwritten
+            #  you will need to PATCH
+            for key, field in get_fields(iObject).items():
+                if key in initial_values and getattr(config, key, _marker) == _marker:
+                    # We don't have a value
+                    config[key] = initial_values[key]
 
-        # Initialize values
-        # If its defined on the guillotina.schema default will not be overwritten
-        #  you will need to PATCH
-        for key, field in get_fields(iObject).items():
-            if key in initial_values and getattr(config, key, _marker) == _marker:
-                # We don't have a value
-                config[key] = initial_values[key]
-
-        return Response(status=201)
+            return Response(status=201)
+        except jsonschema.exceptions.ValidationError as e:
+            raise HTTPPreconditionFailed(content={
+                'reason': 'json schema validation error',
+                'message': e.message,
+                'validator': e.validator,
+                'validator_value': e.validator_value,
+                'path': [i for i in e.path],
+                'schema_path': [i for i in e.schema_path],
+                "schema": app_settings['json_schema_definitions']['Registry']
+            })
 
 
 @configure.service(
@@ -171,8 +187,20 @@ class Write(Service):
         if self.key is _marker:
             # No option to write the root of registry
             return ErrorResponse('InvalidRequest', 'Needs the registry key', status=412)
-
-        data = await self.request.json()
+        try:
+            data = await self.request.json()
+            validator = get_schema_validator('UpdateRegistry')
+            validator.validate(data)
+        except jsonschema.exceptions.ValidationError as e:
+            raise HTTPPreconditionFailed(content={
+                'reason': 'json schema validation error',
+                'message': e.message,
+                'validator': e.validator,
+                'validator_value': e.validator_value,
+                'path': [i for i in e.path],
+                'schema_path': [i for i in e.schema_path],
+                "schema": app_settings['json_schema_definitions']['UpdateRegistry']
+            })
         if 'value' in data:
             value = data['value']
         else:

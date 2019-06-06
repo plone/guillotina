@@ -64,7 +64,6 @@ from guillotina.utils import get_schema_validator
 import jsonschema
 
 
-
 def get_content_json_schema_responses(content):
     return {
         "200": {
@@ -420,14 +419,14 @@ class SharingPOST(Service):
             return await apply_sharing(context, data)
         except jsonschema.exceptions.ValidationError as e:
             raise HTTPPreconditionFailed(content={
-            'reason': 'json schema validation error',
-            'message': e.message,
-            'validator': e.validator,
-            'validator_value': e.validator_value,
-            'path': [i for i in e.path],
-            'schema_path': [i for i in e.schema_path],
-            "schema": app_settings['json_schema_definitions']['Permissions']
-        })
+                'reason': 'json schema validation error',
+                'message': e.message,
+                'validator': e.validator,
+                'validator_value': e.validator_value,
+                'path': [i for i in e.path],
+                'schema_path': [i for i in e.schema_path],
+                "schema": app_settings['json_schema_definitions']['Permissions']
+            })
 
 
 @configure.service(
