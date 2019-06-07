@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.5 (unreleased)
+4.8.5 (2019-06-07)
 ------------------
 
 - Be compatible with aiohttp > 3 < 4
