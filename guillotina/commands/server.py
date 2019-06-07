@@ -1,10 +1,13 @@
 from aiohttp import web
 from guillotina.commands import Command
 
-import aiohttp
 import asyncio
 import sys
 
+try:
+    from aiohttp.web_log import AccessLogger
+except ImportError:
+    from aiohttp.helpers import AccessLogger
 
 try:
     import aiohttp_autoreload
@@ -42,8 +45,7 @@ class ServerCommand(Command):
 
         port = arguments.port or settings.get('address', settings.get('port'))
         host = arguments.host or settings.get('host', '0.0.0.0')
-        log_format = settings.get('access_log_format',
-                                  aiohttp.web_log.AccessLogger.LOG_FORMAT)
+        log_format = settings.get('access_log_format', AccessLogger.LOG_FORMAT)
         try:
             web.run_app(app, host=host, port=port,
                         access_log_format=log_format)

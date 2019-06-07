@@ -4,6 +4,9 @@ CHANGELOG
 4.8.5 (unreleased)
 ------------------
 
+- Be compatible with aiohttp > 3 < 4
+  [vangheem]
+
 - Make sure utility you are providing also provides the interface you
   are creating it for in `load_utilities`. Before, it would not automatically
   apply the interface for you.
