@@ -5,9 +5,9 @@ import asyncio
 import sys
 
 try:
-    from aiohttp.web_log import AccessLogger
+    from aiohttp.web_log import AccessLogger  # type: ignore
 except ImportError:
-    from aiohttp.helpers import AccessLogger
+    from aiohttp.helpers import AccessLogger  # type: ignore
 
 try:
     import aiohttp_autoreload
