@@ -4,7 +4,10 @@ CHANGELOG
 4.8.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure utility you are providing also provides the interface you
+  are creating it for in `load_utilities`. Before, it would not automatically
+  apply the interface for you.
+  [vangheem]
 
 
 4.8.4 (2019-06-06)
