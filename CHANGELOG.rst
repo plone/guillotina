@@ -4,7 +4,8 @@ CHANGELOG
 4.8.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `@move` enable to allow being able to use it for renaming
+  [vangheem]
 
 
 4.8.5 (2019-06-07)
