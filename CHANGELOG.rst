@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.6 (unreleased)
+4.8.6 (2019-06-10)
 ------------------
 
 - Fix `@move` enable to allow being able to use it for renaming
