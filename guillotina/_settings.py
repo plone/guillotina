@@ -62,6 +62,7 @@ app_settings: Dict[str, Any] = {
     },
     'commands': {
         '': 'guillotina.commands.server.ServerCommand',
+        'asgi': 'guillotina.commands.asgi.AsgiCommand',
         'serve': 'guillotina.commands.server.ServerCommand',
         'create': 'guillotina.commands.create.CreateCommand',
         'shell': 'guillotina.commands.shell.ShellCommand',
