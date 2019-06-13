@@ -388,6 +388,7 @@ async def all_permissions(context, request):
     context=IResource, method='POST',
     permission='guillotina.ChangePermissions', name='@sharing',
     summary='Change permissions for a resource',
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",

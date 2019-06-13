@@ -19,6 +19,7 @@ _ = MessageFactory('guillotina')
     context=IContainer, method='POST',
     permission='guillotina.ManageAddons', name='@addons',
     summary='Install addon to container',
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",
@@ -27,10 +28,10 @@ _ = MessageFactory('guillotina')
         }
     }])
 async def install(context, request):
-    validator = get_schema_validator('Addon')
-    try:
+    # validator = get_schema_validator('Addon')
+    # try:
         data = await request.json()
-        validator.validate(data)
+        # validator.validate(data)
         id_to_install = data.get('id', None)
 
         if id_to_install not in app_settings['available_addons']:
@@ -50,16 +51,16 @@ async def install(context, request):
 
         await addons.install(context, id_to_install)
         return await get_addons(context, request)
-    except jsonschema.exceptions.ValidationError as e:
-        raise HTTPPreconditionFailed(content={
-            'reason': 'json schema validation error',
-            'message': e.message,
-            'validator': e.validator,
-            'validator_value': e.validator_value,
-            'path': [i for i in e.path],
-            'schema_path': [i for i in e.schema_path],
-            "schema": app_settings['json_schema_definitions']['Addon']
-        })
+    # except jsonschema.exceptions.ValidationError as e:
+    #     raise HTTPPreconditionFailed(content={
+    #         'reason': 'json schema validation error',
+    #         'message': e.message,
+    #         'validator': e.validator,
+    #         'validator_value': e.validator_value,
+    #         'path': [i for i in e.path],
+    #         'schema_path': [i for i in e.schema_path],
+    #         "schema": app_settings['json_schema_definitions']['Addon']
+    #     })
 
 
 @configure.service(

@@ -7,7 +7,11 @@ from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICloudFileField
 from guillotina.response import HTTPNotFound
 from guillotina.schema import Dict
+from guillotina._settings import app_settings
+from guillotina.utils import get_schema_validator
+from guillotina.response import HTTPPreconditionFailed
 
+import jsonschema
 
 class DictFieldProxy():
 
@@ -36,6 +40,23 @@ class DictFieldProxy():
 
 
 class Service(View):
+    async def validate(self, parameters):
+        data = await  self.request.json()
+        schem = parameters[0]['schema']['$ref'][14:]
+        validator = get_schema_validator(schem)
+        try:
+            validator.validate(data)
+        except jsonschema.exceptions.ValidationError as e:
+            raise HTTPPreconditionFailed(content={
+                'reason': 'json schema validation error',
+                'message': e.message,
+                'validator': e.validator,
+                'validator_value': e.validator_value,
+                'path': [i for i in e.path],
+                'schema_path': [i for i in e.schema_path],
+                "schema": app_settings['json_schema_definitions'][schem]
+             })
+
     async def get_data(self):
         return await self.request.json()
 

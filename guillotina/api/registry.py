@@ -97,6 +97,7 @@ async def get_registry(context, request):
     context=IContainer, method='POST',
     permission='guillotina.RegisterConfigurations', name='@registry',
     summary='Register a new interface to for registry settings',
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",
