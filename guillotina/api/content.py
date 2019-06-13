@@ -711,7 +711,7 @@ async def items(context, request):
     except Exception:
         page = 1
 
-    txn = get_transaction(request)
+    txn = get_transaction()
 
     include = omit = []
     if request.query.get('include'):
@@ -769,7 +769,7 @@ async def addable_types(context, request):
         }
     })
 async def invalidate_cache(context, request):
-    txn = get_transaction(request)
+    txn = get_transaction()
     cache_keys = txn._cache.get_cache_keys(context)
     await txn._cache.delete_all(cache_keys)
 

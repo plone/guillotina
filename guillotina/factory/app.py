@@ -1,17 +1,23 @@
-from aiohttp import web
+import asyncio
+import json
+import logging
+import logging.config
 from copy import deepcopy
+
+from aiohttp import web
 from guillotina import configure
 from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina._settings import default_settings
+from guillotina._settings import request_var
 from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
-from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
+from guillotina.content import load_cached_schema
 from guillotina.event import notify
 from guillotina.events import ApplicationCleanupEvent
 from guillotina.events import ApplicationConfiguredEvent
@@ -32,12 +38,6 @@ from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 from guillotina.utils import secure_passphrase
 from jwcrypto import jwk
-
-import aiotask_context
-import asyncio
-import json
-import logging
-import logging.config
 
 
 app_logger = logging.getLogger('guillotina')
@@ -121,7 +121,7 @@ def load_application(module, root, settings):
 
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
-        aiotask_context.set('request', request)
+        request_var.set(request)
         try:
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
@@ -211,12 +211,6 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     if loop is None:
         loop = asyncio.get_event_loop()
-
-    # chainmap task factory is actually very important
-    # default task factory uses inheritance in a way
-    # that bubbles back down. So it's possible for a sub-task
-    # to clear out the request of the parent task
-    loop.set_task_factory(aiotask_context.chainmap_task_factory)
 
     if config_file is not None:
         with open(config_file, 'r') as config:

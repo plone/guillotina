@@ -8,5 +8,5 @@
   .. autofunction:: get_tm
   .. autofunction:: get_transaction
 
-  .. autoclass:: managed_transaction
+  .. autoclass:: transaction
 

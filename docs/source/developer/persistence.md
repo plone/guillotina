@@ -46,8 +46,8 @@ await tm.begin()  # start new one
 There is also an async context manager:
 
 ```python
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import transaction
 
-async with managed_transaction() as txn:
+async with transaction(db=my_db) as txn:
     # modify objects
 ```

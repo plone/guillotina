@@ -1,3 +1,8 @@
+import asyncio
+import uuid
+
+from guillotina._settings import tm_var
+from guillotina._settings import txn_var
 from guillotina.component import get_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
@@ -5,9 +10,6 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from zope.interface import implementer
-
-import asyncio
-import uuid
 
 
 class MockDBTransaction:
@@ -57,6 +59,13 @@ class MockTransaction:
 
     async def get_annotation(self, ob, key, reader=None):
         pass
+
+    def __enter__(self):
+        txn_var.set(self)
+
+    def __exit__(self, *args):
+        '''
+        '''
 
 
 @implementer(IStorage)
@@ -133,12 +142,20 @@ class MockTransactionManager:
     async def _close_txn(self, *args, **kwargs):
         pass
 
-    def get(self, request):
-        return request._txn
+    def get(self):
+        return tm_var.get()
 
-    async def begin(self, request):
-        request._txn = MockTransaction(self)
-        return request._txn
+    async def begin(self):
+        txn = MockTransaction(self)
+        txn_var.set(txn)
+        return txn
+
+    def __enter__(self):
+        tm_var.set(self)
+
+    def __exit__(self, *args):
+        '''
+        '''
 
 
 class FakeConnection:

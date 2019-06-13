@@ -17,9 +17,8 @@ ITERATIONS = 100
 
 
 async def write_runner(container, strategy):
-    request = get_current_request()
-    txn = get_transaction(request)
-    tm = get_tm(request)
+    txn = get_transaction()
+    tm = get_tm()
     await tm.abort(txn=txn)
 
     tm._storage._transaction_strategy = strategy
@@ -27,7 +26,7 @@ async def write_runner(container, strategy):
     print(f'Test content create with {strategy} strategy')
     start = time.time()
     for _ in range(ITERATIONS):
-        txn = await tm.begin(request=request)
+        txn = await tm.begin()
         id_ = uuid.uuid4().hex
         await create_content_in_container(container, 'Item', id_)
         await tm.commit(txn=txn)
@@ -36,7 +35,7 @@ async def write_runner(container, strategy):
 
     print(f'Test large number create with {strategy} strategy')
     start = time.time()
-    txn = await tm.begin(request=request)
+    txn = await tm.begin()
     for _ in range(ITERATIONS):
         id_ = uuid.uuid4().hex
         await create_content_in_container(container, 'Item', id_)
@@ -46,12 +45,11 @@ async def write_runner(container, strategy):
 
 
 async def read_runner(container, strategy):
-    request = get_current_request()
-    txn = get_transaction(request)
-    tm = get_tm(request)
+    txn = get_transaction()
+    tm = get_tm()
     id_ = uuid.uuid4().hex
     await tm.abort(txn=txn)
-    txn = await tm.begin(request=request)
+    txn = await tm.begin()
     ob = await create_content_in_container(container, 'Item', id_)
     await tm.commit(txn=txn)
 
@@ -60,7 +58,7 @@ async def read_runner(container, strategy):
     print(f'Test content read with {strategy} strategy')
     start = time.time()
     for _ in range(ITERATIONS):
-        txn = await tm.begin(request=request)
+        txn = await tm.begin()
         assert await txn.get(ob._p_oid) is not None
         await tm.commit(txn=txn)
     end = time.time()
@@ -68,7 +66,7 @@ async def read_runner(container, strategy):
 
     print(f'Test large content read with {strategy} strategy')
     start = time.time()
-    txn = await tm.begin(request=request)
+    txn = await tm.begin()
     for _ in range(ITERATIONS):
         assert await txn.get(ob._p_oid) is not None
     await tm.commit(txn=txn)

@@ -6,8 +6,10 @@ from guillotina.db.storages import pg
 from guillotina.db.storages.utils import register_sql
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
+from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
+from guillotina.utils import get_current_request
 from zope.interface import implementer
 
 
@@ -74,12 +76,15 @@ COMMIT;'''
         self._storage = txn._manager._storage
         self._status = 'none'
         self._priority = 'LOW'
-        if txn.request is not None:
-            attempts = getattr(txn.request, '_retry_attempt', 0)
+        try:
+            request = get_current_request()
+            attempts = getattr(request, '_retry_attempt', 0)
             if attempts == 1:
                 self._priority = 'NORMAL'
             elif attempts > 1:
                 self._priority = 'HIGH'
+        except RequestNotFound:
+            pass
 
     async def start(self):
         assert self._status in ('none',)

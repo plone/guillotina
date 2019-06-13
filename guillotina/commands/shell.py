@@ -1,11 +1,14 @@
+import asyncio  # noqa
+import sys
+
 from guillotina._settings import app_settings
+from guillotina._settings import request_var
+from guillotina._settings import tm_var
+from guillotina._settings import txn_var
 from guillotina.commands import Command
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.testing import TESTING_SETTINGS
-
-import asyncio  # noqa
-import sys
 
 
 class ShellHelpers:
@@ -25,8 +28,8 @@ class ShellHelpers:
         self._request._db_id = db_id
         self._active_db = db
         self._active_txn = await tm.begin()
-        self._request._txn = self._active_txn
-        self._request._tm = tm
+        tm_var.set(tm)
+        txn_var.set(self._active_txn)
         return self._active_txn
 
     async def use_container(self, container_id):
@@ -104,7 +107,8 @@ await commit()
         app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
         root = get_utility(IApplication, name='root')
         helpers = ShellHelpers(app, root, self.request)
-        request = self.request  # noqa
+        request = self.request
+        request_var.set(request)
         use_db = helpers.use_db  # noqa
         use_container = helpers.use_container  # noqa
         commit = helpers.commit  # noqa

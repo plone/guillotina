@@ -9,7 +9,7 @@ from guillotina.tests.utils import get_db
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.security.utils import settings_for_object
 from guillotina.tests import utils
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import transaction
 from guillotina.auth.users import GuillotinaUser
 
 import json
@@ -67,7 +67,7 @@ async def test_set_local_guillotina(container_requester):
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             testing_object = await container.async_get('testing')
 
@@ -95,7 +95,7 @@ async def test_set_local_guillotina(container_requester):
 
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             # need to retreive objs again from db since they changed
             container = await root.async_get('guillotina')
             testing_object = await container.async_get('testing')
@@ -118,7 +118,7 @@ async def test_set_local_guillotina(container_requester):
         # need to retreive objs again from db since they changed
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             testing_object = await container.async_get('testing')
             principals = get_principals_with_access_content(testing_object, request)
@@ -143,7 +143,7 @@ async def test_sharing_prinrole(container_requester):
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             assert 'user1' in container.__acl__['prinrole']._bycol
 
@@ -166,7 +166,7 @@ async def test_sharing_roleperm(container_requester):
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             assert 'guillotina.Reader' in container.__acl__['roleperm']._bycol
 
@@ -240,11 +240,12 @@ async def test_inherit(container_requester):
 
         utils.login(request, user)
 
-        assert request.security.check_permission('guillotina.ViewContent',
-                                                 request.container)
-        assert not request.security.check_permission(
-            'guillotina.ViewContent',
-            content)
+        with request:
+            assert request.security.check_permission('guillotina.ViewContent',
+                                                     request.container)
+            assert not request.security.check_permission(
+                'guillotina.ViewContent',
+                content)
 
         response, status = await requester(
             'GET',
@@ -327,10 +328,11 @@ async def test_allowsingle(container_requester):
 
         utils.login(request, user)
 
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
-        assert not request.security.check_permission(
-            'guillotina.AccessContent', content)
+        with request:
+            assert request.security.check_permission('guillotina.AccessContent',
+                                                     request.container)
+            assert not request.security.check_permission(
+                'guillotina.AccessContent', content)
 
 
 async def test_allowsingle2(container_requester):
@@ -444,10 +446,11 @@ async def test_allowsingle2(container_requester):
 
         utils.login(request, user)
 
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
-        assert not request.security.check_permission(
-            'guillotina.AccessContent', content)
+        with request:
+            assert request.security.check_permission('guillotina.AccessContent',
+                                                     request.container)
+            assert not request.security.check_permission(
+                'guillotina.AccessContent', content)
 
         user = GuillotinaUser(request)
         user.id = 'user3'
@@ -457,10 +460,11 @@ async def test_allowsingle2(container_requester):
         test1 = await content.async_get('test1')
         test2 = await content.async_get('test2')
 
-        assert request.security.check_permission(
-            'guillotina.ViewContent', test1)
-        assert request.security.check_permission(
-            'guillotina.ViewContent', test2)
+        with request:
+            assert request.security.check_permission(
+                'guillotina.ViewContent', test1)
+            assert request.security.check_permission(
+                'guillotina.ViewContent', test2)
 
 
 async def test_cached_access_roles(dummy_guillotina):

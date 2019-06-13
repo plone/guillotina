@@ -767,8 +767,9 @@ async def move(context: IResource,
 
     original_parent = context.__parent__
 
-    txn = get_transaction(request)
-    cache_keys = txn._cache.get_cache_keys(context, 'deleted')
+    txn = get_transaction()
+    if txn is not None:
+        cache_keys = txn._cache.get_cache_keys(context, 'deleted')
 
     await notify(
         BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,
@@ -787,5 +788,6 @@ async def move(context: IResource,
                              'destination': destination
                          }))
 
-    cache_keys += txn._cache.get_cache_keys(context, 'added')
-    await txn._cache.delete_all(cache_keys)
+    if txn is not None:
+        cache_keys += txn._cache.get_cache_keys(context, 'added')
+        await txn._cache.delete_all(cache_keys)

@@ -82,6 +82,19 @@ def get_current_interaction(request):
     return interaction
 
 
+@configure.adapter(for_=None, provides=IInteraction)
+def get_none_interaction(request):
+    """
+    Cache IInteraction on the request object because the request object
+    is where we start adding principals
+    """
+    request = get_current_request()
+    interaction = getattr(request, 'security', None)
+    if interaction is not None:
+        return interaction
+    return Interaction()
+
+
 @implementer(IInteraction)
 @provider(ISecurityPolicy)
 class Interaction(object):
@@ -90,12 +103,6 @@ class Interaction(object):
         self.participations = []
         self._cache = LRU(1000)
         self.principal = None
-
-        if request is not None:
-            self.request = request
-        else:
-            # Try  magic request lookup if request not given
-            self.request = get_current_request()
 
     def add(self, participation):
         if participation.interaction is not None:

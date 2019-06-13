@@ -1,4 +1,7 @@
+import asyncio
+import logging
 from concurrent.futures import ThreadPoolExecutor
+
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
@@ -8,6 +11,7 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.const import ROOT_ID
 from guillotina.db.interfaces import IDatabaseManager
+from guillotina.db.interfaces import ITransactionManager
 from guillotina.db.interfaces import IWriter
 from guillotina.db.reader import reader
 from guillotina.db.transaction_manager import TransactionManager
@@ -21,9 +25,6 @@ from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
 from zope.interface import alsoProvides
 from zope.interface import implementer
-
-import asyncio
-import logging
 
 
 logger = logging.getLogger('guillotina')
@@ -161,7 +162,7 @@ class Database:
         """
         request = make_mocked_request('POST', '/')
         request._db_write_enabled = True
-        tm = request._tm = self.get_transaction_manager()
+        tm = self.get_transaction_manager()
         txn = await tm.begin()
 
         try:
@@ -191,7 +192,7 @@ class Database:
     async def finalize(self):
         await self._storage.finalize()
 
-    def get_transaction_manager(self):
+    def get_transaction_manager(self) -> ITransactionManager:
         """
         New transaction manager for every request
         """

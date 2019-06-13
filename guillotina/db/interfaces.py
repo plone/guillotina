@@ -1,5 +1,8 @@
+import typing
+
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
+from zope.interface import Attribute
 from zope.interface import Interface
 
 
@@ -12,7 +15,54 @@ class IWriter(Interface):
 
 
 class ITransaction(Interface):
-    pass
+    _db_conn = Attribute('')
+    _query_count_end = Attribute('')
+    user = Attribute('')
+    status = Attribute('')
+    storage = Attribute('')
+    _cache = Attribute('')
+
+    async def add_after_commit_hook(hook, *real_args, args=[], kws=None, **kwargs):
+        '''
+        Add hook to be called after transaction commit
+        '''
+
+    async def add_before_commit_hook(hook, *real_args, args=[], kws=None, **kwargs):
+        '''
+        Add hook to be called before txn commit
+        '''
+
+    async def commit():
+        '''
+        Commit the transaction
+        '''
+
+    async def abort():
+        '''
+        Abort the transaction
+        '''
+
+    def get_query_count() -> int:
+        '''
+        Get number of queries tranaction ran
+        '''
+
+    async def tpc_begin():
+        '''
+        '''
+
+
+class ITransactionManager(Interface):
+
+    async def commit(*, txn: typing.Optional[ITransaction]=None):
+        '''
+        Commit txn
+        '''
+
+    async def abort(*, txn: typing.Optional[ITransaction]=None):
+        '''
+        abort txn
+        '''
 
 
 class IStorage(Interface):

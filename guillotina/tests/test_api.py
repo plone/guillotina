@@ -10,7 +10,7 @@ from guillotina.addons import Addon
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.tests import utils
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import transaction
 
 
 class ITestingRegistry(Interface):  # pylint: disable=E0239
@@ -164,7 +164,7 @@ async def test_create_content(container_requester):
         assert _['@static_behaviors'][0] == 'guillotina.behaviors.dublincore.IDublinCore'
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('item1')
             assert obj.title == 'Item1'
@@ -213,7 +213,7 @@ async def test_put_content(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('item1')
             assert obj.title == 'foobar'
@@ -324,7 +324,7 @@ async def test_create_contenttype_with_date(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('item1')
             from guillotina.behaviors.dublincore import IDublinCore

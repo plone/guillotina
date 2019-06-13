@@ -1,12 +1,12 @@
-from guillotina.commands import Command
-from guillotina.utils import get_containers
-from guillotina.utils import lazy_apply
-
-import aiotask_context
 import importlib.util
 import inspect
 import logging
 import os
+
+from guillotina._settings import request_var
+from guillotina.commands import Command
+from guillotina.utils import get_containers
+from guillotina.utils import lazy_apply
 
 
 logger = logging.getLogger('guillotina')
@@ -33,7 +33,7 @@ async def run(container):
         return parser
 
     async def run(self, arguments, settings, app):
-        aiotask_context.set('request', self.request)
+        request_var.set(self.request)
         script = os.path.abspath(arguments.script)
         spec = importlib.util.spec_from_file_location("module.name", script)
         module = importlib.util.module_from_spec(spec)

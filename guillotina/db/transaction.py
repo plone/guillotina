@@ -1,5 +1,12 @@
+import asyncio
+import logging
+import sys
+import time
 from collections import OrderedDict
+
 from guillotina._settings import app_settings
+from guillotina._settings import tm_var
+from guillotina._settings import txn_var
 from guillotina.component import get_adapter
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
@@ -16,11 +23,6 @@ from guillotina.profile import profilable
 from guillotina.utils import get_current_request
 from guillotina.utils import lazy_apply
 from zope.interface import implementer
-
-import asyncio
-import logging
-import sys
-import time
 
 
 _EMPTY = '__<EMPTY VALUE>__'
@@ -71,11 +73,11 @@ class cache:
 
 
 @implementer(ITransaction)
-class Transaction(object):
+class Transaction:
     _status = 'empty'
     _skip_commit = False
 
-    def __init__(self, manager, request=None, loop=None):
+    def __init__(self, manager, loop=None):
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE
@@ -108,9 +110,6 @@ class Transaction(object):
         # which would correspond with one connection
         self._lock = asyncio.Lock(loop=loop)
 
-        # we *not* follow naming standards of using "_request" here so
-        # get_current_request can magically find us here...
-        self.request = request
         self._strategy = get_adapter(self, ITransactionStrategy,
                                      name=manager._storage._transaction_strategy)
         self._cache = get_adapter(self, IStorageCache,
@@ -213,13 +212,12 @@ class Transaction(object):
         self._before_commit = []
 
     def check_read_only(self):
-        if self.request is None:
-            try:
-                self.request = get_current_request()
-            except RequestNotFound:
-                return False
-        if hasattr(self.request, '_db_write_enabled') and not self.request._db_write_enabled:
-            raise Unauthorized('Adding content not permited')
+        try:
+            request = get_current_request()
+            if hasattr(request, '_db_write_enabled') and not request._db_write_enabled:
+                raise Unauthorized('Adding content not permited')
+        except RequestNotFound:
+            pass
         # Add the new tid
         if self._manager._storage._read_only:
             raise ReadOnlyError()
@@ -565,3 +563,19 @@ class Transaction(object):
             page += 1
             keys = await self._manager._storage.get_page_of_keys(
                 self, oid, page=page, page_size=page_size)
+
+    def __enter__(self):
+        tm_var.set(self.manager)
+        txn_var.set(self)
+        return self
+
+    def __exit__(self, *args):
+        '''
+        contextvars already tears down to previous value, do not set to None here!
+        '''
+
+    async def __aenter__(self):
+        return self.__enter__()
+
+    async def __aexit__(self, *args):
+        return self.__exit__()

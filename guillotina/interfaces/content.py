@@ -1,13 +1,13 @@
 # NEED use this import because we have a "schema" attribute below
-from guillotina.component.interfaces import ISite as IComponentSite
+# NEED use this import because we have a "schema" attribute below
+import guillotina.schema
 from guillotina.component.interfaces import IFactory
+from guillotina.component.interfaces import ISite as IComponentSite
+from guillotina.db.interfaces import ITransactionManager
 from guillotina.interfaces.common import IMapping
 from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
-
-# NEED use this import because we have a "schema" attribute below
-import guillotina.schema
 
 
 class IAsyncContainer(Interface):
@@ -106,7 +106,7 @@ class IApplication(ITraversable, IAsyncContainer):
 
 
 class IDatabase(ITraversable, IAsyncContainer):
-    def get_transaction_manager():  # type: ignore
+    def get_transaction_manager() -> ITransactionManager:
         '''
         '''
 

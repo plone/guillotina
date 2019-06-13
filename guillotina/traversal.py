@@ -15,6 +15,8 @@ from guillotina import logger
 from guillotina import response
 from guillotina import routes
 from guillotina._settings import app_settings
+from guillotina._settings import tm_var
+from guillotina._settings import txn_var
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.participation import AnonymousParticipation
 from guillotina.browser import View
@@ -96,9 +98,10 @@ async def traverse(request, parent, path):
         request._db_write_enabled = app_settings['check_writable_request'](request)
         request._db_id = context.id
         # Add a transaction Manager to request
-        tm = request._tm = context.get_transaction_manager()
+        tm = context.get_transaction_manager()
+        tm_var.set(tm)
         # Start a transaction
-        txn = await tm.begin(request=request)
+        txn = await tm.begin()
         # Get the root of the tree
         context = await tm.get_root(txn=txn)
 
@@ -192,8 +195,8 @@ class BaseMatchInfo(AbstractMatchInfo):
                     last = timing
                 resp.headers['XG-Timing-Total'] = "{0:.5f}".format(
                     (last - request._initialized) * 1000)
-                try:
-                    txn = request._txn
+                txn = txn_var.get()
+                if txn is not None:
                     resp.headers['XG-Request-Cache-hits'] = str(txn._cache._hits)
                     resp.headers['XG-Request-Cache-misses'] = str(txn._cache._misses)
                     resp.headers['XG-Request-Cache-stored'] = str(txn._cache._stored)
@@ -206,8 +209,6 @@ class BaseMatchInfo(AbstractMatchInfo):
                         counts = txn._queries[query]
                         duration = "{0:.5f}".format(counts[1] * 1000)
                         resp.headers[f'XG-Query-{idx}'] = f'count: {counts[0]}, time: {duration}, query: {query}'  # noqa
-                except AttributeError:
-                    pass
             except (KeyError, AttributeError):
                 resp.headers['XG-Error'] = 'Could not get stats'
 
@@ -260,16 +261,16 @@ class MatchInfo(BaseMatchInfo):
                 # We try to avoid collisions on the same instance of
                 # guillotina
                 view_result = await self.view()
-                await commit(request, warn=False)
+                await commit(warn=False)
             except (ConflictError, TIDConflictError):
                 # bubble this error up
                 raise
             except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
-                await abort(request)
+                await abort()
                 view_result = exc
                 request._view_error = True
             except Exception as e:
-                await abort(request)
+                await abort()
                 view_result = generate_error_response(
                     e, request, 'ServiceError')
                 request._view_error = True
@@ -283,7 +284,7 @@ class MatchInfo(BaseMatchInfo):
                 request._view_error = True
                 view_result = generate_error_response(e, request, 'ViewError')
             finally:
-                await abort(request)
+                await abort()
         request.record('viewrendered')
 
         if IAioHTTPResponse.providedBy(view_result):
@@ -367,19 +368,19 @@ class TraversalRouter(AbstractRouter):
         try:
             result = await self.real_resolve(request)
         except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
-            await abort(request)
+            await abort()
             return BasicMatchInfo(request, exc)
         except Exception:
             logger.error("Exception on resolve execution",
                          exc_info=True, request=request)
-            await abort(request)
+            await abort()
             return BasicMatchInfo(
                 request, response.HTTPInternalServerError())
 
         if result is not None:
             return result
         else:
-            await abort(request)
+            await abort()
             return BasicMatchInfo(request, response.HTTPNotFound())
 
     @profilable

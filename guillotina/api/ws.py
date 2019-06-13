@@ -185,8 +185,8 @@ class WebsocketsView(Service):
         self.request.execute_futures()
 
     async def __call__(self):
-        tm = get_tm(self.request)
-        await tm.abort(self.request)
+        tm = get_tm()
+        await tm.abort()
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
 
@@ -201,7 +201,7 @@ class WebsocketsView(Service):
                 if message['op'] == 'close':
                     await ws.close()
                 elif message['op'].lower() == 'get':
-                    txn = await tm.begin(request=self.request)
+                    txn = await tm.begin()
                     try:
                         await self.handle_ws_request(ws, message)
                     except Exception:
