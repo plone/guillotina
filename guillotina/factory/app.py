@@ -161,13 +161,13 @@ def make_aiohttp_application():
 
 
 def make_asgi_app():
-    from guillotina.commands.asgi import AsgiCommand
+    from guillotina.asgi import AsgiApp
 
     # middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
     router_klass = app_settings.get('router', TraversalRouter)
     router = resolve_dotted_name(router_klass)()
 
-    app = AsgiCommand()
+    app = AsgiApp()
     app.router = router
     return app
 
@@ -182,6 +182,7 @@ _dotted_name_settings = (
     'check_writable_request',
     'request_indexer'
 )
+
 
 def optimize_settings(settings):
     '''
@@ -291,7 +292,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     # Make and initialize aiohttp app
     if server_app is None:
-        server_app = make_asgi_app()
+        server_app = make_aiohttp_application()
     root.app = server_app
     server_app.root = root
     server_app.config = config
@@ -376,6 +377,7 @@ async def close_utilities(app):
         app_logger.info('Removing ' + key)
         await root.del_async_utility(key)
 
+
 async def close_dbs(app):
     root = get_utility(IApplication, name='root')
     for db in root:
@@ -383,5 +385,5 @@ async def close_dbs(app):
             await db[1].finalize()
 
 
-
+# The asgi app
 app = make_asgi_app()

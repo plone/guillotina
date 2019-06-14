@@ -43,14 +43,15 @@ class AsgiApp:
         elif scope["type"] == "lifespan":
             self.app = await self.setup()
 
-    async def setup(self):
+    async def setup(self, settings=None, loop=None):
         # The config file is defined in the env var `CONFIG`
         loop = asyncio.get_event_loop()
         from guillotina.factory import make_app
 
         config = os.getenv("CONFIG", None)
-
-        if not config:
+        if settings:
+            pass
+        elif not config:
             settings = guillotina._settings.default_settings
         else:
             with open(config, "r") as f:
@@ -93,3 +94,7 @@ class AsgiApp:
             body = b""
 
         await send({"type": "http.response.body", "body": body})
+
+
+# asgi app singleton
+app = AsgiApp()

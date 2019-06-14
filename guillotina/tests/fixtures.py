@@ -263,10 +263,12 @@ DELETE from {}
 WHERE zoid != '{}' AND zoid != '{}'
 '''.format(storage._objects_table_name, ROOT_ID, TRASHED_ID))
 
+
 @pytest.fixture(scope='function')
 async def guillotina_main(loop):
     globalregistry.reset()
-    app = await make_app(settings=get_db_settings(), loop=loop)
+    from guillotina.factory.app import app as _app
+    app = await _app.setup(settings=get_db_settings(), loop=loop)
     app.config.execute_actions()
     load_cached_schema()
     await _clear_dbs(app.root)
