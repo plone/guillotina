@@ -45,11 +45,16 @@ class ContextDefaultFactory:
         return 'foobar'
 
 
+CATEGORIES_MAPPING = {
+    'dynamic': False,
+}
+
+
 class IExample(IResource):
 
     metadata('categories')
 
-    index_field('categories', type='nested')
+    index_field('categories', type='nested', field_mapping=CATEGORIES_MAPPING)
     categories = schema.List(
         title='categories',
         default=[],
