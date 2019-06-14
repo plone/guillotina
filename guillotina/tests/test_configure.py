@@ -14,7 +14,6 @@ from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.tests.utils import create_content
-from guillotina.tests.utils import wrap_request
 from zope.interface import Interface
 
 
@@ -242,10 +241,9 @@ def test_loading_configuration_does_not_load_subpackage_definition():
             configuration.get('klass'), '__module__', None)
 
 
-async def test_sync_subscribers_only_called_once(dummy_guillotina, dummy_request):
+async def test_sync_subscribers_only_called_once(dummy_guillotina):
     parent = create_content()
     ob = create_content(parent=parent)
     event = ObjectAddedEvent(ob, parent, ob.__name__, payload={})
-    async with wrap_request(dummy_request):
-        await notify(event)
+    await notify(event)
     assert event.called == 1

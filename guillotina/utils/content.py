@@ -7,6 +7,7 @@ from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
+from guillotina.const import ROOT_ID
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.orm.interfaces import IBaseObject
@@ -186,7 +187,8 @@ async def get_object_by_oid(oid: str, txn=None) -> IBaseObject:
         parent = await get_object_by_oid(result['parent_id'], txn)
         if parent is not None:
             obj.__parent__ = parent
-        raise KeyError(result['parent_id'])
+        else:
+            raise KeyError(result['parent_id'])
     return obj
 
 

@@ -63,10 +63,10 @@ async def get_aps(postgres, strategy=None, pool_size=16, autovacuum=True):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_read_obs(db, dummy_request):
+async def test_read_obs(db, dummy_guillotina):
     """Low level test checks that root is not there"""
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         txn.register(ob)
 
@@ -86,10 +86,10 @@ async def test_read_obs(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_restart_connection(db, dummy_request):
+async def test_restart_connection(db, dummy_guillotina):
     """Low level test checks that root is not there"""
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         txn.register(ob)
 
@@ -112,9 +112,9 @@ async def test_restart_connection(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_restart_connection_pg(db, dummy_request):
+async def test_restart_connection_pg(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, dummy_request:
+    with TransactionManager(aps) as tm:
         # Test it works
         await tm._storage.get_next_tid(Mock())
 
@@ -141,9 +141,9 @@ async def test_restart_connection_pg(db, dummy_request):
 
 @pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
                     reason="Cockroach does not have cascade support")
-async def test_deleting_parent_deletes_children(db, dummy_request):
+async def test_deleting_parent_deletes_children(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         folder = create_content(Folder, 'Folder')
         txn.register(folder)
@@ -183,9 +183,9 @@ async def test_deleting_parent_deletes_children(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_create_blob(db, dummy_request):
+async def test_create_blob(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         txn.register(ob)
 
@@ -209,9 +209,9 @@ async def test_create_blob(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_delete_resource_deletes_blob(db, dummy_request):
+async def test_delete_resource_deletes_blob(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         txn.register(ob)
 
@@ -240,9 +240,9 @@ async def test_delete_resource_deletes_blob(db, dummy_request):
 @pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
                     reason="Cockroach not support resolve...")
 async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
-        db, dummy_request):
+        db, dummy_guillotina):
     aps = await get_aps(db, 'resolve')
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         ob.title = 'foobar'
         ob.description = 'foobar'
@@ -273,9 +273,9 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
 
 @pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
                     reason="Cockroach not support resolve...")
-async def test_should_resolve_conflict_error(db, dummy_request):
+async def test_should_resolve_conflict_error(db, dummy_guillotina):
     aps = await get_aps(db, 'resolve')
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         ob2 = create_content()
         txn.register(ob1)
@@ -304,9 +304,9 @@ async def test_should_resolve_conflict_error(db, dummy_request):
 
 @pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
                     reason="Cockroach not support resolve...")
-async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_request):
+async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_guillotina):
     aps = await get_aps(db, 'resolve')
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         ob1 = create_content()
         txn.register(ob1)
@@ -335,9 +335,9 @@ async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_request)
 
 @pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
                     reason="Cockroach not support simple...")
-async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_request):
+async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_guillotina):
     aps = await get_aps(db, 'simple')
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         ob2 = create_content()
         txn.register(ob1)
@@ -365,9 +365,9 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_req
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_none_strat_allows_trans_commits(db, dummy_request):
+async def test_none_strat_allows_trans_commits(db, dummy_guillotina):
     aps = await get_aps(db, 'none')
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         ob1 = create_content()
         txn.register(ob1)
@@ -397,9 +397,9 @@ async def test_none_strat_allows_trans_commits(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_count_total_objects(db, dummy_request):
+async def test_count_total_objects(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         ob = create_content()
         txn.register(ob)
@@ -417,9 +417,9 @@ async def test_count_total_objects(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_get_resources_of_type(db, dummy_request):
+async def test_get_resources_of_type(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         ob = create_content()
         txn.register(ob)
@@ -441,9 +441,9 @@ async def test_get_resources_of_type(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_get_total_resources_of_type(db, dummy_request):
+async def test_get_total_resources_of_type(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         txn.register(ob)
 
@@ -459,9 +459,9 @@ async def test_get_total_resources_of_type(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_using_gather_with_queries_before_prepare(db, dummy_request):
+async def test_using_gather_with_queries_before_prepare(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         txn.register(ob1)
 
@@ -482,9 +482,9 @@ async def test_using_gather_with_queries_before_prepare(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_using_gather_with_queries_after_prepare(db, dummy_request):
+async def test_using_gather_with_queries_after_prepare(db, dummy_guillotina):
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         txn.register(ob1)
 
@@ -508,10 +508,10 @@ async def test_using_gather_with_queries_after_prepare(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_exhausting_pool_size(db, dummy_request):
+async def test_exhausting_pool_size(db, dummy_guillotina):
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(db, pool_size=2)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         await txn.get_connection()
 
         with pytest.raises(concurrent.futures._base.TimeoutError):
@@ -526,11 +526,11 @@ async def test_exhausting_pool_size(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_mismatched_tid_causes_conflict_error(db, dummy_request):
+async def test_mismatched_tid_causes_conflict_error(db, dummy_guillotina):
 
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         txn.register(ob1)
         await tm.commit(txn=txn)
@@ -548,11 +548,11 @@ async def test_mismatched_tid_causes_conflict_error(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
-async def test_iterate_keys(db, dummy_request):
+async def test_iterate_keys(db, dummy_guillotina):
 
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(db)
-    with TransactionManager(aps) as tm, await tm.begin() as txn, dummy_request:
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         parent = create_content()
         txn.register(parent)
@@ -577,7 +577,7 @@ async def test_iterate_keys(db, dummy_request):
 
 @pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
                     reason="Cockroach does not like this test...")
-async def test_handles_asyncpg_trying_savepoints(db, dummy_request):
+async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
 
     aps = await get_aps(db)
     tm = TransactionManager(aps)
@@ -588,7 +588,7 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_request):
         conn._con._top_xact = asyncpg.transaction.Transaction(
             conn._con, 'read_committed', False, False)
 
-    with await tm.begin() as txn, tm, dummy_request:
+    with await tm.begin() as txn, tm:
 
         # then, try doing stuff...
         ob = create_content()
@@ -611,7 +611,7 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_request):
 
 @pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
                     reason="Cockroach does not like this test...")
-async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_request):
+async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_guillotina):
 
     aps = await get_aps(db)
     tm = TransactionManager(aps)
@@ -621,7 +621,7 @@ async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_request):
             await conn.connect()
         await conn._con.execute('BEGIN;')
 
-    with await tm.begin() as txn, tm, dummy_request:
+    with await tm.begin() as txn, tm:
         # then, try doing stuff...
         ob = create_content()
         txn.register(ob)
@@ -642,7 +642,7 @@ async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_request):
 
 
 @pytest.mark.skipif(DATABASE in ('DUMMY',), reason='only for rdms')
-async def test_vacuum_objects(db, dummy_request):
+async def test_vacuum_objects(db, dummy_guillotina):
     aps = await get_aps(db, autovacuum=False)
     tm = TransactionManager(aps)
 
@@ -654,7 +654,7 @@ async def test_vacuum_objects(db, dummy_request):
     txn.register(ob1)
     txn.register(ob2)
 
-    with dummy_request, txn, tm:
+    with txn, tm:
         await tm.commit(txn=txn)
 
         txn = await tm.begin()

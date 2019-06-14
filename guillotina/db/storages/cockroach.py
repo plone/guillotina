@@ -1,7 +1,7 @@
 import asyncpg
 from guillotina import glogging
 from guillotina.db.interfaces import ICockroachStorage
-from guillotina.db.oid import MAX_OID_LENGTH
+from guillotina.db.uid import MAX_UID_LENGTH
 from guillotina.db.storages import pg
 from guillotina.db.storages.utils import register_sql
 from guillotina.exceptions import ConflictError
@@ -19,8 +19,8 @@ logger = glogging.getLogger('guillotina')
 register_sql('CR_NAIVE_UPSERT', f"""
 INSERT INTO {{table_name}}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
-VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
-        $6::varchar({MAX_OID_LENGTH}), $7::int, $8::varchar({MAX_OID_LENGTH}),
+VALUES ($1::varchar({MAX_UID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
+        $6::varchar({MAX_UID_LENGTH}), $7::int, $8::varchar({MAX_UID_LENGTH}),
         $9::text, $10::text, $11::bytea)
 ON CONFLICT (zoid)
 DO UPDATE SET
@@ -45,14 +45,14 @@ SET
     state_size = $3::int,
     part = $4::int,
     resource = $5::boolean,
-    of = $6::varchar({MAX_OID_LENGTH}),
+    of = $6::varchar({MAX_UID_LENGTH}),
     otid = $7::int,
-    parent_id = $8::varchar({MAX_OID_LENGTH}),
+    parent_id = $8::varchar({MAX_UID_LENGTH}),
     id = $9::text,
     type = $10::text,
     state = $11::bytea
 WHERE
-    zoid = $1::varchar({MAX_OID_LENGTH})
+    zoid = $1::varchar({MAX_UID_LENGTH})
     AND tid = $7::int
 RETURNING tid, otid""")
 

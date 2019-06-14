@@ -1,10 +1,9 @@
+import ujson
 from guillotina._settings import app_settings
 from guillotina.interfaces import IUnauthorized
 from zope.interface import implementer
 from zope.interface.exceptions import Invalid  # noqa pylint: disable=W0611
 from zope.interface.interfaces import ComponentLookupError  # noqa pylint: disable=W0611
-
-import ujson
 
 
 class NoPermissionToAdd(Exception):
@@ -100,7 +99,10 @@ class ConflictError(Exception):
 
     def get_conflict_summary(self, oid, txn, old_serial, writer):
         from guillotina.utils import get_current_request
-        req = get_current_request()
+        try:
+            req = get_current_request()
+        except RequestNotFound:
+            req = None
         max_attempts = app_settings.get('conflict_retry_attempts', 3)
         attempts = getattr(req, '_retry_attempt', 0)
         return f'''Object ID: {oid}

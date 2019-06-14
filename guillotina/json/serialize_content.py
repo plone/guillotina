@@ -63,7 +63,7 @@ class SerializeToJson(object):
             behaviors.append(behavior_schema.__identifier__)
 
         result = {
-            '@id': IAbsoluteURL(self.context, self.request)(),
+            '@id': get_multi_adapter((self.context, self.request), IAbsoluteURL)(),
             '@type': self.context.type_name,
             '@name': self.context.__name__,
             '@uid': self.context.uuid,

@@ -11,8 +11,6 @@ from guillotina.security.utils import get_roles_with_access_content
 from guillotina.security.utils import settings_for_object
 from guillotina.tests import utils
 from guillotina.tests.utils import get_db
-from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import wrap_request
 from guillotina.transactions import transaction
 
 
@@ -460,22 +458,20 @@ async def test_allowsingle2(container_requester):
 async def test_cached_access_roles(dummy_guillotina):
     db = get_db(dummy_guillotina, 'db')
     tm = db.get_transaction_manager()
-    request = get_mocked_request(db)
-    async with wrap_request(request):
-        utils.login()
-        async with tm.transaction():
-            root_ob = await tm.get_root()
-            container = await create_container(root_ob, 'test-container')
-            folder = await create_content_in_container(container, 'Folder', 'foobar')
-            item = await create_content_in_container(folder, 'Item', 'foobar')
+    utils.login()
+    async with tm.transaction():
+        root_ob = await tm.get_root()
+        container = await create_container(root_ob, 'test-container')
+        folder = await create_content_in_container(container, 'Folder', 'foobar')
+        item = await create_content_in_container(folder, 'Item', 'foobar')
 
-            folder_manager = IRolePermissionManager(folder)
-            folder_manager.grant_permission_to_role_no_inherit(
-                'guillotina.AccessContent', 'guillotina.ContainerCreator')
+        folder_manager = IRolePermissionManager(folder)
+        folder_manager.grant_permission_to_role_no_inherit(
+            'guillotina.AccessContent', 'guillotina.ContainerCreator')
 
-            policy = get_utility(ISecurityPolicy)
-            roles = policy.cached_roles(item, 'guillotina.AccessContent', 'o')
-            assert roles.get('guillotina.ContainerCreator') is None
+        policy = get_utility(ISecurityPolicy)
+        roles = policy.cached_roles(item, 'guillotina.AccessContent', 'o')
+        assert roles.get('guillotina.ContainerCreator') is None
 
-            roles = policy.cached_roles(folder, 'guillotina.AccessContent', 'o')
-            assert roles.get('guillotina.ContainerCreator') == 1
+        roles = policy.cached_roles(folder, 'guillotina.AccessContent', 'o')
+        assert roles.get('guillotina.ContainerCreator') == 1

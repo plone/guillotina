@@ -246,12 +246,12 @@ class FileManager(object):
 
         if 'filename' in self.request.matchdict:
             location = posixpath.join(
-                IAbsoluteURL(self.context, self.request)(),
+                get_multi_adapter((self.context, self.request), IAbsoluteURL)(),
                 '@tusupload', self.field.__name__,
                 self.request.matchdict['filename'])
         else:
             location = posixpath.join(
-                IAbsoluteURL(self.context, self.request)(),
+                get_multi_adapter((self.context, self.request), IAbsoluteURL)(),
                 '@tusupload', self.field.__name__)
 
         return Response(status=201, headers={

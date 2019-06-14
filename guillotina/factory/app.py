@@ -267,12 +267,6 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     apply_concrete_behaviors()
 
-    for k, v in _moved:
-        # for b/w compatibility, convert these
-        if k in app_settings:
-            app_settings[v] = app_settings[k]
-            del app_settings[k]
-
     # update *after* plugins loaded
     update_app_settings(settings)
 
@@ -288,6 +282,12 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     root.app = server_app
     server_app.root = root
     server_app.config = config
+
+    for k, v in _moved.items():
+        # for b/w compatibility, convert these
+        if k in app_settings:
+            app_settings[v] = app_settings[k]
+            del app_settings[k]
 
     optimize_settings(app_settings)
 

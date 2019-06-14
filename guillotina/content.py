@@ -29,7 +29,7 @@ from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.component.factory import Factory
-from guillotina.db import oid
+from guillotina.db import uid
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.event import notify
@@ -114,7 +114,7 @@ class ResourceFactory(Factory):
         if id is None:
             if obj.__uuid__ is None:
                 obj.__uuid__ = app_settings['uid_generator'](obj)
-            obj.id = oid.get_short_oid(obj.__uuid__)
+            obj.id = uid.get_short_oid(obj.__uuid__)
         else:
             obj.id = id
         obj.__name__ = obj.id

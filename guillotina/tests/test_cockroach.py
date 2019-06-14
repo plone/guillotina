@@ -18,8 +18,7 @@ async def test_creates_vacuum_task(cockroach_storage):
         assert storage.connection_manager._vacuum_task is not None
 
 
-async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
-    request = dummy_request  # noqa
+async def test_vacuum_cleans_orphaned_content(cockroach_storage):
     async with cockroach_storage as storage:
         tm = TransactionManager(storage)
         txn = await tm.begin()
@@ -60,9 +59,7 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
         await tm.abort(txn=txn)
 
 
-async def test_deleting_parent_deletes_children(cockroach_storage, dummy_request):
-    request = dummy_request  # noqa so magically get_current_request can find
-
+async def test_deleting_parent_deletes_children(cockroach_storage):
     async with cockroach_storage as storage:
         tm = TransactionManager(storage)
         txn = await tm.begin()
