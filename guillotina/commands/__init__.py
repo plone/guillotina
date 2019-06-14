@@ -2,7 +2,6 @@ from fnmatch import fnmatch
 from guillotina import logger
 from guillotina import profile
 from guillotina._settings import app_settings
-from guillotina.factory import make_app
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
 from guillotina.utils import get_dotted_name
@@ -246,6 +245,7 @@ class Command(object):
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
         loop = self.get_loop()
+        from guillotina.factory import make_app
         return loop.run_until_complete(
             make_app(settings=settings, loop=loop))
 

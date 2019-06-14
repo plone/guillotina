@@ -75,7 +75,7 @@ class AsgiCommand(Command):
         request.record = lambda x: None
 
         request.__class__ = guillotina.request.Request
-        r = await self.application.router.resolve(request)
+        r = await self.router.resolve(request)
         resp = await r.handler(request)
 
         await send({
@@ -86,9 +86,14 @@ class AsgiCommand(Command):
             ]
         })
 
+        if resp.text:
+            body = resp.text.encode()
+        else:
+            body = b''
+
         await send({
             'type': 'http.response.body',
-            'body': resp.text.encode()
+            'body': body
         })
 
     def run(self, arguments, settings, app):

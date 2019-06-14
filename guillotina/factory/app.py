@@ -160,6 +160,18 @@ def make_aiohttp_application():
         **app_settings.get('aiohttp_settings', {}))
 
 
+def make_asgi_app():
+    from guillotina.commands.asgi import AsgiCommand
+
+    # middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
+    router_klass = app_settings.get('router', TraversalRouter)
+    router = resolve_dotted_name(router_klass)()
+
+    app = AsgiCommand()
+    app.router = router
+    return app
+
+
 _dotted_name_settings = (
     'auth_extractors',
     'auth_token_validators',
@@ -279,7 +291,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     # Make and initialize aiohttp app
     if server_app is None:
-        server_app = make_aiohttp_application()
+        server_app = make_asgi_app()
     root.app = server_app
     server_app.root = root
     server_app.config = config
@@ -334,7 +346,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     # Set router root
     server_app.router.set_root(root)
-    server_app.on_cleanup.append(cleanup_app)
+    # server_app.on_cleanup.append(cleanup_app)
 
     for util in app_settings.get('utilities') or []:
         app_logger.warning('Adding : ' + util['provides'])
@@ -369,3 +381,7 @@ async def close_dbs(app):
     for db in root:
         if IDatabase.providedBy(db[1]):
             await db[1].finalize()
+
+
+
+app = make_asgi_app()
