@@ -217,7 +217,7 @@ async def matching_service(context, request):
     context=IApplication, method='GET',
     permission='guillotina.AccessContent',
     name='@foobarba',
-    response_headers=[{'HeaderFoo': 'barBaa'}],
+    response_headers={'HeaderFoo': 'barBaa'},
 )
 async def request_with_extra_response_headers(context, request):
     return {}

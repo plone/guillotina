@@ -209,10 +209,10 @@ async def test_route_match_view(container_requester):
 
 async def test_response_headers_are_added(container_requester):
     async with container_requester as requester:
-        response, status = await requester('GET', '/@foobarba')
+        _, status, headers = await requester.make_request('GET', '/@foobarba')
         assert status == 200
-        assert 'HeaderFoo' in response.headers
-        assert response.headers['HeaderFoo'] == 'barBaa'
+        assert 'HeaderFoo' in headers
+        assert headers['HeaderFoo'] == 'barBaa'
 
 
 def test_loading_nested_configuration():
