@@ -59,7 +59,7 @@ async def test_allowed_to_create_content(dummy_request):
             id='guillotina',
             title='Guillotina')
         container.__name__ = 'guillotina'
-        utils._p_register(container)
+        utils.register(container)
 
         await create_content_in_container(container, 'Item', id_='foobar')
 
@@ -72,7 +72,7 @@ async def test_allowed_types(dummy_request):
             id='guillotina',
             title='Guillotina')
         container.__name__ = 'guillotina'
-        utils._p_register(container)
+        utils.register(container)
 
         import guillotina.tests
         configure.register_configuration(Folder, dict(
@@ -107,7 +107,7 @@ async def test_creator_used_from_content_creation(dummy_request):
             id='guillotina',
             title='Guillotina')
         container.__name__ = 'guillotina'
-        utils._p_register(container)
+        utils.register(container)
 
         import guillotina.tests
         configure.register_configuration(Folder, dict(
@@ -142,9 +142,9 @@ def test_base_object():
         '__gannotations__': '_BaseObject__annotations',
         '__immutable_cache__': '_BaseObject__immutable_cache',
         '__new_marker__': '_BaseObject__new_marker',
-        '_p_jar': '_BaseObject__jar',
-        '_p_oid': '_BaseObject__oid',
-        '_p_serial': '_BaseObject__serial'
+        '__txn__': '_BaseObject__txn',
+        '__uuid__': '_BaseObject__uuid',
+        '__serial__': '_BaseObject__serial'
     }
     for name, attr in testing.items():
         item = Item()

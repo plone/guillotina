@@ -13,7 +13,7 @@ def test_generate_oid_with_parent():
     parent.__parent__ = utils.create_content()
     zoid = oid.generate_oid(ob)
     assert len(zoid) == (oid.UUID_LENGTH + len(oid.OID_DELIMITER) + oid.OID_SPLIT_LENGTH)
-    assert zoid.startswith(parent._p_oid[:oid.OID_SPLIT_LENGTH] + oid.OID_DELIMITER)
+    assert zoid.startswith(parent.__uuid__[:oid.OID_SPLIT_LENGTH] + oid.OID_DELIMITER)
 
 
 def test_generate_oid_with_parents():

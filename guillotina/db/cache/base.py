@@ -47,7 +47,7 @@ class BaseCache:
         if oid is not None:
             key += oid
         elif container is not None:
-            key += container._p_oid
+            key += container.__uuid__
         if id is not None:
             key += '/' + id
         if variant is not None:
@@ -89,14 +89,14 @@ class BaseCache:
         if ob.__of__:
             # like an annotiation, invalidate diff
             keys = [
-                self.get_key(oid=ob._p_oid),
+                self.get_key(oid=ob.__uuid__),
                 self.get_key(oid=ob.__of__, id=ob.__name__, variant='annotation'),
                 self.get_key(oid=ob.__of__, variant='annotation-keys')
             ]
         else:
             if type_ == 'modified':
                 keys = [
-                    self.get_key(oid=ob._p_oid),
+                    self.get_key(oid=ob.__uuid__),
                     self.get_key(container=ob.__parent__, id=ob.id)
                 ]
             elif type_ == 'added':
@@ -106,7 +106,7 @@ class BaseCache:
                 ]
             elif type_ == 'deleted':
                 keys = [
-                    self.get_key(oid=ob._p_oid),
+                    self.get_key(oid=ob.__uuid__),
                     self.get_key(container=ob.__parent__, id=ob.id),
                     self.get_key(container=ob.__parent__, variant='len'),
                     self.get_key(container=ob.__parent__, variant='keys')

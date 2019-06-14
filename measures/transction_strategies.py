@@ -59,7 +59,7 @@ async def read_runner(container, strategy):
     start = time.time()
     for _ in range(ITERATIONS):
         txn = await tm.begin()
-        assert await txn.get(ob._p_oid) is not None
+        assert await txn.get(ob.__uuid__) is not None
         await tm.commit(txn=txn)
     end = time.time()
     print(f'Done with {ITERATIONS} in {end - start} seconds')
@@ -68,7 +68,7 @@ async def read_runner(container, strategy):
     start = time.time()
     txn = await tm.begin()
     for _ in range(ITERATIONS):
-        assert await txn.get(ob._p_oid) is not None
+        assert await txn.get(ob.__uuid__) is not None
     await tm.commit(txn=txn)
     end = time.time()
     print(f'Done with {ITERATIONS} in {end - start} seconds\n')

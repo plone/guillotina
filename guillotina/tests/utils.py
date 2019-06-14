@@ -96,11 +96,11 @@ class TestParticipation(object):
         self.interaction = None
 
 
-def _p_register(ob):
-    if ob._p_jar is None:
+def register(ob):
+    if ob.__txn__ is None:
         from guillotina.tests.mocks import FakeConnection
         conn = FakeConnection()
-        conn._p_register(ob)
+        conn.register(ob)
 
 
 class ContainerRequesterAsyncContextManager:
@@ -154,7 +154,7 @@ def create_content(factory=Item, type_name='Item', id=None, parent=None):
     obj = factory()
     obj.__parent__ = parent
     obj.type_name = type_name
-    obj._p_oid = uuid.uuid4().hex
+    obj.__uuid__ = uuid.uuid4().hex
     if id is None:
         id = f'foobar{uuid.uuid4().hex}'
     obj.__name__ = obj.id = id

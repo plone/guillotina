@@ -717,7 +717,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
         update = False
         statement_sql = self._sql.get('NAIVE_UPSERT', self._objects_table_name)
-        if not obj.__new_marker__ and obj._p_serial is not None:
+        if not obj.__new_marker__ and obj.__serial__ is not None:
             # we should be confident this is an object update
             statement_sql = self._sql.get('UPDATE', self._objects_table_name)
             update = True
@@ -745,7 +745,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     raise ConflictIdOnContainer(ex)
                 raise
             except asyncpg.exceptions.ForeignKeyViolationError:
-                txn.deleted[obj._p_oid] = obj
+                txn.deleted[obj.__uuid__] = obj
                 raise TIDConflictError(
                     f'Bad value inserting into database that could be caused '
                     f'by a bad cache value. This should resolve on request retry.',

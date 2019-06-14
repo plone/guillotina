@@ -69,7 +69,7 @@ async def test_get_data_uses_indexes_param(dummy_request):
         container.__name__ = 'guillotina'
         ob = await create_content('Item', id='foobar')
         data = await util.get_data(ob, indexes=['title'])
-        assert len(data) == 4  # uuid, type_name, etc always returned
+        assert len(data) == 4  # @uid, type_name, etc always returned
         data = await util.get_data(ob, indexes=['title', 'id'])
         assert len(data) == 5
 
@@ -86,7 +86,7 @@ async def test_modified_event_gathers_all_index_data(dummy_request):
         container.__name__ = 'guillotina'
         dummy_request.container = container
         ob = await create_content('Item', id='foobar')
-        ob._p_oid = 'foobar'
+        ob.__uuid__ = 'foobar'
         await notify(ObjectModifiedEvent(ob, payload={
             'title': '',
             'id': ''

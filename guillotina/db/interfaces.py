@@ -53,6 +53,7 @@ class ITransaction(Interface):
 
 
 class ITransactionManager(Interface):
+    _last_txn = Attribute('')
 
     async def commit(*, txn: typing.Optional[ITransaction]=None):
         '''

@@ -145,7 +145,7 @@ async def deserialize_cloud_field(field, value, context):
             for key, item_value in value.items():
                 if key in serialize_mappings:
                     setattr(file_ob, serialize_mappings[key], item_value)
-            data_context._p_register()
+            data_context.register()
         if 'data' in value:
             value['data'] = base64.b64decode(value['data'])
         else:

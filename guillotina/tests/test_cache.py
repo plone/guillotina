@@ -53,15 +53,15 @@ async def test_cache_object(dummy_guillotina):
     txn._cache = cache
     ob = create_content()
     storage.store(ob)
-    loaded = await txn.get(ob._p_oid)
+    loaded = await txn.get(ob.__uuid__)
     assert id(loaded) != id(ob)
-    assert loaded._p_oid == ob._p_oid
+    assert loaded.__uuid__ == ob.__uuid__
     assert cache._actions[0]['action'] == 'stored'
     assert cache._hits == 0
     assert cache._misses == 1
 
     # and load from cache
-    await txn.get(ob._p_oid)
+    await txn.get(ob.__uuid__)
     assert cache._actions[-1]['action'] == 'loaded'
     assert cache._hits == 1
 
@@ -87,7 +87,7 @@ async def test_cache_object_from_child(dummy_guillotina):
     assert cache._hits == 1
 
     assert id(loaded) != id(ob)
-    assert loaded._p_oid == ob._p_oid
+    assert loaded.__uuid__ == ob.__uuid__
 
 
 async def test_do_not_cache_large_object(dummy_guillotina):
@@ -99,7 +99,7 @@ async def test_do_not_cache_large_object(dummy_guillotina):
     ob = create_content()
     ob.foobar = 'X' * cache.max_cache_record_size  # push size above cache threshold
     storage.store(ob)
-    loaded = await txn.get(ob._p_oid)
+    loaded = await txn.get(ob.__uuid__)
     assert id(loaded) != id(ob)
-    assert loaded._p_oid == ob._p_oid
+    assert loaded.__uuid__ == ob.__uuid__
     assert len(cache._actions) == 0

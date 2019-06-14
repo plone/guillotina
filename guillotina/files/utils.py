@@ -95,5 +95,5 @@ def generate_key(request, context):
     return '{}{}/{}::{}'.format(
         request._container_id,
         get_content_path(context),
-        context._p_oid,
+        context.__uuid__,
         uuid.uuid4().hex)

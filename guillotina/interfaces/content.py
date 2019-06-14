@@ -1,13 +1,19 @@
-# NEED use this import because we have a "schema" attribute below
-# NEED use this import because we have a "schema" attribute below
+from typing import TYPE_CHECKING
+
 import guillotina.schema
 from guillotina.component.interfaces import IFactory
 from guillotina.component.interfaces import ISite as IComponentSite
-from guillotina.db.interfaces import ITransactionManager
 from guillotina.interfaces.common import IMapping
 from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
+
+
+if TYPE_CHECKING:
+    from guillotina.db.interfaces import ITransactionManager
+else:
+    class ITransactionManager(Interface):
+        pass
 
 
 class IAsyncContainer(Interface):
@@ -163,7 +169,7 @@ class IResource(ILocation):
 
     __acl__ = Attribute('')
     __gannotations__ = Attribute('')
-    _p_oid = Attribute('database object unique id')
+    __uuid__ = Attribute('database object unique id')
 
     id = Attribute('')
     creators = Attribute('')
@@ -201,7 +207,7 @@ class IResource(ILocation):
         readonly=True
     )
 
-    def _p_register():
+    def register():
         '''
         Register object
         '''

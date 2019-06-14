@@ -834,16 +834,16 @@ async def test_items(container_requester):
         response, _ = await requester('GET', '/db/guillotina/@items?page_size=10')
         assert len(response['items']) == 10
         assert response['total'] == 22
-        items = [i['UID'] for i in response['items']]
+        items = [i['@uid'] for i in response['items']]
 
         response, _ = await requester('GET', '/db/guillotina/@items?page_size=10&page=2')
         assert len(response['items']) == 10
         assert response['total'] == 22
-        items.extend([i['UID'] for i in response['items']])
+        items.extend([i['@uid'] for i in response['items']])
 
         response, _ = await requester('GET', '/db/guillotina/@items?page_size=10&page=3')
         assert len(response['items']) == 2
-        items.extend([i['UID'] for i in response['items']])
+        items.extend([i['@uid'] for i in response['items']])
 
         # we should have 22 unique uids now
         assert len(set(items)) == 22

@@ -56,7 +56,7 @@ class BucketListValue:
         metadata = self.annotations_metadata[self.current_annotation_index]
         metadata['len'] = metadata.get('len', 0) + 1
         annotation['items'].append(value)
-        annotation._p_register()
+        annotation.register()
 
     async def extend(self, context, value):
         for item in value:
@@ -89,7 +89,7 @@ class BucketListValue:
             del annotation['items'][item_index]
             metadata = self.annotations_metadata[bucket_index]
             metadata['len'] = metadata.get('len', 0) - 1
-            annotation._p_register()
+            annotation.register()
 
     async def iter_buckets(self, context):
         for index in sorted(self.annotations_metadata.keys()):
@@ -119,7 +119,7 @@ class BucketListField(schema.Field):
         super().__init__(*args, **kwargs)
 
     async def set(self, obj, value):
-        obj._p_register()
+        obj.register()
         if IContentBehavior.providedBy(obj):
             anno_context = obj.__dict__['context']
             self.__key_name__ = obj.__dict__['schema'].__identifier__ + '.' + self.__name__

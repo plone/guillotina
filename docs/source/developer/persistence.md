@@ -16,7 +16,7 @@ There are three kinds of objects that are considered on the system:
 
 If you're manually modifying objects in services(or views) without using
 the serialization adapters, you need to register the object to be saved
-to the database. To do this, just use the `_p_register()` method.
+to the database. To do this, just use the `register()` method.
 
 
 ```python
@@ -25,7 +25,7 @@ from guillotina import configure
     method='PATCH', name='@dosomething')
 async def matching_service(context, request):
     context.foobar = 'foobar'
-    context._p_register()
+    context.register()
 ```
 
 

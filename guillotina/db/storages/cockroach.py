@@ -184,7 +184,7 @@ class CockroachStorage(pg.PostgresqlStorage):
 
         statement_sql = self._sql.get('CR_NAIVE_UPSERT', self._objects_table_name)
         update = False
-        if not obj.__new_marker__ and obj._p_serial is not None:
+        if not obj.__new_marker__ and obj.__serial__ is not None:
             # we should be confident this is an object update
             statement_sql = self._sql.get('CR_UPDATE', self._objects_table_name)
             update = True

@@ -56,7 +56,7 @@ class DeserializeFromJson(object):
                     # signal to caching engine to cache no data here so
                     # we prevent a future lookup
                     try:
-                        txn = self.context._p_jar
+                        txn = self.context.__txn__
                         await txn._cache.set(
                             _EMPTY, container=self.context,
                             id=behavior.__annotations_data_key__,
@@ -79,7 +79,7 @@ class DeserializeFromJson(object):
         if errors and not ignore_errors:
             raise DeserializationError(errors)
 
-        self.context._p_register()
+        self.context.register()
 
         return self.context
 

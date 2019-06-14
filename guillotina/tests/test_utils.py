@@ -188,10 +188,10 @@ async def test_object_utils(container_requester):
 
         ob = await utils.get_object_by_oid(response['@uid'], txn)
         assert ob is not None
-        assert ob._p_oid == response['@uid']
+        assert ob.__uuid__ == response['@uid']
 
         ob2 = await utils.navigate_to(container, 'item1')
-        assert ob2._p_oid == ob._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
 
         url = utils.get_object_url(ob, request)
         assert url.endswith('item1')

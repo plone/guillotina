@@ -186,7 +186,7 @@ class DefaultPOST(Service):
             'contributors': (user,)
         }
         if 'uid' in data:
-            options['_p_oid'] = data.pop('uid')
+            options['__uuid__'] = data.pop('uid')
 
         # Create object
         try:
@@ -477,7 +477,7 @@ class DefaultDELETE(Service):
         content_id = self.context.id
         parent = self.context.__parent__
         await notify(BeforeObjectRemovedEvent(self.context, parent, content_id))
-        self.context._p_jar.delete(self.context)
+        self.context.__txn__.delete(self.context)
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 
@@ -720,7 +720,7 @@ async def items(context, request):
         omit = request.query.get('omit').split(',')
 
     results = []
-    for key in await txn.get_page_of_keys(context._p_oid, page=page, page_size=page_size):
+    for key in await txn.get_page_of_keys(context.__uuid__, page=page, page_size=page_size):
         ob = await context.async_get(key)
         serializer = get_multi_adapter(
             (ob, request),

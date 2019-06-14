@@ -202,5 +202,5 @@ async def apply_sharing(context, data):
         func(roleperm['permission'], roleperm['role'])
 
     if changed:
-        context._p_register()  # make sure data is saved
+        context.register()  # make sure data is saved
         await notify(ObjectPermissionsModifiedEvent(context, data))

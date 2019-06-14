@@ -108,7 +108,7 @@ async def test_deserialize_cloud_file(dummy_request):
     from guillotina.test_package import IFileContent, FileContent
     with dummy_request, get_tm() as tm, await tm.begin() as txn:
         obj = create_content(FileContent)
-        obj._p_jar = txn
+        obj.__txn__ = txn
         obj.file = None
         await get_adapter(
             IFileContent['file'].bind(obj), IJSONToValue,
@@ -580,7 +580,7 @@ async def test_bucket_list_field(dummy_request):
     login(dummy_request)
     with dummy_request:
         content = create_content()
-        content._p_jar = mocks.MockTransaction()
+        content.__txn__ = mocks.MockTransaction()
         deserializer = get_multi_adapter(
             (content, dummy_request), IResourceDeserializeFromJson)
         await deserializer.set_schema(
@@ -745,7 +745,7 @@ async def test_dates_bucket_list_field(dummy_request):
     login(dummy_request)
     content = create_content()
     with dummy_request:
-        content._p_jar = mocks.MockTransaction()
+        content.__txn__ = mocks.MockTransaction()
         deserializer = get_multi_adapter(
             (content, dummy_request), IResourceDeserializeFromJson)
         await deserializer.set_schema(

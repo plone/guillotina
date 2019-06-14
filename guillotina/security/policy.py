@@ -163,8 +163,8 @@ class Interaction(object):
         return False
 
     def cache(self, parent, level=''):
-        serial = getattr(parent, '_p_serial', '')
-        oid = getattr(parent, '_p_oid', '')
+        serial = getattr(parent, '__serial__', '')
+        oid = getattr(parent, '__uuid__', '')
         cache_key = f'{id(parent)}-{oid}-{serial}-{level}'
         cache = self._cache.get(cache_key)
         if cache is None:

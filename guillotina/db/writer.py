@@ -56,7 +56,7 @@ class Writer(object):
 
     @property
     def old_serial(self):
-        return getattr(self._obj, '_p_serial', None)
+        return getattr(self._obj, '__serial__', None)
 
     @property
     def part(self):
@@ -69,7 +69,7 @@ class Writer(object):
     def parent_id(self):
         parent = getattr(self._obj, '__parent__', None)
         if parent is not None:
-            return parent._p_oid
+            return parent.__uuid__
 
     @property
     def id(self):

@@ -24,7 +24,7 @@ async def test_create_blob(db, guillotina_main):
     async with transaction(), request:
         container = await db.async_get('container')
         assert blob.bid == container.blob.bid
-        assert blob.resource_zoid == container._p_oid
+        assert blob.resource_uid == container.__uuid__
         await db.async_del('container')
 
 

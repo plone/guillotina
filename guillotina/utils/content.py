@@ -92,7 +92,7 @@ async def get_containers(request):
 
                 for _, container in items.items():
                     request._txn = txn = await tm.begin()
-                    container._p_jar = request._txn
+                    container.__txn__ = request._txn
                     request.container = container
                     request._container_id = container.id
                     if hasattr(request, 'container_settings'):
@@ -182,7 +182,7 @@ async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
         raise KeyError(oid)
 
     obj = reader(result)
-    obj._p_jar = txn
+    obj.__txn__ = txn
     if result['parent_id']:
         obj.__parent__ = await get_object_by_oid(result['parent_id'], txn)
     return obj

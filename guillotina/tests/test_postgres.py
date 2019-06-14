@@ -76,9 +76,9 @@ async def test_read_obs(db, dummy_request):
 
         txn = await tm.begin()
 
-        ob2 = await txn.get(ob._p_oid)
+        ob2 = await txn.get(ob.__uuid__)
 
-        assert ob2._p_oid == ob._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
         await tm.commit(txn=txn)
 
         await aps.remove()
@@ -102,9 +102,9 @@ async def test_restart_connection(db, dummy_request):
 
         txn = await tm.begin()
 
-        ob2 = await txn.get(ob._p_oid)
+        ob2 = await txn.get(ob.__uuid__)
 
-        assert ob2._p_oid == ob._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
         await tm.commit(txn=txn)
 
         await aps.remove()
@@ -155,11 +155,11 @@ async def test_deleting_parent_deletes_children(db, dummy_request):
         await tm.commit(txn=txn)
         txn = await tm.begin()
 
-        ob2 = await txn.get(ob._p_oid)
-        folder2 = await txn.get(folder._p_oid)
+        ob2 = await txn.get(ob.__uuid__)
+        folder2 = await txn.get(folder.__uuid__)
 
-        assert ob2._p_oid == ob._p_oid
-        assert folder2._p_oid == folder._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
+        assert folder2.__uuid__ == folder.__uuid__
 
         # delete parent, children should be gone...
         txn.delete(folder2)
@@ -172,9 +172,9 @@ async def test_deleting_parent_deletes_children(db, dummy_request):
         txn = await tm.begin()
 
         with pytest.raises(KeyError):
-            await txn.get(ob._p_oid)
+            await txn.get(ob.__uuid__)
         with pytest.raises(KeyError):
-            await txn.get(folder._p_oid)
+            await txn.get(folder.__uuid__)
 
         await tm.abort(txn=txn)
 
@@ -189,7 +189,7 @@ async def test_create_blob(db, dummy_request):
         ob = create_content()
         txn.register(ob)
 
-        await txn.write_blob_chunk('X' * 32, ob._p_oid, 0, b'foobar')
+        await txn.write_blob_chunk('X' * 32, ob.__uuid__, 0, b'foobar')
 
         await tm.commit(txn=txn)
         txn = await tm.begin()
@@ -198,7 +198,7 @@ async def test_create_blob(db, dummy_request):
         assert blob_record['data'] == b'foobar'
 
         # also get data from ob that started as a stub...
-        ob2 = await txn.get(ob._p_oid)
+        ob2 = await txn.get(ob.__uuid__)
         assert ob2.type_name == 'Item'
         assert 'foobar' in ob2.id
 
@@ -215,12 +215,12 @@ async def test_delete_resource_deletes_blob(db, dummy_request):
         ob = create_content()
         txn.register(ob)
 
-        await txn.write_blob_chunk('X' * 32, ob._p_oid, 0, b'foobar')
+        await txn.write_blob_chunk('X' * 32, ob.__uuid__, 0, b'foobar')
 
         await tm.commit(txn=txn)
         txn = await tm.begin()
 
-        ob = await txn.get(ob._p_oid)
+        ob = await txn.get(ob.__uuid__)
         txn.delete(ob)
 
         await tm.commit(txn=txn)
@@ -230,7 +230,7 @@ async def test_delete_resource_deletes_blob(db, dummy_request):
         assert await txn.read_blob_chunk('X' * 32, 0) is None
 
         with pytest.raises(KeyError):
-            await txn.get(ob._p_oid)
+            await txn.get(ob.__uuid__)
 
         await tm.abort(txn=txn)
         await aps.remove()
@@ -254,8 +254,8 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
         txn1 = await tm.begin()
         txn2 = await tm.begin()
 
-        ob1 = await txn1.get(ob._p_oid)
-        ob2 = await txn2.get(ob._p_oid)
+        ob1 = await txn1.get(ob.__uuid__)
+        ob2 = await txn2.get(ob.__uuid__)
         ob1.title = 'foobar1'
         ob2.description = 'foobar2'
 
@@ -287,8 +287,8 @@ async def test_should_resolve_conflict_error(db, dummy_request):
         txn1 = await tm.begin()
         txn2 = await tm.begin()
 
-        ob1 = await txn1.get(ob1._p_oid)
-        ob2 = await txn2.get(ob2._p_oid)
+        ob1 = await txn1.get(ob1.__uuid__)
+        ob2 = await txn2.get(ob2.__uuid__)
 
         txn1.register(ob1)
         txn2.register(ob2)
@@ -317,15 +317,15 @@ async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_request)
         txn1 = await tm.begin()
         txn2 = await tm.begin()
 
-        ob1 = await txn1.get(ob1._p_oid)
-        ob2 = await txn2.get(ob1._p_oid)
+        ob1 = await txn1.get(ob1.__uuid__)
+        ob2 = await txn2.get(ob1.__uuid__)
 
         txn1.register(ob1)
         txn2.register(ob2)
 
         # commit 2 before 1
         await tm.commit(txn=txn2)
-        ob1._p_serial = txn2._tid  # prevent tid error since we're testing trns conflict error
+        ob1.__serial__ = txn2._tid  # prevent tid error since we're testing trns conflict error
         with pytest.raises(ConflictError):
             await tm.commit(txn=txn1)
 
@@ -349,8 +349,8 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_req
         txn1 = await tm.begin()
         txn2 = await tm.begin()
 
-        ob1 = await txn1.get(ob1._p_oid)
-        ob2 = await txn2.get(ob2._p_oid)
+        ob1 = await txn1.get(ob1.__uuid__)
+        ob2 = await txn2.get(ob2.__uuid__)
 
         txn1.register(ob1)
         txn2.register(ob2)
@@ -376,8 +376,8 @@ async def test_none_strat_allows_trans_commits(db, dummy_request):
 
         txn1 = await tm.begin()
         txn2 = await tm.begin()
-        ob1 = await txn1.get(ob1._p_oid)
-        ob2 = await txn2.get(ob1._p_oid)
+        ob1 = await txn1.get(ob1.__uuid__)
+        ob2 = await txn2.get(ob1.__uuid__)
         ob1.title = 'foobar1'
         ob2.title = 'foobar2'
         txn1.register(ob1)
@@ -387,7 +387,7 @@ async def test_none_strat_allows_trans_commits(db, dummy_request):
         await tm.commit(txn=txn1)
 
         txn = await tm.begin()
-        ob1 = await txn.get(ob1._p_oid)
+        ob1 = await txn.get(ob1.__uuid__)
         assert ob1.title == 'foobar1'
 
         await tm.abort(txn=txn)
@@ -470,7 +470,7 @@ async def test_using_gather_with_queries_before_prepare(db, dummy_request):
         txn = await tm.begin()
 
         async def get_ob():
-            await txn.get(ob1._p_oid)
+            await txn.get(ob1.__uuid__)
 
         # before we introduced locking on the connection, this would error
         await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
@@ -493,10 +493,10 @@ async def test_using_gather_with_queries_after_prepare(db, dummy_request):
         txn = await tm.begin()
 
         async def get_ob():
-            await txn.get(ob1._p_oid)
+            await txn.get(ob1.__uuid__)
 
         # one initial call should load prepared statement
-        await txn.get(ob1._p_oid)
+        await txn.get(ob1.__uuid__)
 
         # before we introduction locking on the connection, this would error
         await asyncio.gather(get_ob(), get_ob(), get_ob(), get_ob(), get_ob())
@@ -536,9 +536,9 @@ async def test_mismatched_tid_causes_conflict_error(db, dummy_request):
         await tm.commit(txn=txn)
 
         txn = await tm.begin()
-        ob1 = await txn.get(ob1._p_oid)
+        ob1 = await txn.get(ob1.__uuid__)
         # modify p_serial, try committing, should raise conflict error
-        ob1._p_serial = 3242432
+        ob1.__serial__ = 3242432
         txn.register(ob1)
 
         with pytest.raises(ConflictError):
@@ -567,7 +567,7 @@ async def test_iterate_keys(db, dummy_request):
         txn = await tm.begin()
 
         keys = []
-        async for key in txn.iterate_keys(parent._p_oid, 2):
+        async for key in txn.iterate_keys(parent.__uuid__, 2):
             keys.append(key)
 
         assert len(keys) == 50
@@ -600,9 +600,9 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_request):
 
         txn = await tm.begin()
 
-        ob2 = await txn.get(ob._p_oid)
+        ob2 = await txn.get(ob.__uuid__)
 
-        assert ob2._p_oid == ob._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
         await tm.commit(txn=txn)
 
         await aps.remove()
@@ -632,9 +632,9 @@ async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_request):
 
         txn = await tm.begin()
 
-        ob2 = await txn.get(ob._p_oid)
+        ob2 = await txn.get(ob.__uuid__)
 
-        assert ob2._p_oid == ob._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
         await tm.commit(txn=txn)
 
         await aps.remove()
@@ -664,7 +664,7 @@ async def test_vacuum_objects(db, dummy_request):
 
     async with aps.pool.acquire() as conn:
         result = await conn.fetch(
-            "select * from objects where zoid=$1;", ob1._p_oid)
+            "select * from objects where zoid=$1;", ob1.__uuid__)
         assert len(result) == 1
         # deferenced
         assert result[0]['parent_id'] == 'D' * 32
@@ -675,7 +675,7 @@ async def test_vacuum_objects(db, dummy_request):
 
     async with aps.pool.acquire() as conn:
         result = await conn.fetch(
-            "select * from objects where zoid=$1;", ob1._p_oid)
+            "select * from objects where zoid=$1;", ob1.__uuid__)
         assert len(result) == 0
 
     await aps.remove()
