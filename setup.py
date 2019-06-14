@@ -75,7 +75,7 @@ setup(
             'coverage>=4.0.3',
             'pytest-docker-fixtures',
             'pytest-rerunfailures',
-            'async-asgi-testclient==0.2.0',
+            'async-asgi-testclient==0.2.1',
         ],
         'docs': [
             'sphinx',

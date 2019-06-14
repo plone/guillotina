@@ -267,11 +267,12 @@ WHERE zoid != '{}' AND zoid != '{}'
 @pytest.fixture(scope='function')
 async def guillotina_main(loop):
     globalregistry.reset()
-    from guillotina.factory.app import app as _app
-    app = await _app.setup(settings=get_db_settings(), loop=loop)
-    app.config.execute_actions()
+    from guillotina.factory.app import make_asgi_app
+    app = make_asgi_app()
+    g_app = await app.startup(settings=get_db_settings(), loop=loop)
+    g_app.config.execute_actions()
     load_cached_schema()
-    await _clear_dbs(app.root)
+    await _clear_dbs(g_app.root)
     return app
 
 
@@ -280,10 +281,6 @@ async def app_client(guillotina_main):
     app = guillotina_main
 
     yield app, TestClient(app)
-
-    # async with TestClient(app) as client:
-    #     import pdb; pdb.set_trace()
-    #     yield app, client
 
 
 @pytest.fixture(scope='function')

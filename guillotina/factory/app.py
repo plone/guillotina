@@ -383,7 +383,3 @@ async def close_dbs(app):
     for db in root:
         if IDatabase.providedBy(db[1]):
             await db[1].finalize()
-
-
-# The asgi app
-app = make_asgi_app()

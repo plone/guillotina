@@ -1,5 +1,6 @@
 from aiohttp.test_utils import make_mocked_request
 from aiohttp.streams import EmptyStreamReader
+from aiohttp.web import StreamResponse
 import asyncio
 import multidict
 import guillotina
@@ -37,13 +38,21 @@ class AsgiApp:
         if scope["type"] == "http":
             # daphne is not sending `lifespan` event
             if not self.app:
-                self.app = await self.setup()
+                self.app = await self.startup()
             return await self.handler(scope, receive, send)
 
         elif scope["type"] == "lifespan":
-            self.app = await self.setup()
+            while True:
+                message = await receive()
+                if message['type'] == 'lifespan.startup':
+                    self.app = await self.startup()
+                    await send({'type': 'lifespan.startup.complete'})
+                elif message['type'] == 'lifespan.shutdown':
+                    await self.shutdown()
+                    await send({'type': 'lifespan.shutdown.complete'})
+                    return
 
-    async def setup(self, settings=None, loop=None):
+    async def startup(self, settings=None, loop=None):
         # The config file is defined in the env var `CONFIG`
         loop = asyncio.get_event_loop()
         from guillotina.factory import make_app
@@ -88,12 +97,8 @@ class AsgiApp:
             }
         )
 
-        if resp.text:
-            body = resp.text.encode()
-        else:
-            body = b""
-
-        await send({"type": "http.response.body", "body": body})
+        body = resp.text or b""
+        await send({"type": "http.response.body", "body": body.encode()})
 
 
 # asgi app singleton
