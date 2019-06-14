@@ -21,7 +21,7 @@ async def test_create_annotation(db, guillotina_main):
     login(request)
 
     with request:
-        async with transaction(write=True):
+        async with transaction():
             container = await create_content_in_container(
                 db, 'Container', 'container', request=request,
                 title='Container')
@@ -33,14 +33,14 @@ async def test_create_annotation(db, guillotina_main):
             data['foo'] = 'bar'
             await annotations.async_set('foobar', data)
 
-        async with transaction(write=True):
+        async with transaction():
             container = await db.async_get('container')
             ob = await container.async_get('foobar')
             annotations = IAnnotations(ob)
             assert 'foobar' in (await annotations.async_keys())
             await annotations.async_del('foobar')
 
-        async with transaction(write=True):
+        async with transaction():
             container = await db.async_get('container')
             ob = await container.async_get('foobar')
             annotations = IAnnotations(ob)

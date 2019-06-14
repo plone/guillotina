@@ -24,7 +24,6 @@ class Request(web_request.Request):
 #    resource = None
 #    security = None
 
-    _db_write_enabled = True
     _uid = None
     _view_error = False
     _events: dict = {}

@@ -18,7 +18,6 @@ from guillotina.db.reader import reader
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
-from guillotina.tests.utils import make_mocked_request
 from guillotina.transactions import get_transaction
 from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
@@ -161,8 +160,6 @@ class Database:
         """
         create root object if necessary
         """
-        request = make_mocked_request('POST', '/')
-        request._db_write_enabled = True
         tm = self.get_transaction_manager()
         txn = await tm.begin()
 

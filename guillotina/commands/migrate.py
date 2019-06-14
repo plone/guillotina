@@ -17,7 +17,7 @@ class MigrateCommand(Command):
     async def migrate(self, db):
         migrations = sorted(
             get_utilities_for(IMigration))
-        async with transaction(db=db, write=True) as txn:
+        async with transaction(db=db) as txn:
             # make sure to get fresh copy
             txn._manager._hard_cache.clear()
             root = await db.get_root()

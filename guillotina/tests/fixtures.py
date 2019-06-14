@@ -193,8 +193,7 @@ class GuillotinaDBRequester(object):
             request = get_mocked_request(self.db)
         login(request)
         return wrap_request(
-            request, transaction(
-                db=self.db, write=True, adopt_parent_txn=True))
+            request, transaction(db=self.db, adopt_parent_txn=True))
 
 
 async def close_async_tasks(app):

@@ -35,7 +35,6 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
     request._futures = {}
     request._txn = None
     request.interaction = None
-    request._db_write_enabled = True
     alsoProvides(request, IRequest)
     alsoProvides(request, IDefaultLayer)
     if db is not None:

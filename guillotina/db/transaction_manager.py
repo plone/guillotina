@@ -56,7 +56,7 @@ class TransactionManager:
         return await txn.get(ROOT_ID)
 
     @profilable
-    async def begin(self) -> ITransaction:
+    async def begin(self, read_only: bool=False) -> ITransaction:
         """Starts a new transaction.
         """
         # already has txn registered, as long as connection is closed, it
@@ -73,7 +73,7 @@ class TransactionManager:
                 except Exception:
                     logger.warn('Unable to close spurious connection', exc_info=True)
         else:
-            txn = Transaction(self)
+            txn = Transaction(self, read_only=read_only)
 
         self._last_txn = txn
 

@@ -76,7 +76,8 @@ class Transaction:
     _status = 'empty'
     _skip_commit = False
 
-    def __init__(self, manager, loop=None):
+    def __init__(self, manager, loop=None, read_only=False):
+        self._read_only = read_only
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE
@@ -210,21 +211,19 @@ class Transaction:
         self._after_commit = []
         self._before_commit = []
 
-    def check_read_only(self):
-        try:
-            request = get_current_request()
-            if hasattr(request, '_db_write_enabled') and not request._db_write_enabled:
-                raise Unauthorized('Adding content not permited')
-        except RequestNotFound:
-            pass
-        # Add the new tid
+    @property
+    def read_only(self) -> bool:
+        if self._read_only:
+            return True
         if self._manager._storage._read_only:
-            raise ReadOnlyError()
+            return True
+        return False
 
     @profilable
     def register(self, obj, new_oid=None):
         """We are adding a new object on the DB"""
-        self.check_read_only()
+        if self.read_only:
+            raise ReadOnlyError()
 
         if obj.__txn__ is None:
             obj.__txn__ = self
@@ -245,7 +244,8 @@ class Transaction:
             self.modified[oid] = obj
 
     def delete(self, obj):
-        self.check_read_only()
+        if self.read_only:
+            raise ReadOnlyError()
         oid = obj.__uuid__
         if oid is not None:
             if oid in self.modified:
