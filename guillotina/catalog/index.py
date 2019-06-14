@@ -1,5 +1,4 @@
 from guillotina import configure
-from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_adapter
@@ -16,15 +15,16 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.utils import apply_coroutine
 from guillotina.utils import execute
+from guillotina.utils import find_container
 
 
 class Indexer:
 
-    def __init__(self):
+    def __init__(self, container):
         self.remove = []
         self.index = {}
         self.update = {}
-        self.container = task_vars.container.get()
+        self.container = container
 
     @classmethod
     def get(self):
@@ -81,7 +81,7 @@ class Indexer:
             self.index[uid] = await search.get_data(obj)
 
 
-def get_indexer():
+def get_indexer(context=None):
     search = query_utility(ICatalogUtility)
     if not search:
         return  # no search configured
@@ -89,7 +89,10 @@ def get_indexer():
     klass = app_settings['indexer']
     indexer = klass.get()
     if indexer is None:
-        indexer = klass()
+        container = find_container(context)
+        if container is None:
+            return
+        indexer = klass(container)
         indexer.register()
     return indexer
 
@@ -101,7 +104,7 @@ async def security_changed(obj, event):
         # assuming permissions for group are already handled correctly with search
         await index_object(obj, modified=True, security=True)
         return
-    fut = get_indexer()
+    fut = get_indexer(obj)
     if fut is not None:
         await fut.reindex_security(obj)
 
@@ -109,7 +112,7 @@ async def security_changed(obj, event):
 @configure.subscriber(
     for_=(IResource, IObjectMovedEvent), priority=1000)
 async def moved_object(obj, event):
-    fut = get_indexer()
+    fut = get_indexer(obj)
     if fut is not None:
         await fut.index_object_move(obj)
 
@@ -123,7 +126,7 @@ async def remove_object(obj, event):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    fut = get_indexer()
+    fut = get_indexer(obj)
     if fut is None:
         return
     await fut.remove_object(obj)
@@ -164,7 +167,7 @@ async def index_object(obj, indexes=None, modified=False, security=False):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    fut = get_indexer()
+    fut = get_indexer(obj)
     if fut is None:
         return
 

@@ -297,7 +297,7 @@ def get_schema_validator(schema_name: str):
     return val
 
 
-async def find_container(context=None) -> typing.Optional[IContainer]:
+def find_container(context=None) -> typing.Optional[IContainer]:
     container = task_vars.container.get()
     if container is None:
         while context is not None:
@@ -313,7 +313,7 @@ async def get_registry(context=None) -> typing.Optional[IRegistry]:
     if registry is None:
         container = task_vars.container.get()
         if container is None and context is not None:
-            container = await find_container(context)
+            container = find_container(context)
         if container is None:
             return None
         annotations_container = IAnnotations(container)

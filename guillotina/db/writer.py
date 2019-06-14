@@ -20,14 +20,14 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
     Default serializer just serializer catalog data
     '''
 
-    async def get_container_id(self):
-        container = await find_container()
+    def get_container_id(self):
+        container = find_container(self.content)
         if container is not None:
             return container.__name__
 
     async def __call__(self):
         data = await super().__call__()
-        data['container_id'] = await self.get_container_id()
+        data['container_id'] = self.get_container_id()
         return data
 
 
