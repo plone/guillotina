@@ -277,10 +277,18 @@ async def guillotina_main(loop):
 
 
 @pytest.fixture(scope='function')
-async def app_client(guillotina_main):
-    app = guillotina_main
+async def app_client(loop):
+    globalregistry.reset()
+    from guillotina.factory.app import make_asgi_app
+    app = make_asgi_app()
 
-    yield app, TestClient(app)
+    async with TestClient(app) as client:
+        g_app = app.app
+        #g_app = await app.startup(settings=get_db_settings(), loop=loop)
+        g_app.config.execute_actions()
+        load_cached_schema()
+        await _clear_dbs(g_app.root)
+        yield app, client
 
 
 @pytest.fixture(scope='function')
