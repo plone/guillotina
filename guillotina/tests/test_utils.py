@@ -51,12 +51,13 @@ async def test_get_content_path(container_requester):
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
-        txn = await request._tm.begin(request)
+        tm = requester.db.get_transaction_manager()
+        txn = await tm.begin()
         container = await root.async_get('guillotina')
         obj = await container.async_get('item1')
         assert utils.get_content_path(container) == '/'
         assert utils.get_content_path(obj) == '/item1'
-        await request._tm.abort(txn=txn)
+        await tm.abort(txn=txn)
 
 
 async def test_get_content_depth(container_requester):
@@ -72,12 +73,13 @@ async def test_get_content_depth(container_requester):
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
-        txn = await request._tm.begin(request)
+        tm = requester.db.get_transaction_manager()
+        txn = await tm.begin()
         container = await root.async_get('guillotina')
         obj = await container.async_get('item1')
         assert utils.get_content_depth(container) == 1
         assert utils.get_content_depth(obj) == 2
-        await request._tm.abort(txn=txn)
+        await tm.abort(txn=txn)
 
 
 def test_valid_id():
@@ -100,8 +102,9 @@ def test_get_owners(dummy_guillotina):
 def test_get_authenticated_user_without_request(dummy_guillotina):
     db = get_db(dummy_guillotina, 'db')
     request = get_mocked_request(db)
-    login(request)
-    assert utils.get_authenticated_user() is not None
+    with request:
+        login(request)
+        assert utils.get_authenticated_user() is not None
 
 
 def _test_empty_func():
@@ -179,20 +182,21 @@ async def test_object_utils(container_requester):
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
-        txn = await request._tm.begin(request)
+        tm = requester.db.get_transaction_manager()
+        txn = await tm.begin()
         container = await root.async_get('guillotina')
 
         ob = await utils.get_object_by_oid(response['@uid'], txn)
         assert ob is not None
-        assert ob._p_oid == response['@uid']
+        assert ob.__uuid__ == response['@uid']
 
         ob2 = await utils.navigate_to(container, 'item1')
-        assert ob2._p_oid == ob._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
 
         url = utils.get_object_url(ob, request)
         assert url.endswith('item1')
 
-        await request._tm.abort(txn=txn)
+        await tm.abort(txn=txn)
 
 
 async def test_run_async():
@@ -215,7 +219,8 @@ async def test_navigator_preload(container_requester):
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
-        txn = await request._tm.begin(request)
+        tm = requester.db.get_transaction_manager()
+        txn = await tm.begin()
         container = await root.async_get('guillotina')
         item1 = await container.async_get('item1')
         item1.title = "Item1bis"
@@ -227,7 +232,7 @@ async def test_navigator_preload(container_requester):
         assert item1_bis.title == 'Item1bis'
         assert item1_bis is item1
 
-        await request._tm.abort(txn=txn)
+        await tm.abort(txn=txn)
 
 
 async def test_navigator_get(container_requester):
@@ -275,7 +280,8 @@ async def test_navigator_get(container_requester):
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
-        txn = await request._tm.begin(request)
+        tm = requester.db.get_transaction_manager()
+        txn = await tm.begin()
         container = await root.async_get('guillotina')
         item0 = await container.async_get('item0')
         txn.delete(item0)
@@ -293,7 +299,7 @@ async def test_navigator_get(container_requester):
         assert await nav.get('/folder1/folder2/item2') is None
         assert await nav.get('/folder1/item0') is None
 
-        await request._tm.abort(txn=txn)
+        await tm.abort(txn=txn)
 
 
 async def test_get_behavior(container_requester):
@@ -309,13 +315,14 @@ async def test_get_behavior(container_requester):
         assert status == 201
         request = get_mocked_request(requester.db)
         root = await get_root(request)
-        txn = await request._tm.begin(request)
+        tm = requester.db.get_transaction_manager()
+        txn = await tm.begin()
         container = await root.async_get('guillotina')
         item1 = await container.async_get('item1')
         behavior = await get_behavior(item1, IDublinCore)
         assert behavior is not None
 
-        await request._tm.abort(txn=txn)
+        await tm.abort(txn=txn)
 
 
 def test_bad_passphrase():

@@ -27,7 +27,7 @@ class PatchField(schema.Field):
     async def set(self, obj, value):
         bound_field = self.field.bind(obj)
         await apply_coroutine(bound_field.set, obj, value)
-        obj._p_register()
+        obj.register()
 
 
 @configure.value_deserializer(IPatchField)

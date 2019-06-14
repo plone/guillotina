@@ -1,13 +1,17 @@
+import uuid
+from typing import Any
+from typing import Callable
+from typing import Coroutine
+from typing import Union
+
 from guillotina.component import get_utility
+from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IQueueUtility
 from guillotina.interfaces import IView
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 from zope.interface import implementer
-
-from typing import Any, Coroutine, Callable, Union
-import uuid
 
 
 class ExecuteContext:
@@ -168,15 +172,11 @@ def after_commit(func: Callable, *args, _request=None, **kwargs):
     :param \\*args: arguments to call the func with
     :param \\**kwargs: keyword arguments to call the func with
     '''
-    if _request is not None:
-        request = _request
-    elif 'request' in kwargs:
-        request = kwargs['request']
+    txn = get_transaction()
+    if txn is not None:
+        txn.add_after_commit_hook(func, args=args, kwargs=kwargs)
     else:
-        request = get_current_request()
-
-    txn = get_transaction(request)
-    txn.add_after_commit_hook(func, args=args, kwargs=kwargs)
+        raise TransactionNotFound('Could not find transaction to run job with')
 
 
 def before_commit(func: Callable[..., Coroutine[Any, Any, Any]],
@@ -189,12 +189,8 @@ def before_commit(func: Callable[..., Coroutine[Any, Any, Any]],
     :param \\*args: arguments to call the func with
     :param \\**kwargs: keyword arguments to call the func with
     '''
-    if _request is not None:
-        request = _request
-    elif 'request' in kwargs:
-        request = kwargs['request']
+    txn = get_transaction()
+    if txn is not None:
+        txn.add_before_commit_hook(func, args=args, kwargs=kwargs)
     else:
-        request = get_current_request()
-
-    txn = get_transaction(request)
-    txn.add_before_commit_hook(func, args=args, kwargs=kwargs)
+        raise TransactionNotFound('Could not find transaction to run job with')

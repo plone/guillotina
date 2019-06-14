@@ -108,9 +108,9 @@ class ResourceFactory(Factory):
         obj.creation_date = now
         obj.modification_date = now
         if id is None:
-            if obj._p_oid is None:
-                obj._p_oid = app_settings['oid_generator'](obj)
-            obj.id = oid.get_short_oid(obj._p_oid)
+            if obj.__uuid__ is None:
+                obj.__uuid__ = app_settings['oid_generator'](obj)
+            obj.id = oid.get_short_oid(obj.__uuid__)
         else:
             obj.id = id
         obj.__name__ = obj.id
@@ -166,7 +166,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         """
         The unique id of the content object
         """
-        return self._p_oid
+        return self.__uuid__
 
     def __init__(self, id: str=None) -> None:
         if id is not None:
@@ -224,7 +224,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
                 alsoProvides(self, behavior_registration.marker)
-            self._p_register()  # make sure we resave this obj
+            self.register()  # make sure we resave this obj
 
     def remove_behavior(self, iface: Interface) -> None:
         """We need to apply the marker interface.
@@ -245,7 +245,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
                 pass
         if iface in self.__behaviors__:
             self.__behaviors__ -= {name}
-        self._p_register()  # make sure we resave this obj
+        self.register()  # make sure we resave this obj
 
     @profilable
     def __getattr__(self, name):
@@ -295,8 +295,8 @@ class Folder(Resource):
     """
 
     def _get_transaction(self):
-        if self._p_jar is not None:
-            return self._p_jar
+        if self.__txn__ is not None:
+            return self.__txn__
         return get_transaction()
 
     async def async_contains(self, key: str) -> bool:
@@ -305,7 +305,7 @@ class Folder(Resource):
 
         :param key: key of child object to check
         """
-        return await self._get_transaction().contains(self._p_oid, key)
+        return await self._get_transaction().contains(self.__uuid__, key)
 
     async def async_set(self, key: str, value: Resource) -> None:
         """
@@ -318,7 +318,7 @@ class Folder(Resource):
         value.__name__ = key
         trns = self._get_transaction()
         if trns is not None:
-            value._p_jar = trns
+            value.__txn__ = trns
             trns.register(value)
 
     async def async_get(self, key: str, default=None,
@@ -361,13 +361,13 @@ class Folder(Resource):
         """
         Asynchronously calculate the len of the folder
         """
-        return await self._get_transaction().len(self._p_oid)
+        return await self._get_transaction().len(self.__uuid__)
 
     async def async_keys(self) -> List[str]:
         """
         Asynchronously get the sub object keys in this folder
         """
-        return await self._get_transaction().keys(self._p_oid)
+        return await self._get_transaction().keys(self.__uuid__)
 
     async def async_items(self, suppress_events=False) -> AsyncIterator[
             Tuple[str, Resource]]:
@@ -620,7 +620,7 @@ async def create_content_in_container(
             continue
         setattr(obj, key, value)
 
-    txn = getattr(parent, '_p_jar', None) or get_transaction()
+    txn = getattr(parent, '__txn__', None) or get_transaction()
     if txn is None or not txn.storage.supports_unique_constraints:
         # need to manually check unique constraints
         if await parent.async_contains(obj.id):
@@ -742,9 +742,9 @@ async def move(context: IResource,
 
     if destination_ob is None:
         raise PreconditionFailed(context, 'Could not find destination object')
-    if destination_ob._p_oid == context._p_oid:
+    if destination_ob.__uuid__ == context.__uuid__:
         raise PreconditionFailed(context, 'You can not move object to itself')
-    if destination_ob._p_oid == context.__parent__._p_oid and new_id == context.id:
+    if destination_ob.__uuid__ == context.__parent__.__uuid__ and new_id == context.id:
         raise PreconditionFailed(context, 'Object already belongs to this parent with same id')
 
     old_id = context.id
@@ -767,8 +767,9 @@ async def move(context: IResource,
 
     original_parent = context.__parent__
 
-    txn = get_transaction(request)
-    cache_keys = txn._cache.get_cache_keys(context, 'deleted')
+    txn = get_transaction()
+    if txn is not None:
+        cache_keys = txn._cache.get_cache_keys(context, 'deleted')
 
     await notify(
         BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,
@@ -778,7 +779,7 @@ async def move(context: IResource,
                                }))
 
     context.__parent__ = destination_ob
-    context._p_register()
+    context.register()
 
     await notify(
         ObjectMovedEvent(context, original_parent, old_id, destination_ob,
@@ -787,5 +788,6 @@ async def move(context: IResource,
                              'destination': destination
                          }))
 
-    cache_keys += txn._cache.get_cache_keys(context, 'added')
-    await txn._cache.delete_all(cache_keys)
+    if txn is not None:
+        cache_keys += txn._cache.get_cache_keys(context, 'added')
+        await txn._cache.delete_all(cache_keys)

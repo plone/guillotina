@@ -37,11 +37,9 @@ class CustomContentType(Item):
     pass
 
 
-@pytest.mark.usefixtures("dummy_request")
-class TestContent:
-    async def test_not_allowed_to_create_content(self, dummy_request):
-        self.request = dummy_request
+async def test_not_allowed_to_create_content(dummy_request):
 
+    with dummy_request:
         container = await create_content(
             'Container',
             id='guillotina',
@@ -52,29 +50,29 @@ class TestContent:
             # not logged in, can't create
             await create_content_in_container(container, 'Item', id_='foobar')
 
-    async def test_allowed_to_create_content(self, dummy_request):
-        self.request = dummy_request
-        utils.login(self.request)
+async def test_allowed_to_create_content(dummy_request):
+    with dummy_request:
+        utils.login(dummy_request)
 
         container = await create_content(
             'Container',
             id='guillotina',
             title='Guillotina')
         container.__name__ = 'guillotina'
-        utils._p_register(container)
+        utils.register(container)
 
         await create_content_in_container(container, 'Item', id_='foobar')
 
-    async def test_allowed_types(self, dummy_request):
-        self.request = dummy_request
-        utils.login(self.request)
+async def test_allowed_types(dummy_request):
+    utils.login(dummy_request)
 
+    with dummy_request:
         container = await create_content(
             'Container',
             id='guillotina',
             title='Guillotina')
         container.__name__ = 'guillotina'
-        utils._p_register(container)
+        utils.register(container)
 
         import guillotina.tests
         configure.register_configuration(Folder, dict(
@@ -99,16 +97,17 @@ class TestContent:
             await create_content_in_container(obj, 'TestType', 'foobar')
         await create_content_in_container(obj, 'Item', 'foobar')
 
-    async def test_creator_used_from_content_creation(self, dummy_request):
-        self.request = dummy_request
-        utils.login(self.request)
 
+async def test_creator_used_from_content_creation(dummy_request):
+    utils.login(dummy_request)
+
+    with dummy_request:
         container = await create_content(
             'Container',
             id='guillotina',
             title='Guillotina')
         container.__name__ = 'guillotina'
-        utils._p_register(container)
+        utils.register(container)
 
         import guillotina.tests
         configure.register_configuration(Folder, dict(
@@ -143,9 +142,9 @@ def test_base_object():
         '__gannotations__': '_BaseObject__annotations',
         '__immutable_cache__': '_BaseObject__immutable_cache',
         '__new_marker__': '_BaseObject__new_marker',
-        '_p_jar': '_BaseObject__jar',
-        '_p_oid': '_BaseObject__oid',
-        '_p_serial': '_BaseObject__serial'
+        '__txn__': '_BaseObject__txn',
+        '__uuid__': '_BaseObject__uuid',
+        '__serial__': '_BaseObject__serial'
     }
     for name, attr in testing.items():
         item = Item()

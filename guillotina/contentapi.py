@@ -1,24 +1,24 @@
 import typing
 
-import aiotask_context
 from guillotina._settings import app_settings
+from guillotina._settings import request_var
+from guillotina._settings import txn_var
+from guillotina.auth.users import RootUser
 from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IResource
 from guillotina.interfaces import IParticipation
-from guillotina.security.policy import Interaction
+from guillotina.interfaces import IResource
 from guillotina.registry import REGISTRY_DATA_KEY
+from guillotina.security.policy import Interaction
 from guillotina.tests.utils import get_mocked_request
 from guillotina.utils import get_current_request
 from guillotina.utils import get_object_url
 from guillotina.utils import import_class
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
-
-from guillotina.auth.users import RootUser
 
 
 async def login(request, user):
@@ -43,7 +43,6 @@ class ContentAPI:
         self.tm = db.get_transaction_manager()
         self.request = get_mocked_request()
         self.user = user
-        self.request._tm = self.tm
         self.request._db_id = db.id
         self._active_txn = None
 
@@ -52,13 +51,13 @@ class ContentAPI:
             self._existing_request = get_current_request()
         except RequestNotFound:
             self._existing_request = None
-        aiotask_context.set('request', self.request)
+        request_var.set(self.request)
         await login(self.request, self.user)
         return self
 
     async def __aexit__(self, *args):
         logout(self.request)
-        aiotask_context.set('request', self._existing_request)
+        request_var.set(self._existing_request)
         # make sure to close out connection
         await self.abort()
 
@@ -74,8 +73,8 @@ class ContentAPI:
 
     async def get_transaction(self) -> ITransaction:
         if self._active_txn is None:
-            self._active_txn = await self.tm.begin(self.request)
-            self.request._txn = self._active_txn
+            self._active_txn = await self.tm.begin()
+            txn_var.set(self._active_txn)
         return self._active_txn
 
     async def create(self, payload: dict, in_: IResource=None) -> IResource:

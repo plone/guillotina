@@ -126,7 +126,7 @@ class GuillotinaSecurityMap(SecurityMap):
             map._byrow = self._byrow
             map._bycol = self._bycol
             self.context.__acl__[self.key] = map
-        self.context._p_register()
+        self.context.register()
 
     def add_cell(self, rowentry, colentry, value):
         if super().add_cell(rowentry, colentry, value):

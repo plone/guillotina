@@ -16,12 +16,12 @@ class ObjectTest(BaseObject):
 
 async def test_create_object(dummy_txn_root):
     async with dummy_txn_root as root:
-        assert isinstance(root._p_jar, Transaction)
+        assert isinstance(root.__txn__, Transaction)
         ob1 = ObjectTest()
         ob1.__new_marker__ = True
-        assert ob1._p_jar is None
-        assert ob1._p_serial is None
-        assert ob1._p_oid is None
+        assert ob1.__txn__ is None
+        assert ob1.__serial__ is None
+        assert ob1.__uuid__ is None
         assert ob1.__parent__ is None
         assert ob1.__of__ is None
         assert ob1.__name__ is None
@@ -29,12 +29,12 @@ async def test_create_object(dummy_txn_root):
         await root.async_set('ob1', ob1)
 
         assert ob1.__name__ == 'ob1'
-        assert ob1._p_jar == root._p_jar
-        assert ob1._p_oid is not None
+        assert ob1.__txn__ == root.__txn__
+        assert ob1.__uuid__ is not None
         assert ob1.__of__ is None
         assert ob1.__parent__ is root
 
-        assert len(ob1._p_jar.added) == 1
+        assert len(ob1.__txn__.added) == 1
 
 
 async def test_create_annotation(dummy_txn_root):
@@ -47,14 +47,14 @@ async def test_create_annotation(dummy_txn_root):
 
         ob2 = ObjectTest()
         assert ob2.__of__ is None
-        assert ob2._p_jar is None
+        assert ob2.__txn__ is None
         assert ob2.__name__ is None
         assert ob2.__parent__ is None
         assert len(ob1.__gannotations__) == 0
 
         await annotations.async_set('test2', ob2)
-        assert ob2.__of__ is ob1._p_oid
-        assert ob2._p_jar is ob1._p_jar
+        assert ob2.__of__ is ob1.__uuid__
+        assert ob2.__txn__ is ob1.__txn__
         assert ob2.__name__ == 'test2'
         assert ob2.__parent__ is None
         assert len(ob1.__gannotations__) == 1

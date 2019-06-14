@@ -72,7 +72,6 @@ class SerializeToJson(object):
             'is_folderish': IFolder.providedBy(self.context),  # eek, should be @folderish?
             'creation_date': json_compatible(self.context.creation_date),
             'modification_date': json_compatible(self.context.modification_date),
-            'UID': self.context.uuid,  # should be removed
         }
 
         main_schema = factory.schema
@@ -211,7 +210,6 @@ class DefaultJSONSummarySerializer(object):
             '@id': IAbsoluteURL(self.context)(),
             '@name': self.context.__name__,
             '@type': self.context.type_name,
-            '@uid': self.context.uuid,
-            'UID': self.context.uuid
+            '@uid': self.context.uuid
         })
         return summary

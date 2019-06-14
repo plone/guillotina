@@ -4,7 +4,7 @@ from guillotina.content import create_content_in_container
 from guillotina.interfaces import IApplication
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import transaction
 
 
 async def test_create_blob(db, guillotina_main):
@@ -13,7 +13,7 @@ async def test_create_blob(db, guillotina_main):
     request = get_mocked_request(db)
     login(request)
 
-    async with managed_transaction(request=request):
+    async with transaction(), request:
         container = await create_content_in_container(
             db, 'Container', 'container', request=request,
             title='Container')
@@ -21,10 +21,10 @@ async def test_create_blob(db, guillotina_main):
         blob = Blob(container)
         container.blob = blob
 
-    async with managed_transaction(request=request):
+    async with transaction(), request:
         container = await db.async_get('container')
         assert blob.bid == container.blob.bid
-        assert blob.resource_zoid == container._p_oid
+        assert blob.resource_uid == container.__uuid__
         await db.async_del('container')
 
 
@@ -34,7 +34,7 @@ async def test_write_blob_data(db, guillotina_main):
     request = get_mocked_request(db)
     login(request)
 
-    async with managed_transaction(request=request):
+    async with transaction(), request:
         container = await db.async_get('container')
         if container is None:
             container = await create_content_in_container(
@@ -47,7 +47,7 @@ async def test_write_blob_data(db, guillotina_main):
         blobfi = blob.open('w')
         await blobfi.async_write(b'foobar')
 
-    async with managed_transaction(request=request):
+    async with transaction(), request:
         container = await db.async_get('container')
         assert await container.blob.open().async_read() == b'foobar'
         assert container.blob.size == 6
@@ -62,7 +62,7 @@ async def test_write_large_blob_data(db, guillotina_main):
     request = get_mocked_request(db)
     login(request)
 
-    async with managed_transaction(request=request):
+    async with transaction(), request:
         container = await db.async_get('container')
         if container is None:
             container = await create_content_in_container(
@@ -77,7 +77,7 @@ async def test_write_large_blob_data(db, guillotina_main):
         blobfi = blob.open('w')
         await blobfi.async_write(b'foobar' * multiplier)
 
-    async with managed_transaction(request=request):
+    async with transaction(), request:
         container = await db.async_get('container')
         assert await container.blob.open().async_read() == (b'foobar' * multiplier)
         assert container.blob.size == len(b'foobar' * multiplier)

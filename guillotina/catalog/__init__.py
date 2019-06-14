@@ -57,4 +57,4 @@ def get_parent_uuid(ob):
 
 @directives.index_field.with_accessor(IResource, 'tid', type='keyword')
 def get_tid(ob):
-    return ob._p_serial
+    return ob.__serial__

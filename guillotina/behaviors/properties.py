@@ -17,7 +17,7 @@ class ContextProperty:
 
     def __set__(self, inst, value):
         setattr(inst.context, self.__name__, value)
-        inst.context._p_register()
+        inst.context.register()
 
 
 class FunctionProperty:

@@ -75,11 +75,11 @@ class AnnotationBehavior:
             data = self.__dict__['data']
             data[key] = value
             if IAnnotationData.providedBy(data):
-                data._p_register()
+                data.register()
 
-    def _p_register(self):
+    def register(self):
         if IAnnotationData.providedBy(self.__dict__['data']):
-            self.__dict__['data']._p_register()
+            self.__dict__['data'].register()
 
 
 @implementer(IContentBehavior)
@@ -116,7 +116,7 @@ class ContextBehavior:
         else:
             prefixed_name = self.__dict__['prefix'] + name
             self.__dict__['context'].__setattr__(prefixed_name, value)
-            self.__dict__['context']._p_register()
+            self.__dict__['context'].register()
 
-    def _p_register(self):
-        self.__dict__['context']._p_register()
+    def register(self):
+        self.__dict__['context'].register()

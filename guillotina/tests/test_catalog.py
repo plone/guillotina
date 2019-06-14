@@ -27,18 +27,18 @@ def test_indexed_fields(dummy_guillotina, loop):
 
 
 async def test_get_index_data(dummy_request):
-    request = dummy_request  # noqa
 
-    container = await create_content(
-        'Container',
-        id='guillotina',
-        title='Guillotina')
-    container.__name__ = 'guillotina'
+    with dummy_request:
+        container = await create_content(
+            'Container',
+            id='guillotina',
+            title='Guillotina')
+        container.__name__ = 'guillotina'
 
-    ob = await create_content('Item', id='foobar')
+        ob = await create_content('Item', id='foobar')
 
-    data = ICatalogDataAdapter(ob)
-    fields = await data()
+        data = ICatalogDataAdapter(ob)
+        fields = await data()
     assert 'type_name' in fields
     assert 'uuid' in fields
     assert 'path' in fields
@@ -51,54 +51,54 @@ async def test_registered_base_utility(dummy_request):
 
 
 async def test_get_security_data(dummy_request):
-    request = dummy_request  # noqa
-    ob = test_utils.create_content()
-    adapter = get_adapter(ob, ISecurityInfo)
-    data = adapter()
+    with dummy_request:
+        ob = test_utils.create_content()
+        adapter = get_adapter(ob, ISecurityInfo)
+        data = adapter()
     assert 'access_users' in data
     assert 'access_roles' in data
 
 
 async def test_get_data_uses_indexes_param(dummy_request):
     util = query_utility(ICatalogUtility)
-    request = dummy_request  # noqa
-    container = await create_content(
-        'Container',
-        id='guillotina',
-        title='Guillotina')
-    container.__name__ = 'guillotina'
-    ob = await create_content('Item', id='foobar')
-    data = await util.get_data(ob, indexes=['title'])
-    assert len(data) == 4  # uuid, type_name, etc always returned
-    data = await util.get_data(ob, indexes=['title', 'id'])
-    assert len(data) == 5
+    with dummy_request:
+        container = await create_content(
+            'Container',
+            id='guillotina',
+            title='Guillotina')
+        container.__name__ = 'guillotina'
+        ob = await create_content('Item', id='foobar')
+        data = await util.get_data(ob, indexes=['title'])
+        assert len(data) == 4  # @uid, type_name, etc always returned
+        data = await util.get_data(ob, indexes=['title', 'id'])
+        assert len(data) == 5
 
-    data = await util.get_data(ob)
-    assert len(data) > 9
+        data = await util.get_data(ob)
+        assert len(data) > 9
 
 
 async def test_modified_event_gathers_all_index_data(dummy_request):
-    request = dummy_request  # noqa
-    container = await create_content(
-        'Container',
-        id='guillotina',
-        title='Guillotina')
-    container.__name__ = 'guillotina'
-    request.container = container
-    ob = await create_content('Item', id='foobar')
-    ob._p_oid = 'foobar'
-    await notify(ObjectModifiedEvent(ob, payload={
-        'title': '',
-        'id': ''
-    }))
-    fut = index.get_request_indexer()
+    with dummy_request:
+        container = await create_content(
+            'Container',
+            id='guillotina',
+            title='Guillotina')
+        container.__name__ = 'guillotina'
+        dummy_request.container = container
+        ob = await create_content('Item', id='foobar')
+        ob.__uuid__ = 'foobar'
+        await notify(ObjectModifiedEvent(ob, payload={
+            'title': '',
+            'id': ''
+        }))
+        fut = index.get_request_indexer()
 
-    assert len(fut.update['foobar']) == 5
+        assert len(fut.update['foobar']) == 5
 
-    await notify(ObjectModifiedEvent(ob, payload={
-        'creation_date': ''
-    }))
-    assert len(fut.update['foobar']) == 6
+        await notify(ObjectModifiedEvent(ob, payload={
+            'creation_date': ''
+        }))
+        assert len(fut.update['foobar']) == 6
 
 
 async def test_search_endpoint(container_requester):

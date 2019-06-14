@@ -2,7 +2,7 @@ from guillotina.behaviors.attachment import IAttachment, IMultiAttachment
 from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IFileManager
 from guillotina.tests import utils
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import transaction
 
 import json
 import random
@@ -88,7 +88,7 @@ async def test_multi_upload(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('foobar')
             behavior = IMultiAttachment(obj)
@@ -129,7 +129,7 @@ async def test_large_upload_chunks(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('foobar')
             behavior = IAttachment(obj)
@@ -197,7 +197,7 @@ async def test_tus(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('foobar')
             behavior = IAttachment(obj)
@@ -265,7 +265,7 @@ async def test_tus_multi(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('foobar')
             behavior = IMultiAttachment(obj)
@@ -346,7 +346,7 @@ async def test_tus_unknown_size(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('foobar')
             behavior = IAttachment(obj)
@@ -377,21 +377,22 @@ async def test_copy_file_ob(container_requester):
         assert status == 200
 
         request = utils.get_mocked_request(requester.db)
-        root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
-            container = await root.async_get('guillotina')
-            obj = await container.async_get('foobar')
-            attachment = IAttachment(obj)
-            await attachment.load()
-            existing_bid = attachment.file._blob.bid
-            cfm = get_multi_adapter(
-                (obj, request, IAttachment['file'].bind(attachment)), IFileManager
-            )
-            from_cfm = get_multi_adapter(
-                (obj, request, IAttachment['file'].bind(attachment)), IFileManager
-            )
-            await cfm.copy(from_cfm)
-            assert existing_bid != attachment.file._blob.bid
+        with request:
+            root = await utils.get_root(request)
+            async with transaction(db=requester.db, abort_when_done=True):
+                container = await root.async_get('guillotina')
+                obj = await container.async_get('foobar')
+                attachment = IAttachment(obj)
+                await attachment.load()
+                existing_bid = attachment.file._blob.bid
+                cfm = get_multi_adapter(
+                    (obj, request, IAttachment['file'].bind(attachment)), IFileManager
+                )
+                from_cfm = get_multi_adapter(
+                    (obj, request, IAttachment['file'].bind(attachment)), IFileManager
+                )
+                await cfm.copy(from_cfm)
+                assert existing_bid != attachment.file._blob.bid
 
 
 async def test_tus_unfinished_error(container_requester):
@@ -508,7 +509,7 @@ async def test_tus_with_empty_file(container_requester):
 
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
             obj = await container.async_get('foobar')
             behavior = IAttachment(obj)

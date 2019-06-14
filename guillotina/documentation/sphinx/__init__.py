@@ -130,7 +130,7 @@ class APICall(Directive):
         path = path.split('?')[0]
         path = tuple(p for p in path.split('/') if p)
         ob, tail = await traverse(request, root, path)
-        await abort(request)
+        await abort()
         return ob, tail
 
     def get_service_definition(self, resource, tail):

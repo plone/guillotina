@@ -36,7 +36,7 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
         await tm.commit(txn=txn)
         txn = await tm.begin()
 
-        folder1._p_jar = txn
+        folder1.__txn__ = txn
         txn.delete(folder1)
 
         await tm.commit(txn=txn)
@@ -44,17 +44,17 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
 
         txn = await tm.begin()
         with pytest.raises(KeyError):
-            await txn.get(folder1._p_oid)
+            await txn.get(folder1.__uuid__)
             await tm.abort(txn=txn)
 
         with pytest.raises(KeyError):
             # dangling...
-            await txn.get(item._p_oid)
+            await txn.get(item.__uuid__)
             await tm.abort(txn=txn)
 
         with pytest.raises(KeyError):
             # dangling...
-            await txn.get(folder2._p_oid)
+            await txn.get(folder2.__uuid__)
             await tm.abort(txn=txn)
 
         await tm.abort(txn=txn)
@@ -77,11 +77,11 @@ async def test_deleting_parent_deletes_children(cockroach_storage, dummy_request
         await tm.commit(txn=txn)
         txn = await tm.begin()
 
-        ob2 = await txn.get(ob._p_oid)
-        folder2 = await txn.get(folder._p_oid)
+        ob2 = await txn.get(ob.__uuid__)
+        folder2 = await txn.get(folder.__uuid__)
 
-        assert ob2._p_oid == ob._p_oid
-        assert folder2._p_oid == folder._p_oid
+        assert ob2.__uuid__ == ob.__uuid__
+        assert folder2.__uuid__ == folder.__uuid__
 
         # delete parent, children should be gone...
         txn.delete(folder2)
@@ -94,8 +94,8 @@ async def test_deleting_parent_deletes_children(cockroach_storage, dummy_request
         txn = await tm.begin()
 
         with pytest.raises(KeyError):
-            await txn.get(ob._p_oid)
+            await txn.get(ob.__uuid__)
         with pytest.raises(KeyError):
-            await txn.get(folder._p_oid)
+            await txn.get(folder.__uuid__)
 
         await tm.abort(txn=txn)

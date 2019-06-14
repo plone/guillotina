@@ -1,15 +1,18 @@
-from aiohttp import web_request
-from typing import Callable, Any, Coroutine
-from collections import OrderedDict
-from guillotina.interfaces import IDefaultLayer
-from guillotina.interfaces import IRequest
-from guillotina.profile import profilable
-from typing import Dict
-from zope.interface import implementer
-
 import asyncio
 import time
 import uuid
+from collections import OrderedDict
+from typing import Any
+from typing import Callable
+from typing import Coroutine
+from typing import Dict
+
+from aiohttp import web_request
+from guillotina._settings import request_var
+from guillotina.interfaces import IDefaultLayer
+from guillotina.interfaces import IRequest
+from guillotina.profile import profilable
+from zope.interface import implementer
 
 
 @implementer(IRequest, IDefaultLayer)
@@ -21,8 +24,6 @@ class Request(web_request.Request):
     """
 
 #    _db_id = None
-#    _tm = None
-#    _txn = None
 #    _container_id = None
 #    container = None
 #    container_settings = None
@@ -133,3 +134,17 @@ class Request(web_request.Request):
             else:
                 self._uid = uuid.uuid4().hex
         return self._uid
+
+    def __enter__(self):
+        request_var.set(self)
+
+    def __exit__(self, *args):
+        '''
+        contextvars already tears down to previous value, do not set to None here!
+        '''
+
+    async def __aenter__(self):
+        return self.__enter__()
+
+    async def __aexit__(self, *args):
+        return self.__exit__()

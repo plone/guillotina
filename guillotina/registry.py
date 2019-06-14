@@ -46,7 +46,7 @@ class RecordsProxy(object):
         else:
             prefixed_name = self.__dict__['prefix'] + name
             self.__dict__['records'][prefixed_name] = value
-            self.__dict__['records']._p_register()  # make sure we write this obj
+            self.__dict__['records'].register()  # make sure we write this obj
 
 
 @implementer(IRegistry, IBaseObject)
@@ -70,7 +70,7 @@ class Registry(AnnotationData):
 
     def __setitem__(self, name, value):
         super(Registry, self).__setitem__(name, value)
-        self._p_register()
+        self.register()
 
     def for_interface(self, iface, check=True, omit=(), prefix=None):
         return RecordsProxy(self, iface, prefix=prefix)
