@@ -94,7 +94,7 @@ async def traverse(request, parent, path):
 
     if IDatabase.providedBy(context):
         request._db_write_enabled = app_settings['check_writable_request'](request)
-        request._db_id = context.id
+        task_vars.db.set(context)
         # Add a transaction Manager to request
         tm = context.get_transaction_manager()
         task_vars.tm.set(tm)

@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Remove `Request._db_id`, Use `guillotina.task_vars.db.get().id`
+
 - Remove `Request.container_settings`, Use `guillotina.utils.get_registry`
 
 - Remove `Request._container_id`, use `guillotina.task_vars.container.get().id`

@@ -22,8 +22,9 @@ class ShellHelpers:
 
     async def use_db(self, db_id):
         db = self._root[db_id]
+        task_vars.db.set(db)
         tm = self._active_tm = db.get_transaction_manager()
-        self._request._db_id = db_id
+        task_vars.db.set(db)
         self._active_db = db
         self._active_txn = await tm.begin()
         task_vars.tm.set(tm)

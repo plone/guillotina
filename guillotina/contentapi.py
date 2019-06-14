@@ -42,21 +42,16 @@ class ContentAPI:
         self.tm = db.get_transaction_manager()
         self.request = get_mocked_request()
         self.user = user
-        self.request._db_id = db.id
         self._active_txn = None
 
     async def __aenter__(self):
-        try:
-            self._existing_request = get_current_request()
-        except RequestNotFound:
-            self._existing_request = None
         task_vars.request.set(self.request)
+        task_vars.db.set(self.db)
         await login(self.request, self.user)
         return self
 
     async def __aexit__(self, *args):
         logout(self.request)
-        task_vars.request.set(self._existing_request)
         # make sure to close out connection
         await self.abort()
 

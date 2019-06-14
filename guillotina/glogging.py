@@ -33,12 +33,13 @@ def _wrapped(name):
             except (AttributeError, KeyError):
                 agent = 'Unknown'
             container = task_vars.container.get()
+            db = task_vars.db.get()
             extra.update({
                 'method': request.method,
                 'url': url,
                 'container': getattr(container, 'id', None),
                 'account': getattr(container, 'id', None),
-                'db_id': getattr(request, '_db_id', None),
+                'db_id': getattr(db, 'id', None),
                 'user': get_authenticated_user_id(request) or 'Anonymous',
                 'eid': eid,
                 'agent': agent,

@@ -20,7 +20,6 @@ class Request(web_request.Request):
     object as it is essential our poor man's thread local model
     """
 
-#    _db_id = None
 #    tail = None
 #    resource = None
 #    security = None

@@ -80,8 +80,8 @@ async def get_containers(request):
     for _id, db in root:
         if IDatabase.providedBy(db):
             tm = db.get_transaction_manager()
-            request._db_id = _id
-            with tm:
+            async with tm:
+                task_vars.db.set(db)
                 async with tm.lock:
                     # reset _txn to make sure to create a new ob
                     request._txn = None

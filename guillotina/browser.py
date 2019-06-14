@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina import task_vars
 from guillotina.component import adapter
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import ILocation
@@ -69,9 +70,11 @@ class Absolute_URL(object):
         if container_url:
             return path
         elif relative:
-            return '/' + self.request._db_id + path
+            db = task_vars.db.get()
+            return '/' + db.id + path
         else:
-            return get_url(self.request, self.request._db_id + path)
+            db = task_vars.db.get()
+            return get_url(self.request, db.id + path)
 
 
 @configure.adapter(

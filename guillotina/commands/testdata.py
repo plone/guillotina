@@ -133,7 +133,7 @@ class TestDataCommand(Command):
 
     async def generate_test_data(self, db):
         tm = db.get_transaction_manager()
-        self.request._db_id = db.id
+        task_vars.db.set(db)
         tm = db.get_transaction_manager()
         txn = await tm.begin()
 
