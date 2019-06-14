@@ -398,10 +398,17 @@ COMMIT;''')
 
 
 @pytest.fixture(scope='function')
-def http_cache_enabled():
-    app_settings['http_cache'] = {
-        'max_age': 123,
-        'public': True,
+def simple_httpcache():
+    app_settings.setdefault('load_utilities', {})
+    app_settings['load_utilities']['httpcache'] = {
+        "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",
+        "factory": "guillotina.api.httpcache.SimpleHttpCachePolicyUtility",
+        "settings": {
+            "max_age": 123,
+            "public": True,
+        }
     }
+
     yield
-    app_settings.pop('http_cache', None)
+
+    app_settings['load_utilities'].pop('httpcache')
