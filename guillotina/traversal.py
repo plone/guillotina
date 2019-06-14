@@ -298,7 +298,7 @@ class MatchInfo(BaseMatchInfo):
         # Add extra headers to response if needed
         extra_hdrs = getattr(self.view, '__extra_headers__', {})
         if extra_hdrs:
-            response._headers.update(**extra_hdrs)
+            resp._headers.update(**extra_hdrs)
 
         self.debug(request, resp)
 
