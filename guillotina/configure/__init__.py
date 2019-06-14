@@ -451,7 +451,7 @@ class service(_base_decorator):  # noqa: N801
             klass.__allow_access__ = self.config.get(
                 'allow_access', getattr(func, '__allow_access__', False))
             klass.__route__ = routes.Route(self.config.get('name', ''))
-            klass.__response_headers__ = self.config.get('response_headers', {})
+            klass.__extra_headers__ = self.config.get('extra_headers', {})
             register_configuration(klass, self.config, 'service')
         else:
             if not _has_parameters(func):
@@ -471,7 +471,7 @@ class service(_base_decorator):  # noqa: N801
                 __allow_access__ = self.config.get('allow_access', False)
                 __route__ = routes.Route(self.config.get('name', ''))
                 view_func = staticmethod(func)
-                __response_headers__ = self.config.get('response_headers', {})
+                __extra_headers__ = self.config.get('extra_headers', {})
 
                 async def __call__(self):
                     return await func(self.context, self.request)
