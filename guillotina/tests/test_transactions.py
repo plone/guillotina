@@ -2,7 +2,6 @@ from guillotina.content import create_content_in_container
 from guillotina.db import ROOT_ID
 from guillotina.db.transaction import Transaction
 from guillotina.tests import mocks
-from guillotina.tests import utils
 from guillotina.transactions import transaction
 from guillotina.utils import get_object_by_oid
 

@@ -7,7 +7,6 @@ from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
-from guillotina.const import ROOT_ID
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.orm.interfaces import IBaseObject
