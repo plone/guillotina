@@ -30,6 +30,7 @@ class GuillotinaRequest(Request):
 
         self._client_max_size = client_max_size
 
+        self._read_bytes = None
         self._state = {}
         self._cache = {}
 
@@ -314,4 +315,3 @@ from guillotina.factory.app import make_asgi_app
 
 # asgi app singleton
 app = make_asgi_app()
-

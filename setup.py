@@ -69,6 +69,7 @@ setup(
             'pytest>=3.8.0',
             'docker',
             'backoff',
+            'molotov',
             'psycopg2-binary',
             'pytest-asyncio>=0.10.0',
             'pytest-cov',
