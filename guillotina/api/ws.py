@@ -7,6 +7,7 @@ from aiohttp import web
 from guillotina import configure
 from guillotina import logger
 from guillotina import routes
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
@@ -119,7 +120,7 @@ class WebsocketsView(Service):
         path = tuple(p for p in parsed.path.split('/') if p)
 
         from guillotina.traversal import traverse
-        obj, tail = await traverse(self.request, self.request.container, path)
+        obj, tail = await traverse(self.request, task_vars.container.get(), path)
 
         if tail and len(tail) > 0:
             # convert match lookups

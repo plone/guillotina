@@ -1,10 +1,8 @@
 import asyncio  # noqa
 import sys
 
+from guillotina import task_vars
 from guillotina._settings import app_settings
-from guillotina._settings import request_var
-from guillotina._settings import tm_var
-from guillotina._settings import txn_var
 from guillotina.commands import Command
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
@@ -28,16 +26,15 @@ class ShellHelpers:
         self._request._db_id = db_id
         self._active_db = db
         self._active_txn = await tm.begin()
-        tm_var.set(tm)
-        txn_var.set(self._active_txn)
+        task_vars.tm.set(tm)
+        task_vars.txn.set(self._active_txn)
         return self._active_txn
 
     async def use_container(self, container_id):
         container = await self._active_db.async_get(container_id)
         if container is None:
             raise Exception('Container not found')
-        self._request.container = container
-        self._request._container_id = container.id
+        task_vars.container.set(container)
         self._active_container = container
         return container
 
@@ -108,7 +105,7 @@ await commit()
         root = get_utility(IApplication, name='root')
         helpers = ShellHelpers(app, root, self.request)
         request = self.request
-        request_var.set(request)
+        task_vars.request.set(request)
         use_db = helpers.use_db  # noqa
         use_container = helpers.use_container  # noqa
         commit = helpers.commit  # noqa

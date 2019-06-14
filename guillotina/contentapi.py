@@ -1,14 +1,14 @@
 import typing
 
+from guillotina import task_vars
 from guillotina._settings import app_settings
-from guillotina._settings import request_var
-from guillotina._settings import txn_var
 from guillotina.auth.users import RootUser
 from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IResource
 from guillotina.registry import REGISTRY_DATA_KEY
@@ -51,19 +51,18 @@ class ContentAPI:
             self._existing_request = get_current_request()
         except RequestNotFound:
             self._existing_request = None
-        request_var.set(self.request)
+        task_vars.request.set(self.request)
         await login(self.request, self.user)
         return self
 
     async def __aexit__(self, *args):
         logout(self.request)
-        request_var.set(self._existing_request)
+        task_vars.request.set(self._existing_request)
         # make sure to close out connection
         await self.abort()
 
-    async def use_container(self, container: IResource):
-        self.request.container = container
-        self.request._container_id = container.id
+    async def use_container(self, container: IContainer):
+        task_vars.container.set(container)
         annotations_container = IAnnotations(container)
         self.request.container_settings = await annotations_container.async_get(
             REGISTRY_DATA_KEY)
@@ -74,7 +73,7 @@ class ContentAPI:
     async def get_transaction(self) -> ITransaction:
         if self._active_txn is None:
             self._active_txn = await self.tm.begin()
-            txn_var.set(self._active_txn)
+            task_vars.txn.set(self._active_txn)
         return self._active_txn
 
     async def create(self, payload: dict, in_: IResource=None) -> IResource:

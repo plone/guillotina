@@ -7,9 +7,9 @@ from copy import deepcopy
 from aiohttp import web
 from guillotina import configure
 from guillotina import glogging
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina._settings import default_settings
-from guillotina._settings import request_var
 from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
@@ -121,7 +121,7 @@ def load_application(module, root, settings):
 
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
-        request_var.set(request)
+        task_vars.request.set(request)
         try:
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
@@ -168,7 +168,7 @@ _dotted_name_settings = (
     'oid_generator',
     'cors_renderer',
     'check_writable_request',
-    'request_indexer'
+    'indexer'
 )
 
 def optimize_settings(settings):

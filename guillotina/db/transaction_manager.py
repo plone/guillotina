@@ -4,8 +4,7 @@ from asyncio import shield
 
 import asyncpg
 from guillotina import glogging
-from guillotina._settings import tm_var
-from guillotina._settings import txn_var
+from guillotina import task_vars
 from guillotina.db import ROOT_ID
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
@@ -62,7 +61,7 @@ class TransactionManager:
         """
         # already has txn registered, as long as connection is closed, it
         # is safe
-        txn: typing.Optional[ITransaction] = txn_var.get()
+        txn: typing.Optional[ITransaction] = task_vars.txn.get()
         if (txn is not None and
                 txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
@@ -86,7 +85,7 @@ class TransactionManager:
         await txn.tpc_begin()
 
         # make sure to explicitly set!
-        txn_var.set(txn)
+        task_vars.txn.set(txn)
 
         return txn
 
@@ -163,13 +162,13 @@ class TransactionManager:
     def get(self) -> typing.Optional[ITransaction]:
         """Return the current request specific transaction
         """
-        return txn_var.get()
+        return task_vars.txn.get()
 
     def transaction(self, **kwargs):
         return transaction(tm=self, **kwargs)
 
     def __enter__(self) -> ITransactionManager:
-        tm_var.set(self)
+        task_vars.tm.set(self)
         return self
 
     def __exit__(self, *args):

@@ -242,7 +242,7 @@ async def test_inherit(container_requester):
 
         with request:
             assert request.security.check_permission('guillotina.ViewContent',
-                                                     request.container)
+                                                     container)
             assert not request.security.check_permission(
                 'guillotina.ViewContent',
                 content)
@@ -318,7 +318,7 @@ async def test_allowsingle(container_requester):
         utils.login(request, user)
 
         assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
+                                                 container)
         assert request.security.check_permission('guillotina.AccessContent',
                                                  content)
 
@@ -330,7 +330,7 @@ async def test_allowsingle(container_requester):
 
         with request:
             assert request.security.check_permission('guillotina.AccessContent',
-                                                     request.container)
+                                                     container)
             assert not request.security.check_permission(
                 'guillotina.AccessContent', content)
 
@@ -436,7 +436,7 @@ async def test_allowsingle2(container_requester):
         utils.login(request, user)
 
         assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
+                                                 container)
         assert request.security.check_permission('guillotina.AccessContent',
                                                  content)
 
@@ -448,7 +448,7 @@ async def test_allowsingle2(container_requester):
 
         with request:
             assert request.security.check_permission('guillotina.AccessContent',
-                                                     request.container)
+                                                     container)
             assert not request.security.check_permission(
                 'guillotina.AccessContent', content)
 

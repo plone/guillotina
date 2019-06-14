@@ -1,19 +1,9 @@
 import copy
-from contextvars import ContextVar
 from typing import Any
 from typing import Dict
-from typing import Optional
 
 from guillotina import interfaces
-from guillotina.db.interfaces import ITransaction
-from guillotina.db.interfaces import ITransactionManager
 from guillotina.db.oid import generate_oid
-from guillotina.interfaces import IRequest
-
-
-request_var: ContextVar[Optional[IRequest]] = ContextVar('g_request', default=None)
-txn_var: ContextVar[Optional[ITransaction]] = ContextVar('g_txn', default=None)
-tm_var: ContextVar[Optional[ITransactionManager]] = ContextVar('g_tm', default=None)
 
 
 app_settings: Dict[str, Any] = {
@@ -100,6 +90,6 @@ app_settings: Dict[str, Any] = {
     "oid_generator": generate_oid,
     "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
     "check_writable_request": "guillotina.writable.check_writable_request",
-    "request_indexer": "guillotina.catalog.index.RequestIndexer"
+    "indexer": "guillotina.catalog.index.Indexer"
 }
 default_settings = copy.deepcopy(app_settings)

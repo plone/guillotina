@@ -4,6 +4,16 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Remove `Request.container`, Use `guillotina.task_vars.container.get()`
+
+- Remove `Request.add_future`. Use `guillotina.utils.execute.add_future`
+
+- Add `guillotina.utils.get_container`
+
+- Rename `request_indexer` setting to `indexer`
+
+- Rename `guillotina.catalog.index.RequestIndexer` to `guillotina.catalog.index.Indexer`
+
 - Rename `IWriter.parent_id` to `IWriter.parent_uid`
 
 - Rename `guillotina.db.oid` to `guillotina.db.uid`

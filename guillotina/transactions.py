@@ -1,8 +1,7 @@
 import logging
 import typing
 
-from guillotina._settings import tm_var
-from guillotina._settings import txn_var
+from guillotina import task_vars
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
 from guillotina.exceptions import RequestNotFound
@@ -72,7 +71,7 @@ def get_tm() -> typing.Optional[ITransactionManager]:
         # transaction txn commits or raises ConflictError
 
     """
-    return typing.cast(ITransactionManager, tm_var.get())
+    return typing.cast(ITransactionManager, task_vars.tm.get())
 
 
 def get_transaction() -> typing.Optional[ITransaction]:
@@ -82,7 +81,7 @@ def get_transaction() -> typing.Optional[ITransaction]:
     :param request: request object transaction is connected to
 
     '''
-    return typing.cast(ITransaction, txn_var.get())
+    return typing.cast(ITransaction, task_vars.txn.get())
 
 
 class transaction:  # noqa: N801
@@ -126,8 +125,8 @@ class transaction:  # noqa: N801
 
         self.txn = await self.tm.begin()
         # these should be restored after
-        tm_var.set(self.tm)
-        txn_var.set(self.txn)
+        task_vars.tm.set(self.tm)
+        task_vars.txn.set(self.txn)
         return self.txn
 
     def adopt_objects(self, obs, txn):

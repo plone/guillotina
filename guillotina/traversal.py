@@ -15,8 +15,7 @@ from guillotina import logger
 from guillotina import response
 from guillotina import routes
 from guillotina._settings import app_settings
-from guillotina._settings import tm_var
-from guillotina._settings import txn_var
+from guillotina import task_vars
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.participation import AnonymousParticipation
 from guillotina.browser import View
@@ -99,16 +98,15 @@ async def traverse(request, parent, path):
         request._db_id = context.id
         # Add a transaction Manager to request
         tm = context.get_transaction_manager()
-        tm_var.set(tm)
+        task_vars.tm.set(tm)
         # Start a transaction
         txn = await tm.begin()
         # Get the root of the tree
         context = await tm.get_root(txn=txn)
 
     if IContainer.providedBy(context):
-        request._container_id = context.id
-        request.container = context
-        annotations_container = IAnnotations(request.container)
+        task_vars.container.set(context)
+        annotations_container = IAnnotations(context)
         request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
         layers = request.container_settings.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
@@ -195,7 +193,7 @@ class BaseMatchInfo(AbstractMatchInfo):
                     last = timing
                 resp.headers['XG-Timing-Total'] = "{0:.5f}".format(
                     (last - request._initialized) * 1000)
-                txn = txn_var.get()
+                txn = task_vars.txn.get()
                 if txn is not None:
                     resp.headers['XG-Request-Cache-hits'] = str(txn._cache._hits)
                     resp.headers['XG-Request-Cache-misses'] = str(txn._cache._misses)

@@ -12,10 +12,10 @@ from hashlib import sha256 as sha
 import jsonschema.validators
 from guillotina import glogging
 from guillotina._settings import app_settings
-from guillotina._settings import request_var
+from guillotina import task_vars
 from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
-from guillotina.interfaces import IApplication
+from guillotina.interfaces import IApplication, IContainer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 
@@ -139,7 +139,7 @@ def get_current_request() -> IRequest:
     Return the current request by heuristically looking it up from stack
     """
     try:
-        task_context = request_var.get()
+        task_context = task_vars.request.get()
         if task_context is not None:
             return task_context
     except (ValueError, AttributeError, RuntimeError):

@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_adapter
@@ -14,30 +15,25 @@ from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.utils import apply_coroutine
-from guillotina.utils import get_current_request
+from guillotina.utils import execute
 
 
-class RequestIndexer:
+class Indexer:
 
-    def __init__(self, container, request):
+    def __init__(self):
         self.remove = []
         self.index = {}
         self.update = {}
-        self.container = container
-        self.request = request
+        self.container = task_vars.container.get()
 
     @classmethod
-    def get(self, request):
-        return request.get_future('indexer')
+    def get(self):
+        return execute.get_future('indexer')
 
     def register(self):
-        self.request.add_future('indexer', self)
+        execute.add_future('indexer', self)
 
     async def __call__(self):
-        if self.request.view_error:
-            # there was an error executing this view, we do not want to execute
-            return
-
         # Commits are run in sync thread so there is no asyncloop
         search = query_utility(ICatalogUtility)
         if search:
@@ -53,7 +49,7 @@ class RequestIndexer:
         self.remove = []
 
     async def reindex_security(self, obj):
-        reindex_in_future(obj, self.request, True)
+        reindex_in_future(obj, True)
     index_object_move = reindex_security
 
     async def remove_object(self, obj):
@@ -85,32 +81,17 @@ class RequestIndexer:
             self.index[uid] = await search.get_data(obj)
 
 
-# b/w compat
-IndexFuture = RequestIndexer
-
-
-def get_request_indexer():
-
-    request = get_current_request()
-    try:
-        container = request.container
-        search = query_utility(ICatalogUtility)
-    except (AttributeError, KeyError):
-        return
-
+def get_indexer():
+    search = query_utility(ICatalogUtility)
     if not search:
         return  # no search configured
 
-    klass = app_settings['request_indexer']
-    indexer = klass.get(request)
+    klass = app_settings['indexer']
+    indexer = klass.get()
     if indexer is None:
-        indexer = klass(container, request)
+        indexer = klass()
         indexer.register()
     return indexer
-
-
-# b/w compat
-get_future = get_request_indexer
 
 
 @configure.subscriber(
@@ -120,7 +101,7 @@ async def security_changed(obj, event):
         # assuming permissions for group are already handled correctly with search
         await index_object(obj, modified=True, security=True)
         return
-    fut = get_request_indexer()
+    fut = get_indexer()
     if fut is not None:
         await fut.reindex_security(obj)
 
@@ -128,7 +109,7 @@ async def security_changed(obj, event):
 @configure.subscriber(
     for_=(IResource, IObjectMovedEvent), priority=1000)
 async def moved_object(obj, event):
-    fut = get_request_indexer()
+    fut = get_indexer()
     if fut is not None:
         await fut.index_object_move(obj)
 
@@ -142,7 +123,7 @@ async def remove_object(obj, event):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    fut = get_request_indexer()
+    fut = get_indexer()
     if fut is None:
         return
     await fut.remove_object(obj)
@@ -183,7 +164,7 @@ async def index_object(obj, indexes=None, modified=False, security=False):
     if type_name is None or IContainer.providedBy(obj):
         return
 
-    fut = get_request_indexer()
+    fut = get_indexer()
     if fut is None:
         return
 

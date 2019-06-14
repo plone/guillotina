@@ -1,6 +1,7 @@
 import asyncio
 
 import aiohttp
+from guillotina import task_vars
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.commands import Command
 from guillotina.component import get_utility
@@ -152,8 +153,7 @@ class TestDataCommand(Command):
             await tm.commit(txn=txn)
             txn = await tm.begin()
 
-        self.request.container = container
-        self.request._container_id = container.id
+        task_vars.container.set(container)
 
         api = WikipediaAPI()
         folder_count = 0

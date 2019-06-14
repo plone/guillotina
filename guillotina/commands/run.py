@@ -3,7 +3,7 @@ import inspect
 import logging
 import os
 
-from guillotina._settings import request_var
+from guillotina import task_vars
 from guillotina.commands import Command
 from guillotina.utils import get_containers
 from guillotina.utils import lazy_apply
@@ -33,7 +33,7 @@ async def run(container):
         return parser
 
     async def run(self, arguments, settings, app):
-        request_var.set(self.request)
+        task_vars.request.set(self.request)
         script = os.path.abspath(arguments.script)
         spec = importlib.util.spec_from_file_location("module.name", script)
         module = importlib.util.module_from_spec(spec)

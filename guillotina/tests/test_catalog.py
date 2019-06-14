@@ -2,6 +2,7 @@ import json
 import os
 
 import pytest
+from guillotina import task_vars
 from guillotina.catalog import index
 from guillotina.catalog.utils import get_index_fields
 from guillotina.catalog.utils import get_metadata_fields
@@ -84,14 +85,14 @@ async def test_modified_event_gathers_all_index_data(dummy_request):
             id='guillotina',
             title='Guillotina')
         container.__name__ = 'guillotina'
-        dummy_request.container = container
+        task_vars.container.set(container)
         ob = await create_content('Item', id='foobar')
         ob.__uuid__ = 'foobar'
         await notify(ObjectModifiedEvent(ob, payload={
             'title': '',
             'id': ''
         }))
-        fut = index.get_request_indexer()
+        fut = index.get_indexer()
 
         assert len(fut.update['foobar']) == 5
 

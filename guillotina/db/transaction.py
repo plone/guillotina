@@ -4,9 +4,8 @@ import sys
 import time
 from collections import OrderedDict
 
+from guillotina import task_vars
 from guillotina._settings import app_settings
-from guillotina._settings import tm_var
-from guillotina._settings import txn_var
 from guillotina.component import get_adapter
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
@@ -565,8 +564,8 @@ class Transaction:
                 self, oid, page=page, page_size=page_size)
 
     def __enter__(self):
-        tm_var.set(self.manager)
-        txn_var.set(self)
+        task_vars.tm.set(self.manager)
+        task_vars.txn.set(self)
         return self
 
     def __exit__(self, *args):

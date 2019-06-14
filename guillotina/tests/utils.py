@@ -11,8 +11,7 @@ from aiohttp.http import HttpVersion
 from aiohttp.http import RawRequestMessage
 from aiohttp.web import UrlMappingMatchInfo
 from guillotina._settings import app_settings
-from guillotina._settings import request_var
-from guillotina._settings import tm_var
+from guillotina import task_vars
 from guillotina.auth.users import RootUser
 from guillotina.behaviors import apply_markers
 from guillotina.component import get_adapter
@@ -47,7 +46,7 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
         request._db_id = db.id
         request._db = db
         tm = db.get_transaction_manager()
-        tm_var.set(tm)
+        task_vars.tm.set(tm)
     return request
 
 
@@ -69,9 +68,8 @@ async def get_container(requester=None, request=None, tm=None):
     root = await get_root(request, tm)
     async with transaction(tm=tm):
         container = await root.async_get('guillotina')
+        task_vars.container.set(container)
         if request is not None:
-            request._container_id = container.id
-            request.container = container
             annotations_container = get_adapter(container, IAnnotations)
             request.container_settings = await annotations_container.async_get(
                 REGISTRY_DATA_KEY)
@@ -133,11 +131,11 @@ class wrap_request:
 
     def __init__(self, request, func=None):
         self.request = request
-        self.original = request_var.get()
+        self.original = task_vars.request.get()
         self.func = func
 
     async def __aenter__(self):
-        request_var.set(self.request)
+        task_vars.request.set(self.request)
         if self.func:
             if hasattr(self.func, '__aenter__'):
                 return await self.func.__aenter__()
@@ -147,7 +145,6 @@ class wrap_request:
     async def __aexit__(self, *args):
         if self.func and hasattr(self.func, '__aexit__'):
             return await self.func.__aexit__(*args)
-        request_var.set(self.original)
 
 
 def create_content(factory=Item, type_name='Item', id=None, parent=None):

@@ -1,18 +1,15 @@
-import asyncio
 import time
 import uuid
 from collections import OrderedDict
-from typing import Any
-from typing import Callable
-from typing import Coroutine
 from typing import Dict
 
 from aiohttp import web_request
-from guillotina._settings import request_var
+from guillotina import task_vars
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from zope.interface import implementer
+from guillotina.utils import execute
 
 
 @implementer(IRequest, IDefaultLayer)
@@ -32,7 +29,6 @@ class Request(web_request.Request):
 #    security = None
 
     _db_write_enabled = True
-    _futures: dict = {}
     _uid = None
     _view_error = False
     _events: dict = {}
@@ -44,7 +40,6 @@ class Request(web_request.Request):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._futures: dict = {}
         self._events = OrderedDict()
         self._initialized = time.time()
         #: Dictionary of matched path parameters on request
@@ -58,8 +53,7 @@ class Request(web_request.Request):
         '''
         self._events[event_name] = time.time()
 
-    def add_future(self, name: str, fut: Callable[..., Coroutine[Any, Any, Any]],
-                   scope: str='', args=None, kwargs=None):
+    def add_future(self, *args, **kwargs):
         '''
         Register a future to be executed after the request has finished.
 
@@ -69,13 +63,7 @@ class Request(web_request.Request):
         :param args: arguments to execute future with
         :param kwargs: kwargs to execute future with
         '''
-        if scope not in self._futures:
-            self._futures[scope] = {}
-        self._futures[scope][name] = {
-            'fut': fut,
-            'args': args,
-            'kwargs': kwargs
-        }
+        execute.add_future(*args, **kwargs)
 
     def get_future(self, name: str, scope: str=''):
         '''
@@ -84,20 +72,11 @@ class Request(web_request.Request):
         :param name: scoped futures to execute. Leave default for normal behavior
         :param scope: scope name the future was registered for
         '''
-        try:
-            if scope not in self._futures:
-                return
-            return self._futures[scope][name]['fut']
-        except (AttributeError, KeyError):
-            return
+        return execute.get_future(name, scope)
 
     @property
     def events(self):
         return self._events
-
-    @property
-    def futures(self):
-        return self._futures
 
     @property
     def view_error(self):
@@ -110,18 +89,7 @@ class Request(web_request.Request):
 
         :param scope: scoped futures to execute. Leave default for normal behavior
         '''
-        if scope not in self._futures:
-            return
-        futures = []
-        for fut_data in self._futures[scope].values():
-            fut = fut_data['fut']
-            if not asyncio.iscoroutine(fut):
-                fut = fut(*fut_data.get('args') or [], **fut_data.get('kwargs') or {})
-            futures.append(fut)
-        self._futures[scope] = {}
-        if len(futures) > 0:
-            task = asyncio.ensure_future(asyncio.gather(*futures))
-            return task
+        return execute.execute_futures(scope)
 
     def clear_futures(self):
         self._futures = {}
@@ -136,7 +104,7 @@ class Request(web_request.Request):
         return self._uid
 
     def __enter__(self):
-        request_var.set(self)
+        task_vars.request.set(self)
 
     def __exit__(self, *args):
         '''

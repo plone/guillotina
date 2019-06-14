@@ -1,8 +1,7 @@
 import asyncio
 import uuid
 
-from guillotina._settings import tm_var
-from guillotina._settings import txn_var
+from guillotina import task_vars
 from guillotina.component import get_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
@@ -61,7 +60,7 @@ class MockTransaction:
         pass
 
     def __enter__(self):
-        txn_var.set(self)
+        task_vars.txn.set(self)
 
     def __exit__(self, *args):
         '''
@@ -143,15 +142,15 @@ class MockTransactionManager:
         pass
 
     def get(self):
-        return tm_var.get()
+        return task_vars.tm.get()
 
     async def begin(self):
         txn = MockTransaction(self)
-        txn_var.set(txn)
+        task_vars.txn.set(txn)
         return txn
 
     def __enter__(self):
-        tm_var.set(self)
+        task_vars.tm.set(self)
 
     def __exit__(self, *args):
         '''

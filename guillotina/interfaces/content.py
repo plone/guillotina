@@ -9,7 +9,7 @@ from zope.interface import Attribute
 from zope.interface import Interface
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from guillotina.db.interfaces import ITransactionManager
 else:
     class ITransactionManager(Interface):

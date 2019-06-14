@@ -1,7 +1,11 @@
+import posixpath
+from typing import Optional
+
 from guillotina import addons
 from guillotina import app_settings
 from guillotina import configure
 from guillotina import error_reasons
+from guillotina import task_vars
 from guillotina.api import content
 from guillotina.api.service import Service
 from guillotina.component import get_adapter
@@ -23,9 +27,6 @@ from guillotina.response import HTTPNotImplemented
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
-from typing import Optional
-
-import posixpath
 
 
 @configure.service(
@@ -151,7 +152,7 @@ class DefaultPOST(Service):
             container_type=data.pop('@type'),
             owner_id=owner_id, **data)
         self.request._container_id = container.__name__
-        self.request.container = container
+        task_vars.container.set(container)
 
         annotations_container = get_adapter(container, IAnnotations)
         self.request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)

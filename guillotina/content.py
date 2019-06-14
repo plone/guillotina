@@ -1,7 +1,20 @@
+import os
+import pathlib
 from copy import deepcopy
 from datetime import datetime
+from typing import AsyncIterator
+from typing import FrozenSet
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
+
 from dateutil.tz import tzutc
+
+import guillotina.db.orm.base
 from guillotina import configure
+from guillotina import task_vars
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina._cache import FACTORY_CACHE
 from guillotina._cache import PERMISSIONS_CACHE
@@ -56,22 +69,11 @@ from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_current_request
 from guillotina.utils import navigate_to
-from typing import AsyncIterator
-from typing import FrozenSet
-from typing import Iterator
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from zope.interface import Interface
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from zope.interface import Interface
 from zope.interface import noLongerProvides
 from zope.interface.interfaces import ComponentLookupError
-
-import guillotina.db.orm.base
-import os
-import pathlib
 
 
 _zone = tzutc()  # utz tz is much faster than local tz info
@@ -662,8 +664,12 @@ async def duplicate(context: IResource,
                     new_id: str=None, check_permission: bool=True) -> IResource:
     if destination is not None:
         if isinstance(destination, str):
-            request = get_current_request()
-            destination_ob = await navigate_to(request.container, destination)
+            container = task_vars.container.get()
+            if container:
+                destination_ob = await navigate_to(container, destination)
+            else:
+                raise PreconditionFailed(
+                    context, 'Could not find destination object',)
         else:
             destination_ob = destination
 
@@ -732,11 +738,14 @@ async def move(context: IResource,
         destination_ob = context.__parent__
     else:
         if isinstance(destination, str):
-            request = get_current_request()
-            try:
-                destination_ob = await navigate_to(request.container, destination)
-            except KeyError:
-                destination_ob = None
+            container = task_vars.container.get()
+            if container is not None:
+                try:
+                    destination_ob = await navigate_to(container, destination)
+                except KeyError:
+                    destination_ob = None
+            else:
+                raise PreconditionFailed(context, 'Could not find destination object')
         else:
             destination_ob = destination
 

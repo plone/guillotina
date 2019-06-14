@@ -2,6 +2,7 @@ import string
 import typing
 
 from guillotina import glogging
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
@@ -91,19 +92,18 @@ async def get_containers(request):
                     await tm.abort(txn=txn)
 
                 for _, container in items.items():
-                    request._txn = txn = await tm.begin()
-                    container.__txn__ = request._txn
-                    request.container = container
-                    request._container_id = container.id
-                    if hasattr(request, 'container_settings'):
-                        del request.container_settings
-                    yield txn, tm, container
-                    try:
-                        # do not rely on consumer of object to always close it.
-                        # there is no harm in aborting twice
-                        await tm.abort(txn=txn)
-                    except Exception:
-                        logger.warn('Error aborting transaction', exc_info=True)
+                    with await tm.begin() as txn:
+                        container.__txn__ = txn
+                        task_vars.container.set(container)
+                        if hasattr(request, 'container_settings'):
+                            del request.container_settings
+                        yield txn, tm, container
+                        try:
+                            # do not rely on consumer of object to always close it.
+                            # there is no harm in aborting twice
+                            await tm.abort(txn=txn)
+                        except Exception:
+                            logger.warn('Error aborting transaction', exc_info=True)
 
 
 def get_owners(obj: IResource) -> list:
