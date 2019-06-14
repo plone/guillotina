@@ -1,6 +1,8 @@
 import logging
 import uuid
 
+from guillotina import task_vars
+
 
 def _wrapped(name):
 
@@ -30,11 +32,12 @@ def _wrapped(name):
                 agent = request.headers['User-Agent']
             except (AttributeError, KeyError):
                 agent = 'Unknown'
+            container = task_vars.container.get()
             extra.update({
                 'method': request.method,
                 'url': url,
-                'container': getattr(request, '_container_id', None),
-                'account': getattr(request, '_container_id', None),
+                'container': getattr(container, 'id', None),
+                'account': getattr(container, 'id', None),
                 'db_id': getattr(request, '_db_id', None),
                 'user': get_authenticated_user_id(request) or 'Anonymous',
                 'eid': eid,

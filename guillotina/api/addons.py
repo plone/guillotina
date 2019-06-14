@@ -6,6 +6,7 @@ from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IContainer
 from guillotina.response import ErrorResponse
+from guillotina.utils import get_registry
 
 
 _ = MessageFactory('guillotina')
@@ -31,7 +32,7 @@ async def install(context, request):
             _("Property 'id' is required to be valid"),
             status=412, reason=error_reasons.INVALID_ID)
 
-    registry = request.container_settings
+    registry = await get_registry()
     config = registry.for_interface(IAddons)
 
     if id_to_install in config['enabled']:
@@ -81,7 +82,7 @@ async def uninstall_addon(context, request, id_to_uninstall):
             _("Property 'id' is required to be valid"),
             status=412, reason=error_reasons.INVALID_ID)
 
-    registry = request.container_settings
+    registry = await get_registry()
     config = registry.for_interface(IAddons)
 
     if id_to_uninstall not in config['enabled']:
@@ -117,7 +118,7 @@ async def get_addons(context, request):
             'dependencies': addon['dependencies']
         })
 
-    registry = request.container_settings
+    registry = await get_registry()
     config = registry.for_interface(IAddons)
 
     for installed in config['enabled']:

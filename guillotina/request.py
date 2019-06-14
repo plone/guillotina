@@ -21,9 +21,6 @@ class Request(web_request.Request):
     """
 
 #    _db_id = None
-#    _container_id = None
-#    container = None
-#    container_settings = None
 #    tail = None
 #    resource = None
 #    security = None

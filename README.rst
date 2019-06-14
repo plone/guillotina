@@ -35,7 +35,7 @@ This is the working project of the next generation Guillotina server based on as
 Dependencies
 ------------
 
-* python >= 3.6
+* python >= 3.7
 * postgresql >= 9.6
 
 

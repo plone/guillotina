@@ -11,6 +11,7 @@ from guillotina.response import ErrorResponse
 from guillotina.response import HTTPNotFound
 from guillotina.response import Response
 from guillotina.schema import get_fields
+from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
 
@@ -43,7 +44,8 @@ class Read(Service):
     async def prepare(self):
         # we want have the key of the registry
         self.key = self.request.matchdict['key']
-        self.value = self.request.container_settings.get(self.key, _marker)
+        registry = await get_registry(self.context)
+        self.value = registry.get(self.key, _marker)
         if self.value is _marker:
             raise HTTPNotFound(content={
                 'message': f'{self.key} not in settings'
@@ -76,13 +78,14 @@ class Read(Service):
             }
         }
     })
-async def get_registry(context, request):
+async def get_registry_service(context, request):
     result = {}
-    for key in request.container_settings.keys():
+    registry = await get_registry(context)
+    for key in registry.keys():
         try:
-            value = json_compatible(request.container_settings[key])
+            value = json_compatible(registry[key])
         except (ComponentLookupError, TypeError):
-            value = request.container_settings[key]
+            value = registry[key]
         result[key] = value
     return {
         'value': result
@@ -120,7 +123,8 @@ class Register(Service):
 
     async def __call__(self):
         """ data input : { 'interface': 'INTERFACE' }"""
-        if not hasattr(self.request, 'container_settings'):
+        registry = await get_registry()
+        if registry is None:
             return ErrorResponse(
                 'BadRequest',
                 _("Not in a container request"),
@@ -135,7 +139,6 @@ class Register(Service):
                 'Non existent Interface',
                 status=412)
 
-        registry = self.request.container_settings
         iObject = import_class(interface)
         registry.register_interface(iObject)
         config = registry.for_interface(iObject)
@@ -179,7 +182,8 @@ class Write(Service):
 
     async def prepare(self):
         self.key = self.request.matchdict['dotted_name']
-        self.value = self.request.container_settings.get(self.key)
+        registry = await get_registry()
+        self.value = registry.get(self.key)
 
     async def __call__(self):
         if self.key is _marker:
@@ -214,7 +218,8 @@ class Write(Service):
                 status=412)
 
         try:
-            self.request.container_settings[self.key] = new_value
+            registry = await get_registry()
+            registry[self.key] = new_value
         except DeserializationError as e:
             return ErrorResponse(
                 'DeserializationError',

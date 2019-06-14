@@ -147,9 +147,6 @@ RESERVED_ATTRS = (
 )
 
 class IRequest(Interface):
-    container = Attribute('current container')
-    _container_id = Attribute('id of current container')
-    container_settings = Attribute('container settings')
     security = Attribute('cached IInteraction lookup')
     url = Attribute('')
     path = Attribute('')

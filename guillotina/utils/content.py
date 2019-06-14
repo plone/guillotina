@@ -95,8 +95,6 @@ async def get_containers(request):
                     with await tm.begin() as txn:
                         container.__txn__ = txn
                         task_vars.container.set(container)
-                        if hasattr(request, 'container_settings'):
-                            del request.container_settings
                         yield txn, tm, container
                         try:
                             # do not rely on consumer of object to always close it.

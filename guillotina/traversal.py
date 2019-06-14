@@ -14,8 +14,8 @@ from guillotina import error_reasons
 from guillotina import logger
 from guillotina import response
 from guillotina import routes
-from guillotina._settings import app_settings
 from guillotina import task_vars
+from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
 from guillotina.auth.participation import AnonymousParticipation
 from guillotina.browser import View
@@ -37,7 +37,6 @@ from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IAioHTTPResponse
-from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
@@ -52,7 +51,6 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ITraversable
 from guillotina.profile import profilable
-from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.response import HTTPBadRequest
 from guillotina.response import HTTPMethodNotAllowed
 from guillotina.response import HTTPNotFound
@@ -60,6 +58,7 @@ from guillotina.response import HTTPUnauthorized
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
+from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
@@ -106,9 +105,8 @@ async def traverse(request, parent, path):
 
     if IContainer.providedBy(context):
         task_vars.container.set(context)
-        annotations_container = IAnnotations(context)
-        request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
-        layers = request.container_settings.get(ACTIVE_LAYERS_KEY, [])
+        registry = await get_registry(context)
+        layers = registry.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             try:
                 alsoProvides(request, import_class(layer))

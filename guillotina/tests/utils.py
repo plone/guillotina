@@ -14,12 +14,9 @@ from guillotina._settings import app_settings
 from guillotina import task_vars
 from guillotina.auth.users import RootUser
 from guillotina.behaviors import apply_markers
-from guillotina.component import get_adapter
 from guillotina.content import Item
-from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
-from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.request import Request
 from guillotina.security.policy import Interaction
 from guillotina.transactions import transaction
@@ -69,10 +66,6 @@ async def get_container(requester=None, request=None, tm=None):
     async with transaction(tm=tm):
         container = await root.async_get('guillotina')
         task_vars.container.set(container)
-        if request is not None:
-            annotations_container = get_adapter(container, IAnnotations)
-            request.container_settings = await annotations_container.async_get(
-                REGISTRY_DATA_KEY)
         return container
 
 

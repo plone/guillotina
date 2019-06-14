@@ -4,6 +4,10 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Remove `Request.container_settings`, Use `guillotina.utils.get_registry`
+
+- Remove `Request._container_id`, use `guillotina.task_vars.container.get().id`
+
 - Remove `Request.container`, Use `guillotina.task_vars.container.get()`
 
 - Remove `Request.add_future`. Use `guillotina.utils.execute.add_future`

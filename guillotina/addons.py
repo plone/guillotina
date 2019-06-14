@@ -1,3 +1,4 @@
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.interfaces import IAddOn
 from guillotina.interfaces import IAddons
@@ -27,14 +28,14 @@ async def install(container, addon):
     for dependency in addon_config['dependencies']:
         await install(container, dependency)
     await apply_coroutine(handler.install, container, request)
-    registry = request.container_settings
+    registry = task_vars.registry.get()
     config = registry.for_interface(IAddons)
     config['enabled'] |= {addon}
 
 
 async def uninstall(container, addon):
     request = get_current_request()
-    registry = request.container_settings
+    registry = task_vars.registry.get()
     config = registry.for_interface(IAddons)
     handler = app_settings['available_addons'][addon]['handler']
     await apply_coroutine(handler.uninstall, container, request)

@@ -7,15 +7,14 @@ from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
 from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
-from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IResource
-from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.security.policy import Interaction
 from guillotina.tests.utils import get_mocked_request
 from guillotina.utils import get_current_request
 from guillotina.utils import get_object_url
+from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
@@ -63,12 +62,11 @@ class ContentAPI:
 
     async def use_container(self, container: IContainer):
         task_vars.container.set(container)
-        annotations_container = IAnnotations(container)
-        self.request.container_settings = await annotations_container.async_get(
-            REGISTRY_DATA_KEY)
-        layers = self.request.container_settings.get(ACTIVE_LAYERS_KEY, [])
-        for layer in layers:
-            alsoProvides(self.request, import_class(layer))
+        registry = await get_registry(container)
+        if registry is not None:
+            layers = registry.get(ACTIVE_LAYERS_KEY, [])
+            for layer in layers:
+                alsoProvides(self.request, import_class(layer))
 
     async def get_transaction(self) -> ITransaction:
         if self._active_txn is None:

@@ -8,6 +8,7 @@ from guillotina.db.interfaces import ITransactionManager
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IParticipation
+from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
 
 
@@ -17,4 +18,5 @@ tm: ContextVar[Optional[ITransactionManager]] = ContextVar('g_tm', default=None)
 futures: ContextVar[Optional[Dict]] = ContextVar('g_futures', default=None)
 participations: ContextVar[Optional[List[IParticipation]]] = ContextVar('g_participations', default=None)
 container: ContextVar[Optional[IContainer]] = ContextVar('g_container', default=None)
+registry: ContextVar[Optional[IRegistry]] = ContextVar('g_container', default=None)
 db: ContextVar[Optional[IDatabase]] = ContextVar('g_database', default=None)

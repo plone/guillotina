@@ -151,11 +151,11 @@ class DefaultPOST(Service):
             self.context, data.pop('id'),
             container_type=data.pop('@type'),
             owner_id=owner_id, **data)
-        self.request._container_id = container.__name__
         task_vars.container.set(container)
 
         annotations_container = get_adapter(container, IAnnotations)
-        self.request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
+        task_vars.registry.set(
+            await annotations_container.async_get(REGISTRY_DATA_KEY))
 
         for addon in install_addons:
             await addons.install(container, addon)

@@ -45,7 +45,7 @@ class ManageAddon(Addon):
 
     @classmethod
     async def uninstall(cls, container, request):
-        registry = request.container_settings  # noqa
+        registry = task_vars.registry.get()  # noqa
         # uninstall logic here...
 ```
 

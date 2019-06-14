@@ -11,11 +11,14 @@ from hashlib import sha256 as sha
 
 import jsonschema.validators
 from guillotina import glogging
-from guillotina._settings import app_settings
 from guillotina import task_vars
+from guillotina._settings import app_settings
 from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
-from guillotina.interfaces import IApplication, IContainer
+from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
+from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 
@@ -292,3 +295,29 @@ def get_schema_validator(schema_name: str):
     val = jsonschema_validator(schema)
     _cached_jsonschema_validators[schema_name] = val
     return val
+
+
+async def find_container(context=None) -> typing.Optional[IContainer]:
+    container = task_vars.container.get()
+    if container is None:
+        while context is not None:
+            if IContainer.providedBy(context):
+                container = context
+                break
+            context = getattr(context, '__parent__', None)
+    return container
+
+
+async def get_registry(context=None) -> typing.Optional[IRegistry]:
+    registry = task_vars.registry.get()
+    if registry is None:
+        container = task_vars.container.get()
+        if container is None and context is not None:
+            container = await find_container(context)
+        if container is None:
+            return None
+        annotations_container = IAnnotations(container)
+        from guillotina.registry import REGISTRY_DATA_KEY
+        registry = await annotations_container.async_get(REGISTRY_DATA_KEY)
+        task_vars.registry.set(registry)
+    return registry
