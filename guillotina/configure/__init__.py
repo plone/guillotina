@@ -472,6 +472,7 @@ class service(_base_decorator):  # noqa: N801
                 __route__ = routes.Route(self.config.get('name', ''))
                 view_func = staticmethod(func)
                 __response_headers__ = self.config.get('response_headers', {})
+
                 async def __call__(self):
                     return await func(self.context, self.request)
 
