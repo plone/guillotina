@@ -4,7 +4,7 @@ CHANGELOG
 4.8.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add field mappings for test field [lferran]
 
 
 4.8.6 (2019-06-10)
