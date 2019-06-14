@@ -295,7 +295,10 @@ class MatchInfo(BaseMatchInfo):
         else:
             request.execute_futures('failure')
 
-        self.view.add_extra_headers(resp)
+        # Add extra headers to response if needed
+        extra_hdrs = getattr(self.view, '__extra_headers__', {})
+        if extra_hdrs:
+            response._headers.update(**extra_hdrs)
 
         self.debug(request, resp)
 
