@@ -17,8 +17,6 @@ def headers_to_list(headers):
     return [[k.encode(), v.encode()] for k, v in headers.items()]
 
 
-
-
 class GuillotinaRequest(Request):
 
     def __init__(self, scheme, method, path, raw_headers, payload, client_max_size: int=1024**2):
@@ -266,7 +264,7 @@ class AsgiApp:
 
     async def startup(self, settings=None, loop=None):
         # The config file is defined in the env var `CONFIG`
-        loop = asyncio.get_event_loop()
+        loop = loop or asyncio.get_event_loop()
         from guillotina.factory import make_app
         import guillotina
 
@@ -279,6 +277,9 @@ class AsgiApp:
             with open(config, "r") as f:
                 settings = yaml.load(f, Loader=yaml.FullLoader)
         return await make_app(settings=settings, loop=loop, server_app=self)
+
+    async def shutdown(self):
+        pass
 
     async def handler(self, scope, receive, send):
         # Aiohttp compatible StreamReader
@@ -306,9 +307,8 @@ class AsgiApp:
             }
         )
 
-        body = resp.text or b""
+        body = resp.text or ""
         await send({"type": "http.response.body", "body": body.encode()})
-
 
 
 from guillotina.factory.app import make_asgi_app
