@@ -9,6 +9,7 @@ from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.reader import reader
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IApplication
@@ -161,7 +162,7 @@ def get_object_url(ob: IResource,
     return None
 
 
-async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
+async def get_object_by_oid(oid: str, txn=None) -> IBaseObject:
     '''
     Get an object from an oid
 
@@ -182,7 +183,10 @@ async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
     obj = reader(result)
     obj.__txn__ = txn
     if result['parent_id']:
-        obj.__parent__ = await get_object_by_oid(result['parent_id'], txn)
+        parent = await get_object_by_oid(result['parent_id'], txn)
+        if parent is not None:
+            obj.__parent__ = parent
+        raise KeyError(result['parent_id'])
     return obj
 
 

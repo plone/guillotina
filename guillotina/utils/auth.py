@@ -1,32 +1,25 @@
-from .misc import get_current_request
-from guillotina.interfaces import IPrincipal
-from guillotina.interfaces import IRequest
 from typing import Optional
 
+from guillotina import task_vars
+from guillotina.interfaces import IPrincipal
 
-def get_authenticated_user(request: Optional[IRequest] = None) -> Optional[IPrincipal]:
+
+def get_authenticated_user() -> Optional[IPrincipal]:
     """
     Get the currently authenticated user
 
     :param request: request the user is authenticated against
     """
-    if request is None:
-        request = get_current_request()
-    if (hasattr(request, 'security') and
-            hasattr(request.security, 'participations') and
-            len(request.security.participations) > 0):
-        return request.security.participations[0].principal
-    else:
-        return None
+    return task_vars.authenticated_user.get()
 
 
-def get_authenticated_user_id(request: Optional[IRequest] = None) -> Optional[str]:
+def get_authenticated_user_id() -> Optional[str]:
     """
     Get the currently authenticated user id
 
     :param request: request the user is authenticated against
     """
-    user = get_authenticated_user(request)
+    user = get_authenticated_user()
     if user:
         return user.id
     return None

@@ -14,17 +14,17 @@
 """Define Zope's default security policy
 """
 from guillotina import configure
+from guillotina import task_vars
 from guillotina.auth.users import SystemUser
 from guillotina.component import get_utility
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInheritPermissionMap
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IRequest
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import IView
@@ -34,10 +34,8 @@ from guillotina.profile import profilable
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
-from guillotina.utils import get_current_request
+from guillotina.utils.auth import get_authenticated_user
 from lru import LRU
-from zope.interface import implementer
-from zope.interface import provider
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting
@@ -66,63 +64,17 @@ class CacheEntry:
     pass
 
 
-@configure.adapter(
-    for_=IRequest,
-    provides=IInteraction)
-def get_current_interaction(request):
-    """
-    Cache IInteraction on the request object because the request object
-    is where we start adding principals
-    """
-    interaction = getattr(request, 'security', None)
-    if interaction is not None:
-        return interaction
-    interaction = Interaction(request)
-    request.security = interaction
-    return interaction
+@configure.utility(provides=ISecurityPolicy)
+class SecurityPolicy(object):
 
-
-@configure.adapter(for_=None, provides=IInteraction)
-def get_none_interaction(request):
-    """
-    Cache IInteraction on the request object because the request object
-    is where we start adding principals
-    """
-    request = get_current_request()
-    interaction = getattr(request, 'security', None)
-    if interaction is not None:
-        return interaction
-    return Interaction()
-
-
-@implementer(IInteraction)
-@provider(ISecurityPolicy)
-class Interaction(object):
-
-    def __init__(self, request=None):
-        self.participations = []
+    def __init__(self):
         self._cache = LRU(1000)
-        self.principal = None
-
-    def add(self, participation):
-        if participation.interaction is not None:
-            raise ValueError("%r already belongs to an interaction"
-                             % participation)
-        participation.interaction = self
-        self.participations.append(participation)
-
-    def remove(self, participation):
-        if participation.interaction is not self:
-            raise ValueError("%r does not belong to this interaction"
-                             % participation)
-        self.participations.remove(participation)
-        participation.interaction = None
 
     def invalidate_cache(self):
         self._cache.clear()
 
     @profilable
-    def check_permission(self, permission, obj):
+    def check_permission(self, permission: str, obj: IBaseObject) -> bool:
         # Always allow public attributes
         if permission is Public:
             return True
@@ -132,23 +84,13 @@ class Interaction(object):
 
         # Iterate through participations ('principals')
         # and check permissions they give
-        seen = {}
-        for participation in self.participations:
-            principal = getattr(participation, 'principal', None)
-
-            # Invalid participation (no principal)
-            if principal is None:
-                continue
+        principal = task_vars.authenticated_user.get()
+        if principal is not None:
 
             # System user always has access
             if principal is SystemUser:
                 return True
 
-            # Speed up by skipping seen principals
-            if principal.id in seen:
-                continue
-
-            self.principal = principal
             # Check the permission
             groups = self._groups_for(principal)
             if self.cached_decision(
@@ -157,8 +99,6 @@ class Interaction(object):
                     groups,
                     permission):
                 return True
-
-            seen[principal.id] = 1  # mark as seen
 
         return False
 
@@ -460,12 +400,13 @@ class Interaction(object):
         """On a principal (user/group) get global roles."""
         roles = {}
         groups = get_utility(IGroups)
-        if self.principal and principal == self.principal.id:
+        authenticated_princ = get_authenticated_user()
+        if authenticated_princ and principal == authenticated_princ.id:
             # Its the actual user id
             # We return all the global roles (including group)
-            roles = self.principal.roles.copy()
+            roles = authenticated_princ.roles.copy()
 
-            for group in self.principal.groups:
+            for group in authenticated_princ.groups:
                 roles.update(groups.get_principal(group).roles)
             return roles
 
@@ -477,20 +418,15 @@ class Interaction(object):
     def _global_permissions_for(self, principal, permission):
         """On a principal (user + group) get global permissions."""
         groups = get_utility(IGroups)
-        if self.principal and principal == self.principal.id:
+        authenticated_princ = get_authenticated_user()
+        if authenticated_princ and principal == authenticated_princ.id:
             # Its the actual user
-            permissions = self.principal.permissions.copy()
+            permissions = authenticated_princ.permissions.copy()
             if permission in permissions:
                 return level_setting_as_boolean('p', permissions[permission])
 
-            for group in self.principal.groups:
+            for group in authenticated_princ.groups:
                 permissions = groups.get_principal(principal).permissions
                 if permission in permissions:
                     return level_setting_as_boolean('p', permissions[permission])
-
-        if groups:
-            # Its a group
-            permissions = groups.get_principal(principal).permissions
-            if permission in permissions:
-                return level_setting_as_boolean('p', permissions[permission])
         return None

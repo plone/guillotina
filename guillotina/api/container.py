@@ -145,7 +145,7 @@ class DefaultPOST(Service):
                     "Property '@addons' must refer to a valid addon",
                     status=412, reason=error_reasons.INVALID_ID)
 
-        owner_id = get_authenticated_user_id(self.request)
+        owner_id = get_authenticated_user_id()
 
         container = await create_container(
             self.context, data.pop('id'),

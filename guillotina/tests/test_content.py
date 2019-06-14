@@ -37,101 +37,98 @@ class CustomContentType(Item):
     pass
 
 
-async def test_not_allowed_to_create_content(dummy_request):
+async def test_not_allowed_to_create_content(dummy_guillotina):
+    container = await create_content(
+        'Container',
+        id='guillotina',
+        title='Guillotina')
+    container.__name__ = 'guillotina'
 
-    with dummy_request:
-        container = await create_content(
-            'Container',
-            id='guillotina',
-            title='Guillotina')
-        container.__name__ = 'guillotina'
-
-        with pytest.raises(NoPermissionToAdd):
-            # not logged in, can't create
-            await create_content_in_container(container, 'Item', id_='foobar')
-
-async def test_allowed_to_create_content(dummy_request):
-    with dummy_request:
-        utils.login(dummy_request)
-
-        container = await create_content(
-            'Container',
-            id='guillotina',
-            title='Guillotina')
-        container.__name__ = 'guillotina'
-        utils.register(container)
-
+    with pytest.raises(NoPermissionToAdd):
+        # not logged in, can't create
         await create_content_in_container(container, 'Item', id_='foobar')
 
-async def test_allowed_types(dummy_request):
-    utils.login(dummy_request)
 
-    with dummy_request:
-        container = await create_content(
-            'Container',
-            id='guillotina',
-            title='Guillotina')
-        container.__name__ = 'guillotina'
-        utils.register(container)
+async def test_allowed_to_create_content(dummy_guillotina):
+    utils.login()
 
-        import guillotina.tests
-        configure.register_configuration(Folder, dict(
-            type_name="TestType",
-            allowed_types=['Item'],
-            module=guillotina.tests  # for registration initialization
-        ), 'contenttype')
-        root = get_utility(IApplication, name='root')
+    container = await create_content(
+        'Container',
+        id='guillotina',
+        title='Guillotina')
+    container.__name__ = 'guillotina'
+    utils.register(container)
 
-        configure.load_configuration(
-            root.app.config, 'guillotina.tests', 'contenttype')
-        root.app.config.execute_actions()
-        load_cached_schema()
-
-        obj = await create_content_in_container(container, 'TestType', 'foobar')
-
-        constrains = IConstrainTypes(obj, None)
-        assert constrains.get_allowed_types() == ['Item']
-        assert constrains.is_type_allowed('Item')
-
-        with pytest.raises(NotAllowedContentType):
-            await create_content_in_container(obj, 'TestType', 'foobar')
-        await create_content_in_container(obj, 'Item', 'foobar')
+    await create_content_in_container(container, 'Item', id_='foobar')
 
 
-async def test_creator_used_from_content_creation(dummy_request):
-    utils.login(dummy_request)
+async def test_allowed_types(dummy_guillotina):
+    utils.login()
 
-    with dummy_request:
-        container = await create_content(
-            'Container',
-            id='guillotina',
-            title='Guillotina')
-        container.__name__ = 'guillotina'
-        utils.register(container)
+    container = await create_content(
+        'Container',
+        id='guillotina',
+        title='Guillotina')
+    container.__name__ = 'guillotina'
+    utils.register(container)
 
-        import guillotina.tests
-        configure.register_configuration(Folder, dict(
-            type_name="TestType2",
-            behaviors=[],
-            module=guillotina.tests  # for registration initialization
-        ), 'contenttype')
-        root = get_utility(IApplication, name='root')
+    import guillotina.tests
+    configure.register_configuration(Folder, dict(
+        type_name="TestType",
+        allowed_types=['Item'],
+        module=guillotina.tests  # for registration initialization
+    ), 'contenttype')
+    root = get_utility(IApplication, name='root')
 
-        configure.load_configuration(
-            root.app.config, 'guillotina.tests', 'contenttype')
-        root.app.config.execute_actions()
-        load_cached_schema()
+    configure.load_configuration(
+        root.app.config, 'guillotina.tests', 'contenttype')
+    root.app.config.execute_actions()
+    load_cached_schema()
 
-        obj = await create_content_in_container(
-            container, 'TestType2', 'foobar',
-            creators=('root',), contributors=('root',))
+    obj = await create_content_in_container(container, 'TestType', 'foobar')
 
-        assert obj.creators == ('root',)
-        assert obj.contributors == ('root',)
+    constrains = IConstrainTypes(obj, None)
+    assert constrains.get_allowed_types() == ['Item']
+    assert constrains.is_type_allowed('Item')
 
-        behavior = IDublinCore(obj)
-        assert behavior.creators == ('root',)
-        assert behavior.contributors == ('root',)
+    with pytest.raises(NotAllowedContentType):
+        await create_content_in_container(obj, 'TestType', 'foobar')
+    await create_content_in_container(obj, 'Item', 'foobar')
+
+
+async def test_creator_used_from_content_creation(dummy_guillotina):
+    utils.login()
+
+    container = await create_content(
+        'Container',
+        id='guillotina',
+        title='Guillotina')
+    container.__name__ = 'guillotina'
+    utils.register(container)
+
+    import guillotina.tests
+    configure.register_configuration(Folder, dict(
+        type_name="TestType2",
+        behaviors=[],
+        module=guillotina.tests  # for registration initialization
+    ), 'contenttype')
+    root = get_utility(IApplication, name='root')
+
+    configure.load_configuration(
+        root.app.config, 'guillotina.tests', 'contenttype')
+    root.app.config.execute_actions()
+    load_cached_schema()
+
+    obj = await create_content_in_container(
+        container, 'TestType2', 'foobar',
+        creators=('root',), contributors=('root',))
+
+    assert obj.creators == ('root',)
+    assert obj.contributors == ('root',)
+
+    behavior = IDublinCore(obj)
+    assert behavior.creators == ('root',)
+    assert behavior.contributors == ('root',)
 
 
 def test_base_object():

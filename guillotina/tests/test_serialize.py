@@ -247,7 +247,7 @@ async def test_deserialize_datetime(dummy_guillotina):
 
 
 async def test_check_permission_deserialize_content(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     with dummy_request:
         deserializer = get_multi_adapter(
@@ -257,7 +257,7 @@ async def test_check_permission_deserialize_content(dummy_request):
 
 
 async def test_patch_list_field_normal_patch(dummy_request):
-    login(dummy_request)
+    login()
     with dummy_request:
         content = create_content()
         deserializer = get_multi_adapter(
@@ -272,7 +272,7 @@ async def test_patch_list_field_normal_patch(dummy_request):
 
 
 async def test_patch_list_field(dummy_request):
-    login(dummy_request)
+    login()
     with dummy_request:
         content = create_content()
         deserializer = get_multi_adapter(
@@ -345,7 +345,7 @@ async def test_patch_list_field(dummy_request):
 
 
 async def test_patch_list_field_invalid_type(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     with dummy_request:
         deserializer = get_multi_adapter(
@@ -365,7 +365,7 @@ async def test_patch_list_field_invalid_type(dummy_request):
 
 
 async def test_patch_dict_field_normal_patch(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     deserializer = get_multi_adapter(
         (content, dummy_request), IResourceDeserializeFromJson)
@@ -379,7 +379,7 @@ async def test_patch_dict_field_normal_patch(dummy_request):
 
 
 async def test_patch_dict_field(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     deserializer = get_multi_adapter(
         (content, dummy_request), IResourceDeserializeFromJson)
@@ -424,7 +424,7 @@ async def test_patch_dict_field(dummy_request):
 
 
 async def test_patch_dict_field_invalid_type(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     deserializer = get_multi_adapter(
         (content, dummy_request), IResourceDeserializeFromJson)
@@ -446,7 +446,7 @@ async def test_patch_dict_field_invalid_type(dummy_request):
 
 
 async def test_patch_int_field_normal_path(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     with dummy_request:
         deserializer = get_multi_adapter(
@@ -459,7 +459,7 @@ async def test_patch_int_field_normal_path(dummy_request):
 
 
 async def test_patch_int_field(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     deserializer = get_multi_adapter(
         (content, dummy_request), IResourceDeserializeFromJson)
@@ -557,7 +557,7 @@ async def test_patch_int_field(dummy_request):
 
 
 async def test_patch_int_field_invalid_type(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     with dummy_request:
         deserializer = get_multi_adapter(
@@ -577,7 +577,7 @@ async def test_patch_int_field_invalid_type(dummy_request):
 
 
 async def test_bucket_list_field(dummy_request):
-    login(dummy_request)
+    login()
     with dummy_request:
         content = create_content()
         content.__txn__ = mocks.MockTransaction()
@@ -660,7 +660,7 @@ def test_default_value_deserialize(dummy_request):
 
 
 async def test_nested_patch_deserialize(dummy_request):
-    login(dummy_request)
+    login()
     with dummy_request:
         content = create_content()
         deserializer = get_multi_adapter(
@@ -742,7 +742,7 @@ async def test_nested_patch_deserialize(dummy_request):
 
 
 async def test_dates_bucket_list_field(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     with dummy_request:
         content.__txn__ = mocks.MockTransaction()
@@ -770,7 +770,7 @@ async def test_dates_bucket_list_field(dummy_request):
 
 
 async def test_patchfield_notdefined_field(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     with dummy_request:
         deserializer = get_multi_adapter(
@@ -830,7 +830,7 @@ async def test_patchfield_notdefined_field(dummy_request):
 
 
 async def test_delete_by_value_field(dummy_request):
-    login(dummy_request)
+    login()
     with dummy_request:
         content = create_content()
         deserializer = get_multi_adapter(

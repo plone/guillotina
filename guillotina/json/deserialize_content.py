@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import asyncio
+
 from guillotina import configure
 from guillotina import glogging
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_adapter
+from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
@@ -11,22 +14,19 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
 from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import Invalid
-from guillotina.exceptions import NoInteraction
 from guillotina.exceptions import Unauthorized
 from guillotina.exceptions import ValueDeserializationError
+from guillotina.interfaces import RESERVED_ATTRS
 from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.interfaces import RESERVED_ATTRS
+from guillotina.interfaces import ISecurityPolicy
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
 from zope.interface import Interface
-
-import asyncio
 
 
 logger = glogging.getLogger('guillotina')
@@ -193,11 +193,7 @@ class DeserializeFromJson(object):
             if permission is None:
                 self.permission_cache[permission_name] = True
             else:
-                try:
-                    self.permission_cache[permission_name] = bool(
-                        IInteraction(self.request).check_permission(
-                            permission.id, self.context))
-                except NoInteraction:
-                    # not authenticated
-                    return False
+                self.permission_cache[permission_name] = bool(
+                    get_utility(ISecurityPolicy).check_permission(
+                        permission.id, self.context))
         return self.permission_cache[permission_name]

@@ -165,11 +165,17 @@ _dotted_name_settings = (
     'auth_token_validators',
     'auth_user_identifiers',
     'pg_connection_class',
+    'uid_generator',
     'oid_generator',
     'cors_renderer',
     'check_writable_request',
     'indexer'
 )
+
+_moved = {
+    'oid_generator': 'uid_generator',
+    'request_indexer': 'indexer'
+}
 
 def optimize_settings(settings):
     '''
@@ -241,7 +247,6 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.permissions')
     configure.scan('guillotina.security.security_local')
     configure.scan('guillotina.security.policy')
-    configure.scan('guillotina.auth.participation')
     configure.scan('guillotina.catalog.index')
     configure.scan('guillotina.catalog.catalog')
     configure.scan('guillotina.files')
@@ -261,6 +266,12 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     app_configurator.configure_all_applications()
 
     apply_concrete_behaviors()
+
+    for k, v in _moved:
+        # for b/w compatibility, convert these
+        if k in app_settings:
+            app_settings[v] = app_settings[k]
+            del app_settings[k]
 
     # update *after* plugins loaded
     update_app_settings(settings)

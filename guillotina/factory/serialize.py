@@ -1,7 +1,8 @@
 from guillotina import configure
+from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IInteraction
+from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IStaticDirectory
@@ -40,7 +41,7 @@ class ApplicationToJson(object):
             'static_directory': [],
             '@type': 'Application'
         }
-        allowed = IInteraction(self.request).check_permission(
+        allowed = get_utility(ISecurityPolicy).check_permission(
             'guillotina.GetDatabases', self.application)
 
         for x in self.application._items.keys():

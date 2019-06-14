@@ -1,12 +1,12 @@
 from guillotina import configure
+from guillotina import task_vars
 from guillotina.auth.users import GuillotinaUser
 from guillotina.interfaces import IGroups
-from guillotina.utils import get_current_request
 
 
 class GuillotinaGroup(GuillotinaUser):
-    def __init__(self, request, ident):
-        super(GuillotinaGroup, self).__init__(request)
+    def __init__(self, ident):
+        super(GuillotinaGroup, self).__init__(ident)
         self.id = ident
 
         if ident == 'Managers':
@@ -23,9 +23,10 @@ class GroupsUtility(object):
     """ Class used to get groups. """
 
     def get_principal(self, ident):
-        request = get_current_request()
-        if not hasattr(request, '_cache_groups'):
-            request._cache_groups = {}
-        if ident not in request._cache_groups.keys():
-            request._cache_groups[ident] = GuillotinaGroup(request, ident)
-        return request._cache_groups[ident]
+        groups = task_vars.authenticated_user_groups.get()
+        if groups is None:
+            groups = {}
+            task_vars.authenticated_user_groups.set(groups)
+        if ident not in groups:
+            groups[ident] = GuillotinaGroup(ident)
+        return groups[ident]

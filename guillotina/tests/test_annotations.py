@@ -18,7 +18,7 @@ async def test_create_annotation(db, guillotina_main):
     root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)
-    login(request)
+    login()
 
     with request:
         async with transaction():

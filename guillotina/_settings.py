@@ -87,7 +87,7 @@ app_settings: Dict[str, Any] = {
     "cloud_storage": "guillotina.interfaces.IDBFileField",
     "router": "guillotina.traversal.TraversalRouter",
     "pg_connection_class": "asyncpg.connection.Connection",
-    "oid_generator": generate_oid,
+    "uid_generator": generate_oid,
     "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
     "check_writable_request": "guillotina.writable.check_writable_request",
     "indexer": "guillotina.catalog.index.Indexer"

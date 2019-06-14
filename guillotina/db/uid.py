@@ -22,7 +22,7 @@ def bw_oid_generator(ob):
     return uuid.uuid4().hex
 
 
-def generate_oid(ob):
+def generate_uid(ob):
     '''
     We want OIDs that allow keys to organize data where it is logically
     in the hierarchy of data in the object tree.

@@ -11,7 +11,7 @@ async def test_create_blob(db, guillotina_main):
     root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)
-    login(request)
+    login()
 
     async with transaction(), request:
         container = await create_content_in_container(
@@ -32,7 +32,7 @@ async def test_write_blob_data(db, guillotina_main):
     root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)
-    login(request)
+    login()
 
     async with transaction(), request:
         container = await db.async_get('container')
@@ -60,7 +60,7 @@ async def test_write_large_blob_data(db, guillotina_main):
     root = get_utility(IApplication, name='root')
     db = root['db']
     request = get_mocked_request(db)
-    login(request)
+    login()
 
     async with transaction(), request:
         container = await db.async_get('container')

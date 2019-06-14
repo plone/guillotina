@@ -10,15 +10,15 @@ from aiohttp.helpers import sentinel
 from aiohttp.http import HttpVersion
 from aiohttp.http import RawRequestMessage
 from aiohttp.web import UrlMappingMatchInfo
-from guillotina._settings import app_settings
 from guillotina import task_vars
+from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
+from guillotina.auth.utils import set_authenticated_user
 from guillotina.behaviors import apply_markers
 from guillotina.content import Item
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.request import Request
-from guillotina.security.policy import Interaction
 from guillotina.transactions import transaction
 from multidict import CIMultiDict
 from yarl import URL
@@ -45,11 +45,12 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
     return request
 
 
-def login(request, user=RootUser('foobar')):
-    request.security = Interaction(request)
-    request.security.add(TestParticipation(request, user))
-    request.security.invalidate_cache()
-    request._cache_groups = {}
+def login(user=RootUser('foobar')):
+    set_authenticated_user(user)
+
+
+def logout():
+    set_authenticated_user(None)
 
 
 async def get_root(request=None, tm=None):
@@ -73,16 +74,8 @@ class FakeRequest(object):
     _txn_dm = None
 
     def __init__(self, conn=None):
-        self.security = Interaction(self)
         self.headers = {}
         self._txn_dm = conn
-
-
-class TestParticipation(object):
-
-    def __init__(self, request, user=RootUser('foobar')):
-        self.principal = user
-        self.interaction = None
 
 
 def register(ob):

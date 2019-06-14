@@ -1,6 +1,5 @@
-from guillotina.exceptions import RequestNotFound
-from guillotina.interfaces import IInteraction
-from guillotina.utils import get_current_request
+from guillotina.component import query_utility
+from guillotina.interfaces import ISecurityPolicy
 
 
 class SecurityMap:
@@ -32,24 +31,14 @@ class SecurityMap:
         row[colentry] = value
         col[rowentry] = value
 
-        self._invalidated_interaction_cache()
+        self._invalidated_policy_cache()
 
         return True
 
-    def _invalidated_interaction_cache(self):
-        # Invalidate this threads interaction cache
-        try:
-            request = get_current_request()
-        except RequestNotFound:
-            return
-        interaction = IInteraction(request)
-        if interaction is not None:
-            try:
-                invalidate_cache = interaction.invalidate_cache
-            except AttributeError:
-                pass
-            else:
-                invalidate_cache()
+    def _invalidated_policy_cache(self):
+        policy = query_utility(ISecurityPolicy)
+        if policy is not None:
+            policy.invalidate_cache()
 
     def del_cell(self, rowentry, colentry):
         row = self._byrow.get(rowentry)
@@ -62,7 +51,7 @@ class SecurityMap:
             if not col:
                 del self._bycol[colentry]
 
-            self._invalidated_interaction_cache()
+            self._invalidated_policy_cache()
 
             return True
 

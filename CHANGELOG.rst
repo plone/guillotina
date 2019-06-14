@@ -4,6 +4,20 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- `utils.get_authenticated_user_id` no longer accepts `request` param
+
+- `utils.get_authenticated_user` no longer accepts `request` param
+
+- Removed `guillotina.exceptions.NoInteraction`
+
+- Removed `guillotina.interfaces.IInteraction`
+
+- `auth_user_identifiers` no longer accept `IRequest` in the constructor. Use `utils.get_current_request`
+
+- `auth_user_identifiers` no longer accept `IRequest` in constructor. Use `utils.get_current_request`
+
+- Remove `IInteraction`. Use `get_utility(ISecurityPolicy)`
+
 - Remove `Request._db_write_enabled`, `Transaction` now has `read_only` property
 
 - Remove `Request._db_id`, Use `guillotina.task_vars.db.get().id`

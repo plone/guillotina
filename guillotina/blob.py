@@ -16,7 +16,7 @@ class Blob:
     """
 
     def __init__(self, resource):
-        self.bid = app_settings['oid_generator'](resource)
+        self.bid = app_settings['uid_generator'](resource)
         self.resource_uid = resource.__uuid__
         self.size = 0
         self.chunks = 0

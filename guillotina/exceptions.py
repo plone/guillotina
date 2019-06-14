@@ -89,11 +89,6 @@ class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""
 
 
-class NoInteraction(Exception):
-    """No interaction started
-    """
-
-
 class ConflictError(Exception):
 
     def __init__(self, msg='', oid=None, txn=None, old_serial=None, writer=None):

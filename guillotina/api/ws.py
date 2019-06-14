@@ -11,14 +11,13 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
-from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
+from guillotina.interfaces import ISecurityPolicy
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
 from guillotina.utils import get_jwk_key
@@ -133,7 +132,7 @@ class WebsocketsView(Service):
         permission = get_utility(
             IPermission, name='guillotina.AccessContent')
 
-        security = get_adapter(self.request, IInteraction)
+        security = get_utility(ISecurityPolicy)
         allowed = security.check_permission(permission.id, obj)
         if not allowed:
             return await ws.send_str(ujson.dumps({

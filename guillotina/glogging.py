@@ -40,7 +40,7 @@ def _wrapped(name):
                 'container': getattr(container, 'id', None),
                 'account': getattr(container, 'id', None),
                 'db_id': getattr(db, 'id', None),
-                'user': get_authenticated_user_id(request) or 'Anonymous',
+                'user': get_authenticated_user_id() or 'Anonymous',
                 'eid': eid,
                 'agent': agent,
                 # in case a fake req object doesn't use the guillotina Request object

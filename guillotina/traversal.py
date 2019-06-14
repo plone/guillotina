@@ -17,9 +17,10 @@ from guillotina import routes
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
-from guillotina.auth.participation import AnonymousParticipation
+from guillotina.auth.users import AnonymousUser
+from guillotina.auth.utils import authenticate_request
+from guillotina.auth.utils import set_authenticated_user
 from guillotina.browser import View
-from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_adapter
 from guillotina.component import query_multi_adapter
@@ -42,13 +43,12 @@ from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IErrorResponseException
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import ILanguage
-from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
+from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import ITraversable
 from guillotina.profile import profilable
 from guillotina.response import HTTPBadRequest
@@ -58,6 +58,7 @@ from guillotina.response import HTTPUnauthorized
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
+from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
@@ -382,7 +383,7 @@ class TraversalRouter(AbstractRouter):
     @profilable
     async def real_resolve(self, request: IRequest) -> Optional[MatchInfo]:
         """Main function to resolve a request."""
-        security = get_adapter(request, IInteraction)
+        policy = get_utility(ISecurityPolicy)
 
         if request.method not in app_settings['http_methods']:
             raise HTTPMethodNotAllowed(
@@ -440,8 +441,10 @@ class TraversalRouter(AbstractRouter):
                 break
 
         # Add anonymous participation
-        if len(security.participations) == 0:
-            security.add(AnonymousParticipation(request))
+        authenticated = get_authenticated_user()
+        if authenticated is None:
+            authenticated = AnonymousUser()
+            set_authenticated_user(authenticated)
 
         # container registry lookup
         try:
@@ -456,7 +459,7 @@ class TraversalRouter(AbstractRouter):
         # Check security on context to AccessContent unless
         # is view allows explicit or its OPTIONS
         permission = get_utility(IPermission, name='guillotina.AccessContent')
-        if not security.check_permission(permission.id, resource):
+        if not policy.check_permission(permission.id, resource):
             # Check if its a CORS call:
             if IOPTIONS != method:
                 # Check if the view has permissions explicit
@@ -464,15 +467,13 @@ class TraversalRouter(AbstractRouter):
                     logger.info(
                         "No access content {content} with {auths}".format(
                             content=resource,
-                            auths=str([x.principal.id
-                                       for x in security.participations])),
+                            auth=authenticated.id),
                         request=request)
                     raise HTTPUnauthorized(
                         content={
                             "reason": "You are not authorized to access content",
                             "content": str(resource),
-                            "auths": [x.principal.id
-                                      for x in security.participations]
+                            "auth": authenticated.id
                         }
                     )
 
@@ -487,14 +488,13 @@ class TraversalRouter(AbstractRouter):
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
-        if not security.check_permission(view_permission, view):
+        if not policy.check_permission(view_permission, view):
             if IOPTIONS != method:
                 raise HTTPUnauthorized(
                     content={
                         "reason": "You are not authorized to view",
                         "content": str(resource),
-                        "auths": [x.principal.id
-                                  for x in security.participations]
+                        "auth": authenticated.id
                     }
                 )
 
@@ -521,9 +521,4 @@ class TraversalRouter(AbstractRouter):
 
     @profilable
     async def apply_authorization(self, request: IRequest):
-        # User participation
-        participation = get_adapter(request, IParticipation)
-        # Lets extract the user from the request
-        await participation()
-        if participation.principal is not None:
-            request.security.add(participation)
+        await authenticate_request(request)

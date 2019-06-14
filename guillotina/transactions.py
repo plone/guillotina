@@ -59,7 +59,7 @@ def get_tm() -> typing.Optional[ITransactionManager]:
         # transaction txn commits or raises ConflictError
 
     """
-    return typing.cast(ITransactionManager, task_vars.tm.get())
+    return task_vars.tm.get()
 
 
 def get_transaction() -> typing.Optional[ITransaction]:
@@ -69,7 +69,7 @@ def get_transaction() -> typing.Optional[ITransaction]:
     :param request: request object transaction is connected to
 
     '''
-    return typing.cast(ITransaction, task_vars.txn.get())
+    return task_vars.txn.get()
 
 
 class transaction:  # noqa: N801

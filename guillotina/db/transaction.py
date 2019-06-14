@@ -3,6 +3,9 @@ import logging
 import sys
 import time
 from collections import OrderedDict
+from typing import AsyncIterator
+from typing import List
+from typing import Optional
 
 from guillotina import task_vars
 from guillotina._settings import app_settings
@@ -11,15 +14,13 @@ from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.reader import reader as default_reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
-from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
-from guillotina.exceptions import Unauthorized
 from guillotina.profile import profilable
-from guillotina.utils import get_current_request
 from guillotina.utils import lazy_apply
 from zope.interface import implementer
 
@@ -220,7 +221,7 @@ class Transaction:
         return False
 
     @profilable
-    def register(self, obj, new_oid=None):
+    def register(self, obj: IBaseObject, new_oid: Optional[str]=None):
         """We are adding a new object on the DB"""
         if self.read_only:
             raise ReadOnlyError()
@@ -234,7 +235,7 @@ class Transaction:
             if new_oid is not None:
                 new = True
             else:
-                new_oid = app_settings['oid_generator'](obj)
+                new_oid = app_settings['uid_generator'](obj)
             oid = new_oid
 
         obj.__uuid__ = oid
@@ -243,7 +244,7 @@ class Transaction:
         elif oid not in self.modified and oid not in self.added:
             self.modified[oid] = obj
 
-    def delete(self, obj):
+    def delete(self, obj: IBaseObject):
         if self.read_only:
             raise ReadOnlyError()
         oid = obj.__uuid__
@@ -274,7 +275,7 @@ class Transaction:
         return await self._manager._storage.load(self, oid)
 
     @profilable
-    async def get(self, oid, ignore_registered=False):
+    async def get(self, oid: str, ignore_registered: bool=False) -> IBaseObject:
         """Getting a oid from the db"""
         if not ignore_registered:
             obj = self.modified.get(oid, None)
@@ -293,7 +294,7 @@ class Transaction:
 
         return obj
 
-    async def commit(self):
+    async def commit(self) -> None:
         restarts = 0
         while True:
             # for now, the max commit restarts we'll manage...
@@ -405,7 +406,7 @@ class Transaction:
 
     @profilable
     @cache(lambda oid: {'oid': oid, 'variant': 'keys'})
-    async def keys(self, oid):
+    async def keys(self, oid: str) -> List[str]:
         keys = []
         for record in await self._manager._storage.keys(self, oid):
             keys.append(record['id'])
@@ -423,13 +424,13 @@ class Transaction:
 
         return self._fill_object(result, parent)
 
-    def _fill_object(self, item, parent):
+    def _fill_object(self, item: dict, parent: IBaseObject) -> IBaseObject:
         obj = default_reader(item)
         obj.__parent__ = parent
         obj.__txn__ = self
         return obj
 
-    async def _get_batch_children(self, parent, keys):
+    async def _get_batch_children(self, parent: IBaseObject, keys: List[str]) -> AsyncIterator[IBaseObject]:
         for litem in await self._manager._storage.get_children(
                 self, parent.__uuid__, keys):
             if len(litem['state']) < self._cache.max_cache_record_size:
@@ -472,12 +473,12 @@ class Transaction:
                 yield item
 
     @profilable
-    async def contains(self, oid, key):
+    async def contains(self, oid: str, key: str) -> bool:
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     @profilable
     @cache(lambda oid: {'oid': oid, 'variant': 'len'})
-    async def len(self, oid):
+    async def len(self, oid: str) -> bool:
         return await self._manager._storage.len(self, oid)
 
     @profilable

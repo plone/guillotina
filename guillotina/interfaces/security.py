@@ -1,28 +1,13 @@
-##############################################################################
-#
-# Copyright (c) 2001, 2002 Zope Foundation and Contributors.
-# All Rights Reserved.
-#
-# This software is subject to the provisions of the Zope Public License,
-# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
-# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
-# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE.
-#
-##############################################################################
-"""Security map to hold matrix-like relationships.
+import copyreg
 
-In all cases, 'setting' values are one of the defined constants
-`Allow`, `Deny`, or `Unset`.
-"""
 from guillotina.i18n import MessageFactory
 from guillotina.schema import Text
 from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
 
-import copyreg
+import typing
+from .misc import IRequest
 
 
 _ = MessageFactory('guillotina')
@@ -338,27 +323,6 @@ class IGrantInfo(Interface):  # pylint: disable=E0239
         """
 
 
-class IInteraction(Interface):  # pylint: disable=E0239
-    """A representation of an interaction between some actors and the system.
-    """
-
-    participations = Attribute("""An iterable of participations.""")
-
-    def add(participation):  # noqa: N805
-        """Add a participation."""
-
-    def remove(participation):  # noqa: N805
-        """Remove a participation."""
-
-    def check_permission(permission, object):  # noqa: N805
-        """Return whether security context allows permission on object.
-
-        Arguments:
-        permission -- A permission name
-        object -- The object being accessed according to the permission
-        """
-
-
 class IPermission(Interface):  # pylint: disable=E0239
     """A permission object."""
 
@@ -401,12 +365,6 @@ class IPrincipal(Interface):  # pylint: disable=E0239
         readonly=True)
 
 
-class IParticipation(Interface):  # pylint: disable=E0239
-
-    interaction = Attribute('The interaction')
-    principal = Attribute('The authenticated principal')
-
-
 class ISecurityPolicy(Interface):  # pylint: disable=E0239
 
     def __call__(participation=None):  # noqa: N805
@@ -427,4 +385,10 @@ class IPasswordChecker(Interface):
     def __call__(hashed_value, password):
         '''
         Return True if password matches hashed_value
+        '''
+
+
+class IAuthExtractor(Interface):
+    def __call__(request: IRequest) -> typing.Optional[typing.Dict]:
+        '''
         '''

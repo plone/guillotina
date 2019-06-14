@@ -32,7 +32,6 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IIDGenerator
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
@@ -42,6 +41,7 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.interfaces import IResponse
 from guillotina.interfaces import IRolePermissionMap
+from guillotina.interfaces import ISecurityPolicy
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.response import ErrorResponse
@@ -179,7 +179,7 @@ class DefaultPOST(Service):
                     status=412, reason=error_reasons.INVALID_ID)
             new_id = id_
 
-        user = get_authenticated_user_id(self.request)
+        user = get_authenticated_user_id()
 
         options = {
             'creators': (user,),
@@ -453,14 +453,14 @@ class SharingPUT(SharingPOST):
 async def can_i_do(context, request):
     if 'permission' not in request.query and 'permissions' not in request.query:
         raise PreconditionFailed(context, 'No permission param')
-    interaction = IInteraction(request)
+    policy = get_utility(ISecurityPolicy)
     if 'permissions' in request.query:
         results = {}
         for perm in request.query['permissions'].split(','):
-            results[perm] = interaction.check_permission(perm, context)
+            results[perm] = policy.check_permission(perm, context)
         return results
     else:
-        return interaction.check_permission(request.query['permission'], context)
+        return policy.check_permission(request.query['permission'], context)
 
 
 @configure.service(
@@ -791,8 +791,8 @@ async def resolve_uid(context, request):
         return HTTPNotFound(content={
             'reason': f'Could not find uid: {uid}'
         })
-    interaction = IInteraction(request)
-    if interaction.check_permission('guillotina.AccessContent', ob):
+    policy = get_utility(ISecurityPolicy)
+    if policy.check_permission('guillotina.AccessContent', ob):
         return HTTPMovedPermanently(get_object_url(ob, request))
     else:
         # if a user doesn't have access to it, they shouldn't know anything about it

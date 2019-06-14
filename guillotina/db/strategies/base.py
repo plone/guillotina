@@ -1,5 +1,3 @@
-from guillotina.utils import get_current_request
-from guillotina.exceptions import RequestNotFound
 
 
 class BaseStrategy:

@@ -225,7 +225,7 @@ class Command(object):
 
     def setup_fake_request(self):
         self.request = get_mocked_request()
-        login(self.request)
+        login()
 
     def get_loop(self):
         if self.loop is None:

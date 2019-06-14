@@ -2,6 +2,7 @@ import typing
 
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
+from guillotina.db.orm.interfaces import IBaseObject
 from zope.interface import Attribute
 from zope.interface import Interface
 
@@ -49,6 +50,47 @@ class ITransaction(Interface):
 
     async def tpc_begin():
         '''
+        '''
+
+    async def contains(oid: str, key: str) -> bool:
+        '''
+        Does an object container another
+        '''
+
+    def register(obj: IBaseObject, new_oid: typing.Optional[str]=None):
+        '''
+        register object with transaction to be written
+        '''
+
+    async def get_child(parent: IBaseObject, key: str) -> typing.Optional[IBaseObject]:
+        '''
+        Get child of object
+        '''
+
+    async def get_children(
+            parent: IBaseObject, keys: typing.List[str]) -> typing.AsyncIterator[IBaseObject]:
+        '''
+        Get children of object
+        '''
+
+    def delete(obj: IBaseObject):
+        '''
+        delete object
+        '''
+
+    async def len(oid: str) -> bool:
+        '''
+        Get size of children for object
+        '''
+
+    async def keys(oid: str) -> typing.List[str]:
+        '''
+        Get all keys for object
+        '''
+
+    async def items(content: IBaseObject) -> typing.AsyncIterator[typing.Tuple[str, IBaseObject]]:
+        '''
+        Get items in content
         '''
 
 

@@ -3,36 +3,18 @@ import typing
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
+from guillotina.auth.utils import set_authenticated_user
 from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
-from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IContainer
-from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IResource
-from guillotina.security.policy import Interaction
 from guillotina.tests.utils import get_mocked_request
-from guillotina.utils import get_current_request
 from guillotina.utils import get_object_url
 from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
-
-
-async def login(request, user):
-    request.security = Interaction(request)
-    request._cache_user = user
-    participation = IParticipation(request)
-    await participation()
-    request.security.add(participation)
-    request.security.invalidate_cache()
-    request._cache_groups = {}
-
-def logout(request):
-    request.security = None
-    request._cache_groups = {}
-    request._cache_user = None
 
 
 class ContentAPI:
@@ -47,11 +29,11 @@ class ContentAPI:
     async def __aenter__(self):
         task_vars.request.set(self.request)
         task_vars.db.set(self.db)
-        await login(self.request, self.user)
+        set_authenticated_user(self.user)
         return self
 
     async def __aexit__(self, *args):
-        logout(self.request)
+        set_authenticated_user(None)
         # make sure to close out connection
         await self.abort()
 

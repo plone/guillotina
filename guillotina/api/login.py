@@ -38,7 +38,7 @@ class Login(Service):
             if (validator.for_validators is not None and
                     'basic' not in validator.for_validators):
                 continue
-            user = await validator(self.request).validate(creds)
+            user = await validator().validate(creds)
             if user is not None:
                 break
 
@@ -68,7 +68,7 @@ class Refresh(Service):
     token_timeout = 60 * 60 * 1
 
     async def __call__(self):
-        user = get_authenticated_user(self.request)
+        user = get_authenticated_user()
         data = {
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(seconds=self.token_timeout),
