@@ -39,6 +39,12 @@ class Service(View):
     async def get_data(self):
         return await self.request.json()
 
+    def add_response_headers(self, response):
+        if not self.__response_headers__:
+            return
+
+        response._headers.update(**self.__response_headers__)
+
 
 class DownloadService(View):
 

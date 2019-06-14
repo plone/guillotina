@@ -299,6 +299,8 @@ class MatchInfo(BaseMatchInfo):
         else:
             request.execute_futures('failure')
 
+        self.view.add_response_headers(resp)
+
         self.debug(request, resp)
 
         request.record('finish')
