@@ -1,13 +1,14 @@
 import copyreg
+import typing
 
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.i18n import MessageFactory
+from guillotina.schema import List
 from guillotina.schema import Text
 from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
-from guillotina.db.orm.interfaces import IBaseObject
 
-import typing
 from .misc import IRequest
 
 
@@ -354,6 +355,9 @@ class IPrincipal(Interface):  # pylint: disable=E0239
     define a standard view name (e.g.  'inline_summary') for this
     purpose.
     """
+    groups = List(
+        value_type=TextLine()
+    )
 
     id = TextLine(
         title=_('Id'),

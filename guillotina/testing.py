@@ -12,7 +12,9 @@ TESTING_PORT = 55001
 
 TESTING_SETTINGS: Dict[str, Any] = {
     "debug": True,
-    "applications": ["guillotina.test_package"],
+    "applications": [
+        "guillotina.test_package"
+    ],
     "databases": {
         "db": {
             "storage": "DUMMY",

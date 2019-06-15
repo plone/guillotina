@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Default catalog interface removes the following methods: `get_by_uuid`, `get_by_type`, `get_by_path`,
+  `get_folder_contents`. Keep interfaces simple, use search/query.
+
 - Allow modifying app settings from pytest marks [lferran]
 
 - No longer setup fake request with login for base command

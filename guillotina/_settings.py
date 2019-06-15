@@ -32,7 +32,7 @@ app_settings: Dict[str, Any] = {
             }
         }
     },
-    "store_json": False,
+    "store_json": True,
     "root_user": {
         "password": ""
     },
@@ -90,6 +90,7 @@ app_settings: Dict[str, Any] = {
     "uid_generator": generate_uid,
     "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
     "check_writable_request": "guillotina.writable.check_writable_request",
-    "indexer": "guillotina.catalog.index.Indexer"
+    "indexer": "guillotina.catalog.index.Indexer",
+    'search_parser': 'default'
 }
 default_settings = copy.deepcopy(app_settings)

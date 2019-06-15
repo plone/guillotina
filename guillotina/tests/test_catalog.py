@@ -5,16 +5,22 @@ import pytest
 from guillotina import task_vars
 from guillotina.catalog import index
 from guillotina.catalog.utils import get_index_fields
-from guillotina.catalog.utils import get_metadata_fields
+from guillotina.catalog.utils import get_metadata_fields, parse_query
 from guillotina.component import get_adapter
 from guillotina.component import query_utility
+from guillotina.content import Container
 from guillotina.content import create_content
+from guillotina.db.storages.utils import clear_table_name
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import ISecurityInfo
+from guillotina.tests import mocks
 from guillotina.tests import utils as test_utils
+
+
+NOT_POSTGRES = os.environ.get('DATABASE', 'DUMMY') in ('cockroachdb', 'DUMMY')
 
 
 def test_indexed_fields(dummy_guillotina, loop):
@@ -99,10 +105,26 @@ async def test_modified_event_gathers_all_index_data(dummy_guillotina):
     assert len(fut.update['foobar']) == 6
 
 
+@pytest.mark.app_settings({
+    "applications": ["guillotina.contrib.catalog.pg"]
+})
+@pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
 async def test_search_endpoint(container_requester):
+    async with container_requester as requester:
+        await requester('POST', '/db/guillotina', data=json.dumps({
+            '@type': 'Item'
+        }))
+        response, status = await requester('GET', '/db/guillotina/@search')
+        assert status == 200
+        assert len(response['member']) == 1
+
+
+@pytest.mark.skipif(not NOT_POSTGRES, reason='Only not PG')
+async def test_search_endpoint_no_pg(container_requester):
     async with container_requester as requester:
         response, status = await requester('GET', '/db/guillotina/@search')
         assert status == 200
+        assert len(response['member']) == 0
 
 
 async def test_search_post_endpoint(container_requester):
@@ -131,8 +153,7 @@ async def test_create_catalog(container_requester):
         assert status == 200
 
 
-@pytest.mark.skipif(os.environ.get('DATABASE', 'DUMMY') in ('cockroachdb', 'DUMMY'),
-                    reason='Not for dummy db')
+@pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
 async def test_query_stored_json(container_requester):
     async with container_requester as requester:
         await requester(
@@ -168,3 +189,85 @@ select json from {0}
 where json->>'id' = 'item1' AND json->>'container_id' = 'guillotina'
 '''.format(requester.db.storage._objects_table_name))
         assert len(result) == 1
+
+
+@pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
+async def test_query_pg_catalog(container_requester):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+
+    async with container_requester as requester:
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item2",
+                "id": "item2",
+            })
+        )
+
+        async with requester.db.get_transaction_manager() as tm, await tm.begin():
+            test_utils.login()
+            root = await tm.get_root()
+            container = await root.async_get('guillotina')
+
+            util = PGSearchUtility()
+            await util.initialize()
+            results = await util.query(container, {'id': 'item1'})
+            assert len(results['member']) == 1
+
+
+@pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
+async def test_fulltext_query_pg_catalog(container_requester):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+
+    async with container_requester as requester:
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item1",
+                "title": "Something interesting about foobar"
+            })
+        )
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Something else",
+                "id": "item2",
+            })
+        )
+
+        async with requester.db.get_transaction_manager() as tm, await tm.begin():
+            test_utils.login()
+            root = await tm.get_root()
+            container = await root.async_get('guillotina')
+
+            util = PGSearchUtility()
+            await util.initialize()
+            results = await util.query(container, {'title': 'something'})
+            assert len(results['member']) == 2
+            results = await util.query(container, {'title': 'interesting'})
+            assert len(results['member']) == 1
+
+
+async def test_build_pg_query(dummy_guillotina):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+    util = PGSearchUtility()
+    with mocks.MockTransaction() as txn:
+        content = test_utils.create_content(Container)
+        query = parse_query(content, {
+            'uuid': content.uuid
+        }, util)
+        import pdb; pdb.set_trace()
+        assert content.uuid == arguments[0]
+        assert "json->'uuid'" in sql
+        assert f'from {clear_table_name(txn.storage._objects_table_name)}' in sql

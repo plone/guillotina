@@ -1,3 +1,5 @@
+import typing
+
 from zope.interface import Interface
 
 
@@ -43,6 +45,23 @@ class ICatalogUtility(Interface):
         """
         Raw query
         """
+
+
+class IPGCatalogUtility(ICatalogUtility):
+    '''
+    PG catalog utility
+    '''
+
+
+class ISearchParser(Interface):
+    def __init__(utility: ICatalogUtility, context: Interface):
+        '''
+        '''
+
+    def __call__() -> typing.Any:
+        '''
+        Translate the query
+        '''
 
 
 class ICatalogDataAdapter(Interface):
