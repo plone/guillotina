@@ -8,6 +8,7 @@ from yarl import URL
 
 import multidict
 import json
+import urllib.parse
 
 
 class GuillotinaWebSocket:
@@ -40,7 +41,7 @@ class GuillotinaWebSocket:
 
 class GuillotinaRequest(Request):
 
-    def __init__(self, scheme, method, path, raw_headers,
+    def __init__(self, scheme, method, path, query_string, raw_headers,
                  payload, client_max_size: int=1024**2, loop=None,
                  send=None, receive=None, scope=None):
         self.send = send
@@ -50,6 +51,7 @@ class GuillotinaRequest(Request):
         self._loop = loop
         self._method = method
         self._raw_path = path
+        self._query_string = query_string
         self._rel_url = URL(path)
         self._raw_headers = raw_headers
         self._payload = payload
@@ -130,29 +132,14 @@ class GuillotinaRequest(Request):
 
         E.g., ``/app/blog``
         """
-        return self._rel_url.path
-
-    @reify
-    def path_qs(self) -> str:
-        """The URL including PATH_INFO and the query string.
-
-        E.g, /app/blog?id=10
-        """
-        return str(self._rel_url)
-
-    @reify
-    def raw_path(self) -> str:
-        """ The URL including raw *PATH INFO* without the host or scheme.
-        Warning, the path is unquoted and may contains non valid URL characters
-
-        E.g., ``/my%2Fpath%7Cwith%21some%25strange%24characters``
-        """
         return self._raw_path
 
     @reify
     def query(self) -> 'MultiDictProxy[str]':
         """A multidict with all the variables in the query string."""
-        return self._rel_url.query
+
+        l = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
+        return multidict.CIMultiDict(l)
 
     @reify
     def query_string(self) -> str:
@@ -160,7 +147,7 @@ class GuillotinaRequest(Request):
 
         E.g., id=10
         """
-        return self._rel_url.query_string
+        return self._query_string
 
     @reify
     def headers(self) -> 'CIMultiDictProxy[str]':

@@ -81,6 +81,7 @@ class AsgiApp:
             scope["scheme"],
             scope["method"],
             scope["path"],
+            scope["query_string"],
             scope["headers"],
             payload,
             loop=self.loop,
