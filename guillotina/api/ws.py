@@ -3,14 +3,13 @@ from urllib import parse
 
 import aiohttp
 import ujson
-from aiohttp import web
 from guillotina import configure
 from guillotina import logger
 from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
-from guillotina.request import GuillotinaRequest
+from guillotina.request import Request
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
@@ -189,10 +188,7 @@ class WebsocketsView(Service):
         tm = get_tm(self.request)
         await tm.abort(self.request)
 
-        if isinstance(self.request, GuillotinaRequest):
-            ws = self.request.get_ws()
-        else:
-            ws = web.WebSocketResponse()
+        ws = self.request.get_ws()
         await ws.prepare(self.request)
 
         async for msg in ws:

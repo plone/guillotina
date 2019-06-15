@@ -178,7 +178,6 @@ def make_mocked_request(method, path, headers=None, *,
     specific conditions and errors are hard to trigger.
 
     """
-
     task = mock.Mock()
     loop = mock.Mock()
     loop.create_future.return_value = ()
@@ -196,9 +195,6 @@ def make_mocked_request(method, path, headers=None, *,
 
     chunked = 'chunked' in headers.get(hdrs.TRANSFER_ENCODING, '').lower()
 
-    message = RawRequestMessage(
-        method, path, version, headers,
-        raw_hdrs, closing, False, False, chunked, URL(path))
     if app is None:
         app = test_utils._create_app_mock()
 
@@ -234,9 +230,15 @@ def make_mocked_request(method, path, headers=None, *,
     time_service.timeout = mock.Mock()
     time_service.timeout.side_effect = timeout
 
-    req = Request(message, payload,
-                  protocol, payload_writer, time_service, task,
-                  client_max_size=client_max_size)
+    req = Request(
+        "http",
+        method,
+        path,
+        None,
+        raw_hdrs,
+        payload,
+        client_max_size=client_max_size
+    )
 
     match_info = UrlMappingMatchInfo({}, mock.Mock())
     match_info.add_app(app)

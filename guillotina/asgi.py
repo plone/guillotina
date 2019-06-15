@@ -1,6 +1,7 @@
 from aiohttp.streams import EmptyStreamReader
-from guillotina.request import GuillotinaRequest
+from guillotina.request import Request
 import asyncio
+import aiotask_context
 
 
 def headers_to_list(headers):
@@ -136,7 +137,7 @@ class AsgiApp:
         if scope["type"] == "websocket":
             scope["method"] = "GET"
 
-        request = GuillotinaRequest(
+        request = Request(
             scope["scheme"],
             scope["method"],
             scope["path"],
@@ -148,6 +149,8 @@ class AsgiApp:
             scope=scope,
             receive=receive
         )
+
+        aiotask_context.set('request', request)
 
         route = await self.app.router.resolve(request)
         resp = await route.handler(request)

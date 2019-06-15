@@ -1,7 +1,7 @@
 # this module closely mirrors aiohttp.web_exceptions
-from guillotina.interfaces import IResponse
-from guillotina.interfaces import IAioHTTPResponse
 from guillotina.asgi import AsgiStreamWriter
+from guillotina.interfaces import IAioHTTPResponse
+from guillotina.interfaces import IResponse
 from multidict import CIMultiDict
 from typing import Optional
 from zope.interface import classImplements
@@ -96,7 +96,7 @@ class StreamResponse():
     #         ctype = self._content_type
     #     self.headers[CONTENT_TYPE] = ctype
 
-    async def prepare(self, request: 'GuillotinaRequest'):
+    async def prepare(self, request: 'Request'):
         if self._eof_sent:
             return None
         if self._payload_writer is not None:
@@ -105,7 +105,7 @@ class StreamResponse():
         await request._prepare_hook(self)
         return await self._start(request)
 
-    async def _start(self, request: 'GuillotinaRequest'):
+    async def _start(self, request: 'Request'):
         self._req = request
 
         keep_alive = self._keep_alive
