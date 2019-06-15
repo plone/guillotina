@@ -40,10 +40,9 @@ async def add_http_cache_headers(event):
     """This will add, if configured, the corresponding http cache headers
     on the response of GET requests
     """
-    if isinstance(event.view, (NewContent, NewContainer)):
-        # Just update headers if not creating content nor container
-        return
-    elif event.request.method == "DELETE":
+    delete_method = event.request.method == "DELETE"
+    if isinstance(event.view, (NewContent, NewContainer)) or delete_method:
+        # Just update headers if not creating content or method request is delete
         return
     httpcache_settings = app_settings.get('http_cache', {})
     extra_headers = getattr(event.view, "__extra_headers__", {})
