@@ -16,6 +16,8 @@ from guillotina.interfaces import IContainer
 from guillotina.tests.utils import create_content
 from zope.interface import Interface
 
+import pytest
+
 
 async def test_register_service(container_requester):
     cur_count = len(configure.get_configurations('guillotina.tests', 'service'))
@@ -247,3 +249,15 @@ async def test_sync_subscribers_only_called_once(dummy_guillotina):
     event = ObjectAddedEvent(ob, parent, ob.__name__, payload={})
     await notify(event)
     assert event.called == 1
+
+
+@pytest.mark.app_settings({
+    'foo': 'bar',
+    'root_user': {
+        'password': 'hi there!'
+    }
+})
+async def test_app_settings_are_overwritten_by_pytest_marks(container_requester):
+    from guillotina import app_settings
+    assert app_settings['foo'] == 'bar'
+    assert app_settings['root_user']['password'] == 'hi there!'
