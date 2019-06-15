@@ -252,7 +252,8 @@ class DatabaseInitializedEvent:
 
 @implementer(IRequestFinishedEvent)
 class RequestFinishedEvent:
-    def __init__(self, request, view, response):
+    def __init__(self, request, view, response, resource):
         self.request = request
         self.view = view
+        self.resource = resource
         self.response = response

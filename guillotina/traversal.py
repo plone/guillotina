@@ -297,7 +297,7 @@ class MatchInfo(BaseMatchInfo):
             request.execute_futures('failure')
 
         await notify(RequestFinishedEvent(
-            request, self.view, resp))
+            request, self.view, resp, self.resource))
 
         self.debug(request, resp)
 

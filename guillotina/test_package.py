@@ -222,7 +222,7 @@ async def noop(context, request):
     return {}
 
 
-def custom_endpoint_headers(context, request):
+def custom_endpoint_headers(view, context, request):
     return {
         'Foo': 'Bar',
         'Cache-Control': 'overwritten!',
