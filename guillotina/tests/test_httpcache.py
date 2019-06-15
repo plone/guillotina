@@ -20,7 +20,7 @@ async def test_not_returned_in_default_post(container_requester, http_cache_enab
                 "id": "myitem",
             })
         )
-        assert status == 200
+        assert status in [200, 201]
         assert 'Cache-Control' not in headers
         assert 'ETag' not in headers
 
@@ -33,7 +33,7 @@ async def test_not_returned_in_default_delete(container_requester, http_cache_en
                 "@type": "Item",
                 "id": "myitem",
             }))
-        assert status == 200
+        assert status in [200, 201]
 
         _, status, headers = await requester.make_request(
             'DELETE', '/db/guillotina/myitem')
@@ -46,7 +46,6 @@ async def test_endpoint_specific_headers_supercedes_default(container_requester,
     async with container_requester as requester:
         _, status, headers = await requester.make_request('GET', '/@testHttpCache')
         assert status == 200
-
         assert headers['Cache-Control'] == 'overwritten!'
         assert headers['Foo'] == 'Bar'
         assert 'ETag' in headers
