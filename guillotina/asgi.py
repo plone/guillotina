@@ -3,7 +3,7 @@ from aiohttp.web_ws import WSMessage
 from aiohttp.web import StreamResponse, WSMsgType
 from aiohttp.helpers import reify
 from guillotina.request import Request
-from starlette.websockets import WebSocket
+from starlette.websockets import WebSocket, WebSocketDisconnect
 
 import asyncio
 import multidict
@@ -38,14 +38,12 @@ class GuillotinaWebSocket:
         return self
 
     async def __anext__(self):
-        msg = await self.ws.receive_text()
-
-        # A lot is missing here!!!
-
-        #if msg.type in (WSMsgType.CLOSE,
-        #                WSMsgType.CLOSING,
-        #                WSMsgType.CLOSED):
-        #    raise StopAsyncIteration  # NOQA
+        try:
+            msg = await self.ws.receive_text()
+        except WebSocketDisconnect:
+            # Close the ws connection
+            await self.close()
+            raise StopAsyncIteration()
         return WSMessage(WSMsgType.TEXT, msg, '')
 
 
@@ -352,20 +350,19 @@ class AsgiApp:
         resp = await route.handler(request)
 
         # WS handling after view execution missing here!!!
+        if scope["type"] != "websocket":
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": resp.status,
+                    "headers": headers_to_list(resp.headers)
+                }
+            )
 
-        await send(
-            {
-                "type": "http.response.start",
-                "status": resp.status,
-                "headers": headers_to_list(resp.headers)
-            }
-        )
-
-        body = resp.text or ""
-        await send({"type": "http.response.body", "body": body.encode()})
+            body = resp.text or ""
+            await send({"type": "http.response.body", "body": body.encode()})
 
 
 from guillotina.factory.app import make_asgi_app
-
 # asgi app singleton
 app = make_asgi_app()
