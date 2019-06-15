@@ -383,9 +383,12 @@ COMMIT;''')
 
 @pytest.fixture(scope='function')
 def http_cache_enabled():
-    app_settings['http_cache'] = {
+    test_settings = {
         'max_age': 123,
         'public': True,
     }
-    yield
+    app_settings['http_cache'] = test_settings
+
+    yield test_settings
+
     app_settings.pop('http_cache', None)
