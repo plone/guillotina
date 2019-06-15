@@ -46,7 +46,7 @@ class AsgiApp:
     async def setup(self):
         # The config file is defined in the env var `CONFIG`
         loop = asyncio.get_event_loop()
-        from guillotina.factory import make_app
+        from guillotina.factory.app import startup_app
 
         config = os.getenv("CONFIG", None)
 
@@ -55,7 +55,7 @@ class AsgiApp:
         else:
             with open(config, "r") as f:
                 settings = yaml.load(f, Loader=yaml.FullLoader)
-        return await make_app(settings=settings, loop=loop, server_app=self)
+        return await startup_app(settings=settings, loop=loop, server_app=self)
 
     async def handler(self, scope, receive, send):
         # Copy headers

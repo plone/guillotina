@@ -2,7 +2,6 @@ import base64
 import posixpath
 import uuid
 
-from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
@@ -19,6 +18,7 @@ from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
+from guillotina.response import StreamResponse
 from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
@@ -65,7 +65,7 @@ class FileManager(object):
                 disposition, filename or file.filename)
         })
 
-        download_resp = StreamResponse(headers=headers)
+        download_resp = StreamResponse(status=200, headers=headers)
         download_resp.content_type = content_type or file.guess_content_type()
         if size or file.size:
             download_resp.content_length = size or file.size

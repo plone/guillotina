@@ -106,7 +106,7 @@ class GuillotinaRequest(Request):
 
         Returns aiohttp.protocol.HttpVersion instance.
         """
-        return self._version
+        return self.scope["http_version"]
 
     @reify
     def host(self) -> str:

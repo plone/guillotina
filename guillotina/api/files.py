@@ -1,6 +1,6 @@
 import mimetypes
 
-from aiohttp.web import StreamResponse
+from guillotina.response import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
@@ -76,7 +76,7 @@ class FileGET(DownloadService):
         filepath = str(fi.file_path.absolute())
         filename = fi.file_path.name
         with open(filepath, 'rb') as f:
-            resp = StreamResponse()
+            resp = StreamResponse(status=200)
             resp.content_type, _ = mimetypes.guess_type(filename)
 
             disposition = 'filename="{}"'.format(filename)

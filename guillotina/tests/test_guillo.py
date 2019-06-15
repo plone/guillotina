@@ -62,7 +62,7 @@ async def test_content_paths_are_correct(container_requester):
         assert '/db/guillotina/hello' in response['@id']
 
 
-def test_warn_about_jwt_secret(loop, caplog):
+async def test_warn_about_jwt_secret(loop, caplog):
     settings = deepcopy(testing.get_settings())
     settings.update({
         'debug': False,
@@ -73,13 +73,13 @@ def test_warn_about_jwt_secret(loop, caplog):
     })
     with caplog.at_level(logging.WARNING, logger='guillotina'):
         globalregistry.reset()
-        loop.run_until_complete(
-            make_app(settings=settings, loop=loop))
+        app = make_app(settings=settings, loop=loop)
+        await app.startup()
         assert len(caplog.records) == 1
         assert 'strongly advised' in caplog.records[0].message
 
 
-def test_warn_about_jwt_complexity(loop, caplog):
+async def test_warn_about_jwt_complexity(loop, caplog):
     settings = deepcopy(testing.get_settings())
     settings.update({
         'debug': False,
@@ -90,13 +90,13 @@ def test_warn_about_jwt_complexity(loop, caplog):
     })
     with caplog.at_level(logging.WARNING, logger='guillotina'):
         globalregistry.reset()
-        loop.run_until_complete(
-            make_app(settings=settings, loop=loop))
+        app = make_app(settings=settings, loop=loop)
+        await app.startup()
         assert len(caplog.records) == 1
         assert 'insecure secret' in caplog.records[0].message
 
 
-def test_not_warn_about_jwt_secret(loop, caplog):
+async def test_not_warn_about_jwt_secret(loop, caplog):
     settings = deepcopy(testing.get_settings())
     settings.update({
         'debug': True,
@@ -107,8 +107,8 @@ def test_not_warn_about_jwt_secret(loop, caplog):
     })
     with caplog.at_level(logging.WARNING, logger='guillotina'):
         globalregistry.reset()
-        loop.run_until_complete(
-            make_app(settings=settings, loop=loop))
+        app = make_app(settings=settings, loop=loop)
+        await app.startup()
         assert len(caplog.records) == 0
 
 

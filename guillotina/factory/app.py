@@ -160,18 +160,6 @@ def make_aiohttp_application():
         **app_settings.get('aiohttp_settings', {}))
 
 
-def make_asgi_app():
-    from guillotina.asgi import AsgiApp
-
-    # middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
-    router_klass = app_settings.get('router', TraversalRouter)
-    router = resolve_dotted_name(router_klass)()
-
-    app = AsgiApp()
-    app.router = router
-    return app
-
-
 _dotted_name_settings = (
     'auth_extractors',
     'auth_token_validators',
@@ -203,7 +191,19 @@ def optimize_settings(settings):
             settings[name] = resolve_dotted_name(new_val)
 
 
-async def make_app(config_file=None, settings=None, loop=None, server_app=None):
+def make_app(config_file=None, settings=None, loop=None):
+    from guillotina.asgi import AsgiApp
+
+    # middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
+    router_klass = app_settings.get('router', TraversalRouter)
+    router = resolve_dotted_name(router_klass)()
+
+    app = AsgiApp(config_file, settings, loop)
+    app.router = router
+    return app
+
+
+async def startup_app(config_file=None, settings=None, loop=None, server_app=None):
     '''
     Make application from configuration
 
@@ -291,8 +291,6 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
             app_logger.error('Could not setup logging configuration', exc_info=True)
 
     # Make and initialize aiohttp app
-    if server_app is None:
-        server_app = make_aiohttp_application()
     root.app = server_app
     server_app.root = root
     server_app.config = config

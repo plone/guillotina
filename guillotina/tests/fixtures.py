@@ -174,7 +174,7 @@ class GuillotinaDBRequester(object):
             settings['headers']['AUTHORIZATION'] = '{} {}'.format(
                 auth_type, token)
 
-        settings['form'] = params
+        settings['query_string'] = params
         settings['data'] = data
         settings['allow_redirects'] = allow_redirects
 
@@ -183,7 +183,7 @@ class GuillotinaDBRequester(object):
         try:
             value = resp.json()
         except json.decoder.JSONDecodeError:
-            value = resp.text
+            value = resp.content
 
         status = resp.status_code
         return value, status, resp.headers
@@ -205,14 +205,10 @@ async def close_async_tasks(app):
 @pytest.fixture(scope='function')
 async def dummy_guillotina(loop):
     globalregistry.reset()
-    app = await make_app(settings=get_dummy_settings(), loop=loop)
-    app.config.execute_actions()
-    load_cached_schema()
+    app = make_app(settings=get_dummy_settings(), loop=loop)
+    await app.startup()
     yield app
-    # try:
-    #     loop.run_until_complete(close_async_tasks(aioapp))
-    # except asyncio.CancelledError:
-    #     pass
+    await app.shutdown()
 
 
 class DummyRequestAsyncContextManager(object):
@@ -275,34 +271,16 @@ WHERE zoid != '{}' AND zoid != '{}'
 
 
 @pytest.fixture(scope='function')
-async def guillotina_main(loop):
-    globalregistry.reset()
-    from guillotina.factory.app import make_asgi_app
-    app = make_asgi_app()
-    g_app = await app.startup(settings=get_db_settings(), loop=loop)
-    g_app.config.execute_actions()
-    load_cached_schema()
-    await _clear_dbs(g_app.root)
-    return app
-
-
-@pytest.fixture(scope='function')
 async def app_client(loop):
     globalregistry.reset()
-    from guillotina.factory.app import make_asgi_app
-    app = make_asgi_app()
-
-    real_startup = app.startup
-    async def _startup():
-        app.app = await real_startup(settings=get_db_settings(), loop=loop)
-        app.app.config.execute_actions()
-        load_cached_schema()
-        await _clear_dbs(app.app.root)
-        return app.app
-
-    app.startup = _startup
+    app = make_app(settings=get_db_settings(), loop=loop)
     async with TestClient(app) as client:
         yield app, client
+
+@pytest.fixture(scope='function')
+async def guillotina_main(app_client):
+    app, _ = app_client
+    return app
 
 
 @pytest.fixture(scope='function')
