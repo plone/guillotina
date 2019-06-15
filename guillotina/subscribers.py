@@ -1,12 +1,15 @@
 from datetime import datetime
 from dateutil.tz import tzutc
-from guillotina import app_settings
+from guillotina.component import query_utility
 from guillotina import configure
 from guillotina.component._api import get_component_registry
-from guillotina.api.container import DefaultPOST as NewContainer
-from guillotina.api.content import DefaultPOST as NewContent
+from guillotina.api.container import DefaultPOST as DefaultPOSTContainer
+from guillotina.api.content import DefaultPOST as DefaultPOSTContent
+from guillotina.api.content import DefaultDELETE
+
 from guillotina.component.interfaces import ComponentLookupError
 from guillotina.component.interfaces import IObjectEvent
+from guillotina.api.httpcache import IHttpCachePolicyUtility
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IRequestFinishedEvent
 from guillotina.interfaces import IResource
@@ -38,31 +41,29 @@ async def object_event_notify(event):
     for_=IRequestFinishedEvent)
 async def add_http_cache_headers(event):
     """This will add, if configured, the corresponding http cache headers
-    on the response of GET requests
+    on the response
     """
-    delete_method = event.request.method == "DELETE"
-    if isinstance(event.view, (NewContent, NewContainer)) or delete_method:
+    if isinstance(event.view, (DefaultDELETE, DefaultPOSTContainer, DefaultPOSTContent)):
         # Just update headers if not creating content or method request is delete
         return
-    httpcache_settings = app_settings.get('http_cache', {})
-    extra_headers = getattr(event.view, "__extra_headers__", {})
 
-    if callable(extra_headers):
-        extra_headers = extra_headers(context=event.resource,
-                                      request=event.request)
-    if not httpcache_settings and not extra_headers:
+    import pdb; pdb.set_trace()
+
+    # Compute global http cache policy
+    extra_headers = {}
+    global_policy = query_utility(IHttpCachePolicyUtility)
+    if global_policy is not None:
+        extra_headers = global_policy(event.resource, event.request)
+
+    # Update with view headers
+    aux = getattr(event.view, "__extra_headers__", {})
+    if isinstance(aux, dict):
+        extra_headers.update(**aux)
+    elif isinstance(aux, callable):
+        extra_headers.update(**aux(context=event.resource,
+                                   request=event.request))
+
+    if not extra_headers:
         return
-    max_age_s = httpcache_settings.get('max_age', 0)
-    cache_control = f'max-age={max_age_s}'
-    public = httpcache_settings.get('public', False)
-    if public:
-        cache_control += ', public'
-    else:
-        cache_control = ', private'
-    httpcache_hdrs = {
-        'Cache-Control': cache_control,
-        'ETag': 'foobar',  # TODO: what to use here?
-    }
-    httpcache_hdrs.update(extra_headers)
     # Add http cache headers on response
-    event.response._headers.update(**httpcache_hdrs)
+    event.response._headers.update(**extra_headers)

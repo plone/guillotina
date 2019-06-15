@@ -399,6 +399,9 @@ COMMIT;''')
 
 @pytest.fixture(scope='function')
 def simple_httpcache():
+
+    import pdb; pdb.set_trace()
+
     app_settings.setdefault('load_utilities', {})
     app_settings['load_utilities']['httpcache'] = {
         "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",

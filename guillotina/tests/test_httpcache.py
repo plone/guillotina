@@ -1,7 +1,7 @@
 import json
 
 
-async def test_returned_on_default_get(container_requester, simple_httpcache):
+async def test_returned_on_default_get(simple_httpcache, container_requester):
     async with container_requester as requester:
         _, status, headers = await requester.make_request('GET', '/db/guillotina')
         assert status == 200
