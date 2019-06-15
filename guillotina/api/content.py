@@ -24,7 +24,6 @@ from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ComponentLookupError
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
-from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IConstrainTypes
@@ -222,11 +221,9 @@ class DefaultPOST(Service):
         data['id'] = obj.id
         await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
 
-        absolute_url = query_multi_adapter((obj, self.request), IAbsoluteURL)
-
         headers = {
             'Access-Control-Expose-Headers': 'Location',
-            'Location': absolute_url()
+            'Location': get_object_url(obj, self.request)
         }
 
         serializer = query_multi_adapter(
@@ -347,12 +344,12 @@ async def sharing_get(context, request):
     result['local']['prinrole'] = prinrole._bycol
     for obj in iter_parents(context):
         roleperm = IRolePermissionMap(obj, None)
-        url_factory = query_multi_adapter((obj, request), IAbsoluteURL)
-        if roleperm is not None and url_factory is not None:
+        url = get_object_url(obj, request)
+        if roleperm is not None and url is not None:
             prinperm = IPrincipalPermissionMap(obj)
             prinrole = IPrincipalRoleMap(obj)
             result['inherit'].append({
-                '@id': url_factory(),
+                '@id': url,
                 'roleperm': roleperm._bycol,
                 'prinperm': prinperm._bycol,
                 'prinrole': prinrole._bycol,
@@ -605,9 +602,8 @@ async def move(context, request):
             reason=error_reasons.REQUIRED_PARAM_MISSING,
             status=412)
 
-    absolute_url = query_multi_adapter((context, request), IAbsoluteURL)
     return {
-        '@url': absolute_url()
+        '@url': get_object_url(context, request)
     }
 
 
