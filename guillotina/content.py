@@ -1,7 +1,20 @@
+import os
+import pathlib
 from copy import deepcopy
 from datetime import datetime
+from typing import AsyncIterator
+from typing import FrozenSet
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
+
 from dateutil.tz import tzutc
+
+import guillotina.db.orm.base
 from guillotina import configure
+from guillotina import task_vars
 from guillotina._cache import BEHAVIOR_CACHE
 from guillotina._cache import FACTORY_CACHE
 from guillotina._cache import PERMISSIONS_CACHE
@@ -16,7 +29,9 @@ from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.component.factory import Factory
-from guillotina.db import oid
+from guillotina.db import uid
+from guillotina.db.interfaces import ITransaction
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
 from guillotina.events import BeforeObjectMovedEvent
@@ -28,6 +43,7 @@ from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
+from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
@@ -37,7 +53,6 @@ from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IJavaScriptApplication
 from guillotina.interfaces import ILayers
@@ -54,24 +69,13 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
-from guillotina.utils import get_current_request
+from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
-from typing import AsyncIterator
-from typing import FrozenSet
-from typing import Iterator
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from zope.interface import Interface
 from zope.interface import alsoProvides
 from zope.interface import implementer
-from zope.interface import Interface
 from zope.interface import noLongerProvides
 from zope.interface.interfaces import ComponentLookupError
-
-import guillotina.db.orm.base
-import os
-import pathlib
 
 
 _zone = tzutc()  # utz tz is much faster than local tz info
@@ -109,8 +113,8 @@ class ResourceFactory(Factory):
         obj.modification_date = now
         if id is None:
             if obj.__uuid__ is None:
-                obj.__uuid__ = app_settings['oid_generator'](obj)
-            obj.id = oid.get_short_oid(obj.__uuid__)
+                obj.__uuid__ = app_settings['uid_generator'](obj)
+            obj.id = uid.get_short_oid(obj.__uuid__)
         else:
             obj.id = id
         obj.__name__ = obj.id
@@ -294,10 +298,13 @@ class Folder(Resource):
     to work with contained objects asynchronously.
     """
 
-    def _get_transaction(self):
+    def _get_transaction(self) -> ITransaction:
         if self.__txn__ is not None:
             return self.__txn__
-        return get_transaction()
+        txn = get_transaction()
+        if txn is not None:
+            return txn
+        raise TransactionNotFound()
 
     async def async_contains(self, key: str) -> bool:
         """
@@ -322,14 +329,15 @@ class Folder(Resource):
             trns.register(value)
 
     async def async_get(self, key: str, default=None,
-                        suppress_events=False) -> Resource:
+                        suppress_events=False) -> Optional[IBaseObject]:
         """
         Asynchronously get an object inside this folder
 
         :param key: key of child object to get
         """
         try:
-            val = await self._get_transaction().get_child(self, key)
+            txn = self._get_transaction()
+            val = await txn.get_child(self, key)
             if val is not None:
                 if not suppress_events:
                     await notify(ObjectLoadedEvent(val))
@@ -339,14 +347,14 @@ class Folder(Resource):
         return default
 
     async def async_multi_get(self, keys: List[str], default=None,
-                              suppress_events=False) -> AsyncIterator[
-            Tuple[Resource]]:
+                              suppress_events=False) -> AsyncIterator[IBaseObject]:
         """
         Asynchronously get an multiple objects inside this folder
 
         :param keys: keys of child objects to get
         """
-        async for item in self._get_transaction().get_children(self, keys):
+        txn = self._get_transaction()
+        async for item in txn.get_children(self, keys):  # type: ignore
             yield item
 
     async def async_del(self, key: str) -> None:
@@ -355,7 +363,10 @@ class Folder(Resource):
 
         :param key: key of child objec to delete
         """
-        return self._get_transaction().delete(await self.async_get(key))
+        txn = self._get_transaction()
+        obj = await self.async_get(key)
+        if obj is not None:
+            return txn.delete(obj)
 
     async def async_len(self) -> int:
         """
@@ -374,14 +385,16 @@ class Folder(Resource):
         """
         Asynchronously iterate through contents of folder
         """
-        async for key, value in self._get_transaction().items(self):
+        txn = self._get_transaction()
+        async for key, value in txn.items(self):  # type: ignore
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))
             yield key, value
 
     async def async_values(self, suppress_events=False) -> AsyncIterator[
             Tuple[Resource]]:
-        async for _, value in self._get_transaction().items(self):
+        txn = self._get_transaction()
+        async for _, value in txn.items(self):  # type: ignore
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))
             yield value
@@ -600,12 +613,10 @@ async def create_content_in_container(
             permission = query_utility(IPermission, name=factory.add_permission)
             PERMISSIONS_CACHE[factory.add_permission] = permission
 
-        if request is None:
-            request = get_current_request()
-
-        if permission is not None and \
-                not IInteraction(request).check_permission(permission.id, parent):
-            raise NoPermissionToAdd(str(parent), type_)
+        if permission is not None:
+            policy = get_security_policy()
+            if not policy.check_permission(permission.id, parent):
+                raise NoPermissionToAdd(str(parent), type_)
 
     constrains = IConstrainTypes(parent, None)
     if constrains is not None:
@@ -662,8 +673,12 @@ async def duplicate(context: IResource,
                     new_id: str=None, check_permission: bool=True) -> IResource:
     if destination is not None:
         if isinstance(destination, str):
-            request = get_current_request()
-            destination_ob = await navigate_to(request.container, destination)
+            container = task_vars.container.get()
+            if container:
+                destination_ob = await navigate_to(container, destination)
+            else:
+                raise PreconditionFailed(
+                    context, 'Could not find destination object',)
         else:
             destination_ob = destination
 
@@ -674,9 +689,8 @@ async def duplicate(context: IResource,
         destination_ob = context.__parent__
 
     if check_permission:
-        request = get_current_request()
-        security = IInteraction(request)
-        if not security.check_permission('guillotina.AddContent', destination_ob):
+        policy = get_security_policy()
+        if not policy.check_permission('guillotina.AddContent', destination_ob):
             raise PreconditionFailed(
                 context, 'You do not have permission to add content to '
                          'the destination object',)
@@ -732,11 +746,14 @@ async def move(context: IResource,
         destination_ob = context.__parent__
     else:
         if isinstance(destination, str):
-            request = get_current_request()
-            try:
-                destination_ob = await navigate_to(request.container, destination)
-            except KeyError:
-                destination_ob = None
+            container = task_vars.container.get()
+            if container is not None:
+                try:
+                    destination_ob = await navigate_to(container, destination)
+                except KeyError:
+                    destination_ob = None
+            else:
+                raise PreconditionFailed(context, 'Could not find destination object')
         else:
             destination_ob = destination
 
@@ -754,9 +771,8 @@ async def move(context: IResource,
         new_id = context.id
 
     if check_permission:
-        request = get_current_request()
-        security = IInteraction(request)
-        if not security.check_permission('guillotina.AddContent', destination_ob):
+        policy = get_security_policy()
+        if not policy.check_permission('guillotina.AddContent', destination_ob):
             raise PreconditionFailed(
                 context, 'You do not have permission to add content to the '
                          'destination object')

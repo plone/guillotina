@@ -1,22 +1,22 @@
-from guillotina.db import oid
+from guillotina.db import uid
 from guillotina.tests import utils
 
 
-def test_generate_oid():
+def test_generate_uid():
     ob = utils.create_content()
-    assert len(oid.generate_oid(ob)) == oid.UUID_LENGTH  # should just be UUID here
+    assert len(uid.generate_uid(ob)) == uid.UUID_LENGTH  # should just be UUID here
 
 
-def test_generate_oid_with_parent():
+def test_generate_uid_with_parent():
     ob = utils.create_content()
     parent = ob.__parent__ = utils.create_content()
     parent.__parent__ = utils.create_content()
-    zoid = oid.generate_oid(ob)
-    assert len(zoid) == (oid.UUID_LENGTH + len(oid.OID_DELIMITER) + oid.OID_SPLIT_LENGTH)
-    assert zoid.startswith(parent.__uuid__[:oid.OID_SPLIT_LENGTH] + oid.OID_DELIMITER)
+    zoid = uid.generate_uid(ob)
+    assert len(zoid) == (uid.UUID_LENGTH + len(uid.OID_DELIMITER) + uid.UID_SPLIT_LENGTH)
+    assert zoid.startswith(parent.__uuid__[:uid.UID_SPLIT_LENGTH] + uid.OID_DELIMITER)
 
 
-def test_generate_oid_with_parents():
+def test_generate_uid_with_parents():
     parent = utils.create_content(
         parent=utils.create_content(
             parent=utils.create_content(
@@ -28,5 +28,5 @@ def test_generate_oid_with_parents():
                                     parent=utils.create_content(
                                         parent=utils.create_content())))))))))
     ob = utils.create_content(parent=parent)
-    zoid = oid.generate_oid(ob)
-    assert len(zoid) == oid.MAX_OID_LENGTH
+    zoid = uid.generate_uid(ob)
+    assert len(zoid) == uid.MAX_UID_LENGTH

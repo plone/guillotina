@@ -8,7 +8,6 @@ from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.files.utils import read_request_data
-from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IFileStorageManager
@@ -20,6 +19,7 @@ from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import apply_coroutine
+from guillotina.utils import get_object_url
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
@@ -246,12 +246,12 @@ class FileManager(object):
 
         if 'filename' in self.request.matchdict:
             location = posixpath.join(
-                IAbsoluteURL(self.context, self.request)(),
+                get_object_url(self.context, self.request),
                 '@tusupload', self.field.__name__,
                 self.request.matchdict['filename'])
         else:
             location = posixpath.join(
-                IAbsoluteURL(self.context, self.request)(),
+                get_object_url(self.context, self.request),
                 '@tusupload', self.field.__name__)
 
         return Response(status=201, headers={

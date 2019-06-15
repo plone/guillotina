@@ -1,22 +1,21 @@
 from guillotina.auth import role
 from guillotina.event import notify
+from guillotina.events import ObjectPermissionsModifiedEvent
+from guillotina.exceptions import PreconditionFailed
 from guillotina.interfaces import Deny
-from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IInheritPermissionManager
+from guillotina.interfaces import IInheritPermissionMap
+from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IRolePermissionMap
-from guillotina.interfaces import IPrincipalPermissionManager
-from guillotina.interfaces import IInheritPermissionManager
-from guillotina.interfaces import IInheritPermissionMap
 from guillotina.interfaces import IRolePermissionManager
-from guillotina.events import ObjectPermissionsModifiedEvent
+from guillotina.interfaces import IRolePermissionMap
+from guillotina.security.policy import cached_principals
+from guillotina.security.policy import cached_roles
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
-from guillotina.exceptions import PreconditionFailed
-
-from guillotina.utils import get_current_request
 
 
 def protect_view(cls, permission):
@@ -31,10 +30,7 @@ def get_roles_with_access_content(obj, request=None):
     """ Return the roles that has access to the content that are global roles"""
     if obj is None:
         return []
-    if request is None:
-        request = get_current_request()
-    interaction = IInteraction(request)
-    roles = interaction.cached_roles(obj, 'guillotina.AccessContent', 'o')
+    roles = cached_roles(obj, 'guillotina.AccessContent', 'o')
     result = []
     all_roles = role.global_roles() + role.local_roles()
     for r in roles.keys():
@@ -46,16 +42,13 @@ def get_roles_with_access_content(obj, request=None):
 def get_principals_with_access_content(obj, request=None):
     if obj is None:
         return []
-    if request is None:
-        request = get_current_request()
-    interaction = IInteraction(request)
-    roles = interaction.cached_roles(obj, 'guillotina.AccessContent', 'o')
+    roles = cached_roles(obj, 'guillotina.AccessContent', 'o')
     result = []
     all_roles = role.global_roles() + role.local_roles()
     for r in roles.keys():
         if r in all_roles:
             result.append(r)
-    users = interaction.cached_principals(obj, result, 'guillotina.AccessContent', 'o')
+    users = cached_principals(obj, result, 'guillotina.AccessContent', 'o')
     return list(users.keys())
 
 

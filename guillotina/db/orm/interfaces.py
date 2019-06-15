@@ -10,6 +10,9 @@ class IBaseObject(Interface):
     """Python base object interface
     """
 
+    __name__ = Attribute('')
+    __parent__ = Attribute('')
+
     __txn__ = Attribute(
         """The data manager for the object.
 

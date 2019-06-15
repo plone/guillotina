@@ -4,6 +4,42 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Moved `IInteraction.cached_principals` to module level function `guillotina.security.policy.cached_principals`
+
+- Moved `IInteraction.cached_roles` to module level function `guillotina.security.policy.cached_roles`
+
+- `utils.get_authenticated_user_id` no longer accepts `request` param
+
+- `utils.get_authenticated_user` no longer accepts `request` param
+
+- Removed `guillotina.exceptions.NoInteraction`
+
+- Removed `guillotina.interfaces.IInteraction`
+
+- `auth_user_identifiers` no longer accept `IRequest` in the constructor. Use `utils.get_current_request`
+
+- `auth_user_identifiers` no longer accept `IRequest` in constructor. Use `utils.get_current_request`
+
+- Remove `IInteraction`. Use `get_utility(ISecurityPolicy)`
+
+- Remove `Request._db_write_enabled`, `Transaction` now has `read_only` property
+
+- Remove `Request._db_id`, Use `guillotina.task_vars.db.get().id`
+
+- Remove `Request.container_settings`, Use `guillotina.utils.get_registry`
+
+- Remove `Request._container_id`, use `guillotina.task_vars.container.get().id`
+
+- Remove `Request.container`, Use `guillotina.task_vars.container.get()`
+
+- Remove `Request.add_future`. Use `guillotina.utils.execute.add_future`
+
+- Add `guillotina.utils.get_container`
+
+- Rename `request_indexer` setting to `indexer`
+
+- Rename `guillotina.catalog.index.RequestIndexer` to `guillotina.catalog.index.Indexer`
+
 - Rename `IWriter.parent_id` to `IWriter.parent_uid`
 
 - Rename `guillotina.db.oid` to `guillotina.db.uid`

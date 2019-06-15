@@ -1,6 +1,7 @@
 import asyncio
 
 import aiohttp
+from guillotina import task_vars
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.commands import Command
 from guillotina.component import get_utility
@@ -132,7 +133,7 @@ class TestDataCommand(Command):
 
     async def generate_test_data(self, db):
         tm = db.get_transaction_manager()
-        self.request._db_id = db.id
+        task_vars.db.set(db)
         tm = db.get_transaction_manager()
         txn = await tm.begin()
 
@@ -143,7 +144,6 @@ class TestDataCommand(Command):
             container.__name__ = self.arguments.container
             await db.async_set(self.arguments.container, container)
             await container.install()
-            self.request._container_id = container.__name__
             # Local Roles assign owner as the creator user
             roleperm = IPrincipalRoleManager(container)
             roleperm.assign_role_to_principal('guillotina.Owner', 'root')
@@ -152,8 +152,7 @@ class TestDataCommand(Command):
             await tm.commit(txn=txn)
             txn = await tm.begin()
 
-        self.request.container = container
-        self.request._container_id = container.id
+        task_vars.container.set(container)
 
         api = WikipediaAPI()
         folder_count = 0

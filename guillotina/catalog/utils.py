@@ -24,7 +24,7 @@ def get_metadata_fields(type_name):
     return fields
 
 
-def reindex_in_future(context, request, security=False):
+def reindex_in_future(context, security=False):
     '''
     Function to reindex a tree of content in the catalog.
     '''
@@ -32,5 +32,4 @@ def reindex_in_future(context, request, security=False):
     if search is not None:
         execute.in_pool(
             search.reindex_all_content,
-            context, security,
-            request=request).after_request()
+            context, security).after_request()

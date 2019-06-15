@@ -1,8 +1,10 @@
 import posixpath
 import weakref
 
-from .content import get_content_path
+from guillotina import task_vars
 from guillotina.interfaces import IResource
+
+from .content import get_content_path
 
 
 class Navigator:
@@ -28,6 +30,9 @@ class Navigator:
         self.container = container
         self.index = weakref.WeakValueDictionary()
         self.deleted = {}
+
+        task_vars.container.set(container)
+        task_vars.txn.set(txn)
 
         self.sync()
 

@@ -1,8 +1,8 @@
 import uuid
 
 
-MAX_OID_LENGTH = 64
-OID_SPLIT_LENGTH = 3
+MAX_UID_LENGTH = 64
+UID_SPLIT_LENGTH = 3
 UUID_LENGTH = 32
 # | is sorted *after* alphanumeric characters so parents
 # will show before their children in the key range
@@ -11,7 +11,7 @@ UUID_LENGTH = 32
 OID_DELIMITER = '|'
 
 # max object depth this provides best benefit to is:
-#   (MAX_OID_LENGTH - UUID_LENGTH) / OID_SPLIT_LENGTH
+#   (MAX_UID_LENGTH - UUID_LENGTH) / UID_SPLIT_LENGTH
 
 
 def get_short_oid(oid):
@@ -22,7 +22,7 @@ def bw_oid_generator(ob):
     return uuid.uuid4().hex
 
 
-def generate_oid(ob):
+def generate_uid(ob):
     '''
     We want OIDs that allow keys to organize data where it is logically
     in the hierarchy of data in the object tree.
@@ -45,11 +45,11 @@ def generate_oid(ob):
         parent = current.__parent__
         if parent.__parent__:
             # no value in including root as part of this...
-            parts.append(get_short_oid(parent.__uuid__)[:OID_SPLIT_LENGTH])
+            parts.append(get_short_oid(parent.__uuid__)[:UID_SPLIT_LENGTH])
         current = current.__parent__
     parts = parts[::-1]  # reverse it
     if ob.__of__:
-        parts.append(ob.__of__[:OID_SPLIT_LENGTH])
+        parts.append(ob.__of__[:UID_SPLIT_LENGTH])
     short_oid = uuid.uuid4().hex
     if len(parts) > 0:
         oid = '{}{}{}'.format(
@@ -58,4 +58,4 @@ def generate_oid(ob):
             short_oid)
     else:
         oid = short_oid
-    return oid[-MAX_OID_LENGTH:]  # trim any possible extra...
+    return oid[-MAX_UID_LENGTH:]  # trim any possible extra...

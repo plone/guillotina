@@ -58,13 +58,14 @@ class BaseObject:
         object.__setattr__(inst, '_BaseObject__of', None)
         object.__setattr__(inst, '_BaseObject__name', None)
         object.__setattr__(inst, '_BaseObject__immutable_cache', False)
+        object.__setattr__(inst, '_BaseObject__volatile', {})
         return inst
 
     def __repr__(self):
         return "<%s %d>" % (self.__class__.__name__, id(self))
 
     __slots__ = ('__parent', '__of', '__name', '__annotations', '__immutable_cache',
-                 '__new_marker', '__txn', '__uuid', '__serial')
+                 '__new_marker', '__txn', '__uuid', '__serial', '__volatile')
     __parent__: Optional[IBaseObject] = ObjectProperty[  # type: ignore
         Optional[IBaseObject]]('_BaseObject__parent', None)
     __of__: Optional[IBaseObject] = ObjectProperty[Optional[IBaseObject]](  # type: ignore
@@ -77,6 +78,7 @@ class BaseObject:
         '_BaseObject__txn', None)
     __uuid__: str = ObjectProperty[str]('_BaseObject__uuid', None)  # type: ignore
     __serial__: int = ObjectProperty[int]('_BaseObject__serial', None)  # type: ignore
+    __volatile__: Dict = DictDefaultProperty('_BaseObject__volatile')  # type: ignore
 
     def register(self):
         txn = self.__txn__

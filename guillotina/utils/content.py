@@ -2,12 +2,14 @@ import string
 import typing
 
 from guillotina import glogging
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.reader import reader
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IApplication
@@ -79,8 +81,8 @@ async def get_containers(request):
     for _id, db in root:
         if IDatabase.providedBy(db):
             tm = db.get_transaction_manager()
-            request._db_id = _id
-            with tm:
+            async with tm:
+                task_vars.db.set(db)
                 async with tm.lock:
                     # reset _txn to make sure to create a new ob
                     request._txn = None
@@ -91,19 +93,16 @@ async def get_containers(request):
                     await tm.abort(txn=txn)
 
                 for _, container in items.items():
-                    request._txn = txn = await tm.begin()
-                    container.__txn__ = request._txn
-                    request.container = container
-                    request._container_id = container.id
-                    if hasattr(request, 'container_settings'):
-                        del request.container_settings
-                    yield txn, tm, container
-                    try:
-                        # do not rely on consumer of object to always close it.
-                        # there is no harm in aborting twice
-                        await tm.abort(txn=txn)
-                    except Exception:
-                        logger.warn('Error aborting transaction', exc_info=True)
+                    with await tm.begin() as txn:
+                        container.__txn__ = txn
+                        task_vars.container.set(container)
+                        yield txn, tm, container
+                        try:
+                            # do not rely on consumer of object to always close it.
+                            # there is no harm in aborting twice
+                            await tm.abort(txn=txn)
+                        except Exception:
+                            logger.warn('Error aborting transaction', exc_info=True)
 
 
 def get_owners(obj: IResource) -> list:
@@ -163,7 +162,7 @@ def get_object_url(ob: IResource,
     return None
 
 
-async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
+async def get_object_by_oid(oid: str, txn=None) -> IBaseObject:
     '''
     Get an object from an oid
 
@@ -184,7 +183,11 @@ async def get_object_by_oid(oid: str, txn=None) -> typing.Optional[IResource]:
     obj = reader(result)
     obj.__txn__ = txn
     if result['parent_id']:
-        obj.__parent__ = await get_object_by_oid(result['parent_id'], txn)
+        parent = await get_object_by_oid(result['parent_id'], txn)
+        if parent is not None:
+            obj.__parent__ = parent
+        else:
+            raise KeyError(result['parent_id'])
     return obj
 
 

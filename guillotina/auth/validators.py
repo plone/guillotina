@@ -15,11 +15,8 @@ from guillotina.utils import strings_differ
 
 logger = logging.getLogger('guillotina')
 
-class BaseValidator(object):
+class BaseValidator:
     for_validators = None
-
-    def __init__(self, request):
-        self.request = request
 
 
 @configure.utility(provides=IPasswordHasher, name='sha512')
@@ -64,14 +61,11 @@ def check_password(token, password):
     return check_func(token, password)
 
 
-class SaltedHashPasswordValidator(object):
+class SaltedHashPasswordValidator:
     for_validators = ('basic', 'wstoken')
 
-    def __init__(self, request):
-        self.request = request
-
     async def validate(self, token):
-        user = await find_user(self.request, token)
+        user = await find_user(token)
         user_pw = getattr(user, 'password', None)
         if (not user_pw or
                 ':' not in user_pw or
@@ -81,11 +75,8 @@ class SaltedHashPasswordValidator(object):
             return user
 
 
-class JWTValidator(object):
+class JWTValidator:
     for_validators = ('bearer', 'wstoken', 'cookie')
-
-    def __init__(self, request):
-        self.request = request
 
     async def validate(self, token):
         if token.get('type') not in ('bearer', 'wstoken', 'cookie'):
@@ -102,7 +93,7 @@ class JWTValidator(object):
                 algorithms=[app_settings['jwt']['algorithm']])
             token['id'] = validated_jwt['id']
             token['decoded'] = validated_jwt
-            user = await find_user(self.request, token)
+            user = await find_user(token)
             if user is not None and user.id == token['id']:
                 return user
         except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError,

@@ -58,14 +58,14 @@ class MyAddon(Addon):
 
     @classmethod
     def install(cls, container, request):
-        registry = request.container_settings
+        registry = task_vars.registry.get()
         registry.for_interface(ILayers).active_layers |= {
             LAYER
         }
 
     @classmethod
     def uninstall(cls, container, request):
-        registry = request.container_settings
+        registry = task_vars.registry.get()
         registry.for_interface(ILayers).active_layers -= {
             LAYER
         }

@@ -7,9 +7,9 @@ from copy import deepcopy
 from aiohttp import web
 from guillotina import configure
 from guillotina import glogging
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina._settings import default_settings
-from guillotina._settings import request_var
 from guillotina.behaviors import apply_concrete_behaviors
 from guillotina.component import get_utility
 from guillotina.component import provide_utility
@@ -121,7 +121,7 @@ def load_application(module, root, settings):
 
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
-        request_var.set(request)
+        task_vars.request.set(request)
         try:
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
@@ -165,11 +165,17 @@ _dotted_name_settings = (
     'auth_token_validators',
     'auth_user_identifiers',
     'pg_connection_class',
+    'uid_generator',
     'oid_generator',
     'cors_renderer',
     'check_writable_request',
-    'request_indexer'
+    'indexer'
 )
+
+_moved = {
+    'oid_generator': 'uid_generator',
+    'request_indexer': 'indexer'
+}
 
 def optimize_settings(settings):
     '''
@@ -241,7 +247,6 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.permissions')
     configure.scan('guillotina.security.security_local')
     configure.scan('guillotina.security.policy')
-    configure.scan('guillotina.auth.participation')
     configure.scan('guillotina.catalog.index')
     configure.scan('guillotina.catalog.catalog')
     configure.scan('guillotina.files')
@@ -277,6 +282,12 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     root.app = server_app
     server_app.root = root
     server_app.config = config
+
+    for k, v in _moved.items():
+        # for b/w compatibility, convert these
+        if k in app_settings:
+            app_settings[v] = app_settings[k]
+            del app_settings[k]
 
     optimize_settings(app_settings)
 

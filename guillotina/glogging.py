@@ -1,6 +1,8 @@
 import logging
 import uuid
 
+from guillotina import task_vars
+
 
 def _wrapped(name):
 
@@ -30,13 +32,15 @@ def _wrapped(name):
                 agent = request.headers['User-Agent']
             except (AttributeError, KeyError):
                 agent = 'Unknown'
+            container = task_vars.container.get()
+            db = task_vars.db.get()
             extra.update({
                 'method': request.method,
                 'url': url,
-                'container': getattr(request, '_container_id', None),
-                'account': getattr(request, '_container_id', None),
-                'db_id': getattr(request, '_db_id', None),
-                'user': get_authenticated_user_id(request) or 'Anonymous',
+                'container': getattr(container, 'id', None),
+                'account': getattr(container, 'id', None),
+                'db_id': getattr(db, 'id', None),
+                'user': get_authenticated_user_id() or 'Anonymous',
                 'eid': eid,
                 'agent': agent,
                 # in case a fake req object doesn't use the guillotina Request object

@@ -20,6 +20,7 @@ from guillotina.interfaces import IApplication
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
+from guillotina.tests.utils import logout
 from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
@@ -191,10 +192,9 @@ class GuillotinaDBRequester(object):
     def transaction(self, request=None):
         if request is None:
             request = get_mocked_request(self.db)
-        login(request)
+        login()
         return wrap_request(
-            request, transaction(
-                db=self.db, write=True, adopt_parent_txn=True))
+            request, transaction(db=self.db, adopt_parent_txn=True))
 
 
 async def close_async_tasks(app):
@@ -214,6 +214,7 @@ def dummy_guillotina(loop):
         loop.run_until_complete(close_async_tasks(aioapp))
     except asyncio.CancelledError:
         pass
+    logout()
 
 
 class DummyRequestAsyncContextManager(object):
@@ -287,6 +288,8 @@ def guillotina_main(loop):
     loop.run_until_complete(_clear_dbs(aioapp.root))
 
     yield aioapp
+
+    logout()
     try:
         loop.run_until_complete(close_async_tasks(aioapp))
     except asyncio.CancelledError:

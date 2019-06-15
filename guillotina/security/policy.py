@@ -1,30 +1,17 @@
-##############################################################################
-#
-# Copyright (c) 2001, 2002 Zope Foundation and Contributors.
-# All Rights Reserved.
-#
-# This software is subject to the provisions of the Zope Public License,
-# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
-# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
-# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE.
-#
-##############################################################################
-"""Define Zope's default security policy
-"""
+import typing
+
 from guillotina import configure
 from guillotina.auth.users import SystemUser
 from guillotina.component import get_utility
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInheritPermissionMap
-from guillotina.interfaces import IInteraction
+from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IRequest
 from guillotina.interfaces import IRolePermissionMap
 from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import IView
@@ -34,10 +21,7 @@ from guillotina.profile import profilable
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
-from guillotina.utils import get_current_request
 from lru import LRU
-from zope.interface import implementer
-from zope.interface import provider
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting
@@ -54,7 +38,10 @@ SettingAsBoolean = {
 }
 
 
-def level_setting_as_boolean(level, value):
+SettingType = typing.Union[bool, None, str]
+
+
+def level_setting_as_boolean(level, value) -> SettingType:
     # We want to check if its allow
     let = SettingAsBoolean[value]
     # Never return False on AllowSingle
@@ -66,57 +53,12 @@ class CacheEntry:
     pass
 
 
-@configure.adapter(
-    for_=IRequest,
-    provides=IInteraction)
-def get_current_interaction(request):
-    """
-    Cache IInteraction on the request object because the request object
-    is where we start adding principals
-    """
-    interaction = getattr(request, 'security', None)
-    if interaction is not None:
-        return interaction
-    interaction = Interaction(request)
-    request.security = interaction
-    return interaction
+@configure.adapter(for_=IPrincipal, provides=ISecurityPolicy)
+class SecurityPolicy:
 
-
-@configure.adapter(for_=None, provides=IInteraction)
-def get_none_interaction(request):
-    """
-    Cache IInteraction on the request object because the request object
-    is where we start adding principals
-    """
-    request = get_current_request()
-    interaction = getattr(request, 'security', None)
-    if interaction is not None:
-        return interaction
-    return Interaction()
-
-
-@implementer(IInteraction)
-@provider(ISecurityPolicy)
-class Interaction(object):
-
-    def __init__(self, request=None):
-        self.participations = []
-        self._cache = LRU(1000)
-        self.principal = None
-
-    def add(self, participation):
-        if participation.interaction is not None:
-            raise ValueError("%r already belongs to an interaction"
-                             % participation)
-        participation.interaction = self
-        self.participations.append(participation)
-
-    def remove(self, participation):
-        if participation.interaction is not self:
-            raise ValueError("%r does not belong to this interaction"
-                             % participation)
-        self.participations.remove(participation)
-        participation.interaction = None
+    def __init__(self, principal: IPrincipal):
+        self.principal = principal
+        self._cache = LRU(100)
 
     def invalidate_cache(self):
         self._cache.clear()
@@ -132,33 +74,20 @@ class Interaction(object):
 
         # Iterate through participations ('principals')
         # and check permissions they give
-        seen = {}
-        for participation in self.participations:
-            principal = getattr(participation, 'principal', None)
-
-            # Invalid participation (no principal)
-            if principal is None:
-                continue
+        if self.principal is not None:
 
             # System user always has access
-            if principal is SystemUser:
+            if self.principal is SystemUser:
                 return True
 
-            # Speed up by skipping seen principals
-            if principal.id in seen:
-                continue
-
-            self.principal = principal
             # Check the permission
-            groups = self._groups_for(principal)
+            groups = getattr(self.principal, 'groups', None) or []
             if self.cached_decision(
                     obj,
-                    principal.id,
+                    self.principal.id,
                     groups,
                     permission):
                 return True
-
-            seen[principal.id] = 1  # mark as seen
 
         return False
 
@@ -204,7 +133,7 @@ class Interaction(object):
 
         # Check Roles permission
         # First get the Roles needed
-        roles = self.cached_roles(parent, permission, 'o')
+        roles = cached_roles(parent, permission, 'o')
         if roles:
             # Get the roles from the user
             prin_roles = self.cached_principal_roles(
@@ -218,8 +147,7 @@ class Interaction(object):
         return decision
 
     @profilable
-    def cached_principal_permission(
-            self, parent, principal, groups, permission, level):
+    def cached_principal_permission(self, parent, principal, groups, permission, level):
         # Compute the permission, if any, for the principal.
         cache = self.cache(parent, level)
 
@@ -348,114 +276,6 @@ class Interaction(object):
         cache_principal_roles[principal] = roles
         return roles
 
-    def _groups_for(self, principal):
-        # Right now no recursive groups
-        return getattr(principal, 'groups', ())
-
-    def cached_roles(self, parent, permission, level):
-        """Get the roles for a specific permission.
-
-        Global + Local + Code
-        """
-        cache = self.cache(parent, level)
-        try:
-            cache_roles = cache.roles
-        except AttributeError:
-            cache_roles = cache.roles = {}
-        try:
-            return cache_roles[permission]
-        except KeyError:
-            pass
-
-        if parent is None:
-            roles = dict(
-                [(role, 1)
-                 for (role, setting) in code_roles_for_permission(permission)
-                 if setting is Allow])
-            cache_roles[permission] = roles
-            return roles
-
-        perminhe = IInheritPermissionMap(parent, None)
-
-        if perminhe is None or perminhe.get_inheritance(permission) is Allow:
-            roles = self.cached_roles(
-                getattr(parent, '__parent__', None),
-                permission, 'p')
-        else:
-            # We don't apply global permissions also
-            # Its dangerous as may lead to an object who nobody can see
-            roles = dict()
-
-        roleper = IRolePermissionMap(parent, None)
-        if roleper:
-            roles = roles.copy()
-            for role, setting in roleper.get_roles_for_permission(permission):
-                if setting is Allow:
-                    roles[role] = 1
-                elif setting is AllowSingle and level == 'o':
-                    roles[role] = 1
-                elif setting is Deny and role in roles:
-                    del roles[role]
-
-        if level != 'o':
-            # Only cache on non 1rst level queries needs new way
-            cache_roles[permission] = roles
-        return roles
-
-    def cached_principals(self, parent, roles, permission, level):
-        """Get the roles for a specific permission.
-
-        Global + Local + Code
-        """
-        cache = self.cache(parent, level)
-        try:
-            cache_principals = cache.principals
-        except AttributeError:
-            cache_principals = cache.principals = {}
-        try:
-            return cache_principals[permission]
-        except KeyError:
-            pass
-
-        if parent is None:
-            principals = dict(
-                [(role, 1)
-                 for (role, setting) in code_principals_for_permission(permission)
-                 if setting is Allow])
-            cache_principals[permission] = principals
-            return principals
-
-        principals = self.cached_principals(
-            getattr(parent, '__parent__', None),
-            roles,
-            permission, 'p')
-        prinperm = IPrincipalPermissionMap(parent, None)
-        if prinperm:
-            principals = principals.copy()
-            for principal, setting in prinperm.get_principals_for_permission(permission):
-                if setting is Allow:
-                    principals[principal] = 1
-                elif setting is AllowSingle and level == 'o':
-                    principals[principal] = 1
-                elif setting is Deny and principal in principals:
-                    del principals[principal]
-
-        prinrole = IPrincipalRoleMap(parent, None)
-        if prinrole:
-            for role in roles:
-                for principal, setting in prinrole.get_principals_for_role(role):
-                    if setting is Allow:
-                        principals[principal] = 1
-                    elif setting is AllowSingle and level == 'o':
-                        principals[principal] = 1
-                    elif setting is Deny and principal in principals:
-                        del principals[principal]
-
-        if level != 'o':
-            # Only cache on non 1rst level queries needs new way
-            cache_principals[permission] = principals
-        return principals
-
     def _global_roles_for(self, principal):
         """On a principal (user/group) get global roles."""
         roles = {}
@@ -466,7 +286,7 @@ class Interaction(object):
             roles = self.principal.roles.copy()
 
             for group in self.principal.groups:
-                roles.update(groups.get_principal(group).roles)
+                roles.update(groups.get_principal(group, self.principal).roles)
             return roles
 
         # We are asking for group id so only group roles
@@ -484,13 +304,116 @@ class Interaction(object):
                 return level_setting_as_boolean('p', permissions[permission])
 
             for group in self.principal.groups:
-                permissions = groups.get_principal(principal).permissions
+                permissions = groups.get_principal(group, self.principal).permissions
                 if permission in permissions:
                     return level_setting_as_boolean('p', permissions[permission])
-
-        if groups:
-            # Its a group
-            permissions = groups.get_principal(principal).permissions
-            if permission in permissions:
-                return level_setting_as_boolean('p', permissions[permission])
         return None
+
+
+def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dict[str, int]:
+    """
+    Get the roles for a specific permission.
+    Global + Local + Code
+    """
+    try:
+        cache = parent.__volatile__.setdefault('security_cache', {})
+    except AttributeError:
+        cache = {}
+    try:
+        cache_roles = cache['roles']
+    except KeyError:
+        cache_roles = cache['roles'] = {}
+    try:
+        return cache_roles[permission + level]
+    except KeyError:
+        pass
+
+    if parent is None:
+        roles = dict(
+            [(role, 1)
+                for (role, setting) in code_roles_for_permission(permission)
+                if setting is Allow])
+        cache_roles[permission + level] = roles
+        return roles
+
+    perminhe = IInheritPermissionMap(parent, None)
+
+    if perminhe is None or perminhe.get_inheritance(permission) is Allow:
+        roles = cached_roles(
+            getattr(parent, '__parent__', None),
+            permission, 'p')
+    else:
+        # We don't apply global permissions also
+        # Its dangerous as may lead to an object who nobody can see
+        roles = dict()
+
+    roleper = IRolePermissionMap(parent, None)
+    if roleper:
+        roles = roles.copy()
+        for role, setting in roleper.get_roles_for_permission(permission):
+            if setting is Allow:
+                roles[role] = 1
+            elif setting is AllowSingle and level == 'o':
+                roles[role] = 1
+            elif setting is Deny and role in roles:
+                del roles[role]
+
+    cache_roles[permission + level] = roles
+    return roles
+
+
+def cached_principals(parent: IBaseObject, roles: typing.List[str],
+                      permission: str, level: str) -> typing.Dict[str, int]:
+    """Get the roles for a specific permission.
+
+    Global + Local + Code
+    """
+    try:
+        cache = parent.__volatile__.setdefault('security_cache', {})
+    except AttributeError:
+        cache = {}
+    try:
+        cache_principals = cache['principals']
+    except KeyError:
+        cache_principals = cache['principals'] = {}
+    try:
+        return cache_principals[permission + level]
+    except KeyError:
+        pass
+
+    if parent is None:
+        principals = dict(
+            [(role, 1)
+                for (role, setting) in code_principals_for_permission(permission)
+                if setting is Allow])
+        cache_principals[permission + level] = principals
+        return principals
+
+    principals = cached_principals(
+        getattr(parent, '__parent__', None),
+        roles,
+        permission, 'p')
+    prinperm = IPrincipalPermissionMap(parent, None)
+    if prinperm:
+        principals = principals.copy()
+        for principal, setting in prinperm.get_principals_for_permission(permission):
+            if setting is Allow:
+                principals[principal] = 1
+            elif setting is AllowSingle and level == 'o':
+                principals[principal] = 1
+            elif setting is Deny and principal in principals:
+                del principals[principal]
+
+    prinrole = IPrincipalRoleMap(parent, None)
+    if prinrole:
+        for role in roles:
+            for principal, setting in prinrole.get_principals_for_role(role):
+                if setting is Allow:
+                    principals[principal] = 1
+                elif setting is AllowSingle and level == 'o':
+                    principals[principal] = 1
+                elif setting is Deny and principal in principals:
+                    del principals[principal]
+
+    cache_principals[permission + level] = principals
+    return principals

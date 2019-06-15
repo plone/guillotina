@@ -1,25 +1,12 @@
 import logging
 import typing
 
-from guillotina._settings import tm_var
-from guillotina._settings import txn_var
+from guillotina import task_vars
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
-from guillotina.exceptions import RequestNotFound
-from guillotina.interfaces import IRequest
-from guillotina.utils import get_current_request
 
 
 logger = logging.getLogger('guillotina')
-
-
-def _safe_get_request(request: typing.Optional[IRequest]=None) -> typing.Optional[IRequest]:
-    if request is None:
-        try:
-            request = get_current_request()
-        except RequestNotFound:
-            pass
-    return request
 
 
 async def commit(*, txn: typing.Optional[ITransaction]=None, warn=True) -> None:
@@ -72,7 +59,7 @@ def get_tm() -> typing.Optional[ITransactionManager]:
         # transaction txn commits or raises ConflictError
 
     """
-    return typing.cast(ITransactionManager, tm_var.get())
+    return task_vars.tm.get()
 
 
 def get_transaction() -> typing.Optional[ITransaction]:
@@ -82,7 +69,7 @@ def get_transaction() -> typing.Optional[ITransaction]:
     :param request: request object transaction is connected to
 
     '''
-    return typing.cast(ITransaction, txn_var.get())
+    return task_vars.txn.get()
 
 
 class transaction:  # noqa: N801
@@ -102,13 +89,11 @@ class transaction:  # noqa: N801
     :param execute_futures: Execute registered futures with transaction after done (defaults to true)
     '''
 
-    def __init__(self, *, db=None, tm=None, write=False, abort_when_done=False,
+    def __init__(self, *, db=None, tm=None, abort_when_done=False,
                  adopt_parent_txn=False, execute_futures=True):
-        self.request = _safe_get_request()
         if db is not None and tm is None:
             tm = db.get_transaction_manager()
         self.tm = tm or get_tm()
-        self.write = write
         self.abort_when_done = abort_when_done
         self.previous_txn = self.txn = self.previous_write_setting = None
         self.adopt_parent_txn = adopt_parent_txn
@@ -116,18 +101,14 @@ class transaction:  # noqa: N801
         self.adopted = []
 
     async def __aenter__(self):
-        self.previous_write_setting = getattr(self.request, '_db_write_enabled', False)
-        if self.write and self.request is not None:
-            self.request._db_write_enabled = True
-
         txn = get_transaction()
         if txn is not None:
             self.previous_txn = txn
 
         self.txn = await self.tm.begin()
         # these should be restored after
-        tm_var.set(self.tm)
-        txn_var.set(self.txn)
+        task_vars.tm.set(self.tm)
+        task_vars.txn.set(self.txn)
         return self.txn
 
     def adopt_objects(self, obs, txn):
@@ -176,12 +157,9 @@ class transaction:  # noqa: N801
                 for ob in self.adopted:
                     ob.__txn__ = self.previous_txn
 
-        if self.request is not None:
-            if self.previous_write_setting is not None:
-                self.request._db_write_enabled = self.previous_write_setting
-
-            if self.execute_futures:
-                self.request.execute_futures()
+        if self.execute_futures:
+            from guillotina.utils import execute
+            execute.execute_futures()
 
 
 managed_transaction = transaction  # noqa

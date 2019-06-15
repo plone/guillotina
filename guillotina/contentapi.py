@@ -1,39 +1,20 @@
 import typing
 
+from guillotina import task_vars
 from guillotina._settings import app_settings
-from guillotina._settings import request_var
-from guillotina._settings import txn_var
 from guillotina.auth.users import RootUser
+from guillotina.auth.utils import set_authenticated_user
 from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
-from guillotina.exceptions import RequestNotFound
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IParticipation
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
-from guillotina.registry import REGISTRY_DATA_KEY
-from guillotina.security.policy import Interaction
 from guillotina.tests.utils import get_mocked_request
-from guillotina.utils import get_current_request
 from guillotina.utils import get_object_url
+from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
-
-
-async def login(request, user):
-    request.security = Interaction(request)
-    request._cache_user = user
-    participation = IParticipation(request)
-    await participation()
-    request.security.add(participation)
-    request.security.invalidate_cache()
-    request._cache_groups = {}
-
-def logout(request):
-    request.security = None
-    request._cache_groups = {}
-    request._cache_user = None
 
 
 class ContentAPI:
@@ -43,38 +24,31 @@ class ContentAPI:
         self.tm = db.get_transaction_manager()
         self.request = get_mocked_request()
         self.user = user
-        self.request._db_id = db.id
         self._active_txn = None
 
     async def __aenter__(self):
-        try:
-            self._existing_request = get_current_request()
-        except RequestNotFound:
-            self._existing_request = None
-        request_var.set(self.request)
-        await login(self.request, self.user)
+        task_vars.request.set(self.request)
+        task_vars.db.set(self.db)
+        set_authenticated_user(self.user)
         return self
 
     async def __aexit__(self, *args):
-        logout(self.request)
-        request_var.set(self._existing_request)
+        set_authenticated_user(None)
         # make sure to close out connection
         await self.abort()
 
-    async def use_container(self, container: IResource):
-        self.request.container = container
-        self.request._container_id = container.id
-        annotations_container = IAnnotations(container)
-        self.request.container_settings = await annotations_container.async_get(
-            REGISTRY_DATA_KEY)
-        layers = self.request.container_settings.get(ACTIVE_LAYERS_KEY, [])
-        for layer in layers:
-            alsoProvides(self.request, import_class(layer))
+    async def use_container(self, container: IContainer):
+        task_vars.container.set(container)
+        registry = await get_registry(container)
+        if registry is not None:
+            layers = registry.get(ACTIVE_LAYERS_KEY, [])
+            for layer in layers:
+                alsoProvides(self.request, import_class(layer))
 
     async def get_transaction(self) -> ITransaction:
         if self._active_txn is None:
             self._active_txn = await self.tm.begin()
-            txn_var.set(self._active_txn)
+            task_vars.txn.set(self._active_txn)
         return self._active_txn
 
     async def create(self, payload: dict, in_: IResource=None) -> IResource:

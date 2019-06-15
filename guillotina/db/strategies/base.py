@@ -1,5 +1,3 @@
-from guillotina.utils import get_current_request
-from guillotina.exceptions import RequestNotFound
 
 
 class BaseStrategy:
@@ -9,13 +7,7 @@ class BaseStrategy:
 
     @property
     def writable_transaction(self):
-        try:
-            req = get_current_request()
-            if hasattr(req, '_db_write_enabled'):
-                return req._db_write_enabled
-        except RequestNotFound:
-            pass
-        return True
+        return not self._transaction.read_only
 
     async def tpc_begin(self):
         self._transaction._tid = -1  # temporary before committing
