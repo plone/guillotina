@@ -36,8 +36,12 @@ async def object_event_notify(event):
     for_=IRequestFinishedEvent)
 async def add_http_cache_headers(event):
     """This will add, if configured, the corresponding http cache headers
-    on the response
+    on the response of GET requests
     """
+    if event.request.method != 'GET':
+        # Only cache responses from get requests
+        return
+
     httpcache_settings = app_settings.get('http_cache', {})
     if not httpcache_settings:
         return
