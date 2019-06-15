@@ -1,8 +1,6 @@
 from aiohttp.streams import EmptyStreamReader
 from guillotina.request import GuillotinaRequest
 import asyncio
-import os
-import yaml
 
 
 def headers_to_list(headers):
@@ -150,9 +148,6 @@ class AsgiApp:
             scope=scope,
             receive=receive
         )
-
-        # This is to fake IRequest interface
-        request.record = lambda x: None
 
         route = await self.app.router.resolve(request)
         resp = await route.handler(request)

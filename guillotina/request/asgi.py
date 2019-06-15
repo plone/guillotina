@@ -5,9 +5,11 @@ from guillotina.request import Request
 from starlette.websockets import WebSocket, WebSocketDisconnect
 from typing import Any, Iterator, Tuple
 from yarl import URL
+from collections import OrderedDict
 
 import multidict
 import json
+import time
 import urllib.parse
 
 
@@ -55,12 +57,16 @@ class GuillotinaRequest(Request):
         self._rel_url = URL(path)
         self._raw_headers = raw_headers
         self._payload = payload
+        self._events = OrderedDict()
 
         self._client_max_size = client_max_size
 
         self._read_bytes = None
         self._state = {}
         self._cache = {}
+
+    def record(self, event_name: str):
+        self._events[event_name] = time.time()
 
     def get_ws(self):
         return GuillotinaWebSocket(self.scope,
