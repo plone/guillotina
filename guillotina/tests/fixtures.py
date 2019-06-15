@@ -154,6 +154,17 @@ class GuillotinaDBRequester(object):
     async def __call__(self, method, path, params=None, data=None, authenticated=True,
                        auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
                        accept='application/json', allow_redirects=True):
+
+        value, status, _ = await self.make_request(
+            method, path, params=params, data=data, authenticated=authenticated,
+            auth_type=auth_type, headers=headers, token=token,
+            accept=accept, allow_redirects=allow_redirects
+        )
+        return value, status
+
+    async def make_request(self, method, path, params=None, data=None, authenticated=True,
+                    auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
+                    accept='application/json', allow_redirects=True):
         settings = {}
         headers = headers.copy()
         settings['headers'] = headers
@@ -165,7 +176,7 @@ class GuillotinaDBRequester(object):
 
         settings['form'] = params
         settings['data'] = data
-        #settings['redirect'] = allow_redirects
+        settings['allow_redirects'] = allow_redirects
 
         operation = getattr(self.client, method.lower(), None)
         resp = await operation(path, **settings)
@@ -175,8 +186,7 @@ class GuillotinaDBRequester(object):
             value = resp.text
 
         status = resp.status_code
-        # import pdb; pdb.set_trace()
-        return value, status #, resp.headers
+        return value, status, resp.headers
 
     def transaction(self, request=None):
         if request is None:

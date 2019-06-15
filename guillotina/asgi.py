@@ -22,6 +22,7 @@ class GuillotinaRequest(Request):
     def __init__(self, scheme, method, path, raw_headers, payload, client_max_size: int=1024**2):
         self._scheme = scheme
         self._method = method
+        self._raw_path = path
         self._rel_url = URL(path)
         self._raw_headers = raw_headers
         self._payload = payload
@@ -114,7 +115,7 @@ class GuillotinaRequest(Request):
 
         E.g., ``/my%2Fpath%7Cwith%21some%25strange%24characters``
         """
-        return self._message.path
+        return self._raw_path
 
     @reify
     def query(self) -> 'MultiDictProxy[str]':
@@ -219,7 +220,6 @@ class GuillotinaRequest(Request):
 
     async def _prepare_hook(self, response: StreamResponse) -> None:
         return
-
 
 
 class AsgiStreamReader(EmptyStreamReader):
