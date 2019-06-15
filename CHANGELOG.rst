@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+5.0.1
+-----
+
+- Allow modifying app settings from pytest marks [lferran]
+
+
 5.0.0 (unreleased)
 ------------------
 
