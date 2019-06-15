@@ -41,7 +41,7 @@ async def run(container):
             return
         sig = inspect.signature(module.run)
         if 'container' in sig.parameters:
-            async for txn, tm, container in get_containers(self.request):
+            async for txn, tm, container in get_containers():
                 await module.run(container)
                 await tm.commit(txn=txn)
         else:

@@ -76,7 +76,7 @@ def valid_id(_id):
     return _id == ''.join([l for l in _id if l in _valid_id_characters])
 
 
-async def get_containers(request):
+async def get_containers():
     root = get_utility(IApplication, name='root')
     for _id, db in root:
         if IDatabase.providedBy(db):
@@ -84,13 +84,16 @@ async def get_containers(request):
             async with tm:
                 task_vars.db.set(db)
                 async with tm.lock:
-                    # reset _txn to make sure to create a new ob
-                    request._txn = None
                     txn = await tm.begin()
-                    items = {}
-                    async for c_id, container in db.async_items():
-                        items[c_id] = container
-                    await tm.abort(txn=txn)
+                    try:
+                        items = {}
+                        async for c_id, container in db.async_items():
+                            items[c_id] = container
+                    finally:
+                        try:
+                            await tm.abort(txn=txn)
+                        except Exception:
+                            logger.warn('Error aborting transaction', exc_info=True)
 
                 for _, container in items.items():
                     with await tm.begin() as txn:
