@@ -231,7 +231,7 @@ def custom_endpoint_headers(context, request):
 @configure.service(
     context=IApplication, method='POST', permission='guillotina.AccessContent',
     name='@testHttpCache',
-    extra_headers={'as': 'a dictionary'})
+    extra_headers={'from': 'a dictionary'})
 @configure.service(
     context=IApplication, method='GET', permission='guillotina.AccessContent',
     name='@testHttpCache',

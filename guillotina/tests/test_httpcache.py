@@ -44,9 +44,20 @@ async def test_not_returned_in_default_delete(container_requester, http_cache_en
 
 async def test_endpoint_specific_headers_supercedes_default(container_requester, http_cache_enabled):
     async with container_requester as requester:
-        _, status, headers = await requester.make_request('GET', '/db/guillotina')
+        _, status, headers = await requester.make_request('GET', '/@testHttpCache')
         assert status == 200
 
         assert headers['Cache-Control'] == 'overwritten!'
         assert headers['Foo'] == 'Bar'
+        assert 'ETag' in headers
+
+
+async def test_endpoint_specific_from_dict(container_requester, http_cache_enabled):
+    async with container_requester as requester:
+        _, status, headers = await requester.make_request('POST', '/@testHttpCache')
+        assert status == 200
+        assert headers['from'] == 'a dictionary'
+
+        # Test that default http headers are also there
+        assert 'Cache-Control' in headers
         assert 'ETag' in headers
