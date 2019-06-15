@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- No longer setup fake request with login for base command
+
 - Moved `IInteraction.cached_principals` to module level function `guillotina.security.policy.cached_principals`
 
 - Moved `IInteraction.cached_roles` to module level function `guillotina.security.policy.cached_roles`
