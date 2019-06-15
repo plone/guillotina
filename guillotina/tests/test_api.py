@@ -469,7 +469,7 @@ async def test_uninstall_addons(container_requester):
             })
         )
         assert status == 200
-        assert response is None
+        assert not response
 
 
 async def test_uninstall_addons_path(container_requester):
@@ -488,7 +488,7 @@ async def test_uninstall_addons_path(container_requester):
             f'/db/guillotina/@addons/{id_}',
         )
         assert status == 200
-        assert response is None
+        assert not response
 
 
 async def test_uninstall_invalid_addon(container_requester):
