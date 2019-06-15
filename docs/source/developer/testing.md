@@ -13,5 +13,8 @@ async def my_test(container_requester):
     pass
 ```
 
+The above test would run a guillotina server with `supersecret!` root
+password.
+
 Notice the use `__` to go down the nested configuration
 structure.
