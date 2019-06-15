@@ -30,6 +30,7 @@ from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.event import notify
 from guillotina.events import BeforeRenderViewEvent
 from guillotina.events import ObjectLoadedEvent
+from guillotina.events import RequestFinishedEvent
 from guillotina.events import TraversalResourceMissEvent
 from guillotina.events import TraversalRouteMissEvent
 from guillotina.events import TraversalViewMissEvent
@@ -295,10 +296,8 @@ class MatchInfo(BaseMatchInfo):
         else:
             request.execute_futures('failure')
 
-        # Add extra headers to response if needed
-        extra_hdrs = getattr(self.view, '__extra_headers__', {})
-        if extra_hdrs:
-            resp._headers.update(**extra_hdrs)
+        await notify(RequestFinishedEvent(
+            request, self.view, resp))
 
         self.debug(request, resp)
 

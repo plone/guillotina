@@ -23,6 +23,7 @@ from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectPermissionsViewEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectVisitedEvent
+from guillotina.interfaces import IRequestFinishedEvent
 from guillotina.interfaces import ITraversalMissEvent
 from guillotina.interfaces import ITraversalResourceMissEvent
 from guillotina.interfaces import ITraversalRouteMissEvent
@@ -247,3 +248,11 @@ class TraversalRouteMissEvent(TraversalMissEvent):
 class DatabaseInitializedEvent:
     def __init__(self, database):
         self.database = database
+
+
+@implementer(IRequestFinishedEvent)
+class RequestFinishedEvent:
+    def __init__(self, request, view, response):
+        self.request = request
+        self.view = view
+        self.response = response

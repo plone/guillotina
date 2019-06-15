@@ -55,6 +55,7 @@ from .events import IObjectPermissionsModifiedEvent  # noqa
 from .events import IObjectPermissionsViewEvent  # noqa
 from .events import IObjectRemovedEvent  # noqa
 from .events import IObjectVisitedEvent  # noqa
+from .events import IRequestFinishedEvent  # noqa
 from .events import ITraversalMissEvent  # noqa
 from .events import ITraversalResourceMissEvent  # noqa
 from .events import ITraversalRouteMissEvent  # noqa
