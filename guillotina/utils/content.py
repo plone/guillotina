@@ -79,33 +79,34 @@ def valid_id(_id):
 async def get_containers():
     root = get_utility(IApplication, name='root')
     for _id, db in root:
-        if IDatabase.providedBy(db):
-            tm = db.get_transaction_manager()
-            async with tm:
-                task_vars.db.set(db)
-                async with tm.lock:
-                    txn = await tm.begin()
+        if not IDatabase.providedBy(db):
+            continue
+        tm = db.get_transaction_manager()
+        async with tm:
+            task_vars.db.set(db)
+            async with tm.lock:
+                txn = await tm.begin()
+                try:
+                    items = {}
+                    async for c_id, container in db.async_items():
+                        items[c_id] = container
+                finally:
                     try:
-                        items = {}
-                        async for c_id, container in db.async_items():
-                            items[c_id] = container
-                    finally:
-                        try:
-                            await tm.abort(txn=txn)
-                        except Exception:
-                            logger.warn('Error aborting transaction', exc_info=True)
+                        await tm.abort(txn=txn)
+                    except Exception:
+                        logger.warn('Error aborting transaction', exc_info=True)
 
-                for _, container in items.items():
-                    with await tm.begin() as txn:
-                        container.__txn__ = txn
-                        task_vars.container.set(container)
-                        yield txn, tm, container
-                        try:
-                            # do not rely on consumer of object to always close it.
-                            # there is no harm in aborting twice
-                            await tm.abort(txn=txn)
-                        except Exception:
-                            logger.warn('Error aborting transaction', exc_info=True)
+            for _, container in items.items():
+                with await tm.begin() as txn:
+                    container.__txn__ = txn
+                    task_vars.container.set(container)
+                    yield txn, tm, container
+                    try:
+                        # do not rely on consumer of object to always close it.
+                        # there is no harm in aborting twice
+                        await tm.abort(txn=txn)
+                    except Exception:
+                        logger.warn('Error aborting transaction', exc_info=True)
 
 
 def get_owners(obj: IResource) -> list:
