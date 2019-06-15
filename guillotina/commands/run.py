@@ -33,7 +33,6 @@ async def run(container):
         return parser
 
     async def run(self, arguments, settings, app):
-        task_vars.request.set(self.request)
         script = os.path.abspath(arguments.script)
         spec = importlib.util.spec_from_file_location("module.name", script)
         module = importlib.util.module_from_spec(spec)

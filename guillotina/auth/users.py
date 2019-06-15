@@ -8,7 +8,7 @@ ANONYMOUS_USER_ID = 'Anonymous User'
 
 
 @implementer(IPrincipal)
-class BaseUser(object):
+class BaseUser:
     pass
 
 

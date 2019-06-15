@@ -3,8 +3,6 @@ from guillotina import logger
 from guillotina import profile
 from guillotina._settings import app_settings
 from guillotina.factory import make_app
-from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import login
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 
@@ -125,7 +123,6 @@ class Command(object):
         '''
         Split out into parts that can be overridden
         '''
-        self.setup_fake_request()
         if arguments is None:
             self.parse_arguments()
         else:
@@ -222,10 +219,6 @@ class Command(object):
                     logger.warning(f'Timeout for {task._coro.__qualname__}')
             except (AttributeError, KeyError):
                 pass
-
-    def setup_fake_request(self):
-        self.request = get_mocked_request()
-        login()
 
     def get_loop(self):
         if self.loop is None:

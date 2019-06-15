@@ -7,6 +7,8 @@ from guillotina.commands import Command
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.testing import TESTING_SETTINGS
+from guillotina.tests.utils import get_mocked_request
+from guillotina.tests.utils import login
 
 
 class ShellHelpers:
@@ -104,8 +106,9 @@ await commit()
     def run(self, arguments, settings, app):
         app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
         root = get_utility(IApplication, name='root')
-        helpers = ShellHelpers(app, root, self.request)
-        request = self.request
+        request = get_mocked_request()
+        login()
+        helpers = ShellHelpers(app, root, request)
         task_vars.request.set(request)
         use_db = helpers.use_db  # noqa
         use_container = helpers.use_container  # noqa
