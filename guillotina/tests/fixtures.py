@@ -72,6 +72,17 @@ def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
     }
 
 
+def get_test_settings(pytest_node=None):
+    settings = get_db_settings()
+    if not pytest_node:
+        return settings
+
+    # Update test app settings from pytest markers
+    for mark in pytest_node.iter_markers(name='app_settings'):
+        settings.update(mark.args[0])
+
+    return settings
+
 def get_db_settings():
     settings = testing.get_settings()
     if annotations['testdatabase'] == 'DUMMY':
@@ -113,6 +124,7 @@ def get_db_settings():
         configure_db(settings['databases']['db'], **options)
         configure_db(settings['databases']['db-custom'], **options)
         configure_db(settings['storages']['db'], **options)
+
     return settings
 
 
@@ -278,10 +290,11 @@ WHERE zoid != '{}' AND zoid != '{}'
 
 
 @pytest.fixture(scope='function')
-def guillotina_main(loop):
+def guillotina_main(loop, request):
     globalregistry.reset()
+    test_settings = get_test_settings(request.node)
     aioapp = loop.run_until_complete(
-        make_app(settings=get_db_settings(), loop=loop))
+        make_app(settings=test_settings, loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
 
