@@ -7,14 +7,11 @@ on tests, for instance:
 
 ```python
 @pytest.mark.app_settings({
-    'root_user__password': 'supersecret!'
+    'root_user: {'password': 'supersecret!'}
 })
-async def my_test(container_requester):
+async def test_the_code(container_requester):
     pass
 ```
 
 The above test would run a guillotina server with `supersecret!` root
 password.
-
-Notice the use `__` to go down the nested configuration
-structure.

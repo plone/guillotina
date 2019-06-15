@@ -253,8 +253,12 @@ async def test_sync_subscribers_only_called_once(dummy_guillotina):
 
 @pytest.mark.app_settings({
     'foo': 'bar',
-    'root_user__password': 'hi there!',
-    'databases__db__read_only': 'yo',
+    'root_user': {'password': 'hi there!'},
+    'databases': {
+        'db': {
+            'read_only': 'yo'
+        }
+    },
 })
 async def test_app_settings_are_overwritten_by_pytest_marks(container_requester):
     from guillotina import app_settings

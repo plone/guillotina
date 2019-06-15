@@ -25,7 +25,7 @@ from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
-
+from guillotina.utils import merge_dicts
 
 _dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -76,17 +76,12 @@ def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
 def _update_from_pytest_markers(settings, pytest_node):
     if not pytest_node:
         return settings
+
     # Update test app settings from pytest markers
     for mark in pytest_node.iter_markers(name='app_settings'):
         to_update = mark.args[0]
-        for keys, value in to_update.items():
-            context = settings
-            parts = keys.split('__')
-            for part in parts[:-1]:
-                if part not in context:
-                    context[part] = {}
-                context = context[part]
-            context[parts[-1]] = value
+        settings = merge_dicts(settings, to_update)
+
     return settings
 
 
