@@ -49,8 +49,9 @@ def base_settings_configurator(settings):
 testing.configure_with(base_settings_configurator)
 
 
-def get_dummy_settings():
+def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
+    settings = _update_from_pytest_markers(settings, pytest_node)
     settings['databases']['db']['storage'] = 'DUMMY'
     settings['databases']['db']['dsn'] = {}
     return settings
@@ -72,11 +73,9 @@ def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
     }
 
 
-def get_test_settings(pytest_node=None):
-    settings = get_db_settings()
+def _update_from_pytest_markers(settings, pytest_node):
     if not pytest_node:
         return settings
-
     # Update test app settings from pytest markers
     for mark in pytest_node.iter_markers(name='app_settings'):
         to_update = mark.args[0]
@@ -88,11 +87,13 @@ def get_test_settings(pytest_node=None):
                     context[part] = {}
                 context = context[part]
             context[parts[-1]] = value
-
     return settings
 
-def get_db_settings():
+
+def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
+    settings = _update_from_pytest_markers(settings, pytest_node)
+
     if annotations['testdatabase'] == 'DUMMY':
         return settings
 
@@ -223,10 +224,10 @@ async def close_async_tasks(app):
 
 
 @pytest.fixture(scope='function')
-def dummy_guillotina(loop):
+def dummy_guillotina(loop, request):
     globalregistry.reset()
     aioapp = loop.run_until_complete(
-        make_app(settings=get_dummy_settings(), loop=loop))
+        make_app(settings=get_dummy_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
@@ -300,9 +301,8 @@ WHERE zoid != '{}' AND zoid != '{}'
 @pytest.fixture(scope='function')
 def guillotina_main(loop, request):
     globalregistry.reset()
-    test_settings = get_test_settings(request.node)
     aioapp = loop.run_until_complete(
-        make_app(settings=test_settings, loop=loop))
+        make_app(settings=get_db_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
 
