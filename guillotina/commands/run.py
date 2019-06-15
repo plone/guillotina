@@ -3,7 +3,6 @@ import inspect
 import logging
 import os
 
-from guillotina import task_vars
 from guillotina.commands import Command
 from guillotina.utils import get_containers
 from guillotina.utils import lazy_apply
