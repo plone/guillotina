@@ -7,6 +7,7 @@ import pytest
 import json
 from aiohttp.client_exceptions import ContentTypeError
 from async_asgi_testclient import TestClient
+from async_asgi_testclient.utils import Message
 from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
@@ -144,6 +145,109 @@ def db():
             pytest_docker_fixtures.pg_image.stop()
 
 
+from async_asgi_testclient.response import Response
+from async_asgi_testclient.utils import create_monitored_task
+from async_asgi_testclient.utils import receive
+from async_asgi_testclient.testing import make_test_headers_path_and_query_string
+from functools import partial
+
+
+class WebSocketSession:
+    def __init__(self, url, headers, client):
+        self.url = url
+        self.headers = headers
+        self.client = client
+        self.input_queue: asyncio.Queue[dict] = asyncio.Queue()
+        self.output_queue: asyncio.Queue[dict] = asyncio.Queue()
+
+    async def __aenter__(self):
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        self.close()
+
+    def close(self, code: int = 1000):
+        self.send({"type": "websocket.disconnect", "code": code})
+
+    def send(self, data):
+        self.input_queue.put_nowait(data)
+
+    def send_str(self, data: str) -> None:
+        self.send({"type": "websocket.receive", "text": data})
+
+    def send_bytes(self, data: bytes) -> None:
+        self.send({"type": "websocket.receive", "bytes": data})
+
+    def send_json(self, data, mode: str = "text") -> None:
+        assert mode in ["text", "binary"]
+        text = json.dumps(data)
+        if mode == "text":
+            self.send({"type": "websocket.receive", "text": text})
+        else:
+            self.send({"type": "websocket.receive", "bytes": text.encode("utf-8")})
+
+    async def receive(self):
+        receive_or_fail = partial(receive, self.output_queue)
+        return await self.wait_response(receive_or_fail)
+
+    async def receive_text(self) -> str:
+        message = await self.receive()
+        return message["text"]
+
+    async def receive_bytes(self) -> bytes:
+        message = await self.receive()
+        return message["bytes"]
+
+    async def receive_json(self, mode: str = "text"):
+        assert mode in ["text", "binary"]
+        message = await self.receive()
+        if mode == "text":
+            text = message["text"]
+        else:
+            text = message["bytes"].decode("utf-8")
+        return json.loads(text)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        msg = await self.receive()
+        if isinstance(msg, Message):
+            if msg.event == 'exit':
+                raise StopAsyncIteration(msg)
+        return msg
+
+
+    async def connect(self):
+        self.headers.update({"host": "localhost"})
+        flat_headers = [
+            (bytes(k.lower(), "utf8"), bytes(v, "utf8")) for k, v in self.headers.items()
+        ]
+        scope = {
+            "type": "websocket",
+            "headers": flat_headers,
+            "path": self.url,
+            "query_string": "",
+            "root_path": "",
+            "scheme": "ws",
+            "subprotocols": [],
+        }
+
+        create_monitored_task(
+            self.client.application(scope, self.input_queue.get, self.output_queue.put),
+            self.output_queue.put_nowait
+        )
+
+        self.send({"type": "websocket.connect"})
+        msg = await self.receive()
+        assert msg["type"] == "websocket.accept"
+
+    async def wait_response(self, receive_or_fail):
+        message = await receive_or_fail()
+        return message
+
+
 class GuillotinaDBRequester(object):
 
     def __init__(self, client):
@@ -161,6 +265,9 @@ class GuillotinaDBRequester(object):
             accept=accept, allow_redirects=allow_redirects
         )
         return value, status
+
+    def websocket_connect(self, url, headers):
+        return WebSocketSession(url, headers, self.client)
 
     async def make_request(self, method, path, params=None, data=None, authenticated=True,
                     auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
