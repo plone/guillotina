@@ -10,7 +10,7 @@ from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
-from guillotina.asgi import GuillotinaRequest
+from guillotina.request import GuillotinaRequest
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
