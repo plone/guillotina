@@ -10,6 +10,7 @@ from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
+from guillotina.asgi import GuillotinaRequest
 from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
@@ -187,7 +188,11 @@ class WebsocketsView(Service):
     async def __call__(self):
         tm = get_tm(self.request)
         await tm.abort(self.request)
-        ws = web.WebSocketResponse()
+
+        if isinstance(self.request, GuillotinaRequest):
+            ws = self.request.get_ws()
+        else:
+            ws = web.WebSocketResponse()
         await ws.prepare(self.request)
 
         async for msg in ws:

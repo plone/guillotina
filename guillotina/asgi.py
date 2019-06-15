@@ -1,10 +1,12 @@
-from aiohttp.test_utils import make_mocked_request
 from aiohttp.streams import EmptyStreamReader
-from aiohttp.web import StreamResponse
+from aiohttp.web_ws import WSMessage
+from aiohttp.web import StreamResponse, WSMsgType
 from aiohttp.helpers import reify
+from guillotina.request import Request
+from starlette.websockets import WebSocket
+
 import asyncio
 import multidict
-from guillotina.request import Request
 import os
 import json
 import yaml
@@ -17,10 +19,46 @@ def headers_to_list(headers):
     return [[k.encode(), v.encode()] for k, v in headers.items()]
 
 
+class GuillotinaWebSocket:
+    def __init__(self, scope, send, receive):
+        self.ws = WebSocket(scope,
+                            receive=receive,
+                            send=send)
+
+    async def prepare(self, request):
+        return await self.ws.accept()
+
+    async def close(self):
+        return await self.ws.close()
+
+    async def send_str(self, data):
+        return await self.ws.send_text(data)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        msg = await self.ws.receive_text()
+
+        # A lot is missing here!!!
+
+        #if msg.type in (WSMsgType.CLOSE,
+        #                WSMsgType.CLOSING,
+        #                WSMsgType.CLOSED):
+        #    raise StopAsyncIteration  # NOQA
+        return WSMessage(WSMsgType.TEXT, msg, '')
+
+
 class GuillotinaRequest(Request):
 
-    def __init__(self, scheme, method, path, raw_headers, payload, client_max_size: int=1024**2):
+    def __init__(self, scheme, method, path, raw_headers,
+                 payload, client_max_size: int=1024**2, loop=None,
+                 send=None, receive=None, scope=None):
+        self.send = send
+        self.receive = receive
+        self.scope = scope
         self._scheme = scheme
+        self._loop = loop
         self._method = method
         self._raw_path = path
         self._rel_url = URL(path)
@@ -32,6 +70,11 @@ class GuillotinaRequest(Request):
         self._read_bytes = None
         self._state = {}
         self._cache = {}
+
+    def get_ws(self):
+        return GuillotinaWebSocket(self.scope,
+                                   receive=self.receive,
+                                   send=self.send)
 
     @reify
     def rel_url(self):
@@ -243,9 +286,10 @@ class AsgiStreamReader(EmptyStreamReader):
 class AsgiApp:
     def __init__(self):
         self.app = None
+        self.loop = None
 
     async def __call__(self, scope, receive, send):
-        if scope["type"] == "http":
+        if scope["type"] == "http" or scope["type"] == "websocket":
             # daphne is not sending `lifespan` event
             if not self.app:
                 self.app = await self.startup()
@@ -267,6 +311,7 @@ class AsgiApp:
         loop = loop or asyncio.get_event_loop()
         from guillotina.factory import make_app
         import guillotina
+        self.loop = loop
 
         config = os.getenv("CONFIG", None)
         if settings:
@@ -285,12 +330,19 @@ class AsgiApp:
         # Aiohttp compatible StreamReader
         payload = AsgiStreamReader(receive)
 
+        if scope["type"] == "websocket":
+            scope["method"] = "GET"
+
         request = GuillotinaRequest(
             scope["scheme"],
             scope["method"],
             scope["path"],
             scope["headers"],
-            payload
+            payload,
+            loop=self.loop,
+            send=send,
+            scope=scope,
+            receive=receive
         )
 
         # This is to fake IRequest interface
@@ -298,6 +350,8 @@ class AsgiApp:
 
         route = await self.app.router.resolve(request)
         resp = await route.handler(request)
+
+        # WS handling after view execution missing here!!!
 
         await send(
             {

@@ -1,3 +1,4 @@
+starlette
 Cython==0.29.6
 aiotask_context==0.5.0
 aiohttp>=3.5.0,<4.0.0
