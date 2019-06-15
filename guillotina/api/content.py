@@ -41,7 +41,6 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.interfaces import IResponse
 from guillotina.interfaces import IRolePermissionMap
-from guillotina.interfaces import ISecurityPolicy
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.response import ErrorResponse
@@ -57,7 +56,7 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_object_by_oid
 from guillotina.utils import get_object_url
 from guillotina.utils import iter_parents
-from guillotina.utils import valid_id
+from guillotina.utils import valid_id, get_security_policy
 
 
 def get_content_json_schema_responses(content):
@@ -453,7 +452,7 @@ class SharingPUT(SharingPOST):
 async def can_i_do(context, request):
     if 'permission' not in request.query and 'permissions' not in request.query:
         raise PreconditionFailed(context, 'No permission param')
-    policy = get_utility(ISecurityPolicy)
+    policy = get_security_policy()
     if 'permissions' in request.query:
         results = {}
         for perm in request.query['permissions'].split(','):
@@ -791,7 +790,7 @@ async def resolve_uid(context, request):
         return HTTPNotFound(content={
             'reason': f'Could not find uid: {uid}'
         })
-    policy = get_utility(ISecurityPolicy)
+    policy = get_security_policy()
     if policy.check_permission('guillotina.AccessContent', ob):
         return HTTPMovedPermanently(get_object_url(ob, request))
     else:

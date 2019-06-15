@@ -62,7 +62,6 @@ from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
-from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.profile import profilable
@@ -70,6 +69,7 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
+from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
 from zope.interface import Interface
 from zope.interface import alsoProvides
@@ -614,7 +614,7 @@ async def create_content_in_container(
             PERMISSIONS_CACHE[factory.add_permission] = permission
 
         if permission is not None:
-            policy = get_utility(ISecurityPolicy)
+            policy = get_security_policy()
             if not policy.check_permission(permission.id, parent):
                 raise NoPermissionToAdd(str(parent), type_)
 
@@ -689,7 +689,7 @@ async def duplicate(context: IResource,
         destination_ob = context.__parent__
 
     if check_permission:
-        policy = get_utility(ISecurityPolicy)
+        policy = get_security_policy()
         if not policy.check_permission('guillotina.AddContent', destination_ob):
             raise PreconditionFailed(
                 context, 'You do not have permission to add content to '
@@ -771,7 +771,7 @@ async def move(context: IResource,
         new_id = context.id
 
     if check_permission:
-        policy = get_utility(ISecurityPolicy)
+        policy = get_security_policy()
         if not policy.check_permission('guillotina.AddContent', destination_ob):
             raise PreconditionFailed(
                 context, 'You do not have permission to add content to the '

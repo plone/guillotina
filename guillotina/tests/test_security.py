@@ -9,6 +9,7 @@ from guillotina.interfaces import ISecurityPolicy
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.security.utils import settings_for_object
+from guillotina.utils import get_security_policy
 from guillotina.tests import utils
 from guillotina.tests.utils import get_db
 from guillotina.transactions import transaction
@@ -239,7 +240,7 @@ async def test_inherit(container_requester):
 
         utils.login(user)
 
-        policy = get_utility(ISecurityPolicy)
+        policy = get_security_policy()
         assert policy.check_permission('guillotina.ViewContent', container)
         assert not policy.check_permission('guillotina.ViewContent', content)
 
@@ -313,7 +314,7 @@ async def test_allowsingle(container_requester):
 
         utils.login(user)
 
-        policy = get_utility(ISecurityPolicy)
+        policy = get_security_policy()
         assert policy.check_permission('guillotina.AccessContent', container)
         assert policy.check_permission('guillotina.AccessContent', content)
 
@@ -323,7 +324,7 @@ async def test_allowsingle(container_requester):
 
         utils.login(user)
 
-        policy = get_utility(ISecurityPolicy)
+        policy = get_security_policy()
         assert policy.check_permission('guillotina.AccessContent', container)
         assert not policy.check_permission('guillotina.AccessContent', content)
 
@@ -428,7 +429,7 @@ async def test_allowsingle2(container_requester):
 
         utils.login(user)
 
-        policy = get_utility(ISecurityPolicy)
+        policy = get_security_policy()
         assert policy.check_permission('guillotina.AccessContent', container)
         assert policy.check_permission('guillotina.AccessContent', content)
 
@@ -469,7 +470,7 @@ async def test_cached_access_roles(dummy_guillotina):
         folder_manager.grant_permission_to_role_no_inherit(
             'guillotina.AccessContent', 'guillotina.ContainerCreator')
 
-        policy = get_utility(ISecurityPolicy)
+        policy = get_security_policy()
         roles = policy.cached_roles(item, 'guillotina.AccessContent', 'o')
         assert roles.get('guillotina.ContainerCreator') is None
 

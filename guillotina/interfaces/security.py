@@ -5,6 +5,7 @@ from guillotina.schema import Text
 from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
+from guillotina.db.orm.interfaces import IBaseObject
 
 import typing
 from .misc import IRequest
@@ -365,13 +366,52 @@ class IPrincipal(Interface):  # pylint: disable=E0239
         readonly=True)
 
 
+SettingType = typing.Union[bool, None, str]
+
+
 class ISecurityPolicy(Interface):  # pylint: disable=E0239
 
-    def __call__(participation=None):  # noqa: N805
-        """Creates a new interaction for a given request.
-
-        If participation is not None, it is added to the new interaction.
+    def __init__(IPrincipal):
         """
+        """
+
+    def invalidate_cache():
+        '''
+        Invalidate current cache
+        '''
+
+    def check_permission(permission: str, obj: IBaseObject) -> bool:
+        '''
+        Check if user has permission on object
+        '''
+
+    def cached_decision(parent: IBaseObject, principal: str, groups: typing.List[str], permission: str):
+        '''
+        '''
+
+    def cached_principal_permission(
+            parent: IBaseObject, principal: str,
+            groups: typing.List[str], permission: str, level: str) -> SettingType:
+        '''
+        '''
+
+    def global_principal_roles(self, principal: str, groups: typing.List[str]) -> typing.Dict[str, bool]:
+        '''
+        '''
+
+    def cached_principal_roles(self, parent: IBaseObject, principal: str,
+                               groups: typing.List[str], level: str) -> typing.Dict[str, SettingType]:
+        '''
+        '''
+
+    def cached_roles(self, parent: IBaseObject, permission: str, level: str) -> typing.Dict[str, bool]:
+        '''
+        '''
+
+    def cached_principals(self, parent: IBaseObject, roles: typing.List[str],
+                          permission: str, level: str) -> typing.Dict[str, bool]:
+        '''
+        '''
 
 
 class IPasswordHasher(Interface):

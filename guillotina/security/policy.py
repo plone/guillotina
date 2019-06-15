@@ -14,15 +14,14 @@
 """Define Zope's default security policy
 """
 from guillotina import configure
-from guillotina import task_vars
 from guillotina.auth.users import SystemUser
 from guillotina.component import get_utility
-from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
 from guillotina.interfaces import Deny
 from guillotina.interfaces import IGroups
 from guillotina.interfaces import IInheritPermissionMap
+from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRolePermissionMap
@@ -34,8 +33,8 @@ from guillotina.profile import profilable
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
-from guillotina.utils.auth import get_authenticated_user
 from lru import LRU
+import typing
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting
@@ -52,7 +51,10 @@ SettingAsBoolean = {
 }
 
 
-def level_setting_as_boolean(level, value):
+SettingType = typing.Union[bool, None, str]
+
+
+def level_setting_as_boolean(level, value) -> SettingType:
     # We want to check if its allow
     let = SettingAsBoolean[value]
     # Never return False on AllowSingle
@@ -64,17 +66,18 @@ class CacheEntry:
     pass
 
 
-@configure.utility(provides=ISecurityPolicy)
-class SecurityPolicy(object):
+@configure.adapter(for_=IPrincipal, provides=ISecurityPolicy)
+class SecurityPolicy:
 
-    def __init__(self):
-        self._cache = LRU(1000)
+    def __init__(self, principal: IPrincipal):
+        self.principal = principal
+        self._cache = LRU(100)
 
     def invalidate_cache(self):
         self._cache.clear()
 
     @profilable
-    def check_permission(self, permission: str, obj: IBaseObject) -> bool:
+    def check_permission(self, permission, obj):
         # Always allow public attributes
         if permission is Public:
             return True
@@ -84,18 +87,17 @@ class SecurityPolicy(object):
 
         # Iterate through participations ('principals')
         # and check permissions they give
-        principal = task_vars.authenticated_user.get()
-        if principal is not None:
+        if self.principal is not None:
 
             # System user always has access
-            if principal is SystemUser:
+            if self.principal is SystemUser:
                 return True
 
             # Check the permission
-            groups = self._groups_for(principal)
+            groups = getattr(self.principal, 'groups', None) or []
             if self.cached_decision(
                     obj,
-                    principal.id,
+                    self.principal.id,
                     groups,
                     permission):
                 return True
@@ -158,8 +160,7 @@ class SecurityPolicy(object):
         return decision
 
     @profilable
-    def cached_principal_permission(
-            self, parent, principal, groups, permission, level):
+    def cached_principal_permission(self, parent, principal, groups, permission, level):
         # Compute the permission, if any, for the principal.
         cache = self.cache(parent, level)
 
@@ -288,10 +289,6 @@ class SecurityPolicy(object):
         cache_principal_roles[principal] = roles
         return roles
 
-    def _groups_for(self, principal):
-        # Right now no recursive groups
-        return getattr(principal, 'groups', ())
-
     def cached_roles(self, parent, permission, level):
         """Get the roles for a specific permission.
 
@@ -400,13 +397,12 @@ class SecurityPolicy(object):
         """On a principal (user/group) get global roles."""
         roles = {}
         groups = get_utility(IGroups)
-        authenticated_princ = get_authenticated_user()
-        if authenticated_princ and principal == authenticated_princ.id:
+        if self.principal and principal == self.principal.id:
             # Its the actual user id
             # We return all the global roles (including group)
-            roles = authenticated_princ.roles.copy()
+            roles = self.principal.roles.copy()
 
-            for group in authenticated_princ.groups:
+            for group in self.principal.groups:
                 roles.update(groups.get_principal(group).roles)
             return roles
 
@@ -418,14 +414,13 @@ class SecurityPolicy(object):
     def _global_permissions_for(self, principal, permission):
         """On a principal (user + group) get global permissions."""
         groups = get_utility(IGroups)
-        authenticated_princ = get_authenticated_user()
-        if authenticated_princ and principal == authenticated_princ.id:
+        if self.principal and principal == self.principal.id:
             # Its the actual user
-            permissions = authenticated_princ.permissions.copy()
+            permissions = self.principal.permissions.copy()
             if permission in permissions:
                 return level_setting_as_boolean('p', permissions[permission])
 
-            for group in authenticated_princ.groups:
+            for group in self.principal.groups:
                 permissions = groups.get_principal(principal).permissions
                 if permission in permissions:
                     return level_setting_as_boolean('p', permissions[permission])

@@ -5,7 +5,6 @@ from guillotina import configure
 from guillotina import glogging
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_adapter
-from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
@@ -22,10 +21,10 @@ from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.interfaces import ISecurityPolicy
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
+from guillotina.utils import get_security_policy
 from zope.interface import Interface
 
 
@@ -194,6 +193,6 @@ class DeserializeFromJson(object):
                 self.permission_cache[permission_name] = True
             else:
                 self.permission_cache[permission_name] = bool(
-                    get_utility(ISecurityPolicy).check_permission(
+                    get_security_policy().check_permission(
                         permission.id, self.context))
         return self.permission_cache[permission_name]

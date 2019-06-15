@@ -5,7 +5,7 @@ import logging
 from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_multi_adapter
-from guillotina.component import query_utility, get_utility
+from guillotina.component import query_utility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
@@ -17,11 +17,11 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
-from guillotina.interfaces import ISecurityPolicy
 from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
 from guillotina.schema import get_fields
 from guillotina.utils import apply_coroutine
+from guillotina.utils import get_security_policy
 from zope.interface import Interface
 
 
@@ -155,7 +155,7 @@ class SerializeToJson(object):
             if permission is None:
                 self.permission_cache[permission_name] = True
             else:
-                security = get_utility(ISecurityPolicy)
+                security = get_security_policy()
                 self.permission_cache[permission_name] = bool(
                     security.check_permission(permission.id, self.context))
         return self.permission_cache[permission_name]
@@ -170,7 +170,7 @@ class SerializeFolderToJson(SerializeToJson):
     async def __call__(self, include=[], omit=[]):
         result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
 
-        security = get_utility(ISecurityPolicy)
+        security = get_security_policy()
         length = await self.context.async_len()
 
         if length > MAX_ALLOWED or length == 0:
