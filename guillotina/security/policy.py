@@ -310,7 +310,7 @@ class SecurityPolicy:
         return None
 
 
-def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dict[str, bool]:
+def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dict[str, int]:
     """
     Get the roles for a specific permission.
     Global + Local + Code
@@ -363,7 +363,7 @@ def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dic
 
 
 def cached_principals(parent: IBaseObject, roles: typing.List[str],
-                      permission: str, level: str) -> typing.Dict[str, bool]:
+                      permission: str, level: str) -> typing.Dict[str, int]:
     """Get the roles for a specific permission.
 
     Global + Local + Code

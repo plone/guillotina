@@ -26,6 +26,7 @@ from guillotina.component import query_adapter
 from guillotina.component import query_multi_adapter
 from guillotina.contentnegotiation import get_acceptable_content_types
 from guillotina.contentnegotiation import get_acceptable_languages
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.event import notify
 from guillotina.events import BeforeRenderViewEvent
 from guillotina.events import ObjectLoadedEvent
@@ -47,7 +48,6 @@ from guillotina.interfaces import ILanguage
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
 from guillotina.interfaces import ITraversable
 from guillotina.profile import profilable
 from guillotina.response import HTTPBadRequest
@@ -58,8 +58,8 @@ from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
 from guillotina.utils import get_registry
-from guillotina.utils import import_class
 from guillotina.utils import get_security_policy
+from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
 
@@ -514,7 +514,7 @@ class TraversalRouter(AbstractRouter):
 
         return MatchInfo(resource, request, view)
 
-    async def traverse(self, request: IRequest) -> Tuple[IResource, List[str]]:
+    async def traverse(self, request: IRequest) -> Tuple[IBaseObject, List[str]]:
         """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
