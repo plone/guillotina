@@ -79,7 +79,15 @@ def get_test_settings(pytest_node=None):
 
     # Update test app settings from pytest markers
     for mark in pytest_node.iter_markers(name='app_settings'):
-        settings.update(mark.args[0])
+        to_update = mark.args[0]
+        for keys, value in to_update.items():
+            context = settings
+            parts = keys.split('__')
+            for part in parts[:-1]:
+                if part not in context:
+                    context[part] = {}
+                context = context[part]
+            context[parts[-1]] = value
 
     return settings
 
