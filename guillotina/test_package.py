@@ -213,16 +213,6 @@ async def matching_service(context, request):
     return request.matchdict
 
 
-@configure.service(
-    context=IApplication, method='GET',
-    permission='guillotina.AccessContent',
-    name='@foobarba',
-    extra_headers={'HeaderFoo': 'barBaa'},
-)
-async def request_with_extra_response_headers(context, request):
-    return {}
-
-
 @configure.adapter(
     for_=Interface,
     provides=IIDGenerator)

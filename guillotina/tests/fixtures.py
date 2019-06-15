@@ -7,6 +7,7 @@ import pytest
 from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
 from guillotina import testing
+from guillotina import app_settings
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
 from guillotina.const import ROOT_ID
@@ -378,3 +379,13 @@ def container_command(db):
 DELETE FROM objects;
 DELETe FROM blobs;
 COMMIT;''')
+
+
+@pytest.fixture(scope='function')
+def http_cache_enabled():
+    app_settings['http_cache'] = {
+        'max_age': 123,
+        'public': True,
+    }
+    yield
+    app_settings.pop('http_cache', None)
