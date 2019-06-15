@@ -48,7 +48,6 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
-from guillotina.interfaces import ISecurityPolicy
 from guillotina.interfaces import ITraversable
 from guillotina.profile import profilable
 from guillotina.response import HTTPBadRequest
@@ -58,9 +57,9 @@ from guillotina.response import HTTPUnauthorized
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
-from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_registry
 from guillotina.utils import import_class
+from guillotina.utils import get_security_policy
 from zope.interface import alsoProvides
 
 
@@ -383,7 +382,6 @@ class TraversalRouter(AbstractRouter):
     @profilable
     async def real_resolve(self, request: IRequest) -> Optional[MatchInfo]:
         """Main function to resolve a request."""
-        policy = get_utility(ISecurityPolicy)
 
         if request.method not in app_settings['http_methods']:
             raise HTTPMethodNotAllowed(
@@ -430,8 +428,14 @@ class TraversalRouter(AbstractRouter):
             view_name = ''
 
         request.record('beforeauthentication')
-        await self.apply_authorization(request)
+        authenticated = await authenticate_request(request)
+        # Add anonymous participation
+        if authenticated is None:
+            authenticated = AnonymousUser()
+            set_authenticated_user(authenticated)
         request.record('authentication')
+
+        policy = get_security_policy(authenticated)
 
         for language in get_acceptable_languages(request):
             translator = query_adapter((resource, request), ILanguage,
@@ -439,12 +443,6 @@ class TraversalRouter(AbstractRouter):
             if translator is not None:
                 resource = translator.translate()
                 break
-
-        # Add anonymous participation
-        authenticated = get_authenticated_user()
-        if authenticated is None:
-            authenticated = AnonymousUser()
-            set_authenticated_user(authenticated)
 
         # container registry lookup
         try:
@@ -488,6 +486,9 @@ class TraversalRouter(AbstractRouter):
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
+        if view_permission is None:
+            # use default view permission
+            view_permission = app_settings['default_permission']
         if not policy.check_permission(view_permission, view):
             if IOPTIONS != method:
                 raise HTTPUnauthorized(
@@ -518,7 +519,3 @@ class TraversalRouter(AbstractRouter):
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
-
-    @profilable
-    async def apply_authorization(self, request: IRequest):
-        await authenticate_request(request)

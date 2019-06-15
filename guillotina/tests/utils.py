@@ -53,16 +53,21 @@ def logout():
     set_authenticated_user(None)
 
 
-async def get_root(request=None, tm=None):
-    async with transaction(tm=tm) as txn:
+async def get_root(tm=None, db=None):
+    async with transaction(tm=tm, db=db) as txn:
         return await txn.manager.get_root()
 
 
 async def get_container(requester=None, request=None, tm=None):
     if request is None and requester is not None:
         request = get_mocked_request(requester.db)
-    root = await get_root(request, tm)
-    async with transaction(tm=tm):
+    kw = {
+        'tm': tm
+    }
+    if requester is not None:
+        kw['db'] = requester.db
+    root = await get_root(**kw)
+    async with transaction(**kw):
         container = await root.async_get('guillotina')
         task_vars.container.set(container)
         return container

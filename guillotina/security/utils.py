@@ -11,10 +11,11 @@ from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.interfaces import IRolePermissionMap
+from guillotina.security.policy import cached_principals
+from guillotina.security.policy import cached_roles
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
-from guillotina.utils import get_security_policy
 
 
 def protect_view(cls, permission):
@@ -29,8 +30,7 @@ def get_roles_with_access_content(obj, request=None):
     """ Return the roles that has access to the content that are global roles"""
     if obj is None:
         return []
-    policy = get_security_policy()
-    roles = policy.cached_roles(obj, 'guillotina.AccessContent', 'o')
+    roles = cached_roles(obj, 'guillotina.AccessContent', 'o')
     result = []
     all_roles = role.global_roles() + role.local_roles()
     for r in roles.keys():
@@ -42,14 +42,13 @@ def get_roles_with_access_content(obj, request=None):
 def get_principals_with_access_content(obj, request=None):
     if obj is None:
         return []
-    policy = get_security_policy()
-    roles = policy.cached_roles(obj, 'guillotina.AccessContent', 'o')
+    roles = cached_roles(obj, 'guillotina.AccessContent', 'o')
     result = []
     all_roles = role.global_roles() + role.local_roles()
     for r in roles.keys():
         if r in all_roles:
             result.append(r)
-    users = policy.cached_principals(obj, result, 'guillotina.AccessContent', 'o')
+    users = cached_principals(obj, result, 'guillotina.AccessContent', 'o')
     return list(users.keys())
 
 

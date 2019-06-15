@@ -2,7 +2,6 @@ from typing import Optional
 
 from guillotina import task_vars
 from guillotina.component import get_adapter
-from guillotina.exceptions import AuthenticatedUserNotFound
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import ISecurityPolicy
 
@@ -32,7 +31,8 @@ def get_security_policy(user: Optional[IPrincipal] = None) -> ISecurityPolicy:
     if user is None:
         user = get_authenticated_user()
         if user is None:
-            raise AuthenticatedUserNotFound()
+            from guillotina.auth.users import AnonymousUser
+            user = AnonymousUser()
     security_policies = task_vars.security_policies.get()
     if security_policies is None:
         security_policies = {}

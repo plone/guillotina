@@ -4,6 +4,10 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Moved `IInteraction.cached_principals` to module level function `guillotina.security.policy.cached_principals`
+
+- Moved `IInteraction.cached_roles` to module level function `guillotina.security.policy.cached_roles`
+
 - `utils.get_authenticated_user_id` no longer accepts `request` param
 
 - `utils.get_authenticated_user` no longer accepts `request` param

@@ -83,12 +83,6 @@ class TransactionNotFound(Exception):
     """
 
 
-class AuthenticatedUserNotFound(Exception):
-    """
-    Lookup for the current request for request aware task failed
-    """
-
-
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""

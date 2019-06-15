@@ -395,21 +395,12 @@ class ISecurityPolicy(Interface):  # pylint: disable=E0239
         '''
         '''
 
-    def global_principal_roles(self, principal: str, groups: typing.List[str]) -> typing.Dict[str, bool]:
+    def global_principal_roles(principal: str, groups: typing.List[str]) -> typing.Dict[str, bool]:
         '''
         '''
 
-    def cached_principal_roles(self, parent: IBaseObject, principal: str,
+    def cached_principal_roles(parent: IBaseObject, principal: str,
                                groups: typing.List[str], level: str) -> typing.Dict[str, SettingType]:
-        '''
-        '''
-
-    def cached_roles(self, parent: IBaseObject, permission: str, level: str) -> typing.Dict[str, bool]:
-        '''
-        '''
-
-    def cached_principals(self, parent: IBaseObject, roles: typing.List[str],
-                          permission: str, level: str) -> typing.Dict[str, bool]:
         '''
         '''
 

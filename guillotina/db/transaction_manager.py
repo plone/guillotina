@@ -8,11 +8,13 @@ from guillotina import task_vars
 from guillotina.db import ROOT_ID
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.transaction import Status
 from guillotina.db.transaction import Transaction
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
+from guillotina.exceptions import TransactionNotFound
 from guillotina.profile import profilable
 from guillotina.transactions import transaction
 from guillotina.utils import get_authenticated_user_id
@@ -33,10 +35,6 @@ class TransactionManager:
         # Guillotine Storage
         self._storage = storage
         self._db = db
-        # Pointer to last transaction created
-        self._last_txn = None
-        # Pointer to last db connection opened
-        self._last_db_conn = None
         self._hard_cache = {}
         self._lock = asyncio.Lock()
 
@@ -50,9 +48,11 @@ class TransactionManager:
     def lock(self):
         return self._lock
 
-    async def get_root(self, txn=None):
+    async def get_root(self, txn=None) -> IBaseObject:
         if txn is None:
-            txn = self._last_txn
+            txn = task_vars.txn.get()
+            if txn is None:
+                raise TransactionNotFound()
         return await txn.get(ROOT_ID)
 
     @profilable
@@ -74,8 +74,6 @@ class TransactionManager:
                     logger.warn('Unable to close spurious connection', exc_info=True)
         else:
             txn = Transaction(self, read_only=read_only)
-
-        self._last_txn = txn
 
         try:
             txn.user = get_authenticated_user_id()
@@ -140,9 +138,6 @@ class TransactionManager:
                     else:
                         raise
             txn._db_conn = None
-        if txn == self._last_txn:
-            self._last_txn = None
-            self._last_db_conn = None
 
     async def abort(self, *, txn: typing.Optional[ITransaction]=None) -> None:
         try:

@@ -1,5 +1,4 @@
-from guillotina.component import query_utility
-from guillotina.interfaces import ISecurityPolicy
+from guillotina import task_vars
 
 
 class SecurityMap:
@@ -36,9 +35,8 @@ class SecurityMap:
         return True
 
     def _invalidated_policy_cache(self):
-        policy = query_utility(ISecurityPolicy)
-        if policy is not None:
-            policy.invalidate_cache()
+        policies = task_vars.security_policies.get() or {}
+        policies.clear()
 
     def del_cell(self, rowentry, colentry):
         row = self._byrow.get(rowentry)
@@ -105,6 +103,13 @@ class GuillotinaSecurityMap(SecurityMap):
             self._byrow = map._byrow
             self._bycol = map._bycol
         self.map = map
+
+    def _invalidated_policy_cache(self):
+        super()._invalidated_policy_cache()
+        try:
+            del self.context.__volatile__['security_cache']
+        except KeyError:
+            pass
 
     def _changed(self):
         map = self.map
