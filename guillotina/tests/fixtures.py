@@ -183,7 +183,7 @@ class GuillotinaDBRequester(object):
         try:
             value = resp.json()
         except json.decoder.JSONDecodeError:
-            value = resp.text
+            value = resp.content
 
         status = resp.status_code
         return value, status, resp.headers

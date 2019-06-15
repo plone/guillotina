@@ -15,6 +15,7 @@ class AsgiStreamReader(EmptyStreamReader):
     def __init__(self, receive):
         self.receive = receive
         self.finished = False
+        self._buffer = b""
 
     async def readany(self):
         return await self.read()
@@ -23,8 +24,73 @@ class AsgiStreamReader(EmptyStreamReader):
         if self.finished:
             return b""
         payload = await self.receive()
-        self.finished = True
+        self.finished = not payload.get("more_body", False)
         return payload["body"]
+
+    async def readexactly(self, n: int) -> bytes:
+        data = b""
+
+        if self._buffer:
+            data += self._buffer[:n]
+            self._buffer = self._buffer[n:]  # rest
+
+        while len(data) < n and not self.finished:
+            chunk = await self.read()
+            data += chunk
+
+        if len(data) < n:
+            raise asyncio.IncompleteReadError(data, n)
+
+        self._buffer += data[n:]
+        return data
+
+
+class AsgiStreamWriter():
+    """Dummy implementation of StreamWriter"""
+
+    buffer_size = 0
+    output_size = 0
+    length = 0  # type: Optional[int]
+
+    def __init__(self, send):
+        self.send = send
+        self._buffer = asyncio.Queue()
+        self.eof = False
+
+    async def write(self, chunk: bytes) -> None:
+        """Write chunk into stream."""
+        await self._buffer.put(chunk)
+
+    async def write_eof(self, chunk: bytes=b'') -> None:
+        """Write last chunk."""
+        await self.write(chunk)
+        self.eof = True
+        await self.drain()
+
+    async def drain(self) -> None:
+        """Flush the write buffer."""
+        while not self._buffer.empty():
+            body = await self._buffer.get()
+            await self.send({
+                "type": "http.response.body",
+                "body": body,
+                "more_body": True
+            })
+
+        if self.eof:
+            await self.send({
+                "type": "http.response.body",
+                "body": b"",
+                "more_body": False
+            })
+
+    def enable_compression(self, encoding: str='deflate') -> None:
+        """Enable HTTP body compression"""
+        raise NotImplemented()
+
+    def enable_chunking(self) -> None:
+        """Enable HTTP chunked mode"""
+        raise NotImplemented()
 
 
 class AsgiApp:
@@ -97,18 +163,21 @@ class AsgiApp:
 
         # WS handling after view execution missing here!!!
         if scope["type"] != "websocket":
-            await send(
-                {
-                    "type": "http.response.start",
-                    "status": resp.status,
-                    "headers": headers_to_list(resp.headers)
-                }
-            )
+            from guillotina.response import StreamResponse
 
-            body = resp.text or ""
-            await send({"type": "http.response.body", "body": body.encode()})
+            if not isinstance(resp, StreamResponse):
+                await send(
+                    {
+                        "type": "http.response.start",
+                        "status": resp.status,
+                        "headers": headers_to_list(resp.headers)
+                    }
+                )
+                body = resp.text or ""
+                await send({"type": "http.response.body", "body": body.encode()})
 
 
-from guillotina.factory.app import make_asgi_app
-# asgi app singleton
-app = make_asgi_app()
+# from guillotina.factory.app import make_asgi_app
+
+# # asgi app singleton
+# app = make_asgi_app()
