@@ -17,8 +17,6 @@ txn: ContextVar[Optional[ITransaction]] = ContextVar('g_txn', default=None)
 tm: ContextVar[Optional[ITransactionManager]] = ContextVar('g_tm', default=None)
 futures: ContextVar[Optional[Dict]] = ContextVar('g_futures', default=None)
 authenticated_user: ContextVar[Optional[IPrincipal]] = ContextVar('g_authenticated_user', default=None)
-authenticated_user_groups: ContextVar[Optional[IPrincipal]] = ContextVar(
-    'g_authenticated_user_groups', default=None)
 security_policies: ContextVar[Optional[Dict[str, ISecurityPolicy]]] = ContextVar(
     'g_security_policy', default=None)
 container: ContextVar[Optional[IContainer]] = ContextVar('g_container', default=None)

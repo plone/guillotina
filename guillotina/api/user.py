@@ -47,7 +47,7 @@ async def get_user_info(context, request):
     group_search = get_utility(IGroups)
     result['groups'] = {}
     for group in groups:
-        group_object = group_search.get_principal(group)
+        group_object = group_search.get_principal(group, principal)
         result['groups'][group_object.id] = {
             'roles': group_object.roles,
             'groups': group_object.groups

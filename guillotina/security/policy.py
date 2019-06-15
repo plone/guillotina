@@ -286,7 +286,7 @@ class SecurityPolicy:
             roles = self.principal.roles.copy()
 
             for group in self.principal.groups:
-                roles.update(groups.get_principal(group).roles)
+                roles.update(groups.get_principal(group, self.principal).roles)
             return roles
 
         # We are asking for group id so only group roles
@@ -304,7 +304,7 @@ class SecurityPolicy:
                 return level_setting_as_boolean('p', permissions[permission])
 
             for group in self.principal.groups:
-                permissions = groups.get_principal(principal).permissions
+                permissions = groups.get_principal(group, self.principal).permissions
                 if permission in permissions:
                     return level_setting_as_boolean('p', permissions[permission])
         return None

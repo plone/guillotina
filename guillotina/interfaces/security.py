@@ -79,10 +79,6 @@ Unset = PermissionSetting(
     'Unset', 'Unset constant that denotes no setting for permission')
 
 
-class IGroups(Interface):  # pylint: disable=E0239
-    """A group Utility search."""
-
-
 class IRole(Interface):  # pylint: disable=E0239
     """A role object."""
 
@@ -422,4 +418,12 @@ class IPasswordChecker(Interface):
 class IAuthExtractor(Interface):
     def __call__(request: IRequest) -> typing.Optional[typing.Dict]:
         '''
+        '''
+
+class IGroups(Interface):
+    """A group Utility search."""
+
+    def get_principal(ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
+        '''
+        Get group principal object
         '''

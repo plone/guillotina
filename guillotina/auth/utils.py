@@ -38,7 +38,6 @@ def set_authenticated_user(user):
         if hasattr(user, 'roles') and 'guillotina.Authenticated' not in user.roles:
             user.roles['guillotina.Authenticated'] = 1
     task_vars.authenticated_user.set(user)
-    task_vars.authenticated_user_groups.set({})
 
 
 @profilable
