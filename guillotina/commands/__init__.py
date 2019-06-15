@@ -244,10 +244,9 @@ class Command(object):
 
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
+        from guillotina.factory.app import make_app
         loop = self.get_loop()
-        from guillotina.factory import make_app
-        return loop.run_until_complete(
-            make_app(settings=settings, loop=loop))
+        return make_app(settings=settings, loop=loop)
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)

@@ -153,7 +153,7 @@ class DownloadFile(TraversableFieldService):
             adapter = get_multi_adapter(
                 (self.context, self.request, self.field), IFileManager)
             return await self.handle(adapter, kwargs)
-        except AttributeError as e:
+        except AttributeError:
             # file does not exist
             return HTTPNotFound(content={
                 'reason': 'File does not exist'

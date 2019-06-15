@@ -1,4 +1,4 @@
-from aiohttp import web
+import uvicorn
 from guillotina.commands import Command
 
 import asyncio
@@ -41,14 +41,9 @@ class ServerCommand(Command):
                     'Use `pip install aiohttp_autoreload` to install aiohttp_autoreload.\n'
                 )
                 return 1
-            aiohttp_autoreload.start()
 
         port = arguments.port or settings.get('address', settings.get('port'))
         host = arguments.host or settings.get('host', '0.0.0.0')
-        log_format = settings.get('access_log_format', AccessLogger.LOG_FORMAT)
-        try:
-            web.run_app(app, host=host, port=port,
-                        access_log_format=log_format)
-        except asyncio.CancelledError:
-            # server shut down, we're good here.
-            pass
+        #log_format = settings.get('access_log_format', AccessLogger.LOG_FORMAT)
+
+        uvicorn.run(app, host=host, port=port, reload=arguments.reload)

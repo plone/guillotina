@@ -94,9 +94,11 @@ class AsgiStreamWriter():
 
 
 class AsgiApp:
-    def __init__(self):
+    def __init__(self, config_file, settings, loop):
         self.app = None
-        self.loop = None
+        self.config_file = config_file
+        self.settings = settings
+        self.loop = loop
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http" or scope["type"] == "websocket":
@@ -116,22 +118,11 @@ class AsgiApp:
                     await send({'type': 'lifespan.shutdown.complete'})
                     return
 
-    async def startup(self, settings=None, loop=None):
-        # The config file is defined in the env var `CONFIG`
-        loop = loop or asyncio.get_event_loop()
-        from guillotina.factory import make_app
-        import guillotina
-        self.loop = loop
-
-        config = os.getenv("CONFIG", None)
-        if settings:
-            pass
-        elif not config:
-            settings = guillotina._settings.default_settings
-        else:
-            with open(config, "r") as f:
-                settings = yaml.load(f, Loader=yaml.FullLoader)
-        return await make_app(settings=settings, loop=loop, server_app=self)
+    async def startup(self):
+        from guillotina.factory.app import startup_app
+        return await startup_app(
+            config_file=self.config_file,
+            settings=self.settings, loop=self.loop, server_app=self)
 
     async def shutdown(self):
         pass
