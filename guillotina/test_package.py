@@ -207,6 +207,22 @@ class AsyncUtility:
 
 
 @configure.service(
+    context=IApplication, method='DELETE', permission='guillotina.AccessContent',
+    name='@testit')
+@configure.service(
+    context=IApplication, method='POST', permission='guillotina.AccessContent',
+    name='@testit')
+@configure.service(
+    context=IApplication, method='HEAD', permission='guillotina.AccessContent',
+    name='@testit')
+@configure.service(
+    context=IApplication, method='GET', permission='guillotina.AccessContent',
+    name='@testit')
+async def noop(context, request):
+    return {}
+
+
+@configure.service(
     context=IApplication, method='GET', permission='guillotina.AccessContent',
     name='@match/{foo}/{bar}')
 async def matching_service(context, request):
