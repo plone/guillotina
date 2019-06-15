@@ -3,7 +3,6 @@ import inspect
 import logging
 import os
 
-from guillotina import task_vars
 from guillotina.commands import Command
 from guillotina.utils import get_containers
 from guillotina.utils import lazy_apply
@@ -33,7 +32,6 @@ async def run(container):
         return parser
 
     async def run(self, arguments, settings, app):
-        task_vars.request.set(self.request)
         script = os.path.abspath(arguments.script)
         spec = importlib.util.spec_from_file_location("module.name", script)
         module = importlib.util.module_from_spec(spec)
@@ -43,7 +41,7 @@ async def run(container):
             return
         sig = inspect.signature(module.run)
         if 'container' in sig.parameters:
-            async for txn, tm, container in get_containers(self.request):
+            async for txn, tm, container in get_containers():
                 await module.run(container)
                 await tm.commit(txn=txn)
         else:

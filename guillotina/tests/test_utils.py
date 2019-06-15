@@ -155,9 +155,8 @@ def test_merge_dicts():
 
 
 async def test_get_containers(container_requester):
-    async with container_requester as requester:
-        request = get_mocked_request(requester.db)
-        containers = [c async for c in utils.get_containers(request)]
+    async with container_requester:
+        containers = [c async for c in utils.get_containers()]
         assert len(containers) > 0
 
 
