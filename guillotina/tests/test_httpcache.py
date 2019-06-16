@@ -1,7 +1,18 @@
 import json
+import pytest
 
 
-async def test_returned_on_default_get(simple_httpcache, container_requester):
+@pytest.mark.app_settings({
+    'load_utilities': {'httpcache': {
+        "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",
+        "factory": "guillotina.api.httpcache.SimpleHttpCachePolicyUtility",
+        "settings": {
+            "max_age": 123,
+            "public": True,
+        }}
+    }
+})
+async def test_returned_on_default_get(container_requester):
     async with container_requester as requester:
         _, status, headers = await requester.make_request('GET', '/db/guillotina')
         assert status == 200
@@ -11,7 +22,17 @@ async def test_returned_on_default_get(simple_httpcache, container_requester):
         assert 'ETag' in headers  # <-- it should be the transaction id
 
 
-async def test_not_returned_in_default_post(container_requester, simple_httpcache):
+@pytest.mark.app_settings({
+    'load_utilities': {'httpcache': {
+        "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",
+        "factory": "guillotina.api.httpcache.SimpleHttpCachePolicyUtility",
+        "settings": {
+            "max_age": 123,
+            "public": True,
+        }}
+    }
+})
+async def test_not_returned_in_default_post(container_requester):
     async with container_requester as requester:
         _, status, headers = await requester.make_request(
             'POST', '/db/guillotina',
@@ -25,7 +46,17 @@ async def test_not_returned_in_default_post(container_requester, simple_httpcach
         assert 'ETag' not in headers
 
 
-async def test_not_returned_in_default_delete(container_requester, simple_httpcache):
+@pytest.mark.app_settings({
+    'load_utilities': {'httpcache': {
+        "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",
+        "factory": "guillotina.api.httpcache.SimpleHttpCachePolicyUtility",
+        "settings": {
+            "max_age": 123,
+            "public": True,
+        }}
+    }
+})
+async def test_not_returned_in_default_delete(container_requester):
     async with container_requester as requester:
         _, status = await requester(
             'POST', '/db/guillotina',
@@ -42,7 +73,17 @@ async def test_not_returned_in_default_delete(container_requester, simple_httpca
         assert 'ETag' not in headers
 
 
-async def test_endpoint_specific_headers_supercedes_default(container_requester, simple_httpcache):
+@pytest.mark.app_settings({
+    'load_utilities': {'httpcache': {
+        "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",
+        "factory": "guillotina.api.httpcache.SimpleHttpCachePolicyUtility",
+        "settings": {
+            "max_age": 123,
+            "public": True,
+        }}
+    }
+})
+async def test_endpoint_specific_headers_supercedes_default(container_requester):
     async with container_requester as requester:
         _, status, headers = await requester.make_request('GET', '/@testHttpCache')
         assert status == 200
@@ -51,7 +92,17 @@ async def test_endpoint_specific_headers_supercedes_default(container_requester,
         assert 'ETag' in headers
 
 
-async def test_endpoint_specific_from_dict(container_requester, simple_httpcache):
+@pytest.mark.app_settings({
+    'load_utilities': {'httpcache': {
+        "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",
+        "factory": "guillotina.api.httpcache.SimpleHttpCachePolicyUtility",
+        "settings": {
+            "max_age": 123,
+            "public": True,
+        }}
+    }
+})
+async def test_endpoint_specific_from_dict(container_requester):
     async with container_requester as requester:
         _, status, headers = await requester.make_request('POST', '/@testHttpCache')
         assert status == 200
