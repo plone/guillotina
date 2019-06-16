@@ -103,10 +103,11 @@ class StreamResponse():
         writer = self._payload_writer = AsgiStreamWriter(request.send)
 
         headers = self.headers
-        headers.setdefault(hdrs.CONTENT_TYPE, 'application/octet-stream')
 
         if self.content_type:
             headers.setdefault(hdrs.CONTENT_TYPE, self.content_type)
+        else:
+            headers.setdefault(hdrs.CONTENT_TYPE, 'application/octet-stream')
 
         if self.content_length:
             headers.setdefault(hdrs.CONTENT_LENGTH, str(self.content_length))

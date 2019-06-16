@@ -178,15 +178,15 @@ class Command(object):
             self.__run(app, settings)
 
     def __run(self, app, settings):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(app.startup())
         if asyncio.iscoroutinefunction(self.run):
             # Blocking call which returns when finished
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(app.startup())
             loop.run_until_complete(self.run(self.arguments, settings, app))
-            loop.run_until_complete(self.cleanup(app))
-            loop.close()
         else:
             self.run(self.arguments, settings, app.app)
+        loop.run_until_complete(self.cleanup(app))
+        loop.close()
 
         if self.profiler is not None:
             if self.arguments.profile_output:

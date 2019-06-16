@@ -375,6 +375,7 @@ def app_client(loop):
     app = make_app(settings=get_db_settings(), loop=loop)
 
     original_startup = app.startup
+
     async def custom_startup():
         app = await original_startup()
         await _clear_dbs(app)

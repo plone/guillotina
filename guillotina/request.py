@@ -325,11 +325,11 @@ class Request(object):
         return self._raw_path
 
     @reify
-    def query(self) -> 'multidict.MultiDictProxy[str]':
+    def query(self) -> 'multidict.CIMultiDict[str]':
         """A multidict with all the variables in the query string."""
 
         query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
-        return multidict.MultiDictProxy(multidict.CIMultiDict(query))
+        return multidict.CIMultiDict(query)
 
     @reify
     def query_string(self) -> str:
@@ -340,12 +340,10 @@ class Request(object):
         return self._query_string
 
     @reify
-    def headers(self) -> 'multidict.CIMultiDictProxy[str]':
+    def headers(self) -> 'multidict.CIMultiDict[str]':
         """A case-insensitive multidict proxy with all headers."""
-        return multidict.CIMultiDictProxy(
-            multidict.CIMultiDict(
-                [(k.decode(), v.decode()) for k, v in self._raw_headers]
-            )
+        return multidict.CIMultiDict(
+            [(k.decode(), v.decode()) for k, v in self._raw_headers]
         )
 
     @reify
