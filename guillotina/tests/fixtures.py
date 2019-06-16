@@ -378,7 +378,7 @@ WHERE zoid != '{}' AND zoid != '{}'
 def app_client(loop):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(), loop=loop)
-    client = TestClient(app, loop=loop)
+    client = TestClient(app)
     try:
         loop.run_until_complete(client.__aenter__())
         yield app, client
