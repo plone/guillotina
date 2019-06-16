@@ -47,8 +47,6 @@ async def add_http_cache_headers(event):
         # Just update headers if not creating content or method request is delete
         return
 
-    import pdb; pdb.set_trace()
-
     # Compute global http cache policy
     extra_headers = {}
     global_policy = query_utility(IHttpCachePolicyUtility)
@@ -59,7 +57,7 @@ async def add_http_cache_headers(event):
     aux = getattr(event.view, "__extra_headers__", {})
     if isinstance(aux, dict):
         extra_headers.update(**aux)
-    elif isinstance(aux, callable):
+    elif callable(aux):
         extra_headers.update(**aux(context=event.resource,
                                    request=event.request))
 

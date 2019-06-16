@@ -26,7 +26,7 @@ from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
-
+from guillotina.utils import merge_dicts
 
 _dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -50,8 +50,9 @@ def base_settings_configurator(settings):
 testing.configure_with(base_settings_configurator)
 
 
-def get_dummy_settings():
+def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
+    settings = _update_from_pytest_markers(settings, pytest_node)
     settings['databases']['db']['storage'] = 'DUMMY'
     settings['databases']['db']['dsn'] = {}
     return settings
@@ -73,19 +74,22 @@ def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
     }
 
 
-def get_test_settings(pytest_node=None):
-    settings = get_db_settings()
+def _update_from_pytest_markers(settings, pytest_node):
     if not pytest_node:
         return settings
 
     # Update test app settings from pytest markers
     for mark in pytest_node.iter_markers(name='app_settings'):
-        settings.update(mark.args[0])
+        to_update = mark.args[0]
+        settings = merge_dicts(settings, to_update)
 
     return settings
 
-def get_db_settings():
+
+def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
+    settings = _update_from_pytest_markers(settings, pytest_node)
+
     if annotations['testdatabase'] == 'DUMMY':
         return settings
 
@@ -216,10 +220,10 @@ async def close_async_tasks(app):
 
 
 @pytest.fixture(scope='function')
-def dummy_guillotina(loop):
+def dummy_guillotina(loop, request):
     globalregistry.reset()
     aioapp = loop.run_until_complete(
-        make_app(settings=get_dummy_settings(), loop=loop))
+        make_app(settings=get_dummy_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
@@ -293,9 +297,8 @@ WHERE zoid != '{}' AND zoid != '{}'
 @pytest.fixture(scope='function')
 def guillotina_main(loop, request):
     globalregistry.reset()
-    test_settings = get_test_settings(request.node)
     aioapp = loop.run_until_complete(
-        make_app(settings=test_settings, loop=loop))
+        make_app(settings=get_db_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
 
@@ -395,23 +398,3 @@ def container_command(db):
 DELETE FROM objects;
 DELETe FROM blobs;
 COMMIT;''')
-
-
-@pytest.fixture(scope='function')
-def simple_httpcache():
-
-    import pdb; pdb.set_trace()
-
-    app_settings.setdefault('load_utilities', {})
-    app_settings['load_utilities']['httpcache'] = {
-        "provides": "guillotina.api.httpcache.IHttpCachePolicyUtility",
-        "factory": "guillotina.api.httpcache.SimpleHttpCachePolicyUtility",
-        "settings": {
-            "max_age": 123,
-            "public": True,
-        }
-    }
-
-    yield
-
-    app_settings['load_utilities'].pop('httpcache')
