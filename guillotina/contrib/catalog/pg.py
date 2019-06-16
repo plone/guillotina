@@ -7,7 +7,7 @@ from dateutil.parser import parse
 from guillotina import configure
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
-from guillotina.catalog.parser import BaseParser
+from guillotina.catalog.parser import BaseParser, BasicParsedQueryInfo
 from guillotina.catalog.parser import to_list
 from guillotina.catalog.utils import get_index_definition
 from guillotina.catalog.utils import iter_indexes
@@ -55,15 +55,7 @@ $$SELECT CAST($1 AS timestamptz)$$  -- adapt to your needs
 ]
 
 
-class ParsedQueryInfo(typing.NamedTuple):
-    sort_on: typing.Optional[str]
-    sort_dir: typing.Optional[str]
-    from_: int
-    size: int
-    full_objects: bool
-    metadata: typing.Optional[typing.List[str]]
-    excluded_metadata: typing.Optional[typing.List[str]]
-
+class ParsedQueryInfo(BasicParsedQueryInfo):
     wheres: typing.List[str]
     wheres_arguments: typing.List[typing.Any]
     selects: typing.List[str]
@@ -144,14 +136,14 @@ class Parser(BaseParser):
         pg_index = get_pg_index(field)
         return pg_index.where(result, operator), result, pg_index.select()
 
-    def __call__(self, params: typing.Dict) -> ParsedQueryInfo:  # type: ignore
+    def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
         query_info = super().__call__(params)
 
         wheres = []
         arguments = []
         selects = []
         selects_arguments = []
-        for field, value in query_info.params.items():
+        for field, value in query_info['params'].items():
             result = self.process_queried_field(field, value)
             if result is None:
                 continue
@@ -162,33 +154,27 @@ class Parser(BaseParser):
                 selects.append(select)
                 selects_arguments.append(value)
 
-        return ParsedQueryInfo(
-            from_=query_info.from_,
-            size=query_info.size,
+        return typing.cast(ParsedQueryInfo, dict(
+            query_info,
             wheres=wheres,
             wheres_arguments=arguments,
             selects=selects,
             selects_arguments=selects_arguments,
-            sort_on=query_info.sort_on,
-            sort_dir=query_info.sort_dir,
-            full_objects=query_info.full_objects,
-            metadata=query_info.metadata,
-            excluded_metadata=query_info.excluded_metadata
-        )
+        ))
 
 
 class BasicJsonIndex:
     operators: typing.List[str] = ['=', '!=', '?', '?|']
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
 
     @property
-    def idx_name(self):
+    def idx_name(self) -> str:
         return 'idx_objects_{}'.format(self.name)
 
     @property
-    def index_sql(self):
+    def index_sql(self) -> typing.List[str]:
         return [
             f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name}
                 ON objects ((json->>'{self.name}'));''',
@@ -196,17 +182,17 @@ class BasicJsonIndex:
                 ON objects USING gin ((json->'{self.name}'))'''
         ]
 
-    def where(self, value, operator='='):
+    def where(self, value, operator='=') -> str:
         assert operator in self.operators
         if operator in ('?', '?|'):
             return f"""json->'{self.name}' {operator} ${{arg}} """
         else:
             return f"""json->>'{self.name}' {operator} ${{arg}} """
 
-    def order_by(self, direction='ASC'):
+    def order_by(self, direction='ASC') -> str:
         return f"order by json->>'{self.name}' {direction}"
 
-    def select(self):
+    def select(self) -> typing.Optional[str]:
         return None
 
 
@@ -419,25 +405,24 @@ class PGSearchUtility(DefaultSearchUtility):
 
     def build_query(self, context,
                     query: ParsedQueryInfo) -> typing.Tuple[str, typing.List[typing.Any]]:
-        sort_on = query.sort_on
-        if sort_on is None:
+        if query['sort_on'] is None:
             # always need a sort otherwise paging never works
             order_by_index = get_pg_index('uuid')
         else:
-            order_by_index = get_pg_index(query.sort_on) or BasicJsonIndex(query.sort_on)
+            order_by_index = get_pg_index(query['sort_on']) or BasicJsonIndex(query['sort_on'])
 
         sql_arguments = []
         sql_wheres = []
         select_fields = ['id', 'zoid', 'json']
         arg_index = 1
-        for idx, select in enumerate(query.selects):
+        for idx, select in enumerate(query['selects']):
             select_fields.append(select.format(arg=arg_index))
-            sql_arguments.append(query.selects_arguments[idx])
+            sql_arguments.append(query['selects_arguments'][idx])
             arg_index += 1
 
-        for idx, where in enumerate(query.wheres):
+        for idx, where in enumerate(query['wheres']):
             sql_wheres.append(where.format(arg=arg_index))
-            sql_arguments.append(query.wheres_arguments[idx])
+            sql_arguments.append(query['wheres_arguments'][idx])
             arg_index += 1
 
         txn = get_transaction()
@@ -453,9 +438,9 @@ class PGSearchUtility(DefaultSearchUtility):
             ','.join(select_fields),
             clear_table_name(txn.storage._objects_table_name),
             ' AND '.join(sql_wheres),
-            order_by_index.order_by(query.sort_dir),
-            query.size,
-            query.from_
+            order_by_index.order_by(query['sort_dir']),
+            query['size'],
+            query['from_']
         )
         return sql, sql_arguments
 
@@ -465,9 +450,9 @@ class PGSearchUtility(DefaultSearchUtility):
         sql_wheres = []
         select_fields = ['count(*)']
         arg_index = 1
-        for idx, where in enumerate(query.wheres):
+        for idx, where in enumerate(query['wheres']):
             sql_wheres.append(where.format(arg=arg_index))
-            sql_arguments.append(query.wheres_arguments[idx])
+            sql_arguments.append(query['wheres_arguments'][idx])
             arg_index += 1
 
         sql_wheres.extend(self.get_default_where_clauses(context))
@@ -485,14 +470,14 @@ class PGSearchUtility(DefaultSearchUtility):
 
     def load_meatdata(self, query: ParsedQueryInfo, data: typing.Dict[str, typing.Any]):
         metadata: typing.Dict[str, typing.Any] = {}
-        if query.metadata is None:
+        if query['metadata'] is None:
             metadata = data.copy()
         else:
-            for k in query.metadata:
+            for k in query['metadata']:
                 if k in data:
                     metadata[k] = data[k]
 
-        for k in (query.excluded_metadata or []):
+        for k in (query['excluded_metadata'] or []):
             if k in metadata:
                 del metadata[k]
         return metadata
@@ -520,7 +505,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
         # also do count...
         total = len(results)
-        if total >= query.size:
+        if total >= query['size']:
             sql, arguments = self.build_count_query(context, query)
             logger.debug(f'Running search:\n{sql}\n{arguments}')
             records = await conn.fetch(sql, *arguments)

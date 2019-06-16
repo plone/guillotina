@@ -2,9 +2,10 @@ import typing
 from guillotina.utils import get_content_path
 from guillotina.utils import get_content_depth
 from guillotina.catalog.utils import iter_indexes
+from mypy_extensions import TypedDict
 
 
-def to_list(value):
+def to_list(value: typing.Union[str, list]) -> typing.List[str]:
     if isinstance(value, str):
         value = value.split(',')
     if not isinstance(value, list):
@@ -12,7 +13,7 @@ def to_list(value):
     return value
 
 
-class BasicParsedQueryInfo(typing.NamedTuple):
+class BasicParsedQueryInfo(TypedDict):
     sort_on: typing.Optional[str]
     sort_dir: typing.Optional[str]
     from_: int
@@ -106,13 +107,13 @@ class BaseParser:
         if params.get('_metadata_not'):
             excluded_metadata = to_list(params.pop('_metadata_not'))
 
-        return BasicParsedQueryInfo(
-            from_=from_,
-            size=size,
-            sort_on=sort_field,
-            sort_dir=sort_dir,
-            full_objects=full_objects,
-            metadata=metadata,
-            excluded_metadata=excluded_metadata,
-            params=params
-        )
+        return {
+            'from_': from_,
+            'size': size,
+            'sort_on': sort_field,
+            'sort_dir': sort_dir,
+            'full_objects': full_objects,
+            'metadata': metadata,
+            'excluded_metadata': excluded_metadata,
+            'params': params
+        }
