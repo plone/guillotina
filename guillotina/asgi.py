@@ -1,7 +1,7 @@
 from aiohttp.streams import EmptyStreamReader
 from guillotina.request import Request
+from guillotina import task_vars
 import asyncio
-import aiotask_context
 
 
 def headers_to_list(headers):
@@ -150,7 +150,7 @@ class AsgiApp:
             receive=receive
         )
 
-        aiotask_context.set('request', request)
+        task_vars.request.set(request)
 
         route = await self.app.router.resolve(request)
         resp = await route.handler(request)

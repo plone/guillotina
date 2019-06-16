@@ -4,7 +4,7 @@ from distutils.version import StrictVersion
 from guillotina.commands import Command
 from guillotina.component import get_utilities_for
 from guillotina.interfaces import IMigration
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
 
 
@@ -17,8 +17,7 @@ class MigrateCommand(Command):
     async def migrate(self, db):
         migrations = sorted(
             get_utilities_for(IMigration))
-        self.request._tm = db.get_transaction_manager()
-        async with managed_transaction(self.request, write=True) as txn:
+        async with transaction(db=db) as txn:
             # make sure to get fresh copy
             txn._manager._hard_cache.clear()
             root = await db.get_root()

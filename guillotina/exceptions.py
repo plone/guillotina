@@ -1,10 +1,9 @@
+import ujson
 from guillotina._settings import app_settings
 from guillotina.interfaces import IUnauthorized
 from zope.interface import implementer
 from zope.interface.exceptions import Invalid  # noqa pylint: disable=W0611
 from zope.interface.interfaces import ComponentLookupError  # noqa pylint: disable=W0611
-
-import ujson
 
 
 class NoPermissionToAdd(Exception):
@@ -73,18 +72,20 @@ class PreconditionFailed(Exception):
 
 
 class RequestNotFound(Exception):
-    """Lookup for the current request for request aware transactions failed
+    """
+    Lookup for the current request for request aware task failed
+    """
+
+
+class TransactionNotFound(Exception):
+    """
+    Lookup for the current request for request aware task failed
     """
 
 
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""
-
-
-class NoInteraction(Exception):
-    """No interaction started
-    """
 
 
 class ConflictError(Exception):
@@ -98,7 +99,10 @@ class ConflictError(Exception):
 
     def get_conflict_summary(self, oid, txn, old_serial, writer):
         from guillotina.utils import get_current_request
-        req = get_current_request()
+        try:
+            req = get_current_request()
+        except RequestNotFound:
+            req = None
         max_attempts = app_settings.get('conflict_retry_attempts', 3)
         attempts = getattr(req, '_retry_attempt', 0)
         return f'''Object ID: {oid}
@@ -161,13 +165,6 @@ class ReadOnlyError(Exception):
 
 class BlobChunkNotFound(Exception):
     pass
-
-
-class ResourceLockedTimeout(Exception):
-    '''
-    The resource you are trying to lock for writing is already locked by
-    another process and the wait time for the lock has expired
-    '''
 
 
 class DeserializationError(Exception):

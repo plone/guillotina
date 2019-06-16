@@ -1,23 +1,30 @@
+import asyncio
+import typing
 from asyncio import shield
+
+import asyncpg
 from guillotina import glogging
+from guillotina import task_vars
 from guillotina.db import ROOT_ID
+from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionManager
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.transaction import Status
 from guillotina.db.transaction import Transaction
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
+from guillotina.exceptions import TransactionNotFound
 from guillotina.profile import profilable
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import transaction
 from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_current_request
-
-import asyncio
-import asyncpg
+from zope.interface import implementer
 
 
 logger = glogging.getLogger('guillotina')
 
 
+@implementer(ITransactionManager)
 class TransactionManager:
     """
     Transaction manager for storing the managed transaction in the
@@ -28,10 +35,6 @@ class TransactionManager:
         # Guillotine Storage
         self._storage = storage
         self._db = db
-        # Pointer to last transaction created
-        self._last_txn = None
-        # Pointer to last db connection opened
-        self._last_db_conn = None
         self._hard_cache = {}
         self._lock = asyncio.Lock()
 
@@ -45,32 +48,23 @@ class TransactionManager:
     def lock(self):
         return self._lock
 
-    async def get_root(self, txn=None):
+    async def get_root(self, txn=None) -> IBaseObject:
         if txn is None:
-            txn = self._last_txn
+            txn = task_vars.txn.get()
+            if txn is None:
+                raise TransactionNotFound()
         return await txn.get(ROOT_ID)
 
     @profilable
-    async def begin(self, request=None):
+    async def begin(self, read_only: bool=False) -> ITransaction:
         """Starts a new transaction.
         """
-
-        if request is None:
-            try:
-                request = get_current_request()
-            except RequestNotFound:
-                pass
-
-        user = None
-
-        txn = None
-
         # already has txn registered, as long as connection is closed, it
         # is safe
-        if (getattr(request, '_txn', None) is not None and
-                request._txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
+        txn: typing.Optional[ITransaction] = task_vars.txn.get()
+        if (txn is not None and
+                txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
-            txn = request._txn
             txn.status = Status.ACTIVE
             if (txn._db_conn is not None and
                     getattr(txn._db_conn, '_in_use', None) is None):
@@ -79,31 +73,28 @@ class TransactionManager:
                 except Exception:
                     logger.warn('Unable to close spurious connection', exc_info=True)
         else:
-            txn = Transaction(self, request=request)
+            txn = Transaction(self, read_only=read_only)
 
-        self._last_txn = txn
-
-        if request is not None:
-            # register tm and txn with request
-            request._tm = self
-            request._txn = txn
-            user = get_authenticated_user_id(request)
-
-        if user is not None:
-            txn.user = user
+        try:
+            txn.user = get_authenticated_user_id()
+        except RequestNotFound:
+            pass
 
         await txn.tpc_begin()
 
+        # make sure to explicitly set!
+        task_vars.txn.set(txn)
+
         return txn
 
-    async def commit(self, request=None, txn=None):
-        return await shield(self._commit(request=request, txn=txn))
+    async def commit(self, *, txn: typing.Optional[ITransaction]=None) -> None:
+        return await shield(self._commit(txn=txn))
 
-    async def _commit(self, request=None, txn=None):
+    async def _commit(self, *, txn: typing.Optional[ITransaction]=None) -> None:
         """ Commit the last transaction
         """
         if txn is None:
-            txn = self.get(request=request)
+            txn = self.get()
         if txn is not None:
             try:
                 await txn.commit()
@@ -116,7 +107,7 @@ class TransactionManager:
         else:
             await self._close_txn(txn)
 
-    async def _close_txn(self, txn):
+    async def _close_txn(self, txn: typing.Optional[ITransaction]):
         if txn is not None and txn._db_conn is not None:
             try:
                 txn._query_count_end = txn.get_query_count()
@@ -147,36 +138,41 @@ class TransactionManager:
                     else:
                         raise
             txn._db_conn = None
-        if txn == self._last_txn:
-            self._last_txn = None
-            self._last_db_conn = None
 
-    async def abort(self, request=None, txn=None):
+    async def abort(self, *, txn: typing.Optional[ITransaction]=None) -> None:
         try:
-            return await shield(self._abort(request=request, txn=txn))
+            return await shield(self._abort(txn=txn))
         except asyncio.CancelledError:
             pass
 
-    async def _abort(self, request=None, txn=None):
+    async def _abort(self, *, txn: typing.Optional[ITransaction]=None):
         """ Abort the last transaction
         """
         if txn is None:
-            txn = self.get(request=request)
+            txn = self.get()
         if txn is not None:
             await txn.abort()
         await self._close_txn(txn)
 
-    def get(self, request=None):
+    def get(self) -> typing.Optional[ITransaction]:
         """Return the current request specific transaction
         """
-        if request is None:
-            try:
-                request = get_current_request()
-            except RequestNotFound:
-                pass
-        if request is None:
-            return self._last_txn
-        return request._txn
+        return task_vars.txn.get()
 
     def transaction(self, **kwargs):
-        return managed_transaction(tm=self, **kwargs)
+        return transaction(tm=self, **kwargs)
+
+    def __enter__(self) -> ITransactionManager:
+        task_vars.tm.set(self)
+        return self
+
+    def __exit__(self, *args):
+        '''
+        contextvars already tears down to previous value, do not set to None here!
+        '''
+
+    async def __aenter__(self) -> ITransactionManager:
+        return self.__enter__()
+
+    async def __aexit__(self, *args):
+        return self.__exit__()

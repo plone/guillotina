@@ -1,3 +1,4 @@
+from guillotina.interfaces import Allow
 from guillotina.interfaces import IPrincipal
 from zope.interface import implementer
 
@@ -7,7 +8,7 @@ ANONYMOUS_USER_ID = 'Anonymous User'
 
 
 @implementer(IPrincipal)
-class BaseUser(object):
+class BaseUser:
     pass
 
 
@@ -56,6 +57,7 @@ class GuillotinaUser(BaseUser):
 
 class AnonymousUser(GuillotinaUser):
 
-    def __init__(self, request):
-        super(AnonymousUser, self).__init__(request)
+    def __init__(self):
+        super().__init__()
         self.id = ANONYMOUS_USER_ID
+        self._roles['guillotina.Anonymous'] = Allow

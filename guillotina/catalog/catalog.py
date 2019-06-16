@@ -112,7 +112,7 @@ class DefaultSecurityInfoAdapter(object):
             'access_users': get_principals_with_access_content(self.content),
             'access_roles': get_roles_with_access_content(self.content),
             'type_name': self.content.type_name,
-            'tid': self.content._p_serial
+            'tid': self.content.__serial__
         }
 
 
@@ -149,7 +149,7 @@ class DefaultCatalogDataAdapter(object):
         # For each type
         values = {
             'type_name': self.content.type_name,
-            'tid': self.content._p_serial
+            'tid': self.content.__serial__
         }
         if schemas is None:
             schemas = iter_schemata(self.content)

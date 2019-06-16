@@ -16,8 +16,8 @@ class Blob:
     """
 
     def __init__(self, resource):
-        self.bid = app_settings['oid_generator'](resource)
-        self.resource_zoid = resource._p_oid
+        self.bid = app_settings['uid_generator'](resource)
+        self.resource_uid = resource.__uuid__
         self.size = 0
         self.chunks = 0
 
@@ -55,7 +55,7 @@ class BlobFile:
         self._started_writing = True
 
         await self.transaction.write_blob_chunk(
-            self.blob.bid, self.blob.resource_zoid, self.blob.chunks, data)
+            self.blob.bid, self.blob.resource_uid, self.blob.chunks, data)
 
         self.blob.chunks += 1
         self.blob.size += len(data)

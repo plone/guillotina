@@ -14,16 +14,19 @@ from guillotina import error_reasons
 from guillotina import logger
 from guillotina import response
 from guillotina import routes
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
-from guillotina.auth.participation import AnonymousParticipation
+from guillotina.auth.users import AnonymousUser
+from guillotina.auth.utils import authenticate_request
+from guillotina.auth.utils import set_authenticated_user
 from guillotina.browser import View
-from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_adapter
 from guillotina.component import query_multi_adapter
 from guillotina.contentnegotiation import get_acceptable_content_types
 from guillotina.contentnegotiation import get_acceptable_languages
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.event import notify
 from guillotina.events import BeforeRenderViewEvent
 from guillotina.events import ObjectLoadedEvent
@@ -36,22 +39,17 @@ from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IAioHTTPResponse
-from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IErrorResponseException
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import ILanguage
-from guillotina.interfaces import IParticipation
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
 from guillotina.interfaces import ITraversable
 from guillotina.profile import profilable
-from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.response import HTTPBadRequest
 from guillotina.response import HTTPMethodNotAllowed
 from guillotina.response import HTTPNotFound
@@ -59,6 +57,8 @@ from guillotina.response import HTTPUnauthorized
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
+from guillotina.utils import get_registry
+from guillotina.utils import get_security_policy
 from guillotina.utils import import_class
 from zope.interface import alsoProvides
 
@@ -93,21 +93,20 @@ async def traverse(request, parent, path):
         return parent, path
 
     if IDatabase.providedBy(context):
-        request._db_write_enabled = app_settings['check_writable_request'](request)
-        request._db_id = context.id
+        task_vars.db.set(context)
         # Add a transaction Manager to request
-        tm = request._tm = context.get_transaction_manager()
+        tm = context.get_transaction_manager()
+        task_vars.tm.set(tm)
         # Start a transaction
-        txn = await tm.begin(request=request)
+        txn = await tm.begin(
+            read_only=not app_settings['check_writable_request'](request))
         # Get the root of the tree
         context = await tm.get_root(txn=txn)
 
     if IContainer.providedBy(context):
-        request._container_id = context.id
-        request.container = context
-        annotations_container = IAnnotations(request.container)
-        request.container_settings = await annotations_container.async_get(REGISTRY_DATA_KEY)
-        layers = request.container_settings.get(ACTIVE_LAYERS_KEY, [])
+        task_vars.container.set(context)
+        registry = await get_registry(context)
+        layers = registry.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:
             try:
                 alsoProvides(request, import_class(layer))
@@ -192,8 +191,8 @@ class BaseMatchInfo(AbstractMatchInfo):
                     last = timing
                 resp.headers['XG-Timing-Total'] = "{0:.5f}".format(
                     (last - request._initialized) * 1000)
-                try:
-                    txn = request._txn
+                txn = task_vars.txn.get()
+                if txn is not None:
                     resp.headers['XG-Request-Cache-hits'] = str(txn._cache._hits)
                     resp.headers['XG-Request-Cache-misses'] = str(txn._cache._misses)
                     resp.headers['XG-Request-Cache-stored'] = str(txn._cache._stored)
@@ -206,8 +205,6 @@ class BaseMatchInfo(AbstractMatchInfo):
                         counts = txn._queries[query]
                         duration = "{0:.5f}".format(counts[1] * 1000)
                         resp.headers[f'XG-Query-{idx}'] = f'count: {counts[0]}, time: {duration}, query: {query}'  # noqa
-                except AttributeError:
-                    pass
             except (KeyError, AttributeError):
                 resp.headers['XG-Error'] = 'Could not get stats'
 
@@ -260,16 +257,16 @@ class MatchInfo(BaseMatchInfo):
                 # We try to avoid collisions on the same instance of
                 # guillotina
                 view_result = await self.view()
-                await commit(request, warn=False)
+                await commit(warn=False)
             except (ConflictError, TIDConflictError):
                 # bubble this error up
                 raise
             except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
-                await abort(request)
+                await abort()
                 view_result = exc
                 request._view_error = True
             except Exception as e:
-                await abort(request)
+                await abort()
                 view_result = generate_error_response(
                     e, request, 'ServiceError')
                 request._view_error = True
@@ -283,7 +280,7 @@ class MatchInfo(BaseMatchInfo):
                 request._view_error = True
                 view_result = generate_error_response(e, request, 'ViewError')
             finally:
-                await abort(request)
+                await abort()
         request.record('viewrendered')
 
         if IAioHTTPResponse.providedBy(view_result):
@@ -367,25 +364,24 @@ class TraversalRouter(AbstractRouter):
         try:
             result = await self.real_resolve(request)
         except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
-            await abort(request)
+            await abort()
             return BasicMatchInfo(request, exc)
         except Exception:
             logger.error("Exception on resolve execution",
                          exc_info=True, request=request)
-            await abort(request)
+            await abort()
             return BasicMatchInfo(
                 request, response.HTTPInternalServerError())
 
         if result is not None:
             return result
         else:
-            await abort(request)
+            await abort()
             return BasicMatchInfo(request, response.HTTPNotFound())
 
     @profilable
     async def real_resolve(self, request: IRequest) -> Optional[MatchInfo]:
         """Main function to resolve a request."""
-        security = get_adapter(request, IInteraction)
 
         if request.method not in app_settings['http_methods']:
             raise HTTPMethodNotAllowed(
@@ -432,8 +428,14 @@ class TraversalRouter(AbstractRouter):
             view_name = ''
 
         request.record('beforeauthentication')
-        await self.apply_authorization(request)
+        authenticated = await authenticate_request(request)
+        # Add anonymous participation
+        if authenticated is None:
+            authenticated = AnonymousUser()
+            set_authenticated_user(authenticated)
         request.record('authentication')
+
+        policy = get_security_policy(authenticated)
 
         for language in get_acceptable_languages(request):
             translator = query_adapter((resource, request), ILanguage,
@@ -441,10 +443,6 @@ class TraversalRouter(AbstractRouter):
             if translator is not None:
                 resource = translator.translate()
                 break
-
-        # Add anonymous participation
-        if len(security.participations) == 0:
-            security.add(AnonymousParticipation(request))
 
         # container registry lookup
         try:
@@ -459,7 +457,7 @@ class TraversalRouter(AbstractRouter):
         # Check security on context to AccessContent unless
         # is view allows explicit or its OPTIONS
         permission = get_utility(IPermission, name='guillotina.AccessContent')
-        if not security.check_permission(permission.id, resource):
+        if not policy.check_permission(permission.id, resource):
             # Check if its a CORS call:
             if IOPTIONS != method:
                 # Check if the view has permissions explicit
@@ -467,15 +465,13 @@ class TraversalRouter(AbstractRouter):
                     logger.info(
                         "No access content {content} with {auths}".format(
                             content=resource,
-                            auths=str([x.principal.id
-                                       for x in security.participations])),
+                            auth=authenticated.id),
                         request=request)
                     raise HTTPUnauthorized(
                         content={
                             "reason": "You are not authorized to access content",
                             "content": str(resource),
-                            "auths": [x.principal.id
-                                      for x in security.participations]
+                            "auth": authenticated.id
                         }
                     )
 
@@ -490,14 +486,16 @@ class TraversalRouter(AbstractRouter):
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
-        if not security.check_permission(view_permission, view):
+        if view_permission is None:
+            # use default view permission
+            view_permission = app_settings['default_permission']
+        if not policy.check_permission(view_permission, view):
             if IOPTIONS != method:
                 raise HTTPUnauthorized(
                     content={
                         "reason": "You are not authorized to view",
                         "content": str(resource),
-                        "auths": [x.principal.id
-                                  for x in security.participations]
+                        "auth": authenticated.id
                     }
                 )
 
@@ -516,17 +514,8 @@ class TraversalRouter(AbstractRouter):
 
         return MatchInfo(resource, request, view)
 
-    async def traverse(self, request: IRequest) -> Tuple[IResource, List[str]]:
+    async def traverse(self, request: IRequest) -> Tuple[IBaseObject, List[str]]:
         """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split('/') if p)
         root = self._root
         return await traverse(request, root, path)
-
-    @profilable
-    async def apply_authorization(self, request: IRequest):
-        # User participation
-        participation = get_adapter(request, IParticipation)
-        # Lets extract the user from the request
-        await participation()
-        if participation.principal is not None:
-            request.security.add(participation)

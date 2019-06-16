@@ -2,30 +2,23 @@
 dist: xenial
 language: python
 sudo: required
-addons:
-  postgresql: 9.6
 matrix:
   include:
-    - name: Python 3.6, Dummy DB
-      python: 3.6
-      env: DATABASE=DUMMY
-    - name: Python 3.6, PG 9.6
-      python: 3.6
-      env: DATABASE=postgres
-    - name: Python 3.6, Cockroachdb
-      python: 3.6
-      env: DATABASE=cockroachdb
     - name: Python 3.7, Dummy DB
       python: 3.7
       env: DATABASE=DUMMY
-    - name: Python 3.7, PG 9.6
+    - name: Python 3.7, PG 10
       python: 3.7
       env: DATABASE=postgres
-    - name: Python 3.7, PG 9.6 (db_schema=custom)
+      addons:
+        postgresql: 10
+    - name: Python 3.7, PG 10 (db_schema=custom)
       python: 3.7
       env:
        - DATABASE=postgres
        - DB_SCHEMA=custom
+      addons:
+        postgresql: 10
     - name: Python 3.7, Cockroachdb
       python: 3.7
       env: DATABASE=cockroachdb

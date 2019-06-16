@@ -1,18 +1,17 @@
-from guillotina.security.utils import get_principals_with_access_content
-from guillotina.interfaces import IInteraction
-from guillotina.interfaces import IRolePermissionManager
+import json
+
 from guillotina.api.container import create_container
-from guillotina.tests.utils import get_mocked_request
+from guillotina.auth.users import GuillotinaUser
 from guillotina.content import create_content_in_container
-from guillotina.tests.utils import wrap_request
-from guillotina.tests.utils import get_db
+from guillotina.interfaces import IRolePermissionManager
+from guillotina.security.policy import cached_roles
+from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.security.utils import settings_for_object
 from guillotina.tests import utils
-from guillotina.transactions import managed_transaction
-from guillotina.auth.users import GuillotinaUser
-
-import json
+from guillotina.tests.utils import get_db
+from guillotina.transactions import transaction
+from guillotina.utils import get_security_policy
 
 
 async def test_get_guillotina(container_requester):
@@ -67,7 +66,7 @@ async def test_set_local_guillotina(container_requester):
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             testing_object = await container.async_get('testing')
 
@@ -95,7 +94,7 @@ async def test_set_local_guillotina(container_requester):
 
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             # need to retreive objs again from db since they changed
             container = await root.async_get('guillotina')
             testing_object = await container.async_get('testing')
@@ -118,7 +117,7 @@ async def test_set_local_guillotina(container_requester):
         # need to retreive objs again from db since they changed
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             testing_object = await container.async_get('testing')
             principals = get_principals_with_access_content(testing_object, request)
@@ -143,7 +142,7 @@ async def test_sharing_prinrole(container_requester):
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             assert 'user1' in container.__acl__['prinrole']._bycol
 
@@ -166,7 +165,7 @@ async def test_sharing_roleperm(container_requester):
         request = utils.get_mocked_request(requester.db)
         root = await utils.get_root(request)
 
-        async with managed_transaction(request=request, abort_when_done=True):
+        async with transaction(abort_when_done=True):
             container = await root.async_get('guillotina')
             assert 'guillotina.Reader' in container.__acl__['roleperm']._bycol
 
@@ -235,16 +234,13 @@ async def test_inherit(container_requester):
         container = await utils.get_container(requester, request)
         content = await container.async_get('testing')
 
-        user = GuillotinaUser(request)
-        user.id = 'user1'
+        user = GuillotinaUser('user1')
 
-        utils.login(request, user)
+        utils.login(user)
 
-        assert request.security.check_permission('guillotina.ViewContent',
-                                                 request.container)
-        assert not request.security.check_permission(
-            'guillotina.ViewContent',
-            content)
+        policy = get_security_policy()
+        assert policy.check_permission('guillotina.ViewContent', container)
+        assert not policy.check_permission('guillotina.ViewContent', content)
 
         response, status = await requester(
             'GET',
@@ -306,31 +302,25 @@ async def test_allowsingle(container_requester):
 
         assert status == 200
 
-        request = utils.get_mocked_request(requester.db)
-        container = await utils.get_container(requester, request)
+        container = await utils.get_container(requester)
         content = await container.async_get('testing')
 
-        user = GuillotinaUser(request)
-        user.id = 'user1'
+        user = GuillotinaUser('user1')
         user._groups = ['group1', 'group2']
 
-        utils.login(request, user)
+        utils.login(user)
+        policy = get_security_policy(user)
+        assert policy.check_permission('guillotina.AccessContent', container)
+        assert policy.check_permission('guillotina.AccessContent', content)
 
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 content)
-
-        user = GuillotinaUser(request)
-        user.id = 'user2'
+        user = GuillotinaUser('user2')
         user._groups = ['group1']
 
-        utils.login(request, user)
+        utils.login(user)
 
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
-        assert not request.security.check_permission(
-            'guillotina.AccessContent', content)
+        policy = get_security_policy(user)
+        assert policy.check_permission('guillotina.AccessContent', container)
+        assert not policy.check_permission('guillotina.AccessContent', content)
 
 
 async def test_allowsingle2(container_requester):
@@ -427,61 +417,57 @@ async def test_allowsingle2(container_requester):
         container = await utils.get_container(requester, request)
         content = await container.async_get('testing')
 
-        user = GuillotinaUser(request)
-        user.id = 'user1'
+        user = GuillotinaUser('user1')
         user._groups = ['group2', 'group1']
 
-        utils.login(request, user)
+        utils.login(user)
 
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 content)
+        policy = get_security_policy()
+        assert policy.check_permission('guillotina.AccessContent', container)
+        assert policy.check_permission('guillotina.AccessContent', content)
 
-        user = GuillotinaUser(request)
-        user.id = 'user2'
+        user = GuillotinaUser('user2')
         user._groups = ['group1']
 
-        utils.login(request, user)
+        utils.login(user)
 
-        assert request.security.check_permission('guillotina.AccessContent',
-                                                 request.container)
-        assert not request.security.check_permission(
-            'guillotina.AccessContent', content)
+        policy = get_security_policy(user)
+        assert policy.check_permission('guillotina.AccessContent', container)
+        assert not policy.check_permission('guillotina.AccessContent', content)
 
-        user = GuillotinaUser(request)
-        user.id = 'user3'
+        user = GuillotinaUser('user3')
         user._groups = ['group1', 'group2', 'group3']
 
-        utils.login(request, user)
+        utils.login(user)
         test1 = await content.async_get('test1')
         test2 = await content.async_get('test2')
 
-        assert request.security.check_permission(
+        policy = get_security_policy(user)
+        assert policy.check_permission(
             'guillotina.ViewContent', test1)
-        assert request.security.check_permission(
+        assert policy.check_permission(
             'guillotina.ViewContent', test2)
 
 
 async def test_cached_access_roles(dummy_guillotina):
     db = get_db(dummy_guillotina, 'db')
     tm = db.get_transaction_manager()
-    request = get_mocked_request(db)
-    async with wrap_request(request):
-        utils.login(request)
-        async with tm.transaction():
-            root_ob = await tm.get_root()
-            container = await create_container(root_ob, 'test-container')
-            folder = await create_content_in_container(container, 'Folder', 'foobar')
-            item = await create_content_in_container(folder, 'Item', 'foobar')
+    utils.login()
+    async with tm.transaction():
+        root_ob = await tm.get_root()
+        container = await create_container(root_ob, 'test-container')
+        folder = await create_content_in_container(container, 'Folder', 'foobar-folder')
+        item = await create_content_in_container(folder, 'Item', 'foobar')
 
-            folder_manager = IRolePermissionManager(folder)
-            folder_manager.grant_permission_to_role_no_inherit(
-                'guillotina.AccessContent', 'guillotina.ContainerCreator')
+        folder_manager = IRolePermissionManager(folder)
+        folder_manager.grant_permission_to_role_no_inherit(
+            'guillotina.AccessContent', 'guillotina.ContainerCreator')
 
-            interaction = IInteraction(request)
-            roles = interaction.cached_roles(item, 'guillotina.AccessContent', 'o')
-            assert roles.get('guillotina.ContainerCreator') is None
+        roles = cached_roles(folder, 'guillotina.AccessContent', 'o')
+        assert roles.get('guillotina.ContainerCreator') == 1
 
-            roles = interaction.cached_roles(folder, 'guillotina.AccessContent', 'o')
-            assert roles.get('guillotina.ContainerCreator') == 1
+        roles = cached_roles(item, 'guillotina.AccessContent', 'o')
+        assert roles.get('guillotina.ContainerCreator') is None
+
+        roles = cached_roles(folder, 'guillotina.AccessContent', 'o')
+        assert roles.get('guillotina.ContainerCreator') == 1

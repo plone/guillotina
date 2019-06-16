@@ -7,10 +7,7 @@ class BaseStrategy:
 
     @property
     def writable_transaction(self):
-        req = self._transaction.request
-        if hasattr(req, '_db_write_enabled'):
-            return req._db_write_enabled
-        return True
+        return not self._transaction.read_only
 
     async def tpc_begin(self):
         self._transaction._tid = -1  # temporary before committing

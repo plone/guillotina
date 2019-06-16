@@ -1,20 +1,23 @@
+import json
+import asyncio
+import time
+import multidict
+import uuid
+import urllib.parse
+from collections import OrderedDict
+from typing import Dict
+
+from yarl import URL
 from aiohttp.web_ws import WSMessage
 from aiohttp.web import StreamResponse, WSMsgType
 from aiohttp.helpers import reify
-from collections import OrderedDict
-from guillotina.interfaces import IRequest, IDefaultLayer
+from guillotina import task_vars
+from guillotina.interfaces import IDefaultLayer
+from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
-from starlette.websockets import WebSocket, WebSocketDisconnect
-from typing import Any, Iterator, Tuple, Callable, Coroutine
-from yarl import URL
+from guillotina.utils import execute
 from zope.interface import implementer
-
-import asyncio
-import multidict
-import json
-import time
-import urllib.parse
-import uuid
+from typing import Any, Iterator, Tuple, Callable, Coroutine
 
 
 class GuillotinaWebSocket:
@@ -53,18 +56,10 @@ class Request(object):
     object as it is essential our poor man's thread local model
     """
 
-#    _db_id = None
-#    _tm = None
-#    _txn = None
-#    _container_id = None
-#    container = None
-#    container_settings = None
 #    tail = None
 #    resource = None
 #    security = None
 
-    _db_write_enabled = True
-    _futures: dict = {}
     _uid = None
     _view_error = False
     _events: dict = {}
@@ -117,8 +112,7 @@ class Request(object):
         '''
         self._events[event_name] = time.time()
 
-    def add_future(self, name: str, fut: Callable[..., Coroutine[Any, Any, Any]],
-                   scope: str='', args=None, kwargs=None):
+    def add_future(self, *args, **kwargs):
         '''
         Register a future to be executed after the request has finished.
 
@@ -128,13 +122,7 @@ class Request(object):
         :param args: arguments to execute future with
         :param kwargs: kwargs to execute future with
         '''
-        if scope not in self._futures:
-            self._futures[scope] = {}
-        self._futures[scope][name] = {
-            'fut': fut,
-            'args': args,
-            'kwargs': kwargs
-        }
+        execute.add_future(*args, **kwargs)
 
     def get_future(self, name: str, scope: str=''):
         '''
@@ -143,20 +131,11 @@ class Request(object):
         :param name: scoped futures to execute. Leave default for normal behavior
         :param scope: scope name the future was registered for
         '''
-        try:
-            if scope not in self._futures:
-                return
-            return self._futures[scope][name]['fut']
-        except (AttributeError, KeyError):
-            return
+        return execute.get_future(name, scope)
 
     @property
     def events(self):
         return self._events
-
-    @property
-    def futures(self):
-        return self._futures
 
     @property
     def view_error(self):
@@ -169,18 +148,7 @@ class Request(object):
 
         :param scope: scoped futures to execute. Leave default for normal behavior
         '''
-        if scope not in self._futures:
-            return
-        futures = []
-        for fut_data in self._futures[scope].values():
-            fut = fut_data['fut']
-            if not asyncio.iscoroutine(fut):
-                fut = fut(*fut_data.get('args') or [], **fut_data.get('kwargs') or {})
-            futures.append(fut)
-        self._futures[scope] = {}
-        if len(futures) > 0:
-            task = asyncio.ensure_future(asyncio.gather(*futures))
-            return task
+        return execute.execute_futures(scope)
 
     def clear_futures(self):
         self._futures = {}
@@ -193,6 +161,20 @@ class Request(object):
             else:
                 self._uid = uuid.uuid4().hex
         return self._uid
+
+    def __enter__(self):
+        task_vars.request.set(self)
+
+    def __exit__(self, *args):
+        '''
+        contextvars already tears down to previous value, do not set to None here!
+        '''
+
+    async def __aenter__(self):
+        return self.__enter__()
+
+    async def __aexit__(self, *args):
+        return self.__exit__()
 
     @reify
     def rel_url(self):

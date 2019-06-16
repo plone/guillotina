@@ -1,3 +1,7 @@
+import asyncio
+import uuid
+
+from guillotina import task_vars
 from guillotina.component import get_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
@@ -5,9 +9,6 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from zope.interface import implementer
-
-import asyncio
-import uuid
 
 
 class MockDBTransaction:
@@ -44,7 +45,7 @@ class MockTransaction:
         return ob
 
     def register(self, ob):
-        self.modified[ob._p_oid] = ob
+        self.modified[ob.__uuid__] = ob
 
     def tpc_cleanup(self):
         pass
@@ -57,6 +58,13 @@ class MockTransaction:
 
     async def get_annotation(self, ob, key, reader=None):
         pass
+
+    def __enter__(self):
+        task_vars.txn.set(self)
+
+    def __exit__(self, *args):
+        '''
+        '''
 
 
 @implementer(IStorage)
@@ -98,10 +106,10 @@ class MockStorage:
     async def load(self, txn, oid):
         return self._objects[oid]
 
-    async def get_child(self, txn, container_p_oid, key):
-        if container_p_oid not in self._objects:
+    async def get_child(self, txn, container_uid, key):
+        if container_uid not in self._objects:
             return
-        children = self._objects[container_p_oid]['children']
+        children = self._objects[container_uid]['children']
         if key in children:
             oid = children[key]
             if oid in self._objects:
@@ -109,15 +117,15 @@ class MockStorage:
 
     def store(self, ob):
         writer = IWriter(ob)
-        self._objects[ob._p_oid] = {
+        self._objects[ob.__uuid__] = {
             'state': writer.serialize(),
-            'zoid': ob._p_oid,
+            'zoid': ob.__uuid__,
             'tid': 1,
             'id': writer.id,
-            'children': self._objects.get(ob._p_oid, {}).get('children', {})
+            'children': self._objects.get(ob.__uuid__, {}).get('children', {})
         }
-        if ob.__parent__ and ob.__parent__._p_oid in self._objects:
-            self._objects[ob.__parent__._p_oid]['children'][ob.id] = ob._p_oid
+        if ob.__parent__ and ob.__parent__.__uuid__ in self._objects:
+            self._objects[ob.__parent__.__uuid__]['children'][ob.id] = ob.__uuid__
 
 
 class MockTransactionManager:
@@ -133,12 +141,20 @@ class MockTransactionManager:
     async def _close_txn(self, *args, **kwargs):
         pass
 
-    def get(self, request):
-        return request._txn
+    def get(self):
+        return task_vars.tm.get()
 
-    async def begin(self, request):
-        request._txn = MockTransaction(self)
-        return request._txn
+    async def begin(self):
+        txn = MockTransaction(self)
+        task_vars.txn.set(txn)
+        return txn
+
+    def __enter__(self):
+        task_vars.tm.set(self)
+
+    def __exit__(self, *args):
+        '''
+        '''
 
 
 class FakeConnection:
@@ -153,8 +169,8 @@ class FakeConnection:
         return key in [self.refs[oid].id for oid in oids]
 
     def register(self, ob):
-        ob._p_jar = self
-        ob._p_oid = uuid.uuid4().hex
-        self.refs[ob._p_oid] = ob
-        self.containments[ob._p_oid] = []
-    _p_register = register
+        ob.__txn__ = self
+        ob.__uuid__ = uuid.uuid4().hex
+        self.refs[ob.__uuid__] = ob
+        self.containments[ob.__uuid__] = []
+

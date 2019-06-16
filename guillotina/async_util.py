@@ -1,19 +1,20 @@
+import asyncio
+import typing
 from datetime import datetime
+
 from dateutil.tz import tzutc
+
 from guillotina import logger
 from guillotina.browser import View
 from guillotina.db.transaction import Status
 from guillotina.exceptions import ServerClosingException
+from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IAsyncJobPool  # noqa
 from guillotina.interfaces import IAsyncUtility  # noqa
 from guillotina.interfaces import IQueueUtility  # noqa
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
-from guillotina.transactions import managed_transaction
-
-import aiotask_context
-import asyncio
-import typing
+from guillotina.transactions import transaction
 
 
 _zone = tzutc()
@@ -41,12 +42,12 @@ class QueueUtility(object):
             try:
                 view = await self.queue.get()
                 got_obj = True
-                txn = get_transaction(view.request)
-                tm = get_tm(view.request)
+                txn = get_transaction()
+                tm = get_tm()
                 if txn is None or (txn.status in (
                         Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and
                         txn._db_conn is None):
-                    txn = await tm.begin(view.request)
+                    txn = await tm.begin()
                 else:
                     # still finishing current transaction, this connection
                     # will be cut off, so we need to wait until we no longer
@@ -55,15 +56,15 @@ class QueueUtility(object):
                     await asyncio.sleep(1)
                     continue
 
-                try:
-                    aiotask_context.set('request', view.request)
-                    await view()
-                    await tm.commit(txn=txn)
-                except Exception as e:
-                    logger.error(
-                        "Exception on writing execution",
-                        exc_info=e)
-                    await tm.abort(txn=txn)
+                with view.request, tm, txn:
+                    try:
+                        await view()
+                        await tm.commit(txn=txn)
+                    except Exception as e:
+                        logger.error(
+                            "Exception on writing execution",
+                            exc_info=e)
+                        await tm.abort(txn=txn)
             except (RuntimeError, SystemExit, GeneratorExit, KeyboardInterrupt,
                     asyncio.CancelledError, KeyboardInterrupt):
                 # dive, these errors mean we're exit(ing)
@@ -73,10 +74,6 @@ class QueueUtility(object):
                 self._exceptions = True
                 logger.error('Worker call failed', exc_info=e)
             finally:
-                try:
-                    aiotask_context.set('request', None)
-                except (RuntimeError, ValueError):
-                    pass
                 if got_obj:
                     try:
                         view.request.execute_futures()
@@ -127,17 +124,12 @@ class Job:
         return self._func
 
     async def run(self):
-        try:
-            if self._request is not None:
-                aiotask_context.set('request', self._request)
-                async with managed_transaction(
-                        request=self._request, abort_when_done=False):
-                    await self._func(*self._args or [], **self._kwargs or {})
-            else:
-                # if no request, we do it without transaction
+        if self._request is not None:
+            async with transaction(abort_when_done=False), self._request:
                 await self._func(*self._args or [], **self._kwargs or {})
-        finally:
-            aiotask_context.set('request', None)
+        else:
+            # if no request, we do it without transaction
+            await self._func(*self._args or [], **self._kwargs or {})
 
 
 class AsyncJobPool:
@@ -182,15 +174,18 @@ class AsyncJobPool:
 
     def add_job_after_commit(self, func: typing.Callable[[], typing.Coroutine],
                              request=None, args=None, kwargs=None):
-        txn = get_transaction(request)
-        txn.add_after_commit_hook(
-            self._add_job_after_commit,
-            args=[func],
-            kws={
-                'request': request,
-                'args': args,
-                'kwargs': kwargs
-            })
+        txn = get_transaction()
+        if txn is not None:
+            txn.add_after_commit_hook(
+                self._add_job_after_commit,
+                args=[func],
+                kws={
+                    'request': request,
+                    'args': args,
+                    'kwargs': kwargs
+                })
+        else:
+            raise TransactionNotFound('Could not find transaction to run job with')
 
     def _done_callback(self, task):
         self._running.remove(task)

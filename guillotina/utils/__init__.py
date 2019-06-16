@@ -1,5 +1,6 @@
 from .auth import get_authenticated_user  # noqa
 from .auth import get_authenticated_user_id  # noqa
+from .auth import get_security_policy  # noqa
 from .content import get_behavior  # noqa
 from .content import get_containers  # noqa
 from .content import get_content_depth  # noqa
@@ -14,9 +15,11 @@ from .content import navigate_to  # noqa
 from .content import valid_id  # noqa
 from .crypto import get_jwk_key  # noqa
 from .crypto import secure_passphrase  # noqa
-from .misc import apply_coroutine  # noqa
+from .misc import apply_coroutine  # noqa; noqa
+from .misc import find_container  # noqa
 from .misc import get_current_request  # noqa
 from .misc import get_random_string  # noqa
+from .misc import get_registry  # noqa
 from .misc import get_schema_validator  # noqa
 from .misc import get_url  # noqa
 from .misc import lazy_apply  # noqa

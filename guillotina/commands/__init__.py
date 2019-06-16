@@ -2,8 +2,7 @@ from fnmatch import fnmatch
 from guillotina import logger
 from guillotina import profile
 from guillotina._settings import app_settings
-from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import login
+from guillotina.factory import make_app
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 
@@ -124,7 +123,6 @@ class Command(object):
         '''
         Split out into parts that can be overridden
         '''
-        self.setup_fake_request()
         if arguments is None:
             self.parse_arguments()
         else:
@@ -222,10 +220,6 @@ class Command(object):
             except (AttributeError, KeyError):
                 pass
 
-    def setup_fake_request(self):
-        self.request = get_mocked_request()
-        login(self.request)
-
     def get_loop(self):
         if self.loop is None:
             try:
@@ -244,7 +238,7 @@ class Command(object):
 
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
-        from guillotina.factory.app import make_app
+        from guillotina.factory import make_app
         loop = self.get_loop()
         return make_app(settings=settings, loop=loop)
 

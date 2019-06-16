@@ -1,11 +1,14 @@
+import asyncio  # noqa
+import sys
+
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.commands import Command
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.testing import TESTING_SETTINGS
-
-import asyncio  # noqa
-import sys
+from guillotina.tests.utils import get_mocked_request
+from guillotina.tests.utils import login
 
 
 class ShellHelpers:
@@ -21,20 +24,20 @@ class ShellHelpers:
 
     async def use_db(self, db_id):
         db = self._root[db_id]
+        task_vars.db.set(db)
         tm = self._active_tm = db.get_transaction_manager()
-        self._request._db_id = db_id
+        task_vars.db.set(db)
         self._active_db = db
         self._active_txn = await tm.begin()
-        self._request._txn = self._active_txn
-        self._request._tm = tm
+        task_vars.tm.set(tm)
+        task_vars.txn.set(self._active_txn)
         return self._active_txn
 
     async def use_container(self, container_id):
         container = await self._active_db.async_get(container_id)
         if container is None:
             raise Exception('Container not found')
-        self._request.container = container
-        self._request._container_id = container.id
+        task_vars.container.set(container)
         self._active_container = container
         return container
 
@@ -103,8 +106,10 @@ await commit()
     def run(self, arguments, settings, app):
         app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
         root = get_utility(IApplication, name='root')
-        helpers = ShellHelpers(app, root, self.request)
-        request = self.request  # noqa
+        request = get_mocked_request()
+        login()
+        helpers = ShellHelpers(app, root, request)
+        task_vars.request.set(request)
         use_db = helpers.use_db  # noqa
         use_container = helpers.use_container  # noqa
         commit = helpers.commit  # noqa

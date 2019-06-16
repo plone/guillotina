@@ -24,7 +24,6 @@ from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ComponentLookupError
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
-from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IConstrainTypes
@@ -32,7 +31,6 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IIDGenerator
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IPrincipalRoleMap
@@ -57,7 +55,7 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_object_by_oid
 from guillotina.utils import get_object_url
 from guillotina.utils import iter_parents
-from guillotina.utils import valid_id
+from guillotina.utils import valid_id, get_security_policy
 
 
 def get_content_json_schema_responses(content):
@@ -179,14 +177,14 @@ class DefaultPOST(Service):
                     status=412, reason=error_reasons.INVALID_ID)
             new_id = id_
 
-        user = get_authenticated_user_id(self.request)
+        user = get_authenticated_user_id()
 
         options = {
             'creators': (user,),
             'contributors': (user,)
         }
         if 'uid' in data:
-            options['_p_oid'] = data.pop('uid')
+            options['__uuid__'] = data.pop('uid')
 
         # Create object
         try:
@@ -223,11 +221,9 @@ class DefaultPOST(Service):
         data['id'] = obj.id
         await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
 
-        absolute_url = query_multi_adapter((obj, self.request), IAbsoluteURL)
-
         headers = {
             'Access-Control-Expose-Headers': 'Location',
-            'Location': absolute_url()
+            'Location': get_object_url(obj, self.request)
         }
 
         serializer = query_multi_adapter(
@@ -348,12 +344,12 @@ async def sharing_get(context, request):
     result['local']['prinrole'] = prinrole._bycol
     for obj in iter_parents(context):
         roleperm = IRolePermissionMap(obj, None)
-        url_factory = query_multi_adapter((obj, request), IAbsoluteURL)
-        if roleperm is not None and url_factory is not None:
+        url = get_object_url(obj, request)
+        if roleperm is not None and url is not None:
             prinperm = IPrincipalPermissionMap(obj)
             prinrole = IPrincipalRoleMap(obj)
             result['inherit'].append({
-                '@id': url_factory(),
+                '@id': url,
                 'roleperm': roleperm._bycol,
                 'prinperm': prinperm._bycol,
                 'prinrole': prinrole._bycol,
@@ -453,14 +449,14 @@ class SharingPUT(SharingPOST):
 async def can_i_do(context, request):
     if 'permission' not in request.query and 'permissions' not in request.query:
         raise PreconditionFailed(context, 'No permission param')
-    interaction = IInteraction(request)
+    policy = get_security_policy()
     if 'permissions' in request.query:
         results = {}
         for perm in request.query['permissions'].split(','):
-            results[perm] = interaction.check_permission(perm, context)
+            results[perm] = policy.check_permission(perm, context)
         return results
     else:
-        return interaction.check_permission(request.query['permission'], context)
+        return policy.check_permission(request.query['permission'], context)
 
 
 @configure.service(
@@ -477,7 +473,7 @@ class DefaultDELETE(Service):
         content_id = self.context.id
         parent = self.context.__parent__
         await notify(BeforeObjectRemovedEvent(self.context, parent, content_id))
-        self.context._p_jar.delete(self.context)
+        self.context.__txn__.delete(self.context)
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 
@@ -606,9 +602,8 @@ async def move(context, request):
             reason=error_reasons.REQUIRED_PARAM_MISSING,
             status=412)
 
-    absolute_url = query_multi_adapter((context, request), IAbsoluteURL)
     return {
-        '@url': absolute_url()
+        '@url': get_object_url(context, request)
     }
 
 
@@ -711,7 +706,7 @@ async def items(context, request):
     except Exception:
         page = 1
 
-    txn = get_transaction(request)
+    txn = get_transaction()
 
     include = omit = []
     if request.query.get('include'):
@@ -720,7 +715,7 @@ async def items(context, request):
         omit = request.query.get('omit').split(',')
 
     results = []
-    for key in await txn.get_page_of_keys(context._p_oid, page=page, page_size=page_size):
+    for key in await txn.get_page_of_keys(context.__uuid__, page=page, page_size=page_size):
         ob = await context.async_get(key)
         serializer = get_multi_adapter(
             (ob, request),
@@ -769,7 +764,7 @@ async def addable_types(context, request):
         }
     })
 async def invalidate_cache(context, request):
-    txn = get_transaction(request)
+    txn = get_transaction()
     cache_keys = txn._cache.get_cache_keys(context)
     await txn._cache.delete_all(cache_keys)
 
@@ -791,8 +786,8 @@ async def resolve_uid(context, request):
         return HTTPNotFound(content={
             'reason': f'Could not find uid: {uid}'
         })
-    interaction = IInteraction(request)
-    if interaction.check_permission('guillotina.AccessContent', ob):
+    policy = get_security_policy()
+    if policy.check_permission('guillotina.AccessContent', ob):
         return HTTPMovedPermanently(get_object_url(ob, request))
     else:
         # if a user doesn't have access to it, they shouldn't know anything about it

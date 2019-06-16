@@ -1,26 +1,28 @@
+import asyncio
+import logging
+import sys
+import time
 from collections import OrderedDict
+from typing import AsyncIterator
+from typing import List
+from typing import Optional
+
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.db.interfaces import IStorageCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.reader import reader as default_reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
-from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
-from guillotina.exceptions import Unauthorized
 from guillotina.profile import profilable
-from guillotina.utils import get_current_request
 from guillotina.utils import lazy_apply
 from zope.interface import implementer
-
-import asyncio
-import logging
-import sys
-import time
 
 
 _EMPTY = '__<EMPTY VALUE>__'
@@ -71,11 +73,12 @@ class cache:
 
 
 @implementer(ITransaction)
-class Transaction(object):
+class Transaction:
     _status = 'empty'
     _skip_commit = False
 
-    def __init__(self, manager, request=None, loop=None):
+    def __init__(self, manager, loop=None, read_only=False):
+        self._read_only = read_only
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE
@@ -108,9 +111,6 @@ class Transaction(object):
         # which would correspond with one connection
         self._lock = asyncio.Lock(loop=loop)
 
-        # we *not* follow naming standards of using "_request" here so
-        # get_current_request can magically find us here...
-        self.request = request
         self._strategy = get_adapter(self, ITransactionStrategy,
                                      name=manager._storage._transaction_strategy)
         self._cache = get_adapter(self, IStorageCache,
@@ -212,44 +212,42 @@ class Transaction(object):
         self._after_commit = []
         self._before_commit = []
 
-    def check_read_only(self):
-        if self.request is None:
-            try:
-                self.request = get_current_request()
-            except RequestNotFound:
-                return False
-        if hasattr(self.request, '_db_write_enabled') and not self.request._db_write_enabled:
-            raise Unauthorized('Adding content not permited')
-        # Add the new tid
+    @property
+    def read_only(self) -> bool:
+        if self._read_only:
+            return True
         if self._manager._storage._read_only:
-            raise ReadOnlyError()
+            return True
+        return False
 
     @profilable
-    def register(self, obj, new_oid=None):
+    def register(self, obj: IBaseObject, new_oid: Optional[str]=None):
         """We are adding a new object on the DB"""
-        self.check_read_only()
+        if self.read_only:
+            raise ReadOnlyError()
 
-        if obj._p_jar is None:
-            obj._p_jar = self
+        if obj.__txn__ is None:
+            obj.__txn__ = self
 
-        oid = obj._p_oid
+        oid = obj.__uuid__
         new = False
         if oid is None:
             if new_oid is not None:
                 new = True
             else:
-                new_oid = app_settings['oid_generator'](obj)
+                new_oid = app_settings['uid_generator'](obj)
             oid = new_oid
 
-        obj._p_oid = oid
+        obj.__uuid__ = oid
         if new or obj.__new_marker__:
             self.added[oid] = obj
         elif oid not in self.modified and oid not in self.added:
             self.modified[oid] = obj
 
-    def delete(self, obj):
-        self.check_read_only()
-        oid = obj._p_oid
+    def delete(self, obj: IBaseObject):
+        if self.read_only:
+            raise ReadOnlyError()
+        oid = obj.__uuid__
         if oid is not None:
             if oid in self.modified:
                 del self.modified[oid]
@@ -265,19 +263,19 @@ class Transaction(object):
         '''
         refresh an object with the value from the database
         '''
-        new = await self.get(ob._p_oid, ignore_registered=True)
+        new = await self.get(ob.__uuid__, ignore_registered=True)
         for key, value in new.__dict__.items():
-            if key.startswith('_p') or key.startswith('__'):
+            if key.startswith('__'):
                 continue
             ob.__dict__[key] = value
-        ob._p_serial = new._p_serial
+        ob.__serial__ = new.__serial__
 
     @cache(lambda oid: {'oid': oid}, True)
     async def _get(self, oid):
         return await self._manager._storage.load(self, oid)
 
     @profilable
-    async def get(self, oid, ignore_registered=False):
+    async def get(self, oid: str, ignore_registered: bool=False) -> IBaseObject:
         """Getting a oid from the db"""
         if not ignore_registered:
             obj = self.modified.get(oid, None)
@@ -289,14 +287,14 @@ class Transaction(object):
             result = await self._get(oid)
 
         obj = default_reader(result)
-        obj._p_jar = self
+        obj.__txn__ = self
         if obj.__immutable_cache__:
             # ttl of zero means we want to provide a hard cache here
             self._manager._hard_cache[oid] = result
 
         return obj
 
-    async def commit(self):
+    async def commit(self) -> None:
         restarts = 0
         while True:
             # for now, the max commit restarts we'll manage...
@@ -351,23 +349,23 @@ class Transaction(object):
         self._before_commit = []
 
     @profilable
-    async def _store_object(self, obj, oid, added=False):
+    async def _store_object(self, obj, uid, added=False):
         # Modified objects
-        if obj._p_jar is not self and obj._p_jar is not None:
+        if obj.__txn__ is not self and obj.__txn__ is not None:
             raise Exception(f'Invalid reference to txn: {obj}')
 
         # There is no serial
         if added:
             serial = None
         else:
-            serial = getattr(obj, "_p_serial", 0)
+            serial = getattr(obj, "__serial__", None) or 0
 
         writer = IWriter(obj)
-        await self._manager._storage.store(oid, serial, writer, obj, self)
-        obj._p_serial = self._tid
-        obj._p_oid = oid
-        if obj._p_jar is None:
-            obj._p_jar = self
+        await self._manager._storage.store(uid, serial, writer, obj, self)
+        obj.__serial__ = self._tid
+        obj.__uuid__ = uid
+        if obj.__txn__ is None:
+            obj.__txn__ = self
 
     @profilable
     async def tpc_commit(self):
@@ -379,7 +377,7 @@ class Transaction(object):
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
-            if obj._p_jar is not self and obj._p_jar is not None:
+            if obj.__txn__ is not self and obj.__txn__ is not None:
                 raise Exception(f'Invalid reference to txn: {obj}')
             await self._manager._storage.delete(self, oid)
 
@@ -408,7 +406,7 @@ class Transaction(object):
 
     @profilable
     @cache(lambda oid: {'oid': oid, 'variant': 'keys'})
-    async def keys(self, oid):
+    async def keys(self, oid: str) -> List[str]:
         keys = []
         for record in await self._manager._storage.keys(self, oid):
             keys.append(record['id'])
@@ -416,7 +414,7 @@ class Transaction(object):
 
     @cache(lambda container, key: {'container': container, 'id': key}, True)
     async def _get_child(self, container, key):
-        return await self._manager._storage.get_child(self, container._p_oid, key)
+        return await self._manager._storage.get_child(self, container.__uuid__, key)
 
     @profilable
     async def get_child(self, parent, key):
@@ -426,15 +424,15 @@ class Transaction(object):
 
         return self._fill_object(result, parent)
 
-    def _fill_object(self, item, parent):
+    def _fill_object(self, item: dict, parent: IBaseObject) -> IBaseObject:
         obj = default_reader(item)
         obj.__parent__ = parent
-        obj._p_jar = self
+        obj.__txn__ = self
         return obj
 
-    async def _get_batch_children(self, parent, keys):
+    async def _get_batch_children(self, parent: IBaseObject, keys: List[str]) -> AsyncIterator[IBaseObject]:
         for litem in await self._manager._storage.get_children(
-                self, parent._p_oid, keys):
+                self, parent.__uuid__, keys):
             if len(litem['state']) < self._cache.max_cache_record_size:
                 await self._cache.set(litem, container=parent, id=litem['id'])
                 self._cache._stored += 1
@@ -475,25 +473,25 @@ class Transaction(object):
                 yield item
 
     @profilable
-    async def contains(self, oid, key):
+    async def contains(self, oid: str, key: str) -> bool:
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     @profilable
     @cache(lambda oid: {'oid': oid, 'variant': 'len'})
-    async def len(self, oid):
+    async def len(self, oid: str) -> bool:
         return await self._manager._storage.len(self, oid)
 
     @profilable
     async def items(self, container):
         # XXX not using cursor because we can't cache with cursor results...
-        keys = await self.keys(container._p_oid)
+        keys = await self.keys(container.__uuid__)
         async for item in self.get_children(container, keys):
             yield item.__name__, item
 
     @profilable
     @cache(lambda base_obj, id: {'container': base_obj, 'id': id, 'variant': 'annotation'}, True)
     async def _get_annotation(self, base_obj, id):
-        result = await self._manager._storage.get_annotation(self, base_obj._p_oid, id)
+        result = await self._manager._storage.get_annotation(self, base_obj.__uuid__, id)
         if result is None:
             return _EMPTY
         return result
@@ -507,8 +505,8 @@ class Transaction(object):
             obj = default_reader(result)
         else:
             obj = reader(result)
-        obj.__of__ = base_obj._p_oid
-        obj._p_jar = self
+        obj.__of__ = base_obj.__uuid__
+        obj.__txn__ = self
         return obj
 
     @profilable
@@ -565,3 +563,19 @@ class Transaction(object):
             page += 1
             keys = await self._manager._storage.get_page_of_keys(
                 self, oid, page=page, page_size=page_size)
+
+    def __enter__(self):
+        task_vars.tm.set(self.manager)
+        task_vars.txn.set(self)
+        return self
+
+    def __exit__(self, *args):
+        '''
+        contextvars already tears down to previous value, do not set to None here!
+        '''
+
+    async def __aenter__(self):
+        return self.__enter__()
+
+    async def __aexit__(self, *args):
+        return self.__exit__()

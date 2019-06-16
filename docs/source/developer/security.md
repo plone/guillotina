@@ -500,15 +500,15 @@ from guillotina.security.utils import settings_for_object
 settings_for_object(obj)
 
 # Code to get the Interaction object ( security object )
-from guillotina.interfaces import IInteraction
+from guillotina.interfaces import ISecurityPolicy
 
-interaction = IInteraction(request)
+policy = get_utility(ISecurityPolicy)
 
 # Get the list of global roles for a user and some groups
-interaction.global_principal_roles(principal, groups)
+policy.global_principal_roles(principal, groups)
 
 # Get if the authenticated user has permission on a object
-interaction.check_permission(permission, obj)
+policy.check_permission(permission, obj)
 ```
 
 ## REST APIs

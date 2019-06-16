@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.addons import Addon
+from guillotina.utils import get_registry
 
 
 @configure.addon(
@@ -9,11 +10,11 @@ from guillotina.addons import Addon
 class ManageAddon(Addon):
 
     @classmethod
-    def install(cls, container, request):
-        registry = request.container_settings  # noqa
+    async def install(cls, container, request):
+        registry = await get_registry(container)  # noqa
         # install logic here...
 
     @classmethod
-    def uninstall(cls, container, request):
-        registry = request.container_settings  # noqa
+    async def uninstall(cls, container, request):
+        registry = await get_registry(container)  # noqa
         # uninstall logic here...

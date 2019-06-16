@@ -11,9 +11,9 @@ from async_asgi_testclient.utils import Message
 from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
-from guillotina.content import load_cached_schema
 from guillotina.const import ROOT_ID
 from guillotina.const import TRASHED_ID
+from guillotina.content import load_cached_schema
 from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.cockroach import CockroachStorage
@@ -22,8 +22,10 @@ from guillotina.interfaces import IApplication
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
+from guillotina.tests.utils import logout
 from guillotina.tests.utils import wrap_request
-from guillotina.transactions import managed_transaction
+from guillotina.transactions import get_tm
+from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
 
 
@@ -298,10 +300,9 @@ class GuillotinaDBRequester(object):
     def transaction(self, request=None):
         if request is None:
             request = get_mocked_request(self.db)
-        login(request)
+        login()
         return wrap_request(
-            request, managed_transaction(
-                request=request, write=True, adopt_parent_txn=True))
+            request, transaction(db=self.db, adopt_parent_txn=True))
 
 
 async def close_async_tasks(app):
@@ -345,15 +346,16 @@ def dummy_request(dummy_guillotina, monkeypatch):
     return request
 
 
-class RootAsyncContextManager(object):
+class RootAsyncContextManager:
     def __init__(self, request):
         self.request = request
         self.root = None
         self.txn = None
 
     async def __aenter__(self):
-        self.txn = await self.request._tm.begin(request=dummy_request)
-        self.root = await self.request._tm.get_root()
+        tm = get_tm()
+        self.txn = await tm.begin()
+        self.root = await tm.get_root()
         return self.root
 
     async def __aexit__(self, exc_type, exc, tb):

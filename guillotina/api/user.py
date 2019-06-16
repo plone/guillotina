@@ -1,9 +1,9 @@
 from guillotina import configure
 from guillotina.component import get_utility
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IGroups
-from guillotina.interfaces import IInteraction
+from guillotina.utils.auth import get_authenticated_user
 
 
 @configure.service(
@@ -35,7 +35,7 @@ async def get_user_info(context, request):
     """
     result = {}
     groups = set()
-    principal = IInteraction(request).principal
+    principal = get_authenticated_user()
     result[principal.id] = {
         'roles': principal.roles,
         'groups': principal.groups,
@@ -47,7 +47,7 @@ async def get_user_info(context, request):
     group_search = get_utility(IGroups)
     result['groups'] = {}
     for group in groups:
-        group_object = group_search.get_principal(group)
+        group_object = group_search.get_principal(group, principal)
         result['groups'][group_object.id] = {
             'roles': group_object.roles,
             'groups': group_object.groups

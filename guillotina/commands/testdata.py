@@ -1,3 +1,7 @@
+import asyncio
+
+import aiohttp
+from guillotina import task_vars
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.commands import Command
 from guillotina.component import get_utility
@@ -8,9 +12,6 @@ from guillotina.events import ObjectAddedEvent
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
-
-import aiohttp
-import asyncio
 
 
 class AsyncUrlRetriever:
@@ -131,10 +132,10 @@ class TestDataCommand(Command):
         return parser
 
     async def generate_test_data(self, db):
-        tm = self.request._tm = db.get_transaction_manager()
-        self.request._db_id = db.id
         tm = db.get_transaction_manager()
-        self.request._txn = txn = await tm.begin(self.request)
+        task_vars.db.set(db)
+        tm = db.get_transaction_manager()
+        txn = await tm.begin()
 
         container = await db.async_get(self.arguments.container)
         if container is None:
@@ -143,17 +144,15 @@ class TestDataCommand(Command):
             container.__name__ = self.arguments.container
             await db.async_set(self.arguments.container, container)
             await container.install()
-            self.request._container_id = container.__name__
             # Local Roles assign owner as the creator user
             roleperm = IPrincipalRoleManager(container)
             roleperm.assign_role_to_principal('guillotina.Owner', 'root')
 
             await notify(ObjectAddedEvent(container, db, container.__name__))
             await tm.commit(txn=txn)
-            txn = await tm.begin(self.request)
+            txn = await tm.begin()
 
-        self.request.container = container
-        self.request._container_id = container.id
+        task_vars.container.set(container)
 
         api = WikipediaAPI()
         folder_count = 0
@@ -185,7 +184,7 @@ class TestDataCommand(Command):
 
         if self._count % self._batch_size == 0:
             await tm.commit(txn=txn)
-            await tm.begin(self.request)
+            await tm.begin()
 
         if self.arguments.depth > depth:
             folder_count = 0

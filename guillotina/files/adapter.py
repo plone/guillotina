@@ -64,7 +64,7 @@ class DBDataManager:
             await bfile.async_del()
 
         self._data.clear()
-        self.context._p_register()
+        self.context.register()
         self._data['last_activity'] = time.time()
 
         await notify(
@@ -73,7 +73,7 @@ class DBDataManager:
     async def update(self, **kwargs):
         kwargs['last_activity'] = time.time()
         self._data.update(kwargs)
-        self.context._p_register()
+        self.context.register()
 
     async def save(self, **kwargs):
         pass
@@ -118,12 +118,12 @@ class DBDataManager:
 
         if self.field.__name__ in getattr(self.context, '__uploads__', {}):
             del self.context.__uploads__[self.field.__name__]
-            self.context._p_register()
+            self.context.register()
 
         try:
-            self.field.context.data._p_register()
+            self.field.context.data.register()
         except AttributeError:
-            self.field.context._p_register()
+            self.field.context.register()
 
         await notify(
             FileUploadFinishedEvent(self.context, field=self.field,

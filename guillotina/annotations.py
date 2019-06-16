@@ -48,9 +48,9 @@ class AnnotationsAdapter(object):
         element = annotations.get(key, _marker)
         if element is _marker:
             # Get from DB
-            if self.obj._p_jar is not None:
+            if self.obj.__txn__ is not None:
                 try:
-                    obj = await self.obj._p_jar.get_annotation(self.obj, key, reader=reader)
+                    obj = await self.obj.__txn__.get_annotation(self.obj, key, reader=reader)
                 except KeyError:
                     obj = None
                 if obj is not None:
@@ -60,7 +60,7 @@ class AnnotationsAdapter(object):
         return default
 
     async def async_keys(self):
-        return await self.obj._p_jar.get_annotation_keys(self.obj._p_oid)
+        return await self.obj.__txn__.get_annotation_keys(self.obj.__uuid__)
 
     async def async_set(self, key, value):
         if not isinstance(value, BaseObject):
@@ -68,19 +68,19 @@ class AnnotationsAdapter(object):
         annotations = self.obj.__gannotations__
         value.id = key  # make sure id is set...
         annotations[key] = value
-        value.__of__ = self.obj._p_oid
+        value.__of__ = self.obj.__uuid__
         value.__name__ = key
         value.__new_marker__ = True
         # we register the value
-        value._p_jar = self.obj._p_jar
-        value._p_jar.register(value)
+        value.__txn__ = self.obj.__txn__
+        value.__txn__.register(value)
         logger.debug('registering annotation {}({}), of: {}'.format(
-            value._p_oid, key, value.__of__
+            value.__uuid__, key, value.__of__
         ))
 
     async def async_del(self, key):
         annotation = await self.async_get(key)
         if annotation is not None:
-            self.obj._p_jar.delete(annotation)
+            self.obj.__txn__.delete(annotation)
             if key in self.obj.__gannotations__:
                 del self.obj.__gannotations__[key]

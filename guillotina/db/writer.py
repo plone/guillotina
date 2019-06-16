@@ -7,8 +7,8 @@ from guillotina.component import query_adapter
 from guillotina.db.interfaces import IJSONDBSerializer
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
+from guillotina.utils import find_container
 from guillotina.utils import get_dotted_name
 
 
@@ -21,11 +21,9 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
     '''
 
     def get_container_id(self):
-        ob = self.content
-        while getattr(ob, '__parent__', None) and not IContainer.providedBy(ob):
-            ob = ob.__parent__
-        if IContainer.providedBy(ob):
-            return ob.__name__
+        container = find_container(self.content)
+        if container is not None:
+            return container.__name__
 
     async def __call__(self):
         data = await super().__call__()
@@ -56,7 +54,7 @@ class Writer(object):
 
     @property
     def old_serial(self):
-        return getattr(self._obj, '_p_serial', None)
+        return getattr(self._obj, '__serial__', None)
 
     @property
     def part(self):
@@ -69,7 +67,7 @@ class Writer(object):
     def parent_id(self):
         parent = getattr(self._obj, '__parent__', None)
         if parent is not None:
-            return parent._p_oid
+            return parent.__uuid__
 
     @property
     def id(self):

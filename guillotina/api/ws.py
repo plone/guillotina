@@ -6,21 +6,20 @@ import ujson
 from guillotina import configure
 from guillotina import logger
 from guillotina import routes
+from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
-from guillotina.request import Request
-from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
 from guillotina.utils import get_jwk_key
+from guillotina.utils import get_security_policy
 from jwcrypto import jwe
 from jwcrypto.common import json_encode
 
@@ -119,7 +118,7 @@ class WebsocketsView(Service):
         path = tuple(p for p in parsed.path.split('/') if p)
 
         from guillotina.traversal import traverse
-        obj, tail = await traverse(self.request, self.request.container, path)
+        obj, tail = await traverse(self.request, task_vars.container.get(), path)
 
         if tail and len(tail) > 0:
             # convert match lookups
@@ -132,7 +131,7 @@ class WebsocketsView(Service):
         permission = get_utility(
             IPermission, name='guillotina.AccessContent')
 
-        security = get_adapter(self.request, IInteraction)
+        security = get_security_policy()
         allowed = security.check_permission(permission.id, obj)
         if not allowed:
             return await ws.send_str(ujson.dumps({
@@ -185,9 +184,8 @@ class WebsocketsView(Service):
         self.request.execute_futures()
 
     async def __call__(self):
-        tm = get_tm(self.request)
-        await tm.abort(self.request)
-
+        tm = get_tm()
+        await tm.abort()
         ws = self.request.get_ws()
         await ws.prepare(self.request)
 
@@ -202,7 +200,7 @@ class WebsocketsView(Service):
                 if message['op'] == 'close':
                     await ws.close()
                 elif message['op'].lower() == 'get':
-                    txn = await tm.begin(request=self.request)
+                    txn = await tm.begin()
                     try:
                         await self.handle_ws_request(ws, message)
                     except Exception:

@@ -1,28 +1,14 @@
-##############################################################################
-#
-# Copyright (c) 2001, 2002 Zope Foundation and Contributors.
-# All Rights Reserved.
-#
-# This software is subject to the provisions of the Zope Public License,
-# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
-# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
-# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
-# FOR A PARTICULAR PURPOSE.
-#
-##############################################################################
-"""Security map to hold matrix-like relationships.
+import copyreg
 
-In all cases, 'setting' values are one of the defined constants
-`Allow`, `Deny`, or `Unset`.
-"""
 from guillotina.i18n import MessageFactory
 from guillotina.schema import Text
 from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
+from guillotina.db.orm.interfaces import IBaseObject
 
-import copyreg
+import typing
+from .misc import IRequest
 
 
 _ = MessageFactory('guillotina')
@@ -91,10 +77,6 @@ AllowSingle = PermissionSetting(
 
 Unset = PermissionSetting(
     'Unset', 'Unset constant that denotes no setting for permission')
-
-
-class IGroups(Interface):  # pylint: disable=E0239
-    """A group Utility search."""
 
 
 class IRole(Interface):  # pylint: disable=E0239
@@ -338,27 +320,6 @@ class IGrantInfo(Interface):  # pylint: disable=E0239
         """
 
 
-class IInteraction(Interface):  # pylint: disable=E0239
-    """A representation of an interaction between some actors and the system.
-    """
-
-    participations = Attribute("""An iterable of participations.""")
-
-    def add(participation):  # noqa: N805
-        """Add a participation."""
-
-    def remove(participation):  # noqa: N805
-        """Remove a participation."""
-
-    def check_permission(permission, object):  # noqa: N805
-        """Return whether security context allows permission on object.
-
-        Arguments:
-        permission -- A permission name
-        object -- The object being accessed according to the permission
-        """
-
-
 class IPermission(Interface):  # pylint: disable=E0239
     """A permission object."""
 
@@ -401,19 +362,43 @@ class IPrincipal(Interface):  # pylint: disable=E0239
         readonly=True)
 
 
-class IParticipation(Interface):  # pylint: disable=E0239
-
-    interaction = Attribute('The interaction')
-    principal = Attribute('The authenticated principal')
+SettingType = typing.Union[bool, None, str]
 
 
 class ISecurityPolicy(Interface):  # pylint: disable=E0239
 
-    def __call__(participation=None):  # noqa: N805
-        """Creates a new interaction for a given request.
-
-        If participation is not None, it is added to the new interaction.
+    def __init__(IPrincipal):
         """
+        """
+
+    def invalidate_cache():
+        '''
+        Invalidate current cache
+        '''
+
+    def check_permission(permission: str, obj: IBaseObject) -> bool:
+        '''
+        Check if user has permission on object
+        '''
+
+    def cached_decision(parent: IBaseObject, principal: str, groups: typing.List[str], permission: str):
+        '''
+        '''
+
+    def cached_principal_permission(
+            parent: IBaseObject, principal: str,
+            groups: typing.List[str], permission: str, level: str) -> SettingType:
+        '''
+        '''
+
+    def global_principal_roles(principal: str, groups: typing.List[str]) -> typing.Dict[str, bool]:
+        '''
+        '''
+
+    def cached_principal_roles(parent: IBaseObject, principal: str,
+                               groups: typing.List[str], level: str) -> typing.Dict[str, SettingType]:
+        '''
+        '''
 
 
 class IPasswordHasher(Interface):
@@ -427,4 +412,18 @@ class IPasswordChecker(Interface):
     def __call__(hashed_value, password):
         '''
         Return True if password matches hashed_value
+        '''
+
+
+class IAuthExtractor(Interface):
+    def __call__(request: IRequest) -> typing.Optional[typing.Dict]:
+        '''
+        '''
+
+class IGroups(Interface):
+    """A group Utility search."""
+
+    def get_principal(ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
+        '''
+        Get group principal object
         '''

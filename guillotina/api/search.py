@@ -5,6 +5,7 @@ from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.utils import get_content_path
+from guillotina import task_vars
 
 
 @configure.service(
@@ -35,7 +36,7 @@ async def search_get(context, request):
         }
 
     return await search.get_by_path(
-        container=request.container,
+        container=task_vars.container.get(),
         path=get_content_path(context),
         query=q)
 
@@ -111,7 +112,7 @@ class AsyncCatalogReindex(Service):
         self._security_reindex = security
 
     async def __call__(self):
-        reindex_in_future(self.context, self.request, False)
+        reindex_in_future(self.context, False)
         return {}
 
 

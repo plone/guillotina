@@ -25,6 +25,7 @@ for a complete list.
 
 setup(
     name='guillotina',
+    python_requires='>=3.7.0',
     version=open('VERSION').read().strip(),
     description='asyncio REST API Resource database',  # noqa
     long_description=long_description,
@@ -35,8 +36,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     url='https://github.com/plone/guillotina',
@@ -61,7 +62,6 @@ setup(
         'asyncpg',
         'cffi',
         'PyYAML>=5.1',
-        'aiotask_context',
         'lru-dict'
     ],
     extras_require={

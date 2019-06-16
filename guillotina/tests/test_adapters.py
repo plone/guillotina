@@ -8,7 +8,6 @@ from guillotina.factory.security import ApplicationSpecialPermissions
 from guillotina.factory.security import DatabaseSpecialPermissions
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IFactorySerializeToJson
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IPrincipalPermissionManager
 from guillotina.interfaces import IResource
@@ -25,12 +24,6 @@ from guillotina.json.serialize_content import DefaultJSONSummarySerializer
 from guillotina.json.serialize_content import SerializeFolderToJson
 from guillotina.json.serialize_content import SerializeToJson
 from guillotina.json.serialize_value import json_compatible
-from guillotina.security.policy import Interaction
-
-
-def test_get_current_interaction(dummy_request):
-    adapter = get_adapter(dummy_request, interface=IInteraction)
-    assert isinstance(adapter, Interaction)
 
 
 async def test_DatabaseSpecialPermissions_IDatabase(dummy_txn_root):  # noqa: N802

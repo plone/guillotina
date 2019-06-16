@@ -3,7 +3,7 @@ from typing import Any
 from typing import Dict
 
 from guillotina import interfaces
-from guillotina.db.oid import generate_oid
+from guillotina.db.uid import generate_uid
 
 
 app_settings: Dict[str, Any] = {
@@ -87,9 +87,9 @@ app_settings: Dict[str, Any] = {
     "cloud_storage": "guillotina.interfaces.IDBFileField",
     "router": "guillotina.traversal.TraversalRouter",
     "pg_connection_class": "asyncpg.connection.Connection",
-    "oid_generator": generate_oid,
+    "uid_generator": generate_uid,
     "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
     "check_writable_request": "guillotina.writable.check_writable_request",
-    "request_indexer": "guillotina.catalog.index.RequestIndexer"
+    "indexer": "guillotina.catalog.index.Indexer"
 }
 default_settings = copy.deepcopy(app_settings)

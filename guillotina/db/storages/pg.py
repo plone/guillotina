@@ -10,7 +10,7 @@ import ujson
 from guillotina._settings import app_settings
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
-from guillotina.db.oid import MAX_OID_LENGTH
+from guillotina.db.uid import MAX_UID_LENGTH
 from guillotina.db.storages.base import BaseStorage
 from guillotina.db.storages.utils import SQLStatements
 from guillotina.db.storages.utils import clear_table_name
@@ -31,45 +31,45 @@ log = logging.getLogger("guillotina.storage")
 register_sql('GET_OID', f"""
 SELECT zoid, tid, state_size, resource, of, parent_id, id, type, state
 FROM {{table_name}}
-WHERE zoid = $1::varchar({MAX_OID_LENGTH})
+WHERE zoid = $1::varchar({MAX_UID_LENGTH})
 """)
 
 register_sql('GET_CHILDREN_KEYS', f"""
 SELECT id
 FROM {{table_name}}
-WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
+WHERE parent_id = $1::varchar({MAX_UID_LENGTH})
 """)
 
 
 register_sql('GET_ANNOTATIONS_KEYS', f"""
 SELECT id, parent_id
 FROM {{table_name}}
-WHERE of = $1::varchar({MAX_OID_LENGTH})
+WHERE of = $1::varchar({MAX_UID_LENGTH})
 """)
 
 register_sql('GET_CHILD', f"""
 SELECT zoid, tid, state_size, resource, type, state, id
 FROM {{table_name}}
-WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
+WHERE parent_id = $1::varchar({MAX_UID_LENGTH}) AND id = $2::text
 """)
 
 register_sql('GET_CHILDREN_BATCH', f"""
 SELECT zoid, tid, state_size, resource, type, state, id
 FROM {{table_name}}
-WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = ANY($2)
+WHERE parent_id = $1::varchar({MAX_UID_LENGTH}) AND id = ANY($2)
 """)
 
 register_sql('EXIST_CHILD', f"""
 SELECT zoid
 FROM {{table_name}}
-WHERE parent_id = $1::varchar({MAX_OID_LENGTH}) AND id = $2::text
+WHERE parent_id = $1::varchar({MAX_UID_LENGTH}) AND id = $2::text
 """)
 
 
 register_sql('HAS_OBJECT', f"""
 SELECT zoid
 FROM {{table_name}}
-WHERE zoid = $1::varchar({MAX_OID_LENGTH})
+WHERE zoid = $1::varchar({MAX_UID_LENGTH})
 """)
 
 
@@ -77,7 +77,7 @@ register_sql('GET_ANNOTATION', f"""
 SELECT zoid, tid, state_size, resource, type, state, id, parent_id
 FROM {{table_name}}
 WHERE
-    of = $1::varchar({MAX_OID_LENGTH}) AND
+    of = $1::varchar({MAX_UID_LENGTH}) AND
     id = $2::text
 """)
 
@@ -93,8 +93,8 @@ SELECT count(*) FROM rows""".format(txt)
 NAIVE_UPSERT = f"""
 INSERT INTO {{table_name}}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
-VALUES ($1::varchar({MAX_OID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
-        $6::varchar({MAX_OID_LENGTH}), $7::int, $8::varchar({MAX_OID_LENGTH}),
+VALUES ($1::varchar({MAX_UID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
+        $6::varchar({MAX_UID_LENGTH}), $7::int, $8::varchar({MAX_UID_LENGTH}),
         $9::text, $10::text, $11::json, $12::bytea)
 ON CONFLICT (zoid)
 DO UPDATE SET
@@ -123,15 +123,15 @@ SET
     state_size = $3::int,
     part = $4::int,
     resource = $5::boolean,
-    of = $6::varchar({MAX_OID_LENGTH}),
+    of = $6::varchar({MAX_UID_LENGTH}),
     otid = $7::int,
-    parent_id = $8::varchar({MAX_OID_LENGTH}),
+    parent_id = $8::varchar({MAX_UID_LENGTH}),
     id = $9::text,
     type = $10::text,
     json = $11::json,
     state = $12::bytea
 WHERE
-    zoid = $1::varchar({MAX_OID_LENGTH})"""
+    zoid = $1::varchar({MAX_UID_LENGTH})"""
 register_sql(
     'UPDATE', _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int"""))
 register_sql('NAIVE_UPDATE', _wrap_return_count(NAIVE_UPDATE))
@@ -143,7 +143,7 @@ MAX_TID = "SELECT last_value FROM {schema}.tid_sequence;"
 
 register_sql(
     'NUM_CHILDREN',
-    f"SELECT count(*) FROM {{table_name}} WHERE parent_id = $1::varchar({MAX_OID_LENGTH})")
+    f"SELECT count(*) FROM {{table_name}} WHERE parent_id = $1::varchar({MAX_UID_LENGTH})")
 
 
 register_sql('NUM_ROWS', "SELECT count(*) FROM {table_name}")
@@ -168,7 +168,7 @@ OFFSET $3::int
 register_sql('GET_CHILDREN', f"""
 SELECT zoid, tid, state_size, resource, type, state, id
 FROM {{table_name}}
-WHERE parent_id = $1::VARCHAR({MAX_OID_LENGTH})
+WHERE parent_id = $1::VARCHAR({MAX_UID_LENGTH})
 """)
 
 
@@ -177,27 +177,27 @@ UPDATE {{table_name}}
 SET
     parent_id = '{TRASHED_ID}'
 WHERE
-    zoid = $1::varchar({MAX_OID_LENGTH})
+    zoid = $1::varchar({MAX_UID_LENGTH})
 """)
 
 
 register_sql('INSERT_BLOB_CHUNK', f"""
 INSERT INTO {{table_name}}
 (bid, zoid, chunk_index, data)
-VALUES ($1::VARCHAR({MAX_OID_LENGTH}), $2::VARCHAR({MAX_OID_LENGTH}),
+VALUES ($1::VARCHAR({MAX_UID_LENGTH}), $2::VARCHAR({MAX_UID_LENGTH}),
         $3::INT, $4::BYTEA)
 """)
 
 
 register_sql('READ_BLOB_CHUNK', f"""
 SELECT * from {{table_name}}
-WHERE bid = $1::VARCHAR({MAX_OID_LENGTH})
+WHERE bid = $1::VARCHAR({MAX_UID_LENGTH})
 AND chunk_index = $2::int
 """)
 
 
 register_sql('DELETE_BLOB', f"""
-DELETE FROM {{table_name}} WHERE bid = $1::VARCHAR({MAX_OID_LENGTH});
+DELETE FROM {{table_name}} WHERE bid = $1::VARCHAR({MAX_UID_LENGTH});
 """)
 
 
@@ -213,7 +213,7 @@ register_sql('TXN_CONFLICTS_ON_OIDS', TXN_CONFLICTS + ' AND zoid = ANY($2)')
 register_sql('BATCHED_GET_CHILDREN_KEYS', f"""
 SELECT id
 FROM {{table_name}}
-WHERE parent_id = $1::varchar({MAX_OID_LENGTH})
+WHERE parent_id = $1::varchar({MAX_UID_LENGTH})
 ORDER BY zoid
 LIMIT $2::int
 OFFSET $3::int
@@ -221,7 +221,7 @@ OFFSET $3::int
 
 register_sql('DELETE_OBJECT', f"""
 DELETE FROM {{table_name}}
-WHERE zoid = $1::varchar({MAX_OID_LENGTH});
+WHERE zoid = $1::varchar({MAX_UID_LENGTH});
 """)
 
 register_sql('GET_TRASHED_OBJECTS', f"""
@@ -473,14 +473,14 @@ class PostgresqlStorage(BaseStorage):
     _blobs_table_name = 'blobs'
 
     _object_schema = {
-        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL PRIMARY KEY',
+        'zoid': f'VARCHAR({MAX_UID_LENGTH}) NOT NULL PRIMARY KEY',
         'tid': 'BIGINT NOT NULL',
         'state_size': 'BIGINT NOT NULL',
         'part': 'BIGINT NOT NULL',
         'resource': 'BOOLEAN NOT NULL',
-        'of': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES {{objects_table_name}} ON DELETE CASCADE',
+        'of': f'VARCHAR({MAX_UID_LENGTH}) REFERENCES {{objects_table_name}} ON DELETE CASCADE',
         'otid': 'BIGINT',
-        'parent_id': f'VARCHAR({MAX_OID_LENGTH}) REFERENCES {{objects_table_name}} ON DELETE CASCADE',  # noqa
+        'parent_id': f'VARCHAR({MAX_UID_LENGTH}) REFERENCES {{objects_table_name}} ON DELETE CASCADE',  # noqa
         'id': 'TEXT',
         'type': 'TEXT NOT NULL',
         'json': 'JSONB',
@@ -488,8 +488,8 @@ class PostgresqlStorage(BaseStorage):
     }
 
     _blob_schema = {
-        'bid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL',
-        'zoid': f'VARCHAR({MAX_OID_LENGTH}) NOT NULL REFERENCES {{objects_table_name}} ON DELETE CASCADE',
+        'bid': f'VARCHAR({MAX_UID_LENGTH}) NOT NULL',
+        'zoid': f'VARCHAR({MAX_UID_LENGTH}) NOT NULL REFERENCES {{objects_table_name}} ON DELETE CASCADE',
         'chunk_index': 'INT NOT NULL',
         'data': 'BYTEA'
     }
@@ -652,18 +652,18 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             result = await self.read_conn.fetch("""
     select * from information_schema.columns
     where table_name='{}'""".format(self._objects_table_name))
-            if len(result) > 0 and result[0]['character_maximum_length'] != MAX_OID_LENGTH:
+            if len(result) > 0 and result[0]['character_maximum_length'] != MAX_UID_LENGTH:
                 log.warn('Migrating VARCHAR key length')
                 await self.read_conn.execute(f'''
-    ALTER TABLE {self._objects_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+    ALTER TABLE {self._objects_table_name} ALTER COLUMN zoid TYPE varchar({MAX_UID_LENGTH})''')
                 await self.read_conn.execute(f'''
-    ALTER TABLE {self._objects_table_name} ALTER COLUMN of TYPE varchar({MAX_OID_LENGTH})''')
+    ALTER TABLE {self._objects_table_name} ALTER COLUMN of TYPE varchar({MAX_UID_LENGTH})''')
                 await self.read_conn.execute(f'''
-    ALTER TABLE {self._objects_table_name} ALTER COLUMN parent_id TYPE varchar({MAX_OID_LENGTH})''')
+    ALTER TABLE {self._objects_table_name} ALTER COLUMN parent_id TYPE varchar({MAX_UID_LENGTH})''')
                 await self.read_conn.execute(f'''
-    ALTER TABLE {self._blobs_table_name} ALTER COLUMN bid TYPE varchar({MAX_OID_LENGTH})''')
+    ALTER TABLE {self._blobs_table_name} ALTER COLUMN bid TYPE varchar({MAX_UID_LENGTH})''')
                 await self.read_conn.execute(f'''
-    ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_OID_LENGTH})''')
+    ALTER TABLE {self._blobs_table_name} ALTER COLUMN zoid TYPE varchar({MAX_UID_LENGTH})''')
             self._connection_initialized_on = time.time()
 
     async def initialize_tid_statements(self):
@@ -717,7 +717,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
         update = False
         statement_sql = self._sql.get('NAIVE_UPSERT', self._objects_table_name)
-        if not obj.__new_marker__ and obj._p_serial is not None:
+        if not obj.__new_marker__ and obj.__serial__ is not None:
             # we should be confident this is an object update
             statement_sql = self._sql.get('UPDATE', self._objects_table_name)
             update = True
@@ -745,7 +745,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     raise ConflictIdOnContainer(ex)
                 raise
             except asyncpg.exceptions.ForeignKeyViolationError:
-                txn.deleted[obj._p_oid] = obj
+                txn.deleted[obj.__uuid__] = obj
                 raise TIDConflictError(
                     f'Bad value inserting into database that could be caused '
                     f'by a bad cache value. This should resolve on request retry.',
@@ -983,7 +983,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             async with txn._lock:
                 await conn.execute(f'''INSERT INTO {self._objects_table_name}
 (zoid, tid, state_size, part, resource, type)
-VALUES ($1::varchar({MAX_OID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
+VALUES ($1::varchar({MAX_UID_LENGTH}), -1, 0, 0, TRUE, 'stub')''', oid)
         conn = await txn.get_connection()
         sql = self._sql.get('INSERT_BLOB_CHUNK', self._blobs_table_name)
         async with txn._lock:

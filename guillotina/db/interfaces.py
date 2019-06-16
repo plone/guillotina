@@ -1,5 +1,9 @@
+import typing
+
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
+from guillotina.db.orm.interfaces import IBaseObject
+from zope.interface import Attribute
 from zope.interface import Interface
 
 
@@ -12,7 +16,96 @@ class IWriter(Interface):
 
 
 class ITransaction(Interface):
-    pass
+    _db_conn = Attribute('')
+    _query_count_end = Attribute('')
+    user = Attribute('')
+    status = Attribute('')
+    storage = Attribute('')
+    _cache = Attribute('')
+
+    async def add_after_commit_hook(hook, *real_args, args=[], kws=None, **kwargs):
+        '''
+        Add hook to be called after transaction commit
+        '''
+
+    async def add_before_commit_hook(hook, *real_args, args=[], kws=None, **kwargs):
+        '''
+        Add hook to be called before txn commit
+        '''
+
+    async def commit():
+        '''
+        Commit the transaction
+        '''
+
+    async def abort():
+        '''
+        Abort the transaction
+        '''
+
+    def get_query_count() -> int:
+        '''
+        Get number of queries tranaction ran
+        '''
+
+    async def tpc_begin():
+        '''
+        '''
+
+    async def contains(oid: str, key: str) -> bool:
+        '''
+        Does an object container another
+        '''
+
+    def register(obj: IBaseObject, new_oid: typing.Optional[str]=None):
+        '''
+        register object with transaction to be written
+        '''
+
+    async def get_child(parent: IBaseObject, key: str) -> typing.Optional[IBaseObject]:
+        '''
+        Get child of object
+        '''
+
+    async def get_children(
+            parent: IBaseObject, keys: typing.List[str]) -> typing.AsyncIterator[IBaseObject]:
+        '''
+        Get children of object
+        '''
+
+    def delete(obj: IBaseObject):
+        '''
+        delete object
+        '''
+
+    async def len(oid: str) -> bool:
+        '''
+        Get size of children for object
+        '''
+
+    async def keys(oid: str) -> typing.List[str]:
+        '''
+        Get all keys for object
+        '''
+
+    async def items(content: IBaseObject) -> typing.AsyncIterator[typing.Tuple[str, IBaseObject]]:
+        '''
+        Get items in content
+        '''
+
+
+class ITransactionManager(Interface):
+    _last_txn = Attribute('')
+
+    async def commit(*, txn: typing.Optional[ITransaction]=None):
+        '''
+        Commit txn
+        '''
+
+    async def abort(*, txn: typing.Optional[ITransaction]=None):
+        '''
+        abort txn
+        '''
 
 
 class IStorage(Interface):

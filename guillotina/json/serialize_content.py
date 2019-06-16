@@ -10,10 +10,8 @@ from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
-from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFolder
-from guillotina.interfaces import IInteraction
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceSerializeToJson
@@ -22,6 +20,8 @@ from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
 from guillotina.schema import get_fields
 from guillotina.utils import apply_coroutine
+from guillotina.utils import get_object_url
+from guillotina.utils import get_security_policy
 from zope.interface import Interface
 
 
@@ -63,7 +63,7 @@ class SerializeToJson(object):
             behaviors.append(behavior_schema.__identifier__)
 
         result = {
-            '@id': IAbsoluteURL(self.context, self.request)(),
+            '@id': get_object_url(self.context, self.request),
             '@type': self.context.type_name,
             '@name': self.context.__name__,
             '@uid': self.context.uuid,
@@ -72,7 +72,6 @@ class SerializeToJson(object):
             'is_folderish': IFolder.providedBy(self.context),  # eek, should be @folderish?
             'creation_date': json_compatible(self.context.creation_date),
             'modification_date': json_compatible(self.context.modification_date),
-            'UID': self.context.uuid,  # should be removed
         }
 
         main_schema = factory.schema
@@ -156,7 +155,7 @@ class SerializeToJson(object):
             if permission is None:
                 self.permission_cache[permission_name] = True
             else:
-                security = IInteraction(self.request)
+                security = get_security_policy()
                 self.permission_cache[permission_name] = bool(
                     security.check_permission(permission.id, self.context))
         return self.permission_cache[permission_name]
@@ -171,7 +170,7 @@ class SerializeFolderToJson(SerializeToJson):
     async def __call__(self, include=[], omit=[]):
         result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
 
-        security = IInteraction(self.request)
+        security = get_security_policy()
         length = await self.context.async_len()
 
         if length > MAX_ALLOWED or length == 0:
@@ -208,10 +207,9 @@ class DefaultJSONSummarySerializer(object):
     async def __call__(self):
 
         summary = json_compatible({
-            '@id': IAbsoluteURL(self.context)(),
+            '@id': get_object_url(self.context, self.request),
             '@name': self.context.__name__,
             '@type': self.context.type_name,
-            '@uid': self.context.uuid,
-            'UID': self.context.uuid
+            '@uid': self.context.uuid
         })
         return summary

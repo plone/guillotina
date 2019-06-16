@@ -1,4 +1,8 @@
 # load the patch before anything else.
+import os
+
+import pkg_resources
+
 from guillotina import glogging
 from guillotina._cache import BEHAVIOR_CACHE  # noqa
 from guillotina._cache import FACTORY_CACHE  # noqa
@@ -8,8 +12,6 @@ from guillotina._settings import app_settings  # noqa
 from guillotina.i18n import default_message_factory as _  # noqa
 from zope.interface import Interface  # noqa
 
-import os
-import pkg_resources
 
 __version__ = pkg_resources.get_distribution('guillotina').version
 

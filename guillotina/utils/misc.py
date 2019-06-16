@@ -1,24 +1,27 @@
-from aiohttp.web import Request
-from collections import MutableMapping
-from functools import partial
-from guillotina import glogging
-from guillotina._settings import app_settings
-from guillotina.component import get_utility
-from guillotina.exceptions import RequestNotFound
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IRequest
-from guillotina.profile import profilable
-from hashlib import sha256 as sha
-
-import aiotask_context
 import asyncio
 import inspect
-import jsonschema.validators
 import random
 import string
 import time
 import types
 import typing
+from collections import MutableMapping
+from functools import partial
+from hashlib import sha256 as sha
+
+import jsonschema.validators
+from guillotina import glogging
+from guillotina import task_vars
+from guillotina._settings import app_settings
+from guillotina.component import get_utility
+from guillotina.exceptions import RequestNotFound
+from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
+from guillotina.interfaces import IRegistry
+from guillotina.interfaces import IRequest
+from guillotina.profile import profilable
+
 
 try:
     random = random.SystemRandom()  # type: ignore
@@ -139,21 +142,12 @@ def get_current_request() -> IRequest:
     Return the current request by heuristically looking it up from stack
     """
     try:
-        task_context = aiotask_context.get('request')
+        task_context = task_vars.request.get()
         if task_context is not None:
             return task_context
     except (ValueError, AttributeError, RuntimeError):
         pass
 
-    # fallback
-    frame = inspect.currentframe()
-    while frame is not None:
-        request = getattr(frame.f_locals.get('self'), 'request', None)
-        if request is not None:
-            return request
-        elif isinstance(frame.f_locals.get('request'), Request):
-            return frame.f_locals['request']
-        frame = frame.f_back
     raise RequestNotFound(RequestNotFound.__doc__)
 
 
@@ -301,3 +295,29 @@ def get_schema_validator(schema_name: str):
     val = jsonschema_validator(schema)
     _cached_jsonschema_validators[schema_name] = val
     return val
+
+
+def find_container(context=None) -> typing.Optional[IContainer]:
+    container = task_vars.container.get()
+    if container is None:
+        while context is not None:
+            if IContainer.providedBy(context):
+                container = context
+                break
+            context = getattr(context, '__parent__', None)
+    return container
+
+
+async def get_registry(context=None) -> typing.Optional[IRegistry]:
+    registry = task_vars.registry.get()
+    if registry is None:
+        container = task_vars.container.get()
+        if container is None and context is not None:
+            container = find_container(context)
+        if container is None:
+            return None
+        annotations_container = IAnnotations(container)
+        from guillotina.registry import REGISTRY_DATA_KEY
+        registry = await annotations_container.async_get(REGISTRY_DATA_KEY)
+        task_vars.registry.set(registry)
+    return registry

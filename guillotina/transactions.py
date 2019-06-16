@@ -1,22 +1,15 @@
-from guillotina.exceptions import RequestNotFound
-from guillotina.utils import get_current_request
-
 import logging
+import typing
+
+from guillotina import task_vars
+from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionManager
 
 
 logger = logging.getLogger('guillotina')
 
 
-def _safe_get_request(request):
-    if request is None:
-        try:
-            request = get_current_request()
-        except RequestNotFound:
-            pass
-    return request
-
-
-async def commit(request=None, warn=True):
+async def commit(*, txn: typing.Optional[ITransaction]=None, warn=True) -> None:
     '''
     Commit the current active transaction.
 
@@ -24,16 +17,16 @@ async def commit(request=None, warn=True):
     '''
     tm = None
     try:
-        request = _safe_get_request(request)
-        tm = get_tm(request)
+        tm = get_tm()
     except AttributeError:
         if warn:
             logger.warning('Could not locate transaction manager to commit', exc_info=True)
 
     if tm is not None:
-        await tm.commit(request)
+        await tm.commit(txn=txn)
 
-async def abort(request=None):
+
+async def abort(*, txn: typing.Optional[ITransaction]=None) -> None:
     '''
     Abort the current active transaction.
 
@@ -41,15 +34,15 @@ async def abort(request=None):
     '''
     tm = None
     try:
-        tm = get_tm(request)
+        tm = get_tm()
     except AttributeError:
         # not part of transaction, ignore
         pass
     if tm is not None:
-        await tm.abort(request)
+        await tm.abort(txn=txn)
 
 
-def get_tm(request=None):
+def get_tm() -> typing.Optional[ITransactionManager]:
     """Return shared transaction manager (from request)
 
     This is used together with "with" syntax for wrapping mutating
@@ -59,36 +52,36 @@ def get_tm(request=None):
 
     Example::
 
-        with get_tm(request).transaction() as txn:  # begin transaction txn
+        with get_tm().transaction() as txn:  # begin transaction txn
 
             # do something
 
         # transaction txn commits or raises ConflictError
 
     """
-    return _safe_get_request(request)._tm
+    return task_vars.tm.get()
 
 
-def get_transaction(request=None):
+def get_transaction() -> typing.Optional[ITransaction]:
     '''
     Return the current active transaction.
 
     :param request: request object transaction is connected to
 
     '''
-    req = _safe_get_request(request)
-    return req._tm.get(req)
+    return task_vars.txn.get()
 
 
-class managed_transaction:  # noqa: N801
+class transaction:  # noqa: N801
     '''
     Execute a transaction as async context manager and
     automatically close connection after done.
 
-    >>> async with managed_transaction() as txn:
+    >>> async with transaction() as txn:
     >>>   pass
 
     :param request: request object to connect transaction with
+    :param db: transaction manager to retrieve transaction from
     :param tm: transaction manager to retrieve transaction from
     :param write: Does this write to database? (defaults to false)
     :param abort_when_done: Abort transaction when done (defaults to false)
@@ -96,13 +89,11 @@ class managed_transaction:  # noqa: N801
     :param execute_futures: Execute registered futures with transaction after done (defaults to true)
     '''
 
-    def __init__(self, request=None, tm=None, write=False, abort_when_done=False,
+    def __init__(self, *, db=None, tm=None, abort_when_done=False,
                  adopt_parent_txn=False, execute_futures=True):
-        self.request = _safe_get_request(request)
-        if tm is None:
-            tm = request._tm
-        self.tm = tm
-        self.write = write
+        if db is not None and tm is None:
+            tm = db.get_transaction_manager()
+        self.tm = tm or get_tm()
         self.abort_when_done = abort_when_done
         self.previous_txn = self.txn = self.previous_write_setting = None
         self.adopt_parent_txn = adopt_parent_txn
@@ -110,18 +101,20 @@ class managed_transaction:  # noqa: N801
         self.adopted = []
 
     async def __aenter__(self):
-        if self.request is not None and hasattr(self.request, '_txn'):
-            self.previous_txn = self.request._txn
-            self.previous_write_setting = getattr(self.request, '_db_write_enabled', False)
-            if self.write:
-                self.request._db_write_enabled = True
-        self.txn = await self.tm.begin(request=self.request)
+        txn = get_transaction()
+        if txn is not None:
+            self.previous_txn = txn
+
+        self.txn = await self.tm.begin()
+        # these should be restored after
+        task_vars.tm.set(self.tm)
+        task_vars.txn.set(self.txn)
         return self.txn
 
     def adopt_objects(self, obs, txn):
         for oid, ob in obs.items():
             self.adopted.append(ob)
-            ob._p_jar = txn
+            ob.__txn__ = txn
 
     async def __aexit__(self, exc_type, exc, tb):
         if self.adopt_parent_txn and self.previous_txn is not None:
@@ -162,17 +155,11 @@ class managed_transaction:  # noqa: N801
                 self.previous_txn.added = {}
 
                 for ob in self.adopted:
-                    ob._p_jar = self.previous_txn
+                    ob.__txn__ = self.previous_txn
 
-        if self.request is not None:
-            if self.previous_txn is not None:
-                # we do not want to overwrite _txn if is it None since we can
-                # reuse transaction objects and we don't want to screw up
-                # stale objects that reference dangling transactions with no
-                # db connection
-                self.request._txn = self.previous_txn
-            if self.previous_write_setting is not None:
-                self.request._db_write_enabled = self.previous_write_setting
+        if self.execute_futures:
+            from guillotina.utils import execute
+            execute.execute_futures()
 
-        if self.request is not None and self.execute_futures:
-            self.request.execute_futures()
+
+managed_transaction = transaction  # noqa
