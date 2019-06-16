@@ -65,3 +65,11 @@ async def add_http_cache_headers(event):
         return
     # Add http cache headers on response
     event.response._headers.update(**extra_headers)
+
+
+@configure.subscriber(for_=(IResource, IObjectModifiedEvent))
+async def httpcache_purge(obj, event):
+    """Purges object from all HTTP cache proxys"""
+    httpcache_util = query_utility(IHttpCachePolicyUtility)
+    if httpcache_util is not None:
+        await httpcache_util.purge(obj)
