@@ -27,20 +27,22 @@ class AsgiStreamReader(EmptyStreamReader):
         return data
 
     async def read(self, n: int = -1):
-        if self.finished:
-            return b""
-
-        data = b""
         if self._buffer:
-            data += self._buffer[:n]
-            self._buffer = self._buffer[n:]  # rest
+            data = self._buffer
+        else:
+            data = b""
 
         while (n == -1 or len(data) < n) and not self.finished:
             chunk = await self.receive()
             data += chunk
 
-        self._buffer += data[n:]
-        return data
+        if n == -1:
+            self._buffer = None
+            return data
+        else:
+            req_chunk, rest = data[:n], data[n:]
+            self._buffer = rest
+            return req_chunk
 
     async def receive(self):
         payload = await self._asgi_receive()
