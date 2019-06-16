@@ -1,10 +1,10 @@
 # this module closely mirrors aiohttp.web_exceptions
 from guillotina.asgi import AsgiStreamWriter
+from guillotina.request import Request
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IResponse
 from multidict import CIMultiDict
 from typing import Optional
-from zope.interface import classImplements
 from zope.interface import implementer
 from typing import Any
 from aiohttp import hdrs
@@ -100,7 +100,6 @@ class StreamResponse():
             keep_alive = request.keep_alive
         self._keep_alive = keep_alive
 
-        version = request.version
         writer = self._payload_writer = AsgiStreamWriter(request.send)
 
         headers = self.headers

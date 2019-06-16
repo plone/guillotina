@@ -1,6 +1,5 @@
 from guillotina.testing import ADMIN_TOKEN
 
-import aiohttp
 import json
 
 

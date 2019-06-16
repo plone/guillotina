@@ -3,12 +3,10 @@ import uuid
 from contextlib import contextmanager
 from unittest import mock
 
-from aiohttp import hdrs
 from aiohttp import test_utils
 from aiohttp.helpers import noop
 from aiohttp.helpers import sentinel
 from aiohttp.http import HttpVersion
-from aiohttp.http import RawRequestMessage
 from aiohttp.web import UrlMappingMatchInfo
 from guillotina import task_vars
 from guillotina._settings import app_settings
@@ -21,7 +19,6 @@ from guillotina.interfaces import IRequest
 from guillotina.request import Request
 from guillotina.transactions import transaction
 from multidict import CIMultiDict
-from yarl import URL
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
@@ -166,12 +163,8 @@ def make_mocked_request(method, path, headers=None, *,
     specific conditions and errors are hard to trigger.
 
     """
-    task = mock.Mock()
     loop = mock.Mock()
     loop.create_future.return_value = ()
-
-    if version < HttpVersion(1, 1):
-        closing = True
 
     if headers is None:
         headers = {}
@@ -180,8 +173,6 @@ def make_mocked_request(method, path, headers=None, *,
     headers = CIMultiDict(headers)
     raw_hdrs = tuple(
         (k.encode('utf-8'), v.encode('utf-8')) for k, v in headers.items())
-
-    chunked = 'chunked' in headers.get(hdrs.TRANSFER_ENCODING, '').lower()
 
     if app is None:
         app = test_utils._create_app_mock()

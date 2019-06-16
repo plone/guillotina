@@ -2,18 +2,17 @@ import asyncio
 import os
 from unittest import mock
 
-import aiohttp
 import pytest
 import json
-from aiohttp.client_exceptions import ContentTypeError
 from async_asgi_testclient import TestClient
 from async_asgi_testclient.utils import Message
+from async_asgi_testclient.utils import create_monitored_task
+from async_asgi_testclient.utils import receive
 from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
 from guillotina.const import ROOT_ID
 from guillotina.const import TRASHED_ID
-from guillotina.content import load_cached_schema
 from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.cockroach import CockroachStorage
@@ -22,11 +21,11 @@ from guillotina.interfaces import IApplication
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
-from guillotina.tests.utils import logout
 from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
+from functools import partial
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -147,13 +146,6 @@ def db():
             pytest_docker_fixtures.pg_image.stop()
 
 
-from async_asgi_testclient.response import Response
-from async_asgi_testclient.utils import create_monitored_task
-from async_asgi_testclient.utils import receive
-from async_asgi_testclient.testing import make_test_headers_path_and_query_string
-from functools import partial
-
-
 class WebSocketSession:
     def __init__(self, url, headers, client):
         self.url = url
@@ -271,8 +263,8 @@ class GuillotinaDBRequester(object):
         return WebSocketSession(url, headers, self.client)
 
     async def make_request(self, method, path, params=None, data=None, authenticated=True,
-                    auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
-                    accept='application/json', allow_redirects=True):
+                           auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
+                           accept='application/json', allow_redirects=True):
         settings = {}
         headers = headers.copy()
         settings['headers'] = headers
@@ -381,7 +373,7 @@ def app_client(loop):
     try:
         loop.run_until_complete(client.__aenter__())
         yield app, client
-    except Exception as e:
+    except Exception:
         import sys
         loop.run_until_complete(client.__aexit__(
             sys.exc_type,

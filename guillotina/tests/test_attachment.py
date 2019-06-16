@@ -9,8 +9,8 @@ import random
 
 
 async def chunked_stream_gen(char=b'X',
-                             chunk_size=1024*1024*4,
-                             total_size=1024*1024*4):
+                             chunk_size=1024 * 1024 * 4,
+                             total_size=1024 * 1024 * 4):
     assert total_size >= chunk_size
     chunk = b''
     remain = total_size
@@ -53,6 +53,7 @@ async def test_create_content_with_behavior(container_requester):
         assert status == 200
         assert len(response) == (1024 * 1024 * 4)
 
+
 async def test_multi_upload(container_requester):
     async with container_requester as requester:
         response, status = await requester(
@@ -67,8 +68,8 @@ async def test_multi_upload(container_requester):
         assert status == 201
 
         data = chunked_stream_gen(b'X',
-                                  chunk_size=1024*1024*4,
-                                  total_size=1024*1024*10)
+                                  chunk_size=1024 * 1024 * 4,
+                                  total_size=1024 * 1024 * 10)
         response, status = await requester(
             'PATCH',
             '/db/guillotina/foobar/@upload/files/key1',
@@ -80,8 +81,8 @@ async def test_multi_upload(container_requester):
         assert status == 200
 
         data = chunked_stream_gen(b'Y',
-                                  chunk_size=1024*1024*4,
-                                  total_size=1024*1024*10)
+                                  chunk_size=1024 * 1024 * 4,
+                                  total_size=1024 * 1024 * 10)
         response, status = await requester(
             'PATCH',
             '/db/guillotina/foobar/@upload/files/key2',
@@ -132,8 +133,8 @@ async def test_large_upload_chunks(container_requester):
         assert status == 201
 
         data = chunked_stream_gen(b'X',
-                                  chunk_size=1024*1024*4,
-                                  total_size=1024*1024*10)
+                                  chunk_size=1024 * 1024 * 4,
+                                  total_size=1024 * 1024 * 10)
         response, status = await requester(
             'PATCH',
             '/db/guillotina/foobar/@upload/file',
@@ -338,10 +339,6 @@ async def test_tus_unknown_size(container_requester):
         for idx in range(10):
             # random sizes
             size = 1024 * random.choice([1024, 1243, 5555, 7777])
-            chunk_size = min(size, 1024*1024*4)
-            data = chunked_stream_gen(b'X',
-                                      chunk_size=chunk_size,
-                                      total_size=size)
 
             response, status = await requester(
                 'PATCH',
@@ -350,7 +347,7 @@ async def test_tus_unknown_size(container_requester):
                     'TUS-RESUMABLE': '1.0.0',
                     'upload-offset': str(offset)
                 },
-                data=b'X'*size
+                data=b'X' * size
             )
             offset += size
             assert status == 200
@@ -396,8 +393,8 @@ async def test_copy_file_ob(container_requester):
         )
         assert status == 201
         data = chunked_stream_gen(b'X',
-                                  chunk_size=1024*1024*4,
-                                  total_size=1024*1024*4)
+                                  chunk_size=1024 * 1024 * 4,
+                                  total_size=1024 * 1024 * 4)
         response, status = await requester(
             'PATCH',
             '/db/guillotina/foobar/@upload/file',

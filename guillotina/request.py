@@ -1,23 +1,26 @@
-import json
-import time
-import multidict
-import uuid
-import urllib.parse
-from collections import OrderedDict
-from typing import Dict
-
-from yarl import URL
 from aiohttp.web_ws import WSMessage
 from aiohttp.web import StreamResponse, WSMsgType
 from aiohttp.helpers import reify
+from aiohttp.streams import EmptyStreamReader
+from aiohttp.web_exceptions import HTTPRequestEntityTooLarge
+from collections import OrderedDict
 from guillotina import task_vars
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
-from zope.interface import implementer
 from typing import Any, Iterator, Tuple
+from typing import Dict
+from yarl import URL
+from zope.interface import implementer
+
 import enum
+import warnings
+import json
+import time
+import multidict
+import uuid
+import urllib.parse
 
 
 class State(enum.Enum):
@@ -29,6 +32,7 @@ class State(enum.Enum):
 class WebSocketDisconnect(Exception):
     def __init__(self, code):
         self.code = code
+
 
 class WebSocketException(Exception):
     pass
@@ -322,11 +326,11 @@ class Request(object):
         return self._raw_path
 
     @reify
-    def query(self) -> 'MultiDictProxy[str]':
+    def query(self) -> 'multidict.MultiDictProxy[str]':
         """A multidict with all the variables in the query string."""
 
-        l = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
-        return multidict.CIMultiDict(l)
+        query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
+        return multidict.CIMultiDict(query)
 
     @reify
     def query_string(self) -> str:
@@ -337,7 +341,7 @@ class Request(object):
         return self._query_string
 
     @reify
-    def headers(self) -> 'CIMultiDictProxy[str]':
+    def headers(self) -> 'multidict.CIMultiDictProxy[str]':
         """A case-insensitive multidict proxy with all headers."""
         headers = multidict.CIMultiDict()
         # TODO: extend

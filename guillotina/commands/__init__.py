@@ -2,7 +2,6 @@ from fnmatch import fnmatch
 from guillotina import logger
 from guillotina import profile
 from guillotina._settings import app_settings
-from guillotina.factory import make_app
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 

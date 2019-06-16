@@ -1,6 +1,8 @@
 from aiohttp.streams import EmptyStreamReader
 from guillotina.request import Request
 from guillotina import task_vars
+from typing import Optional
+
 import asyncio
 
 
@@ -55,7 +57,7 @@ class AsgiStreamWriter():
 
     buffer_size = 0
     output_size = 0
-    length = 0  # type: Optional[int]
+    length: Optional[int] = 0
 
     def __init__(self, send):
         self.send = send
