@@ -305,11 +305,6 @@ class GuillotinaDBRequester(object):
             request, transaction(db=self.db, adopt_parent_txn=True))
 
 
-async def close_async_tasks(app):
-    for clean in app.on_cleanup:
-        await clean(app)
-
-
 @pytest.fixture(scope='function')
 async def dummy_guillotina(loop):
     globalregistry.reset()
@@ -380,14 +375,27 @@ WHERE zoid != '{}' AND zoid != '{}'
 
 
 @pytest.fixture(scope='function')
-async def app_client(loop):
+def app_client(loop):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(), loop=loop)
-    async with TestClient(app) as client:
+    client = TestClient(app, loop=loop)
+    try:
+        loop.run_until_complete(client.__aenter__())
         yield app, client
+    except Exception as e:
+        import sys
+        loop.run_until_complete(client.__aexit__(
+            sys.exc_type,
+            sys.exc_value,
+            sys.exc_traceback)
+        )
+        raise
+    else:
+        loop.run_until_complete(client.__aexit__(None, None, None))
+
 
 @pytest.fixture(scope='function')
-async def guillotina_main(app_client):
+def guillotina_main(app_client):
     app, _ = app_client
     return app
 

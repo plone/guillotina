@@ -70,7 +70,6 @@ class Request(object):
     view_name = None
     found_view = None
 
-
     def __init__(self, scheme, method, path, query_string, raw_headers,
                  payload, client_max_size: int=1024**2, loop=None,
                  send=None, receive=None, scope=None):

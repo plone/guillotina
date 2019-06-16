@@ -104,6 +104,7 @@ class AsgiApp:
         self.config_file = config_file
         self.settings = settings
         self.loop = loop
+        self.on_cleanup = []
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http" or scope["type"] == "websocket":
@@ -130,7 +131,8 @@ class AsgiApp:
             settings=self.settings, loop=self.loop, server_app=self)
 
     async def shutdown(self):
-        pass
+        for clean in self.on_cleanup:
+            await clean(self)
 
     async def handler(self, scope, receive, send):
         # Aiohttp compatible StreamReader

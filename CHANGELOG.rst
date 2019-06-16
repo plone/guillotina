@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Replaced aiohttp with ASGI (running with uvicorn by default)
+
 - No longer setup fake request with login for base command
 
 - Moved `IInteraction.cached_principals` to module level function `guillotina.security.policy.cached_principals`

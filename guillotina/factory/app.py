@@ -349,7 +349,7 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
 
     # Set router root
     server_app.router.set_root(root)
-    # server_app.on_cleanup.append(cleanup_app)
+    server_app.on_cleanup.append(cleanup_app)
 
     for util in app_settings.get('utilities') or []:
         app_logger.warning('Adding : ' + util['provides'])

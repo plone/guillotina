@@ -71,6 +71,7 @@ class StreamResponse():
         if status in (204, 205):
             self.content = None
         self.status_code = status
+        self.content_type = None
         self.content_length = None
 
         self._state = {}
@@ -81,20 +82,6 @@ class StreamResponse():
     @property
     def prepared(self) -> bool:
         return self._payload_writer is not None
-
-    # def _generate_content_type_header(
-    #         self,
-    #         CONTENT_TYPE=hdrs.CONTENT_TYPE
-    #     ) -> None:
-    #     assert self._content_dict is not None
-    #     assert self._content_type is not None
-    #     params = '; '.join("{}={}".format(k, v)
-    #                        for k, v in self._content_dict.items())
-    #     if params:
-    #         ctype = self._content_type + '; ' + params
-    #     else:
-    #         ctype = self._content_type
-    #     self.headers[CONTENT_TYPE] = ctype
 
     async def prepare(self, request: 'Request'):
         if self._eof_sent:
@@ -119,7 +106,10 @@ class StreamResponse():
         headers = self.headers
         headers.setdefault(hdrs.CONTENT_TYPE, 'application/octet-stream')
 
-        if self.content_length is not None:
+        if self.content_type:
+            headers.setdefault(hdrs.CONTENT_TYPE, self.content_type)
+
+        if self.content_length:
             headers.setdefault(hdrs.CONTENT_LENGTH, str(self.content_length))
 
         from guillotina.asgi import headers_to_list
