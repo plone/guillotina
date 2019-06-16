@@ -2,6 +2,7 @@ from fnmatch import fnmatch
 from guillotina import logger
 from guillotina import profile
 from guillotina._settings import app_settings
+from guillotina.factory import make_app
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 
@@ -180,11 +181,12 @@ class Command(object):
         if asyncio.iscoroutinefunction(self.run):
             # Blocking call which returns when finished
             loop = asyncio.get_event_loop()
+            loop.run_until_complete(app.startup())
             loop.run_until_complete(self.run(self.arguments, settings, app))
             loop.run_until_complete(self.cleanup(app))
             loop.close()
         else:
-            self.run(self.arguments, settings, app)
+            self.run(self.arguments, settings, app.app)
 
         if self.profiler is not None:
             if self.arguments.profile_output:
@@ -201,8 +203,7 @@ class Command(object):
 
     async def cleanup(self, app):
         try:
-            app.freeze()
-            await app.on_cleanup.send(app)
+            await app.shutdown()
         except Exception:
             logger.warning('Unhandled error cleanup tasks', exc_info=True)
         for task in asyncio.Task.all_tasks():
@@ -237,7 +238,6 @@ class Command(object):
 
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
-        from guillotina.factory import make_app
         loop = self.get_loop()
         return make_app(settings=settings, loop=loop)
 

@@ -152,7 +152,7 @@ class Request(object):
     found_view = None
 
     def __init__(self, scheme, method, path, query_string, raw_headers,
-                 payload, client_max_size: int=1024**2, loop=None,
+                 stream_reader, client_max_size: int=1024**2, loop=None,
                  send=None, receive=None, scope=None):
         self.send = send
         self._initialized = time.time()
@@ -165,7 +165,7 @@ class Request(object):
         self._query_string = query_string
         self._rel_url = URL(path)
         self._raw_headers = raw_headers
-        self._payload = payload
+        self._stream_reader = stream_reader
 
         self._client_max_size = client_max_size
 
@@ -358,7 +358,7 @@ class Request(object):
     @reify
     def content(self):
         """Return raw payload stream."""
-        return self._payload
+        return self._stream_reader
 
     @property
     def has_body(self) -> bool:
@@ -366,25 +366,25 @@ class Request(object):
         warnings.warn(
             "Deprecated, use .can_read_body #2005",
             DeprecationWarning, stacklevel=2)
-        return not self._payload.at_eof()
+        return not self._stream_reader.at_eof()
 
     @property
     def can_read_body(self) -> bool:
         """Return True if request's HTTP BODY can be read, False otherwise."""
-        return not self._payload.at_eof()
+        return not self._stream_reader.at_eof()
 
     @reify
     def body_exists(self) -> bool:
         """Return True if request has HTTP BODY, False otherwise."""
-        return type(self._payload) is not EmptyStreamReader
+        return type(self._stream_reader) is not EmptyStreamReader
 
     async def release(self) -> None:
         """Release request.
 
         Eat unread part of HTTP BODY if present.
         """
-        while not self._payload.at_eof():
-            await self._payload.readany()
+        while not self._stream_reader.at_eof():
+            await self._stream_reader.readany()
 
     async def read(self) -> bytes:
         """Read request body if present.
@@ -394,7 +394,7 @@ class Request(object):
         if self._read_bytes is None:
             body = bytearray()
             while True:
-                chunk = await self._payload.readany()
+                chunk = await self._stream_reader.readany()
                 body.extend(chunk)
                 if self._client_max_size:
                     body_size = len(body)

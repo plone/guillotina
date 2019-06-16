@@ -4,6 +4,7 @@ from unittest import mock
 
 import pytest
 import json
+import sys
 from async_asgi_testclient import TestClient
 from async_asgi_testclient.utils import Message
 from async_asgi_testclient.utils import create_monitored_task
@@ -353,7 +354,8 @@ async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
 
 
-async def _clear_dbs(root):
+async def _clear_dbs(app):
+    root = app.root
     # make sure to completely clear db before carrying on...
     async for db in iter_databases(root):
         storage = db.storage
@@ -369,17 +371,13 @@ WHERE zoid != '{}' AND zoid != '{}'
 def app_client(loop):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(), loop=loop)
+    app.on_cleanup.insert(0, _clear_dbs)
     client = TestClient(app)
     try:
         loop.run_until_complete(client.__aenter__())
         yield app, client
     except Exception:
-        import sys
-        loop.run_until_complete(client.__aexit__(
-            sys.exc_type,
-            sys.exc_value,
-            sys.exc_traceback)
-        )
+        loop.run_until_complete(client.__aexit__(*sys.exc_info()))
         raise
     else:
         loop.run_until_complete(client.__aexit__(None, None, None))
@@ -393,7 +391,7 @@ def guillotina_main(app_client):
 
 @pytest.fixture(scope='function')
 def guillotina(db, app_client):
-    app, client = app_client
+    _, client = app_client
     requester = GuillotinaDBRequester(client)
     yield requester
 

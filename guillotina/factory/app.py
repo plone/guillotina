@@ -4,10 +4,8 @@ import logging
 import logging.config
 from copy import deepcopy
 
-from aiohttp import web
 from guillotina import configure
 from guillotina import glogging
-from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina._settings import default_settings
 from guillotina.behaviors import apply_concrete_behaviors
@@ -23,14 +21,10 @@ from guillotina.events import ApplicationCleanupEvent
 from guillotina.events import ApplicationConfiguredEvent
 from guillotina.events import ApplicationInitializedEvent
 from guillotina.events import DatabaseInitializedEvent
-from guillotina.exceptions import ConflictError
-from guillotina.exceptions import TIDConflictError
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
-from guillotina.request import Request
-from guillotina.response import HTTPConflict
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
@@ -117,47 +111,6 @@ def load_application(module, root, settings):
     app_configurator = ApplicationConfigurator(
         [module.__name__], None, root, settings)
     app_configurator.load_application(module)
-
-
-class GuillotinaAIOHTTPApplication(web.Application):
-    async def _handle(self, request, retries=0):
-        task_vars.request.set(request)
-        try:
-            return await super()._handle(request)
-        except (ConflictError, TIDConflictError) as e:
-            if app_settings.get('conflict_retry_attempts', 3) > retries:
-                label = 'DB Conflict detected'
-                if isinstance(e, TIDConflictError):
-                    label = 'TID Conflict Error detected'
-                tid = getattr(getattr(request, '_txn', None), '_tid', 'not issued')
-                logger.debug(
-                    f'{label}, retrying request, tid: {tid}, retries: {retries + 1})',
-                    exc_info=True)
-                request._retry_attempt = retries + 1
-                request.clear_futures()
-                return await self._handle(request, retries + 1)
-            logger.error(
-                'Exhausted retry attempts for conflict error on tid: {}'.format(
-                    getattr(getattr(request, '_txn', None), '_tid', 'not issued')
-                ))
-            return HTTPConflict()
-
-    def _make_request(self, message, payload, protocol, writer, task,
-                      _cls=Request):
-        return _cls(
-            message, payload, protocol, writer, task,
-            self._loop,
-            client_max_size=self._client_max_size)
-
-
-def make_aiohttp_application():
-    middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
-    router_klass = app_settings.get('router', TraversalRouter)
-    router = resolve_dotted_name(router_klass)()
-    return GuillotinaAIOHTTPApplication(
-        router=router,
-        middlewares=middlewares,
-        **app_settings.get('aiohttp_settings', {}))
 
 
 _dotted_name_settings = (

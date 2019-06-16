@@ -1,9 +1,15 @@
 from aiohttp.streams import EmptyStreamReader
-from guillotina.request import Request
+from guillotina import glogging
 from guillotina import task_vars
+from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
+from guillotina.request import Request
 from typing import Optional
 
 import asyncio
+
+
+logger = glogging.getLogger('guillotina')
 
 
 def headers_to_list(headers):
@@ -107,19 +113,17 @@ class AsgiApp:
         self.settings = settings
         self.loop = loop
         self.on_cleanup = []
+        self.route = None
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http" or scope["type"] == "websocket":
-            # daphne is not sending `lifespan` event
-            if not self.app:
-                self.app = await self.startup()
             return await self.handler(scope, receive, send)
 
         elif scope["type"] == "lifespan":
             while True:
                 message = await receive()
                 if message['type'] == 'lifespan.startup':
-                    self.app = await self.startup()
+                    await self.startup()
                     await send({'type': 'lifespan.startup.complete'})
                 elif message['type'] == 'lifespan.shutdown':
                     await self.shutdown()
@@ -128,9 +132,10 @@ class AsgiApp:
 
     async def startup(self):
         from guillotina.factory.app import startup_app
-        return await startup_app(
+        self.app = await startup_app(
             config_file=self.config_file,
             settings=self.settings, loop=self.loop, server_app=self)
+        return self.app
 
     async def shutdown(self):
         for clean in self.on_cleanup:
@@ -157,9 +162,7 @@ class AsgiApp:
         )
 
         task_vars.request.set(request)
-
-        route = await self.app.router.resolve(request)
-        resp = await route.handler(request)
+        resp = await self.request_handler(request)
 
         # WS handling after view execution missing here!!!
         if scope["type"] != "websocket":
@@ -176,8 +179,27 @@ class AsgiApp:
                 body = resp.text or ""
                 await send({"type": "http.response.body", "body": body.encode()})
 
+    async def request_handler(self, request, retries=0):
+        try:
+            route = await self.app.router.resolve(request)
+            return await route.handler(request)
 
-# from guillotina.factory.app import make_asgi_app
-
-# # asgi app singleton
-# app = make_asgi_app()
+        except (ConflictError, TIDConflictError) as e:
+            if self.settings.get('conflict_retry_attempts', 3) > retries:
+                label = 'DB Conflict detected'
+                if isinstance(e, TIDConflictError):
+                    label = 'TID Conflict Error detected'
+                tid = getattr(getattr(request, '_txn', None), '_tid', 'not issued')
+                logger.debug(
+                    f'{label}, retrying request, tid: {tid}, retries: {retries + 1})',
+                    exc_info=True)
+                request._retry_attempt = retries + 1
+                request.clear_futures()
+                return await self.request_handler(request, retries + 1)
+            else:
+                logger.error(
+                    'Exhausted retry attempts for conflict error on tid: {}'.format(
+                        getattr(getattr(request, '_txn', None), '_tid', 'not issued')
+                    ))
+                from guillotina.response import HTTPConflict
+                return HTTPConflict()

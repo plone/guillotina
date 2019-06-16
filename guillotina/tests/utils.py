@@ -1,10 +1,7 @@
 import json
 import uuid
-from contextlib import contextmanager
 from unittest import mock
 
-from aiohttp import test_utils
-from aiohttp.helpers import noop
 from aiohttp.helpers import sentinel
 from aiohttp.http import HttpVersion
 from aiohttp.web import UrlMappingMatchInfo
@@ -174,46 +171,14 @@ def make_mocked_request(method, path, headers=None, *,
     raw_hdrs = tuple(
         (k.encode('utf-8'), v.encode('utf-8')) for k, v in headers.items())
 
-    if app is None:
-        app = test_utils._create_app_mock()
-
-    if protocol is sentinel:
-        protocol = mock.Mock()
-
-    if transport is sentinel:
-        transport = test_utils._create_transport(sslcontext)
-
-    if writer is sentinel:
-        writer = mock.Mock()
-        writer.transport = transport
-
-    if payload_writer is sentinel:
-        payload_writer = mock.Mock()
-        payload_writer.write_eof.side_effect = noop
-        payload_writer.drain.side_effect = noop
-
-    protocol.transport = transport
-    protocol.writer = writer
-
     if payload is sentinel:
         payload = mock.Mock()
-
-    time_service = mock.Mock()
-    time_service.time.return_value = 12345
-    time_service.strtime.return_value = "Tue, 15 Nov 1994 08:12:31 GMT"
-
-    @contextmanager
-    def timeout(*args, **kw):
-        yield
-
-    time_service.timeout = mock.Mock()
-    time_service.timeout.side_effect = timeout
 
     req = Request(
         "http",
         method,
         path,
-        None,
+        b"",
         raw_hdrs,
         payload,
         client_max_size=client_max_size
