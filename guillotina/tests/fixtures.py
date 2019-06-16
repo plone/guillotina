@@ -22,6 +22,7 @@ from guillotina.interfaces import IApplication
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
+from guillotina.tests.utils import logout
 from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
@@ -304,6 +305,7 @@ async def dummy_guillotina(loop):
     await app.startup()
     yield app
     await app.shutdown()
+    logout()
 
 
 class DummyRequestAsyncContextManager(object):
@@ -381,6 +383,8 @@ def app_client(loop):
         raise
     else:
         loop.run_until_complete(client.__aexit__(None, None, None))
+    finally:
+        logout()
 
 
 @pytest.fixture(scope='function')
