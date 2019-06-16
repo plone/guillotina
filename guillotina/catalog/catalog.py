@@ -55,7 +55,7 @@ class DefaultSearchUtility(object):
         '''
         Raw search query, uses parser to transform query
         '''
-        parsed_query = parse_query(query)
+        parsed_query = parse_query(context, query, self)
         return await self.search(context, parsed_query)
 
     async def index(self, container: IContainer, datas):

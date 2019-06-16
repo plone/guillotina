@@ -5,12 +5,12 @@ import pytest
 from guillotina import task_vars
 from guillotina.catalog import index
 from guillotina.catalog.utils import get_index_fields
-from guillotina.catalog.utils import get_metadata_fields, parse_query
+from guillotina.catalog.utils import get_metadata_fields
+from guillotina.catalog.utils import parse_query
 from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import Container
 from guillotina.content import create_content
-from guillotina.db.storages.utils import clear_table_name
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import ICatalogDataAdapter
@@ -21,6 +21,15 @@ from guillotina.tests import utils as test_utils
 
 
 NOT_POSTGRES = os.environ.get('DATABASE', 'DUMMY') in ('cockroachdb', 'DUMMY')
+PG_CATALOG_SETTINGS = {
+    "applications": ["guillotina.contrib.catalog.pg"],
+    "load_utilities": {
+        "catalog": {
+            "provides": "guillotina.interfaces.ICatalogUtility",
+            "factory": "guillotina.contrib.catalog.pg.PGSearchUtility"
+        }
+    }
+}
 
 
 def test_indexed_fields(dummy_guillotina, loop):
@@ -105,9 +114,7 @@ async def test_modified_event_gathers_all_index_data(dummy_guillotina):
     assert len(fut.update['foobar']) == 6
 
 
-@pytest.mark.app_settings({
-    "applications": ["guillotina.contrib.catalog.pg"]
-})
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
 async def test_search_endpoint(container_requester):
     async with container_requester as requester:
@@ -259,14 +266,12 @@ async def test_fulltext_query_pg_catalog(container_requester):
             assert len(results['member']) == 1
 
 
-@pytest.mark.app_settings({
-    "applications": ["guillotina.contrib.catalog.pg"]
-})
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
 async def test_build_pg_query(dummy_guillotina):
     from guillotina.contrib.catalog.pg import PGSearchUtility
     util = PGSearchUtility()
-    with mocks.MockTransaction() as txn:
+    with mocks.MockTransaction():
         content = test_utils.create_content(Container)
         query = parse_query(content, {
             'uuid': content.uuid

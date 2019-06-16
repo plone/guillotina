@@ -569,12 +569,15 @@ class PGSearchUtility(DefaultSearchUtility):
             results.append(data)
 
         # also do count...
-        sql, arguments = self.build_count_query(context, query)
-        logger.debug(f'Running search:\n{sql}\n{arguments}')
-        records = await conn.fetch(sql, *arguments)
+        total = len(results)
+        if total < query.size:
+            sql, arguments = self.build_count_query(context, query)
+            logger.debug(f'Running search:\n{sql}\n{arguments}')
+            records = await conn.fetch(sql, *arguments)
+            total = records[0]['count']
         return {
             'member': results,
-            'total': records[0]['count']
+            'total': total
         }
 
     async def index(self, container, datas):

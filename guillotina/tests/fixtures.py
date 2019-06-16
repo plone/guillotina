@@ -40,11 +40,10 @@ annotations = {
 }
 
 def base_settings_configurator(settings):
-    if 'catalog' not in settings["load_utilities"]:
-        settings["load_utilities"]['catalog'] = {
-            "provides": "guillotina.interfaces.ICatalogUtility",
-            "factory": "guillotina.catalog.catalog.DefaultSearchUtility"
-        }
+    settings["load_utilities"]['catalog'] = {
+        "provides": "guillotina.interfaces.ICatalogUtility",
+        "factory": "guillotina.catalog.catalog.DefaultSearchUtility"
+    }
 
 
 testing.configure_with(base_settings_configurator)
