@@ -25,7 +25,7 @@ from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
-
+from guillotina.utils import merge_dicts
 
 _dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -49,8 +49,9 @@ def base_settings_configurator(settings):
 testing.configure_with(base_settings_configurator)
 
 
-def get_dummy_settings():
+def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
+    settings = _update_from_pytest_markers(settings, pytest_node)
     settings['databases']['db']['storage'] = 'DUMMY'
     settings['databases']['db']['dsn'] = {}
     return settings
@@ -72,8 +73,22 @@ def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
     }
 
 
-def get_db_settings():
+def _update_from_pytest_markers(settings, pytest_node):
+    if not pytest_node:
+        return settings
+
+    # Update test app settings from pytest markers
+    for mark in pytest_node.iter_markers(name='app_settings'):
+        to_update = mark.args[0]
+        settings = merge_dicts(settings, to_update)
+
+    return settings
+
+
+def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
+    settings = _update_from_pytest_markers(settings, pytest_node)
+
     if annotations['testdatabase'] == 'DUMMY':
         return settings
 
@@ -113,6 +128,7 @@ def get_db_settings():
         configure_db(settings['databases']['db'], **options)
         configure_db(settings['databases']['db-custom'], **options)
         configure_db(settings['storages']['db'], **options)
+
     return settings
 
 
@@ -203,10 +219,10 @@ async def close_async_tasks(app):
 
 
 @pytest.fixture(scope='function')
-def dummy_guillotina(loop):
+def dummy_guillotina(loop, request):
     globalregistry.reset()
     aioapp = loop.run_until_complete(
-        make_app(settings=get_dummy_settings(), loop=loop))
+        make_app(settings=get_dummy_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
@@ -278,10 +294,10 @@ WHERE zoid != '{}' AND zoid != '{}'
 
 
 @pytest.fixture(scope='function')
-def guillotina_main(loop):
+def guillotina_main(loop, request):
     globalregistry.reset()
     aioapp = loop.run_until_complete(
-        make_app(settings=get_db_settings(), loop=loop))
+        make_app(settings=get_db_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
 
