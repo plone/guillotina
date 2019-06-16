@@ -1,5 +1,4 @@
 import json
-from guillotina.const import TRASHED_ID
 import logging
 import typing
 
@@ -11,8 +10,10 @@ from guillotina.catalog.catalog import DefaultSearchUtility
 from guillotina.catalog.utils import get_index_definition
 from guillotina.catalog.utils import iter_indexes
 from guillotina.component import get_utility
+from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.utils import clear_table_name
+from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
@@ -360,8 +361,8 @@ class FullTextIndex(BasicJsonIndex):
     def where(self, value, operator=''):
         """
         to_tsvector('english', json->>'text') @@ to_tsquery('python & ruby')
+        operator is ignored for now...
         """
-        assert not operator
         return f"""
 to_tsvector('english', json->>'{self.name}') @@ plainto_tsquery(${{arg}}::text)"""
 
@@ -559,7 +560,10 @@ class PGSearchUtility(DefaultSearchUtility):
         conn = await txn.get_connection()
 
         results = []
-        context_url = get_object_url(context)
+        try:
+            context_url = get_object_url(context)
+        except RequestNotFound:
+            context_url = get_content_path(context)
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
@@ -570,7 +574,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
         # also do count...
         total = len(results)
-        if total < query.size:
+        if total >= query.size:
             sql, arguments = self.build_count_query(context, query)
             logger.debug(f'Running search:\n{sql}\n{arguments}')
             records = await conn.fetch(sql, *arguments)
