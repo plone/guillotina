@@ -16,6 +16,7 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
+from starlette.websockets import WebSocket, WebSocketDisconnect
 from zope.interface import implementer
 from typing import Any, Iterator, Tuple, Callable, Coroutine
 
