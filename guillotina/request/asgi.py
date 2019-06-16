@@ -47,6 +47,7 @@ class GuillotinaRequest(Request):
                  payload, client_max_size: int=1024**2, loop=None,
                  send=None, receive=None, scope=None):
         self.send = send
+        self._initialized = time.time()
         self.receive = receive
         self.scope = scope
         self._scheme = scheme
