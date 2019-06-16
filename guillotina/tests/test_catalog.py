@@ -295,7 +295,7 @@ async def test_parse_bbb_plone(dummy_guillotina):
     result = parser({
         'portal_type': 'Folder',
         'SearchableText': 'foobar',
-        'b_size': 200,
+        'b_size': 45,
         'b_start': 50,
         'path.depth': 2
     })
@@ -304,7 +304,7 @@ async def test_parse_bbb_plone(dummy_guillotina):
     assert 'type_name' in result['params']
     assert 'portal_type' not in result['params']
     assert result['_from'] == 50
-    assert result['size'] == 200
+    assert result['size'] == 45
 
 
 async def test_parse_base():
