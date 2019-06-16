@@ -7,7 +7,6 @@ import pytest
 from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
 from guillotina import testing
-from guillotina import app_settings
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
 from guillotina.const import ROOT_ID
