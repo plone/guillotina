@@ -39,10 +39,13 @@ class BaseParser:
         if 'path.depth' in params:
             params['depth'] = params.pop('path.depth')
 
+        if 'portal_type' in params:
+            params['type_name'] = params.pop('portal_type')
+
         # Fullobject
         full_objects = params.pop('_fullobject', False)
 
-        from_ = 0
+        _from = 0
         size = 20
         sort_field = None
         sort_dir = 'ASC'
@@ -60,9 +63,9 @@ class BaseParser:
         # From
         if '_from' in params:
             try:
-                from_ = params.pop('_from')
+                _from = int(params.pop('_from'))
             except ValueError:
-                pass
+                _from = 0
 
         # Sort
         if '_sort_asc' in params:
@@ -78,9 +81,12 @@ class BaseParser:
             path = '/' + path.strip('/')
         else:
             path = get_content_path(self.context)
+        params['path__starts'] = path
 
         if '_size' in params:
-            size = params.pop('_size')
+            try:
+                size = int(params.pop('_size'))
+            except ValueError: pass
 
         # Metadata
         metadata = None
@@ -97,7 +103,7 @@ class BaseParser:
             excluded_metadata = to_list(params.pop('_metadata_not'))
 
         return {
-            'from_': from_,
+            '_from': _from,
             'size': size,
             'sort_on': sort_field,
             'sort_dir': sort_dir,

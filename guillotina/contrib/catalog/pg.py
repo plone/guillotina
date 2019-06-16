@@ -77,10 +77,6 @@ class Parser(BaseParser):
         result: typing.Any = value
 
         operator = '='
-        if field == 'portal_type':
-            # XXX: Compatibility with plone?
-            field = 'type_name'
-
         if field.endswith('__not'):
             operator = '!='
             field = field.rstrip('__not')
@@ -103,10 +99,6 @@ class Parser(BaseParser):
             operator = '<='
             field = field.rstrip('__lte')
 
-        if field == 'portal_type':
-            # XXX: Compatibility with plone?
-            field = 'type_name'
-
         index = get_index_definition(field)
         if index is None:
             return None
@@ -124,7 +116,7 @@ class Parser(BaseParser):
                 result = True
             else:
                 result = False
-        elif _type == 'keyword':
+        elif _type == 'keyword' and operator not in ('?', '?|'):
             operator = '?'
 
         if operator == '?|':
@@ -440,7 +432,7 @@ class PGSearchUtility(DefaultSearchUtility):
             ' AND '.join(sql_wheres),
             order_by_index.order_by(query['sort_dir']),
             query['size'],
-            query['from_']
+            query['_from']
         )
         return sql, sql_arguments
 
