@@ -373,7 +373,14 @@ WHERE zoid != '{}' AND zoid != '{}'
 def app_client(loop):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(), loop=loop)
-    app.on_cleanup.insert(0, _clear_dbs)
+
+    original_startup = app.startup
+    async def custom_startup():
+        app = await original_startup()
+        await _clear_dbs(app)
+        return app
+    app.startup = custom_startup
+
     client = TestClient(app)
     try:
         loop.run_until_complete(client.__aenter__())
