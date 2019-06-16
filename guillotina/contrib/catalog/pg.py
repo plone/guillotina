@@ -7,6 +7,9 @@ from dateutil.parser import parse
 from guillotina import configure
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
+from guillotina.catalog.parser import BaseParser
+from guillotina.catalog.parser import BasicParsedQueryInfo
+from guillotina.catalog.parser import to_list
 from guillotina.catalog.utils import get_index_definition
 from guillotina.catalog.utils import iter_indexes
 from guillotina.component import get_utility
@@ -25,7 +28,6 @@ from guillotina.interfaces.content import IApplication
 from guillotina.transactions import get_transaction
 from guillotina.utils import find_container
 from guillotina.utils import get_authenticated_user
-from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 from guillotina.utils import get_object_url
 from guillotina.utils import get_security_policy
@@ -54,176 +56,106 @@ $$SELECT CAST($1 AS timestamptz)$$  -- adapt to your needs
 ]
 
 
-def to_list(value):
-    if isinstance(value, str):
-        value = value.split(',')
-    if not isinstance(value, list):
-        value = [value]
-    return value
-
-
-def process_queried_field(field: str, value) -> typing.Optional[
-        typing.Tuple[str, typing.Any, typing.Optional[str]]]:
-    result: typing.Any = value
-
-    operator = '='
-    if field == 'portal_type':
-        # XXX: Compatibility with plone?
-        field = 'type_name'
-
-    if field.endswith('__not'):
-        operator = '!='
-        field = field.rstrip('__not')
-    elif field.endswith('__in'):
-        operator = '?|'
-        field = field.rstrip('__in')
-    elif field.endswith('__eq'):
-        operator = '='
-        field = field.rstrip('__eq')
-    elif field.endswith('__gt'):
-        operator = '>'
-        field = field.rstrip('__gt')
-    elif field.endswith('__lt'):
-        operator = '<'
-        field = field.rstrip('__lt')
-    elif field.endswith('__gte'):
-        operator = '>='
-        field = field.rstrip('__gte')
-    elif field.endswith('__lte'):
-        operator = '<='
-        field = field.rstrip('__lte')
-
-    if field == 'portal_type':
-        # XXX: Compatibility with plone?
-        field = 'type_name'
-
-    index = get_index_definition(field)
-    if index is None:
-        return None
-
-    _type = index['type']
-    if _type == 'int':
-        try:
-            result = int(value)
-        except ValueError:
-            pass
-    elif _type == 'date':
-        result = parse(value).replace(tzinfo=None)
-    elif _type == 'boolean':
-        if value in ('true', 'True', 'yes', '1'):
-            result = True
-        else:
-            result = False
-    elif _type == 'keyword':
-        operator = '?'
-
-    if operator == '?|':
-        result = to_list(value)
-
-    if operator == '?' and isinstance(result, list):
-        operator = '?|'
-
-    pg_index = get_pg_index(field)
-    return pg_index.where(result, operator), result, pg_index.select()
-
-
-def bbb_parser(get_params):
-
-    if 'SearchableText' in get_params:
-        value = get_params.pop('SearchableText')
-        for index_name, idx_data in iter_indexes():
-            if idx_data['type'] in ('text', 'searchabletext'):
-                get_params['{}__in'.format(index_name)] = value
-
-    if get_params.get('sort_on') == 'getObjPositionInParent':
-        get_params['_sort_asc'] = 'position_in_parent'
-        del get_params['sort_on']
-
-    if 'b_size' in get_params:
-        if 'b_start' in get_params:
-            get_params['_from'] = get_params['b_start']
-            del get_params['b_start']
-        get_params['_size'] = get_params['b_size']
-        del get_params['b_size']
-
-    if 'path.depth' in get_params:
-        get_params['depth'] = get_params['path.depth']
-        del get_params['path.depth']
-
-
 class ParsedQueryInfo(typing.NamedTuple):
+    sort_on: typing.Optional[str]
+    sort_dir: typing.Optional[str]
+    from_: int
+    size: int
+    full_objects: bool
+    metadata: typing.Optional[typing.List[str]]
+    excluded_metadata: typing.Optional[typing.List[str]]
+
     sort_on: typing.Optional[str]
     sort_dir: typing.Optional[str]
     wheres: typing.List[str]
     wheres_arguments: typing.List[typing.Any]
     selects: typing.List[str]
     selects_arguments: typing.List[typing.Any]
-    from_: int
-    size: int
-    full_objects: bool
 
 
 @configure.adapter(
     for_=(ICatalogUtility, IResource),
     provides=ISearchParser,
     name='default')
-class Parser:
+class Parser(BaseParser):
 
     def __init__(self, util, context):
         self.util = util
         self.context = context
 
-    def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
-        # Fullobject
-        full_objects = params.pop('_fullobject', False)
+    def process_queried_field(self, field: str, value) -> typing.Optional[
+            typing.Tuple[str, typing.Any, typing.Optional[str]]]:
+        result: typing.Any = value
 
-        bbb_parser(params)
-        from_ = 0
-        size = 20
-        sort_field = None
-        sort_dir = 'ASC'
+        operator = '='
+        if field == 'portal_type':
+            # XXX: Compatibility with plone?
+            field = 'type_name'
 
-        # normalize depth
-        found = False
-        for param in params.keys():
-            if param == 'depth' or param.startswith('depth__'):
-                found = True
-                params[param] = str(int(params[param]) + get_content_depth(self.context))
-        if not found:
-            # default to a depth so we don't show container
-            params['depth__gte'] = str(1 + get_content_depth(self.context))
+        if field.endswith('__not'):
+            operator = '!='
+            field = field.rstrip('__not')
+        elif field.endswith('__in'):
+            operator = '?|'
+            field = field.rstrip('__in')
+        elif field.endswith('__eq'):
+            operator = '='
+            field = field.rstrip('__eq')
+        elif field.endswith('__gt'):
+            operator = '>'
+            field = field.rstrip('__gt')
+        elif field.endswith('__lt'):
+            operator = '<'
+            field = field.rstrip('__lt')
+        elif field.endswith('__gte'):
+            operator = '>='
+            field = field.rstrip('__gte')
+        elif field.endswith('__lte'):
+            operator = '<='
+            field = field.rstrip('__lte')
 
-        # From
-        if '_from' in params:
+        if field == 'portal_type':
+            # XXX: Compatibility with plone?
+            field = 'type_name'
+
+        index = get_index_definition(field)
+        if index is None:
+            return None
+
+        _type = index['type']
+        if _type == 'int':
             try:
-                from_ = params.pop('_from')
+                result = int(value)
             except ValueError:
                 pass
+        elif _type == 'date':
+            result = parse(value).replace(tzinfo=None)
+        elif _type == 'boolean':
+            if value in ('true', 'True', 'yes', '1'):
+                result = True
+            else:
+                result = False
+        elif _type == 'keyword':
+            operator = '?'
 
-        # Sort
-        if '_sort_asc' in params:
-            sort_field = params.pop('_sort_asc')
-            sort_dir = 'ASC'
-        elif '_sort_des' in params:
-            sort_field = params.pop('_sort_des')
-            sort_dir = 'DESC'
+        if operator == '?|':
+            result = to_list(value)
 
-        # Path specific use case
-        if 'path__starts' in params:
-            path = params.pop('path__starts')
-            path = '/' + path.strip('/')
-        else:
-            path = get_content_path(self.context)
+        if operator == '?' and isinstance(result, list):
+            operator = '?|'
 
-        if '_size' in params:
-            size = params.pop('_size')
+        pg_index = get_pg_index(field)
+        return pg_index.where(result, operator), result, pg_index.select()
+
+    def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
+        query_info = super().__call__(params)
 
         wheres = []
         arguments = []
         selects = []
         selects_arguments = []
-        for field, value in params.items():
-            result = process_queried_field(field, value)
+        for field, value in query_info.params.items():
+            result = self.process_queried_field(field, value)
             if result is None:
                 continue
             sql, value, select = result
@@ -234,15 +166,17 @@ class Parser:
                 selects_arguments.append(value)
 
         return ParsedQueryInfo(
-            from_=from_,
-            size=size,
+            from_=query_info.from_,
+            size=query_info.size,
             wheres=wheres,
             wheres_arguments=arguments,
             selects=selects,
             selects_arguments=selects_arguments,
-            sort_on=sort_field,
-            sort_dir=sort_dir,
-            full_objects=full_objects
+            sort_on=query_info.sort_on,
+            sort_dir=query_info.sort_dir,
+            full_objects=query_info.full_objects,
+            metadata=query_info.metadata,
+            excluded_metadata=query_info.excluded_metadata
         )
 
 
@@ -552,6 +486,20 @@ class PGSearchUtility(DefaultSearchUtility):
             ' AND '.join(sql_wheres))
         return sql, sql_arguments
 
+    def load_meatdata(self, query: ParsedQueryInfo, data: typing.Dict[str, typing.Any]):
+        metadata = {}
+        if query.metadata is None:
+            metadata = data.copy()
+        else:
+            for k in query.metadata:
+                if k in data:
+                    metadata[k] = data[k]
+        
+        for k in (query.excluded_metadata or []):
+            if k in metadata:
+                del metadata[k]
+        return metadata
+
     async def search(self, context, query: ParsedQueryInfo):  # type: ignore
         sql, arguments = self.build_query(context, query)
         txn = get_transaction()
@@ -567,10 +515,11 @@ class PGSearchUtility(DefaultSearchUtility):
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
-            data['@name'] = record['id']
-            data['@uid'] = record['zoid']
-            data['@id'] = data['@absolute_url'] = context_url + data['path']
-            results.append(data)
+            result = self.load_meatdata(query, data)
+            result['@name'] = record['id']
+            result['@uid'] = record['zoid']
+            result['@id'] = data['@absolute_url'] = context_url + data['path']
+            results.append(result)
 
         # also do count...
         total = len(results)
