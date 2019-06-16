@@ -259,6 +259,10 @@ async def test_fulltext_query_pg_catalog(container_requester):
             assert len(results['member']) == 1
 
 
+@pytest.mark.app_settings({
+    "applications": ["guillotina.contrib.catalog.pg"]
+})
+@pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
 async def test_build_pg_query(dummy_guillotina):
     from guillotina.contrib.catalog.pg import PGSearchUtility
     util = PGSearchUtility()
@@ -267,7 +271,5 @@ async def test_build_pg_query(dummy_guillotina):
         query = parse_query(content, {
             'uuid': content.uuid
         }, util)
-        import pdb; pdb.set_trace()
-        assert content.uuid == arguments[0]
-        assert "json->'uuid'" in sql
-        assert f'from {clear_table_name(txn.storage._objects_table_name)}' in sql
+        assert content.uuid == query.wheres_arguments[0]
+        assert "json->'uuid'" in query.wheres[0]
