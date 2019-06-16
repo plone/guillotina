@@ -7,14 +7,14 @@ from dateutil.parser import parse
 from guillotina import configure
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
-from guillotina.catalog.parser import BaseParser, BasicParsedQueryInfo
+from guillotina.catalog.parser import BaseParser
 from guillotina.catalog.parser import to_list
+from guillotina.catalog.types import BasicParsedQueryInfo
 from guillotina.catalog.utils import get_index_definition
 from guillotina.catalog.utils import iter_indexes
 from guillotina.component import get_utility
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
-from guillotina.db.storages.utils import clear_table_name
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IContainer
@@ -436,7 +436,7 @@ class PGSearchUtility(DefaultSearchUtility):
                  {}
                  limit {} offset {}'''.format(
             ','.join(select_fields),
-            clear_table_name(txn.storage._objects_table_name),
+            txn.storage._objects_table_name,
             ' AND '.join(sql_wheres),
             order_by_index.order_by(query['sort_dir']),
             query['size'],
@@ -464,7 +464,7 @@ class PGSearchUtility(DefaultSearchUtility):
                  from {}
                  where {}'''.format(
             ','.join(select_fields),
-            clear_table_name(txn.storage._objects_table_name),
+            txn.storage._objects_table_name,
             ' AND '.join(sql_wheres))
         return sql, sql_arguments
 

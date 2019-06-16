@@ -278,5 +278,5 @@ async def test_build_pg_query(dummy_guillotina):
         query = parse_query(content, {
             'uuid': content.uuid
         }, util)
-        assert content.uuid == query.wheres_arguments[0]
-        assert "json->'uuid'" in query.wheres[0]
+        assert content.uuid == query['wheres_arguments'][0]
+        assert "json->'uuid'" in query['wheres'][0]
