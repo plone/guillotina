@@ -220,7 +220,6 @@ class WebSocketSession:
                 raise StopAsyncIteration(msg)
         return msg
 
-
     async def connect(self):
         self.headers.update({"host": "localhost"})
         flat_headers = [

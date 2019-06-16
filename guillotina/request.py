@@ -1,5 +1,4 @@
 import json
-import asyncio
 import time
 import multidict
 import uuid
@@ -16,37 +15,115 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
-from starlette.websockets import WebSocket, WebSocketDisconnect
 from zope.interface import implementer
-from typing import Any, Iterator, Tuple, Callable, Coroutine
+from typing import Any, Iterator, Tuple
+import enum
+
+
+class State(enum.Enum):
+    CONNECTING = 0
+    CONNECTED = 1
+    DISCONNECTED = 2
+
+
+class WebSocketDisconnect(Exception):
+    def __init__(self, code):
+        self.code = code
+
+class WebSocketException(Exception):
+    pass
 
 
 class GuillotinaWebSocket:
     def __init__(self, scope, send, receive):
-        self.ws = WebSocket(scope,
-                            receive=receive,
-                            send=send)
+        self.scope = scope
+        self._receive = receive
+        self._send = send
+        self.in_state = State.CONNECTING
+        self.out_state = State.CONNECTING
 
-    async def prepare(self, request):
-        return await self.ws.accept()
-
-    async def close(self):
-        return await self.ws.close()
+    async def prepare(self, request=None):
+        return await self.accept()
 
     async def send_str(self, data):
-        return await self.ws.send_text(data)
+        return await self.send_text(data)
 
     def __aiter__(self):
         return self
 
     async def __anext__(self):
+        if self.out_state == State.DISCONNECTED:
+            raise StopAsyncIteration()
+
         try:
-            msg = await self.ws.receive_text()
+            msg = await self.receive_text()
         except WebSocketDisconnect:
             # Close the ws connection
             await self.close()
             raise StopAsyncIteration()
         return WSMessage(WSMsgType.TEXT, msg, '')
+
+    async def receive(self):
+        if self.in_state == State.CONNECTING:
+            msg = await self._receive()
+            msg_type = msg["type"]
+            if msg_type != "websocket.connect":
+                raise WebSocketException(f"msg_type {msg_type} not allowed in state {self.in_state}")
+            self.in_state = State.CONNECTED
+            return msg
+        elif self.in_state == State.CONNECTED:
+            msg = await self._receive()
+            msg_type = msg["type"]
+            if msg_type not in ["websocket.receive", "websocket.disconnect"]:
+                raise WebSocketException(f"msg_type {msg_type} not allowed in state {self.in_state}")
+
+            if msg_type == "websocket.disconnect":
+                self.in_state = State.DISCONNECTED
+            return msg
+        else:
+            raise RuntimeError("channel is already closed")
+
+    async def send(self, msg):
+        if self.out_state == State.CONNECTING:
+            msg_type = msg["type"]
+            if msg_type not in ["websocket.accept", "websocket.close"]:
+                raise WebSocketException(f"msg_type {msg_type} not allowed in state {self.out_state}")
+            if msg_type == "websocket.accept":
+                self.out_state = State.CONNECTED
+            else:
+                self.out_state = State.DISCONNECTED
+            await self._send(msg)
+        elif self.out_state == State.CONNECTED:
+            msg_type = msg["type"]
+            if msg_type not in ["websocket.send", "websocket.close"]:
+                raise WebSocketException(f"msg_type {msg_type} not allowed in state {self.out_state}")
+
+            if msg_type == "websocket.close":
+                self.out_state = State.DISCONNECTED
+            await self._send(msg)
+        else:
+            raise RuntimeError("channel is already closed")
+
+    async def receive_text(self):
+        if self.in_state != State.CONNECTED:
+            raise WebSocketException(f"receive is not allowed in state {self.in_state}")
+
+        msg = await self.receive()
+        if msg["type"] == "websocket.disconnect":
+            raise WebSocketDisconnect(msg["code"])
+        return msg["text"]
+
+    async def send_text(self, data):
+        await self.send({"type": "websocket.send", "text": data})
+
+    async def accept(self, subprotocol=None):
+        # Wait for the connect message
+        if self.in_state == State.CONNECTING:
+            await self.receive()
+        await self.send({"type": "websocket.accept", "subprotocol": subprotocol})
+
+    async def close(self, code=1000):
+        await self.send({"type": "websocket.close", "code": code})
 
 
 @implementer(IRequest, IDefaultLayer)
