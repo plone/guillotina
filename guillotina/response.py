@@ -4,9 +4,8 @@ from guillotina.request import Request
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IResponse
 from multidict import CIMultiDict
-from typing import Optional
 from zope.interface import implementer
-from typing import Any
+from typing import Any, Dict, Optional
 from aiohttp import hdrs
 
 import warnings
@@ -74,10 +73,11 @@ class StreamResponse():
         self.content_type = None
         self.content_length = None
 
-        self._state = {}
-        self._payload_writer = None
+        self._state: Dict[str, Any] = {}
+        self._payload_writer: Optional[AsgiStreamWriter] = None
         self._eof_sent = False
         self._keep_alive = True
+        self._req: Optional['Request'] = None
 
     @property
     def prepared(self) -> bool:
@@ -165,8 +165,7 @@ class StreamResponse():
             info = "{} {} ".format(self._req.method, self._req.path)
         else:
             info = "not prepared"
-        return "<{} {} {}>".format(self.__class__.__name__,
-                                   self.reason, info)
+        return "<{} {}>".format(self.__class__.__name__, info)
 
     def __getitem__(self, key: str) -> Any:
         return self._state[key]

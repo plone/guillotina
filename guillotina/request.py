@@ -1,5 +1,5 @@
 from aiohttp.web_ws import WSMessage
-from aiohttp.web import StreamResponse, WSMsgType
+from aiohttp.web import WSMsgType
 from aiohttp.helpers import reify
 from aiohttp.streams import EmptyStreamReader
 from aiohttp.web_exceptions import HTTPRequestEntityTooLarge
@@ -9,18 +9,17 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
-from typing import Any, Iterator, Tuple
-from typing import Dict
+from typing import Any, Dict, Iterator, Tuple, Optional
 from yarl import URL
 from zope.interface import implementer
 
 import enum
-import warnings
 import json
 import time
 import multidict
 import uuid
 import urllib.parse
+import warnings
 
 
 class State(enum.Enum):
@@ -172,9 +171,9 @@ class Request(object):
         self.charset = None
         self.content_type = None
 
-        self._read_bytes = None
-        self._state = {}
-        self._cache = {}
+        self._read_bytes: Optional[bytes] = None
+        self._state: Dict[str, Any] = {}
+        self._cache: Dict[Any, Any] = {}
         self._futures: dict = {}
         self._events = OrderedDict()
         self._initialized = time.time()
@@ -330,7 +329,7 @@ class Request(object):
         """A multidict with all the variables in the query string."""
 
         query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
-        return multidict.CIMultiDict(query)
+        return multidict.MultiDictProxy(multidict.CIMultiDict(query))
 
     @reify
     def query_string(self) -> str:
@@ -343,12 +342,11 @@ class Request(object):
     @reify
     def headers(self) -> 'multidict.CIMultiDictProxy[str]':
         """A case-insensitive multidict proxy with all headers."""
-        headers = multidict.CIMultiDict()
-        # TODO: extend
-        for key, value in self._raw_headers:
-            headers.add(key.decode(), value.decode())
-        self._headers = headers
-        return headers
+        return multidict.CIMultiDictProxy(
+            multidict.CIMultiDict(
+                [(k.decode(), v.decode()) for k, v in self._raw_headers]
+            )
+        )
 
     @reify
     def raw_headers(self):
@@ -414,7 +412,7 @@ class Request(object):
         encoding = self.charset or 'utf-8'
         return bytes_body.decode(encoding)
 
-    async def json(self, *, loads=json.loads) -> Any:
+    async def json(self, *, loads=json.loads) -> Any:  # type: ignore
         """Return BODY as JSON."""
         body = await self.text()
         return loads(body)
@@ -428,5 +426,5 @@ class Request(object):
     def __eq__(self, other: object) -> bool:
         return id(self) == id(other)
 
-    async def _prepare_hook(self, response: StreamResponse) -> None:
+    async def _prepare_hook(self, response):
         return
