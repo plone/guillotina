@@ -80,7 +80,7 @@ class FileGET(DownloadService):
             resp.content_type, _ = mimetypes.guess_type(filename)
 
             disposition = 'filename="{}"'.format(filename)
-            if 'text' not in resp.content_type:
+            if 'text' not in (resp.content_type or ""):
                 disposition = 'attachment; ' + disposition
 
             resp.headers['CONTENT-DISPOSITION'] = disposition
@@ -88,7 +88,6 @@ class FileGET(DownloadService):
             data = f.read()
             resp.content_length = len(data)
             await resp.prepare(self.request)
-
             await resp.write(data)
             await resp.write_eof()
             return resp
