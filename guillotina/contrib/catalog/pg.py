@@ -62,6 +62,12 @@ class ParsedQueryInfo(BasicParsedQueryInfo):
     selects_arguments: typing.List[typing.Any]
 
 
+_type_mapping = {
+    'int': int,
+    'float': float
+}
+
+
 @configure.adapter(
     for_=(ICatalogUtility, IResource),
     provides=ISearchParser,
@@ -79,36 +85,37 @@ class Parser(BaseParser):
         operator = '='
         if field.endswith('__not'):
             operator = '!='
-            field = field.rstrip('__not')
+            field = field[:-len('__not')]
         elif field.endswith('__in'):
             operator = '?|'
-            field = field.rstrip('__in')
+            field = field[:-len('__in')]
         elif field.endswith('__eq'):
             operator = '='
-            field = field.rstrip('__eq')
+            field = field[:-len('__eq')]
         elif field.endswith('__gt'):
             operator = '>'
-            field = field.rstrip('__gt')
+            field = field[:-len('__gt')]
         elif field.endswith('__lt'):
             operator = '<'
-            field = field.rstrip('__lt')
+            field = field[:-len('__lt')]
         elif field.endswith('__gte'):
             operator = '>='
-            field = field.rstrip('__gte')
+            field = field[:-len('__gte')]
         elif field.endswith('__lte'):
             operator = '<='
-            field = field.rstrip('__lte')
+            field = field[:-len('__lte')]
 
         index = get_index_definition(field)
         if index is None:
             return None
 
         _type = index['type']
-        if _type == 'int':
+        if _type in _type_mapping:
             try:
-                result = int(value)
+                result = _type_mapping[_type](value)
             except ValueError:
-                pass
+                # invalid, can't continue... We could throw query parse error?
+                return None
         elif _type == 'date':
             result = parse(value).replace(tzinfo=None)
         elif _type == 'boolean':
@@ -508,10 +515,14 @@ class PGSearchUtility(DefaultSearchUtility):
         }
 
     async def index(self, container, datas):
-        pass
+        '''
+        ignored, json storage done for us already
+        '''
 
     async def remove(self, container, uids):
-        pass
+        '''
+        ignored, remove done for us already
+        '''
 
     async def reindex_all_content(self, container, security=False):
         """

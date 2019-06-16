@@ -11,9 +11,9 @@ CHANGELOG
 
 - No longer setup fake request with login for base command
 
-- Moved `IInteraction.cached_principals` to module level function `guillotina.security.policy.cached_principals`
+- Moved `ISecurityPolicy.cached_principals` to module level function `guillotina.security.policy.cached_principals`
 
-- Moved `IInteraction.cached_roles` to module level function `guillotina.security.policy.cached_roles`
+- Moved `ISecurityPolicy.cached_roles` to module level function `guillotina.security.policy.cached_roles`
 
 - `utils.get_authenticated_user_id` no longer accepts `request` param
 
@@ -27,7 +27,7 @@ CHANGELOG
 
 - `auth_user_identifiers` no longer accept `IRequest` in constructor. Use `utils.get_current_request`
 
-- Remove `IInteraction`. Use `get_utility(ISecurityPolicy)`
+- Remove `IInteraction`. Use `guillotina.utils.get_security_policy()`
 
 - Remove `Request._db_write_enabled`, `Transaction` now has `read_only` property
 

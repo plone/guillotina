@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 import pytest
 from guillotina import task_vars
@@ -341,6 +342,13 @@ async def test_parse_base():
     result['excluded_metadata'] == ['modification_date']
 
 
+async def test_basic_index_generator():
+    from guillotina.contrib.catalog.pg import BasicJsonIndex
+    index = BasicJsonIndex('foobar')
+    assert "json->'" in index.where('foobar', '?')
+    assert "json->>'" in index.where('foobar', '=')
+
+
 async def test_pg_field_parser(dummy_guillotina):
     from guillotina.contrib.catalog.pg import Parser
     content = test_utils.create_content(Container)
@@ -352,6 +360,9 @@ async def test_pg_field_parser(dummy_guillotina):
         where, value, select = parser.process_queried_field(f'depth__{q1}', '2')
         assert f' {q2} ' in where
         assert value == 2
+
+    # bad int
+    assert parser.process_queried_field(f'depth__{q1}', 'foobar') is None
 
     # convert bool
     where, value, select = parser.process_queried_field(f'boolean_field', 'true')
@@ -372,3 +383,36 @@ async def test_pg_field_parser(dummy_guillotina):
 
     where, value, select = parser.process_queried_field(f'tags', ['foo', 'bar'])
     assert ' ?| ' in where
+
+    # date parsing
+    where, value, select = parser.process_queried_field(
+        f'creation_date__gte', '2019-06-15T18:37:31.008359+00:00')
+    assert isinstance(value, datetime)
+
+    # path
+    where, value, select = parser.process_queried_field(f'path', '/foo/bar')
+    assert 'substring(json->>' in where
+
+    # ft
+    where, value, select = parser.process_queried_field(f'title', 'foobar')
+    assert 'to_tsvector' in where
+
+
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
+@pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
+async def test_parse_metadata(dummy_guillotina):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+    util = PGSearchUtility()
+    with mocks.MockTransaction():
+        content = test_utils.create_content(Container)
+        query = parse_query(content, {
+            '_metadata': 'foobar'
+        })
+        result = util.load_meatdata(query, {'foobar': 'foobar', 'blah': 'blah'})
+        assert result == {'foobar': 'foobar'}
+
+        query = parse_query(content, {
+            '_metadata_not': 'foobar'
+        })
+        result = util.load_meatdata(query, {'foobar': 'foobar', 'blah': 'blah'})
+        assert result == {'blah': 'blah'}
