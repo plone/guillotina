@@ -8,7 +8,6 @@ from guillotina import configure
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
 from guillotina.catalog.parser import BaseParser
-from guillotina.catalog.parser import BasicParsedQueryInfo
 from guillotina.catalog.parser import to_list
 from guillotina.catalog.utils import get_index_definition
 from guillotina.catalog.utils import iter_indexes
@@ -65,8 +64,6 @@ class ParsedQueryInfo(typing.NamedTuple):
     metadata: typing.Optional[typing.List[str]]
     excluded_metadata: typing.Optional[typing.List[str]]
 
-    sort_on: typing.Optional[str]
-    sort_dir: typing.Optional[str]
     wheres: typing.List[str]
     wheres_arguments: typing.List[typing.Any]
     selects: typing.List[str]
@@ -147,7 +144,7 @@ class Parser(BaseParser):
         pg_index = get_pg_index(field)
         return pg_index.where(result, operator), result, pg_index.select()
 
-    def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
+    def __call__(self, params: typing.Dict) -> ParsedQueryInfo:  # type: ignore
         query_info = super().__call__(params)
 
         wheres = []
@@ -487,14 +484,14 @@ class PGSearchUtility(DefaultSearchUtility):
         return sql, sql_arguments
 
     def load_meatdata(self, query: ParsedQueryInfo, data: typing.Dict[str, typing.Any]):
-        metadata = {}
+        metadata: typing.Dict[str, typing.Any] = {}
         if query.metadata is None:
             metadata = data.copy()
         else:
             for k in query.metadata:
                 if k in data:
                     metadata[k] = data[k]
-        
+
         for k in (query.excluded_metadata or []):
             if k in metadata:
                 del metadata[k]

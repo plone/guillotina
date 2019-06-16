@@ -95,7 +95,8 @@ class BaseParser:
         # Metadata
         metadata = None
         if (params.get('_metadata') or params.get('metadata_fields')):
-            fields = params.get('_metadata') or params.get('metadata_fields')
+            fields: str = typing.cast(
+                str, params.get('_metadata') or params.get('metadata_fields'))
             if '_all' not in fields:
                 metadata = to_list(fields)
             params.pop('_metadata', None)
