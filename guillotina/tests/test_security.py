@@ -236,7 +236,7 @@ async def test_inherit(container_requester):
 
         user = GuillotinaUser('user1')
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy()
         assert policy.check_permission('guillotina.ViewContent', container)
@@ -308,7 +308,7 @@ async def test_allowsingle(container_requester):
         user = GuillotinaUser('user1')
         user._groups = ['group1', 'group2']
 
-        utils.login(user)
+        utils.login(user=user)
         policy = get_security_policy(user)
         assert policy.check_permission('guillotina.AccessContent', container)
         assert policy.check_permission('guillotina.AccessContent', content)
@@ -316,7 +316,7 @@ async def test_allowsingle(container_requester):
         user = GuillotinaUser('user2')
         user._groups = ['group1']
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy(user)
         assert policy.check_permission('guillotina.AccessContent', container)
@@ -420,7 +420,7 @@ async def test_allowsingle2(container_requester):
         user = GuillotinaUser('user1')
         user._groups = ['group2', 'group1']
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy()
         assert policy.check_permission('guillotina.AccessContent', container)
@@ -429,7 +429,7 @@ async def test_allowsingle2(container_requester):
         user = GuillotinaUser('user2')
         user._groups = ['group1']
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy(user)
         assert policy.check_permission('guillotina.AccessContent', container)
@@ -438,7 +438,7 @@ async def test_allowsingle2(container_requester):
         user = GuillotinaUser('user3')
         user._groups = ['group1', 'group2', 'group3']
 
-        utils.login(user)
+        utils.login(user=user)
         test1 = await content.async_get('test1')
         test2 = await content.async_get('test2')
 
