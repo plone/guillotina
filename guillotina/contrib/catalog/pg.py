@@ -67,6 +67,23 @@ _type_mapping = {
     'float': float
 }
 
+_sql_replacements = (
+    ("'", "''"),
+    ("\\", "\\\\"),
+    ('\x00', '')
+)
+
+def sqlq(v):
+    """
+    Escape sql...
+
+    We use sql arguments where we don't control the information but let's
+    be extra careful anyways...
+    """
+    for value, replacement in _sql_replacements:
+        v = v.replace(value, replacement)
+    return v
+
 
 @configure.adapter(
     for_=(ICatalogUtility, IResource),
@@ -175,21 +192,21 @@ class BasicJsonIndex:
     @property
     def index_sql(self) -> typing.List[str]:
         return [
-            f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name}
-                ON objects ((json->>'{self.name}'));''',
-            f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name}
-                ON objects USING gin ((json->'{self.name}'))'''
+            f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+                ON objects ((json->>'{sqlq(self.name)}'));''',
+            f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+                ON objects USING gin ((json->'{sqlq(self.name)}'))'''
         ]
 
     def where(self, value, operator='=') -> str:
         assert operator in self.operators
         if operator in ('?', '?|'):
-            return f"""json->'{self.name}' {operator} ${{arg}} """
+            return f"""json->'{sqlq(self.name)}' {sqlq(operator)} ${{arg}} """
         else:
-            return f"""json->>'{self.name}' {operator} ${{arg}} """
+            return f"""json->>'{sqlq(self.name)}' {sqlq(operator)} ${{arg}} """
 
     def order_by(self, direction='ASC') -> str:
-        return f"order by json->>'{self.name}' {direction}"
+        return f"order by json->>'{sqlq(self.name)}' {sqlq(direction)}"
 
     def select(self) -> typing.Optional[str]:
         return None
@@ -198,12 +215,12 @@ class BasicJsonIndex:
 class BooleanIndex(BasicJsonIndex):
     @property
     def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name}
-                    ON objects (((json->>'{self.name}')::boolean));''']
+        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+                    ON objects (((json->>'{sqlq(self.name)}')::boolean));''']
 
     def where(self, value, operator='='):
         assert operator in self.operators
-        return f"""(json->>'{self.name}')::boolean {operator} ${{arg}}::boolean """
+        return f"""(json->>'{sqlq(self.name)}')::boolean {sqlq(operator)} ${{arg}}::boolean """
 
 
 class KeywordIndex(BasicJsonIndex):
@@ -211,12 +228,12 @@ class KeywordIndex(BasicJsonIndex):
 
     @property
     def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name}
-                    ON objects USING gin ((json->'{self.name}'))''']
+        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+                    ON objects USING gin ((json->'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='?'):
         assert operator in self.operators
-        return f"""json->'{self.name}' {operator} ${{arg}} """
+        return f"""json->'{sqlq(self.name)}' {sqlq(operator)} ${{arg}} """
 
 
 class PathIndex(BasicJsonIndex):
@@ -225,7 +242,7 @@ class PathIndex(BasicJsonIndex):
     def where(self, value, operator='='):
         assert operator in self.operators
         return f"""
-substring(json->>'{self.name}', 0, {len(value) + 1}) {operator} ${{arg}}::text """
+substring(json->>'{sqlq(self.name)}', 0, {len(value) + 1}) {sqlq(operator)} ${{arg}}::text """
 
 
 class CastIntIndex(BasicJsonIndex):
@@ -234,8 +251,8 @@ class CastIntIndex(BasicJsonIndex):
 
     @property
     def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name} ON objects
-                    using btree(CAST(json->>'{self.name}' AS {self.cast_type}))''']
+        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
+                    using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))''']
 
     def where(self, value, operator='>'):
         """
@@ -243,7 +260,8 @@ class CastIntIndex(BasicJsonIndex):
         """
         assert operator in self.operators
         return f"""
-CAST(json->>'{self.name}' AS {self.cast_type}) {operator} ${{arg}}::{self.cast_type}"""
+CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)})
+{sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""
 
 
 class CastFloatIndex(CastIntIndex):
@@ -255,8 +273,8 @@ class CastDateIndex(CastIntIndex):
 
     @property
     def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name} ON objects
-                    (f_cast_isots(json->>'{self.name}'))''']
+        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
+                    (f_cast_isots(json->>'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='>'):
         """
@@ -264,15 +282,15 @@ class CastDateIndex(CastIntIndex):
         """
         assert operator in self.operators
         return f"""
-f_cast_isots(json->>'{self.name}') {operator} ${{arg}}::{self.cast_type}"""
+f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""
 
 
 class FullTextIndex(BasicJsonIndex):
 
     @property
     def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {self.idx_name} ON objects
-                   using gin(to_tsvector('english', json->>'{self.name}'));''']
+        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
+                   using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));''']
 
     def where(self, value, operator=''):
         """
@@ -280,14 +298,14 @@ class FullTextIndex(BasicJsonIndex):
         operator is ignored for now...
         """
         return f"""
-to_tsvector('english', json->>'{self.name}') @@ plainto_tsquery(${{arg}}::text)"""
+to_tsvector('english', json->>'{sqlq(self.name)}') @@ plainto_tsquery(${{arg}}::text)"""
 
     def order_by(self, direction='ASC'):
-        return f'order by {self.name}_score {direction}'
+        return f'order by {sqlq(self.name)}_score {sqlq(direction)}'
 
     def select(self):
-        return f'''ts_rank_cd(to_tsvector('english', json->>'{self.name}'),
-                   plainto_tsquery(${{arg}}::text)) AS {self.name}_score'''
+        return f'''ts_rank_cd(to_tsvector('english', json->>'{sqlq(self.name)}'),
+                   plainto_tsquery(${{arg}}::text)) AS {sqlq(self.name)}_score'''
 
 
 index_mappings = {
@@ -377,10 +395,10 @@ class PGSearchUtility(DefaultSearchUtility):
 
         clauses = [
             "json->'access_users' ?| array['{}']".format(
-                "','".join(users)
+                "','".join([sqlq(u) for u in users])
             ),
             "json->'access_roles' ?| array['{}']".format(
-                "','".join(roles)
+                "','".join([sqlq(r) for r in roles])
             )
         ]
         sql_wheres = ['({})'.format(
@@ -390,16 +408,16 @@ class PGSearchUtility(DefaultSearchUtility):
         context_path = get_content_path(context)
         sql_wheres.append("""substring(json->>'path', 0, {}) = '{}'""".format(
             len(context_path) + 1,
-            context_path
+            sqlq(context_path)
         ))
         if IContainer.providedBy(context):
             container = context
         else:
             container = find_container(context)  # type: ignore
         if container is not None:
-            sql_wheres.append(f"""json->>'container_id' = '{container.id}'""")
+            sql_wheres.append(f"""json->>'container_id' = '{sqlq(container.id)}'""")
         sql_wheres.append("""type != 'Container'""")
-        sql_wheres.append(f"""parent_id != '{TRASHED_ID}'""")
+        sql_wheres.append(f"""parent_id != '{sqlq(TRASHED_ID)}'""")
         return sql_wheres
 
     def build_query(self, context,
@@ -415,7 +433,7 @@ class PGSearchUtility(DefaultSearchUtility):
         select_fields = ['id', 'zoid', 'json']
         arg_index = 1
         for idx, select in enumerate(query['selects']):
-            select_fields.append(select.format(arg=arg_index))
+            select_fields.append(sqlq(select.format(arg=arg_index)))
             sql_arguments.append(query['selects_arguments'][idx])
             arg_index += 1
 
@@ -435,11 +453,11 @@ class PGSearchUtility(DefaultSearchUtility):
                  {}
                  limit {} offset {}'''.format(
             ','.join(select_fields),
-            txn.storage._objects_table_name,
+            sqlq(txn.storage._objects_table_name),
             ' AND '.join(sql_wheres),
             order_by_index.order_by(query['sort_dir']),
-            query['size'],
-            query['_from']
+            sqlq(query['size']),
+            sqlq(query['_from'])
         )
         return sql, sql_arguments
 
@@ -463,7 +481,7 @@ class PGSearchUtility(DefaultSearchUtility):
                  from {}
                  where {}'''.format(
             ','.join(select_fields),
-            txn.storage._objects_table_name,
+            sqlq(txn.storage._objects_table_name),
             ' AND '.join(sql_wheres))
         return sql, sql_arguments
 
