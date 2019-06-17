@@ -4,7 +4,8 @@ CHANGELOG
 4.8.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Emit events for registry configuration changes
+  [vangheem]
 
 
 4.8.7 (2019-06-14)
