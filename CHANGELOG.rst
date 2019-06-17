@@ -5,6 +5,9 @@ CHANGELOG
 ------------------
 
 - Replaced aiohttp with ASGI (running with uvicorn by default)
+  [dmanchon,masipcat]
+
+- Allow modifying app settings from pytest marks [lferran]
 
 - No longer setup fake request with login for base command
 
