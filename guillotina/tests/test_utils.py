@@ -48,7 +48,7 @@ async def test_get_content_path(container_requester):
                 "id": "item1"
             }))
         assert status == 201
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
         root = await get_root(request)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
@@ -70,7 +70,7 @@ async def test_get_content_depth(container_requester):
                 "id": "item1"
             }))
         assert status == 201
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
         root = await get_root(request)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
@@ -175,7 +175,7 @@ async def test_object_utils(container_requester):
                 "id": "item1"
             }))
         assert status == 201
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
         root = await get_root(request)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
@@ -212,7 +212,7 @@ async def test_navigator_preload(container_requester):
                 "id": "item1"
             }))
         assert status == 201
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
         root = await get_root(request)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
@@ -273,7 +273,7 @@ async def test_navigator_get(container_requester):
                 "id": "item2"
             }))
         assert status == 201
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
         root = await get_root(request)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
@@ -308,7 +308,7 @@ async def test_get_behavior(container_requester):
                 "id": "item1"
             }))
         assert status == 201
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
         root = await get_root(request)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()

@@ -60,7 +60,7 @@ async def get_root(tm=None, db=None):
 
 async def get_container(*, requester=None, request=None, tm=None):
     if request is None and requester is not None:
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
     kw = {
         'tm': tm
     }
