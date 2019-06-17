@@ -434,7 +434,7 @@ class PGSearchUtility(DefaultSearchUtility):
         select_fields = ['id', 'zoid', 'json']
         arg_index = 1
         for idx, select in enumerate(query['selects']):
-            select_fields.append(sqlq(select.format(arg=arg_index)))
+            select_fields.append(select.format(arg=arg_index))
             sql_arguments.append(query['selects_arguments'][idx])
             arg_index += 1
 
