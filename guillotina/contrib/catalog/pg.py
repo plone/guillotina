@@ -262,8 +262,7 @@ class CastIntIndex(BasicJsonIndex):
         """
         assert operator in self.operators
         return f"""
-CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)})
-{sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""
+CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}) {sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""  # noqa
 
 
 class CastFloatIndex(CastIntIndex):
