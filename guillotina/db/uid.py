@@ -14,7 +14,7 @@ OID_DELIMITER = '|'
 #   (MAX_UID_LENGTH - UUID_LENGTH) / UID_SPLIT_LENGTH
 
 
-def get_short_oid(oid):
+def get_short_uid(oid):
     return oid.split(OID_DELIMITER)[-1]
 
 
@@ -45,7 +45,7 @@ def generate_uid(ob):
         parent = current.__parent__
         if parent.__parent__:
             # no value in including root as part of this...
-            parts.append(get_short_oid(parent.__uuid__)[:UID_SPLIT_LENGTH])
+            parts.append(get_short_uid(parent.__uuid__)[:UID_SPLIT_LENGTH])
         current = current.__parent__
     parts = parts[::-1]  # reverse it
     if ob.__of__:
