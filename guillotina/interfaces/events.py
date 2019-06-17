@@ -158,3 +158,9 @@ class IDatabaseInitializedEvent(Interface):
 class IBeforeRenderViewEvent(Interface):
     '''Right before the view gets rendered
     '''
+
+
+class IRegistryEditedEvent(interfaces.IObjectEvent):
+    '''
+    When registry edited
+    '''

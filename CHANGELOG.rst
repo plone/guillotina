@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Emit events for registry configuration changes
+
 - Allow modifying app settings from pytest marks [lferran]
 
 - No longer setup fake request with login for base command
