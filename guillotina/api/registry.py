@@ -1,10 +1,12 @@
 from guillotina import configure
+from guillotina.event import notify
 from guillotina.api.service import Service
 from guillotina.component import get_adapter
 from guillotina.exceptions import ComponentLookupError
 from guillotina.exceptions import DeserializationError
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
+from guillotina.events import RegistryEditedEvent
 from guillotina.interfaces import IJSONToValue
 from guillotina.json.serialize_value import json_compatible
 from guillotina.response import ErrorResponse
@@ -148,6 +150,10 @@ class Register(Service):
                 # We don't have a value
                 config[key] = initial_values[key]
 
+        await notify(RegistryEditedEvent(self.context, registry, {
+            interface: initial_values
+        }))
+
         return Response(status=201)
 
 
@@ -193,8 +199,8 @@ class Write(Service):
             value = data
 
         assert '.' in self.key, 'Registry key must be dotted.iface.name.fieldname'  # noqa
-        iface, name = self.key.rsplit('.', 1)
-        iface = resolve_dotted_name(iface)
+        iface_name, name = self.key.rsplit('.', 1)
+        iface = resolve_dotted_name(iface_name)
 
         assert iface is not None, 'Must provide valid registry interface'  # noqa
         try:
@@ -221,5 +227,11 @@ class Write(Service):
                 str(e),
                 exc=e,
                 status=412)
+
+        await notify(RegistryEditedEvent(self.context, self.request.container_settings, {
+            iface_name: {
+                name: value
+            }
+        }))
 
         return Response(status=204)
