@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.8 (unreleased)
+4.8.8 (2019-06-17)
 ------------------
 
 - Emit events for registry configuration changes
