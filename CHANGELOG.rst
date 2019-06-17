@@ -4,7 +4,7 @@ CHANGELOG
 4.8.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- bump
 
 
 4.8.8 (2019-06-17)

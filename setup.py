@@ -14,7 +14,9 @@ for line in changelog.splitlines():
     long_description += '\n' + line
 
 
-long_description += '''...
+long_description += '''
+
+...
 
 You are seeing a truncated changelog.
 
