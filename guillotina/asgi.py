@@ -134,7 +134,10 @@ class AsgiApp:
         from guillotina.factory.app import startup_app
         self.app = await startup_app(
             config_file=self.config_file,
-            settings=self.settings, loop=self.loop, server_app=self)
+            settings=self.settings,
+            loop=self.loop,
+            server_app=self
+        )
         return self.app
 
     async def shutdown(self):

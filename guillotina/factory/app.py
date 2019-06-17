@@ -184,8 +184,8 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
         loop = asyncio.get_event_loop()
 
     if config_file is not None:
-        with open(config_file, 'r') as config:
-            settings = json.load(config)
+        from guillotina.commands import get_settings
+        settings = get_settings(config_file)
     elif settings is None:
         raise Exception('Neither configuration or settings')
 
