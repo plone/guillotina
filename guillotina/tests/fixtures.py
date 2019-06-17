@@ -289,7 +289,7 @@ WHERE zoid != '{}' AND zoid != '{}'
 @pytest.fixture(scope='function')
 def app_client(loop, request):
     globalregistry.reset()
-    app = make_app(settings=get_db_settings(request), loop=loop)
+    app = make_app(settings=get_db_settings(request.node), loop=loop)
     app.on_cleanup.insert(0, _clear_dbs)
     client = TestClient(app)
     try:
