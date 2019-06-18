@@ -4,6 +4,7 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Rename `utils.get_object_by_oid` to `utils.get_object_by_uid`
 
 - Emit events for registry configuration changes
 
