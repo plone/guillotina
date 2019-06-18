@@ -16,6 +16,7 @@ _ = MessageFactory('guillotina')
     context=IContainer, method='POST',
     permission='guillotina.ManageAddons', name='@addons',
     summary='Install addon to container',
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",
@@ -49,6 +50,7 @@ async def install(context, request):
     context=IContainer, method='DELETE',
     permission='guillotina.ManageAddons', name='@addons',
     summary='Uninstall an addon from container',
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",

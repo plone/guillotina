@@ -412,6 +412,7 @@ class SharingPOST(Service):
     context=IResource, method='PUT',
     permission='guillotina.ChangePermissions', name='@sharing',
     summary='Replace permissions for a resource',
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",

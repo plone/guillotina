@@ -14,6 +14,7 @@ from guillotina.utils import resolve_dotted_name
     context=IResource, method='PATCH',
     permission='guillotina.ModifyContent', name='@behaviors',
     summary="Add behavior to resource",
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",
@@ -81,6 +82,7 @@ async def default_delete_withparams(context, request):
     context=IResource, method='DELETE',
     permission='guillotina.ModifyContent', name='@behaviors',
     summary="Remove behavior from resource",
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",

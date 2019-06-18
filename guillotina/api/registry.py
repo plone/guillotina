@@ -98,21 +98,13 @@ async def get_registry_service(context, request):
     context=IContainer, method='POST',
     permission='guillotina.RegisterConfigurations', name='@registry',
     summary='Register a new interface to for registry settings',
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",
         "type": "object",
         "schema": {
-            "properties": {
-                "interface": {
-                    "type": "string",
-                    "required": True
-                },
-                "initial_values": {
-                    "type": "object",
-                    "required": False
-                }
-            }
+            "$ref": "#/definitions/Registry"
         }
     }],
     responses={
@@ -164,17 +156,13 @@ class Register(Service):
     context=IContainer, method='PATCH',
     permission='guillotina.WriteConfiguration', name='@registry/{dotted_name}',
     summary='Update registry setting',
+    validate=True,
     parameters={
         "name": "body",
         "in": "body",
         "type": "object",
         "schema": {
-            "properties": {
-                "value": {
-                    "type": "any",
-                    'required': True
-                }
-            }
+            "$ref": "#/definitions/UpdateRegistry"
         }
     },
     responses={

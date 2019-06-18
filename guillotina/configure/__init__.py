@@ -447,6 +447,15 @@ class service(_base_decorator):  # noqa: N801
                 )
             # create new class with customizations
             klass = type(func.__name__, (func,), dict(func.__dict__))
+            klass.config = self.config
+            __parameters__ = klass.config.get('parameters', {}) 
+            if klass.config.get('validate', False):
+                original = klass.__call__
+
+                async def new_call(self):
+                    await self.validate(__parameters__)
+                    return await original(self)
+                klass.__call__ = new_call
             klass.__module__ = func.__module__
             klass.__allow_access__ = self.config.get(
                 'allow_access', getattr(func, '__allow_access__', False))
@@ -469,9 +478,14 @@ class service(_base_decorator):  # noqa: N801
             class _View(self.config.get('base', Service)):
                 __allow_access__ = self.config.get('allow_access', False)
                 __route__ = routes.Route(self.config.get('name', ''))
+                __auto_validate__ = self.config.get('validate', False)
+                __parameters__ = self.config.get('parameters', {})
+                __config__ = self.config
                 view_func = staticmethod(func)
 
                 async def __call__(self):
+                    if self.__auto_validate__:
+                        await self.validate(self.__parameters__)
                     return await func(self.context, self.request)
 
             register_configuration(_View, self.config, 'service')

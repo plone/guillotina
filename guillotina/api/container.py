@@ -88,6 +88,7 @@ async def create_container(parent: IDatabase, container_id: str,
     context=IDatabase, method='POST', permission='guillotina.AddContainer',
     summary="Create a new Container",
     description="Creates a new container on the database",
+    validate=True,
     parameters=[{
         "name": "body",
         "in": "body",

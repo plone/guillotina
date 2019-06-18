@@ -6,6 +6,7 @@ CHANGELOG
 
 - Nothing changed yet.
 
+- json schema validation
 
 5.0.0a3 (2019-06-21)
 --------------------
