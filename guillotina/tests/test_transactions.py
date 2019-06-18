@@ -3,7 +3,7 @@ from guillotina.db import ROOT_ID
 from guillotina.db.transaction import Transaction
 from guillotina.tests import mocks
 from guillotina.transactions import transaction
-from guillotina.utils import get_object_by_oid
+from guillotina.utils import get_object_by_uid
 
 
 async def test_no_tid_created_for_reads(dummy_request, loop):
@@ -59,7 +59,7 @@ async def test_managed_transaction_works_with_parent_txn_adoption(container_requ
 
             # nest it with adoption
             async with transaction(adopt_parent_txn=True) as txn:
-                ob = await get_object_by_oid('foobar', txn)
+                ob = await get_object_by_uid('foobar', txn)
                 txn.delete(ob)
 
         # finally, retrieve it again and make sure it's updated

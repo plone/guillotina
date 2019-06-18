@@ -181,7 +181,7 @@ async def test_object_utils(container_requester):
         txn = await tm.begin()
         container = await root.async_get('guillotina')
 
-        ob = await utils.get_object_by_oid(response['@uid'], txn)
+        ob = await utils.get_object_by_uid(response['@uid'], txn)
         assert ob is not None
         assert ob.__uuid__ == response['@uid']
 
