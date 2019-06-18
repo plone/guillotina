@@ -44,6 +44,7 @@ class Service(View):
         data = await  self.request.json()
         schem = parameters[0]['schema']['$ref'][14:]
         validator = get_schema_validator(schem)
+        print(schem)
         try:
             validator.validate(data)
         except jsonschema.exceptions.ValidationError as e:
@@ -55,7 +56,7 @@ class Service(View):
                 'path': [i for i in e.path],
                 'schema_path': [i for i in e.schema_path],
                 "schema": app_settings['json_schema_definitions'][schem]
-             })
+            })
 
     async def get_data(self):
         return await self.request.json()
