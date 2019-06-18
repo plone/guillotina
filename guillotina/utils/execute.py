@@ -211,7 +211,7 @@ def add_future(name: str, fut: Callable[..., Coroutine[Any, Any, Any]],
         futures = {}
         task_vars.futures.set(futures)
         task = asyncio.current_task()
-        if task is not None and scope=='':
+        if task is not None and scope == '':
             task.add_done_callback(partial(execute_futures, scope, futures))
     if scope not in futures:
         futures[scope] = {}
