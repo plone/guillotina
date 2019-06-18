@@ -15,11 +15,14 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_utility
 from guillotina.exceptions import RequestNotFound
+from guillotina.exceptions import TransactionNotFound
+from guillotina.exceptions import ContainerNotFound
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
+from guillotina.db.interfaces import ITransaction
 from guillotina.profile import profilable
 
 
@@ -149,6 +152,35 @@ def get_current_request() -> IRequest:
         pass
 
     raise RequestNotFound(RequestNotFound.__doc__)
+
+@profilable
+def get_current_transaction() -> ITransaction:
+    """
+    Return the current request by heuristically looking it up from stack
+    """
+    try:
+        task_context = task_vars.txn.get()
+        if task_context is not None:
+            return task_context
+    except (ValueError, AttributeError, RuntimeError):
+        pass
+
+    raise TransactionNotFound(TransactionNotFound.__doc__)
+
+
+@profilable
+def get_current_container() -> IContainer:
+    """
+    Return the current request by heuristically looking it up from stack
+    """
+    try:
+        task_context = task_vars.container.get()
+        if task_context is not None:
+            return task_context
+    except (ValueError, AttributeError, RuntimeError):
+        pass
+
+    raise ContainerNotFound(ContainerNotFound.__doc__)
 
 
 def lazy_apply(func, *call_args, **call_kwargs):

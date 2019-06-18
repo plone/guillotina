@@ -82,6 +82,10 @@ class TransactionNotFound(Exception):
     Lookup for the current request for request aware task failed
     """
 
+class ContainerNotFound(Exception):
+    """
+    Lookup for the current container for request aware task failed
+    """
 
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
