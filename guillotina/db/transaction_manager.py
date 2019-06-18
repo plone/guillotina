@@ -39,6 +39,10 @@ class TransactionManager:
         self._lock = asyncio.Lock()
 
     @property
+    def storage(self):
+        return self._storage
+
+    @property
     def db_id(self):
         if self._db is not None:
             return self._db.id

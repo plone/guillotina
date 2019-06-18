@@ -2,7 +2,7 @@ import asyncio
 import uuid
 
 from guillotina import task_vars
-from guillotina.component import get_adapter
+from guillotina.component import query_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
@@ -30,13 +30,14 @@ class MockTransaction:
         self._tid = 1
         self.modified = {}
         self.request = None
-        self._strategy = get_adapter(
+        self._strategy = query_adapter(
             self, ITransactionStrategy,
             name=manager._storage._transaction_strategy)
         self._cache = DummyCache(self)
         self._lock = asyncio.Lock()
         self._status = 'started'
         self._db_conn = None
+        self.storage = MockStorage()
 
     async def get_connection(self):
         return self._db_conn
@@ -61,6 +62,7 @@ class MockTransaction:
 
     def __enter__(self):
         task_vars.txn.set(self)
+        return self
 
     def __exit__(self, *args):
         '''
@@ -86,6 +88,7 @@ class MockStorage:
         self._hits = 0
         self._misses = 0
         self._stored = 0
+        self._objects_table_name = 'objects'
 
     async def get_annotation(self, trns, oid, id):
         return None

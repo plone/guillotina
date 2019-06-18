@@ -55,6 +55,9 @@ class IExample(IResource):
 
     metadata('categories')
 
+    index_field('boolean_field', type='boolean')
+    boolean_field = schema.Bool(required=False)
+
     index_field('categories', field_mapping=CATEGORIES_MAPPING)
     categories = schema.List(
         title='categories',

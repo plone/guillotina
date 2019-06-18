@@ -30,7 +30,7 @@ def get_db(app, db_id):
     return app.root[db_id]
 
 
-def get_mocked_request(db=None, method='POST', path='/', headers={}):
+def get_mocked_request(*, db=None, method='POST', path='/', headers={}):
     request = make_mocked_request(method, path, headers=headers)
     request._futures = {}
     request._txn = None
@@ -45,7 +45,7 @@ def get_mocked_request(db=None, method='POST', path='/', headers={}):
     return request
 
 
-def login(user=RootUser('foobar')):
+def login(*, user=RootUser('foobar')):
     set_authenticated_user(user)
 
 
@@ -58,9 +58,9 @@ async def get_root(tm=None, db=None):
         return await txn.manager.get_root()
 
 
-async def get_container(requester=None, request=None, tm=None):
+async def get_container(*, requester=None, request=None, tm=None):
     if request is None and requester is not None:
-        request = get_mocked_request(requester.db)
+        request = get_mocked_request(db=requester.db)
     kw = {
         'tm': tm
     }

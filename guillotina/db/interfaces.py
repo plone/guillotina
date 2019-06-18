@@ -93,9 +93,13 @@ class ITransaction(Interface):
         Get items in content
         '''
 
+    async def get_connection() -> typing.Any:
+        '''
+        Get current connection object
+        '''
+
 
 class ITransactionManager(Interface):
-    _last_txn = Attribute('')
 
     async def commit(*, txn: typing.Optional[ITransaction]=None):
         '''

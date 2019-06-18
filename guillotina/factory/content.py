@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import typing
 from concurrent.futures import ThreadPoolExecutor
 
 from guillotina._settings import app_settings
@@ -199,14 +200,8 @@ class Database:
         return self._tm
 
     @property
-    def __txn__(self) -> ITransaction:
-        try:
-            txn = get_transaction()
-            if txn is None:
-                txn = self.get_transaction_manager()._last_txn
-            return txn
-        except AttributeError:
-            return self.get_transaction_manager()._last_txn
+    def __txn__(self) -> typing.Optional[ITransaction]:
+        return get_transaction()
 
     async def get_root(self):
         try:

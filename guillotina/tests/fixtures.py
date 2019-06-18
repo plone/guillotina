@@ -207,7 +207,7 @@ class GuillotinaDBRequester(object):
 
     def transaction(self, request=None):
         if request is None:
-            request = get_mocked_request(self.db)
+            request = get_mocked_request(db=self.db)
         login()
         return wrap_request(
             request, transaction(db=self.db, adopt_parent_txn=True))
@@ -256,7 +256,7 @@ def dummy_request(dummy_guillotina, monkeypatch):
     root = get_utility(IApplication, name='root')
     db = root['db']
 
-    request = get_mocked_request(db)
+    request = get_mocked_request(db=db)
     return request
 
 

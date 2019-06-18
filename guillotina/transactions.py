@@ -90,7 +90,7 @@ class transaction:  # noqa: N801
     '''
 
     def __init__(self, *, db=None, tm=None, abort_when_done=False,
-                 adopt_parent_txn=False, execute_futures=True):
+                 adopt_parent_txn=False, execute_futures=True, read_only=False):
         if db is not None and tm is None:
             tm = db.get_transaction_manager()
         self.tm = tm or get_tm()
@@ -99,13 +99,14 @@ class transaction:  # noqa: N801
         self.adopt_parent_txn = adopt_parent_txn
         self.execute_futures = execute_futures
         self.adopted = []
+        self.read_only = read_only
 
     async def __aenter__(self):
         txn = get_transaction()
         if txn is not None:
             self.previous_txn = txn
 
-        self.txn = await self.tm.begin()
+        self.txn = await self.tm.begin(read_only=self.read_only)
         # these should be restored after
         task_vars.tm.set(self.tm)
         task_vars.txn.set(self.txn)

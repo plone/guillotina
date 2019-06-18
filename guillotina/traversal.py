@@ -128,12 +128,15 @@ def generate_error_response(e, request, error, status=500):
         return http_response
     message = _('Error on execution of view') + ' ' + eid
     logger.error(message, exc_info=e, eid=eid, request=request)
-    return response.HTTPInternalServerError(content={
+    data = {
         'message': message,
         'reason': error_reasons.UNKNOWN.name,
         'details': error_reasons.UNKNOWN.details,
         'eid': eid
-    })
+    }
+    if app_settings.get('debug'):
+        data['traceback'] = traceback.format_exc()
+    return response.HTTPInternalServerError(content=data)
 
 
 class BaseMatchInfo(AbstractMatchInfo):
