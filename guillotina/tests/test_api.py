@@ -162,7 +162,7 @@ async def test_create_content(container_requester):
             '/db/guillotina/item1'
         )
         assert _['@static_behaviors'][0] == 'guillotina.behaviors.dublincore.IDublinCore'
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
@@ -211,7 +211,7 @@ async def test_put_content(container_requester):
         assert resp[IDublinCore.__identifier__]['tags'] is None
         assert resp[IAttachment.__identifier__]['file'] is None
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
@@ -322,7 +322,7 @@ async def test_create_contenttype_with_date(container_requester):
             })
         )
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')

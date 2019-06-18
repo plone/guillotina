@@ -1,22 +1,31 @@
+import logging
+
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
-from guillotina.utils import get_content_path
-from guillotina import task_vars
+
+
+logger = logging.getLogger('guillotina')
+
+
+async def _search(context, request, query):
+    search = query_utility(ICatalogUtility)
+    if search is None:
+        return {
+            'items_count': 0,
+            'member': []
+        }
+
+    return await search.query(context, query)
 
 
 @configure.service(
     context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
     summary='Make search request',
-    parameters=[{
-        "name": "q",
-        "in": "query",
-        "required": True,
-        "type": "string"
-    }],
+    parameters=[],
     responses={
         "200": {
             "description": "Search results",
@@ -27,18 +36,8 @@ from guillotina import task_vars
         }
     })
 async def search_get(context, request):
-    q = request.query.get('q')
-    search = query_utility(ICatalogUtility)
-    if search is None:
-        return {
-            'items_count': 0,
-            'member': []
-        }
-
-    return await search.get_by_path(
-        container=task_vars.container.get(),
-        path=get_content_path(context),
-        query=q)
+    q = request.url.query.copy()
+    return await _search(context, request, q)
 
 
 @configure.service(
@@ -63,14 +62,7 @@ async def search_get(context, request):
     })
 async def search_post(context, request):
     q = await request.json()
-    search = query_utility(ICatalogUtility)
-    if search is None:
-        return {
-            'items_count': 0,
-            'member': []
-        }
-
-    return await search.query(context, q)
+    return await _search(context, request, q)
 
 
 @configure.service(
@@ -91,8 +83,7 @@ class CatalogReindex(Service):
     async def __call__(self):
         search = query_utility(ICatalogUtility)
         if search is not None:
-            await search.reindex_all_content(
-                self.context, self._security_reindex, request=self.request)
+            await search.reindex_all_content(self.context, self._security_reindex)
         return {}
 
 

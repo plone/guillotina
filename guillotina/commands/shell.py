@@ -34,12 +34,13 @@ class ShellHelpers:
         return self._active_txn
 
     async def use_container(self, container_id):
-        container = await self._active_db.async_get(container_id)
-        if container is None:
-            raise Exception('Container not found')
-        task_vars.container.set(container)
-        self._active_container = container
-        return container
+        with self._active_txn:
+            container = await self._active_db.async_get(container_id)
+            if container is None:
+                raise Exception('Container not found')
+            task_vars.container.set(container)
+            self._active_container = container
+            return container
 
     async def commit(self):
         if self._active_tm is None:

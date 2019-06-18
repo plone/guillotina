@@ -114,7 +114,7 @@ class ResourceFactory(Factory):
         if id is None:
             if obj.__uuid__ is None:
                 obj.__uuid__ = app_settings['uid_generator'](obj)
-            obj.id = uid.get_short_oid(obj.__uuid__)
+            obj.id = uid.get_short_uid(obj.__uuid__)
         else:
             obj.id = id
         obj.__name__ = obj.id

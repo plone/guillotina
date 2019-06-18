@@ -1,6 +1,7 @@
 ---
 applications:
 - {{cookiecutter.package_name}}
+- guillotina.contrib.catalog.pg
 databases:
   db:
     storage: postgresql

@@ -29,7 +29,7 @@ async def test_add_sync_utility(guillotina, loop):
         await asyncio.sleep(0.01)
         var.append(msg)
 
-    request = utils.get_mocked_request(guillotina.db)
+    request = utils.get_mocked_request(db=guillotina.db)
     root = await utils.get_root(request)
 
     await util.add(AsyncMockView(root, request, printHi, 'hola1'))
