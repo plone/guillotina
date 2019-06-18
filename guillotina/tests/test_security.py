@@ -24,7 +24,7 @@ async def test_get_guillotina(container_requester):
 async def test_database_root_has_none_parent(container_requester):
     async with container_requester as requester:
         # important for security checks to not inherit...
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         assert root.__parent__ is None
 
@@ -63,7 +63,7 @@ async def test_set_local_guillotina(container_requester):
         assert 'Anonymous User' not in response['inherit'][0]['prinrole']
         assert response['inherit'][0]['prinperm']['user1']['guillotina.AccessContent'] == 'AllowSingle'  # noqa
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
 
         async with transaction(abort_when_done=True):
@@ -139,7 +139,7 @@ async def test_sharing_prinrole(container_requester):
         )
         assert status == 200
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
 
         async with transaction(abort_when_done=True):
@@ -162,7 +162,7 @@ async def test_sharing_roleperm(container_requester):
         )
         assert status == 200
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
 
         async with transaction(abort_when_done=True):
@@ -230,13 +230,13 @@ async def test_inherit(container_requester):
             '/db/guillotina/testing/@all_permissions')
         assert status == 200
 
-        request = utils.get_mocked_request(requester.db)
-        container = await utils.get_container(requester, request)
+        request = utils.get_mocked_request(db=requester.db)
+        container = await utils.get_container(requester=requester, request=request)
         content = await container.async_get('testing')
 
         user = GuillotinaUser('user1')
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy()
         assert policy.check_permission('guillotina.ViewContent', container)
@@ -302,13 +302,13 @@ async def test_allowsingle(container_requester):
 
         assert status == 200
 
-        container = await utils.get_container(requester)
+        container = await utils.get_container(requester=requester)
         content = await container.async_get('testing')
 
         user = GuillotinaUser('user1')
         user._groups = ['group1', 'group2']
 
-        utils.login(user)
+        utils.login(user=user)
         policy = get_security_policy(user)
         assert policy.check_permission('guillotina.AccessContent', container)
         assert policy.check_permission('guillotina.AccessContent', content)
@@ -316,7 +316,7 @@ async def test_allowsingle(container_requester):
         user = GuillotinaUser('user2')
         user._groups = ['group1']
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy(user)
         assert policy.check_permission('guillotina.AccessContent', container)
@@ -413,14 +413,14 @@ async def test_allowsingle2(container_requester):
 
         assert status == 200
 
-        request = utils.get_mocked_request(requester.db)
-        container = await utils.get_container(requester, request)
+        request = utils.get_mocked_request(db=requester.db)
+        container = await utils.get_container(requester=requester, request=request)
         content = await container.async_get('testing')
 
         user = GuillotinaUser('user1')
         user._groups = ['group2', 'group1']
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy()
         assert policy.check_permission('guillotina.AccessContent', container)
@@ -429,7 +429,7 @@ async def test_allowsingle2(container_requester):
         user = GuillotinaUser('user2')
         user._groups = ['group1']
 
-        utils.login(user)
+        utils.login(user=user)
 
         policy = get_security_policy(user)
         assert policy.check_permission('guillotina.AccessContent', container)
@@ -438,7 +438,7 @@ async def test_allowsingle2(container_requester):
         user = GuillotinaUser('user3')
         user._groups = ['group1', 'group2', 'group3']
 
-        utils.login(user)
+        utils.login(user=user)
         test1 = await content.async_get('test1')
         test2 = await content.async_get('test2')
 

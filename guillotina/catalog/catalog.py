@@ -1,6 +1,11 @@
+import logging
+import typing
+
 from guillotina import configure
+from guillotina.catalog.utils import parse_query
 from guillotina.component import query_adapter
 from guillotina.content import iter_schemata
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.directives import index
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
@@ -12,6 +17,7 @@ from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.json.serialize_value import json_compatible
+from guillotina.schema.interfaces import IContainer
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
@@ -22,6 +28,8 @@ from guillotina.utils import get_content_path
 from zope.interface import implementer
 
 
+logger = logging.getLogger('guillotina')
+
 global_principal_permission_setting = principal_permission_manager.get_setting
 global_roles_for_permission = role_permission_manager.get_roles_for_permission
 
@@ -30,61 +38,52 @@ global_roles_for_permission = role_permission_manager.get_roles_for_permission
 class DefaultSearchUtility(object):
 
     async def initialize(self, app):
-        pass
+        '''
+        initialization
+        '''
 
-    async def search(self, container, query):
-        pass
+    async def search(self, context: IBaseObject, query: typing.Any):
+        '''
+        Search parsed query
+        '''
+        return {
+            'member': [],
+            'total': 0
+        }
 
-    async def query(self, container, q):
-        pass
+    async def query(self, context: IBaseObject, query: typing.Any):
+        '''
+        Raw search query, uses parser to transform query
+        '''
+        parsed_query = parse_query(context, query, self)
+        return await self.search(context, parsed_query)
 
-    async def get_by_uuid(self, container, uuid):
-        pass
-
-    async def get_object_by_uuid(self, container, uuid):
-        pass
-
-    async def get_by_type(self, container, doc_type, query={}):
-        pass
-
-    async def get_by_path(self, container, path, depth=-1, query={}, doc_type=None):
-        pass
-
-    async def get_folder_contents(self, container, parent_uid):
-        pass
-
-    async def index(self, container, datas):
+    async def index(self, container: IContainer, datas):
         """
         {uid: <dict>}
         """
-        pass
 
-    async def update(self, container, datas):
+    async def update(self, container: IContainer, datas):
         """
         {uid: <dict>}
         """
-        pass
 
-    async def remove(self, container, uids):
+    async def remove(self, container: IContainer, uids):
         """
         list of UIDs to remove from index
         """
-        pass
 
-    async def reindex_all_content(self, container, security=False, request=None):
+    async def reindex_all_content(self, context: IBaseObject, security=False):
         """ For all content add a queue task that reindex the object
         """
-        pass
 
-    async def initialize_catalog(self, container):
+    async def initialize_catalog(self, container: IContainer):
         """ Creates an index
         """
-        pass
 
-    async def remove_catalog(self, container):
+    async def remove_catalog(self, container: IContainer):
         """ Deletes an index
         """
-        pass
 
     async def get_data(self, content, indexes=None, schemas=None):
         data = {}

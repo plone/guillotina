@@ -86,7 +86,7 @@ async def test_multi_upload(container_requester):
         assert status == 200
         assert response == b'Y' * 1024 * 1024 * 10
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
@@ -127,7 +127,7 @@ async def test_large_upload_chunks(container_requester):
         assert status == 200
         assert len(response) == (1024 * 1024 * 10)
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
@@ -195,7 +195,7 @@ async def test_tus(container_requester):
         assert status == 200
         assert len(response) == (1024 * 1024 * 10)
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
@@ -263,7 +263,7 @@ async def test_tus_multi(container_requester):
         assert status == 200
         assert len(response) == (1024 * 1024 * 10)
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
@@ -344,7 +344,7 @@ async def test_tus_unknown_size(container_requester):
         assert status == 200
         assert len(response) == offset
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
@@ -376,7 +376,7 @@ async def test_copy_file_ob(container_requester):
         )
         assert status == 200
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         with request:
             root = await utils.get_root(request)
             async with transaction(db=requester.db, abort_when_done=True):
@@ -507,7 +507,7 @@ async def test_tus_with_empty_file(container_requester):
         assert status == 200
         assert len(response) == 0
 
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
         async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get('guillotina')
