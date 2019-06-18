@@ -233,7 +233,7 @@ class Write(Service):
                 exc=e,
                 status=412)
 
-        await notify(RegistryEditedEvent(self.context, self.request.container_settings, {
+        await notify(RegistryEditedEvent(self.context, registry, {
             iface_name: {
                 name: value
             }
