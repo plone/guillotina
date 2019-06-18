@@ -287,7 +287,7 @@ WHERE zoid != '{}' AND zoid != '{}'
 
 
 @pytest.fixture(scope='function')
-def app_client(loop, request):
+def app_client(loop, db, request):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(request.node), loop=loop)
     app.on_cleanup.insert(0, _clear_dbs)
@@ -311,7 +311,7 @@ def guillotina_main(app_client):
 
 
 @pytest.fixture(scope='function')
-def guillotina(db, app_client):
+def guillotina(app_client):
     _, client = app_client
     requester = GuillotinaDBRequester(client)
     yield requester
