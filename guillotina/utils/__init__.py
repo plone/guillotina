@@ -17,7 +17,9 @@ from .crypto import get_jwk_key  # noqa
 from .crypto import secure_passphrase  # noqa
 from .misc import apply_coroutine  # noqa; noqa
 from .misc import find_container  # noqa
+from .misc import get_current_container  # noqa
 from .misc import get_current_request  # noqa
+from .misc import get_current_transaction  # noqa
 from .misc import get_random_string  # noqa
 from .misc import get_registry  # noqa
 from .misc import get_schema_validator  # noqa

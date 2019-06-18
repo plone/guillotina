@@ -66,6 +66,7 @@ async def create_container(parent: IDatabase, container_id: str,
     # Special case we don't want the parent pointer
     container.__name__ = container_id
 
+    task_vars.container.set(container)
     await parent.async_set(container_id, container)
     await container.install()
 

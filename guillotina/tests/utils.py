@@ -52,9 +52,7 @@ async def get_root(tm=None, db=None):
         return await txn.manager.get_root()
 
 
-async def get_container(*, requester=None, request=None, tm=None):
-    if request is None and requester is not None:
-        request = get_mocked_request(db=requester.db)
+async def get_container(*, requester=None, tm=None, container_id='guillotina'):
     kw = {
         'tm': tm
     }
@@ -62,7 +60,7 @@ async def get_container(*, requester=None, request=None, tm=None):
         kw['db'] = requester.db
     root = await get_root(**kw)
     async with transaction(**kw):
-        container = await root.async_get('guillotina')
+        container = await root.async_get(container_id)
         task_vars.container.set(container)
         return container
 
