@@ -1,4 +1,5 @@
 from guillotina.component.interfaces import IObjectEvent
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IApplicationCleanupEvent
 from guillotina.interfaces import IApplicationConfiguredEvent
 from guillotina.interfaces import IApplicationEvent
@@ -23,6 +24,8 @@ from guillotina.interfaces import IObjectPermissionsModifiedEvent
 from guillotina.interfaces import IObjectPermissionsViewEvent
 from guillotina.interfaces import IObjectRemovedEvent
 from guillotina.interfaces import IObjectVisitedEvent
+from guillotina.interfaces import IRegistry
+from guillotina.interfaces import IRegistryEditedEvent
 from guillotina.interfaces import ITraversalMissEvent
 from guillotina.interfaces import ITraversalResourceMissEvent
 from guillotina.interfaces import ITraversalRouteMissEvent
@@ -30,6 +33,8 @@ from guillotina.interfaces import ITraversalViewMissEvent
 from guillotina.interfaces import IUserLogin
 from guillotina.interfaces import IUserRefreshToken
 from zope.interface import implementer
+
+import typing
 
 
 @implementer(IObjectEvent)
@@ -247,3 +252,14 @@ class TraversalRouteMissEvent(TraversalMissEvent):
 class DatabaseInitializedEvent:
     def __init__(self, database):
         self.database = database
+
+
+@implementer(IRegistryEditedEvent)
+class RegistryEditedEvent(ObjectEvent):
+    """
+    Registry has been edited
+    """
+
+    def __init__(self, object: IBaseObject, registry: IRegistry, changes: typing.Dict):
+        ObjectEvent.__init__(self, object)
+        self.changes = changes

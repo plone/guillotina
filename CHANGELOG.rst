@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+
+- Emit events for registry configuration changes
+
 - Default catalog interface removes the following methods: `get_by_uuid`, `get_by_type`, `get_by_path`,
   `get_folder_contents`. Keep interfaces simple, use search/query.
 
