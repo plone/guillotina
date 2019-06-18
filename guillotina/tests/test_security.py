@@ -231,7 +231,7 @@ async def test_inherit(container_requester):
         assert status == 200
 
         request = utils.get_mocked_request(db=requester.db)
-        container = await utils.get_container(requester=requester, request=request)
+        container = await utils.get_container(requester=requester)
         content = await container.async_get('testing')
 
         user = GuillotinaUser('user1')
@@ -414,7 +414,7 @@ async def test_allowsingle2(container_requester):
         assert status == 200
 
         request = utils.get_mocked_request(db=requester.db)
-        container = await utils.get_container(requester=requester, request=request)
+        container = await utils.get_container(requester=requester)
         content = await container.async_get('testing')
 
         user = GuillotinaUser('user1')
