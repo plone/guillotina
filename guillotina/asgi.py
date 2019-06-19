@@ -97,14 +97,6 @@ class AsgiStreamWriter():
                 "more_body": False
             })
 
-    def enable_compression(self, encoding: str='deflate') -> None:
-        """Enable HTTP body compression"""
-        raise NotImplemented()
-
-    def enable_chunking(self) -> None:
-        """Enable HTTP chunked mode"""
-        raise NotImplemented()
-
 
 class AsgiApp:
     def __init__(self, config_file, settings, loop):

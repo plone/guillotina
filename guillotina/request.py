@@ -19,7 +19,6 @@ import time
 import multidict
 import uuid
 import urllib.parse
-import warnings
 
 
 class State(enum.Enum):
@@ -301,15 +300,8 @@ class Request(object):
     @reify
     def host(self) -> str:
         """Hostname of the request.
-
-        Hostname is resolved in this order:
-
-        - overridden value by .clone(host=new_host) call.
-        - HOST HTTP header
-        - socket.getfqdn() value
         """
-        host = self.headers.get("host")
-        return host
+        return self.headers.get("host")
 
     @reify
     def url(self):
@@ -327,7 +319,6 @@ class Request(object):
     @reify
     def query(self) -> 'multidict.CIMultiDict[str]':
         """A multidict with all the variables in the query string."""
-
         query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
         return multidict.CIMultiDict(query)
 
@@ -355,14 +346,6 @@ class Request(object):
     def content(self):
         """Return raw payload stream."""
         return self._stream_reader
-
-    @property
-    def has_body(self) -> bool:
-        """Return True if request's HTTP BODY can be read, False otherwise."""
-        warnings.warn(
-            "Deprecated, use .can_read_body #2005",
-            DeprecationWarning, stacklevel=2)
-        return not self._stream_reader.at_eof()
 
     @property
     def can_read_body(self) -> bool:

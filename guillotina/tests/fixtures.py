@@ -291,7 +291,7 @@ def app_client(loop, db, request):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(request.node), loop=loop)
     app.on_cleanup.insert(0, _clear_dbs)
-    client = TestClient(app)
+    client = TestClient(app, timeout=5)
     try:
         loop.run_until_complete(client.__aenter__())
         yield app, client
