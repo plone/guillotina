@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a2 (unreleased)
+5.0.0a2 (2019-06-19)
 --------------------
 
 - Missing mypy requirement
