@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+6.0.0 (unreleased)
+------------------
+
+- Replaced aiohttp with ASGI (running with uvicorn by default)
+  [dmanchon,masipcat]
+
+
 5.0.0a2 (unreleased)
 --------------------
 
@@ -12,9 +19,6 @@ CHANGELOG
 
 5.0.0a1 (2019-06-19)
 --------------------
-
-- Replaced aiohttp with ASGI (running with uvicorn by default)
-  [dmanchon,masipcat]
 
 - Fix events antipattern [lferran]
 
