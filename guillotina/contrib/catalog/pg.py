@@ -25,7 +25,6 @@ from guillotina.interfaces import ISearchParser
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.interfaces.content import IApplication
 from guillotina.transactions import get_transaction
-from guillotina.utils import find_container
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_content_path
 from guillotina.utils import get_object_url
@@ -378,7 +377,7 @@ class PGSearchUtility(DefaultSearchUtility):
                         logger.debug(f'Creating index:\n {sql}')
                         await conn.execute(sql)
 
-    def get_default_where_clauses(self, context) -> typing.List[str]:
+    def get_default_where_clauses(self, container: IContainer) -> typing.List[str]:
         users = []
         roles = []
         principal = get_authenticated_user()
@@ -405,23 +404,12 @@ class PGSearchUtility(DefaultSearchUtility):
         sql_wheres = ['({})'.format(
             ' OR '.join(clauses)
         )]
-        # ensure we only query this context
-        context_path = get_content_path(context)
-        sql_wheres.append("""substring(json->>'path', 0, {}) = '{}'""".format(
-            len(context_path) + 1,
-            sqlq(context_path)
-        ))
-        if IContainer.providedBy(context):
-            container = context
-        else:
-            container = find_container(context)  # type: ignore
-        if container is not None:
-            sql_wheres.append(f"""json->>'container_id' = '{sqlq(container.id)}'""")
+        sql_wheres.append(f"""json->>'container_id' = '{sqlq(container.id)}'""")
         sql_wheres.append("""type != 'Container'""")
         sql_wheres.append(f"""parent_id != '{sqlq(TRASHED_ID)}'""")
         return sql_wheres
 
-    def build_query(self, context,
+    def build_query(self, container: IContainer,
                     query: ParsedQueryInfo) -> typing.Tuple[str, typing.List[typing.Any]]:
         if query['sort_on'] is None:
             # always need a sort otherwise paging never works
@@ -446,7 +434,7 @@ class PGSearchUtility(DefaultSearchUtility):
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
-        sql_wheres.extend(self.get_default_where_clauses(context))
+        sql_wheres.extend(self.get_default_where_clauses(container))
 
         sql = '''select {}
                  from {}
@@ -500,8 +488,8 @@ class PGSearchUtility(DefaultSearchUtility):
                 del metadata[k]
         return metadata
 
-    async def search(self, context, query: ParsedQueryInfo):  # type: ignore
-        sql, arguments = self.build_query(context, query)
+    async def search(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
+        sql, arguments = self.build_query(container, query)
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
@@ -509,9 +497,9 @@ class PGSearchUtility(DefaultSearchUtility):
 
         results = []
         try:
-            context_url = get_object_url(context)
+            context_url = get_object_url(container)
         except RequestNotFound:
-            context_url = get_content_path(context)
+            context_url = get_content_path(container)
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
@@ -524,7 +512,7 @@ class PGSearchUtility(DefaultSearchUtility):
         # also do count...
         total = len(results)
         if total >= query['size']:
-            sql, arguments = self.build_count_query(context, query)
+            sql, arguments = self.build_count_query(container, query)
             logger.debug(f'Running search:\n{sql}\n{arguments}')
             records = await conn.fetch(sql, *arguments)
             total = records[0]['count']
