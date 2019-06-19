@@ -1,5 +1,3 @@
-# this module closely mirrors aiohttp.web_exceptions
-from guillotina.asgi import AsgiStreamWriter
 from guillotina.request import Request
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IResponse
@@ -8,7 +6,46 @@ from zope.interface import implementer
 from typing import Any, Dict, Optional
 from aiohttp import hdrs
 
+import asyncio
 import warnings
+
+
+class AsgiStreamWriter():
+    buffer_size = 0
+    output_size = 0
+    length: Optional[int] = 0
+
+    def __init__(self, send):
+        self.send = send
+        self._buffer = asyncio.Queue()
+        self.eof = False
+
+    async def write(self, chunk: bytes) -> None:
+        """Write chunk into stream."""
+        await self._buffer.put(chunk)
+
+    async def write_eof(self, chunk: bytes=b'') -> None:
+        """Write last chunk."""
+        await self.write(chunk)
+        self.eof = True
+        await self.drain()
+
+    async def drain(self) -> None:
+        """Flush the write buffer."""
+        while not self._buffer.empty():
+            body = await self._buffer.get()
+            await self.send({
+                "type": "http.response.body",
+                "body": body,
+                "more_body": True
+            })
+
+        if self.eof:
+            await self.send({
+                "type": "http.response.body",
+                "body": b"",
+                "more_body": False
+            })
 
 
 @implementer(IResponse)
@@ -409,6 +446,11 @@ class HTTPPreconditionFailed(HTTPClientError):
 
 class HTTPRequestEntityTooLarge(HTTPClientError):
     status_code = 413
+
+    def __init__(self, max_size, actual_size, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_size = max_size
+        self.actual_size = actual_size
 
 
 class HTTPRequestURITooLong(HTTPClientError):

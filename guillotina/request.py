@@ -1,24 +1,26 @@
 from aiohttp.web_ws import WSMessage
 from aiohttp.web import WSMsgType
 from aiohttp.helpers import reify
-from aiohttp.streams import EmptyStreamReader
-from aiohttp.web_exceptions import HTTPRequestEntityTooLarge
 from collections import OrderedDict
 from guillotina import task_vars
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
-from typing import Any, Dict, Iterator, Tuple, Optional
+from typing import Any, Awaitable, Callable, Dict, Generic, Iterator, Tuple, TypeVar, Optional
 from yarl import URL
 from zope.interface import implementer
 
+import asyncio
 import enum
 import json
 import time
 import multidict
 import uuid
 import urllib.parse
+
+
+_T = TypeVar('_T')
 
 
 class State(enum.Enum):
@@ -126,6 +128,64 @@ class GuillotinaWebSocket:
 
     async def close(self, code=1000):
         await self.send({"type": "websocket.close", "code": code})
+
+
+class AsyncStreamIterator(Generic[_T]):
+
+    def __init__(self, read_func: Callable[[], Awaitable[_T]]) -> None:
+        self.read_func = read_func
+
+    def __aiter__(self) -> 'AsyncStreamIterator[_T]':
+        return self
+
+    async def __anext__(self) -> _T:
+        rv = await self.read_func()
+        if rv == b'':
+            raise StopAsyncIteration  # NOQA
+        return rv
+
+
+class AsgiStreamReader():
+    def __init__(self, receive):
+        self.finished = False
+        self._asgi_receive = receive
+        self._buffer = b""
+
+    async def readany(self):
+        from guillotina.files import CHUNK_SIZE
+        return await self.read(CHUNK_SIZE)
+
+    async def readexactly(self, n: int) -> bytes:
+        data = await self.read(n)
+        if len(data) < n:
+            raise asyncio.IncompleteReadError(data, n)
+        return data
+
+    async def read(self, n: int = -1):
+        if self._buffer:
+            data = self._buffer
+        else:
+            data = b""
+
+        while (n == -1 or len(data) < n) and not self.finished:
+            chunk = await self.receive()
+            data += chunk
+
+        if n == -1:
+            self._buffer = None
+            return data
+        else:
+            req_chunk, rest = data[:n], data[n:]
+            self._buffer = rest
+            return req_chunk
+
+    async def receive(self):
+        payload = await self._asgi_receive()
+        self.finished = not payload.get("more_body", False)
+        return payload["body"]
+
+    def __aiter__(self) -> AsyncStreamIterator[bytes]:
+        return AsyncStreamIterator(self.readany)  # type: ignore
 
 
 @implementer(IRequest, IDefaultLayer)
@@ -352,11 +412,6 @@ class Request(object):
         """Return True if request's HTTP BODY can be read, False otherwise."""
         return not self._stream_reader.at_eof()
 
-    @reify
-    def body_exists(self) -> bool:
-        """Return True if request has HTTP BODY, False otherwise."""
-        return type(self._stream_reader) is not EmptyStreamReader
-
     async def release(self) -> None:
         """Release request.
 
@@ -378,6 +433,7 @@ class Request(object):
                 if self._client_max_size:
                     body_size = len(body)
                     if body_size >= self._client_max_size:
+                        from guillotina.response import HTTPRequestEntityTooLarge
                         raise HTTPRequestEntityTooLarge(
                             max_size=self._client_max_size,
                             actual_size=body_size
