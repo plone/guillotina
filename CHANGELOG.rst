@@ -4,8 +4,7 @@ CHANGELOG
 4.8.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Fix events antipattern [lferran]
 
 4.8.9 (2019-06-17)
 ------------------
