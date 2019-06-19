@@ -284,6 +284,14 @@ async def _clear_dbs(app):
 DELETE from {}
 WHERE zoid != '{}' AND zoid != '{}'
 '''.format(storage._objects_table_name, ROOT_ID, TRASHED_ID))
+                await conn.execute('''
+SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
+   FROM   pg_index  i
+   LEFT   JOIN pg_depend d ON d.objid = i.indexrelid
+                          AND d.deptype = 'i'
+   WHERE  i.indrelid = '{}'::regclass
+   AND    d.objid IS NULL
+'''.format(storage._objects_table_name))
 
 
 @pytest.fixture(scope='function')

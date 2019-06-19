@@ -1,8 +1,17 @@
 CHANGELOG
 =========
 
-5.0.0 (unreleased)
-------------------
+5.0.0a2 (unreleased)
+--------------------
+
+- Missing mypy requirement
+- Fix catalog interface
+- Fix catalog not working with db schemas
+- Update intro docs
+
+
+5.0.0a1 (2019-06-19)
+--------------------
 
 - Replaced aiohttp with ASGI (running with uvicorn by default)
   [dmanchon,masipcat]

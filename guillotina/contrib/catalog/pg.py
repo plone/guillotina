@@ -3,7 +3,6 @@ import logging
 import typing
 
 from dateutil.parser import parse
-
 from guillotina import configure
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
@@ -25,7 +24,6 @@ from guillotina.interfaces import ISearchParser
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.interfaces.content import IApplication
 from guillotina.transactions import get_transaction
-from guillotina.utils import find_container
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_content_path
 from guillotina.utils import get_object_url
@@ -191,13 +189,12 @@ class BasicJsonIndex:
     def idx_name(self) -> str:
         return 'idx_objects_{}'.format(self.name)
 
-    @property
-    def index_sql(self) -> typing.List[str]:
+    def get_index_sql(self, storage: IPostgresStorage) -> typing.List[str]:
         return [
             f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                ON objects ((json->>'{sqlq(self.name)}'));''',
+                ON {sqlq(storage.objects_table_name)} ((json->>'{sqlq(self.name)}'));''',
             f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                ON objects USING gin ((json->'{sqlq(self.name)}'))'''
+                ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))'''
         ]
 
     def where(self, value, operator='=') -> str:
@@ -215,10 +212,10 @@ class BasicJsonIndex:
 
 
 class BooleanIndex(BasicJsonIndex):
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                    ON objects (((json->>'{sqlq(self.name)}')::boolean));''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage.objects_table_name)} (((json->>'{sqlq(self.name)}')::boolean));''']
 
     def where(self, value, operator='='):
         assert operator in self.operators
@@ -228,10 +225,10 @@ class BooleanIndex(BasicJsonIndex):
 class KeywordIndex(BasicJsonIndex):
     operators = ['?', '?|']
 
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                    ON objects USING gin ((json->'{sqlq(self.name)}'))''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='?'):
         assert operator in self.operators
@@ -251,10 +248,11 @@ class CastIntIndex(BasicJsonIndex):
     cast_type = 'integer'
     operators = ['=', '!=', '>', '<', '>=', '<=']
 
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
-                    using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage.objects_table_name)}
+using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))''']
 
     def where(self, value, operator='>'):
         """
@@ -272,10 +270,10 @@ class CastFloatIndex(CastIntIndex):
 class CastDateIndex(CastIntIndex):
     cast_type = 'timestamp'
 
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
-                    (f_cast_isots(json->>'{sqlq(self.name)}'))''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage.objects_table_name)} (f_cast_isots(json->>'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='>'):
         """
@@ -288,10 +286,11 @@ f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.c
 
 class FullTextIndex(BasicJsonIndex):
 
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
-                   using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage.objects_table_name)}
+using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));''']
 
     def where(self, value, operator=''):
         """
@@ -374,11 +373,12 @@ class PGSearchUtility(DefaultSearchUtility):
                 for func in PG_FUNCTIONS:
                     await conn.execute(func)
                 for index in [BasicJsonIndex('container_id')] + [v for v in get_pg_indexes().values()]:
-                    for sql in index.index_sql:
+                    sqls = index.get_index_sql(tm.storage)
+                    for sql in sqls:
                         logger.debug(f'Creating index:\n {sql}')
                         await conn.execute(sql)
 
-    def get_default_where_clauses(self, context) -> typing.List[str]:
+    def get_default_where_clauses(self, container: IContainer) -> typing.List[str]:
         users = []
         roles = []
         principal = get_authenticated_user()
@@ -405,23 +405,12 @@ class PGSearchUtility(DefaultSearchUtility):
         sql_wheres = ['({})'.format(
             ' OR '.join(clauses)
         )]
-        # ensure we only query this context
-        context_path = get_content_path(context)
-        sql_wheres.append("""substring(json->>'path', 0, {}) = '{}'""".format(
-            len(context_path) + 1,
-            sqlq(context_path)
-        ))
-        if IContainer.providedBy(context):
-            container = context
-        else:
-            container = find_container(context)  # type: ignore
-        if container is not None:
-            sql_wheres.append(f"""json->>'container_id' = '{sqlq(container.id)}'""")
+        sql_wheres.append(f"""json->>'container_id' = '{sqlq(container.id)}'""")
         sql_wheres.append("""type != 'Container'""")
         sql_wheres.append(f"""parent_id != '{sqlq(TRASHED_ID)}'""")
         return sql_wheres
 
-    def build_query(self, context,
+    def build_query(self, container: IContainer,
                     query: ParsedQueryInfo) -> typing.Tuple[str, typing.List[typing.Any]]:
         if query['sort_on'] is None:
             # always need a sort otherwise paging never works
@@ -446,7 +435,7 @@ class PGSearchUtility(DefaultSearchUtility):
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
-        sql_wheres.extend(self.get_default_where_clauses(context))
+        sql_wheres.extend(self.get_default_where_clauses(container))
 
         sql = '''select {}
                  from {}
@@ -454,7 +443,7 @@ class PGSearchUtility(DefaultSearchUtility):
                  {}
                  limit {} offset {}'''.format(
             ','.join(select_fields),
-            sqlq(txn.storage._objects_table_name),
+            sqlq(txn.storage.objects_table_name),
             ' AND '.join(sql_wheres),
             order_by_index.order_by(query['sort_dir']),
             sqlq(query['size']),
@@ -482,7 +471,7 @@ class PGSearchUtility(DefaultSearchUtility):
                  from {}
                  where {}'''.format(
             ','.join(select_fields),
-            sqlq(txn.storage._objects_table_name),
+            sqlq(txn.storage.objects_table_name),
             ' AND '.join(sql_wheres))
         return sql, sql_arguments
 
@@ -500,8 +489,8 @@ class PGSearchUtility(DefaultSearchUtility):
                 del metadata[k]
         return metadata
 
-    async def search(self, context, query: ParsedQueryInfo):  # type: ignore
-        sql, arguments = self.build_query(context, query)
+    async def search(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
+        sql, arguments = self.build_query(container, query)
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
@@ -509,9 +498,9 @@ class PGSearchUtility(DefaultSearchUtility):
 
         results = []
         try:
-            context_url = get_object_url(context)
+            context_url = get_object_url(container)
         except RequestNotFound:
-            context_url = get_content_path(context)
+            context_url = get_content_path(container)
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
@@ -524,7 +513,7 @@ class PGSearchUtility(DefaultSearchUtility):
         # also do count...
         total = len(results)
         if total >= query['size']:
-            sql, arguments = self.build_count_query(context, query)
+            sql, arguments = self.build_count_query(container, query)
             logger.debug(f'Running search:\n{sql}\n{arguments}')
             records = await conn.fetch(sql, *arguments)
             total = records[0]['count']
