@@ -7,6 +7,8 @@ CHANGELOG
 - Replaced aiohttp with ASGI (running with uvicorn by default)
   [dmanchon,masipcat]
 
+- Fix events antipattern [lferran]
+
 - Rename `utils.get_object_by_oid` to `utils.get_object_by_uid`
 
 - Emit events for registry configuration changes
