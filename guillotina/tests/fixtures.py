@@ -17,6 +17,7 @@ from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IDatabase
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
@@ -24,8 +25,8 @@ from guillotina.tests.utils import logout
 from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
-from guillotina.utils import iter_databases
 from guillotina.utils import merge_dicts
+
 
 _dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -283,7 +284,9 @@ async def dummy_txn_root(dummy_request):
 
 async def _clear_dbs(root):
     # make sure to completely clear db before carrying on...
-    async for db in iter_databases(root):
+    for _, db in root:
+        if not IDatabase.providedBy(db):
+            continue
         storage = db.storage
         if IPostgresStorage.providedBy(storage) or ICockroachStorage.providedBy(storage):
             async with storage.pool.acquire() as conn:
@@ -291,6 +294,14 @@ async def _clear_dbs(root):
 DELETE from {}
 WHERE zoid != '{}' AND zoid != '{}'
 '''.format(storage._objects_table_name, ROOT_ID, TRASHED_ID))
+                await conn.execute('''
+SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
+   FROM   pg_index  i
+   LEFT   JOIN pg_depend d ON d.objid = i.indexrelid
+                          AND d.deptype = 'i'
+   WHERE  i.indrelid = '{}'::regclass
+   AND    d.objid IS NULL
+'''.format(storage._objects_table_name))
 
 
 @pytest.fixture(scope='function')
