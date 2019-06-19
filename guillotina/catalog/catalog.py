@@ -10,19 +10,21 @@ from guillotina.directives import index
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
 from guillotina.directives import metadata
+from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import NoIndexField
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.json.serialize_value import json_compatible
-from guillotina.schema.interfaces import IContainer
 from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.utils import apply_coroutine
+from guillotina.utils import find_container
 from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 from zope.interface import implementer
@@ -35,14 +37,14 @@ global_roles_for_permission = role_permission_manager.get_roles_for_permission
 
 
 @implementer(ICatalogUtility)
-class DefaultSearchUtility(object):
+class DefaultSearchUtility:
 
     async def initialize(self, app):
         '''
         initialization
         '''
 
-    async def search(self, context: IBaseObject, query: typing.Any):
+    async def search(self, container: IContainer, query: typing.Any):
         '''
         Search parsed query
         '''
@@ -56,7 +58,10 @@ class DefaultSearchUtility(object):
         Raw search query, uses parser to transform query
         '''
         parsed_query = parse_query(context, query, self)
-        return await self.search(context, parsed_query)
+        container = find_container(context)
+        if container is not None:
+            return await self.search(container, parsed_query)
+        raise ContainerNotFound()
 
     async def index(self, container: IContainer, datas):
         """

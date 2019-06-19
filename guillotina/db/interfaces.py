@@ -276,7 +276,7 @@ class IStorage(Interface):
 
 
 class IPostgresStorage(IStorage):
-    pass
+    objects_table_name = Attribute('')
 
 
 class ICockroachStorage(IStorage):

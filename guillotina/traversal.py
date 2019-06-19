@@ -463,7 +463,7 @@ class TraversalRouter(AbstractRouter):
                 # Check if the view has permissions explicit
                 if view is None or not view.__allow_access__:
                     logger.info(
-                        "No access content {content} with {auths}".format(
+                        "No access content {content} with {auth}".format(
                             content=resource,
                             auth=authenticated.id),
                         request=request)

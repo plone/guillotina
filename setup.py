@@ -69,7 +69,8 @@ setup(
         'asyncpg',
         'cffi',
         'PyYAML>=5.1',
-        'lru-dict'
+        'lru-dict',
+        'mypy_extensions'
     ],
     extras_require={
         'test': [
