@@ -143,17 +143,17 @@ class BeforeObjectRemovedEvent(BaseObjectRemovedEvent):
 @implementer(IBeforeObjectModifiedEvent)
 class BeforeObjectModifiedEvent(object):
 
-    def __init__(self, object, payload={}):
+    def __init__(self, object, payload=None):
         self.object = object
-        self.payload = payload
+        self.payload = payload or {}
 
 
 @implementer(IObjectModifiedEvent)
 class ObjectModifiedEvent(object):
 
-    def __init__(self, object, payload={}):
+    def __init__(self, object, payload=None):
         self.object = object
-        self.payload = payload
+        self.payload = payload or {}
 
 
 @implementer(IObjectLoadedEvent)
