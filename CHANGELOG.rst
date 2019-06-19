@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-5.0.0 (unreleased)
-------------------
+5.0.0a1 (2019-06-19)
+--------------------
 
 - Fix events antipattern [lferran]
 
