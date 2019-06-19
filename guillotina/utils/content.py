@@ -166,28 +166,28 @@ def get_object_url(ob: IResource,
     return None
 
 
-async def get_object_by_oid(oid: str, txn=None) -> IBaseObject:
+async def get_object_by_uid(uid: str, txn=None) -> IBaseObject:
     '''
-    Get an object from an oid
+    Get an object from an uid
 
-    :param oid: Object id of object you need to retreive
+    :param uid: Object id of object you need to retreive
     :param txn: Database transaction object. Will get current
                 transaction is not provided
     '''
     if txn is None:
         from guillotina.transactions import get_transaction
         txn = get_transaction()
-    result = txn._manager._hard_cache.get(oid, None)
+    result = txn._manager._hard_cache.get(uid, None)
     if result is None:
-        result = await txn._get(oid)
+        result = await txn._get(uid)
 
     if result['parent_id'] == TRASHED_ID:
-        raise KeyError(oid)
+        raise KeyError(uid)
 
     obj = reader(result)
     obj.__txn__ = txn
     if result['parent_id']:
-        parent = await get_object_by_oid(result['parent_id'], txn)
+        parent = await get_object_by_uid(result['parent_id'], txn)
         if parent is not None:
             obj.__parent__ = parent
         else:

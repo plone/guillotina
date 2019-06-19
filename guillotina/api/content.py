@@ -52,7 +52,7 @@ from guillotina.response import Response
 from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_object_by_oid
+from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_object_url
 from guillotina.utils import iter_parents
 from guillotina.utils import valid_id, get_security_policy
@@ -781,7 +781,7 @@ async def invalidate_cache(context, request):
 async def resolve_uid(context, request):
     uid = request.matchdict['uid']
     try:
-        ob = await get_object_by_oid(uid)
+        ob = await get_object_by_uid(uid)
     except KeyError:
         return HTTPNotFound(content={
             'reason': f'Could not find uid: {uid}'

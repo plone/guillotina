@@ -7,6 +7,8 @@ CHANGELOG
 - Replaced aiohttp with ASGI (running with uvicorn by default)
   [dmanchon,masipcat]
 
+- Rename `utils.get_object_by_oid` to `utils.get_object_by_uid`
+
 - Emit events for registry configuration changes
 
 - Default catalog interface removes the following methods: `get_by_uuid`, `get_by_type`, `get_by_path`,

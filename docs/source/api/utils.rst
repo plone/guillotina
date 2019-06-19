@@ -9,7 +9,7 @@
   .. autofunction:: navigate_to
   .. autofunction:: get_owners
   .. autofunction:: get_object_url
-  .. autofunction:: get_object_by_oid
+  .. autofunction:: get_object_by_uid
   .. autofunction:: get_behavior
 
   .. autofunction:: get_authenticated_user
