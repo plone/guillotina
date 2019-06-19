@@ -192,9 +192,9 @@ class BasicJsonIndex:
     def get_index_sql(self, storage: IPostgresStorage) -> typing.List[str]:
         return [
             f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                ON {sqlq(storage._objects_table_name)} ((json->>'{sqlq(self.name)}'));''',
+                ON {sqlq(storage.objects_table_name)} ((json->>'{sqlq(self.name)}'));''',
             f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                ON {sqlq(storage._objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))'''
+                ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))'''
         ]
 
     def where(self, value, operator='=') -> str:
@@ -215,7 +215,7 @@ class BooleanIndex(BasicJsonIndex):
     def get_index_sql(self, storage):
         return [f'''
 CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-ON {sqlq(storage._objects_table_name)} (((json->>'{sqlq(self.name)}')::boolean));''']
+ON {sqlq(storage.objects_table_name)} (((json->>'{sqlq(self.name)}')::boolean));''']
 
     def where(self, value, operator='='):
         assert operator in self.operators
@@ -228,7 +228,7 @@ class KeywordIndex(BasicJsonIndex):
     def get_index_sql(self, storage):
         return [f'''
 CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-ON {sqlq(storage._objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))''']
+ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='?'):
         assert operator in self.operators
@@ -251,7 +251,7 @@ class CastIntIndex(BasicJsonIndex):
     def get_index_sql(self, storage):
         return [f'''
 CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-ON {sqlq(storage._objects_table_name)}
+ON {sqlq(storage.objects_table_name)}
 using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))''']
 
     def where(self, value, operator='>'):
@@ -273,7 +273,7 @@ class CastDateIndex(CastIntIndex):
     def get_index_sql(self, storage):
         return [f'''
 CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-ON {sqlq(storage._objects_table_name)} (f_cast_isots(json->>'{sqlq(self.name)}'))''']
+ON {sqlq(storage.objects_table_name)} (f_cast_isots(json->>'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='>'):
         """
@@ -289,7 +289,7 @@ class FullTextIndex(BasicJsonIndex):
     def get_index_sql(self, storage):
         return [f'''
 CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-ON {sqlq(storage._objects_table_name)}
+ON {sqlq(storage.objects_table_name)}
 using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));''']
 
     def where(self, value, operator=''):
@@ -443,7 +443,7 @@ class PGSearchUtility(DefaultSearchUtility):
                  {}
                  limit {} offset {}'''.format(
             ','.join(select_fields),
-            sqlq(txn.storage._objects_table_name),
+            sqlq(txn.storage.objects_table_name),
             ' AND '.join(sql_wheres),
             order_by_index.order_by(query['sort_dir']),
             sqlq(query['size']),
@@ -471,7 +471,7 @@ class PGSearchUtility(DefaultSearchUtility):
                  from {}
                  where {}'''.format(
             ','.join(select_fields),
-            sqlq(txn.storage._objects_table_name),
+            sqlq(txn.storage.objects_table_name),
             ' AND '.join(sql_wheres))
         return sql, sql_arguments
 

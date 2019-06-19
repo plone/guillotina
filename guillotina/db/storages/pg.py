@@ -555,6 +555,10 @@ class PostgresqlStorage(BaseStorage):
     def lock(self):
         return self._connection_manager.lock
 
+    @property
+    def objects_table_name(self):
+        return self._objects_table_name
+
     async def vacuum(self):
         await self.connection_manager.vacuum.run(self._objects_table_name)
         while self.connection_manager.vacuum.size > 0:
