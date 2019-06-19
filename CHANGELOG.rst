@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0 (unreleased)
 ------------------
 
+- Fix events antipattern [lferran]
+
 - Rename `utils.get_object_by_oid` to `utils.get_object_by_uid`
 
 - Emit events for registry configuration changes
