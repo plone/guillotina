@@ -3,7 +3,6 @@ import logging
 import typing
 
 from dateutil.parser import parse
-
 from guillotina import configure
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
@@ -190,13 +189,12 @@ class BasicJsonIndex:
     def idx_name(self) -> str:
         return 'idx_objects_{}'.format(self.name)
 
-    @property
-    def index_sql(self) -> typing.List[str]:
+    def get_index_sql(self, storage: IPostgresStorage) -> typing.List[str]:
         return [
             f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                ON objects ((json->>'{sqlq(self.name)}'));''',
+                ON {sqlq(storage._object_table_name)} ((json->>'{sqlq(self.name)}'));''',
             f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                ON objects USING gin ((json->'{sqlq(self.name)}'))'''
+                ON {sqlq(storage._object_table_name)} USING gin ((json->'{sqlq(self.name)}'))'''
         ]
 
     def where(self, value, operator='=') -> str:
@@ -214,10 +212,10 @@ class BasicJsonIndex:
 
 
 class BooleanIndex(BasicJsonIndex):
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                    ON objects (((json->>'{sqlq(self.name)}')::boolean));''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage._object_table_name)} (((json->>'{sqlq(self.name)}')::boolean));''']
 
     def where(self, value, operator='='):
         assert operator in self.operators
@@ -227,10 +225,10 @@ class BooleanIndex(BasicJsonIndex):
 class KeywordIndex(BasicJsonIndex):
     operators = ['?', '?|']
 
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
-                    ON objects USING gin ((json->'{sqlq(self.name)}'))''']
+    def get_index_sql(self, storage):
+        return [f'''
+INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage._object_table_name)} USING gin ((json->'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='?'):
         assert operator in self.operators
@@ -250,10 +248,11 @@ class CastIntIndex(BasicJsonIndex):
     cast_type = 'integer'
     operators = ['=', '!=', '>', '<', '>=', '<=']
 
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
-                    using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage._object_table_name)}
+using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))''']
 
     def where(self, value, operator='>'):
         """
@@ -272,9 +271,10 @@ class CastDateIndex(CastIntIndex):
     cast_type = 'timestamp'
 
     @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
-                    (f_cast_isots(json->>'{sqlq(self.name)}'))''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage._object_table_name)} (f_cast_isots(json->>'{sqlq(self.name)}'))''']
 
     def where(self, value, operator='>'):
         """
@@ -287,10 +287,11 @@ f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.c
 
 class FullTextIndex(BasicJsonIndex):
 
-    @property
-    def index_sql(self):
-        return [f'''CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)} ON objects
-                   using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));''']
+    def get_index_sql(self, storage):
+        return [f'''
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+ON {sqlq(storage._object_table_name)}
+using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));''']
 
     def where(self, value, operator=''):
         """
@@ -373,7 +374,8 @@ class PGSearchUtility(DefaultSearchUtility):
                 for func in PG_FUNCTIONS:
                     await conn.execute(func)
                 for index in [BasicJsonIndex('container_id')] + [v for v in get_pg_indexes().values()]:
-                    for sql in index.index_sql:
+                    sqls = index.get_index_sql(tm.storage)
+                    for sql in sqls:
                         logger.debug(f'Creating index:\n {sql}')
                         await conn.execute(sql)
 
