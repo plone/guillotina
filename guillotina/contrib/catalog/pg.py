@@ -54,7 +54,7 @@ $$SELECT CAST($1 AS timestamptz)$$  -- adapt to your needs
 
 
 class ParsedQueryInfo(BasicParsedQueryInfo):
-    wheres: typing.List[str]
+    wheres: typing.List[typing.Any]
     wheres_arguments: typing.List[typing.Any]
     selects: typing.List[str]
     selects_arguments: typing.List[typing.Any]
@@ -91,8 +91,30 @@ def sqlq(v):
     name='default')
 class Parser(BaseParser):
 
+    def process_compound_field(self, field, value, operator):
+        if not isinstance(value, dict):
+            return None
+        wheres = []
+        arguments = []
+        selects = []
+        for sfield, svalue in value.items():
+            result = self.process_queried_field(sfield, svalue)
+            if result is not None:
+                wheres.append(result[0])
+                arguments.extend(result[1])
+                selects.extend(result[2])
+        if len(wheres) > 0:
+            return (operator, wheres), arguments, selects
+
     def process_queried_field(self, field: str, value) -> typing.Optional[
-            typing.Tuple[str, typing.Any, typing.Optional[str]]]:
+            typing.Tuple[typing.Any, typing.List[typing.Any], typing.List[str]]]:
+        # compound field support
+        if field.endswith('__or'):
+            return self.process_compound_field(field, value, ' OR ')
+        elif field.endswith('__and'):
+            field = field[:-len('__and')]
+            return self.process_compound_field(field, value, ' AND ')
+
         result: typing.Any = value
 
         operator = '='
@@ -138,6 +160,9 @@ class Parser(BaseParser):
                 result = False
         elif _type == 'keyword' and operator not in ('?', '?|'):
             operator = '?'
+        elif _type in ('text', 'searchabletext'):
+            operator = '='
+            value = '&'.join(to_list(value))
 
         if operator == '?|':
             result = to_list(value)
@@ -146,7 +171,7 @@ class Parser(BaseParser):
             operator = '?|'
 
         pg_index = get_pg_index(field)
-        return pg_index.where(result, operator), result, pg_index.select()
+        return pg_index.where(result, operator), [result], pg_index.select()
 
     def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
         query_info = super().__call__(params)
@@ -159,12 +184,12 @@ class Parser(BaseParser):
             result = self.process_queried_field(field, value)
             if result is None:
                 continue
-            sql, value, select = result
+            sql, values, select = result
             wheres.append(sql)
-            arguments.append(value)
-            if select is not None:
-                selects.append(select)
-                selects_arguments.append(value)
+            arguments.extend(values)
+            if select:
+                selects.extend(select)
+                selects_arguments.extend(values)
 
         return typing.cast(ParsedQueryInfo, dict(
             query_info,
@@ -203,8 +228,8 @@ class BasicJsonIndex:
     def order_by(self, direction='ASC') -> str:
         return f"order by json->>'{sqlq(self.name)}' {sqlq(direction)}"
 
-    def select(self) -> typing.Optional[str]:
-        return None
+    def select(self) -> typing.List[typing.Any]:
+        return []
 
 
 class BooleanIndex(BasicJsonIndex):
@@ -281,6 +306,7 @@ f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.c
 
 
 class FullTextIndex(BasicJsonIndex):
+    operators = ['?', '?|', '=']
 
     def get_index_sql(self, storage):
         return [f'''
@@ -300,8 +326,8 @@ to_tsvector('english', json->>'{sqlq(self.name)}') @@ plainto_tsquery(${{arg}}::
         return f'order by {sqlq(self.name)}_score {sqlq(direction)}'
 
     def select(self):
-        return f'''ts_rank_cd(to_tsvector('english', json->>'{sqlq(self.name)}'),
-                   plainto_tsquery(${{arg}}::text)) AS {sqlq(self.name)}_score'''
+        return [f'''ts_rank_cd(to_tsvector('english', json->>'{sqlq(self.name)}'),
+                    plainto_tsquery(${{arg}}::text)) AS {sqlq(self.name)}_score''']
 
 
 index_mappings = {
@@ -423,10 +449,20 @@ class PGSearchUtility(DefaultSearchUtility):
             sql_arguments.append(query['selects_arguments'][idx])
             arg_index += 1
 
-        for idx, where in enumerate(query['wheres']):
-            sql_wheres.append(where.format(arg=arg_index))
-            sql_arguments.append(query['wheres_arguments'][idx])
-            arg_index += 1
+        where_arg_index = 0
+        for where in query['wheres']:
+            if isinstance(where, tuple):
+                operator, sub_wheres = where
+                sub_result = []
+                for sub_where in sub_wheres:
+                    sub_result.append(sub_where.format(arg=arg_index + where_arg_index))
+                    sql_arguments.append(query['wheres_arguments'][where_arg_index])
+                    where_arg_index += 1
+                sql_wheres.append('(' + operator.join(sub_result) + ')')
+            else:
+                sql_wheres.append(where.format(arg=arg_index + where_arg_index))
+                sql_arguments.append(query['wheres_arguments'][where_arg_index])
+                where_arg_index += 1
 
         txn = get_transaction()
         if txn is None:
@@ -498,6 +534,7 @@ class PGSearchUtility(DefaultSearchUtility):
         except RequestNotFound:
             context_url = get_content_path(container)
         logger.debug(f'Running search:\n{sql}\n{arguments}')
+        print(f'{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
             result = self.load_meatdata(query, data)
@@ -515,7 +552,7 @@ class PGSearchUtility(DefaultSearchUtility):
             total = records[0]['count']
         return {
             'member': results,
-            'total': total
+            'items_count': total
         }
 
     async def index(self, container, datas):

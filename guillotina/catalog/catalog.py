@@ -50,7 +50,7 @@ class DefaultSearchUtility:
         '''
         return {
             'member': [],
-            'total': 0
+            'items_count': 0
         }
 
     async def query(self, context: IBaseObject, query: typing.Any):

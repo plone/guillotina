@@ -23,9 +23,11 @@ class BaseParser:
         # bbb
         if 'SearchableText' in params:
             value = params.pop('SearchableText')
+            anding = {}
             for index_name, idx_data in iter_indexes():
                 if idx_data['type'] in ('text', 'searchabletext'):
-                    params['{}__in'.format(index_name)] = value
+                    anding['{}__in'.format(index_name)] = value
+            params['text__or'] = anding
 
         if params.get('sort_on') == 'getObjPositionInParent':
             params['_sort_asc'] = 'position_in_parent'
