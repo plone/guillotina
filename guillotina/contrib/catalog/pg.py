@@ -544,7 +544,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
         # also do count...
         total = len(results)
-        if total >= query['size']:
+        if total >= query['size'] or query['_from'] != 0:
             sql, arguments = self.build_count_query(container, query)
             logger.debug(f'Running search:\n{sql}\n{arguments}')
             records = await conn.fetch(sql, *arguments)
