@@ -112,6 +112,8 @@ class IApplication(ITraversable, IAsyncContainer):
 
 
 class IDatabase(ITraversable, IAsyncContainer):
+    __db_id__ = Attribute('')
+
     def get_transaction_manager() -> ITransactionManager:
         '''
         '''
