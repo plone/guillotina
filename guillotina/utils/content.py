@@ -262,6 +262,10 @@ async def get_database(db_id, root=None):
 def get_full_content_path(ob) -> str:
     parts = []
     while ob is not None and not IApplication.providedBy(ob):
-        parts.append(ob.__name__)
-        ob = getattr(ob, '__parent__', None)
+        if IDatabase.providedBy(ob):
+            parts.append(ob.__db_id__)
+            break
+        else:
+            parts.append(ob.__name__)
+            ob = getattr(ob, '__parent__', None)
     return '/' + '/'.join(reversed(parts))
