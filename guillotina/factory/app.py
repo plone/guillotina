@@ -65,6 +65,17 @@ class ApplicationConfigurator:
         self.root = root
         self.settings = settings
 
+        self._init_dependency_applictions()
+
+    def _init_dependency_applictions(self):
+        for application_name in self.applications[:]:
+            module = resolve_dotted_name(application_name)
+            if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+                # load dependencies if necessary
+                for dependency in module.app_settings.get('applications') or []:
+                    if dependency not in self.applications:
+                        self.applications.append(dependency)
+
     def load_application(self, module):
         # includeme function
         if hasattr(module, 'includeme'):
@@ -79,7 +90,6 @@ class ApplicationConfigurator:
             module_name for module_name in
             set(self.applications) - set([module.__name__])
             if not module.__name__.startswith(module_name)]
-
         # services
         return configure.load_all_configurations(
             self.root.config, module.__name__, excluded_modules)
