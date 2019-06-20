@@ -93,7 +93,10 @@ class ApplicationRoot(object):
         self.cancel_async_utility(key)
         config = self._async_utilities[key]['config']
         interface = import_class(config['provides'])
-        utility = get_utility(interface)
+        if 'name' in config:
+            utility = get_utility(interface, name=config['name'])
+        else:
+            utility = get_utility(interface)
         if hasattr(utility, 'finalize'):
             await lazy_apply(utility.finalize, app=self.app)
         gsm = get_global_components()
