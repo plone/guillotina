@@ -4,7 +4,7 @@ CHANGELOG
 5.0.0a3 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Add `guillotina.contrib.swagger`
 
 
 5.0.0a2 (2019-06-19)

@@ -209,10 +209,10 @@ See [instructions below](#playing-with-those-examples) to play with.
 
 ### Playing with those examples
 
-In order to play with those examples you should install guillotina and cookiecutter, let's do that in a python virtualenv:
+In order to play with those examples you should install guillotina and cookiecutter, let's do that in a python venv:
 
 ```
-$ virtualenv .
+$ python -m venv .
 $ source ./bin/activate
 $ pip install guillotina cookiecutter
 ```

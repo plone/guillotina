@@ -11,9 +11,9 @@ and docker. You can use, for example, buildout as well.
 
 ```eval_rst
 .. note::
-   It is recommended you install along with a virtualenv::
+   It is recommended you install along with a venv::
 
-      virtualenv-3.6 genv
+      python -m venv genv
       cd genv
       source ./bin/activate
 ```

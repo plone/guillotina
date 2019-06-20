@@ -91,10 +91,6 @@ def sqlq(v):
     name='default')
 class Parser(BaseParser):
 
-    def __init__(self, util, context):
-        self.util = util
-        self.context = context
-
     def process_queried_field(self, field: str, value) -> typing.Optional[
             typing.Tuple[str, typing.Any, typing.Optional[str]]]:
         result: typing.Any = value

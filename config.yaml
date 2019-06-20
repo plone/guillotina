@@ -2,6 +2,7 @@
 debug: true
 applications:
   - guillotina.contrib.catalog.pg
+  - guillotina.contrib.swagger
 databases:
   db:
     storage: postgresql

@@ -1,0 +1,29 @@
+/*
+No way, purse css? how is this possible?
+
+Well, since it's minimal, we'll do it this way for now...
+
+*/
+
+/* remove swagger branding and we only want this to work with Guillotina */
+.info_title,
+#message-bar,
+.authorize-wrapper {
+  display: none;
+}
+
+.swagger-section .swagger-ui-wrap .info_description,
+.swagger-section .swagger-ui-wrap .info_description p {
+  padding-bottom: 0;
+}
+
+
+.auth-container input {
+  width: 80%;
+  height: 25px;
+  line-height: 20px;
+  font-size: 18px;
+}
+.auth-container .wrapper {
+  margin: 10px 0;
+}
