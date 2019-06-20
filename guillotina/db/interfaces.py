@@ -21,6 +21,7 @@ class ITransaction(Interface):
     user = Attribute('')
     status = Attribute('')
     storage = Attribute('')
+    manager = Attribute('')
     _cache = Attribute('')
 
     async def add_after_commit_hook(hook, *real_args, args=[], kws=None, **kwargs):

@@ -62,7 +62,7 @@ CHANGELOG
 
 - Remove `Request.add_future`. Use `guillotina.utils.execute.add_future`
 
-- Add `guillotina.utils.get_container`
+- Add `guillotina.utils.get_current_container`
 
 - Rename `request_indexer` setting to `indexer`
 

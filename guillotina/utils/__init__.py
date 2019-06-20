@@ -5,6 +5,7 @@ from .content import get_behavior  # noqa
 from .content import get_containers  # noqa
 from .content import get_content_depth  # noqa
 from .content import get_content_path  # noqa
+from .content import get_full_content_path  # noqa
 from .content import get_database  # noqa
 from .content import get_object_by_uid as get_object_by_oid  # noqa
 from .content import get_object_by_uid  # noqa
@@ -23,6 +24,7 @@ from .misc import get_current_request  # noqa
 from .misc import get_current_transaction  # noqa
 from .misc import get_random_string  # noqa
 from .misc import get_registry  # noqa
+from .misc import get_request_scheme  # noqa
 from .misc import get_schema_validator  # noqa
 from .misc import get_url  # noqa
 from .misc import lazy_apply  # noqa

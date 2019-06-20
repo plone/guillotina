@@ -14,7 +14,7 @@ Installation
 
 This example will use python virtual env::
 
-  python -m venv .
+  python3.7 -m venv .
   ./bin/pip install -e .
 
 

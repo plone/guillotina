@@ -1,4 +1,3 @@
-from guillotina.const import ROOT_ID
 from guillotina.db.interfaces import IStorage
 from guillotina.db.storages.base import BaseStorage
 from guillotina.exceptions import ConflictIdOnContainer
@@ -46,9 +45,6 @@ class DummyStorage(BaseStorage):
 
     async def close(self, con):
         pass
-
-    async def root(self):
-        return await self.load(None, ROOT_ID)
 
     async def last_transaction(self, txn):
         return self._last_transaction

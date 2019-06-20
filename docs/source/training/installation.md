@@ -13,7 +13,7 @@ and docker. You can use, for example, buildout as well.
 .. note::
    It is recommended you install along with a venv::
 
-      python -m venv genv
+      python3.7 -m venv genv
       cd genv
       source ./bin/activate
 ```

@@ -9,10 +9,10 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.component import getMultiAdapter
-from guillotina.contrib.swagger.utils import get_full_content_path
-from guillotina.contrib.swagger.utils import get_scheme
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.utils import get_authenticated_user
+from guillotina.utils import get_full_content_path
+from guillotina.utils import get_request_scheme
 from guillotina.utils import get_security_policy
 from guillotina.utils import resolve_dotted_name
 from zope.interface import Interface
@@ -120,7 +120,7 @@ class SwaggerDefinitionService(Service):
             definition["basePath"] = parsed_url.path
         else:
             definition["host"] = self.request.host
-            definition["schemes"] = [get_scheme(self.request)]
+            definition["schemes"] = [get_request_scheme(self.request)]
         if 'version' not in definition['info']:
             definition["info"]["version"] = pkg_resources.get_distribution(
                 "guillotina"
@@ -128,7 +128,7 @@ class SwaggerDefinitionService(Service):
 
         api_defs = app_settings["api_definition"]
 
-        path = get_full_content_path(self.request, self.context)
+        path = get_full_content_path(self.context)
 
         for dotted_iface in api_defs.keys():
             iface = resolve_dotted_name(dotted_iface)
@@ -174,7 +174,7 @@ async def render_docs_index(context, request):
         try:
             url = getMultiAdapter((context, request), IAbsoluteURL)()
         except ComponentLookupError:
-            url = "{}://{}".format(get_scheme(request), request.host)
+            url = "{}://{}".format(get_request_scheme(request), request.host)
     swagger_settings["initial_swagger_url"] = url
 
     if swagger_settings['authentication_allowed']:
