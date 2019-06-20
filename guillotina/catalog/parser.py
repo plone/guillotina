@@ -51,7 +51,7 @@ class BaseParser:
 
         # normalize depth
         found = False
-        for param in params.keys():
+        for param in [k for k in params.keys()]:
             if param == 'depth' or param.startswith('depth__'):
                 found = True
                 params[param] = str(int(params[param]) + get_content_depth(self.context))
