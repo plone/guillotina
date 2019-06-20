@@ -47,9 +47,6 @@ class DummyStorage(BaseStorage):
     async def close(self, con):
         pass
 
-    async def root(self):
-        return await self.load(None, ROOT_ID)
-
     async def last_transaction(self, txn):
         return self._last_transaction
 

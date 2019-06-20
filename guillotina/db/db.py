@@ -15,7 +15,7 @@ class Root(Folder):
 
     def __init__(self, db_id):
         super().__init__()
-        self.__db_id__ = db_id
+        self.__db_id__ = self.__name__ = db_id
 
     def __repr__(self):
         return "<Database %d>" % id(self)
