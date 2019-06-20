@@ -10,7 +10,7 @@ tool for managing your python environment.
 Setup the environment:
 
 ```
-python -m venv .
+python3.7 -m venv .
 ```
 
 Install `guillotina`:

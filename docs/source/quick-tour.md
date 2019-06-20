@@ -212,7 +212,7 @@ See [instructions below](#playing-with-those-examples) to play with.
 In order to play with those examples you should install guillotina and cookiecutter, let's do that in a python venv:
 
 ```
-$ python -m venv .
+$ python3.7 -m venv .
 $ source ./bin/activate
 $ pip install guillotina cookiecutter
 ```

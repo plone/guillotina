@@ -66,7 +66,7 @@ class TransactionManager:
         # already has txn registered, as long as connection is closed, it
         # is safe
         txn: typing.Optional[ITransaction] = task_vars.txn.get()
-        if (txn is not None and
+        if (txn is not None and txn.manager == self and
                 txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
             txn.status = Status.ACTIVE
