@@ -1,8 +1,10 @@
 from guillotina.component import get_utility
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
-from guillotina.db.cache.cache import BasicCache
+from guillotina.contrib.cache.strategy import BasicCache
 from guillotina.interfaces import ICacheUtility
+from guillotina.db.transaction import Transaction
+
 
 import pytest
 
@@ -84,4 +86,60 @@ async def test_invalidate_object(guillotina_main, loop):
     await rcache.close(invalidate=True)
     assert await rcache.get(oid=content.__uuid__) is None
 
+
+@pytest.mark.app_settings(DEFAULT_SETTINGS)
+async def test_cache_object(guillotina_main, loop):
+    tm = mocks.MockTransactionManager()
+    storage = tm._storage
+    txn = Transaction(tm)
+    cache = BasicCache(txn)
+    txn._cache = cache
+    ob = create_content()
+    storage.store(ob)
+    loaded = await txn.get(ob.__uuid__)
+    assert id(loaded) != id(ob)
+    assert loaded.__uuid__ == ob.__uuid__
+    assert cache._hits == 0
+    assert cache._misses == 1
+
+    # and load from cache
+    await txn.get(ob.__uuid__)
+    assert cache._hits == 1
+
+
+@pytest.mark.app_settings(DEFAULT_SETTINGS)
+async def test_cache_object_from_child(guillotina_main, loop):
+    tm = mocks.MockTransactionManager()
+    storage = tm._storage
+    txn = Transaction(tm)
+    cache = BasicCache(txn)
+    txn._cache = cache
+    ob = create_content()
+    parent = create_content()
+    ob.__parent__ = parent
+    storage.store(parent)
+    storage.store(ob)
+
+    loaded = await txn.get_child(parent, ob.id)
+    assert cache._hits == 0
+    loaded = await txn.get_child(parent, ob.id)
+    assert cache._hits == 1
+
+    assert id(loaded) != id(ob)
+    assert loaded.__uuid__ == ob.__uuid__
+
+
+@pytest.mark.app_settings(DEFAULT_SETTINGS)
+async def test_do_not_cache_large_object(guillotina_main, loop):
+    tm = mocks.MockTransactionManager()
+    storage = tm._storage
+    txn = Transaction(tm)
+    cache = BasicCache(txn)
+    txn._cache = cache
+    ob = create_content()
+    ob.foobar = 'X' * cache.max_cache_record_size  # push size above cache threshold
+    storage.store(ob)
+    loaded = await txn.get(ob.__uuid__)
+    assert id(loaded) != id(ob)
+    assert loaded.__uuid__ == ob.__uuid__
 

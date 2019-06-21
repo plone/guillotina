@@ -2,7 +2,7 @@ from guillotina import app_settings
 from guillotina.component import get_utility
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
-from guillotina.db.cache.cache import BasicCache
+from guillotina.contrib.cache.strategy import BasicCache
 from guillotina.contrib.cache import CACHE_PREFIX
 from guillotina.contrib.cache import serialize
 from guillotina.interfaces import ICacheUtility
