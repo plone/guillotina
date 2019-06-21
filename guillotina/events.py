@@ -17,6 +17,8 @@ from guillotina.interfaces import INewUserAdded
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectDuplicatedEvent
 from guillotina.interfaces import IObjectLoadedEvent
+from guillotina.interfaces import IBeforeAsyncUtilityLoadedEvent
+from guillotina.interfaces import IAfterAsyncUtilityLoadedEvent
 from guillotina.interfaces import IObjectLocationEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IObjectMovedEvent
@@ -263,3 +265,19 @@ class RegistryEditedEvent(ObjectEvent):
     def __init__(self, object: IBaseObject, registry: IRegistry, changes: typing.Dict):
         ObjectEvent.__init__(self, object)
         self.changes = changes
+
+
+@implementer(IBeforeAsyncUtilityLoadedEvent)
+class BeforeAsyncUtilityLoadedEvent:
+    def __init__(self, name, config):
+        self.name = name
+        self.config = config
+
+
+@implementer(IAfterAsyncUtilityLoadedEvent)
+class AfterAsyncUtilityLoadedEvent:
+    def __init__(self, name, config, utility, task):
+        self.name = name
+        self.config = config
+        self.utility = utility
+        self.task = task

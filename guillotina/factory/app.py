@@ -19,9 +19,11 @@ from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.content import load_cached_schema
 from guillotina.event import notify
+from guillotina.events import AfterAsyncUtilityLoadedEvent
 from guillotina.events import ApplicationCleanupEvent
 from guillotina.events import ApplicationConfiguredEvent
 from guillotina.events import ApplicationInitializedEvent
+from guillotina.events import BeforeAsyncUtilityLoadedEvent
 from guillotina.events import DatabaseInitializedEvent
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
@@ -353,7 +355,10 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     for key, util in app_settings['load_utilities'].items():
         app_logger.info('Adding ' + key + ' : ' + util['provides'])
-        root.add_async_utility(key, util, loop=loop)
+        await notify(BeforeAsyncUtilityLoadedEvent(key, util))
+        result = root.add_async_utility(key, util, loop=loop)
+        if result is not None:
+            await notify(AfterAsyncUtilityLoadedEvent(key, util, *result))
 
     # Load cached Schemas
     load_cached_schema()
