@@ -1,3 +1,5 @@
+from guillotina.schema.utils import get_default_from_schema
+
 
 _EMPTY = object()
 
@@ -16,10 +18,7 @@ class ContextProperty:
         if callable(result):
             result = result(context=inst.context, name=self.__name__)
         if result == _EMPTY:
-            try:
-                return inst.schema[self.__name__].default
-            except KeyError:
-                raise AttributeError(self.__name__)
+            return get_default_from_schema(inst.context, inst.schema, self.__name__)
         return result
 
     def __set__(self, inst, value):
