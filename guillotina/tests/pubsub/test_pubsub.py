@@ -35,4 +35,4 @@ async def test_pubsub(redis_container, guillotina_main, loop):
     await util.publish('test', 'you', 'mydata')
     assert len(RESULT) == 2
 
-    await util.finalize()
+    await util.finalize(None)

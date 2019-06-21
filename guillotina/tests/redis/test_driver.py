@@ -60,7 +60,7 @@ async def test_redis_pubsub(redis_container, guillotina_main, loop):
     await asyncio.sleep(0.1)
 
     assert len(RESULTS) > 0
-    assert RESULTS[0] == 'dummydata'
+    assert RESULTS[0] == b'dummydata'
 
     task.cancel()
     await driver.finalize()

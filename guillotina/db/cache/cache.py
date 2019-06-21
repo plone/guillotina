@@ -99,7 +99,7 @@ class BasicCache(BaseCache):
                 await self.delete_all(keys_to_invalidate)
 
             if len(self._keys_to_publish) > 0:
-                asyncio.ensure_future(self._utility._synchronize(
+                asyncio.ensure_future(self._utility.synchronize(
                     self._stored_objects, self._keys_to_publish,
                     self._transaction._tid))
             self._keys_to_publish = []
