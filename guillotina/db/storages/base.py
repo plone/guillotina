@@ -2,16 +2,13 @@
 
 class BaseStorage:
 
-    _cache_strategy = 'dummy'
     _read_only = False
     _transaction_strategy = 'resolve'
     _supports_unique_constraints = False
 
-    def __init__(self, read_only=False, transaction_strategy='resolve',
-                 cache_strategy='dummy'):
+    def __init__(self, read_only=False, transaction_strategy='resolve'):
         self._read_only = read_only
         self._transaction_strategy = transaction_strategy
-        self._cache_strategy = cache_strategy
         self._hits = 0
         self._misses = 0
         self._stored = 0

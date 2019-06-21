@@ -514,12 +514,11 @@ class PostgresqlStorage(BaseStorage):
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
-                 conn_acquire_timeout=20, cache_strategy='dummy', db_schema='public',
+                 conn_acquire_timeout=20, db_schema='public',
                  objects_table_name='objects', blobs_table_name='blobs',
                  connection_manager=None, autovacuum=True, **options):
         super(PostgresqlStorage, self).__init__(
-            read_only, transaction_strategy=transaction_strategy,
-            cache_strategy=cache_strategy)
+            read_only, transaction_strategy=transaction_strategy)
         self._dsn = dsn
         self._pool_size = pool_size
         self._partition_class = partition

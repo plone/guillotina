@@ -38,6 +38,7 @@ configure.permission('guillotina.GetAPIDefinition', 'Get the API definition')
 configure.permission('guillotina.Public', 'Public access to content')
 configure.permission('guillotina.WebSocket', 'Access to websocket')
 
+configure.permission('guillotina.CacheManage', 'Manage cache')
 
 configure.role("guillotina.Anonymous", "Everybody",
                "All users have this role implicitly", False)
@@ -173,6 +174,9 @@ configure.grant(
 configure.grant(
     permission="guillotina.RawSearchContent",
     role="guillotina.ContainerAdmin")
+configure.grant(
+    permission="guillotina.CacheManage",
+    role="guillotina.Manager")
 configure.grant(
     permission="guillotina.Manage",
     role="guillotina.Manager")

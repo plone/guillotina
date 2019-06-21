@@ -9,7 +9,6 @@ class BaseCache:
     max_cache_record_size = 1024 * 1024 * 5  # even 5mb is quite large...
 
     def __init__(self, transaction):
-        self._storage = transaction._manager._storage
         self._transaction = transaction
         self.__hits = 0
         self.__misses = 0
@@ -22,7 +21,6 @@ class BaseCache:
     @_hits.setter
     def _hits(self, value):
         self.__hits += 1
-        self._storage._hits += 1
 
     @property
     def _misses(self):
@@ -31,7 +29,6 @@ class BaseCache:
     @_misses.setter
     def _misses(self, value):
         self.__misses += 1
-        self._storage._misses += 1
 
     @property
     def _stored(self):
@@ -40,7 +37,6 @@ class BaseCache:
     @_stored.setter
     def _stored(self, value):
         self.__stored += 1
-        self._storage._stored += 1
 
     def get_key(self, oid=None, container=None, id=None, variant=None):
         key = '{}-'.format(getattr(self._transaction.manager, 'db_id', 'root'))

@@ -1,0 +1,2 @@
+class NoRedisConfigured(Exception):
+    pass
