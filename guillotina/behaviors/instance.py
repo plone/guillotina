@@ -16,7 +16,7 @@ class AnnotationBehavior:
 
     auto_serialize = True
 
-    __local__properties__: Tuple[str, ...] = ()
+    __local__properties__: Tuple[str, ...] = ()  # bbb
 
     # each annotation is stored
     __annotations_data_key__ = 'default'
@@ -52,6 +52,7 @@ class AnnotationBehavior:
 
     def __getattr__(self, name):
         if (name not in self.__dict__['schema'] or
+                hasattr(self, name) or
                 name in self.__local__properties__):
             return super(AnnotationBehavior, self).__getattr__(name)
 
@@ -68,6 +69,7 @@ class AnnotationBehavior:
                 name.startswith('__') or
                 name.startswith('_v_') or
                 name in self.__local__properties__ or
+                hasattr(self, name) or
                 name.startswith('_p_')):
             super(AnnotationBehavior, self).__setattr__(name, value)
         else:

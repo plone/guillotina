@@ -7,6 +7,7 @@ from guillotina import schema
 from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.instance import ContextBehavior
+from guillotina.behaviors.properties import ContextProperty
 from guillotina.content import Item
 from guillotina.content import Resource
 from guillotina.directives import index_field
@@ -105,7 +106,8 @@ class IMarkerBehavior(Interface):
 
 
 class ITestBehavior(Interface):
-    foobar = schema.TextLine()
+    foobar = schema.TextLine(required=False)
+    foobar_context = schema.TextLine(required=False, default='default-foobar')
 
 
 @configure.behavior(
@@ -114,7 +116,7 @@ class ITestBehavior(Interface):
     marker=IMarkerBehavior,
     for_="guillotina.interfaces.IResource")
 class GTestBehavior(AnnotationBehavior):
-    pass
+    foobar_context = ContextProperty('foobar_context')
 
 
 class ITestContextBehavior(Interface):

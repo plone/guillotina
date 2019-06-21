@@ -12,6 +12,7 @@ Guillotina 5 changes focus around the following features:
 API Removals/changes
 -------------------
 
+- `__local__properties__` no longer necessary `ContextProperty` on behaviors
 - Removed `IInteraction`. Use `guillotina.utils.get_security_policy()`
 - `ISecurityPolicy`: instead of adapting request, it now adapter a principal
   - Move `ISecurityPolicy.cached_principals` to module level function `guillotina.security.policy.cached_principals`

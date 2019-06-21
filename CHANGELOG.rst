@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a5 (unreleased)
 --------------------
 
+- deprecate `__local__properties__`. `ContextProperty` works on it's own now
+  [vangheem]
+
 - Add argon2 pw hashing
   [vangheem]
 
