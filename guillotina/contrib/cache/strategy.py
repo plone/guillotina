@@ -142,8 +142,10 @@ class BasicCache(BaseCache):
             raise NoPubSubUtility()
         await channel_utility.publish(
             app_settings['cache']['updates_channel'],
+            self._transaction._tid,
             serialize.dumps({
                 'tid': self._transaction._tid,
                 'keys': self._keys_to_publish,
                 'push': push
-            }))
+            })
+        )

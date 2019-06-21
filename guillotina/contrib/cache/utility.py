@@ -164,7 +164,7 @@ class CacheUtility:
         self.ignore_tid(tid)
         if self._subscriber:
             await self._subscriber.publish(
-                self._settings['updates_channel'],
+                app_settings['cache']['updates_channel'],
                 serialize.dumps({
                     'tid': tid,
                     'keys': keys_to_publish,
