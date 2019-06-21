@@ -268,6 +268,18 @@ async def test_create_delete_contenttype(container_requester):
 
 async def test_register_registry(container_requester):
     async with container_requester as requester:
+        # JSON schema validation
+        _, status = await requester(
+            'POST',
+            '/db/guillotina/@registry',
+            data=json.dumps({
+                "initial_values": {
+                    "enabled": True
+                }
+            })
+        )
+        assert status == 412
+
         response, status = await requester(
             'POST',
             '/db/guillotina/@registry',
@@ -279,6 +291,16 @@ async def test_register_registry(container_requester):
             })
         )
         assert status == 201
+
+        # JSON Schema validation
+        _, status = await requester(
+            'PATCH',
+            '/db/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.enabled',
+            data=json.dumps({
+                "v": False
+            })
+        )
+        assert status == 412
 
         response, status = await requester(
             'PATCH',

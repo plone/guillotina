@@ -56,6 +56,16 @@ async def test_set_dynamic_behavior(custom_type_container_requester):
         )
         assert status == 201
 
+        # JSON schema validation
+        response, status = await requester(
+            'PATCH',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'b': 'guillotina.test_package.ITestBehavior'
+            })
+        )
+        assert status == 412
+
         # We create the behavior
         response, status = await requester(
             'PATCH',
@@ -215,6 +225,16 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
         )
 
         assert 'guillotina.test_package.ITestBehavior' in response
+
+        # JSON schema Validation
+        response, status = await requester(
+            'DELETE',
+            '/db/guillotina/item1/@behaviors',
+            data=json.dumps({
+                'b': 'guillotina.test_package.ITestBehavior'
+            })
+        )
+        assert status == 412
 
         # We delete the behavior
         response, status = await requester(
