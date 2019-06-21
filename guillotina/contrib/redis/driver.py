@@ -10,6 +10,7 @@ from guillotina import app_settings
 from guillotina.contrib.redis.exceptions import NoRedisConfigured
 from typing import List
 from typing import Optional
+from typing import Any
 
 logger = logging.getLogger('guillotina.contrib.redis')
 
@@ -53,7 +54,7 @@ class RedisDriver:
     async def set(self, key: str, data: str, *, expire: Optional[int] = None):
         if self._pool is None:
             raise NoRedisConfigured()
-        args = []
+        args: List[Any] = []
         if expire is not None:
             args[:] = [b'EX', expire]
         ok = await self._pool.execute(b'SET', key, data, *args)
