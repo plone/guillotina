@@ -70,7 +70,8 @@ setup(
         'cffi',
         'PyYAML>=5.1',
         'lru-dict',
-        'mypy_extensions'
+        'mypy_extensions',
+        'argon2-cffi'
     ],
     extras_require={
         'test': [
