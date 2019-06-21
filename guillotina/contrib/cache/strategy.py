@@ -1,20 +1,23 @@
-from guillotina import configure
-from guillotina.component import query_utility
-from guillotina.interfaces import ICacheUtility
-from guillotina.db.interfaces import ITransaction
-from guillotina.db.interfaces import ITransactionCache
-from guillotina.db.cache.base import BaseCache
-from guillotina.profile import profilable
-
-
 import asyncio
 import logging
+
+from guillotina import configure
+from guillotina.component import query_utility
+from guillotina.contrib.cache import serialize
+from guillotina.db.cache.base import BaseCache
+from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionCache
+from guillotina.exceptions import NoPubSubUtility
+from guillotina.interfaces import ICacheUtility
+from guillotina.interfaces import IPubSubUtility
+from guillotina.profile import profilable
 
 
 logger = logging.getLogger('guillotina_rediscache')
 
 _default_size = 1024
 _basic_types = (bytes, str, int, float)
+
 
 @configure.adapter(for_=ITransaction, provides=ITransactionCache, name="basic")
 class BasicCache(BaseCache):
@@ -99,11 +102,47 @@ class BasicCache(BaseCache):
                 await self.delete_all(keys_to_invalidate)
 
             if len(self._keys_to_publish) > 0:
-                asyncio.ensure_future(self._utility.synchronize(
-                    self._stored_objects, self._keys_to_publish,
-                    self._transaction._tid))
+                asyncio.ensure_future(self.synchronize())
             self._keys_to_publish = []
             self._stored_objects = []
         except Exception:
             logger.warning('Error closing connection', exc_info=True)
 
+    @profilable
+    async def synchronize(self):
+        '''
+        publish cache changes on redis
+        '''
+        push = {}
+        for obj, pickled in self._stored_objects:
+            val = {
+                'state': pickled,
+                'zoid': obj.__uuid__,
+                'tid': obj.__serial__,
+                'id': obj.__name__
+            }
+            if obj.__of__:
+                ob_key = self.get_key(
+                    oid=obj.__of__, id=obj.__name__, variant='annotation')
+                await self.set(
+                    val, oid=obj.__of__, id=obj.__name__, variant='annotation')
+            else:
+                ob_key = self.get_key(
+                    container=obj.__parent__, id=obj.__name__)
+                await self.set(
+                    val, container=obj.__parent__, id=obj.__name__)
+
+            if ob_key in self._keys_to_publish:
+                self._keys_to_publish.remove(ob_key)
+            push[ob_key] = val
+
+        channel_utility = query_utility(IPubSubUtility)
+        if channel_utility is None:
+            raise NoPubSubUtility()
+        await channel_utility.publish(
+            self._settings['updates_channel'],
+            serialize.dumps({
+                'tid': self._transaction._tid,
+                'keys': self._keys_to_publish,
+                'push': push
+            }))

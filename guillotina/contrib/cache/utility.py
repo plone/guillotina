@@ -171,45 +171,6 @@ class CacheUtility:
                     'push': push
                 }))
 
-    @profilable
-    async def synchronize(self, stored_objects, keys_to_publish, tid):
-        '''
-        publish cache changes on redis
-        '''
-        push = {}
-        for obj, pickled in stored_objects:
-            val = {
-                'state': pickled,
-                'zoid': obj.__uuid__,
-                'tid': obj.__serial__,
-                'id': obj.__name__
-            }
-            if obj.__of__:
-                ob_key = self.get_key(
-                    oid=obj.__of__, id=obj.__name__, variant='annotation')
-                await self.set(
-                    val, oid=obj.__of__, id=obj.__name__, variant='annotation')
-            else:
-                ob_key = self.get_key(
-                    container=obj.__parent__, id=obj.__name__)
-                await self.set(
-                    val, container=obj.__parent__, id=obj.__name__)
-
-            if ob_key in keys_to_publish:
-                keys_to_publish.remove(ob_key)
-            push[ob_key] = val
-
-        channel_utility = query_utility(IPubSubUtility)
-        if channel_utility is None:
-            raise NoPubSubUtility()
-        await channel_utility.publish(
-            self._settings['updates_channel'],
-            serialize.dumps({
-                'tid': tid,
-                'keys': keys_to_publish,
-                'push': push
-            }))
-
     async def get_stats(self):
         result = {
             'in-memory': {

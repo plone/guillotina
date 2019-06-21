@@ -23,3 +23,4 @@ app_settings = {
 
 def includeme(root, settings):
     configure.scan('guillotina.contrib.cache.api')
+    configure.scan('guillotina.contrib.cache.strategy')
