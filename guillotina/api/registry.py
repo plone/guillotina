@@ -157,14 +157,14 @@ class Register(Service):
     permission='guillotina.WriteConfiguration', name='@registry/{dotted_name}',
     summary='Update registry setting',
     validate=True,
-    parameters={
+    parameters=[{
         "name": "body",
         "in": "body",
         "type": "object",
         "schema": {
             "$ref": "#/definitions/UpdateRegistry"
         }
-    },
+    }],
     responses={
         "200": {
             "description": "Successfully wrote configuration"

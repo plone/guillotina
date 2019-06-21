@@ -41,10 +41,8 @@ class DictFieldProxy():
 
 class Service(View):
     async def validate(self, parameters):
-        data = await  self.request.json()
+        data = await self.request.json()
         schema = parameters[0]['schema']['$ref'][14:]
-        print(parameters)
-        print(schema)
         validator = get_schema_validator(schema)
         try:
             validator.validate(data)

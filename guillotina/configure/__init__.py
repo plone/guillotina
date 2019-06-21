@@ -448,7 +448,7 @@ class service(_base_decorator):  # noqa: N801
             # create new class with customizations
             klass = type(func.__name__, (func,), dict(func.__dict__))
             klass.config = self.config
-            __parameters__ = klass.config.get('parameters', {}) 
+            __parameters__ = klass.config.get('parameters', {})
             if klass.config.get('validate', False):
                 original = klass.__call__
 
