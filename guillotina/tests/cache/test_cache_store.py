@@ -15,7 +15,8 @@ DEFAULT_SETTINGS = {
         'guillotina.contrib.cache',
     ],
     'cache': {
-        'updates_channel': None
+        'updates_channel': None,
+        'driver': 'guillotina.contrib.redis'
     }
 }
 

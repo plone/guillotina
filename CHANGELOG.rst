@@ -3,6 +3,9 @@ CHANGELOG
 
 5.0.0a5 (unreleased)
 --------------------
+- Adding rediscache and pubsub logic. Now you can have memory cache, network cache with invalidation
+  and pubsub service. `guillotina_rediscache` is not necessary any more.
+  [bloodbare]
 
 - Add argon2 pw hashing
   [vangheem]

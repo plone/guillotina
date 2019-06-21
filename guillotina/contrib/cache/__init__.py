@@ -5,8 +5,8 @@ CACHE_PREFIX = 'gcache2-'
 
 app_settings = {
     'cache': {
-        'driver': '',  # to use redis 'guillotina.contrib.redis'
-        'updates_channel': '',  # to use pubsub invalidation you need a id for the channel
+        'driver': None,  # to use redis 'guillotina.contrib.redis', empty memory
+        'updates_channel': None,  # to use pubsub invalidation you need a id for the channel
         'memory_cache_size': 209715200,
         'strategy': 'basic',
         'ttl': 3600,

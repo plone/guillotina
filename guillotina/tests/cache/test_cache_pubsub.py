@@ -18,7 +18,12 @@ DEFAULT_SETTINGS = {
         'guillotina.contrib.redis',
         'guillotina.contrib.cache',
         'guillotina.contrib.pubsub',
-    ]
+    ],
+    'cache': {
+        'updates_channel': 'guillotina',
+        'driver': 'guillotina.contrib.redis'
+    }
+
 }
 
 

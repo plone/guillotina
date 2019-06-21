@@ -175,6 +175,7 @@ Now you can start hands-on style guide to learn how to use it.
    developer/debugging
 ```
 
+
 # Deploying
 
 - [Installing guillotina](./installation/installation.html)
@@ -213,6 +214,12 @@ Now you can start hands-on style guide to learn how to use it.
    installation/index
 ```
 
+```eval_rst
+.. toctree::
+   :maxdepth: 2
+
+   contrib/index
+```
 
 # About
 
