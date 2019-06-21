@@ -5,14 +5,14 @@ CACHE_PREFIX = 'gcache2-'
 
 app_settings = {
     'cache': {
-        'driver': 'guillotina.contrib.redis',  # Empty to use memory
-        'updates_channel': 'guillotina',  # Empty to not subscribe
+        'driver': '',  # to use redis 'guillotina.contrib.redis'
+        'updates_channel': '',  # to use pubsub invalidation you need a id for the channel
         'memory_cache_size': 209715200,
         'strategy': 'basic',
         'ttl': 3600,
     },
     'load_utilities': {
-        'guillotina.cache': {
+        'guillotina_cache': {
             'provides': 'guillotina.interfaces.ICacheUtility',
             'factory': 'guillotina.contrib.cache.utility.CacheUtility',
             'settings': {}

@@ -7,16 +7,6 @@ import pickle
 import asyncio
 import logging
 
-app_settings = {
-    'pubsub': 'guillotina.contrib.redis.driver.driver',
-    'load_utilities': {
-        'subscription': {
-            'provides': 'guillotina.interfaces.IPubSubUtility',
-            'factory': 'guillotina.contrib.pubsub.PubSubUtility',
-            'settings': {}
-        }
-    }
-}
 
 logger = logging.getLogger('guillotina')
 

@@ -1,7 +1,7 @@
 
 app_settings = {
     'load_utilities': {
-        'guillotina.pubsub': {
+        'guillotina_pubsub': {
             'provides': 'guillotina.interfaces.IPubSubUtility',
             'factory': 'guillotina.contrib.pubsub.utility.PubSubUtility',
             'settings': {

@@ -149,13 +149,12 @@ class CacheUtility:
             self._ignored_tids.remove(msg['tid'])
             return
 
-        mem_cache_obj = memcache.get_memory_cache()
         for key in msg['keys']:
-            if key in mem_cache_obj:
-                del mem_cache_obj[key]
+            if key in self._memory_cache:
+                del self._memory_cache[key]
 
         for cache_key, ob in msg.get('push', {}).items():
-            mem_cache_obj[cache_key] = ob
+            self._memory_cache[cache_key] = ob
 
     def ignore_tid(self, tid):
         # so we don't invalidate twice...
