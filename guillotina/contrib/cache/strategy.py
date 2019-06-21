@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import query_utility
 from guillotina.contrib.cache import serialize
@@ -140,7 +141,7 @@ class BasicCache(BaseCache):
         if channel_utility is None:
             raise NoPubSubUtility()
         await channel_utility.publish(
-            self._settings['updates_channel'],
+            app_settings['cache']['updates_channel'],
             serialize.dumps({
                 'tid': self._transaction._tid,
                 'keys': self._keys_to_publish,
