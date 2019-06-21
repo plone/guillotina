@@ -93,7 +93,7 @@ class SaltedHashPasswordValidator:
     def get_executor(self):
         root = get_utility(IApplication, name='root')
         if not hasattr(root, '_pw_executor'):
-            root._pw_executor = ThreadPoolExecutor(max_workers=3)
+            root._pw_executor = ThreadPoolExecutor(max_workers=2)
         return root._pw_executor
 
     async def validate(self, token):
