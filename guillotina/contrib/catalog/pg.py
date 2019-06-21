@@ -542,7 +542,6 @@ class PGSearchUtility(DefaultSearchUtility):
         except RequestNotFound:
             context_url = get_content_path(container)
         logger.debug(f'Running search:\n{sql}\n{arguments}')
-        print(f'{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
             result = self.load_meatdata(query, data)
