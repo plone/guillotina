@@ -304,7 +304,9 @@ class DefaultPUT(DefaultPATCH):
                 await annotations_container.async_del(behavior.__annotations_data_key__)
             try:
                 behavior.data.clear()
-                for local_prop in behavior.__local__properties__:
+                for local_prop in vars(type(behavior)):
+                    if local_prop[0] == '_':
+                        continue
                     if local_prop in self.context.__dict__:
                         del self.context.__dict__[local_prop]
             except AttributeError:
