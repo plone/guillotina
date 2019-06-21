@@ -1,4 +1,5 @@
 import hashlib
+import asyncio
 import logging
 import uuid
 
@@ -9,9 +10,11 @@ from guillotina._settings import app_settings
 from guillotina.auth import find_user
 from guillotina.component import get_utility
 from guillotina.component import query_utility
-from guillotina.interfaces import IPasswordChecker
+from guillotina.interfaces import IPasswordChecker, IApplication
 from guillotina.interfaces import IPasswordHasher
 from guillotina.utils import strings_differ
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 
 
 ph = argon2.PasswordHasher()
@@ -87,6 +90,12 @@ def check_password(token, password):
 class SaltedHashPasswordValidator:
     for_validators = ('basic', 'wstoken')
 
+    def get_executor(self):
+        root = get_utility(IApplication, name='root')
+        if not hasattr(root, '_pw_executor'):
+            root._pw_executor = ThreadPoolExecutor(max_workers=3)
+        return root._pw_executor
+
     async def validate(self, token):
         user = await find_user(token)
         user_pw = getattr(user, 'password', None)
@@ -94,7 +103,9 @@ class SaltedHashPasswordValidator:
                 ':' not in user_pw or
                 'token' not in token):
             return
-        if check_password(user_pw, token['token']):
+        executor = self.get_executor()
+        loop = asyncio.get_event_loop()
+        if await loop.run_in_executor(executor, partial(check_password, user_pw, token['token'])):
             return user
 
 
