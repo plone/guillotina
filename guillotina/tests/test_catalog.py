@@ -227,8 +227,7 @@ async def test_query_pg_catalog(container_requester):
             root = await tm.get_root()
             container = await root.async_get('guillotina')
 
-            util = PGSearchUtility()
-            await util.initialize()
+            util = query_utility(ICatalogUtility)
             results = await util.query(container, {'id': 'item1'})
             assert len(results['member']) == 1
 
@@ -266,8 +265,7 @@ async def test_fulltext_query_pg_catalog(container_requester):
             root = await tm.get_root()
             container = await root.async_get('guillotina')
 
-            util = PGSearchUtility()
-            await util.initialize()
+            util = query_utility(ICatalogUtility)
             results = await util.query(container, {'title': 'something'})
             assert len(results['member']) == 2
             results = await util.query(container, {'title': 'interesting'})
