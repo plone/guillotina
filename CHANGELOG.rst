@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a4 (unreleased)
+5.0.0a4 (2019-06-21)
 --------------------
 
 - Fix path__startswith query
