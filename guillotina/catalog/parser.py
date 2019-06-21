@@ -23,9 +23,11 @@ class BaseParser:
         # bbb
         if 'SearchableText' in params:
             value = params.pop('SearchableText')
+            oring = {}
             for index_name, idx_data in iter_indexes():
                 if idx_data['type'] in ('text', 'searchabletext'):
-                    params['{}__in'.format(index_name)] = value
+                    oring['{}__in'.format(index_name)] = value
+            params['searchabletext__or'] = oring
 
         if params.get('sort_on') == 'getObjPositionInParent':
             params['_sort_asc'] = 'position_in_parent'
@@ -49,7 +51,7 @@ class BaseParser:
 
         # normalize depth
         found = False
-        for param in params.keys():
+        for param in [k for k in params.keys()]:
             if param == 'depth' or param.startswith('depth__'):
                 found = True
                 params[param] = str(int(params[param]) + get_content_depth(self.context))

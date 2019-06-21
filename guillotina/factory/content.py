@@ -60,7 +60,10 @@ class ApplicationRoot(object):
                          exc_info=True)
             raise
         alsoProvides(utility_object, interface)
-        provide_utility(utility_object, interface)
+        kw = {}
+        if 'name' in config:
+            kw['name'] = config['name']
+        provide_utility(utility_object, interface, **kw)
         if hasattr(utility_object, 'initialize'):
             task = asyncio.ensure_future(
                 lazy_apply(utility_object.initialize, app=self.app),
@@ -90,7 +93,10 @@ class ApplicationRoot(object):
         self.cancel_async_utility(key)
         config = self._async_utilities[key]['config']
         interface = import_class(config['provides'])
-        utility = get_utility(interface)
+        if 'name' in config:
+            utility = get_utility(interface, name=config['name'])
+        else:
+            utility = get_utility(interface)
         if hasattr(utility, 'finalize'):
             await lazy_apply(utility.finalize, app=self.app)
         gsm = get_global_components()
