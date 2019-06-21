@@ -27,7 +27,7 @@ class BaseParser:
             for index_name, idx_data in iter_indexes():
                 if idx_data['type'] in ('text', 'searchabletext'):
                     oring['{}__in'.format(index_name)] = value
-            params['text__or'] = oring
+            params['searchabletext__or'] = oring
 
         if params.get('sort_on') == 'getObjPositionInParent':
             params['_sort_asc'] = 'position_in_parent'

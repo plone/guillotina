@@ -299,7 +299,8 @@ async def test_parse_bbb_plone(dummy_guillotina):
         'b_start': 50,
         'path.depth': 2
     })
-    assert 'title__in' in result['params']
+    assert 'searchabletext__or' in result['params']
+    assert 'title__in' in result['params']['searchabletext__or']
     assert 'depth' in result['params']
     assert 'type_name' in result['params']
     assert 'portal_type' not in result['params']
@@ -359,23 +360,23 @@ async def test_pg_field_parser(dummy_guillotina):
                    ('not', '!='), ('lt', '<')):
         where, value, select = parser.process_queried_field(f'depth__{q1}', '2')
         assert f' {q2} ' in where
-        assert value == 2
+        assert value == [2]
 
     # bad int
     assert parser.process_queried_field(f'depth__{q1}', 'foobar') is None
 
     # convert bool
     where, value, select = parser.process_queried_field(f'boolean_field', 'true')
-    assert value is True
+    assert value == [True]
     where, value, select = parser.process_queried_field(f'boolean_field', 'false')
-    assert value is False
+    assert value == [False]
 
     # none for invalid
     assert parser.process_queried_field(f'foobar', None) is None
 
     # convert to list
     where, value, select = parser.process_queried_field(f'tags__in', 'foo,bar')
-    assert value == ['foo', 'bar']
+    assert value == [['foo', 'bar']]
     assert ' ?| ' in where
 
     where, value, select = parser.process_queried_field(f'tags', 'bar')
@@ -387,7 +388,7 @@ async def test_pg_field_parser(dummy_guillotina):
     # date parsing
     where, value, select = parser.process_queried_field(
         f'creation_date__gte', '2019-06-15T18:37:31.008359+00:00')
-    assert isinstance(value, datetime)
+    assert isinstance(value[0], datetime)
 
     # path
     where, value, select = parser.process_queried_field(f'path', '/foo/bar')
