@@ -164,3 +164,15 @@ class IRegistryEditedEvent(interfaces.IObjectEvent):
     '''
     When registry edited
     '''
+
+
+class IBeforeAsyncUtilityLoadedEvent(Interface):
+    '''
+    Right before async utility is loaded
+    '''
+
+
+class IAfterAsyncUtilityLoadedEvent(Interface):
+    '''
+    Right after async utility is loaded
+    '''
