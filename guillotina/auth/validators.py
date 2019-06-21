@@ -2,6 +2,7 @@ import hashlib
 import logging
 import uuid
 
+import argon2
 import jwt
 from guillotina import configure
 from guillotina._settings import app_settings
@@ -13,10 +14,32 @@ from guillotina.interfaces import IPasswordHasher
 from guillotina.utils import strings_differ
 
 
+ph = argon2.PasswordHasher()
+
+
 logger = logging.getLogger('guillotina')
 
 class BaseValidator:
     for_validators = None
+
+
+@configure.utility(provides=IPasswordHasher, name='argon2')
+def argon2_pw_hasher(pw, salt):
+    return ph.hash(pw + salt)
+
+
+@configure.utility(provides=IPasswordChecker, name='argon2')
+def argon2_password_checker(token, password):
+    split = token.split(':')
+    if len(split) != 3:
+        return False
+    salt = split[1]
+    hashed = split[2]
+    try:
+        return ph.verify(hashed, password + salt)
+    except (argon2.exceptions.InvalidHash,
+            argon2.exceptions.VerifyMismatchError):
+        return False
 
 
 @configure.utility(provides=IPasswordHasher, name='sha512')
@@ -34,7 +57,7 @@ def hash_password_checker(token, password):
     return not strings_differ(hash_password(password, salt, algorithm), token)
 
 
-def hash_password(password, salt=None, algorithm='sha512'):
+def hash_password(password, salt=None, algorithm='argon2'):
     if salt is None:
         salt = uuid.uuid4().hex
 

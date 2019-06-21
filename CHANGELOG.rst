@@ -4,8 +4,8 @@ CHANGELOG
 5.0.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
-
+- Add argon2 pw hashing
+  [vangheem]
 
 5.0.0a4 (2019-06-21)
 --------------------
