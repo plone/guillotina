@@ -1,5 +1,4 @@
 from guillotina.contrib.cache.utility import CacheUtility
-from guillotina.tests import mocks
 
 
 async def test_get_size_of_item():

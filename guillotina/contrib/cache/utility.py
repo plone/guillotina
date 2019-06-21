@@ -203,7 +203,7 @@ class CacheUtility:
         if channel_utility is None:
             raise NoPubSubUtility()
         await channel_utility.publish(
-            self._settings['updates_channel'], 
+            self._settings['updates_channel'],
             serialize.dumps({
                 'tid': tid,
                 'keys': keys_to_publish,
