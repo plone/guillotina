@@ -139,6 +139,9 @@ class Parser(BaseParser):
         elif field.endswith('__lte'):
             operator = '<='
             field = field[:-len('__lte')]
+        elif field.endswith('__starts'):
+            operator = 'starts'
+            field = field[:-len('__starts')]
 
         index = get_index_definition(field)
         if index is None:
@@ -163,6 +166,11 @@ class Parser(BaseParser):
         elif _type in ('text', 'searchabletext'):
             operator = '='
             value = '&'.join(to_list(value))
+        if _type == 'path':
+            if operator != 'starts':
+                # we do not currently support other search types
+                logger.warning(f'Unsupported search {field}: {value}')
+            operator = '='
 
         if operator == '?|':
             result = to_list(value)

@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a4 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix path__startswith query
+  [vangheem]
 
 
 5.0.0a3 (2019-06-21)
