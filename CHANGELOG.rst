@@ -4,8 +4,11 @@ CHANGELOG
 5.0.0a5 (unreleased)
 --------------------
 
-- Completely remove support for `utilities` configuration. Use `load_utilities`.
+- Add argon2 pw hashing
+  [vangheem]
 
+- Completely remove support for `utilities` configuration. Use `load_utilities`.
+  [vangheem]
 
 5.0.0a4 (2019-06-21)
 --------------------

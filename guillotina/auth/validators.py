@@ -1,22 +1,49 @@
+import asyncio
 import hashlib
 import logging
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 
+import argon2
 import jwt
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.auth import find_user
 from guillotina.component import get_utility
 from guillotina.component import query_utility
+from guillotina.interfaces import IApplication
 from guillotina.interfaces import IPasswordChecker
 from guillotina.interfaces import IPasswordHasher
 from guillotina.utils import strings_differ
+
+
+ph = argon2.PasswordHasher()
 
 
 logger = logging.getLogger('guillotina')
 
 class BaseValidator:
     for_validators = None
+
+
+@configure.utility(provides=IPasswordHasher, name='argon2')
+def argon2_pw_hasher(pw, salt):
+    return ph.hash(pw + salt)
+
+
+@configure.utility(provides=IPasswordChecker, name='argon2')
+def argon2_password_checker(token, password):
+    split = token.split(':')
+    if len(split) != 3:
+        return False
+    salt = split[1]
+    hashed = split[2]
+    try:
+        return ph.verify(hashed, password + salt)
+    except (argon2.exceptions.InvalidHash,
+            argon2.exceptions.VerifyMismatchError):
+        return False
 
 
 @configure.utility(provides=IPasswordHasher, name='sha512')
@@ -34,7 +61,7 @@ def hash_password_checker(token, password):
     return not strings_differ(hash_password(password, salt, algorithm), token)
 
 
-def hash_password(password, salt=None, algorithm='sha512'):
+def hash_password(password, salt=None, algorithm='argon2'):
     if salt is None:
         salt = uuid.uuid4().hex
 
@@ -64,6 +91,12 @@ def check_password(token, password):
 class SaltedHashPasswordValidator:
     for_validators = ('basic', 'wstoken')
 
+    def get_executor(self):
+        root = get_utility(IApplication, name='root')
+        if not hasattr(root, '_pw_executor'):
+            root._pw_executor = ThreadPoolExecutor(max_workers=2)
+        return root._pw_executor
+
     async def validate(self, token):
         user = await find_user(token)
         user_pw = getattr(user, 'password', None)
@@ -71,7 +104,9 @@ class SaltedHashPasswordValidator:
                 ':' not in user_pw or
                 'token' not in token):
             return
-        if check_password(user_pw, token['token']):
+        executor = self.get_executor()
+        loop = asyncio.get_event_loop()
+        if await loop.run_in_executor(executor, partial(check_password, user_pw, token['token'])):
             return user
 
 
