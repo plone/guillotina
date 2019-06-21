@@ -26,6 +26,7 @@ matrix:
 services:
   - postgresql
   - docker
+  - redis-server
 before_script:
   - psql -c 'create database guillotina;' -U postgres
 
