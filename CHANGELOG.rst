@@ -4,7 +4,7 @@ CHANGELOG
 5.0.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Completely remove support for `utilities` configuration. Use `load_utilities`.
 
 
 5.0.0a4 (2019-06-21)

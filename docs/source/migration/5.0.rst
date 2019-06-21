@@ -29,7 +29,6 @@ API Removals/changes
 - Remove `Request.container`, Use `guillotina.task_vars.container.get()`
 - Remove `Request.add_future`. Use `guillotina.utils.execute.add_future`
 - Add `guillotina.utils.find_container`
-- Rename `request_indexer` setting to `indexer`
 - Rename `guillotina.catalog.index.RequestIndexer` to `guillotina.catalog.index.Indexer`
 - Rename `IWriter.parent_id` to `IWriter.parent_uid`
 - Rename `guillotina.db.oid` to `guillotina.db.uid`
@@ -41,6 +40,15 @@ API Removals/changes
 - rename `guillotina.transactions.managed_transaction` to `guillotina.transactions.transaction`
 - Default catalog interface removes the following methods: `get_by_uuid`, `get_by_type`, `get_by_path`,
   `get_folder_contents`.
+
+
+Settings changes
+----------------
+
+Application(json/yaml) settings changes.
+
+- Rename `request_indexer` to `indexer`
+- Remove `utilities` support. Use `load_utilities`
 
 
 Command changes
