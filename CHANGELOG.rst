@@ -7,6 +7,10 @@ CHANGELOG
   and pubsub service. `guillotina_rediscache` is not necessary any more.
   [bloodbare]
 
+
+- deprecate `__local__properties__`. `ContextProperty` works on it's own now
+  [vangheem]
+
 - Add argon2 pw hashing
   [vangheem]
 
