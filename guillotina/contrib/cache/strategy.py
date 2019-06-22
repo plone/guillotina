@@ -9,7 +9,6 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionCache
 from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import ICacheUtility
-from guillotina.interfaces import IPubSubUtility
 from guillotina.profile import profilable
 
 
@@ -99,7 +98,7 @@ class BasicCache(BaseCache):
                 ])
                 await self.delete_all(keys_to_invalidate)
 
-            if len(self._keys_to_publish) > 0:
+            if len(self._keys_to_publish) > 0 and self._utility._subscriber is not None:
                 asyncio.ensure_future(self.synchronize())
         except Exception:
             logger.warning('Error closing connection', exc_info=True)
@@ -109,6 +108,8 @@ class BasicCache(BaseCache):
         '''
         publish cache changes on redis
         '''
+        if self._utility._subscriber is None:
+            raise NoPubSubUtility()
         push = {}
         for obj, pickled in self._stored_objects:
             val = {
@@ -132,11 +133,8 @@ class BasicCache(BaseCache):
                 self._keys_to_publish.remove(ob_key)
             push[ob_key] = val
 
-        channel_utility = query_utility(IPubSubUtility)
-        if channel_utility is None:
-            raise NoPubSubUtility()
         self._utility.ignore_tid(self._transaction._tid)
-        await channel_utility.publish(
+        await self._utility._subscriber.publish(
             app_settings['cache']['updates_channel'],
             self._transaction._tid,
             {
