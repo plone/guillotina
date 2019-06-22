@@ -3,6 +3,10 @@ import jwt
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.testing import TESTING_SETTINGS
 
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 
 async def test_login(container_requester):
     async with container_requester as requester:

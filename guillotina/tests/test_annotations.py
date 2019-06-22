@@ -9,6 +9,8 @@ from guillotina.interfaces import IApplication
 from guillotina.tests.utils import login
 from guillotina.transactions import transaction
 
+pytestmark = pytest.mark.asyncio
+
 
 pytest.mark.skipif(os.environ.get('DATABASE') == 'cockroachdb',
                    reason="Flaky cockroachdb test")

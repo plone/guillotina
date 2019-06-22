@@ -213,7 +213,7 @@ class APICall(Directive):
                 'body': _fmt_body(self.options.get('body'), 8)
             },
             'response': {
-                'status': resp.status,
+                'status': resp.status_code,
                 'headers': _fmt_headers(_clean_headers(dict(resp.headers)), 8),
                 'body': resp_body
             },

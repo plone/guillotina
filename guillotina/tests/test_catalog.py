@@ -21,6 +21,9 @@ from guillotina.tests import mocks
 from guillotina.tests import utils as test_utils
 
 
+pytestmark = pytest.mark.asyncio
+
+
 NOT_POSTGRES = os.environ.get('DATABASE', 'DUMMY') in ('cockroachdb', 'DUMMY')
 PG_CATALOG_SETTINGS = {
     "applications": ["guillotina.contrib.catalog.pg"],
@@ -33,7 +36,7 @@ PG_CATALOG_SETTINGS = {
 }
 
 
-def test_indexed_fields(dummy_guillotina, loop):
+async def test_indexed_fields(dummy_guillotina):
     fields = get_index_fields('Item')
     assert 'uuid' in fields
     assert 'path' in fields
@@ -199,6 +202,7 @@ where json->>'id' = 'item1' AND json->>'container_id' = 'guillotina'
         assert len(result) == 1
 
 
+@pytest.mark.asyncio
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
 async def test_query_pg_catalog(container_requester):
@@ -237,6 +241,7 @@ async def test_query_pg_catalog(container_requester):
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
+@pytest.mark.asyncio
 async def test_fulltext_query_pg_catalog(container_requester):
     async with container_requester as requester:
         await requester(

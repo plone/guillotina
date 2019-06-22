@@ -1,6 +1,9 @@
 from guillotina.tests.utils import make_mocked_request
 
 import asyncio
+import pytest
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_execute_futures():

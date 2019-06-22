@@ -6,6 +6,7 @@ from guillotina.traversal import TraversalRouter
 from unittest import mock
 
 import asyncio
+import pytest
 
 
 def test_make_app(dummy_guillotina):
@@ -13,6 +14,7 @@ def test_make_app(dummy_guillotina):
     assert type(dummy_guillotina.router) == TraversalRouter
 
 
+@pytest.mark.asyncio
 async def test_trns_retries_with_app(dummy_guillotina, dummy_request):
     with mock.patch('guillotina.traversal.BasicMatchInfo.handler') as handle_mock:  # noqa
         f = asyncio.Future()
@@ -23,6 +25,7 @@ async def test_trns_retries_with_app(dummy_guillotina, dummy_request):
         assert resp.status_code == 409
 
 
+@pytest.mark.asyncio
 async def test_async_util_started_and_stopped(dummy_guillotina):
     util = get_utility(ITestAsyncUtility)
     util.state == 'init'

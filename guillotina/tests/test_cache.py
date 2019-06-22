@@ -3,6 +3,10 @@ from guillotina.db.transaction import Transaction
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 
 class MemoryCache(BaseCache):
 

@@ -9,6 +9,8 @@ from zope.interface import Interface
 import json
 import pytest
 
+pytestmark = pytest.mark.asyncio
+
 
 class IFoobarType(Interface):
     pass
@@ -338,7 +340,7 @@ async def test_can_not_delete_concrete_behaviors(custom_type_container_requester
         assert 'guillotina.behaviors.dublincore.IDublinCore' in response
 
 
-def test_function_property():
+async def test_function_property():
     class Ob:
         pass
 

@@ -19,6 +19,10 @@ from guillotina.tests.utils import login
 from guillotina.transactions import get_tm
 from zope.interface import Interface
 
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 
 async def test_serialize_resource(dummy_request):
     content = create_content()
@@ -640,7 +644,7 @@ async def test_bucket_list_field(dummy_request):
     assert 'bucketlist-bucket_list0' in content.__gannotations__
 
 
-def test_default_value_deserialize(dummy_request):
+async def test_default_value_deserialize(dummy_request):
     content = create_content()
     assert {'text': 'foobar'} == deserialize_value.default_value_converter(ITestSchema, {
         'text': 'foobar'

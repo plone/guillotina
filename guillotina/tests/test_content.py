@@ -18,6 +18,8 @@ from guillotina.tests import utils
 import pickle
 import pytest
 
+pytestmark = pytest.mark.asyncio
+
 
 class ICustomContentType(IItem):
 
@@ -131,7 +133,7 @@ async def test_creator_used_from_content_creation(dummy_guillotina):
     assert behavior.contributors == ('root',)
 
 
-def test_base_object():
+async def test_base_object():
     testing = {
         '__parent__': '_BaseObject__parent',
         '__of__': '_BaseObject__of',

@@ -6,10 +6,9 @@ images.configure(
     'cockroachdb/cockroach', 'v2.1.6')
 
 
-images.configure('postgresql', version='10')
+images.configure('postgresql', version='10.9')
 
 
 pytest_plugins = [
-    'aiohttp.pytest_plugin',
     'guillotina.tests.fixtures'
 ]

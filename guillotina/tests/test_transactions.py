@@ -6,16 +6,21 @@ from guillotina.transactions import transaction
 from guillotina.utils import get_object_by_uid
 
 
-async def test_no_tid_created_for_reads(dummy_request, loop):
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
+
+async def test_no_tid_created_for_reads(dummy_request, event_loop):
     tm = mocks.MockTransactionManager()
-    trns = Transaction(tm, loop=loop, read_only=True)
+    trns = Transaction(tm, loop=event_loop, read_only=True)
     await trns.tpc_begin()
     assert trns._tid is None
 
 
-async def test_tid_created_for_writes(dummy_request, loop):
+async def test_tid_created_for_writes(dummy_request, event_loop):
     tm = mocks.MockTransactionManager()
-    trns = Transaction(tm, loop=loop)
+    trns = Transaction(tm, loop=event_loop)
     await trns.tpc_begin()
     assert trns._tid == 1
 

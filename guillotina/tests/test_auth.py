@@ -3,6 +3,9 @@ from datetime import timedelta
 from guillotina._settings import app_settings
 
 import jwt
+import pytest
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_jwt_auth(container_requester):

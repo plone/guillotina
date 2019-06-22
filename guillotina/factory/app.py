@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import logging.config
@@ -168,8 +167,10 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
     :param config_file: path to configuration file to load
     :param settings: dictionary of settings
     :param loop: if not using with default event loop
-    :param settings: provide your own aiohttp application
+    :param settings: provide your own asgi application
     '''
+    assert loop is not None
+
     # reset app_settings
     startup_vars = {}
     for key in app_settings.keys():
@@ -179,9 +180,6 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
     app_settings.clear()
     app_settings.update(startup_vars)
     app_settings.update(deepcopy(default_settings))
-
-    if loop is None:
-        loop = asyncio.get_event_loop()
 
     if config_file is not None:
         from guillotina.commands import get_settings
@@ -241,7 +239,7 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
         except Exception:
             app_logger.error('Could not setup logging configuration', exc_info=True)
 
-    # Make and initialize aiohttp app
+    # Make and initialize asgi app
     root.app = server_app
     server_app.root = root
     server_app.config = config

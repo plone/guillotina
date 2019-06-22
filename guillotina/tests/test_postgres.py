@@ -13,6 +13,8 @@ import concurrent
 import os
 import pytest
 
+pytestmark = pytest.mark.asyncio
+
 
 DATABASE = os.environ.get('DATABASE', 'DUMMY')
 USE_RDMS = DATABASE != 'DUMMY'

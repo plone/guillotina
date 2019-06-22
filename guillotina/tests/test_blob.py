@@ -5,6 +5,10 @@ from guillotina.interfaces import IApplication
 from guillotina.tests.utils import login
 from guillotina.transactions import transaction
 
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 
 async def test_create_blob(db, guillotina_main):
     root = get_utility(IApplication, name='root')

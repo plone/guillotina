@@ -6,6 +6,9 @@ from guillotina.transactions import transaction
 
 import json
 import random
+import pytest
+
+pytestmark = pytest.mark.asyncio
 
 
 async def chunked_stream_gen(char=b'X',

@@ -4,7 +4,6 @@ from unittest import mock
 
 import pytest
 import json
-import sys
 from async_asgi_testclient import TestClient
 from guillotina import testing
 from guillotina.component import get_utility
@@ -47,6 +46,21 @@ def base_settings_configurator(settings):
 
 
 testing.configure_with(base_settings_configurator)
+
+
+@pytest.yield_fixture
+def event_loop():
+    """Create an instance of the default event loop for each test case."""
+    # https://github.com/pytest-dev/pytest-asyncio/issues/30#issuecomment-226947196
+    policy = asyncio.get_event_loop_policy()
+    res = policy.new_event_loop()
+    asyncio.set_event_loop(res)
+    res._close = res.close
+    res.close = lambda: None
+
+    yield res
+
+    res._close()
 
 
 def get_dummy_settings(pytest_node=None):
@@ -214,12 +228,11 @@ class GuillotinaDBRequester(object):
 
 
 @pytest.fixture(scope='function')
-async def dummy_guillotina(loop, request):
+async def dummy_guillotina(event_loop, request):
     globalregistry.reset()
-    app = make_app(settings=get_dummy_settings(request.node), loop=loop)
-    await app.startup()
-    yield app
-    await app.shutdown()
+    app = make_app(settings=get_dummy_settings(request.node), loop=event_loop)
+    async with TestClient(app):
+        yield app
     logout()
 
 
@@ -271,8 +284,7 @@ async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
 
 
-async def _clear_dbs(app):
-    root = app.root
+async def _clear_dbs(root):
     # make sure to completely clear db before carrying on...
     for _, db in root:
         if not IDatabase.providedBy(db):
@@ -295,32 +307,25 @@ SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
 
 
 @pytest.fixture(scope='function')
-def app_client(loop, db, request):
+async def app_client(event_loop, db, request):
     globalregistry.reset()
-    app = make_app(settings=get_db_settings(request.node), loop=loop)
-    app.on_cleanup.insert(0, _clear_dbs)
-    client = TestClient(app, timeout=5)
-    try:
-        loop.run_until_complete(client.__aenter__())
-        yield app, client
-    except Exception:
-        loop.run_until_complete(client.__aexit__(*sys.exc_info()))
-        raise
-    else:
-        loop.run_until_complete(client.__aexit__(None, None, None))
-    finally:
-        logout()
+    app = make_app(settings=get_db_settings(request.node), loop=event_loop)
+    async with TestClient(app, timeout=5) as client:
+        await _clear_dbs(app.app.root)
+        yield client
 
 
 @pytest.fixture(scope='function')
-def guillotina_main(app_client):
-    app, _ = app_client
-    return app
+async def guillotina_main(event_loop, db, request):
+    app = make_app(settings=get_db_settings(request.node), loop=event_loop)
+    async with TestClient(app, timeout=5):
+        await _clear_dbs(app.app.root)
+        yield app
 
 
 @pytest.fixture(scope='function')
 def guillotina(app_client):
-    _, client = app_client
+    client = app_client
     requester = GuillotinaDBRequester(client)
     yield requester
 

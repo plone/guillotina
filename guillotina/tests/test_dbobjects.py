@@ -8,6 +8,8 @@ from zope.interface import implementer
 
 import pytest
 
+pytestmark = pytest.mark.asyncio
+
 
 @implementer(IResource)
 class ObjectTest(BaseObject):

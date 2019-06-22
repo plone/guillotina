@@ -1,4 +1,5 @@
 import json
+import pytest
 
 from guillotina.api.container import create_container
 from guillotina.auth.users import GuillotinaUser
@@ -12,6 +13,8 @@ from guillotina.tests import utils
 from guillotina.tests.utils import get_db
 from guillotina.transactions import transaction
 from guillotina.utils import get_security_policy
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_get_guillotina(container_requester):

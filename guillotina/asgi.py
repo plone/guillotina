@@ -86,8 +86,7 @@ class AsgiApp:
                         "headers": headers_to_list(resp.headers)
                     }
                 )
-                body = resp.text or ""
-                await send({"type": "http.response.body", "body": body.encode()})
+                await send({"type": "http.response.body", "body": resp.body or b""})
 
     async def request_handler(self, request, retries=0):
         try:

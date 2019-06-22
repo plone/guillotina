@@ -5,6 +5,9 @@ from guillotina.component import get_utility
 from guillotina.tests import utils
 
 import asyncio
+import pytest
+
+pytestmark = pytest.mark.asyncio
 
 
 class AsyncMockView(View):
@@ -20,7 +23,7 @@ class AsyncMockView(View):
         await self.func(*self.args, **self.kwargs)
 
 
-async def test_add_sync_utility(guillotina, loop):
+async def test_add_sync_utility(guillotina):
 
     util = get_utility(IQueueUtility)
     var = []
