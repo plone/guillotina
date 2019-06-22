@@ -43,11 +43,13 @@ class ApplicationRoot(object):
         self._async_utilities = {}
         self._loop = loop
 
-    def add_async_utility(self, key, config, loop=None):
+    def add_async_utility(self, key: str, config: typing.Dict,
+                          loop: typing.Optional[asyncio.AbstractEventLoop]=None) -> typing.Optional[
+                              typing.Tuple[typing.Any, typing.Optional[asyncio.Future]]]:
         if key in self._async_utilities:
             logger.warn(
                 f'Utility already registered {key}')
-            return
+            return None
 
         interface = import_class(config['provides'])
         factory = import_class(config['factory'])
@@ -60,17 +62,21 @@ class ApplicationRoot(object):
                          exc_info=True)
             raise
         alsoProvides(utility_object, interface)
-        provide_utility(utility_object, interface)
+        kw = {}
+        if 'name' in config:
+            kw['name'] = config['name']
+        provide_utility(utility_object, interface, **kw)
         if hasattr(utility_object, 'initialize'):
             task = asyncio.ensure_future(
                 lazy_apply(utility_object.initialize, app=self.app),
                 loop=loop or self._loop)
+            self.add_async_task(key, task, config)
+            return utility_object, task
         else:
-            task = None
-            logger.warn(f'No initialize method found on {utility_object} object')
-        self.add_async_task(key, task, config)
+            logger.info(f'No initialize method found on {utility_object} object')
+            return None
 
-    def add_async_task(self, ident, task, config):
+    def add_async_task(self, ident: str, task: asyncio.Future, config: typing.Dict) -> None:
         if ident in self._async_utilities:
             raise KeyError("Already exist an async utility with this id")
         self._async_utilities[ident] = {
@@ -78,7 +84,7 @@ class ApplicationRoot(object):
             'config': config
         }
 
-    def cancel_async_utility(self, ident):
+    def cancel_async_utility(self, ident: str):
         if ident in self._async_utilities:
             if self._async_utilities[ident]['task'] is not None:
                 if not self._async_utilities[ident]['task'].done():
@@ -86,11 +92,14 @@ class ApplicationRoot(object):
         else:
             raise KeyError("Ident does not exist as utility")
 
-    async def del_async_utility(self, key):
+    async def del_async_utility(self, key: str):
         self.cancel_async_utility(key)
         config = self._async_utilities[key]['config']
         interface = import_class(config['provides'])
-        utility = get_utility(interface)
+        if 'name' in config:
+            utility = get_utility(interface, name=config['name'])
+        else:
+            utility = get_utility(interface)
         if hasattr(utility, 'finalize'):
             await lazy_apply(utility.finalize, app=self.app)
         gsm = get_global_components()

@@ -353,3 +353,17 @@ async def get_registry(context=None) -> typing.Optional[IRegistry]:
         registry = await annotations_container.async_get(REGISTRY_DATA_KEY)
         task_vars.registry.set(registry)
     return registry
+
+
+def get_request_scheme(req) -> str:
+    scheme = req.headers.get(
+        "X-Forwarded-Protocol",
+        req.headers.get(
+            "X-Scheme", req.headers.get("X-Forwarded-Proto", None)
+        ),
+    )
+
+    if scheme:
+        return scheme
+
+    return req.scheme

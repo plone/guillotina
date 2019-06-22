@@ -16,9 +16,11 @@ from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
 from guillotina.content import load_cached_schema
 from guillotina.event import notify
+from guillotina.events import AfterAsyncUtilityLoadedEvent
 from guillotina.events import ApplicationCleanupEvent
 from guillotina.events import ApplicationConfiguredEvent
 from guillotina.events import ApplicationInitializedEvent
+from guillotina.events import BeforeAsyncUtilityLoadedEvent
 from guillotina.events import DatabaseInitializedEvent
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
@@ -57,6 +59,22 @@ class ApplicationConfigurator:
         self.config = config
         self.root = root
         self.settings = settings
+        self.contrib_apps = [
+            'guillotina.contrib.catalog.pg',
+            'guillotina.contrib.redis',
+            'guillotina.contrib.cache',
+            'guillotina.contrib.pubsub',
+        ]
+        self._init_dependency_applictions()
+
+    def _init_dependency_applictions(self):
+        for application_name in self.applications[:]:
+            module = resolve_dotted_name(application_name)
+            if hasattr(module, 'app_settings') and app_settings != module.app_settings:
+                # load dependencies if necessary
+                for dependency in module.app_settings.get('applications') or []:
+                    if dependency not in self.applications:
+                        self.applications.append(dependency)
 
     def load_application(self, module):
         # includeme function
@@ -71,8 +89,11 @@ class ApplicationConfigurator:
         excluded_modules = [
             module_name for module_name in
             set(self.applications) - set([module.__name__])
-            if not module.__name__.startswith(module_name)]
-
+            if not module.__name__.startswith(module_name)
+        ] + [
+            module_name for module_name in self.contrib_apps
+            if module_name != module.__name__
+        ]
         # services
         return configure.load_all_configurations(
             self.root.config, module.__name__, excluded_modules)
@@ -302,13 +323,12 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
     server_app.router.set_root(root)
     server_app.on_cleanup.append(cleanup_app)
 
-    for util in app_settings.get('utilities') or []:
-        app_logger.warning('Adding : ' + util['provides'])
-        root.add_async_utility(util['provides'], util, loop=loop)
-
     for key, util in app_settings['load_utilities'].items():
         app_logger.info('Adding ' + key + ' : ' + util['provides'])
-        root.add_async_utility(key, util, loop=loop)
+        await notify(BeforeAsyncUtilityLoadedEvent(key, util))
+        result = root.add_async_utility(key, util, loop=loop)
+        if result is not None:
+            await notify(AfterAsyncUtilityLoadedEvent(key, util, *result))
 
     # Load cached Schemas
     load_cached_schema()

@@ -1,10 +1,14 @@
+import json
+import pickle
+
+import pytest
 from guillotina import configure
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import get_utility
-from guillotina.content import create_content
-from guillotina.content import create_content_in_container
 from guillotina.content import Folder
 from guillotina.content import Item
+from guillotina.content import create_content
+from guillotina.content import create_content_in_container
 from guillotina.content import load_cached_schema
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -13,10 +17,10 @@ from guillotina.interfaces import IItem
 from guillotina.interfaces.types import IConstrainTypes
 from guillotina.schema import Dict
 from guillotina.schema import TextLine
+from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
-
-import pickle
-import pytest
+from guillotina.utils import get_behavior
+from guillotina.utils import get_object_by_oid
 
 pytestmark = pytest.mark.asyncio
 
@@ -175,3 +179,47 @@ async def test_getattr_default_factory(container_requester):
 
     assert custom_content.default_factory_test == 'foobar'
     assert custom_content.context_default_factory_test == 'foobar'
+
+
+async def test_context_property(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+                "@behaviors": [ITestBehavior.__identifier__],
+                ITestBehavior.__identifier__: {
+                    "foobar_context": "foobar"
+                }
+            })
+        )
+        assert status == 201
+
+        async with requester.db.get_transaction_manager().transaction():
+            ob = await get_object_by_oid(response['@uid'])
+            behavior = await get_behavior(ob, ITestBehavior)
+            assert behavior.foobar_context == 'foobar'
+            assert ob.foobar_context == 'foobar'
+
+
+async def test_context_property_default_schema_value(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            'POST',
+            '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+                "@behaviors": [ITestBehavior.__identifier__]
+            })
+        )
+        assert status == 201
+
+        async with requester.db.get_transaction_manager().transaction():
+            ob = await get_object_by_oid(response['@uid'])
+            behavior = await get_behavior(ob, ITestBehavior)
+            assert behavior.foobar_context == 'default-foobar'

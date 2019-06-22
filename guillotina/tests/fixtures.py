@@ -35,6 +35,7 @@ DB_SCHEMA = os.environ.get('DB_SCHEMA', 'public')
 annotations = {
     'testdatabase': DATABASE,
     'test_dbschema': DB_SCHEMA,
+    'redis': None,
     'travis': IS_TRAVIS
 }
 
@@ -102,6 +103,11 @@ def _update_from_pytest_markers(settings, pytest_node):
 def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
     settings = _update_from_pytest_markers(settings, pytest_node)
+    if annotations['redis'] is not None:
+        if 'redis' not in settings:
+            settings['redis'] = {}
+        settings['redis']['host'] = annotations['redis'][0]
+        settings['redis']['port'] = annotations['redis'][1]
 
     if annotations['testdatabase'] == 'DUMMY':
         return settings
@@ -406,3 +412,13 @@ def container_command(db):
 DELETE FROM objects;
 DELETe FROM blobs;
 COMMIT;''')
+
+
+@pytest.fixture(scope='session')
+def redis_container():
+    import pytest_docker_fixtures
+    host, port = pytest_docker_fixtures.redis_image.run()
+    annotations['redis'] = (host, port)
+    yield host, port  # provide the fixture value
+    pytest_docker_fixtures.redis_image.stop()
+    annotations['redis'] = None

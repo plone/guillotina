@@ -1,6 +1,7 @@
 from datetime import datetime
 from datetime import timedelta
 from guillotina._settings import app_settings
+from guillotina.auth import validators
 
 import jwt
 import pytest
@@ -25,3 +26,15 @@ async def test_jwt_auth(container_requester):
             auth_type='Bearer'
         )
         assert status == 200
+
+
+async def test_argon_hashing(dummy_guillotina):
+    hashed = validators.hash_password('foobar', algorithm='argon2')
+    assert validators.check_password(hashed, 'foobar')
+    assert not validators.check_password(hashed, 'barfoo')
+
+
+async def test_sha512_hashing(dummy_guillotina):
+    hashed = validators.hash_password('foobar', algorithm='sha512')
+    assert validators.check_password(hashed, 'foobar')
+    assert not validators.check_password(hashed, 'barfoo')

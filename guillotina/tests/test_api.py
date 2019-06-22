@@ -869,7 +869,7 @@ async def test_debug_headers(container_requester):
             headers={
                 'X-Debug': '1'
             })
-        assert 'XG-Request-Cache-hits' in headers
+        assert 'XG-Total-Cache-hits' in headers
         assert 'XG-Timing-0-Start' in headers
 
 

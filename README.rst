@@ -91,7 +91,7 @@ Using pip(requires python > 3.6)::
 
   git clone git@github.com:plone/guillotina.git
   cd guillotina
-  python -m venv .
+  python3.7 -m venv .
   ./bin/pip install -r requirements.txt
   ./bin/pip install -e .[test]
 

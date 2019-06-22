@@ -1,8 +1,12 @@
+from guillotina.schema.utils import get_default_from_schema
+
+
+_EMPTY = object()
 
 
 class ContextProperty:
 
-    def __init__(self, attribute, default):
+    def __init__(self, attribute, default=_EMPTY):
         self.__name__ = attribute
         self.default = default
 
@@ -13,6 +17,8 @@ class ContextProperty:
         result = getattr(inst.context, self.__name__, self.default)
         if callable(result):
             result = result(context=inst.context, name=self.__name__)
+        if result == _EMPTY:
+            return get_default_from_schema(inst.context, inst.schema, self.__name__)
         return result
 
     def __set__(self, inst, value):

@@ -2,7 +2,7 @@
 
 How to quickly get started using `guillotina`.
 
-This tutorial will assume usage of virtualenv. You can use your own preferred
+This tutorial will assume usage of venv. You can use your own preferred
 tool for managing your python environment.
 
 *This tutorial assumes you have postgresql running*
@@ -10,7 +10,7 @@ tool for managing your python environment.
 Setup the environment:
 
 ```
-virtualenv .
+python3.7 -m venv .
 ```
 
 Install `guillotina`:

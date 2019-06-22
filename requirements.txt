@@ -16,3 +16,4 @@ ujson==1.35
 yarl==1.2.6
 zope.interface==4.4.3
 uvicorn==0.7.2
+argon2-cffi==18.3.0

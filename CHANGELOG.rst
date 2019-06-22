@@ -7,8 +7,51 @@ CHANGELOG
 - Replaced aiohttp with ASGI (running with uvicorn by default)
   [dmanchon,masipcat]
 
+5.0.0a7 (unreleased)
+--------------------
 
-5.0.0a2 (unreleased)
+- Nothing changed yet.
+
+
+5.0.0a6 (2019-06-22)
+--------------------
+
+- Cache password checked decisions to fix basic auth support
+  [vangheem]
+
+- Make sure you can import contrib packages without automatically activating them
+  [vangheem]
+
+5.0.0a5 (2019-06-22)
+--------------------
+- Adding rediscache and pubsub logic. Now you can have memory cache, network cache with invalidation
+  and pubsub service. `guillotina_rediscache` is not necessary any more.
+  [bloodbare]
+
+
+- deprecate `__local__properties__`. `ContextProperty` works on it's own now
+  [vangheem]
+
+- Add argon2 pw hashing
+  [vangheem]
+
+- Completely remove support for `utilities` configuration. Use `load_utilities`.
+  [vangheem]
+
+5.0.0a4 (2019-06-21)
+--------------------
+
+- Fix path__startswith query
+  [vangheem]
+
+
+5.0.0a3 (2019-06-21)
+--------------------
+
+- Add `guillotina.contrib.swagger`
+
+
+5.0.0a2 (2019-06-19)
 --------------------
 
 - Missing mypy requirement
@@ -63,7 +106,7 @@ CHANGELOG
 
 - Remove `Request.add_future`. Use `guillotina.utils.execute.add_future`
 
-- Add `guillotina.utils.get_container`
+- Add `guillotina.utils.get_current_container`
 
 - Rename `request_indexer` setting to `indexer`
 

@@ -1,6 +1,5 @@
 import os
 import pathlib
-from copy import deepcopy
 from datetime import datetime
 from typing import AsyncIterator
 from typing import FrozenSet
@@ -66,7 +65,7 @@ from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
-from guillotina.schema.interfaces import IContextAwareDefaultFactory
+from guillotina.schema.utils import get_default_from_schema
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_security_policy
@@ -130,25 +129,6 @@ class ResourceFactory(Factory):
     def __repr__(self):
         return '<{0:s} for {1:s}>'.format(self.__class__.__name__,
                                           self.type_name)
-
-
-def _default_from_schema(context, schema, fieldname):
-    """helper to lookup default value of a field
-    """
-    if schema is None:
-        return _marker
-    field = schema.get(fieldname, None)
-    if field is None:
-        return _marker
-    df = getattr(field, 'defaultFactory', None)
-    if df is not None:
-        if IContextAwareDefaultFactory.providedBy(df):
-            return deepcopy(field.defaultFactory(context))
-        else:
-            return deepcopy(field.defaultFactory())
-    else:
-        return deepcopy(field.default)
-    return _marker
 
 
 @implementer(IResource)
@@ -267,10 +247,11 @@ class Resource(guillotina.db.orm.base.BaseObject):
 
         # attribute was not found; try to look it up in the schema and return
         # a default
-        value = _default_from_schema(
+        value = get_default_from_schema(
             self,
             SCHEMA_CACHE.get(self.type_name, {}).get('schema'),
-            name
+            name,
+            _marker
         )
         if value is not _marker:
             setattr(self, name, value)
@@ -764,6 +745,10 @@ async def move(context: IResource,
     if destination_ob.__uuid__ == context.__parent__.__uuid__ and new_id == context.id:
         raise PreconditionFailed(context, 'Object already belongs to this parent with same id')
 
+    txn = get_transaction()
+    if txn is not None:
+        cache_keys = txn._cache.get_cache_keys(context, 'deleted')
+
     old_id = context.id
     if new_id is not None:
         context.id = context.__name__ = new_id
@@ -782,10 +767,6 @@ async def move(context: IResource,
             context, f'Destination already has object with the id {new_id}')
 
     original_parent = context.__parent__
-
-    txn = get_transaction()
-    if txn is not None:
-        cache_keys = txn._cache.get_cache_keys(context, 'deleted')
 
     await notify(
         BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,

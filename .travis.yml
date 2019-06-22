@@ -26,6 +26,7 @@ matrix:
 services:
   - postgresql
   - docker
+  - redis-server
 before_script:
   - psql -c 'create database guillotina;' -U postgres
 
@@ -35,6 +36,7 @@ cache:
 install:
   - pip install Cython==0.27.3
   - pip install -r requirements.txt
+  - pip install -r contrib-requirements.txt
   - pip install -e .[test]
   - pip install flake8==3.7.7 codecov mypy==0.670 mypy-zope
   - sleep 5
@@ -50,3 +52,9 @@ deploy:
   script: bash docker_push
   on:
     tags: true
+
+# safelist
+branches:
+  only:
+  - master
+  - 4.x

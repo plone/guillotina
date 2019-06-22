@@ -75,13 +75,11 @@ class MockStorage:
     _cache: dict = {}
     _read_only = False
     _transaction_strategy = 'resolve'
-    _cache_strategy = 'dummy'
     _options: dict = {}
     supports_unique_constraints = False
 
-    def __init__(self, transaction_strategy='resolve', cache_strategy='dummy'):
+    def __init__(self, transaction_strategy='resolve'):
         self._transaction_strategy = transaction_strategy
-        self._cache_strategy = cache_strategy
         self._transaction = None
         self._objects = {}
         self._parent_objs = {}
