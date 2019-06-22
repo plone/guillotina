@@ -1,7 +1,6 @@
 import time
 from urllib import parse
 
-import aiohttp
 import ujson
 from guillotina import configure
 from guillotina import logger
@@ -16,6 +15,7 @@ from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPermission
+from guillotina.request import WebSocketJsonDecodeError
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
 from guillotina.utils import get_jwk_key
@@ -190,28 +190,25 @@ class WebsocketsView(Service):
         await ws.prepare(self.request)
 
         async for msg in ws:
-            if msg.type == aiohttp.WSMsgType.text:
+            try:
+                message = msg.json
+            except WebSocketJsonDecodeError:
+                # We only care about json messages
+                logger.warning('Invalid websocket payload, ignored: {}'.format(msg))
+                continue
+
+            if message['op'] == 'close':
+                await ws.close()
+            elif message['op'].lower() == 'get':
+                txn = await tm.begin()
                 try:
-                    message = ujson.loads(msg.data)
-                except ValueError:
-                    logger.warning('Invalid websocket payload, ignored: {}'.format(
-                        msg.data))
-                    continue
-                if message['op'] == 'close':
-                    await ws.close()
-                elif message['op'].lower() == 'get':
-                    txn = await tm.begin()
-                    try:
-                        await self.handle_ws_request(ws, message)
-                    except Exception:
-                        logger.error('Exception on ws', exc_info=True)
-                    finally:
-                        # only currently support GET requests which are *never*
-                        # supposed to be commits
-                        await tm.abort(txn=txn)
-            elif msg.type == aiohttp.WSMsgType.error:
-                logger.debug('ws connection closed with exception {0:s}'
-                             .format(ws.exception()))
+                    await self.handle_ws_request(ws, message)
+                except Exception:
+                    logger.error('Exception on ws', exc_info=True)
+                finally:
+                    # only currently support GET requests which are *never*
+                    # supposed to be commits
+                    await tm.abort(txn=txn)
 
         logger.debug('websocket connection closed')
 

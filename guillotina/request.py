@@ -38,6 +38,50 @@ class WebSocketException(Exception):
     pass
 
 
+class WebSocketJsonDecodeError(WebSocketException):
+    pass
+
+
+class WebSocketMsg:
+    # Type constants
+    TEXT = "text"
+    BYTES = "bytes"
+
+    def __init__(self, msg):
+        self.msg = msg
+
+    @property
+    def type(self):
+        if "bytes" in self.msg and self.msg["bytes"]:
+            return WebSocketMsg.BYTES
+        else:
+            return WebSocketMsg.TEXT
+
+    @property
+    def json(self):
+        try:
+            if self.type == WebSocketMsg.TEXT:
+                return json.loads(self.msg["text"])
+            else:
+                return json.loads(self.msg["bytes"])
+        except json.JSONDecodeError:
+            raise WebSocketJsonDecodeError()
+
+    @property
+    def text(self):
+        return self.msg["text"]
+
+    @property
+    def bytes(self):
+        return self.msg["bytes"]
+
+    def __str__(self):
+        if self.msg.type == WebSocketMsg.TEXT:
+            return f"[TEXT]: {self.text[:15]}..."
+        else:
+            return f"[BYTES]: {self.bytes[:15]}..."
+
+
 class GuillotinaWebSocket:
     def __init__(self, scope, send, receive):
         self.scope = scope
@@ -60,12 +104,12 @@ class GuillotinaWebSocket:
             raise StopAsyncIteration()
 
         try:
-            msg = await self.receive_text()
+            msg = await self.receive()
         except WebSocketDisconnect:
             # Close the ws connection
             await self.close()
             raise StopAsyncIteration()
-        return WSMessage(WSMsgType.TEXT, msg, '')
+        return WebSocketMsg(msg)
 
     async def receive(self):
         if self.in_state == State.CONNECTING:
