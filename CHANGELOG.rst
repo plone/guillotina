@@ -4,8 +4,17 @@ CHANGELOG
 5.0.0a7 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Change `guillotina.files.utils.generate_key` to not accept a `request` parameter. It was
+  used to get the container id which is now a context var.
+  [vangheem]
 
+- Add `IExternalFileStorageManager` interface to be able to designate a file storage that
+  store a file into an external database. This enables you to automatically leverage the
+  `redis` data manager.
+
+- Add `cloud_datamanager` setting. Allows you to select between `db`(default) and
+  `redis`(if `guillotina.contrib.redis` is used) to not write to db to maintain state.
+  The `redis` option is only usable for gcloud and s3 adapters.
 
 5.0.0a6 (2019-06-22)
 --------------------

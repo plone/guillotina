@@ -70,6 +70,12 @@ class IFileStorageManager(Interface):
         '''
 
 
+class IExternalFileStorageManager(IFileStorageManager):
+    '''
+    File manager that uses database to store upload state
+    '''
+
+
 class IFileManager(Interface):
     """Interface to create uploaders and downloaders."""
 

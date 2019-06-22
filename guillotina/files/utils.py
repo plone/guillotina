@@ -93,7 +93,7 @@ def guess_content_type(content_type, filename):
     return ct
 
 
-def generate_key(request, context):
+def generate_key(context):
     return '{}{}/{}::{}'.format(
         task_vars.container.get().id,
         get_content_path(context),

@@ -27,3 +27,9 @@ class DBFile(BaseCloudFile):
     @size.setter
     def size(self, val):
         pass
+
+    @property
+    def chunks(self) -> int:
+        if self._blob is not None:
+            return self._blob.chunks
+        return 0

@@ -88,6 +88,7 @@ app_settings: Dict[str, Any] = {
         "CONNECT": interfaces.ICONNECT
     },
     "cloud_storage": "guillotina.interfaces.IDBFileField",
+    "cloud_datamanager": "db",
     "router": "guillotina.traversal.TraversalRouter",
     "pg_connection_class": "asyncpg.connection.Connection",
     "uid_generator": generate_uid,
