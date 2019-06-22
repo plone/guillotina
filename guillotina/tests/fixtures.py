@@ -316,7 +316,7 @@ SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
 async def app_client(event_loop, db, request):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(request.node), loop=event_loop)
-    async with TestClient(app, timeout=5) as client:
+    async with TestClient(app, timeout=30) as client:
         await _clear_dbs(app.app.root)
         yield client
 
@@ -324,7 +324,7 @@ async def app_client(event_loop, db, request):
 @pytest.fixture(scope='function')
 async def guillotina_main(event_loop, db, request):
     app = make_app(settings=get_db_settings(request.node), loop=event_loop)
-    async with TestClient(app, timeout=5):
+    async with TestClient(app, timeout=30):
         await _clear_dbs(app.app.root)
         yield app
 
@@ -377,8 +377,8 @@ class CockroachStorageAsyncContextManager(object):
 
 
 @pytest.fixture(scope='function')
-def cockroach_storage(db, dummy_request, loop):
-    return CockroachStorageAsyncContextManager(dummy_request, loop, db)
+def cockroach_storage(db, dummy_request, event_loop):
+    return CockroachStorageAsyncContextManager(dummy_request, event_loop, db)
 
 
 @pytest.fixture(scope='function')
