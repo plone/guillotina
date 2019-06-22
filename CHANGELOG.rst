@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a6 (unreleased)
+5.0.0a7 (unreleased)
 --------------------
 
 - Change `guillotina.files.utils.generate_key` to not accept a `request` parameter. It was
@@ -15,6 +15,11 @@ CHANGELOG
 - Add `cloud_datamanager` setting. Allows you to select between `db`(default) and
   `redis`(if `guillotina.contrib.redis` is used) to not write to db to maintain state.
   The `redis` option is only usable for gcloud and s3 adapters.
+
+5.0.0a6 (2019-06-22)
+--------------------
+
+- Cache password checked decisions to fix basic auth support
   [vangheem]
 
 - Make sure you can import contrib packages without automatically activating them

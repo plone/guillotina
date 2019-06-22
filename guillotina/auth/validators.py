@@ -16,10 +16,11 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IPasswordChecker
 from guillotina.interfaces import IPasswordHasher
 from guillotina.utils import strings_differ
+from lru import LRU
 
 
 ph = argon2.PasswordHasher()
-
+_pw_auth_validator = LRU(100)
 
 logger = logging.getLogger('guillotina')
 
@@ -77,6 +78,9 @@ def hash_password(password, salt=None, algorithm='argon2'):
 
 
 def check_password(token, password):
+    cache_key = token + hashlib.sha256(password.encode('utf-8')).hexdigest()
+    if cache_key in _pw_auth_validator:
+        return _pw_auth_validator[cache_key]
     split = token.split(':')
     if len(split) != 3:
         return False
@@ -85,7 +89,9 @@ def check_password(token, password):
     if check_func is None:
         logger.error(f'Could not find password checker for {algorithm}')
         return False
-    return check_func(token, password)
+    decision = check_func(token, password)
+    _pw_auth_validator[cache_key] = decision
+    return decision
 
 
 class SaltedHashPasswordValidator:
