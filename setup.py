@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import find_packages
 from setuptools import setup
+from setuptools import Extension
 
 
 long_description = open('README.rst').read() + '\n'
@@ -22,6 +23,11 @@ You can read the `changelog file <https://github.com/plone/guillotina/blob/maste
 for a complete list.
 
 '''
+
+lru_module = Extension(
+    'guillotina.contrib.cache.lru',
+    sources=['guillotina/contrib/cache/lru.c']
+)
 
 setup(
     name='guillotina',
@@ -47,6 +53,7 @@ setup(
     ],
     zip_safe=True,
     include_package_data=True,
+    ext_modules=[lru_module],
     package_data={'': ['*.txt', '*.rst', 'guillotina/documentation/meta/*.json']},
     packages=find_packages(),
     install_requires=[
@@ -86,6 +93,9 @@ setup(
             'sphinx-guillotina-theme',
             'sphinx-autodoc-typehints'
         ],
+        'redis': [
+            'aioredis>=1.2'
+        ]
     },
     entry_points={
         'console_scripts': [

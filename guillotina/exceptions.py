@@ -222,3 +222,8 @@ class ServerClosingException(Exception):
     '''
     Server closing, can not perform action
     '''
+
+class NoPubSubUtility(Exception):
+    '''
+    No PubSub Utility found
+    '''

@@ -3,6 +3,10 @@ CHANGELOG
 
 5.0.0a5 (unreleased)
 --------------------
+- Adding rediscache and pubsub logic. Now you can have memory cache, network cache with invalidation
+  and pubsub service. `guillotina_rediscache` is not necessary any more.
+  [bloodbare]
+
 
 - deprecate `__local__properties__`. `ContextProperty` works on it's own now
   [vangheem]

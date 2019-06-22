@@ -196,12 +196,9 @@ class BaseMatchInfo(AbstractMatchInfo):
                     (last - request._initialized) * 1000)
                 txn = task_vars.txn.get()
                 if txn is not None:
-                    resp.headers['XG-Request-Cache-hits'] = str(txn._cache._hits)
-                    resp.headers['XG-Request-Cache-misses'] = str(txn._cache._misses)
-                    resp.headers['XG-Request-Cache-stored'] = str(txn._cache._stored)
-                    resp.headers['XG-Total-Cache-hits'] = str(txn._manager._storage._hits)
-                    resp.headers['XG-Total-Cache-misses'] = str(txn._manager._storage._misses)
-                    resp.headers['XG-Total-Cache-stored'] = str(txn._manager._storage._stored)
+                    resp.headers['XG-Total-Cache-hits'] = str(txn._cache._hits)
+                    resp.headers['XG-Total-Cache-misses'] = str(txn._cache._misses)
+                    resp.headers['XG-Total-Cache-stored'] = str(txn._cache._stored)
                     resp.headers['XG-Num-Queries'] = str(
                         txn._query_count_end - txn._query_count_start)
                     for idx, query in enumerate(txn._queries.keys()):
@@ -385,7 +382,6 @@ class TraversalRouter(AbstractRouter):
     @profilable
     async def real_resolve(self, request: IRequest) -> Optional[MatchInfo]:
         """Main function to resolve a request."""
-
         if request.method not in app_settings['http_methods']:
             raise HTTPMethodNotAllowed(
                 method=request.method,

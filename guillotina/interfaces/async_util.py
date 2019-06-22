@@ -20,3 +20,10 @@ class IQueueUtility(IAsyncUtility):
 
 class IAsyncJobPool(IAsyncUtility):
     pass
+
+
+class ICacheUtility(IAsyncUtility):
+    pass
+
+class IPubSubUtility(IAsyncUtility):
+    pass

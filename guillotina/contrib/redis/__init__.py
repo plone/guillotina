@@ -1,0 +1,30 @@
+from guillotina.contrib.redis.driver import RedisDriver
+from asyncio import get_running_loop
+_driver = None
+
+app_settings = {
+    'redis': {
+        'host': 'localhost',
+        'port': 6379,
+        'pool': {
+            'minsize': 5,
+            'maxsize': 100
+        },
+        'cluster_mode': False
+    }
+}
+
+def includeme(root, settings):
+    global _driver
+    _driver = RedisDriver()
+
+
+async def get_driver():
+    global _driver
+    if _driver is None:
+        raise Exception("Not added guillotina.contrib.redis on applications")
+    else:
+        if _driver.initialized is False:
+            loop = get_running_loop()
+            await _driver.initialize(loop)
+        return _driver

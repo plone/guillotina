@@ -10,8 +10,9 @@ from typing import Optional
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
-from guillotina.db.interfaces import IStorageCache
+from guillotina.component import query_adapter
 from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionCache
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
@@ -53,20 +54,16 @@ class cache:
             key_args = this.key_gen(*args, **kwargs)
             result = await self._cache.get(**key_args)
             if result is not None:
-                self._cache._hits += 1
                 return result
             result = await func(self, *args, **kwargs)
 
             if result is not None:
-                self._cache._misses += 1
                 try:
                     if (not this.check_state_size or
                             len(result['state']) < self._cache.max_cache_record_size):
                         await self._cache.set(result, **key_args)
-                        self._cache._stored += 1
                 except (TypeError, KeyError):
                     await self._cache.set(result, **key_args)
-                    self._cache._stored += 1
                 return result
 
         return _wrapper
@@ -113,8 +110,10 @@ class Transaction:
 
         self._strategy = get_adapter(self, ITransactionStrategy,
                                      name=manager._storage._transaction_strategy)
-        self._cache = get_adapter(self, IStorageCache,
-                                  name=manager._storage._cache_strategy)
+
+        self._cache = query_adapter(
+            self, ITransactionCache,
+            name=app_settings['cache']['strategy'])
 
         self._query_count_start = self._query_count_end = 0
 
@@ -435,7 +434,6 @@ class Transaction:
                 self, parent.__uuid__, keys):
             if len(litem['state']) < self._cache.max_cache_record_size:
                 await self._cache.set(litem, container=parent, id=litem['id'])
-                self._cache._stored += 1
             yield self._fill_object(litem, parent)
 
     async def get_children(self, parent, keys):
@@ -450,7 +448,6 @@ class Transaction:
         for key in keys:
             item = await self._cache.get(container=parent, id=key)
             if item is None:
-                self._cache._misses += 1
                 lookup_group.append(key)
                 if len(lookup_group) > 15:  # limit batch size
                     async for litem in self._get_batch_children(parent, lookup_group):
@@ -458,7 +455,6 @@ class Transaction:
                     lookup_group = []
                 continue
 
-            self._cache._hits += 1
             if len(lookup_group) > 0:
                 # we need to clear this buffer first before we can yield this item
                 async for litem in self._get_batch_children(parent, lookup_group):

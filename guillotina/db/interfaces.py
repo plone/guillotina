@@ -112,6 +112,38 @@ class ITransactionManager(Interface):
         abort txn
         '''
 
+class ITransactionCache(Interface):
+
+    async def clear():  # type: ignore
+        '''
+        clear cache
+        '''
+
+    async def get(oid=None, container=None, id=None, variant=None):
+        '''
+        get cached object
+        '''
+
+    async def set(value, oid=None, container=None, id=None, variant=None):
+        '''
+        set cached data
+        '''
+
+    async def delete(key):
+        '''
+        delete cache key
+        '''
+
+    async def delete_all(keys):
+        '''
+        delete list of keys
+        '''
+
+    async def close():  # type: ignore
+        '''
+        close the cache
+        '''
+
 
 class IStorage(Interface):
     '''
@@ -272,39 +304,6 @@ class ITransactionStrategy(Interface):
 
 class IDBTransactionStrategy(ITransactionStrategy):
     pass
-
-
-class IStorageCache(Interface):
-
-    async def clear():  # type: ignore
-        '''
-        clear cache
-        '''
-
-    async def get(oid=None, container=None, id=None, variant=None):
-        '''
-        get cached object
-        '''
-
-    async def set(value, oid=None, container=None, id=None, variant=None):
-        '''
-        set cached data
-        '''
-
-    async def delete(key):
-        '''
-        delete cache key
-        '''
-
-    async def delete_all(keys):
-        '''
-        delete list of keys
-        '''
-
-    async def close():  # type: ignore
-        '''
-        close the cache
-        '''
 
 
 class IDatabaseManager(Interface):

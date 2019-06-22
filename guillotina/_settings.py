@@ -11,6 +11,9 @@ app_settings: Dict[str, Any] = {
     "aiohttp_settings": {},
     "databases": [],
     "storages": {},
+    "cache": {
+        "strategy": "dummy"
+    },
     "conflict_retry_attempts": 3,
     "host": "127.0.0.1",
     "port": 8080,
