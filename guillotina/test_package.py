@@ -2,6 +2,7 @@
 import json
 import os
 import tempfile
+import typing
 from shutil import copyfile
 
 from guillotina import configure
@@ -286,7 +287,7 @@ class MemoryFile(BaseCloudFile):
         self._size = val
 
 
-_tmp_files = {}
+_tmp_files: typing.Dict = {}
 
 
 @configure.adapter(
