@@ -70,12 +70,6 @@ class IFileStorageManager(Interface):
         '''
 
 
-class IDBFileStorageManager(IFileStorageManager):
-    '''
-    File manager that uses database to store upload state
-    '''
-
-
 class IExternalFileStorageManager(IFileStorageManager):
     '''
     File manager that uses database to store upload state

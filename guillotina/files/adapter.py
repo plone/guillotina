@@ -8,7 +8,7 @@ from guillotina.events import FileUploadStartedEvent
 from guillotina.files.utils import guess_content_type
 from guillotina.interfaces import IDBFileField
 from guillotina.interfaces import IFileCleanup
-from guillotina.interfaces import IDBFileStorageManager
+from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
@@ -18,7 +18,7 @@ import time
 
 
 @configure.adapter(
-    for_=IDBFileStorageManager,
+    for_=IFileStorageManager,
     provides=IUploadDataManager,
     name='db')
 class DBDataManager:
@@ -164,7 +164,7 @@ class DefaultFileCleanup:
 
 @configure.adapter(
     for_=(IResource, IRequest, IDBFileField),
-    provides=IDBFileStorageManager)
+    provides=IFileStorageManager)
 class DBFileStorageManagerAdapter:
 
     file_class = DBFile
