@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+5.0.0a6 (unreleased)
+--------------------
+
+- Nothing changed yet.
+
+
 5.0.0a5 (2019-06-22)
 --------------------
 - Adding rediscache and pubsub logic. Now you can have memory cache, network cache with invalidation
