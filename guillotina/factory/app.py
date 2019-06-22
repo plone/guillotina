@@ -66,7 +66,12 @@ class ApplicationConfigurator:
         self.config = config
         self.root = root
         self.settings = settings
-
+        self.contrib_apps = [
+            'guillotina.contrib.catalog.pg',
+            'guillotina.contrib.redis',
+            'guillotina.contrib.cache',
+            'guillotina.contrib.pubsub',
+        ]
         self._init_dependency_applictions()
 
     def _init_dependency_applictions(self):
@@ -91,7 +96,11 @@ class ApplicationConfigurator:
         excluded_modules = [
             module_name for module_name in
             set(self.applications) - set([module.__name__])
-            if not module.__name__.startswith(module_name)]
+            if not module.__name__.startswith(module_name)
+        ] + [
+            module_name for module_name in self.contrib_apps
+            if module_name != module.__name__
+        ]
         # services
         return configure.load_all_configurations(
             self.root.config, module.__name__, excluded_modules)
