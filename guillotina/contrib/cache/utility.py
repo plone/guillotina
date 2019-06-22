@@ -160,15 +160,14 @@ class CacheUtility:
         # so we don't invalidate twice...
         self._ignored_tids.append(tid)
 
-    async def send_invalidation(self, tid, keys_to_publish, push):
-        self.ignore_tid(tid)
+    async def send_invalidation(self, keys_to_publish, push=None):
         if self._subscriber:
             await self._subscriber.publish(
                 app_settings['cache']['updates_channel'],
+                self._uid,
                 serialize.dumps({
-                    'tid': tid,
                     'keys': keys_to_publish,
-                    'push': push
+                    'push': push or {}
                 }))
 
     async def get_stats(self):

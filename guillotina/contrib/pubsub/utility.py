@@ -79,14 +79,17 @@ class PubSubUtility:
         if self._driver is None:
             raise NoPubSubDriver()
 
-        del self._subscribers[channel_name][req_id]
-        if len(self._subscribers[channel_name]) == 0:
-            if not self._tasks[channel_name].done():
-                self._tasks[channel_name].cancel()
-            del self._tasks[channel_name]
+        if channel_name in self._subscribers:
+            if req_id in self._subscribers[channel_name]:
+                del self._subscribers[channel_name][req_id]
 
-            await self._driver.unsubscribe(channel_name)
-            del self._subscribers[channel_name]
+            if len(self._subscribers[channel_name]) == 0:
+                if not self._tasks[channel_name].done():
+                    self._tasks[channel_name].cancel()
+                del self._tasks[channel_name]
+
+                await self._driver.unsubscribe(channel_name)
+                del self._subscribers[channel_name]
 
     async def publish(self, channel_name: str, rid: str, data: Any):
         if self._driver is not None:
