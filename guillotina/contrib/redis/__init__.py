@@ -1,5 +1,9 @@
-from guillotina.contrib.redis.driver import RedisDriver
 from asyncio import get_running_loop
+
+from guillotina import configure
+from guillotina.contrib.redis.driver import RedisDriver
+
+
 _driver = None
 
 app_settings = {
@@ -15,6 +19,7 @@ app_settings = {
 }
 
 def includeme(root, settings):
+    configure.scan('guillotina.contrib.redis.dm')
     global _driver
     _driver = RedisDriver()
 

@@ -42,7 +42,8 @@ class FileManager(object):
         self.file_storage_manager = get_multi_adapter(
             (context, request, field), IFileStorageManager)
         self.dm = get_adapter(
-            self.file_storage_manager, IUploadDataManager)
+            self.file_storage_manager, IUploadDataManager,
+            name=app_settings.get('cloud_datamanager') or 'db')
 
     async def prepare_download(self, disposition=None, filename=None,
                                content_type=None, size=None, **kwargs):

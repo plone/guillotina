@@ -19,7 +19,8 @@ import time
 
 @configure.adapter(
     for_=IFileStorageManager,
-    provides=IUploadDataManager)
+    provides=IUploadDataManager,
+    name='db')
 class DBDataManager:
 
     _data = None

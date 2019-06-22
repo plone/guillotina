@@ -6,8 +6,15 @@ from guillotina.transactions import transaction
 
 import json
 import random
+import pytest
 
-
+@pytest.mark.parametrize(
+    "",
+    [
+        pytest.param(marks=pytest.mark.app_settings({
+            'applications': ['guillotina.contrib.redis']
+        }))
+    ])
 async def test_create_content_with_behavior(container_requester):
     async with container_requester as requester:
         response, status = await requester(
