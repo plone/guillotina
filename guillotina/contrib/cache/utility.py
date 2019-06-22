@@ -148,13 +148,11 @@ class CacheUtility:
         assert 'keys' in data
         if data['tid'] in self._ignored_tids:
             # on the same thread, ignore this sucker...
-            print(f'IGNORE {data["tid"]}')
             self._ignored_tids.remove(data['tid'])
             return
 
         for key in data['keys']:
             if key in self._memory_cache:
-                print(f'DELETE FROM INVALIDATE {key}')
                 del self._memory_cache[key]
 
         for cache_key, ob in data.get('push', {}).items():
