@@ -441,7 +441,9 @@ class PGSearchUtility(DefaultSearchUtility):
         return sql_wheres
 
     def build_query(self, container: IContainer,
-                    query: ParsedQueryInfo) -> typing.Tuple[str, typing.List[typing.Any]]:
+                    query: ParsedQueryInfo,
+                    select_fields: typing.List[str],
+                    distinct: typing.Optional[bool] = False) -> typing.Tuple[str, typing.List[typing.Any]]:
         if query['sort_on'] is None:
             # always need a sort otherwise paging never works
             order_by_index = get_pg_index('uuid')
@@ -450,7 +452,6 @@ class PGSearchUtility(DefaultSearchUtility):
 
         sql_arguments = []
         sql_wheres = []
-        select_fields = ['id', 'zoid', 'json']
         arg_index = 1
         for idx, select in enumerate(query['selects']):
             select_fields.append(select.format(arg=arg_index))
@@ -477,15 +478,16 @@ class PGSearchUtility(DefaultSearchUtility):
             raise TransactionNotFound()
         sql_wheres.extend(self.get_default_where_clauses(container))
 
-        sql = '''select {}
+        sql = '''select {} {}
                  from {}
                  where {}
                  {}
                  limit {} offset {}'''.format(
+            'distinct' if distinct else '',
             ','.join(select_fields),
             sqlq(txn.storage.objects_table_name),
             ' AND '.join(sql_wheres),
-            order_by_index.order_by(query['sort_dir']),
+            '' if distinct else order_by_index.order_by(query['sort_dir']),
             sqlq(query['size']),
             sqlq(query['_from'])
         )
@@ -529,8 +531,33 @@ class PGSearchUtility(DefaultSearchUtility):
                 del metadata[k]
         return metadata
 
+    async def aggregation(self, container: IContainer, query: ParsedQueryInfo):
+        select_fields = ['json->\'' + field + '\' as ' + field for field in query['metadata']]  # noqa
+        sql, arguments = self.build_query(container, query, select_fields, True)
+
+        txn = get_transaction()
+        if txn is None:
+            raise TransactionNotFound()
+        conn = await txn.get_connection()
+
+        results = []
+        logger.debug(f'Running search:\n{sql}\n{arguments}')
+        for record in await conn.fetch(sql, *arguments):
+            results.append([json.loads(record[field]) for field in query['metadata']])
+
+        total = len(results)
+        if total >= query['size'] or query['_from'] != 0:
+            sql, arguments = self.build_count_query(container, query)
+            logger.debug(f'Running search:\n{sql}\n{arguments}')
+            records = await conn.fetch(sql, *arguments)
+            total = records[0]['count']
+        return {
+            'member': results,
+            'items_count': total
+        }
+
     async def search(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
-        sql, arguments = self.build_query(container, query)
+        sql, arguments = self.build_query(container, query, ['id', 'zoid', 'json'])
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
