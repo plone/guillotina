@@ -89,6 +89,8 @@ class BasicCache(BaseCache):
     async def close(self, invalidate=True):
         if self._utility is None:
             return
+        if self._utility._subscriber is None:
+            return
         try:
             if invalidate:
                 # A commit worked so we want to invalidate
@@ -109,6 +111,8 @@ class BasicCache(BaseCache):
         '''
         publish cache changes on redis
         '''
+        if self._utility._subscriber is None:
+            raise NoPubSubUtility()
         push = {}
         for obj, pickled in self._stored_objects:
             val = {
@@ -132,11 +136,8 @@ class BasicCache(BaseCache):
                 self._keys_to_publish.remove(ob_key)
             push[ob_key] = val
 
-        channel_utility = query_utility(IPubSubUtility)
-        if channel_utility is None:
-            raise NoPubSubUtility()
         self._utility.ignore_tid(self._transaction._tid)
-        await channel_utility.publish(
+        await self._utility._subscriber.publish(
             app_settings['cache']['updates_channel'],
             self._transaction._tid,
             {
