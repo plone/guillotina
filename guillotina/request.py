@@ -1,5 +1,3 @@
-from aiohttp.web_ws import WSMessage
-from aiohttp.web import WSMsgType
 from aiohttp.helpers import reify
 from collections import OrderedDict
 from guillotina import task_vars
