@@ -63,6 +63,15 @@ class DefaultSearchUtility:
             return await self.search(container, parsed_query)
         raise ContainerNotFound()
 
+    async def aggregation(container, parsed_query):
+        """
+        Search aggregation
+        """
+        return {
+            'member': [],
+            'items_count': 0
+        }
+
     async def query_aggregation(self, context: IBaseObject, query: typing.Any):
         '''
         Raw search query, uses parser to transform query

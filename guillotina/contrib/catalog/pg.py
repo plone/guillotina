@@ -532,7 +532,7 @@ class PGSearchUtility(DefaultSearchUtility):
         return metadata
 
     async def aggregation(self, container: IContainer, query: ParsedQueryInfo):
-        select_fields = ['json->\'' + field + '\' as ' + field for field in query['metadata']]  # noqa
+        select_fields = ['json->\'' + sqlq(field) + '\' as ' + sqlq(field) for field in query['metadata']]  # noqa
         sql, arguments = self.build_query(container, query, select_fields, True)
 
         txn = get_transaction()
