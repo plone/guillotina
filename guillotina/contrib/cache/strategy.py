@@ -9,7 +9,6 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionCache
 from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import ICacheUtility
-from guillotina.interfaces import IPubSubUtility
 from guillotina.profile import profilable
 
 
@@ -89,8 +88,6 @@ class BasicCache(BaseCache):
     async def close(self, invalidate=True):
         if self._utility is None:
             return
-        if self._utility._subscriber is None:
-            return
         try:
             if invalidate:
                 # A commit worked so we want to invalidate
@@ -101,7 +98,7 @@ class BasicCache(BaseCache):
                 ])
                 await self.delete_all(keys_to_invalidate)
 
-            if len(self._keys_to_publish) > 0:
+            if len(self._keys_to_publish) > 0 and self._utility._subscriber is not None:
                 asyncio.ensure_future(self.synchronize())
         except Exception:
             logger.warning('Error closing connection', exc_info=True)
