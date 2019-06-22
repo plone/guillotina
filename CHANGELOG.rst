@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a6 (unreleased)
+5.0.0a6 (2019-06-22)
 --------------------
 
 - Cache password checked decisions to fix basic auth support
