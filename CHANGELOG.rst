@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a6 (unreleased)
 --------------------
 
+- Cache password checked decisions to fix basic auth support
+  [vangheem]
+
 - Make sure you can import contrib packages without automatically activating them
   [vangheem]
 
