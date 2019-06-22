@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a5 (unreleased)
+5.0.0a5 (2019-06-22)
 --------------------
 - Adding rediscache and pubsub logic. Now you can have memory cache, network cache with invalidation
   and pubsub service. `guillotina_rediscache` is not necessary any more.
