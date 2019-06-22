@@ -52,3 +52,9 @@ deploy:
   script: bash docker_push
   on:
     tags: true
+
+# safelist
+branches:
+  only:
+  - master
+  - 4.x
