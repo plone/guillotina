@@ -4,7 +4,6 @@ import logging
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import query_utility
-from guillotina.contrib.cache import serialize
 from guillotina.db.cache.base import BaseCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionCache
@@ -68,8 +67,7 @@ class BasicCache(BaseCache):
     async def delete_all(self, keys):
         if self._utility is None:
             return
-        for key in keys:
-            self._keys_to_publish.append(key)
+        self._keys_to_publish.extend(keys)
         await self._utility.delete_all(keys)
 
     async def store_object(self, obj, pickled):
@@ -92,7 +90,6 @@ class BasicCache(BaseCache):
         if self._utility is None:
             return
         try:
-
             if invalidate:
                 # A commit worked so we want to invalidate
                 keys_to_invalidate = await self._extract_invalidation_keys([
@@ -104,8 +101,6 @@ class BasicCache(BaseCache):
 
             if len(self._keys_to_publish) > 0:
                 asyncio.ensure_future(self.synchronize())
-            self._keys_to_publish = []
-            self._stored_objects = []
         except Exception:
             logger.warning('Error closing connection', exc_info=True)
 
@@ -140,12 +135,13 @@ class BasicCache(BaseCache):
         channel_utility = query_utility(IPubSubUtility)
         if channel_utility is None:
             raise NoPubSubUtility()
+        self._utility.ignore_tid(self._transaction._tid)
         await channel_utility.publish(
             app_settings['cache']['updates_channel'],
             self._transaction._tid,
-            serialize.dumps({
+            {
                 'tid': self._transaction._tid,
                 'keys': self._keys_to_publish,
                 'push': push
-            })
+            }
         )

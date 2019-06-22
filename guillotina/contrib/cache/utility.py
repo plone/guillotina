@@ -1,18 +1,18 @@
-from guillotina import app_settings
-from guillotina.component import query_utility
-from guillotina.interfaces import IPubSubUtility
-from guillotina.contrib.cache import CACHE_PREFIX
-from guillotina.contrib.cache import serialize
-from guillotina.contrib.cache import memcache
-from guillotina.exceptions import NoPubSubUtility
-from guillotina.profile import profilable
-from guillotina.utils import resolve_dotted_name
-from sys import getsizeof
-
 import asyncio
 import logging
 import pickle
 import uuid
+from sys import getsizeof
+
+from guillotina import app_settings
+from guillotina.component import query_utility
+from guillotina.contrib.cache import CACHE_PREFIX
+from guillotina.contrib.cache import memcache
+from guillotina.contrib.cache import serialize
+from guillotina.exceptions import NoPubSubUtility
+from guillotina.interfaces import IPubSubUtility
+from guillotina.profile import profilable
+from guillotina.utils import resolve_dotted_name
 
 
 logger = logging.getLogger('guillotina.contrib.cache')
@@ -46,7 +46,8 @@ class CacheUtility:
             raise NoPubSubUtility()
         elif settings['updates_channel'] not in (None, ''):
             await self._subscriber.initialized()
-            await self._subscriber.subscribe(settings['updates_channel'], self._uid, self.invalidate)
+            await self._subscriber.subscribe(
+                settings['updates_channel'], self._uid, self.invalidate)
         self.initialized = True
 
     async def finalize(self, app):
@@ -135,26 +136,34 @@ class CacheUtility:
     @profilable
     # Called by the subscription to invalidations
     async def invalidate(self, *, data=None, sender=None):
-        try:
-            msg = serialize.loads(data)
-        except (TypeError, pickle.UnpicklingError):
-            logger.warning("Invalid invalidation message")
-            pass
+        if isinstance(data, (bytes, str)):
+            try:
+                data = serialize.loads(data)
+            except (TypeError, pickle.UnpicklingError):
+                logger.warning("Invalid message")
+                return
 
-        assert isinstance(msg, dict)
-        assert 'tid' in msg
-        assert 'keys' in msg
-        if msg['tid'] in self._ignored_tids:
+        assert isinstance(data, dict)
+        assert 'tid' in data
+        assert 'keys' in data
+        if data['tid'] in self._ignored_tids:
             # on the same thread, ignore this sucker...
-            self._ignored_tids.remove(msg['tid'])
+            print(f'IGNORE {data["tid"]}')
+            self._ignored_tids.remove(data['tid'])
             return
 
-        for key in msg['keys']:
+        for key in data['keys']:
             if key in self._memory_cache:
+                print(f'DELETE FROM INVALIDATE {key}')
                 del self._memory_cache[key]
 
-        for cache_key, ob in msg.get('push', {}).items():
+        for cache_key, ob in data.get('push', {}).items():
+            print(f'PUSH {cache_key}')
             self._memory_cache[cache_key] = ob
+
+        # clean up possible memory leak
+        while len(self._ignored_tids) > 100:
+            self._ignored_tids.pop(0)
 
     def ignore_tid(self, tid):
         # so we don't invalidate twice...
@@ -165,10 +174,10 @@ class CacheUtility:
             await self._subscriber.publish(
                 app_settings['cache']['updates_channel'],
                 self._uid,
-                serialize.dumps({
+                {
                     'keys': keys_to_publish,
                     'push': push or {}
-                }))
+                })
 
     async def get_stats(self):
         result = {

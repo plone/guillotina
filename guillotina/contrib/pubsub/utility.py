@@ -46,7 +46,11 @@ class PubSubUtility:
         try:
             while channel_name in self._subscribers:
                 async for msg in channel:
-                    data = pickle.loads(msg)
+                    try:
+                        data = pickle.loads(msg)
+                    except (TypeError, pickle.UnpicklingError):
+                        logger.warning("Invalid message")
+                        continue
                     for req, callback in self._subscribers[channel_name].items():
                         if data.get('ruid') != req:
                             await callback(data=data['data'], sender=data['ruid'])

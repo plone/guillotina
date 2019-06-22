@@ -764,6 +764,10 @@ async def move(context: IResource,
     if destination_ob.__uuid__ == context.__parent__.__uuid__ and new_id == context.id:
         raise PreconditionFailed(context, 'Object already belongs to this parent with same id')
 
+    txn = get_transaction()
+    if txn is not None:
+        cache_keys = txn._cache.get_cache_keys(context, 'deleted')
+
     old_id = context.id
     if new_id is not None:
         context.id = context.__name__ = new_id
@@ -782,10 +786,6 @@ async def move(context: IResource,
             context, f'Destination already has object with the id {new_id}')
 
     original_parent = context.__parent__
-
-    txn = get_transaction()
-    if txn is not None:
-        cache_keys = txn._cache.get_cache_keys(context, 'deleted')
 
     await notify(
         BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,

@@ -382,7 +382,6 @@ class TraversalRouter(AbstractRouter):
     @profilable
     async def real_resolve(self, request: IRequest) -> Optional[MatchInfo]:
         """Main function to resolve a request."""
-
         if request.method not in app_settings['http_methods']:
             raise HTTPMethodNotAllowed(
                 method=request.method,
