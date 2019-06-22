@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a7 (unreleased)
+5.0.0a7 (2019-06-22)
 --------------------
 
 - Change `guillotina.files.utils.generate_key` to not accept a `request` parameter. It was
