@@ -543,7 +543,7 @@ class PGSearchUtility(DefaultSearchUtility):
         results = []
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
-            results.append([json.loads(record[field]) for field in query['metadata']])
+            results.append([json.loads(record[field]) for field in query['metadata'] or []])
 
         total = len(results)
         if total >= query['size'] or query['_from'] != 0:

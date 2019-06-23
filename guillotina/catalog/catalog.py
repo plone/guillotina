@@ -63,7 +63,7 @@ class DefaultSearchUtility:
             return await self.search(container, parsed_query)
         raise ContainerNotFound()
 
-    async def aggregation(self, container: IBaseObject, parsed_query: typing.Any):
+    async def aggregation(self, container: IContainer, parsed_query: typing.Any):
         """
         Search aggregation
         """
