@@ -5,6 +5,7 @@ CHANGELOG
 --------------------
 
 - Nothing changed yet.
+- Executioner 1.2.0, providing pagination support in navigation
 
 
 5.0.0a8 (2019-06-23)
