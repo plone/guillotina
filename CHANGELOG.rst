@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a8 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Aggregations in PG JSONb
+  [bloodbare]
 
 
 5.0.0a7 (2019-06-22)

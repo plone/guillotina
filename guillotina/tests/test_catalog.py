@@ -237,6 +237,14 @@ async def test_query_pg_catalog(container_requester):
             results = await util.query(container, {'_size': '1', '_from': '1'})
             assert len(results['member']) == 1
 
+            results = await util.query_aggregation(container, {'_metadata': 'title'})
+            assert len(results['member']) == 2
+            assert results['member'][0][0] == 'Item1'
+
+            results = await util.query_aggregation(container, {'_metadata': ['title', 'creators']})
+            assert len(results['member']) == 2
+            assert results['member'][0][1][0] == 'root'
+
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason='Only PG')
