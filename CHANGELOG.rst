@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a8 (unreleased)
+5.0.0a8 (2019-06-23)
 --------------------
 
 - Aggregations in PG JSONb
