@@ -4,8 +4,10 @@ CHANGELOG
 5.0.0a9 (unreleased)
 --------------------
 
-- Nothing changed yet.
-- Executioner 1.2.0, providing pagination support in navigation
+- Executioner:
+    - providing pagination support in navigation (1.2.0)
+    - supporting token authentication from login form (1.3.0)
+    - using @search endpoint to navigate in container items
 
 
 5.0.0a8 (2019-06-23)
