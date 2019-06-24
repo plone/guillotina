@@ -4,8 +4,8 @@ CHANGELOG
 5.0.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Move guillotina_dbusers to guillotina.contrib.dbusers
+  [jordic, lferran]
 
 5.0.26 (2019-10-21)
 -------------------
