@@ -34,7 +34,6 @@ class RedisFileDataManager(DBDataManager):
                 self._data = json.loads(data)
 
     async def start(self):
-        print('start')
         self.protect()
         self._data.clear()
 
@@ -43,7 +42,6 @@ class RedisFileDataManager(DBDataManager):
         txn.add_after_commit_hook(self._save)
 
     async def _save(self):
-        print('save')
         redis = await self.get_redis()
         key = self.get_key()
         self._data['last_activity'] = time.time()
@@ -64,11 +62,9 @@ class RedisFileDataManager(DBDataManager):
         )
 
     async def update(self, **kwargs):
-        print('update')
         self._data.update(kwargs)
 
     async def finish(self, values=None):
-        print('finish')
         val = await super().finish(values=values)
         txn = get_transaction()
         txn.add_after_commit_hook(self._delete_key)
