@@ -86,7 +86,6 @@ class DeleteUser(BaseUser):
         return await view()
 
 
-
 @configure.service(
     context=IContainer, name="@users", method="GET", permission="guillotina.ManageUsers"
 )

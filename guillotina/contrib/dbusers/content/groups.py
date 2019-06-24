@@ -18,8 +18,7 @@ class IGroup(IFolder):
         title=_("Roles"), value_type=schema.TextLine(), required=False
     )
     users = schema.List(
-        title=_("Users"), value_type=schema.TextLine(), required=False,
-        default=[]
+        title=_("Users"), value_type=schema.TextLine(), required=False, default=[]
     )
 
 
@@ -31,7 +30,7 @@ class IGroup(IFolder):
 )
 class Group(Folder):
     name = None
-    user_roles = []
+    user_roles: List[str] = []
 
     @property
     def roles(self):

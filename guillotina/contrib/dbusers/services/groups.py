@@ -39,7 +39,7 @@ class GetGroups(Service):
 
 class BaseGroup(Service):
     async def get_group(self):
-        group_id =  self.request.matchdict["group"]
+        group_id = self.request.matchdict["group"]
         group = await navigate_to(self.context, "groups/{}".format(group_id))
         if not group:
             raise HTTPNotFound()

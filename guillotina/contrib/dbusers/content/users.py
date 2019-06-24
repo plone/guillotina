@@ -71,9 +71,9 @@ class User(Folder):
     username = email = name = password = None
     disabled = False
     user_roles = ['guillotina.Member']
-    user_groups = []
-    user_permissions = {}
-    properties = {}
+    user_groups: List[str] = []
+    user_permissions: List[str] = []
+    properties: Dict[str, Any] = {}
 
     @property
     def roles(self):

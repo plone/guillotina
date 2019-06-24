@@ -1,8 +1,4 @@
 
-from guillotina.tests.utils import ContainerRequesterAsyncContextManager  # noqa
-
-import pytest
-
 DEFAULT_SETTINGS = {
     "auth_user_identifiers": [
         "guillotina.contrib.dbusers.users.DBUserIdentifier"
@@ -13,10 +9,10 @@ DEFAULT_SETTINGS = {
 }
 
 user_data = {
-        "@type": "User",
-        "name": "Foobar",
-        "id": "foobar",
-        "username": "foobar",
-        "email": "foo@bar.com",
-        "password": "password",
-    }
+    "@type": "User",
+    "name": "Foobar",
+    "id": "foobar",
+    "username": "foobar",
+    "email": "foo@bar.com",
+    "password": "password",
+}
