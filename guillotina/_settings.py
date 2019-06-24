@@ -95,6 +95,7 @@ app_settings: Dict[str, Any] = {
     "cors_renderer": "guillotina.cors.DefaultCorsRenderer",
     "check_writable_request": "guillotina.writable.check_writable_request",
     "indexer": "guillotina.catalog.index.Indexer",
-    'search_parser': 'default'
+    'search_parser': 'default',
+    'object_reader': 'guillotina.db.reader.reader'
 }
 default_settings = copy.deepcopy(app_settings)

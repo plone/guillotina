@@ -10,7 +10,6 @@ from guillotina.component import query_multi_adapter
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.db.reader import reader
 from guillotina.interfaces import IAbsoluteURL
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
@@ -184,7 +183,7 @@ async def get_object_by_uid(uid: str, txn=None) -> IBaseObject:
     if result['parent_id'] == TRASHED_ID:
         raise KeyError(uid)
 
-    obj = reader(result)
+    obj = app_settings['object_reader'](result)
     obj.__txn__ = txn
     if result['parent_id']:
         parent = await get_object_by_uid(result['parent_id'], txn)

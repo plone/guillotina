@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a8 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Be able to customize the object reader function with the `object_reader` setting
+  [vangheem]
 
 
 5.0.0a7 (2019-06-22)

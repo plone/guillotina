@@ -202,7 +202,7 @@ Each change can use the following settings:
 
 ## Exploring the API with Swagger
 
-In the previous step, we installed `guillotina_swagger`. With Swagger, we can
+In the previous step, we installed `guillotina.contrib.swagger`. With Swagger, we can
 inspect any context and explore the API.
 
 Visit `http://localhost:8080/@docs`

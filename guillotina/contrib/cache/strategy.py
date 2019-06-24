@@ -12,7 +12,7 @@ from guillotina.interfaces import ICacheUtility
 from guillotina.profile import profilable
 
 
-logger = logging.getLogger('guillotina_rediscache')
+logger = logging.getLogger('guillotina')
 
 _default_size = 1024
 _basic_types = (bytes, str, int, float)
