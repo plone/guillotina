@@ -14,7 +14,8 @@ from zope.interface import alsoProvides
 
 @configure.service(
     for_=IContainer, method="GET",
-    name="@groups"
+    name="@groups",
+    permission='guillotina.ManageUsers'
 )
 class GetGroups(Service):
     async def __call__(self):
@@ -48,7 +49,8 @@ class BaseGroup(Service):
 
 @configure.service(
     for_=IContainer, methods="GET",
-    name="@groups/{group}"
+    name="@groups/{group}",
+    permission='guillotina.ManageUsers'
 )
 class GetGroup(BaseGroup):
     async def __call__(self):
@@ -61,7 +63,8 @@ class GetGroup(BaseGroup):
 
 @configure.service(
     for_=IContainer, method="PATCH",
-    name="@groups/{group}"
+    name="@groups/{group}",
+    permission='guillotina.ManageUsers'
 )
 class PatchGroups(BaseGroup):
     async def __call__(self):
@@ -73,7 +76,8 @@ class PatchGroups(BaseGroup):
 
 @configure.service(
     for_=IContainer, method="DELETE",
-    name="@groups/{group}"
+    name="@groups/{group}",
+    permission='guillotina.ManageUsers'
 )
 class DeleteGroup(BaseGroup):
     async def __call__(self):

@@ -6,7 +6,7 @@ Store users/groups in the database for guillotina.
 
 ## Installation
 
-- add `guillotina_dbusers` to list of applications in your guillotina configuration
+- add `guillotina.contrib.dbusers` to list of applications in your guillotina configuration
 - install into your container using the `@addons` endpoint using `dbusers` as id.
 
 Available content types:
