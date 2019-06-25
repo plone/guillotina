@@ -24,12 +24,12 @@ class ITransaction(Interface):
     manager = Attribute('')
     _cache = Attribute('')
 
-    async def add_after_commit_hook(hook, *real_args, args=[], kws=None, **kwargs):
+    async def add_after_commit_hook(hook, *real_args, args=None, kws=None, **kwargs):
         '''
         Add hook to be called after transaction commit
         '''
 
-    async def add_before_commit_hook(hook, *real_args, args=[], kws=None, **kwargs):
+    async def add_before_commit_hook(hook, *real_args, args=None, kws=None, **kwargs):
         '''
         Add hook to be called before txn commit
         '''

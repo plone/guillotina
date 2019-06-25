@@ -134,7 +134,8 @@ class Job:
 
 class AsyncJobPool:
 
-    def __init__(self, settings={'max_size': 5}, loop=None):
+    def __init__(self, settings=None, loop=None):
+        settings = settings or {'max_size': 5}
         self._loop = None
         self._running = []
         self._pending = []

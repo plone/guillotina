@@ -9,6 +9,7 @@ CHANGELOG
     - supporting token authentication from login form (1.3.0)
     - using @search endpoint to navigate in container items
 
+- A few more python antipattern fixes [lferran]
 
 5.0.0a8 (2019-06-23)
 --------------------
