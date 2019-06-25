@@ -62,7 +62,8 @@ from jwcrypto.common import json_encode
 class WebsocketGetToken(Service):
     _websockets_ttl = 60
 
-    def generate_websocket_token(self, real_token, data={}):
+    def generate_websocket_token(self, real_token, data=None):
+        data = data or {}
         claims = {
             'iat': int(time.time()),
             'exp': int(time.time() + self._websockets_ttl),

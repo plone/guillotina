@@ -154,11 +154,11 @@ class Transaction:
         """
         return iter(self._before_commit)
 
-    def add_before_commit_hook(self, hook, *real_args, args=[], kws=None, **kwargs):
+    def add_before_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
         """ See ITransaction.
         """
-        if kws is None:
-            kws = {}
+        args = args or []
+        kws = kws or {}
         kwargs.update(kws)
         self._before_commit.append((hook, real_args + tuple(args), kwargs))
 
@@ -167,11 +167,11 @@ class Transaction:
         """
         return iter(self._after_commit)
 
-    def add_after_commit_hook(self, hook, *real_args, args=[], kws=None, **kwargs):
+    def add_after_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
         """ See ITransaction.
         """
-        if kws is None:
-            kws = {}
+        args = args or []
+        kws = kws or {}
         kwargs.update(kws)
         self._after_commit.append((hook, real_args + tuple(args), kwargs))
 

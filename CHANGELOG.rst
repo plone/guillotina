@@ -1,12 +1,24 @@
 CHANGELOG
 =========
 
-5.0.0a8 (unreleased)
+5.0.0a9 (unreleased)
 --------------------
 
 - Be able to customize the object reader function with the `object_reader` setting
   [vangheem]
 
+- Executioner:
+    - providing pagination support in navigation (1.2.0)
+    - supporting token authentication from login form (1.3.0)
+    - using @search endpoint to navigate in container items
+
+- A few more python antipattern fixes [lferran]
+
+5.0.0a8 (2019-06-23)
+--------------------
+
+- Aggregations in PG JSONb
+  [bloodbare]
 
 5.0.0a7 (2019-06-22)
 --------------------

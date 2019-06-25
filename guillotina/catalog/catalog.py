@@ -63,6 +63,25 @@ class DefaultSearchUtility:
             return await self.search(container, parsed_query)
         raise ContainerNotFound()
 
+    async def aggregation(self, container: IContainer, parsed_query: typing.Any):
+        """
+        Search aggregation
+        """
+        return {
+            'member': [],
+            'items_count': 0
+        }
+
+    async def query_aggregation(self, context: IBaseObject, query: typing.Any):
+        '''
+        Raw search query, uses parser to transform query
+        '''
+        parsed_query = parse_query(context, query, self)
+        container = find_container(context)
+        if container is not None:
+            return await self.aggregation(container, parsed_query)
+        raise ContainerNotFound()
+
     async def index(self, container: IContainer, datas):
         """
         {uid: <dict>}
