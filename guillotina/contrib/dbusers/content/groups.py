@@ -5,6 +5,8 @@ from guillotina.contrib.dbusers import _
 from guillotina.interfaces import IFolder
 from zope.interface import implementer
 
+import typing
+
 
 class IGroupManager(IFolder):
     pass
@@ -30,7 +32,7 @@ class IGroup(IFolder):
 )
 class Group(Folder):
     name = None
-    user_roles: List[str] = []
+    user_roles: typing.List[str] = []
 
     @property
     def roles(self):

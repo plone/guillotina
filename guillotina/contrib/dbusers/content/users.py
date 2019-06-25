@@ -8,6 +8,8 @@ from guillotina.interfaces import Allow
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPrincipal
 
+import typing
+
 
 class IUserManager(IFolder):
     pass
@@ -71,9 +73,9 @@ class User(Folder):
     username = email = name = password = None
     disabled = False
     user_roles = ['guillotina.Member']
-    user_groups: List[str] = []
-    user_permissions: List[str] = []
-    properties: Dict[str, Any] = {}
+    user_groups: typing.List[str] = []
+    user_permissions: typing.List[str] = []
+    properties: typing.Dict[str, typing.Any] = {}
 
     @property
     def roles(self):
