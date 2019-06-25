@@ -33,6 +33,8 @@ from .content import IResourceFactory  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
+from .mail import IMailer  # noqa
+from .mail import IMailEndpoint  # noqa
 from .events import IAfterAsyncUtilityLoadedEvent  # noqa
 from .events import IApplicationCleanupEvent  # noqa
 from .events import IApplicationConfiguredEvent  # noqa

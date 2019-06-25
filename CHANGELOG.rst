@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a9 (unreleased)
 --------------------
 
+- Move guillotina_mailer to guillotina.contrib.mailer
+  [bloodbare]
+
 - Executioner:
     - providing pagination support in navigation (1.2.0)
     - supporting token authentication from login form (1.3.0)
