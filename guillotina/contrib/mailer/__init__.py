@@ -3,7 +3,9 @@ from guillotina import configure
 from guillotina.interfaces import IMailer
 from guillotina.component import provide_utility
 from guillotina.utils import import_class
+import logging
 
+logger = logging.getLogger('guillotina.contrib.mailer')
 
 app_settings = {
     "mailer": {
@@ -22,11 +24,11 @@ app_settings = {
     }
 }
 
-
 def includeme(root, settings):
     factory = import_class(
         settings.get('mailer', {}).get('utility',
-                                       app_settings['mailer']['utility']))
+                                       settings['mailer']['utility']))
+    logger.debug(f"Setting Mail Utility: {settings['mailer']['utility']}")
     utility = factory()
     provide_utility(utility, IMailer)
 
