@@ -4,6 +4,10 @@ CHANGELOG
 4.8.10 (unreleased)
 -------------------
 
+- Fix indexing data potentially missing updated content when `fields` for accessor
+  is not specified
+  [vangheem]
+
 - Fix events antipattern [lferran]
 
 4.8.9 (2019-06-17)
