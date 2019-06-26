@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.10 (unreleased)
+4.8.10 (2019-06-26)
 -------------------
 
 - Fix indexing data potentially missing updated content when `fields` for accessor
