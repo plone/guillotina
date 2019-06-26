@@ -162,7 +162,9 @@ def handle(*objects):
 
 
 @hookable
-def adapter_hook(interface, object, name='', default=None, args=[], kwargs={}):
+def adapter_hook(interface, object, name='', default=None, args=None, kwargs=None):
+    args = args or []
+    kwargs = kwargs or {}
     try:
         registry = get_component_registry()
     except ComponentLookupError:  # pragma NO COVER w/o context, cannot test

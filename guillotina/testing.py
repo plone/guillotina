@@ -91,7 +91,7 @@ def configure_with(func):
     _configurators.append(func)
 
 
-def get_settings(override_settings={}):
+def get_settings():
     settings = deepcopy(TESTING_SETTINGS)
     for func in _configurators:
         lazy_apply(func, settings, _configurators)

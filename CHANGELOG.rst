@@ -15,6 +15,7 @@ CHANGELOG
   [vangheem]
 
 - Fix events antipattern [lferran]
+- A few more antipattern fixes [lferran]
 
 4.8.9 (2019-06-17)
 ------------------
