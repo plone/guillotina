@@ -45,6 +45,37 @@ async def test_get_index_data(dummy_request):
     assert 'title' in fields
 
 
+async def test_get_index_data_with_accessors(dummy_request):
+    request = dummy_request  # noqa
+
+    container = await create_content(
+        'Container',
+        id='guillotina',
+        title='Guillotina')
+    container.__name__ = 'guillotina'
+
+    ob = await create_content('Example', id='foobar', categories=[{
+        'label': 'foo',
+        'number': 1
+    }])
+
+    data = ICatalogDataAdapter(ob)
+    fields = await data()
+    for field_name in ('categories_accessor', 'foobar_accessor', 'type_name',
+                       'categories', 'uuid', 'path', 'title', 'tid'):
+        assert field_name in fields
+
+    # now only with indexes specified
+    data = ICatalogDataAdapter(ob)
+    fields = await data(indexes=['categories'])
+    # but should also pull in `foobar_accessor` because it does not
+    # have a field specified for it.
+    for field_name in ('categories_accessor', 'foobar_accessor', 'type_name',
+                       'categories', 'uuid', 'tid'):
+        assert field_name in fields
+    assert 'title' not in fields
+
+
 async def test_registered_base_utility(dummy_request):
     util = query_utility(ICatalogUtility)
     assert util is not None
