@@ -117,7 +117,7 @@ def categories_index_accessor(ob):
         ]
 
 
- @index_field.with_accessor(IExample, 'foobar_accessor')
+@index_field.with_accessor(IExample, 'foobar_accessor')
 def foobar_accessor(ob):
     return 'foobar'
 
