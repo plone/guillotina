@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a10 (unreleased)
+5.0.0a10 (2019-06-27)
 ---------------------
 
 - Adding store_json property on db configuration so we can disable json storage for each db.
