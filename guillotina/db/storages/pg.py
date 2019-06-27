@@ -514,7 +514,7 @@ class PostgresqlStorage(BaseStorage):
 
     def __init__(self, dsn=None, partition=None, read_only=False, name=None,
                  pool_size=13, transaction_strategy='resolve_readcommitted',
-                 conn_acquire_timeout=20, db_schema='public',
+                 conn_acquire_timeout=20, db_schema='public', store_json=True,
                  objects_table_name='objects', blobs_table_name='blobs',
                  connection_manager=None, autovacuum=True, **options):
         super(PostgresqlStorage, self).__init__(
@@ -526,6 +526,7 @@ class PostgresqlStorage(BaseStorage):
         self.__name__ = name
         self._conn_acquire_timeout = conn_acquire_timeout
         self._options = options
+        self._store_json = store_json
         self._connection_options = {}
         self._connection_initialized_on = time.time()
         self._db_schema = db_schema
@@ -712,8 +713,11 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         pickled = writer.serialize()  # This calls __getstate__ of obj
         if len(pickled) >= self._large_record_size:
             log.info(f"Large object {obj.__class__}: {len(pickled)}")
-        json_dict = await writer.get_json()
-        json = ujson.dumps(json_dict)
+        if self._store_json:
+            json_dict = await writer.get_json()
+            json = ujson.dumps(json_dict)
+        else:
+            json = {}
         part = writer.part
         if part is None:
             part = 0
