@@ -43,20 +43,18 @@ g -c config-foobar.yaml
 
 ## Installing applications
 
-Guillotina applications are python packages that you install and then configure
+Guillotina applications are python packages or modules that you install and then configure
 in your application settings.
 
 For an example, we'll go through installing swagger support.
 
-```
-pip install guillotina_swagger
-```
+Since version 5, swagger is in packaged with Guillotina by default.
 
-Then, add this to your `config.yaml` file.
+Add this to your `config.yaml` file.
 
 ```yaml
 applications:
-- guillotina_swagger
+- guillotina.contrib.swagger
 ```
 
 Finally, start Guillotina again and visit `http://localhost:8080/@docs`.

@@ -16,7 +16,6 @@ from guillotina.db.interfaces import ITransactionCache
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.db.reader import reader as default_reader
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RestartCommit
@@ -285,7 +284,7 @@ class Transaction:
         if result is None:
             result = await self._get(oid)
 
-        obj = default_reader(result)
+        obj = app_settings['object_reader'](result)
         obj.__txn__ = self
         if obj.__immutable_cache__:
             # ttl of zero means we want to provide a hard cache here
@@ -424,7 +423,7 @@ class Transaction:
         return self._fill_object(result, parent)
 
     def _fill_object(self, item: dict, parent: IBaseObject) -> IBaseObject:
-        obj = default_reader(item)
+        obj = app_settings['object_reader'](item)
         obj.__parent__ = parent
         obj.__txn__ = self
         return obj
@@ -498,7 +497,7 @@ class Transaction:
         if result == _EMPTY:
             raise KeyError(id)
         if reader is None:
-            obj = default_reader(result)
+            obj = app_settings['object_reader'](result)
         else:
             obj = reader(result)
         obj.__of__ = base_obj.__uuid__

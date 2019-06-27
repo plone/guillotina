@@ -185,12 +185,16 @@ _dotted_name_settings = (
     'auth_extractors',
     'auth_token_validators',
     'auth_user_identifiers',
+    'http_methods',
     'pg_connection_class',
+    'cloud_storage',
+    "router",
     'uid_generator',
     'oid_generator',
     'cors_renderer',
     'check_writable_request',
-    'indexer'
+    'indexer',
+    'object_reader'
 )
 
 _moved = {

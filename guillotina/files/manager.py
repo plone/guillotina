@@ -20,7 +20,7 @@ from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_object_url
-from guillotina.utils import import_class
+from guillotina.utils import resolve_dotted_name
 from zope.interface import alsoProvides
 
 from .const import CHUNK_SIZE
@@ -36,7 +36,7 @@ class FileManager(object):
         self.request = request
         self.field = field
 
-        iface = import_class(app_settings['cloud_storage'])
+        iface = resolve_dotted_name(app_settings['cloud_storage'])
         alsoProvides(field, iface)
 
         self.file_storage_manager = get_multi_adapter(

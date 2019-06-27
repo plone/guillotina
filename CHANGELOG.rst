@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a9 (unreleased)
 --------------------
 
+- Be able to customize the object reader function with the `object_reader` setting
+  [vangheem]
+
 - Fix indexing data potentially missing updated content when `fields` for accessor
   is not specified
   [vangheem]
@@ -20,7 +23,6 @@ CHANGELOG
 
 - Aggregations in PG JSONb
   [bloodbare]
-
 
 5.0.0a7 (2019-06-22)
 --------------------
