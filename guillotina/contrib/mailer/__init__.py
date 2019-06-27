@@ -29,7 +29,7 @@ def includeme(root, settings):
         settings.get('mailer', {}).get('utility',
                                        settings['mailer']['utility']))
     logger.debug(f"Setting Mail Utility: {settings['mailer']['utility']}")
-    if settings['mailer']['default_sender'] is None:
+    if settings.get('mailer', {}).get('default_sender', None) is None:
         logger.warning(f"No sender mail configured on mailer.default_sender settings")
     utility = factory()
     provide_utility(utility, IMailer)
