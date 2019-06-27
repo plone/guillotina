@@ -133,7 +133,7 @@ class Transaction:
 
     async def get_connection(self):
         if self._db_conn is None:
-            self._db_conn = await self._manager._storage.open()
+            self._db_conn = await self._manager._storage.open(read_only=self._read_only)
             self._query_count_start = self.get_query_count()
         return self._db_conn
 
