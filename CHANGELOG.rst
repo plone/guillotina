@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a9 (unreleased)
+5.0.0a9 (2019-06-27)
 --------------------
 
 - Move guillotina_mailer to guillotina.contrib.mailer
