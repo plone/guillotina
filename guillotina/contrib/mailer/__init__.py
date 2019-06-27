@@ -9,7 +9,7 @@ logger = logging.getLogger('guillotina.contrib.mailer')
 
 app_settings = {
     "mailer": {
-        "default_sender": "foo@bar.com",
+        "default_sender": None,
         "endpoints": {
             "default": {
                 "type": "smtp",
@@ -29,6 +29,8 @@ def includeme(root, settings):
         settings.get('mailer', {}).get('utility',
                                        settings['mailer']['utility']))
     logger.debug(f"Setting Mail Utility: {settings['mailer']['utility']}")
+    if settings['mailer']['default_sender'] is None:
+        logger.warning(f"No sender mail configured on mailer.default_sender settings")
     utility = factory()
     provide_utility(utility, IMailer)
 
