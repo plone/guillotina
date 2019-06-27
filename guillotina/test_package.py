@@ -1,10 +1,4 @@
 # this is for testing.py, do not import into other modules
-import json
-import os
-import tempfile
-import typing
-from shutil import copyfile
-
 from guillotina import configure
 from guillotina import schema
 from guillotina.async_util import IAsyncUtility
@@ -16,6 +10,7 @@ from guillotina.content import Resource
 from guillotina.directives import index_field
 from guillotina.directives import metadata
 from guillotina.directives import write_permission
+from guillotina.exceptions import NoIndexField
 from guillotina.fields import CloudFileField
 from guillotina.files import BaseCloudFile
 from guillotina.files.utils import generate_key
@@ -33,8 +28,14 @@ from guillotina.interfaces import IResource
 from guillotina.response import HTTPUnprocessableEntity
 from guillotina.schema import Object
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
-from zope.interface import Interface
+from shutil import copyfile
 from zope.interface import implementer
+from zope.interface import Interface
+
+import json
+import os
+import tempfile
+import typing
 
 
 app_settings = {
@@ -103,6 +104,22 @@ class IExample(IResource):
     context_default_factory_test = schema.Text(
         defaultFactory=ContextDefaultFactory()
     )
+
+
+@index_field.with_accessor(
+    IExample, 'categories_accessor', field='categories')
+def categories_index_accessor(ob):
+    if not ob.categories:
+        raise NoIndexField
+    else:
+        return [
+            c['label'] for c in ob.categories
+        ]
+
+
+@index_field.with_accessor(IExample, 'foobar_accessor')
+def foobar_accessor(ob):
+    return 'foobar'
 
 
 configure.permission('example.MyPermission', 'example permission')

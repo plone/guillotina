@@ -58,7 +58,8 @@ class SwaggerDefinitionService(Service):
             "responses": self.get_data(service_def.get("responses", {})),
         }
 
-    def get_endpoints(self, iface_conf, base_path, api_def, tags=[]):
+    def get_endpoints(self, iface_conf, base_path, api_def, tags=None):
+        tags = tags or []
         for method in iface_conf.keys():
             if method == "endpoints":
                 for name in iface_conf["endpoints"]:

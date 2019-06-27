@@ -30,7 +30,8 @@ def get_db(app, db_id):
     return app.root[db_id]
 
 
-def get_mocked_request(*, db=None, method='POST', path='/', headers={}):
+def get_mocked_request(*, db=None, method='POST', path='/', headers=None):
+    headers = headers or {}
     request = make_mocked_request(method, path, headers=headers)
     request._futures = {}
     request._txn = None

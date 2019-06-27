@@ -15,7 +15,6 @@ from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
 from guillotina.db.interfaces import IWriter
-from guillotina.db.reader import reader
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -177,7 +176,7 @@ class Database:
             await txn._strategy.retrieve_tid()
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
-                root = reader(root)
+                root = app_settings['object_reader'](root)
                 root.__txn__ = txn
                 if root.__db_id__ is None:
                     root.__db_id__ = self._database_name

@@ -4,7 +4,8 @@ def clear_table_name(table_name):
     return table_name
 
 
-def get_table_definition(name, schema, primary_keys=[]):
+def get_table_definition(name, schema, primary_keys=None):
+    primary_keys = primary_keys or []
     pk = ''
     if len(primary_keys) > 0:
         pk = ', CONSTRAINT pk_{} PRIMARY KEY({})'.format(

@@ -20,4 +20,3 @@ Contents:
    asyncio
    extending/index
    commands
-   kitchensink
