@@ -62,6 +62,37 @@ async def test_get_index_data(dummy_guillotina):
     assert 'title' in fields
 
 
+async def test_get_index_data_with_accessors(dummy_request):
+    request = dummy_request  # noqa
+
+    container = await create_content(
+        'Container',
+        id='guillotina',
+        title='Guillotina')
+    container.__name__ = 'guillotina'
+
+    ob = await create_content('Example', id='foobar', categories=[{
+        'label': 'foo',
+        'number': 1
+    }])
+
+    data = ICatalogDataAdapter(ob)
+    fields = await data()
+    for field_name in ('categories_accessor', 'foobar_accessor', 'type_name',
+                       'categories', 'uuid', 'path', 'title', 'tid'):
+        assert field_name in fields
+
+    # now only with indexes specified
+    data = ICatalogDataAdapter(ob)
+    fields = await data(indexes=['categories'])
+    # but should also pull in `foobar_accessor` because it does not
+    # have a field specified for it.
+    for field_name in ('categories_accessor', 'foobar_accessor', 'type_name',
+                       'categories', 'uuid', 'tid'):
+        assert field_name in fields
+    assert 'title' not in fields
+
+
 async def test_registered_base_utility(dummy_guillotina):
     util = query_utility(ICatalogUtility)
     assert util is not None
@@ -84,9 +115,9 @@ async def test_get_data_uses_indexes_param(dummy_guillotina):
     container.__name__ = 'guillotina'
     ob = await create_content('Item', id='foobar')
     data = await util.get_data(ob, indexes=['title'])
-    assert len(data) == 4  # @uid, type_name, etc always returned
+    assert len(data) == 7  # @uid, type_name, etc always returned
     data = await util.get_data(ob, indexes=['title', 'id'])
-    assert len(data) == 5
+    assert len(data) == 8
 
     data = await util.get_data(ob)
     assert len(data) > 9
@@ -107,12 +138,12 @@ async def test_modified_event_gathers_all_index_data(dummy_guillotina):
     }))
     fut = index.get_indexer()
 
-    assert len(fut.update['foobar']) == 5
+    assert len(fut.update['foobar']) == 8
 
     await notify(ObjectModifiedEvent(ob, payload={
         'creation_date': ''
     }))
-    assert len(fut.update['foobar']) == 6
+    assert len(fut.update['foobar']) == 9
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)

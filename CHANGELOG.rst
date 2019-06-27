@@ -7,6 +7,10 @@ CHANGELOG
 - Be able to customize the object reader function with the `object_reader` setting
   [vangheem]
 
+- Fix indexing data potentially missing updated content when `fields` for accessor
+  is not specified
+  [vangheem]
+
 - Executioner:
     - providing pagination support in navigation (1.2.0)
     - supporting token authentication from login form (1.3.0)
