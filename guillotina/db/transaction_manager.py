@@ -70,13 +70,13 @@ class TransactionManager:
                 txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
             txn.status = Status.ACTIVE
-            txn._read_only = read_only
             if (txn._db_conn is not None and
                     getattr(txn._db_conn, '_in_use', None) is None):
                 try:
                     await self._close_txn(txn)
                 except Exception:
                     logger.warn('Unable to close spurious connection', exc_info=True)
+            txn._read_only = read_only
         else:
             txn = Transaction(self, read_only=read_only)
 
@@ -120,7 +120,7 @@ class TransactionManager:
                 pass
             try:
                 try:
-                    await self._storage.close(txn._db_conn)
+                    await self._storage.close(txn._db_conn, read_only=txn._read_only)
                 except asyncpg.exceptions.InterfaceError as ex:
                     if 'received invalid connection' in str(ex):
                         # ignore, new pool was created so we can not close this conn

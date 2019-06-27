@@ -720,13 +720,21 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
         return conn
 
-    async def close(self, con):
-        try:
-            await shield(
-                asyncio.wait_for(self.pool.release(con, timeout=1), 1))
-        except (asyncio.CancelledError, RuntimeError, asyncio.TimeoutError,
-                asyncpg.exceptions.ConnectionDoesNotExistError):
-            pass
+    async def close(self, con, read_only=False):
+        if read_only and self.read_pool is not None:
+            try:
+                await shield(
+                    asyncio.wait_for(self.read_pool.release(con, timeout=1), 1))
+            except (asyncio.CancelledError, RuntimeError, asyncio.TimeoutError,
+                    asyncpg.exceptions.ConnectionDoesNotExistError):
+                pass
+        else:
+            try:
+                await shield(
+                    asyncio.wait_for(self.pool.release(con, timeout=1), 1))
+            except (asyncio.CancelledError, RuntimeError, asyncio.TimeoutError,
+                    asyncpg.exceptions.ConnectionDoesNotExistError):
+                pass
 
     async def terminate(self, conn):
         conn.terminate()
