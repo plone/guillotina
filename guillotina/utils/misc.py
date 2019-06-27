@@ -14,12 +14,14 @@ from guillotina import glogging
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_utility
+from guillotina.exceptions import DatabaseNotFound
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
 from guillotina.exceptions import ContainerNotFound
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
 from guillotina.db.interfaces import ITransaction
@@ -171,7 +173,7 @@ def get_current_transaction() -> ITransaction:
 @profilable
 def get_current_container() -> IContainer:
     """
-    Return the current request by heuristically looking it up from stack
+    Return the current container by heuristically looking it up from stack
     """
     try:
         task_context = task_vars.container.get()
@@ -181,6 +183,21 @@ def get_current_container() -> IContainer:
         pass
 
     raise ContainerNotFound(ContainerNotFound.__doc__)
+
+
+@profilable
+def get_current_db() -> IDatabase:
+    """
+    Return the current db by heuristically looking it up from stack
+    """
+    try:
+        task_context = task_vars.db.get()
+        if task_context is not None:
+            return task_context
+    except (ValueError, AttributeError, RuntimeError):
+        pass
+
+    raise DatabaseNotFound(DatabaseNotFound.__doc__)
 
 
 def lazy_apply(func, *call_args, **call_kwargs):

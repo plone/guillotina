@@ -87,6 +87,11 @@ class ContainerNotFound(Exception):
     Lookup for the current container for request aware task failed
     """
 
+class DatabaseNotFound(Exception):
+    """
+    Lookup for the current db for request aware task failed
+    """
+
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""

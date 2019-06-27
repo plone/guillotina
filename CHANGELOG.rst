@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a9 (unreleased)
 --------------------
 
+- Move guillotina_mailer to guillotina.contrib.mailer
+  [bloodbare]
+
 - Be able to customize the object reader function with the `object_reader` setting
   [vangheem]
 

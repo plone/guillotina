@@ -95,6 +95,10 @@ setup(
         ],
         'redis': [
             'aioredis>=1.2'
+        ],
+        'mailer': [
+            'html2text>=2018.1.9',
+            'aiosmtplib>=1.0.6'
         ]
     },
     entry_points={
