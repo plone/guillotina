@@ -84,13 +84,14 @@ class FieldProperty(object):
         return getattr(self.__field, name)
 
 
-def createFieldProperties(schema, omit=[]):
+def createFieldProperties(schema, omit=None):
     """Creates a FieldProperty fields in `schema` on the class it is called on.
 
     schema ... interface those fields should be added to class
     omit ... list of field names to be omitted in creation
 
     """
+    omit = omit or []
     frame = sys._getframe(1)
     for name in guillotina.schema.getFieldNamesInOrder(schema):
         if name in omit:

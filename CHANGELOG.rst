@@ -4,8 +4,7 @@ CHANGELOG
 4.8.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- A few more antipattern fixes [lferran]
 
 4.8.10 (2019-06-26)
 -------------------
