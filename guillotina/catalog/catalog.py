@@ -44,10 +44,10 @@ class DefaultSearchUtility(object):
     async def get_object_by_uuid(self, container, uuid):
         pass
 
-    async def get_by_type(self, container, doc_type, query={}):
+    async def get_by_type(self, container, doc_type, query=None):
         pass
 
-    async def get_by_path(self, container, path, depth=-1, query={}, doc_type=None):
+    async def get_by_path(self, container, path, depth=-1, query=None, doc_type=None):
         pass
 
     async def get_folder_contents(self, container, parent_uid):

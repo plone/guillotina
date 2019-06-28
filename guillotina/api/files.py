@@ -15,11 +15,13 @@ from guillotina.interfaces import IStaticFile
 from guillotina.response import HTTPNotFound
 
 
-def _traversed_file_doc(summary, parameters=[], responses={
-    "200": {
-        "description": "Successfully updated content"
+def _traversed_file_doc(summary, parameters=None, responses=None):
+    parameters = parameters or []
+    responses = responses or {
+        "200": {
+            "description": "Successfully updated content"
+        }
     }
-}):
     return {
         'traversed_service_definitions': {
             '{field_name}': {

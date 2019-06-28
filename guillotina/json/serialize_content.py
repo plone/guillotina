@@ -42,9 +42,9 @@ class SerializeToJson(object):
         self.permission_cache = {}
 
     @profilable
-    async def __call__(self, include=[], omit=[]):
-        self.include = include
-        self.omit = omit
+    async def __call__(self, include=None, omit=None):
+        self.include = include or []
+        self.omit = omit or []
 
         parent = self.context.__parent__
         if parent is not None:
@@ -168,7 +168,9 @@ class SerializeToJson(object):
 class SerializeFolderToJson(SerializeToJson):
 
     @profilable
-    async def __call__(self, include=[], omit=[]):
+    async def __call__(self, include=None, omit=None):
+        include = include or []
+        omit = omit or []
         result = await super(SerializeFolderToJson, self).__call__(include=include, omit=omit)
 
         security = IInteraction(self.request)

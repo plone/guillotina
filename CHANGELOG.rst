@@ -10,6 +10,7 @@ CHANGELOG
 - JSONField works with dict instead of requiring str(which is then converted to dict anyways)
   [vangheem]
 
+- A few more antipattern fixes [lferran]
 
 4.8.10 (2019-06-26)
 -------------------
