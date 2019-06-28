@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.11 (unreleased)
+4.8.11 (2019-06-28)
 -------------------
 
 - Cache JSONField schema validator object
