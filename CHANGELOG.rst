@@ -4,7 +4,11 @@ CHANGELOG
 4.8.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Cache JSONField schema validator object
+  [vangheem]
+
+- JSONField works with dict instead of requiring str(which is then converted to dict anyways)
+  [vangheem]
 
 
 4.8.10 (2019-06-26)
