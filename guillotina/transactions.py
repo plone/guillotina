@@ -13,7 +13,7 @@ async def commit(*, txn: typing.Optional[ITransaction]=None, warn=True) -> None:
     '''
     Commit the current active transaction.
 
-    :param request: request object transaction is connected to
+    :param txn: transaction to commit
     '''
     tm = None
     try:
@@ -30,7 +30,7 @@ async def abort(*, txn: typing.Optional[ITransaction]=None) -> None:
     '''
     Abort the current active transaction.
 
-    :param request: request object transaction is connected to
+    :param txn: transaction to abort
     '''
     tm = None
     try:
@@ -48,8 +48,6 @@ def get_tm() -> typing.Optional[ITransactionManager]:
     This is used together with "with" syntax for wrapping mutating
     code into a request owned transaction.
 
-    :param request: request owning the transaction
-
     Example::
 
         with get_tm().transaction() as txn:  # begin transaction txn
@@ -65,9 +63,6 @@ def get_tm() -> typing.Optional[ITransactionManager]:
 def get_transaction() -> typing.Optional[ITransaction]:
     '''
     Return the current active transaction.
-
-    :param request: request object transaction is connected to
-
     '''
     return task_vars.txn.get()
 
