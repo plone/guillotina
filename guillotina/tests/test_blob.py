@@ -1,14 +1,12 @@
 from guillotina.blob import Blob
-from guillotina.component import get_utility
 from guillotina.content import create_content_in_container
-from guillotina.interfaces import IApplication
 from guillotina.tests.utils import login
 from guillotina.transactions import transaction
+from guillotina.utils import get_database
 
 
 async def test_create_blob(db, guillotina_main):
-    root = get_utility(IApplication, name='root')
-    db = root['db']
+    db = await get_database('db')
     login()
 
     async with transaction(db=db):
@@ -26,8 +24,7 @@ async def test_create_blob(db, guillotina_main):
 
 
 async def test_write_blob_data(db, guillotina_main):
-    root = get_utility(IApplication, name='root')
-    db = root['db']
+    db = await get_database('db')
     login()
 
     async with transaction(db=db):
@@ -52,8 +49,7 @@ async def test_write_blob_data(db, guillotina_main):
 
 
 async def test_write_large_blob_data(db, guillotina_main):
-    root = get_utility(IApplication, name='root')
-    db = root['db']
+    db = await get_database('db')
     login()
 
     async with transaction(db=db):

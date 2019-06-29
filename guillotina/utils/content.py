@@ -1,4 +1,5 @@
 import string
+from guillotina.exceptions import DatabaseNotFound
 import typing
 
 from guillotina import glogging
@@ -28,7 +29,7 @@ logger = glogging.getLogger('guillotina')
 
 def get_content_path(content: IResource) -> str:
     """
-    Generate full path of resource object
+    Generate path of resource object from the container
 
     :param content: object to get path from
     """
@@ -239,7 +240,12 @@ async def iter_databases(root=None):
                 yield db
 
 
-async def get_database(db_id, root=None):
+async def get_database(db_id, root=None) -> IDatabase:
+    '''
+    Get configured database
+
+    :param db_id: configured database id
+    '''
     if root is None:
         root = get_utility(IApplication, name='root')
 
@@ -255,10 +261,15 @@ async def get_database(db_id, root=None):
         if db_id in databases:
             return await factory.get_database(db_id)
 
-    return None
+    raise DatabaseNotFound(db_id)
 
 
 def get_full_content_path(ob) -> str:
+    """
+    Generate full path of resource object from root
+
+    :param content: object to get path from
+    """
     parts = []
     while ob is not None and not IApplication.providedBy(ob):
         if IDatabase.providedBy(ob):

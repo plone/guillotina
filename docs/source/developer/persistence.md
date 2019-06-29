@@ -47,7 +47,9 @@ There is also an async context manager:
 
 ```python
 from guillotina.transactions import transaction
+from guillotina.utils import get_database
 
+my_db = await get_database('my-db-id')
 async with transaction(db=my_db) as txn:
     # modify objects
 ```
