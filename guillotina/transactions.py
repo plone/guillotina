@@ -80,13 +80,12 @@ class transaction:  # noqa: N801
     >>> async with transaction() as txn:
     >>>   pass
 
-    :param request: request object to connect transaction with
-    :param db: transaction manager to retrieve transaction from
+    :param db: db to operate transaction on
     :param tm: transaction manager to retrieve transaction from
-    :param write: Does this write to database? (defaults to false)
     :param abort_when_done: Abort transaction when done (defaults to false)
     :param adopt_parent_txn: If this is a sub-transaction, use parent's registered objects
     :param execute_futures: Execute registered futures with transaction after done (defaults to true)
+    :param read_only: Is this a read_only txn? (default to false)
     '''
 
     def __init__(self, *, db=None, tm=None, abort_when_done=False,
@@ -95,7 +94,7 @@ class transaction:  # noqa: N801
             tm = db.get_transaction_manager()
         self.tm = tm or get_tm()
         self.abort_when_done = abort_when_done
-        self.previous_txn = self.txn = self.previous_write_setting = None
+        self.previous_txn = self.txn = None
         self.adopt_parent_txn = adopt_parent_txn
         self.execute_futures = execute_futures
         self.adopted = []
