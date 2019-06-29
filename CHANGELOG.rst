@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Documentation improvements
+  [vangheem]
 
 
 5.0.0a10 (2019-06-27)
