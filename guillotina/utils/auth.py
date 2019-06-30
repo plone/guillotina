@@ -9,8 +9,6 @@ from guillotina.interfaces import ISecurityPolicy
 def get_authenticated_user() -> Optional[IPrincipal]:
     """
     Get the currently authenticated user
-
-    :param request: request the user is authenticated against
     """
     return task_vars.authenticated_user.get()
 
@@ -18,8 +16,6 @@ def get_authenticated_user() -> Optional[IPrincipal]:
 def get_authenticated_user_id() -> Optional[str]:
     """
     Get the currently authenticated user id
-
-    :param request: request the user is authenticated against
     """
     user = get_authenticated_user()
     if user:
@@ -28,6 +24,11 @@ def get_authenticated_user_id() -> Optional[str]:
 
 
 def get_security_policy(user: Optional[IPrincipal] = None) -> ISecurityPolicy:
+    """
+    Get the current security policy
+
+    :param user: user to use for security policy
+    """
     if user is None:
         user = get_authenticated_user()
         if user is None:

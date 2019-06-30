@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Documentation improvements
+  [vangheem]
+
 - Cache JSONField schema validator object
   [vangheem]
 

@@ -197,7 +197,7 @@ def get_current_db() -> IDatabase:
     except (ValueError, AttributeError, RuntimeError):
         pass
 
-    raise DatabaseNotFound(DatabaseNotFound.__doc__)
+    raise DatabaseNotFound('Could not find current task database')
 
 
 def lazy_apply(func, *call_args, **call_kwargs):
@@ -347,6 +347,10 @@ def get_schema_validator(schema_name: str):
 
 
 def find_container(context=None) -> typing.Optional[IContainer]:
+    '''
+    Find container based on contextvar or by looking up the
+    container from the provided context parameter
+    '''
     container = task_vars.container.get()
     if container is None:
         while context is not None:
