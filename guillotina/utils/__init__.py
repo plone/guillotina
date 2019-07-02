@@ -32,6 +32,7 @@ from .misc import lazy_apply  # noqa
 from .misc import list_or_dict_items  # noqa
 from .misc import loop_apply_coroutine  # noqa
 from .misc import merge_dicts  # noqa
+from .misc import notice_on_error  # noqa
 from .misc import run_async  # noqa
 from .misc import safe_unidecode  # noqa
 from .misc import strings_differ  # noqa

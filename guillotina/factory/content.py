@@ -23,6 +23,7 @@ from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
+from guillotina.utils import notice_on_error
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
@@ -67,12 +68,6 @@ class ApplicationRoot(object):
         provide_utility(utility_object, interface, **kw)
         if hasattr(utility_object, 'initialize'):
             func = lazy_apply(utility_object.initialize, app=self.app)
-
-            async def notice_on_error(key, func_to_call):
-                try:
-                    await func_to_call
-                except Exception:  # noqa
-                    logger.exception(f"Error on initialize utility {key}", exc_info=True)
 
             task = asyncio.ensure_future(
                 notice_on_error(key, func),

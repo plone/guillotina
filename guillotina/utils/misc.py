@@ -384,3 +384,10 @@ def get_request_scheme(req) -> str:
         return scheme
 
     return req.scheme
+
+
+async def notice_on_error(key: str, func_to_await):
+    try:
+        await func_to_await
+    except Exception:  # noqa
+        logger.exception(f"Error on initialize utility {key}", exc_info=True)
