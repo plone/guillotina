@@ -37,7 +37,7 @@ of functionality so it will never be as fast as say Pyramid.
 ## Asynchronous
 
 `guillotina` is asynchronous from the ground up, built on top of `aiohttp`
-using Python 3.6's asyncio features.
+using Python 3.7's asyncio features.
 
 Practically speaking, being built completely on asyncio compatible technologies,
 `guillotina` does not block for network IO to the database, index catalog,

@@ -19,7 +19,7 @@ Multiple tasks can subscribe to the same channel and `guillotina` will broadcast
 
 ```python
 from guillotina.component import get_utility
-from guillotina.interfaces import IPusSubUtility
+from guillotina.interfaces import IPubSubUtility
 
 
 MY_PROCESS_ID = 'me'
@@ -28,7 +28,7 @@ async def callback(*, data=None, sender=None):
     ...
 
 
-util = get_utility(IPusSubUtility)
+util = get_utility(IPubSubUtility)
 await util.subscribe('channel_name', MY_PROCESS_ID, callback)
 await util.publish('channel_name', MY_PROCESS_ID, 'mydata')
 
