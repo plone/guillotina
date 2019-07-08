@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Define TTL on cache set
+  [bloodbare]
+
 - Documentation improvements
   [vangheem]
 

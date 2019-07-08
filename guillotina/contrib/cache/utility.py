@@ -90,15 +90,17 @@ class CacheUtility:
         return _default_size
 
     # Set a object from cache
-    async def set(self, key, value):
+    async def set(self, key, value, ttl=None):
         try:
             size = self.get_size(value)
             self._memory_cache.set(key, value, size)
+            if ttl is None:
+                ttl = self._settings.get('ttl', 3600)
             if self._obj_driver is not None:
                 await self._obj_driver.set(
                     CACHE_PREFIX + key,
                     serialize.dumps(value),
-                    expire=self._settings.get('ttl', 3600))
+                    expire=ttl)
             logger.info('set {} in cache'.format(key))
         except Exception:
             logger.warning('Error setting cache value', exc_info=True)
