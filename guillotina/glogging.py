@@ -56,6 +56,7 @@ class Logger:
     def __init__(self, logger_name):
         self._logger = logging.getLogger(logger_name)
 
+    exception = _wrapped('exception')
     warning = _wrapped('warning')
     warn = _wrapped('warn')
     error = _wrapped('error')

@@ -23,6 +23,7 @@ from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
+from guillotina.utils import notice_on_error
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
@@ -66,8 +67,10 @@ class ApplicationRoot(object):
             kw['name'] = config['name']
         provide_utility(utility_object, interface, **kw)
         if hasattr(utility_object, 'initialize'):
+            func = lazy_apply(utility_object.initialize, app=self.app)
+
             task = asyncio.ensure_future(
-                lazy_apply(utility_object.initialize, app=self.app),
+                notice_on_error(key, func),
                 loop=loop or self._loop)
             self.add_async_task(key, task, config)
             return utility_object, task

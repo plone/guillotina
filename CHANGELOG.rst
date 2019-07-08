@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Logging async util exception
+  [bloodbare]
+
 - Documentation improvements
   [vangheem]
 
