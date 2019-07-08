@@ -4,7 +4,8 @@ CHANGELOG
 4.8.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Handle CancelledError on application cleanup. This seems to happen with uvloop
+  [vangheem]
 
 
 4.8.11 (2019-06-28)

@@ -185,8 +185,11 @@ class Command(object):
             # Blocking call which returns when finished
             loop = asyncio.get_event_loop()
             loop.run_until_complete(self.run(self.arguments, settings, app))
-            loop.run_until_complete(self.cleanup(app))
-            loop.close()
+            try:
+                loop.run_until_complete(self.cleanup(app))
+                loop.close()
+            except (asyncio.CancelledError, RuntimeError):
+                logger.warning('Cancelled error on cleanup')
         else:
             self.run(self.arguments, settings, app)
 
