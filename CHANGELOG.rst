@@ -7,6 +7,9 @@ CHANGELOG
 - Define TTL on cache set
   [bloodbare]
 
+- Logging async util exception
+  [bloodbare]
+
 - Documentation improvements
   [vangheem]
 
