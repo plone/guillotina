@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.12 (unreleased)
+4.8.12 (2019-07-08)
 -------------------
 
 - Handle CancelledError on application cleanup. This seems to happen with uvloop
