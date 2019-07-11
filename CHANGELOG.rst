@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Merge CORS headers
+  [qiwn]
+
 - Define TTL on cache set
   [bloodbare]
 
