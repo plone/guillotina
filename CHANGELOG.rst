@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Handle cancelled error on cleanup
+  [vangheem]
+
 - Define TTL on cache set
   [bloodbare]
 
