@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Fix redis pubsub potential cpu bound deadlock
+  [vangheem]
+
 - Handle cancelled error on cleanup
   [vangheem]
 
