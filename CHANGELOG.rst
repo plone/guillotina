@@ -4,6 +4,9 @@ CHANGELOG
 4.8.13 (unreleased)
 -------------------
 
+- Merge CORS headers
+  [qiwn]
+
 - Nothing changed yet.
 
 

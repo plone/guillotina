@@ -229,7 +229,24 @@ async def _apply_cors(request, resp):
     cors_renderer = app_settings['cors_renderer'](request)
     try:
         cors_headers = await cors_renderer.get_headers()
-        cors_headers.update(resp.headers)
+        fields = (
+            'Access-Control-Expose-Headers',
+            'Access-Control-Allow-Methods',
+            'Access-Control-Allow-Headers'
+        )
+        for name, value in resp.headers.items():
+            if name in fields and name in cors_headers:
+                if value == '*':
+                    cors_headers[name] = '*'
+                elif cors_headers[name] != '*':
+                    cors_values = cors_headers[name].split(', ')
+                    for item in value.split(', '):
+                        if item not in cors_values:
+                            cors_values.append(item)
+                    cors_headers[name] = ', '.join(cors_values)
+            else:
+                cors_headers[name] = value
+
         resp._headers = cors_headers
         retry_attempts = getattr(request, '_retry_attempt', 0)
         if retry_attempts > 0:
