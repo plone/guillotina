@@ -1,6 +1,8 @@
 CHANGELOG
 =========
 
+- swagger2 upgrade to openapi3.0
+
 5.0.0a11 (unreleased)
 ---------------------
 

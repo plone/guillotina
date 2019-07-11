@@ -1,22 +1,20 @@
-import copy
-import json
-import os
-from urllib.parse import urlparse
-
-import pkg_resources
-
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.component import getMultiAdapter
 from guillotina.interfaces import IAbsoluteURL
-from guillotina.utils import get_authenticated_user
-from guillotina.utils import get_full_content_path
-from guillotina.utils import get_request_scheme
-from guillotina.utils import get_security_policy
+from guillotina.interfaces import IInteraction
 from guillotina.utils import resolve_dotted_name
+from guillotina_swagger.utils import get_full_content_path
+from guillotina_swagger.utils import get_scheme
+from jinja2 import Template
+from urllib.parse import urlparse
 from zope.interface import Interface
 from zope.interface.interfaces import ComponentLookupError
+
+import copy
+import os
+import pkg_resources
 
 
 here = os.path.dirname(os.path.realpath(__file__))
@@ -26,7 +24,7 @@ here = os.path.dirname(os.path.realpath(__file__))
     method="GET",
     context=Interface,
     name="@swagger",
-    permission="guillotina.swagger.View",
+    permission="guillotina_swagger.View",
     ignore=True,
 )
 class SwaggerDefinitionService(Service):
@@ -42,24 +40,25 @@ class SwaggerDefinitionService(Service):
         if path not in api_def:
             api_def[path or "/"] = {}
         desc = self.get_data(service_def.get("description", ""))
+        print()
         swagger_conf = service_def.get("swagger", {})
         if swagger_conf.get("display_permission", True):
             if desc:
                 desc += f" 〜 permission: {service_def['permission']}"
             else:
                 desc += f"permission: {service_def['permission']}"
-
         api_def[path or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", [""]) or tags,
             "parameters": self.get_data(service_def.get("parameters", {})),
             "produces": self.get_data(service_def.get("produces", [])),
             "summary": self.get_data(service_def.get("summary", "")),
             "description": desc,
+            "accept": self.get_data(service_def.get("content", "")),
             "responses": self.get_data(service_def.get("responses", {})),
+            "security": "",
         }
 
-    def get_endpoints(self, iface_conf, base_path, api_def, tags=None):
-        tags = tags or []
+    def get_endpoints(self, iface_conf, base_path, api_def, tags=[]):
         for method in iface_conf.keys():
             if method == "endpoints":
                 for name in iface_conf["endpoints"]:
@@ -75,11 +74,14 @@ class SwaggerDefinitionService(Service):
 
                 service_def = iface_conf[method]
                 swagger_conf = service_def.get("swagger", {})
-                if (service_def.get("ignore") or
-                        service_def.get("swagger_ignore") or swagger_conf.get("ignore")):
+                if (
+                    service_def.get("ignore")
+                    or service_def.get("swagger_ignore")
+                    or swagger_conf.get("ignore")
+                ):
                     continue
 
-                if not self.policy.check_permission(
+                if not self.interaction.check_permission(
                     service_def["permission"], self.context
                 ):
                     continue
@@ -108,8 +110,7 @@ class SwaggerDefinitionService(Service):
                         )
 
     async def __call__(self):
-        user = get_authenticated_user()
-        self.policy = get_security_policy(user)
+        self.interaction = IInteraction(self.request)
         definition = copy.deepcopy(
             app_settings["swagger"]["base_configuration"]
         )
@@ -121,7 +122,7 @@ class SwaggerDefinitionService(Service):
             definition["basePath"] = parsed_url.path
         else:
             definition["host"] = self.request.host
-            definition["schemes"] = [get_request_scheme(self.request)]
+            definition["schemes"] = [get_scheme(self.request)]
         if 'version' not in definition['info']:
             definition["info"]["version"] = pkg_resources.get_distribution(
                 "guillotina"
@@ -129,7 +130,7 @@ class SwaggerDefinitionService(Service):
 
         api_defs = app_settings["api_definition"]
 
-        path = get_full_content_path(self.context)
+        path = get_full_content_path(self.request, self.context)
 
         for dotted_iface in api_defs.keys():
             iface = resolve_dotted_name(dotted_iface)
@@ -137,26 +138,16 @@ class SwaggerDefinitionService(Service):
                 iface_conf = api_defs[dotted_iface]
                 self.get_endpoints(iface_conf, path, definition["paths"])
 
-        definition["definitions"] = app_settings["json_schema_definitions"]
+        definition["components"]["schemas"] = app_settings["json_schema_definitions"]
+        
         return definition
-
-
-AUTH_HTML = '''
-    <form id='api_selector'>
-      <div id="auth_container">
-        <div>
-          <a class="authorize__btn" href="#">Authorize</a>
-        </div>
-      </div>
-    </form>
-'''
 
 
 @configure.service(
     method="GET",
     context=Interface,
     name="@docs",
-    permission="guillotina.swagger.View",
+    permission="guillotina_swagger.View",
     ignore=True,
 )
 async def render_docs_index(context, request):
@@ -167,6 +158,7 @@ async def render_docs_index(context, request):
     with open(index_file) as fi:
         html = fi.read()
 
+    template = Template(html)
     swagger_settings = app_settings["swagger"]
     url = swagger_settings["base_url"] or request.headers.get(
         "X-VirtualHost-Monster"
@@ -175,19 +167,12 @@ async def render_docs_index(context, request):
         try:
             url = getMultiAdapter((context, request), IAbsoluteURL)()
         except ComponentLookupError:
-            url = "{}://{}".format(get_request_scheme(request), request.host)
+            url = "{}://{}".format(get_scheme(request), request.host)    
     swagger_settings["initial_swagger_url"] = url
-
-    if swagger_settings['authentication_allowed']:
-        auth = AUTH_HTML
-    else:
-        auth = ''
-    return html.format(
+    return template.render(
         app_settings=app_settings,
         request=request,
-        swagger_settings=json.dumps(swagger_settings),
+        swagger_settings=swagger_settings,
         base_url=url,
         static_url="{}/swagger_static/".format(url if url != "/" else ""),
-        auth=auth,
-        title=swagger_settings['base_configuration']['info']['title']
     )
