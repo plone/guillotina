@@ -7,6 +7,9 @@ CHANGELOG
 - Merge CORS headers
   [qiwn]
 
+- Handle cancelled error on cleanup
+  [vangheem]
+
 - Define TTL on cache set
   [bloodbare]
 
