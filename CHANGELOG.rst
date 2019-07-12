@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Make sure that channel is configured on cache pubsub
+  [bloodbare]
+
 - Handle cancelled error on cleanup
   [vangheem]
 
