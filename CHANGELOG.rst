@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Fix redis pubsub potential cpu bound deadlock
+  [vangheem]
+
 - Make sure that channel is configured on cache pubsub
   [bloodbare]
 
