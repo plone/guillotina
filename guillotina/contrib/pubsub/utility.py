@@ -42,9 +42,9 @@ class PubSubUtility:
         await asyncio.sleep(0.1)
 
     async def real_subscribe(self, channel_name):
-        channel = await self._driver.subscribe(channel_name)
         try:
             while channel_name in self._subscribers:
+                channel = await self._driver.subscribe(channel_name)
                 async for msg in channel:
                     try:
                         data = pickle.loads(msg)
