@@ -7,6 +7,9 @@ CHANGELOG
 - Fix redis pubsub potential cpu bound deadlock
   [vangheem]
 
+- Make sure that channel is configured on cache pubsub
+  [bloodbare]
+
 - Handle cancelled error on cleanup
   [vangheem]
 
