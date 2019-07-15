@@ -24,6 +24,11 @@ class ITransaction(Interface):
     manager = Attribute('')
     _cache = Attribute('')
 
+    def initialize():
+        '''
+        Reset transient information to enable reusage of the transaction
+        '''
+
     async def add_after_commit_hook(hook, *real_args, args=None, kws=None, **kwargs):
         '''
         Add hook to be called after transaction commit

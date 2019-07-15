@@ -69,7 +69,7 @@ class TransactionManager:
         if (txn is not None and txn.manager == self and
                 txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
-            txn.clean(read_only)
+            txn.initialize(read_only)
             if (txn._db_conn is not None and
                     getattr(txn._db_conn, '_in_use', None) is None):
                 try:

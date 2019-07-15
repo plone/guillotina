@@ -74,7 +74,7 @@ class Transaction:
     _skip_commit = False
 
     def __init__(self, manager, loop=None, read_only=False):
-        self.clean(read_only)
+        self.initialize(read_only)
 
         # Transaction Manager
         self._manager = manager
@@ -100,7 +100,7 @@ class Transaction:
 
         self._query_count_start = self._query_count_end = 0
 
-    def clean(self, read_only):
+    def initialize(self, read_only):
         self._read_only = read_only
         self._txn_time = None
         self._tid = None
