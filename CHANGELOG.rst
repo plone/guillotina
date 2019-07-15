@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.13 (unreleased)
+4.8.13 (2019-07-15)
 -------------------
 
 - Allow modifying app settings from pytest marks [lferran]
