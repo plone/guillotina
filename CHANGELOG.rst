@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Merge CORS headers
+  [qiwn]
+
 - Fix redis pubsub potential cpu bound deadlock
   [vangheem]
 
