@@ -4,6 +4,11 @@ CHANGELOG
 4.8.13 (unreleased)
 -------------------
 
+- Allow modifying app settings from pytest marks [lferran]
+
+- Merge CORS headers
+  [qiwn]
+
 - Fix `managed_transaction()` crashes when `request` and `tm` are not provided
   [masipcat]
 
