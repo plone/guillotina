@@ -74,26 +74,10 @@ class Transaction:
     _skip_commit = False
 
     def __init__(self, manager, loop=None, read_only=False):
-        self._read_only = read_only
-        self._txn_time = None
-        self._tid = None
-        self.status = Status.ACTIVE
+        self.clean(read_only)
 
         # Transaction Manager
         self._manager = manager
-
-        # List of objects added
-        # needs to be ordered because content inserted after other might
-        # reference each other
-        self.added = OrderedDict()
-        self.modified = {}
-        self.deleted = {}
-
-        # List of (hook, args, kws) tuples added by addBeforeCommitHook().
-        self._before_commit = []
-
-        # List of (hook, args, kws) tuples added by addAfterCommitHook().
-        self._after_commit = []
 
         logger.debug("new transaction")
 
@@ -115,6 +99,25 @@ class Transaction:
             name=app_settings['cache']['strategy'])
 
         self._query_count_start = self._query_count_end = 0
+
+    def clean(self, read_only):
+        self._read_only = read_only
+        self._txn_time = None
+        self._tid = None
+        self.status = Status.ACTIVE
+
+        # List of objects added
+        # needs to be ordered because content inserted after other might
+        # reference each other
+        self.added = OrderedDict()
+        self.modified = {}
+        self.deleted = {}
+
+        # List of (hook, args, kws) tuples added by addBeforeCommitHook().
+        self._before_commit = []
+
+        # List of (hook, args, kws) tuples added by addAfterCommitHook().
+        self._after_commit = []
 
     def get_query_count(self):
         '''
