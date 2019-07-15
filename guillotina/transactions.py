@@ -100,7 +100,7 @@ class managed_transaction:  # noqa: N801
                  adopt_parent_txn=False, execute_futures=True):
         self.request = _safe_get_request(request)
         if tm is None:
-            tm = request._tm
+            tm = self.request._tm
         self.tm = tm
         self.write = write
         self.abort_when_done = abort_when_done
