@@ -4,7 +4,8 @@ CHANGELOG
 4.8.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix `managed_transaction()` crashes when `request` and `tm` are not provided
+  [masipcat]
 
 
 4.8.12 (2019-07-08)
