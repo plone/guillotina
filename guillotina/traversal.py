@@ -234,13 +234,14 @@ async def _apply_cors(request, resp):
             'Access-Control-Allow-Methods',
             'Access-Control-Allow-Headers'
         )
+        # merge CORS headers
         for name, value in resp.headers.items():
             if name in fields and name in cors_headers:
                 if value == '*':
                     cors_headers[name] = '*'
                 elif cors_headers[name] != '*':
-                    cors_values = cors_headers[name].split(', ')
-                    for item in value.split(', '):
+                    cors_values = [v.strip() for v in cors_headers[name].split(',')]
+                    for item in [v.strip() for v in value.split(',')]:
                         if item not in cors_values:
                             cors_values.append(item)
                     cors_headers[name] = ', '.join(cors_values)
