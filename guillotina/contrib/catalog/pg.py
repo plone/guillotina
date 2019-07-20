@@ -620,7 +620,6 @@ class PGSearchUtility(DefaultSearchUtility):
         recursively go through all content to reindex jsonb...
         """
 
-        self._sql = SQLStatements()
         data = {
             'count': 0,
             'transaction': None,
@@ -670,7 +669,7 @@ class PGSearchUtility(DefaultSearchUtility):
         json_dict = await writer.get_json()
         json_value = ujson.dumps(json_dict)
 
-        statement_sql = self._sql.get('JSONB_UPDATE', table_name)
+        statement_sql = txn._manager._storage._sql.get('JSONB_UPDATE', table_name)
         conn = await txn.get_connection()
         async with txn._lock:
             await conn.fetch(
