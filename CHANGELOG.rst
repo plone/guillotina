@@ -7,6 +7,9 @@ CHANGELOG
 - Allow to reindex on PG catalog implementation
   [bloodbare]
 
+- Read only txn can be reused without changing read only param
+  [bloodbare]
+
 - Merge CORS headers
   [qiwn]
 
