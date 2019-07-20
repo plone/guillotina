@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Allow to reindex on PG catalog implementation
+  [bloodbare]
+
 - Merge CORS headers
   [qiwn]
 
