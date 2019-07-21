@@ -717,7 +717,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             json_dict = await writer.get_json()
             json = ujson.dumps(json_dict)
         else:
-            json = {}
+            json = None
         part = writer.part
         if part is None:
             part = 0

@@ -1,6 +1,7 @@
 import json
 import logging
 import typing
+import ujson
 
 from dateutil.parser import parse
 from guillotina import configure
@@ -14,10 +15,14 @@ from guillotina.catalog.utils import iter_indexes
 from guillotina.component import get_utility
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
+from guillotina.db.interfaces import IWriter
+from guillotina.db.storages.utils import register_sql
+from guillotina.db.uid import MAX_UID_LENGTH
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
+from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPGCatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.interfaces import ISearchParser
@@ -28,6 +33,7 @@ from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_content_path
 from guillotina.utils import get_object_url
 from guillotina.utils import get_security_policy
+from guillotina.utils import get_current_transaction
 from zope.interface import implementer
 
 
@@ -51,6 +57,15 @@ PG_FUNCTIONS = [
 $$SELECT CAST($1 AS timestamptz)$$  -- adapt to your needs
   LANGUAGE sql IMMUTABLE;'''
 ]
+
+# Reindex logic
+register_sql(
+    'JSONB_UPDATE', f"""
+UPDATE {{table_name}}
+SET
+    json = $2::json
+WHERE
+    zoid = $1::varchar({MAX_UID_LENGTH})""")
 
 
 class ParsedQueryInfo(BasicParsedQueryInfo):
@@ -603,3 +618,61 @@ class PGSearchUtility(DefaultSearchUtility):
         """
         recursively go through all content to reindex jsonb...
         """
+
+        data = {
+            'count': 0,
+            'transaction': None,
+            'transactions': 0,
+            'tm': get_current_transaction()._manager,
+        }
+
+        data['table_name'] = data['tm']._storage._objects_table_name
+        await self._process_object(container, data)
+        await self._process_folder(container, data)
+        if data['transaction'] is not None:
+            await data['transaction'].commit()
+            data['transaction'] = None
+
+    async def _process_folder(self, obj, data):
+        for key in await obj.async_keys():
+            try:
+                item = await data['transaction'].get_child(obj, key)
+            except (KeyError, ModuleNotFoundError):
+                continue
+            if item is None:
+                continue
+            await self._process_object(item, data)
+
+    async def _process_object(self, obj, data):
+
+        if data['count'] % 2 == 0 and data['transaction'] is not None:
+            await data['transaction'].commit()
+            data['transaction'] = None
+
+        if data['transaction'] is None:
+            data['transaction'] = await data['tm'].begin()
+            obj.__txn__ = data['transaction']
+
+        uuid = obj.__uuid__
+
+        writer = IWriter(obj)
+        await self._index(uuid, writer, data['transaction'], data['table_name'])
+
+        data['count'] += 1
+
+        if IFolder.providedBy(obj):
+            await self._process_folder(obj, data)
+        del obj
+
+    async def _index(self, oid, writer, txn, table_name):
+        json_dict = await writer.get_json()
+        json_value = ujson.dumps(json_dict)
+
+        statement_sql = txn._manager._storage._sql.get('JSONB_UPDATE', table_name)
+        conn = await txn.get_connection()
+        async with txn._lock:
+            await conn.fetch(
+                statement_sql,
+                oid,                 # The OID of the object
+                json_value           # JSON catalog
+            )

@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Allow to reindex on PG catalog implementation
+  [bloodbare]
+
 - Read only txn can be reused without changing read only param
   [bloodbare]
 
