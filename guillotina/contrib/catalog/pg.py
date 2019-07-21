@@ -17,7 +17,6 @@ from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.interfaces import IWriter
 from guillotina.db.storages.utils import register_sql
-from guillotina.db.storages.utils import SQLStatements
 from guillotina.db.uid import MAX_UID_LENGTH
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
