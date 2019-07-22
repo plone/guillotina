@@ -594,7 +594,7 @@ class PGSearchUtility(DefaultSearchUtility):
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
-            if fullobjects and request is not None:
+            if fullobjects and request is not None and txn is not None:
                 # Get Object
                 obj = await txn.get(data['uuid'])
                 # Serialize object
