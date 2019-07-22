@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a11 (unreleased)
 ---------------------
 
+- Allow to receive a fullobject serialization on search
+  [bloodbare]
+
 - Allow to reindex on PG catalog implementation
   [bloodbare]
 
