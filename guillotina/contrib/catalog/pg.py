@@ -581,15 +581,14 @@ class PGSearchUtility(DefaultSearchUtility):
         conn = await txn.get_connection()
 
         results = []
+        fullobjects = query['fullobjects']
         try:
             context_url = get_object_url(container)
             request = get_current_request()
-            fullobjects = request.query.get('_fullobjects', 'false').lower() != 'false'
             txn = get_current_transaction()
         except RequestNotFound:
             context_url = get_content_path(container)
             request = None
-            fullobjects = False
             txn = None
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
