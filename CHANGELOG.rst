@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a11 (unreleased)
+5.0.0a11 (2019-07-22)
 ---------------------
 
 - Allow to receive a fullobject serialization on search
