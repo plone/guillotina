@@ -58,6 +58,11 @@ class ITransaction(Interface):
         """
         """
 
+    async def get(oid: str) -> typing.Optional[IBaseObject]:
+        """
+        Get oid object
+        """
+
     async def contains(oid: str, key: str) -> bool:
         """
         Does an object container another

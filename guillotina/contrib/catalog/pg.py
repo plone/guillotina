@@ -5,6 +5,7 @@ import ujson
 
 from dateutil.parser import parse
 from guillotina import configure
+from guillotina.api.content import DefaultGET
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
 from guillotina.catalog.parser import BaseParser
@@ -34,6 +35,7 @@ from guillotina.utils import get_content_path
 from guillotina.utils import get_object_url
 from guillotina.utils import get_security_policy
 from guillotina.utils import get_current_transaction
+from guillotina.utils import get_current_request
 from zope.interface import implementer
 
 
@@ -579,17 +581,29 @@ class PGSearchUtility(DefaultSearchUtility):
         conn = await txn.get_connection()
 
         results = []
+        fullobjects = query['fullobjects']
         try:
             context_url = get_object_url(container)
+            request = get_current_request()
+            txn = get_current_transaction()
         except RequestNotFound:
             context_url = get_content_path(container)
+            request = None
+            txn = None
         logger.debug(f'Running search:\n{sql}\n{arguments}')
         for record in await conn.fetch(sql, *arguments):
             data = json.loads(record['json'])
-            result = self.load_meatdata(query, data)
-            result['@name'] = record['id']
-            result['@uid'] = record['zoid']
-            result['@id'] = data['@absolute_url'] = context_url + data['path']
+            if fullobjects and request is not None and txn is not None:
+                # Get Object
+                obj = await txn.get(data['uuid'])
+                # Serialize object
+                view = DefaultGET(obj, request)
+                result = await view()
+            else:
+                result = self.load_meatdata(query, data)
+                result['@name'] = record['id']
+                result['@uid'] = record['zoid']
+                result['@id'] = data['@absolute_url'] = context_url + data['path']
             results.append(result)
 
         # also do count...

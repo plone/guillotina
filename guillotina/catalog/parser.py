@@ -44,6 +44,11 @@ class BaseParser:
         if 'portal_type' in params:
             params['type_name'] = params.pop('portal_type')
 
+        if '_fullobjects' in params:
+            fullobjects = True
+        else:
+            fullobjects = False
+
         _from = 0
         size = 20
         sort_field = None
@@ -107,6 +112,7 @@ class BaseParser:
             'sort_on': sort_field,
             'sort_dir': sort_dir,
             'metadata': metadata,
+            'fullobjects': fullobjects,
             'excluded_metadata': excluded_metadata,
             'params': params
         }
