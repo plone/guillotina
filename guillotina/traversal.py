@@ -255,6 +255,19 @@ async def _apply_cors(request, resp):
     return resp
 
 
+def _clean_request(request, response):
+    if isinstance(response, Exception):
+        traceback.clear_frames(response.__traceback__)
+
+    for attr in ('resource', 'found_view'):
+        if getattr(request, attr, None) is not None:
+            setattr(request, attr, None)
+
+    for attr in ('_cache_data', '_last_read_pos',):
+        if hasattr(request, attr):
+            delattr(request, attr)
+
+
 class MatchInfo(BaseMatchInfo):
     """Function that returns from traversal request on aiohttp."""
 
@@ -317,6 +330,9 @@ class MatchInfo(BaseMatchInfo):
 
         request.record('finish')
 
+        _clean_request(request, resp)
+        del self.view
+        del self.resource
         request.clear_futures()
         return resp
 
@@ -342,6 +358,7 @@ class BasicMatchInfo(BaseMatchInfo):
         """Main handler function for aiohttp."""
         request.record('finish')
         self.debug(request, self.resp)
+        _clean_request(request, self.resp)
         if IAioHTTPResponse.providedBy(self.resp):
             return self.resp
         else:
