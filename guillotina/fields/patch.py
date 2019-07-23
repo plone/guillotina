@@ -25,6 +25,7 @@ class PatchField(schema.Field):
         self.required = field.required
 
     async def set(self, obj, value):
+        self.field.__name__ = self.__name__
         bound_field = self.field.bind(obj)
         await apply_coroutine(bound_field.set, obj, value)
         obj._p_register()
