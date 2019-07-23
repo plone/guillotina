@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Improve request memory usage
+  [vangheem]
 
 
 5.0.0a11 (2019-07-22)
