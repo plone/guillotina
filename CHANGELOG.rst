@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a12 (unreleased)
 ---------------------
 
+- Make sure field name of patch field is set before using
+  [vangheem]
+
 - Fix: just skip indexing attributes from schemas that object does not
   adapt to [lferran]
 
