@@ -4,8 +4,8 @@ CHANGELOG
 5.0.0a12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
-
+- Fix: just skip indexing attributes from schemas that object does not
+  adapt to [lferran]
 
 5.0.0a11 (2019-07-22)
 ---------------------
