@@ -155,7 +155,13 @@ class DefaultCatalogDataAdapter(object):
             schemas = iter_schemata(self.content)
 
         for schema in schemas:
-            behavior = schema(self.content)
+            try:
+                behavior = schema(self.content)
+            except TypeError:
+                # Content can't adapt to schema, so we don't need to
+                # index it anyway. Just continue
+                continue
+
             loaded = False
             for field_name, index_data in merged_tagged_value_dict(schema, index.key).items():
                 index_name = index_data.get('index_name', field_name)
