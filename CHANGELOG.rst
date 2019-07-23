@@ -4,7 +4,8 @@ CHANGELOG
 4.8.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improve request memory usage
+  [vangheem]
 
 
 4.8.13 (2019-07-15)
