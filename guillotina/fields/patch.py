@@ -33,6 +33,7 @@ class PatchField(schema.Field):
 
 @configure.value_deserializer(IPatchField)
 def field_converter(field, value, context):
+    field.field.__name__ = field.__name__
     if isinstance(value, dict) and 'op' in value:
         if not isinstance(value, dict):
             raise ValueDeserializationError(field, value, 'Not an object')
