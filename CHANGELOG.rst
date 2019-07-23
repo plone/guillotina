@@ -7,6 +7,9 @@ CHANGELOG
 - Fix: just skip indexing attributes from schemas that object does not
   adapt to [lferran]
 
+- Improve request memory usage
+  [vangheem]
+
 
 4.8.13 (2019-07-15)
 -------------------
