@@ -266,6 +266,10 @@ def _clean_request(request, response):
         if getattr(request, attr, None) is not None:
             setattr(request, attr, None)
 
+    for attr in ('_cache_data', '_last_read_pos',):
+        if hasattr(request, attr):
+            delattr(request, attr)
+
 
 class MatchInfo(BaseMatchInfo):
     """Function that returns from traversal request on aiohttp."""
