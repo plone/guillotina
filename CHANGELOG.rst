@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.15 (unreleased)
+4.8.15 (2019-07-23)
 -------------------
 
 - Make sure field name of patch field is set before using
