@@ -40,8 +40,12 @@ from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
+from guillotina.utils import get_schema_validator
+from guillotina.response import HTTPPreconditionFailed
 
 
+
+import pdb
 _registered_configurations: ConfigurationType = []
 # stored as tuple of (type, configuration) so we get keep it in the order
 # it is registered even if you mix types of registrations
@@ -447,13 +451,12 @@ class service(_base_decorator):  # noqa: N801
                 )
             # create new class with customizations
             klass = type(func.__name__, (func,), dict(func.__dict__))
-            klass.config = self.config
-            __parameters__ = klass.config.get('parameters', {})
-            if klass.config.get('validate', False):
+            klass.__config__ = self.config
+            if self.config.get('validate', False):
                 original = klass.__call__
 
                 async def new_call(self):
-                    await self.validate(__parameters__)
+                    await self.validate()
                     return await original(self)
                 klass.__call__ = new_call
             klass.__module__ = func.__module__
@@ -479,13 +482,13 @@ class service(_base_decorator):  # noqa: N801
                 __allow_access__ = self.config.get('allow_access', False)
                 __route__ = routes.Route(self.config.get('name', ''))
                 __auto_validate__ = self.config.get('validate', False)
-                __parameters__ = self.config.get('parameters', {})
                 __config__ = self.config
                 view_func = staticmethod(func)
 
                 async def __call__(self):
+
                     if self.__auto_validate__:
-                        await self.validate(self.__parameters__)
+                        await self.validate()
                     return await func(self.context, self.request)
 
             register_configuration(_View, self.config, 'service')

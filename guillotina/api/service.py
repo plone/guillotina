@@ -11,6 +11,7 @@ from guillotina._settings import app_settings
 from guillotina.utils import get_schema_validator
 from guillotina.response import HTTPPreconditionFailed
 
+import pdb
 import jsonschema
 
 class DictFieldProxy():
@@ -40,9 +41,9 @@ class DictFieldProxy():
 
 
 class Service(View):
-    async def validate(self, parameters):
+    async def validate(self):
         data = await self.request.json()
-        schema = parameters[0]['schema']['$ref'].split('/')[-1]
+        schema = self.__config__['parameters'][0]['schema']['$ref'].split('/')[-1]
         validator = get_schema_validator(schema)
         try:
             validator.validate(data)
