@@ -25,6 +25,7 @@ class PatchField(schema.Field):
         self.required = field.required
 
     async def set(self, obj, value):
+        self.field.__name__ = self.__name__
         bound_field = self.field.bind(obj)
         await apply_coroutine(bound_field.set, obj, value)
         obj._p_register()
@@ -32,7 +33,6 @@ class PatchField(schema.Field):
 
 @configure.value_deserializer(IPatchField)
 def field_converter(field, value, context):
-    field.field.__name__ = field.__name__
     if isinstance(value, dict) and 'op' in value:
         if not isinstance(value, dict):
             raise ValueDeserializationError(field, value, 'Not an object')

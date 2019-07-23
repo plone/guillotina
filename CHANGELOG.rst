@@ -4,7 +4,8 @@ CHANGELOG
 4.8.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure field name of patch field is set before using
+  [vangheem]
 
 
 4.8.14 (2019-07-23)
