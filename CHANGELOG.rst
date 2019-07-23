@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.14 (unreleased)
+4.8.14 (2019-07-23)
 -------------------
 
 - Fix: just skip indexing attributes from schemas that object does not
