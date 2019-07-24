@@ -13,14 +13,15 @@ def test_make_app(dummy_guillotina):
     assert type(dummy_guillotina.router) == TraversalRouter
 
 
-async def test_trns_retries_with_app(dummy_guillotina, dummy_request):
-    with mock.patch('aiohttp.web.Application._handle') as handle_mock:  # noqa
-        f = asyncio.Future()
-        f.set_result(None)
-        handle_mock.return_value = f
-        handle_mock.side_effect = ConflictError()
-        resp = await dummy_guillotina._handle(dummy_request)
-        assert resp.status_code == 409
+async def test_trns_retries_with_app(container_requester):
+    async with container_requester as requester:
+        with mock.patch('aiohttp.web.Application._handle') as handle_mock:  # noqa
+            f = asyncio.Future()
+            f.set_result(None)
+            handle_mock.return_value = f
+            handle_mock.side_effect = ConflictError()
+            response, status = await requester('GET', '/db/guillotina/@types')
+            status == 409
 
 
 async def test_async_util_started_and_stopped(dummy_guillotina):
