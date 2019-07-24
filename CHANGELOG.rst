@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.16 (unreleased)
+4.8.16 (2019-07-24)
 -------------------
 
 - Fix exhausted retries conflict error response
