@@ -4,7 +4,8 @@ CHANGELOG
 4.8.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix exhausted retries conflict error response
+  [vangheem]
 
 
 4.8.15 (2019-07-23)

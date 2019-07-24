@@ -1,4 +1,5 @@
 from aiohttp import web
+from aiohttp.web_exceptions import HTTPConflict
 from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
@@ -24,7 +25,6 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.request import Request
-from guillotina.response import HTTPConflict
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
