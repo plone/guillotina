@@ -1,10 +1,6 @@
-import asyncio
-import json
-import logging
-import logging.config
-from copy import deepcopy
-
 from aiohttp import web
+from aiohttp.web_exceptions import HTTPConflict
+from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
 from guillotina import task_vars
@@ -15,9 +11,9 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.configure.config import ConfigurationMachine
 from guillotina.content import JavaScriptApplication
+from guillotina.content import load_cached_schema
 from guillotina.content import StaticDirectory
 from guillotina.content import StaticFile
-from guillotina.content import load_cached_schema
 from guillotina.event import notify
 from guillotina.events import AfterAsyncUtilityLoadedEvent
 from guillotina.events import ApplicationCleanupEvent
@@ -32,7 +28,6 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.request import Request
-from guillotina.response import HTTPConflict
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
@@ -40,6 +35,11 @@ from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_path
 from guillotina.utils import secure_passphrase
 from jwcrypto import jwk
+
+import asyncio
+import json
+import logging
+import logging.config
 
 
 app_logger = logging.getLogger('guillotina')
