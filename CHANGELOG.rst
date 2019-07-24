@@ -4,6 +4,10 @@ CHANGELOG
 5.0.0a12 (unreleased)
 ---------------------
 
+- Only register object for writing if base object changed. Otherwise, changes to behavior data
+  was also causing writes to the object it was associated with
+  [vangheem]
+
 - Fix exhausted retries conflict error response
   [vangheem]
 
