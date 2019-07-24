@@ -4,7 +4,9 @@ CHANGELOG
 4.8.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Only register object for writing if base object changed. Otherwise, changes to behavior data
+  was also causing writes to the object it was associated with
+  [vangheem]
 
 
 4.8.16 (2019-07-24)
