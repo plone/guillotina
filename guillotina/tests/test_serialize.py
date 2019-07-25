@@ -342,7 +342,6 @@ async def test_patch_list_field(dummy_request):
 
 
 async def test_patch_tuple_field(dummy_request):
-    request = dummy_request  # noqa
     login(request)
     content = create_content()
     deserializer = get_multi_adapter(
