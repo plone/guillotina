@@ -342,10 +342,10 @@ async def test_patch_list_field(dummy_request):
 
 
 async def test_patch_tuple_field(dummy_request):
-    login(request)
+    login(dummy_request)
     content = create_content()
     deserializer = get_multi_adapter(
-        (content, request), IResourceDeserializeFromJson)
+        (content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
         ITestSchema, content, {
             'patch_tuple': {
