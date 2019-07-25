@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.17 (unreleased)
+4.8.17 (2019-07-25)
 -------------------
 
 - Make Tuple type work with patch field
