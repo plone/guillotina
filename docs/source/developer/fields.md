@@ -56,12 +56,35 @@ Then, payload for patching to append to this list would look like:
 }
 ```
 
+
+Append if unique value only:
+
+```json
+{
+    "values": {
+        "op": "appendunique",
+        "value": "foobar"
+    }
+}
+```
+
 Extend:
 
 ```json
 {
     "values": {
         "op": "extend",
+        "value": ["foo", "bar"]
+    }
+}
+```
+
+Extend if unique values:
+
+```json
+{
+    "values": {
+        "op": "extendunique",
         "value": ["foo", "bar"]
     }
 }
