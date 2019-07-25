@@ -5,6 +5,7 @@ from guillotina import schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index_field
+from guillotina.fields.patch import PatchField
 from zope.interface import Interface
 
 
@@ -63,11 +64,11 @@ class IDublinCore(Interface):
         value_type=schema.TextLine(),
         required=False)
 
-    tags = schema.Tuple(
+    tags = PatchField(schema.Tuple(
         title=u'Tags',
         description=u"The unqualified Dublin Core 'Tags' element values",
         value_type=schema.TextLine(),
-        required=False)
+        required=False))
 
     publisher = schema.Text(
         title=u'Publisher',

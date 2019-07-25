@@ -10,8 +10,9 @@ from guillotina.interfaces import IJSONToValue
 from guillotina.schema.interfaces import IDict
 from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IList
-from zope.interface import implementer
+from guillotina.schema.interfaces import ITuple
 from guillotina.utils import apply_coroutine
+from zope.interface import implementer
 
 
 @implementer(IPatchField)
@@ -74,6 +75,10 @@ class PatchListAppend:
                 field_type, IJSONToValue, args=[value, ob])
         return value
 
+    def do_operation(self, existing, value):
+        existing.append(value)
+        return existing
+
     def __call__(self, context, value):
         value = self.get_value(value, None)
         if self.field.value_type:
@@ -81,8 +86,38 @@ class PatchListAppend:
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
             existing = self.field.missing_value or []
-        existing.append(value)
+        return self.do_operation(existing, value)
+
+
+@configure.adapter(
+    for_=IList,
+    provides=IPatchFieldOperation,
+    name='appendunique')
+class PatchListAppendUnique(PatchListAppend):
+    def do_operation(self, existing, value):
+        if value not in existing:
+            existing.append(value)
         return existing
+
+
+@configure.adapter(
+    for_=ITuple,
+    provides=IPatchFieldOperation,
+    name='append')
+class PatchTupleAppend(PatchListAppend):
+
+    def do_operation(self, existing, value):
+        return tuple(super().do_operation(list(existing), value))
+
+
+@configure.adapter(
+    for_=ITuple,
+    provides=IPatchFieldOperation,
+    name='appendunique')
+class PatchTupleAppendUnique(PatchListAppendUnique):
+
+    def do_operation(self, existing, value):
+        return tuple(super().do_operation(list(existing), value))
 
 
 @configure.adapter(
@@ -90,6 +125,11 @@ class PatchListAppend:
     provides=IPatchFieldOperation,
     name='extend')
 class PatchListExtend(PatchListAppend):
+
+    def do_operation(self, existing, value):
+        existing.extend(value)
+        return existing
+
     def __call__(self, context, value):
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
@@ -104,8 +144,41 @@ class PatchListExtend(PatchListAppend):
                     item, None, field_type=self.field.value_type)
                 self.field.value_type.validate(item_value)
                 values.append(item_value)
-        existing.extend(values)
+
+        return self.do_operation(existing, values)
+
+
+@configure.adapter(
+    for_=IList,
+    provides=IPatchFieldOperation,
+    name='extendunique')
+class PatchListExtendUnique(PatchListExtend):
+
+    def do_operation(self, existing, value):
+        for item in value:
+            if item not in existing:
+                existing.append(item)
         return existing
+
+
+@configure.adapter(
+    for_=ITuple,
+    provides=IPatchFieldOperation,
+    name='extend')
+class PatchTupleExtend(PatchListExtend):
+
+    def do_operation(self, existing, value):
+        return tuple(super().do_operation(list(existing), value))
+
+
+@configure.adapter(
+    for_=ITuple,
+    provides=IPatchFieldOperation,
+    name='extendunique')
+class PatchTupleExtendUnique(PatchListExtendUnique):
+
+    def do_operation(self, existing, value):
+        return tuple(super().do_operation(list(existing), value))
 
 
 @configure.adapter(
@@ -113,13 +186,26 @@ class PatchListExtend(PatchListAppend):
     provides=IPatchFieldOperation,
     name='del')
 class PatchListDel(PatchListAppend):
-    def __call__(self, context, value):
-        existing = getattr(context, self.field.__name__, None) or {}
+
+    def do_operation(self, existing, value):
         try:
             del existing[value]
         except IndexError:
             raise ValueDeserializationError(self.field, value, 'Not valid index value')
         return existing
+
+    def __call__(self, context, value):
+        existing = getattr(context, self.field.__name__, None) or {}
+        return self.do_operation(existing, value)
+
+
+@configure.adapter(
+    for_=ITuple,
+    provides=IPatchFieldOperation,
+    name='del')
+class PatchTupleDel(PatchListDel):
+    def do_operation(self, existing, value):
+        return tuple(super().do_operation(list(existing), value))
 
 
 @configure.adapter(
@@ -127,8 +213,7 @@ class PatchListDel(PatchListAppend):
     provides=IPatchFieldOperation,
     name='remove')
 class PatchListRemove(PatchListAppend):
-    def __call__(self, context, value):
-        existing = getattr(context, self.field.__name__, None) or {}
+    def do_operation(self, existing, value):
         try:
             existing.remove(value)
         except ValueError:
@@ -136,12 +221,30 @@ class PatchListRemove(PatchListAppend):
                 self.field, value, '{} not in value'.format(value))
         return existing
 
+    def __call__(self, context, value):
+        existing = getattr(context, self.field.__name__, None) or {}
+        return self.do_operation(existing, value)
+
+
+@configure.adapter(
+    for_=ITuple,
+    provides=IPatchFieldOperation,
+    name='remove')
+class PatchTupleRemove(PatchListRemove):
+    def do_operation(self, existing, value):
+        return tuple(super().do_operation(list(existing), value))
+
 
 @configure.adapter(
     for_=IList,
     provides=IPatchFieldOperation,
     name='update')
 class PatchListUpdate(PatchListAppend):
+
+    def do_operation(self, existing, index, result_value):
+        existing[index] = result_value
+        return existing
+
     def __call__(self, context, value):
         if 'index' not in value or 'value' not in value:
             raise ValueDeserializationError(self.field, value, 'Not valid patch value')
@@ -155,8 +258,17 @@ class PatchListUpdate(PatchListAppend):
         result_value = self.get_value(value['value'], existing_item)
         if self.field.value_type:
             self.field.value_type.validate(result_value)
-        existing[value['index']] = result_value
-        return existing
+
+        return self.do_operation(existing, value['index'], result_value)
+
+
+@configure.adapter(
+    for_=ITuple,
+    provides=IPatchFieldOperation,
+    name='update')
+class PatchTupleUpdate(PatchListUpdate):
+    def do_operation(self, existing, index, result_value):
+        return tuple(super().do_operation(list(existing), index, result_value))
 
 
 @configure.adapter(

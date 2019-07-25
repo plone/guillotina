@@ -4,7 +4,14 @@ CHANGELOG
 4.8.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make Tuple type work with patch field
+  [vangheem]
+
+- Make IDublinCore.tags a patch field
+  [vangheem]
+
+- Add `appendunique` and `extendunique` to patch field operations
+  [vangheem]
 
 
 4.8.16 (2019-07-24)

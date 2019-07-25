@@ -969,3 +969,63 @@ async def test_create_content_with_uses_good_id(container_requester):
             })
         )
         assert 'foobar' == resp['@name']
+
+
+async def test_tags_patch_field(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1",
+                IDublinCore.__identifier__: {
+                    "tags": ["one"]
+                }
+            })
+        )
+        assert status == 201
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/item1',
+            data=json.dumps({
+                IDublinCore.__identifier__: {
+                    "tags": {
+                        "op": "append",
+                        "value": "two"
+                    }
+                }
+            })
+        )
+        assert status == 204
+
+        resp, status = await requester('GET', '/db/guillotina/item1')
+        assert status == 200
+        assert resp[IDublinCore.__identifier__]['tags'] == ['one', 'two']
+
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/item1',
+            data=json.dumps({
+                IDublinCore.__identifier__: {
+                    "tags": {
+                        "op": "appendunique",
+                        "value": "two"
+                    }
+                }
+            })
+        )
+        resp, status = await requester('GET', '/db/guillotina/item1')
+        assert resp[IDublinCore.__identifier__]['tags'] == ['one', 'two']
+
+        resp, status = await requester(
+            'PATCH', '/db/guillotina/item1',
+            data=json.dumps({
+                IDublinCore.__identifier__: {
+                    "tags": {
+                        "op": "extendunique",
+                        "value": ["one", "two"]
+                    }
+                }
+            })
+        )
+        resp, status = await requester('GET', '/db/guillotina/item1')
+        assert resp[IDublinCore.__identifier__]['tags'] == ['one', 'two']
