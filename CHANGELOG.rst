@@ -4,6 +4,15 @@ CHANGELOG
 5.0.0a12 (unreleased)
 ---------------------
 
+- Make Tuple type work with patch field
+  [vangheem]
+
+- Make IDublinCore.tags a patch field
+  [vangheem]
+
+- Add `appendunique` and `extendunique` to patch field operations
+  [vangheem]
+
 - Fix exhausted retries conflict error response
   [vangheem]
 
