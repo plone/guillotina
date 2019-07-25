@@ -10,10 +10,11 @@ from guillotina.schema import Dict
 from guillotina._settings import app_settings
 from guillotina.utils import get_schema_validator
 from guillotina.response import HTTPPreconditionFailed
+from guillotina import glogging
 
-import pdb
 import jsonschema
 
+logger = glogging.getLogger('guillotina')
 class DictFieldProxy():
 
     def __init__(self, key, context, field_name):
@@ -41,22 +42,29 @@ class DictFieldProxy():
 
 
 class Service(View):
+    __validator__ = None
+
     async def validate(self):
         data = await self.request.json()
-        schema = self.__config__['parameters'][0]['schema']['$ref'].split('/')[-1]
-        validator = get_schema_validator(schema)
-        try:
-            validator.validate(data)
-        except jsonschema.exceptions.ValidationError as e:
-            raise HTTPPreconditionFailed(content={
-                'reason': 'json schema validation error',
-                'message': e.message,
-                'validator': e.validator,
-                'validator_value': e.validator_value,
-                'path': [i for i in e.path],
-                'schema_path': [i for i in e.schema_path],
-                "schema": app_settings['json_schema_definitions'][schema]
-            })
+        if(self.__class__.__validator__ is None):
+            try:
+                self.__class__.__schema__ = self.__config__['parameters'][0]['schema']['$ref'].split('/')[-1]
+                self.__class__.__validator__ = get_schema_validator(self.__class__.__schema__)
+            except Exception as e:
+                logger.warning('Invalid jsonschema: {}'.format(e))
+        if self.__class__.__validator__:
+            try:
+                self.__class__.__validator__.validate(data)
+            except jsonschema.exceptions.ValidationError as e:
+                raise HTTPPreconditionFailed(content={
+                    'reason': 'json schema validation error',
+                    'message': e.message,
+                    'validator': e.validator,
+                    'validator_value': e.validator_value,
+                    'path': [i for i in e.path],
+                    'schema_path': [i for i in e.schema_path],
+                    "schema": app_settings['json_schema_definitions'][self.__class__.__schema__]
+                })
 
     async def get_data(self):
         return await self.request.json()

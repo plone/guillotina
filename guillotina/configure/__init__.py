@@ -40,12 +40,8 @@ from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
-from guillotina.utils import get_schema_validator
-from guillotina.response import HTTPPreconditionFailed
 
 
-
-import pdb
 _registered_configurations: ConfigurationType = []
 # stored as tuple of (type, configuration) so we get keep it in the order
 # it is registered even if you mix types of registrations
