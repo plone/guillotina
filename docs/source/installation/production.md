@@ -23,6 +23,40 @@ Sample configuration on `nginx`:
 ```
 
 
+## Servicing Guillotina with Ambassador/Envoy
+
+Working with ambassador/envoy works the same as with any other api service gateway; however,
+there are a few things you can do to improve your experience.
+
+First off, if you want to use internal urls to access guillotina defined services,
+you will need to utilize dynamically adding a header to the request in order
+for Guillotina to understand how it's being served and generate urls correctly.
+
+Example with ambassador:
+
+```
+getambassador.io/config: |
+  ...
+  add_request_headers:
+    x-virtualhost-path: /path-served-at/
+  ...
+```
+
+Additionally, it is recommended to use a resolver with a load balancer that will
+hash requests to backends based on the Authorization header. This encourages
+requests from a single user to be directed at the same backend so you will get
+more cache hits.
+
+```
+getambassador.io/config: |
+  ...
+  resolver: <my endpoint resolver>
+  load_balancer:
+    policy: ring_hash
+    header: Authorization
+```
+
+
 ## Postgresql
 
 With very large databases, Postgresql can get into a state where particular

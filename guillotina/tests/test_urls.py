@@ -53,3 +53,11 @@ async def test_url_of_object_with_scheme(container_requester):
         url = resp['@id']
         assert url.startswith('https://')
         assert url.endswith('/db/guillotina/foobar')
+
+
+def test_vh_path_url(dummy_guillotina):
+    request = make_mocked_request('GET', '/', {
+        'X-VirtualHost-Path': '/foo/bar'
+    })
+
+    assert get_url(request, '/c/d').endswith('/foo/bar/c/d')
