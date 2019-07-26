@@ -14,11 +14,13 @@ import aiotask_context
 import asyncio
 import inspect
 import jsonschema.validators
+import os
 import random
 import string
 import time
 import types
 import typing
+
 
 try:
     random = random.SystemRandom()  # type: ignore
@@ -263,21 +265,25 @@ def get_url(req, path):
     Return calculated url from a request object taking
     into account X-VirtualHost-Monster header
     '''
+    virtualhost_path = virtualhost = None
     if 'X-VirtualHost-Monster' in req.headers:
         virtualhost = req.headers['X-VirtualHost-Monster']
-    else:
-        virtualhost = None
+    elif 'X-VirtualHost-Path' in req.headers:
+        virtualhost_path = req.headers['X-VirtualHost-Path']
 
     if virtualhost:
         return '{}/{}'.format(virtualhost.rstrip('/'), path.strip('/'))
-    else:
-        url = req.url.with_path(path)
-        for hdr in ('X-Forwarded-Proto', 'X-Forwarded-Scheme',):
-            forwarded_proto = req.headers.get(hdr, None)
-            if forwarded_proto:
-                url = url.with_scheme(forwarded_proto)
-                break
-        return str(url)
+
+    if virtualhost_path:
+        path = os.path.join(virtualhost_path.rstrip('/'), path.strip('/'))
+
+    url = req.url.with_path(path)
+    for hdr in ('X-Forwarded-Proto', 'X-Forwarded-Scheme',):
+        forwarded_proto = req.headers.get(hdr, None)
+        if forwarded_proto:
+            url = url.with_scheme(forwarded_proto)
+            break
+    return str(url)
 
 
 _cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}
