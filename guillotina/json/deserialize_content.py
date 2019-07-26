@@ -156,7 +156,7 @@ class DeserializeFromJson(object):
                         'error': ValueError('Required parameter')})
 
         if validate_all:
-            invariant_errors = []
+            invariant_errors = []  # type: ignore
             try:
                 schema.validateInvariants(object, invariant_errors)
             except Invalid:
