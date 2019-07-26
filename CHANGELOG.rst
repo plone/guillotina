@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a12 (unreleased)
+5.0.0a12 (2019-07-26)
 ---------------------
 
 - Fix exhausted retries conflict error response
