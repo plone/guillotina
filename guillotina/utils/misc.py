@@ -1,31 +1,32 @@
-import asyncio
-import inspect
-import random
-import string
-import time
-import types
-import typing
 from collections import MutableMapping
 from functools import partial
-from hashlib import sha256 as sha
-
-import jsonschema.validators
 from guillotina import glogging
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_utility
+from guillotina.db.interfaces import ITransaction
+from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import DatabaseNotFound
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
-from guillotina.exceptions import ContainerNotFound
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
-from guillotina.db.interfaces import ITransaction
 from guillotina.profile import profilable
+from hashlib import sha256 as sha
+
+import asyncio
+import inspect
+import jsonschema.validators
+import os
+import random
+import string
+import time
+import types
+import typing
 
 
 try:
@@ -306,21 +307,25 @@ def get_url(req, path):
     Return calculated url from a request object taking
     into account X-VirtualHost-Monster header
     '''
+    virtualhost_path = virtualhost = None
     if 'X-VirtualHost-Monster' in req.headers:
         virtualhost = req.headers['X-VirtualHost-Monster']
-    else:
-        virtualhost = None
+    elif 'X-VirtualHost-Path' in req.headers:
+        virtualhost_path = req.headers['X-VirtualHost-Path']
 
     if virtualhost:
         return '{}/{}'.format(virtualhost.rstrip('/'), path.strip('/'))
-    else:
-        url = req.url.with_path(path)
-        for hdr in ('X-Forwarded-Proto', 'X-Forwarded-Scheme',):
-            forwarded_proto = req.headers.get(hdr, None)
-            if forwarded_proto:
-                url = url.with_scheme(forwarded_proto)
-                break
-        return str(url)
+
+    if virtualhost_path:
+        path = os.path.join(virtualhost_path.rstrip('/'), path.strip('/'))
+
+    url = req.url.with_path(path)
+    for hdr in ('X-Forwarded-Proto', 'X-Forwarded-Scheme',):
+        forwarded_proto = req.headers.get(hdr, None)
+        if forwarded_proto:
+            url = url.with_scheme(forwarded_proto)
+            break
+    return str(url)
 
 
 _cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}
