@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.18 (unreleased)
+4.8.18 (2019-07-26)
 -------------------
 
 - Add `x-virtualhost-path` header support for url generation
