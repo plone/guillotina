@@ -31,11 +31,15 @@ _marker = object()
     responses={
         "200": {
             "description": "Successfully registered interface",
-            "type": "object",
-            "schema": {
-                "properties": {
-                    "value": {
-                        "type": "object"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "object"
+                            }
+                        }
                     }
                 }
             }
@@ -70,11 +74,15 @@ class Read(Service):
     responses={
         "200": {
             "description": "Successfully registered interface",
-            "type": "object",
-            "schema": {
-                "properties": {
-                    "value": {
-                        "type": "object"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "object"
+                            }
+                        }
                     }
                 }
             }
@@ -99,14 +107,16 @@ async def get_registry_service(context, request):
     permission='guillotina.RegisterConfigurations', name='@registry',
     summary='Register a new interface to for registry settings',
     validate=True,
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "$ref": "#/definitions/Registry"
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/Registry"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully registered interface"
@@ -157,14 +167,16 @@ class Register(Service):
     permission='guillotina.WriteConfiguration', name='@registry/{dotted_name}',
     summary='Update registry setting',
     validate=True,
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "$ref": "#/definitions/UpdateRegistry"
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/UpdateRegistry"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully wrote configuration"

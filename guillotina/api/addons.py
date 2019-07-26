@@ -17,13 +17,16 @@ _ = MessageFactory('guillotina')
     permission='guillotina.ManageAddons', name='@addons',
     summary='Install addon to container',
     validate=True,
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/Addon"
+    requestBody={
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/Addon"
+                }
+            }
         }
-    }])
+    })
 async def install(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -51,13 +54,16 @@ async def install(context, request):
     permission='guillotina.ManageAddons', name='@addons',
     summary='Uninstall an addon from container',
     validate=True,
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/Addon"
+    requestBody={
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/Addon"
+                }
+            }
         }
-    }])
+    })
 async def uninstall(context, request):
     data = await request.json()
     id_to_uninstall = data.get('id', None)
@@ -103,8 +109,12 @@ async def uninstall_addon(context, request, id_to_uninstall):
     responses={
         "200": {
             "description": "Get list of available and installed addons",
-            "schema": {
-                "$ref": "#/definitions/AddonResponse"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "$ref": "#/components/schemas/AddonResponse"
+                    }
+                }
             }
         }
     })

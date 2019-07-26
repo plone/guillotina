@@ -15,13 +15,16 @@ from guillotina.utils import resolve_dotted_name
     permission='guillotina.ModifyContent', name='@behaviors',
     summary="Add behavior to resource",
     validate=True,
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/Behavior"
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/Behavior"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully added behavior"
@@ -58,13 +61,16 @@ async def default_patch(context, request):
     context=IResource, method='DELETE',
     permission='guillotina.ModifyContent', name='@behaviors/{behavior}',
     summary="Remove behavior from resource",
-    parameters=[{
-        "name": "behavior",
-        "in": "path",
-        "schema": {
-            "$ref": "#/definitions/Behavior"
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/Behavior"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully removed behavior"
@@ -83,13 +89,16 @@ async def default_delete_withparams(context, request):
     permission='guillotina.ModifyContent', name='@behaviors',
     summary="Remove behavior from resource",
     validate=True,
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/Behavior"
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/Behaviour"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully removed behavior"
@@ -127,8 +136,10 @@ async def delete_behavior(context, behavior):
     responses={
         "200": {
             "description": "A listing of behaviors for content",
-            "schema": {
-                "$ref": "#/definitions/BehaviorsResponse"
+            "content": {
+                "application/json": {
+                    "schema": "#/components/schemas/BehaviorsResponse"
+                }
             }
         }
     })

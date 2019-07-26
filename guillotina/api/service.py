@@ -46,15 +46,16 @@ class Service(View):
 
     async def validate(self):
         data = await self.request.json()
-        if(self.__class__.__validator__ is None):
+        if(self.__validator__ is None):
             try:
-                self.__class__.__schema__ = self.__config__['parameters'][0]['schema']['$ref'].split('/')[-1]
-                self.__class__.__validator__ = get_schema_validator(self.__class__.__schema__)
+                requestBody = self.__config__['requestBody']
+                self.__schema__ = requestBody['content']['application/json']['schema']['$ref'].split('/')[-1]
+                self.__validator__ = get_schema_validator(self.__schema__)
             except Exception as e:
                 logger.warning('Invalid jsonschema: {}'.format(e))
-        if self.__class__.__validator__:
+        if self.__validator__:
             try:
-                self.__class__.__validator__.validate(data)
+                self.__validator__.validate(data)
             except jsonschema.exceptions.ValidationError as e:
                 raise HTTPPreconditionFailed(content={
                     'reason': 'json schema validation error',
@@ -63,7 +64,7 @@ class Service(View):
                     'validator_value': e.validator_value,
                     'path': [i for i in e.path],
                     'schema_path': [i for i in e.schema_path],
-                    "schema": app_settings['json_schema_definitions'][self.__class__.__schema__]
+                    "schema": app_settings['json_schema_definitions'][self.__schema__]
                 })
 
     async def get_data(self):
