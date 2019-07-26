@@ -342,7 +342,7 @@ async def test_patch_list_field(dummy_request):
 
 
 async def test_patch_tuple_field(dummy_request):
-    login(dummy_request)
+    login()
     content = create_content()
     deserializer = get_multi_adapter(
         (content, dummy_request), IResourceDeserializeFromJson)
