@@ -44,15 +44,34 @@ class DictFieldProxy():
 class Service(View):
     __validator__ = None
 
+    def _get_validator(self, config):
+        [schema, validator] = [None, None]
+        if config['requestBody']:
+            requestBody = config['requestBody']
+            if requestBody['content']['application/json']['schema']['$ref']:
+                try:
+                    schema_name = requestBody['content']['application/json']['schema']['$ref'].split('/')[-1]
+                    schema = app_settings['json_schema_definitions'][schema_name]
+                    validator = get_schema_validator(schema_name)
+                except KeyError as e:
+                    logger.warning('Invalid jsonschema: {}'.format(e))
+            elif requestBody['content']['application/json']['schema']:
+                try:
+                    schema = requestBody['content']['application/json']['schema']
+                    jsonschema_validator = jsonschema.validators.validator_for(schema)
+                    validator = jsonschema_validator(schema)
+                except jsonschema.exceptions.ValidationError as e:
+                    logger.warning(e)
+            else:
+                logger.warning("No schema found in service definition")
+        else:
+            pass  # can be used for query, path or header parameters
+        return [schema, validator]
+
     async def validate(self):
         data = await self.request.json()
         if(self.__validator__ is None):
-            try:
-                requestBody = self.__config__['requestBody']
-                self.__schema__ = requestBody['content']['application/json']['schema']['$ref'].split('/')[-1]
-                self.__validator__ = get_schema_validator(self.__schema__)
-            except Exception as e:
-                logger.warning('Invalid jsonschema: {}'.format(e))
+            [self.__schema__, self.__validator__] = self._get_validator(self.__config__)
         if self.__validator__:
             try:
                 self.__validator__.validate(data)
@@ -64,7 +83,7 @@ class Service(View):
                     'validator_value': e.validator_value,
                     'path': [i for i in e.path],
                     'schema_path': [i for i in e.schema_path],
-                    "schema": app_settings['json_schema_definitions'][self.__schema__]
+                    "schema": self.__schema__
                 })
 
     async def get_data(self):
