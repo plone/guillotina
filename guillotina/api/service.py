@@ -43,9 +43,11 @@ class DictFieldProxy():
 
 class Service(View):
     __validator__ = None
+    _sentinal = object()
 
     def _get_validator(self, config):
         [schema, validator] = [None, None]
+        validator = self._sentinal
         if config['requestBody']:
             requestBody = config['requestBody']
             if requestBody['content']['application/json']['schema']['$ref']:
@@ -70,7 +72,7 @@ class Service(View):
 
     async def validate(self):
         data = await self.request.json()
-        if(self.__validator__ is None):
+        if(self.__validator__ is None and self.__validator__ != self._sentinal):
             [self.__schema__, self.__validator__] = self._get_validator(self.__config__)
         if self.__validator__:
             try:

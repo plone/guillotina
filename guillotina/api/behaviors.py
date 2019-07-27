@@ -94,7 +94,7 @@ async def default_delete_withparams(context, request):
         'content': {
             'application/json': {
                 "schema": {
-                    "$ref": "#/components/schemas/Behaviour"
+                    "$ref": "#/components/schemas/Behavior"
                 }
             }
         }
