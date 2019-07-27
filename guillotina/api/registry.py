@@ -112,7 +112,17 @@ async def get_registry_service(context, request):
         'content': {
             'application/json': {
                 "schema": {
-                    "$ref": "#/components/schemas/Registry"
+                    "type": "object",
+                    "title": "Registry",
+                    "properties": {
+                        "interface": {
+                             "type": "string"
+                        },
+                        "initial_values": {
+                            "type": "object"
+                        }
+                    },
+                    'required': ['interface']
                 }
             }
         }

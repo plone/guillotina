@@ -50,14 +50,14 @@ class Service(View):
         validator = self._sentinal
         if config['requestBody']:
             requestBody = config['requestBody']
-            if requestBody['content']['application/json']['schema']['$ref']:
+            if '$ref' in requestBody['content']['application/json']['schema']:
                 try:
                     schema_name = requestBody['content']['application/json']['schema']['$ref'].split('/')[-1]
                     schema = app_settings['json_schema_definitions'][schema_name]
                     validator = get_schema_validator(schema_name)
                 except KeyError as e:
                     logger.warning('Invalid jsonschema: {}'.format(e))
-            elif requestBody['content']['application/json']['schema']:
+            elif requestBody['content']['application/json']['schema'] is not None:
                 try:
                     schema = requestBody['content']['application/json']['schema']
                     jsonschema_validator = jsonschema.validators.validator_for(schema)
