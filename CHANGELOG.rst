@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.8.19 (unreleased)
+4.8.19 (2019-07-28)
 -------------------
 
 - Only register object for writing if base object changed. Otherwise, changes to behavior data
