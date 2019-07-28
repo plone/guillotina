@@ -73,20 +73,17 @@ class DeserializeFromJson(object):
 
         factory = get_cached_factory(self.context.type_name)
         main_schema = factory.schema
-        changed = await self.set_schema(
+        await self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)
 
         if errors and not ignore_errors:
             raise DeserializationError(errors)
 
-        if changed:
-            self.context._p_register()
-
         return self.context
 
     async def set_schema(
             self, schema, obj, data, errors,
-            validate_all=False, behavior=False) -> bool:
+            validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
         changed = False
         for name, field in get_fields(schema).items():
@@ -172,7 +169,9 @@ class DeserializeFromJson(object):
                         'field': error[0],
                         'error': error
                     })
-        return changed
+
+        if changed:
+            obj._p_register()
 
     async def get_value(self, field, obj, value):
         if value is None:
