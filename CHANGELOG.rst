@@ -4,6 +4,10 @@ CHANGELOG
 5.0.0a13 (unreleased)
 ---------------------
 
+- Only register object for writing if base object changed. Otherwise, changes to behavior data
+  was also causing writes to the object it was associated with
+  [vangheem]
+
 - Add `x-virtualhost-path` header support for url generation
   [vangheem]
 
