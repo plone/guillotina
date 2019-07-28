@@ -1,11 +1,27 @@
 CHANGELOG
 =========
 
-5.0.0a12 (unreleased)
+5.0.0a13 (unreleased)
 ---------------------
 
 - Only register object for writing if base object changed. Otherwise, changes to behavior data
   was also causing writes to the object it was associated with
+  [vangheem]
+
+- Add `x-virtualhost-path` header support for url generation
+  [vangheem]
+
+
+5.0.0a12 (2019-07-26)
+---------------------
+
+- Make Tuple type work with patch field
+  [vangheem]
+
+- Make IDublinCore.tags a patch field
+  [vangheem]
+
+- Add `appendunique` and `extendunique` to patch field operations
   [vangheem]
 
 - Fix exhausted retries conflict error response

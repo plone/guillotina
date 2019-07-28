@@ -202,6 +202,11 @@ class ITestSchema(Interface):
         value_type=schema.Object(schema=INestFieldSchema)
     ))
 
+    patch_tuple = fields.PatchField(schema.Tuple(
+        required=False,
+        value_type=schema.Text(schema=INestFieldSchema)
+    ))
+
 
 async def test_deserialize_text(dummy_guillotina):
     assert schema_compatible('foobar', ITestSchema['text']) == 'foobar'
@@ -334,6 +339,77 @@ async def test_patch_list_field(dummy_request):
             }
         }, [])
     assert len(content.patch_list) == 3
+
+
+async def test_patch_tuple_field(dummy_request):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter(
+        (content, dummy_request), IResourceDeserializeFromJson)
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_tuple': {
+                'op': 'append',
+                'value': "foo"
+            }
+        }, [])
+
+    assert len(content.patch_tuple) == 1
+    assert content.patch_tuple[0] == 'foo'
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_tuple': {
+                'op': 'appendunique',
+                'value': 'foo'
+            }
+        }, [])
+
+    assert len(content.patch_tuple) == 1
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_tuple': {
+                'op': 'extend',
+                'value': ['bar']
+            }
+        }, [])
+
+    assert len(content.patch_tuple) == 2
+    assert content.patch_tuple[1] == 'bar'
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_tuple': {
+                'op': 'extendunique',
+                'value': ['bar']
+            }
+        }, [])
+
+    assert len(content.patch_tuple) == 2
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_tuple': {
+                'op': 'update',
+                'value': {
+                    'index': 1,
+                    'value': 'barupdated'
+                }
+            }
+        }, [])
+
+    assert len(content.patch_tuple) == 2
+    assert content.patch_tuple[1] == 'barupdated'
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'patch_tuple': {
+                'op': 'del',
+                'value': 1
+            }
+        }, [])
+    assert len(content.patch_tuple) == 1
 
 
 async def test_patch_list_field_invalid_type(dummy_request):
