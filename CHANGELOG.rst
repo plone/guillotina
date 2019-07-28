@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a13 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Add `x-virtualhost-path` header support for url generation
+  [vangheem]
 
 
 5.0.0a12 (2019-07-26)
