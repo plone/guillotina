@@ -72,7 +72,7 @@ class DeserializeFromJson(object):
 
         factory = get_cached_factory(self.context.type_name)
         main_schema = factory.schema
-        changed = await self.set_schema(
+        await self.set_schema(
             main_schema, self.context, data, errors, validate_all, False)
 
         if errors and not ignore_errors:
