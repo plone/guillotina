@@ -79,15 +79,13 @@ class DeserializeFromJson(object):
         if errors and not ignore_errors:
             raise DeserializationError(errors)
 
-        self.context._p_register()
-
         return self.context
 
     async def set_schema(
             self, schema, obj, data, errors,
             validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
-
+        changed = False
         for name, field in get_fields(schema).items():
             if name in RESERVED_ATTRS:
                 continue
@@ -128,6 +126,7 @@ class DeserializeFromJson(object):
                     # record object changes for potential future conflict resolution
                     try:
                         await apply_coroutine(field.set, obj, value)
+                        changed = True
                     except ValidationError as e:
                         errors.append({
                             'message': e.doc(), 'field': name, 'error': e})
@@ -144,6 +143,7 @@ class DeserializeFromJson(object):
                                 'Error setting data on field, falling back to setattr',
                                 exc_info=True)
                             setattr(obj, name, value)
+                            changed = True
                         else:
                             logger.warning(
                                 'Error setting data on field', exc_info=True)
@@ -154,7 +154,7 @@ class DeserializeFromJson(object):
                         'error': ValueError('Required parameter')})
 
         if validate_all:
-            invariant_errors = []
+            invariant_errors = []  # type: ignore
             try:
                 schema.validateInvariants(object, invariant_errors)
             except Invalid:
@@ -169,6 +169,9 @@ class DeserializeFromJson(object):
                         'field': error[0],
                         'error': error
                     })
+
+        if changed:
+            obj._p_register()
 
     async def get_value(self, field, obj, value):
         if value is None:
