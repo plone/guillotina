@@ -138,7 +138,7 @@ class SerializeToJson(object):
             value = await apply_coroutine(field.get, context)
         except Exception:
             logger.warning(f'Could not find value for schema field'
-                           f'({self.field.__name__}), falling back to getattr')
+                           f'({field.__name__}), falling back to getattr')
             value = getattr(context, field.__name__, default)
         result = json_compatible(value)
         if asyncio.iscoroutine(result):

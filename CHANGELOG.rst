@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a13 (unreleased)
 ---------------------
 
+- Run default factory on attributes on behaviors
+  [bloodbare]
+
 - Allow to get full object serialization on GET operation
   [bloodbare]
 
