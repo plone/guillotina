@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a13 (unreleased)
 ---------------------
 
+- Allow to get full object serialization on GET operation
+  [bloodbare]
+
 - Only register object for writing if base object changed. Otherwise, changes to behavior data
   was also causing writes to the object it was associated with
   [vangheem]
