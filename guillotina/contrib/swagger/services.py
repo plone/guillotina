@@ -52,10 +52,12 @@ class SwaggerDefinitionService(Service):
         api_def[path or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", [""]) or tags,
             "parameters": self.get_data(service_def.get("parameters", {})),
+            "requestBody": self.get_data(service_def.get("requestBody", "")),
             "produces": self.get_data(service_def.get("produces", [])),
             "summary": self.get_data(service_def.get("summary", "")),
             "description": desc,
             "responses": self.get_data(service_def.get("responses", {})),
+            "security": "",
         }
 
     def get_endpoints(self, iface_conf, base_path, api_def, tags=[]):
@@ -136,7 +138,7 @@ class SwaggerDefinitionService(Service):
                 iface_conf = api_defs[dotted_iface]
                 self.get_endpoints(iface_conf, path, definition["paths"])
 
-        definition["definitions"] = app_settings["json_schema_definitions"]
+        definition["components"]["schemas"] = app_settings["json_schema_definitions"]
         return definition
 
 
