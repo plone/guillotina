@@ -821,6 +821,21 @@ async def test_patching_write_protected_field_without_permission_should_return_4
         assert status == 401
 
 
+async def test_items_fullobjects(container_requester):
+    """Get a content type definition."""
+    async with container_requester as requester:
+        # add 20 items
+        for _ in range(22):
+            response, _ = await requester(
+                'POST', '/db/guillotina',
+                data=json.dumps({
+                    '@type': 'Item'
+                }))
+        response, _ = await requester('GET', '/db/guillotina/?fullobjects')
+        assert len(response['items']) == 22
+        assert 'guillotina.behaviors.dublincore.IDublinCore' in response['items'][0]
+
+
 async def test_items(container_requester):
     """Get a content type definition."""
     async with container_requester as requester:

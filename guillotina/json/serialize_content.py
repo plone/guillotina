@@ -175,7 +175,9 @@ class SerializeFolderToJson(SerializeToJson):
         security = get_security_policy()
         length = await self.context.async_len()
 
-        if length > MAX_ALLOWED or length == 0:
+        fullobjects = self.request.query.get('fullobjects', False) in (None, '', 'true')
+
+        if (length > MAX_ALLOWED or length == 0) and not fullobjects:
             result['items'] = []
         else:
             result['items'] = []
@@ -183,10 +185,16 @@ class SerializeFolderToJson(SerializeToJson):
                 if not ident.startswith('_') and bool(
                         security.check_permission(
                         'guillotina.AccessContent', member)):
-                    result['items'].append(
-                        await get_multi_adapter(
-                            (member, self.request),
-                            IResourceSerializeToJsonSummary)())
+                    if fullobjects:
+                        result['items'].append(
+                            await get_multi_adapter(
+                                (member, self.request),
+                                IResourceSerializeToJson)())
+                    else:
+                        result['items'].append(
+                            await get_multi_adapter(
+                                (member, self.request),
+                                IResourceSerializeToJsonSummary)())
         result['length'] = length
 
         return result
