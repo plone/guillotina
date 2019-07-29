@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a13 (unreleased)
+5.0.0a13 (2019-07-29)
 ---------------------
 
 - Run default factory on attributes on behaviors
