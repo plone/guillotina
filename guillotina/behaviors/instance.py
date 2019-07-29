@@ -3,6 +3,7 @@ from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IContentBehavior
+from guillotina.schema.utils import get_default_from_schema
 from typing import Tuple
 from zope.interface import implementer
 
@@ -58,7 +59,11 @@ class AnnotationBehavior:
         data = self.__dict__['data']
 
         if key_name not in data:
-            return self.__dict__['schema'][name].missing_value
+            return get_default_from_schema(
+                self,
+                self.__dict__["schema"],
+                name,
+                self.__dict__["schema"][name].missing_value)
 
         return data[key_name]
 
@@ -104,7 +109,11 @@ class ContextBehavior:
         key_name = self.__dict__['prefix'] + name
         field = self.__dict__['schema'][name]
         if not hasattr(context, key_name):
-            return field.missing_value
+            return get_default_from_schema(
+                self,
+                self.__dict__["schema"],
+                name,
+                field.missing_value)
 
         return getattr(context, key_name, field.default)
 
