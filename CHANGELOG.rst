@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a14 (unreleased)
+5.0.0a14 (2019-07-30)
 ---------------------
 
 - Leaking txn on reindex on pg
