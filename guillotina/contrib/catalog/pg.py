@@ -640,12 +640,17 @@ class PGSearchUtility(DefaultSearchUtility):
             'tm': get_current_transaction()._manager,
         }
 
-        data['table_name'] = data['tm']._storage._objects_table_name
+        try:
+            data['table_name'] = data['tm']._storage._objects_table_name
+        except AttributeError:
+            # Not supported DB
+            return
+
+        data['transaction'] = await data['tm'].begin()
+        container.__txn__ = data['transaction']
         await self._process_object(container, data)
         await self._process_folder(container, data)
-        if data['transaction'] is not None:
-            await data['transaction'].commit()
-            data['transaction'] = None
+        await data['tm'].commit(txn=data['transaction'])
 
     async def _process_folder(self, obj, data):
         for key in await obj.async_keys():
@@ -659,11 +664,8 @@ class PGSearchUtility(DefaultSearchUtility):
 
     async def _process_object(self, obj, data):
 
-        if data['count'] % 2 == 0 and data['transaction'] is not None:
-            await data['transaction'].commit()
-            data['transaction'] = None
-
-        if data['transaction'] is None:
+        if data['count'] % 200 == 0:
+            await data['tm'].commit(txn=data['transaction'])
             data['transaction'] = await data['tm'].begin()
             obj.__txn__ = data['transaction']
 

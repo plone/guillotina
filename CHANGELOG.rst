@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a14 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Leaking txn on reindex on pg
+  [bloodbare]
 
 
 5.0.0a13 (2019-07-29)
