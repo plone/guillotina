@@ -207,6 +207,12 @@ class ITestSchema(Interface):
         value_type=schema.Text(schema=INestFieldSchema)
     ))
 
+    bucket_dict = fields.BucketDictField(
+        bucket_len=10, required=False,
+        key_type=schema.Text(),
+        value_type=schema.Text()
+    )
+
 
 async def test_deserialize_text(dummy_guillotina):
     assert schema_compatible('foobar', ITestSchema['text']) == 'foobar'
@@ -937,3 +943,70 @@ async def test_delete_by_value_field(dummy_request):
         }, errors)
     assert len(errors) == 1
     assert errors[0]['field'] == 'patch_list_int'
+
+
+async def test_bucket_dict_field(dummy_request):
+    request = dummy_request  # noqa
+    login(request)
+    content = create_content()
+    content._p_jar = mocks.MockTransaction()
+    deserializer = get_multi_adapter(
+        (content, request), IResourceDeserializeFromJson)
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'bucket_dict': {
+                'op': 'assign',
+                'value': {
+                    'key': 'foo',
+                    'value': 'bar'
+                }
+            }
+        }, [])
+    import pdb; pdb.set_trace()
+    assert content.bucket_dict.annotations_metadata[0]['len'] == 1
+    assert await content.bucket_dict.get(content, 'foo') == 'bar'
+    assert await content.bucket_list.get(content, 'bar') is None
+
+    for idx in range(100):
+        await deserializer.set_schema(
+            ITestSchema, content, {
+                'bucket_dict': {
+                    'op': 'append',
+                    'value': {
+                        'key': str(idx),
+                        'value': 'foobar'
+                    }
+                }
+            }, [])
+
+    assert len(content.bucket_dict.annotations_metadata) == 11
+    assert content.bucket_dict.annotations_metadata[0]['len'] == 10
+    assert content.bucket_dict.annotations_metadata[5]['len'] == 10
+    assert content.bucket_dict.annotations_metadata[10]['len'] == 1
+
+    assert len(content.bucket_list) == 101
+    await content.bucket_dict.remove(content, '1')
+    assert len(content.bucket_list) == 100
+
+    await deserializer.set_schema(
+        ITestSchema, content, {
+            'bucket_list': {
+                'op': 'update',
+                'value': [{
+                    'key': '1',
+                    'value': '1'
+                }, {
+                    'key': '2',
+                    'value': '2'
+                }]
+            }
+        }, [])
+
+    assert len(content.bucket_list) == 101
+
+    assert json_compatible(content.bucket_list) == {
+        'len': 100,
+        'buckets': 11
+    }
+
+    assert 'bucketlist-bucket_list0' in content.__gannotations__
