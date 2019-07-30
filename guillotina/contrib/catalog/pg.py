@@ -650,8 +650,7 @@ class PGSearchUtility(DefaultSearchUtility):
         container.__txn__ = data['transaction']
         await self._process_object(container, data)
         await self._process_folder(container, data)
-        await data['transaction'].commit()
-        await data['tm']._close_txn(data['transaction'])
+        await data['tm'].commit(txn=data['transaction'])
 
     async def _process_folder(self, obj, data):
         for key in await obj.async_keys():
@@ -666,8 +665,7 @@ class PGSearchUtility(DefaultSearchUtility):
     async def _process_object(self, obj, data):
 
         if data['count'] % 200 == 0:
-            await data['transaction'].commit()
-            await data['tm']._close_txn(data['transaction'])
+            await data['tm'].commit(txn=data['transaction'])
             data['transaction'] = await data['tm'].begin()
             obj.__txn__ = data['transaction']
 
