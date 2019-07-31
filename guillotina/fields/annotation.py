@@ -9,7 +9,11 @@ from guillotina.fields.interfaces import IBucketListField
 from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IContentBehavior
+from guillotina.interfaces import IFieldValueRenderer
+from guillotina.interfaces import IRequest
+from guillotina.response import HTTPPreconditionFailed
 from zope.interface import implementer
+from zope.interface import Interface
 
 import bisect
 import time
@@ -436,3 +440,62 @@ def value_dict_converter(value):
         'len': len(value),
         'buckets': len(value.buckets)
     }
+
+
+@configure.adapter(
+    for_=(Interface, IRequest, IBucketDictField),
+    provides=IFieldValueRenderer)
+class BucketDictFieldRenderer:
+
+    def __init__(self, context, request, field):
+        self.context = context
+        self.request = request
+        self.field = field
+
+    async def __call__(self):
+        '''
+        Iterate values bucket by bucket
+        '''
+        val = await self.field.get(self.field.context)
+        if val is None:
+            return {
+                "values": {},
+                "total": 0,
+                "cursor": None
+            }
+        bidx = 0
+        if 'cursor' in self.request.url.query:
+            cursor = self.request.url.query['cursor']
+            try:
+                bidx = int(cursor)
+            except ValueError:
+                raise HTTPPreconditionFailed(content={
+                    'reason': 'Invalid bucket type',
+                    'cursor': cursor
+                })
+
+        try:
+            bucket = self.buckets[bidx]
+        except IndexError:
+            raise HTTPPreconditionFailed(content={
+                'reason': 'Invalid bucket, not found',
+                'bidx': bidx
+            })
+
+        annotation = await val.get_annotation(self.context, anno_id=bucket['id'], create=False)
+        if annotation is None:
+            raise HTTPPreconditionFailed(content={
+                'reason': 'No data found for bucket',
+                'bidx': bidx
+            })
+
+        cursor = bidx + 1
+        try:
+            val.buckets[cursor]
+        except IndexError:
+            cursor = None
+        return {
+            "values": dict(zip(annotation['keys'], annotation['values'])),
+            "total": len(val),
+            "cursor": cursor
+        }
