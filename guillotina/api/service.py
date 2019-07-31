@@ -45,39 +45,36 @@ class Service(View):
     __validator__ = None
     _sentinal = object()
 
-    def _get_validator(self, config):
-        [schema, validator] = [None, None]
-        if(self.__validator__ is None and self.__validator__ != self._sentinal):
-            validator = self._sentinal
-            if config['requestBody']:
-                requestBody = config['requestBody']
+    def _get_validator(self):
+        if self.__validator__ is None and self.__validator__ != self._sentinal:
+            self.__validator__ = self._sentinal
+            if self.__config__['requestBody']:
+                requestBody = self.__config__['requestBody']
                 if '$ref' in requestBody['content']['application/json']['schema']:
                     try:
                         ref = requestBody['content']['application/json']['schema']['$ref']
                         schema_name = ref.split('/')[-1]
-                        schema = app_settings['json_schema_definitions'][schema_name]
-                        validator = get_schema_validator(schema_name)
+                        self.__schema__ = app_settings['json_schema_definitions'][schema_name]
+                        self.__validator__ = get_schema_validator(schema_name)
                     except KeyError:
                         logger.warning('Invalid jsonschema', exc_info=True)
                 elif requestBody['content']['application/json']['schema'] is not None:
                     try:
-                        schema = requestBody['content']['application/json']['schema']
-                        jsonschema_validator = jsonschema.validators.validator_for(schema)
-                        validator = jsonschema_validator(schema)
+                        self.__schema__ = requestBody['content']['application/json']['schema']
+                        jsonschema_validator = jsonschema.validators.validator_for(self.__schema__)
+                        self.__validator__ = jsonschema_validator(self.__schema__)
                     except jsonschema.exceptions.ValidationError:
                         logger.warning('Could not validate schema', exc_info=True)
                 else:
                     logger.warning("No schema found in service definition")
             else:
                 pass  # can be used for query, path or header parameters
-            return [schema, validator]
-        else:
-            return [self.__schema__, self.__validator__]
+        return [self.__schema__, self.__validator__]
 
     async def validate(self):
 
-        [self.__schema__, self.__validator__] = self._get_validator(self.__config__)
-        if self.__validator__:
+        [schema, validator] = self._get_validator()
+        if validator:
             try:
                 data = await self.request.json()
                 self.__validator__.validate(data)
@@ -89,7 +86,7 @@ class Service(View):
                     'validator_value': e.validator_value,
                     'path': [i for i in e.path],
                     'schema_path': [i for i in e.schema_path],
-                    "schema": self.__schema__
+                    "schema": schema
                 })
 
     async def get_data(self):
