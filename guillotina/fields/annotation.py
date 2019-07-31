@@ -151,7 +151,7 @@ class BucketListField(schema.Field):
     provides=IPatchFieldOperation,
     name='append')
 class PatchBucketListAppend(patch.PatchListAppend):
-    value_factory = BucketListValue
+    value_factory: typing.Any = BucketListValue
 
     def get_existing_value(self, field_context):
         existing = getattr(field_context, self.field.__name__, None)
@@ -250,7 +250,7 @@ class BucketDictValue:
                 annotation_name, _default)
         if annotation is _default:
             if not create:
-                return
+                return None
             annotation = AnnotationData({
                 'keys': [],
                 'values': []

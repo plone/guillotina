@@ -257,7 +257,12 @@ class IAnnotations(Interface):
     '''
     '''
 
-    async def async_get(name):
+    def get(name, default=None):
+        '''
+        get already loaded annotation
+        '''
+
+    async def async_get(name, default=None):
         '''
         Get annotation
         '''
