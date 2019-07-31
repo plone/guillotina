@@ -277,9 +277,10 @@ class BucketDictValue:
             new_annotation['keys'] = annotation['keys'][middle_idx:]
             new_annotation['values'] = annotation['values'][middle_idx:]
             new_bucket['len'] = len(new_annotation['keys'])
+            new_annotation._p_register()
 
-            annotation['keys'] = annotation['keys'][:middle_idx]
-            annotation['values'] = annotation['values'][:middle_idx]
+            del annotation['keys'][middle_idx:]
+            del annotation['values'][middle_idx:]
             bucket['len'] = len(annotation['keys'])
 
             # get annotation for this key again
