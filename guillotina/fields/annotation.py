@@ -1,4 +1,3 @@
-
 from guillotina import configure
 from guillotina import schema
 from guillotina.annotations import AnnotationData
@@ -12,7 +11,10 @@ from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IContentBehavior
 from zope.interface import implementer
 
-import sys
+import bisect
+import time
+import typing
+import uuid
 
 
 _default = object()
@@ -144,11 +146,12 @@ class BucketListField(schema.Field):
     provides=IPatchFieldOperation,
     name='append')
 class PatchBucketListAppend(patch.PatchListAppend):
+    value_factory = BucketListValue
 
     def get_existing_value(self, field_context):
         existing = getattr(field_context, self.field.__name__, None)
         if existing is None:
-            existing = BucketListValue(
+            existing = self.value_factory(
                 bucket_len=self.field.bucket_len,
                 annotation_prefix=self.field.annotation_prefix + self.field.__key_name__)
             setattr(field_context, self.field.__name__, existing)
@@ -204,36 +207,36 @@ class BucketDictValue:
     '''
 
     def __init__(self, annotation_prefix='bucketdict-', bucket_len=1000):
-        self.annotations_metadata = {
-            0: {
+        self.buckets = [
+            {
+                'id': uuid.uuid4().hex,  # random gen
                 'len': 0,
-                'range': (0, sys.maxunicode)
+                'created': time.time(),
+                'start': None  # first one has no bound here
             }
-        }
+        ]
         self.annotation_prefix = annotation_prefix
         self.bucket_len = bucket_len
 
-    def __len__(self):
-        total = 0
-        for metadata in self.annotations_metadata.values():
-            total += metadata.get('len', 0)
-        return total
+    def _find_bucket(self, key) -> typing.Tuple[int, dict]:
+        found = (0, self.buckets[0])
+        for idx, bucket in enumerate(self.buckets[1:]):
+            if key < bucket['start']:
+                # searched as far as we need to go
+                break
+            found = (idx + 1, bucket)
+        return found
 
-    def _find_annotation_index(self, key):
-        first_chr = ord(str(key)[0])
-        for idx, metadata in self.annotations_metadata.items():
-            start_chr, end_chr = metadata['range']
-            if first_chr >= start_chr and first_chr <= end_chr:
-                return idx
+    def get_annotation_name(self, bucket_id: str) -> str:
+        return f'{self.annotation_prefix}{bucket_id}'
 
-    def _get_annotation_name(self, index):
-        return f'{self.annotation_prefix}{index}'
-
-    async def get_annotation(self, context, key, create=True):
-        annotation_index = self._find_annotation_index(key)
-        if annotation_index is None:
-            raise KeyError(f'Could not find annotation index for key: {key}')
-        annotation_name = self.get_annotation_name(annotation_index)
+    async def get_annotation(self, context, key=None,
+                             anno_id=None, create=True) -> typing.Optional[AnnotationData]:
+        if anno_id is None:
+            bidx, bucket = self._find_bucket(key)
+            annotation_name = self.get_annotation_name(bucket['id'])
+        else:
+            annotation_name = self.get_annotation_name(anno_id)
 
         annotations_container = IAnnotations(context)
         annotation = annotations_container.get(annotation_name, _default)
@@ -243,68 +246,82 @@ class BucketDictValue:
         if annotation is _default:
             if not create:
                 return
-            annotation = AnnotationData()
+            annotation = AnnotationData({
+                'keys': [],
+                'values': []
+            })
             await annotations_container.async_set(annotation_name, annotation)
-        if annotation_index not in self.annotations_metadata:
-            self.annotations_metadata[annotation_index] = {}
         return annotation
 
     async def assign(self, context, key, value):
         annotation = await self.get_annotation(context, key)
-        annotation_idx = self._find_annotation_index(key)
-        annotation_metadata = self.annotations_metadata[annotation_idx]
 
-        if len(annotation) >= self.bucket_len:
-            # split bucket before we append here...
-            bstart, bend = annotation_metadata['range']
-            new_bend = int(bend / 2)
-            annotation_metadata['range'] = (bstart, new_bend)
-
-            new_annotation_index = len(self.annotations_metadata)
-            new_ann_start = new_bend + 1
-            new_annotation_metadata = self.annotations_metadata[new_annotation_index] = {
-                'len': 0,
-                'range': (new_ann_start, bend)
+        if len(annotation['keys']) >= self.bucket_len:
+            # we need to split this bucket
+            bidx, bucket = self._find_bucket(key)
+            middle_idx = int(self.bucket_len / 2)
+            middle_key = annotation['keys'][middle_idx]
+            new_bucket = {
+                'id': uuid.uuid4().hex,
+                'start': middle_key,
+                'created': time.time(),
             }
-            new_annotation = await self.get_annotation(context, key)
+            self.buckets.insert(bidx + 1, new_bucket)
+            new_annotation = await self.get_annotation(context, middle_key)
+            # rebalance now
+            new_annotation['keys'] = annotation['keys'][middle_idx:]
+            new_annotation['values'] = annotation['values'][middle_idx:]
+            new_bucket['len'] = len(new_annotation['keys'])
 
-            # split dictionaries up
-            for k in list(annotation.keys()):
-                first_chr = ord(str(k)[0])
-                if first_chr >= new_ann_start:
-                    new_annotation[k] = annotation[k]
-                    del annotation[k]
+            annotation['keys'] = annotation['keys'][:middle_idx]
+            annotation['values'] = annotation['values'][:middle_idx]
+            bucket['len'] = len(annotation['keys'])
 
-            annotation._p_register()
-            new_annotation_metadata['len'] = len(new_annotation)
-            annotation_metadata['len'] = len(new_annotation)
+            # get annotation for this key again
+            annotation = await self.get_annotation(context, key)
 
-            curr_key_first_chr = ord(str(key)[0])
-            if curr_key_first_chr >= new_ann_start:
-                annotation = new_annotation
-                annotation_metadata = new_annotation_metadata
-                annotation_idx = self._find_annotation_index(key)
-
-        annotation[key] = value
-        annotation_metadata[annotation_idx] = len(annotation)
+        if key in annotation['keys']:
+            # change existing value
+            idx = annotation['keys'].index(key)
+            annotation['values'][idx] = value
+        else:
+            insert_idx = bisect.bisect_left(annotation['keys'], key)
+            annotation['keys'].insert(insert_idx, key)
+            annotation['values'].insert(insert_idx, value)
+            _, bucket = self._find_bucket(key)
+            bucket['len'] = len(annotation['keys'])
         annotation._p_register()
 
     async def get(self, context, key):
         annotation = await self.get_annotation(context, key, create=False)
         if annotation is None:
             return None
-        return annotation.get(key)
+        try:
+            idx = annotation['keys'].index(key)
+        except ValueError:
+            return None
+        return annotation['values'][idx]
 
     async def remove(self, context, key):
         annotation = await self.get_annotation(context, key, create=False)
         if annotation is None:
             return
 
-        if key in annotation:
-            del annotation[key]
-            annotation._p_register()
-            annotation_idx = self._find_annotation_index(key)
-            self.annotations_metadata[annotation_idx]['len'] = len(annotation)
+        try:
+            idx = annotation['keys'].index(key)
+        except ValueError:
+            return None
+        del annotation['keys'][idx]
+        del annotation['values'][idx]
+        _, bucket = self._find_bucket(key)
+        bucket['len'] = len(annotation['keys'])
+        annotation._p_register()
+
+    def __len__(self):
+        total = 0
+        for bucket in self.buckets:
+            total += bucket.get('len', 0)
+        return total
 
 
 @implementer(IBucketDictField)
@@ -314,7 +331,7 @@ class BucketDictField(BucketListField):
     def __init__(self, *args, key_type=None, value_type=None,
                  bucket_len=1000, annotation_prefix='bucketdict-', **kwargs):
         self.key_type = key_type
-        super().__init__(*args, value_type=value_type, bucket_len=1000,
+        super().__init__(*args, value_type=value_type, bucket_len=bucket_len,
                          annotation_prefix=annotation_prefix, **kwargs)
 
 
@@ -323,6 +340,8 @@ class BucketDictField(BucketListField):
     provides=IPatchFieldOperation,
     name='assign')
 class PatchBucketDictSet(PatchBucketListAppend):
+    value_factory = BucketDictValue
+
     async def __call__(self, field_context, context, value):
         if 'key' not in value or 'value' not in value:
             raise ValueDeserializationError(self.field, value, 'Not valid patch value')
@@ -331,7 +350,7 @@ class PatchBucketDictSet(PatchBucketListAppend):
             self.field.key_type.validate(value['key'])
 
         existing = self.get_existing_value(field_context)
-        existing_item = await existing.get(value['key'])
+        existing_item = await existing.get(context, value['key'])
 
         new_value = self.get_value(value['value'], existing_item)
         if self.field.value_type:
@@ -360,7 +379,7 @@ class PatchBucketDictExtend(PatchBucketDictSet):
             if self.field.key_type:
                 self.field.key_type.validate(item['key'])
 
-            existing_item = await existing.get(item['key'])
+            existing_item = await existing.get(context, item['key'])
 
             new_value = self.get_value(item['value'], existing_item)
             if self.field.value_type:
@@ -401,7 +420,6 @@ def field_converter(field, value, context):
     return value
 
 
-@configure.value_serializer(BucketDictValue)
 @configure.value_serializer(BucketListValue)
 def value_converter(value):
     if value is None:
@@ -409,4 +427,12 @@ def value_converter(value):
     return {
         'len': len(value),
         'buckets': len(value.annotations_metadata)
+    }
+
+
+@configure.value_serializer(BucketDictValue)
+def value_dict_converter(value):
+    return {
+        'len': len(value),
+        'buckets': len(value.buckets)
     }

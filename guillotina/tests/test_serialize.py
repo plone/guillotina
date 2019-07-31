@@ -17,6 +17,8 @@ from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
 
+import uuid
+
 
 async def test_serialize_resource(dummy_request):
     content = create_content()
@@ -962,51 +964,73 @@ async def test_bucket_dict_field(dummy_request):
                 }
             }
         }, [])
-    import pdb; pdb.set_trace()
-    assert content.bucket_dict.annotations_metadata[0]['len'] == 1
+    assert content.bucket_dict.buckets[0]['len'] == 1
     assert await content.bucket_dict.get(content, 'foo') == 'bar'
-    assert await content.bucket_list.get(content, 'bar') is None
+    assert await content.bucket_dict.get(content, 'bar') is None
 
+    inserted = {'foo': 'bar'}
     for idx in range(100):
+        key = uuid.uuid4().hex
+        inserted[key] = str(idx)
         await deserializer.set_schema(
             ITestSchema, content, {
                 'bucket_dict': {
-                    'op': 'append',
+                    'op': 'assign',
                     'value': {
-                        'key': str(idx),
-                        'value': 'foobar'
+                        'key': key,
+                        'value': str(idx)
                     }
                 }
             }, [])
 
-    assert len(content.bucket_dict.annotations_metadata) == 11
-    assert content.bucket_dict.annotations_metadata[0]['len'] == 10
-    assert content.bucket_dict.annotations_metadata[5]['len'] == 10
-    assert content.bucket_dict.annotations_metadata[10]['len'] == 1
+    # number of buckets and sizes of each is random depending on keys
+    assert len(content.bucket_dict) == 101
+    removed = list(inserted.keys())[-1]
+    del inserted[removed]
+    await content.bucket_dict.remove(content, removed)
+    assert len(content.bucket_dict) == 100
 
-    assert len(content.bucket_list) == 101
-    await content.bucket_dict.remove(content, '1')
-    assert len(content.bucket_list) == 100
-
+    one = list(inserted.keys())[-1]
+    two = list(inserted.keys())[-2]
     await deserializer.set_schema(
         ITestSchema, content, {
-            'bucket_list': {
+            'bucket_dict': {
                 'op': 'update',
                 'value': [{
-                    'key': '1',
+                    'key': one,
                     'value': '1'
                 }, {
-                    'key': '2',
+                    'key': two,
                     'value': '2'
                 }]
             }
         }, [])
 
-    assert len(content.bucket_list) == 101
+    inserted[one] = '1'
+    inserted[two] = '2'
+    assert len(content.bucket_dict) == 100
+    assert await content.bucket_dict.get(content, one) == '1'
+    assert await content.bucket_dict.get(content, two) == '2'
 
-    assert json_compatible(content.bucket_list) == {
-        'len': 100,
-        'buckets': 11
-    }
+    assert json_compatible(content.bucket_dict)['len'] == 100
 
-    assert 'bucketlist-bucket_list0' in content.__gannotations__
+    assert len(content.bucket_dict.buckets) == len([
+        name for name in content.__gannotations__.keys()
+        if name.startswith('bucketdict-')
+    ])
+
+    # test everything completely sorted
+    all_keys = []
+    all_values = []
+    for bucket in content.bucket_dict.buckets:
+        annotation = await content.bucket_dict.get_annotation(
+            content, anno_id=bucket['id'])
+        assert annotation['keys'] == sorted(annotation['keys'])
+        all_keys.extend(annotation['keys'])
+        all_values.extend(annotation['values'])
+    assert all_keys == sorted(all_keys)
+    assert all_keys == sorted(inserted.keys())
+
+    # check all values as well
+    for idx, key in enumerate(all_keys):
+        assert inserted[key] == all_values[idx]
