@@ -11,6 +11,7 @@ from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IContentBehavior
 from guillotina.interfaces import IFieldValueRenderer
 from guillotina.interfaces import IRequest
+from guillotina.response import HTTPGone
 from guillotina.response import HTTPPreconditionFailed
 from zope.interface import implementer
 from zope.interface import Interface
@@ -412,7 +413,7 @@ class PatchBucketDictDel(PatchBucketDictSet):
 @configure.value_deserializer(IBucketDictField)
 def field_converter(field, value, context):
     if not isinstance(value, dict):
-        raise ValueDeserializationError(field, value, 'Not an object')
+        raise ValueDeserializationError(field, value, 'Not valid patch operation definition')
     operation_name = value.get('op', 'undefined')
     operation = query_adapter(field, IPatchFieldOperation, name=operation_name)
     if operation is None:
@@ -420,7 +421,7 @@ def field_converter(field, value, context):
             field, value, f'"{operation_name}" not a valid operation')
     if 'value' not in value:
         raise ValueDeserializationError(
-            field, value, f'Mising value')
+            field, value, f'Missing value')
     return value
 
 
@@ -456,7 +457,7 @@ class BucketDictFieldRenderer:
         '''
         Iterate values bucket by bucket
         '''
-        val = await self.field.get(self.field.context)
+        val = self.field.get(self.field.context)
         if val is None:
             return {
                 "values": {},
@@ -475,7 +476,7 @@ class BucketDictFieldRenderer:
                 })
 
         try:
-            bucket = self.buckets[bidx]
+            bucket = val.buckets[bidx]
         except IndexError:
             raise HTTPPreconditionFailed(content={
                 'reason': 'Invalid bucket, not found',
@@ -484,7 +485,7 @@ class BucketDictFieldRenderer:
 
         annotation = await val.get_annotation(self.context, anno_id=bucket['id'], create=False)
         if annotation is None:
-            raise HTTPPreconditionFailed(content={
+            raise HTTPGone(content={
                 'reason': 'No data found for bucket',
                 'bidx': bidx
             })

@@ -1,4 +1,6 @@
 from guillotina import configure
+from guillotina.directives import merged_tagged_value_dict
+from guillotina.directives import read_permission
 from guillotina import content
 from guillotina import error_reasons
 from guillotina import security
@@ -805,34 +807,39 @@ async def resolve_uid(context, request):
 
 
 @configure.service(
-    context=IContainer, method='GET',
+    context=IResource, method='GET',
     permission='guillotina.ViewContent', name='@fieldvalue/{dotted_name}',
     summary='Get field value')
 async def get_field_value(context, request):
-    key = request.matchdict['dotted_name']
+    field_name = request.matchdict['dotted_name']
 
-    if '.' in key:
+    if '.' in field_name:
         # behavior field lookup
-        iface_dotted = '.'.join(key.split('.')[:-1])
-        field_name = key.split('.')[-1]
+        iface_dotted = '.'.join(field_name.split('.')[:-1])
+        field_name = field_name.split('.')[-1]
 
         try:
-            iface = resolve_dotted_name(iface_dotted)
+            schema = resolve_dotted_name(iface_dotted)
         except ModuleNotFoundError:
             return HTTPNotFound(content={
-                'reason': f'Could resolve: {iface}'
+                'reason': f'Could resolve: {iface_dotted}'
             })
         try:
-            field = iface[field_name]
+            field = schema[field_name]
         except KeyError:
             return HTTPNotFound(content={
                 'reason': f'No field: {field_name}'
             })
 
-        behavior = await get_behavior(context, iface)
+        try:
+            behavior = await get_behavior(context, schema)
+        except AttributeError:
+            return HTTPNotFound(content={
+                'reason': f'Could not load behavior: {iface_dotted}'
+            })
         if behavior is None:
             return HTTPNotFound(content={
-                'reason': f'Not valid behavior: {iface}'
+                'reason': f'Not valid behavior: {iface_dotted}'
             })
         field = field.bind(behavior)
         field_context = behavior
@@ -841,20 +848,27 @@ async def get_field_value(context, request):
         factory = get_cached_factory(context.type_name)
         schema = factory.schema
         try:
-            field = schema[key]
+            field = schema[field_name]
         except KeyError:
             return HTTPNotFound(content={
-                'reason': f'No field: {key}'
+                'reason': f'No field: {field_name}'
             })
         field = field.bind(context)
         field_context = context
+
+    # check permission
+    read_permissions = merged_tagged_value_dict(schema, read_permission.key)
+    serializer = get_multi_adapter((context, request), IResourceSerializeToJson)
+
+    if not serializer.check_permission(read_permissions.get(field_name)):
+        return HTTPUnauthorized(content={
+            'reason': 'You are not authorized to render this field'
+        })
 
     field_renderer = query_multi_adapter(
         (context, request, field), IFieldValueRenderer
     )
     if field_renderer is None:
-        serializer = get_multi_adapter(
-            (context, request), IResourceSerializeToJson)
         return await serializer.serialize_field(field_context, field)
     else:
         return await field_renderer()
