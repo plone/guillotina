@@ -265,7 +265,12 @@ class IAnnotations(Interface):
     '''
     '''
 
-    async def async_get(name):
+    def get(name, default=None):
+        '''
+        get already loaded annotation
+        '''
+
+    async def async_get(name, default=None):
         '''
         Get annotation
         '''
@@ -299,3 +304,19 @@ class IIDGenerator(Interface):
     '''
     Generates an id on a POST for the new object
     '''
+
+
+class IFieldValueRenderer(Interface):
+    '''
+    Adapter to customize how to render results from `@fieldvalue` endpoint
+    '''
+
+    def __init__(context, request, field):
+        '''
+        adapts context/request and field because query params might affect how we render
+        '''
+
+    async def __call__():
+        '''
+        render value
+        '''

@@ -56,6 +56,9 @@
 
   .. autoclass:: BucketListField
      :members:
+   
+  .. autoclass:: BucketDictField
+     :members:
 
   .. autoclass:: CloudFileField
      :members:

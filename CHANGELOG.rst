@@ -7,6 +7,267 @@ CHANGELOG
 - Fix potential bug when working with multiple databases/transaction managers
   [vangheem]
 
+- New `guillotina.fields.BucketDictField`
+  [vangheem]
+
+- New `@fieldvalue/{field name or dotted behavior + field name}` endpoint
+  [vangheem]
+
+
+4.8.19 (2019-07-28)
+-------------------
+
+- Only register object for writing if base object changed. Otherwise, changes to behavior data
+  was also causing writes to the object it was associated with
+  [vangheem]
+
+
+4.8.18 (2019-07-26)
+-------------------
+
+- Add `x-virtualhost-path` header support for url generation
+  [vangheem]
+
+
+4.8.17 (2019-07-25)
+-------------------
+
+- Make Tuple type work with patch field
+  [vangheem]
+
+- Make IDublinCore.tags a patch field
+  [vangheem]
+
+- Add `appendunique` and `extendunique` to patch field operations
+  [vangheem]
+
+
+4.8.16 (2019-07-24)
+-------------------
+
+- Fix exhausted retries conflict error response
+  [vangheem]
+
+
+4.8.15 (2019-07-23)
+-------------------
+
+- Make sure field name of patch field is set before using
+  [vangheem]
+
+
+4.8.14 (2019-07-23)
+-------------------
+
+- Fix: just skip indexing attributes from schemas that object does not
+  adapt to [lferran]
+
+- Improve request memory usage
+  [vangheem]
+
+
+4.8.13 (2019-07-15)
+-------------------
+
+- Allow modifying app settings from pytest marks [lferran]
+
+- Merge CORS headers
+  [qiwn]
+
+- Fix `managed_transaction()` crashes when `request` and `tm` are not provided
+  [masipcat]
+
+
+4.8.12 (2019-07-08)
+-------------------
+
+- Handle CancelledError on application cleanup. This seems to happen with uvloop
+  [vangheem]
+
+
+4.8.11 (2019-06-28)
+-------------------
+
+- Cache JSONField schema validator object
+  [vangheem]
+
+- JSONField works with dict instead of requiring str(which is then converted to dict anyways)
+  [vangheem]
+
+- A few more antipattern fixes [lferran]
+
+4.8.10 (2019-06-26)
+-------------------
+
+- Fix indexing data potentially missing updated content when `fields` for accessor
+  is not specified
+  [vangheem]
+
+- Fix events antipattern [lferran]
+
+4.8.9 (2019-06-17)
+------------------
+
+- bump
+
+
+4.8.8 (2019-06-17)
+------------------
+
+- Emit events for registry configuration changes
+  [vangheem]
+
+
+4.8.7 (2019-06-14)
+------------------
+
+- Add field mappings for test field [lferran]
+
+
+4.8.6 (2019-06-10)
+------------------
+
+- Fix `@move` enable to allow being able to use it for renaming
+  [vangheem]
+
+
+4.8.5 (2019-06-07)
+------------------
+
+- Be compatible with aiohttp > 3 < 4
+  [vangheem]
+
+- Make sure utility you are providing also provides the interface you
+  are creating it for in `load_utilities`. Before, it would not automatically
+  apply the interface for you.
+  [vangheem]
+
+
+4.8.4 (2019-06-06)
+------------------
+
+- Fix aiohttp startup bug
+  [vangheem]
+
+- propagate unique violation errors on deletion as they should not happen
+  anymore unless db hasn't been migrated
+  [vangheem]
+
+
+4.8.3 (2019-06-06)
+------------------
+
+- Upgrade to aiohttp 3.5.0
+  [vangheem]
+
+
+4.8.2 (2019-05-28)
+------------------
+
+- Fix bug where non-async object subscribers were getting called twice
+  [vangheem]
+
+4.8.2 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
+4.8.1 (2019-05-25)
+------------------
+
+- Improve startup speed by not using glogger for startup code
+  [vangheem]
+
+- Support zope.Interface inheritance in schema.Object
+  [masipcat]
+
+
+4.8.0 (2019-05-13)
+------------------
+
+- `get_object_by_oid` now raises KeyError since it provided unsafe behavior
+  when used with tombstoned objects
+  [vangheem]
+
+
+4.7.8 (2019-05-06)
+------------------
+
+- Fix potential memory leak in security lookup cache
+  [vangheem]
+
+- Fix security policy cache lookup to distinguish between types of cached
+  decisions for parent vs top level object
+  [vangheem]
+
+
+4.7.7 (2019-05-01)
+------------------
+
+- Fix json schema definitions and provide `get_schema_validator` utility
+  [vangheem]
+
+- Fix `managed_transaction` context manager to correctly adopt parent transaction
+  along with new transaction objects
+  [vangheem]
+
+
+4.7.6 (2019-04-28)
+------------------
+
+- Provide `connection_settings` on the request object with `tests.utils.get_container`
+  [vangheem]
+
+
+4.7.5 (2019-04-27)
+------------------
+
+- Fix command cleanup procedure to correctly cleanup asyncio tasks for commands
+  [vangheem]
+
+
+4.7.4 (2019-04-26)
+------------------
+
+- use execute utility for index future
+
+
+4.7.3 (2019-04-26)
+------------------
+
+- Fix missing indexer
+  [vangheem]
+
+
+4.7.2 (2019-04-26)
+------------------
+
+- Provide `request_indexer` setting to be able to override how we handle
+  indexing data
+  [vangheem]
+
+- Provide `connection_settings` on the request object with `tests.utils.get_container`
+  [vangheem]
+
+
+4.7.1 (2019-04-26)
+------------------
+
+- Update postgresql constraint to also not allow having parent id same as zoid
+  [vangheem]
+
+- Do not allow moving content into itself
+  [vangheem]
+
+
+4.7.0 (2019-04-16)
+------------------
+
+- Remove `IBeforeFieldModified` event and replace with `IBeforeObjectModifiedEvent`
+>>>>>>> d2955243... bucket dict field implementation (#609)
+  [vangheem]
+
 
 5.0.0a14 (2019-07-30)
 ---------------------
