@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-4.9.0 (unreleased)
-------------------
+4.8.20 (2019-08-01)
+-------------------
 
 - New `guillotina.fields.BucketDictField`
   [vangheem]
