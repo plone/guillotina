@@ -318,6 +318,7 @@ from guillotina import schema
 
 class IMySchema(Interface):
     values = BucketDictField(
+        key_type=schema.Text(),
         value_type=schema.Text(),
         bucket_len=5000
     )
