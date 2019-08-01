@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.9.1 (unreleased)
+4.9.1 (2019-08-01)
 ------------------
 
 - Fix bug when working with multiple databases/transaction managers with same request
