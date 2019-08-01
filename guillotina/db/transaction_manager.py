@@ -67,6 +67,7 @@ class TransactionManager:
         # is safe
         txn: typing.Optional[ITransaction] = task_vars.txn.get()
         if (txn is not None and txn.manager == self and
+                txn.storage == self.storage and
                 txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
             txn.initialize(read_only)
