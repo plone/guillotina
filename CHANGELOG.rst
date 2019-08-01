@@ -4,7 +4,8 @@ CHANGELOG
 4.9.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix bug when working with multiple databases/transaction managers with same request
+  [vangheem]
 
 
 4.9.0 (2019-08-01)
