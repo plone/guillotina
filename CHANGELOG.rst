@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a15 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix potential bug when working with multiple databases/transaction managers
+  [vangheem]
 
 
 5.0.0a14 (2019-07-30)
