@@ -68,6 +68,7 @@ class TransactionManager:
         # already has txn registered, as long as connection is closed, it
         # is safe
         if (getattr(request, '_txn', None) is not None and
+                request._txn.storage == self._storage and
                 request._txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
             # re-use txn if possible
             txn = request._txn

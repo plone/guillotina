@@ -18,6 +18,7 @@ class MigrateCommand(Command):
         migrations = sorted(
             get_utilities_for(IMigration))
         self.request._tm = db.get_transaction_manager()
+        self.request._txn = None
         async with managed_transaction(self.request, write=True) as txn:
             # make sure to get fresh copy
             txn._manager._hard_cache.clear()
