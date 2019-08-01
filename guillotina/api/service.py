@@ -42,42 +42,43 @@ class DictFieldProxy():
 
 
 class Service(View):
-    __validator__ = None
+    __validator__ = __schema__ = None
     _sentinal = object()
 
-    def _get_validator(self):
-        if self.__validator__ is None and self.__validator__ != self._sentinal:
-            self.__validator__ = self._sentinal
-            if self.__config__['requestBody']:
-                requestBody = self.__config__['requestBody']
+    @classmethod
+    def _get_validator(cls):
+        if cls.__validator__ is None and cls.__validator__ != cls._sentinal:
+            cls.__validator__ = cls._sentinal
+            if cls.__config__['requestBody']:
+                requestBody = cls.__config__['requestBody']
                 if '$ref' in requestBody['content']['application/json']['schema']:
                     try:
                         ref = requestBody['content']['application/json']['schema']['$ref']
                         schema_name = ref.split('/')[-1]
-                        self.__schema__ = app_settings['json_schema_definitions'][schema_name]
-                        self.__validator__ = get_schema_validator(schema_name)
+                        cls.__schema__ = app_settings['json_schema_definitions'][schema_name]
+                        cls.__validator__ = get_schema_validator(schema_name)
                     except KeyError:
                         logger.warning('Invalid jsonschema', exc_info=True)
                 elif requestBody['content']['application/json']['schema'] is not None:
                     try:
-                        self.__schema__ = requestBody['content']['application/json']['schema']
-                        jsonschema_validator = jsonschema.validators.validator_for(self.__schema__)
-                        self.__validator__ = jsonschema_validator(self.__schema__)
+                        cls.__schema__ = requestBody['content']['application/json']['schema']
+                        jsonschema_validator = jsonschema.validators.validator_for(cls.__schema__)
+                        cls.__validator__ = jsonschema_validator(cls.__schema__)
                     except jsonschema.exceptions.ValidationError:
                         logger.warning('Could not validate schema', exc_info=True)
                 else:
                     logger.warning("No schema found in service definition")
             else:
                 pass  # can be used for query, path or header parameters
-        return [self.__schema__, self.__validator__]
+        return cls.__schema__, cls.__validator__
 
     async def validate(self):
 
-        [schema, validator] = self._get_validator()
+        schema, validator = self._get_validator()
         if validator:
             try:
                 data = await self.request.json()
-                self.__validator__.validate(data)
+                validator.validate(data)
             except jsonschema.exceptions.ValidationError as e:
                 raise HTTPPreconditionFailed(content={
                     'reason': 'json schema validation error',
