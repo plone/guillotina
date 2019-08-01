@@ -17,6 +17,7 @@ from .content import IApplication  # noqa
 from .content import IAsyncContainer  # noqa
 from .content import IContainer  # noqa
 from .content import IDatabase  # noqa
+from .content import IFieldValueRenderer  # noqa
 from .content import IFolder  # noqa
 from .content import IGetOwner  # noqa
 from .content import IGroupFolder  # noqa

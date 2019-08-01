@@ -1,5 +1,6 @@
 # this is for testing.py, do not import into other modules
 from guillotina import configure
+from guillotina import fields
 from guillotina import schema
 from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors.instance import AnnotationBehavior
@@ -8,6 +9,7 @@ from guillotina.content import Item
 from guillotina.content import Resource
 from guillotina.directives import index_field
 from guillotina.directives import metadata
+from guillotina.directives import read_permission
 from guillotina.directives import write_permission
 from guillotina.exceptions import NoIndexField
 from guillotina.fields import CloudFileField
@@ -120,6 +122,16 @@ class IMarkerBehavior(Interface):
 
 class ITestBehavior(Interface):
     foobar = schema.TextLine()
+
+    bucket_dict = fields.BucketDictField(
+        bucket_len=10, required=False,
+        default=None,
+        key_type=schema.Text(),
+        value_type=schema.Text()
+    )
+
+    read_permission(no_read_field='example.MyPermission')
+    no_read_field = schema.TextLine(required=False, default='')
 
 
 @configure.behavior(

@@ -1,10 +1,14 @@
 CHANGELOG
 =========
 
-4.8.20 (unreleased)
--------------------
+4.9.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- New `guillotina.fields.BucketDictField`
+  [vangheem]
+
+- New `@fieldvalue/{field name or dotted behavior + field name}` endpoint
+  [vangheem]
 
 
 4.8.19 (2019-07-28)
