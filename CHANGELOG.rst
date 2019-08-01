@@ -1,10 +1,10 @@
 CHANGELOG
 =========
 
-4.8.21 (unreleased)
--------------------
+4.9.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Fix release number
 
 
 4.8.20 (2019-08-01)
