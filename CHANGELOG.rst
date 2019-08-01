@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.9.0 (unreleased)
+4.9.0 (2019-08-01)
 ------------------
 
 - Fix release number
