@@ -27,3 +27,15 @@ Well, since it's minimal, we'll do it this way for now...
 .auth-container .wrapper {
   margin: 10px 0;
 }
+
+.topbar {
+  display: none;
+}
+
+.info {
+  display: none;
+}
+
+.scheme-container {
+  display: none;
+}
