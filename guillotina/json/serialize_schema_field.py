@@ -115,6 +115,8 @@ class DefaultSchemaFieldSerializer(object):
             if IJSONField.providedBy(field):
                 result.update(field.json_schema)
             if IDict.providedBy(field):
+                if 'properties' not in result:
+                    result['properties'] = {}
                 if field.value_type:
                     field_serializer = get_multi_adapter(
                         (field.value_type, self.schema, self.request),
