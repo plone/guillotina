@@ -13,6 +13,8 @@ from guillotina.content import create_content_in_container
 from guillotina.content import get_all_behavior_interfaces
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
+from guillotina.directives import merged_tagged_value_dict
+from guillotina.directives import read_permission
 from guillotina.event import notify
 from guillotina.events import BeforeObjectModifiedEvent
 from guillotina.events import BeforeObjectRemovedEvent
@@ -28,6 +30,7 @@ from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IFieldValueRenderer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
 from guillotina.interfaces import IIDGenerator
@@ -52,10 +55,13 @@ from guillotina.response import Response
 from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
+from guillotina.utils import get_behavior
 from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_object_url
+from guillotina.utils import get_security_policy
 from guillotina.utils import iter_parents
-from guillotina.utils import valid_id, get_security_policy
+from guillotina.utils import resolve_dotted_name
+from guillotina.utils import valid_id
 
 
 def get_content_json_schema_responses(content):
@@ -796,3 +802,71 @@ async def resolve_uid(context, request):
         return HTTPNotFound(content={
             'reason': f'Could not find uid: {uid}'
         })
+
+
+@configure.service(
+    context=IResource, method='GET',
+    permission='guillotina.ViewContent', name='@fieldvalue/{dotted_name}',
+    summary='Get field value')
+async def get_field_value(context, request):
+    field_name = request.matchdict['dotted_name']
+
+    if '.' in field_name:
+        # behavior field lookup
+        iface_dotted = '.'.join(field_name.split('.')[:-1])
+        field_name = field_name.split('.')[-1]
+
+        try:
+            schema = resolve_dotted_name(iface_dotted)
+        except ModuleNotFoundError:
+            return HTTPNotFound(content={
+                'reason': f'Could resolve: {iface_dotted}'
+            })
+        try:
+            field = schema[field_name]
+        except KeyError:
+            return HTTPNotFound(content={
+                'reason': f'No field: {field_name}'
+            })
+
+        try:
+            behavior = await get_behavior(context, schema)
+        except AttributeError:
+            return HTTPNotFound(content={
+                'reason': f'Could not load behavior: {iface_dotted}'
+            })
+        if behavior is None:
+            return HTTPNotFound(content={
+                'reason': f'Not valid behavior: {iface_dotted}'
+            })
+        field = field.bind(behavior)
+        field_context = behavior
+    else:
+        # main object field
+        factory = get_cached_factory(context.type_name)
+        schema = factory.schema
+        try:
+            field = schema[field_name]
+        except KeyError:
+            return HTTPNotFound(content={
+                'reason': f'No field: {field_name}'
+            })
+        field = field.bind(context)
+        field_context = context
+
+    # check permission
+    read_permissions = merged_tagged_value_dict(schema, read_permission.key)
+    serializer = get_multi_adapter((context, request), IResourceSerializeToJson)
+
+    if not serializer.check_permission(read_permissions.get(field_name)):
+        return HTTPUnauthorized(content={
+            'reason': 'You are not authorized to render this field'
+        })
+
+    field_renderer = query_multi_adapter(
+        (context, request, field), IFieldValueRenderer
+    )
+    if field_renderer is None:
+        return await serializer.serialize_field(field_context, field)
+    else:
+        return await field_renderer()

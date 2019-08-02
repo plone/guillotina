@@ -1,16 +1,20 @@
-import json
 from datetime import datetime
-
-import pytest
-from zope.interface import Interface
-
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
-from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.behaviors.attachment import IAttachment
+from guillotina.behaviors.dublincore import IDublinCore
+from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IFile
+from guillotina.interfaces import IResource
+from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
 from guillotina.transactions import transaction
+from guillotina.utils import get_behavior
+from zope.interface import Interface
+
+import json
+import pytest
 
 
 class ITestingRegistry(Interface):  # pylint: disable=E0239
@@ -1044,3 +1048,201 @@ async def test_tags_patch_field(container_requester):
         )
         resp, status = await requester('GET', '/db/guillotina/item1')
         assert resp[IDublinCore.__identifier__]['tags'] == ['one', 'two']
+
+
+async def test_field_values_instance(container_requester):
+    async with container_requester as requester:
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "title": "Item1",
+                "id": "item1"
+            })
+        )
+        resp, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/title')
+        assert status == 200
+        assert resp == "Item1"
+
+
+async def test_field_values_behavior(container_requester):
+    async with container_requester as requester:
+        await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item1",
+                IDublinCore.__identifier__: {
+                    "tags": ["one"]
+                }
+            })
+        )
+        resp, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.tags'.format(
+                IDublinCore.__identifier__
+            ))
+        assert status == 200
+        assert resp == ["one"]
+
+
+async def test_field_values_with_custom_renderer(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item1",
+                "@behaviors": [ITestBehavior.__identifier__],
+                ITestBehavior.__identifier__: {
+                    "foobar": "blah",
+                    "bucket_dict": {
+                        'op': 'update',
+                        'value': [
+                            {'key': str(idx), 'value': str(idx)}
+                            for idx in range(50)
+                        ]
+                    }
+                }
+            })
+        )
+        assert status == 201
+        resp, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.bucket_dict'.format(
+                ITestBehavior.__identifier__
+            ))
+        assert status == 200
+        assert resp['values']
+        assert resp['total'] == 50
+        assert resp['cursor'] == 1
+
+        resp, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.bucket_dict?cursor={}'.format(
+                ITestBehavior.__identifier__,
+                resp['cursor']
+            ))
+        assert status == 200
+        assert resp['values']
+        assert resp['cursor'] == 2
+
+
+async def test_field_values_404(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item1"
+            })
+        )
+        _, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/title')
+        assert status == 200
+        _, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/foobar')
+        assert status == 404
+        _, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/foo.bar.wrong')
+        assert status == 404
+        _, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/{}.foobar'.format(
+            IDublinCore.__identifier__
+        ))
+        assert status == 404
+        _, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/{}.size'.format(
+            IFile.__identifier__
+        ))
+        assert status == 404
+        _, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/{}.title'.format(
+            IResource.__identifier__
+        ))
+        assert status == 404
+
+
+async def test_field_values_unauthorized(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item1",
+                "@behaviors": [ITestBehavior.__identifier__],
+                ITestBehavior.__identifier__: {
+                    "foobar": "blah",
+                    "no_read_field": "foobar"
+                }
+            })
+        )
+        assert status == 201
+        _, status = await requester('GET', '/db/guillotina/item1/@fieldvalue/{}.no_read_field'.format(
+            ITestBehavior.__identifier__
+        ))
+        assert status == 401
+
+
+async def test_field_values_dict_bucket_preconditions(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            'POST', '/db/guillotina/',
+            data=json.dumps({
+                "@type": "Item",
+                "id": "item1",
+                "@behaviors": [ITestBehavior.__identifier__]
+            })
+        )
+        assert status == 201
+        resp, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.bucket_dict'.format(
+                ITestBehavior.__identifier__
+            ))
+        assert status == 200
+        assert len(resp['values']) == 0
+        assert resp['cursor'] is None
+        assert resp['total'] == 0
+
+        await requester('PATCH', '/db/guillotina/item1', data=json.dumps({
+            "@behaviors": [ITestBehavior.__identifier__],
+            ITestBehavior.__identifier__: {
+                "foobar": "blah",
+                "bucket_dict": {
+                    'op': 'update',
+                    'value': [
+                        {'key': str(idx), 'value': str(idx)}
+                        for idx in range(20)
+                    ]
+                }
+            }
+        }))
+        resp, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.bucket_dict'.format(
+                ITestBehavior.__identifier__
+            ))
+        assert status == 200
+        assert resp['values']
+        assert resp['total'] == 20
+        assert resp['cursor'] == 1
+
+        _, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.bucket_dict?cursor=foobar'.format(
+                ITestBehavior.__identifier__
+            ))
+        assert status == 412
+
+        _, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.bucket_dict?cursor=500'.format(
+                ITestBehavior.__identifier__
+            ))
+        assert status == 412
+
+        # delete annotation for bucket that should be there, we should get 410
+        request = utils.get_mocked_request(db=requester.db)
+        root = await utils.get_root(request)
+        async with transaction(db=requester.db):
+            container = await root.async_get('guillotina')
+            obj = await container.async_get('item1')
+            beh = await get_behavior(obj, ITestBehavior)
+            val = beh.bucket_dict
+            ann_name = val.get_annotation_name(val.buckets[0]['id'])
+            annotations_container = IAnnotations(obj)
+            await annotations_container.async_del(ann_name)
+
+        _, status = await requester(
+            'GET', '/db/guillotina/item1/@fieldvalue/{}.bucket_dict'.format(
+                ITestBehavior.__identifier__
+            ))
+        assert status == 410

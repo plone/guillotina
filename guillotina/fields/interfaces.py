@@ -14,6 +14,10 @@ class IBucketListField(IField):
     pass
 
 
+class IBucketDictField(IField):
+    pass
+
+
 class IPatchFieldOperation(Interface):
 
     def __init__(field):

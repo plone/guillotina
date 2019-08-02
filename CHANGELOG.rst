@@ -10,6 +10,12 @@ CHANGELOG
 - Fix potential bug when working with multiple databases/transaction managers
   [vangheem]
 
+- New `guillotina.fields.BucketDictField`
+  [vangheem]
+
+- New `@fieldvalue/{field name or dotted behavior + field name}` endpoint
+  [vangheem]
+
 
 5.0.0a14 (2019-07-30)
 ---------------------
