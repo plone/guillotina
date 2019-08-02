@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a15 (unreleased)
+5.0.0a15 (2019-08-02)
 ---------------------
 
 - Dict schema serialization needs properties to be valid JSON Schema
