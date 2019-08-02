@@ -934,7 +934,7 @@ async def test_delete_by_value_field(dummy_request):
 async def test_bucket_dict_field(dummy_request):
     login()
     content = create_content()
-    content._p_jar = mocks.MockTransaction()
+    content.__txn__ = mocks.MockTransaction()
     deserializer = get_multi_adapter(
         (content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
