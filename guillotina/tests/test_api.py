@@ -9,7 +9,6 @@ from guillotina.interfaces import IFile
 from guillotina.interfaces import IResource
 from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
-from guillotina.transactions import managed_transaction
 from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
 from zope.interface import Interface
@@ -1231,9 +1230,9 @@ async def test_field_values_dict_bucket_preconditions(container_requester):
         assert status == 412
 
         # delete annotation for bucket that should be there, we should get 410
-        request = utils.get_mocked_request(requester.db)
+        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(request)
-        async with managed_transaction(request=request, write=True):
+        async with transaction(db=requester.db):
             container = await root.async_get('guillotina')
             obj = await container.async_get('item1')
             beh = await get_behavior(obj, ITestBehavior)
