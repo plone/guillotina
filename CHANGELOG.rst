@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a15 (unreleased)
 ---------------------
 
+- Dict schema serialization needs properties to be valid JSON Schema
+  [bloodbare]
+
 - Fix potential bug when working with multiple databases/transaction managers
   [vangheem]
 
