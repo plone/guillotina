@@ -74,7 +74,7 @@ class Service(View):
 
     async def validate(self):
 
-        schema, validator = self._get_validator()
+        schema, validator = self.__class__._get_validator()
         if validator:
             try:
                 data = await self.request.json()
