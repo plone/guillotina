@@ -829,6 +829,14 @@ async def invalidate_cache(context, request):
     method='GET', name="@resolveuid/{uid}", context=IContainer,
     permission='guillotina.AccessContent',
     summary='Get content by UID',
+    parameters=[{
+        "in": "path",
+        "name": "uid",
+        "required": "true",
+        "schema": {
+            "type":"string"
+        }
+    }],
     responses={
         "200": {
             "description": "Successful"

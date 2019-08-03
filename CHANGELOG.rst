@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Swagger Fixes
+
 - Nothing changed yet.
 
 - json schema validation

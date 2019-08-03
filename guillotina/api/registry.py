@@ -28,6 +28,14 @@ _marker = object()
     context=IContainer, method='GET',
     permission='guillotina.ReadConfiguration', name='@registry/{key}',
     summary='Read container registry settings',
+    parameters=[{
+        "in": "path",
+        "name": "key",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }],
     responses={
         "200": {
             "description": "Successfully registered interface",
@@ -177,6 +185,14 @@ class Register(Service):
     permission='guillotina.WriteConfiguration', name='@registry/{dotted_name}',
     summary='Update registry setting',
     validate=True,
+    parameters=[{
+        "in": "path",
+        "name": "dotter_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }],
     requestBody={
         'required': True,
         'content': {
