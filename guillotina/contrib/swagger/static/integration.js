@@ -1,10 +1,9 @@
 /* global
-  SwaggerUi,
+  SwaggerUibundle,
   localStorage,
   XMLHttpRequest,
   btoa,
-  hljs,
-  SwaggerClient
+  hljs
 */
 /*
 No way, pure js(minus swagger ui), how is this possible?
@@ -136,7 +135,6 @@ var Authenticator = function(options){
   };
 
   that.isLoggedIn = function(){
-    console.log("call")
     return that.authorization || (that.username && that.password);
   };
 
@@ -212,11 +210,8 @@ var Application = function(settings){
           },
           configs: {
             preFetch: function(req) {
-              // if (authToken) {
-                console.log()
-                req.headers["Authorization"] = "Basic " + btoa(localStorage.getItem("_swagger_username")+":"+localStorage.getItem("_swagger_password"));
-              // }
-                    return req;
+                req.headers["Authorization"] = that.authenticator.getAuthToken();
+                return req;
             }
           },
           deepLinking: true,
@@ -230,28 +225,7 @@ var Application = function(settings){
           layout: "StandaloneLayout",
       });
 
-      window.ui = that.ui;
-      
-      
-      var originalAuthorize = ui.authActions.authorize;
-      console.log(!!that.authenticator.isLoggedIn())
-      function auth(){
-        ui.authActions.authorize = function(authorization) {
-          authToken = "Basic " + btoa("root"+":"+"root");
-           originalAuthorize(authorization);
-           
-          // }
-          // if(authorization.bearerAuth){
-          //   authToken = "Bearer " + authorization.bearerAuth.value
-          //   originalAuthorize(authorization);
-          // }
-        }
-      }
-      
-      if(that.authenticator.isLoggedIn()){
-          auth()
-        }
-        
+      window.ui = that.ui;  
     });
   };
 
