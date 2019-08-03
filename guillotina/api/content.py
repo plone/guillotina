@@ -834,7 +834,7 @@ async def invalidate_cache(context, request):
         "name": "uid",
         "required": "true",
         "schema": {
-            "type":"string"
+            "type": "string"
         }
     }],
     responses={
