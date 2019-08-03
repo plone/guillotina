@@ -100,11 +100,17 @@ async def default_head(context, request):
     parameters=[{
         "name": "include",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }, {
         "name": "omit",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }])
 class DefaultGET(Service):
     @profilable
@@ -128,13 +134,16 @@ class DefaultGET(Service):
 @configure.service(
     context=IResource, method='POST', permission='guillotina.AddContent',
     summary='Add new resouce inside this container resource',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/components/schemas/AddableResource"
+    requestBody={
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/AddableResource"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Resource data",
@@ -460,7 +469,9 @@ class SharingPUT(SharingPOST):
         "name": "permission",
         "in": "query",
         "required": True,
-        "type": "string"
+        "schema": {
+            "type": "string"
+        }
     }],
     responses={
         "200": {
@@ -699,21 +710,33 @@ async def ids(context, request):
     parameters=[{
         "name": "include",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }, {
         "name": "omit",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }, {
         "name": "page_size",
         "in": "query",
-        "type": "number",
-        "default": 20
+        "default": 20,
+        "required": "true",
+        "schema": {
+            "type": "number"
+        }
     }, {
         "name": "page",
         "in": "query",
-        "type": "number",
-        "default": 1
+        "default": 1,
+        "required": "true",
+        "schema": {
+            "type": "number"
+        }
     }],
     responses={
         "200": {

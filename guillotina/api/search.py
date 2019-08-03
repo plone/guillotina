@@ -25,7 +25,6 @@ async def _search(context, request, query):
 @configure.service(
     context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
     summary='Make search request',
-    parameters=[],
     responses={
         "200": {
             "description": "Search results",

@@ -77,6 +77,10 @@ async def uninstall(context, request):
     parameters=[{
         "name": "addon",
         "in": "path",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }])
 async def uninstall_path(context, request):
     id_to_uninstall = request.matchdict['addon']
