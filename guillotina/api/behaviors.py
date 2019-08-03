@@ -61,6 +61,14 @@ async def default_patch(context, request):
     context=IResource, method='DELETE',
     permission='guillotina.ModifyContent', name='@behaviors/{behavior}',
     summary="Remove behavior from resource",
+    parameters=[{
+        "in": "path",
+        "name": "key",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }],
     requestBody={
         'required': True,
         'content': {
