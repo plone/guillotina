@@ -7,8 +7,14 @@ from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICloudFileField
 from guillotina.response import HTTPNotFound
 from guillotina.schema import Dict
+from guillotina._settings import app_settings
+from guillotina.utils import get_schema_validator
+from guillotina.response import HTTPPreconditionFailed
+from guillotina import glogging
 
+import jsonschema
 
+logger = glogging.getLogger('guillotina')
 class DictFieldProxy():
 
     def __init__(self, key, context, field_name):
@@ -36,6 +42,54 @@ class DictFieldProxy():
 
 
 class Service(View):
+    __validator__ = __schema__ = None
+    _sentinal = object()
+
+    @classmethod
+    def _get_validator(cls):
+        if cls.__validator__ is None and cls.__validator__ != cls._sentinal:
+            cls.__validator__ = cls._sentinal
+            if cls.__config__['requestBody']:
+                requestBody = cls.__config__['requestBody']
+                if '$ref' in requestBody['content']['application/json']['schema']:
+                    try:
+                        ref = requestBody['content']['application/json']['schema']['$ref']
+                        schema_name = ref.split('/')[-1]
+                        cls.__schema__ = app_settings['json_schema_definitions'][schema_name]
+                        cls.__validator__ = get_schema_validator(schema_name)
+                    except KeyError:
+                        logger.warning('Invalid jsonschema', exc_info=True)
+                elif requestBody['content']['application/json']['schema'] is not None:
+                    try:
+                        cls.__schema__ = requestBody['content']['application/json']['schema']
+                        jsonschema_validator = jsonschema.validators.validator_for(cls.__schema__)
+                        cls.__validator__ = jsonschema_validator(cls.__schema__)
+                    except jsonschema.exceptions.ValidationError:
+                        logger.warning('Could not validate schema', exc_info=True)
+                else:
+                    logger.warning("No schema found in service definition")
+            else:
+                pass  # can be used for query, path or header parameters
+        return cls.__schema__, cls.__validator__
+
+    async def validate(self):
+
+        schema, validator = self.__class__._get_validator()
+        if validator:
+            try:
+                data = await self.request.json()
+                validator.validate(data)
+            except jsonschema.exceptions.ValidationError as e:
+                raise HTTPPreconditionFailed(content={
+                    'reason': 'json schema validation error',
+                    'message': e.message,
+                    'validator': e.validator,
+                    'validator_value': e.validator_value,
+                    'path': [i for i in e.path],
+                    'schema_path': [i for i in e.schema_path],
+                    "schema": schema
+                })
+
     async def get_data(self):
         return await self.request.json()
 

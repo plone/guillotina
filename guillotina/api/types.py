@@ -16,8 +16,12 @@ from guillotina.response import HTTPNotFound
     responses={
         "200": {
             "description": "Result results on types",
-            "schema": {
-                "properties": {}
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "properties": {}
+                    }
+                }
             }
         }
     })
@@ -38,8 +42,12 @@ async def get_all_types(context, request):
     responses={
         "200": {
             "description": "Result results on types",
-            "schema": {
-                "properties": {}
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "properties": {}
+                    }
+                }
             }
         }
     })

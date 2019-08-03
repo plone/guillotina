@@ -13,8 +13,12 @@ from guillotina.utils.auth import get_authenticated_user
     responses={
         "200": {
             "description": "Get information on the user",
-            "schema": {
-                "properties": {}
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "properties": {}
+                    }
+                }
             }
         }
     })
@@ -25,8 +29,12 @@ from guillotina.utils.auth import get_authenticated_user
     responses={
         "200": {
             "description": "Get information on the user",
-            "schema": {
-                "properties": {}
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "properties": {}
+                    }
+                }
             }
         }
     })

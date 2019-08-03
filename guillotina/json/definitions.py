@@ -24,14 +24,14 @@ configure.json_schema_definition('AddonResponse', {
             "type": "array",
             "items": {
                 "type": "object",
-                "$ref": "#/definitions/Addon"
+                "$ref": "#/components/schemas/Addon"
             }
         },
         "installed": {
             "type": "array",
             "items": {
                 "type": "object",
-                "$ref": "#/definitions/Addon"
+                "$ref": "#/components/schemas/Addon"
             }
         }
     }
@@ -137,8 +137,8 @@ configure.json_schema_definition('AddableResource', {
     "type": "object",
     "title": "Writable resource data",
     "allOf": [
-        {"$ref": "#/definitions/BaseResource"},
-        {"$ref": "#/definitions/WritableResource"}
+        {"$ref": "#/components/schemas/BaseResource"},
+        {"$ref": "#/components/schemas/WritableResource"}
     ]
 })
 
@@ -147,7 +147,7 @@ configure.json_schema_definition('Resource', {
     "type": "object",
     "title": "Resource data",
     "allOf": [
-        {"$ref": "#/definitions/WritableResource"},
+        {"$ref": "#/components/schemas/WritableResource"},
         {
             "type": "object",
             "properties": {
@@ -181,13 +181,13 @@ configure.json_schema_definition('ResourceFolder', {
     "type": "object",
     "title": "Resource folder data",
     "allOf": [
-        {"$ref": "#/definitions/Resource"},
+        {"$ref": "#/components/schemas/Resource"},
         {
             "properties": {
                 "items": {
                     "type": "object",
                     "schema": {
-                        "$ref": "#/definitions/Resource"
+                        "$ref": "#/components/schemas/Resource"
                     }
                 },
                 "length": {
@@ -226,7 +226,7 @@ configure.json_schema_definition('ResourceACL', {
         "local": {
             "type": "object",
             "schema": {
-                "$ref": "#/definitions/ACL"
+                "$ref": "#/components/schemas/ACL"
             }
         },
         "inherit": {
@@ -234,7 +234,7 @@ configure.json_schema_definition('ResourceACL', {
             "items": {
                 "type": "object",
                 "schema": {
-                    "$ref": "#/definitions/ACL"
+                    "$ref": "#/components/schemas/ACL"
                 }
             }
         }
@@ -305,7 +305,7 @@ configure.json_schema_definition('Permissions', {
             "items": {
                 "type": "object",
                 "schema": {
-                    "$ref": "#/definitions/PrincipalPermission"
+                    "$ref": "#/components/schemas/PrincipalPermission"
                 }
             },
         },
@@ -314,7 +314,7 @@ configure.json_schema_definition('Permissions', {
             "items": {
                 "type": "object",
                 "schema": {
-                    "$ref": "#/definitions/PrincipalRole"
+                    "$ref": "#/components/schemas/PrincipalRole"
                 }
             },
         },
@@ -323,7 +323,7 @@ configure.json_schema_definition('Permissions', {
             "items": {
                 "type": "object",
                 "schema": {
-                    "$ref": "#/definitions/RolePermission"
+                    "$ref": "#/components/schemas/RolePermission"
                 },
             }
         }
@@ -337,7 +337,7 @@ configure.json_schema_definition('AllPermissions', {
         "schema": {
             "type": "object",
             "schema": {
-                "$ref": "#/definitions/Permissions"
+                "$ref": "#/components/schemas/Permissions"
             }
         }
     }
@@ -362,7 +362,7 @@ configure.json_schema_definition('SearchResults', {
             "items": {
                 "type": "object",
                 "schema": {
-                    "$ref": "#/definitions/SearchResult"
+                    "$ref": "#/components/schemas/SearchResult"
                 }
             }
         },
@@ -371,4 +371,14 @@ configure.json_schema_definition('SearchResults', {
         }
     },
     'required': ['member']
+})
+
+
+configure.json_schema_definition('UpdateRegistry', {
+    "type": "object",
+    "title": "Update registry",
+    "properties": {
+        "value": {}
+    },
+    'required': ['value']
 })

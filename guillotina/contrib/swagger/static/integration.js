@@ -1,10 +1,9 @@
 /* global
-  SwaggerUi,
+  SwaggerUibundle,
   localStorage,
   XMLHttpRequest,
   btoa,
-  hljs,
-  SwaggerClient
+  hljs
 */
 /*
 No way, pure js(minus swagger ui), how is this possible?
@@ -202,39 +201,31 @@ var Application = function(settings){
 
   that.render = function(){
     that.getSwagger(function(definition){
-      that.ui = new SwaggerUi({
-        spec: definition,
-        dom_id: "swagger-ui-container",
-        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
-        validatorUrl: null,
-        docExpansion: 'list',
-        onComplete: function(){
-        },
-        onFailure: function() {
-          console.log("Unable to Load SwaggerUI");
-        },
-        jsonEditor: false,
-        defaultModelRendering: 'schema',
-        showRequestHeaders: false,
-        showOperationIds: false,
-        apisSorter: 'alpha',
-        operationsSorter: function(one, two){
-          if(one.method === 'get'){
-            return -1;
-          }else if(two.method === 'get'){
-            return 1;
-          }
-          return one.method > two.method;
-        }
+      that.ui = new SwaggerUIBundle({
+          spec: definition,
+          dom_id: '#swagger-ui-container',
+          supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+          onFailure: function() {
+            console.log("Unable to Load SwaggerUI");
+          },
+          configs: {
+            preFetch: function(req) {
+                req.headers["Authorization"] = that.authenticator.getAuthToken();
+                return req;
+            }
+          },
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: "StandaloneLayout",
       });
 
-      that.ui.load();
-      if(that.authenticator.isLoggedIn()){
-        var auth =
-        that.ui.api.clientAuthorizations.add(
-          "auth_name", new SwaggerClient.ApiKeyAuthorization(
-            "AUTHORIZATION", that.authenticator.getAuthToken(), "header"));
-        }
+      window.ui = that.ui;  
     });
   };
 

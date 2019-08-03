@@ -182,13 +182,19 @@ class HeadFile(DownloadFile):
             'description': 'Successfully patched data',
             'headers': {
                 'Location': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Resumable': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Access-Control-Expose-Headers': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 }
             }
         }
@@ -201,13 +207,19 @@ class HeadFile(DownloadFile):
             'description': 'Successfully patched data',
             'headers': {
                 'Location': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Resumable': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Access-Control-Expose-Headers': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 }
             }
         }
@@ -230,17 +242,23 @@ class TusCreateFile(UploadFile):
     context=IResource, method='HEAD', permission='guillotina.ModifyContent',
     name='@tusupload/{field_name}/{filename}',
     **_traversed_file_doc('TUS endpoint', responses={
-        '200': {
+        '204': {
             'description': 'Successfully patched data',
             'headers': {
-                'Upload-Offset': {
-                    'type': 'integer'
+                'Location': {
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Resumable': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Access-Control-Expose-Headers': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 }
             }
         }
@@ -252,14 +270,20 @@ class TusCreateFile(UploadFile):
         '200': {
             'description': 'Successfully patched data',
             'headers': {
-                'Upload-Offset': {
-                    'type': 'integer'
+                'Location': {
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Resumable': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Access-Control-Expose-Headers': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 }
             }
         }
@@ -292,7 +316,9 @@ class TusHeadFile(UploadFile):
             'description': 'Successfully patched data',
             'headers': {
                 'Upload-Offset': {
-                    'type': 'integer'
+                    "schema": {
+                        'type': 'integer'
+                    }
                 }
             }
         }
@@ -315,7 +341,9 @@ class TusHeadFile(UploadFile):
             'description': 'Successfully patched data',
             'headers': {
                 'Upload-Offset': {
-                    'type': 'integer'
+                    "schema": {
+                        'type': 'integer'
+                    }
                 }
             }
         }
@@ -338,16 +366,24 @@ class TusPatchFile(UploadFile):
             'description': 'Successfully returned tus info',
             'headers': {
                 'Tus-Version': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Resumable': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Max-Size': {
-                    'type': 'integer'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Extension': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 }
             }
         }
@@ -360,16 +396,24 @@ class TusPatchFile(UploadFile):
             'description': 'Successfully returned tus info',
             'headers': {
                 'Tus-Version': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Resumable': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Max-Size': {
-                    'type': 'integer'
+                    "schema": {
+                        'type': 'string'
+                    }
                 },
                 'Tus-Extension': {
-                    'type': 'string'
+                    "schema": {
+                        'type': 'string'
+                    }
                 }
             }
         }

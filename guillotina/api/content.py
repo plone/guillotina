@@ -70,7 +70,7 @@ def get_content_json_schema_responses(content):
             "description": "Resource data",
             "schema": {
                 "allOf": [
-                    {"$ref": "#/definitions/ResourceFolder"},
+                    {"$ref": "#/components/schemas/ResourceFolder"},
                     {"properties": convert_interfaces_to_schema(
                         get_all_behavior_interfaces(content))}
                 ]
@@ -85,7 +85,7 @@ def patch_content_json_schema_parameters(content):
         "in": "body",
         "schema": {
             "allOf": [
-                {"$ref": "#/definitions/WritableResource"},
+                {"$ref": "#/components/schemas/WritableResource"},
                 {"properties": convert_interfaces_to_schema(
                     get_all_behavior_interfaces(content))}
             ]
@@ -106,11 +106,17 @@ async def default_head(context, request):
     parameters=[{
         "name": "include",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }, {
         "name": "omit",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }])
 class DefaultGET(Service):
     @profilable
@@ -134,18 +140,21 @@ class DefaultGET(Service):
 @configure.service(
     context=IResource, method='POST', permission='guillotina.AddContent',
     summary='Add new resouce inside this container resource',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/AddableResource"
+    requestBody={
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/AddableResource"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Resource data",
             "schema": {
-                "$ref": "#/definitions/ResourceFolder"
+                "$ref": "#/components/schemas/ResourceFolder"
             }
         }
     })
@@ -247,8 +256,12 @@ class DefaultPOST(Service):
     responses={
         "200": {
             "description": "Resource data",
-            "schema": {
-                "$ref": "#/definitions/Resource"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "$ref": "#/components/schemas/Resource"
+                    }
+                }
             }
         }
     })
@@ -291,8 +304,12 @@ class DefaultPATCH(Service):
     responses={
         "200": {
             "description": "Resource data",
-            "schema": {
-                "$ref": "#/definitions/Resource"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "$ref": "#/components/schemas/Resource"
+                    }
+                }
             }
         }
     })
@@ -334,8 +351,12 @@ class DefaultPUT(DefaultPATCH):
     responses={
         "200": {
             "description": "All the sharing defined on this resource",
-            "schema": {
-                "$ref": "#/definitions/ResourceACL"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "ref": "#/components/schemas/ResourceACL"
+                    }
+                }
             }
         }
     })
@@ -373,8 +394,12 @@ async def sharing_get(context, request):
     responses={
         "200": {
             "description": "All the permissions defined on this resource",
-            "schema": {
-                "$ref": "#/definitions/AllPermissions"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "$ref": "#/components/schemas/AllPermissions"
+                    }
+                }
             }
         }
     })
@@ -388,14 +413,16 @@ async def all_permissions(context, request):
     context=IResource, method='POST',
     permission='guillotina.ChangePermissions', name='@sharing',
     summary='Change permissions for a resource',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "$ref": "#/definitions/Permissions"
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/Permissions"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully changed permission"
@@ -420,14 +447,17 @@ class SharingPOST(Service):
     context=IResource, method='PUT',
     permission='guillotina.ChangePermissions', name='@sharing',
     summary='Replace permissions for a resource',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "$ref": "#/definitions/Permissions"
+    validate=True,
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/Permissions"
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully replaced permissions"
@@ -447,7 +477,9 @@ class SharingPUT(SharingPOST):
         "name": "permission",
         "in": "query",
         "required": True,
-        "type": "string"
+        "schema": {
+            "type": "string"
+        }
     }],
     responses={
         "200": {
@@ -571,25 +603,27 @@ class DefaultOPTIONS(Service):
     context=IResource, method='POST', name="@move",
     permission='guillotina.MoveContent',
     summary='Move resource',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "properties": {
-                "destination": {
-                    "type": "string",
-                    "description": "Absolute path to destination object from container",
-                    "required": False
-                },
-                "new_id": {
-                    "type": "string",
-                    "description": "Optional new id to assign object",
-                    "required": False
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "properties": {
+                        "destination": {
+                            "type": "string",
+                            "description": "Absolute path to destination object from container",
+                            "required": False
+                        },
+                        "new_id": {
+                            "type": "string",
+                            "description": "Optional new id to assign object",
+                            "required": False
+                        }
+                    }
                 }
             }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully moved resource"
@@ -619,25 +653,27 @@ async def move(context, request):
     context=IResource, method='POST', name="@duplicate",
     permission='guillotina.DuplicateContent',
     summary='Duplicate resource',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "properties": {
-                "destination": {
-                    "type": "string",
-                    "description": "Absolute path to destination object from container",
-                    "required": False
-                },
-                "new_id": {
-                    "type": "string",
-                    "description": "Optional new id to assign object",
-                    "required": False
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "properties": {
+                        "destination": {
+                            "type": "string",
+                            "description": "Absolute path to destination object from container",
+                            "required": False
+                        },
+                        "new_id": {
+                            "type": "string",
+                            "description": "Optional new id to assign object",
+                            "required": False
+                        }
+                    }
                 }
             }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully duplicated object"
@@ -682,21 +718,33 @@ async def ids(context, request):
     parameters=[{
         "name": "include",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }, {
         "name": "omit",
         "in": "query",
-        "type": "string"
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }, {
         "name": "page_size",
         "in": "query",
-        "type": "number",
-        "default": 20
+        "default": 20,
+        "required": "true",
+        "schema": {
+            "type": "number"
+        }
     }, {
         "name": "page",
         "in": "query",
-        "type": "number",
-        "default": 1
+        "default": 1,
+        "required": "true",
+        "schema": {
+            "type": "number"
+        }
     }],
     responses={
         "200": {

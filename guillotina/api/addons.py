@@ -16,13 +16,17 @@ _ = MessageFactory('guillotina')
     context=IContainer, method='POST',
     permission='guillotina.ManageAddons', name='@addons',
     summary='Install addon to container',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/Addon"
+    validate=True,
+    requestBody={
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/Addon"
+                }
+            }
         }
-    }])
+    })
 async def install(context, request):
     data = await request.json()
     id_to_install = data.get('id', None)
@@ -49,13 +53,17 @@ async def install(context, request):
     context=IContainer, method='DELETE',
     permission='guillotina.ManageAddons', name='@addons',
     summary='Uninstall an addon from container',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/Addon"
+    validate=True,
+    requestBody={
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "$ref": "#/components/schemas/Addon"
+                }
+            }
         }
-    }])
+    })
 async def uninstall(context, request):
     data = await request.json()
     id_to_uninstall = data.get('id', None)
@@ -69,6 +77,10 @@ async def uninstall(context, request):
     parameters=[{
         "name": "addon",
         "in": "path",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
     }])
 async def uninstall_path(context, request):
     id_to_uninstall = request.matchdict['addon']
@@ -101,8 +113,12 @@ async def uninstall_addon(context, request, id_to_uninstall):
     responses={
         "200": {
             "description": "Get list of available and installed addons",
-            "schema": {
-                "$ref": "#/definitions/AddonResponse"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "$ref": "#/components/schemas/AddonResponse"
+                    }
+                }
             }
         }
     })

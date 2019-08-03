@@ -35,12 +35,16 @@ from guillotina.utils import get_authenticated_user_id
     responses={
         "200": {
             "description": "Get a list of containers",
-            "schema": {
-                "properties": {
-                    "containers": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "properties": {
+                            "containers": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -88,23 +92,31 @@ async def create_container(parent: IDatabase, container_id: str,
     context=IDatabase, method='POST', permission='guillotina.AddContainer',
     summary="Create a new Container",
     description="Creates a new container on the database",
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "$ref": "#/definitions/BaseResource",
-            "properties": {
-                "@addons": {
-                    "type": "string"
+    validate=True,
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/BaseResource",
+                    "properties": {
+                        "@addons": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Container result",
-            "schema": {
-                "$ref": "#/definitions/BaseResource"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "$ref": "#/components/schemas/BaseResource"
+                    }
+                }
             }
         }
     })

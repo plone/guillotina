@@ -31,11 +31,15 @@ _marker = object()
     responses={
         "200": {
             "description": "Successfully registered interface",
-            "type": "object",
-            "schema": {
-                "properties": {
-                    "value": {
-                        "type": "object"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "object"
+                            }
+                        }
                     }
                 }
             }
@@ -70,11 +74,15 @@ class Read(Service):
     responses={
         "200": {
             "description": "Successfully registered interface",
-            "type": "object",
-            "schema": {
-                "properties": {
-                    "value": {
-                        "type": "object"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "object"
+                            }
+                        }
                     }
                 }
             }
@@ -98,23 +106,27 @@ async def get_registry_service(context, request):
     context=IContainer, method='POST',
     permission='guillotina.RegisterConfigurations', name='@registry',
     summary='Register a new interface to for registry settings',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "properties": {
-                "interface": {
-                    "type": "string",
-                    "required": True
-                },
-                "initial_values": {
+    validate=True,
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
                     "type": "object",
-                    "required": False
+                    "title": "Registry",
+                    "properties": {
+                        "interface": {
+                             "type": "string"
+                        },
+                        "initial_values": {
+                            "type": "object"
+                        }
+                    },
+                    'required': ['interface']
                 }
             }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Successfully registered interface"
@@ -164,15 +176,13 @@ class Register(Service):
     context=IContainer, method='PATCH',
     permission='guillotina.WriteConfiguration', name='@registry/{dotted_name}',
     summary='Update registry setting',
-    parameters={
-        "name": "body",
-        "in": "body",
-        "type": "object",
-        "schema": {
-            "properties": {
-                "value": {
-                    "type": "any",
-                    'required': True
+    validate=True,
+    requestBody={
+        'required': True,
+        'content': {
+            'application/json': {
+                "schema": {
+                    "$ref": "#/components/schemas/UpdateRegistry"
                 }
             }
         }

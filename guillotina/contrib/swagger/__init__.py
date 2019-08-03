@@ -17,19 +17,39 @@ app_settings = {
         "base_url": None,
         "auth_storage_search_keys": ["auth"],
         "base_configuration": {
-            "swagger": "2.0",
+            "openapi": "3.0.0",
             "info": {
-                "version": "",
+                "version": "1.0",
                 "title": "Guillotina",
                 "description": "The REST Resource API",
             },
-            "host": "",
-            "basePath": "",
-            "schemes": [],
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
+            "servers": [
+                {
+                    "url": "http://localhost:8080"
+                }
+            ],
             "paths": {},
-            "definitions": {},
+            "security": [
+                {
+                    "basicAuth": []
+                },
+                {
+                    "bearerAuth": []
+                },
+            ],
+            "components": {
+                "securitySchemes": {
+                    "basicAuth": {
+                        "type": "http",
+                        "scheme": "basic"
+                    },
+                    "bearerAuth": {
+                        "type": "http",
+                        "scheme": "bearer",
+                        "bearerFormat": "JWT"
+                    }
+                }
+            },
         },
     },
 }

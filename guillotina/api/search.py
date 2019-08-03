@@ -25,13 +25,16 @@ async def _search(context, request, query):
 @configure.service(
     context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
     summary='Make search request',
-    parameters=[],
     responses={
         "200": {
             "description": "Search results",
-            "type": "object",
-            "schema": {
-                "$ref": "#/definitions/SearchResults"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/SearchResults"
+                    }
+                }
             }
         }
     })
@@ -44,19 +47,25 @@ async def search_get(context, request):
     context=IResource, method='POST',
     permission='guillotina.RawSearchContent', name='@search',
     summary='Make a complex search query',
-    parameters=[{
-        "name": "body",
-        "in": "body",
-        "schema": {
-            "properties": {}
+    requestBody={
+        'content': {
+            'application/json': {
+                "schema": {
+                    "properties": {}
+                }
+            }
         }
-    }],
+    },
     responses={
         "200": {
             "description": "Search results",
-            "type": "object",
-            "schema": {
-                "$ref": "#/definitions/SearchResults"
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/SearchResults"
+                    }
+                }
             }
         }
     })
