@@ -30,7 +30,10 @@ def _traversed_file_doc(summary, parameters=None, responses=None):
                     'name': 'field_name',
                     'in': 'path',
                     'description': 'Name of file field',
-                    'required': True
+                    'required': True,
+                    'schema': {
+                        "type": "string"
+                    }
                 }] + parameters,
                 'responses': responses
             }
@@ -112,11 +115,25 @@ class DirectoryGET(FileGET):
 # Field File
 @configure.service(
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
-    name='@upload/{field_name}',
+    name='@upload/{field_name}', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }],
     **_traversed_file_doc('Update the content of a file'))
 @configure.service(
     context=IResource, method='PATCH', permission='guillotina.ModifyContent',
-    name='@upload/{field_name}/{filename}',
+    name='@upload/{field_name}/{filename}', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }],
     **_traversed_file_doc('Update the content of a file'))
 class UploadFile(TraversableFieldService):
 
@@ -134,11 +151,32 @@ class UploadFile(TraversableFieldService):
 
 @configure.service(
     context=IResource, method='GET', permission='guillotina.ViewContent',
-    name='@download/{field_name}',
+    name='@download/{field_name}', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }],
     **_traversed_file_doc('Download the content of a file'))
 @configure.service(
     context=IResource, method='GET', permission='guillotina.ViewContent',
-    name='@download/{field_name}/{filename}',
+    name='@download/{field_name}/{filename}', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }, {
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }],
     **_traversed_file_doc('Download the content of a file'))
 class DownloadFile(TraversableFieldService):
 
@@ -164,10 +202,31 @@ class DownloadFile(TraversableFieldService):
 
 @configure.service(
     context=IResource, method='HEAD', permission='guillotina.ViewContent',
-    name='@download/{field_name}')
+    name='@download/{field_name}', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }])
 @configure.service(
     context=IResource, method='HEAD', permission='guillotina.ViewContent',
-    name='@download/{field_name}/{filename}')
+    name='@download/{field_name}/{filename}', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }, {
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }])
 class HeadFile(DownloadFile):
 
     async def handle(self, adapter, kwargs):
@@ -241,7 +300,21 @@ class TusCreateFile(UploadFile):
 @configure.service(
     context=IResource, method='HEAD', permission='guillotina.ModifyContent',
     name='@tusupload/{field_name}/{filename}',
-    **_traversed_file_doc('TUS endpoint', responses={
+    **_traversed_file_doc('TUS endpoint', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }, {
+        "in": "path",
+        "name": "filename",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }], responses={
         '204': {
             'description': 'Successfully patched data',
             'headers': {
@@ -266,7 +339,14 @@ class TusCreateFile(UploadFile):
 @configure.service(
     context=IResource, method='HEAD', permission='guillotina.ModifyContent',
     name='@tusupload/{field_name}',
-    **_traversed_file_doc('TUS endpoint', responses={
+    **_traversed_file_doc('TUS endpoint', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }], responses={
         '200': {
             'description': 'Successfully patched data',
             'headers': {
@@ -361,7 +441,14 @@ class TusPatchFile(UploadFile):
 @configure.service(
     context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight',
     name='@tusupload/{field_name}',
-    **_traversed_file_doc('TUS endpoint', responses={
+    **_traversed_file_doc('TUS endpoint', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }], responses={
         '200': {
             'description': 'Successfully returned tus info',
             'headers': {
@@ -391,7 +478,21 @@ class TusPatchFile(UploadFile):
 @configure.service(
     context=IResource, method='OPTIONS', permission='guillotina.AccessPreflight',
     name='@tusupload/{field_name}/{filename}',
-    **_traversed_file_doc('TUS endpoint', responses={
+    **_traversed_file_doc('TUS endpoint', parameters=[{
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }, {
+        "in": "path",
+        "name": "field_name",
+        "required": "true",
+        "schema": {
+            "type": "string"
+        }
+    }], responses={
         '200': {
             'description': 'Successfully returned tus info',
             'headers': {
