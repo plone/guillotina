@@ -25,10 +25,9 @@ app_settings = {
 }
 
 def includeme(root, settings):
-    factory = import_class(
-        settings.get('mailer', {}).get('utility',
-                                       settings['mailer']['utility']))
-    logger.debug(f"Setting Mail Utility: {settings['mailer']['utility']}")
+    mailer_settings = settings.get('mailer') or app_settings.get('mailer')
+    factory = import_class(mailer_settings.get('utility'))
+    logger.debug(f"Setting Mail Utility: {mailer_settings['utility']}")
     if settings.get('mailer', {}).get('default_sender', None) is None:
         logger.warning(f"No sender mail configured on mailer.default_sender settings")
     utility = factory()

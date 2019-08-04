@@ -10,6 +10,7 @@ Applications are used to provide additional functionality to guillotina.
 - `guillotina.contrib.cache`: Cache support for guillotina.
 - `guillotina.contrib.redis`: Cache support for guillotina using redis with invalidation across multiple instances.
 - `guillotina.contrib.pubsub`: Pubsub support for guillotina
+- `guillotina.contrib.mailer`: Send email with guillotina
 
 
 ## Community Addons
@@ -18,7 +19,6 @@ Some useful addons to use in your own development:
 
 - [guillotina_elasticsearch](https://github.com/guillotinaweb/guillotina_elasticsearch/): Index content in elastic search
 - [guillotina_dbusers](https://github.com/guillotinaweb/guillotina_dbusers): Store and authenticate users in the database
-- [guillotina_mailer](https://github.com/guillotinaweb/guillotina_mailer): async send mail
 
 
 ## Creating
