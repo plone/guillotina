@@ -8,6 +8,8 @@ CHANGELOG
 
 - Swagger Fixes
 
+- Swagger Fixes
+
 - Nothing changed yet.
 
 - json schema validation
