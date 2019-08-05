@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Getting OpenAPI js and css from CDN 
+
 - Doc edit for OpenAPI
 
 - Swagger Fixes
