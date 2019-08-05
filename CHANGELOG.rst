@@ -6,6 +6,10 @@ CHANGELOG
 
 - Getting OpenAPI js and css from CDN 
 
+- Doc edit for OpenAPI
+
+- Swagger Fixes
+
 - Swagger Fixes
 
 - Swagger Fixes

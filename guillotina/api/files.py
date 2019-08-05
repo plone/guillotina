@@ -44,33 +44,45 @@ def _traversed_file_doc(summary, parameters=None, responses=None):
 TUS_PARAMETERS = [{
     "name": "Upload-Offset",
     "in": "headers",
-    "type": "integer",
-    "required": True
+    "required": True,
+    "schema": {
+        "type": "integer"
+    }
 }, {
     "name": "UPLOAD-LENGTH",
     "in": "headers",
-    "type": "integer",
-    "required": True
+    "required": True,
+    "schema": {
+        "type": "integer"
+    }
 }, {
     "name": "UPLOAD-MD5",
     "in": "headers",
-    "type": "string",
-    "required": False
+    "required": False,
+    "schema": {
+        "type": "string"
+    }
 }, {
     "name": "UPLOAD-EXTENSION",
     "in": "headers",
-    "type": "string",
-    "required": False
+    "required": False,
+    "schema": {
+        "type": "string"
+    }
 }, {
     "name": "TUS-RESUMABLE",
     "in": "headers",
-    "type": "string",
-    "required": True
+    "required": True,
+    "schema": {
+        "type": "string"
+    }
 }, {
     "name": "UPLOAD-METADATA",
     "in": "headers",
-    "type": "string",
-    "required": False
+    "required": False,
+    "schema": {
+        "type": "string"
+    }
 }]
 
 # Static File
@@ -384,13 +396,17 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc('TUS endpoint', parameters=[{
         "name": "Upload-Offset",
         "in": "headers",
-        "type": "integer",
-        "required": True
+        "required": True,
+        "schema": {
+            "type": "integer"
+        }
     }, {
         "name": "CONTENT-LENGTH",
         "in": "headers",
-        "type": "integer",
-        "required": True
+        "required": True,
+        "schema": {
+            "type": "integer"
+        }
     }], responses={
         '204': {
             'description': 'Successfully patched data',
@@ -409,13 +425,17 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc('TUS endpoint', parameters=[{
         "name": "Upload-Offset",
         "in": "headers",
-        "type": "integer",
-        "required": True
+        "required": True,
+        "schema": {
+            "type": "integer"
+        }
     }, {
         "name": "CONTENT-LENGTH",
         "in": "headers",
-        "type": "integer",
-        "required": True
+        "required": True,
+        "schema": {
+            "type": "integer"
+        }
     }], responses={
         '204': {
             'description': 'Successfully patched data',
