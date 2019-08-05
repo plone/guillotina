@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Doc edit for OpenAPI
+
 - Swagger Fixes
 
 - Swagger Fixes

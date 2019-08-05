@@ -24,10 +24,11 @@
      :param layer: Layer this service is registered for. Default is `IDefaultLayer`
      :type layer: str
      :param name: This is used as part of the uri. Example `@foobar` -> `/mycontent/@foobar`.
-     :param summary: Used for documentation and swagger.
-     :param description: Used for documentation and swagger.
-     :param responses: Used for documentation and swagger.
-     :param parameters: Used for documentation and swagger.
+     :param summary: Used for documentation and OpenAPI.
+     :param description: Used for documentation and OpenAPI.
+     :param responses: Used for documentation and OpenAPI.
+     :param parameters: Used for documentation and OpenAPI.
+     :param requestBody: Used for documentation and OpenAPI
 
   .. function:: contenttype(**kwargs)
 
