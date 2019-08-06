@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Fix union field saving value
+
 - Getting OpenAPI js and css from CDN 
 
 - Doc edit for OpenAPI
