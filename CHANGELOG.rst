@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.9.2 (unreleased)
+4.9.2 (2019-08-06)
 ------------------
 
 - Fix union field saving value correctly
