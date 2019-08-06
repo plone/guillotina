@@ -4,7 +4,8 @@ CHANGELOG
 4.9.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix union field saving value correctly
+  [vangheem]
 
 
 4.9.1 (2019-08-01)

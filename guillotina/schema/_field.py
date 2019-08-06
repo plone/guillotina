@@ -724,4 +724,5 @@ class UnionField(Field):
 
     def set(self, object, value):
         field = self.validate(value)
+        field.__name__ = self.__name__
         field.set(object, value)
