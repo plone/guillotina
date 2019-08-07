@@ -41,8 +41,10 @@ window.onload = function(){
         originalAuthorize(authorization);
       }
     };
-
-
-    
+    var logout = ui.authActions.logout
+    ui.authActions.logout = function(){
+      authToken = undefined;
+      return logout.apply(this, arguments)
+    }   
   window.ui=ui
 }
