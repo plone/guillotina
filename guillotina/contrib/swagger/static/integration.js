@@ -1,13 +1,16 @@
 //   SwaggerUi,
 var authToken = undefined;
-
+// console.log()
 window.onload = function(){
   ui = SwaggerUIBundle({
-    url: "http://localhost:8080/@swagger",
+    url: "http://localhost:8080/",
     dom_id: '#swagger-ui-container',
     supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
     configs: {
       preFetch: function(req) {
+        req.url.trim()
+        req.url.replace(/\/$/, '');
+        req.url = req.url + '/@swagger'
         if (authToken) {
           req.headers["Authorization"] = authToken;
           window.ui=ui
