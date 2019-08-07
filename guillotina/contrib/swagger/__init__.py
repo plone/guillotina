@@ -25,7 +25,7 @@ app_settings = {
             },
             "servers": [
                 {
-                    "url": "http://localhost:8080"
+                    "url": ""
                 }
             ],
             "paths": {},

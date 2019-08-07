@@ -179,7 +179,7 @@ async def render_docs_index(context, request):
         except ComponentLookupError:
             url = "{}://{}".format(get_request_scheme(request), request.host)
     swagger_settings["initial_swagger_url"] = url
-
+    swagger_settings["base_configuration"]["servers"][0]["url"] = url
     if swagger_settings['authentication_allowed']:
         auth = AUTH_HTML
     else:

@@ -4,6 +4,8 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Refractor SwaggerUI and to use in built auth of SwaggerUI
+
 - Getting OpenAPI js and css from CDN 
 
 - Doc edit for OpenAPI
