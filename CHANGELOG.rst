@@ -12,12 +12,6 @@ CHANGELOG
 
 - Swagger Fixes
 
-- Swagger Fixes
-
-- Swagger Fixes
-
-- Nothing changed yet.
-
 - json schema validation
 
 5.0.0a15 (2019-08-02)
