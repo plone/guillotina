@@ -4,19 +4,13 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
-- Fix union field saving value
+- Refractor SwaggerUI and to use in built auth of SwaggerUI
 
 - Getting OpenAPI js and css from CDN 
 
 - Doc edit for OpenAPI
 
 - Swagger Fixes
-
-- Swagger Fixes
-
-- Swagger Fixes
-
-- Nothing changed yet.
 
 - json schema validation
 
