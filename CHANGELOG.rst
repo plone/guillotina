@@ -4,9 +4,12 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Fix `modification_date` not indexed when an object is patched
+  [masipcat]
+
 - Refractor SwaggerUI and to use in built auth of SwaggerUI
 
-- Getting OpenAPI js and css from CDN 
+- Getting OpenAPI js and css from CDN
 
 - Doc edit for OpenAPI
 
