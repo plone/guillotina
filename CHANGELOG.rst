@@ -4,7 +4,8 @@ CHANGELOG
 4.9.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `modification_date` not indexed when an object is patched
+  [masipcat]
 
 
 4.9.2 (2019-08-06)

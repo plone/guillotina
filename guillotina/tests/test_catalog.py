@@ -100,12 +100,12 @@ async def test_get_data_uses_indexes_param(dummy_request):
     container.__name__ = 'guillotina'
     ob = await create_content('Item', id='foobar')
     data = await util.get_data(ob, indexes=['title'])
-    assert len(data) == 7  # uuid, type_name, etc always returned
+    assert len(data) == 8  # uuid, type_name, etc always returned
     data = await util.get_data(ob, indexes=['title', 'id'])
-    assert len(data) == 8
+    assert len(data) == 9
 
     data = await util.get_data(ob)
-    assert len(data) > 9
+    assert len(data) > 10
 
 
 async def test_modified_event_gathers_all_index_data(dummy_request):
@@ -124,12 +124,13 @@ async def test_modified_event_gathers_all_index_data(dummy_request):
     }))
     fut = index.get_request_indexer()
 
-    assert len(fut.update['foobar']) == 8
+    assert len(fut.update['foobar']) == 9
 
     await notify(ObjectModifiedEvent(ob, payload={
         'creation_date': ''
     }))
-    assert len(fut.update['foobar']) == 9
+    assert 'modification_date' in fut.update['foobar']
+    assert len(fut.update['foobar']) == 10
 
 
 async def test_search_endpoint(container_requester):
