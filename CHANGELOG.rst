@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.9.3 (unreleased)
+4.9.3 (2019-08-13)
 ------------------
 
 - Fix `modification_date` not indexed when an object is patched
