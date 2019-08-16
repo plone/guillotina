@@ -4,9 +4,12 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Fix field.validate() crashes when providing invalid schema (for field of type Object)
+  [masipcat]
+
 - Refractor SwaggerUI and to use in built auth of SwaggerUI
 
-- Getting OpenAPI js and css from CDN 
+- Getting OpenAPI js and css from CDN
 
 - Doc edit for OpenAPI
 
