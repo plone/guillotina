@@ -4,7 +4,8 @@ CHANGELOG
 4.9.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix field.validate() crashes when providing invalid schema (for field of type Object)
+  [masipcat]
 
 
 4.9.3 (2019-08-13)

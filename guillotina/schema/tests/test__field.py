@@ -1729,6 +1729,20 @@ class ObjectTests(unittest.TestCase):
         objf = self._makeOne(schema)
         self.assertRaises(SchemaNotProvided, objf.validate, object())
 
+    def test__validate_w_value_providing_invalid_schema(self):
+        from zope.interface import implementer
+        from guillotina.schema.exceptions import SchemaNotProvided
+        from guillotina.schema.exceptions import WrongContainedType
+        from guillotina.schema.exceptions import RequiredMissing
+        from guillotina.schema.exceptions import WrongType
+        from guillotina.schema._bootstrapfields import Text
+        schema = self._makeSchema(foo=Text())
+        objf = self._makeOne(schema)
+
+        objf.validate({"foo": "val"})
+        self.assertRaises(SchemaNotProvided, objf.validate, {"bar": "val"})
+        self.assertRaises(SchemaNotProvided, objf.validate, {"foo": "val", "bar": "val"})
+
     def test__validate_w_value_providing_schema_but_missing_fields(self):
         from zope.interface import implementer
         from guillotina.schema.exceptions import RequiredMissing
