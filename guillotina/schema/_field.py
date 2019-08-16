@@ -605,8 +605,14 @@ class Object(Field):
             valid_type = namedtuple(
                 'temp_validate_type',
                 set(self.schema.names(all=True)) & set(value.keys()))
+
             # check the value against schema
-            errors = _validate_fields(self.schema, valid_type(**value))
+            try:
+                t = valid_type(**value)
+            except TypeError:
+                raise SchemaNotProvided
+
+            errors = _validate_fields(self.schema, t)
         else:
             if not self.schema.providedBy(value):
                 raise SchemaNotProvided

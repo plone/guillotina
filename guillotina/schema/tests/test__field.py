@@ -1729,6 +1729,26 @@ class ObjectTests(unittest.TestCase):
         objf = self._makeOne(schema)
         self.assertRaises(SchemaNotProvided, objf.validate, object())
 
+    def test__validate_w_value_providing_invalid_schema(self):
+        from zope.interface import implementer
+        from guillotina.schema.exceptions import SchemaNotProvided
+        from guillotina.schema.exceptions import WrongContainedType
+        from guillotina.schema.exceptions import RequiredMissing
+        from guillotina.schema.exceptions import WrongType
+        from guillotina.schema._bootstrapfields import Text
+        schema = self._makeSchema(foo=Text())
+        objf = self._makeOne(schema)
+
+        # Works as expected
+        objf.validate({"foo": "val"})
+
+        # this was crashing with:
+        #     TypeError: __new__() got an unexpected keyword argument 'bar'
+        self.assertRaises(SchemaNotProvided, objf.validate, {"bar": "val"})
+
+        # I don't know what should happen in this case. Should we ignore the invalid field 'bar'?
+        self.assertRaises(SchemaNotProvided, objf.validate, {"foo": "val", "bar": "val"})
+
     def test__validate_w_value_providing_schema_but_missing_fields(self):
         from zope.interface import implementer
         from guillotina.schema.exceptions import RequiredMissing
