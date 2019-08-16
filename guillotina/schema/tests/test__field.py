@@ -1739,8 +1739,14 @@ class ObjectTests(unittest.TestCase):
         schema = self._makeSchema(foo=Text())
         objf = self._makeOne(schema)
 
+        # Works as expected
         objf.validate({"foo": "val"})
+
+        # this was crashing with:
+        #     TypeError: __new__() got an unexpected keyword argument 'bar'
         self.assertRaises(SchemaNotProvided, objf.validate, {"bar": "val"})
+
+        # I don't know what should happen in this case. Should we ignore the invalid field 'bar'?
         self.assertRaises(SchemaNotProvided, objf.validate, {"foo": "val", "bar": "val"})
 
     def test__validate_w_value_providing_schema_but_missing_fields(self):
