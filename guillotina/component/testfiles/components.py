@@ -56,7 +56,7 @@ class Comp(object):
 
     a = 1
 
-    def f():
+    def f(self):
         pass  # type: ignore
 
 
