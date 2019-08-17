@@ -1,0 +1,18 @@
+replicaCount: 2
+
+image:
+  repository: guillotina/guillotina
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

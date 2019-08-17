@@ -1,0 +1,32 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: guillotina
+  namespace: default
+  labels:
+    run: guillotina
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: guillotina
+  template:
+    metadata:
+      labels:
+        run: guillotina
+    spec:
+      containers:
+      - name: guillotina
+        image: guillotina/guillotina
+        args:
+        - "/bin/sh"
+        resources: {}
+        imagePullPolicy: Always
+        stdin: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
