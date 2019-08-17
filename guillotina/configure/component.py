@@ -53,9 +53,7 @@ def adapter(_context, factory, provides=None, for_=None, name=""):
             for_ = adaptedBy(factory[0])
 
         if for_ is None:
-            raise TypeError(
-                "No for attribute was provided and can't " "determine what the factory adapts."
-            )
+            raise TypeError("No for attribute was provided and can't " "determine what the factory adapts.")
 
     for_ = tuple(for_)
 
@@ -115,8 +113,7 @@ def subscriber(_context, for_=None, factory=None, handler=None, provides=None):
         for_ = adaptedBy(factory)
         if for_ is None:
             raise TypeError(
-                "No for attribute was provided and can't "
-                "determine what the factory (or handler) adapts."
+                "No for attribute was provided and can't " "determine what the factory (or handler) adapts."
             )
 
     for_ = tuple(for_)

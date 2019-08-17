@@ -76,10 +76,7 @@ async def test_subscriber_invalidates(redis_container, guillotina_main, loop):
     await driver.publish(
         app_settings["cache"]["updates_channel"],
         pickle.dumps(
-            {
-                "data": serialize.dumps({"tid": 32423, "keys": ["root-" + content.__uuid__]}),
-                "ruid": "nonce",
-            }
+            {"data": serialize.dumps({"tid": 32423, "keys": ["root-" + content.__uuid__]}), "ruid": "nonce"}
         ),
     )
     await asyncio.sleep(1)  # should be enough for pub/sub to finish
@@ -115,10 +112,7 @@ async def test_subscriber_ignores_trsn_on_invalidate(redis_container, guillotina
     await driver.publish(
         app_settings["cache"]["updates_channel"],
         pickle.dumps(
-            {
-                "data": serialize.dumps({"tid": 5555, "keys": ["root-" + content.__uuid__]}),
-                "ruid": "nonce",
-            }
+            {"data": serialize.dumps({"tid": 5555, "keys": ["root-" + content.__uuid__]}), "ruid": "nonce"}
         ),
     )
     await asyncio.sleep(1)  # should be enough for pub/sub to finish

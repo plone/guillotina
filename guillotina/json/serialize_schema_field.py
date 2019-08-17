@@ -98,9 +98,7 @@ class DefaultSchemaFieldSerializer(object):
             elif isinstance(value, str):
                 text = value
             elif IField.providedBy(value):
-                serializer = get_multi_adapter(
-                    (value, field, self.request), ISchemaFieldSerializeToJson
-                )
+                serializer = get_multi_adapter((value, field, self.request), ISchemaFieldSerializeToJson)
                 text = serializer.serialize()
                 if "properties" in text:
                     text = text["properties"]
@@ -125,9 +123,7 @@ class DefaultSchemaFieldSerializer(object):
                 else:
                     result["additionalProperties"] = True
             elif IObject.providedBy(field):
-                schema_serializer = get_multi_adapter(
-                    (field.schema, self.request), ISchemaSerializeToJson
-                )
+                schema_serializer = get_multi_adapter((field.schema, self.request), ISchemaSerializeToJson)
                 result["properties"] = schema_serializer.serialize()
         if field.extra_values is not None:
             result.update(field.extra_values)
@@ -165,9 +161,7 @@ class DefaultPatchFieldSchemaFieldSerializer(DefaultSchemaFieldSerializer):
         return "object"
 
 
-@configure.adapter(
-    for_=(ICloudFileField, Interface, Interface), provides=ISchemaFieldSerializeToJson
-)
+@configure.adapter(for_=(ICloudFileField, Interface, Interface), provides=ISchemaFieldSerializeToJson)
 class DefaultCloudFileSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):

@@ -38,9 +38,7 @@ async def run(app):
 
 
 @pytest.mark.skipif(DATABASE != "postgres", reason="Only works with pg")
-@pytest.mark.skipif(
-    DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'"
-)
+@pytest.mark.skipif(DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_command_with_container(command_arguments, container_command):
     _, filepath = mkstemp(suffix=".py")
     _, filepath2 = mkstemp()
@@ -61,18 +59,14 @@ async def run(container):
 
 
 @pytest.mark.skipif(DATABASE != "postgres", reason="Only works with pg")
-@pytest.mark.skipif(
-    DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'"
-)
+@pytest.mark.skipif(DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_vacuum_with_container(command_arguments, container_command):
     command = VacuumCommand(command_arguments)
     command.run_command(settings=container_command["settings"])
 
 
 @pytest.mark.skipif(DATABASE != "postgres", reason="Only works with pg")
-@pytest.mark.skipif(
-    DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'"
-)
+@pytest.mark.skipif(DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_migration(command_arguments, container_command):
     command = MigrateCommand(command_arguments)
     command.run_command(settings=container_command["settings"])
@@ -86,11 +80,7 @@ def test_get_settings():
 
 def test_get_settings_with_environment_variables():
     os.environ.update(
-        {
-            "G_foobar": "foobar",
-            "G_foo__bar": "foobar",
-            "G_foo__bar1__bar2": json.dumps({"foo": "bar"}),
-        }
+        {"G_foobar": "foobar", "G_foo__bar": "foobar", "G_foo__bar1__bar2": json.dumps({"foo": "bar"})}
     )
     settings = get_settings("doesnotexist.json")
     assert settings["foobar"] == "foobar"

@@ -9,9 +9,7 @@ _ = MessageFactory("guillotina")
 class ILayers(Interface):
 
     active_layers = schema.FrozenSet(
-        title=_("Active Layers"),
-        defaultFactory=frozenset,
-        value_type=schema.TextLine(title="Value"),
+        title=_("Active Layers"), defaultFactory=frozenset, value_type=schema.TextLine(title="Value")
     )
 
 

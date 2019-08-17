@@ -114,9 +114,7 @@ async def __add_to_pool(func: Callable[..., Coroutine[Any, Any, Any]], request, 
     util.add_job(func, request=request, args=args, kwargs=kwargs)
 
 
-def in_pool(
-    func: Callable[..., Coroutine[Any, Any, Any]], *args, request=None, **kwargs
-) -> ExecuteContext:
+def in_pool(func: Callable[..., Coroutine[Any, Any, Any]], *args, request=None, **kwargs) -> ExecuteContext:
     """
     Execute function in the async pool.
 
@@ -132,12 +130,7 @@ def in_pool(
 
 
 def after_request(
-    func: Callable[..., Coroutine[Any, Any, Any]],
-    *args,
-    _name=None,
-    _request=None,
-    _scope="",
-    **kwargs,
+    func: Callable[..., Coroutine[Any, Any, Any]], *args, _name=None, _request=None, _scope="", **kwargs
 ):
     """
     Execute after the request has successfully finished.

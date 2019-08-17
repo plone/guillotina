@@ -139,15 +139,11 @@ async def default_get(context, request):
             if adaptable:
                 result["available"].append(name)
                 serialize = True
-                schema_serializer = get_multi_adapter(
-                    (utility.interface, request), ISchemaSerializeToJson
-                )
+                schema_serializer = get_multi_adapter((utility.interface, request), ISchemaSerializeToJson)
                 result[name] = await schema_serializer()
         else:
             serialize = True
         if serialize:
-            schema_serializer = get_multi_adapter(
-                (utility.interface, request), ISchemaSerializeToJson
-            )
+            schema_serializer = get_multi_adapter((utility.interface, request), ISchemaSerializeToJson)
             result[name] = await schema_serializer()
     return result

@@ -34,9 +34,7 @@ def test_dotted_name():
 async def test_get_content_path(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
         request = get_mocked_request(db=requester.db)
@@ -53,9 +51,7 @@ async def test_get_content_path(container_requester):
 async def test_get_content_depth(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
         request = get_mocked_request(db=requester.db)
@@ -143,9 +139,7 @@ def test_safe_unidecode():
 async def test_object_utils(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
         request = get_mocked_request(db=requester.db)
@@ -177,9 +171,7 @@ async def test_run_async():
 async def test_navigator_preload(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
         request = get_mocked_request(db=requester.db)
@@ -213,9 +205,7 @@ async def test_navigator_get(container_requester):
             data=json.dumps({"@type": "Folder", "title": "Folder2", "id": "folder2"}),
         )
         response, status = await requester(
-            "POST",
-            "/db/guillotina",
-            data=json.dumps({"@type": "Item", "title": "Item0", "id": "item0"}),
+            "POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "Item0", "id": "item0"})
         )
         response, status = await requester(
             "POST",
@@ -255,9 +245,7 @@ async def test_navigator_get(container_requester):
 async def test_get_behavior(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
         request = get_mocked_request(db=requester.db)

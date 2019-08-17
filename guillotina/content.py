@@ -305,9 +305,7 @@ class Folder(Resource):
             value.__txn__ = trns
             trns.register(value)
 
-    async def async_get(
-        self, key: str, default=None, suppress_events=False
-    ) -> Optional[IBaseObject]:
+    async def async_get(self, key: str, default=None, suppress_events=False) -> Optional[IBaseObject]:
         """
         Asynchronously get an object inside this folder
 
@@ -490,10 +488,7 @@ def load_cached_schema():
                 else:
                     name = iface
                 behaviors_registrations.append(get_utility(IBehavior, name=name))
-            SCHEMA_CACHE[factory.type_name] = {
-                "behaviors": behaviors_registrations,
-                "schema": factory.schema,
-            }
+            SCHEMA_CACHE[factory.type_name] = {"behaviors": behaviors_registrations, "schema": factory.schema}
     for iface, utility in get_utilities_for(IBehavior):
         if isinstance(iface, str):
             name = iface
@@ -670,9 +665,7 @@ async def duplicate(
 
     if new_id is not None:
         if await destination_ob.async_contains(new_id):
-            raise PreconditionFailed(
-                context, f"Destination already has object with the id {new_id}"
-            )
+            raise PreconditionFailed(context, f"Destination already has object with the id {new_id}")
     else:
         count = 1
         new_id = f"{context.id}-duplicate-{count}"
@@ -713,11 +706,7 @@ async def duplicate(
 
     await notify(
         ObjectDuplicatedEvent(
-            new_obj,
-            context,
-            destination_ob,
-            new_id,
-            payload={"id": new_id, "destination": destination},
+            new_obj, context, destination_ob, new_id, payload={"id": new_id, "destination": destination}
         )
     )
     return new_obj

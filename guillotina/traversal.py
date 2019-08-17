@@ -153,9 +153,7 @@ class BaseMatchInfo(AbstractMatchInfo):
 
     @contextmanager
     def set_current_app(self, app):
-        assert app in self._apps, "Expected one of the following apps {!r}, got {!r}".format(
-            self._apps, app
-        )
+        assert app in self._apps, "Expected one of the following apps {!r}, got {!r}".format(self._apps, app)
         prev = self._current_app
         self._current_app = app
         try:
@@ -186,17 +184,13 @@ class BaseMatchInfo(AbstractMatchInfo):
                     header_name = "XG-Timing-{}-{}".format(idx, event_name)
                     resp.headers[header_name] = "{0:.5f}".format((timing - last) * 1000)
                     last = timing
-                resp.headers["XG-Timing-Total"] = "{0:.5f}".format(
-                    (last - request._initialized) * 1000
-                )
+                resp.headers["XG-Timing-Total"] = "{0:.5f}".format((last - request._initialized) * 1000)
                 txn = task_vars.txn.get()
                 if txn is not None:
                     resp.headers["XG-Total-Cache-hits"] = str(txn._cache._hits)
                     resp.headers["XG-Total-Cache-misses"] = str(txn._cache._misses)
                     resp.headers["XG-Total-Cache-stored"] = str(txn._cache._stored)
-                    resp.headers["XG-Num-Queries"] = str(
-                        txn._query_count_end - txn._query_count_start
-                    )
+                    resp.headers["XG-Num-Queries"] = str(txn._query_count_end - txn._query_count_start)
                     for idx, query in enumerate(txn._queries.keys()):
                         counts = txn._queries[query]
                         duration = "{0:.5f}".format(counts[1] * 1000)
@@ -408,8 +402,7 @@ class TraversalRouter(AbstractRouter):
         """Main function to resolve a request."""
         if request.method not in app_settings["http_methods"]:
             raise HTTPMethodNotAllowed(
-                method=request.method,
-                allowed_methods=[k for k in app_settings["http_methods"].keys()],
+                method=request.method, allowed_methods=[k for k in app_settings["http_methods"].keys()]
             )
         method = app_settings["http_methods"][request.method]
 

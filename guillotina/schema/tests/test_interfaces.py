@@ -89,6 +89,4 @@ class Test__fields(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.TestSuite(
-        (unittest.makeSuite(Test__is_field), unittest.makeSuite(Test__fields))
-    )
+    return unittest.TestSuite((unittest.makeSuite(Test__is_field), unittest.makeSuite(Test__fields)))

@@ -122,15 +122,12 @@ class DeserializeFromJson(object):
                     except ValueDeserializationError as e:
                         errors.append({"message": e.message, "field": name, "error": e})
                     except AttributeError:
-                        logger.warning(
-                            f"AttributeError setting data on field {name}", exc_info=True
-                        )
+                        logger.warning(f"AttributeError setting data on field {name}", exc_info=True)
                     except Exception:
                         if not isinstance(getattr(type(obj), name, None), property):
                             # we can not set data on properties
                             logger.warning(
-                                "Error setting data on field, falling back to setattr",
-                                exc_info=True,
+                                "Error setting data on field, falling back to setattr", exc_info=True
                             )
                             setattr(obj, name, value)
                             changed = True

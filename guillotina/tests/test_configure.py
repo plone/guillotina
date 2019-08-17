@@ -27,9 +27,7 @@ async def test_register_service(container_requester):
             return {"foo": "bar"}
 
     configure.register_configuration(
-        TestService,
-        dict(context=IContainer, name="@foobar", permission="guillotina.ViewContent"),
-        "service",
+        TestService, dict(context=IContainer, name="@foobar", permission="guillotina.ViewContent"), "service"
     )
 
     assert len(configure.get_configurations("guillotina.tests", "service")) == cur_count + 1  # noqa
@@ -52,9 +50,7 @@ async def test_register_service_permission(container_requester):
 
     configure.permission("guillotina.NoBody", "Nobody has access")
     configure.register_configuration(
-        TestService,
-        dict(context=IContainer, name="@foobar2", permission="guillotina.NoBody"),
-        "service",
+        TestService, dict(context=IContainer, name="@foobar2", permission="guillotina.NoBody"), "service"
     )
 
     assert len(configure.get_configurations("guillotina.tests", "service")) == cur_count + 1  # noqa
@@ -88,9 +84,7 @@ async def test_register_contenttype(container_requester):
         "contenttype",
     )
 
-    assert (
-        len(configure.get_configurations("guillotina.tests", "contenttype")) == cur_count + 1
-    )  # noqa
+    assert len(configure.get_configurations("guillotina.tests", "contenttype")) == cur_count + 1  # noqa
 
     async with container_requester as requester:
         config = requester.root.app.config
@@ -151,10 +145,7 @@ async def test_register_behavior(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina/@types")
         type_ = [s for s in response if s["title"] == "MyType2"][0]
-        assert (
-            "foobar"
-            in type_["definitions"]["guillotina.tests.test_configure.IMyBehavior"]["properties"]
-        )
+        assert "foobar" in type_["definitions"]["guillotina.tests.test_configure.IMyBehavior"]["properties"]
 
     # also get_all_possible_schemas_for_type should come with this new behavior
     behaviors_schemas = get_all_possible_schemas_for_type("MyType2")
@@ -221,9 +212,7 @@ def test_loading_configuration_does_not_load_subpackage_definition():
     root = ApplicationRoot(None, None)
     config = ConfigurationMachine()
     root.config = config
-    app_configurator = ApplicationConfigurator(
-        ["guillotina", "guillotina.test_package"], config, root, {}
-    )
+    app_configurator = ApplicationConfigurator(["guillotina", "guillotina.test_package"], config, root, {})
 
     loaded = app_configurator.load_application(guillotina)
     # it should not load sub package configuration

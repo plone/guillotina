@@ -97,9 +97,7 @@ class ApplicationConfigurator:
             if not module.__name__.startswith(module_name)
         ] + [module_name for module_name in self.contrib_apps if module_name != module.__name__]
         # services
-        return configure.load_all_configurations(
-            self.root.config, module.__name__, excluded_modules
-        )
+        return configure.load_all_configurations(self.root.config, module.__name__, excluded_modules)
 
     def configure_application(self, module_name):
         if module_name in self.configured:
@@ -145,9 +143,7 @@ class GuillotinaAIOHTTPApplication(web.Application):
                 if isinstance(e, TIDConflictError):
                     label = "TID Conflict Error detected"
                 tid = getattr(getattr(request, "_txn", None), "_tid", "not issued")
-                logger.debug(
-                    f"{label}, retrying request, tid: {tid}, retries: {retries + 1})", exc_info=True
-                )
+                logger.debug(f"{label}, retrying request, tid: {tid}, retries: {retries + 1})", exc_info=True)
                 request._retry_attempt = retries + 1
                 request.clear_futures()
                 return await self._handle(request, retries + 1)
@@ -160,13 +156,7 @@ class GuillotinaAIOHTTPApplication(web.Application):
 
     def _make_request(self, message, payload, protocol, writer, task, _cls=Request):
         return _cls(
-            message,
-            payload,
-            protocol,
-            writer,
-            task,
-            self._loop,
-            client_max_size=self._client_max_size,
+            message, payload, protocol, writer, task, self._loop, client_max_size=self._client_max_size
         )
 
 
@@ -252,9 +242,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     # Initialize global (threadlocal) ZCA configuration
     config = root.config = ConfigurationMachine()
 
-    app_configurator = ApplicationConfigurator(
-        settings.get("applications") or [], config, root, settings
-    )
+    app_configurator = ApplicationConfigurator(settings.get("applications") or [], config, root, settings)
 
     configure.scan("guillotina.renderers")
     configure.scan("guillotina.api")
@@ -335,11 +323,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
 
     root.set_root_user(app_settings["root_user"])
 
-    if (
-        app_settings.get("jwk")
-        and app_settings.get("jwk").get("k")
-        and app_settings.get("jwk").get("kty")
-    ):
+    if app_settings.get("jwk") and app_settings.get("jwk").get("k") and app_settings.get("jwk").get("kty"):
         key = jwk.JWK.from_json(json.dumps(app_settings.get("jwk")))
         app_settings["jwk"] = key
         # {"k":"QqzzWH1tYqQO48IDvW7VH7gvJz89Ita7G6APhV-uLMo","kty":"oct"}

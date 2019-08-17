@@ -89,10 +89,7 @@ class SerializeToJson(object):
                 ):
                     # make sure the schema isn't filtered
                     continue
-                if (
-                    not getattr(behavior, "auto_serialize", True)
-                    and dotted_name not in included_ifaces
-                ):
+                if not getattr(behavior, "auto_serialize", True) and dotted_name not in included_ifaces:
                     continue
             if IAsyncBehavior.implementedBy(behavior.__class__):
                 # providedBy not working here?
@@ -120,10 +117,7 @@ class SerializeToJson(object):
                 dotted_name in self.omit
                 or (
                     len(self.include) > 0
-                    and (
-                        dotted_name not in self.include
-                        and schema.__identifier__ not in self.include
-                    )
+                    and (dotted_name not in self.include and schema.__identifier__ not in self.include)
                 )
             ):
                 # make sure the fields aren't filtered
@@ -144,8 +138,7 @@ class SerializeToJson(object):
             value = await apply_coroutine(field.get, context)
         except Exception:
             logger.warning(
-                f"Could not find value for schema field"
-                f"({field.__name__}), falling back to getattr"
+                f"Could not find value for schema field" f"({field.__name__}), falling back to getattr"
             )
             value = getattr(context, field.__name__, default)
         result = json_compatible(value)
@@ -192,15 +185,11 @@ class SerializeFolderToJson(SerializeToJson):
                 ):
                     if fullobjects:
                         result["items"].append(
-                            await get_multi_adapter(
-                                (member, self.request), IResourceSerializeToJson
-                            )()
+                            await get_multi_adapter((member, self.request), IResourceSerializeToJson)()
                         )
                     else:
                         result["items"].append(
-                            await get_multi_adapter(
-                                (member, self.request), IResourceSerializeToJsonSummary
-                            )()
+                            await get_multi_adapter((member, self.request), IResourceSerializeToJsonSummary)()
                         )
         result["length"] = length
 

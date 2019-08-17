@@ -1789,9 +1789,7 @@ class ObjectTests(unittest.TestCase):
         class IPerson(Interface):
             """A schema that participate to a cycle"""
 
-            unit = Object(
-                schema=IUnit, title=_("Unit"), description=_("Unit description"), required=False
-            )
+            unit = Object(schema=IUnit, title=_("Unit"), description=_("Unit description"), required=False)
 
         IUnit["boss"].schema = IPerson
         IUnit["members"].value_type.schema = IPerson

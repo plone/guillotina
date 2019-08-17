@@ -46,9 +46,7 @@ async def custom_type_container_requester(guillotina):
 async def test_set_dynamic_behavior(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"})
         )
         assert status == 201
 
@@ -76,9 +74,7 @@ async def test_set_dynamic_behavior(custom_type_container_requester):
 async def test_set_dynamic_context_behavior(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"})
         )
         assert status == 201
 
@@ -108,9 +104,7 @@ async def test_set_dynamic_context_behavior(custom_type_container_requester):
 async def test_auto_serialize_behavior(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"})
         )
         assert status == 201
 
@@ -141,9 +135,7 @@ async def test_auto_serialize_behavior(custom_type_container_requester):
 async def test_create_delete_dynamic_behavior(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"})
         )
         assert status == 201
 
@@ -208,9 +200,7 @@ async def test_create_delete_dynamic_behavior(custom_type_container_requester):
 async def test_delete_dynamic_behavior_url(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"})
         )
         assert status == 201
 
@@ -232,9 +222,7 @@ async def test_delete_dynamic_behavior_url(custom_type_container_requester):
 async def test_get_behaviors(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"})
         )
         assert status == 201
 
@@ -247,9 +235,7 @@ async def test_get_behaviors(custom_type_container_requester):
 async def test_can_not_delete_concrete_behaviors(custom_type_container_requester):
     async with custom_type_container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Foobar", "title": "Item1", "id": "item1"})
         )
         assert status == 201
 
@@ -429,10 +415,7 @@ async def test_add_dynamic_fields_invalid_type(container_requester):
                 {
                     "@behaviors": [IDynamicFieldValues.__identifier__],
                     IDynamicFieldValues.__identifier__: {
-                        "values": {
-                            "op": "assign",
-                            "value": {"key": "foobar", "value": "not-an-int"},
-                        }
+                        "values": {"op": "assign", "value": {"key": "foobar", "value": "not-an-int"}}
                     },
                 }
             ),
@@ -480,10 +463,7 @@ async def test_dynamic_fields_keyword_multi(container_requester):
                 {
                     "@behaviors": [IDynamicFieldValues.__identifier__],
                     IDynamicFieldValues.__identifier__: {
-                        "values": {
-                            "op": "assign",
-                            "value": {"key": "foobar", "value": ["foo", "bar"]},
-                        }
+                        "values": {"op": "assign", "value": {"key": "foobar", "value": ["foo", "bar"]}}
                     },
                 }
             ),
@@ -546,10 +526,7 @@ async def test_del_dynamic_field_value(container_requester):
                 {
                     "@behaviors": [IDynamicFieldValues.__identifier__],
                     IDynamicFieldValues.__identifier__: {
-                        "values": {
-                            "op": "assign",
-                            "value": {"key": "foobar", "value": ["foo", "bar"]},
-                        }
+                        "values": {"op": "assign", "value": {"key": "foobar", "value": ["foo", "bar"]}}
                     },
                 }
             ),
@@ -563,9 +540,7 @@ async def test_del_dynamic_field_value(container_requester):
             data=json.dumps(
                 {
                     "@behaviors": [IDynamicFieldValues.__identifier__],
-                    IDynamicFieldValues.__identifier__: {
-                        "values": {"op": "del", "value": "foobar"}
-                    },
+                    IDynamicFieldValues.__identifier__: {"values": {"op": "del", "value": "foobar"}},
                 }
             ),
         )

@@ -55,8 +55,7 @@ class SMTPMailEndpoint(object):
                 except Exception:
                     reschedule = True
                     logger.error(
-                        "Error sending mail {} times, retrying again".format(tries + 1),
-                        exc_info=True,
+                        "Error sending mail {} times, retrying again".format(tries + 1), exc_info=True
                     )
             except RuntimeError:
                 # just dive out here.
@@ -113,9 +112,7 @@ class MailerUtility:
                     )
                     return self._endpoints[endpoint_name]
                 else:
-                    raise NoEndpointDefinedException(
-                        "{} mail endpoint not defined".format(endpoint_name)
-                    )
+                    raise NoEndpointDefinedException("{} mail endpoint not defined".format(endpoint_name))
             utility.from_settings(settings)
             asyncio.ensure_future(utility.initialize())
             self._endpoints[endpoint_name] = utility
@@ -138,15 +135,7 @@ class MailerUtility:
             message.attach(MIMEText(html, "html"))
 
     def get_message(
-        self,
-        recipient,
-        subject,
-        sender,
-        message=None,
-        text=None,
-        html=None,
-        message_id=None,
-        attachments=[],
+        self, recipient, subject, sender, message=None, text=None, html=None, message_id=None, attachments=[]
     ):
         if message is None:
             message = MIMEMultipart("alternative")
@@ -181,14 +170,7 @@ class MailerUtility:
         if sender is None:
             sender = self.settings.get("default_sender")
         message = self.get_message(
-            recipient,
-            subject,
-            sender,
-            message,
-            text,
-            html,
-            message_id=message_id,
-            attachments=attachments,
+            recipient, subject, sender, message, text, html, message_id=message_id, attachments=attachments
         )
         encoding.cleanup_message(message)
         if message["Date"] is None:

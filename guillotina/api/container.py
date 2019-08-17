@@ -39,9 +39,7 @@ from guillotina.utils import get_authenticated_user_id
             "description": "Get a list of containers",
             "content": {
                 "application/json": {
-                    "schema": {
-                        "properties": {"containers": {"type": "array", "items": {"type": "string"}}}
-                    }
+                    "schema": {"properties": {"containers": {"type": "array", "items": {"type": "string"}}}}
                 }
             },
         }
@@ -77,9 +75,7 @@ async def create_container(
 
     if emit_events:
         await notify(
-            ObjectAddedEvent(
-                container, parent, container.__name__, payload={"id": container.id, **data}
-            )
+            ObjectAddedEvent(container, parent, container.__name__, payload={"id": container.id, **data})
         )
     return container
 
@@ -105,9 +101,7 @@ async def create_container(
     responses={
         "200": {
             "description": "Container result",
-            "content": {
-                "application/json": {"schema": {"$ref": "#/components/schemas/BaseResource"}}
-            },
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BaseResource"}}},
         }
     },
 )
@@ -148,11 +142,7 @@ class DefaultPOST(Service):
         owner_id = get_authenticated_user_id()
 
         container = await create_container(
-            self.context,
-            data.pop("id"),
-            container_type=data.pop("@type"),
-            owner_id=owner_id,
-            **data,
+            self.context, data.pop("id"), container_type=data.pop("@type"), owner_id=owner_id, **data
         )
         task_vars.container.set(container)
 
@@ -169,21 +159,14 @@ class DefaultPOST(Service):
 
 
 @configure.service(
-    context=IContainer,
-    method="DELETE",
-    permission="guillotina.DeleteContainers",
-    summary="Delete container",
+    context=IContainer, method="DELETE", permission="guillotina.DeleteContainers", summary="Delete container"
 )
 class DefaultDELETE(content.DefaultDELETE):
     pass
 
 
-@configure.service(
-    context=IDatabase, method="DELETE", permission="guillotina.UmountDatabase", ignore=True
-)
-@configure.service(
-    context=IApplication, method="PUT", permission="guillotina.MountDatabase", ignore=True
-)
+@configure.service(context=IDatabase, method="DELETE", permission="guillotina.UmountDatabase", ignore=True)
+@configure.service(context=IApplication, method="PUT", permission="guillotina.MountDatabase", ignore=True)
 class NotImplemented(Service):
     async def __call__(self):
         raise HTTPNotImplemented(content={"message": "Function not implemented"}, status=501)

@@ -269,10 +269,7 @@ class TreeVocabularyTests(unittest.TestCase):
         from collections import OrderedDict
 
         d = {
-            (1, "new_york", "New York"): {
-                (2, "ny_albany", "Albany"): {},
-                (3, "ny_new_york", "New York"): {},
-            },
+            (1, "new_york", "New York"): {(2, "ny_albany", "Albany"): {}, (3, "ny_new_york", "New York"): {}},
             (4, "california", "California"): {
                 (5, "ca_los_angeles", "Los Angeles"): {},
                 (6, "ca_san_francisco", "San Francisco"): {},
@@ -301,8 +298,7 @@ class TreeVocabularyTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            [k for k in sorted(tv2.term_by_token.keys())],
-            ["auss", "aut", "bav", "ger", "regions", "tyr"],
+            [k for k in sorted(tv2.term_by_token.keys())], ["auss", "aut", "bav", "ger", "regions", "tyr"]
         )
 
         self.assertEqual(
@@ -381,13 +377,9 @@ class TreeVocabularyTests(unittest.TestCase):
         tv3 = self.tree_vocab_3()
         self.assertEqual(tv2.getTermPath("Bavaria"), ["Regions", "Germany", "Bavaria"])
         self.assertEqual(tv2.getTermPath("Austria"), ["Regions", "Austria"])
-        self.assertEqual(
-            tv2.getTermPath("Ausserfern"), ["Regions", "Austria", "Tyrol", "Ausserfern"]
-        )
+        self.assertEqual(tv2.getTermPath("Ausserfern"), ["Regions", "Austria", "Tyrol", "Ausserfern"])
         self.assertEqual(tv2.getTermPath("Non-existent"), [])
-        self.assertEqual(
-            tv3.getTermPath("database"), ["infrastructure", "data_transaction", "database"]
-        )
+        self.assertEqual(tv3.getTermPath("database"), ["infrastructure", "data_transaction", "database"])
 
     def test_len(self):
         # len returns the number of all nodes in the dict
@@ -432,12 +424,8 @@ class TreeVocabularyTests(unittest.TestCase):
     def test_nonunique_values_and_tokens(self):
         # Since we do term and value lookups, all terms' values and tokens
         # must be unique. This rule applies recursively.
-        self.assertRaises(
-            ValueError, self._getTargetClass().fromDict, {("one", "1"): {}, ("two", "1"): {}}
-        )
-        self.assertRaises(
-            ValueError, self._getTargetClass().fromDict, {("one", "1"): {}, ("one", "2"): {}}
-        )
+        self.assertRaises(ValueError, self._getTargetClass().fromDict, {("one", "1"): {}, ("two", "1"): {}})
+        self.assertRaises(ValueError, self._getTargetClass().fromDict, {("one", "1"): {}, ("one", "2"): {}})
         # Even nested tokens must be unique.
         self.assertRaises(
             ValueError,

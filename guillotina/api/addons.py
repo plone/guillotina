@@ -40,10 +40,7 @@ async def install(context, request):
 
     if id_to_install in config["enabled"]:
         return ErrorResponse(
-            "Duplicate",
-            _("Addon already installed"),
-            status=412,
-            reason=error_reasons.ALREADY_INSTALLED,
+            "Duplicate", _("Addon already installed"), status=412, reason=error_reasons.ALREADY_INSTALLED
         )
 
     await addons.install(context, id_to_install)
@@ -110,9 +107,7 @@ async def uninstall_addon(context, request, id_to_uninstall):
     responses={
         "200": {
             "description": "Get list of available and installed addons",
-            "content": {
-                "application/json": {"schema": {"$ref": "#/components/schemas/AddonResponse"}}
-            },
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AddonResponse"}}},
         }
     },
 )

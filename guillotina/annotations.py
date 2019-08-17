@@ -70,9 +70,7 @@ class AnnotationsAdapter(object):
         # we register the value
         value.__txn__ = self.obj.__txn__
         value.__txn__.register(value)
-        logger.debug(
-            "registering annotation {}({}), of: {}".format(value.__uuid__, key, value.__of__)
-        )
+        logger.debug("registering annotation {}({}), of: {}".format(value.__uuid__, key, value.__of__))
 
     async def async_del(self, key):
         annotation = await self.async_get(key)

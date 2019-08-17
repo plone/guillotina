@@ -66,16 +66,12 @@ class IExample(IResource):
 
     index_field("categories", field_mapping=CATEGORIES_MAPPING)
     categories = schema.List(
-        title="categories",
-        default=[],
-        value_type=schema.JSONField(title="term", schema=TERM_SCHEMA),
+        title="categories", default=[], value_type=schema.JSONField(title="term", schema=TERM_SCHEMA)
     )
 
     textline_field = schema.TextLine(title="kk", widget="testing", required=False)
     text_field = schema.Text(required=False)
-    dict_value = schema.Dict(
-        key_type=schema.TextLine(), value_type=schema.TextLine(), required=False
-    )
+    dict_value = schema.Dict(key_type=schema.TextLine(), value_type=schema.TextLine(), required=False)
     datetime = schema.Datetime(required=False)
 
     write_permission(write_protected="example.MyPermission")
@@ -116,11 +112,7 @@ class ITestBehavior(Interface):
     foobar_context = schema.TextLine(required=False, default="default-foobar")
 
     bucket_dict = fields.BucketDictField(
-        bucket_len=10,
-        required=False,
-        default=None,
-        key_type=schema.Text(),
-        value_type=schema.Text(),
+        bucket_len=10, required=False, default=None, key_type=schema.Text(), value_type=schema.Text()
     )
 
     read_permission(no_read_field="example.MyPermission")
@@ -156,9 +148,7 @@ class ITestNoSerializeBehavior(Interface):
     foobar = schema.TextLine()
 
 
-@configure.behavior(
-    title="", provides=ITestNoSerializeBehavior, for_="guillotina.interfaces.IResource"
-)
+@configure.behavior(title="", provides=ITestNoSerializeBehavior, for_="guillotina.interfaces.IResource")
 class GTestNoSerializeBehavior(ContextBehavior):
     auto_serialize = False
 
@@ -199,16 +189,10 @@ configure.register_configuration(
 
 
 @configure.service(
-    context=IApplication,
-    method="GET",
-    permission="guillotina.AccessContent",
-    name="@raise-http-exception",
+    context=IApplication, method="GET", permission="guillotina.AccessContent", name="@raise-http-exception"
 )
 @configure.service(
-    context=IApplication,
-    method="POST",
-    permission="guillotina.AccessContent",
-    name="@raise-http-exception",
+    context=IApplication, method="POST", permission="guillotina.AccessContent", name="@raise-http-exception"
 )
 async def raise_http_exception(context, request):
     raise HTTPUnprocessableEntity()
@@ -231,10 +215,7 @@ class AsyncUtility:
 
 
 @configure.service(
-    context=IApplication,
-    method="GET",
-    permission="guillotina.AccessContent",
-    name="@match/{foo}/{bar}",
+    context=IApplication, method="GET", permission="guillotina.AccessContent", name="@match/{foo}/{bar}"
 )
 async def matching_service(context, request):
     return request.matchdict
@@ -296,9 +277,7 @@ class MemoryFile(BaseCloudFile):
 _tmp_files: typing.Dict = {}
 
 
-@configure.adapter(
-    for_=(IResource, IRequest, IMemoryFileField), provides=IExternalFileStorageManager
-)
+@configure.adapter(for_=(IResource, IRequest, IMemoryFileField), provides=IExternalFileStorageManager)
 class InMemoryFileManager:
 
     file_class = MemoryFile

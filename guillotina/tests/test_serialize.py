@@ -102,10 +102,7 @@ async def test_deserialize_cloud_file(dummy_request):
         await get_adapter(
             IFileContent["file"].bind(obj),
             IJSONToValue,
-            args=[
-                "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-                obj,
-            ],
+            args=["data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", obj],
         )
         assert isinstance(obj.file, DBFile)
         assert obj.file.size == 42
@@ -127,17 +124,13 @@ class ITestSchema(Interface):
     tuple_of_text = schema.Tuple(value_type=schema.TextLine(), required=False)
     set_of_text = schema.Set(value_type=schema.TextLine(), required=False)
     frozenset_of_text = schema.FrozenSet(value_type=schema.TextLine(), required=False)
-    dict_value = schema.Dict(
-        key_type=schema.TextLine(), value_type=schema.TextLine(), required=False
-    )
+    dict_value = schema.Dict(key_type=schema.TextLine(), value_type=schema.TextLine(), required=False)
     datetime = schema.Datetime(required=False)
     date = schema.Date(required=False)
     time = schema.Time(required=False)
 
     patch_list = fields.PatchField(
-        schema.List(
-            value_type=schema.Dict(key_type=schema.Text(), value_type=schema.Text()), required=False
-        )
+        schema.List(value_type=schema.Dict(key_type=schema.Text(), value_type=schema.Text()), required=False)
     )
     patch_list_int = fields.PatchField(schema.List(value_type=schema.Int(), required=False))
     patch_dict = fields.PatchField(
@@ -154,17 +147,13 @@ class ITestSchema(Interface):
         value_type=schema.Dict(key_type=schema.Text(), value_type=schema.Text()),
     )
 
-    datetime_bucket_list = fields.BucketListField(
-        bucket_len=10, required=False, value_type=schema.Datetime()
-    )
+    datetime_bucket_list = fields.BucketListField(bucket_len=10, required=False, value_type=schema.Datetime())
 
     nested_patch = fields.PatchField(
         schema.Dict(
             required=False,
             key_type=schema.Text(),
-            value_type=fields.PatchField(
-                schema.List(value_type=schema.Object(schema=INestFieldSchema))
-            ),
+            value_type=fields.PatchField(schema.List(value_type=schema.Object(schema=INestFieldSchema))),
         )
     )
 
@@ -173,11 +162,7 @@ class ITestSchema(Interface):
     )
 
     patch_dict_of_obj = fields.PatchField(
-        schema.Dict(
-            required=False,
-            key_type=schema.Text(),
-            value_type=schema.Object(schema=INestFieldSchema),
-        )
+        schema.Dict(required=False, key_type=schema.Text(), value_type=schema.Object(schema=INestFieldSchema))
     )
 
     patch_tuple = fields.PatchField(
@@ -274,21 +259,14 @@ async def test_patch_list_field(dummy_request):
     await deserializer.set_schema(
         ITestSchema,
         content,
-        {
-            "patch_list": {
-                "op": "update",
-                "value": {"index": 3, "value": {"fooupdated": "barupdated"}},
-            }
-        },
+        {"patch_list": {"op": "update", "value": {"index": 3, "value": {"fooupdated": "barupdated"}}}},
         [],
     )
 
     assert len(content.patch_list) == 4
     assert content.patch_list[-1] == {"fooupdated": "barupdated"}
 
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_list": {"op": "del", "value": 3}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_list": {"op": "del", "value": 3}}, [])
     assert len(content.patch_list) == 3
 
 
@@ -296,9 +274,7 @@ async def test_patch_tuple_field(dummy_request):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_tuple": {"op": "append", "value": "foo"}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_tuple": {"op": "append", "value": "foo"}}, [])
 
     assert len(content.patch_tuple) == 1
     assert content.patch_tuple[0] == "foo"
@@ -332,9 +308,7 @@ async def test_patch_tuple_field(dummy_request):
     assert len(content.patch_tuple) == 2
     assert content.patch_tuple[1] == "barupdated"
 
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_tuple": {"op": "del", "value": 1}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_tuple": {"op": "del", "value": 1}}, [])
     assert len(content.patch_tuple) == 1
 
 
@@ -343,9 +317,7 @@ async def test_patch_list_field_invalid_type(dummy_request):
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     errors = []
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_list": {"op": "append", "value": 1}}, errors
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_list": {"op": "append", "value": 1}}, errors)
 
     assert len(getattr(content, "patch_list", [])) == 0
     assert len(errors) == 1
@@ -365,28 +337,20 @@ async def test_patch_dict_field(dummy_request):
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {"patch_dict": {"op": "assign", "value": {"key": "foo", "value": "bar"}}},
-        [],
+        ITestSchema, content, {"patch_dict": {"op": "assign", "value": {"key": "foo", "value": "bar"}}}, []
     )
 
     assert len(content.patch_dict) == 1
     assert content.patch_dict["foo"] == "bar"
 
     await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {"patch_dict": {"op": "assign", "value": {"key": "foo2", "value": "bar2"}}},
-        [],
+        ITestSchema, content, {"patch_dict": {"op": "assign", "value": {"key": "foo2", "value": "bar2"}}}, []
     )
 
     assert len(content.patch_dict) == 2
     assert content.patch_dict["foo2"] == "bar2"
 
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_dict": {"op": "del", "value": "foo2"}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_dict": {"op": "del", "value": "foo2"}}, [])
 
     assert len(content.patch_dict) == 1
     assert "foo2" not in content.patch_dict
@@ -398,10 +362,7 @@ async def test_patch_dict_field_invalid_type(dummy_request):
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     errors = []
     await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {"patch_dict": {"op": "assign", "value": {"key": 1, "value": "bar2"}}},
-        errors,
+        ITestSchema, content, {"patch_dict": {"op": "assign", "value": {"key": 1, "value": "bar2"}}}, errors
     )
 
     assert len(getattr(content, "patch_dict", {})) == 0
@@ -422,9 +383,7 @@ async def test_patch_int_field(dummy_request):
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     # Increment it and check it adds to default value
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_int": {"op": "inc", "value": 3}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_int": {"op": "inc", "value": 3}}, [])
     assert content.patch_int == 25
     # Check that increments 1 if no value is passed
     await deserializer.set_schema(ITestSchema, content, {"patch_int": {"op": "inc"}}, [])
@@ -434,14 +393,10 @@ async def test_patch_int_field(dummy_request):
     await deserializer.set_schema(ITestSchema, content, {"patch_int": {"op": "dec"}}, [])
     assert content.patch_int == 25
     # Decrement it
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_int": {"op": "dec", "value": 5}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_int": {"op": "dec", "value": 5}}, [])
     assert content.patch_int == 20
     # Check that we can have negative integers
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_int": {"op": "dec", "value": 25}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_int": {"op": "dec", "value": 25}}, [])
     assert content.patch_int == -5
 
     # Reset it to default value if not specified
@@ -449,9 +404,7 @@ async def test_patch_int_field(dummy_request):
     assert content.patch_int == 22
 
     # Reset it to specified value
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_int": {"op": "reset", "value": 400}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_int": {"op": "reset", "value": 400}}, [])
     assert content.patch_int == 400
 
     # Check that assumes value as 0 if there is no existing value and
@@ -464,9 +417,7 @@ async def test_patch_int_field(dummy_request):
     await deserializer.set_schema(ITestSchema, content, {"patch_int_no_default": {"op": "dec"}}, [])
     assert content.patch_int_no_default == -1
     content.patch_int_no_default = None
-    await deserializer.set_schema(
-        ITestSchema, content, {"patch_int_no_default": {"op": "reset"}}, []
-    )
+    await deserializer.set_schema(ITestSchema, content, {"patch_int_no_default": {"op": "reset"}}, [])
     assert content.patch_int_no_default == 0
 
 
@@ -476,9 +427,7 @@ async def test_patch_int_field_invalid_type(dummy_request):
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     for op in ("inc", "dec", "reset"):
         errors = []
-        await deserializer.set_schema(
-            ITestSchema, content, {"patch_int": {"op": op, "value": 3.3}}, errors
-        )
+        await deserializer.set_schema(ITestSchema, content, {"patch_int": {"op": op, "value": 3.3}}, errors)
         assert getattr(content, "patch_int", 0) == 0
         assert len(errors) == 1
         assert isinstance(errors[0]["error"], WrongType)
@@ -490,10 +439,7 @@ async def test_bucket_list_field(dummy_request):
     content.__txn__ = mocks.MockTransaction()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {"bucket_list": {"op": "append", "value": {"key": "foo", "value": "bar"}}},
-        [],
+        ITestSchema, content, {"bucket_list": {"op": "append", "value": {"key": "foo", "value": "bar"}}}, []
     )
     assert content.bucket_list.annotations_metadata[0]["len"] == 1
     assert await content.bucket_list.get(content, 0, 0) == {"key": "foo", "value": "bar"}
@@ -588,10 +534,7 @@ async def test_nested_patch_deserialize(dummy_request):
         {
             "nested_patch": {
                 "op": "assign",
-                "value": {
-                    "key": "foobar",
-                    "value": {"op": "append", "value": {"foo": "bar2", "bar": 2}},
-                },
+                "value": {"key": "foobar", "value": {"op": "append", "value": {"foo": "bar2", "bar": 2}}},
             }
         },
         errors,
@@ -742,10 +685,7 @@ async def test_bucket_dict_field(dummy_request):
     content.__txn__ = mocks.MockTransaction()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {"bucket_dict": {"op": "assign", "value": {"key": "foo", "value": "bar"}}},
-        [],
+        ITestSchema, content, {"bucket_dict": {"op": "assign", "value": {"key": "foo", "value": "bar"}}}, []
     )
     assert content.bucket_dict.buckets[0]["len"] == 1
     assert await content.bucket_dict.get(content, "foo") == "bar"
@@ -774,12 +714,7 @@ async def test_bucket_dict_field(dummy_request):
     await deserializer.set_schema(
         ITestSchema,
         content,
-        {
-            "bucket_dict": {
-                "op": "update",
-                "value": [{"key": one, "value": "1"}, {"key": two, "value": "2"}],
-            }
-        },
+        {"bucket_dict": {"op": "update", "value": [{"key": one, "value": "1"}, {"key": two, "value": "2"}]}},
         [],
     )
 

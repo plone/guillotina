@@ -30,9 +30,7 @@ async def test_get_container(container_requester):
 async def test_get_content(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina",
-            data=json.dumps({"@type": "Item", "id": "hello", "title": "Hola"}),
+            "POST", "/db/guillotina", data=json.dumps({"@type": "Item", "id": "hello", "title": "Hola"})
         )
         assert status == 201
         response, status = await requester("GET", "/db/guillotina/hello")
@@ -42,9 +40,7 @@ async def test_get_content(container_requester):
 async def test_content_paths_are_correct(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina",
-            data=json.dumps({"@type": "Item", "id": "hello", "title": "Hola"}),
+            "POST", "/db/guillotina", data=json.dumps({"@type": "Item", "id": "hello", "title": "Hola"})
         )
         assert status == 201
         response, status = await requester("GET", "/db/guillotina/hello")

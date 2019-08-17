@@ -127,9 +127,7 @@ class JWTValidator:
 
         try:
             validated_jwt = jwt.decode(
-                token["token"],
-                app_settings["jwt"]["secret"],
-                algorithms=[app_settings["jwt"]["algorithm"]],
+                token["token"], app_settings["jwt"]["secret"], algorithms=[app_settings["jwt"]["algorithm"]]
             )
             token["id"] = validated_jwt["id"]
             token["decoded"] = validated_jwt

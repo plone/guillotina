@@ -42,9 +42,7 @@ def field_converter(field, value, context):
         bound_field = field.field.bind(context)
         operation = query_adapter(bound_field, field.operation_type, name=operation_name)
         if operation is None:
-            raise ValueDeserializationError(
-                field, value, f'"{operation_name}" not a valid operation'
-            )
+            raise ValueDeserializationError(field, value, f'"{operation_name}" not a valid operation')
         value = operation(context, value.get("value"))
     elif isinstance(value, (dict, list)):
         value = get_adapter(field.field, IJSONToValue, args=[value, context])

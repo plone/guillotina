@@ -34,9 +34,7 @@ async def test_create_content_with_behavior(manager_type, redis_container, conta
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -106,9 +104,7 @@ async def test_large_upload_chunks(manager_type, redis_container, container_requ
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -140,9 +136,7 @@ async def test_tus(manager_type, redis_container, container_requester):
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -254,9 +248,7 @@ async def test_tus_unknown_size(manager_type, redis_container, container_request
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -321,9 +313,7 @@ async def test_copy_file_ob(manager_type, redis_container, container_requester):
         _, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
         response, status = await requester(
@@ -347,9 +337,7 @@ async def test_copy_file_ob(manager_type, redis_container, container_requester):
                     existing_id = attachment.file._blob.bid
                 else:
                     existing_id = attachment.file.uri
-                cfm = get_multi_adapter(
-                    (obj, request, IAttachment["file"].bind(attachment)), IFileManager
-                )
+                cfm = get_multi_adapter((obj, request, IAttachment["file"].bind(attachment)), IFileManager)
                 from_cfm = get_multi_adapter(
                     (obj, request, IAttachment["file"].bind(attachment)), IFileManager
                 )
@@ -366,9 +354,7 @@ async def test_tus_unfinished_error(manager_type, redis_container, container_req
         _, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -409,9 +395,7 @@ async def test_tus_with_empty_file(manager_type, redis_container, container_requ
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -494,9 +478,7 @@ async def test_update_filename_on_files(manager_type, redis_container, container
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -534,16 +516,12 @@ async def test_update_filename_on_files(manager_type, redis_container, container
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)
-async def test_should_fourohfour_with_invalid_fieldname(
-    manager_type, redis_container, container_requester
-):
+async def test_should_fourohfour_with_invalid_fieldname(manager_type, redis_container, container_requester):
     async with container_requester as requester:
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 
@@ -557,9 +535,7 @@ async def test_file_head(manager_type, redis_container, container_requester):
         _, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
         response, status = await requester(
@@ -584,9 +560,7 @@ async def test_file_head_not_found(manager_type, redis_container, container_requ
         _, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
 

@@ -25,7 +25,5 @@ async def test_get_uid_from_forwarded():
 
 async def test_get_forward_proto(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
-            "GET", "/db/guillotina", headers={"X-Forwarded-Proto": "https"}
-        )
+        response, status = await requester("GET", "/db/guillotina", headers={"X-Forwarded-Proto": "https"})
         assert response["@id"].startswith("https")

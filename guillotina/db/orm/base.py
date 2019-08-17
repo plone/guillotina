@@ -83,12 +83,8 @@ class BaseObject:
     __of__: Optional[IBaseObject] = ObjectProperty[Optional[IBaseObject]](  # type: ignore
         "_BaseObject__of", None
     )
-    __name__: Optional[str] = ObjectProperty[Optional[str]](
-        "_BaseObject__name", None
-    )  # type: ignore
-    __immutable_cache__: bool = ObjectProperty[bool](
-        "_BaseObject__immutable_cache", False
-    )  # type: ignore
+    __name__: Optional[str] = ObjectProperty[Optional[str]]("_BaseObject__name", None)  # type: ignore
+    __immutable_cache__: bool = ObjectProperty[bool]("_BaseObject__immutable_cache", False)  # type: ignore
     __new_marker__: bool = ObjectProperty[bool]("_BaseObject__new_marker", False)  # type: ignore
     __gannotations__: Dict = DictDefaultProperty("_BaseObject__annotations")  # type: ignore
     __txn__: Optional[ITransaction] = ObjectProperty[Optional[ITransaction]](  # type: ignore

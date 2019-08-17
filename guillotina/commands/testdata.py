@@ -126,9 +126,7 @@ class TestDataCommand(Command):
 
     def get_parser(self):
         parser = super(TestDataCommand, self).get_parser()
-        parser.add_argument(
-            "--per-node", help="How many items to import per node", type=int, default=30
-        )
+        parser.add_argument("--per-node", help="How many items to import per node", type=int, default=30)
         parser.add_argument("--depth", help="How deep to make the nodes", type=int, default=6)
         parser.add_argument("--container", help="Container to put data in", default="testdata")
         return parser
@@ -141,9 +139,7 @@ class TestDataCommand(Command):
 
         container = await db.async_get(self.arguments.container)
         if container is None:
-            container = await create_content(
-                "Container", id=self.arguments.container, title="Test Data"
-            )
+            container = await create_content("Container", id=self.arguments.container, title="Test Data")
             container.__name__ = self.arguments.container
             await db.async_set(self.arguments.container, container)
             await container.install()

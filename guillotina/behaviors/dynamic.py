@@ -59,9 +59,7 @@ class IDynamicFields(Interface):
     )
 
 
-@configure.behavior(
-    title="Dynamic fields", provides=IDynamicFields, for_="guillotina.interfaces.IResource"
-)
+@configure.behavior(title="Dynamic fields", provides=IDynamicFields, for_="guillotina.interfaces.IResource")
 class DynamicFieldsBehavior(ContextBehavior):
     """
     context behavior so we don't have to do an async load here...
@@ -76,9 +74,7 @@ class IDynamicFieldValues(Interface):
 
 
 @configure.behavior(
-    title="Dynamic field values",
-    provides=IDynamicFieldValues,
-    for_="guillotina.interfaces.IResource",
+    title="Dynamic field values", provides=IDynamicFieldValues, for_="guillotina.interfaces.IResource"
 )
 class DynamicFieldValuesBehavior(AnnotationBehavior):
     auto_serialize = False

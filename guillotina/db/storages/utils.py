@@ -8,9 +8,7 @@ def get_table_definition(name, schema, primary_keys=None):
     primary_keys = primary_keys or []
     pk = ""
     if len(primary_keys) > 0:
-        pk = ", CONSTRAINT pk_{} PRIMARY KEY({})".format(
-            clear_table_name(name), ", ".join(primary_keys)
-        )
+        pk = ", CONSTRAINT pk_{} PRIMARY KEY({})".format(clear_table_name(name), ", ".join(primary_keys))
     return "CREATE TABLE IF NOT EXISTS {} ({}{});".format(
         name, ",\n".join("{} {}".format(c, d) for c, d in schema.items()), pk
     )

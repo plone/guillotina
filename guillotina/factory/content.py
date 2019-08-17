@@ -53,9 +53,7 @@ class ApplicationRoot(object):
         interface = import_class(config["provides"])
         factory = import_class(config["factory"])
         try:
-            utility_object = lazy_apply(
-                factory, config.get("settings", {}), loop=loop or self._loop
-            )
+            utility_object = lazy_apply(factory, config.get("settings", {}), loop=loop or self._loop)
         except Exception:
             logger.error("Error initializing utility {}".format(repr(factory)), exc_info=True)
             raise

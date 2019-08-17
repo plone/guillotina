@@ -239,19 +239,13 @@ class Command(object):
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)
-        parser.add_argument(
-            "-c", "--configuration", default="config.yaml", help="Configuration file"
-        )
+        parser.add_argument("-c", "--configuration", default="config.yaml", help="Configuration file")
         parser.add_argument("--debug", dest="debug", action="store_true", help="Log verbose")
         parser.add_argument(
             "-m", "--monitor", action="store_true", dest="monitor", help="Monitor", default=False
         )
         parser.add_argument(
-            "--profile",
-            action="store_true",
-            dest="profile",
-            help="Profile execution",
-            default=False,
+            "--profile", action="store_true", dest="profile", help="Profile execution", default=False
         )
         parser.add_argument(
             "--profile-output", help="Where to store the output of the profile data", default=None
@@ -265,9 +259,7 @@ class Command(object):
         )
         parser.add_argument("--line-profiler-matcher", help="Line profiler execution", default=None)
         parser.add_argument(
-            "--line-profiler-output",
-            help="Where to store the output of the line profiler data",
-            default=None,
+            "--line-profiler-output", help="Where to store the output of the line profiler data", default=None
         )
         parser.add_argument("--override", action="append", help="Override configuration values")
         parser.set_defaults(debug=False)
@@ -292,9 +284,7 @@ def command_runner():
     parser = argparse.ArgumentParser(description="Guillotina command runner", add_help=False)
     parser.add_argument("command", nargs="?")
     parser.add_argument("-c", "--configuration", default="config.yaml", help="Configuration file")
-    parser.add_argument(
-        "-h", "--help", action="store_true", dest="help", help="Help", default=False
-    )
+    parser.add_argument("-h", "--help", action="store_true", dest="help", help="Help", default=False)
 
     arguments, _ = parser.parse_known_args()
     settings = get_settings(arguments.configuration)
@@ -332,9 +322,7 @@ Available commands:
     Command = resolve_dotted_name(_commands[arguments.command])
     if Command is None:
         return print(
-            "Could not resolve command {}:{}".format(
-                arguments.command, _commands[arguments.command]
-            )
+            "Could not resolve command {}:{}".format(arguments.command, _commands[arguments.command])
         )
 
     app_settings["__run_command__"] = arguments.command

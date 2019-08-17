@@ -22,12 +22,8 @@ class CreateCommand(Command):
             help="Template to use to generate project",
             choices=set(["application", "configuration"]),
         )
-        parser.add_argument(
-            "-w", "--overwrite", action="store_true", dest="overwrite", help="Overwrite"
-        )
-        parser.add_argument(
-            "-n", "--no-input", action="store_true", dest="no_input", help="No input"
-        )
+        parser.add_argument("-w", "--overwrite", action="store_true", dest="overwrite", help="Overwrite")
+        parser.add_argument("-n", "--no-input", action="store_true", dest="no_input", help="No input")
         parser.add_argument("-o", "--output", default="./", dest="output", help="Output directory")
         return parser
 

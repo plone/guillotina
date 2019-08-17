@@ -22,9 +22,7 @@ class IBehavior(Interface):
         required=False,
     )
 
-    interface = schema.Object(
-        title="Interface describing this behavior", required=True, schema=IInterface
-    )
+    interface = schema.Object(title="Interface describing this behavior", required=True, schema=IInterface)
 
     marker = schema.Object(
         title="Marker interface for objects sporting this behavior",
@@ -36,9 +34,7 @@ class IBehavior(Interface):
         schema=IInterface,
     )
 
-    factory = schema.Object(
-        title="An adapter factory for the behavior", required=True, schema=Interface
-    )
+    factory = schema.Object(title="An adapter factory for the behavior", required=True, schema=Interface)
 
 
 class IBehaviorSchemaAwareFactory(Interface):

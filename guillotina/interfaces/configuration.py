@@ -28,13 +28,7 @@ class IConfigurationContext(Interface):
     )
 
     def action(
-        discriminator,
-        callable,
-        args=None,
-        kw=None,
-        order=0,  # noqa: N805
-        includepath=None,
-        info=None,
+        discriminator, callable, args=None, kw=None, order=0, includepath=None, info=None  # noqa: N805
     ):
         """Record a configuration action
 

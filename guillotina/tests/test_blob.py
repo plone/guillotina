@@ -10,9 +10,7 @@ async def test_create_blob(db, guillotina_main):
     login()
 
     async with transaction(db=db):
-        container = await create_content_in_container(
-            db, "Container", "container", title="Container"
-        )
+        container = await create_content_in_container(db, "Container", "container", title="Container")
 
         blob = Blob(container)
         container.blob = blob
@@ -31,9 +29,7 @@ async def test_write_blob_data(db, guillotina_main):
     async with transaction(db=db):
         container = await db.async_get("container")
         if container is None:
-            container = await create_content_in_container(
-                db, "Container", "container", title="Container"
-            )
+            container = await create_content_in_container(db, "Container", "container", title="Container")
 
         blob = Blob(container)
         container.blob = blob
@@ -57,9 +53,7 @@ async def test_write_large_blob_data(db, guillotina_main):
     async with transaction(db=db):
         container = await db.async_get("container")
         if container is None:
-            container = await create_content_in_container(
-                db, "Container", "container", title="Container"
-            )
+            container = await create_content_in_container(db, "Container", "container", title="Container")
 
         blob = Blob(container)
         container.blob = blob

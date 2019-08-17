@@ -231,13 +231,7 @@ def make_mocked_request(
     time_service.timeout.side_effect = timeout
 
     req = Request(
-        message,
-        payload,
-        protocol,
-        payload_writer,
-        time_service,
-        task,
-        client_max_size=client_max_size,
+        message, payload, protocol, payload_writer, time_service, task, client_max_size=client_max_size
     )
 
     match_info = UrlMappingMatchInfo({}, mock.Mock())

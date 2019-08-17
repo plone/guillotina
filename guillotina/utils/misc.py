@@ -68,9 +68,7 @@ def strings_differ(string1: str, string2: str) -> bool:
     return invalid_bits != 0
 
 
-def get_random_string(
-    length: int = 30, allowed_chars: str = string.ascii_letters + string.digits
-) -> str:
+def get_random_string(length: int = 30, allowed_chars: str = string.ascii_letters + string.digits) -> str:
     """
     Heavily inspired by Plone/Django
     Returns a securely generated random string.
@@ -231,9 +229,7 @@ def lazy_apply(func, *call_args, **call_kwargs):
         else:
             if param.name in call_kwargs:
                 kwargs[param.name] = call_kwargs.pop(param.name)
-            elif param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD and len(call_args) >= (
-                idx + 1
-            ):
+            elif param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD and len(call_args) >= (idx + 1):
                 args.append(call_args[idx])
     return func(*args, **kwargs)
 
@@ -387,8 +383,7 @@ async def get_registry(context=None) -> typing.Optional[IRegistry]:
 
 def get_request_scheme(req) -> str:
     scheme = req.headers.get(
-        "X-Forwarded-Protocol",
-        req.headers.get("X-Scheme", req.headers.get("X-Forwarded-Proto", None)),
+        "X-Forwarded-Protocol", req.headers.get("X-Scheme", req.headers.get("X-Forwarded-Proto", None))
     )
 
     if scheme:

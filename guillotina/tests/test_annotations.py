@@ -17,9 +17,7 @@ async def test_create_annotation(db, guillotina_main):
     login()
 
     async with transaction(db=db):
-        container = await create_content_in_container(
-            db, "Container", "container", title="Container"
-        )
+        container = await create_content_in_container(db, "Container", "container", title="Container")
         ob = await create_content_in_container(container, "Item", "foobar")
 
         annotations = IAnnotations(ob)

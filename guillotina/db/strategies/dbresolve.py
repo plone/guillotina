@@ -19,9 +19,7 @@ class DBResolveStrategy(SimpleStrategy):
         return True
 
 
-@configure.adapter(
-    for_=ITransaction, provides=IDBTransactionStrategy, name="dbresolve_readcommitted"
-)
+@configure.adapter(for_=ITransaction, provides=IDBTransactionStrategy, name="dbresolve_readcommitted")
 class DBResolveReadCommittedStrategy(DBResolveStrategy):
     """
     Delay starting transaction to the commit phase so reads will be inconsistent.

@@ -94,11 +94,7 @@ class FieldPropertyTests(_Base, _Integration):
         from guillotina.schema import Text
 
         field = Text(
-            __name__="testing",
-            description="DESCRIPTION",
-            default="DEFAULT",
-            readonly=True,
-            required=True,
+            __name__="testing", description="DESCRIPTION", default="DEFAULT", readonly=True, required=True
         )
         cname = self._getTargetClass().__name__
         prop = self._makeOne(field, name="override")
@@ -113,11 +109,7 @@ class FieldPropertyTests(_Base, _Integration):
         from guillotina.schema import Text
 
         field = Text(
-            __name__="testing",
-            description="DESCRIPTION",
-            default="DEFAULT",
-            readonly=True,
-            required=True,
+            __name__="testing", description="DESCRIPTION", default="DEFAULT", readonly=True, required=True
         )
 
         prop = self._makeOne(field=field)
@@ -271,11 +263,7 @@ class FieldPropertyTests(_Base, _Integration):
         sync_subscribers.append(log.append)
         self.assertEqual(log, [])
         field = Text(
-            __name__="testing",
-            description="DESCRIPTION",
-            default="DEFAULT",
-            readonly=True,
-            required=True,
+            __name__="testing", description="DESCRIPTION", default="DEFAULT", readonly=True, required=True
         )
         self.assertEqual(len(log), 6)
         event = log[0]
@@ -293,9 +281,7 @@ class FieldPropertyTests(_Base, _Integration):
         from guillotina.component.event import sync_subscribers
         from guillotina.schema.fieldproperty import FieldUpdatedEvent
 
-        field = Text(
-            __name__="testing", description="DESCRIPTION", default="DEFAULT", required=True
-        )
+        field = Text(__name__="testing", description="DESCRIPTION", default="DEFAULT", required=True)
         prop = self._makeOne(field=field)
 
         class Foo(object):
@@ -342,11 +328,7 @@ class FieldPropertyStoredThroughFieldTests(_Base, _Integration):
         from guillotina.schema import Text
 
         field = Text(
-            __name__="testing",
-            description="DESCRIPTION",
-            default="DEFAULT",
-            readonly=True,
-            required=True,
+            __name__="testing", description="DESCRIPTION", default="DEFAULT", readonly=True, required=True
         )
         cname = self._getTargetClass().__name__
         prop = self._makeOne(field, name="override")
@@ -561,9 +543,7 @@ class FieldPropertyStoredThroughFieldTests(_Base, _Integration):
         from guillotina.component.event import sync_subscribers
         from guillotina.schema.fieldproperty import FieldUpdatedEvent
 
-        field = Text(
-            __name__="testing", description="DESCRIPTION", default="DEFAULT", required=True
-        )
+        field = Text(__name__="testing", description="DESCRIPTION", default="DEFAULT", required=True)
         prop = self._makeOne(field=field)
 
         class Foo(object):
@@ -594,11 +574,7 @@ class FieldPropertyStoredThroughFieldTests(_Base, _Integration):
         sync_subscribers.append(log.append)
         self.assertEqual(log, [])
         field = Text(
-            __name__="testing",
-            description="DESCRIPTION",
-            default="DEFAULT",
-            readonly=True,
-            required=True,
+            __name__="testing", description="DESCRIPTION", default="DEFAULT", readonly=True, required=True
         )
         self.assertEqual(len(log), 6)
         # these are fieldproperties in the field

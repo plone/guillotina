@@ -56,12 +56,7 @@ def get_server():
 
     server = TestServer(aioapp)
     loop.run_until_complete(server.start_server(loop=loop))
-    _server = {
-        "loop": loop,
-        "server": server,
-        "client": TestClient(server, loop=loop),
-        "app": aioapp,
-    }
+    _server = {"loop": loop, "server": server, "client": TestClient(server, loop=loop), "app": aioapp}
     return _server
 
 
@@ -181,20 +176,11 @@ class APICall(Directive):
         raw_service_definition = self.get_service_definition(ob, tail)
         if raw_service_definition is not None:
             for key, value in raw_service_definition.items():
-                if key in (
-                    "method",
-                    "permission",
-                    "summary",
-                    "description",
-                    "responses",
-                    "parameters",
-                ):
+                if key in ("method", "permission", "summary", "description", "responses", "parameters"):
                     if callable(value):
                         value = value(ob)
                     service_definition[key] = value
-            service_definition["context"] = get_dotted_name(
-                raw_service_definition.get("context", Interface)
-            )
+            service_definition["context"] = get_dotted_name(raw_service_definition.get("context", Interface))
 
         resp_body = None
         if resp.headers.get("content-type") == "application/json":
@@ -204,9 +190,7 @@ class APICall(Directive):
             resp_body = loop.run_until_complete(resp.text())
 
         content = {
-            "path_spec": (
-                self.options.get("path_spec") or self.options.get("method", "GET").upper()
-            ),
+            "path_spec": (self.options.get("path_spec") or self.options.get("method", "GET").upper()),
             "request": {
                 "method": self.options.get("method", "GET").upper(),
                 "method_lower": self.options.get("method", "GET").lower(),
@@ -259,8 +243,7 @@ class APICall(Directive):
             rst_content += "\n    :query {type} {name}: {description}".format(**parameter)
 
         responses = {
-            code: info["description"]
-            for code, info in service_definition.get("responses", {}).items()
+            code: info["description"] for code, info in service_definition.get("responses", {}).items()
         }
         responses.setdefault("401", "You are not authorized to perform the operation")
         responses.setdefault("404", "The resource does not exist")

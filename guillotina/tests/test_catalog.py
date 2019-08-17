@@ -86,14 +86,7 @@ async def test_get_index_data_with_accessors(dummy_request):
     fields = await data(indexes=["categories"])
     # but should also pull in `foobar_accessor` because it does not
     # have a field specified for it.
-    for field_name in (
-        "categories_accessor",
-        "foobar_accessor",
-        "type_name",
-        "categories",
-        "uuid",
-        "tid",
-    ):
+    for field_name in ("categories_accessor", "foobar_accessor", "type_name", "categories", "uuid", "tid"):
         assert field_name in fields
     assert "title" not in fields
 
@@ -172,9 +165,7 @@ async def test_reindex_endpoint(container_requester):
 
 async def test_async_reindex_endpoint(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
-            "POST", "/db/guillotina/@async-catalog-reindex", data="{}"
-        )
+        response, status = await requester("POST", "/db/guillotina/@async-catalog-reindex", data="{}")
         assert status == 200
 
 
@@ -190,14 +181,10 @@ async def test_create_catalog(container_requester):
 async def test_query_stored_json(container_requester):
     async with container_requester as requester:
         await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"})
         )
 
         conn = requester.db.storage.read_conn
@@ -233,14 +220,10 @@ async def test_query_pg_catalog(container_requester):
 
     async with container_requester as requester:
         await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"})
         )
 
         async with requester.db.get_transaction_manager() as tm, await tm.begin():
@@ -276,9 +259,7 @@ async def test_fulltext_query_pg_catalog(container_requester):
         await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps(
-                {"@type": "Item", "id": "item1", "title": "Something interesting about foobar"}
-            ),
+            data=json.dumps({"@type": "Item", "id": "item1", "title": "Something interesting about foobar"}),
         )
         await requester(
             "POST",
@@ -318,13 +299,7 @@ async def test_parse_bbb_plone(dummy_guillotina):
     content = test_utils.create_content(Container)
     parser = BaseParser(None, content)
     result = parser(
-        {
-            "portal_type": "Folder",
-            "SearchableText": "foobar",
-            "b_size": 45,
-            "b_start": 50,
-            "path.depth": 2,
-        }
+        {"portal_type": "Folder", "SearchableText": "foobar", "b_size": 45, "b_start": 50, "path.depth": 2}
     )
     assert "searchabletext__or" in result["params"]
     assert "title__in" in result["params"]["searchabletext__or"]
@@ -374,14 +349,7 @@ async def test_pg_field_parser(dummy_guillotina):
     parser = Parser(None, content)
 
     # test convert operators
-    for q1, q2 in (
-        ("gte", ">="),
-        ("gt", ">"),
-        ("eq", "="),
-        ("lte", "<="),
-        ("not", "!="),
-        ("lt", "<"),
-    ):
+    for q1, q2 in (("gte", ">="), ("gt", ">"), ("eq", "="), ("lte", "<="), ("not", "!="), ("lt", "<")):
         where, value, select = parser.process_queried_field(f"depth__{q1}", "2")
         assert f" {q2} " in where
         assert value == [2]

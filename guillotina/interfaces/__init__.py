@@ -149,13 +149,4 @@ ADDONS_KEY = "guillotina.registry.IAddons.enabled"
 INHERIT_KEY = "Inheritance"
 
 # Attributes not allowed in deserialization payloads
-RESERVED_ATTRS = (
-    "__name__",
-    "__behaviors__",
-    "__parent__",
-    "__acl__",
-    "id",
-    "parent",
-    "uuid",
-    "type_name",
-)
+RESERVED_ATTRS = ("__name__", "__behaviors__", "__parent__", "__acl__", "id", "parent", "uuid", "type_name")

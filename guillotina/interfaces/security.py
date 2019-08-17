@@ -78,10 +78,7 @@ class IRole(Interface):  # pylint: disable=E0239
     """A role object."""
 
     id = TextLine(
-        title="Id",
-        description="Id as which this role will be known and used.",
-        readonly=True,
-        required=True,
+        title="Id", description="Id as which this role will be known and used.", readonly=True, required=True
     )
 
     title = TextLine(title="Title", description="Provides a title for the role.", required=True)
@@ -322,14 +319,10 @@ class IPermission(Interface):  # pylint: disable=E0239
         required=True,
     )
 
-    title = TextLine(
-        title=_("Title"), description=_("Provides a title for the permission."), required=True
-    )
+    title = TextLine(title=_("Title"), description=_("Provides a title for the permission."), required=True)
 
     description = Text(
-        title=_("Description"),
-        description=_("Provides a description for the permission."),
-        required=False,
+        title=_("Description"), description=_("Provides a description for the permission."), required=False
     )
 
 
@@ -376,9 +369,7 @@ class ISecurityPolicy(Interface):  # pylint: disable=E0239
         Check if user has permission on object
         """
 
-    def cached_decision(
-        parent: IBaseObject, principal: str, groups: typing.List[str], permission: str
-    ):
+    def cached_decision(parent: IBaseObject, principal: str, groups: typing.List[str], permission: str):
         """
         """
 

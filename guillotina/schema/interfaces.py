@@ -69,15 +69,10 @@ class IField(Interface):
         need to be bound.
         """
 
-    title = TextLine(
-        title=_("Title"), description=_("A short summary or label"), default="", required=False
-    )
+    title = TextLine(title=_("Title"), description=_("A short summary or label"), default="", required=False)
 
     description = Text(
-        title=_("Description"),
-        description=_("A description of the field"),
-        default="",
-        required=False,
+        title=_("Description"), description=_("A description of the field"), default="", required=False
     )
 
     required = Bool(
@@ -200,9 +195,7 @@ class IMinMax(IOrderable):
 
     min = Field(title=_("Start of the range"), required=False, default=None)
 
-    max = Field(
-        title=_("End of the range (including the value itself)"), required=False, default=None
-    )
+    max = Field(title=_("End of the range (including the value itself)"), required=False, default=None)
 
 
 class IMinMaxLen(ILen):
@@ -305,9 +298,7 @@ class IInt(IMinMax, IField):
 
     min = Int(title=_("Start of the range"), required=False, default=None)
 
-    max = Int(
-        title=_("End of the range (including the value itself)"), required=False, default=None
-    )
+    max = Int(title=_("End of the range (including the value itself)"), required=False, default=None)
 
     default = Int(
         title=_("Default Value"),
@@ -377,9 +368,7 @@ class IDottedName(INativeStringLine):
     min_dots = Int(title=_("Minimum number of dots"), required=True, min=0, default=0)
 
     max_dots = Int(
-        title=_("Maximum number of dots (should not be less than min_dots)"),
-        required=False,
-        default=None,
+        title=_("Maximum number of dots (should not be less than min_dots)"), required=False, default=None
     )
 
 
@@ -420,9 +409,7 @@ class ICollection(IMinMaxLen, IIterable, IContainer):
 
     value_type = Field(
         title=_("Value Type"),
-        description=_(
-            "Field value items must conform to the given type, " "expressed via a Field."
-        ),
+        description=_("Field value items must conform to the given type, " "expressed via a Field."),
     )
 
     unique = Bool(
@@ -492,9 +479,7 @@ class IDict(IMinMaxLen, IIterable, IContainer):
     of restrictions for keys and values contained in the dict.
     """
 
-    key_type = Attribute(
-        "key_type", _("Field keys must conform to the given type, expressed via a Field.")
-    )
+    key_type = Attribute("key_type", _("Field keys must conform to the given type, expressed via a Field."))
 
     value_type = Attribute(
         "value_type", _("Field values must conform to the given type, expressed " "via a Field.")

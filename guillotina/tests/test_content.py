@@ -98,11 +98,7 @@ async def test_creator_used_from_content_creation(dummy_guillotina):
 
     configure.register_configuration(
         Folder,
-        dict(
-            type_name="TestType2",
-            behaviors=[],
-            module=guillotina.tests,  # for registration initialization
-        ),
+        dict(type_name="TestType2", behaviors=[], module=guillotina.tests),  # for registration initialization
         "contenttype",
     )
     root = get_utility(IApplication, name="root")

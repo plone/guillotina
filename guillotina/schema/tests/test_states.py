@@ -53,9 +53,7 @@ class StateSelectionTest(unittest.TestCase):
                 description="The state you like the most.",
                 vocabulary=StateVocabulary(),
             )
-            state4 = Choice(
-                title="Name", description="The name of your new state", vocabulary="states"
-            )
+            state4 = Choice(title="Name", description="The name of your new state", vocabulary="states")
 
         return IBirthInfo
 

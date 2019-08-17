@@ -36,18 +36,12 @@ class FileManager(object):
         iface = resolve_dotted_name(app_settings["cloud_storage"])
         alsoProvides(field, iface)
 
-        self.file_storage_manager = get_multi_adapter(
-            (context, request, field), IFileStorageManager
-        )
+        self.file_storage_manager = get_multi_adapter((context, request, field), IFileStorageManager)
         self.dm = get_adapter(
-            self.file_storage_manager,
-            IUploadDataManager,
-            name=app_settings.get("cloud_datamanager") or "db",
+            self.file_storage_manager, IUploadDataManager, name=app_settings.get("cloud_datamanager") or "db"
         )
 
-    async def prepare_download(
-        self, disposition=None, filename=None, content_type=None, size=None, **kwargs
-    ):
+    async def prepare_download(self, disposition=None, filename=None, content_type=None, size=None, **kwargs):
         if disposition is None:
             disposition = self.request.query.get("disposition", "attachment")
 
@@ -61,11 +55,7 @@ class FileManager(object):
         cors_renderer = app_settings["cors_renderer"](self.request)
         headers = await cors_renderer.get_headers()
         headers.update(
-            {
-                "Content-Disposition": '{}; filename="{}"'.format(
-                    disposition, filename or file.filename
-                )
-            }
+            {"Content-Disposition": '{}; filename="{}"'.format(disposition, filename or file.filename)}
         )
 
         download_resp = StreamResponse(headers=headers)
@@ -82,15 +72,11 @@ class FileManager(object):
             # file exists on cloud platform still
             if not await apply_coroutine(self.file_storage_manager.exists):
                 raise HTTPNotFound(content={"message": "File object does not exist"})
-        download_resp = await self.prepare_download(
-            disposition, filename, content_type, size, **kwargs
-        )
+        download_resp = await self.prepare_download(disposition, filename, content_type, size, **kwargs)
         await download_resp.write_eof()
         return download_resp
 
-    async def download(
-        self, disposition=None, filename=None, content_type=None, size=None, **kwargs
-    ):
+    async def download(self, disposition=None, filename=None, content_type=None, size=None, **kwargs):
         download_resp = None
         async for chunk in self.file_storage_manager.iter_data(**kwargs):
             if download_resp is None:
@@ -103,9 +89,7 @@ class FileManager(object):
             await download_resp.drain()
         if download_resp is None:
             # deferred
-            download_resp = await self.prepare_download(
-                disposition, filename, content_type, size, **kwargs
-            )
+            download_resp = await self.prepare_download(disposition, filename, content_type, size, **kwargs)
         await download_resp.write_eof()
         return download_resp
 
@@ -161,20 +145,15 @@ class FileManager(object):
         if offset != ob_offset:
             raise HTTPConflict(
                 content={
-                    "reason": f"Current upload offset({offset}) does not match "
-                    f"object offset {ob_offset}"
+                    "reason": f"Current upload offset({offset}) does not match " f"object offset {ob_offset}"
                 }
             )
 
-        read_bytes = await self.file_storage_manager.append(
-            self.dm, self._iterate_request_data(), offset
-        )
+        read_bytes = await self.file_storage_manager.append(self.dm, self._iterate_request_data(), offset)
 
         if to_upload and read_bytes != to_upload:
             # check length matches if provided
-            raise HTTPPreconditionFailed(
-                content={"reason": "Upload size does not match what was provided"}
-            )
+            raise HTTPPreconditionFailed(content={"reason": "Upload size does not match what was provided"})
         await self.dm.update(offset=offset + read_bytes)
 
         headers = {
@@ -288,30 +267,20 @@ class FileManager(object):
         if "X-UPLOAD-FILENAME" in self.request.headers:
             filename = self.request.headers["X-UPLOAD-FILENAME"]
         elif "X-UPLOAD-FILENAME-B64" in self.request.headers:
-            filename = base64.b64decode(self.request.headers["X-UPLOAD-FILENAME-B64"]).decode(
-                "utf-8"
-            )
+            filename = base64.b64decode(self.request.headers["X-UPLOAD-FILENAME-B64"]).decode("utf-8")
         else:
             filename = uuid.uuid4().hex
 
         await self.dm.start()
         await self.dm.update(
-            content_type=self.request.content_type,
-            md5=md5,
-            filename=filename,
-            extension=extension,
-            size=size,
+            content_type=self.request.content_type, md5=md5, filename=filename, extension=extension, size=size
         )
         await self.file_storage_manager.start(self.dm)
 
-        read_bytes = await self.file_storage_manager.append(
-            self.dm, self._iterate_request_data(), 0
-        )
+        read_bytes = await self.file_storage_manager.append(self.dm, self._iterate_request_data(), 0)
 
         if read_bytes != size:
-            raise HTTPPreconditionFailed(
-                content={"reason": "Upload size does not match what was provided"}
-            )
+            raise HTTPPreconditionFailed(content={"reason": "Upload size does not match what was provided"})
 
         await self.file_storage_manager.finish(self.dm)
         await self.dm.finish()
@@ -320,16 +289,11 @@ class FileManager(object):
         async for chunk in self.file_storage_manager.iter_data():
             yield chunk
 
-    async def save_file(
-        self, generator, content_type=None, filename=None, extension=None, size=None
-    ):
+    async def save_file(self, generator, content_type=None, filename=None, extension=None, size=None):
         await self.dm.load()
         await self.dm.start()
         await self.dm.update(
-            content_type=content_type,
-            filename=filename or uuid.uuid4().hex,
-            extension=extension,
-            size=size,
+            content_type=content_type, filename=filename or uuid.uuid4().hex, extension=extension, size=size
         )
         await self.file_storage_manager.start(self.dm)
 

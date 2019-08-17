@@ -4,9 +4,7 @@ import json
 
 
 def test_vhm_url(dummy_guillotina):
-    request = make_mocked_request(
-        "GET", "/", {"X-VirtualHost-Monster": "https://foobar.com/foo/bar"}
-    )
+    request = make_mocked_request("GET", "/", {"X-VirtualHost-Monster": "https://foobar.com/foo/bar"})
 
     assert get_url(request, "/c/d") == "https://foobar.com/foo/bar/c/d"
 

@@ -34,12 +34,7 @@ IS_TRAVIS = "TRAVIS" in os.environ
 DATABASE = os.environ.get("DATABASE", "DUMMY")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
 
-annotations = {
-    "testdatabase": DATABASE,
-    "test_dbschema": DB_SCHEMA,
-    "redis": None,
-    "travis": IS_TRAVIS,
-}
+annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None, "travis": IS_TRAVIS}
 
 
 def base_settings_configurator(settings):
@@ -117,15 +112,11 @@ def get_db_settings(pytest_node=None):
         "password": "",
     }
 
-    options = dict(
-        host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432)
-    )
+    options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
 
     if annotations["testdatabase"] == "cockroachdb":
         configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
-        configure_db(
-            settings["databases"]["db-custom"], **options, user="root", storage="cockroach"
-        )
+        configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
         configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
     else:
         configure_db(settings["databases"]["db"], **options)

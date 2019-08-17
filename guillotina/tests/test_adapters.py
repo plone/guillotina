@@ -50,9 +50,7 @@ async def test_SerializeToJson(dummy_request):  # noqa: N802
 
 
 def test_DefaultJSONSummarySerializer(dummy_request):  # noqa: N802
-    adapter = get_multi_adapter(
-        (Container(), dummy_request), interface=IResourceSerializeToJsonSummary
-    )
+    adapter = get_multi_adapter((Container(), dummy_request), interface=IResourceSerializeToJsonSummary)
     assert isinstance(adapter, DefaultJSONSummarySerializer)
 
 
@@ -65,14 +63,8 @@ def test_all(dummy_request):
         (schema.Int(), serialize_schema_field.DefaultIntSchemaFieldSerializer),
         (schema.Bool(), serialize_schema_field.DefaultBoolSchemaFieldSerializer),
         (schema.List(), serialize_schema_field.DefaultCollectionSchemaFieldSerializer),
-        (
-            schema.Choice(values=("one", "two")),
-            serialize_schema_field.DefaultChoiceSchemaFieldSerializer,
-        ),
-        (
-            schema.Object(schema=IResource),
-            serialize_schema_field.DefaultObjectSchemaFieldSerializer,
-        ),
+        (schema.Choice(values=("one", "two")), serialize_schema_field.DefaultChoiceSchemaFieldSerializer),
+        (schema.Object(schema=IResource), serialize_schema_field.DefaultObjectSchemaFieldSerializer),
         (schema.Date(), serialize_schema_field.DefaultDateSchemaFieldSerializer),
         (schema.Time(), serialize_schema_field.DefaultTimeSchemaFieldSerializer),
         (schema.Dict(), serialize_schema_field.DefaultDictSchemaFieldSerializer),
@@ -80,9 +72,7 @@ def test_all(dummy_request):
     ]
     container = Container()
     for field, klass in mapping:
-        adapter = get_multi_adapter(
-            (field, container, dummy_request), interface=ISchemaFieldSerializeToJson
-        )
+        adapter = get_multi_adapter((field, container, dummy_request), interface=ISchemaFieldSerializeToJson)
         assert isinstance(adapter, klass)
 
 

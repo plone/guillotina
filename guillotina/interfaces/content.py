@@ -160,8 +160,7 @@ class ILocation(Interface):
 
     __name__ = TextLine(
         title="The name within the parent",
-        description="The object can be looked up from the parent's "
-        "sublocations using this name.",
+        description="The object can be looked up from the parent's " "sublocations using this name.",
         required=False,
         default=None,
         readonly=True,

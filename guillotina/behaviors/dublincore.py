@@ -27,9 +27,7 @@ class IDublinCore(Interface):
     index_field("contributors", type="keyword")
 
     title = schema.TextLine(
-        title="Title",
-        description="The first unqualified Dublin Core 'Title' element value.",
-        required=False,
+        title="Title", description="The first unqualified Dublin Core 'Title' element value.", required=False
     )
 
     description = schema.Text(
@@ -40,8 +38,7 @@ class IDublinCore(Interface):
 
     creation_date = schema.Datetime(
         title="Creation Date",
-        description="The date and time that an object is created. "
-        "\nThis is normally set automatically.",
+        description="The date and time that an object is created. " "\nThis is normally set automatically.",
         required=False,
     )
 

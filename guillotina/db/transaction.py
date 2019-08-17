@@ -57,10 +57,7 @@ class cache:
 
             if result is not None:
                 try:
-                    if (
-                        not this.check_state_size
-                        or len(result["state"]) < self._cache.max_cache_record_size
-                    ):
+                    if not this.check_state_size or len(result["state"]) < self._cache.max_cache_record_size:
                         await self._cache.set(result, **key_args)
                 except (TypeError, KeyError):
                     await self._cache.set(result, **key_args)
@@ -92,9 +89,7 @@ class Transaction:
         # which would correspond with one connection
         self._lock = asyncio.Lock(loop=loop)
 
-        self._strategy = get_adapter(
-            self, ITransactionStrategy, name=manager._storage._transaction_strategy
-        )
+        self._strategy = get_adapter(self, ITransactionStrategy, name=manager._storage._transaction_strategy)
 
         self._cache = query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
 
@@ -197,9 +192,7 @@ class Transaction:
             except Exception:
                 # We need to catch the exceptions if we want all hooks
                 # to be called
-                logger.error(
-                    "Error in after commit hook exec in %s ", hook, exc_info=sys.exc_info()
-                )
+                logger.error("Error in after commit hook exec in %s ", hook, exc_info=sys.exc_info())
         self._after_commit = []
 
     # BEGIN TXN
@@ -432,9 +425,7 @@ class Transaction:
         obj.__txn__ = self
         return obj
 
-    async def _get_batch_children(
-        self, parent: IBaseObject, keys: List[str]
-    ) -> AsyncIterator[IBaseObject]:
+    async def _get_batch_children(self, parent: IBaseObject, keys: List[str]) -> AsyncIterator[IBaseObject]:
         for litem in await self._manager._storage.get_children(self, parent.__uuid__, keys):
             if len(litem["state"]) < self._cache.max_cache_record_size:
                 await self._cache.set(litem, container=parent, id=litem["id"])
@@ -549,23 +540,17 @@ class Transaction:
             )
 
     async def get_page_of_keys(self, parent_oid, page=1, page_size=1000):
-        return await self._manager._storage.get_page_of_keys(
-            self, parent_oid, page=page, page_size=page_size
-        )
+        return await self._manager._storage.get_page_of_keys(self, parent_oid, page=page, page_size=page_size)
 
     @profilable
     async def iterate_keys(self, oid, page_size=1000):
         page = 1
-        keys = await self._manager._storage.get_page_of_keys(
-            self, oid, page=page, page_size=page_size
-        )
+        keys = await self._manager._storage.get_page_of_keys(self, oid, page=page, page_size=page_size)
         while len(keys) > 0:
             for key in keys:
                 yield key
             page += 1
-            keys = await self._manager._storage.get_page_of_keys(
-                self, oid, page=page, page_size=page_size
-            )
+            keys = await self._manager._storage.get_page_of_keys(self, oid, page=page, page_size=page_size)
 
     def __enter__(self):
         task_vars.tm.set(self.manager)

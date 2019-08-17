@@ -53,9 +53,7 @@ class BlobFile:
 
         self._started_writing = True
 
-        await self.transaction.write_blob_chunk(
-            self.blob.bid, self.blob.resource_uid, self.blob.chunks, data
-        )
+        await self.transaction.write_blob_chunk(self.blob.bid, self.blob.resource_uid, self.blob.chunks, data)
 
         self.blob.chunks += 1
         self.blob.size += len(data)
@@ -74,9 +72,7 @@ class BlobFile:
         try:
             return (await self.transaction.read_blob_chunk(self.blob.bid, chunk_index))["data"]
         except (KeyError, TypeError):
-            raise BlobChunkNotFound(
-                "Could not find blob({}), chunk({})".format(self.blob.bid, chunk_index)
-            )
+            raise BlobChunkNotFound("Could not find blob({}), chunk({})".format(self.blob.bid, chunk_index))
 
     async def iter_async_read(self):
         """

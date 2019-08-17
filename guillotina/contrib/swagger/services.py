@@ -23,11 +23,7 @@ here = os.path.dirname(os.path.realpath(__file__))
 
 
 @configure.service(
-    method="GET",
-    context=Interface,
-    name="@swagger",
-    permission="guillotina.swagger.View",
-    ignore=True,
+    method="GET", context=Interface, name="@swagger", permission="guillotina.swagger.View", ignore=True
 )
 class SwaggerDefinitionService(Service):
     __allow_access__ = True
@@ -95,11 +91,7 @@ class SwaggerDefinitionService(Service):
                             for sub_path, sub_service_def in trav_defs.items():
                                 sub_service_def["permission"] = service_def["permission"]
                                 self.load_swagger_info(
-                                    api_def,
-                                    os.path.join(path, sub_path),
-                                    method,
-                                    tags,
-                                    sub_service_def,
+                                    api_def, os.path.join(path, sub_path), method, tags, sub_service_def
                                 )
                     else:
                         self.load_swagger_info(api_def, path, method, tags, service_def)

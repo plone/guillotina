@@ -31,9 +31,7 @@ class ServerCommand(Command):
             help="Auto reload on code changes",
             default=False,
         )
-        parser.add_argument(
-            "--port", help="Override port to run this server on", default=None, type=int
-        )
+        parser.add_argument("--port", help="Override port to run this server on", default=None, type=int)
         parser.add_argument("--host", help="Override host to run this server on", default=None)
         return parser
 

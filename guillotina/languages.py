@@ -433,10 +433,7 @@ _combinedlanguagelist = {
     "pt-gw": {"name": "Portuguese (Guiné-Bissau)", "native": "Português (Guiné-Bissau)"},
     "pt-mz": {"name": "Portuguese (Moçambique)", "native": "Português (Moçambique)"},
     "pt-pt": {"name": "Portuguese (Portugal)", "native": "Português (Portugal)"},
-    "pt-st": {
-        "name": "Portuguese (São Tomé e Príncipe)",
-        "native": "Português (São Tomé e Príncipe)",
-    },
+    "pt-st": {"name": "Portuguese (São Tomé e Príncipe)", "native": "Português (São Tomé e Príncipe)"},
     "sd-in": {"name": "Sindhi (India)"},
     "sd-pk": {"name": "Sindhi (Pakistan)"},
     "sr-ba": {"name": "Serbian (Bosnia-Herzegovina)"},

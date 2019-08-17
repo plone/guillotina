@@ -50,9 +50,6 @@ async def get_user_info(context, request):
     result["groups"] = {}
     for group in groups:
         group_object = group_search.get_principal(group, principal)
-        result["groups"][group_object.id] = {
-            "roles": group_object.roles,
-            "groups": group_object.groups,
-        }
+        result["groups"][group_object.id] = {"roles": group_object.roles, "groups": group_object.groups}
 
     return result

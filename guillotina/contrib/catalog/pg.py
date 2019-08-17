@@ -428,9 +428,7 @@ class PGSearchUtility(DefaultSearchUtility):
             async with tm.storage.pool.acquire() as conn:
                 for func in PG_FUNCTIONS:
                     await conn.execute(func)
-                for index in [BasicJsonIndex("container_id")] + [
-                    v for v in get_pg_indexes().values()
-                ]:
+                for index in [BasicJsonIndex("container_id")] + [v for v in get_pg_indexes().values()]:
                     sqls = index.get_index_sql(tm.storage)
                     for sql in sqls:
                         logger.debug(f"Creating index:\n {sql}")
@@ -635,12 +633,7 @@ class PGSearchUtility(DefaultSearchUtility):
         recursively go through all content to reindex jsonb...
         """
 
-        data = {
-            "count": 0,
-            "transaction": None,
-            "transactions": 0,
-            "tm": get_current_transaction()._manager,
-        }
+        data = {"count": 0, "transaction": None, "transactions": 0, "tm": get_current_transaction()._manager}
 
         try:
             data["table_name"] = data["tm"]._storage._objects_table_name
@@ -689,6 +682,4 @@ class PGSearchUtility(DefaultSearchUtility):
         statement_sql = txn._manager._storage._sql.get("JSONB_UPDATE", table_name)
         conn = await txn.get_connection()
         async with txn._lock:
-            await conn.fetch(
-                statement_sql, oid, json_value  # The OID of the object  # JSON catalog
-            )
+            await conn.fetch(statement_sql, oid, json_value)  # The OID of the object  # JSON catalog

@@ -21,9 +21,7 @@ configure.permission("guillotina.AccessPreflight", "Access Preflight View")
 
 configure.permission("guillotina.ReadConfiguration", "Read a configuration")
 configure.permission("guillotina.WriteConfiguration", "Write a configuration")
-configure.permission(
-    "guillotina.RegisterConfigurations", "Register a new configuration on Registry"
-)
+configure.permission("guillotina.RegisterConfigurations", "Register a new configuration on Registry")
 
 configure.permission("guillotina.ManageAddons", "Manage addons on a container")
 
@@ -56,14 +54,9 @@ configure.role("guillotina.Reviewer", "Reviewer", "can review content", True)
 configure.role("guillotina.Owner", "Content Manager", "can add/delete content", True)
 
 configure.role("guillotina.Manager", "Container Manager", False)
+configure.role("guillotina.ContainerAdmin", "Container Administrator", "can set settings on container", False)
 configure.role(
-    "guillotina.ContainerAdmin", "Container Administrator", "can set settings on container", False
-)
-configure.role(
-    "guillotina.ContainerCreator",
-    "Container DB Manager",
-    "Can create containers and db connections",
-    False,
+    "guillotina.ContainerCreator", "Container DB Manager", "Can create containers and db connections", False
 )
 configure.role("guillotina.ContainerDeleter", "Container Remover", "Can destroy a container", False)
 

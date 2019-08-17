@@ -66,9 +66,7 @@ def settings_for_object(ob):
         if principal_permissions is not None:
             settings = principal_permissions.get_principals_and_permissions()
             settings.sort()
-            data["prinperm"] = [
-                {"principal": pr, "permission": p, "setting": s} for (p, pr, s) in settings
-            ]
+            data["prinperm"] = [{"principal": pr, "permission": p, "setting": s} for (p, pr, s) in settings]
 
         principal_roles = IPrincipalRoleMap(ob, None)
         if principal_roles is not None:
@@ -107,9 +105,7 @@ def settings_for_object(ob):
 
     settings = role_permission_manager.get_roles_and_permissions()
     data["roleperm"] = [
-        {"permission": p, "role": r, "setting": s}
-        for (p, r, s) in settings
-        if p not in locked_permissions
+        {"permission": p, "role": r, "setting": s} for (p, r, s) in settings if p not in locked_permissions
     ]
 
     return result

@@ -91,10 +91,7 @@ class BaseCache:
             ]
         else:
             if type_ == "modified":
-                keys = [
-                    self.get_key(oid=ob.__uuid__),
-                    self.get_key(container=ob.__parent__, id=ob.id),
-                ]
+                keys = [self.get_key(oid=ob.__uuid__), self.get_key(container=ob.__parent__, id=ob.id)]
             elif type_ == "added":
                 keys = [
                     self.get_key(container=ob.__parent__, variant="len"),

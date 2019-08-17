@@ -144,9 +144,7 @@ class index_field(MetadataDictDirective):  # noqa: N801
         kw.setdefault("type", "text")
         if kw.get("type") not in self.allowed_types:
             raise Exception(
-                "Invalid index type {}. Avilable types are: {}".format(
-                    name, ", ".join(self.allowed_types)
-                )
+                "Invalid index type {}. Avilable types are: {}".format(name, ", ".join(self.allowed_types))
             )
         return {name: kw}
 

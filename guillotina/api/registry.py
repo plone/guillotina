@@ -102,10 +102,7 @@ async def get_registry_service(context, request):
                 "schema": {
                     "type": "object",
                     "title": "Registry",
-                    "properties": {
-                        "interface": {"type": "string"},
-                        "initial_values": {"type": "object"},
-                    },
+                    "properties": {"interface": {"type": "string"}, "initial_values": {"type": "object"}},
                     "required": ["interface"],
                 }
             }
@@ -152,14 +149,10 @@ class Register(Service):
     name="@registry/{dotted_name}",
     summary="Update registry setting",
     validate=True,
-    parameters=[
-        {"in": "path", "name": "dotter_name", "required": "true", "schema": {"type": "string"}}
-    ],
+    parameters=[{"in": "path", "name": "dotter_name", "required": "true", "schema": {"type": "string"}}],
     requestBody={
         "required": True,
-        "content": {
-            "application/json": {"schema": {"$ref": "#/components/schemas/UpdateRegistry"}}
-        },
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/UpdateRegistry"}}},
     },
     responses={"200": {"description": "Successfully wrote configuration"}},
 )
@@ -199,9 +192,7 @@ class Write(Service):
             new_value = get_adapter((field), IJSONToValue, args=[value, self.context])
         except ComponentLookupError:
             return ErrorResponse(
-                "DeserializationError",
-                "Cannot deserialize type {}".format(str(self.field)),
-                status=412,
+                "DeserializationError", "Cannot deserialize type {}".format(str(self.field)), status=412
             )
 
         try:

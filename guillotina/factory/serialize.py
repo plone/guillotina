@@ -25,15 +25,8 @@ class ApplicationToJson(object):
         self.request = request
 
     async def __call__(self):
-        result = {
-            "databases": [],
-            "static_file": [],
-            "static_directory": [],
-            "@type": "Application",
-        }
-        allowed = get_security_policy().check_permission(
-            "guillotina.GetDatabases", self.application
-        )
+        result = {"databases": [], "static_file": [], "static_directory": [], "@type": "Application"}
+        allowed = get_security_policy().check_permission("guillotina.GetDatabases", self.application)
 
         for x in self.application._items.keys():
             if IDatabase.providedBy(self.application._items[x]) and allowed:

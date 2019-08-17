@@ -63,9 +63,7 @@ class WebsocketGetToken(Service):
         }
         claims.update(data)
         payload = ujson.dumps(claims)
-        jwetoken = jwe.JWE(
-            payload.encode("utf-8"), json_encode({"alg": "A256KW", "enc": "A256CBC-HS512"})
-        )
+        jwetoken = jwe.JWE(payload.encode("utf-8"), json_encode({"alg": "A256KW", "enc": "A256CBC-HS512"}))
         jwetoken.add_recipient(get_jwk_key())
         token = jwetoken.serialize(compact=True)
         return token

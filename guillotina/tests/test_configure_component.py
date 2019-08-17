@@ -93,9 +93,7 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
             pass
 
         _cfg_ctx = _makeConfigContext()
-        self.assertRaises(
-            ComponentConfigurationError, self._callFUT, _cfg_ctx, [], [Interface], IFoo
-        )
+        self.assertRaises(ComponentConfigurationError, self._callFUT, _cfg_ctx, [], [Interface], IFoo)
 
     def test_multiple_factory_multiple_for_(self):
         from zope.interface import Interface
@@ -115,12 +113,7 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
 
         _cfg_ctx = _makeConfigContext()
         self.assertRaises(
-            ComponentConfigurationError,
-            self._callFUT,
-            _cfg_ctx,
-            [Foo, Bar],
-            [Interface, IBar],
-            IFoo,
+            ComponentConfigurationError, self._callFUT, _cfg_ctx, [Foo, Bar], [Interface, IBar], IFoo
         )
 
     def test_no_for__factory_not_adapt(self):
@@ -257,9 +250,7 @@ class Test_subscriber(unittest.TestCase):  # noqa: N801
             pass
 
         _cfg_ctx = _makeConfigContext()
-        self.assertRaises(
-            TypeError, self._callFUT, _cfg_ctx, (Interface,), handler=_handler, provides=IFoo
-        )
+        self.assertRaises(TypeError, self._callFUT, _cfg_ctx, (Interface,), handler=_handler, provides=IFoo)
 
     def test_w_factory_w_handler(self):
         from zope.interface import Interface
@@ -374,9 +365,7 @@ class Test_utility(unittest.TestCase):  # noqa: N801
 
         _COMPONENT = object
         _cfg_ctx = _makeConfigContext()
-        self.assertRaises(
-            TypeError, self._callFUT, _cfg_ctx, factory=_Factory, component=_COMPONENT
-        )
+        self.assertRaises(TypeError, self._callFUT, _cfg_ctx, factory=_Factory, component=_COMPONENT)
 
     def test_w_factory_wo_provides_factory_no_implement(self):
         class _Factory(object):
@@ -660,9 +649,7 @@ class Test_view(unittest.TestCase):  # noqa: N801
         # Register the adapter
         action = _cfg_ctx._actions[0][1]
         self.assertEqual(action["callable"], handler)
-        self.assertEqual(
-            action["discriminator"], ("view", (Interface, IViewType), "test", Interface)
-        )
+        self.assertEqual(action["discriminator"], ("view", (Interface, IViewType), "test", Interface))
         self.assertEqual(action["args"][0], "registerAdapter")
         self.assertEqual(action["args"][1], _View)
         self.assertEqual(action["args"][2], (Interface, IViewType))

@@ -35,11 +35,7 @@ from guillotina.utils import get_authenticated_user
 class Login(Service):
     async def __call__(self):
         data = await self.request.json()
-        creds = {
-            "type": "basic",
-            "token": data["password"],
-            "id": data.get("username", data.get("login")),
-        }
+        creds = {"type": "basic", "token": data["password"], "id": data.get("username", data.get("login"))}
 
         for validator in app_settings["auth_token_validators"]:
             if validator.for_validators is not None and "basic" not in validator.for_validators:

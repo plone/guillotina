@@ -34,9 +34,7 @@ class ResolveStrategy(SimpleStrategy):
                 return False
         if len(conflicts) > 0:
             logger.info(
-                "Resolved conflict between transaction ids: {}, {}".format(
-                    self._transaction._tid, tids
-                )
+                "Resolved conflict between transaction ids: {}, {}".format(self._transaction._tid, tids)
             )
 
         return True

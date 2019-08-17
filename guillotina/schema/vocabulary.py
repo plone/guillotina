@@ -43,9 +43,7 @@ class SimpleTerm(object):
         # In Python 3 str(bytes) returns str(repr(bytes)), which is not what
         # we want here. On the other hand, we want to try to keep the token as
         # readable as possible.
-        self.token = (
-            str(token) if not isinstance(token, bytes) else str(token.decode("ascii", "ignore"))
-        )
+        self.token = str(token) if not isinstance(token, bytes) else str(token.decode("ascii", "ignore"))
         self.title = title
         if title is not None:
             directlyProvides(self, ITitledTokenizedTerm)  # noqa

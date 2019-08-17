@@ -71,11 +71,7 @@ def get_content_json_schema_responses(content):
             "schema": {
                 "allOf": [
                     {"$ref": "#/components/schemas/ResourceFolder"},
-                    {
-                        "properties": convert_interfaces_to_schema(
-                            get_all_behavior_interfaces(content)
-                        )
-                    },
+                    {"properties": convert_interfaces_to_schema(get_all_behavior_interfaces(content))},
                 ]
             },
         }
@@ -90,11 +86,7 @@ def patch_content_json_schema_parameters(content):
             "schema": {
                 "allOf": [
                     {"$ref": "#/components/schemas/WritableResource"},
-                    {
-                        "properties": convert_interfaces_to_schema(
-                            get_all_behavior_interfaces(content)
-                        )
-                    },
+                    {"properties": convert_interfaces_to_schema(get_all_behavior_interfaces(content))},
                 ]
             },
         }
@@ -141,15 +133,10 @@ class DefaultGET(Service):
     summary="Add new resouce inside this container resource",
     requestBody={
         "required": True,
-        "content": {
-            "application/json": {"schema": {"$ref": "#/components/schemas/AddableResource"}}
-        },
+        "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AddableResource"}}},
     },
     responses={
-        "200": {
-            "description": "Resource data",
-            "schema": {"$ref": "#/components/schemas/ResourceFolder"},
-        }
+        "200": {"description": "Resource data", "schema": {"$ref": "#/components/schemas/ResourceFolder"}}
     },
 )
 class DefaultPOST(Service):
@@ -229,10 +216,7 @@ class DefaultPOST(Service):
         data["id"] = obj.id
         await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
 
-        headers = {
-            "Access-Control-Expose-Headers": "Location",
-            "Location": get_object_url(obj, self.request),
-        }
+        headers = {"Access-Control-Expose-Headers": "Location", "Location": get_object_url(obj, self.request)}
 
         serializer = query_multi_adapter((obj, self.request), IResourceSerializeToJsonSummary)
         response = await serializer()
@@ -265,9 +249,7 @@ class DefaultPATCH(Service):
                     content={"message": f"{behavior} is not a valid behavior", "behavior": behavior}
                 )
 
-        deserializer = query_multi_adapter(
-            (self.context, self.request), IResourceDeserializeFromJson
-        )
+        deserializer = query_multi_adapter((self.context, self.request), IResourceDeserializeFromJson)
         if deserializer is None:
             raise ErrorResponse(
                 "DeserializationError",
@@ -338,9 +320,7 @@ class DefaultPUT(DefaultPATCH):
     responses={
         "200": {
             "description": "All the sharing defined on this resource",
-            "content": {
-                "application/json": {"schema": {"ref": "#/components/schemas/ResourceACL"}}
-            },
+            "content": {"application/json": {"schema": {"ref": "#/components/schemas/ResourceACL"}}},
         }
     },
 )
@@ -379,9 +359,7 @@ async def sharing_get(context, request):
     responses={
         "200": {
             "description": "All the permissions defined on this resource",
-            "content": {
-                "application/json": {"schema": {"$ref": "#/components/schemas/AllPermissions"}}
-            },
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AllPermissions"}}},
         }
     },
 )
@@ -444,9 +422,7 @@ class SharingPUT(SharingPOST):
     permission="guillotina.AccessContent",
     name="@canido",
     summary="Check if user has permissions on context",
-    parameters=[
-        {"name": "permission", "in": "query", "required": True, "schema": {"type": "string"}}
-    ],
+    parameters=[{"name": "permission", "in": "query", "required": True, "schema": {"type": "string"}}],
     responses={"200": {"description": "Successfully changed permission"}},
 )
 async def can_i_do(context, request):
@@ -507,9 +483,7 @@ class DefaultOPTIONS(Service):
 
         requested_method = self.getRequestMethod()
         if not requested_method:
-            raise HTTPNotFound(
-                content={"text": "Access-Control-Request-Method this header is mandatory"}
-            )
+            raise HTTPNotFound(content={"text": "Access-Control-Request-Method this header is mandatory"})
 
         requested_headers = self.request.headers.get("Access-Control-Request-Headers", ())
 
@@ -598,10 +572,7 @@ async def move(context, request):
         await content.move(context, **data)
     except TypeError:
         raise ErrorResponse(
-            "RequiredParam",
-            _("Invalid params"),
-            reason=error_reasons.REQUIRED_PARAM_MISSING,
-            status=412,
+            "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412
         )
 
     return {"@url": get_object_url(context, request)}
@@ -646,10 +617,7 @@ async def duplicate(context, request):
         new_obj = await content.duplicate(context, **data)
     except TypeError:
         raise ErrorResponse(
-            "RequiredParam",
-            _("Invalid params"),
-            reason=error_reasons.REQUIRED_PARAM_MISSING,
-            status=412,
+            "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412
         )
 
     get = DefaultGET(new_obj, request)
@@ -677,20 +645,8 @@ async def ids(context, request):
     parameters=[
         {"name": "include", "in": "query", "required": "true", "schema": {"type": "string"}},
         {"name": "omit", "in": "query", "required": "true", "schema": {"type": "string"}},
-        {
-            "name": "page_size",
-            "in": "query",
-            "default": 20,
-            "required": "true",
-            "schema": {"type": "number"},
-        },
-        {
-            "name": "page",
-            "in": "query",
-            "default": 1,
-            "required": "true",
-            "schema": {"type": "number"},
-        },
+        {"name": "page_size", "in": "query", "default": 20, "required": "true", "schema": {"type": "number"}},
+        {"name": "page", "in": "query", "default": 1, "required": "true", "schema": {"type": "number"}},
     ],
     responses={"200": {"description": "Successfully returned response object"}},
 )
@@ -722,12 +678,7 @@ async def items(context, request):
         except TypeError:
             results.append(await serializer())
 
-    return {
-        "items": results,
-        "total": await context.async_len(),
-        "page": page,
-        "page_size": page_size,
-    }
+    return {"items": results, "total": await context.async_len(), "page": page, "page_size": page_size}
 
 
 @configure.service(

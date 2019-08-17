@@ -174,8 +174,7 @@ MAX_TID = "SELECT last_value FROM {schema}.tid_sequence;"
 
 
 register_sql(
-    "NUM_CHILDREN",
-    f"SELECT count(*) FROM {{table_name}} WHERE parent_id = $1::varchar({MAX_UID_LENGTH})",
+    "NUM_CHILDREN", f"SELECT count(*) FROM {{table_name}} WHERE parent_id = $1::varchar({MAX_UID_LENGTH})"
 )
 
 
@@ -301,10 +300,7 @@ def restart_conn_on_exception(f):
     async def decorator(self: "PostgresqlStorage", *args, **kwargs):
         try:
             return await f(self, *args, **kwargs)
-        except (
-            asyncpg.exceptions.PostgresConnectionError,
-            asyncpg.exceptions.InterfaceError,
-        ) as ex:
+        except (asyncpg.exceptions.PostgresConnectionError, asyncpg.exceptions.InterfaceError) as ex:
             await self._check_bad_connection(ex)
             raise
 
@@ -423,12 +419,7 @@ class PGConnectionManager:
     """
 
     def __init__(
-        self,
-        dsn=None,
-        pool_size=13,
-        connection_options=None,
-        conn_acquire_timeout=20,
-        vacuum_class=PGVacuum,
+        self, dsn=None, pool_size=13, connection_options=None, conn_acquire_timeout=20, vacuum_class=PGVacuum
     ):
         self._dsn = dsn
         self._pool_size = pool_size
@@ -595,9 +586,7 @@ class PostgresqlStorage(BaseStorage):
         autovacuum=True,
         **options,
     ):
-        super(PostgresqlStorage, self).__init__(
-            read_only, transaction_strategy=transaction_strategy
-        )
+        super(PostgresqlStorage, self).__init__(read_only, transaction_strategy=transaction_strategy)
         self._dsn = dsn
         self._pool_size = pool_size
         self._partition_class = partition
@@ -656,9 +645,7 @@ class PostgresqlStorage(BaseStorage):
             [
                 get_table_definition(self._objects_table_name, self._object_schema),
                 get_table_definition(
-                    self._blobs_table_name,
-                    self._blob_schema,
-                    primary_keys=("bid", "zoid", "chunk_index"),
+                    self._blobs_table_name, self._blob_schema, primary_keys=("bid", "zoid", "chunk_index")
                 ),
             ]
         )
@@ -729,10 +716,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             except asyncpg.exceptions.ReadOnlySQLTransactionError:
                 # Not necessary for read-only pg
                 pass
-            except (
-                asyncpg.exceptions.UndefinedTableError,
-                asyncpg.exceptions.InvalidSchemaNameError,
-            ):
+            except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
                 await self.create()
                 # only available on new databases
                 await self.read_conn.execute(
@@ -873,11 +857,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if "another operation is in progress" in ex.args[0]:
                     raise ConflictError(
-                        f"asyncpg error, another operation in progress.",
-                        oid,
-                        txn,
-                        old_serial,
-                        writer,
+                        f"asyncpg error, another operation in progress.", oid, txn, old_serial, writer
                     )
                 raise
             except asyncpg.exceptions.DeadlockDetectedError:
@@ -962,10 +942,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             try:
                 await txn._db_txn.start()
                 return
-            except (
-                asyncpg.exceptions.InterfaceError,
-                asyncpg.exceptions.InternalServerError,
-            ) as ex:
+            except (asyncpg.exceptions.InterfaceError, asyncpg.exceptions.InternalServerError) as ex:
                 error = ex
 
         if error is not None:
@@ -977,10 +954,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 restart = True
                 if error.sqlstate == "XX000":
                     rollback = True
-            elif (
-                "manually started transaction" in error.args[0]
-                or "connection is closed" in error.args[0]
-            ):
+            elif "manually started transaction" in error.args[0] or "connection is closed" in error.args[0]:
                 restart = True
                 if "manually started transaction" in error.args[0]:
                     rollback = True

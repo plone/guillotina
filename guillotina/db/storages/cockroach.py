@@ -178,9 +178,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         except asyncpg.exceptions.UndefinedTableError:
             pass
         except Exception:
-            logger.warning(
-                "Unknown error attempting to detect constraints installed.", exc_info=True
-            )
+            logger.warning("Unknown error attempting to detect constraints installed.", exc_info=True)
         return False
 
     async def store(self, oid, old_serial, writer, obj, txn):
@@ -224,11 +222,7 @@ class CockroachStorage(pg.PostgresqlStorage):
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if "another operation is in progress" in ex.args[0]:
                     raise ConflictError(
-                        f"asyncpg error, another operation in progress.",
-                        oid,
-                        txn,
-                        old_serial,
-                        writer,
+                        f"asyncpg error, another operation in progress.", oid, txn, old_serial, writer
                     )
                 raise
             if update and len(result) != 1:

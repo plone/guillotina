@@ -45,9 +45,7 @@ class CacheUtility:
             raise NoPubSubUtility()
         elif settings["updates_channel"] not in (None, ""):
             await self._subscriber.initialized()
-            await self._subscriber.subscribe(
-                settings["updates_channel"], self._uid, self.invalidate
-            )
+            await self._subscriber.subscribe(settings["updates_channel"], self._uid, self.invalidate)
         self.initialized = True
 
     async def finalize(self, app):
@@ -175,9 +173,7 @@ class CacheUtility:
             )
 
     async def get_stats(self):
-        result = {
-            "in-memory": {"size": len(self._memory_cache), "stats": self._memory_cache.get_stats()}
-        }
+        result = {"in-memory": {"size": len(self._memory_cache), "stats": self._memory_cache.get_stats()}}
         if self._obj_driver is not None:
             result["network"]: self.driver.info()
         return result

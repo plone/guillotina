@@ -176,9 +176,7 @@ def load_contenttype(_context, contenttype):
         add_permission=conf.get("add_permission") or DEFAULT_ADD_PERMISSION,
         allowed_types=conf.get("allowed_types", None),
     )
-    component.utility(
-        _context, provides=IResourceFactory, component=factory, name=conf["type_name"]
-    )
+    component.utility(_context, provides=IResourceFactory, component=factory, name=conf["type_name"])
 
 
 register_configuration_handler("contenttype", load_contenttype)  # noqa
@@ -250,9 +248,7 @@ def load_behavior(_context, behavior):
     )
     if not name_only:
         # behavior registration by provides interface identifier
-        component.utility(
-            _context, provides=IBehavior, name=schema.__identifier__, component=registration
-        )
+        component.utility(_context, provides=IBehavior, name=schema.__identifier__, component=registration)
 
     if name is not None:
         # for convinience we register with a given name
@@ -412,9 +408,7 @@ class _factory_decorator(_base_decorator):  # noqa: N801
     def __call__(self, klass=None):
         if klass is None:
             if "factory" not in self.config:
-                raise Exception(
-                    "Must provide factory configuration when defining " "without a class"
-                )
+                raise Exception("Must provide factory configuration when defining " "without a class")
             klass = get_caller_module()
         return super(_factory_decorator, self).__call__(klass)
 
@@ -438,8 +432,7 @@ class service(_base_decorator):  # noqa: N801
                 )
             if not asyncio.iscoroutinefunction(func.__call__):
                 raise ServiceConfigurationError(
-                    f"Service __call__ method must be async: {func.__call__}\n"
-                    f"{pformat(self.config)}"
+                    f"Service __call__ method must be async: {func.__call__}\n" f"{pformat(self.config)}"
                 )
             # create new class with customizations
             klass = type(func.__name__, (func,), dict(func.__dict__))
@@ -453,9 +446,7 @@ class service(_base_decorator):  # noqa: N801
 
                 klass.__call__ = new_call
             klass.__module__ = func.__module__
-            klass.__allow_access__ = self.config.get(
-                "allow_access", getattr(func, "__allow_access__", False)
-            )
+            klass.__allow_access__ = self.config.get("allow_access", getattr(func, "__allow_access__", False))
             klass.__route__ = routes.Route(self.config.get("name", ""))
             register_configuration(klass, self.config, "service")
         else:
@@ -593,9 +584,7 @@ def json_schema_definition(name: str, schema: dict) -> None:
     :param name: Name of schema
     :param schema: schema definition, must be json compatible
     """
-    register_configuration(
-        get_caller_module(), dict(name=name, schema=schema), "json_schema_definition"
-    )
+    register_configuration(get_caller_module(), dict(name=name, schema=schema), "json_schema_definition")
 
 
 def grant_directive(_context, principal=None, role=None, permission=None, permissions=None):
@@ -604,10 +593,7 @@ def grant_directive(_context, principal=None, role=None, permission=None, permis
     from guillotina.security.security_code import principal_role_manager as principal_role_mgr
 
     nspecified = (
-        (principal is not None)
-        + (role is not None)
-        + (permission is not None)
-        + (permissions is not None)
+        (principal is not None) + (role is not None) + (permission is not None) + (permissions is not None)
     )
     permspecified = (permission is not None) + (permissions is not None)
 
@@ -651,9 +637,7 @@ def grantAll_directive(_context, principal=None, role=None):  # noqa: N802
     nspecified = (principal is not None) + (role is not None)
 
     if nspecified != 1:
-        raise ConfigurationError(
-            "Exactly one of the principal and role attributes " "must be specified"
-        )
+        raise ConfigurationError("Exactly one of the principal and role attributes " "must be specified")
 
     if principal:
         _context.action(

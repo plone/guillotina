@@ -161,9 +161,6 @@ async def deserialize_cloud_field(field, value, context):
     content_type = value.get("content_type", value.get("content-type"))
     filename = value.get("filename", None)
     val = await file_manager.save_file(
-        partial(_generator, value),
-        content_type=content_type,
-        size=len(value["data"]),
-        filename=filename,
+        partial(_generator, value), content_type=content_type, size=len(value["data"]), filename=filename
     )
     return val

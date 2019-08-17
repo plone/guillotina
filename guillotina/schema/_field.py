@@ -263,9 +263,7 @@ class Choice(Field):
         elif isinstance(vocabulary, str):
             self.vocabularyName = vocabulary
         else:
-            if not ISource.providedBy(vocabulary) and not IContextSourceBinder.providedBy(
-                vocabulary
-            ):
+            if not ISource.providedBy(vocabulary) and not IContextSourceBinder.providedBy(vocabulary):
                 raise ValueError("Invalid vocabulary")
             self.vocabulary = vocabulary
         # Before a default value is checked, it is validated. However, a
@@ -273,9 +271,7 @@ class Choice(Field):
         # initialized. Therefore signal the validation method to ignore
         # default value checks during initialization of a Choice tied to a
         # registered vocabulary.
-        self._init_field = bool(self.vocabularyName) or IContextSourceBinder.providedBy(
-            self.vocabulary
-        )
+        self._init_field = bool(self.vocabularyName) or IContextSourceBinder.providedBy(self.vocabulary)
         super(Choice, self).__init__(**kw)
         self._init_field = False
 

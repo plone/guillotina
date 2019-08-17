@@ -47,9 +47,7 @@ class DBDataManager:
             # someone else
             if (time.time() - self._data["last_activity"]) < self._timeout:
                 if self.request.headers.get("TUS-OVERRIDE-UPLOAD", "0") != "1":
-                    raise HTTPPreconditionFailed(
-                        content={"reason": "There is already an active tusupload"}
-                    )
+                    raise HTTPPreconditionFailed(content={"reason": "There is already an active tusupload"})
 
     async def start(self):
         self.protect()
@@ -92,9 +90,7 @@ class DBDataManager:
                 else:
                     file._previous_blob = getattr(file, "_blob", None)
 
-        await notify(
-            FileBeforeUploadFinishedEvent(self.context, field=self.field, file=file, dm=self)
-        )
+        await notify(FileBeforeUploadFinishedEvent(self.context, field=self.field, file=file, dm=self))
 
         # save previous data on file.
         # we do this instead of creating a new file object on every

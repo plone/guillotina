@@ -90,9 +90,7 @@ class DirectoryGET(FileGET):
     method="PATCH",
     permission="guillotina.ModifyContent",
     name="@upload/{field_name}",
-    parameters=[
-        {"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}
-    ],
+    parameters=[{"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}],
     **_traversed_file_doc("Update the content of a file"),
 )
 @configure.service(
@@ -100,9 +98,7 @@ class DirectoryGET(FileGET):
     method="PATCH",
     permission="guillotina.ModifyContent",
     name="@upload/{field_name}/{filename}",
-    parameters=[
-        {"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}
-    ],
+    parameters=[{"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}],
     **_traversed_file_doc("Update the content of a file"),
 )
 class UploadFile(TraversableFieldService):
@@ -121,9 +117,7 @@ class UploadFile(TraversableFieldService):
     method="GET",
     permission="guillotina.ViewContent",
     name="@download/{field_name}",
-    parameters=[
-        {"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}
-    ],
+    parameters=[{"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}],
     **_traversed_file_doc("Download the content of a file"),
 )
 @configure.service(
@@ -160,9 +154,7 @@ class DownloadFile(TraversableFieldService):
     method="HEAD",
     permission="guillotina.ViewContent",
     name="@download/{field_name}",
-    parameters=[
-        {"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}
-    ],
+    parameters=[{"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}],
 )
 @configure.service(
     context=IResource,
@@ -260,9 +252,7 @@ class TusCreateFile(UploadFile):
     name="@tusupload/{field_name}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[
-            {"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}
-        ],
+        parameters=[{"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}],
         responses={
             "200": {
                 "description": "Successfully patched data",
@@ -291,18 +281,8 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc(
         "TUS endpoint",
         parameters=[
-            {
-                "name": "Upload-Offset",
-                "in": "headers",
-                "required": True,
-                "schema": {"type": "integer"},
-            },
-            {
-                "name": "CONTENT-LENGTH",
-                "in": "headers",
-                "required": True,
-                "schema": {"type": "integer"},
-            },
+            {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
+            {"name": "CONTENT-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
         ],
         responses={
             "204": {
@@ -320,18 +300,8 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc(
         "TUS endpoint",
         parameters=[
-            {
-                "name": "Upload-Offset",
-                "in": "headers",
-                "required": True,
-                "schema": {"type": "integer"},
-            },
-            {
-                "name": "CONTENT-LENGTH",
-                "in": "headers",
-                "required": True,
-                "schema": {"type": "integer"},
-            },
+            {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
+            {"name": "CONTENT-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
         ],
         responses={
             "204": {
@@ -356,9 +326,7 @@ class TusPatchFile(UploadFile):
     name="@tusupload/{field_name}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[
-            {"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}
-        ],
+        parameters=[{"in": "path", "name": "field_name", "required": "true", "schema": {"type": "string"}}],
         responses={
             "200": {
                 "description": "Successfully returned tus info",

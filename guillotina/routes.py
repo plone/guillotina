@@ -62,9 +62,7 @@ class Route:
             parts = self.raw.split("/")
             if URL_MATCH_RE.match(parts[0]):
                 # first part of route should not be variable
-                raise InvalidRoute(
-                    content={"reason": f"First part of route can not be variable {raw_route}"}
-                )
+                raise InvalidRoute(content={"reason": f"First part of route can not be variable {raw_route}"})
             self.view_name = parts[0]
             self.route_parts.append(RoutePart(parts[0]))
             for part in parts[1:]:

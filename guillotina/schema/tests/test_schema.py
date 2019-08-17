@@ -25,9 +25,7 @@ def _makeSchema():
         (Interface,),
         {
             "title": Bytes(title="Title", description="Title", default=b"", required=True),
-            "description": Bytes(
-                title="Description", description="Description", default=b"", required=True
-            ),
+            "description": Bytes(title="Description", description="Description", default=b"", required=True),
             "spam": Bytes(title="Spam", description="Spam", default=b"", required=True),
         },
         "",

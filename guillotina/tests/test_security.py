@@ -91,11 +91,7 @@ async def test_set_local_guillotina(container_requester):
             data=json.dumps(
                 {
                     "prinperm": [
-                        {
-                            "principal": "user1",
-                            "permission": "guillotina.AccessContent",
-                            "setting": "Allow",
-                        }
+                        {"principal": "user1", "permission": "guillotina.AccessContent", "setting": "Allow"}
                     ]
                 }
             ),
@@ -118,11 +114,7 @@ async def test_set_local_guillotina(container_requester):
             data=json.dumps(
                 {
                     "prinperm": [
-                        {
-                            "principal": "user1",
-                            "permission": "guillotina.AccessContent",
-                            "setting": "Deny",
-                        }
+                        {"principal": "user1", "permission": "guillotina.AccessContent", "setting": "Deny"}
                     ]
                 }
             ),
@@ -143,15 +135,7 @@ async def test_sharing_prinrole(container_requester):
             "POST",
             "/db/guillotina/@sharing",
             data=json.dumps(
-                {
-                    "prinrole": [
-                        {
-                            "principal": "user1",
-                            "role": "guillotina.Reader",
-                            "setting": "AllowSingle",
-                        }
-                    ]
-                }
+                {"prinrole": [{"principal": "user1", "role": "guillotina.Reader", "setting": "AllowSingle"}]}
             ),
         )
         assert status == 200
@@ -193,9 +177,7 @@ async def test_sharing_roleperm(container_requester):
 
 async def test_canido(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
-            "GET", "/db/guillotina/@canido?permission=guillotina.ViewContent"
-        )
+        response, status = await requester("GET", "/db/guillotina/@canido?permission=guillotina.ViewContent")
         assert status == 200
         assert response
 
@@ -223,11 +205,7 @@ async def test_inherit(container_requester):
             "POST",
             "/db/guillotina/@sharing",
             data=json.dumps(
-                {
-                    "prinrole": [
-                        {"principal": "user1", "role": "guillotina.Reader", "setting": "Allow"}
-                    ]
-                }
+                {"prinrole": [{"principal": "user1", "role": "guillotina.Reader", "setting": "Allow"}]}
             ),
         )
 
@@ -236,9 +214,7 @@ async def test_inherit(container_requester):
         response, status = await requester(
             "POST",
             "/db/guillotina/testing/@sharing",
-            data=json.dumps(
-                {"perminhe": [{"permission": "guillotina.ViewContent", "setting": "Deny"}]}
-            ),
+            data=json.dumps({"perminhe": [{"permission": "guillotina.ViewContent", "setting": "Deny"}]}),
         )
         assert status == 200
 
@@ -311,11 +287,7 @@ async def test_allowsingle(container_requester):
             data=json.dumps(
                 {
                     "prinperm": [
-                        {
-                            "principal": "group2",
-                            "permission": "guillotina.AccessContent",
-                            "setting": "Allow",
-                        }
+                        {"principal": "group2", "permission": "guillotina.AccessContent", "setting": "Allow"}
                     ]
                 }
             ),
@@ -385,11 +357,7 @@ async def test_allowsingle2(container_requester):
             data=json.dumps(
                 {
                     "prinperm": [
-                        {
-                            "principal": "group2",
-                            "permission": "guillotina.AccessContent",
-                            "setting": "Allow",
-                        },
+                        {"principal": "group2", "permission": "guillotina.AccessContent", "setting": "Allow"},
                         {
                             "principal": "group1",
                             "permission": "guillotina.ViewContent",
@@ -408,11 +376,7 @@ async def test_allowsingle2(container_requester):
             data=json.dumps(
                 {
                     "prinperm": [
-                        {
-                            "principal": "group3",
-                            "permission": "guillotina.ViewContent",
-                            "setting": "Allow",
-                        }
+                        {"principal": "group3", "permission": "guillotina.ViewContent", "setting": "Allow"}
                     ]
                 }
             ),
@@ -425,9 +389,7 @@ async def test_allowsingle2(container_requester):
             "/db/guillotina/testing/test2/@sharing",
             data=json.dumps(
                 {
-                    "prinrole": [
-                        {"principal": "group2", "role": "guillotina.Reader", "setting": "Allow"}
-                    ],
+                    "prinrole": [{"principal": "group2", "role": "guillotina.Reader", "setting": "Allow"}],
                     "roleperm": [
                         {
                             "role": "guillotina.Reader",

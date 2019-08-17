@@ -8,9 +8,7 @@ async def test_hello(guillotina, container_requester):
     async with container_requester:
         async with aiohttp.ClientSession() as session:
             url = guillotina.server.make_url("db/guillotina/@ws")
-            async with session.ws_connect(
-                url, headers={"AUTHORIZATION": "Basic %s" % ADMIN_TOKEN}
-            ) as ws:
+            async with session.ws_connect(url, headers={"AUTHORIZATION": "Basic %s" % ADMIN_TOKEN}) as ws:
                 # we should check version
                 sending = {
                     "op": "GET",
@@ -28,9 +26,7 @@ async def test_send_close(guillotina, container_requester):
     async with container_requester:
         async with aiohttp.ClientSession() as session:
             url = guillotina.server.make_url("db/guillotina/@ws")
-            async with session.ws_connect(
-                url, headers={"AUTHORIZATION": "Basic %s" % ADMIN_TOKEN}
-            ) as ws:
+            async with session.ws_connect(url, headers={"AUTHORIZATION": "Basic %s" % ADMIN_TOKEN}) as ws:
 
                 await ws.send_str(json.dumps({"op": "close"}))
                 async for msg in ws:  # noqa

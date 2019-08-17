@@ -29,9 +29,7 @@ async def test_get_storage(container_requester):
 
 async def test_create_database(container_requester):
     async with container_requester as requester:
-        response, status = await requester(
-            "POST", "/@storages/db", data=json.dumps({"name": "foobar"})
-        )
+        response, status = await requester("POST", "/@storages/db", data=json.dumps({"name": "foobar"}))
         assert status == 200
         response, status = await requester("GET", "/@storages/db")
         assert "foobar" in response["databases"]
@@ -61,10 +59,7 @@ async def test_storage_impl(db, guillotina_main):
     storages = app_settings["storages"]
     storage_config = storages["db"]
     factory = get_adapter(
-        guillotina_main.root,
-        IDatabaseManager,
-        name=storage_config["storage"],
-        args=[storage_config],
+        guillotina_main.root, IDatabaseManager, name=storage_config["storage"], args=[storage_config]
     )
     original_size = len(await factory.get_names())
     await factory.create("foobar")
@@ -78,10 +73,7 @@ async def test_storage_exists(db, guillotina_main):
     storages = app_settings["storages"]
     storage_config = storages["db"]
     factory = get_adapter(
-        guillotina_main.root,
-        IDatabaseManager,
-        name=storage_config["storage"],
-        args=[storage_config],
+        guillotina_main.root, IDatabaseManager, name=storage_config["storage"], args=[storage_config]
     )
     assert not await factory.exists("foobar")
     await factory.create("foobar")
@@ -91,9 +83,7 @@ async def test_storage_exists(db, guillotina_main):
 
 
 async def test_get_dsn_from_url():
-    factory = CockroachDatabaseManager(
-        None, {"dsn": "postgresql://root@127.0.0.1:26257?sslmode=disable"}
-    )
+    factory = CockroachDatabaseManager(None, {"dsn": "postgresql://root@127.0.0.1:26257?sslmode=disable"})
     assert factory.get_dsn("foobar") == "postgresql://root@127.0.0.1:26257/foobar?sslmode=disable"
 
 
@@ -107,10 +97,7 @@ async def test_get_internal_dyn_database(db, guillotina_main):
     storages = app_settings["storages"]
     storage_config = storages["db"]
     factory = get_adapter(
-        guillotina_main.root,
-        IDatabaseManager,
-        name=storage_config["storage"],
-        args=[storage_config],
+        guillotina_main.root, IDatabaseManager, name=storage_config["storage"], args=[storage_config]
     )
     await factory.create("foobar")
     db_obj = await get_database("foobar")

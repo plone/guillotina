@@ -31,30 +31,21 @@ class ITestBehavior3(Interface):
 
 
 @configure.behavior(
-    title="",
-    provides=ITestBehavior1,
-    marker=IMarkerBehavior1,
-    for_="guillotina.interfaces.IResource",
+    title="", provides=ITestBehavior1, marker=IMarkerBehavior1, for_="guillotina.interfaces.IResource"
 )
 class TestBehavior1(AnnotationBehavior):
     pass
 
 
 @configure.behavior(
-    title="",
-    provides=ITestBehavior2,
-    marker=IMarkerBehavior2,
-    for_="guillotina.interfaces.IResource",
+    title="", provides=ITestBehavior2, marker=IMarkerBehavior2, for_="guillotina.interfaces.IResource"
 )
 class TestBehavior2(AnnotationBehavior):
     pass
 
 
 @configure.behavior(
-    title="",
-    provides=ITestBehavior3,
-    marker=IMarkerBehavior3,
-    for_="guillotina.interfaces.IResource",
+    title="", provides=ITestBehavior3, marker=IMarkerBehavior3, for_="guillotina.interfaces.IResource"
 )
 class TestBehavior3(AnnotationBehavior):
     pass

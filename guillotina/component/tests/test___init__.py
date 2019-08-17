@@ -99,6 +99,4 @@ class Test_Interface_call(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.TestSuite(
-        (unittest.makeSuite(Test_package), unittest.makeSuite(Test_Interface_call))
-    )
+    return unittest.TestSuite((unittest.makeSuite(Test_package), unittest.makeSuite(Test_Interface_call)))

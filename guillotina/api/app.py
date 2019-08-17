@@ -16,9 +16,7 @@ from guillotina.utils import get_dotted_name
     responses={
         "200": {
             "description": "Application data",
-            "content": {
-                "application/json": {"schema": {"$ref": "#/components/schemas/Application"}}
-            },
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Application"}}},
         }
     },
 )

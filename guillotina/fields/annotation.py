@@ -117,9 +117,7 @@ class BucketListValue:
 class BucketListField(schema.Field):
     value_type = None
 
-    def __init__(
-        self, *args, value_type=None, bucket_len=5000, annotation_prefix="bucketlist-", **kwargs
-    ):
+    def __init__(self, *args, value_type=None, bucket_len=5000, annotation_prefix="bucketlist-", **kwargs):
         self.bucket_len = bucket_len
         self.value_type = value_type
         self.annotation_prefix = annotation_prefix
@@ -323,11 +321,7 @@ class BucketDictField(BucketListField):
     ):
         self.key_type = key_type
         super().__init__(
-            *args,
-            value_type=value_type,
-            bucket_len=bucket_len,
-            annotation_prefix=annotation_prefix,
-            **kwargs,
+            *args, value_type=value_type, bucket_len=bucket_len, annotation_prefix=annotation_prefix, **kwargs
         )
 
 
@@ -437,16 +431,12 @@ class BucketDictFieldRenderer:
             try:
                 bidx = int(cursor)
             except ValueError:
-                raise HTTPPreconditionFailed(
-                    content={"reason": "Invalid bucket type", "cursor": cursor}
-                )
+                raise HTTPPreconditionFailed(content={"reason": "Invalid bucket type", "cursor": cursor})
 
         try:
             bucket = val.buckets[bidx]
         except IndexError:
-            raise HTTPPreconditionFailed(
-                content={"reason": "Invalid bucket, not found", "bidx": bidx}
-            )
+            raise HTTPPreconditionFailed(content={"reason": "Invalid bucket, not found", "bidx": bidx})
 
         annotation = await val.get_annotation(self.context, anno_id=bucket["id"], create=False)
         if annotation is None:

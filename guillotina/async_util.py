@@ -44,8 +44,7 @@ class QueueUtility(object):
                 txn = get_transaction()
                 tm = get_tm()
                 if txn is None or (
-                    txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)
-                    and txn._db_conn is None
+                    txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and txn._db_conn is None
                 ):
                     txn = await tm.begin()
                 else:
@@ -163,9 +162,7 @@ class AsyncJobPool:
     async def finalize(self):
         await self.join()
 
-    def add_job(
-        self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None
-    ):
+    def add_job(self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None):
         if self._closing:
             raise ServerClosingException("Can not schedule job")
         job = Job(func, request=request, args=args, kwargs=kwargs)

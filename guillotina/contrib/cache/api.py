@@ -4,9 +4,7 @@ from guillotina.interfaces import ICacheUtility
 from guillotina.interfaces import IContainer
 
 
-@configure.service(
-    context=IContainer, name="@cache-stats", method="GET", permission="guillotina.CacheManage"
-)
+@configure.service(context=IContainer, name="@cache-stats", method="GET", permission="guillotina.CacheManage")
 async def stats(context, request):
     utility = get_utility(ICacheUtility)
     return await utility.get_stats()

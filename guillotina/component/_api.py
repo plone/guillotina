@@ -53,13 +53,7 @@ def get_adapter(object, interface=Interface, name=_BLANK, context=None, args=[],
     :raises ComponentLookupError:
     """
     adapter_ = query_adapter(
-        object,
-        interface=interface,
-        name=name,
-        default=_MISSING,
-        context=context,
-        args=args,
-        kwargs=kwargs,
+        object, interface=interface, name=name, default=_MISSING, context=context, args=args, kwargs=kwargs
     )
     if adapter_ is _MISSING:
         # result from get_adapter can be None and still be valid
@@ -67,9 +61,7 @@ def get_adapter(object, interface=Interface, name=_BLANK, context=None, args=[],
     return adapter_
 
 
-def query_adapter(
-    object, interface=Interface, name=_BLANK, default=None, context=None, args=[], kwargs={}
-):
+def query_adapter(object, interface=Interface, name=_BLANK, default=None, context=None, args=[], kwargs={}):
     """
     Get a registered adapter
 
@@ -95,9 +87,7 @@ def get_multi_adapter(objects, interface=Interface, name=_BLANK, context=None, a
     :param kwargs: kwargs to provide the adapter constructor
     :raises ComponentLookupError:
     """
-    adapter_ = query_multi_adapter(
-        objects, interface, name, context=context, args=args, kwargs=kwargs
-    )
+    adapter_ = query_multi_adapter(objects, interface, name, context=context, args=args, kwargs=kwargs)
     if adapter_ is None:
         raise ComponentLookupError(objects, interface, name)
     return adapter_

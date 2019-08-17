@@ -168,15 +168,11 @@ class SecurityPolicy:
                 return prinper
 
             # If we did not found the permission for the user look at code
-            prinper = SettingAsBoolean[
-                code_principal_permission_setting(permission, principal, None)
-            ]
+            prinper = SettingAsBoolean[code_principal_permission_setting(permission, principal, None)]
             # Now look for the group ids
             if prinper is None:
                 for group in groups:
-                    prinper = SettingAsBoolean[
-                        code_principal_permission_setting(permission, group, None)
-                    ]
+                    prinper = SettingAsBoolean[code_principal_permission_setting(permission, group, None)]
                     if prinper is not None:
                         continue
             cache_prin_per[permission] = prinper
@@ -186,9 +182,7 @@ class SecurityPolicy:
         # As we want to quit as soon as possible we check first locally
         prinper_map = IPrincipalPermissionMap(parent, None)
         if prinper_map is not None:
-            prinper = level_setting_as_boolean(
-                level, prinper_map.get_setting(permission, principal, None)
-            )
+            prinper = level_setting_as_boolean(level, prinper_map.get_setting(permission, principal, None))
             if prinper is None:
                 for group in groups:
                     prinper = level_setting_as_boolean(
@@ -210,10 +204,7 @@ class SecurityPolicy:
 
     def global_principal_roles(self, principal, groups):
         roles = dict(
-            [
-                (role, SettingAsBoolean[setting])
-                for (role, setting) in code_roles_for_principal(principal)
-            ]
+            [(role, SettingAsBoolean[setting]) for (role, setting) in code_roles_for_principal(principal)]
         )
         for group in groups:
             for role, settings in code_roles_for_principal(group):
@@ -245,9 +236,7 @@ class SecurityPolicy:
             cache_principal_roles[principal] = roles
             return roles
 
-        roles = self.cached_principal_roles(
-            getattr(parent, "__parent__", None), principal, groups, "p"
-        )
+        roles = self.cached_principal_roles(getattr(parent, "__parent__", None), principal, groups, "p")
 
         # We check the local map of roles
         prinrole = IPrincipalRoleMap(parent, None)
@@ -317,11 +306,7 @@ def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dic
 
     if parent is None:
         roles = dict(
-            [
-                (role, 1)
-                for (role, setting) in code_roles_for_permission(permission)
-                if setting is Allow
-            ]
+            [(role, 1) for (role, setting) in code_roles_for_permission(permission) if setting is Allow]
         )
         cache_roles[permission + level] = roles
         return roles
@@ -372,11 +357,7 @@ def cached_principals(
 
     if parent is None:
         principals = dict(
-            [
-                (role, 1)
-                for (role, setting) in code_principals_for_permission(permission)
-                if setting is Allow
-            ]
+            [(role, 1) for (role, setting) in code_principals_for_permission(permission) if setting is Allow]
         )
         cache_principals[permission + level] = principals
         return principals

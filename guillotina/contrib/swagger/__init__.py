@@ -14,11 +14,7 @@ app_settings = {
         "auth_storage_search_keys": ["auth"],
         "base_configuration": {
             "openapi": "3.0.0",
-            "info": {
-                "version": "1.0",
-                "title": "Guillotina",
-                "description": "The REST Resource API",
-            },
+            "info": {"version": "1.0", "title": "Guillotina", "description": "The REST Resource API"},
             "servers": [{"url": ""}],
             "paths": {},
             "security": [{"basicAuth": []}, {"bearerAuth": []}],

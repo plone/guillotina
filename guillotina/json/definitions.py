@@ -18,14 +18,8 @@ configure.json_schema_definition(
         "type": "object",
         "title": "Addons response data",
         "properties": {
-            "available": {
-                "type": "array",
-                "items": {"type": "object", "$ref": "#/components/schemas/Addon"},
-            },
-            "installed": {
-                "type": "array",
-                "items": {"type": "object", "$ref": "#/components/schemas/Addon"},
-            },
+            "available": {"type": "array", "items": {"type": "object", "$ref": "#/components/schemas/Addon"}},
+            "installed": {"type": "array", "items": {"type": "object", "$ref": "#/components/schemas/Addon"}},
         },
     },
 )
@@ -60,18 +54,9 @@ configure.json_schema_definition(
         "type": "object",
         "title": "Behavior data on a resource",
         "properties": {
-            "static": {
-                "type": "array",
-                "items": {"type": "string", "title": "Dotted name to interface"},
-            },
-            "dynamic": {
-                "type": "array",
-                "items": {"type": "string", "title": "Dotted name to interface"},
-            },
-            "available": {
-                "type": "array",
-                "items": {"type": "string", "title": "Dotted name to interface"},
-            },
+            "static": {"type": "array", "items": {"type": "string", "title": "Dotted name to interface"}},
+            "dynamic": {"type": "array", "items": {"type": "string", "title": "Dotted name to interface"}},
+            "available": {"type": "array", "items": {"type": "string", "title": "Dotted name to interface"}},
         },
     },
 )
@@ -82,11 +67,7 @@ configure.json_schema_definition(
     {
         "type": "object",
         "title": "Base resource data",
-        "properties": {
-            "id": {"type": "string"},
-            "@type": {"type": "string"},
-            "title": {"type": "string"},
-        },
+        "properties": {"id": {"type": "string"}, "@type": {"type": "string"}, "title": {"type": "string"}},
         "required": ["id"],
     },
 )
@@ -94,11 +75,7 @@ configure.json_schema_definition(
 
 configure.json_schema_definition(
     "WritableResource",
-    {
-        "type": "object",
-        "title": "Writable resource data",
-        "properties": {"title": {"type": "string"}},
-    },
+    {"type": "object", "title": "Writable resource data", "properties": {"title": {"type": "string"}}},
 )
 
 
@@ -129,9 +106,7 @@ configure.json_schema_definition(
                     "@type": {"type": "string"},
                     "parent": {
                         "type": "object",
-                        "schema": {
-                            "properties": {"@id": {"type": "string"}, "@type": {"type": "string"}}
-                        },
+                        "schema": {"properties": {"@id": {"type": "string"}, "@type": {"type": "string"}}},
                     },
                 },
                 "required": ["@id", "@type"],
@@ -150,10 +125,7 @@ configure.json_schema_definition(
             {"$ref": "#/components/schemas/Resource"},
             {
                 "properties": {
-                    "items": {
-                        "type": "object",
-                        "schema": {"$ref": "#/components/schemas/Resource"},
-                    },
+                    "items": {"type": "object", "schema": {"$ref": "#/components/schemas/Resource"}},
                     "length": {"type": "integer"},
                 }
             },
@@ -246,24 +218,15 @@ configure.json_schema_definition(
         "properties": {
             "prinperm": {
                 "type": "array",
-                "items": {
-                    "type": "object",
-                    "schema": {"$ref": "#/components/schemas/PrincipalPermission"},
-                },
+                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/PrincipalPermission"}},
             },
             "prinrole": {
                 "type": "array",
-                "items": {
-                    "type": "object",
-                    "schema": {"$ref": "#/components/schemas/PrincipalRole"},
-                },
+                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/PrincipalRole"}},
             },
             "roleperm": {
                 "type": "array",
-                "items": {
-                    "type": "object",
-                    "schema": {"$ref": "#/components/schemas/RolePermission"},
-                },
+                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/RolePermission"}},
             },
         },
     },
@@ -294,10 +257,7 @@ configure.json_schema_definition(
         "properties": {
             "member": {
                 "type": "array",
-                "items": {
-                    "type": "object",
-                    "schema": {"$ref": "#/components/schemas/SearchResult"},
-                },
+                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/SearchResult"}},
             },
             "items_count": {"type": "integer"},
         },
@@ -308,10 +268,5 @@ configure.json_schema_definition(
 
 configure.json_schema_definition(
     "UpdateRegistry",
-    {
-        "type": "object",
-        "title": "Update registry",
-        "properties": {"value": {}},
-        "required": ["value"],
-    },
+    {"type": "object", "title": "Update registry", "properties": {"value": {}}, "required": ["value"]},
 )

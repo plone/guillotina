@@ -243,9 +243,7 @@ class FieldTests(unittest.TestCase):
         def _factory():
             return obj
 
-        field = self._makeOne(
-            required=False, readonly=True, constraint=_constraint, defaultFactory=_factory
-        )
+        field = self._makeOne(required=False, readonly=True, constraint=_constraint, defaultFactory=_factory)
         self.assertEqual(field.required, False)
         self.assertEqual(field.readonly, True)
         self.assertEqual(field.constraint(self), False)

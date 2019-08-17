@@ -46,9 +46,7 @@ def default_value_converter(schema, value, context=None):
 
     keys = [k for k in value.keys()]
     values = [k for k in value.values()]
-    values = [
-        schema_compatible(values[idx], schema[keys[idx]], context) for idx in range(len(keys))
-    ]
+    values = [schema_compatible(values[idx], schema[keys[idx]], context) for idx in range(len(keys))]
     return dict(zip(keys, values))
 
 
@@ -113,9 +111,7 @@ def dict_converter(field, value, context=None):
 
     keys, values = zip(*value.items())
     keys = [schema_compatible(keys[idx], field.key_type, context) for idx in range(len(keys))]
-    values = [
-        schema_compatible(values[idx], field.value_type, context) for idx in range(len(values))
-    ]
+    values = [schema_compatible(values[idx], field.value_type, context) for idx in range(len(values))]
     return dict(zip(keys, values))
 
 

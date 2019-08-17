@@ -20,10 +20,7 @@ async def authenticate_request(request) -> Optional[IPrincipal]:
         token = await policy(request).extract_token()
         if token:
             for validator in app_settings["auth_token_validators"]:
-                if (
-                    validator.for_validators is not None
-                    and policy.name not in validator.for_validators
-                ):
+                if validator.for_validators is not None and policy.name not in validator.for_validators:
                     continue
                 user = await validator().validate(token)
                 if user is not None:
@@ -57,11 +54,7 @@ def authenticate_user(userid, data=None, timeout=60 * 60 * 1):
     if data is None:
         data = {}
     data.update(
-        {
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(seconds=timeout),
-            "id": userid,
-        }
+        {"iat": datetime.utcnow(), "exp": datetime.utcnow() + timedelta(seconds=timeout), "id": userid}
     )
     jwt_token = jwt.encode(
         data, app_settings["jwt"]["secret"], algorithm=app_settings["jwt"]["algorithm"]

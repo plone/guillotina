@@ -190,9 +190,7 @@ class DefaultCatalogDataAdapter(object):
                             if not loaded:
                                 await self.load_behavior(behavior)
                                 loaded = True
-                            values[index_name] = await apply_coroutine(
-                                index_data["accessor"], behavior
-                            )
+                            values[index_name] = await apply_coroutine(index_data["accessor"], behavior)
                     elif (
                         indexes is None
                         or field_name in indexes

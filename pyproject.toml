@@ -15,6 +15,7 @@ exclude = '''
     | guillotina/cookiecutter
     | lib
     | build
+    | bin
     | dist
   )/
   | foo.py           # also separately exclude a file named foo.py in
