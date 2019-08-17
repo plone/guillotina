@@ -1,3 +1,8 @@
-aioredis>=1.2.0
-html2text
-aiosmtplib
+aioredis==1.2.0
+html2text==2019.8.11
+aiosmtplib==1.0.6
+pre-commit==1.18.2
+flake8==3.7.7
+codecov==2.0.15
+mypy==0.670
+mypy-zope==0.1.3
