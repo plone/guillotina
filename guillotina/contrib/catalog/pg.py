@@ -54,10 +54,17 @@ app_settings = {
 
 # 2019-06-15T18:37:31.008359+00:00
 PG_FUNCTIONS = [
-    """CREATE OR REPLACE FUNCTION f_cast_isots(text)
-  RETURNS timestamptz AS
-$$SELECT CAST($1 AS timestamptz)$$  -- adapt to your needs
-  LANGUAGE sql IMMUTABLE;"""
+    """CREATE OR REPLACE FUNCTION f_cast_isots(text) RETURNS timestamptz AS $$
+begin
+    return CAST($1 AS timestamptz);
+exception
+    when invalid_text_representation then
+        return CAST('1970-01-01T00:00:00Z' AS timestamptz);
+    when datetime_field_overflow then
+        return CAST('1970-01-01T00:00:00Z' AS timestamptz);
+end;
+$$ language plpgsql immutable;
+"""
 ]
 
 # Reindex logic
