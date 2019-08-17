@@ -13,11 +13,12 @@
 ##############################################################################
 # flake8: noqa
 
-class hookable(object):
-    __slots__ = ('__original', '__implementation')
 
-    original = property(lambda self: self.__original,)
-    implementation = property(lambda self: self.__implementation,)
+class hookable(object):
+    __slots__ = ("__original", "__implementation")
+
+    original = property(lambda self: self.__original)
+    implementation = property(lambda self: self.__implementation)
 
     def __init__(self, implementation):
         self.__original = self.__implementation = implementation

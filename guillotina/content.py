@@ -88,13 +88,20 @@ class ResourceFactory(Factory):
     behaviors = None
     add_permission = None
 
-    def __init__(self, klass, title='', description='',
-                 type_name='', schema=None, behaviors=None,
-                 add_permission=DEFAULT_ADD_PERMISSION,
-                 allowed_types=None):
+    def __init__(
+        self,
+        klass,
+        title="",
+        description="",
+        type_name="",
+        schema=None,
+        behaviors=None,
+        add_permission=DEFAULT_ADD_PERMISSION,
+        allowed_types=None,
+    ):
         super(ResourceFactory, self).__init__(
-            klass, title, description,
-            tuple(filter(bool, [schema] + list(behaviors) or list())))
+            klass, title, description, tuple(filter(bool, [schema] + list(behaviors) or list()))
+        )
         self.type_name = type_name
         self.schema = schema or Interface
         self.behaviors = behaviors or ()
@@ -112,7 +119,7 @@ class ResourceFactory(Factory):
         obj.modification_date = now
         if id is None:
             if obj.__uuid__ is None:
-                obj.__uuid__ = app_settings['uid_generator'](obj)
+                obj.__uuid__ = app_settings["uid_generator"](obj)
             obj.id = uid.get_short_uid(obj.__uuid__)
         else:
             obj.id = id
@@ -127,8 +134,7 @@ class ResourceFactory(Factory):
         return spec
 
     def __repr__(self):
-        return '<{0:s} for {1:s}>'.format(self.__class__.__name__,
-                                          self.type_name)
+        return "<{0:s} for {1:s}>".format(self.__class__.__name__, self.type_name)
 
 
 @implementer(IResource)
@@ -152,7 +158,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         """
         return self.__uuid__
 
-    def __init__(self, id: str=None) -> None:
+    def __init__(self, id: str = None) -> None:
         if id is not None:
             self.__name__ = id
         super(Resource, self).__init__()
@@ -160,11 +166,8 @@ class Resource(guillotina.db.orm.base.BaseObject):
     def __repr__(self):
         """
         """
-        path = '/'.join(get_physical_path(self))
-        return "< {type} at {path} by {mem} >".format(
-            type=self.type_name,
-            path=path,
-            mem=id(self))
+        path = "/".join(get_physical_path(self))
+        return "< {type} at {path} by {mem} >".format(type=self.type_name, path=path, mem=id(self))
 
     @property
     def acl(self) -> dict:
@@ -200,10 +203,9 @@ class Resource(guillotina.db.orm.base.BaseObject):
         elif Interface.providedBy(iface):
             name = iface.__identifier__  # type: ignore
         else:
-            raise AttributeError('Cant identify Interface')
+            raise AttributeError("Cant identify Interface")
         behavior_registration = get_utility(IBehavior, name=name)
-        if behavior_registration is not None and\
-                behavior_registration.interface(self) is not None:
+        if behavior_registration is not None and behavior_registration.interface(self) is not None:
             # We can adapt so we can apply this dynamic behavior
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
@@ -220,8 +222,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         elif Interface.providedBy(iface):
             name = iface.__identifier__  # type: ignore
         behavior_registration = get_utility(IBehavior, name=name)
-        if (behavior_registration is not None and
-                behavior_registration.marker is not None):
+        if behavior_registration is not None and behavior_registration.marker is not None:
             try:
                 noLongerProvides(self, behavior_registration.marker)
             except ValueError:
@@ -242,16 +243,13 @@ class Resource(guillotina.db.orm.base.BaseObject):
         # defined).
         # also handle special dynamic providedBy cache here.
         # also handle the get_current_request call
-        if name.startswith('__') or name == '_v__providedBy__' or name == 'request':
+        if name.startswith("__") or name == "_v__providedBy__" or name == "request":
             raise AttributeError(name)
 
         # attribute was not found; try to look it up in the schema and return
         # a default
         value = get_default_from_schema(
-            self,
-            SCHEMA_CACHE.get(self.type_name, {}).get('schema'),
-            name,
-            _marker
+            self, SCHEMA_CACHE.get(self.type_name, {}).get("schema"), name, _marker
         )
         if value is not _marker:
             setattr(self, name, value)
@@ -260,9 +258,8 @@ class Resource(guillotina.db.orm.base.BaseObject):
 
 
 @configure.contenttype(
-    type_name="Item",
-    schema=IItem,
-    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
+    type_name="Item", schema=IItem, behaviors=["guillotina.behaviors.dublincore.IDublinCore"]
+)
 class Item(Resource):
     """
     Basic item content type. Inherits from Resource
@@ -270,9 +267,8 @@ class Item(Resource):
 
 
 @configure.contenttype(
-    type_name="Folder",
-    schema=IFolder,
-    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
+    type_name="Folder", schema=IFolder, behaviors=["guillotina.behaviors.dublincore.IDublinCore"]
+)
 class Folder(Resource):
     """
     Basic folder content type. Inherits from Resource but provides interface
@@ -309,8 +305,9 @@ class Folder(Resource):
             value.__txn__ = trns
             trns.register(value)
 
-    async def async_get(self, key: str, default=None,
-                        suppress_events=False) -> Optional[IBaseObject]:
+    async def async_get(
+        self, key: str, default=None, suppress_events=False
+    ) -> Optional[IBaseObject]:
         """
         Asynchronously get an object inside this folder
 
@@ -327,8 +324,9 @@ class Folder(Resource):
             pass
         return default
 
-    async def async_multi_get(self, keys: List[str], default=None,
-                              suppress_events=False) -> AsyncIterator[IBaseObject]:
+    async def async_multi_get(
+        self, keys: List[str], default=None, suppress_events=False
+    ) -> AsyncIterator[IBaseObject]:
         """
         Asynchronously get an multiple objects inside this folder
 
@@ -361,8 +359,7 @@ class Folder(Resource):
         """
         return await self._get_transaction().keys(self.__uuid__)
 
-    async def async_items(self, suppress_events=False) -> AsyncIterator[
-            Tuple[str, Resource]]:
+    async def async_items(self, suppress_events=False) -> AsyncIterator[Tuple[str, Resource]]:
         """
         Asynchronously iterate through contents of folder
         """
@@ -372,8 +369,7 @@ class Folder(Resource):
                 await notify(ObjectLoadedEvent(value))
             yield key, value
 
-    async def async_values(self, suppress_events=False) -> AsyncIterator[
-            Tuple[Resource]]:
+    async def async_values(self, suppress_events=False) -> AsyncIterator[Tuple[Resource]]:
         txn = self._get_transaction()
         async for _, value in txn.items(self):  # type: ignore
             if not suppress_events:
@@ -389,6 +385,7 @@ class Container(Folder):
     async def install(self):
         # Creating and registering a local registry
         from guillotina.registry import Registry
+
         annotations_container = IAnnotations(self)
         registry = Registry()
         await annotations_container.async_set(REGISTRY_DATA_KEY, registry)
@@ -397,18 +394,12 @@ class Container(Folder):
         registry.register_interface(ILayers)
         registry.register_interface(IAddons)
         layers = registry.for_interface(ILayers)
-        layers['active_layers'] = frozenset()
+        layers["active_layers"] = frozenset()
 
         roles = IPrincipalRoleManager(self)
-        roles.assign_role_to_principal(
-            'guillotina.ContainerAdmin',
-            ROOT_USER_ID
-        )
+        roles.assign_role_to_principal("guillotina.ContainerAdmin", ROOT_USER_ID)
 
-        roles.assign_role_to_principal(
-            'guillotina.Owner',
-            ROOT_USER_ID
-        )
+        roles.assign_role_to_principal("guillotina.Owner", ROOT_USER_ID)
 
 
 @implementer(IStaticFile)
@@ -423,7 +414,7 @@ class StaticDirectory(dict):
     Using dict makes this a simple container so traversing works
     """
 
-    def __init__(self, file_path: pathlib.Path, base_path: pathlib.Path=None) -> None:
+    def __init__(self, file_path: pathlib.Path, base_path: pathlib.Path = None) -> None:
         self.file_path = file_path
         if base_path is None:
             self.base_path = file_path
@@ -454,7 +445,7 @@ class JavaScriptApplication(StaticDirectory):
     """
 
     def __getitem__(self, filename):
-        if filename.lower() in app_settings['default_static_filenames']:
+        if filename.lower() in app_settings["default_static_filenames"]:
             path = pathlib.Path(os.path.join(self.base_path.absolute(), filename))
             return StaticFile(path)
         path = pathlib.Path(os.path.join(self.file_path.absolute(), filename))
@@ -479,7 +470,7 @@ class JavaScriptApplication(StaticDirectory):
 class StaticFileSpecialPermissions(PrincipalPermissionManager):
     def __init__(self, db):
         super(StaticFileSpecialPermissions, self).__init__()
-        self.grant_permission_to_principal('guillotina.AccessContent', ANONYMOUS_USER_ID)
+        self.grant_permission_to_principal("guillotina.AccessContent", ANONYMOUS_USER_ID)
 
 
 @configure.utility(provides=IGetOwner)
@@ -500,8 +491,8 @@ def load_cached_schema():
                     name = iface
                 behaviors_registrations.append(get_utility(IBehavior, name=name))
             SCHEMA_CACHE[factory.type_name] = {
-                'behaviors': behaviors_registrations,
-                'schema': factory.schema
+                "behaviors": behaviors_registrations,
+                "schema": factory.schema,
             }
     for iface, utility in get_utilities_for(IBehavior):
         if isinstance(iface, str):
@@ -560,7 +551,7 @@ async def create_content(type_, **kw) -> IResource:
     This method should not be used to add content, just internally.
     """
     factory = get_cached_factory(type_)
-    id_ = kw.pop('id', None)
+    id_ = kw.pop("id", None)
 
     # We create the object with at least the ID
     obj = factory(id=id_)
@@ -572,8 +563,8 @@ async def create_content(type_, **kw) -> IResource:
 
 @profilable
 async def create_content_in_container(
-        parent: Folder, type_: str, id_: str, request: IRequest=None,
-        check_security=True, **kw) -> Resource:
+    parent: Folder, type_: str, id_: str, request: IRequest = None, check_security=True, **kw
+) -> Resource:
     """Utility to create a content.
 
     This method is the one to use to create content.
@@ -607,16 +598,16 @@ async def create_content_in_container(
     # We create the object with at least the ID
     obj = factory(id=id_, parent=parent)
     for key, value in kw.items():
-        if key == 'id':
+        if key == "id":
             # the factory sets id
             continue
         setattr(obj, key, value)
 
-    txn = getattr(parent, '__txn__', None) or get_transaction()
+    txn = getattr(parent, "__txn__", None) or get_transaction()
     if txn is None or not txn.storage.supports_unique_constraints:
         # need to manually check unique constraints
         if await parent.async_contains(obj.id):
-            raise ConflictIdOnContainer(f'Duplicate ID: {parent} -> {obj.id}')
+            raise ConflictIdOnContainer(f"Duplicate ID: {parent} -> {obj.id}")
 
     obj.__new_marker__ = True
 
@@ -649,53 +640,61 @@ async def get_all_behaviors(content, create=False, load=True) -> list:
     return behaviors
 
 
-async def duplicate(context: IResource,
-                    destination: Union[IResource, str]=None,
-                    new_id: str=None, check_permission: bool=True) -> IResource:
+async def duplicate(
+    context: IResource,
+    destination: Union[IResource, str] = None,
+    new_id: str = None,
+    check_permission: bool = True,
+) -> IResource:
     if destination is not None:
         if isinstance(destination, str):
             container = task_vars.container.get()
             if container:
                 destination_ob = await navigate_to(container, destination)
             else:
-                raise PreconditionFailed(
-                    context, 'Could not find destination object',)
+                raise PreconditionFailed(context, "Could not find destination object")
         else:
             destination_ob = destination
 
         if destination_ob is None:
-            raise PreconditionFailed(
-                context, 'Could not find destination object',)
+            raise PreconditionFailed(context, "Could not find destination object")
     else:
         destination_ob = context.__parent__
 
     if check_permission:
         policy = get_security_policy()
-        if not policy.check_permission('guillotina.AddContent', destination_ob):
+        if not policy.check_permission("guillotina.AddContent", destination_ob):
             raise PreconditionFailed(
-                context, 'You do not have permission to add content to '
-                         'the destination object',)
+                context, "You do not have permission to add content to " "the destination object"
+            )
 
     if new_id is not None:
         if await destination_ob.async_contains(new_id):
             raise PreconditionFailed(
-                context, f'Destination already has object with the id {new_id}')
+                context, f"Destination already has object with the id {new_id}"
+            )
     else:
         count = 1
-        new_id = f'{context.id}-duplicate-{count}'
+        new_id = f"{context.id}-duplicate-{count}"
         while await destination_ob.async_contains(new_id):
             count += 1
-            new_id = f'{context.id}-duplicate-{count}'
+            new_id = f"{context.id}-duplicate-{count}"
 
     from guillotina.content import create_content_in_container
+
     new_obj = await create_content_in_container(
-        destination_ob, context.type_name, new_id, id=new_id,
-        creators=context.creators, contributors=context.contributors)
+        destination_ob,
+        context.type_name,
+        new_id,
+        id=new_id,
+        creators=context.creators,
+        contributors=context.contributors,
+    )
 
     for key in context.__dict__.keys():
-        if key.startswith('__') or key.startswith('_BaseObject'):
+        if key.startswith("__") or key.startswith("_BaseObject"):
             continue
-        if key in ('id',):
+        if key in ("id",):
             continue
         new_obj.__dict__[key] = context.__dict__[key]
     new_obj.__acl__ = context.__acl__
@@ -713,16 +712,23 @@ async def duplicate(context: IResource,
         await annotations_container.async_set(anno_id, new_anno_data)
 
     await notify(
-        ObjectDuplicatedEvent(new_obj, context, destination_ob, new_id, payload={
-            'id': new_id,
-            'destination': destination,
-        }))
+        ObjectDuplicatedEvent(
+            new_obj,
+            context,
+            destination_ob,
+            new_id,
+            payload={"id": new_id, "destination": destination},
+        )
+    )
     return new_obj
 
 
-async def move(context: IResource,
-               destination: Union[IResource, str]=None,
-               new_id: str=None, check_permission: bool=True) -> None:
+async def move(
+    context: IResource,
+    destination: Union[IResource, str] = None,
+    new_id: str = None,
+    check_permission: bool = True,
+) -> None:
     if destination is None:
         destination_ob = context.__parent__
     else:
@@ -734,20 +740,20 @@ async def move(context: IResource,
                 except KeyError:
                     destination_ob = None
             else:
-                raise PreconditionFailed(context, 'Could not find destination object')
+                raise PreconditionFailed(context, "Could not find destination object")
         else:
             destination_ob = destination
 
     if destination_ob is None:
-        raise PreconditionFailed(context, 'Could not find destination object')
+        raise PreconditionFailed(context, "Could not find destination object")
     if destination_ob.__uuid__ == context.__uuid__:
-        raise PreconditionFailed(context, 'You can not move object to itself')
+        raise PreconditionFailed(context, "You can not move object to itself")
     if destination_ob.__uuid__ == context.__parent__.__uuid__ and new_id == context.id:
-        raise PreconditionFailed(context, 'Object already belongs to this parent with same id')
+        raise PreconditionFailed(context, "Object already belongs to this parent with same id")
 
     txn = get_transaction()
     if txn is not None:
-        cache_keys = txn._cache.get_cache_keys(context, 'deleted')
+        cache_keys = txn._cache.get_cache_keys(context, "deleted")
 
     old_id = context.id
     if new_id is not None:
@@ -757,34 +763,41 @@ async def move(context: IResource,
 
     if check_permission:
         policy = get_security_policy()
-        if not policy.check_permission('guillotina.AddContent', destination_ob):
+        if not policy.check_permission("guillotina.AddContent", destination_ob):
             raise PreconditionFailed(
-                context, 'You do not have permission to add content to the '
-                         'destination object')
+                context, "You do not have permission to add content to the " "destination object"
+            )
 
     if await destination_ob.async_contains(new_id):
-        raise PreconditionFailed(
-            context, f'Destination already has object with the id {new_id}')
+        raise PreconditionFailed(context, f"Destination already has object with the id {new_id}")
 
     original_parent = context.__parent__
 
     await notify(
-        BeforeObjectMovedEvent(context, original_parent, old_id, destination_ob,
-                               new_id, payload={
-                                   'id': new_id,
-                                   'destination': destination
-                               }))
+        BeforeObjectMovedEvent(
+            context,
+            original_parent,
+            old_id,
+            destination_ob,
+            new_id,
+            payload={"id": new_id, "destination": destination},
+        )
+    )
 
     context.__parent__ = destination_ob
     context.register()
 
     await notify(
-        ObjectMovedEvent(context, original_parent, old_id, destination_ob,
-                         new_id, payload={
-                             'id': new_id,
-                             'destination': destination
-                         }))
+        ObjectMovedEvent(
+            context,
+            original_parent,
+            old_id,
+            destination_ob,
+            new_id,
+            payload={"id": new_id, "destination": destination},
+        )
+    )
 
     if txn is not None:
-        cache_keys += txn._cache.get_cache_keys(context, 'added')
+        cache_keys += txn._cache.get_cache_keys(context, "added")
         await txn._cache.delete_all(cache_keys)

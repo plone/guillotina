@@ -10,10 +10,7 @@ from guillotina.renderers import GuillotinaJSONEncoder
 from guillotina.transactions import get_transaction
 
 
-@configure.adapter(
-    for_=IExternalFileStorageManager,
-    provides=IUploadDataManager,
-    name='redis')
+@configure.adapter(for_=IExternalFileStorageManager, provides=IUploadDataManager, name="redis")
 class RedisFileDataManager(DBDataManager):
 
     _data = None
@@ -44,10 +41,8 @@ class RedisFileDataManager(DBDataManager):
     async def _save(self):
         redis = await self.get_redis()
         key = self.get_key()
-        self._data['last_activity'] = time.time()
-        await redis.set(
-            key, json.dumps(self._data, cls=GuillotinaJSONEncoder),
-            expire=self._ttl)
+        self._data["last_activity"] = time.time()
+        await redis.set(key, json.dumps(self._data, cls=GuillotinaJSONEncoder), expire=self._ttl)
 
     async def get_redis(self):
         if self._redis is None:
@@ -56,10 +51,7 @@ class RedisFileDataManager(DBDataManager):
 
     def get_key(self):
         # only need 1 write to save upload object id...
-        return 'redisdm-{}-{}'.format(
-            self.context.__uuid__,
-            self.field.__name__
-        )
+        return "redisdm-{}-{}".format(self.context.__uuid__, self.field.__name__)
 
     async def update(self, **kwargs):
         self._data.update(kwargs)

@@ -1,5 +1,3 @@
-
-
 class BaseStrategy:
     def __init__(self, transaction):
         self._storage = transaction._manager._storage

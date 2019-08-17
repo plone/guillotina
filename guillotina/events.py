@@ -41,7 +41,6 @@ import typing
 
 @implementer(IObjectEvent)
 class ObjectEvent(object):
-
     def __init__(self, object, **kwargs):
         self.object = object
         self.data = kwargs
@@ -100,8 +99,7 @@ class BaseAddedEvent(ObjectLocationEvent):
             new_parent = object.__parent__
         if new_name is None:
             new_name = object.__name__
-        super().__init__(object, None, None, new_parent, new_name,
-                         payload=payload)
+        super().__init__(object, None, None, new_parent, new_name, payload=payload)
 
 
 @implementer(IObjectAddedEvent)
@@ -111,8 +109,7 @@ class ObjectAddedEvent(BaseAddedEvent):
 
 @implementer(IObjectDuplicatedEvent)
 class ObjectDuplicatedEvent(ObjectAddedEvent):
-    def __init__(self, object, original_object, new_parent=None, new_name=None,
-                 payload=None):
+    def __init__(self, object, original_object, new_parent=None, new_name=None, payload=None):
         super().__init__(object, new_parent, new_name, payload)
 
 
@@ -144,7 +141,6 @@ class BeforeObjectRemovedEvent(BaseObjectRemovedEvent):
 
 @implementer(IBeforeObjectModifiedEvent)
 class BeforeObjectModifiedEvent(object):
-
     def __init__(self, object, payload=None):
         self.object = object
         self.payload = payload or {}
@@ -152,7 +148,6 @@ class BeforeObjectModifiedEvent(object):
 
 @implementer(IObjectModifiedEvent)
 class ObjectModifiedEvent(object):
-
     def __init__(self, object, payload=None):
         self.object = object
         self.payload = payload or {}
@@ -206,7 +201,6 @@ class UserRefreshToken(object):
 
 @implementer(IApplicationEvent)
 class ApplicationEvent:
-
     def __init__(self, app, loop=None, **kwargs):
         self.app = app
         self.loop = loop

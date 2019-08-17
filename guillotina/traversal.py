@@ -77,9 +77,9 @@ async def traverse(request, parent, path):
         # not a traversable context
         return parent, path
     try:
-        if path[0][0] == '_' or path[0] in ('.', '..'):
+        if path[0][0] == "_" or path[0] in (".", ".."):
             raise HTTPUnauthorized()
-        if path[0][0] == '@':
+        if path[0][0] == "@":
             # shortcut
             return parent, path
 
@@ -98,8 +98,7 @@ async def traverse(request, parent, path):
         tm = context.get_transaction_manager()
         task_vars.tm.set(tm)
         # Start a transaction
-        txn = await tm.begin(
-            read_only=not app_settings['check_writable_request'](request))
+        txn = await tm.begin(read_only=not app_settings["check_writable_request"](request))
         # Get the root of the tree
         context = await tm.get_root(txn=txn)
 
@@ -111,7 +110,7 @@ async def traverse(request, parent, path):
             try:
                 alsoProvides(request, import_class(layer))
             except ModuleNotFoundError:
-                logger.error('Can not apply layer ' + layer, request=request)
+                logger.error("Can not apply layer " + layer, request=request)
 
     return await traverse(request, context, path[1:])
 
@@ -119,28 +118,23 @@ async def traverse(request, parent, path):
 def generate_error_response(e, request, error, status=500):
     # We may need to check the roles of the users to show the real error
     eid = uuid.uuid4().hex
-    http_response = query_adapter(
-        e, IErrorResponseException, kwargs={
-            'error': error,
-            'eid': eid
-        })
+    http_response = query_adapter(e, IErrorResponseException, kwargs={"error": error, "eid": eid})
     if http_response is not None:
         return http_response
-    message = _('Error on execution of view') + ' ' + eid
+    message = _("Error on execution of view") + " " + eid
     logger.error(message, exc_info=e, eid=eid, request=request)
     data = {
-        'message': message,
-        'reason': error_reasons.UNKNOWN.name,
-        'details': error_reasons.UNKNOWN.details,
-        'eid': eid
+        "message": message,
+        "reason": error_reasons.UNKNOWN.name,
+        "details": error_reasons.UNKNOWN.details,
+        "eid": eid,
     }
-    if app_settings.get('debug'):
-        data['traceback'] = traceback.format_exc()
+    if app_settings.get("debug"):
+        data["traceback"] = traceback.format_exc()
     return response.HTTPInternalServerError(content=data)
 
 
 class BaseMatchInfo(AbstractMatchInfo):
-
     def __init__(self):
         self._apps = ()
         self._frozen = False
@@ -159,9 +153,9 @@ class BaseMatchInfo(AbstractMatchInfo):
 
     @contextmanager
     def set_current_app(self, app):
-        assert app in self._apps, (
-            "Expected one of the following apps {!r}, got {!r}"
-            .format(self._apps, app))
+        assert app in self._apps, "Expected one of the following apps {!r}, got {!r}".format(
+            self._apps, app
+        )
         prev = self._current_app
         self._current_app = app
         try:
@@ -183,75 +177,77 @@ class BaseMatchInfo(AbstractMatchInfo):
         return None
 
     def debug(self, request, resp):
-        resp.headers['Server'] = 'Guillotina/' + __version__
-        if 'X-Debug' in request.headers:
+        resp.headers["Server"] = "Guillotina/" + __version__
+        if "X-Debug" in request.headers:
             try:
                 last = request._initialized
                 for idx, event_name in enumerate(request._events.keys()):
                     timing = request._events[event_name]
-                    header_name = 'XG-Timing-{}-{}'.format(idx, event_name)
+                    header_name = "XG-Timing-{}-{}".format(idx, event_name)
                     resp.headers[header_name] = "{0:.5f}".format((timing - last) * 1000)
                     last = timing
-                resp.headers['XG-Timing-Total'] = "{0:.5f}".format(
-                    (last - request._initialized) * 1000)
+                resp.headers["XG-Timing-Total"] = "{0:.5f}".format(
+                    (last - request._initialized) * 1000
+                )
                 txn = task_vars.txn.get()
                 if txn is not None:
-                    resp.headers['XG-Total-Cache-hits'] = str(txn._cache._hits)
-                    resp.headers['XG-Total-Cache-misses'] = str(txn._cache._misses)
-                    resp.headers['XG-Total-Cache-stored'] = str(txn._cache._stored)
-                    resp.headers['XG-Num-Queries'] = str(
-                        txn._query_count_end - txn._query_count_start)
+                    resp.headers["XG-Total-Cache-hits"] = str(txn._cache._hits)
+                    resp.headers["XG-Total-Cache-misses"] = str(txn._cache._misses)
+                    resp.headers["XG-Total-Cache-stored"] = str(txn._cache._stored)
+                    resp.headers["XG-Num-Queries"] = str(
+                        txn._query_count_end - txn._query_count_start
+                    )
                     for idx, query in enumerate(txn._queries.keys()):
                         counts = txn._queries[query]
                         duration = "{0:.5f}".format(counts[1] * 1000)
-                        resp.headers[f'XG-Query-{idx}'] = f'count: {counts[0]}, time: {duration}, query: {query}'  # noqa
+                        resp.headers[
+                            f"XG-Query-{idx}"
+                        ] = f"count: {counts[0]}, time: {duration}, query: {query}"  # noqa
             except (KeyError, AttributeError):
-                resp.headers['XG-Error'] = 'Could not get stats'
+                resp.headers["XG-Error"] = "Could not get stats"
 
 
 async def apply_rendering(view, request, view_result):
     for ct in get_acceptable_content_types(request):
-        renderer = query_multi_adapter(
-            (view, request), IRenderer, name=ct)
+        renderer = query_multi_adapter((view, request), IRenderer, name=ct)
         if renderer is not None:
             break
     else:
         # default to application/json
-        renderer = query_multi_adapter(
-            (view, request), IRenderer, name='application/json')
+        renderer = query_multi_adapter((view, request), IRenderer, name="application/json")
     return await renderer(view_result)
 
 
 async def _apply_cors(request, resp):
-    cors_renderer = app_settings['cors_renderer'](request)
+    cors_renderer = app_settings["cors_renderer"](request)
     try:
         cors_headers = await cors_renderer.get_headers()
         fields = (
-            'Access-Control-Expose-Headers',
-            'Access-Control-Allow-Methods',
-            'Access-Control-Allow-Headers'
+            "Access-Control-Expose-Headers",
+            "Access-Control-Allow-Methods",
+            "Access-Control-Allow-Headers",
         )
         # merge CORS headers
         for name, value in resp.headers.items():
             if name in fields and name in cors_headers:
-                if value == '*':
-                    cors_headers[name] = '*'
-                elif cors_headers[name] != '*':
-                    cors_values = [v.strip() for v in cors_headers[name].split(',')]
-                    for item in [v.strip() for v in value.split(',')]:
+                if value == "*":
+                    cors_headers[name] = "*"
+                elif cors_headers[name] != "*":
+                    cors_values = [v.strip() for v in cors_headers[name].split(",")]
+                    for item in [v.strip() for v in value.split(",")]:
                         if item not in cors_values:
                             cors_values.append(item)
-                    cors_headers[name] = ', '.join(cors_values)
+                    cors_headers[name] = ", ".join(cors_values)
             else:
                 cors_headers[name] = value
 
         resp._headers = cors_headers
-        retry_attempts = getattr(request, '_retry_attempt', 0)
+        retry_attempts = getattr(request, "_retry_attempt", 0)
         if retry_attempts > 0:
-            resp.headers['X-Retry-Transaction-Count'] = str(retry_attempts)
+            resp.headers["X-Retry-Transaction-Count"] = str(retry_attempts)
     except response.Response as exc:
         resp = exc
-    request.record('headers')
+    request.record("headers")
     return resp
 
 
@@ -259,11 +255,11 @@ def _clean_request(request, response):
     if isinstance(response, Exception):
         traceback.clear_frames(response.__traceback__)
 
-    for attr in ('resource', 'found_view'):
+    for attr in ("resource", "found_view"):
         if getattr(request, attr, None) is not None:
             setattr(request, attr, None)
 
-    for attr in ('_cache_data', '_last_read_pos',):
+    for attr in ("_cache_data", "_last_read_pos"):
         if hasattr(request, attr):
             delattr(request, attr)
 
@@ -282,8 +278,8 @@ class MatchInfo(BaseMatchInfo):
         """Main handler function for aiohttp."""
         request._view_error = False
         await notify(BeforeRenderViewEvent(request, self.view))
-        request.record('viewrender')
-        if app_settings['check_writable_request'](request):
+        request.record("viewrender")
+        if app_settings["check_writable_request"](request):
             try:
                 # We try to avoid collisions on the same instance of
                 # guillotina
@@ -298,8 +294,7 @@ class MatchInfo(BaseMatchInfo):
                 request._view_error = True
             except Exception as e:
                 await abort()
-                view_result = generate_error_response(
-                    e, request, 'ServiceError')
+                view_result = generate_error_response(e, request, "ServiceError")
                 request._view_error = True
         else:
             try:
@@ -309,26 +304,26 @@ class MatchInfo(BaseMatchInfo):
                 request._view_error = True
             except Exception as e:
                 request._view_error = True
-                view_result = generate_error_response(e, request, 'ViewError')
+                view_result = generate_error_response(e, request, "ViewError")
             finally:
                 await abort()
-        request.record('viewrendered')
+        request.record("viewrendered")
 
         if IAioHTTPResponse.providedBy(view_result):
             resp = view_result
         else:
             resp = await apply_rendering(self.view, self.request, view_result)
-            request.record('renderer')
+            request.record("renderer")
             resp = await _apply_cors(request, resp)
 
         if not request._view_error:
             request.execute_futures()
         else:
-            request.execute_futures('failure')
+            request.execute_futures("failure")
 
         self.debug(request, resp)
 
-        request.record('finish')
+        request.record("finish")
 
         _clean_request(request, resp)
         del self.view
@@ -338,10 +333,10 @@ class MatchInfo(BaseMatchInfo):
 
     def get_info(self):
         return {
-            'request': self.request,
-            'resource': self.resource,
-            'view': self.view,
-            'rendered': self.rendered
+            "request": self.request,
+            "resource": self.resource,
+            "view": self.view,
+            "rendered": self.rendered,
         }
 
 
@@ -356,22 +351,18 @@ class BasicMatchInfo(BaseMatchInfo):
     @profilable
     async def handler(self, request):
         """Main handler function for aiohttp."""
-        request.record('finish')
+        request.record("finish")
         self.debug(request, self.resp)
         _clean_request(request, self.resp)
         if IAioHTTPResponse.providedBy(self.resp):
             return self.resp
         else:
-            resp = await apply_rendering(
-                View(None, request), request, self.resp)
+            resp = await apply_rendering(View(None, request), request, self.resp)
             resp = await _apply_cors(request, resp)
             return resp
 
     def get_info(self):
-        return {
-            'request': self.request,
-            'resp': self.resp
-        }
+        return {"request": self.request, "resp": self.resp}
 
 
 class TraversalRouter(AbstractRouter):
@@ -379,7 +370,7 @@ class TraversalRouter(AbstractRouter):
 
     _root = None
 
-    def __init__(self, root: IApplication=None) -> None:
+    def __init__(self, root: IApplication = None) -> None:
         """On traversing aiohttp sets the root object."""
         self.set_root(root)
 
@@ -388,13 +379,13 @@ class TraversalRouter(AbstractRouter):
         self._root = root
 
     async def resolve(self, request: IRequest) -> BaseMatchInfo:  # type: ignore
-        '''
+        """
         Resolve a request
-        '''
+        """
         # prevent: https://github.com/aio-libs/aiohttp/issues/3335
         request.url
 
-        request.record('start')
+        request.record("start")
         result = None
         try:
             result = await self.real_resolve(request)
@@ -402,11 +393,9 @@ class TraversalRouter(AbstractRouter):
             await abort()
             return BasicMatchInfo(request, exc)
         except Exception:
-            logger.error("Exception on resolve execution",
-                         exc_info=True, request=request)
+            logger.error("Exception on resolve execution", exc_info=True, request=request)
             await abort()
-            return BasicMatchInfo(
-                request, response.HTTPInternalServerError())
+            return BasicMatchInfo(request, response.HTTPInternalServerError())
 
         if result is not None:
             return result
@@ -417,11 +406,12 @@ class TraversalRouter(AbstractRouter):
     @profilable
     async def real_resolve(self, request: IRequest) -> Optional[MatchInfo]:
         """Main function to resolve a request."""
-        if request.method not in app_settings['http_methods']:
+        if request.method not in app_settings["http_methods"]:
             raise HTTPMethodNotAllowed(
                 method=request.method,
-                allowed_methods=[k for k in app_settings['http_methods'].keys()])
-        method = app_settings['http_methods'][request.method]
+                allowed_methods=[k for k in app_settings["http_methods"].keys()],
+            )
+        method = app_settings["http_methods"][request.method]
 
         try:
             resource, tail = await self.traverse(request)
@@ -429,21 +419,19 @@ class TraversalRouter(AbstractRouter):
             # can also happen from connection errors so we bubble this...
             raise
         except Exception as _exc:
-            logger.error('Unhandled exception occurred', exc_info=True)
+            logger.error("Unhandled exception occurred", exc_info=True)
             request.resource = request.tail = None
             request.exc = _exc
             data = {
-                'success': False,
-                'exception_message': str(_exc),
-                'exception_type': getattr(type(_exc), '__name__', str(type(_exc))),  # noqa
+                "success": False,
+                "exception_message": str(_exc),
+                "exception_type": getattr(type(_exc), "__name__", str(type(_exc))),  # noqa
             }
-            if app_settings.get('debug'):
-                data['traceback'] = traceback.format_exc()
-            raise HTTPBadRequest(content={
-                'reason': data
-            })
+            if app_settings.get("debug"):
+                data["traceback"] = traceback.format_exc()
+            raise HTTPBadRequest(content={"reason": data})
 
-        request.record('traversed')
+        request.record("traversed")
 
         await notify(ObjectLoadedEvent(resource))
         request.resource = resource
@@ -451,37 +439,33 @@ class TraversalRouter(AbstractRouter):
 
         if request.resource is None:
             await notify(TraversalResourceMissEvent(request, tail))
-            raise HTTPNotFound(content={
-                "reason": 'Resource not found'
-            })
+            raise HTTPNotFound(content={"reason": "Resource not found"})
 
         if tail and len(tail) > 0:
             # convert match lookups
             view_name = routes.path_to_view_name(tail)
         elif not tail:
-            view_name = ''
+            view_name = ""
 
-        request.record('beforeauthentication')
+        request.record("beforeauthentication")
         authenticated = await authenticate_request(request)
         # Add anonymous participation
         if authenticated is None:
             authenticated = AnonymousUser()
             set_authenticated_user(authenticated)
-        request.record('authentication')
+        request.record("authentication")
 
         policy = get_security_policy(authenticated)
 
         for language in get_acceptable_languages(request):
-            translator = query_adapter((resource, request), ILanguage,
-                                       name=language)
+            translator = query_adapter((resource, request), ILanguage, name=language)
             if translator is not None:
                 resource = translator.translate()
                 break
 
         # container registry lookup
         try:
-            view = query_multi_adapter(
-                (resource, request), method, name=view_name)
+            view = query_multi_adapter((resource, request), method, name=view_name)
         except AttributeError:
             view = None
 
@@ -490,7 +474,7 @@ class TraversalRouter(AbstractRouter):
 
         # Check security on context to AccessContent unless
         # is view allows explicit or its OPTIONS
-        permission = get_utility(IPermission, name='guillotina.AccessContent')
+        permission = get_utility(IPermission, name="guillotina.AccessContent")
         if not policy.check_permission(permission.id, resource):
             # Check if its a CORS call:
             if IOPTIONS != method:
@@ -498,14 +482,15 @@ class TraversalRouter(AbstractRouter):
                 if view is None or not view.__allow_access__:
                     logger.info(
                         "No access content {content} with {auth}".format(
-                            content=resource,
-                            auth=authenticated.id),
-                        request=request)
+                            content=resource, auth=authenticated.id
+                        ),
+                        request=request,
+                    )
                     raise HTTPUnauthorized(
                         content={
                             "reason": "You are not authorized to access content",
                             "content": str(resource),
-                            "auth": authenticated.id
+                            "auth": authenticated.id,
                         }
                     )
 
@@ -516,20 +501,20 @@ class TraversalRouter(AbstractRouter):
 
         request.found_view = view
         request.view_name = view_name
-        request.record('viewfound')
+        request.record("viewfound")
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
         if view_permission is None:
             # use default view permission
-            view_permission = app_settings['default_permission']
+            view_permission = app_settings["default_permission"]
         if not policy.check_permission(view_permission, view):
             if IOPTIONS != method:
                 raise HTTPUnauthorized(
                     content={
                         "reason": "You are not authorized to view",
                         "content": str(resource),
-                        "auth": authenticated.id
+                        "auth": authenticated.id,
                     }
                 )
 
@@ -541,15 +526,15 @@ class TraversalRouter(AbstractRouter):
         except AttributeError:
             pass
 
-        if hasattr(view, 'prepare'):
+        if hasattr(view, "prepare"):
             view = (await view.prepare()) or view
 
-        request.record('authorization')
+        request.record("authorization")
 
         return MatchInfo(resource, request, view)
 
     async def traverse(self, request: IRequest) -> Tuple[IBaseObject, List[str]]:
         """Wrapper that looks for the path based on aiohttp API."""
-        path = tuple(p for p in request.path.split('/') if p)
+        path = tuple(p for p in request.path.split("/") if p)
         root = self._root
         return await traverse(request, root, path)

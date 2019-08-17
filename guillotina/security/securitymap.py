@@ -2,7 +2,6 @@ from guillotina import task_vars
 
 
 class SecurityMap:
-
     def __init__(self):
         self._clear()
 
@@ -66,7 +65,7 @@ class SecurityMap:
         marker = object()
         cell = self.queryCell(rowentry, colentry, marker)
         if cell is marker:
-            raise KeyError('Not a valid row and column pair.')
+            raise KeyError("Not a valid row and column pair.")
         return cell
 
     def get_row(self, rowentry):
@@ -92,7 +91,6 @@ class SecurityMap:
 
 
 class GuillotinaSecurityMap(SecurityMap):
-
     def __init__(self, context):
         self.context = context
         map = self.context.acl.get(self.key)
@@ -107,7 +105,7 @@ class GuillotinaSecurityMap(SecurityMap):
     def _invalidated_policy_cache(self):
         super()._invalidated_policy_cache()
         try:
-            del self.context.__volatile__['security_cache']
+            del self.context.__volatile__["security_cache"]
         except KeyError:
             pass
 

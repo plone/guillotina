@@ -13,9 +13,8 @@ class IMultiAttachmentMarker(Interface):
 
 
 @configure.behavior(
-    title="Attachment behavior",
-    marker=IAttachmentMarker,
-    for_="guillotina.interfaces.IResource")
+    title="Attachment behavior", marker=IAttachmentMarker, for_="guillotina.interfaces.IResource"
+)
 class IAttachment(Interface):
     file = CloudFileField()
 
@@ -23,10 +22,7 @@ class IAttachment(Interface):
 @configure.behavior(
     title="MultiAttachment behavior",
     marker=IMultiAttachmentMarker,
-    for_="guillotina.interfaces.IResource")
+    for_="guillotina.interfaces.IResource",
+)
 class IMultiAttachment(Interface):
-    files = Dict(
-        key_type=TextLine(),
-        value_type=CloudFileField(),
-        missing_value={}
-    )
+    files = Dict(key_type=TextLine(), value_type=CloudFileField(), missing_value={})

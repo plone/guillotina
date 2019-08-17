@@ -1,5 +1,3 @@
-
-
 class Message(str):
     """
     XXX nothing right now, implement i18n here...
@@ -33,4 +31,4 @@ class MessageFactory(object):
         return Message(ustr, self._domain, default, mapping)
 
 
-default_message_factory = MessageFactory('guillotina')
+default_message_factory = MessageFactory("guillotina")

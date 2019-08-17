@@ -18,84 +18,64 @@ from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
 
 
-_ = MessageFactory('guillotina')
+_ = MessageFactory("guillotina")
 
 
 _marker = object()
 
 
 @configure.service(
-    context=IContainer, method='GET',
-    permission='guillotina.ReadConfiguration', name='@registry/{key}',
-    summary='Read container registry settings',
-    parameters=[{
-        "in": "path",
-        "name": "key",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }],
+    context=IContainer,
+    method="GET",
+    permission="guillotina.ReadConfiguration",
+    name="@registry/{key}",
+    summary="Read container registry settings",
+    parameters=[{"in": "path", "name": "key", "required": "true", "schema": {"type": "string"}}],
     responses={
         "200": {
             "description": "Successfully registered interface",
             "content": {
                 "application/json": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "value": {
-                                "type": "object"
-                            }
-                        }
-                    }
+                    "schema": {"type": "object", "properties": {"value": {"type": "object"}}}
                 }
-            }
+            },
         }
-    })
+    },
+)
 class Read(Service):
-
     async def prepare(self):
         # we want have the key of the registry
-        self.key = self.request.matchdict['key']
+        self.key = self.request.matchdict["key"]
         registry = await get_registry(self.context)
         self.value = registry.get(self.key, _marker)
         if self.value is _marker:
-            raise HTTPNotFound(content={
-                'message': f'{self.key} not in settings'
-            })
+            raise HTTPNotFound(content={"message": f"{self.key} not in settings"})
 
     async def __call__(self):
         try:
             result = json_compatible(self.value)
         except (ComponentLookupError, TypeError):
             result = self.value
-        return {
-            'value': result
-        }
+        return {"value": result}
 
 
 @configure.service(
-    context=IContainer, method='GET',
-    permission='guillotina.ReadConfiguration', name='@registry',
-    summary='Read container registry settings',
+    context=IContainer,
+    method="GET",
+    permission="guillotina.ReadConfiguration",
+    name="@registry",
+    summary="Read container registry settings",
     responses={
         "200": {
             "description": "Successfully registered interface",
             "content": {
                 "application/json": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "value": {
-                                "type": "object"
-                            }
-                        }
-                    }
+                    "schema": {"type": "object", "properties": {"value": {"type": "object"}}}
                 }
-            }
+            },
         }
-    })
+    },
+)
 async def get_registry_service(context, request):
     result = {}
     registry = await get_registry(context)
@@ -105,41 +85,34 @@ async def get_registry_service(context, request):
         except (ComponentLookupError, TypeError):
             value = registry[key]
         result[key] = value
-    return {
-        'value': result
-    }
+    return {"value": result}
 
 
 @configure.service(
-    context=IContainer, method='POST',
-    permission='guillotina.RegisterConfigurations', name='@registry',
-    summary='Register a new interface to for registry settings',
+    context=IContainer,
+    method="POST",
+    permission="guillotina.RegisterConfigurations",
+    name="@registry",
+    summary="Register a new interface to for registry settings",
     validate=True,
     requestBody={
-        'required': True,
-        'content': {
-            'application/json': {
+        "required": True,
+        "content": {
+            "application/json": {
                 "schema": {
                     "type": "object",
                     "title": "Registry",
                     "properties": {
-                        "interface": {
-                             "type": "string"
-                        },
-                        "initial_values": {
-                            "type": "object"
-                        }
+                        "interface": {"type": "string"},
+                        "initial_values": {"type": "object"},
                     },
-                    'required': ['interface']
+                    "required": ["interface"],
                 }
             }
-        }
+        },
     },
-    responses={
-        "200": {
-            "description": "Successfully registered interface"
-        }
-    })
+    responses={"200": {"description": "Successfully registered interface"}},
+)
 class Register(Service):
     """Register an Interface on the Registry."""
 
@@ -147,19 +120,13 @@ class Register(Service):
         """ data input : { 'interface': 'INTERFACE' }"""
         registry = await get_registry()
         if registry is None:
-            return ErrorResponse(
-                'BadRequest',
-                _("Not in a container request"),
-                status=412)
+            return ErrorResponse("BadRequest", _("Not in a container request"), status=412)
 
         data = await self.request.json()
-        interface = data.get('interface', None)
-        initial_values = data.get('initial_values', {})
+        interface = data.get("interface", None)
+        initial_values = data.get("initial_values", {})
         if interface is None:
-            return ErrorResponse(
-                'InvalidRequest',
-                'Non existent Interface',
-                status=412)
+            return ErrorResponse("InvalidRequest", "Non existent Interface", status=412)
 
         iObject = import_class(interface)
         registry.register_interface(iObject)
@@ -173,96 +140,76 @@ class Register(Service):
                 # We don't have a value
                 config[key] = initial_values[key]
 
-        await notify(RegistryEditedEvent(self.context, registry, {
-            interface: initial_values
-        }))
+        await notify(RegistryEditedEvent(self.context, registry, {interface: initial_values}))
 
         return Response(status=201)
 
 
 @configure.service(
-    context=IContainer, method='PATCH',
-    permission='guillotina.WriteConfiguration', name='@registry/{dotted_name}',
-    summary='Update registry setting',
+    context=IContainer,
+    method="PATCH",
+    permission="guillotina.WriteConfiguration",
+    name="@registry/{dotted_name}",
+    summary="Update registry setting",
     validate=True,
-    parameters=[{
-        "in": "path",
-        "name": "dotter_name",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }],
+    parameters=[
+        {"in": "path", "name": "dotter_name", "required": "true", "schema": {"type": "string"}}
+    ],
     requestBody={
-        'required': True,
-        'content': {
-            'application/json': {
-                "schema": {
-                    "$ref": "#/components/schemas/UpdateRegistry"
-                }
-            }
-        }
+        "required": True,
+        "content": {
+            "application/json": {"schema": {"$ref": "#/components/schemas/UpdateRegistry"}}
+        },
     },
-    responses={
-        "200": {
-            "description": "Successfully wrote configuration"
-        }
-    })
+    responses={"200": {"description": "Successfully wrote configuration"}},
+)
 class Write(Service):
     key = _marker
     value = None
 
     async def prepare(self):
-        self.key = self.request.matchdict['dotted_name']
+        self.key = self.request.matchdict["dotted_name"]
         registry = await get_registry()
         self.value = registry.get(self.key)
 
     async def __call__(self):
         if self.key is _marker:
             # No option to write the root of registry
-            return ErrorResponse('InvalidRequest', 'Needs the registry key', status=412)
+            return ErrorResponse("InvalidRequest", "Needs the registry key", status=412)
 
         data = await self.request.json()
-        if 'value' in data:
-            value = data['value']
+        if "value" in data:
+            value = data["value"]
         else:
             value = data
 
-        assert '.' in self.key, 'Registry key must be dotted.iface.name.fieldname'  # noqa
-        iface_name, name = self.key.rsplit('.', 1)
+        assert "." in self.key, "Registry key must be dotted.iface.name.fieldname"  # noqa
+        iface_name, name = self.key.rsplit(".", 1)
         iface = resolve_dotted_name(iface_name)
 
-        assert iface is not None, 'Must provide valid registry interface'  # noqa
+        assert iface is not None, "Must provide valid registry interface"  # noqa
         try:
             field = iface[name]
         except KeyError:
             return ErrorResponse(
-                'DeserializationError',
-                'Invalid field name {}'.format(str(name)),
-                status=412)
+                "DeserializationError", "Invalid field name {}".format(str(name)), status=412
+            )
 
         try:
             new_value = get_adapter((field), IJSONToValue, args=[value, self.context])
         except ComponentLookupError:
             return ErrorResponse(
-                'DeserializationError',
-                'Cannot deserialize type {}'.format(str(self.field)),
-                status=412)
+                "DeserializationError",
+                "Cannot deserialize type {}".format(str(self.field)),
+                status=412,
+            )
 
         try:
             registry = await get_registry()
             registry[self.key] = new_value
         except DeserializationError as e:
-            return ErrorResponse(
-                'DeserializationError',
-                str(e),
-                exc=e,
-                status=412)
+            return ErrorResponse("DeserializationError", str(e), exc=e, status=412)
 
-        await notify(RegistryEditedEvent(self.context, registry, {
-            iface_name: {
-                name: value
-            }
-        }))
+        await notify(RegistryEditedEvent(self.context, registry, {iface_name: {name: value}}))
 
         return Response(status=204)

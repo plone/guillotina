@@ -10,137 +10,101 @@ import re
 
 
 @configure.service(
-    context=IApplication, method='GET', permission='guillotina.GetDatabases',
-    name='@storages')
+    context=IApplication, method="GET", permission="guillotina.GetDatabases", name="@storages"
+)
 async def storages_get(context, request):
     result = []
-    for key, dbconfig in list_or_dict_items(app_settings['storages']):
-        result.append({
-            'id': key,
-            'type': dbconfig['storage']
-        })
+    for key, dbconfig in list_or_dict_items(app_settings["storages"]):
+        result.append({"id": key, "type": dbconfig["storage"]})
     return result
 
 
 def _get_storage_config(storage_id):
-    for key, dbconfig in list_or_dict_items(app_settings['storages']):
+    for key, dbconfig in list_or_dict_items(app_settings["storages"]):
         if key == storage_id:
-            dbconfig['storage_id'] = storage_id
+            dbconfig["storage_id"] = storage_id
             return dbconfig
 
 
 @configure.service(
-    context=IApplication, method='GET', permission='guillotina.GetDatabases',
-    name='@storages/{storage_id}', parameters=[{
-        "in": "path",
-        "name": "storage_id",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }])
+    context=IApplication,
+    method="GET",
+    permission="guillotina.GetDatabases",
+    name="@storages/{storage_id}",
+    parameters=[
+        {"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}}
+    ],
+)
 async def storage_get(context, request):
-    storage_id = request.matchdict['storage_id']
+    storage_id = request.matchdict["storage_id"]
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(content={
-            'reason': f'Storage {storage_id}'
-        })
-    manager = config.get('type', config['storage'])
-    factory = get_adapter(context, IDatabaseManager,
-                          name=manager, args=[config])
-    return {
-        'id': storage_id,
-        'type': config['storage'],
-        'databases': await factory.get_names()
-    }
+        raise HTTPNotFound(content={"reason": f"Storage {storage_id}"})
+    manager = config.get("type", config["storage"])
+    factory = get_adapter(context, IDatabaseManager, name=manager, args=[config])
+    return {"id": storage_id, "type": config["storage"], "databases": await factory.get_names()}
 
 
 @configure.service(
-    context=IApplication, method='POST', permission='guillotina.MountDatabase',
-    name='@storages/{storage_id}', parameters=[{
-        "in": "path",
-        "name": "storage_id",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }])
+    context=IApplication,
+    method="POST",
+    permission="guillotina.MountDatabase",
+    name="@storages/{storage_id}",
+    parameters=[
+        {"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}}
+    ],
+)
 async def storage_create_db(context, request):
-    storage_id = request.matchdict['storage_id']
+    storage_id = request.matchdict["storage_id"]
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(content={
-            'reason': f'Storage {storage_id}'})
-    manager = config.get('type', config['storage'])
-    factory = get_adapter(context, IDatabaseManager,
-                          name=manager, args=[config])
+        raise HTTPNotFound(content={"reason": f"Storage {storage_id}"})
+    manager = config.get("type", config["storage"])
+    factory = get_adapter(context, IDatabaseManager, name=manager, args=[config])
     data = await request.json()
-    name = data['name']
+    name = data["name"]
     assert name == re.escape(name)
-    await factory.create(data['name'])
+    await factory.create(data["name"])
 
 
 @configure.service(
-    context=IApplication, method='DELETE', permission='guillotina.UmountDatabase',
-    name='@storages/{storage_id}/{db_id}', parameters=[{
-        "in": "path",
-        "name": "storage_id",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }, {
-        "in": "path",
-        "name": "db_id",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }])
+    context=IApplication,
+    method="DELETE",
+    permission="guillotina.UmountDatabase",
+    name="@storages/{storage_id}/{db_id}",
+    parameters=[
+        {"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}},
+        {"in": "path", "name": "db_id", "required": "true", "schema": {"type": "string"}},
+    ],
+)
 async def delete_db(context, request):
-    storage_id = request.matchdict['storage_id']
+    storage_id = request.matchdict["storage_id"]
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(content={
-            'reason': f'Storage {storage_id}'})
-    manager = config.get('type', config['storage'])
-    factory = get_adapter(context, IDatabaseManager,
-                          name=manager, args=[config])
-    assert request.matchdict['db_id'] in await factory.get_names()
-    await factory.delete(request.matchdict['db_id'])
+        raise HTTPNotFound(content={"reason": f"Storage {storage_id}"})
+    manager = config.get("type", config["storage"])
+    factory = get_adapter(context, IDatabaseManager, name=manager, args=[config])
+    assert request.matchdict["db_id"] in await factory.get_names()
+    await factory.delete(request.matchdict["db_id"])
 
 
 @configure.service(
-    context=IApplication, method='GET', permission='guillotina.GetDatabases',
-    name='@storages/{storage_id}/{db_id}', parameters=[{
-        "in": "path",
-        "name": "storage_id",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }, {
-        "in": "path",
-        "name": "db_id",
-        "required": "true",
-        "schema": {
-            "type": "string"
-        }
-    }])
+    context=IApplication,
+    method="GET",
+    permission="guillotina.GetDatabases",
+    name="@storages/{storage_id}/{db_id}",
+    parameters=[
+        {"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}},
+        {"in": "path", "name": "db_id", "required": "true", "schema": {"type": "string"}},
+    ],
+)
 async def get_db(context, request):
-    storage_id = request.matchdict['storage_id']
+    storage_id = request.matchdict["storage_id"]
     config = _get_storage_config(storage_id)
     if config is None:
-        raise HTTPNotFound(content={
-            'reason': f'Storage {storage_id}'})
-    manager = config.get('type', config['storage'])
-    factory = get_adapter(context, IDatabaseManager,
-                          name=manager, args=[config])
-    db_id = request.matchdict['db_id']
+        raise HTTPNotFound(content={"reason": f"Storage {storage_id}"})
+    manager = config.get("type", config["storage"])
+    factory = get_adapter(context, IDatabaseManager, name=manager, args=[config])
+    db_id = request.matchdict["db_id"]
     db = await factory.get_database(db_id)
-    return {
-        'id': db.id,
-        'storage_id': storage_id,
-        'type': config['storage']
-    }
+    return {"id": db.id, "storage_id": storage_id, "type": config["storage"]}

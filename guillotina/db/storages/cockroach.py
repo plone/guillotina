@@ -13,10 +13,12 @@ from guillotina.utils import get_current_request
 from zope.interface import implementer
 
 
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 # upsert without checking matching tids on updated object
-register_sql('CR_NAIVE_UPSERT', f"""
+register_sql(
+    "CR_NAIVE_UPSERT",
+    f"""
 INSERT INTO {{table_name}}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, state)
 VALUES ($1::varchar({MAX_UID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
@@ -34,11 +36,14 @@ DO UPDATE SET
     id = EXCLUDED.id,
     type = EXCLUDED.type,
     state = EXCLUDED.state
-RETURNING NOTHING""")
+RETURNING NOTHING""",
+)
 
 
 # update without checking matching tids on updated object
-register_sql('CR_UPDATE', f"""
+register_sql(
+    "CR_UPDATE",
+    f"""
 UPDATE {{table_name}}
 SET
     tid = $2::int,
@@ -54,70 +59,73 @@ SET
 WHERE
     zoid = $1::varchar({MAX_UID_LENGTH})
     AND tid = $7::int
-RETURNING tid, otid""")
+RETURNING tid, otid""",
+)
 
 
 NEXT_TID = """SELECT unique_rowid()"""
 
 
 class CockroachDBTransaction:
-    '''
+    """
     Custom transaction object to work with cockroachdb so we can...
     1. restart commits when cockroach throws a 40001 error
     2. retry transctions with custom priorities
-    '''
+    """
 
-    commit_statement = '''RELEASE SAVEPOINT cockroach_restart;
-COMMIT;'''
+    commit_statement = """RELEASE SAVEPOINT cockroach_restart;
+COMMIT;"""
 
     def __init__(self, txn):
         self._txn = txn
         self._conn = txn._db_conn
         self._storage = txn._manager._storage
-        self._status = 'none'
-        self._priority = 'LOW'
+        self._status = "none"
+        self._priority = "LOW"
         try:
             request = get_current_request()
-            attempts = getattr(request, '_retry_attempt', 0)
+            attempts = getattr(request, "_retry_attempt", 0)
             if attempts == 1:
-                self._priority = 'NORMAL'
+                self._priority = "NORMAL"
             elif attempts > 1:
-                self._priority = 'HIGH'
+                self._priority = "HIGH"
         except RequestNotFound:
             pass
 
     async def start(self):
-        assert self._status in ('none',)
-        await self._conn.execute(f'''BEGIN PRIORITY {self._priority};
-SAVEPOINT cockroach_restart;''')
-        self._status = 'started'
+        assert self._status in ("none",)
+        await self._conn.execute(
+            f"""BEGIN PRIORITY {self._priority};
+SAVEPOINT cockroach_restart;"""
+        )
+        self._status = "started"
 
     async def commit(self):
-        assert self._status in ('started',)
+        assert self._status in ("started",)
         try:
             await self._conn.execute(self.commit_statement)
         except asyncpg.exceptions.UniqueViolationError as ex:
-            if 'duplicate key value (parent_id,id)' in ex.message:
+            if "duplicate key value (parent_id,id)" in ex.message:
                 raise ConflictIdOnContainer(ex)
             raise
-        self._status = 'committed'
+        self._status = "committed"
 
     async def restart(self):
-        await self._conn.execute('ROLLBACK TO SAVEPOINT COCKROACH_RESTART')
+        await self._conn.execute("ROLLBACK TO SAVEPOINT COCKROACH_RESTART")
 
     async def rollback(self):
-        assert self._status in ('started',)
+        assert self._status in ("started",)
         try:
-            await self._conn.execute('ROLLBACK;')
+            await self._conn.execute("ROLLBACK;")
         except asyncpg.exceptions.InternalServerError:
             # already aborted...
             pass
-        self._status = 'rolledback'
+        self._status = "rolledback"
 
 
 @implementer(ICockroachStorage)
 class CockroachStorage(pg.PostgresqlStorage):
-    '''
+    """
     Differences that we use from postgresql:
         - no jsonb support
         - no CASCADE support(ON DELETE CASCADE)
@@ -131,7 +139,7 @@ class CockroachStorage(pg.PostgresqlStorage):
     Once cockroachdb 2.0 is stable...
         - we can change this cockroach driver to work almost the exact same
           way as postgresql driver with on delete cascade support
-    '''
+    """
 
     _db_transaction_factory = CockroachDBTransaction
     _vacuum = _vacuum_task = None
@@ -141,14 +149,15 @@ class CockroachStorage(pg.PostgresqlStorage):
     #                        WHERE parent_id != '{TRASHED_ID}'"""
 
     def __init__(self, *args, **kwargs):
-        transaction_strategy = kwargs.get('transaction_strategy', 'dbresolve_readcommitted')
-        if transaction_strategy not in (
-                'none', 'tidonly', 'dbresolve', 'dbresolve_readcommitted'):
-            logger.warning(f'Unsupported transaction strategy specified for '
-                           f'cockroachdb({transaction_strategy}). '
-                           f'Forcing to `dbresolve_readcommitted` strategy')
-            transaction_strategy = 'dbresolve_readcommitted'
-        kwargs['transaction_strategy'] = transaction_strategy
+        transaction_strategy = kwargs.get("transaction_strategy", "dbresolve_readcommitted")
+        if transaction_strategy not in ("none", "tidonly", "dbresolve", "dbresolve_readcommitted"):
+            logger.warning(
+                f"Unsupported transaction strategy specified for "
+                f"cockroachdb({transaction_strategy}). "
+                f"Forcing to `dbresolve_readcommitted` strategy"
+            )
+            transaction_strategy = "dbresolve_readcommitted"
+        kwargs["transaction_strategy"] = transaction_strategy
         super().__init__(*args, **kwargs)
 
     async def initialize_tid_statements(self):
@@ -160,16 +169,18 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def has_unique_constraint(self):
         try:
             for result in await self.read_conn.fetch(
-                    '''SHOW CONSTRAINTS FROM {};'''.format(self._objects_table_name)):
+                """SHOW CONSTRAINTS FROM {};""".format(self._objects_table_name)
+            ):
                 result = dict(result)
-                c_name = result.get('Name', result.get('constraint_name'))
-                if c_name == '{}_parent_id_id_key'.format(self._objects_table_name):
+                c_name = result.get("Name", result.get("constraint_name"))
+                if c_name == "{}_parent_id_id_key".format(self._objects_table_name):
                     return True
         except asyncpg.exceptions.UndefinedTableError:
             pass
         except Exception:
             logger.warning(
-                'Unknown error attempting to detect constraints installed.', exc_info=True)
+                "Unknown error attempting to detect constraints installed.", exc_info=True
+            )
         return False
 
     async def store(self, oid, old_serial, writer, obj, txn):
@@ -182,11 +193,11 @@ class CockroachStorage(pg.PostgresqlStorage):
         if part is None:
             part = 0
 
-        statement_sql = self._sql.get('CR_NAIVE_UPSERT', self._objects_table_name)
+        statement_sql = self._sql.get("CR_NAIVE_UPSERT", self._objects_table_name)
         update = False
         if not obj.__new_marker__ and obj.__serial__ is not None:
             # we should be confident this is an object update
-            statement_sql = self._sql.get('CR_UPDATE', self._objects_table_name)
+            statement_sql = self._sql.get("CR_UPDATE", self._objects_table_name)
             update = True
 
         conn = await txn.get_connection()
@@ -194,35 +205,43 @@ class CockroachStorage(pg.PostgresqlStorage):
             try:
                 result = await conn.fetch(
                     statement_sql,
-                    oid,                 # The OID of the object
-                    txn._tid,            # Our TID
-                    len(pickled),        # Len of the object
-                    part,                # Partition indicator
-                    writer.resource,     # Is a resource ?
-                    writer.of,           # It belogs to a main
-                    old_serial,          # Old serial
-                    writer.parent_id,    # Parent OID
-                    writer.id,           # Traversal ID
-                    writer.type,         # Guillotina type
-                    pickled              # Pickle state)
+                    oid,  # The OID of the object
+                    txn._tid,  # Our TID
+                    len(pickled),  # Len of the object
+                    part,  # Partition indicator
+                    writer.resource,  # Is a resource ?
+                    writer.of,  # It belogs to a main
+                    old_serial,  # Old serial
+                    writer.parent_id,  # Parent OID
+                    writer.id,  # Traversal ID
+                    writer.type,  # Guillotina type
+                    pickled,  # Pickle state)
                 )
             except asyncpg.exceptions.UniqueViolationError as ex:
-                if 'duplicate key value (parent_id,id)' in ex.detail:
+                if "duplicate key value (parent_id,id)" in ex.detail:
                     raise ConflictIdOnContainer(ex)
                 raise
             except asyncpg.exceptions._base.InterfaceError as ex:
-                if 'another operation is in progress' in ex.args[0]:
+                if "another operation is in progress" in ex.args[0]:
                     raise ConflictError(
-                        f'asyncpg error, another operation in progress.',
-                        oid, txn, old_serial, writer)
+                        f"asyncpg error, another operation in progress.",
+                        oid,
+                        txn,
+                        old_serial,
+                        writer,
+                    )
                 raise
             if update and len(result) != 1:
                 # raise tid conflict error
                 raise TIDConflictError(
-                    f'Mismatch of tid of object being updated. This is likely '
-                    f'caused by a cache invalidation race condition and should '
-                    f'be an edge case. This should resolve on request retry.',
-                    oid, txn, old_serial, writer)
+                    f"Mismatch of tid of object being updated. This is likely "
+                    f"caused by a cache invalidation race condition and should "
+                    f"be an edge case. This should resolve on request retry.",
+                    oid,
+                    txn,
+                    old_serial,
+                    writer,
+                )
         await txn._cache.store_object(obj, pickled)
 
     async def commit(self, transaction):
@@ -231,10 +250,10 @@ class CockroachStorage(pg.PostgresqlStorage):
                 try:
                     await transaction._db_txn.commit()
                 except asyncpg.exceptions.SerializationError as ex:
-                    if ex.sqlstate == '40001':
+                    if ex.sqlstate == "40001":
                         raise RestartCommit(ex.args[0])
-        elif self._transaction_strategy not in ('none', 'tidonly'):
-            logger.info('Do not have db transaction to commit')
+        elif self._transaction_strategy not in ("none", "tidonly"):
+            logger.info("Do not have db transaction to commit")
 
         return transaction._tid
 
@@ -251,7 +270,7 @@ class CockroachStorage(pg.PostgresqlStorage):
             else:
                 result = await conn.fetch(sql, *args)
         except asyncpg.exceptions.SerializationError as ex:
-            if ex.sqlstate == '40001':
+            if ex.sqlstate == "40001":
                 # these are not handled with the ROLLBACK TO SAVEPOINT COCKROACH_RESTART
                 # logic unfortunately; however, it does give us a chance to handle
                 # it like a restart with higher priority

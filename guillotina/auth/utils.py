@@ -16,12 +16,14 @@ from guillotina.utils import get_security_policy
 
 @profilable
 async def authenticate_request(request) -> Optional[IPrincipal]:
-    for policy in app_settings['auth_extractors']:
+    for policy in app_settings["auth_extractors"]:
         token = await policy(request).extract_token()
         if token:
-            for validator in app_settings['auth_token_validators']:
-                if (validator.for_validators is not None and
-                        policy.name not in validator.for_validators):
+            for validator in app_settings["auth_token_validators"]:
+                if (
+                    validator.for_validators is not None
+                    and policy.name not in validator.for_validators
+                ):
                     continue
                 user = await validator().validate(token)
                 if user is not None:
@@ -35,17 +37,17 @@ def set_authenticated_user(user):
     if user is not None:
         policy = get_security_policy(user)
         policy.invalidate_cache()
-        if hasattr(user, 'roles') and 'guillotina.Authenticated' not in user.roles:
-            user.roles['guillotina.Authenticated'] = 1
+        if hasattr(user, "roles") and "guillotina.Authenticated" not in user.roles:
+            user.roles["guillotina.Authenticated"] = 1
     task_vars.authenticated_user.set(user)
 
 
 @profilable
 async def find_user(token):
-    if token.get('id') == ROOT_USER_ID:
-        root = get_utility(IApplication, name='root')
+    if token.get("id") == ROOT_USER_ID:
+        root = get_utility(IApplication, name="root")
         return root.root_user
-    for identifier in app_settings['auth_user_identifiers']:
+    for identifier in app_settings["auth_user_identifiers"]:
         user = await identifier().get_user(token)
         if user is not None:
             return user
@@ -54,12 +56,14 @@ async def find_user(token):
 def authenticate_user(userid, data=None, timeout=60 * 60 * 1):
     if data is None:
         data = {}
-    data.update({
-        'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(seconds=timeout),
-        'id': userid
-    })
+    data.update(
+        {
+            "iat": datetime.utcnow(),
+            "exp": datetime.utcnow() + timedelta(seconds=timeout),
+            "id": userid,
+        }
+    )
     jwt_token = jwt.encode(
-        data, app_settings['jwt']['secret'],
-        algorithm=app_settings['jwt']['algorithm']).decode('utf-8')
+        data, app_settings["jwt"]["secret"], algorithm=app_settings["jwt"]["algorithm"]
+    ).decode("utf-8")
     return jwt_token, data

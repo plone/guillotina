@@ -18,50 +18,43 @@ import yaml
 
 try:
     import line_profiler
+
     HAS_LINE_PROFILER = True
 except ImportError:
     HAS_LINE_PROFILER = False
 
 try:
     import aiomonitor
+
     HAS_AIOMONITOR = True
 except ImportError:
     HAS_AIOMONITOR = False
 
 
 MISSING_SETTINGS = {
-    "databases": [{
-        "db": {
-            "storage": "DUMMY_FILE"
-        }
-    }],
-    "jsapps": {
-        "+admin": "guillotina:static/executioner"
-    },
+    "databases": [{"db": {"storage": "DUMMY_FILE"}}],
+    "jsapps": {"+admin": "guillotina:static/executioner"},
     "port": 8080,
-    "root_user": {
-        "password": "root"
-    }
+    "root_user": {"password": "root"},
 }
 
 
 def get_settings(configuration, overrides=None):
-    if configuration == 'config.yaml' and not os.path.exists(configuration):
+    if configuration == "config.yaml" and not os.path.exists(configuration):
         # try config.json as well...
-        configuration = 'config.json'
+        configuration = "config.json"
     if os.path.exists(configuration):
-        with open(configuration, 'r') as config:
-            if configuration.lower().endswith('.json'):
+        with open(configuration, "r") as config:
+            if configuration.lower().endswith(".json"):
                 try:
                     settings = json.load(config)
                 except json.decoder.JSONDecodeError:
-                    logger.warning('Could not parse json configuration {}'.format(
-                        configuration))
+                    logger.warning("Could not parse json configuration {}".format(configuration))
                     raise
             else:
                 # should be yaml then...
                 settings = yaml.load(config, Loader=yaml.FullLoader)
-        settings['__file__'] = configuration
+        settings["__file__"] = configuration
     else:
         try:
             settings = json.loads(configuration)
@@ -76,18 +69,17 @@ def get_settings(configuration, overrides=None):
                 settings = None
 
     if settings is None or settings == configuration:
-        if 'logged' not in MISSING_SETTINGS:
-            logger.warning(f'No configuration file found. '
-                           f'Using default settings.')
-        MISSING_SETTINGS['logged'] = True
+        if "logged" not in MISSING_SETTINGS:
+            logger.warning(f"No configuration file found. " f"Using default settings.")
+        MISSING_SETTINGS["logged"] = True
         settings = MISSING_SETTINGS.copy()
 
     for override in overrides or []:
-        if '=' not in override:
-            raise Exception(f'Invalid configuration {override}')
-        name, _, value = override.partition('=')
+        if "=" not in override:
+            raise Exception(f"Invalid configuration {override}")
+        name, _, value = override.partition("=")
         context = settings
-        parts = name.split('.')
+        parts = name.split(".")
         for part in parts[:-1]:
             if part not in context:
                 context[part] = {}
@@ -95,14 +87,14 @@ def get_settings(configuration, overrides=None):
         context[parts[-1]] = value
 
     for env_name in os.environ.keys():
-        if not env_name.startswith('G_'):
+        if not env_name.startswith("G_"):
             continue
         name = env_name[2:].lower()
         value = os.environ[env_name]
-        if value[0] in ('{', '['):
+        if value[0] in ("{", "["):
             value = json.loads(value)
         context = settings
-        parts = name.split('__')
+        parts = name.split("__")
         for part in parts[:-1]:
             if part not in context:
                 context[part] = {}
@@ -115,14 +107,14 @@ def get_settings(configuration, overrides=None):
 class Command(object):
 
     profiler = line_profiler = None
-    description = ''
+    description = ""
     hide = False
     loop = None
 
     def __init__(self, arguments=None):
-        '''
+        """
         Split out into parts that can be overridden
-        '''
+        """
         if arguments is None:
             self.parse_arguments()
         else:
@@ -137,8 +129,8 @@ class Command(object):
             self.loop = loop
         if settings is None:
             settings = get_settings(self.arguments.configuration, self.arguments.override)
-        if settings.get('loop_policy'):
-            loop_policy = resolve_dotted_name(settings['loop_policy'])
+        if settings.get("loop_policy"):
+            loop_policy = resolve_dotted_name(settings["loop_policy"])
             asyncio.set_event_loop_policy(loop_policy())
 
         app = self.make_app(settings)
@@ -146,13 +138,13 @@ class Command(object):
         if self.arguments.line_profiler:
             if not HAS_LINE_PROFILER:
                 sys.stderr.write(
-                    'You must first install line_profiler for the --line-profiler option to work.\n'
-                    'Use `pip install line_profiler` to install line_profiler.\n'
+                    "You must first install line_profiler for the --line-profiler option to work.\n"
+                    "Use `pip install line_profiler` to install line_profiler.\n"
                 )
                 return 1
             self.line_profiler = line_profiler.LineProfiler()
             for func in profile.get_profilable_functions():
-                if fnmatch(get_dotted_name(func), self.arguments.line_profiler_matcher or '*'):
+                if fnmatch(get_dotted_name(func), self.arguments.line_profiler_matcher or "*"):
                     self.line_profiler.add_function(func)
             self.line_profiler.enable_by_count()
 
@@ -160,9 +152,10 @@ class Command(object):
         if self.arguments.monitor:
             if not HAS_AIOMONITOR:
                 sys.stderr.write(
-                    'You must install aiomonitor for the '
-                    '--monitor option to work.\n'
-                    'Use `pip install aiomonitor` to install aiomonitor.\n')
+                    "You must install aiomonitor for the "
+                    "--monitor option to work.\n"
+                    "Use `pip install aiomonitor` to install aiomonitor.\n"
+                )
                 return 1
             run_func = self.__run_with_monitor
 
@@ -186,7 +179,7 @@ class Command(object):
                 loop.run_until_complete(self.cleanup(app))
                 loop.close()
             except (asyncio.CancelledError, RuntimeError):
-                logger.warning('Cancelled error on cleanup')
+                logger.warning("Cancelled error on cleanup")
         else:
             self.run(self.arguments, settings, app)
 
@@ -208,18 +201,18 @@ class Command(object):
             app.freeze()
             await app.on_cleanup.send(app)
         except Exception:
-            logger.warning('Unhandled error cleanup tasks', exc_info=True)
+            logger.warning("Unhandled error cleanup tasks", exc_info=True)
         for task in asyncio.Task.all_tasks():
             if task.done():
                 continue
-            if 'cleanup' in task._coro.__qualname__:
+            if "cleanup" in task._coro.__qualname__:
                 continue
             try:
-                logger.info(f'Waiting for {task._coro.__qualname__} to finish')
+                logger.info(f"Waiting for {task._coro.__qualname__} to finish")
                 try:
                     await asyncio.wait_for(asyncio.shield(task), 1)
                 except asyncio.TimeoutError:
-                    logger.warning(f'Timeout for {task._coro.__qualname__}')
+                    logger.warning(f"Timeout for {task._coro.__qualname__}")
             except (AttributeError, KeyError):
                 pass
 
@@ -242,33 +235,41 @@ class Command(object):
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
         loop = self.get_loop()
-        return loop.run_until_complete(
-            make_app(settings=settings, loop=loop))
+        return loop.run_until_complete(make_app(settings=settings, loop=loop))
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)
-        parser.add_argument('-c', '--configuration',
-                            default='config.yaml', help='Configuration file')
-        parser.add_argument('--debug', dest='debug', action='store_true',
-                            help='Log verbose')
-        parser.add_argument('-m', '--monitor', action='store_true',
-                            dest='monitor', help='Monitor', default=False)
-        parser.add_argument('--profile', action='store_true',
-                            dest='profile', help='Profile execution',
-                            default=False)
-        parser.add_argument('--profile-output',
-                            help='Where to store the output of the profile data',
-                            default=None)
-        parser.add_argument('--line-profiler', action='store_true',
-                            dest='line_profiler', help='Line profiler execution',
-                            default=False)
-        parser.add_argument('--line-profiler-matcher',
-                            help='Line profiler execution', default=None)
-        parser.add_argument('--line-profiler-output',
-                            help='Where to store the output of the line profiler data',
-                            default=None)
-        parser.add_argument('--override', action='append',
-                            help='Override configuration values')
+        parser.add_argument(
+            "-c", "--configuration", default="config.yaml", help="Configuration file"
+        )
+        parser.add_argument("--debug", dest="debug", action="store_true", help="Log verbose")
+        parser.add_argument(
+            "-m", "--monitor", action="store_true", dest="monitor", help="Monitor", default=False
+        )
+        parser.add_argument(
+            "--profile",
+            action="store_true",
+            dest="profile",
+            help="Profile execution",
+            default=False,
+        )
+        parser.add_argument(
+            "--profile-output", help="Where to store the output of the profile data", default=None
+        )
+        parser.add_argument(
+            "--line-profiler",
+            action="store_true",
+            dest="line_profiler",
+            help="Line profiler execution",
+            default=False,
+        )
+        parser.add_argument("--line-profiler-matcher", help="Line profiler execution", default=None)
+        parser.add_argument(
+            "--line-profiler-output",
+            help="Where to store the output of the line profiler data",
+            default=None,
+        )
+        parser.add_argument("--override", action="append", help="Override configuration values")
         parser.set_defaults(debug=False)
         return parser
 
@@ -276,59 +277,67 @@ class Command(object):
         """
         to prevent command line from printing object...
         """
-        return ''
+        return ""
 
 
 def load_commands(module_name, commands):
     module = resolve_dotted_name(module_name)
-    if hasattr(module, 'app_settings') and app_settings != module.app_settings:
-        commands.update(module.app_settings.get('commands', {}))
-        for dependency in module.app_settings.get('applications') or []:
+    if hasattr(module, "app_settings") and app_settings != module.app_settings:
+        commands.update(module.app_settings.get("commands", {}))
+        for dependency in module.app_settings.get("applications") or []:
             load_commands(dependency, commands)
 
 
 def command_runner():
-    parser = argparse.ArgumentParser(
-        description='Guillotina command runner',
-        add_help=False)
-    parser.add_argument('command', nargs='?')
-    parser.add_argument('-c', '--configuration',
-                        default='config.yaml', help='Configuration file')
-    parser.add_argument('-h', '--help', action='store_true',
-                        dest='help', help='Help', default=False)
+    parser = argparse.ArgumentParser(description="Guillotina command runner", add_help=False)
+    parser.add_argument("command", nargs="?")
+    parser.add_argument("-c", "--configuration", default="config.yaml", help="Configuration file")
+    parser.add_argument(
+        "-h", "--help", action="store_true", dest="help", help="Help", default=False
+    )
 
     arguments, _ = parser.parse_known_args()
     settings = get_settings(arguments.configuration)
-    _commands = app_settings['commands'].copy()
-    _commands.update(settings.get('commands', {}))
-    for module_name in settings.get('applications', []):
+    _commands = app_settings["commands"].copy()
+    _commands.update(settings.get("commands", {}))
+    for module_name in settings.get("applications", []):
         load_commands(module_name, _commands)
 
     if not arguments.command and arguments.help:
         # for other commands, pass through and allow those parsers to print help
         parser.print_help()
-        return print('''
+        return print(
+            """
 Available commands:
-{}\n\n'''.format('\n  - '.join(c for c in _commands.keys())))
+{}\n\n""".format(
+                "\n  - ".join(c for c in _commands.keys())
+            )
+        )
 
     if not arguments.command:
         # default to serve command
-        arguments.command = 'serve'
+        arguments.command = "serve"
 
     if arguments.command not in _commands:
-        return print('''Invalid command "{}".
+        return print(
+            """Invalid command "{}".
 
 Available commands:
-{}\n\n'''.format(arguments.command, '\n  - '.join(c for c in _commands.keys())))
+{}\n\n""".format(
+                arguments.command, "\n  - ".join(c for c in _commands.keys())
+            )
+        )
 
-    app_settings['_command'] = arguments.command
+    app_settings["_command"] = arguments.command
     Command = resolve_dotted_name(_commands[arguments.command])
     if Command is None:
-        return print('Could not resolve command {}:{}'.format(
-            arguments.command, _commands[arguments.command]
-        ))
+        return print(
+            "Could not resolve command {}:{}".format(
+                arguments.command, _commands[arguments.command]
+            )
+        )
 
-    app_settings['__run_command__'] = arguments.command
+    app_settings["__run_command__"] = arguments.command
     # finally, run it...
     command = Command()
     command.run_command()

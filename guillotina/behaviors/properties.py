@@ -5,7 +5,6 @@ _EMPTY = object()
 
 
 class ContextProperty:
-
     def __init__(self, attribute, default=_EMPTY):
         self.__name__ = attribute
         self.default = default
@@ -27,7 +26,6 @@ class ContextProperty:
 
 
 class FunctionProperty:
-
     def __init__(self, attribute, getter, setter):
         self.__name__ = attribute
         self.setter = setter

@@ -20,9 +20,9 @@ class Request(web_request.Request):
     object as it is essential our poor man's thread local model
     """
 
-#    tail = None
-#    resource = None
-#    security = None
+    #    tail = None
+    #    resource = None
+    #    security = None
 
     _uid = None
     _view_error = False
@@ -41,15 +41,15 @@ class Request(web_request.Request):
         self.matchdict: Dict[str, str] = {}
 
     def record(self, event_name: str):
-        '''
+        """
         Record event on the request
 
         :param event_name: name of event
-        '''
+        """
         self._events[event_name] = time.time()
 
     def add_future(self, *args, **kwargs):
-        '''
+        """
         Register a future to be executed after the request has finished.
 
         :param name: name of future
@@ -57,16 +57,16 @@ class Request(web_request.Request):
         :param scope: group the futures to execute different groupings together
         :param args: arguments to execute future with
         :param kwargs: kwargs to execute future with
-        '''
+        """
         execute.add_future(*args, **kwargs)
 
-    def get_future(self, name: str, scope: str=''):
-        '''
+    def get_future(self, name: str, scope: str = ""):
+        """
         Get a registered future
 
         :param name: scoped futures to execute. Leave default for normal behavior
         :param scope: scope name the future was registered for
-        '''
+        """
         return execute.get_future(name, scope)
 
     @property
@@ -78,12 +78,12 @@ class Request(web_request.Request):
         return self._view_error
 
     @profilable
-    def execute_futures(self, scope: str=''):
-        '''
+    def execute_futures(self, scope: str = ""):
+        """
         Execute all the registered futures in a new task
 
         :param scope: scoped futures to execute. Leave default for normal behavior
-        '''
+        """
         return execute.execute_futures(scope)
 
     def clear_futures(self):
@@ -92,8 +92,8 @@ class Request(web_request.Request):
     @property
     def uid(self):
         if self._uid is None:
-            if 'X-FORWARDED-REQUEST-UID' in self.headers:
-                self._uid = self.headers['X-FORWARDED-REQUEST-UID']
+            if "X-FORWARDED-REQUEST-UID" in self.headers:
+                self._uid = self.headers["X-FORWARDED-REQUEST-UID"]
             else:
                 self._uid = uuid.uuid4().hex
         return self._uid
@@ -102,9 +102,9 @@ class Request(web_request.Request):
         task_vars.request.set(self)
 
     def __exit__(self, *args):
-        '''
+        """
         contextvars already tears down to previous value, do not set to None here!
-        '''
+        """
 
     async def __aenter__(self):
         return self.__enter__()

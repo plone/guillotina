@@ -2,10 +2,8 @@ from guillotina import configure
 from guillotina.schema.vocabulary import getVocabularyRegistry
 
 
-@configure.vocabulary(
-    name="testvocab")
+@configure.vocabulary(name="testvocab")
 class VocabTest:
-
     def __init__(self, context):
         self.context = context
 
@@ -19,12 +17,12 @@ class VocabTest:
         return 10
 
     def getTerm(self, value):
-        return 'value'
+        return "value"
 
 
 def test_registered_vocabulary(dummy_request):
     vr = getVocabularyRegistry()
-    vocabulary = vr.get(None, 'testvocab')
+    vocabulary = vr.get(None, "testvocab")
     assert vocabulary is not None
     assert 0 in vocabulary
-    assert vocabulary.getTerm(0) == 'value'
+    assert vocabulary.getTerm(0) == "value"

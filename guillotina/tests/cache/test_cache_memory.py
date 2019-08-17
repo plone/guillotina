@@ -9,15 +9,10 @@ from guillotina.db.transaction import Transaction
 import pytest
 
 DEFAULT_SETTINGS = {
-    'applications': [
-        'guillotina',
-        'guillotina.contrib.cache',
-    ],
-    'cache': {
-        'updates_channel': None,
-        'driver': None
-    }
+    "applications": ["guillotina", "guillotina.contrib.cache"],
+    "cache": {"updates_channel": None, "driver": None},
 }
+
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
 async def test_cache_set(guillotina_main, loop):
@@ -28,11 +23,11 @@ async def test_cache_set(guillotina_main, loop):
     rcache = BasicCache(trns)
     await rcache.clear()
 
-    await rcache.set('bar', oid='foo')
+    await rcache.set("bar", oid="foo")
     # but also in memory
-    assert util._memory_cache.get('root-foo') == 'bar'
+    assert util._memory_cache.get("root-foo") == "bar"
     # and api matches..
-    assert await rcache.get(oid='foo') == 'bar'
+    assert await rcache.get(oid="foo") == "bar"
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
@@ -43,14 +38,14 @@ async def test_cache_delete(guillotina_main, loop):
     rcache = BasicCache(trns)
     await rcache.clear()
 
-    await rcache.set('bar', oid='foo')
+    await rcache.set("bar", oid="foo")
     # make sure it is in redis
-    assert util._memory_cache.get('root-foo') == 'bar'
-    assert await rcache.get(oid='foo') == 'bar'
+    assert util._memory_cache.get("root-foo") == "bar"
+    assert await rcache.get(oid="foo") == "bar"
 
     # now delete
-    await rcache.delete('root-foo')
-    assert await rcache.get(oid='foo') is None
+    await rcache.delete("root-foo")
+    assert await rcache.get(oid="foo") is None
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
@@ -61,12 +56,12 @@ async def test_cache_clear(guillotina_main, loop):
     rcache = BasicCache(trns)
     await rcache.clear()
 
-    await rcache.set('bar', oid='foo')
-    assert util._memory_cache.get('root-foo') == 'bar'
-    assert await rcache.get(oid='foo') == 'bar'
+    await rcache.set("bar", oid="foo")
+    assert util._memory_cache.get("root-foo") == "bar"
+    assert await rcache.get(oid="foo") == "bar"
 
     await rcache.clear()
-    assert await rcache.get(oid='foo') is None
+    assert await rcache.get(oid="foo") is None
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
@@ -79,9 +74,9 @@ async def test_invalidate_object(guillotina_main, loop):
     rcache = BasicCache(trns)
     await rcache.clear()
 
-    await rcache.set('foobar', oid=content.__uuid__)
-    assert util._memory_cache.get('root-' + content.__uuid__) == 'foobar'
-    assert await rcache.get(oid=content.__uuid__) == 'foobar'
+    await rcache.set("foobar", oid=content.__uuid__)
+    assert util._memory_cache.get("root-" + content.__uuid__) == "foobar"
+    assert await rcache.get(oid=content.__uuid__) == "foobar"
 
     await rcache.close(invalidate=True)
     assert await rcache.get(oid=content.__uuid__) is None
@@ -137,9 +132,8 @@ async def test_do_not_cache_large_object(guillotina_main, loop):
     cache = BasicCache(txn)
     txn._cache = cache
     ob = create_content()
-    ob.foobar = 'X' * cache.max_cache_record_size  # push size above cache threshold
+    ob.foobar = "X" * cache.max_cache_record_size  # push size above cache threshold
     storage.store(ob)
     loaded = await txn.get(ob.__uuid__)
     assert id(loaded) != id(ob)
     assert loaded.__uuid__ == ob.__uuid__
-

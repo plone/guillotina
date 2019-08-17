@@ -33,27 +33,26 @@ async def test_DatabaseSpecialPermissions_IDatabase(dummy_txn_root):  # noqa: N8
 
 
 async def test_RootSpecialPermissions_IApplication(dummy_guillotina):  # noqa: N802
-    root = get_utility(IApplication, name='root')
+    root = get_utility(IApplication, name="root")
     adapter = get_adapter(root, interface=IPrincipalPermissionManager)
     assert isinstance(adapter, ApplicationSpecialPermissions)
 
 
 async def test_SerializeFolderToJson(dummy_request):  # noqa: N802
-    adapter = get_multi_adapter((Container(), dummy_request),
-                                interface=IResourceSerializeToJson)
+    adapter = get_multi_adapter((Container(), dummy_request), interface=IResourceSerializeToJson)
     assert isinstance(adapter, SerializeFolderToJson)
 
 
 async def test_SerializeToJson(dummy_request):  # noqa: N802
     obj = Item()
-    adapter = get_multi_adapter((obj, dummy_request),
-                                interface=IResourceSerializeToJson)
+    adapter = get_multi_adapter((obj, dummy_request), interface=IResourceSerializeToJson)
     assert isinstance(adapter, SerializeToJson)
 
 
 def test_DefaultJSONSummarySerializer(dummy_request):  # noqa: N802
-    adapter = get_multi_adapter((Container(), dummy_request),
-                                interface=IResourceSerializeToJsonSummary)
+    adapter = get_multi_adapter(
+        (Container(), dummy_request), interface=IResourceSerializeToJsonSummary
+    )
     assert isinstance(adapter, DefaultJSONSummarySerializer)
 
 
@@ -66,10 +65,14 @@ def test_all(dummy_request):
         (schema.Int(), serialize_schema_field.DefaultIntSchemaFieldSerializer),
         (schema.Bool(), serialize_schema_field.DefaultBoolSchemaFieldSerializer),
         (schema.List(), serialize_schema_field.DefaultCollectionSchemaFieldSerializer),
-        (schema.Choice(values=('one', 'two')),
-            serialize_schema_field.DefaultChoiceSchemaFieldSerializer),
-        (schema.Object(schema=IResource),
-            serialize_schema_field.DefaultObjectSchemaFieldSerializer),
+        (
+            schema.Choice(values=("one", "two")),
+            serialize_schema_field.DefaultChoiceSchemaFieldSerializer,
+        ),
+        (
+            schema.Object(schema=IResource),
+            serialize_schema_field.DefaultObjectSchemaFieldSerializer,
+        ),
         (schema.Date(), serialize_schema_field.DefaultDateSchemaFieldSerializer),
         (schema.Time(), serialize_schema_field.DefaultTimeSchemaFieldSerializer),
         (schema.Dict(), serialize_schema_field.DefaultDictSchemaFieldSerializer),
@@ -77,36 +80,32 @@ def test_all(dummy_request):
     ]
     container = Container()
     for field, klass in mapping:
-        adapter = get_multi_adapter((field, container, dummy_request),
-                                    interface=ISchemaFieldSerializeToJson)
+        adapter = get_multi_adapter(
+            (field, container, dummy_request), interface=ISchemaFieldSerializeToJson
+        )
         assert isinstance(adapter, klass)
 
 
 def test_vocabulary(dummy_request):
     from guillotina.schema.vocabulary import SimpleVocabulary
-    vocab = SimpleVocabulary.fromItems((
-        (u"Foo", "id_foo"),
-        (u"Bar", "id_bar")))
+
+    vocab = SimpleVocabulary.fromItems((("Foo", "id_foo"), ("Bar", "id_bar")))
     res = json_compatible(vocab)
     assert type(res) == list
 
 
 def test_SerializeFactoryToJson(dummy_request):  # noqa: N802
-    factory = get_utility(IResourceFactory, name='Item')
-    adapter = get_multi_adapter((factory, dummy_request),
-                                interface=IFactorySerializeToJson)
+    factory = get_utility(IResourceFactory, name="Item")
+    adapter = get_multi_adapter((factory, dummy_request), interface=IFactorySerializeToJson)
     assert isinstance(adapter, serialize_schema.SerializeFactoryToJson)
 
 
 def test_DefaultSchemaSerializer(dummy_request):  # noqa: N802
-    adapter = get_multi_adapter(
-        (IItem, dummy_request),
-        ISchemaSerializeToJson)
+    adapter = get_multi_adapter((IItem, dummy_request), ISchemaSerializeToJson)
     assert isinstance(adapter, serialize_schema.DefaultSchemaSerializer)
 
 
 def test_DeserializeFromJson(dummy_request):  # noqa: N802
     obj = Item()
-    adapter = get_multi_adapter((obj, dummy_request),
-                                interface=IResourceDeserializeFromJson)
+    adapter = get_multi_adapter((obj, dummy_request), interface=IResourceDeserializeFromJson)
     assert isinstance(adapter, deserialize_content.DeserializeFromJson)

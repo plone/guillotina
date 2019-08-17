@@ -50,23 +50,19 @@ class FieldReadAccessor(Method):
 
     def __provides__(self):
         return providedBy(self.field) + implementedBy(FieldReadAccessor)
+
     __provides__ = property(__provides__)  # type: ignore
 
     def __init__(self, field):
         self.field = field
-        Method.__init__(self, '')
-        self.__doc__ = 'get %s' % field.__doc__
+        Method.__init__(self, "")
+        self.__doc__ = "get %s" % field.__doc__
 
     def getSignatureString(self):
-        return '()'
+        return "()"
 
     def getSignatureInfo(self):
-        return {'positional': (),
-                'required': (),
-                'optional': (),
-                'varargs': None,
-                'kwargs': None,
-                }
+        return {"positional": (), "required": (), "optional": (), "varargs": None, "kwargs": None}
 
     def get(self, object):
         return getattr(object, self.__name__)()
@@ -95,22 +91,22 @@ class FieldReadAccessor(Method):
 
 
 class FieldWriteAccessor(Method):
-
     def __init__(self, field):
-        Method.__init__(self, '')
+        Method.__init__(self, "")
         self.field = field
-        self.__doc__ = 'set %s' % field.__doc__
+        self.__doc__ = "set %s" % field.__doc__
 
     def getSignatureString(self):
-        return '(newvalue)'
+        return "(newvalue)"
 
     def getSignatureInfo(self):
-        return {'positional': ('newvalue',),
-                'required': ('newvalue',),
-                'optional': (),
-                'varargs': None,
-                'kwargs': None,
-                }
+        return {
+            "positional": ("newvalue",),
+            "required": ("newvalue",),
+            "optional": (),
+            "varargs": None,
+            "kwargs": None,
+        }
 
 
 def accessors(field):

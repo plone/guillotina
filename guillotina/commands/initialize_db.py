@@ -5,11 +5,11 @@ from guillotina.interfaces import IDatabase
 
 
 class DatabaseInitializationCommand(Command):
-    description = 'Guillotina db initiliazation'
+    description = "Guillotina db initiliazation"
 
     async def run(self, arguments, settings, app):
-        root = get_utility(IApplication, name='root')
+        root = get_utility(IApplication, name="root")
         for _id, db in root:
             if IDatabase.providedBy(db):
-                print(f'Initializing database: {_id}')
+                print(f"Initializing database: {_id}")
                 await db._storage.create()

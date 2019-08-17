@@ -12,16 +12,14 @@ from guillotina.security.securitymap import GuillotinaSecurityMap
 from guillotina.interfaces import INHERIT_KEY
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=IRolePermissionManager)
+@configure.adapter(for_=IResource, provides=IRolePermissionManager)
 class GuillotinaRolePermissionManager(GuillotinaSecurityMap):
     """Provide adapter that manages role permission data in an object attribute
     """
 
     # the annotation key is a holdover from this module's old
     # location, but cannot change without breaking existing databases
-    key = 'roleperm'
+    key = "roleperm"
 
     def grant_permission_to_role(self, permission_id, role_id):
         self.add_cell(permission_id, role_id, Allow)
@@ -41,12 +39,10 @@ class GuillotinaRolePermissionManager(GuillotinaSecurityMap):
         return self.query_cell(permission_id, role_id, default)
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=IInheritPermissionManager)
+@configure.adapter(for_=IResource, provides=IInheritPermissionManager)
 class GuillotinaInheritPermissionManager(GuillotinaSecurityMap):
 
-    key = 'perminhe'
+    key = "perminhe"
 
     def get_locked_permissions(self):
         return self.get_col(INHERIT_KEY)
@@ -61,9 +57,7 @@ class GuillotinaInheritPermissionManager(GuillotinaSecurityMap):
         self.add_cell(permission_id, INHERIT_KEY, Allow)
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=IPrincipalPermissionManager)
+@configure.adapter(for_=IResource, provides=IPrincipalPermissionManager)
 class GuillotinaPrincipalPermissionManager(GuillotinaSecurityMap):
     """Mappings between principals and permissions."""
 
@@ -71,13 +65,12 @@ class GuillotinaPrincipalPermissionManager(GuillotinaSecurityMap):
     # location, but cannot change without breaking existing databases
     # It is also is misspelled, but that's OK. It just has to be unique.
     # we'll keep it as is, to prevent breaking old data:
-    key = 'prinperm'
+    key = "prinperm"
 
     def grant_permission_to_principal(self, permission_id, principal_id):
         self.add_cell(permission_id, principal_id, Allow)
 
-    def grant_permission_to_principal_no_inherit(
-            self, permission_id, principal_id):
+    def grant_permission_to_principal_no_inherit(self, permission_id, principal_id):
         self.add_cell(permission_id, principal_id, AllowSingle)
 
     def deny_permission_to_principal(self, permission_id, principal_id):
@@ -93,13 +86,11 @@ class GuillotinaPrincipalPermissionManager(GuillotinaSecurityMap):
     get_principals_and_permissions = GuillotinaSecurityMap.get_all_cells
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=IPrincipalRoleManager)
+@configure.adapter(for_=IResource, provides=IPrincipalRoleManager)
 class GuillotinaPrincipalRoleManager(GuillotinaSecurityMap):
     """Mappings between principals and roles with global."""
 
-    key = 'prinrole'
+    key = "prinrole"
 
     def assign_role_to_principal(self, role_id, principal_id, inherit=True):
         self.add_cell(role_id, principal_id, Allow)

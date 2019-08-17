@@ -18,7 +18,6 @@ from guillotina.component._compat import CLASS_TYPES, _BLANK
 
 
 class adapter(object):
-
     def __init__(self, *interfaces):
         self.interfaces = interfaces
 
@@ -36,21 +35,21 @@ def adapts(*interfaces):
     locals = frame.f_locals
 
     # Ensure we were called from a class def.
-    if locals is frame.f_globals or '__module__' not in locals:
+    if locals is frame.f_globals or "__module__" not in locals:
         raise TypeError("adapts can be used only from a class definition.")
 
-    if '__component_adapts__' in locals:
+    if "__component_adapts__" in locals:
         raise TypeError("adapts can be used only once in a class definition.")
 
-    locals['__component_adapts__'] = _adapts_descr(interfaces)
+    locals["__component_adapts__"] = _adapts_descr(interfaces)
 
 
 def adaptedBy(ob):
-    return getattr(ob, '__component_adapts__', None)
+    return getattr(ob, "__component_adapts__", None)
 
 
 def getName(ob):
-    return getattr(ob, '__component_name__', _BLANK)
+    return getattr(ob, "__component_name__", _BLANK)
 
 
 class _adapts_descr(object):
@@ -60,4 +59,4 @@ class _adapts_descr(object):
     def __get__(self, inst, cls):
         if inst is None:
             return self.interfaces
-        raise AttributeError('__component_adapts__')
+        raise AttributeError("__component_adapts__")

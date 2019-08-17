@@ -22,11 +22,11 @@ def json_converter(value):
         return value
 
     return {
-        'filename': value.filename,
-        'content_type': to_str(value.content_type),
-        'size': value.size,
-        'extension': value.extension,
-        'md5': value.md5
+        "filename": value.filename,
+        "content_type": to_str(value.content_type),
+        "size": value.size,
+        "extension": value.extension,
+        "md5": value.md5,
     }
 
 
@@ -34,17 +34,16 @@ def json_converter(value):
 class BaseCloudFile:
     """Base cloud file storage class"""
 
-    filename: str = FieldProperty(IFile['filename'])  # type: ignore
+    filename: str = FieldProperty(IFile["filename"])  # type: ignore
     valid = True
 
-    def __init__(self, content_type='application/octet-stream',
-                 filename=None, size=0, md5=None):
+    def __init__(self, content_type="application/octet-stream", filename=None, size=0, md5=None):
         if isinstance(content_type, bytes):
-            content_type = content_type.decode('utf8')
+            content_type = content_type.decode("utf8")
         self.content_type = content_type
         if filename is not None:
             self.filename = filename
-            extension_discovery = filename.split('.')
+            extension_discovery = filename.split(".")
             if len(extension_discovery) > 1:
                 self._extension = extension_discovery[-1]
         elif self.filename is None:
@@ -70,7 +69,7 @@ class BaseCloudFile:
 
     @property
     def uri(self):
-        if hasattr(self, '_uri'):
+        if hasattr(self, "_uri"):
             return self._uri
 
     @uri.setter
@@ -79,7 +78,7 @@ class BaseCloudFile:
 
     @property
     def size(self):
-        if hasattr(self, '_size'):
+        if hasattr(self, "_size"):
             return self._size
         else:
             return None
@@ -90,7 +89,7 @@ class BaseCloudFile:
 
     @property
     def md5(self):
-        if hasattr(self, '_md5'):
+        if hasattr(self, "_md5"):
             return self._md5
         else:
             return None
@@ -101,11 +100,11 @@ class BaseCloudFile:
 
     @property
     def extension(self):
-        if getattr(self, '_extension', None):
+        if getattr(self, "_extension", None):
             return self._extension
         else:
-            if '.' in self.filename:
-                return self.filename.split('.')[-1]
+            if "." in self.filename:
+                return self.filename.split(".")[-1]
             return None
 
     @extension.setter
@@ -114,14 +113,14 @@ class BaseCloudFile:
 
 
 async def _generator(value):
-    yield value['data']
+    yield value["data"]
 
 
 serialize_mappings = {
-    'filename': 'filename',
-    'md5': '_md5',
-    'content_type': 'content_type',
-    'extension': '_extension'
+    "filename": "filename",
+    "md5": "_md5",
+    "content_type": "content_type",
+    "extension": "_extension",
 }
 
 
@@ -146,8 +145,8 @@ async def deserialize_cloud_field(field, value, context):
                 if key in serialize_mappings:
                     setattr(file_ob, serialize_mappings[key], item_value)
             data_context.register()
-        if 'data' in value:
-            value['data'] = base64.b64decode(value['data'])
+        if "data" in value:
+            value["data"] = base64.b64decode(value["data"])
         else:
             # already updated necessary values
             return file_ob
@@ -159,9 +158,12 @@ async def deserialize_cloud_field(field, value, context):
     # 'data', 'encoding', 'content-type', 'filename'
     request = get_current_request()
     file_manager = get_multi_adapter((context, request, field), IFileManager)
-    content_type = value.get('content_type', value.get('content-type'))
-    filename = value.get('filename', None)
+    content_type = value.get("content_type", value.get("content-type"))
+    filename = value.get("filename", None)
     val = await file_manager.save_file(
-        partial(_generator, value), content_type=content_type,
-        size=len(value['data']), filename=filename)
+        partial(_generator, value),
+        content_type=content_type,
+        size=len(value["data"]),
+        filename=filename,
+    )
     return val

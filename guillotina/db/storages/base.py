@@ -1,12 +1,10 @@
-
-
 class BaseStorage:
 
     _read_only = False
-    _transaction_strategy = 'resolve'
+    _transaction_strategy = "resolve"
     _supports_unique_constraints = False
 
-    def __init__(self, read_only=False, transaction_strategy='resolve'):
+    def __init__(self, read_only=False, transaction_strategy="resolve"):
         self._read_only = read_only
         self._transaction_strategy = transaction_strategy
         self._hits = 0

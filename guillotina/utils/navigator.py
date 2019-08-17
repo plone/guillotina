@@ -56,7 +56,7 @@ class Navigator:
         If this path was already modified or loaded by Navigator, the same
         object instance will be returned.
         """
-        if path == '/':
+        if path == "/":
             return self.container
         if path in self.deleted:
             return None
@@ -82,7 +82,6 @@ class Navigator:
 
     def _load_obj(self, obj: IResource):
         """insert an object in the index"""
-        if obj.__parent__ and get_content_path(
-                obj.__parent__) not in self.index:
+        if obj.__parent__ and get_content_path(obj.__parent__) not in self.index:
             self._load_obj(obj.__parent__)
         self.index[get_content_path(obj)] = obj

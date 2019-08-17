@@ -23,6 +23,8 @@ from guillotina.component.interfaces import IUtilityRegistration
 @adapter(IUtilityRegistration, IRegistrationEvent)
 def dispatch_utility_registration_event(registration, event):
     handle(registration.component, event)
+
+
 # provide_adapter(dispatch_utility_registration_event)
 
 

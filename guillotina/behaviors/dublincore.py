@@ -22,80 +22,92 @@ class IMarkerDublinCore(Interface):
 
 
 class IDublinCore(Interface):
-    index_field('creators', type='keyword')
-    index_field('tags', type='keyword')
-    index_field('contributors', type='keyword')
+    index_field("creators", type="keyword")
+    index_field("tags", type="keyword")
+    index_field("contributors", type="keyword")
 
     title = schema.TextLine(
-        title=u'Title',
-        description=u"The first unqualified Dublin Core 'Title' element value.",
-        required=False)
+        title="Title",
+        description="The first unqualified Dublin Core 'Title' element value.",
+        required=False,
+    )
 
     description = schema.Text(
-        title=u'Description',
-        description=u"The first unqualified Dublin Core 'Description' element value.",
-        required=False)
+        title="Description",
+        description="The first unqualified Dublin Core 'Description' element value.",
+        required=False,
+    )
 
     creation_date = schema.Datetime(
-        title=u'Creation Date',
-        description=u"The date and time that an object is created. "
-                    u"\nThis is normally set automatically.",
-        required=False)
+        title="Creation Date",
+        description="The date and time that an object is created. "
+        "\nThis is normally set automatically.",
+        required=False,
+    )
 
     modification_date = schema.Datetime(
-        title=u'Modification Date',
-        description=u"The date and time that the object was last modified in a\n"
-                    u"meaningful way.",
-        required=False)
+        title="Modification Date",
+        description="The date and time that the object was last modified in a\n" "meaningful way.",
+        required=False,
+    )
 
     effective_date = schema.Datetime(
-        title=u'Effective Date',
-        description=u"The date and time that an object should be published. ",
-        required=False)
+        title="Effective Date",
+        description="The date and time that an object should be published. ",
+        required=False,
+    )
 
     expiration_date = schema.Datetime(
-        title=u'Expiration Date',
-        description=u"The date and time that the object should become unpublished.",
-        required=False)
+        title="Expiration Date",
+        description="The date and time that the object should become unpublished.",
+        required=False,
+    )
 
     creators = schema.Tuple(
-        title=u'Creators',
-        description=u"The unqualified Dublin Core 'Creator' element values",
+        title="Creators",
+        description="The unqualified Dublin Core 'Creator' element values",
         value_type=schema.TextLine(),
-        required=False)
+        required=False,
+    )
 
-    tags = PatchField(schema.Tuple(
-        title=u'Tags',
-        description=u"The unqualified Dublin Core 'Tags' element values",
-        value_type=schema.TextLine(),
-        required=False))
+    tags = PatchField(
+        schema.Tuple(
+            title="Tags",
+            description="The unqualified Dublin Core 'Tags' element values",
+            value_type=schema.TextLine(),
+            required=False,
+        )
+    )
 
     publisher = schema.Text(
-        title=u'Publisher',
-        description=u"The first unqualified Dublin Core 'Publisher' element value.",
-        required=False)
+        title="Publisher",
+        description="The first unqualified Dublin Core 'Publisher' element value.",
+        required=False,
+    )
 
     contributors = schema.Tuple(
-        title=u'Contributors',
-        description=u"The unqualified Dublin Core 'Contributor' element values",
+        title="Contributors",
+        description="The unqualified Dublin Core 'Contributor' element values",
         value_type=schema.TextLine(),
-        required=False)
+        required=False,
+    )
 
 
 @configure.behavior(
     title="Dublin Core fields",
     provides=IDublinCore,
     marker=IMarkerDublinCore,
-    for_="guillotina.interfaces.IResource")
+    for_="guillotina.interfaces.IResource",
+)
 class DublinCore(AnnotationBehavior):
     auto_serialize = True
 
-    title = ContextProperty('title', None)
-    creators = ContextProperty('creators', ())
-    contributors = ContextProperty('contributors', ())
-    creation_date = ContextProperty('creation_date', None)
-    modification_date = ContextProperty('modification_date', None)
+    title = ContextProperty("title", None)
+    creators = ContextProperty("creators", ())
+    contributors = ContextProperty("contributors", ())
+    creation_date = ContextProperty("creation_date", None)
+    modification_date = ContextProperty("modification_date", None)
 
     def __init__(self, context):
-        self.__dict__['context'] = context
+        self.__dict__["context"] = context
         super(DublinCore, self).__init__(context)

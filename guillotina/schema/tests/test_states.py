@@ -16,17 +16,18 @@ import unittest
 
 
 class StateSelectionTest(unittest.TestCase):
-
     def setUp(self):
         from guillotina.schema.vocabulary import _clear
         from guillotina.schema.vocabulary import getVocabularyRegistry
         from guillotina.schema.tests.states import StateVocabulary
+
         _clear()
         vr = getVocabularyRegistry()
         vr.register("states", StateVocabulary)
 
     def tearDown(self):
         from guillotina.schema.vocabulary import _clear
+
         _clear()
 
     def _makeSchema(self):
@@ -36,32 +37,32 @@ class StateSelectionTest(unittest.TestCase):
 
         class IBirthInfo(Interface):
             state1 = Choice(
-                title='State of Birth',
-                description='The state in which you were born.',
+                title="State of Birth",
+                description="The state in which you were born.",
                 vocabulary="states",
                 default="AL",
-                )
+            )
             state2 = Choice(
-                title='State of Birth',
-                description='The state in which you were born.',
+                title="State of Birth",
+                description="The state in which you were born.",
                 vocabulary="states",
                 default="AL",
-                )
+            )
             state3 = Choice(
-                title='Favorite State',
-                description='The state you like the most.',
+                title="Favorite State",
+                description="The state you like the most.",
                 vocabulary=StateVocabulary(),
-                )
+            )
             state4 = Choice(
-                title="Name",
-                description="The name of your new state",
-                vocabulary="states",
-                )
+                title="Name", description="The name of your new state", vocabulary="states"
+            )
+
         return IBirthInfo
 
     def test_default_presentation(self):
         from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabulary
+
         schema = self._makeSchema()
         field = schema.getDescriptionFor("state1")
         bound = field.bind(object())
@@ -72,6 +73,7 @@ class StateSelectionTest(unittest.TestCase):
         from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabulary
         from guillotina.schema.tests.states import StateVocabulary
+
         vocab = StateVocabulary()
         self.assertTrue(verifyObject(IVocabulary, vocab))
         count = 0
@@ -90,6 +92,7 @@ class StateSelectionTest(unittest.TestCase):
     def test_prebound_vocabulary(self):
         from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabulary
+
         schema = self._makeSchema()
         field = schema.getDescriptionFor("state3")  # type: ignore
         bound = field.bind(None)
@@ -99,6 +102,4 @@ class StateSelectionTest(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(StateSelectionTest),
-    ))
+    return unittest.TestSuite((unittest.makeSuite(StateSelectionTest),))

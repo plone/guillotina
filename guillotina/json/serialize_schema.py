@@ -13,11 +13,8 @@ from guillotina.schema import get_fields_in_order
 from zope.interface import Interface
 
 
-@configure.adapter(
-    for_=(IFactory, IRequest),
-    provides=IFactorySerializeToJson)
+@configure.adapter(for_=(IFactory, IRequest), provides=IFactorySerializeToJson)
 class SerializeFactoryToJson(object):
-
     def __init__(self, factory, request):
         self.factory = factory
         self.request = request
@@ -26,61 +23,53 @@ class SerializeFactoryToJson(object):
     async def __call__(self):
         factory = self.factory
         result = {
-            'title': factory.type_name,
-            '$schema': 'http://json-schema.org/draft-04/schema#',
-            'type': 'object',
-            'required': [],
-            'definitions': {},
-            'properties': {}
+            "title": factory.type_name,
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "required": [],
+            "definitions": {},
+            "properties": {},
         }
 
         # Base object class serialized
         for name, field in get_fields_in_order(factory.schema):
             if field.required:
-                result['required'].append(name)
+                result["required"].append(name)
             serializer = get_multi_adapter(
-                (field, factory.schema, self.request),
-                ISchemaFieldSerializeToJson)
-            result['properties'][name] = await serializer()
+                (field, factory.schema, self.request), ISchemaFieldSerializeToJson
+            )
+            result["properties"][name] = await serializer()
 
         invariants = []
-        for i in factory.schema.queryTaggedValue('invariants', []):
+        for i in factory.schema.queryTaggedValue("invariants", []):
             invariants.append("%s.%s" % (i.__module__, i.__name__))
-        result['invariants'] = invariants
+        result["invariants"] = invariants
 
         # Behavior serialization
         for schema in factory.behaviors or ():
-            schema_serializer = get_multi_adapter(
-                (schema, self.request), ISchemaSerializeToJson)
+            schema_serializer = get_multi_adapter((schema, self.request), ISchemaSerializeToJson)
 
             serialization = await schema_serializer()
-            result['properties'][schema_serializer.name] = \
-                {'$ref': '#/components/schemas/' + schema_serializer.name},
-            result['definitions'][schema_serializer.name] = serialization
+            result["properties"][schema_serializer.name] = (
+                {"$ref": "#/components/schemas/" + schema_serializer.name},
+            )
+            result["definitions"][schema_serializer.name] = serialization
 
             behavior = get_utility(IBehavior, name=schema_serializer.name)
 
-            definition = result['definitions'][schema_serializer.name]
-            definition['title'] = behavior.title or schema_serializer.short_name
-            definition['description'] = behavior.description
+            definition = result["definitions"][schema_serializer.name]
+            definition["title"] = behavior.title or schema_serializer.short_name
+            definition["description"] = behavior.description
 
         return result
 
 
-@configure.adapter(
-    for_=(Interface, Interface),
-    provides=ISchemaSerializeToJson)
+@configure.adapter(for_=(Interface, Interface), provides=ISchemaSerializeToJson)
 class DefaultSchemaSerializer(object):
-
     def __init__(self, schema, request):
         self.schema = schema
         self.request = request
-        self.schema_json = {
-            'type': 'object',
-            'properties': {},
-            'required': [],
-            'invariants': []
-        }
+        self.schema_json = {"type": "object", "properties": {}, "required": [], "invariants": []}
 
     async def __call__(self):
         return self.serialize()
@@ -88,12 +77,12 @@ class DefaultSchemaSerializer(object):
     def serialize(self):
         for name, field in get_fields_in_order(self.schema):
             serializer = get_multi_adapter(
-                (field, self.schema, self.request),
-                ISchemaFieldSerializeToJson)
-            self.schema_json['properties'][name] = serializer.serialize()
+                (field, self.schema, self.request), ISchemaFieldSerializeToJson
+            )
+            self.schema_json["properties"][name] = serializer.serialize()
             if field.required:
-                self.schema_json['required'].append(name)
-        self.schema_json['invariants'] = self.invariants
+                self.schema_json["required"].append(name)
+        self.schema_json["invariants"] = self.invariants
 
         return self.schema_json
 
@@ -108,6 +97,6 @@ class DefaultSchemaSerializer(object):
     @property
     def invariants(self):
         invariants = []
-        for i in self.schema.queryTaggedValue('invariants', []):
+        for i in self.schema.queryTaggedValue("invariants", []):
             invariants.append("%s.%s" % (i.__module__, i.__identifier__))
         return invariants

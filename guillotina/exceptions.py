@@ -45,7 +45,11 @@ class ConflictIdOnContainer(Exception):
         self.pg_exc = pg_exc
 
     def __repr__(self):
-        msg = getattr(self.pg_exc, "detail", None) or getattr(self.pg_exc, "message", None) or self.pg_exc
+        msg = (
+            getattr(self.pg_exc, "detail", None)
+            or getattr(self.pg_exc, "message", None)
+            or self.pg_exc
+        )
         return f"Conflict ID {msg}"
 
 

@@ -14,16 +14,17 @@ from guillotina import glogging
 
 import jsonschema
 
-logger = glogging.getLogger('guillotina')
-class DictFieldProxy():
+logger = glogging.getLogger("guillotina")
 
+
+class DictFieldProxy:
     def __init__(self, key, context, field_name):
         self.__key = key
         self.__context = context
         self.__field_name = field_name
 
     def __getattribute__(self, name):
-        if name.startswith('_DictFieldProxy'):  # local attribute
+        if name.startswith("_DictFieldProxy"):  # local attribute
             return super().__getattribute__(name)
 
         if name == self.__field_name:
@@ -32,7 +33,7 @@ class DictFieldProxy():
             return getattr(self.__context, name)
 
     def __setattr__(self, name, value):
-        if name.startswith('_DictFieldProxy'):
+        if name.startswith("_DictFieldProxy"):
             return super().__setattr__(name, value)
 
         if name == self.__field_name:
@@ -49,23 +50,23 @@ class Service(View):
     def _get_validator(cls):
         if cls.__validator__ is None and cls.__validator__ != cls._sentinal:
             cls.__validator__ = cls._sentinal
-            if cls.__config__['requestBody']:
-                requestBody = cls.__config__['requestBody']
-                if '$ref' in requestBody['content']['application/json']['schema']:
+            if cls.__config__["requestBody"]:
+                requestBody = cls.__config__["requestBody"]
+                if "$ref" in requestBody["content"]["application/json"]["schema"]:
                     try:
-                        ref = requestBody['content']['application/json']['schema']['$ref']
-                        schema_name = ref.split('/')[-1]
-                        cls.__schema__ = app_settings['json_schema_definitions'][schema_name]
+                        ref = requestBody["content"]["application/json"]["schema"]["$ref"]
+                        schema_name = ref.split("/")[-1]
+                        cls.__schema__ = app_settings["json_schema_definitions"][schema_name]
                         cls.__validator__ = get_schema_validator(schema_name)
                     except KeyError:
-                        logger.warning('Invalid jsonschema', exc_info=True)
-                elif requestBody['content']['application/json']['schema'] is not None:
+                        logger.warning("Invalid jsonschema", exc_info=True)
+                elif requestBody["content"]["application/json"]["schema"] is not None:
                     try:
-                        cls.__schema__ = requestBody['content']['application/json']['schema']
+                        cls.__schema__ = requestBody["content"]["application/json"]["schema"]
                         jsonschema_validator = jsonschema.validators.validator_for(cls.__schema__)
                         cls.__validator__ = jsonschema_validator(cls.__schema__)
                     except jsonschema.exceptions.ValidationError:
-                        logger.warning('Could not validate schema', exc_info=True)
+                        logger.warning("Could not validate schema", exc_info=True)
                 else:
                     logger.warning("No schema found in service definition")
             else:
@@ -80,22 +81,23 @@ class Service(View):
                 data = await self.request.json()
                 validator.validate(data)
             except jsonschema.exceptions.ValidationError as e:
-                raise HTTPPreconditionFailed(content={
-                    'reason': 'json schema validation error',
-                    'message': e.message,
-                    'validator': e.validator,
-                    'validator_value': e.validator_value,
-                    'path': [i for i in e.path],
-                    'schema_path': [i for i in e.schema_path],
-                    "schema": schema
-                })
+                raise HTTPPreconditionFailed(
+                    content={
+                        "reason": "json schema validation error",
+                        "message": e.message,
+                        "validator": e.validator,
+                        "validator_value": e.validator_value,
+                        "path": [i for i in e.path],
+                        "schema_path": [i for i in e.schema_path],
+                        "schema": schema,
+                    }
+                )
 
     async def get_data(self):
         return await self.request.json()
 
 
 class DownloadService(View):
-
     def __init__(self, context, request):
         super(DownloadService, self).__init__(context, request)
 
@@ -105,7 +107,7 @@ class TraversableFieldService(View):
 
     async def prepare(self):
         # we want have the field
-        name = self.request.matchdict['field_name']
+        name = self.request.matchdict["field_name"]
         fti = query_utility(IFactory, name=self.context.type_name)
         schema = fti.schema
         field = None
@@ -129,29 +131,24 @@ class TraversableFieldService(View):
 
         # Check that its a File Field
         if field is None:
-            raise HTTPNotFound(content={
-                'reason': 'No valid name'})
+            raise HTTPNotFound(content={"reason": "No valid name"})
 
         if self.behavior is not None:
             ctx = self.behavior
         else:
             ctx = self.context
 
-        if (self.behavior is not None and
-                IAsyncBehavior.implementedBy(self.behavior.__class__)):
+        if self.behavior is not None and IAsyncBehavior.implementedBy(self.behavior.__class__):
             # providedBy not working here?
             await self.behavior.load()
 
         if type(field) == Dict:
-            key = self.request.matchdict['filename']
-            self.field = CloudFileField(__name__=name).bind(
-                DictFieldProxy(key, ctx, name)
-            )
+            key = self.request.matchdict["filename"]
+            self.field = CloudFileField(__name__=name).bind(DictFieldProxy(key, ctx, name))
         elif ICloudFileField.providedBy(field):
             self.field = field.bind(ctx)
 
         if self.field is None:
-            raise HTTPNotFound(content={
-                'reason': 'No valid name'})
+            raise HTTPNotFound(content={"reason": "No valid name"})
 
         return self

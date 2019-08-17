@@ -117,7 +117,12 @@ class BasicCache(BaseCache):
             raise NoChannelConfigured()
         push = {}
         for obj, pickled in self._stored_objects:
-            val = {"state": pickled, "zoid": obj.__uuid__, "tid": obj.__serial__, "id": obj.__name__}
+            val = {
+                "state": pickled,
+                "zoid": obj.__uuid__,
+                "tid": obj.__serial__,
+                "id": obj.__name__,
+            }
             if obj.__of__:
                 ob_key = self.get_key(oid=obj.__of__, id=obj.__name__, variant="annotation")
                 await self.set(val, oid=obj.__of__, id=obj.__name__, variant="annotation")

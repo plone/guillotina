@@ -35,17 +35,17 @@ from recommonmark.parser import CommonMarkParser
 from recommonmark.transform import AutoStructify
 
 extensions = [
-    'sphinx.ext.coverage',
-    'sphinx.ext.autodoc',
-    'sphinx_autodoc_typehints',
-    'sphinxcontrib.httpdomain',
-    'sphinxcontrib.httpexample',
-    'guillotina.documentation.sphinx',
-    'sphinx_guillotina_theme'
+    "sphinx.ext.coverage",
+    "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
+    "sphinxcontrib.httpdomain",
+    "sphinxcontrib.httpexample",
+    "guillotina.documentation.sphinx",
+    "sphinx_guillotina_theme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -57,19 +57,19 @@ templates_path = ['_templates']
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = 'Guillotina'
-copyright = '2016, Ramon Navarro Bosch & Nathan Van Gheem'
-author = 'Ramon Navarro Bosch & Nathan Van Gheem'
+project = "Guillotina"
+copyright = "2016, Ramon Navarro Bosch & Nathan Van Gheem"
+author = "Ramon Navarro Bosch & Nathan Van Gheem"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = pkg_resources.get_distribution("guillotina").version.split('.dev')[0]
+version = pkg_resources.get_distribution("guillotina").version.split(".dev")[0]
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -114,7 +114,7 @@ exclude_patterns = []
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -131,15 +131,14 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'guillotina'
+html_theme = "guillotina"
 html_use_smartypants = False
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {
-}
+html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -167,7 +166,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -247,34 +246,36 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Guillotina'
+htmlhelp_basename = "Guillotina"
 
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-     # The paper size ('letterpaper' or 'a4paper').
-     #
-     # 'papersize': 'letterpaper',
-
-     # The font size ('10pt', '11pt' or '12pt').
-     #
-     # 'pointsize': '10pt',
-
-     # Additional stuff for the LaTeX preamble.
-     #
-     # 'preamble': '',
-
-     # Latex figure (float) alignment
-     #
-     # 'figure_align': 'htbp',
+    # The paper size ('letterpaper' or 'a4paper').
+    #
+    # 'papersize': 'letterpaper',
+    # The font size ('10pt', '11pt' or '12pt').
+    #
+    # 'pointsize': '10pt',
+    # Additional stuff for the LaTeX preamble.
+    #
+    # 'preamble': '',
+    # Latex figure (float) alignment
+    #
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'guillotina.tex', 'guillotina Documentation',
-     'Ramon Navarro Bosch \\& Nathan Van Gheem', 'manual'),
+    (
+        master_doc,
+        "guillotina.tex",
+        "guillotina Documentation",
+        "Ramon Navarro Bosch \\& Nathan Van Gheem",
+        "manual",
+    )
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -314,10 +315,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'guillotina', 'Guillotina Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "guillotina", "Guillotina Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 #
@@ -330,16 +328,20 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'guillotina', 'Guillotina Documentation',
-     author, 'guillotina', 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "guillotina",
+        "Guillotina Documentation",
+        author,
+        "guillotina",
+        "One line description of project.",
+        "Miscellaneous",
+    )
 ]
 
-source_parsers = {
-    '.md': CommonMarkParser,
-}
+source_parsers = {".md": CommonMarkParser}
 
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 
 # Documents to append as an appendix to all manuals.
 #
@@ -359,8 +361,5 @@ source_suffix = ['.rst', '.md']
 
 # At the bottom of conf.py
 def setup(app):
-    app.add_config_value(
-        'recommonmark_config', {
-            'auto_toc_tree_section': 'Contents',
-        }, True)
+    app.add_config_value("recommonmark_config", {"auto_toc_tree_section": "Contents"}, True)
     app.add_transform(AutoStructify)

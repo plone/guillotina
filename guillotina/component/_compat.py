@@ -23,4 +23,4 @@ CLASS_TYPES = (type,)
 PYTHON3 = True
 PYTHON2 = False
 
-_BLANK = u''
+_BLANK = ""

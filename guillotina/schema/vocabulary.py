@@ -43,9 +43,9 @@ class SimpleTerm(object):
         # In Python 3 str(bytes) returns str(repr(bytes)), which is not what
         # we want here. On the other hand, we want to try to keep the token as
         # readable as possible.
-        self.token = str(token) \
-            if not isinstance(token, bytes) \
-            else str(token.decode('ascii', 'ignore'))
+        self.token = (
+            str(token) if not isinstance(token, bytes) else str(token.decode("ascii", "ignore"))
+        )
         self.title = title
         if title is not None:
             directlyProvides(self, ITitledTokenizedTerm)  # noqa
@@ -73,14 +73,12 @@ class SimpleVocabulary(object):
         self.by_token = {}
         self._terms = terms
         for term in self._terms:
-            swallow_dupes = kwargs.get('swallow_duplicates', False)
+            swallow_dupes = kwargs.get("swallow_duplicates", False)
             if not swallow_dupes:
                 if term.value in self.by_value:
-                    raise ValueError(
-                        'term values must be unique: %s' % repr(term.value))
+                    raise ValueError("term values must be unique: %s" % repr(term.value))
                 if term.token in self.by_token:
-                    raise ValueError(
-                        'term tokens must be unique: %s' % repr(term.token))
+                    raise ValueError("term tokens must be unique: %s" % repr(term.token))
             self.by_value[term.value] = term
             self.by_token[term.token] = term
         if interfaces:
@@ -173,6 +171,7 @@ def _createTermTree(ttree, dict_):
 class TreeVocabulary(object):
     """ Vocabulary that relies on a tree (i.e nested) structure.
     """
+
     # The default implementation uses a dict to create the tree structure. This
     # can however be overridden in a subclass by any other IEnumerableMapping
     # compliant object type. Python 2.7's OrderedDict for example.
@@ -288,23 +287,20 @@ class TreeVocabulary(object):
         tree:  The tree (a nested/recursive dictionary).
         """
         for term in tree.keys():
-            value = getattr(term, 'value')
-            token = getattr(term, 'token')
+            value = getattr(term, "value")
+            token = getattr(term, "token")
 
             if value in self.term_by_value:
-                raise ValueError(
-                    "Term values must be unique: '%s'" % value)
+                raise ValueError("Term values must be unique: '%s'" % value)
 
             if token in self.term_by_token:
-                raise ValueError(
-                    "Term tokens must be unique: '%s'" % token)
+                raise ValueError("Term tokens must be unique: '%s'" % token)
 
             self.term_by_value[value] = term
             self.term_by_token[token] = term
 
             if value not in self.path_by_value:
-                self.path_by_value[value] = self._getPathToTreeNode(self,
-                                                                    value)
+                self.path_by_value[value] = self._getPathToTreeNode(self, value)
             self._populateIndexes(tree[term])
 
     def getTerm(self, value):
@@ -358,7 +354,7 @@ class VocabularyRegistryError(LookupError):
 
 @implementer(IVocabularyRegistry)
 class VocabularyRegistry(object):
-    __slots__ = '_map',
+    __slots__ = ("_map",)
 
     def __init__(self):
         self._map = {}

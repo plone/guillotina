@@ -19,13 +19,12 @@ class Response(Exception):
     empty_body = False
     default_content: dict = {}  # noqa
 
-    def __init__(self, *, content: dict=None,
-                 headers: dict=None, status: int=None) -> None:
-        '''
+    def __init__(self, *, content: dict = None, headers: dict = None, status: int = None) -> None:
+        """
         :param content: content to serialize
         :param headers: headers to set on response
         :param status: customize the response status
-        '''
+        """
         if self.empty_body:
             self.content = None
         else:
@@ -36,7 +35,7 @@ class Response(Exception):
             self.headers = CIMultiDict(headers)  # type: ignore
         if status is not None:
             if self.status_code:
-                raise ValueError('Can not customize status code of this type')
+                raise ValueError("Can not customize status code of this type")
             else:
                 if status in (204, 205):
                     self.content = None
@@ -44,24 +43,29 @@ class Response(Exception):
 
 
 class ErrorResponse(Response):
-    def __init__(self, type: str, message: str, *, reason=None,
-                 content: dict=None, headers: dict=None,
-                 status: int=500) -> None:
-        '''
+    def __init__(
+        self,
+        type: str,
+        message: str,
+        *,
+        reason=None,
+        content: dict = None,
+        headers: dict = None,
+        status: int = 500,
+    ) -> None:
+        """
         :param type: type of error
         :param message: error message
         :param content: provide additional content
         :param headers: headers to set on response
         :param status: customize the response status
-        '''
+        """
         if content is None:
             content = {}
-        content['error'] = {
-            'type': type,
-            'message': message
-        }
+        content["error"] = {"type": type, "message": message}
         if reason is not None:
             from guillotina.exc_resp import render_error_response
+
             content.update(render_error_response(type, reason))
         super().__init__(content=content, headers=headers, status=status)
 
@@ -114,49 +118,49 @@ class HTTPPartialContent(HTTPSuccessful):
 
 
 class _HTTPMove(HTTPRedirection):
-
-    def __init__(self, location: str, *,
-                 content: dict=None, headers: dict=None) -> None:
+    def __init__(self, location: str, *, content: dict = None, headers: dict = None) -> None:
         if not location:
             raise ValueError("HTTP redirects need a location to redirect to.")
         super().__init__(content=content, headers=headers)
-        self.headers['Location'] = str(location)
+        self.headers["Location"] = str(location)
         self.location = location
 
 
 class HTTPMultipleChoices(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
 
     status_code = 300
 
 
 class HTTPMovedPermanently(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
 
     status_code = 301
 
 
 class HTTPFound(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
+
     status_code = 302
 
 
 # This one is safe after a POST (the redirected location will be
 # retrieved with GET):
 class HTTPSeeOther(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
+
     status_code = 303
 
 
@@ -209,25 +213,26 @@ class HTTPNotFound(HTTPClientError):
 
 
 class InvalidRoute(HTTPNotFound):
-    '''
+    """
     The defined route is invalid
-    '''
+    """
 
 
 class HTTPMethodNotAllowed(HTTPClientError):
     status_code = 405
 
-    def __init__(self, method: str, allowed_methods: list, *,
-                 content: dict=None, headers: dict=None) -> None:
-        '''
+    def __init__(
+        self, method: str, allowed_methods: list, *, content: dict = None, headers: dict = None
+    ) -> None:
+        """
         :param method: method not allowed
         :param allowed_methods: list of allowed methods
         :param content: content to serialize
         :param headers: headers to set on response
-        '''
-        allow = ','.join(sorted(allowed_methods))
+        """
+        allow = ",".join(sorted(allowed_methods))
         super().__init__(content=content, headers=headers)
-        self.headers['Allow'] = allow
+        self.headers["Allow"] = allow
         self.allowed_methods = allowed_methods
         self.method = method.upper()
 
@@ -313,7 +318,7 @@ class HTTPUnavailableForLegalReasons(HTTPClientError):
 
     def __init__(self, link, *, content=None, headers=None):
         super().__init__(content=content, headers=headers)
-        self.headers['Link'] = '<%s>; rel="blocked-by"' % link
+        self.headers["Link"] = '<%s>; rel="blocked-by"' % link
         self.link = link
 
 

@@ -4,8 +4,7 @@ from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.strategies.base import BaseStrategy
 
 
-@configure.adapter(
-    for_=ITransaction, provides=ITransactionStrategy, name="none")
+@configure.adapter(for_=ITransaction, provides=ITransactionStrategy, name="none")
 class TransactionlessStrategy(BaseStrategy):
     """
     Do not handle/detect any conflicts on the database
@@ -15,8 +14,7 @@ class TransactionlessStrategy(BaseStrategy):
         self._transaction._tid = 1
 
 
-@configure.adapter(
-    for_=ITransaction, provides=ITransactionStrategy, name="tidonly")
+@configure.adapter(for_=ITransaction, provides=ITransactionStrategy, name="tidonly")
 class TIDOnlyStrategy(BaseStrategy):
     """
     Still issue a transaction id and never issue explicit transaction

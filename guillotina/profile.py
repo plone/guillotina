@@ -1,4 +1,3 @@
-
 _profiled_functions: list = []
 
 

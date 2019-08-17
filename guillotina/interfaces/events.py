@@ -4,9 +4,9 @@ from zope.interface import interfaces
 
 
 class IBeforeObjectModifiedEvent(interfaces.IObjectEvent):
-    '''
+    """
     Before an object has been modified
-    '''
+    """
 
 
 class IObjectModifiedEvent(interfaces.IObjectEvent):
@@ -25,8 +25,8 @@ class IObjectMovedEvent(IObjectLocationEvent):
 
 
 class IBeforeObjectMovedEvent(IObjectLocationEvent):
-    '''
-    '''
+    """
+    """
 
 
 class IObjectAddedEvent(IObjectLocationEvent):
@@ -66,8 +66,8 @@ class IObjectPermissionsModifiedEvent(interfaces.IObjectEvent):
 
 
 class IFileUploadEvent(interfaces.IObjectEvent):
-    '''
-    '''
+    """
+    """
 
 
 class IFileStartedUpload(interfaces.IObjectEvent):
@@ -105,74 +105,74 @@ class IUserRefreshToken(Interface):
 
 
 class IApplicationEvent(Interface):
-    app = Attribute('Server application object')
-    loop = Attribute('')
+    app = Attribute("Server application object")
+    loop = Attribute("")
 
 
 class IApplicationConfiguredEvent(IApplicationEvent):
-    '''
+    """
     After guillotina has been configured
-    '''
+    """
 
 
 class IApplicationInitializedEvent(IApplicationEvent):
-    '''
+    """
     After initialization of static files, keys
     and async utilities
-    '''
+    """
 
 
 class IApplicationCleanupEvent(IApplicationEvent):
-    '''
+    """
     On app cleanup
-    '''
+    """
 
 
 class ITraversalMissEvent(Interface):
-    request = Attribute('Request object')
-    tail = Attribute('Unresolvable part of the request path')
+    request = Attribute("Request object")
+    tail = Attribute("Unresolvable part of the request path")
 
 
 class ITraversalResourceMissEvent(ITraversalMissEvent):
-    '''
+    """
     When application was not able to resolve requested resource
-    '''
+    """
 
 
 class ITraversalViewMissEvent(ITraversalMissEvent):
-    '''
+    """
     When application was not able to resolve requested route for resource
-    '''
+    """
 
 
 class ITraversalRouteMissEvent(ITraversalMissEvent):
-    '''
+    """
     When application was not able to resolve requested route for resource
-    '''
+    """
 
 
 class IDatabaseInitializedEvent(Interface):
-    database = Attribute('')
+    database = Attribute("")
 
 
 class IBeforeRenderViewEvent(Interface):
-    '''Right before the view gets rendered
-    '''
+    """Right before the view gets rendered
+    """
 
 
 class IRegistryEditedEvent(interfaces.IObjectEvent):
-    '''
+    """
     When registry edited
-    '''
+    """
 
 
 class IBeforeAsyncUtilityLoadedEvent(Interface):
-    '''
+    """
     Right before async utility is loaded
-    '''
+    """
 
 
 class IAfterAsyncUtilityLoadedEvent(Interface):
-    '''
+    """
     Right after async utility is loaded
-    '''
+    """

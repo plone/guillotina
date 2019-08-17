@@ -47,28 +47,28 @@ class IMapping(Interface):
         """
 
     def iterkeys():  # type: ignore
-        'iterate over keys; equivalent to __iter__'
+        "iterate over keys; equivalent to __iter__"
 
     def itervalues():  # type: ignore
-        'iterate over values'
+        "iterate over values"
 
     def iteritems():  # type: ignore
-        'iterate over items'
+        "iterate over items"
 
     def copy():  # type: ignore
-        'return copy of dict'
+        "return copy of dict"
 
     def has_key(key):  # noqa: N805
         """Tell if a key exists in the mapping; equivalent to __contains__"""
 
     def clear():  # type: ignore
-        'delete all items'
+        "delete all items"
 
     def update(d):  # noqa: N805
-        ' Update D from E: for k in E.keys(): D[k] = E[k]'
+        " Update D from E: for k in E.keys(): D[k] = E[k]"
 
     def setdefault(key, default=None):  # noqa: N805
-        'D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D'
+        "D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"
 
     def pop(k, *args):  # noqa: N805
         """remove specified key and return the corresponding value

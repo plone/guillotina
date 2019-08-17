@@ -78,7 +78,9 @@ class ITransaction(Interface):
         Get child of object
         """
 
-    async def get_children(parent: IBaseObject, keys: typing.List[str]) -> typing.AsyncIterator[IBaseObject]:
+    async def get_children(
+        parent: IBaseObject, keys: typing.List[str]
+    ) -> typing.AsyncIterator[IBaseObject]:
         """
         Get children of object
         """

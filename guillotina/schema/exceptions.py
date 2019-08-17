@@ -18,15 +18,14 @@ class ValidationError(zope.interface.Invalid):
         return self.__class__.__doc__
 
     def __eq__(self, other):
-        if not hasattr(other, 'args'):
+        if not hasattr(other, "args"):
             return False
         return self.args == other.args
 
     __hash__ = zope.interface.Invalid.__hash__  # python3
 
     def __repr__(self):  # pragma: no cover
-        return '%s(%s)' % (self.__class__.__name__,
-                           ', '.join(repr(arg) for arg in self.args))
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(repr(arg) for arg in self.args))
 
 
 class RequiredMissing(ValidationError):

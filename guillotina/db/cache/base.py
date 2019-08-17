@@ -1,7 +1,7 @@
 from guillotina import glogging
 
 
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 
 class BaseCache:
@@ -39,32 +39,32 @@ class BaseCache:
         self.__stored += 1
 
     def get_key(self, oid=None, container=None, id=None, variant=None):
-        key = '{}-'.format(getattr(self._transaction.manager, 'db_id', 'root'))
+        key = "{}-".format(getattr(self._transaction.manager, "db_id", "root"))
         if oid is not None:
             key += oid
         elif container is not None:
             key += container.__uuid__
         if id is not None:
-            key += '/' + id
+            key += "/" + id
         if variant is not None:
-            key += '-' + variant
+            key += "-" + variant
         return key
 
     async def get(self, oid=None, container=None, id=None, variant=None):
-        '''
+        """
         Use params to build cache key
         MUST return dictionary-like object with these keys:
             - state: the pickle value
             - zoid: object unique id in the database
             - tid: transaction id for ob
             - id
-        '''
+        """
         raise NotImplemented()
 
     async def set(self, value, oid=None, container=None, id=None, variant=None):
-        '''
+        """
         Use params to build cache key
-        '''
+        """
         raise NotImplemented()
 
     async def clear(self):
@@ -79,33 +79,33 @@ class BaseCache:
     async def store_object(self, obj, pickled):
         pass
 
-    def get_cache_keys(self, ob, type_='modified'):
+    def get_cache_keys(self, ob, type_="modified"):
         keys = []
 
         if ob.__of__:
             # like an annotiation, invalidate diff
             keys = [
                 self.get_key(oid=ob.__uuid__),
-                self.get_key(oid=ob.__of__, id=ob.__name__, variant='annotation'),
-                self.get_key(oid=ob.__of__, variant='annotation-keys')
+                self.get_key(oid=ob.__of__, id=ob.__name__, variant="annotation"),
+                self.get_key(oid=ob.__of__, variant="annotation-keys"),
             ]
         else:
-            if type_ == 'modified':
-                keys = [
-                    self.get_key(oid=ob.__uuid__),
-                    self.get_key(container=ob.__parent__, id=ob.id)
-                ]
-            elif type_ == 'added':
-                keys = [
-                    self.get_key(container=ob.__parent__, variant='len'),
-                    self.get_key(container=ob.__parent__, variant='keys')
-                ]
-            elif type_ == 'deleted':
+            if type_ == "modified":
                 keys = [
                     self.get_key(oid=ob.__uuid__),
                     self.get_key(container=ob.__parent__, id=ob.id),
-                    self.get_key(container=ob.__parent__, variant='len'),
-                    self.get_key(container=ob.__parent__, variant='keys')
+                ]
+            elif type_ == "added":
+                keys = [
+                    self.get_key(container=ob.__parent__, variant="len"),
+                    self.get_key(container=ob.__parent__, variant="keys"),
+                ]
+            elif type_ == "deleted":
+                keys = [
+                    self.get_key(oid=ob.__uuid__),
+                    self.get_key(container=ob.__parent__, id=ob.id),
+                    self.get_key(container=ob.__parent__, variant="len"),
+                    self.get_key(container=ob.__parent__, variant="keys"),
                 ]
         return keys
 

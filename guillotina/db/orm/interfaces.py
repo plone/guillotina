@@ -10,8 +10,8 @@ class IBaseObject(Interface):
     """Python base object interface
     """
 
-    __name__ = Attribute('')
-    __parent__ = Attribute('')
+    __name__ = Attribute("")
+    __parent__ = Attribute("")
 
     __txn__ = Attribute(
         """The data manager for the object.
@@ -23,7 +23,8 @@ class IBaseObject(Interface):
 
         Once assigned to a data manager, an object cannot be re-assigned
         to another.
-        """)
+        """
+    )
 
     __uuid__ = Attribute(
         """The object id.
@@ -36,7 +37,8 @@ class IBaseObject(Interface):
         database root object.
 
         Once assigned an OID, an object cannot be re-assigned another.
-        """)
+        """
+    )
 
     __serial__ = Attribute(
         """The object serial number.
@@ -45,7 +47,8 @@ class IBaseObject(Interface):
         revisions of a given persistent object.
 
         This is an 8-byte string (not Unicode).
-        """)
+        """
+    )
 
     # Attribute access protocol
     def __getattribute__(name):  # type: ignore
