@@ -14,8 +14,8 @@ import os
 import pytest
 
 
-DATABASE = os.environ.get('DATABASE', 'DUMMY')
-USE_RDMS = DATABASE != 'DUMMY'
+DATABASE = os.environ.get("DATABASE", "DUMMY")
+USE_RDMS = DATABASE != "DUMMY"
 
 
 async def cleanup(aps):
@@ -28,7 +28,7 @@ async def cleanup(aps):
     conn = txn._db_conn
     await conn.execute("DROP TABLE IF EXISTS objects;")
     await conn.execute("DROP TABLE IF EXISTS blobs;")
-    if DATABASE == 'postgres':
+    if DATABASE == "postgres":
         await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn._db_txn.commit()
     await aps.pool.release(conn)
@@ -37,32 +37,29 @@ async def cleanup(aps):
 
 
 async def get_aps(postgres, strategy=None, pool_size=16, autovacuum=True):
-    dsn = "postgres://postgres:@{}:{}/guillotina".format(
-        postgres[0],
-        postgres[1],
-    )
+    dsn = "postgres://postgres:@{}:{}/guillotina".format(postgres[0], postgres[1])
     klass = PostgresqlStorage
     if strategy is None:
-        if DATABASE == 'cockroachdb':
-            strategy = 'dbresolve_readcommitted'
+        if DATABASE == "cockroachdb":
+            strategy = "dbresolve_readcommitted"
         else:
-            strategy = 'resolve_readcommitted'
-    if DATABASE == 'cockroachdb':
+            strategy = "resolve_readcommitted"
+    if DATABASE == "cockroachdb":
         klass = CockroachStorage
-        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
-            postgres[0],
-            postgres[1],
-        )
+        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(postgres[0], postgres[1])
     aps = klass(
-        dsn=dsn, name='db',
-        transaction_strategy=strategy, pool_size=pool_size,
+        dsn=dsn,
+        name="db",
+        transaction_strategy=strategy,
+        pool_size=pool_size,
         conn_acquire_timeout=0.1,
-        autovacuum=autovacuum)
+        autovacuum=autovacuum,
+    )
     await aps.initialize()
     return aps
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_read_obs(db, dummy_guillotina):
     """Low level test checks that root is not there"""
     aps = await get_aps(db)
@@ -85,7 +82,7 @@ async def test_read_obs(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_restart_connection(db, dummy_guillotina):
     """Low level test checks that root is not there"""
     aps = await get_aps(db)
@@ -111,7 +108,7 @@ async def test_restart_connection(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_restart_connection_pg(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm:
@@ -123,11 +120,11 @@ async def test_restart_connection_pg(db, dummy_guillotina):
 
         async def fetchval_conn_closed():
             raise asyncpg.exceptions.InterfaceError(
-                'cannot call PreparedStatement.fetchval(): the underlying connection is closed'
+                "cannot call PreparedStatement.fetchval(): the underlying connection is closed"
             )
 
         # Simulate underlying connection is closed
-        tm._storage._stmt_next_tid = Mock(**{'fetchval': fetchval_conn_closed})
+        tm._storage._stmt_next_tid = Mock(**{"fetchval": fetchval_conn_closed})
 
         with pytest.raises(ConflictError):
             await tm._storage.get_next_tid(Mock())
@@ -139,16 +136,15 @@ async def test_restart_connection_pg(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
-                    reason="Cockroach does not have cascade support")
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not have cascade support")
 async def test_deleting_parent_deletes_children(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
 
-        folder = create_content(Folder, 'Folder')
+        folder = create_content(Folder, "Folder")
         txn.register(folder)
         ob = create_content()
-        await folder.async_set('foobar', ob)
+        await folder.async_set("foobar", ob)
 
         assert len(txn.modified) == 2
 
@@ -182,25 +178,25 @@ async def test_deleting_parent_deletes_children(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_create_blob(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         txn.register(ob)
 
-        await txn.write_blob_chunk('X' * 32, ob.__uuid__, 0, b'foobar')
+        await txn.write_blob_chunk("X" * 32, ob.__uuid__, 0, b"foobar")
 
         await tm.commit(txn=txn)
         txn = await tm.begin()
 
-        blob_record = await txn.read_blob_chunk('X' * 32, 0)
-        assert blob_record['data'] == b'foobar'
+        blob_record = await txn.read_blob_chunk("X" * 32, 0)
+        assert blob_record["data"] == b"foobar"
 
         # also get data from ob that started as a stub...
         ob2 = await txn.get(ob.__uuid__)
-        assert ob2.type_name == 'Item'
-        assert 'foobar' in ob2.id
+        assert ob2.type_name == "Item"
+        assert "foobar" in ob2.id
 
         await tm.abort(txn=txn)
 
@@ -208,14 +204,14 @@ async def test_create_blob(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_delete_resource_deletes_blob(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
         txn.register(ob)
 
-        await txn.write_blob_chunk('X' * 32, ob.__uuid__, 0, b'foobar')
+        await txn.write_blob_chunk("X" * 32, ob.__uuid__, 0, b"foobar")
 
         await tm.commit(txn=txn)
         txn = await tm.begin()
@@ -227,7 +223,7 @@ async def test_delete_resource_deletes_blob(db, dummy_guillotina):
         await asyncio.sleep(0.1)  # make sure cleanup runs
         txn = await tm.begin()
 
-        assert await txn.read_blob_chunk('X' * 32, 0) is None
+        assert await txn.read_blob_chunk("X" * 32, 0) is None
 
         with pytest.raises(KeyError):
             await txn.get(ob.__uuid__)
@@ -237,15 +233,13 @@ async def test_delete_resource_deletes_blob(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
-                    reason="Cockroach not support resolve...")
-async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
-        db, dummy_guillotina):
-    aps = await get_aps(db, 'resolve')
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support resolve...")
+async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(db, dummy_guillotina):
+    aps = await get_aps(db, "resolve")
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
-        ob.title = 'foobar'
-        ob.description = 'foobar'
+        ob.title = "foobar"
+        ob.description = "foobar"
         txn.register(ob)
 
         await tm.commit(txn=txn)
@@ -256,8 +250,8 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
 
         ob1 = await txn1.get(ob.__uuid__)
         ob2 = await txn2.get(ob.__uuid__)
-        ob1.title = 'foobar1'
-        ob2.description = 'foobar2'
+        ob1.title = "foobar1"
+        ob2.description = "foobar2"
 
         txn1.register(ob1)
         txn2.register(ob2)
@@ -271,10 +265,9 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
-                    reason="Cockroach not support resolve...")
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support resolve...")
 async def test_should_resolve_conflict_error(db, dummy_guillotina):
-    aps = await get_aps(db, 'resolve')
+    aps = await get_aps(db, "resolve")
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         ob2 = create_content()
@@ -302,10 +295,9 @@ async def test_should_resolve_conflict_error(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
-                    reason="Cockroach not support resolve...")
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support resolve...")
 async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_guillotina):
-    aps = await get_aps(db, 'resolve')
+    aps = await get_aps(db, "resolve")
     with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         ob1 = create_content()
@@ -333,10 +325,9 @@ async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_guilloti
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
-                    reason="Cockroach not support simple...")
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support simple...")
 async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_guillotina):
-    aps = await get_aps(db, 'simple')
+    aps = await get_aps(db, "simple")
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         ob2 = create_content()
@@ -364,9 +355,9 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_gui
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_none_strat_allows_trans_commits(db, dummy_guillotina):
-    aps = await get_aps(db, 'none')
+    aps = await get_aps(db, "none")
     with TransactionManager(aps) as tm, await tm.begin() as txn:
 
         ob1 = create_content()
@@ -378,8 +369,8 @@ async def test_none_strat_allows_trans_commits(db, dummy_guillotina):
         txn2 = await tm.begin()
         ob1 = await txn1.get(ob1.__uuid__)
         ob2 = await txn2.get(ob1.__uuid__)
-        ob1.title = 'foobar1'
-        ob2.title = 'foobar2'
+        ob1.title = "foobar1"
+        ob2.title = "foobar2"
         txn1.register(ob1)
         txn2.register(ob2)
 
@@ -388,7 +379,7 @@ async def test_none_strat_allows_trans_commits(db, dummy_guillotina):
 
         txn = await tm.begin()
         ob1 = await txn.get(ob1.__uuid__)
-        assert ob1.title == 'foobar1'
+        assert ob1.title == "foobar1"
 
         await tm.abort(txn=txn)
 
@@ -396,7 +387,7 @@ async def test_none_strat_allows_trans_commits(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_count_total_objects(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
@@ -416,7 +407,7 @@ async def test_count_total_objects(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_get_resources_of_type(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
@@ -428,8 +419,8 @@ async def test_get_resources_of_type(db, dummy_guillotina):
         txn = await tm.begin()
 
         count = 0
-        async for item in txn._get_resources_of_type('Item'):
-            assert item['type'] == 'Item'
+        async for item in txn._get_resources_of_type("Item"):
+            assert item["type"] == "Item"
             count += 1
 
         assert count == 1
@@ -440,7 +431,7 @@ async def test_get_resources_of_type(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_get_total_resources_of_type(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
@@ -450,7 +441,7 @@ async def test_get_total_resources_of_type(db, dummy_guillotina):
         await tm.commit(txn=txn)
         txn = await tm.begin()
 
-        assert 1 == await txn.get_total_resources_of_type('Item')
+        assert 1 == await txn.get_total_resources_of_type("Item")
 
         await tm.abort(txn=txn)
 
@@ -458,7 +449,7 @@ async def test_get_total_resources_of_type(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_using_gather_with_queries_before_prepare(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
@@ -481,7 +472,7 @@ async def test_using_gather_with_queries_before_prepare(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_using_gather_with_queries_after_prepare(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
@@ -507,7 +498,7 @@ async def test_using_gather_with_queries_after_prepare(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_exhausting_pool_size(db, dummy_guillotina):
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(db, pool_size=2)
@@ -525,7 +516,7 @@ async def test_exhausting_pool_size(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_mismatched_tid_causes_conflict_error(db, dummy_guillotina):
 
     # base aps uses 1 connection from the pool for starting transactions
@@ -547,7 +538,7 @@ async def test_mismatched_tid_causes_conflict_error(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE == 'DUMMY', reason='Not for dummy db')
+@pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_iterate_keys(db, dummy_guillotina):
 
     # base aps uses 1 connection from the pool for starting transactions
@@ -575,8 +566,7 @@ async def test_iterate_keys(db, dummy_guillotina):
         await tm.abort(txn=txn)
 
 
-@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
-                    reason="Cockroach does not like this test...")
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test...")
 async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
 
     aps = await get_aps(db)
@@ -585,8 +575,7 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
     for conn in tm._storage.pool._queue._queue:
         if conn._con is None:
             await conn.connect()
-        conn._con._top_xact = asyncpg.transaction.Transaction(
-            conn._con, 'read_committed', False, False)
+        conn._con._top_xact = asyncpg.transaction.Transaction(conn._con, "read_committed", False, False)
 
     with await tm.begin() as txn, tm:
 
@@ -609,8 +598,7 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ('cockroachdb', 'DUMMY'),
-                    reason="Cockroach does not like this test...")
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test...")
 async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_guillotina):
 
     aps = await get_aps(db)
@@ -619,7 +607,7 @@ async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_guillotina):
     for conn in tm._storage.pool._queue._queue:
         if conn._con is None:
             await conn.connect()
-        await conn._con.execute('BEGIN;')
+        await conn._con.execute("BEGIN;")
 
     with await tm.begin() as txn, tm:
         # then, try doing stuff...
@@ -641,7 +629,7 @@ async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ('DUMMY',), reason='only for rdms')
+@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="only for rdms")
 async def test_vacuum_objects(db, dummy_guillotina):
     aps = await get_aps(db, autovacuum=False)
     tm = TransactionManager(aps)
@@ -663,19 +651,17 @@ async def test_vacuum_objects(db, dummy_guillotina):
         await tm.commit(txn=txn)
 
     async with aps.pool.acquire() as conn:
-        result = await conn.fetch(
-            "select * from objects where zoid=$1;", ob1.__uuid__)
+        result = await conn.fetch("select * from objects where zoid=$1;", ob1.__uuid__)
         assert len(result) == 1
         # deferenced
-        assert result[0]['parent_id'] == 'D' * 32
+        assert result[0]["parent_id"] == "D" * 32
 
     await aps.vacuum()
 
     await asyncio.sleep(0.1)
 
     async with aps.pool.acquire() as conn:
-        result = await conn.fetch(
-            "select * from objects where zoid=$1;", ob1.__uuid__)
+        result = await conn.fetch("select * from objects where zoid=$1;", ob1.__uuid__)
         assert len(result) == 0
 
     await aps.remove()

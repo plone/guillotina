@@ -40,91 +40,62 @@ import tempfile
 import typing
 
 
-app_settings = {
-    'applications': ['guillotina']
-}
+app_settings = {"applications": ["guillotina"]}
 
 
-TERM_SCHEMA = json.dumps({
-    'type': 'object',
-    'properties': {
-        'label': {'type': 'string'},
-        'number': {'type': 'number'}
-    },
-})
+TERM_SCHEMA = json.dumps(
+    {"type": "object", "properties": {"label": {"type": "string"}, "number": {"type": "number"}}}
+)
 
 
 @implementer(IContextAwareDefaultFactory)
 class ContextDefaultFactory:
-
     def __call__(self, context):
-        return 'foobar'
+        return "foobar"
 
 
-CATEGORIES_MAPPING = {
-    'dynamic': False,
-    'type': 'nested',
-}
+CATEGORIES_MAPPING = {"dynamic": False, "type": "nested"}
 
 
 class IExample(IResource):
 
-    metadata('categories')
+    metadata("categories")
 
-    index_field('boolean_field', type='boolean')
+    index_field("boolean_field", type="boolean")
     boolean_field = schema.Bool(required=False)
 
-    index_field('categories', field_mapping=CATEGORIES_MAPPING)
+    index_field("categories", field_mapping=CATEGORIES_MAPPING)
     categories = schema.List(
-        title='categories',
-        default=[],
-        value_type=schema.JSONField(
-            title='term',
-            schema=TERM_SCHEMA)
+        title="categories", default=[], value_type=schema.JSONField(title="term", schema=TERM_SCHEMA)
     )
 
-    textline_field = schema.TextLine(
-        title='kk', widget='testing', required=False)
+    textline_field = schema.TextLine(title="kk", widget="testing", required=False)
     text_field = schema.Text(required=False)
-    dict_value = schema.Dict(
-        key_type=schema.TextLine(),
-        value_type=schema.TextLine(),
-        required=False
-    )
+    dict_value = schema.Dict(key_type=schema.TextLine(), value_type=schema.TextLine(), required=False)
     datetime = schema.Datetime(required=False)
 
-    write_permission(write_protected='example.MyPermission')
-    write_protected = schema.TextLine(
-        title='Write protected field',
-        required=False,
-    )
+    write_permission(write_protected="example.MyPermission")
+    write_protected = schema.TextLine(title="Write protected field", required=False)
 
-    default_factory_test = schema.Text(
-        defaultFactory=lambda: 'foobar'
-    )
+    default_factory_test = schema.Text(defaultFactory=lambda: "foobar")
 
-    context_default_factory_test = schema.Text(
-        defaultFactory=ContextDefaultFactory()
-    )
+    context_default_factory_test = schema.Text(defaultFactory=ContextDefaultFactory())
 
 
-@index_field.with_accessor(
-    IExample, 'categories_accessor', field='categories')
+@index_field.with_accessor(IExample, "categories_accessor", field="categories")
 def categories_index_accessor(ob):
     if not ob.categories:
         raise NoIndexField
     else:
-        return [
-            c['label'] for c in ob.categories
-        ]
+        return [c["label"] for c in ob.categories]
 
 
-@index_field.with_accessor(IExample, 'foobar_accessor')
+@index_field.with_accessor(IExample, "foobar_accessor")
 def foobar_accessor(ob):
-    return 'foobar'
+    return "foobar"
 
 
-configure.permission('example.MyPermission', 'example permission')
+configure.permission("example.MyPermission", "example permission")
 
 
 @implementer(IExample)
@@ -138,26 +109,21 @@ class IMarkerBehavior(Interface):
 
 class ITestBehavior(Interface):
     foobar = schema.TextLine(required=False)
-    foobar_context = schema.TextLine(required=False, default='default-foobar')
+    foobar_context = schema.TextLine(required=False, default="default-foobar")
 
     bucket_dict = fields.BucketDictField(
-        bucket_len=10, required=False,
-        default=None,
-        key_type=schema.Text(),
-        value_type=schema.Text()
+        bucket_len=10, required=False, default=None, key_type=schema.Text(), value_type=schema.Text()
     )
 
-    read_permission(no_read_field='example.MyPermission')
-    no_read_field = schema.TextLine(required=False, default='')
+    read_permission(no_read_field="example.MyPermission")
+    no_read_field = schema.TextLine(required=False, default="")
 
 
 @configure.behavior(
-    title="",
-    provides=ITestBehavior,
-    marker=IMarkerBehavior,
-    for_="guillotina.interfaces.IResource")
+    title="", provides=ITestBehavior, marker=IMarkerBehavior, for_="guillotina.interfaces.IResource"
+)
 class GTestBehavior(AnnotationBehavior):
-    foobar_context = ContextProperty('foobar_context')
+    foobar_context = ContextProperty("foobar_context")
 
 
 class ITestContextBehavior(Interface):
@@ -172,7 +138,8 @@ class IMarkerTestContextBehavior(Interface):
     title="",
     provides=ITestContextBehavior,
     marker=IMarkerTestContextBehavior,
-    for_="guillotina.interfaces.IResource")
+    for_="guillotina.interfaces.IResource",
+)
 class GContextTestBehavior(ContextBehavior):
     pass
 
@@ -181,10 +148,7 @@ class ITestNoSerializeBehavior(Interface):
     foobar = schema.TextLine()
 
 
-@configure.behavior(
-    title="",
-    provides=ITestNoSerializeBehavior,
-    for_="guillotina.interfaces.IResource")
+@configure.behavior(title="", provides=ITestNoSerializeBehavior, for_="guillotina.interfaces.IResource")
 class GTestNoSerializeBehavior(ContextBehavior):
     auto_serialize = False
 
@@ -194,44 +158,42 @@ class IFileContent(IItem):
 
 
 @configure.contenttype(
-    schema=IFileContent, type_name="File",
-    behaviors=[
-        "guillotina.behaviors.dublincore.IDublinCore"
-    ])
+    schema=IFileContent, type_name="File", behaviors=["guillotina.behaviors.dublincore.IDublinCore"]
+)
 class FileContent(Item):
     pass
 
 
-@configure.subscriber(
-    for_=(IFileContent, IObjectAddedEvent), priority=-1000)
+@configure.subscriber(for_=(IFileContent, IObjectAddedEvent), priority=-1000)
 async def foobar_sub(ob, evt):
     pass
 
 
-@configure.subscriber(
-    for_=(IResource, IObjectAddedEvent), priority=-1000)
+@configure.subscriber(for_=(IResource, IObjectAddedEvent), priority=-1000)
 def sync_foobar_sub(ob, evt):
-    if not hasattr(evt, 'called'):
+    if not hasattr(evt, "called"):
         evt.called = 0
     evt.called += 1
 
 
-configure.register_configuration(Example, dict(
-    context=IContainer,
-    schema=IExample,
-    type_name="Example",
-    behaviors=[
-        "guillotina.behaviors.dublincore.IDublinCore"
-    ]
-), 'contenttype')
+configure.register_configuration(
+    Example,
+    dict(
+        context=IContainer,
+        schema=IExample,
+        type_name="Example",
+        behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+    ),
+    "contenttype",
+)
 
 
 @configure.service(
-    context=IApplication, method='GET', permission='guillotina.AccessContent',
-    name='@raise-http-exception')
+    context=IApplication, method="GET", permission="guillotina.AccessContent", name="@raise-http-exception"
+)
 @configure.service(
-    context=IApplication, method='POST', permission='guillotina.AccessContent',
-    name='@raise-http-exception')
+    context=IApplication, method="POST", permission="guillotina.AccessContent", name="@raise-http-exception"
+)
 async def raise_http_exception(context, request):
     raise HTTPUnprocessableEntity()
 
@@ -243,25 +205,23 @@ class ITestAsyncUtility(IAsyncUtility):
 @configure.utility(provides=ITestAsyncUtility)
 class AsyncUtility:
     def __init__(self, settings=None, loop=None):
-        self.state = 'init'
+        self.state = "init"
 
     async def initialize(self):
-        self.state = 'initialize'
+        self.state = "initialize"
 
     async def finalize(self):
-        self.state = 'finalize'
+        self.state = "finalize"
 
 
 @configure.service(
-    context=IApplication, method='GET', permission='guillotina.AccessContent',
-    name='@match/{foo}/{bar}')
+    context=IApplication, method="GET", permission="guillotina.AccessContent", name="@match/{foo}/{bar}"
+)
 async def matching_service(context, request):
     return request.matchdict
 
 
-@configure.adapter(
-    for_=Interface,
-    provides=IIDGenerator)
+@configure.adapter(for_=Interface, provides=IIDGenerator)
 class IDGenerator(object):
     """
     Test id generator
@@ -272,11 +232,11 @@ class IDGenerator(object):
 
     def __call__(self, data):
 
-        if 'bad-id' in data:
-            return data['bad-id']
+        if "bad-id" in data:
+            return data["bad-id"]
 
-        if 'custom-id' in data:
-            return data['custom-id']
+        if "custom-id" in data:
+            return data["custom-id"]
 
 
 class IMemoryFileField(IFileField):
@@ -289,9 +249,7 @@ class IInMemoryCloudFile(IFile):
     """
 
 
-@configure.adapter(
-    for_=(dict, IMemoryFileField),
-    provides=IJSONToValue)
+@configure.adapter(for_=(dict, IMemoryFileField), provides=IJSONToValue)
 def dictfile_converter(value, field):
     return MemoryFile(**value)
 
@@ -319,9 +277,7 @@ class MemoryFile(BaseCloudFile):
 _tmp_files: typing.Dict = {}
 
 
-@configure.adapter(
-    for_=(IResource, IRequest, IMemoryFileField),
-    provides=IExternalFileStorageManager)
+@configure.adapter(for_=(IResource, IRequest, IMemoryFileField), provides=IExternalFileStorageManager)
 class InMemoryFileManager:
 
     file_class = MemoryFile
@@ -335,23 +291,20 @@ class InMemoryFileManager:
         if uri is None:
             file = self.field.get(self.field.context or self.context)
             uri = file.uri
-        with open(_tmp_files[uri], 'rb') as fi:
+        with open(_tmp_files[uri], "rb") as fi:
             chunk = fi.read(1024)
             while chunk:
                 yield chunk
                 chunk = fi.read(1024)
 
     async def start(self, dm):
-        upload_file_id = dm.get('upload_file_id')
+        upload_file_id = dm.get("upload_file_id")
         if upload_file_id is not None:
             await self.delete_upload(upload_file_id)
 
         upload_file_id = generate_key(self.context)
         _tmp_files[upload_file_id] = tempfile.mkstemp()[1]
-        await dm.update(
-            _chunks=0,
-            upload_file_id=upload_file_id
-        )
+        await dm.update(_chunks=0, upload_file_id=upload_file_id)
 
     async def delete_upload(self, uri):
         if uri in _tmp_files:
@@ -361,9 +314,9 @@ class InMemoryFileManager:
 
     async def append(self, dm, iterable, offset) -> int:
         count = 0
-        file_id = dm.get('upload_file_id')
-        chunk_count = dm.get('_chunks')
-        with open(_tmp_files[file_id], 'ab') as fi:
+        file_id = dm.get("upload_file_id")
+        chunk_count = dm.get("_chunks")
+        with open(_tmp_files[file_id], "ab") as fi:
             async for chunk in iterable:
                 if chunk:
                     fi.write(chunk)
@@ -373,10 +326,7 @@ class InMemoryFileManager:
         return count
 
     async def finish(self, dm):
-        await dm.update(
-            uri=dm.get('upload_file_id'),
-            upload_file_id=None
-        )
+        await dm.update(uri=dm.get("upload_file_id"), upload_file_id=None)
 
     async def exists(self):
         file = self.field.get(self.field.context or self.context)
@@ -390,10 +340,10 @@ class InMemoryFileManager:
         copyfile(_tmp_files[file.uri], _tmp_files[new_uri])
         await to_dm.finish(
             values={
-                'content_type': file.content_type,
-                'size': file.size,
-                'uri': new_uri,
-                'filename': file.filename or 'unknown'
+                "content_type": file.content_type,
+                "size": file.size,
+                "uri": new_uri,
+                "filename": file.filename or "unknown",
             }
         )
 
@@ -406,6 +356,6 @@ class InMemoryFileField(Object):
     schema = IInMemoryCloudFile
 
     def __init__(self, **kw):
-        if 'schema' in kw:
-            self.schema = kw.pop('schema')
+        if "schema" in kw:
+            self.schema = kw.pop("schema")
         super(InMemoryFileField, self).__init__(schema=self.schema, **kw)

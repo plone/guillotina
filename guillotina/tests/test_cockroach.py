@@ -8,8 +8,8 @@ import pytest
 
 
 pytestmark = pytest.mark.skipif(
-    os.environ.get('DATABASE') != 'cockroachdb',
-    reason="These tests are only for cockroach")
+    os.environ.get("DATABASE") != "cockroachdb", reason="These tests are only for cockroach"
+)
 
 
 async def test_creates_vacuum_task(cockroach_storage):
@@ -64,10 +64,10 @@ async def test_deleting_parent_deletes_children(cockroach_storage):
         tm = TransactionManager(storage)
         txn = await tm.begin()
 
-        folder = create_content(Folder, 'Folder')
+        folder = create_content(Folder, "Folder")
         txn.register(folder)
         ob = create_content()
-        await folder.async_set('foobar', ob)
+        await folder.async_set("foobar", ob)
 
         assert len(txn.modified) == 2
 

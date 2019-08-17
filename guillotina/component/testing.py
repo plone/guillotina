@@ -20,14 +20,19 @@ import guillotina.component.event
 class PlacelessSetup(object):
     def cleanUp(self):
         from guillotina.component.globalregistry import base
-        base.__init__('base')
+
+        base.__init__("base")
+
     def setUp(self):
         self.cleanUp()
+
     def tearDown(self):
         self.cleanUp()
 
+
 def setUp(test=None):
     PlacelessSetup().setUp()
+
 
 def tearDown(test=None):
     PlacelessSetup().tearDown()

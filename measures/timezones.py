@@ -28,39 +28,39 @@ ITERATIONS = 1000000
 
 
 async def run1():
-    print('Test local timezone usage')
+    print("Test local timezone usage")
     start = time.time()
     for _ in range(ITERATIONS):
         datetime.now(tz=tz.tzlocal())
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run2():
-    print('Test utz timezone usage')
+    print("Test utz timezone usage")
     start = time.time()
     for _ in range(ITERATIONS):
         datetime.now(tz=tz.tzutc())
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run3():
-    print('Test no timezone now()')
+    print("Test no timezone now()")
     start = time.time()
     for _ in range(ITERATIONS):
         datetime.now()
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run4():
-    print('Test no timezone utcnow()')
+    print("Test no timezone utcnow()")
     start = time.time()
     for _ in range(ITERATIONS):
         datetime.utcnow()
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run():

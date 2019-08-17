@@ -137,25 +137,16 @@ from .views import IView  # noqa
 from .catalog import ICatalogDataAdapter  # noqa; noqa
 
 
-DEFAULT_ADD_PERMISSION = 'guillotina.AddContent'
-DEFAULT_READ_PERMISSION = 'guillotina.ViewContent'
-DEFAULT_WRITE_PERMISSION = 'guillotina.ManageContent'
+DEFAULT_ADD_PERMISSION = "guillotina.AddContent"
+DEFAULT_READ_PERMISSION = "guillotina.ViewContent"
+DEFAULT_WRITE_PERMISSION = "guillotina.ManageContent"
 
-WRITING_VERBS = ['POST', 'PUT', 'PATCH', 'DELETE']
+WRITING_VERBS = ["POST", "PUT", "PATCH", "DELETE"]
 
-ACTIVE_LAYERS_KEY = 'guillotina.interfaces.registry.ILayers.active_layers'
-ADDONS_KEY = 'guillotina.registry.IAddons.enabled'
+ACTIVE_LAYERS_KEY = "guillotina.interfaces.registry.ILayers.active_layers"
+ADDONS_KEY = "guillotina.registry.IAddons.enabled"
 
-INHERIT_KEY = 'Inheritance'
+INHERIT_KEY = "Inheritance"
 
 # Attributes not allowed in deserialization payloads
-RESERVED_ATTRS = (
-    '__name__',
-    '__behaviors__',
-    '__parent__',
-    '__acl__',
-    'id',
-    'parent',
-    'uuid',
-    'type_name'
-)
+RESERVED_ATTRS = ("__name__", "__behaviors__", "__parent__", "__acl__", "id", "parent", "uuid", "type_name")

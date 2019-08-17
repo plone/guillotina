@@ -6,32 +6,32 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
 
 
-logger = logging.getLogger('guillotina')
+logger = logging.getLogger("guillotina")
 
 
-async def commit(*, txn: typing.Optional[ITransaction]=None, warn=True) -> None:
-    '''
+async def commit(*, txn: typing.Optional[ITransaction] = None, warn=True) -> None:
+    """
     Commit the current active transaction.
 
     :param txn: transaction to commit
-    '''
+    """
     tm = None
     try:
         tm = get_tm()
     except AttributeError:
         if warn:
-            logger.warning('Could not locate transaction manager to commit', exc_info=True)
+            logger.warning("Could not locate transaction manager to commit", exc_info=True)
 
     if tm is not None:
         await tm.commit(txn=txn)
 
 
-async def abort(*, txn: typing.Optional[ITransaction]=None) -> None:
-    '''
+async def abort(*, txn: typing.Optional[ITransaction] = None) -> None:
+    """
     Abort the current active transaction.
 
     :param txn: transaction to abort
-    '''
+    """
     tm = None
     try:
         tm = get_tm()
@@ -61,14 +61,14 @@ def get_tm() -> typing.Optional[ITransactionManager]:
 
 
 def get_transaction() -> typing.Optional[ITransaction]:
-    '''
+    """
     Return the current active transaction.
-    '''
+    """
     return task_vars.txn.get()
 
 
 class transaction:  # noqa: N801
-    '''
+    """
     Execute a transaction as async context manager and
     automatically close connection after done.
 
@@ -81,10 +81,18 @@ class transaction:  # noqa: N801
     :param adopt_parent_txn: If this is a sub-transaction, use parent's registered objects
     :param execute_futures: Execute registered futures with transaction after done (defaults to true)
     :param read_only: Is this a read_only txn? (default to false)
-    '''
+    """
 
-    def __init__(self, *, db=None, tm=None, abort_when_done=False,
-                 adopt_parent_txn=False, execute_futures=True, read_only=False):
+    def __init__(
+        self,
+        *,
+        db=None,
+        tm=None,
+        abort_when_done=False,
+        adopt_parent_txn=False,
+        execute_futures=True,
+        read_only=False,
+    ):
         if db is not None and tm is None:
             tm = db.get_transaction_manager()
         self.tm = tm or get_tm()
@@ -121,15 +129,9 @@ class transaction:  # noqa: N801
             # where, we we're adopted those objects with this transaction
             if self.previous_txn != self.txn:
                 # try adopting currently registered objects
-                self.txn.modified = {
-                    **self.previous_txn.modified,
-                    **self.txn.modified}
-                self.txn.deleted = {
-                    **self.previous_txn.deleted,
-                    **self.txn.deleted}
-                self.txn.added = {
-                    **self.previous_txn.added,
-                    **self.txn.added}
+                self.txn.modified = {**self.previous_txn.modified, **self.txn.modified}
+                self.txn.deleted = {**self.previous_txn.deleted, **self.txn.deleted}
+                self.txn.added = {**self.previous_txn.added, **self.txn.added}
 
                 self.adopt_objects(self.previous_txn.modified, self.txn)
                 self.adopt_objects(self.previous_txn.deleted, self.txn)
@@ -154,6 +156,7 @@ class transaction:  # noqa: N801
 
         if self.execute_futures:
             from guillotina.utils import execute
+
             execute.execute_futures()
 
 

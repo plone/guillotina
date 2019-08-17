@@ -50,7 +50,7 @@ class ConfigurationContext(object):
         super(ConfigurationContext, self).__init__()
         # on commit, we increment so we can override registered components
         self.count = 0
-        self.module_name = 'guillotina'
+        self.module_name = "guillotina"
 
     def begin(self, module_name):
         self.module_name = module_name
@@ -72,13 +72,16 @@ class ConfigurationContext(object):
 
         action = extra
 
-        action.update(dict(
-            discriminator=discriminator,
-            callable=callable,
-            args=args,
-            kw=kw,
-            module_name=self.module_name,
-            order=self.count))
+        action.update(
+            dict(
+                discriminator=discriminator,
+                callable=callable,
+                args=args,
+                kw=kw,
+                module_name=self.module_name,
+                order=self.count,
+            )
+        )
 
         self.actions.append(action)
 
@@ -99,11 +102,11 @@ class ConfigurationMachine(ConfigurationContext):
         """
         try:
             for action in resolve_conflicts(self.actions):
-                callable = action['callable']
+                callable = action["callable"]
                 if callable is None:
                     continue
-                args = action['args']
-                kw = action['kw']
+                args = action["args"]
+                kw = action["kw"]
                 try:
                     callable(*args, **kw)
                 except (KeyboardInterrupt, SystemExit):  # pragma NO COVER
@@ -113,8 +116,7 @@ class ConfigurationMachine(ConfigurationContext):
                         raise
                     t, v, tb = sys.exc_info()
                     try:
-                        reraise(ConfigurationExecutionError(t, v),
-                                None, tb)
+                        reraise(ConfigurationExecutionError(t, v), None, tb)
                     finally:
                         del t, v, tb
 
@@ -126,11 +128,12 @@ class ConfigurationMachine(ConfigurationContext):
 class ConfigurationExecutionError(ConfigurationError):
     """An error occurred during execution of a configuration action
     """
+
     def __init__(self, etype, evalue):
         self.etype, self.evalue = etype, evalue
 
     def __str__(self):  # pragma NO COVER
-        return '%s: %s\n  in:\n  %s' % (self.etype, self.evalue)
+        return "%s: %s\n  in:\n  %s" % (self.etype, self.evalue)
 
 
 ##############################################################################
@@ -154,8 +157,8 @@ def resolve_conflicts(actions):
         # executed before actions in a higher order.  Within an order,
         # actions are executed sequentially based on original action ordering
         # ("i").
-        order = action['order'] or 0
-        discriminator = action['discriminator']
+        order = action["order"] or 0
+        discriminator = action["discriminator"]
 
         # "ainfo" is a tuple of (order, i, action) where "order" is a
         # user-supplied grouping, "i" is an integer expressing the relative
@@ -188,15 +191,15 @@ def resolve_conflicts(actions):
         ainfo, rest = ainfos[0], ainfos[1:]
         output.append(ainfo)
         _, _, action = ainfo
-        order = action['order']
-        discriminator = action['discriminator']
-        base_module_name = action['module_name']
-        base_order = action['order']
+        order = action["order"]
+        discriminator = action["discriminator"]
+        base_module_name = action["module_name"]
+        base_order = action["order"]
 
         for _, _, action in rest:
-            if action['order'] <= base_order:
+            if action["order"] <= base_order:
                 L = conflicts.setdefault(discriminator, [base_module_name, base_order])  # noqa
-                L.append((action['module_name'], action['order']))
+                L.append((action["module_name"], action["order"]))
 
     if conflicts:
         raise ConfigurationConflictError(conflicts)
@@ -206,18 +209,17 @@ def resolve_conflicts(actions):
 
 
 class ConfigurationConflictError(ConfigurationError):
-
     def __init__(self, conflicts):
         self._conflicts = conflicts
 
     def __str__(self):  # pragma NO COVER
-        r = ['Conflicting configuration actions']
+        r = ["Conflicting configuration actions"]
         items = [(k, v) for k, v in self._conflicts.items()]
         items.sort()
         for discriminator, infos in items:
-            r.append('  For: %s' % (discriminator, ))
+            r.append("  For: %s" % (discriminator,))
             for info in infos:
-                for line in str(info).rstrip().split('\n'):
-                    r.append('    ' + line)
+                for line in str(info).rstrip().split("\n"):
+                    r.append("    " + line)
 
-        return '\n'.join(r)
+        return "\n".join(r)

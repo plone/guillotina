@@ -8,83 +8,71 @@ from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 
 
-logger = logging.getLogger('guillotina')
+logger = logging.getLogger("guillotina")
 
 
 async def _search(context, request, query):
     search = query_utility(ICatalogUtility)
     if search is None:
-        return {
-            'items_count': 0,
-            'member': []
-        }
+        return {"items_count": 0, "member": []}
 
     return await search.query(context, query)
 
 
 @configure.service(
-    context=IResource, method='GET', permission='guillotina.SearchContent', name='@search',
-    summary='Make search request',
+    context=IResource,
+    method="GET",
+    permission="guillotina.SearchContent",
+    name="@search",
+    summary="Make search request",
     responses={
         "200": {
             "description": "Search results",
             "content": {
                 "application/json": {
-                    "schema": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/SearchResults"
-                    }
+                    "schema": {"type": "object", "$ref": "#/components/schemas/SearchResults"}
                 }
-            }
+            },
         }
-    })
+    },
+)
 async def search_get(context, request):
     q = request.url.query.copy()
     return await _search(context, request, q)
 
 
 @configure.service(
-    context=IResource, method='POST',
-    permission='guillotina.RawSearchContent', name='@search',
-    summary='Make a complex search query',
-    requestBody={
-        'content': {
-            'application/json': {
-                "schema": {
-                    "properties": {}
-                }
-            }
-        }
-    },
+    context=IResource,
+    method="POST",
+    permission="guillotina.RawSearchContent",
+    name="@search",
+    summary="Make a complex search query",
+    requestBody={"content": {"application/json": {"schema": {"properties": {}}}}},
     responses={
         "200": {
             "description": "Search results",
             "content": {
                 "application/json": {
-                    "schema": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/SearchResults"
-                    }
+                    "schema": {"type": "object", "$ref": "#/components/schemas/SearchResults"}
                 }
-            }
+            },
         }
-    })
+    },
+)
 async def search_post(context, request):
     q = await request.json()
     return await _search(context, request, q)
 
 
 @configure.service(
-    context=IResource, method='POST',
-    permission='guillotina.ReindexContent', name='@catalog-reindex',
-    summary='Reindex entire container content',
-    responses={
-        "200": {
-            "description": "Successfully reindexed content"
-        }
-    })
+    context=IResource,
+    method="POST",
+    permission="guillotina.ReindexContent",
+    name="@catalog-reindex",
+    summary="Reindex entire container content",
+    responses={"200": {"description": "Successfully reindexed content"}},
+)
 class CatalogReindex(Service):
-
     def __init__(self, context, request, security=False):
         super(CatalogReindex, self).__init__(context, request)
         self._security_reindex = security
@@ -97,16 +85,14 @@ class CatalogReindex(Service):
 
 
 @configure.service(
-    context=IResource, method='POST',
-    permission='guillotina.ReindexContent', name='@async-catalog-reindex',
-    summary='Asynchronously reindex entire container content',
-    responses={
-        "200": {
-            "description": "Successfully initiated reindexing"
-        }
-    })
+    context=IResource,
+    method="POST",
+    permission="guillotina.ReindexContent",
+    name="@async-catalog-reindex",
+    summary="Asynchronously reindex entire container content",
+    responses={"200": {"description": "Successfully initiated reindexing"}},
+)
 class AsyncCatalogReindex(Service):
-
     def __init__(self, context, request, security=False):
         super(AsyncCatalogReindex, self).__init__(context, request)
         self._security_reindex = security
@@ -117,14 +103,13 @@ class AsyncCatalogReindex(Service):
 
 
 @configure.service(
-    context=IResource, method='POST',
-    permission='guillotina.ManageCatalog', name='@catalog',
-    summary='Initialize catalog',
-    responses={
-        "200": {
-            "description": "Successfully initialized catalog"
-        }
-    })
+    context=IResource,
+    method="POST",
+    permission="guillotina.ManageCatalog",
+    name="@catalog",
+    summary="Initialize catalog",
+    responses={"200": {"description": "Successfully initialized catalog"}},
+)
 async def catalog_post(context, request):
     search = query_utility(ICatalogUtility)
     await search.initialize_catalog(context)
@@ -132,14 +117,13 @@ async def catalog_post(context, request):
 
 
 @configure.service(
-    context=IResource, method='DELETE',
-    permission='guillotina.ManageCatalog', name='@catalog',
-    summary='Delete search catalog',
-    responses={
-        "200": {
-            "description": "Successfully deleted catalog"
-        }
-    })
+    context=IResource,
+    method="DELETE",
+    permission="guillotina.ManageCatalog",
+    name="@catalog",
+    summary="Delete search catalog",
+    responses={"200": {"description": "Successfully deleted catalog"}},
+)
 async def catalog_delete(context, request):
     search = query_utility(ICatalogUtility)
     await search.remove_catalog(context)

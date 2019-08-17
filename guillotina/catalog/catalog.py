@@ -30,7 +30,7 @@ from guillotina.utils import get_content_path
 from zope.interface import implementer
 
 
-logger = logging.getLogger('guillotina')
+logger = logging.getLogger("guillotina")
 
 global_principal_permission_setting = principal_permission_manager.get_setting
 global_roles_for_permission = role_permission_manager.get_roles_for_permission
@@ -38,25 +38,21 @@ global_roles_for_permission = role_permission_manager.get_roles_for_permission
 
 @implementer(ICatalogUtility)
 class DefaultSearchUtility:
-
     async def initialize(self, app):
-        '''
+        """
         initialization
-        '''
+        """
 
     async def search(self, container: IContainer, query: typing.Any):
-        '''
+        """
         Search parsed query
-        '''
-        return {
-            'member': [],
-            'items_count': 0
-        }
+        """
+        return {"member": [], "items_count": 0}
 
     async def query(self, context: IBaseObject, query: typing.Any):
-        '''
+        """
         Raw search query, uses parser to transform query
-        '''
+        """
         parsed_query = parse_query(context, query, self)
         container = find_container(context)
         if container is not None:
@@ -67,15 +63,12 @@ class DefaultSearchUtility:
         """
         Search aggregation
         """
-        return {
-            'member': [],
-            'items_count': 0
-        }
+        return {"member": [], "items_count": 0}
 
     async def query_aggregation(self, context: IBaseObject, query: typing.Any):
-        '''
+        """
         Raw search query, uses parser to transform query
-        '''
+        """
         parsed_query = parse_query(context, query, self)
         container = find_container(context)
         if container is not None:
@@ -117,33 +110,26 @@ class DefaultSearchUtility:
         return data
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=ISecurityInfo)
+@configure.adapter(for_=IResource, provides=ISecurityInfo)
 class DefaultSecurityInfoAdapter(object):
-
     def __init__(self, content):
         self.content = content
 
     def __call__(self):
         """ access_users and access_roles """
         return {
-            'path': get_content_path(self.content),
-            'depth': get_content_depth(self.content),
-            'parent_uuid': getattr(
-                getattr(self.content, '__parent__', None), 'uuid', None),
-            'access_users': get_principals_with_access_content(self.content),
-            'access_roles': get_roles_with_access_content(self.content),
-            'type_name': self.content.type_name,
-            'tid': self.content.__serial__
+            "path": get_content_path(self.content),
+            "depth": get_content_depth(self.content),
+            "parent_uuid": getattr(getattr(self.content, "__parent__", None), "uuid", None),
+            "access_users": get_principals_with_access_content(self.content),
+            "access_roles": get_roles_with_access_content(self.content),
+            "type_name": self.content.type_name,
+            "tid": self.content.__serial__,
         }
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=ICatalogDataAdapter)
+@configure.adapter(for_=IResource, provides=ICatalogDataAdapter)
 class DefaultCatalogDataAdapter(object):
-
     def __init__(self, content):
         self.content = content
         self.attempts = []  # prevent indexing same data twice
@@ -170,10 +156,7 @@ class DefaultCatalogDataAdapter(object):
 
     async def __call__(self, indexes=None, schemas=None):
         # For each type
-        values = {
-            'type_name': self.content.type_name,
-            'tid': self.content.__serial__
-        }
+        values = {"type_name": self.content.type_name, "tid": self.content.__serial__}
         if schemas is None:
             schemas = iter_schemata(self.content)
 
@@ -187,7 +170,7 @@ class DefaultCatalogDataAdapter(object):
 
             loaded = False
             for field_name, index_data in merged_tagged_value_dict(schema, index.key).items():
-                index_name = index_data.get('index_name', field_name)
+                index_name = index_data.get("index_name", field_name)
                 if index_name in values or index_name in self.attempts:
                     # you can override indexers so we do not want to index
                     # the same value more than once
@@ -198,16 +181,21 @@ class DefaultCatalogDataAdapter(object):
                 try:
                     # accessors we always reindex since we can't know if updated
                     # from the indexes param--they are "fake" like indexes, not fields
-                    if 'accessor' in index_data:
-                        if (indexes is None or not index_data.get('fields') or
-                                (len(set(index_data.get('fields', [])) & set(indexes)) > 0)):
+                    if "accessor" in index_data:
+                        if (
+                            indexes is None
+                            or not index_data.get("fields")
+                            or (len(set(index_data.get("fields", [])) & set(indexes)) > 0)
+                        ):
                             if not loaded:
                                 await self.load_behavior(behavior)
                                 loaded = True
-                            values[index_name] = await apply_coroutine(
-                                index_data['accessor'], behavior)
-                    elif (indexes is None or field_name in indexes or
-                            isinstance(getattr(type(self.content), field_name, None), property)):
+                            values[index_name] = await apply_coroutine(index_data["accessor"], behavior)
+                    elif (
+                        indexes is None
+                        or field_name in indexes
+                        or isinstance(getattr(type(self.content), field_name, None), property)
+                    ):
                         if not loaded:
                             await self.load_behavior(behavior)
                             loaded = True
@@ -218,8 +206,11 @@ class DefaultCatalogDataAdapter(object):
                     pass
 
             for metadata_name in merged_tagged_value_list(schema, metadata.key):
-                if (indexes is not None and metadata_name not in indexes and
-                        not isinstance(getattr(type(self.content), metadata_name, None), property)):
+                if (
+                    indexes is not None
+                    and metadata_name not in indexes
+                    and not isinstance(getattr(type(self.content), metadata_name, None), property)
+                ):
                     # in this case, properties are also dynamic so we have to make sure
                     # to allow for them to be reindexed every time.
                     continue  # skip

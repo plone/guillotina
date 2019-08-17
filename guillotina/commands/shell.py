@@ -13,7 +13,6 @@ from guillotina import utils
 
 
 class ShellHelpers:
-
     def __init__(self, app, root, request):
         self._app = app
         self._root = root
@@ -38,14 +37,14 @@ class ShellHelpers:
         with self._active_txn:
             container = await self._active_db.async_get(container_id)
             if container is None:
-                raise Exception('Container not found')
+                raise Exception("Container not found")
             task_vars.container.set(container)
             self._active_container = container
             return container
 
     async def commit(self):
         if self._active_tm is None:
-            raise Exception('No active transaction manager')
+            raise Exception("No active transaction manager")
         await self._active_tm.commit(txn=self._active_txn)
         self._request.execute_futures()
         self._active_txn = await self._active_tm.begin()
@@ -53,16 +52,16 @@ class ShellHelpers:
 
     async def abort(self):
         if self._active_tm is None:
-            raise Exception('No active transaction manager')
+            raise Exception("No active transaction manager")
         await self._active_tm.abort(txn=self._active_txn)
         self._active_txn = await self._active_tm.begin()
         return self._active_txn
 
 
 class ShellCommand(Command):
-    description = 'Guillotina server shell'
+    description = "Guillotina server shell"
     loop = None
-    banner = '''
+    banner = """
 guillotina interactive shell
 ==============================
 
@@ -103,18 +102,18 @@ Configured databases
 
 {}
 
-'''
+"""
 
     async def get_banner(self):
         db_ids = []
         async for db in utils.iter_databases():
-            db_ids.append('- ' + db.id)
+            db_ids.append("- " + db.id)
 
-        return self.banner.format('\n'.join(db_ids))
+        return self.banner.format("\n".join(db_ids))
 
     def run(self, arguments, settings, app):
-        app_settings['root_user']['password'] = TESTING_SETTINGS['root_user']['password']
-        root = get_utility(IApplication, name='root')
+        app_settings["root_user"]["password"] = TESTING_SETTINGS["root_user"]["password"]
+        root = get_utility(IApplication, name="root")
         request = get_mocked_request()
         login()
         helpers = ShellHelpers(app, root, request)
@@ -129,9 +128,10 @@ Configured databases
             from traitlets.config.loader import Config
         except ImportError:
             sys.stderr.write(
-                'You must install ipython for the '
-                'shell command to work.\n'
-                'Use `pip install ipython` to install ipython.\n')
+                "You must install ipython for the "
+                "shell command to work.\n"
+                "Use `pip install ipython` to install ipython.\n"
+            )
             return 1
 
         cfg = Config()

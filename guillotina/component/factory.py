@@ -26,7 +26,7 @@ class Factory(object):
     factories for classes, functions and other objects.
     """
 
-    def __init__(self, callable, title='', description='', interfaces=None):
+    def __init__(self, callable, title="", description="", interfaces=None):
         self._callable = callable
         self.title = title
         self.description = description
@@ -38,9 +38,9 @@ class Factory(object):
     def get_interfaces(self):
         if self._interfaces is not None:
             spec = Implements(*self._interfaces)
-            spec.__name__ = getattr(self._callable, '__name__', '[callable]')
+            spec.__name__ = getattr(self._callable, "__name__", "[callable]")
             return spec
         return implementedBy(self._callable)
 
-    def __repr__(self): #pragma NO COVER
-        return '<%s for %s>' % (self.__class__.__name__, repr(self._callable))
+    def __repr__(self):  # pragma NO COVER
+        return "<%s for %s>" % (self.__class__.__name__, repr(self._callable))

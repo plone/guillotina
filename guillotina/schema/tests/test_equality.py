@@ -16,21 +16,15 @@ import unittest
 
 
 class FieldEqualityTests(unittest.TestCase):
-
     def test_equality(self):
 
         from guillotina.schema import Int  # noqa
         from guillotina.schema import Text  # noqa
 
-        equality = [
-            'Text(title="Foo", description="Bar")',
-            'Int(title="Foo", description="Bar")',
-        ]
+        equality = ['Text(title="Foo", description="Bar")', 'Int(title="Foo", description="Bar")']
         for text in equality:
             self.assertEqual(eval(text), eval(text))
 
 
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(FieldEqualityTests),
-        ))
+    return unittest.TestSuite((unittest.makeSuite(FieldEqualityTests),))

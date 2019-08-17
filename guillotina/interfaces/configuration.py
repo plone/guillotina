@@ -3,9 +3,9 @@ from zope.interface import Interface
 
 
 class IDatabaseConfigurationFactory(Interface):
-    '''
+    """
     Factory to create database object
-    '''
+    """
 
 
 class IConfigurationContext(Interface):
@@ -18,16 +18,18 @@ class IConfigurationContext(Interface):
     """
 
     package = BytesLine(
-        title='The current package name',
+        title="The current package name",
         description="""\
           This is the name of the package containing the configuration
           file being executed. If the configuration file was not
           included by package, then this is None.
           """,
-        required=False)
+        required=False,
+    )
 
-    def action(discriminator, callable, args=None, kw=None, order=0,  # noqa: N805
-               includepath=None, info=None):
+    def action(
+        discriminator, callable, args=None, kw=None, order=0, includepath=None, info=None  # noqa: N805
+    ):
         """Record a configuration action
 
         The job of most directives is to compute actions for later

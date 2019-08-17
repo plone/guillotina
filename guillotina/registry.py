@@ -7,7 +7,7 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 
 
-REGISTRY_DATA_KEY = '_registry'
+REGISTRY_DATA_KEY = "_registry"
 
 
 class RecordsProxy(object):
@@ -22,45 +22,42 @@ class RecordsProxy(object):
     """
 
     def __init__(self, context, iface, prefix=None):
-        self.__dict__['records'] = context
-        self.__dict__['schema'] = iface
+        self.__dict__["records"] = context
+        self.__dict__["schema"] = iface
         if prefix is not None:
-            self.__dict__['prefix'] = prefix + '.'
+            self.__dict__["prefix"] = prefix + "."
         else:
-            self.__dict__['prefix'] = iface.__identifier__ + '.'
+            self.__dict__["prefix"] = iface.__identifier__ + "."
         alsoProvides(self, iface)
 
     def __getitem__(self, name):
-        if name not in self.__dict__['schema']:
+        if name not in self.__dict__["schema"]:
             raise KeyError(name)
 
-        records = self.__dict__['records']
-        key_name = self.__dict__['prefix'] + name
+        records = self.__dict__["records"]
+        key_name = self.__dict__["prefix"] + name
         if key_name not in records:
-            return self.__dict__['schema'][name].missing_value
+            return self.__dict__["schema"][name].missing_value
         return records[key_name]
 
     def __setitem__(self, name, value):
-        if name not in self.__dict__['schema']:
+        if name not in self.__dict__["schema"]:
             super(RecordsProxy, self).__setattr__(name, value)
         else:
-            prefixed_name = self.__dict__['prefix'] + name
-            self.__dict__['records'][prefixed_name] = value
-            self.__dict__['records'].register()  # make sure we write this obj
+            prefixed_name = self.__dict__["prefix"] + name
+            self.__dict__["records"][prefixed_name] = value
+            self.__dict__["records"].register()  # make sure we write this obj
 
 
 @implementer(IRegistry, IBaseObject)
 class Registry(AnnotationData):
 
-    __name__ = '_registry'
-    type_name = 'Registry'
+    __name__ = "_registry"
+    type_name = "Registry"
 
     def __repr__(self):
-        path = '/'.join([name or 'n/a' for name in get_physical_path(self)])
-        return "<Registry at {path} by {mem} >".format(
-            type=self.type_name,
-            path=path,
-            mem=id(self))
+        path = "/".join([name or "n/a" for name in get_physical_path(self)])
+        return "<Registry at {path} by {mem} >".format(type=self.type_name, path=path, mem=id(self))
 
     def get(self, name, default=None):
         try:

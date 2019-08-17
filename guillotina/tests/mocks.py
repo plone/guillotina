@@ -12,9 +12,9 @@ from zope.interface import implementer
 
 
 class MockDBTransaction:
-    '''
+    """
     a db transaction is different than a transaction from guillotina
-    '''
+    """
 
     def __init__(self, storage, trns):
         self._storage = storage
@@ -31,11 +31,11 @@ class MockTransaction:
         self.modified = {}
         self.request = None
         self._strategy = query_adapter(
-            self, ITransactionStrategy,
-            name=manager._storage._transaction_strategy)
+            self, ITransactionStrategy, name=manager._storage._transaction_strategy
+        )
         self._cache = DummyCache(self)
         self._lock = asyncio.Lock()
-        self._status = 'started'
+        self._status = "started"
         self._db_conn = None
         self.storage = MockStorage()
 
@@ -65,8 +65,8 @@ class MockTransaction:
         return self
 
     def __exit__(self, *args):
-        '''
-        '''
+        """
+        """
 
 
 @implementer(IStorage)
@@ -74,11 +74,11 @@ class MockStorage:
 
     _cache: dict = {}
     _read_only = False
-    _transaction_strategy = 'resolve'
+    _transaction_strategy = "resolve"
     _options: dict = {}
     supports_unique_constraints = False
 
-    def __init__(self, transaction_strategy='resolve'):
+    def __init__(self, transaction_strategy="resolve"):
         self._transaction_strategy = transaction_strategy
         self._transaction = None
         self._objects = {}
@@ -86,7 +86,7 @@ class MockStorage:
         self._hits = 0
         self._misses = 0
         self._stored = 0
-        self._objects_table_name = 'objects'
+        self._objects_table_name = "objects"
 
     async def get_annotation(self, trns, oid, id):
         return None
@@ -110,7 +110,7 @@ class MockStorage:
     async def get_child(self, txn, container_uid, key):
         if container_uid not in self._objects:
             return
-        children = self._objects[container_uid]['children']
+        children = self._objects[container_uid]["children"]
         if key in children:
             oid = children[key]
             if oid in self._objects:
@@ -119,19 +119,19 @@ class MockStorage:
     def store(self, ob):
         writer = IWriter(ob)
         self._objects[ob.__uuid__] = {
-            'state': writer.serialize(),
-            'zoid': ob.__uuid__,
-            'tid': 1,
-            'id': writer.id,
-            'children': self._objects.get(ob.__uuid__, {}).get('children', {})
+            "state": writer.serialize(),
+            "zoid": ob.__uuid__,
+            "tid": 1,
+            "id": writer.id,
+            "children": self._objects.get(ob.__uuid__, {}).get("children", {}),
         }
         if ob.__parent__ and ob.__parent__.__uuid__ in self._objects:
-            self._objects[ob.__parent__.__uuid__]['children'][ob.id] = ob.__uuid__
+            self._objects[ob.__parent__.__uuid__]["children"][ob.id] = ob.__uuid__
 
 
 class MockTransactionManager:
     _storage = None
-    db_id = 'root'
+    db_id = "root"
 
     def __init__(self, storage=None):
         if storage is None:
@@ -154,12 +154,11 @@ class MockTransactionManager:
         task_vars.tm.set(self)
 
     def __exit__(self, *args):
-        '''
-        '''
+        """
+        """
 
 
 class FakeConnection:
-
     def __init__(self):
         self.containments = {}
         self.refs = {}
@@ -174,4 +173,3 @@ class FakeConnection:
         ob.__uuid__ = uuid.uuid4().hex
         self.refs[ob.__uuid__] = ob
         self.containments[ob.__uuid__] = []
-

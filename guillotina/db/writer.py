@@ -12,13 +12,11 @@ from guillotina.utils import find_container
 from guillotina.utils import get_dotted_name
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=IJSONDBSerializer)
+@configure.adapter(for_=IResource, provides=IJSONDBSerializer)
 class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
-    '''
+    """
     Default serializer just serializer catalog data
-    '''
+    """
 
     def get_container_id(self):
         container = find_container(self.content)
@@ -27,13 +25,11 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
 
     async def __call__(self):
         data = await super().__call__()
-        data['container_id'] = self.get_container_id()
+        data["container_id"] = self.get_container_id()
         return data
 
 
-@configure.adapter(
-    for_=(IBaseObject),
-    provides=IWriter)
+@configure.adapter(for_=(IBaseObject), provides=IWriter)
 class Writer(object):
 
     resource = False
@@ -46,7 +42,7 @@ class Writer(object):
 
     @property
     def of(self):
-        return getattr(self._obj, '__of__', None)
+        return getattr(self._obj, "__of__", None)
 
     @property
     def type(self):
@@ -54,42 +50,40 @@ class Writer(object):
 
     @property
     def old_serial(self):
-        return getattr(self._obj, '__serial__', None)
+        return getattr(self._obj, "__serial__", None)
 
     @property
     def part(self):
-        return getattr(self._obj, '__partition_id__', 0)
+        return getattr(self._obj, "__partition_id__", 0)
 
     def serialize(self):
         return pickle.dumps(self._obj, protocol=pickle.HIGHEST_PROTOCOL)
 
     @property
     def parent_id(self):
-        parent = getattr(self._obj, '__parent__', None)
+        parent = getattr(self._obj, "__parent__", None)
         if parent is not None:
             return parent.__uuid__
 
     @property
     def id(self):
-        return getattr(self._obj, 'id', None)
+        return getattr(self._obj, "id", None)
 
 
-@configure.adapter(
-    for_=(IResource),
-    provides=IWriter)
+@configure.adapter(for_=(IResource), provides=IWriter)
 class ResourceWriter(Writer):
 
     resource = True
 
     @property
     def type(self):
-        if hasattr(self._obj, 'type_name'):
+        if hasattr(self._obj, "type_name"):
             return self._obj.type_name
         else:
             return get_dotted_name(self._obj)
 
     async def get_json(self):
-        if not app_settings.get('store_json', False):
+        if not app_settings.get("store_json", False):
             return {}
         adapter = query_adapter(self._obj, IJSONDBSerializer)
         if adapter is not None:

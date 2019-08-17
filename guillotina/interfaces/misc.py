@@ -3,25 +3,27 @@ from zope.interface import Interface
 
 
 class IRequest(Interface):
-    url = Attribute('')
-    path = Attribute('')
-    method = Attribute('')
-    resource = Attribute('traversed resource')
-    tail = Attribute('')
-    exc = Attribute('')
-    found_view = Attribute('')
-    view_name = Attribute('')
+    url = Attribute("")
+    path = Attribute("")
+    method = Attribute("")
+    resource = Attribute("traversed resource")
+    tail = Attribute("")
+    exc = Attribute("")
+    found_view = Attribute("")
+    view_name = Attribute("")
 
     def record(event_name) -> None:
-        '''
+        """
         record request event
-        '''
+        """
+
 
 class ILanguage(Interface):
     pass
 
 
 # Target interfaces on resolving
+
 
 class IRenderer(Interface):
     pass
@@ -36,12 +38,12 @@ class IAbsoluteURL(Interface):
 
 # Addon interface
 
-class IAddOn(Interface):
 
+class IAddOn(Interface):
     def install(cls, container, request):  # noqa: N805
-        '''
-        '''
+        """
+        """
 
     def uninstall(cls, container, request):  # noqa: N805
-        '''
-        '''
+        """
+        """

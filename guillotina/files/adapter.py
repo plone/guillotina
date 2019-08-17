@@ -17,10 +17,7 @@ from guillotina.response import HTTPPreconditionFailed
 import time
 
 
-@configure.adapter(
-    for_=IFileStorageManager,
-    provides=IUploadDataManager,
-    name='db')
+@configure.adapter(for_=IFileStorageManager, provides=IUploadDataManager, name="db")
 class DBDataManager:
 
     _data = None
@@ -38,41 +35,37 @@ class DBDataManager:
         return self.field.context or self.context
 
     async def load(self):
-        if not hasattr(self.context, '__uploads__'):
+        if not hasattr(self.context, "__uploads__"):
             self.context.__uploads__ = {}
         if self.field.__name__ not in self.context.__uploads__:
             self.context.__uploads__[self.field.__name__] = {}
         self._data = self.context.__uploads__[self.field.__name__]
 
     def protect(self):
-        if 'last_activity' in self._data:
+        if "last_activity" in self._data:
             # check for another active upload, fail if we're screwing with
             # someone else
-            if (time.time() - self._data['last_activity']) < self._timeout:
-                if self.request.headers.get('TUS-OVERRIDE-UPLOAD', '0') != '1':
-                    raise HTTPPreconditionFailed(
-                        content={
-                            'reason': 'There is already an active tusupload'
-                        })
+            if (time.time() - self._data["last_activity"]) < self._timeout:
+                if self.request.headers.get("TUS-OVERRIDE-UPLOAD", "0") != "1":
+                    raise HTTPPreconditionFailed(content={"reason": "There is already an active tusupload"})
 
     async def start(self):
         self.protect()
 
-        if '_blob' in self._data:
+        if "_blob" in self._data:
             # clean it
-            blob = self._data['_blob']
-            bfile = blob.open('r')
+            blob = self._data["_blob"]
+            bfile = blob.open("r")
             await bfile.async_del()
 
         self._data.clear()
         self.context.register()
-        self._data['last_activity'] = time.time()
+        self._data["last_activity"] = time.time()
 
-        await notify(
-            FileUploadStartedEvent(self.context, field=self.field, dm=self))
+        await notify(FileUploadStartedEvent(self.context, field=self.field, dm=self))
 
     async def update(self, **kwargs):
-        kwargs['last_activity'] = time.time()
+        kwargs["last_activity"] = time.time()
         self._data.update(kwargs)
         self.context.register()
 
@@ -89,17 +82,15 @@ class DBDataManager:
         if file is None:
             file = self.file_storage_manager.file_class()
         else:
-            if getattr(file, '_blob', None):
+            if getattr(file, "_blob", None):
                 cleanup = IFileCleanup(self.context, None)
                 if cleanup is None or cleanup.should_clean(file=file):
-                    bfile = file._blob.open('r')
+                    bfile = file._blob.open("r")
                     await bfile.async_del()
                 else:
-                    file._previous_blob = getattr(file, '_blob', None)
+                    file._previous_blob = getattr(file, "_blob", None)
 
-        await notify(
-            FileBeforeUploadFinishedEvent(self.context, field=self.field,
-                                          file=file, dm=self))
+        await notify(FileBeforeUploadFinishedEvent(self.context, field=self.field, file=file, dm=self))
 
         # save previous data on file.
         # we do this instead of creating a new file object on every
@@ -117,7 +108,7 @@ class DBDataManager:
         for key, value in values.items():
             setattr(file, key, value)
 
-        if self.field.__name__ in getattr(self.context, '__uploads__', {}):
+        if self.field.__name__ in getattr(self.context, "__uploads__", {}):
             del self.context.__uploads__[self.field.__name__]
             self.context.register()
 
@@ -126,23 +117,19 @@ class DBDataManager:
         except AttributeError:
             self.field.context.register()
 
-        await notify(
-            FileUploadFinishedEvent(self.context, field=self.field,
-                                    file=file, dm=self))
+        await notify(FileUploadFinishedEvent(self.context, field=self.field, file=file, dm=self))
         return file
 
     @property
     def content_type(self):
-        return guess_content_type(
-            self._data.get('content_type'),
-            self._data.get('filename'))
+        return guess_content_type(self._data.get("content_type"), self._data.get("filename"))
 
     @property
     def size(self):
-        return self._data.get('size', 0)
+        return self._data.get("size", 0)
 
     def get_offset(self):
-        return self._data.get('offset', 0)
+        return self._data.get("offset", 0)
 
     def get(self, name, default=None):
         if self._data is None:
@@ -150,10 +137,7 @@ class DBDataManager:
         return self._data.get(name, default)
 
 
-@configure.adapter(
-    for_=IResource,
-    provides=IFileCleanup
-)
+@configure.adapter(for_=IResource, provides=IFileCleanup)
 class DefaultFileCleanup:
     def __init__(self, context):
         pass
@@ -162,9 +146,7 @@ class DefaultFileCleanup:
         return True
 
 
-@configure.adapter(
-    for_=(IResource, IRequest, IDBFileField),
-    provides=IFileStorageManager)
+@configure.adapter(for_=(IResource, IRequest, IDBFileField), provides=IFileStorageManager)
 class DBFileStorageManagerAdapter:
 
     file_class = DBFile
@@ -193,10 +175,10 @@ class DBFileStorageManagerAdapter:
             yield chunk
 
     async def append(self, dm, iterable, offset) -> int:
-        blob = dm.get('_blob')
-        mode = 'a'
+        blob = dm.get("_blob")
+        mode = "a"
         if blob.chunks == 0:
-            mode = 'w'
+            mode = "w"
         bfile = blob.open(mode)
         size = 0
         async for chunk in iterable:

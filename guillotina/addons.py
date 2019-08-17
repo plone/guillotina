@@ -23,20 +23,20 @@ class Addon(object):
 
 async def install(container, addon):
     request = get_current_request()
-    addon_config = app_settings['available_addons'][addon]
-    handler = addon_config['handler']
-    for dependency in addon_config['dependencies']:
+    addon_config = app_settings["available_addons"][addon]
+    handler = addon_config["handler"]
+    for dependency in addon_config["dependencies"]:
         await install(container, dependency)
     await apply_coroutine(handler.install, container, request)
     registry = task_vars.registry.get()
     config = registry.for_interface(IAddons)
-    config['enabled'] |= {addon}
+    config["enabled"] |= {addon}
 
 
 async def uninstall(container, addon):
     request = get_current_request()
     registry = task_vars.registry.get()
     config = registry.for_interface(IAddons)
-    handler = app_settings['available_addons'][addon]['handler']
+    handler = app_settings["available_addons"][addon]["handler"]
     await apply_coroutine(handler.uninstall, container, request)
-    config['enabled'] -= {addon}
+    config["enabled"] -= {addon}

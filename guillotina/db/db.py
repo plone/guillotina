@@ -10,8 +10,8 @@ class Root(Folder):
     __name__ = None
     __immutable_cache__ = True
     __db_id__ = None
-    type_name = 'GuillotinaDBRoot'
-    migration_version = '1.0.0'  # base version
+    type_name = "GuillotinaDBRoot"
+    migration_version = "1.0.0"  # base version
 
     def __init__(self, db_id):
         super().__init__()

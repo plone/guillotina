@@ -24,7 +24,7 @@ from .misc import get_current_request
 from .misc import list_or_dict_items
 
 
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 
 def get_content_path(content: IResource) -> str:
@@ -34,13 +34,17 @@ def get_content_path(content: IResource) -> str:
     :param content: object to get path from
     """
     parts = []
-    parent = getattr(content, '__parent__', None)
-    while content is not None and content.__name__ is not None and\
-            parent is not None and not IContainer.providedBy(content):
+    parent = getattr(content, "__parent__", None)
+    while (
+        content is not None
+        and content.__name__ is not None
+        and parent is not None
+        and not IContainer.providedBy(content)
+    ):
         parts.append(content.__name__)
         content = parent
-        parent = getattr(content, '__parent__', None)
-    return '/' + '/'.join(reversed(parts))
+        parent = getattr(content, "__parent__", None)
+    return "/" + "/".join(reversed(parts))
 
 
 def get_content_depth(content: IResource) -> int:
@@ -59,25 +63,25 @@ def iter_parents(content: IResource) -> typing.Iterator[IResource]:
 
     :param content: object to get path from
     """
-    content = getattr(content, '__parent__', None)
+    content = getattr(content, "__parent__", None)
     while content is not None:
         yield content
-        content = getattr(content, '__parent__', None)
+        content = getattr(content, "__parent__", None)
 
 
-_valid_id_characters = string.digits + string.ascii_lowercase + '.-_@$^()+ ='
+_valid_id_characters = string.digits + string.ascii_lowercase + ".-_@$^()+ ="
 
 
 def valid_id(_id):
     _id = _id.lower()
     # can't start with _
-    if not _id or _id[0] in ('_', '@'):
+    if not _id or _id[0] in ("_", "@"):
         return False
-    return _id == ''.join([l for l in _id if l in _valid_id_characters])
+    return _id == "".join([l for l in _id if l in _valid_id_characters])
 
 
 async def get_containers():
-    root = get_utility(IApplication, name='root')
+    root = get_utility(IApplication, name="root")
     for _id, db in root:
         if not IDatabase.providedBy(db):
             continue
@@ -94,7 +98,7 @@ async def get_containers():
                     try:
                         await tm.abort(txn=txn)
                     except Exception:
-                        logger.warn('Error aborting transaction', exc_info=True)
+                        logger.warn("Error aborting transaction", exc_info=True)
 
             for _, container in items.items():
                 with await tm.begin() as txn:
@@ -106,15 +110,15 @@ async def get_containers():
                         # there is no harm in aborting twice
                         await tm.abort(txn=txn)
                     except Exception:
-                        logger.warn('Error aborting transaction', exc_info=True)
+                        logger.warn("Error aborting transaction", exc_info=True)
 
 
 def get_owners(obj: IResource) -> list:
-    '''
+    """
     Return owners of an object
 
     :param obj: object to get path from
-    '''
+    """
     try:
         prinrole = IPrincipalRoleMap(obj)
     except TypeError:
@@ -122,42 +126,40 @@ def get_owners(obj: IResource) -> list:
     owners = []
     for user, roles in prinrole._bycol.items():
         for role in roles:
-            if role == 'guillotina.Owner':
+            if role == "guillotina.Owner":
                 owners.append(user)
-    if len(owners) == 0 and getattr(obj, '__parent__', None) is not None:
+    if len(owners) == 0 and getattr(obj, "__parent__", None) is not None:
         # owner can be parent if none found on current object
         return get_owners(obj.__parent__)
     return owners
 
 
 async def navigate_to(obj: IAsyncContainer, path: str):
-    '''
+    """
     Get a sub-object.
 
     :param obj: object to get path from
     :param path: relative path to object you want to retrieve
-    '''
+    """
     actual = obj
-    path_components = path.strip('/').split('/')
+    path_components = path.strip("/").split("/")
     for p in path_components:
-        if p != '':
+        if p != "":
             item = await actual.async_get(p)
             if item is None:
-                raise KeyError('No %s in %s' % (p, actual))
+                raise KeyError("No %s in %s" % (p, actual))
             else:
                 actual = item
     return actual
 
 
-def get_object_url(ob: IResource,
-                   request: IRequest=None,
-                   **kwargs) -> typing.Optional[str]:
-    '''
+def get_object_url(ob: IResource, request: IRequest = None, **kwargs) -> typing.Optional[str]:
+    """
     Generate full url of object.
 
     :param ob: object to get url for
     :param request: relative path to object you want to retrieve
-    '''
+    """
     if request is None:
         request = get_current_request()
     url_adapter = query_multi_adapter((ob, request), IAbsoluteURL)
@@ -167,42 +169,43 @@ def get_object_url(ob: IResource,
 
 
 async def get_object_by_uid(uid: str, txn=None) -> IBaseObject:
-    '''
+    """
     Get an object from an uid
 
     :param uid: Object id of object you need to retreive
     :param txn: Database transaction object. Will get current
                 transaction is not provided
-    '''
+    """
     if txn is None:
         from guillotina.transactions import get_transaction
+
         txn = get_transaction()
     result = txn._manager._hard_cache.get(uid, None)
     if result is None:
         result = await txn._get(uid)
 
-    if result['parent_id'] == TRASHED_ID:
+    if result["parent_id"] == TRASHED_ID:
         raise KeyError(uid)
 
-    obj = app_settings['object_reader'](result)
+    obj = app_settings["object_reader"](result)
     obj.__txn__ = txn
-    if result['parent_id']:
-        parent = await get_object_by_uid(result['parent_id'], txn)
+    if result["parent_id"]:
+        parent = await get_object_by_uid(result["parent_id"], txn)
         if parent is not None:
             obj.__parent__ = parent
         else:
-            raise KeyError(result['parent_id'])
+            raise KeyError(result["parent_id"])
     return obj
 
 
 async def get_behavior(ob, iface, create=False):
-    '''
+    """
     Generate behavior of object.
 
     :param ob: object to get behavior for
     :param interface: interface registered for behavior
     :param create: if behavior data empty, should we create it?
-    '''
+    """
     behavior = iface(ob, None)
     if behavior is None:
         return behavior
@@ -212,7 +215,7 @@ async def get_behavior(ob, iface, create=False):
 
 async def iter_databases(root=None):
     if root is None:
-        root = get_utility(IApplication, name='root')
+        root = get_utility(IApplication, name="root")
 
     loaded = []
 
@@ -229,8 +232,8 @@ async def iter_databases(root=None):
         last_checked = loaded[:]
 
         # from all dynamic storages
-        for _, config in list_or_dict_items(app_settings['storages']):
-            ctype = config.get('type', config['storage'])
+        for _, config in list_or_dict_items(app_settings["storages"]):
+            ctype = config.get("type", config["storage"])
             factory = get_adapter(root, IDatabaseManager, name=ctype, args=[config])
             for db_name in await factory.get_names():
                 if db_name in loaded:
@@ -241,21 +244,21 @@ async def iter_databases(root=None):
 
 
 async def get_database(db_id, root=None) -> IDatabase:
-    '''
+    """
     Get configured database
 
     :param db_id: configured database id
-    '''
+    """
     if root is None:
-        root = get_utility(IApplication, name='root')
+        root = get_utility(IApplication, name="root")
 
     if db_id in root:
         db = root[db_id]
         if IDatabase.providedBy(db):
             return db
 
-    for _, config in list_or_dict_items(app_settings['storages']):
-        ctype = config.get('type', config['storage'])
+    for _, config in list_or_dict_items(app_settings["storages"]):
+        ctype = config.get("type", config["storage"])
         factory = get_adapter(root, IDatabaseManager, name=ctype, args=[config])
         databases = await factory.get_names()
         if db_id in databases:
@@ -277,5 +280,5 @@ def get_full_content_path(ob) -> str:
             break
         else:
             parts.append(ob.__name__)
-            ob = getattr(ob, '__parent__', None)
-    return '/' + '/'.join(reversed(parts))
+            ob = getattr(ob, "__parent__", None)
+    return "/" + "/".join(reversed(parts))

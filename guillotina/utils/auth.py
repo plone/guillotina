@@ -33,6 +33,7 @@ def get_security_policy(user: Optional[IPrincipal] = None) -> ISecurityPolicy:
         user = get_authenticated_user()
         if user is None:
             from guillotina.auth.users import AnonymousUser
+
             user = AnonymousUser()
     security_policies = task_vars.security_policies.get()
     if security_policies is None:

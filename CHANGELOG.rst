@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Move to black code formatter
+  [vangheem]
+
 - Fix field.validate() crashes when providing invalid schema (for field of type Object)
   [masipcat]
 

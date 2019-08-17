@@ -19,38 +19,28 @@ ITERATIONS = 10000
 
 
 async def runit(type_name):
-    print(f'Test content serialization with {type_name}')
+    print(f"Test content serialization with {type_name}")
     request = get_current_request()
     txn = mocks.MockTransaction()
-    ob = await create_content(type_name, id='foobar')
+    ob = await create_content(type_name, id="foobar")
     ob.__txn__ = txn
-    deserializer = get_multi_adapter((ob, request),
-                                     IResourceDeserializeFromJson)
+    deserializer = get_multi_adapter((ob, request), IResourceDeserializeFromJson)
     data = {
-        'title': 'Foobar',
-        'guillotina.behaviors.dublincore.IDublinCore': {
-            'tags': ['foo', 'bar']
-        },
-        'measures.configuration.ITestBehavior1': {
-            'foobar': '123'
-        },
-        'measures.configuration.ITestBehavior2': {
-            'foobar': '123'
-        },
-        'measures.configuration.ITestBehavior3': {
-            'foobar': '123'
-        }
+        "title": "Foobar",
+        "guillotina.behaviors.dublincore.IDublinCore": {"tags": ["foo", "bar"]},
+        "measures.configuration.ITestBehavior1": {"foobar": "123"},
+        "measures.configuration.ITestBehavior2": {"foobar": "123"},
+        "measures.configuration.ITestBehavior3": {"foobar": "123"},
     }
     await deserializer(data, validate_all=True)
     start = time.time()
     for _ in range(ITERATIONS):
-        serializer = get_multi_adapter((ob, request),
-                                       IResourceSerializeToJson)
+        serializer = get_multi_adapter((ob, request), IResourceSerializeToJson)
         await serializer()
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run():
-    await runit('TestContent1')
-    await runit('TestContent6')
+    await runit("TestContent1")
+    await runit("TestContent6")

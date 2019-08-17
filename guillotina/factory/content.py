@@ -28,7 +28,7 @@ from zope.interface import alsoProvides
 from zope.interface import implementer
 
 
-logger = logging.getLogger('guillotina')
+logger = logging.getLogger("guillotina")
 
 
 @implementer(IApplication)
@@ -43,73 +43,64 @@ class ApplicationRoot(object):
         self._async_utilities = {}
         self._loop = loop
 
-    def add_async_utility(self, key: str, config: typing.Dict,
-                          loop: typing.Optional[asyncio.AbstractEventLoop]=None) -> typing.Optional[
-                              typing.Tuple[typing.Any, typing.Optional[asyncio.Future]]]:
+    def add_async_utility(
+        self, key: str, config: typing.Dict, loop: typing.Optional[asyncio.AbstractEventLoop] = None
+    ) -> typing.Optional[typing.Tuple[typing.Any, typing.Optional[asyncio.Future]]]:
         if key in self._async_utilities:
-            logger.warn(
-                f'Utility already registered {key}')
+            logger.warn(f"Utility already registered {key}")
             return None
 
-        interface = import_class(config['provides'])
-        factory = import_class(config['factory'])
+        interface = import_class(config["provides"])
+        factory = import_class(config["factory"])
         try:
-            utility_object = lazy_apply(
-                factory, config.get('settings', {}),
-                loop=loop or self._loop)
+            utility_object = lazy_apply(factory, config.get("settings", {}), loop=loop or self._loop)
         except Exception:
-            logger.error('Error initializing utility {}'.format(repr(factory)),
-                         exc_info=True)
+            logger.error("Error initializing utility {}".format(repr(factory)), exc_info=True)
             raise
         alsoProvides(utility_object, interface)
         kw = {}
-        if 'name' in config:
-            kw['name'] = config['name']
+        if "name" in config:
+            kw["name"] = config["name"]
         provide_utility(utility_object, interface, **kw)
-        if hasattr(utility_object, 'initialize'):
+        if hasattr(utility_object, "initialize"):
             func = lazy_apply(utility_object.initialize, app=self.app)
 
-            task = asyncio.ensure_future(
-                notice_on_error(key, func),
-                loop=loop or self._loop)
+            task = asyncio.ensure_future(notice_on_error(key, func), loop=loop or self._loop)
             self.add_async_task(key, task, config)
             return utility_object, task
         else:
-            logger.info(f'No initialize method found on {utility_object} object')
+            logger.info(f"No initialize method found on {utility_object} object")
             return None
 
     def add_async_task(self, ident: str, task: asyncio.Future, config: typing.Dict) -> None:
         if ident in self._async_utilities:
             raise KeyError("Already exist an async utility with this id")
-        self._async_utilities[ident] = {
-            'task': task,
-            'config': config
-        }
+        self._async_utilities[ident] = {"task": task, "config": config}
 
     def cancel_async_utility(self, ident: str):
         if ident in self._async_utilities:
-            if self._async_utilities[ident]['task'] is not None:
-                if not self._async_utilities[ident]['task'].done():
-                    self._async_utilities[ident]['task'].cancel()
+            if self._async_utilities[ident]["task"] is not None:
+                if not self._async_utilities[ident]["task"].done():
+                    self._async_utilities[ident]["task"].cancel()
         else:
             raise KeyError("Ident does not exist as utility")
 
     async def del_async_utility(self, key: str):
         self.cancel_async_utility(key)
-        config = self._async_utilities[key]['config']
-        interface = import_class(config['provides'])
-        if 'name' in config:
-            utility = get_utility(interface, name=config['name'])
+        config = self._async_utilities[key]["config"]
+        interface = import_class(config["provides"])
+        if "name" in config:
+            utility = get_utility(interface, name=config["name"])
         else:
             utility = get_utility(interface)
-        if hasattr(utility, 'finalize'):
+        if hasattr(utility, "finalize"):
             await lazy_apply(utility.finalize, app=self.app)
         gsm = get_global_components()
         gsm.unregisterUtility(utility, provided=interface)
         del self._async_utilities[key]
 
     def set_root_user(self, user):
-        password = user['password']
+        password = user["password"]
         if password:
             password = hash_password(password)
         self.root_user = RootUser(password)
@@ -142,17 +133,15 @@ class ApplicationRoot(object):
         if key in self._items:
             return self._items[key]
         # check configured storages, see if there is a database registered under this name...
-        for _, config in list_or_dict_items(app_settings['storages']):
-            manager = config.get('type', config['storage'])
-            factory = get_adapter(self, IDatabaseManager,
-                                  name=manager, args=[config])
+        for _, config in list_or_dict_items(app_settings["storages"]):
+            manager = config.get("type", config["storage"])
+            factory = get_adapter(self, IDatabaseManager, name=manager, args=[config])
             if await factory.exists(key):
                 return await factory.get_database(key)
 
 
 @implementer(IDatabase)
 class Database:
-
     def __init__(self, key, storage, klass=TransactionManager):
         """
         Create an object database.
@@ -179,13 +168,14 @@ class Database:
             await txn._strategy.retrieve_tid()
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
-                root = app_settings['object_reader'](root)
+                root = app_settings["object_reader"](root)
                 root.__txn__ = txn
                 if root.__db_id__ is None:
                     root.__db_id__ = self._database_name
                     await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
         except KeyError:
             from guillotina.db.db import Root
+
             root = Root(self._database_name)
             await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
         finally:

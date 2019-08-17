@@ -21,16 +21,21 @@ class Test_dispatch_utility_registration_event(unittest.TestCase):
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry import dispatch_utility_registration_event
+
         return dispatch_utility_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
+
         class _Registration(object):
             component = object()
+
         _EVENT = object()
         _handled = []
+
         def _handle(*args):
             _handled.append(args)
+
         with _Monkey(registry, handle=_handle):
             self._callFUT(_Registration(), _EVENT)
         self.assertEqual(_handled, [(_Registration.component, _EVENT)])
@@ -42,18 +47,23 @@ class Test_dispatch_adapter_registration_event(unittest.TestCase):
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry import dispatch_adapter_registration_event
+
         return dispatch_adapter_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
+
         class _Registration(object):
             def factory(self, *args, **kw):
                 pass
+
         _registration = _Registration()
         _EVENT = object()
         _handled = []
+
         def _handle(*args):
             _handled.append(args)
+
         with _Monkey(registry, handle=_handle):
             self._callFUT(_registration, _EVENT)
         self.assertEqual(_handled, [(_registration.factory, _EVENT)])
@@ -64,20 +74,24 @@ class Test_dispatch_subscription_adapter_registration_event(unittest.TestCase):
     from guillotina.component.testing import setUp, tearDown
 
     def _callFUT(self, *args, **kw):
-        from guillotina.component.registry \
-            import dispatch_subscription_adapter_registration_event
+        from guillotina.component.registry import dispatch_subscription_adapter_registration_event
+
         return dispatch_subscription_adapter_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
+
         class _Registration(object):
             def factory(self, *args, **kw):
                 pass
+
         _registration = _Registration()
         _EVENT = object()
         _handled = []
+
         def _handle(*args):
             _handled.append(args)
+
         with _Monkey(registry, handle=_handle):
             self._callFUT(_registration, _EVENT)
         self.assertEqual(_handled, [(_registration.factory, _EVENT)])
@@ -89,18 +103,23 @@ class Test_dispatch_handler_registration_event(unittest.TestCase):
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry import dispatch_handler_registration_event
+
         return dispatch_handler_registration_event(*args, **kw)
 
     def test_it(self):
         from guillotina.component import registry
+
         class _Registration(object):
             def handler(self, *args, **kw):
                 pass
+
         _registration = _Registration()
         _EVENT = object()
         _handled = []
+
         def _handle(*args):
             _handled.append(args)
+
         with _Monkey(registry, handle=_handle):
             self._callFUT(_registration, _EVENT)
         self.assertEqual(_handled, [(_registration.handler, _EVENT)])
@@ -121,10 +140,13 @@ class _Monkey(object):
         for key, value in self.to_restore.items():
             setattr(self.module, key, value)
 
+
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(Test_dispatch_utility_registration_event),
-        unittest.makeSuite(Test_dispatch_adapter_registration_event),
-        unittest.makeSuite(Test_dispatch_subscription_adapter_registration_event),
-        unittest.makeSuite(Test_dispatch_handler_registration_event),
-    ))
+    return unittest.TestSuite(
+        (
+            unittest.makeSuite(Test_dispatch_utility_registration_event),
+            unittest.makeSuite(Test_dispatch_adapter_registration_event),
+            unittest.makeSuite(Test_dispatch_subscription_adapter_registration_event),
+            unittest.makeSuite(Test_dispatch_handler_registration_event),
+        )
+    )

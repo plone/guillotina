@@ -8,15 +8,14 @@ from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
 
 
-logger = logging.getLogger('guillotina')
+logger = logging.getLogger("guillotina")
 
 
 class MigrateCommand(Command):
-    description = 'Run migrate on databases'
+    description = "Run migrate on databases"
 
     async def migrate(self, db):
-        migrations = sorted(
-            get_utilities_for(IMigration))
+        migrations = sorted(get_utilities_for(IMigration))
         async with transaction(db=db) as txn:
             # make sure to get fresh copy
             txn._manager._hard_cache.clear()
@@ -24,9 +23,9 @@ class MigrateCommand(Command):
             current_version = StrictVersion(root.migration_version)
             for version, migration in migrations:
                 if StrictVersion(version) > current_version:
-                    logger.warning(f'Starting migration on db {version}: {db.id}')
+                    logger.warning(f"Starting migration on db {version}: {db.id}")
                     await migration(db)
-                    logger.warning(f'Finished migration on db {version}: {db.id}')
+                    logger.warning(f"Finished migration on db {version}: {db.id}")
                     root.migration_version = version
             txn.register(root)
 

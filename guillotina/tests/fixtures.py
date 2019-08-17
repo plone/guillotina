@@ -30,21 +30,17 @@ from guillotina.utils import merge_dicts
 
 _dir = os.path.dirname(os.path.realpath(__file__))
 
-IS_TRAVIS = 'TRAVIS' in os.environ
-DATABASE = os.environ.get('DATABASE', 'DUMMY')
-DB_SCHEMA = os.environ.get('DB_SCHEMA', 'public')
+IS_TRAVIS = "TRAVIS" in os.environ
+DATABASE = os.environ.get("DATABASE", "DUMMY")
+DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
 
-annotations = {
-    'testdatabase': DATABASE,
-    'test_dbschema': DB_SCHEMA,
-    'redis': None,
-    'travis': IS_TRAVIS
-}
+annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None, "travis": IS_TRAVIS}
+
 
 def base_settings_configurator(settings):
-    settings["load_utilities"]['catalog'] = {
+    settings["load_utilities"]["catalog"] = {
         "provides": "guillotina.interfaces.ICatalogUtility",
-        "factory": "guillotina.catalog.catalog.DefaultSearchUtility"
+        "factory": "guillotina.catalog.catalog.DefaultSearchUtility",
     }
 
 
@@ -54,24 +50,29 @@ testing.configure_with(base_settings_configurator)
 def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
     settings = _update_from_pytest_markers(settings, pytest_node)
-    settings['databases']['db']['storage'] = 'DUMMY'
-    settings['databases']['db']['dsn'] = {}
+    settings["databases"]["db"]["storage"] = "DUMMY"
+    settings["databases"]["db"]["dsn"] = {}
     return settings
 
 
-def configure_db(obj, scheme='postgres', dbname='guillotina', user='postgres',
-                 host='localhost', port=5432, password='', storage='postgresql'):
-    obj.update({
-        'storage': storage,
-        'partition': 'guillotina.interfaces.IResource'
-    })
-    obj['dsn'] = {
-        'scheme': scheme,
-        'dbname': dbname,
-        'user': user,
-        'host': host,
-        'port': port,
-        'password': password
+def configure_db(
+    obj,
+    scheme="postgres",
+    dbname="guillotina",
+    user="postgres",
+    host="localhost",
+    port=5432,
+    password="",
+    storage="postgresql",
+):
+    obj.update({"storage": storage, "partition": "guillotina.interfaces.IResource"})
+    obj["dsn"] = {
+        "scheme": scheme,
+        "dbname": dbname,
+        "user": user,
+        "host": host,
+        "port": port,
+        "password": password,
     }
 
 
@@ -80,7 +81,7 @@ def _update_from_pytest_markers(settings, pytest_node):
         return settings
 
     # Update test app settings from pytest markers
-    for mark in pytest_node.iter_markers(name='app_settings'):
+    for mark in pytest_node.iter_markers(name="app_settings"):
         to_update = mark.args[0]
         settings = merge_dicts(settings, to_update)
 
@@ -90,116 +91,129 @@ def _update_from_pytest_markers(settings, pytest_node):
 def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
     settings = _update_from_pytest_markers(settings, pytest_node)
-    if annotations['redis'] is not None:
-        if 'redis' not in settings:
-            settings['redis'] = {}
-        settings['redis']['host'] = annotations['redis'][0]
-        settings['redis']['port'] = annotations['redis'][1]
+    if annotations["redis"] is not None:
+        if "redis" not in settings:
+            settings["redis"] = {}
+        settings["redis"]["host"] = annotations["redis"][0]
+        settings["redis"]["port"] = annotations["redis"][1]
 
-    if annotations['testdatabase'] == 'DUMMY':
+    if annotations["testdatabase"] == "DUMMY":
         return settings
 
-    settings['databases']['db']['storage'] = 'postgresql'
-    settings['databases']['db']['db_schema'] = annotations['test_dbschema']
+    settings["databases"]["db"]["storage"] = "postgresql"
+    settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
 
-    settings['databases']['db']['dsn'] = {
-        'scheme': 'postgres',
-        'dbname': 'guillotina',
-        'user': 'postgres',
-        'host': annotations.get('pg_host', 'localhost'),
-        'port': annotations.get('pg_port', 5432),
-        'password': '',
+    settings["databases"]["db"]["dsn"] = {
+        "scheme": "postgres",
+        "dbname": "guillotina",
+        "user": "postgres",
+        "host": annotations.get("pg_host", "localhost"),
+        "port": annotations.get("pg_port", 5432),
+        "password": "",
     }
 
-    options = dict(
-        host=annotations.get('pg_host', 'localhost'),
-        port=annotations.get('pg_port', 5432),
-    )
+    options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
 
-    if annotations['testdatabase'] == 'cockroachdb':
-        configure_db(
-            settings['databases']['db'],
-            **options,
-            user='root',
-            storage='cockroach')
-        configure_db(
-            settings['databases']['db-custom'],
-            **options,
-            user='root',
-            storage='cockroach')
-        configure_db(
-            settings['storages']['db'], **options,
-            user='root',
-            storage='cockroach')
+    if annotations["testdatabase"] == "cockroachdb":
+        configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
+        configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
+        configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
     else:
-        configure_db(settings['databases']['db'], **options)
-        configure_db(settings['databases']['db-custom'], **options)
-        configure_db(settings['storages']['db'], **options)
+        configure_db(settings["databases"]["db"], **options)
+        configure_db(settings["databases"]["db-custom"], **options)
+        configure_db(settings["storages"]["db"], **options)
 
     return settings
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def db():
     """
     detect travis, use travis's postgres; otherwise, use docker
     """
-    if annotations['testdatabase'] == 'DUMMY':
+    if annotations["testdatabase"] == "DUMMY":
         yield
     else:
         import pytest_docker_fixtures
-        if annotations['testdatabase'] == 'cockroachdb':
+
+        if annotations["testdatabase"] == "cockroachdb":
             host, port = pytest_docker_fixtures.cockroach_image.run()
         else:
-            if not annotations['travis']:
+            if not annotations["travis"]:
                 host, port = pytest_docker_fixtures.pg_image.run()
             else:
-                host = 'localhost'
-                port = int(os.environ.get('PGPORT', 5432))
+                host = "localhost"
+                port = int(os.environ.get("PGPORT", 5432))
 
-        annotations['pg_host'] = host
-        annotations['pg_port'] = port
+        annotations["pg_host"] = host
+        annotations["pg_port"] = port
 
         yield host, port  # provide the fixture value
 
-        if annotations['testdatabase'] == 'cockroachdb':
+        if annotations["testdatabase"] == "cockroachdb":
             pytest_docker_fixtures.cockroach_image.stop()
-        elif not annotations['travis']:
+        elif not annotations["travis"]:
             pytest_docker_fixtures.pg_image.stop()
 
 
 class GuillotinaDBRequester(object):
-
     def __init__(self, server, loop):
         self.server = server
         self.loop = loop
-        self.root = get_utility(IApplication, name='root')
-        self.db = self.root['db']
+        self.root = get_utility(IApplication, name="root")
+        self.db = self.root["db"]
 
-    async def __call__(self, method, path, params=None, data=None, authenticated=True,
-                       auth_type='Basic', headers={}, token=testing.ADMIN_TOKEN,
-                       accept='application/json', allow_redirects=True):
+    async def __call__(
+        self,
+        method,
+        path,
+        params=None,
+        data=None,
+        authenticated=True,
+        auth_type="Basic",
+        headers={},
+        token=testing.ADMIN_TOKEN,
+        accept="application/json",
+        allow_redirects=True,
+    ):
         value, status, headers = await self.make_request(
-            method, path, params, data, authenticated,
-            auth_type, headers, token, accept, allow_redirects=allow_redirects)
+            method,
+            path,
+            params,
+            data,
+            authenticated,
+            auth_type,
+            headers,
+            token,
+            accept,
+            allow_redirects=allow_redirects,
+        )
         return value, status
 
-    async def make_request(self, method, path, params=None, data=None,
-                           authenticated=True, auth_type='Basic', headers={},
-                           token=testing.ADMIN_TOKEN, accept='application/json',
-                           allow_redirects=True):
+    async def make_request(
+        self,
+        method,
+        path,
+        params=None,
+        data=None,
+        authenticated=True,
+        auth_type="Basic",
+        headers={},
+        token=testing.ADMIN_TOKEN,
+        accept="application/json",
+        allow_redirects=True,
+    ):
         settings = {}
         headers = headers.copy()
-        settings['headers'] = headers
+        settings["headers"] = headers
         if accept is not None:
-            settings['headers']['ACCEPT'] = accept
+            settings["headers"]["ACCEPT"] = accept
         if authenticated and token is not None:
-            settings['headers']['AUTHORIZATION'] = '{} {}'.format(
-                auth_type, token)
+            settings["headers"]["AUTHORIZATION"] = "{} {}".format(auth_type, token)
 
-        settings['params'] = params
-        settings['data'] = data
-        settings['allow_redirects'] = allow_redirects
+        settings["params"] = params
+        settings["data"] = data
+        settings["allow_redirects"] = allow_redirects
 
         async with aiohttp.ClientSession(loop=self.loop) as session:
             operation = getattr(session, method.lower(), None)
@@ -216,8 +230,7 @@ class GuillotinaDBRequester(object):
         if request is None:
             request = get_mocked_request(db=self.db)
         login()
-        return wrap_request(
-            request, transaction(db=self.db, adopt_parent_txn=True))
+        return wrap_request(request, transaction(db=self.db, adopt_parent_txn=True))
 
 
 async def close_async_tasks(app):
@@ -225,11 +238,10 @@ async def close_async_tasks(app):
         await clean(app)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def dummy_guillotina(loop, request):
     globalregistry.reset()
-    aioapp = loop.run_until_complete(
-        make_app(settings=get_dummy_settings(request.node), loop=loop))
+    aioapp = loop.run_until_complete(make_app(settings=get_dummy_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
     yield aioapp
@@ -256,12 +268,13 @@ class DummyRequestAsyncContextManager(object):
         del task.request
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def dummy_request(dummy_guillotina, monkeypatch):
     from guillotina.interfaces import IApplication
     from guillotina.component import get_utility
-    root = get_utility(IApplication, name='root')
-    db = root['db']
+
+    root = get_utility(IApplication, name="root")
+    db = root["db"]
 
     request = get_mocked_request(db=db)
     return request
@@ -283,7 +296,7 @@ class RootAsyncContextManager:
         await self.txn.abort()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
 
@@ -296,25 +309,32 @@ async def _clear_dbs(root):
         storage = db.storage
         if IPostgresStorage.providedBy(storage) or ICockroachStorage.providedBy(storage):
             async with storage.pool.acquire() as conn:
-                await conn.execute('''
+                await conn.execute(
+                    """
 DELETE from {}
 WHERE zoid != '{}' AND zoid != '{}'
-'''.format(storage._objects_table_name, ROOT_ID, TRASHED_ID))
-                await conn.execute('''
+""".format(
+                        storage._objects_table_name, ROOT_ID, TRASHED_ID
+                    )
+                )
+                await conn.execute(
+                    """
 SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
    FROM   pg_index  i
    LEFT   JOIN pg_depend d ON d.objid = i.indexrelid
                           AND d.deptype = 'i'
    WHERE  i.indrelid = '{}'::regclass
    AND    d.objid IS NULL
-'''.format(storage._objects_table_name))
+""".format(
+                        storage._objects_table_name
+                    )
+                )
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def guillotina_main(loop, request):
     globalregistry.reset()
-    aioapp = loop.run_until_complete(
-        make_app(settings=get_db_settings(request.node), loop=loop))
+    aioapp = loop.run_until_complete(make_app(settings=get_db_settings(request.node), loop=loop))
     aioapp.config.execute_actions()
     load_cached_schema()
 
@@ -329,7 +349,7 @@ def guillotina_main(loop, request):
         pass
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def guillotina(db, guillotina_main, loop):
     server = TestServer(guillotina_main)
     loop.run_until_complete(server.start_server(loop=loop))
@@ -338,7 +358,7 @@ def guillotina(db, guillotina_main, loop):
     loop.run_until_complete(server.close())
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def container_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina)
 
@@ -358,32 +378,25 @@ class CockroachStorageAsyncContextManager(object):
         self.db = db
 
     async def __aenter__(self):
-        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
-            self.db[0],
-            self.db[1]
-        )
-        self.storage = CockroachStorage(
-            dsn=dsn, name='db', pool_size=25,
-            conn_acquire_timeout=0.1)
+        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(self.db[0], self.db[1])
+        self.storage = CockroachStorage(dsn=dsn, name="db", pool_size=25, conn_acquire_timeout=0.1)
         await self.storage.initialize(self.loop)
         return self.storage
 
     async def __aexit__(self, exc_type, exc, tb):
         conn = await self.storage.open()
-        await _bomb_shelter(
-            conn.execute("DROP DATABASE IF EXISTS guillotina;"))
-        await _bomb_shelter(
-            conn.execute("CREATE DATABASE guillotina;"))
+        await _bomb_shelter(conn.execute("DROP DATABASE IF EXISTS guillotina;"))
+        await _bomb_shelter(conn.execute("CREATE DATABASE guillotina;"))
         await self.storage.pool.release(conn)
         await self.storage.finalize()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def cockroach_storage(db, dummy_request, loop):
     return CockroachStorageAsyncContextManager(dummy_request, loop, db)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def command_arguments():
     arguments = mock.MagicMock()
     arguments.line_profiler = False
@@ -392,35 +405,37 @@ def command_arguments():
     return arguments
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def container_command(db):
     import psycopg2
+
     settings = get_db_settings()
-    host = settings['databases']['db']['dsn']['host']
-    port = settings['databases']['db']['dsn']['port']
+    host = settings["databases"]["db"]["dsn"]["host"]
+    port = settings["databases"]["db"]["dsn"]["port"]
     conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
     cur = conn.cursor()
     cur.execute(open(os.path.join(_dir, "data/tables.sql"), "r").read())
-    cur.execute('COMMIT;')
+    cur.execute("COMMIT;")
     cur.close()
     conn.close()
-    yield {
-        'settings': settings
-    }
+    yield {"settings": settings}
 
     conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
     cur = conn.cursor()
-    cur.execute('''
+    cur.execute(
+        """
 DELETE FROM objects;
 DELETe FROM blobs;
-COMMIT;''')
+COMMIT;"""
+    )
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def redis_container():
     import pytest_docker_fixtures
+
     host, port = pytest_docker_fixtures.redis_image.run()
-    annotations['redis'] = (host, port)
+    annotations["redis"] = (host, port)
     yield host, port  # provide the fixture value
     pytest_docker_fixtures.redis_image.stop()
-    annotations['redis'] = None
+    annotations["redis"] = None

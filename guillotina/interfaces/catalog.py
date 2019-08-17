@@ -8,19 +8,19 @@ from .content import IContainer
 
 class ICatalogUtility(Interface):
     async def initialize(app):
-        '''
+        """
         initialization
-        '''
+        """
 
     async def search(container: IContainer, query: typing.Any):
-        '''
+        """
         Search parsed query
-        '''
+        """
 
     async def query(context: IBaseObject, query: typing.Any):
-        '''
+        """
         Raw search query, uses parser to transform query
-        '''
+        """
 
     async def index(container: IContainer, datas):
         """
@@ -50,43 +50,43 @@ class ICatalogUtility(Interface):
         """
 
     async def get_data(content, indexes=None, schemas=None):
-        '''
+        """
         get data to index
-        '''
+        """
 
 
 class IPGCatalogUtility(ICatalogUtility):
-    '''
+    """
     PG catalog utility
-    '''
+    """
 
 
 class ISearchParser(Interface):
     def __init__(utility: ICatalogUtility, context: Interface):
-        '''
-        '''
+        """
+        """
 
     def __call__() -> typing.Any:
-        '''
+        """
         Translate the query
-        '''
+        """
 
 
 class ICatalogDataAdapter(Interface):
-    '''
-    '''
+    """
+    """
 
     async def __call__(indexes=None, schemas=None):
-        '''
+        """
         Return a dictionary of [index name, value]
-        '''
+        """
 
 
 class ISecurityInfo(Interface):
-    '''
-    '''
+    """
+    """
 
     async def __call__(indexes=None, schemas=None):
-        '''
+        """
         Return a dictionary of [index name, value]
-        '''
+        """

@@ -19,7 +19,6 @@ from guillotina.utils import find_container
 
 
 class Indexer:
-
     def __init__(self, container):
         self.remove = []
         self.index = {}
@@ -28,10 +27,10 @@ class Indexer:
 
     @classmethod
     def get(self):
-        return execute.get_future('indexer')
+        return execute.get_future("indexer")
 
     def register(self):
-        execute.add_future('indexer', self)
+        execute.add_future("indexer", self)
 
     async def __call__(self):
         # Commits are run in sync thread so there is no asyncloop
@@ -50,6 +49,7 @@ class Indexer:
 
     async def reindex_security(self, obj):
         reindex_in_future(obj, True)
+
     index_object_move = reindex_security
 
     async def remove_object(self, obj):
@@ -86,7 +86,7 @@ def get_indexer(context=None):
     if not search:
         return  # no search configured
 
-    klass = app_settings['indexer']
+    klass = app_settings["indexer"]
     indexer = klass.get()
     if indexer is None:
         container = find_container(context)
@@ -97,8 +97,7 @@ def get_indexer(context=None):
     return indexer
 
 
-@configure.subscriber(
-    for_=(IResource, IObjectPermissionsModifiedEvent), priority=1000)
+@configure.subscriber(for_=(IResource, IObjectPermissionsModifiedEvent), priority=1000)
 async def security_changed(obj, event):
     if IGroupFolder.providedBy(obj):
         # assuming permissions for group are already handled correctly with search
@@ -109,8 +108,7 @@ async def security_changed(obj, event):
         await fut.reindex_security(obj)
 
 
-@configure.subscriber(
-    for_=(IResource, IObjectMovedEvent), priority=1000)
+@configure.subscriber(for_=(IResource, IObjectMovedEvent), priority=1000)
 async def moved_object(obj, event):
     fut = get_indexer(obj)
     if fut is not None:
@@ -119,10 +117,10 @@ async def moved_object(obj, event):
 
 @configure.subscriber(for_=(IResource, IObjectRemovedEvent))
 async def remove_object(obj, event):
-    uid = getattr(obj, 'uuid', None)
+    uid = getattr(obj, "uuid", None)
     if uid is None:
         return
-    type_name = getattr(obj, 'type_name', None)
+    type_name = getattr(obj, "type_name", None)
     if type_name is None or IContainer.providedBy(obj):
         return
 
@@ -132,10 +130,8 @@ async def remove_object(obj, event):
     await fut.remove_object(obj)
 
 
-@configure.subscriber(
-    for_=(IResource, IObjectAddedEvent), priority=1000)
-@configure.subscriber(
-    for_=(IResource, IObjectModifiedEvent), priority=1000)
+@configure.subscriber(for_=(IResource, IObjectAddedEvent), priority=1000)
+@configure.subscriber(for_=(IResource, IObjectModifiedEvent), priority=1000)
 async def add_object(obj, event=None, modified=None, payload=None):
     if modified is None:
         modified = IObjectModifiedEvent.providedBy(event)
@@ -147,7 +143,7 @@ async def add_object(obj, event=None, modified=None, payload=None):
         if payload and len(payload) > 0:
             # get a list of potential indexes
             for field_name in payload.keys():
-                if '.' in field_name:
+                if "." in field_name:
                     value = payload[field_name]
                     if not isinstance(value, dict):
                         continue
@@ -160,10 +156,10 @@ async def add_object(obj, event=None, modified=None, payload=None):
 
 
 async def index_object(obj, indexes=None, modified=False, security=False):
-    uid = getattr(obj, 'uuid', None)
+    uid = getattr(obj, "uuid", None)
     if uid is None:
         return
-    type_name = getattr(obj, 'type_name', None)
+    type_name = getattr(obj, "type_name", None)
     if type_name is None or IContainer.providedBy(obj):
         return
 
@@ -174,8 +170,7 @@ async def index_object(obj, indexes=None, modified=False, security=False):
     await fut.add_object(obj, indexes, modified, security)
 
 
-@configure.subscriber(
-    for_=(IContainer, IObjectAddedEvent), priority=1000)
+@configure.subscriber(for_=(IContainer, IObjectAddedEvent), priority=1000)
 async def initialize_catalog(container, event):
     search = query_utility(ICatalogUtility)
     if search:

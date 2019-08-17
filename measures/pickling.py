@@ -20,39 +20,34 @@ ITERATIONS = 100000
 
 
 async def run1():
-    print('Test serialize content for db')
-    ob = await create_content('TestContent6', id='foobar')
-    ob.foobar1 = '1'
-    ob.foobar2 = '2'
-    ob.foobar6 = '6'
+    print("Test serialize content for db")
+    ob = await create_content("TestContent6", id="foobar")
+    ob.foobar1 = "1"
+    ob.foobar2 = "2"
+    ob.foobar6 = "6"
     start = time.time()
     writer = get_adapter(ob, IWriter)
     for _ in range(ITERATIONS):
         writer.serialize()
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run2():
-    print('Test deserialize content from db')
-    ob = await create_content('TestContent6', id='foobar')
-    ob.foobar1 = '1'
-    ob.foobar2 = '2'
-    ob.foobar6 = '6'
+    print("Test deserialize content from db")
+    ob = await create_content("TestContent6", id="foobar")
+    ob.foobar1 = "1"
+    ob.foobar2 = "2"
+    ob.foobar6 = "6"
     start = time.time()
     writer = get_adapter(ob, IWriter)
     serialized = writer.serialize()
     for _ in range(ITERATIONS):
-        ob = reader({
-            'state': serialized,
-            'zoid': 0,
-            'tid': 0,
-            'id': 'foobar'
-        })
+        ob = reader({"state": serialized, "zoid": 0, "tid": 0, "id": "foobar"})
     end = time.time()
-    assert ob.foobar1 == '1'
-    assert ob.foobar6 == '6'
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    assert ob.foobar1 == "1"
+    assert ob.foobar6 == "6"
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run():
