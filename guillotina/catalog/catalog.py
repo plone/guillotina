@@ -125,6 +125,7 @@ class DefaultSecurityInfoAdapter(object):
             "access_roles": get_roles_with_access_content(self.content),
             "type_name": self.content.type_name,
             "tid": self.content.__serial__,
+            "modification_date": json_compatible(self.content.modification_date),
         }
 
 
@@ -156,7 +157,11 @@ class DefaultCatalogDataAdapter(object):
 
     async def __call__(self, indexes=None, schemas=None):
         # For each type
-        values = {"type_name": self.content.type_name, "tid": self.content.__serial__}
+        values = {
+            "type_name": self.content.type_name,
+            "tid": self.content.__serial__,
+            "modification_date": json_compatible(self.content.modification_date),
+        }
         if schemas is None:
             schemas = iter_schemata(self.content)
 

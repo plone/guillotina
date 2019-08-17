@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Fix `modification_date` not indexed when an object is patched
+  [masipcat]
+
 - Move to black code formatter
   [vangheem]
 
