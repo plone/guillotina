@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: guillotina
+  labels:
+    run: guillotina
+spec:
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 32354
+  selector:
+    run: guillotina
+  type: NodePort
+  externalTrafficPolicy: Cluster
+status:
+  loadBalancer: {}

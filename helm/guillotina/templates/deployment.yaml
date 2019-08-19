@@ -1,5 +1,5 @@
 kind: Deployment
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 metadata:
   name: guillotina
   namespace: default
@@ -20,13 +20,8 @@ spec:
       containers:
       - name: guillotina
         image: guillotina/guillotina
+        ports:
+        - containerPort: 8080
         args:
         - "guillotina"
         resources: {}
-        imagePullPolicy: Always
-        stdin: true
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      securityContext: {}
-      schedulerName: default-scheduler
