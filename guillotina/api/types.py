@@ -38,7 +38,7 @@ async def get_all_types(context, request):
     permission="guillotina.AccessContent",
     name="@types/{type_name}",
     summary="Read information on available types",
-    parameters=[{"in": "path", "name": "type_name", "required": "true", "schema": {"type": "string"}}],
+    parameters=[{"in": "path", "name": "type_name", "required": True, "schema": {"type": "string"}}],
     responses={
         "200": {
             "description": "Result results on types",

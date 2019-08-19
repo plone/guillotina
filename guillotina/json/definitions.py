@@ -270,3 +270,28 @@ configure.json_schema_definition(
     "UpdateRegistry",
     {"type": "object", "title": "Update registry", "properties": {"value": {}}, "required": ["value"]},
 )
+
+
+configure.json_schema_definition(
+    "SearchQuery",
+    {
+        "type": "object",
+        "tutle": "Search Query",
+        "properties": {
+            "term": {"type": "string"},
+            "_from": {"type": "string"},
+            "_size": {"type": "string"},
+            "_sort_asc": {"type": "string"},
+            "_sort_des": {"type": "string"},
+            "_metadata": {"type": "string"},
+            "_metadata_not": {"type": "string"},
+            "__eq": {"type": "string"},
+            "__not": {"type": "string"},
+            "__gt": {"type": "string"},
+            "__gte": {"type": "string"},
+            "__lte": {"type": "string"},
+            "__lt": {"type": "string"},
+            "__in": {"type": "string"},
+        },
+    },
+)

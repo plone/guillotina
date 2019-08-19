@@ -81,13 +81,20 @@ def get_content_json_schema_responses(content):
 def patch_content_json_schema_parameters(content):
     return [
         {
-            "name": "body",
-            "in": "body",
-            "schema": {
-                "allOf": [
-                    {"$ref": "#/components/schemas/WritableResource"},
-                    {"properties": convert_interfaces_to_schema(get_all_behavior_interfaces(content))},
-                ]
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "allOf": [
+                            {"$ref": "#/components/schemas/WritableResource"},
+                            {
+                                "properties": convert_interfaces_to_schema(
+                                    get_all_behavior_interfaces(content)
+                                )
+                            },
+                        ]
+                    }
+                }
             },
         }
     ]
@@ -105,8 +112,8 @@ async def default_head(context, request):
     summary="Retrieves serialization of resource",
     responses=get_content_json_schema_responses,
     parameters=[
-        {"name": "include", "in": "query", "required": "true", "schema": {"type": "string"}},
-        {"name": "omit", "in": "query", "required": "true", "schema": {"type": "string"}},
+        {"name": "include", "in": "query", "required": True, "schema": {"type": "string"}},
+        {"name": "omit", "in": "query", "required": True, "schema": {"type": "string"}},
     ],
 )
 class DefaultGET(Service):
@@ -228,7 +235,7 @@ class DefaultPOST(Service):
     method="PATCH",
     permission="guillotina.ModifyContent",
     summary="Modify the content of this resource",
-    parameters=patch_content_json_schema_parameters,
+    requestBody=patch_content_json_schema_parameters,
     responses={
         "200": {
             "description": "Resource data",
@@ -643,10 +650,10 @@ async def ids(context, request):
     permission="guillotina.Manage",
     summary="Paginated list of sub objects",
     parameters=[
-        {"name": "include", "in": "query", "required": "true", "schema": {"type": "string"}},
-        {"name": "omit", "in": "query", "required": "true", "schema": {"type": "string"}},
-        {"name": "page_size", "in": "query", "default": 20, "required": "true", "schema": {"type": "number"}},
-        {"name": "page", "in": "query", "default": 1, "required": "true", "schema": {"type": "number"}},
+        {"name": "include", "in": "query", "required": True, "schema": {"type": "string"}},
+        {"name": "omit", "in": "query", "required": True, "schema": {"type": "string"}},
+        {"name": "page_size", "in": "query", "default": 20, "required": True, "schema": {"type": "number"}},
+        {"name": "page", "in": "query", "default": 1, "required": True, "schema": {"type": "number"}},
     ],
     responses={"200": {"description": "Successfully returned response object"}},
 )
@@ -720,7 +727,7 @@ async def invalidate_cache(context, request):
     context=IContainer,
     permission="guillotina.AccessContent",
     summary="Get content by UID",
-    parameters=[{"in": "path", "name": "uid", "required": "true", "schema": {"type": "string"}}],
+    parameters=[{"in": "path", "name": "uid", "required": True, "schema": {"type": "string"}}],
     responses={"200": {"description": "Successful"}},
 )
 async def resolve_uid(context, request):

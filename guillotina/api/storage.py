@@ -29,7 +29,7 @@ def _get_storage_config(storage_id):
     method="GET",
     permission="guillotina.GetDatabases",
     name="@storages/{storage_id}",
-    parameters=[{"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}}],
+    parameters=[{"in": "path", "name": "storage_id", "required": True, "schema": {"type": "string"}}],
 )
 async def storage_get(context, request):
     storage_id = request.matchdict["storage_id"]
@@ -46,7 +46,7 @@ async def storage_get(context, request):
     method="POST",
     permission="guillotina.MountDatabase",
     name="@storages/{storage_id}",
-    parameters=[{"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}}],
+    parameters=[{"in": "path", "name": "storage_id", "required": True, "schema": {"type": "string"}}],
 )
 async def storage_create_db(context, request):
     storage_id = request.matchdict["storage_id"]
@@ -67,8 +67,8 @@ async def storage_create_db(context, request):
     permission="guillotina.UmountDatabase",
     name="@storages/{storage_id}/{db_id}",
     parameters=[
-        {"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}},
-        {"in": "path", "name": "db_id", "required": "true", "schema": {"type": "string"}},
+        {"in": "path", "name": "storage_id", "required": True, "schema": {"type": "string"}},
+        {"in": "path", "name": "db_id", "required": True, "schema": {"type": "string"}},
     ],
 )
 async def delete_db(context, request):
@@ -88,8 +88,8 @@ async def delete_db(context, request):
     permission="guillotina.GetDatabases",
     name="@storages/{storage_id}/{db_id}",
     parameters=[
-        {"in": "path", "name": "storage_id", "required": "true", "schema": {"type": "string"}},
-        {"in": "path", "name": "db_id", "required": "true", "schema": {"type": "string"}},
+        {"in": "path", "name": "storage_id", "required": True, "schema": {"type": "string"}},
+        {"in": "path", "name": "db_id", "required": True, "schema": {"type": "string"}},
     ],
 )
 async def get_db(context, request):
