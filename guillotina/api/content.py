@@ -87,11 +87,15 @@ def patch_content_json_schema_parameters(content):
                     "schema": {
                         "allOf": [
                             {"$ref": "#/components/schemas/WritableResource"},
-                            {"properties": convert_interfaces_to_schema(get_all_behavior_interfaces(content))},
+                            {
+                                "properties": convert_interfaces_to_schema(
+                                    get_all_behavior_interfaces(content)
+                                )
+                            },
                         ]
                     }
                 }
-            }
+            },
         }
     ]
 

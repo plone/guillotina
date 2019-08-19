@@ -10,112 +10,65 @@ from guillotina.interfaces import IResource
 
 logger = logging.getLogger("guillotina")
 
-QUERY_PARAMETERS = [{
-    "in": "query",
-    "required": False,
-    "name": "term",
-    "description": "Generic search term support. See modifier list below for usage",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "_from",
-    "description": "start from a point in search results",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "_size",
-    "description": "How large of result set. Max of 50.",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "_sort_asc",
-    "description": "How ascending field",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "_sort_des",
-    "description": "How descending field",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "_metadata",
-    "description": "list of metadata fields to include",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "_metadata_not",
-    "description": "list of metadata fields to exclude",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "__eq",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "__not",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "__gt",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "__gte",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "__lte",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "__lt",
-    "schema": {
-        "type": "string"
-    }
-}, {
-    "in": "query",
-    "required": False,
-    "name": "__in",
-    "schema": {
-        "type": "string"
-    }
-}]
+QUERY_PARAMETERS = [
+    {
+        "in": "query",
+        "required": False,
+        "name": "term",
+        "description": "Generic search term support. See modifier list below for usage",
+        "schema": {"type": "string"},
+    },
+    {
+        "in": "query",
+        "required": False,
+        "name": "_from",
+        "description": "start from a point in search results",
+        "schema": {"type": "string"},
+    },
+    {
+        "in": "query",
+        "required": False,
+        "name": "_size",
+        "description": "How large of result set. Max of 50.",
+        "schema": {"type": "string"},
+    },
+    {
+        "in": "query",
+        "required": False,
+        "name": "_sort_asc",
+        "description": "How ascending field",
+        "schema": {"type": "string"},
+    },
+    {
+        "in": "query",
+        "required": False,
+        "name": "_sort_des",
+        "description": "How descending field",
+        "schema": {"type": "string"},
+    },
+    {
+        "in": "query",
+        "required": False,
+        "name": "_metadata",
+        "description": "list of metadata fields to include",
+        "schema": {"type": "string"},
+    },
+    {
+        "in": "query",
+        "required": False,
+        "name": "_metadata_not",
+        "description": "list of metadata fields to exclude",
+        "schema": {"type": "string"},
+    },
+    {"in": "query", "required": False, "name": "__eq", "schema": {"type": "string"}},
+    {"in": "query", "required": False, "name": "__not", "schema": {"type": "string"}},
+    {"in": "query", "required": False, "name": "__gt", "schema": {"type": "string"}},
+    {"in": "query", "required": False, "name": "__gte", "schema": {"type": "string"}},
+    {"in": "query", "required": False, "name": "__lte", "schema": {"type": "string"}},
+    {"in": "query", "required": False, "name": "__lt", "schema": {"type": "string"}},
+    {"in": "query", "required": False, "name": "__in", "schema": {"type": "string"}},
+]
+
 
 async def _search(context, request, query):
     search = query_utility(ICatalogUtility)

@@ -47,36 +47,46 @@ class Service(View):
     _sentinal = object()
 
     def _validate_parameters(self):
-        if 'parameters' in self.__config__:
+        if "parameters" in self.__config__:
             data = self.request.url.query
-            for parameter in self.__config__['parameters']:
-                if parameter['in'] == 'query':
-                    if 'schema' in parameter:
-                        if parameter['schema']['type'] == 'integer':
+            for parameter in self.__config__["parameters"]:
+                if parameter["in"] == "query":
+                    if "schema" in parameter:
+                        if parameter["schema"]["type"] == "integer":
                             try:
-                                if 'name' in parameter:
-                                    int(data[parameter['name']])
+                                if "name" in parameter:
+                                    int(data[parameter["name"]])
                             except ValueError:
-                                raise HTTPPreconditionFailed(content={
-                                    'reason': 'Schema validation error',
-                                    'message': 'can not convert {} to Int'.format(data[parameter['name']])
-                                })
-                        elif parameter['schema']['type'] == 'float':
+                                raise HTTPPreconditionFailed(
+                                    content={
+                                        "reason": "Schema validation error",
+                                        "message": "can not convert {} to Int".format(
+                                            data[parameter["name"]]
+                                        ),
+                                    }
+                                )
+                        elif parameter["schema"]["type"] == "float":
                             try:
-                                float(data[parameter['name']])
+                                float(data[parameter["name"]])
                             except ValueError:
-                                raise HTTPPreconditionFailed(content={
-                                    'reason': 'Schema validation error',
-                                    'message': 'can not convert {} to Float'.format(data[parameter['name']])
-                                })
+                                raise HTTPPreconditionFailed(
+                                    content={
+                                        "reason": "Schema validation error",
+                                        "message": "can not convert {} to Float".format(
+                                            data[parameter["name"]]
+                                        ),
+                                    }
+                                )
                         else:
                             pass
                         try:
-                            if parameter['required'] and parameter['name'] not in data:
-                                raise HTTPPreconditionFailed(content={
-                                    'reason': 'Schema validation error',
-                                    'message': '{} is required'.format(parameter['name'])
-                                })
+                            if parameter["required"] and parameter["name"] not in data:
+                                raise HTTPPreconditionFailed(
+                                    content={
+                                        "reason": "Schema validation error",
+                                        "message": "{} is required".format(parameter["name"]),
+                                    }
+                                )
                         except KeyError:
                             logger.warning("`required` is a mandatory field", exc_info=True)
 
