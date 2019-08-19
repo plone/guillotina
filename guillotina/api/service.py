@@ -80,7 +80,6 @@ class Service(View):
                         except KeyError:
                             logger.warning("`required` is a mandatory field", exc_info=True)
 
-
     @classmethod
     def _get_validator(cls):
         if cls.__validator__ is None and cls.__validator__ != cls._sentinal:
