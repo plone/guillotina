@@ -46,11 +46,46 @@ class Service(View):
     __validator__ = __schema__ = None
     _sentinal = object()
 
+    def _validate_parameters(self):
+        if 'parameters' in self.__config__:
+            data = self.request.url.query
+            for parameter in self.__config__['parameters']:
+                if parameter['in'] == 'query':
+                    if 'schema' in parameter:
+                        if parameter['schema']['type'] == 'integer':
+                            try:
+                                if 'name' in parameter:
+                                    int(data[parameter['name']])
+                            except ValueError:
+                                raise HTTPPreconditionFailed(content={
+                                    'reason': 'Schema validation error',
+                                    'message': 'can not convert {} to Int'.format(data[parameter['name']])
+                                })
+                        elif parameter['schema']['type'] == 'float':
+                            try:
+                                float(data[parameter['name']])
+                            except ValueError:
+                                raise HTTPPreconditionFailed(content={
+                                    'reason': 'Schema validation error',
+                                    'message': 'can not convert {} to Float'.format(data[parameter['name']])
+                                })
+                        else:
+                            pass
+                        try:
+                            if parameter['required'] and parameter['name'] not in data:
+                                raise HTTPPreconditionFailed(content={
+                                    'reason': 'Schema validation error',
+                                    'message': '{} is required'.format(parameter['name'])
+                                })
+                        except KeyError:
+                            logger.warning("`required` is a mandatory field", exc_info=True)
+
+
     @classmethod
     def _get_validator(cls):
         if cls.__validator__ is None and cls.__validator__ != cls._sentinal:
             cls.__validator__ = cls._sentinal
-            if cls.__config__["requestBody"]:
+            if "requestBody" in cls.__config__:
                 requestBody = cls.__config__["requestBody"]
                 if "$ref" in requestBody["content"]["application/json"]["schema"]:
                     try:
@@ -75,8 +110,9 @@ class Service(View):
 
     async def validate(self):
 
+        self._validate_parameters()
         schema, validator = self.__class__._get_validator()
-        if validator:
+        if validator and validator != self._sentinal:
             try:
                 data = await self.request.json()
                 validator.validate(data)

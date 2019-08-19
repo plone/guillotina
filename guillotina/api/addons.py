@@ -71,7 +71,7 @@ async def uninstall(context, request):
     permission="guillotina.ManageAddons",
     name="@addons/{addon}",
     summary="Uninstall an addon from container",
-    parameters=[{"name": "addon", "in": "path", "required": "true", "schema": {"type": "string"}}],
+    parameters=[{"name": "addon", "in": "path", "required": True, "schema": {"type": "string"}}],
 )
 async def uninstall_path(context, request):
     id_to_uninstall = request.matchdict["addon"]
