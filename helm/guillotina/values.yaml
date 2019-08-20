@@ -11,9 +11,13 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+exposedPort: 32354
+
 resources: {}
 
 nodeSelector: {}
+
+guillotinaPort: 8080
 
 tolerations: []
 

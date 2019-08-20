@@ -21,7 +21,7 @@ spec:
       - name: {{.Values.name}}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         ports:
-        - containerPort: 8080
+        - containerPort: {{.Values.guillotinaPort }}
         command: ["guillotina"]
         args:
           {{  range .Values.arguments }}
