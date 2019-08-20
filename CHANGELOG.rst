@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Fix `LightweightConnection` pg class to close active cursors when connection done
+  [vangheem]
+
 - Swagger doc for search endpoint
   [karannaoh]
 
