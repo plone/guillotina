@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.9.4 (unreleased)
+4.9.4 (2019-08-20)
 ------------------
 
 - Fix `LightweightConnection` pg class to close active cursors when connection done
