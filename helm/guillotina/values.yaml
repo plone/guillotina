@@ -7,20 +7,10 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
 exposedPort: 32354
 
 resources: {}
 
-nodeSelector: {}
-
 guillotinaPort: 8080
-
-tolerations: []
-
-affinity: {}
 
 arguments: [--override="root_user.password=foobar", --override="debug=false" ]

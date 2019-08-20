@@ -2,7 +2,6 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{.Values.name}}
-  namespace: default
   labels:
     run: {{.Values.name}}
   annotations:
@@ -20,6 +19,7 @@ spec:
       containers:
       - name: {{.Values.name}}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{.Values.guillotinaPort }}
         command: ["guillotina"]
@@ -30,8 +30,8 @@ spec:
         resources: {}
         volumeMounts:
         - name: config
-          mountPath: /config.yaml
-          subPath: config.yaml
+          mountPath: /config.json
+          subPath: config.json
       volumes:
       - name: config
         configMap:
