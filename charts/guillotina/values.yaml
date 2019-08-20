@@ -13,4 +13,4 @@ resources: {}
 
 guillotinaPort: 8080
 
-arguments: [--override="root_user.password=foobar", --override="debug=false" ]
+arguments: []
