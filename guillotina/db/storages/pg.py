@@ -324,7 +324,7 @@ class LightweightConnection(asyncpg.connection.Connection):
             advisory_locks=False,
             notifications=False,
             sql_reset=False,
-            sql_close_all=False,
+            sql_close_all=self._server_caps.sql_close_all,
             plpgsql=self._server_caps.plpgsql,
         )
 
