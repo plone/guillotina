@@ -1,0 +1,51 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: config
+data:
+  config.yaml: |-
+    ---
+    debug: true
+    applications:
+      - guillotina.contrib.catalog.pg
+      - guillotina.contrib.swagger
+    root_user:
+      password: root
+    cors:
+      allow_origin:
+      - "*"
+      allow_methods:
+      - GET
+      - POST
+      - DELETE
+      - HEAD
+      - PATCH
+      - PUT
+      allow_headers:
+      - "*"
+      expose_headers:
+      - "*"
+      allow_credentials: true
+      max_age: 3660
+    utilities: []
+    jsapps:
+      +admin: guillotina:static/executioner
+    static:
+      assets: guillotina:static/assets
+    logging:
+      version: 1
+      formatters:
+        default:
+          format: "%(asctime)s %(levelname)-8s %(name)-15s %(message)s"
+          datefmt: "%Y-%m-%d %H:%M:%S"
+      handlers:
+        default:
+          class: logging.StreamHandler
+          level: DEBUG
+      loggers:
+        guillotina:
+          level: DEBUG
+          handlers:
+            - default
+          propagate: 1

@@ -1,9 +1,9 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: guillotina
+  name: {{ .Values.name }}
   labels:
-    run: guillotina
+    run: {{ .Values.name }}
 spec:
   ports:
   - protocol: TCP
@@ -11,7 +11,7 @@ spec:
     targetPort: 8080
     nodePort: 32354
   selector:
-    run: guillotina
+    run: {{ .Values.name }}
   type: NodePort
   externalTrafficPolicy: Cluster
 status:

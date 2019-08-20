@@ -1,5 +1,7 @@
 replicaCount: 2
 
+name: guillotina
+
 image:
   repository: guillotina/guillotina
   tag: latest
@@ -16,3 +18,5 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+arguments: [--override="root_user.password=foobar", --override="debug=false" ]

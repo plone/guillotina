@@ -1,27 +1,38 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: guillotina
+  name: {{.Values.name}}
   namespace: default
   labels:
-    run: guillotina
+    run: {{.Values.name}}
   annotations:
     deployment.kubernetes.io/revision: '1'
 spec:
   replicas: 2
   selector:
     matchLabels:
-      run: guillotina
+      run: {{.Values.name}}
   template:
     metadata:
       labels:
-        run: guillotina
+        run: {{.Values.name}}
     spec:
       containers:
-      - name: guillotina
-        image: guillotina/guillotina
+      - name: {{.Values.name}}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         ports:
         - containerPort: 8080
+        command: ["guillotina"]
         args:
-        - "guillotina"
+          {{  range .Values.arguments }}
+            - {{ . }}
+          {{ end }}
         resources: {}
+        volumeMounts:
+        - name: config
+          mountPath: /config.yaml
+          subPath: config.yaml
+      volumes:
+      - name: config
+        configMap:
+          name: config
