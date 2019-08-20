@@ -4,6 +4,9 @@ CHANGELOG
 4.9.4 (unreleased)
 ------------------
 
+- Fix `LightweightConnection` pg class to close active cursors when connection done
+  [vangheem]
+
 - Fix field.validate() crashes when providing invalid schema (for field of type Object)
   [masipcat]
 
