@@ -12,7 +12,7 @@ spec:
     nodePort: {{.Values.exposedPort}}
   selector:
     run: {{ .Values.name }}
-  type: NodePort
+  type: {{.Values.serviceType}}
   externalTrafficPolicy: Cluster
 status:
   loadBalancer: {}

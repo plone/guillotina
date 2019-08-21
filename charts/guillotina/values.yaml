@@ -9,6 +9,8 @@ image:
 
 exposedPort: 32354
 
+serviceType: NodePort
+
 resources: {}
 
 guillotinaPort: 8080
