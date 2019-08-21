@@ -36,10 +36,26 @@ WITH rows AS (
 SELECT count(*) FROM rows;
 """)
 
+# CR allows limit directly in update clause
+register_sql('CR_TRASH_BATCH', f"""
+WITH rows AS (
+    UPDATE
+        {{table_name}}
+    SET
+        parent_id = '{TRASHED_ID}'
+    WHERE
+        parent_id = ANY($1)
+    LIMIT $2
+    RETURNING 1
+)
+SELECT count(*) FROM rows;
+""")
+
 
 @configure.adapter(for_=IPostgresStorage, provides=IVacuumProvider)
-@configure.adapter(for_=ICockroachStorage, provides=IVacuumProvider)
 class PGVacuum:
+
+    _trash_batch_name = 'TRASH_BATCH'
 
     def __init__(self, storage):
         self._storage = storage
@@ -68,7 +84,7 @@ class PGVacuum:
                 updated = 1
                 while updated > 0:
                     result = await conn.fetch(
-                        sql.get('TRASH_BATCH', table_name), [r['zoid'] for r in batch], 500)
+                        sql.get(self._trash_batch_name, table_name), [r['zoid'] for r in batch], 500)
                     updated = result[0]['count']
                     self._trashed += updated
                     self.status()
@@ -79,3 +95,8 @@ class PGVacuum:
                 self._deleted += len(batch)
                 self.status()
         self.status('', '\n')
+
+
+@configure.adapter(for_=ICockroachStorage, provides=IVacuumProvider)
+class CRVacuum(PGVacuum):
+    _trash_batch_name = 'CR_TRASH_BATCH'

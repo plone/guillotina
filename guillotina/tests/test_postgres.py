@@ -1,5 +1,5 @@
-from guillotina.content import Folder
 from guillotina.component import get_adapter
+from guillotina.content import Folder
 from guillotina.db.interfaces import IVacuumProvider
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.pg import PostgresqlStorage
