@@ -4,6 +4,10 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Implement more optimized way to vacuum objects which dramatically improves handling
+  of deleting very large object trees
+  [vangheem]
+
 - Fix `LightweightConnection` pg class to close active cursors when connection done
   [vangheem]
 

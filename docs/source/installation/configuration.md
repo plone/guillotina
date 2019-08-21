@@ -56,6 +56,8 @@ Currently supported database drivers are:
 - `conn_acquire_timeout`: How long to wait for connection to be freed up from pool. (defaults to `20`)
 - `objects_table_name`: Table name to store object data. (defaults to `objects`)
 - `blobs_table_name`: Table name to store blob data. (defaults to `blobs`)
+- `autovacuum`: Default vacuum relies on pg referential integrity to delete all objects. If you have extremely large databases,
+  this can be very heavy on pg. Set this to `false` and run the `dbvacuum` command in a cronjob. (defaults to `true`)
 
 
 ### Storages

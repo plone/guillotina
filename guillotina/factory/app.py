@@ -262,6 +262,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan("guillotina.constraintypes")
     configure.scan("guillotina.subscribers")
     configure.scan("guillotina.db.strategies")
+    configure.scan("guillotina.db.storages.vacuum")
     configure.scan("guillotina.db.cache")
     configure.scan("guillotina.db.writer")
     configure.scan("guillotina.db.factory")

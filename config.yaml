@@ -12,6 +12,7 @@ databases:
     read_only: false
     statement_cache_size: 100
     max_cached_statement_lifetime: 300
+    autovacuum: false
   db-custom:
     storage: postgresql
     dsn: postgresql://postgres@localhost:5432/guillotina

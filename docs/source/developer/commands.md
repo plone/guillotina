@@ -12,6 +12,7 @@ You can provide your own CLI commands for guillotina through a simple interface.
 * `testdata`: populate the database with test data from wikipedia
 * `run`: run a python script. The file must have a function `async def run(container):`
 * `gen-key`: generate cryptographic key for jwt, jwk
+* `dbvacuum`: run optimized vacuuming process to clean up deleted objects
 
 
 ## Command Options
