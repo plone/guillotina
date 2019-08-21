@@ -419,7 +419,13 @@ class PGConnectionManager:
     """
 
     def __init__(
-        self, dsn=None, pool_size=13, connection_options=None, conn_acquire_timeout=20, vacuum_class=PGVacuum
+        self,
+        dsn=None,
+        pool_size=13,
+        connection_options=None,
+        conn_acquire_timeout=20,
+        vacuum_class=PGVacuum,
+        autovacuum=True,
     ):
         self._dsn = dsn
         self._pool_size = pool_size
@@ -432,6 +438,7 @@ class PGConnectionManager:
         self._vacuum = None
         self._vacuum_task = None
         self._vacuum_class = vacuum_class
+        self._autovacuum = autovacuum
 
     @property
     def vacuum(self):
@@ -493,8 +500,9 @@ class PGConnectionManager:
             # shared read connection on all transactions
             self._read_conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
 
-            self._vacuum = self._vacuum_class(self, loop)
-            self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
+            if self._autovacuum:
+                self._vacuum = self._vacuum_class(self, loop)
+                self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
 
     async def restart(self, timeout=2):
         # needs to be used with lock
@@ -627,11 +635,6 @@ class PostgresqlStorage(BaseStorage):
     def objects_table_name(self):
         return self._objects_table_name
 
-    async def vacuum(self):
-        await self.connection_manager.vacuum.run(self._objects_table_name)
-        while self.connection_manager.vacuum.size > 0:
-            await asyncio.sleep(0.1)
-
     async def create(self):
         # Check DB
         log.info("Creating initial database objects")
@@ -702,6 +705,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 connection_options=self._connection_options,
                 conn_acquire_timeout=self._conn_acquire_timeout,
                 vacuum_class=self._vacuum_class,
+                autovacuum=self._autovacuum,
             )
             await self._connection_manager.initialize(loop, **kw)
 
@@ -882,7 +886,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         await txn._cache.store_object(obj, pickled)
 
     async def _txn_oid_commit_hook(self, status, oid):
-        await self._connection_manager._vacuum.add_to_queue(oid, self._objects_table_name)
+        if self._connection_manager._vacuum is not None:
+            await self._connection_manager._vacuum.add_to_queue(oid, self._objects_table_name)
 
     async def delete(self, txn, oid):
         conn = await txn.get_connection()
