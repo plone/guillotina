@@ -42,7 +42,7 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage):
 
         await tm.commit(txn=txn)
 
-        vacuumer = get_adapter(aps, IVacuumProvider)
+        vacuumer = get_adapter(storage, IVacuumProvider)
         await vacuumer()
 
         txn = await tm.begin()
