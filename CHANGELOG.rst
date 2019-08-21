@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.9.5 (unreleased)
+4.9.5 (2019-08-21)
 ------------------
 
 - Implement more optimized way to vacuum objects which dramatically improves handling
