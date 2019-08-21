@@ -5,6 +5,7 @@ from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
+from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
@@ -149,7 +150,11 @@ class TestDataCommand(Command):
             roleperm.assign_role_to_principal('guillotina.Owner', 'root')
 
             await notify(ObjectAddedEvent(container, db, container.__name__))
-            await tm.commit(txn=txn)
+            try:
+                await tm.commit(txn=txn)
+            except ConflictIdOnContainer:
+                # ignore id conflicts
+                await tm.abort(txn=txn)
             txn = await tm.begin(self.request)
 
         self.request.container = container
@@ -163,7 +168,11 @@ class TestDataCommand(Command):
             if folder_count >= self.arguments.per_node:
                 break
 
-        await tm.commit(txn=txn)
+        try:
+            await tm.commit(txn=txn)
+        except ConflictIdOnContainer:
+            # ignore id conflicts
+            await tm.abort(txn=txn)
         api.close()
 
     async def import_folder(self, api, tm, txn, folder, page_data, depth=1):
@@ -184,7 +193,11 @@ class TestDataCommand(Command):
         behavior.description = page_data.get('extract', '')
 
         if self._count % self._batch_size == 0:
-            await tm.commit(txn=txn)
+            try:
+                await tm.commit(txn=txn)
+            except ConflictIdOnContainer:
+                # ignore id conflicts
+                await tm.abort(txn=txn)
             await tm.begin(self.request)
 
         if self.arguments.depth > depth:

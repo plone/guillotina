@@ -1,4 +1,6 @@
 from guillotina.content import Folder
+from guillotina.component import get_adapter
+from guillotina.db.interfaces import IVacuumProvider
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
@@ -757,7 +759,8 @@ async def test_vacuum_objects(db, dummy_request):
         # deferenced
         assert result[0]['parent_id'] == 'D' * 32
 
-    await aps.vacuum()
+    vacuumer = get_adapter(aps, IVacuumProvider)
+    await vacuumer()
 
     await asyncio.sleep(0.1)
 
