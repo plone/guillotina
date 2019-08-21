@@ -4,7 +4,9 @@ CHANGELOG
 4.9.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Implement more optimized way to vacuum objects which dramatically improves handling
+  of deleting very large object trees
+  [vangheem]
 
 
 4.9.4 (2019-08-20)

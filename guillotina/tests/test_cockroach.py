@@ -1,4 +1,6 @@
+from guillotina.component import get_adapter
 from guillotina.content import Folder
+from guillotina.db.interfaces import IVacuumProvider
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.tests.utils import create_content
 
@@ -40,7 +42,8 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage, dummy_request):
         txn.delete(folder1)
 
         await tm.commit(txn=txn)
-        await storage.vacuum()
+        vacuumer = get_adapter(storage, IVacuumProvider)
+        await vacuumer()
 
         txn = await tm.begin()
         with pytest.raises(KeyError):

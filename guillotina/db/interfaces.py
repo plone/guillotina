@@ -239,3 +239,15 @@ class IDatabaseManager(Interface):
 class IJSONDBSerializer(ICatalogDataAdapter):
     '''
     '''
+
+
+class IVacuumProvider(Interface):
+    def __init__(storage):
+        '''
+        Adapts a configured storage
+        '''
+
+    async def __call__():
+        '''
+        Run vacuuming
+        '''

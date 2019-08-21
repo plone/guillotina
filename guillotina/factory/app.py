@@ -258,6 +258,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     configure.scan('guillotina.db.cache')
     configure.scan('guillotina.db.writer')
     configure.scan('guillotina.db.factory')
+    configure.scan('guillotina.db.storages.vacuum')
     configure.scan('guillotina.exc_resp')
     configure.scan('guillotina.fields')
     configure.scan('guillotina.migrations')
