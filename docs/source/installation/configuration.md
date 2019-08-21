@@ -37,6 +37,7 @@ databases:
     read_only: false
     statement_cache_size: 100
     max_cached_statement_lifetime: 300
+    autovacuum: true
 ```
 
 In this configuration, the `db` key referenced in configuration here will be mapped
@@ -58,6 +59,8 @@ Currently supported database drivers are:
 - `cache_strategy`: If you have something like guillotina_rediscache installed, you can configure here. (defaults to `dummy`)
 - `objects_table_name`: Table name to store object data. (defaults to `objects`)
 - `blobs_table_name`: Table name to store blob data. (defaults to `blobs`)
+- `autovacuum`: Default vacuum relies on pg referential integrity to delete all objects. If you have extremely large databases,
+  this can be very heavy on pg. Set this to `false` and run the `dbvacuum` command in a cronjob. (defaults to `true`)
 
 
 ### Storages
