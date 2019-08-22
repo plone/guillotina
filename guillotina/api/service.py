@@ -51,11 +51,10 @@ class Service(View):
             data = self.request.url.query
             for parameter in self.__config__["parameters"]:
                 if parameter["in"] == "query":
-                    if "schema" in parameter:
+                    if "schema" in parameter and "name" in parameter:
                         if parameter["schema"]["type"] == "integer":
                             try:
-                                if "name" in parameter:
-                                    int(data[parameter["name"]])
+                                int(data[parameter["name"]])
                             except ValueError:
                                 raise HTTPPreconditionFailed(
                                     content={
