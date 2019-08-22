@@ -30,8 +30,8 @@ spec:
         resources: {}
         volumeMounts:
         - name: config
-          mountPath: /config.json
-          subPath: config.json
+          mountPath: /config.yaml
+          subPath: config.yaml
       volumes:
       - name: config
         configMap:
