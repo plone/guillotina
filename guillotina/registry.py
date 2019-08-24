@@ -3,6 +3,7 @@ from guillotina.browser import get_physical_path
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IRegistry
 from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
+from guillotina.utils import get_current_transaction
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
@@ -67,7 +68,7 @@ class Registry(AnnotationData):
 
     def __setitem__(self, name, value):
         super(Registry, self).__setitem__(name, value)
-        self.register()
+        get_current_transaction().register(self)
 
     def for_interface(self, iface, check=True, omit=(), prefix=None):
         return RecordsProxy(self, iface, prefix=prefix)

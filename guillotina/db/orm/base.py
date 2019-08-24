@@ -1,10 +1,14 @@
-from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.interfaces import ITransaction
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.profile import profilable
 from typing import Any
 from typing import Dict
-from typing import Optional, Generic, TypeVar
+from typing import Generic
+from typing import Optional
+from typing import TypeVar
 from zope.interface import implementer
+
+import weakref
 
 
 T = TypeVar("T")
@@ -87,17 +91,16 @@ class BaseObject:
     __immutable_cache__: bool = ObjectProperty[bool]("_BaseObject__immutable_cache", False)  # type: ignore
     __new_marker__: bool = ObjectProperty[bool]("_BaseObject__new_marker", False)  # type: ignore
     __gannotations__: Dict = DictDefaultProperty("_BaseObject__annotations")  # type: ignore
-    __txn__: Optional[ITransaction] = ObjectProperty[Optional[ITransaction]](  # type: ignore
-        "_BaseObject__txn", None
-    )
+
     __uuid__: str = ObjectProperty[str]("_BaseObject__uuid", None)  # type: ignore
     __serial__: int = ObjectProperty[int]("_BaseObject__serial", None)  # type: ignore
     __volatile__: Dict = DictDefaultProperty("_BaseObject__volatile")  # type: ignore
 
     def register(self):
-        txn = self.__txn__
-        if txn is not None:
-            txn.register(self)
+        from guillotina.utils import get_current_transaction
+
+        txn = get_current_transaction()
+        txn.register(self)
 
     @profilable
     def __getstate__(self):

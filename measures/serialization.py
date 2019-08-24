@@ -23,7 +23,6 @@ async def runit(type_name):
     request = get_current_request()
     txn = mocks.MockTransaction()
     ob = await create_content(type_name, id="foobar")
-    ob.__txn__ = txn
     deserializer = get_multi_adapter((ob, request), IResourceDeserializeFromJson)
     data = {
         "title": "Foobar",

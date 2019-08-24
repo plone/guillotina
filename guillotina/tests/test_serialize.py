@@ -97,7 +97,6 @@ async def test_deserialize_cloud_file(dummy_request):
 
     with get_tm() as tm, await tm.begin() as txn, dummy_request:
         obj = create_content(FileContent)
-        obj.__txn__ = txn
         obj.file = None
         await get_adapter(
             IFileContent["file"].bind(obj),
@@ -433,59 +432,62 @@ async def test_patch_int_field_invalid_type(dummy_request):
         assert isinstance(errors[0]["error"], WrongType)
 
 
-async def test_bucket_list_field(dummy_request):
+async def test_bucket_list_field(db, dummy_request):
     login()
     content = create_content()
-    content.__txn__ = mocks.MockTransaction()
-    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
-    await deserializer.set_schema(
-        ITestSchema, content, {"bucket_list": {"op": "append", "value": {"key": "foo", "value": "bar"}}}, []
-    )
-    assert content.bucket_list.annotations_metadata[0]["len"] == 1
-    assert await content.bucket_list.get(content, 0, 0) == {"key": "foo", "value": "bar"}
-    assert await content.bucket_list.get(content, 0, 1) is None
-    assert await content.bucket_list.get(content, 1, 0) is None
-
-    for _ in range(100):
+    with mocks.MockTransaction() as txn:
+        deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
         await deserializer.set_schema(
             ITestSchema,
             content,
             {"bucket_list": {"op": "append", "value": {"key": "foo", "value": "bar"}}},
             [],
         )
+        assert content.bucket_list.annotations_metadata[0]["len"] == 1
+        assert await content.bucket_list.get(content, 0, 0) == {"key": "foo", "value": "bar"}
+        assert await content.bucket_list.get(content, 0, 1) is None
+        assert await content.bucket_list.get(content, 1, 0) is None
 
-    assert len(content.bucket_list.annotations_metadata) == 11
-    assert content.bucket_list.annotations_metadata[0]["len"] == 10
-    assert content.bucket_list.annotations_metadata[5]["len"] == 10
-    assert content.bucket_list.annotations_metadata[10]["len"] == 1
+        for _ in range(100):
+            await deserializer.set_schema(
+                ITestSchema,
+                content,
+                {"bucket_list": {"op": "append", "value": {"key": "foo", "value": "bar"}}},
+                [],
+            )
 
-    await content.bucket_list.remove(content, 10, 0)
-    assert content.bucket_list.annotations_metadata[10]["len"] == 0
-    await content.bucket_list.remove(content, 9, 0)
-    assert content.bucket_list.annotations_metadata[9]["len"] == 9
+        assert len(content.bucket_list.annotations_metadata) == 11
+        assert content.bucket_list.annotations_metadata[0]["len"] == 10
+        assert content.bucket_list.annotations_metadata[5]["len"] == 10
+        assert content.bucket_list.annotations_metadata[10]["len"] == 1
 
-    assert len(content.bucket_list) == 99
+        await content.bucket_list.remove(content, 10, 0)
+        assert content.bucket_list.annotations_metadata[10]["len"] == 0
+        await content.bucket_list.remove(content, 9, 0)
+        assert content.bucket_list.annotations_metadata[9]["len"] == 9
 
-    await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {
-            "bucket_list": {
-                "op": "extend",
-                "value": [{"key": "foo", "value": "bar"}, {"key": "foo", "value": "bar"}],
-            }
-        },
-        [],
-    )
+        assert len(content.bucket_list) == 99
 
-    assert len(content.bucket_list) == 101
+        await deserializer.set_schema(
+            ITestSchema,
+            content,
+            {
+                "bucket_list": {
+                    "op": "extend",
+                    "value": [{"key": "foo", "value": "bar"}, {"key": "foo", "value": "bar"}],
+                }
+            },
+            [],
+        )
 
-    assert json_compatible(content.bucket_list) == {"len": 101, "buckets": 11}
+        assert len(content.bucket_list) == 101
 
-    assert len([b async for b in content.bucket_list.iter_buckets(content)]) == 11
-    assert len([i async for i in content.bucket_list.iter_items(content)]) == 101
+        assert json_compatible(content.bucket_list) == {"len": 101, "buckets": 11}
 
-    assert "bucketlist-bucket_list0" in content.__gannotations__
+        assert len([b async for b in content.bucket_list.iter_buckets(content)]) == 11
+        assert len([i async for i in content.bucket_list.iter_items(content)]) == 101
+
+        assert "bucketlist-bucket_list0" in content.__gannotations__
 
 
 def test_default_value_deserialize(dummy_request):
@@ -571,28 +573,28 @@ async def test_nested_patch_deserialize(dummy_request):
 
 async def test_dates_bucket_list_field(dummy_request):
     login()
-    content = create_content()
-    content.__txn__ = mocks.MockTransaction()
-    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
-    await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {"datetime_bucket_list": {"op": "append", "value": "2018-06-05T12:35:30.865745+00:00"}},
-        [],
-    )
-    assert content.datetime_bucket_list.annotations_metadata[0]["len"] == 1
-    await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {
-            "datetime_bucket_list": {
-                "op": "extend",
-                "value": ["2019-06-05T12:35:30.865745+00:00", "2020-06-05T12:35:30.865745+00:00"],
-            }
-        },
-        [],
-    )
-    assert content.datetime_bucket_list.annotations_metadata[0]["len"] == 3
+    with mocks.MockTransaction():
+        content = create_content()
+        deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+        await deserializer.set_schema(
+            ITestSchema,
+            content,
+            {"datetime_bucket_list": {"op": "append", "value": "2018-06-05T12:35:30.865745+00:00"}},
+            [],
+        )
+        assert content.datetime_bucket_list.annotations_metadata[0]["len"] == 1
+        await deserializer.set_schema(
+            ITestSchema,
+            content,
+            {
+                "datetime_bucket_list": {
+                    "op": "extend",
+                    "value": ["2019-06-05T12:35:30.865745+00:00", "2020-06-05T12:35:30.865745+00:00"],
+                }
+            },
+            [],
+        )
+        assert content.datetime_bucket_list.annotations_metadata[0]["len"] == 3
 
 
 async def test_patchfield_notdefined_field(dummy_request):
@@ -682,65 +684,73 @@ async def test_delete_by_value_field(dummy_request):
 async def test_bucket_dict_field(dummy_request):
     login()
     content = create_content()
-    content.__txn__ = mocks.MockTransaction()
-    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
-    await deserializer.set_schema(
-        ITestSchema, content, {"bucket_dict": {"op": "assign", "value": {"key": "foo", "value": "bar"}}}, []
-    )
-    assert content.bucket_dict.buckets[0]["len"] == 1
-    assert await content.bucket_dict.get(content, "foo") == "bar"
-    assert await content.bucket_dict.get(content, "bar") is None
-
-    inserted = {"foo": "bar"}
-    for idx in range(100):
-        key = uuid.uuid4().hex
-        inserted[key] = str(idx)
+    with mocks.MockTransaction():
+        deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
         await deserializer.set_schema(
             ITestSchema,
             content,
-            {"bucket_dict": {"op": "assign", "value": {"key": key, "value": str(idx)}}},
+            {"bucket_dict": {"op": "assign", "value": {"key": "foo", "value": "bar"}}},
+            [],
+        )
+        assert content.bucket_dict.buckets[0]["len"] == 1
+        assert await content.bucket_dict.get(content, "foo") == "bar"
+        assert await content.bucket_dict.get(content, "bar") is None
+
+        inserted = {"foo": "bar"}
+        for idx in range(100):
+            key = uuid.uuid4().hex
+            inserted[key] = str(idx)
+            await deserializer.set_schema(
+                ITestSchema,
+                content,
+                {"bucket_dict": {"op": "assign", "value": {"key": key, "value": str(idx)}}},
+                [],
+            )
+
+        # number of buckets and sizes of each is random depending on keys
+        assert len(content.bucket_dict) == 101
+        removed = list(inserted.keys())[-1]
+        del inserted[removed]
+        await content.bucket_dict.remove(content, removed)
+        assert len(content.bucket_dict) == 100
+
+        one = list(inserted.keys())[-1]
+        two = list(inserted.keys())[-2]
+        await deserializer.set_schema(
+            ITestSchema,
+            content,
+            {
+                "bucket_dict": {
+                    "op": "update",
+                    "value": [{"key": one, "value": "1"}, {"key": two, "value": "2"}],
+                }
+            },
             [],
         )
 
-    # number of buckets and sizes of each is random depending on keys
-    assert len(content.bucket_dict) == 101
-    removed = list(inserted.keys())[-1]
-    del inserted[removed]
-    await content.bucket_dict.remove(content, removed)
-    assert len(content.bucket_dict) == 100
+        inserted[one] = "1"
+        inserted[two] = "2"
+        assert len(content.bucket_dict) == 100
+        assert await content.bucket_dict.get(content, one) == "1"
+        assert await content.bucket_dict.get(content, two) == "2"
 
-    one = list(inserted.keys())[-1]
-    two = list(inserted.keys())[-2]
-    await deserializer.set_schema(
-        ITestSchema,
-        content,
-        {"bucket_dict": {"op": "update", "value": [{"key": one, "value": "1"}, {"key": two, "value": "2"}]}},
-        [],
-    )
+        assert json_compatible(content.bucket_dict)["len"] == 100
 
-    inserted[one] = "1"
-    inserted[two] = "2"
-    assert len(content.bucket_dict) == 100
-    assert await content.bucket_dict.get(content, one) == "1"
-    assert await content.bucket_dict.get(content, two) == "2"
+        assert len(content.bucket_dict.buckets) == len(
+            [name for name in content.__gannotations__.keys() if name.startswith("bucketdict-")]
+        )
 
-    assert json_compatible(content.bucket_dict)["len"] == 100
+        # test everything completely sorted
+        all_keys = []
+        all_values = []
+        for bucket in content.bucket_dict.buckets:
+            annotation = await content.bucket_dict.get_annotation(content, anno_id=bucket["id"])
+            assert annotation["keys"] == sorted(annotation["keys"])
+            all_keys.extend(annotation["keys"])
+            all_values.extend(annotation["values"])
+        assert all_keys == sorted(all_keys)
+        assert all_keys == sorted(inserted.keys())
 
-    assert len(content.bucket_dict.buckets) == len(
-        [name for name in content.__gannotations__.keys() if name.startswith("bucketdict-")]
-    )
-
-    # test everything completely sorted
-    all_keys = []
-    all_values = []
-    for bucket in content.bucket_dict.buckets:
-        annotation = await content.bucket_dict.get_annotation(content, anno_id=bucket["id"])
-        assert annotation["keys"] == sorted(annotation["keys"])
-        all_keys.extend(annotation["keys"])
-        all_values.extend(annotation["values"])
-    assert all_keys == sorted(all_keys)
-    assert all_keys == sorted(inserted.keys())
-
-    # check all values as well
-    for idx, key in enumerate(all_keys):
-        assert inserted[key] == all_values[idx]
+        # check all values as well
+        for idx, key in enumerate(all_keys):
+            assert inserted[key] == all_values[idx]

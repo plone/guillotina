@@ -35,32 +35,30 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage):
         txn.register(item)
 
         await tm.commit(txn=txn)
-        txn = await tm.begin()
+        with await tm.begin():
+            txn.delete(folder1)
 
-        folder1.__txn__ = txn
-        txn.delete(folder1)
+            await tm.commit(txn=txn)
 
-        await tm.commit(txn=txn)
+            vacuumer = get_adapter(storage, IVacuumProvider)
+            await vacuumer()
 
-        vacuumer = get_adapter(storage, IVacuumProvider)
-        await vacuumer()
+            txn = await tm.begin()
+            with pytest.raises(KeyError):
+                await txn.get(folder1.__uuid__)
+                await tm.abort(txn=txn)
 
-        txn = await tm.begin()
-        with pytest.raises(KeyError):
-            await txn.get(folder1.__uuid__)
+            with pytest.raises(KeyError):
+                # dangling...
+                await txn.get(item.__uuid__)
+                await tm.abort(txn=txn)
+
+            with pytest.raises(KeyError):
+                # dangling...
+                await txn.get(folder2.__uuid__)
+                await tm.abort(txn=txn)
+
             await tm.abort(txn=txn)
-
-        with pytest.raises(KeyError):
-            # dangling...
-            await txn.get(item.__uuid__)
-            await tm.abort(txn=txn)
-
-        with pytest.raises(KeyError):
-            # dangling...
-            await txn.get(folder2.__uuid__)
-            await tm.abort(txn=txn)
-
-        await tm.abort(txn=txn)
 
 
 async def test_deleting_parent_deletes_children(cockroach_storage):

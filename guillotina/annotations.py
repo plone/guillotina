@@ -3,8 +3,9 @@ from guillotina import configure
 from guillotina.db.orm.base import BaseObject
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IResource
 from guillotina.interfaces import IRegistry
+from guillotina.interfaces import IResource
+from guillotina.utils import get_current_transaction
 from zope.interface import implementer
 
 import logging
@@ -44,19 +45,19 @@ class AnnotationsAdapter(object):
         element = annotations.get(key, _marker)
         if element is _marker:
             # Get from DB
-            if self.obj.__txn__ is not None:
-                try:
-                    obj = await self.obj.__txn__.get_annotation(self.obj, key, reader=reader)
-                except KeyError:
-                    obj = None
-                if obj is not None:
-                    annotations[key] = obj
+            txn = get_current_transaction()
+            try:
+                obj = await txn.get_annotation(self.obj, key, reader=reader)
+            except KeyError:
+                obj = None
+            if obj is not None:
+                annotations[key] = obj
         if key in annotations:
             return annotations[key]
         return default
 
     async def async_keys(self):
-        return await self.obj.__txn__.get_annotation_keys(self.obj.__uuid__)
+        return await get_current_transaction().get_annotation_keys(self.obj.__uuid__)
 
     async def async_set(self, key, value):
         if not isinstance(value, BaseObject):
@@ -68,13 +69,13 @@ class AnnotationsAdapter(object):
         value.__name__ = key
         value.__new_marker__ = True
         # we register the value
-        value.__txn__ = self.obj.__txn__
-        value.__txn__.register(value)
+        txn = get_current_transaction()
+        txn.register(value)
         logger.debug("registering annotation {}({}), of: {}".format(value.__uuid__, key, value.__of__))
 
     async def async_del(self, key):
         annotation = await self.async_get(key)
         if annotation is not None:
-            self.obj.__txn__.delete(annotation)
+            get_current_transaction().delete(annotation)
             if key in self.obj.__gannotations__:
                 del self.obj.__gannotations__[key]

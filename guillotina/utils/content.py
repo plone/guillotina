@@ -102,7 +102,6 @@ async def get_containers():
 
             for _, container in items.items():
                 with await tm.begin() as txn:
-                    container.__txn__ = txn
                     task_vars.container.set(container)
                     yield txn, tm, container
                     try:
@@ -188,7 +187,6 @@ async def get_object_by_uid(uid: str, txn=None) -> IBaseObject:
         raise KeyError(uid)
 
     obj = app_settings["object_reader"](result)
-    obj.__txn__ = txn
     if result["parent_id"]:
         parent = await get_object_by_uid(result["parent_id"], txn)
         if parent is not None:

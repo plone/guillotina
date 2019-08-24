@@ -1,17 +1,5 @@
-import os
-import pathlib
 from datetime import datetime
-from typing import AsyncIterator
-from typing import FrozenSet
-from typing import Iterator
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
-
 from dateutil.tz import tzutc
-
-import guillotina.db.orm.base
 from guillotina import configure
 from guillotina import task_vars
 from guillotina._cache import BEHAVIOR_CACHE
@@ -29,7 +17,6 @@ from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.component.factory import Factory
 from guillotina.db import uid
-from guillotina.db.interfaces import ITransaction
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.event import notify
 from guillotina.events import BeforeObjectAddedEvent
@@ -42,7 +29,6 @@ from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
-from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
 from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
@@ -68,13 +54,25 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.utils import get_default_from_schema
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
+from guillotina.utils import get_current_transaction
 from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
-from zope.interface import Interface
+from typing import AsyncIterator
+from typing import FrozenSet
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 from zope.interface import alsoProvides
 from zope.interface import implementer
+from zope.interface import Interface
 from zope.interface import noLongerProvides
 from zope.interface.interfaces import ComponentLookupError
+
+import guillotina.db.orm.base
+import os
+import pathlib
 
 
 _zone = tzutc()  # utz tz is much faster than local tz info
@@ -210,7 +208,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
             self.__behaviors__ |= {name}
             if behavior_registration.marker is not None:
                 alsoProvides(self, behavior_registration.marker)
-            self.register()  # make sure we resave this obj
+            get_current_transaction().register(self)
 
     def remove_behavior(self, iface: Interface) -> None:
         """We need to apply the marker interface.
@@ -230,7 +228,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
                 pass
         if iface in self.__behaviors__:
             self.__behaviors__ -= {name}
-        self.register()  # make sure we resave this obj
+        get_current_transaction().register(self)
 
     @profilable
     def __getattr__(self, name):
@@ -275,21 +273,13 @@ class Folder(Resource):
     to work with contained objects asynchronously.
     """
 
-    def _get_transaction(self) -> ITransaction:
-        if self.__txn__ is not None:
-            return self.__txn__
-        txn = get_transaction()
-        if txn is not None:
-            return txn
-        raise TransactionNotFound()
-
     async def async_contains(self, key: str) -> bool:
         """
         Asynchronously check if key exists inside this folder
 
         :param key: key of child object to check
         """
-        return await self._get_transaction().contains(self.__uuid__, key)
+        return await get_current_transaction().contains(self.__uuid__, key)
 
     async def async_set(self, key: str, value: Resource) -> None:
         """
@@ -300,9 +290,8 @@ class Folder(Resource):
         """
         value.__parent__ = self
         value.__name__ = key
-        trns = self._get_transaction()
+        trns = get_current_transaction()
         if trns is not None:
-            value.__txn__ = trns
             trns.register(value)
 
     async def async_get(self, key: str, default=None, suppress_events=False) -> Optional[IBaseObject]:
@@ -312,7 +301,7 @@ class Folder(Resource):
         :param key: key of child object to get
         """
         try:
-            txn = self._get_transaction()
+            txn = get_current_transaction()
             val = await txn.get_child(self, key)
             if val is not None:
                 if not suppress_events:
@@ -330,7 +319,7 @@ class Folder(Resource):
 
         :param keys: keys of child objects to get
         """
-        txn = self._get_transaction()
+        txn = get_current_transaction()
         async for item in txn.get_children(self, keys):  # type: ignore
             yield item
 
@@ -340,7 +329,7 @@ class Folder(Resource):
 
         :param key: key of child objec to delete
         """
-        txn = self._get_transaction()
+        txn = get_current_transaction()
         obj = await self.async_get(key)
         if obj is not None:
             return txn.delete(obj)
@@ -349,26 +338,26 @@ class Folder(Resource):
         """
         Asynchronously calculate the len of the folder
         """
-        return await self._get_transaction().len(self.__uuid__)
+        return await get_current_transaction().len(self.__uuid__)
 
     async def async_keys(self) -> List[str]:
         """
         Asynchronously get the sub object keys in this folder
         """
-        return await self._get_transaction().keys(self.__uuid__)
+        return await get_current_transaction().keys(self.__uuid__)
 
     async def async_items(self, suppress_events=False) -> AsyncIterator[Tuple[str, Resource]]:
         """
         Asynchronously iterate through contents of folder
         """
-        txn = self._get_transaction()
+        txn = get_current_transaction()
         async for key, value in txn.items(self):  # type: ignore
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))
             yield key, value
 
     async def async_values(self, suppress_events=False) -> AsyncIterator[Tuple[Resource]]:
-        txn = self._get_transaction()
+        txn = get_current_transaction()
         async for _, value in txn.items(self):  # type: ignore
             if not suppress_events:
                 await notify(ObjectLoadedEvent(value))
@@ -598,7 +587,7 @@ async def create_content_in_container(
             continue
         setattr(obj, key, value)
 
-    txn = getattr(parent, "__txn__", None) or get_transaction()
+    txn = get_current_transaction()
     if txn is None or not txn.storage.supports_unique_constraints:
         # need to manually check unique constraints
         if await parent.async_contains(obj.id):

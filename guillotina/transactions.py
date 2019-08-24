@@ -117,7 +117,6 @@ class transaction:  # noqa: N801
     def adopt_objects(self, obs, txn):
         for oid, ob in obs.items():
             self.adopted.append(ob)
-            ob.__txn__ = txn
 
     async def __aexit__(self, exc_type, exc, tb):
         if self.adopt_parent_txn and self.previous_txn is not None:
@@ -150,9 +149,6 @@ class transaction:  # noqa: N801
                 self.previous_txn.modified = {}
                 self.previous_txn.deleted = {}
                 self.previous_txn.added = {}
-
-                for ob in self.adopted:
-                    ob.__txn__ = self.previous_txn
 
         if self.execute_futures:
             from guillotina.utils import execute

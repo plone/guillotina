@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 
 from guillotina import task_vars
@@ -34,7 +33,6 @@ class MockTransaction:
             self, ITransactionStrategy, name=manager._storage._transaction_strategy
         )
         self._cache = DummyCache(self)
-        self._lock = asyncio.Lock()
         self._status = "started"
         self._db_conn = None
         self.storage = MockStorage()
@@ -169,7 +167,6 @@ class FakeConnection:
         return key in [self.refs[oid].id for oid in oids]
 
     def register(self, ob):
-        ob.__txn__ = self
         ob.__uuid__ = uuid.uuid4().hex
         self.refs[ob.__uuid__] = ob
         self.containments[ob.__uuid__] = []

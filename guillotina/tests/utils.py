@@ -1,8 +1,3 @@
-import json
-import uuid
-from contextlib import contextmanager
-from unittest import mock
-
 from aiohttp import hdrs
 from aiohttp import test_utils
 from aiohttp.helpers import noop
@@ -10,6 +5,7 @@ from aiohttp.helpers import sentinel
 from aiohttp.http import HttpVersion
 from aiohttp.http import RawRequestMessage
 from aiohttp.web import UrlMappingMatchInfo
+from contextlib import contextmanager
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
@@ -20,10 +16,15 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.request import Request
 from guillotina.transactions import transaction
+from guillotina.utils import get_current_transaction
 from multidict import CIMultiDict
+from unittest import mock
 from yarl import URL
 from zope.interface import alsoProvides
 from zope.interface import implementer
+
+import json
+import uuid
 
 
 def get_db(app, db_id):
@@ -81,11 +82,8 @@ class FakeRequest(object):
 
 
 def register(ob):
-    if ob.__txn__ is None:
-        from guillotina.tests.mocks import FakeConnection
-
-        conn = FakeConnection()
-        conn.register(ob)
+    txn = get_current_transaction()
+    txn.register(ob)
 
 
 class ContainerRequesterAsyncContextManager:

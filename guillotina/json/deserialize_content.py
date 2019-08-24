@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import asyncio
-
 from guillotina import configure
 from guillotina import glogging
 from guillotina.component import ComponentLookupError
@@ -15,17 +13,20 @@ from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import Invalid
 from guillotina.exceptions import Unauthorized
 from guillotina.exceptions import ValueDeserializationError
-from guillotina.interfaces import RESERVED_ATTRS
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
+from guillotina.interfaces import RESERVED_ATTRS
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
+from guillotina.utils import get_current_transaction
 from guillotina.utils import get_security_policy
 from zope.interface import Interface
+
+import asyncio
 
 
 logger = glogging.getLogger("guillotina")
@@ -42,6 +43,7 @@ class DeserializeFromJson(object):
 
     async def __call__(self, data, validate_all=False, ignore_errors=False, create=False):
         errors = []
+        txn = get_current_transaction()
 
         # do behavior first in case they modify context values
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
@@ -53,7 +55,6 @@ class DeserializeFromJson(object):
                     # signal to caching engine to cache no data here so
                     # we prevent a future lookup
                     try:
-                        txn = self.context.__txn__
                         await txn._cache.set(
                             _EMPTY,
                             container=self.context,

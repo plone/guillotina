@@ -221,9 +221,6 @@ class Transaction:
         if self.read_only:
             raise ReadOnlyError()
 
-        if obj.__txn__ is None:
-            obj.__txn__ = self
-
         oid = obj.__uuid__
         new = False
         if oid is None:
@@ -282,7 +279,6 @@ class Transaction:
             result = await self._get(oid)
 
         obj = app_settings["object_reader"](result)
-        obj.__txn__ = self
         if obj.__immutable_cache__:
             # ttl of zero means we want to provide a hard cache here
             self._manager._hard_cache[oid] = result
@@ -345,10 +341,6 @@ class Transaction:
 
     @profilable
     async def _store_object(self, obj, uid, added=False):
-        # Modified objects
-        if obj.__txn__ is not self and obj.__txn__ is not None:
-            raise Exception(f"Invalid reference to txn: {obj}")
-
         # There is no serial
         if added:
             serial = None
@@ -359,8 +351,6 @@ class Transaction:
         await self._manager._storage.store(uid, serial, writer, obj, self)
         obj.__serial__ = self._tid
         obj.__uuid__ = uid
-        if obj.__txn__ is None:
-            obj.__txn__ = self
 
     @profilable
     async def tpc_commit(self):
@@ -372,8 +362,6 @@ class Transaction:
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
-            if obj.__txn__ is not self and obj.__txn__ is not None:
-                raise Exception(f"Invalid reference to txn: {obj}")
             await self._manager._storage.delete(self, oid)
 
     @profilable
@@ -422,7 +410,6 @@ class Transaction:
     def _fill_object(self, item: dict, parent: IBaseObject) -> IBaseObject:
         obj = app_settings["object_reader"](item)
         obj.__parent__ = parent
-        obj.__txn__ = self
         return obj
 
     async def _get_batch_children(self, parent: IBaseObject, keys: List[str]) -> AsyncIterator[IBaseObject]:
@@ -497,7 +484,6 @@ class Transaction:
         else:
             obj = reader(result)
         obj.__of__ = base_obj.__uuid__
-        obj.__txn__ = self
         return obj
 
     @profilable

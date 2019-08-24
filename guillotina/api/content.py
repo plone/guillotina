@@ -56,6 +56,7 @@ from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_behavior
+from guillotina.utils import get_current_transaction
 from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_object_url
 from guillotina.utils import get_security_policy
@@ -457,7 +458,7 @@ class DefaultDELETE(Service):
         content_id = self.context.id
         parent = self.context.__parent__
         await notify(BeforeObjectRemovedEvent(self.context, parent, content_id))
-        self.context.__txn__.delete(self.context)
+        get_current_transaction().delete(self.context)
         await notify(ObjectRemovedEvent(self.context, parent, content_id))
 
 

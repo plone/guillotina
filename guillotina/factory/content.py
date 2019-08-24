@@ -1,8 +1,4 @@
-import asyncio
-import logging
-import typing
 from concurrent.futures import ThreadPoolExecutor
-
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.validators import hash_password
@@ -12,20 +8,23 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.const import ROOT_ID
 from guillotina.db.interfaces import IDatabaseManager
-from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
 from guillotina.db.interfaces import IWriter
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
-from guillotina.transactions import get_transaction
 from guillotina.utils import apply_coroutine
+from guillotina.utils import get_current_transaction
 from guillotina.utils import import_class
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
 from guillotina.utils import notice_on_error
 from zope.interface import alsoProvides
 from zope.interface import implementer
+
+import asyncio
+import logging
+import typing
 
 
 logger = logging.getLogger("guillotina")
@@ -169,7 +168,6 @@ class Database:
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
                 root = app_settings["object_reader"](root)
-                root.__txn__ = txn
                 if root.__db_id__ is None:
                     root.__db_id__ = self._database_name
                     await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
@@ -200,13 +198,9 @@ class Database:
             self._tm = self.transaction_klass(self._storage, self)
         return self._tm
 
-    @property
-    def __txn__(self) -> typing.Optional[ITransaction]:
-        return get_transaction()
-
     async def get_root(self):
         try:
-            return await self.__txn__.get(ROOT_ID)
+            return await get_current_transaction().get(ROOT_ID)
         except KeyError:
             pass
 
@@ -218,7 +212,7 @@ class Database:
     async def async_keys(self):
         root = await self.get_root()
         if root is not None:
-            return await root.__txn__.keys(root.__uuid__)
+            return await get_current_transaction().keys(root.__uuid__)
         return []
 
     async def async_set(self, key, value):
@@ -227,23 +221,23 @@ class Database:
 
     async def async_del(self, key):
         root = await self.get_root()
-        await apply_coroutine(root.__txn__.delete, await root.async_get(key))
+        await apply_coroutine(get_current_transaction().delete, await root.async_get(key))
 
     async def async_items(self):
         root = await self.get_root()
         if root is not None:
-            async for key, value in root.__txn__.items(root):
+            async for key, value in get_current_transaction().items(root):
                 yield key, value
 
     async def async_contains(self, key):
         # is there any request active ? -> conn there
         root = await self.get_root()
         if root is not None:
-            return await apply_coroutine(root.__txn__.contains, root.__uuid__, key)
+            return await apply_coroutine(get_current_transaction().contains, root.__uuid__, key)
         return False
 
     async def async_len(self):
         root = await self.get_root()
         if root is not None:
-            return await apply_coroutine(root.__txn__.len, root.__uuid__)
+            return await apply_coroutine(get_current_transaction().len, root.__uuid__)
         return 0

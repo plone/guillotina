@@ -649,7 +649,6 @@ class PGSearchUtility(DefaultSearchUtility):
             return
 
         data["transaction"] = await data["tm"].begin()
-        container.__txn__ = data["transaction"]
         await self._process_object(container, data)
         await self._process_folder(container, data)
         await data["tm"].commit(txn=data["transaction"])
@@ -668,8 +667,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
         if data["count"] % 200 == 0:
             await data["tm"].commit(txn=data["transaction"])
-            data["transaction"] = await data["tm"].begin()
-            obj.__txn__ = data["transaction"]
+            await data["tm"].begin(txn=data["transaction"])
 
         uuid = obj.__uuid__
 

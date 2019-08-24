@@ -13,19 +13,6 @@ class IBaseObject(Interface):
     __name__ = Attribute("")
     __parent__ = Attribute("")
 
-    __txn__ = Attribute(
-        """The data manager for the object.
-
-        The data manager should implement IPersistentDataManager (note that
-        this constraint is not enforced).
-
-        If there is no data manager, then this is None.
-
-        Once assigned to a data manager, an object cannot be re-assigned
-        to another.
-        """
-    )
-
     __uuid__ = Attribute(
         """The object id.
 

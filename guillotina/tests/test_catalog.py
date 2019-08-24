@@ -1,8 +1,4 @@
-import json
-import os
 from datetime import datetime
-
-import pytest
 from guillotina import task_vars
 from guillotina.catalog import index
 from guillotina.catalog.utils import get_index_fields
@@ -18,7 +14,13 @@ from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import ISecurityInfo
 from guillotina.tests import mocks
+from guillotina.utils import get_database
 from guillotina.tests import utils as test_utils
+from guillotina.transactions import transaction
+
+import json
+import os
+import pytest
 
 
 NOT_POSTGRES = os.environ.get("DATABASE", "DUMMY") in ("cockroachdb", "DUMMY")
@@ -43,52 +45,60 @@ def test_indexed_fields(dummy_guillotina, loop):
     assert len(metadata) == 1
 
 
-async def test_get_index_data(dummy_guillotina):
+async def test_get_index_data(db, guillotina_main):
+    db = await get_database("db")
+    async with transaction(db=db):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
 
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
+        ob = await create_content("Item", id="foobar")
 
-    ob = await create_content("Item", id="foobar")
+        data = ICatalogDataAdapter(ob)
+        fields = await data()
 
-    data = ICatalogDataAdapter(ob)
-    fields = await data()
-
-    assert "type_name" in fields
-    assert "uuid" in fields
-    assert "path" in fields
-    assert "title" in fields
+        assert "type_name" in fields
+        assert "uuid" in fields
+        assert "path" in fields
+        assert "title" in fields
 
 
-async def test_get_index_data_with_accessors(dummy_request):
-    request = dummy_request  # noqa
+async def test_get_index_data_with_accessors(db, guillotina_main):
+    db = await get_database("db")
+    async with transaction(db=db):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
 
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
+        ob = await create_content("Example", id="foobar", categories=[{"label": "foo", "number": 1}])
 
-    ob = await create_content("Example", id="foobar", categories=[{"label": "foo", "number": 1}])
+        data = ICatalogDataAdapter(ob)
+        fields = await data()
+        for field_name in (
+            "categories_accessor",
+            "foobar_accessor",
+            "type_name",
+            "categories",
+            "uuid",
+            "path",
+            "title",
+            "tid",
+        ):
+            assert field_name in fields
 
-    data = ICatalogDataAdapter(ob)
-    fields = await data()
-    for field_name in (
-        "categories_accessor",
-        "foobar_accessor",
-        "type_name",
-        "categories",
-        "uuid",
-        "path",
-        "title",
-        "tid",
-    ):
-        assert field_name in fields
-
-    # now only with indexes specified
-    data = ICatalogDataAdapter(ob)
-    fields = await data(indexes=["categories"])
-    # but should also pull in `foobar_accessor` because it does not
-    # have a field specified for it.
-    for field_name in ("categories_accessor", "foobar_accessor", "type_name", "categories", "uuid", "tid"):
-        assert field_name in fields
-    assert "title" not in fields
+        # now only with indexes specified
+        data = ICatalogDataAdapter(ob)
+        fields = await data(indexes=["categories"])
+        # but should also pull in `foobar_accessor` because it does not
+        # have a field specified for it.
+        for field_name in (
+            "categories_accessor",
+            "foobar_accessor",
+            "type_name",
+            "categories",
+            "uuid",
+            "tid",
+        ):
+            assert field_name in fields
+        assert "title" not in fields
 
 
 async def test_registered_base_utility(dummy_guillotina):
@@ -106,32 +116,34 @@ async def test_get_security_data(dummy_guillotina):
 
 async def test_get_data_uses_indexes_param(dummy_guillotina):
     util = query_utility(ICatalogUtility)
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
-    ob = await create_content("Item", id="foobar")
-    data = await util.get_data(ob, indexes=["title"])
-    assert len(data) == 8  # @uid, type_name, etc always returned
-    data = await util.get_data(ob, indexes=["title", "id"])
-    assert len(data) == 9
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        ob = await create_content("Item", id="foobar")
+        data = await util.get_data(ob, indexes=["title"])
+        assert len(data) == 8  # @uid, type_name, etc always returned
+        data = await util.get_data(ob, indexes=["title", "id"])
+        assert len(data) == 9
 
-    data = await util.get_data(ob)
-    assert len(data) > 10
+        data = await util.get_data(ob)
+        assert len(data) > 10
 
 
 async def test_modified_event_gathers_all_index_data(dummy_guillotina):
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
-    task_vars.container.set(container)
-    ob = await create_content("Item", id="foobar")
-    ob.__uuid__ = "foobar"
-    await notify(ObjectModifiedEvent(ob, payload={"title": "", "id": ""}))
-    fut = index.get_indexer()
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        task_vars.container.set(container)
+        ob = await create_content("Item", id="foobar")
+        ob.__uuid__ = "foobar"
+        await notify(ObjectModifiedEvent(ob, payload={"title": "", "id": ""}))
+        fut = index.get_indexer()
 
-    assert len(fut.update["foobar"]) == 9
+        assert len(fut.update["foobar"]) == 9
 
-    await notify(ObjectModifiedEvent(ob, payload={"creation_date": ""}))
-    assert "modification_date" in fut.update["foobar"]
-    assert len(fut.update["foobar"]) == 10
+        await notify(ObjectModifiedEvent(ob, payload={"creation_date": ""}))
+        assert "modification_date" in fut.update["foobar"]
+        assert len(fut.update["foobar"]) == 10
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)

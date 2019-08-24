@@ -30,11 +30,9 @@ async def runit(type_name):
     request = get_current_request()
     txn = mocks.MockTransaction()
     container = await create_content(type_name, id="container")
-    container.__txn__ = txn
     start = time.time()
     for _ in range(ITERATIONS):
         ob = await create_content(type_name, id="foobar")
-        ob.__txn__ = txn
         await notify(BeforeObjectAddedEvent(ob, container, "foobar"))
         deserializer = get_multi_adapter((ob, request), IResourceDeserializeFromJson)
         data = {

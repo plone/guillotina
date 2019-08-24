@@ -28,7 +28,7 @@ async def test_managed_transaction_with_adoption(container_requester):
             container.title = "changed title"
             container.register()
 
-            assert container.__uuid__ in container.__txn__.modified
+            assert container.__uuid__ in txn.modified
 
             # nest it with adoption
             async with transaction(adopt_parent_txn=True):
@@ -36,7 +36,7 @@ async def test_managed_transaction_with_adoption(container_requester):
                 pass
 
             # no longer modified, adopted in previous txn
-            assert container.__uuid__ not in container.__txn__.modified
+            assert container.__uuid__ not in txn.modified
 
         # finally, retrieve it again and make sure it's updated
         async with transaction(abort_when_done=True):
