@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-4.9.6 (unreleased)
+4.9.6 (2019-08-24)
 ------------------
 
 - Fix cache key for SQLStatements cache. This was causing vacuuming on multi-db environments
