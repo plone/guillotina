@@ -5,7 +5,6 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_utility
 from guillotina.db.interfaces import ITransaction
-from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import DatabaseNotFound
 from guillotina.exceptions import RequestNotFound

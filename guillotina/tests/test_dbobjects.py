@@ -3,7 +3,6 @@ from guillotina.content import Item
 from guillotina.interfaces import IAnnotations
 from guillotina.transactions import transaction
 from guillotina.utils import get_database
-from guillotina.content import Item
 
 import pytest
 

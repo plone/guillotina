@@ -1,4 +1,3 @@
-from guillotina.db.interfaces import ITransaction
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.profile import profilable
 from typing import Any
@@ -7,8 +6,6 @@ from typing import Generic
 from typing import Optional
 from typing import TypeVar
 from zope.interface import implementer
-
-import weakref
 
 
 T = TypeVar("T")

@@ -1,5 +1,3 @@
-import json
-
 from guillotina import utils
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IPrincipalRoleManager
@@ -8,8 +6,12 @@ from guillotina.tests.utils import create_content
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import get_root
 from guillotina.tests.utils import login
+from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
+from guillotina.utils import get_database
 from guillotina.utils.navigator import Navigator
+
+import json
 
 
 def test_module_resolve_path():
@@ -73,13 +75,14 @@ def test_valid_id():
     assert not utils.valid_id("FooBar-_-.?")
 
 
-def test_get_owners(dummy_guillotina):
-    content = create_content()
-    roleperm = IPrincipalRoleManager(content)
-    roleperm.assign_role_to_principal("guillotina.Owner", "foobar")
-    assert utils.get_owners(content) == ["foobar"]
-    roleperm.assign_role_to_principal("guillotina.Owner", "foobar2")
-    assert utils.get_owners(content) == ["foobar", "foobar2"]
+async def test_get_owners(dummy_guillotina):
+    async with transaction(db=await get_database("db")):
+        content = create_content()
+        roleperm = IPrincipalRoleManager(content)
+        roleperm.assign_role_to_principal("guillotina.Owner", "foobar")
+        assert utils.get_owners(content) == ["foobar"]
+        roleperm.assign_role_to_principal("guillotina.Owner", "foobar2")
+        assert utils.get_owners(content) == ["foobar", "foobar2"]
 
 
 def test_get_authenticated_user_without_request(dummy_guillotina):

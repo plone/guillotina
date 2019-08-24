@@ -14,7 +14,6 @@ from guillotina.interfaces.types import IConstrainTypes
 from guillotina.schema import Dict
 from guillotina.schema import TextLine
 from guillotina.test_package import ITestBehavior
-from guillotina.tests.mocks import MockTransaction
 from guillotina.tests import utils
 from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
