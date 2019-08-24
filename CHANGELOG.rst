@@ -4,7 +4,9 @@ CHANGELOG
 4.9.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix cache key for SQLStatements cache. This was causing vacuuming on multi-db environments
+  to not work since the vacuuming object was shared between dbs on guillotina_dynamictablestorage.
+  [vangheem]
 
 
 4.9.5 (2019-08-21)
