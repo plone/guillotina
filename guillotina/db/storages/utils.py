@@ -26,7 +26,7 @@ class SQLStatements:
         self._cached = {}
 
     def get(self, name, table_name):
-        key = name + '::' + table_name
+        key = name + "::" + table_name
         if key in self._cached:
             return self._cached[key]
         sql = _statements[name].format(table_name=table_name)
