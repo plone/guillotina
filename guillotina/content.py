@@ -547,7 +547,7 @@ async def create_content(type_, **kw) -> IResource:
 
 @profilable
 async def create_content_in_container(
-    parent: Folder, type_: str, id_: str, request: IRequest = None, check_security=True, **kw
+    parent: Folder, type_: str, id_: str, check_security=True, **kw
 ) -> Resource:
     """Utility to create a content.
 
@@ -557,7 +557,6 @@ async def create_content_in_container(
     :param parent: where to create content inside of
     :param type_: content type to create
     :param id_: id to give content in parent object
-    :param request: <optional>
     :param check_security: be able to disable security checks
     """
     factory = get_cached_factory(type_)

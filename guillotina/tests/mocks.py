@@ -1,5 +1,3 @@
-import uuid
-
 from guillotina import task_vars
 from guillotina.component import query_adapter
 from guillotina.db.cache.dummy import DummyCache
@@ -8,6 +6,9 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from zope.interface import implementer
+
+import asyncio
+import uuid
 
 
 class MockDBTransaction:
@@ -85,6 +86,14 @@ class MockStorage:
         self._misses = 0
         self._stored = 0
         self._objects_table_name = "objects"
+        self.__lock = None
+
+    @property
+    def _lock(self):
+        # lazy create lock
+        if self.__lock is None:
+            self.__lock = asyncio.Lock()
+        return self.__lock
 
     async def get_annotation(self, trns, oid, id):
         return None
