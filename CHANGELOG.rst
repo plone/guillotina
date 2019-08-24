@@ -4,7 +4,9 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
-- Refractor and bug fix in validation of parameter
+- Fix cache key for SQLStatements cache. This was causing vacuuming on multi-db environments
+  to not work since the vacuuming object was shared between dbs on guillotina_dynamictablestorage.
+  [vangheem]
 
 - Implement more optimized way to vacuum objects which dramatically improves handling
   of deleting very large object trees
@@ -25,15 +27,12 @@ CHANGELOG
 - Fix field.validate() crashes when providing invalid schema (for field of type Object)
   [masipcat]
 
-- Refractor SwaggerUI and to use in built auth of SwaggerUI
+- Upgrade to Swagger 3/Open API 3
+  [karannaoh]
 
-- Getting OpenAPI js and css from CDN
+- Implement json schema validation
+  [karannaoh]
 
-- Doc edit for OpenAPI
-
-- Swagger Fixes
-
-- json schema validation
 
 5.0.0a15 (2019-08-02)
 ---------------------
