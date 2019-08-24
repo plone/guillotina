@@ -29,6 +29,7 @@
      :param responses: Used for documentation and OpenAPI.
      :param parameters: Used for documentation and OpenAPI.
      :param requestBody: Used for documentation and OpenAPI
+     :param validate: Automatically validate request body with OpenAPI definition
 
   .. function:: contenttype(**kwargs)
 
