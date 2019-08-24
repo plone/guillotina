@@ -17,6 +17,7 @@ from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
 from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
+from guillotina.utils import get_database
 from guillotina.utils import get_object_by_oid
 
 import json
@@ -34,8 +35,8 @@ class CustomContentType(Item):
     pass
 
 
-async def test_not_allowed_to_create_content(db):
-    async with transaction(db=db):
+async def test_not_allowed_to_create_content(guillotina_main):
+    async with transaction(db=await get_database("db")):
         container = await create_content("Container", id="guillotina", title="Guillotina")
         container.__name__ = "guillotina"
 
@@ -55,10 +56,10 @@ async def test_allowed_to_create_content(db):
         await create_content_in_container(container, "Item", id_="foobar")
 
 
-async def test_allowed_types(db):
+async def test_allowed_types(guillotina_main):
     utils.login()
 
-    async with transaction(db=db):
+    async with transaction(db=await get_database("db")):
         container = await create_content("Container", id="guillotina", title="Guillotina")
         container.__name__ = "guillotina"
         utils.register(container)
@@ -91,10 +92,10 @@ async def test_allowed_types(db):
         await create_content_in_container(obj, "Item", "foobar")
 
 
-async def test_creator_used_from_content_creation(db):
+async def test_creator_used_from_content_creation(guillotina_main):
     utils.login()
 
-    async with transaction(db=db):
+    async with transaction(db=await get_database("db")):
         container = await create_content("Container", id="guillotina", title="Guillotina")
         container.__name__ = "guillotina"
         utils.register(container)
