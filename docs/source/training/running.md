@@ -7,7 +7,7 @@ However, before we begin, we'll need to run a postgresql server for Guillotina
 to use.
 
 ```
-docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:9.6
+docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres -p 127.0.0.1:5432:5432 postgres:9.6
 ```
 
 ```eval_rst

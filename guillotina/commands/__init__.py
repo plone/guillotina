@@ -70,7 +70,7 @@ def get_settings(configuration, overrides=None):
 
     if settings is None or settings == configuration:
         if "logged" not in MISSING_SETTINGS:
-            logger.warning(f"No configuration file found. " f"Using default settings.")
+            logger.warning(f"No configuration file found. Using default settings with DUMMY_FILE db.")
         MISSING_SETTINGS["logged"] = True
         settings = MISSING_SETTINGS.copy()
 
