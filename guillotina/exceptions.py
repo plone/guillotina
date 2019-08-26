@@ -49,6 +49,13 @@ class ConflictIdOnContainer(Exception):
         return f"Conflict ID {msg}"
 
 
+class TransactionClosedException(Exception):
+    def __init__(self, msg, txn, ob):
+        super().__init__(msg)
+        self.txn = txn
+        self.object = ob
+
+
 class UnRetryableRequestError(Exception):
     pass
 

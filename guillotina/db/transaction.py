@@ -20,6 +20,7 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
+from guillotina.exceptions import TransactionClosedException
 from guillotina.profile import profilable
 from guillotina.utils import lazy_apply
 from zope.interface import implementer
@@ -220,6 +221,9 @@ class Transaction:
         """We are adding a new object on the DB"""
         if self.read_only:
             raise ReadOnlyError()
+
+        if self.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT):
+            raise TransactionClosedException(f"Could not save {obj} to closed transaction", self, obj)
 
         if obj.__txn__ is None:
             obj.__txn__ = self

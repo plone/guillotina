@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a16 (unreleased)
 ---------------------
 
+- Throw exception when saving object to closed transaction
+  [vangheem]
+
 - Fix cache key for SQLStatements cache. This was causing vacuuming on multi-db environments
   to not work since the vacuuming object was shared between dbs on guillotina_dynamictablestorage.
   [vangheem]
