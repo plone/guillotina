@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.0a16 (unreleased)
+5.0.0a16 (2019-08-26)
 ---------------------
 
 - Throw exception when saving object to closed transaction
