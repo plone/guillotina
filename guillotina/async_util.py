@@ -1,12 +1,9 @@
-import asyncio
-import typing
 from datetime import datetime
-
 from dateutil.tz import tzutc
-
 from guillotina import logger
 from guillotina.browser import View
 from guillotina.db.transaction import Status
+from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import ServerClosingException
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IAsyncJobPool  # noqa
@@ -14,8 +11,11 @@ from guillotina.interfaces import IAsyncUtility  # noqa
 from guillotina.interfaces import IQueueUtility  # noqa
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
-from guillotina.utils import get_current_request
 from guillotina.transactions import transaction
+from guillotina.utils import get_current_request
+
+import asyncio
+import typing
 
 
 _zone = tzutc()
@@ -167,7 +167,12 @@ class AsyncJobPool:
     def add_job(self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None):
         if self._closing:
             raise ServerClosingException("Can not schedule job")
-        job = Job(func, request=request or get_current_request(), tm=get_tm(), args=args, kwargs=kwargs)
+        if request is None:
+            try:
+                request = get_current_request()
+            except RequestNotFound:
+                pass
+        job = Job(func, request=request, tm=get_tm(), args=args, kwargs=kwargs)
         self._pending.insert(0, job)
         self._schedule()
         return job
