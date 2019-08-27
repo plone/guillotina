@@ -14,6 +14,7 @@ from guillotina.interfaces import IAsyncUtility  # noqa
 from guillotina.interfaces import IQueueUtility  # noqa
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
+from guillotina.utils import get_current_request
 from guillotina.transactions import transaction
 
 
@@ -39,10 +40,8 @@ class QueueUtility(object):
         while True:
             got_obj = False
             try:
-                view = await self.queue.get()
+                view, tm, txn = await self.queue.get()
                 got_obj = True
-                txn = get_transaction()
-                tm = get_tm()
                 if txn is None or (
                     txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and txn._db_conn is None
                 ):
@@ -51,7 +50,7 @@ class QueueUtility(object):
                     # still finishing current transaction, this connection
                     # will be cut off, so we need to wait until we no longer
                     # have an active transaction on the reqeust...
-                    await self.add(view)
+                    await self.add((view, tm, txn))
                     await asyncio.sleep(1)
                     continue
 
@@ -93,7 +92,9 @@ class QueueUtility(object):
         return self._total_queued
 
     async def add(self, view):
-        await self.queue.put(view)
+        tm = get_tm()
+        txn = get_transaction()
+        await self.queue.put((view, tm, txn))
         self._total_queued += 1
         return self.queue.qsize()
 
@@ -114,9 +115,10 @@ class QueueObject(View):
 
 class Job:
     def __init__(
-        self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None
+        self, func: typing.Callable[[], typing.Coroutine], request=None, tm=None, args=None, kwargs=None
     ) -> None:
         self._func = func
+        self._tm = tm
         self._request = request
         self._args = args
         self._kwargs = kwargs
@@ -127,7 +129,7 @@ class Job:
 
     async def run(self):
         if self._request is not None:
-            async with transaction(abort_when_done=False), self._request:
+            async with self._tm, transaction(tm=self._tm), self._request:
                 await self._func(*self._args or [], **self._kwargs or {})
         else:
             # if no request, we do it without transaction
@@ -165,7 +167,7 @@ class AsyncJobPool:
     def add_job(self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None):
         if self._closing:
             raise ServerClosingException("Can not schedule job")
-        job = Job(func, request=request, args=args, kwargs=kwargs)
+        job = Job(func, request=request or get_current_request(), tm=get_tm(), args=args, kwargs=kwargs)
         self._pending.insert(0, job)
         self._schedule()
         return job

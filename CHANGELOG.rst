@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a17 (unreleased)
 ---------------------
 
+- Fix async utils to work correctly with transactions and context vars
+  [vangheem]
+
 - Be able to have `None` default field values
   [vangheem]
 
