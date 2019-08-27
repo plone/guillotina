@@ -349,10 +349,6 @@ class Transaction:
 
     @profilable
     async def _store_object(self, obj, uid, added=False):
-        # Modified objects
-        if obj.__txn__ is not self and obj.__txn__ is not None:
-            raise Exception(f"Invalid reference to txn: {obj}")
-
         # There is no serial
         if added:
             serial = None
@@ -376,8 +372,6 @@ class Transaction:
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
-            if obj.__txn__ is not self and obj.__txn__ is not None:
-                raise Exception(f"Invalid reference to txn: {obj}")
             await self._manager._storage.delete(self, oid)
 
     @profilable

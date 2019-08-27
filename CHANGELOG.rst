@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a17 (unreleased)
 ---------------------
 
+- Allow committing objects that were created with different transaction
+  [vangheem]
+
 - Fix async utils to work correctly with transactions and context vars
   [vangheem]
 
