@@ -1,12 +1,4 @@
-import asyncio
-import logging
-import sys
-import time
 from collections import OrderedDict
-from typing import AsyncIterator
-from typing import List
-from typing import Optional
-
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
@@ -21,9 +13,18 @@ from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import TransactionClosedException
+from guillotina.exceptions import TransactionMismatchException
 from guillotina.profile import profilable
 from guillotina.utils import lazy_apply
+from typing import AsyncIterator
+from typing import List
+from typing import Optional
 from zope.interface import implementer
+
+import asyncio
+import logging
+import sys
+import time
 
 
 _EMPTY = "__<EMPTY VALUE>__"
@@ -72,7 +73,7 @@ class Transaction:
     _status = "empty"
     _skip_commit = False
 
-    def __init__(self, manager, loop=None, read_only=False):
+    def __init__(self, manager, loop=None, read_only=False, validate_objects=True):
         self.initialize(read_only)
 
         # Transaction Manager
@@ -95,6 +96,7 @@ class Transaction:
         self._cache = query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
 
         self._query_count_start = self._query_count_end = 0
+        self._validate_objects = validate_objects
 
     def initialize(self, read_only):
         self._read_only = read_only
@@ -349,6 +351,10 @@ class Transaction:
 
     @profilable
     async def _store_object(self, obj, uid, added=False):
+        # Modified objects
+        if self._validate_objects and obj.__txn__ is not self and obj.__txn__ is not None:
+            raise TransactionMismatchException(f"Invalid store reference to txn: {obj}", self, obj)
+
         # There is no serial
         if added:
             serial = None
@@ -372,6 +378,8 @@ class Transaction:
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
+            if self._validate_objects and obj.__txn__ is not self and obj.__txn__ is not None:
+                raise TransactionMismatchException(f"Invalid delete reference to txn: {obj}", self, obj)
             await self._manager._storage.delete(self, oid)
 
     @profilable
