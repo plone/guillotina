@@ -92,6 +92,7 @@ class transaction:  # noqa: N801
         adopt_parent_txn=False,
         execute_futures=True,
         read_only=False,
+        validate_objects=True,
     ):
         if db is not None and tm is None:
             tm = db.get_transaction_manager()
@@ -102,6 +103,7 @@ class transaction:  # noqa: N801
         self.execute_futures = execute_futures
         self.adopted = []
         self.read_only = read_only
+        self.validate_objects
 
     async def __aenter__(self):
         txn = get_transaction()
@@ -109,6 +111,7 @@ class transaction:  # noqa: N801
             self.previous_txn = txn
 
         self.txn = await self.tm.begin(read_only=self.read_only)
+        self.txn._validate_objects = self.validate_objects
         # these should be restored after
         task_vars.tm.set(self.tm)
         task_vars.txn.set(self.txn)
