@@ -4,7 +4,8 @@ CHANGELOG
 5.0.0a17 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Be able to have `None` default field values
+  [vangheem]
 
 
 5.0.0a16 (2019-08-26)
