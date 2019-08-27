@@ -103,7 +103,7 @@ class transaction:  # noqa: N801
         self.execute_futures = execute_futures
         self.adopted = []
         self.read_only = read_only
-        self.validate_objects
+        self.validate_objects = validate_objects
 
     async def __aenter__(self):
         txn = get_transaction()
