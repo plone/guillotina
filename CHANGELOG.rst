@@ -4,6 +4,9 @@ CHANGELOG
 5.0.0a17 (unreleased)
 ---------------------
 
+- More normalization of execute module with task_vars/request objects
+  [vangheem]
+
 - Allow committing objects that were created with different transaction
   [vangheem]
 

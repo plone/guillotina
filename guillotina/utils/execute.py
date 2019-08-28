@@ -5,18 +5,14 @@ from typing import Any
 from typing import Callable
 from typing import Coroutine
 from typing import Optional
-from typing import Union
 
 from guillotina import task_vars
 from guillotina.component import get_utility
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IQueueUtility
-from guillotina.interfaces import IView
 from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
-from guillotina.utils import get_current_request
-from zope.interface import implementer
 
 
 class ExecuteContext:
@@ -30,73 +26,36 @@ class ExecuteContext:
         self.args = args
         self.kwargs = kwargs
 
-    def after_request(self, _name=None, _request=None):
+    def after_request(self, _name=None):
         """
         Execute after the request has successfully finished.
 
         :param _name: unique identifier to give in case you want to prevent duplicates
-        :param _request: provide request object to prevent request lookup
         """
-        after_request(self.func, _name=_name, _request=_request, *self.args, **self.kwargs)
+        after_request(self.func, _name=_name, *self.args, **self.kwargs)
 
-    def after_request_failed(self, _name=None, _request=None):
+    def after_request_failed(self, _name=None):
         """
         Execute after the request has failed or errored.
 
         :param _name: unique identifier to give in case you want to prevent duplicates
-        :param _request: provide request object to prevent request lookup
         """
-        after_request_failed(self.func, _name=_name, _request=_request, *self.args, **self.kwargs)
+        after_request_failed(self.func, _name=_name, *self.args, **self.kwargs)
 
-    def after_commit(self, _request=None):
+    def after_commit(self):
         """
         Execute after we commit to the database.
-
-        :param _request: provide request object to prevent request lookup
         """
-        after_commit(self.func, _request=_request, *self.args, **self.kwargs)
+        after_commit(self.func, *self.args, **self.kwargs)
 
-    def before_commit(self, _request=None):
+    def before_commit(self):
         """
         Execute just before we commit to the database.
-
-        :param _request: provide request object to prevent request lookup
         """
-        before_commit(self.func, _request=_request, *self.args, **self.kwargs)
+        before_commit(self.func, *self.args, **self.kwargs)
 
 
-@implementer(IView)
-class GenerateQueueView:
-    def __init__(self, func, request, args, kwargs):
-        self.func = func
-        self.request = request
-        self.args = args
-        self.kwargs = kwargs
-
-    async def __call__(self):
-        await self.func(*self.args, **self.kwargs)
-
-
-def in_queue_with_func(
-    func: Callable[..., Coroutine[Any, Any, Any]], *args, _request=None, **kwargs
-) -> ExecuteContext:
-    """
-    Execute function in the async queue.
-
-    :param func: function to be queued
-    :param _request: provide request object to prevent request lookup
-    :param \\*args: arguments to call the func with
-    :param \\**kwargs: keyword arguments to call the func with
-
-    :rtype: ExecuteContext
-    """
-    if _request is None:
-        _request = get_current_request()
-    view = GenerateQueueView(func, _request, args, kwargs)
-    return in_queue(view)
-
-
-def in_queue(view: Union[IView, GenerateQueueView]) -> ExecuteContext:
+def in_queue(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs) -> ExecuteContext:
     """
     Execute view-type object(context, request) in the async queue.
 
@@ -105,33 +64,32 @@ def in_queue(view: Union[IView, GenerateQueueView]) -> ExecuteContext:
     :rtype: ExecuteContext
     """
     util = get_utility(IQueueUtility)
-    return ExecuteContext(util.add, view)
+    return ExecuteContext(util.add, partial(func, *args, **kwargs))
+
+
+in_queue_with_func = in_queue
 
 
 async def __add_to_pool(func: Callable[..., Coroutine[Any, Any, Any]], request, args, kwargs):
     # make add_job async
     util = get_utility(IAsyncJobPool)
-    util.add_job(func, request=request, args=args, kwargs=kwargs)
+    util.add_job(func, args=args, kwargs=kwargs)
 
 
-def in_pool(func: Callable[..., Coroutine[Any, Any, Any]], *args, request=None, **kwargs) -> ExecuteContext:
+def in_pool(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs) -> ExecuteContext:
     """
     Execute function in the async pool.
 
     :param func: function to be queued
-    :param _request: provide request object to prevent request lookup.
-                     Provide if function be wrapped in database transaction.
     :param \\*args: arguments to call the func with
     :param \\**kwargs: keyword arguments to call the func with
 
     :rtype: ExecuteContext
     """
-    return ExecuteContext(__add_to_pool, func, request, args, kwargs)
+    return ExecuteContext(__add_to_pool, partial(func, *args, **kwargs))
 
 
-def after_request(
-    func: Callable[..., Coroutine[Any, Any, Any]], *args, _name=None, _request=None, _scope="", **kwargs
-):
+def after_request(func: Callable[..., Coroutine[Any, Any, Any]], *args, _name=None, _scope="", **kwargs):
     """
     Execute after the request has successfully finished.
 
@@ -143,13 +101,10 @@ def after_request(
     """
     if _name is None:
         _name = uuid.uuid4().hex
-    kwargs.pop("_request", None)  # b/w compat pop unused param
     add_future(_name, func, scope=_scope, args=args, kwargs=kwargs)
 
 
-def after_request_failed(
-    func: Callable[..., Coroutine[Any, Any, Any]], *args, _name=None, _request=None, **kwargs
-):
+def after_request_failed(func: Callable[..., Coroutine[Any, Any, Any]], *args, _name=None, **kwargs):
     """
     Execute after the request has failed or errored.
 
@@ -157,7 +112,6 @@ def after_request_failed(
     :param \\*args: arguments to call the func with
     :param \\**kwargs: keyword arguments to call the func with
     """
-    kwargs.pop("_request", None)  # b/w compat pop unused param
     after_request(func, _name=_name, _scope="failed", *args, **kwargs)
 
 
