@@ -1,11 +1,6 @@
-import asyncio
-import os
-from unittest import mock
-
-import aiohttp
-import pytest
 from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
+from guillotina import task_vars
 from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
@@ -26,6 +21,12 @@ from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
 from guillotina.utils import merge_dicts
+from unittest import mock
+
+import aiohttp
+import asyncio
+import os
+import pytest
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -277,6 +278,7 @@ def dummy_request(dummy_guillotina, monkeypatch):
     db = root["db"]
 
     request = get_mocked_request(db=db)
+    task_vars.request.set(request)
     return request
 
 
