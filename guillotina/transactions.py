@@ -112,6 +112,8 @@ class transaction:  # noqa: N801
 
         self.txn = await self.tm.begin(read_only=self.read_only)
         self.txn._validate_objects = self.validate_objects
+        if self.adopt_parent_txn and self.previous_txn is not None:
+            self.previous_txn._child_txn = self.txn
         # these should be restored after
         task_vars.tm.set(self.tm)
         task_vars.txn.set(self.txn)
@@ -156,6 +158,7 @@ class transaction:  # noqa: N801
 
                 for ob in self.adopted:
                     ob.__txn__ = self.previous_txn
+            self.previous_txn._child_txn = None
 
         if self.execute_futures:
             from guillotina.utils import execute

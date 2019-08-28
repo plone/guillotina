@@ -72,6 +72,7 @@ class cache:
 class Transaction:
     _status = "empty"
     _skip_commit = False
+    _child_txn = None
 
     def __init__(self, manager, loop=None, read_only=False, validate_objects=True):
         self.initialize(read_only)
@@ -224,7 +225,9 @@ class Transaction:
         if self.read_only:
             raise ReadOnlyError()
 
-        if self.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT):
+        if self.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and (
+            self._child_txn is None or self._child_txn in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)
+        ):
             raise TransactionClosedException(f"Could not save {obj} to closed transaction", self, obj)
 
         if obj.__txn__ is None:
