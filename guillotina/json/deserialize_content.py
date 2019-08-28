@@ -81,6 +81,7 @@ class DeserializeFromJson(object):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
         changed = False
         for name, field in get_fields(schema).items():
+
             if name in RESERVED_ATTRS:
                 continue
 

@@ -70,7 +70,7 @@ def in_queue(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs) -> 
 in_queue_with_func = in_queue
 
 
-async def __add_to_pool(func: Callable[..., Coroutine[Any, Any, Any]], request, args, kwargs):
+async def __add_to_pool(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs):
     # make add_job async
     util = get_utility(IAsyncJobPool)
     util.add_job(func, args=args, kwargs=kwargs)
