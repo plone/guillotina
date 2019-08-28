@@ -1,6 +1,7 @@
 from datetime import datetime
 from dateutil.tz import tzutc
 from guillotina import logger
+from guillotina import task_vars
 from guillotina.browser import View
 from guillotina.db.transaction import Status
 from guillotina.exceptions import RequestNotFound
@@ -12,6 +13,7 @@ from guillotina.interfaces import IQueueUtility  # noqa
 from guillotina.transactions import get_tm
 from guillotina.transactions import get_transaction
 from guillotina.transactions import transaction
+from guillotina.utils import find_container
 from guillotina.utils import get_current_request
 
 import asyncio
@@ -54,6 +56,9 @@ class QueueUtility(object):
                     await asyncio.sleep(1)
                     continue
 
+                container = find_container(view.context)
+                if container is not None:
+                    task_vars.container.set(container)
                 with view.request, tm, txn:
                     try:
                         await view()
@@ -76,6 +81,7 @@ class QueueUtility(object):
                 self._exceptions = True
                 logger.error("Worker call failed", exc_info=e)
             finally:
+                task_vars.container.set(None)
                 if got_obj:
                     try:
                         view.request.execute_futures()
