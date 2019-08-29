@@ -72,9 +72,8 @@ class cache:
 class Transaction:
     _status = "empty"
     _skip_commit = False
-    _child_txn = None
 
-    def __init__(self, manager, loop=None, read_only=False, validate_objects=True):
+    def __init__(self, manager, loop=None, read_only=False):
         self.initialize(read_only)
 
         # Transaction Manager
@@ -97,7 +96,6 @@ class Transaction:
         self._cache = query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
 
         self._query_count_start = self._query_count_end = 0
-        self._validate_objects = validate_objects
 
     def initialize(self, read_only):
         self._read_only = read_only
@@ -225,9 +223,7 @@ class Transaction:
         if self.read_only:
             raise ReadOnlyError()
 
-        if self.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and (
-            self._child_txn is None or self._child_txn in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)
-        ):
+        if self.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT):
             raise TransactionClosedException(f"Could not save {obj} to closed transaction", self, obj)
 
         if obj.__txn__ is None:
@@ -352,11 +348,13 @@ class Transaction:
                 await result
         self._before_commit = []
 
+    def _validate_object_txn(self, obj):
+        if obj.__txn__ is not self and obj.__txn__ is not None:
+            raise TransactionMismatchException(f"Invalid store reference to txn: {obj}", self, obj)
+
     @profilable
     async def _store_object(self, obj, uid, added=False):
-        # Modified objects
-        if self._validate_objects and obj.__txn__ is not self and obj.__txn__ is not None:
-            raise TransactionMismatchException(f"Invalid store reference to txn: {obj}", self, obj)
+        self._validate_object_txn(obj)
 
         # There is no serial
         if added:
@@ -381,8 +379,7 @@ class Transaction:
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
-            if self._validate_objects and obj.__txn__ is not self and obj.__txn__ is not None:
-                raise TransactionMismatchException(f"Invalid delete reference to txn: {obj}", self, obj)
+            self._validate_object_txn(obj)
             await self._manager._storage.delete(self, oid)
 
     @profilable

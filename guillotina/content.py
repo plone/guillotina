@@ -598,7 +598,10 @@ async def create_content_in_container(
             continue
         setattr(obj, key, value)
 
-    txn = getattr(parent, "__txn__", None) or get_transaction()
+    try:
+        txn = parent._get_transaction()
+    except AttributeError:
+        txn = getattr(parent, "__txn__", None) or get_transaction()
     if txn is None or not txn.storage.supports_unique_constraints:
         # need to manually check unique constraints
         if await parent.async_contains(obj.id):
