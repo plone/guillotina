@@ -97,7 +97,7 @@ class transaction:  # noqa: N801
             tm = db.get_transaction_manager()
         self.tm = tm or get_tm()
         self.abort_when_done = abort_when_done
-        self.previous_txn = self.txn = None
+        self.previous_tm = self.previous_txn = self.txn = None
         self.adopt_parent_txn = adopt_parent_txn
         self.execute_futures = execute_futures
         self.adopted = []
@@ -107,6 +107,9 @@ class transaction:  # noqa: N801
         txn = get_transaction()
         if txn is not None:
             self.previous_txn = txn
+        tm = get_tm()
+        if tm is not None:
+            self.previous_tm = tm
 
         self.txn = await self.tm.begin(read_only=self.read_only)
         # these should be restored after
@@ -158,6 +161,11 @@ class transaction:  # noqa: N801
             from guillotina.utils import execute
 
             execute.execute_futures()
+
+        if self.previous_txn is not None:
+            task_vars.txn.set(self.previous_txn)
+        if self.previous_tm is not None:
+            task_vars.tm.set(self.previous_tm)
 
 
 managed_transaction = transaction  # noqa
