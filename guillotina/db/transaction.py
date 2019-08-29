@@ -349,14 +349,8 @@ class Transaction:
                 await result
         self._before_commit = []
 
-    def _validate_object_txn(self, obj):
-        if obj.__txn__ is not self and obj.__txn__ is not None:
-            raise TransactionMismatchException(f"Invalid store reference to txn: {obj}", self, obj)
-
     @profilable
     async def _store_object(self, obj, uid, added=False):
-        self._validate_object_txn(obj)
-
         # There is no serial
         if added:
             serial = None
@@ -380,7 +374,6 @@ class Transaction:
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
         for oid, obj in self.deleted.items():
-            self._validate_object_txn(obj)
             await self._manager._storage.delete(self, oid)
 
     @profilable
