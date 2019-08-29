@@ -34,11 +34,10 @@ def get_db(app, db_id):
 def get_mocked_request(*, db=None, method="POST", path="/", headers=None):
     headers = headers or {}
     request = make_mocked_request(method, path, headers=headers)
-    request._futures = {}
-    request._txn = None
     request.interaction = None
     alsoProvides(request, IRequest)
     alsoProvides(request, IDefaultLayer)
+    task_vars.request.set(request)
     if db is not None:
         db.request = request
         task_vars.db.set(db)
