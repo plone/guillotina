@@ -238,6 +238,19 @@ class GuillotinaDBRequester(object):
 async def close_async_tasks(app):
     for clean in app.on_cleanup:
         await clean(app)
+    # clear all task_vars
+    for var in (
+        "request",
+        "txn",
+        "tm",
+        "futures",
+        "authenticated_user",
+        "security_policies",
+        "container",
+        "registry",
+        "db",
+    ):
+        getattr(task_vars, var).set(None)
 
 
 @pytest.fixture(scope="function")
