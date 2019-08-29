@@ -114,7 +114,7 @@ class ASGIResponse:
 
         await self._req.send({"type": "http.response.body", "body": data, "more_body": False})
         self._eof_sent = True
-        delattr(self, '_req')
+        delattr(self, "_req")
 
     def _headers_to_list(self, headers: Dict) -> List[Tuple]:
         return [(k.encode(), v.encode()) for k, v in headers.items()]
