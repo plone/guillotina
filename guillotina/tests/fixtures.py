@@ -13,6 +13,7 @@ from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.tests import mocks
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
@@ -301,6 +302,14 @@ class RootAsyncContextManager:
 @pytest.fixture(scope="function")
 async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
+
+
+@pytest.fixture(scope="function")
+def mock_txn():
+    txn = mocks.MockTransaction()
+    task_vars.txn.set(txn)
+    yield txn
+    task_vars.txn.set(None)
 
 
 async def _clear_dbs(root):

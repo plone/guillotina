@@ -117,11 +117,6 @@ class transaction:  # noqa: N801
         task_vars.txn.set(self.txn)
         return self.txn
 
-    def adopt_objects(self, obs, txn):
-        for oid, ob in obs.items():
-            self.adopted.append(ob)
-            ob.__txn__ = txn
-
     async def __aexit__(self, exc_type, exc, tb):
         if self.adopt_parent_txn and self.previous_txn is not None:
             # take on parent's modified, added, deleted objects if necessary
@@ -136,10 +131,6 @@ class transaction:  # noqa: N801
                 self.txn.deleted = {**self.previous_txn.deleted, **self.txn.deleted}
                 self.txn.added = {**self.previous_txn.added, **self.txn.added}
 
-                self.adopt_objects(self.previous_txn.modified, self.txn)
-                self.adopt_objects(self.previous_txn.deleted, self.txn)
-                self.adopt_objects(self.previous_txn.added, self.txn)
-
         if self.abort_when_done:
             await self.tm.abort(txn=self.txn)
         else:
@@ -153,9 +144,6 @@ class transaction:  # noqa: N801
                 self.previous_txn.modified = {}
                 self.previous_txn.deleted = {}
                 self.previous_txn.added = {}
-
-                for ob in self.adopted:
-                    ob.__txn__ = self.previous_txn
 
         if self.execute_futures:
             from guillotina.utils import execute

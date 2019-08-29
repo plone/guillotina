@@ -73,7 +73,7 @@ def test_valid_id():
     assert not utils.valid_id("FooBar-_-.?")
 
 
-def test_get_owners(dummy_guillotina):
+def test_get_owners(dummy_guillotina, mock_txn):
     content = create_content()
     roleperm = IPrincipalRoleManager(content)
     roleperm.assign_role_to_principal("guillotina.Owner", "foobar")

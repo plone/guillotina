@@ -31,7 +31,7 @@ async def test_managed_transaction_with_adoption(container_requester):
             assert container.__uuid__ in container.__txn__.modified
 
             # nest it with adoption
-            async with transaction(adopt_parent_txn=True):
+            async with transaction(db=requester.db, adopt_parent_txn=True):
                 # this should commit, take on parent txn for container
                 pass
 
@@ -39,7 +39,7 @@ async def test_managed_transaction_with_adoption(container_requester):
             assert container.__uuid__ not in container.__txn__.modified
 
         # finally, retrieve it again and make sure it's updated
-        async with transaction(abort_when_done=True):
+        async with transaction(db=requester.db, abort_when_done=True):
             container = await root.async_get("guillotina")
             assert container.title == "changed title"
 
