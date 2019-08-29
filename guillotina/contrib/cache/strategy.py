@@ -137,7 +137,6 @@ class BasicCache(BaseCache):
                 keys_to_publish.remove(ob_key)
             push[ob_key] = val
 
-        print(f"Send invalidate {keys_to_publish}")
         self._utility.ignore_tid(self._transaction._tid)
         await self._utility._subscriber.publish(
             app_settings["cache"]["updates_channel"],
