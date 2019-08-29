@@ -58,7 +58,6 @@ class ASGIResponse:
         self._state: Dict[str, Any] = {}
         self._prepared = False
         self._eof_sent = False
-        self._req: Optional["Request"] = None
 
     @property
     def prepared(self) -> bool:
@@ -71,7 +70,7 @@ class ASGIResponse:
         return await self._start(request)
 
     async def _start(self, request: "Request"):
-        self._req = request
+        self._req: "Request" = request
         self._prepared = True
 
         headers = self.headers
@@ -114,12 +113,11 @@ class ASGIResponse:
         assert self._prepared is not None, "Response has not been started"
 
         await self._req.send({"type": "http.response.body", "body": data, "more_body": False})
-
         self._eof_sent = True
-        self._req = None
+        delattr(self, '_req')
 
     def _headers_to_list(self, headers: Dict) -> List[Tuple]:
-        return [[k.encode(), v.encode()] for k, v in headers.items()]
+        return [(k.encode(), v.encode()) for k, v in headers.items()]
 
     def __repr__(self) -> str:
         if self._eof_sent:

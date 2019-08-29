@@ -30,7 +30,6 @@ from guillotina.utils import resolve_path
 from guillotina.utils import secure_passphrase
 from jwcrypto import jwk
 
-import asyncio
 import json
 import logging
 import logging.config
