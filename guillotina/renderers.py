@@ -1,8 +1,8 @@
-from aiohttp.web import Response as aioResponse
 from datetime import datetime
 from guillotina import configure
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
+from guillotina.response import ASGISimpleResponse
 from guillotina.profile import profilable
 from typing import Dict
 from typing import Optional
@@ -48,7 +48,7 @@ class Renderer:
         return str(value).encode('utf-8')
 
     @profilable
-    async def __call__(self, value) -> aioResponse:
+    async def __call__(self, value) -> ASGISimpleResponse:
         '''
         Value can be:
         - Guillotina response object
@@ -61,12 +61,12 @@ class Renderer:
             status = value.status_code or 200
             value = value.content
 
-        headers.update({
-            'Content-Type': self.content_type
-        })
-
-        return aioResponse(
-            body=self.get_body(value), status=status, headers=headers)
+        return ASGISimpleResponse(
+            body=self.get_body(value) or b"",
+            status=status,
+            headers=headers,
+            content_type=self.content_type
+        )
 
 
 @configure.renderer(name='application/json')

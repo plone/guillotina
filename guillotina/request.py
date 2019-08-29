@@ -222,7 +222,7 @@ class AsgiStreamReader():
     def __init__(self, receive):
         self.finished = False
         self._asgi_receive = receive
-        self._buffer = b""
+        self._buffer = bytearray()
 
     async def readany(self):
         from guillotina.files import CHUNK_SIZE
@@ -234,23 +234,20 @@ class AsgiStreamReader():
             raise asyncio.IncompleteReadError(data, n)
         return data
 
-    async def read(self, n: int = -1):
-        if self._buffer:
-            data = self._buffer
-        else:
-            data = b""
+    async def read(self, n: int = -1) -> bytearray:
+        data = self._buffer
 
         while (n == -1 or len(data) < n) and not self.finished:
             chunk = await self.receive()
-            data += chunk
+            data.extend(chunk)
 
         if n == -1:
-            self._buffer = None
+            self._buffer = bytearray()
             return data
         else:
-            req_chunk, rest = data[:n], data[n:]
-            self._buffer = rest
-            return req_chunk
+            data = memoryview(data)
+            self._buffer = bytearray(data[n:])
+            return data[:n]
 
     async def receive(self):
         payload = await self._asgi_receive()
@@ -423,10 +420,8 @@ class Request(object):
         return self._method
 
     @reify
-    def version(self) -> Tuple[int, int]:
+    def version(self) -> str:
         """Read only property for getting HTTP version of request.
-
-        Returns aiohttp.protocol.HttpVersion instance.
         """
         return self.scope["http_version"]
 

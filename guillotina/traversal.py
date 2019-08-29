@@ -38,7 +38,7 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IOPTIONS
-from guillotina.interfaces import IAioHTTPResponse
+from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
@@ -261,7 +261,7 @@ class MatchInfo(BaseMatchInfo):
             except (ConflictError, TIDConflictError):
                 # bubble this error up
                 raise
-            except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+            except response.Response as exc:
                 await abort()
                 view_result = exc
                 request._view_error = True
@@ -273,7 +273,7 @@ class MatchInfo(BaseMatchInfo):
         else:
             try:
                 view_result = await self.view()
-            except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+            except response.Response as exc:
                 view_result = exc
                 request._view_error = True
             except Exception as e:
@@ -283,7 +283,7 @@ class MatchInfo(BaseMatchInfo):
                 await abort()
         request.record('viewrendered')
 
-        if IAioHTTPResponse.providedBy(view_result):
+        if IASGIResponse.providedBy(view_result):
             resp = view_result
         else:
             resp = await apply_rendering(self.view, self.request, view_result)
@@ -324,7 +324,7 @@ class BasicMatchInfo(BaseMatchInfo):
         """Main handler function for aiohttp."""
         request.record('finish')
         self.debug(request, self.resp)
-        if IAioHTTPResponse.providedBy(self.resp):
+        if IASGIResponse.providedBy(self.resp):
             return self.resp
         else:
             resp = await apply_rendering(
@@ -363,7 +363,7 @@ class TraversalRouter(AbstractRouter):
         result = None
         try:
             result = await self.real_resolve(request)
-        except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+        except response.Response as exc:
             await abort()
             return BasicMatchInfo(request, exc)
         except Exception:

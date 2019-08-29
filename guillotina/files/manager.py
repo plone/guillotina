@@ -17,7 +17,7 @@ from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
-from guillotina.response import StreamResponse
+from guillotina.response import ASGIResponse
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_object_url
 from guillotina.utils import import_class
@@ -65,11 +65,12 @@ class FileManager(object):
                 disposition, filename or file.filename)
         })
 
-        download_resp = StreamResponse(status=200, headers=headers)
-        download_resp.content_type = content_type or file.guess_content_type()
-        if size or file.size:
-            download_resp.content_length = size or file.size
-
+        download_resp = ASGIResponse(
+            status=200,
+            headers=headers,
+            content_type=content_type or file.guess_content_type(),
+            content_length=size or file.size
+        )
         await download_resp.prepare(self.request)
         return download_resp
 
@@ -97,7 +98,6 @@ class FileManager(object):
                 download_resp = await self.prepare_download(
                     disposition, filename, content_type, size, **kwargs)
             await download_resp.write(chunk)
-            await download_resp.drain()
         if download_resp is None:
             # deferred
             download_resp = await self.prepare_download(

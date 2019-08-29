@@ -318,20 +318,18 @@ async def app_client(event_loop, db, request):
     app = make_app(settings=get_db_settings(request.node), loop=event_loop)
     async with TestClient(app, timeout=30) as client:
         await _clear_dbs(app.app.root)
-        yield client
+        yield app, client
 
 
 @pytest.fixture(scope='function')
-async def guillotina_main(event_loop, db, request):
-    app = make_app(settings=get_db_settings(request.node), loop=event_loop)
-    async with TestClient(app, timeout=30):
-        await _clear_dbs(app.app.root)
-        yield app
+async def guillotina_main(app_client):
+    app, _ = app_client
+    return app
 
 
 @pytest.fixture(scope='function')
 def guillotina(app_client):
-    client = app_client
+    _, client = app_client
     requester = GuillotinaDBRequester(client)
     yield requester
 

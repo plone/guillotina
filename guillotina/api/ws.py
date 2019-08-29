@@ -11,7 +11,7 @@ from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
-from guillotina.interfaces import IAioHTTPResponse
+from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPermission
@@ -167,8 +167,8 @@ class WebsocketsView(Service):
             view = (await view.prepare()) or view
 
         view_result = await view()
-        if IAioHTTPResponse.providedBy(view_result):
-            raise Exception('Do not accept raw aiohttp exceptions in ws')
+        if IASGIResponse.providedBy(view_result):
+            raise Exception('Do not accept raw ASGI exceptions in ws')
         else:
             from guillotina.traversal import apply_rendering
             resp = await apply_rendering(view, self.request, view_result)

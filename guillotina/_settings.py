@@ -8,7 +8,6 @@ from guillotina.db.uid import generate_uid
 
 app_settings: Dict[str, Any] = {
     "debug": False,
-    "aiohttp_settings": {},
     "databases": [],
     "storages": {},
     "cache": {

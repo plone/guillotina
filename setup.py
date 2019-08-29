@@ -88,6 +88,7 @@ setup(
             'async-asgi-testclient~=1.0.2',
         ],
         'docs': [
+            'aiohttp>=3.0.0,<4.0.0',
             'sphinx',
             'recommonmark',
             'sphinxcontrib-httpdomain',

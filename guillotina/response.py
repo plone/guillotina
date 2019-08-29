@@ -1,51 +1,13 @@
 from guillotina.request import Request
-from guillotina.interfaces import IAioHTTPResponse
+from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IResponse
 from multidict import CIMultiDict
 from zope.interface import implementer
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Tuple, Optional
 from aiohttp import hdrs
 
 import asyncio
 import warnings
-
-
-class AsgiStreamWriter():
-    buffer_size = 0
-    output_size = 0
-    length: Optional[int] = 0
-
-    def __init__(self, send):
-        self.send = send
-        self._buffer = asyncio.Queue()
-        self.eof = False
-
-    async def write(self, chunk: bytes) -> None:
-        """Write chunk into stream."""
-        await self._buffer.put(chunk)
-
-    async def write_eof(self, chunk: bytes=b'') -> None:
-        """Write last chunk."""
-        await self.write(chunk)
-        self.eof = True
-        await self.drain()
-
-    async def drain(self) -> None:
-        """Flush the write buffer."""
-        while not self._buffer.empty():
-            body = await self._buffer.get()
-            await self.send({
-                "type": "http.response.body",
-                "body": body,
-                "more_body": True
-            })
-
-        if self.eof:
-            await self.send({
-                "type": "http.response.body",
-                "body": b"",
-                "more_body": False
-            })
 
 
 @implementer(IResponse)
@@ -79,68 +41,39 @@ class Response(Exception):
                 self.status_code = status
 
 
-@implementer(IAioHTTPResponse)
-class StreamResponse():
+@implementer(IASGIResponse)
+class ASGIResponse():
 
-    empty_body = False
-    default_content: dict = {}  # noqa
-
-    def __init__(self, *, content: dict=None,
-                 headers: dict=None, status: int=None) -> None:
-        '''
-        :param content: content to serialize
-        :param headers: headers to set on response
-        :param status: customize the response status
-        '''
-        if self.empty_body:
-            self.content = None
-        else:
-            self.content = content or self.default_content.copy()
-        if headers is None:
-            self.headers = CIMultiDict()  # type: ignore
-        else:
-            self.headers = CIMultiDict(headers)  # type: ignore
-
+    def __init__(self, *, headers: dict=None, status: int=None,
+                 content_type: str = None, content_length: int = None) -> None:
         if status is None:
             raise ValueError("Status is none")
 
-        if status in (204, 205):
-            self.content = None
         self.status_code = status
-        self.content_type = None
-        self.content_length = None
+        self.headers = headers or {}
+        self.content_type = content_type
+        self.content_length = content_length
 
         self._state: Dict[str, Any] = {}
-        self._payload_writer: Optional[AsgiStreamWriter] = None
+        self._prepared = False
         self._eof_sent = False
-        self._keep_alive = True
         self._req: Optional['Request'] = None
 
     @property
     def prepared(self) -> bool:
-        return self._payload_writer is not None
+        return self._prepared is True
 
     async def prepare(self, request: 'Request'):
-        if self._eof_sent:
-            return None
-        if self._payload_writer is not None:
-            return self._payload_writer
-
+        if self._eof_sent or self._prepared:
+            return
         await request._prepare_hook(self)
         return await self._start(request)
 
     async def _start(self, request: 'Request'):
         self._req = request
-
-        keep_alive = self._keep_alive
-        if keep_alive is None:
-            keep_alive = request.keep_alive
-        self._keep_alive = keep_alive
-
-        writer = self._payload_writer = AsgiStreamWriter(request.send)
+        self._prepared = True
 
         headers = self.headers
-
         if self.content_type:
             headers.setdefault(hdrs.CONTENT_TYPE, self.content_type)
         else:
@@ -149,15 +82,11 @@ class StreamResponse():
         if self.content_length:
             headers.setdefault(hdrs.CONTENT_LENGTH, str(self.content_length))
 
-        from guillotina.asgi import headers_to_list
-
         await request.send({
             "type": "http.response.start",
-            "headers": headers_to_list(headers),
+            "headers": self._headers_to_list(headers),
             "status": self.status_code
         })
-
-        return writer
 
     async def write(self, data: bytes) -> None:
         assert isinstance(data, (bytes, bytearray, memoryview)), \
@@ -165,19 +94,14 @@ class StreamResponse():
 
         if self._eof_sent:
             raise RuntimeError("Cannot call write() after write_eof()")
-        if self._payload_writer is None:
+        if self._prepared is False:
             raise RuntimeError("Cannot call write() before prepare()")
 
-        await self._payload_writer.write(data)
-
-    async def drain(self) -> None:
-        assert not self._eof_sent, "EOF has already been sent"
-        assert self._payload_writer is not None, \
-            "Response has not been started"
-        warnings.warn("drain method is deprecated, use await resp.write()",
-                      DeprecationWarning,
-                      stacklevel=2)
-        await self._payload_writer.drain()
+        await self._req.send({
+            "type": "http.response.body",
+            "body": data,
+            "more_body": True
+        })
 
     async def write_eof(self, data: bytes=b'') -> None:
         assert isinstance(data, (bytes, bytearray, memoryview)), \
@@ -186,14 +110,20 @@ class StreamResponse():
         if self._eof_sent:
             return
 
-        assert self._payload_writer is not None, \
+        assert self._prepared is not None, \
             "Response has not been started"
 
-        await self._payload_writer.write_eof(data)
+        await self._req.send({
+            "type": "http.response.body",
+            "body": data,
+            "more_body": False
+        })
+
         self._eof_sent = True
         self._req = None
-        self._body_length = self._payload_writer.output_size
-        self._payload_writer = None
+
+    def _headers_to_list(self, headers: Dict) -> List[Tuple]:
+        return [[k.encode(), v.encode()] for k, v in headers.items()]
 
     def __repr__(self) -> str:
         if self._eof_sent:
@@ -225,6 +155,19 @@ class StreamResponse():
 
     def __eq__(self, other: object) -> bool:
         return self is other
+
+
+class ASGISimpleResponse(ASGIResponse):
+
+    def __init__(self, *, body: bytes=b"", **kwargs) -> None:
+        self.body = body
+        super().__init__(**kwargs)
+
+    async def prepare(self, request: 'Request'):
+        await super().prepare(request)
+        if self._eof_sent is False:
+            await self.write(self.body)
+            await self.write_eof()
 
 
 class ErrorResponse(Response):

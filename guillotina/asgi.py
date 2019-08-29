@@ -9,10 +9,6 @@ from guillotina.request import Request
 logger = glogging.getLogger('guillotina')
 
 
-def headers_to_list(headers):
-    return [[k.encode(), v.encode()] for k, v in headers.items()]
-
-
 class AsgiApp:
     def __init__(self, config_file, settings, loop):
         self.app = None
@@ -52,7 +48,6 @@ class AsgiApp:
             await clean(self)
 
     async def handler(self, scope, receive, send):
-        # Aiohttp compatible StreamReader
         payload = AsgiStreamReader(receive)
 
         if scope["type"] == "websocket":
@@ -74,19 +69,10 @@ class AsgiApp:
         task_vars.request.set(request)
         resp = await self.request_handler(request)
 
-        # WS handling after view execution missing here!!!
-        if scope["type"] != "websocket":
-            from guillotina.response import StreamResponse
+        if not resp.prepared:
+            await resp.prepare(request)
 
-            if not isinstance(resp, StreamResponse):
-                await send(
-                    {
-                        "type": "http.response.start",
-                        "status": resp.status,
-                        "headers": headers_to_list(resp.headers)
-                    }
-                )
-                await send({"type": "http.response.body", "body": resp.body or b""})
+        return resp
 
     async def request_handler(self, request, retries=0):
         try:
