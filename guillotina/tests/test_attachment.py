@@ -1,7 +1,3 @@
-import json
-import random
-
-import pytest
 from guillotina import task_vars
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.attachment import IMultiAttachment

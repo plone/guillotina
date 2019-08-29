@@ -16,12 +16,12 @@ def test_make_app(dummy_guillotina):
 
 @pytest.mark.asyncio
 async def test_trns_retries_with_app(container_requester):
-    with mock.patch("guillotina.traversal.BasicMatchInfo.handler") as handle_mock:  # noqa
-        f = asyncio.Future()
-        f.set_result(None)
-        handle_mock.return_value = f
-        handle_mock.side_effect = ConflictError()
-        async with container_requester as requester:
+    async with container_requester as requester:
+        with mock.patch("guillotina.traversal.MatchInfo.handler") as handle_mock:  # noqa
+            f = asyncio.Future()
+            f.set_result(None)
+            handle_mock.return_value = f
+            handle_mock.side_effect = ConflictError()
             _, status = await requester("GET", "/db/guillotina/@types")
             assert status == 409
 

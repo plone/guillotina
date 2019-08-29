@@ -6,9 +6,6 @@ from zope.interface import implementer
 from typing import Any, Dict, List, Tuple, Optional
 from aiohttp import hdrs
 
-import asyncio
-import warnings
-
 
 @implementer(IResponse)
 class Response(Exception):

@@ -426,8 +426,8 @@ class BucketDictFieldRenderer:
         if val is None:
             return {"values": {}, "total": 0, "cursor": None}
         bidx = 0
-        if "cursor" in self.request.url.query:
-            cursor = self.request.url.query["cursor"]
+        if "cursor" in self.request.query:
+            cursor = self.request.query["cursor"]
             try:
                 bidx = int(cursor)
             except ValueError:

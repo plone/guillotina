@@ -175,30 +175,18 @@ class WebsocketsView(Service):
                 logger.warning("Invalid websocket payload, ignored: {}".format(msg))
                 continue
 
-            if message["op"] == "close":
+            if message["op"].lower() == "close":
                 await ws.close()
             elif message["op"].lower() == "get":
                 txn = await tm.begin()
                 try:
-                    message = ujson.loads(msg.data)
-                except ValueError:
-                    logger.warning("Invalid websocket payload, ignored: {}".format(msg.data))
-                    continue
-                if message["op"] == "close":
-                    await ws.close()
-                elif message["op"].lower() == "get":
-                    txn = await tm.begin()
-                    try:
-                        await self.handle_ws_request(ws, message)
-                    except Exception:
-                        logger.error("Exception on ws", exc_info=True)
-                    finally:
-                        # only currently support GET requests which are *never*
-                        # supposed to be commits
-                        await tm.abort(txn=txn)
-            elif msg.type == aiohttp.WSMsgType.error:
-                logger.debug("ws connection closed with exception {0:s}".format(ws.exception()))
+                    await self.handle_ws_request(ws, message)
+                except Exception:
+                    logger.error("Exception on ws", exc_info=True)
+                finally:
+                    # only currently support GET requests which are *never*
+                    # supposed to be commits
+                    await tm.abort(txn=txn)
 
         logger.debug("websocket connection closed")
-
         return {}

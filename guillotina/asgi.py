@@ -2,8 +2,8 @@ from guillotina import glogging
 from guillotina import task_vars
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
-from guillotina.request import AsgiStreamReader
 from guillotina.request import Request
+from guillotina.response import ASGISimpleResponse
 
 
 logger = glogging.getLogger("guillotina")
@@ -46,24 +46,10 @@ class AsgiApp:
             await clean(self)
 
     async def handler(self, scope, receive, send):
-        payload = AsgiStreamReader(receive)
-
         if scope["type"] == "websocket":
             scope["method"] = "GET"
 
-        request = Request(
-            scope["scheme"],
-            scope["method"],
-            scope["path"],
-            scope["query_string"],
-            scope["headers"],
-            payload,
-            loop=self.loop,
-            send=send,
-            scope=scope,
-            receive=receive,
-        )
-
+        request = Request.factory(scope, send, receive, self.loop)
         task_vars.request.set(request)
         resp = await self.request_handler(request)
 
@@ -93,6 +79,4 @@ class AsgiApp:
                         getattr(getattr(request, "_txn", None), "_tid", "not issued")
                     )
                 )
-                from guillotina.response import HTTPConflict
-
-                return HTTPConflict()
+                return ASGISimpleResponse(body=b"", status=409)

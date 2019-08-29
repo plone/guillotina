@@ -220,6 +220,8 @@ where json->>'id' = 'item1' AND json->>'container_id' = 'guillotina'
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_query_pg_catalog(container_requester):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+
     async with container_requester as requester:
         await requester(
             "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
@@ -255,6 +257,8 @@ async def test_query_pg_catalog(container_requester):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_fulltext_query_pg_catalog(container_requester):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+
     async with container_requester as requester:
         await requester(
             "POST",

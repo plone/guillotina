@@ -1,14 +1,7 @@
 """Main routing traversal class."""
-import traceback
-import uuid
-from contextlib import contextmanager
-from typing import List
-from typing import Optional
-from typing import Tuple
-
-import aiohttp
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
+from contextlib import contextmanager
 from guillotina import __version__
 from guillotina import error_reasons
 from guillotina import logger
@@ -60,7 +53,13 @@ from guillotina.transactions import commit
 from guillotina.utils import get_registry
 from guillotina.utils import get_security_policy
 from guillotina.utils import import_class
+from typing import List
+from typing import Optional
+from typing import Tuple
 from zope.interface import alsoProvides
+
+import traceback
+import uuid
 
 
 async def traverse(request, parent, path):
@@ -235,7 +234,7 @@ async def _apply_cors(request, resp):
             else:
                 cors_headers[name] = value
 
-        resp._headers = cors_headers
+        resp.headers.update(cors_headers)
         retry_attempts = getattr(request, "_retry_attempt", 0)
         if retry_attempts > 0:
             resp.headers["X-Retry-Transaction-Count"] = str(retry_attempts)

@@ -4,13 +4,14 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
-from typing import Any, Awaitable, Callable, Dict, Generic, Iterator, Tuple, TypeVar, Optional
+from typing import Any, Awaitable, Callable, Dict, Generic, Iterator, List, TypeVar, Optional
 from yarl import URL
 from zope.interface import implementer
 
 import asyncio
 import enum
 import json
+import ujson
 import time
 import multidict
 import uuid
@@ -90,10 +91,10 @@ class WebSocketMsg:
     def json(self):
         try:
             if self.type == WebSocketMsg.TEXT:
-                return json.loads(self.msg["text"])
+                return ujson.loads(self.msg["text"])
             else:
-                return json.loads(self.msg["bytes"])
-        except json.JSONDecodeError:
+                return ujson.loads(self.msg["bytes"])
+        except ValueError:
             raise WebSocketJsonDecodeError()
 
     @property
@@ -258,6 +259,10 @@ class AsgiStreamReader:
         return AsyncStreamIterator(self.readany)  # type: ignore
 
 
+def raw_headers_to_multidict(raw_headers: List[List]) -> multidict.CIMultiDict:
+    return multidict.CIMultiDict([(k.decode(), v.decode()) for k, v in raw_headers])
+
+
 @implementer(IRequest, IDefaultLayer)
 class Request(object):
     """
@@ -319,6 +324,22 @@ class Request(object):
         self._initialized = time.time()
         #: Dictionary of matched path parameters on request
         self.matchdict: Dict[str, str] = {}
+
+    @classmethod
+    def factory(cls, scope, send, receive, loop=None):
+        loop = loop or asyncio.get_event_loop()
+        return cls(
+            scope["scheme"],
+            scope["method"],
+            scope["path"],
+            scope["query_string"],
+            scope["headers"],
+            AsgiStreamReader(receive),
+            loop=loop,
+            send=send,
+            scope=scope,
+            receive=receive,
+        )
 
     def get_ws(self):
         return GuillotinaWebSocket(self.scope, receive=self.receive, send=self.send)
@@ -470,7 +491,7 @@ class Request(object):
     @reify
     def headers(self) -> "multidict.CIMultiDict[str]":
         """A case-insensitive multidict proxy with all headers."""
-        return multidict.CIMultiDict([(k.decode(), v.decode()) for k, v in self._raw_headers])
+        return raw_headers_to_multidict(self._raw_headers)
 
     @reify
     def raw_headers(self):

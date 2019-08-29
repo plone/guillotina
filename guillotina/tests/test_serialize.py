@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from guillotina import fields
 from guillotina import schema
 from guillotina.component import get_adapter
@@ -19,10 +18,10 @@ from guillotina.tests.utils import login
 from guillotina.transactions import get_tm
 from zope.interface import Interface
 
+import uuid
 import pytest
 
 pytestmark = pytest.mark.asyncio
-import uuid
 
 
 async def test_serialize_resource(dummy_request):

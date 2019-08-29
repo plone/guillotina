@@ -1,8 +1,4 @@
-import json
-import logging
-import logging.config
 from copy import deepcopy
-
 from guillotina import configure
 from guillotina import glogging
 from guillotina._settings import app_settings
