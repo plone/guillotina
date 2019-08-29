@@ -1,9 +1,13 @@
-from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.interfaces import ITransaction
+from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.exceptions import TransactionNotFound
 from guillotina.profile import profilable
+from guillotina.transactions import get_transaction
 from typing import Any
 from typing import Dict
-from typing import Optional, Generic, TypeVar
+from typing import Generic
+from typing import Optional
+from typing import TypeVar
 from zope.interface import implementer
 
 
@@ -58,6 +62,7 @@ class BaseObject:
         object.__setattr__(inst, "_BaseObject__name", None)
         object.__setattr__(inst, "_BaseObject__immutable_cache", False)
         object.__setattr__(inst, "_BaseObject__volatile", {})
+        object.__setattr__(inst, "_BaseObject__volatile", {})
         return inst
 
     def __repr__(self):
@@ -94,10 +99,16 @@ class BaseObject:
     __serial__: int = ObjectProperty[int]("_BaseObject__serial", None)  # type: ignore
     __volatile__: Dict = DictDefaultProperty("_BaseObject__volatile")  # type: ignore
 
-    def register(self):
-        txn = self.__txn__
-        if txn is not None:
-            txn.register(self)
+    def register(self, prefer_local=False):
+        if not prefer_local:
+            txn = get_transaction()
+            if txn is not None:
+                txn.register(self)
+                return
+        if self.__txn__ is not None:
+            self.__txn__.register(self)
+            return
+        raise TransactionNotFound()
 
     @profilable
     def __getstate__(self):

@@ -269,6 +269,7 @@ class Transaction:
                 continue
             ob.__dict__[key] = value
         ob.__serial__ = new.__serial__
+        ob.__txn__ = self
 
     @cache(lambda oid: {"oid": oid}, True)
     async def _get(self, oid):

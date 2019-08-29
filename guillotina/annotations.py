@@ -79,11 +79,11 @@ class AnnotationsAdapter:
         logger.debug("registering annotation {}({}), of: {}".format(value.__uuid__, key, value.__of__))
 
     def _get_transaction(self) -> ITransaction:
-        if self.obj.__txn__ is not None:
-            return self.obj.__txn__
         txn = get_transaction()
         if txn is not None:
             return txn
+        if self.obj.__txn__ is not None:
+            return self.obj.__txn__
         raise TransactionNotFound()
 
     async def async_del(self, key):

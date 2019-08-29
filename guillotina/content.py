@@ -276,11 +276,11 @@ class Folder(Resource):
     """
 
     def _get_transaction(self) -> ITransaction:
-        if self.__txn__ is not None:
-            return self.__txn__
         txn = get_transaction()
         if txn is not None:
             return txn
+        if self.__txn__ is not None:
+            return self.__txn__
         raise TransactionNotFound()
 
     async def async_contains(self, key: str) -> bool:
