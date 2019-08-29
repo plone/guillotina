@@ -25,7 +25,7 @@ from zope.interface import Interface
 from zope.interface import providedBy
 
 
-_ = MessageFactory('guillotina')
+_ = MessageFactory("guillotina")
 
 
 def handler(method_name, *args, **kwargs):
@@ -40,20 +40,20 @@ def _rolledUpFactory(factories):  # noqa: N802
         for f in factories:
             ob = f(ob)
         return ob
+
     # Store the original factory for documentation
     factory.factory = factories[0]
     return factory
 
 
-def adapter(_context, factory, provides=None, for_=None, name=''):
+def adapter(_context, factory, provides=None, for_=None, name=""):
 
     if for_ is None:
         if len(factory) == 1:
             for_ = adaptedBy(factory[0])
 
         if for_ is None:
-            raise TypeError("No for attribute was provided and can't "
-                            "determine what the factory adapts.")
+            raise TypeError("No for attribute was provided and can't " "determine what the factory adapts.")
 
     for_ = tuple(for_)
 
@@ -66,7 +66,7 @@ def adapter(_context, factory, provides=None, for_=None, name=''):
         if provides is None:
             raise TypeError("Missing 'provides' attribute")
 
-    if name == '':
+    if name == "":
         if len(factory) == 1:
             name = getName(factory[0])
 
@@ -77,26 +77,20 @@ def adapter(_context, factory, provides=None, for_=None, name=''):
     elif len(factories) < 1:
         raise ComponentConfigurationError("No factory specified")
     elif len(factories) > 1 and len(for_) != 1:
-        raise ComponentConfigurationError(
-            "Can't use multiple factories and multiple for")
+        raise ComponentConfigurationError("Can't use multiple factories and multiple for")
     else:
         factory = _rolledUpFactory(factories)
 
     _context.action(
-        discriminator=('adapter', for_, provides, name),
+        discriminator=("adapter", for_, provides, name),
         callable=handler,
-        args=('registerAdapter', factory, for_, provides, name))
-    _context.action(
-        discriminator=None,
-        callable=provide_interface,
-        args=('', provides))
+        args=("registerAdapter", factory, for_, provides, name),
+    )
+    _context.action(discriminator=None, callable=provide_interface, args=("", provides))
     if for_:
         for iface in for_:
             if iface is not None:
-                _context.action(
-                    discriminator=None,
-                    callable=provide_interface,
-                    args=('', iface))
+                _context.action(discriminator=None, callable=provide_interface, args=("", iface))
 
 
 _handler = handler
@@ -113,45 +107,38 @@ def subscriber(_context, for_=None, factory=None, handler=None, provides=None):
         if handler is not None:
             raise TypeError("Cannot use handler with factory")
         if provides is None:
-            raise TypeError(
-                "You must specify a provided interface when registering "
-                "a factory")
+            raise TypeError("You must specify a provided interface when registering " "a factory")
 
     if for_ is None:
         for_ = adaptedBy(factory)
         if for_ is None:
-            raise TypeError("No for attribute was provided and can't "
-                            "determine what the factory (or handler) adapts.")
+            raise TypeError(
+                "No for attribute was provided and can't " "determine what the factory (or handler) adapts."
+            )
 
     for_ = tuple(for_)
 
     if handler is not None:
         _context.action(
-            discriminator=None,
-            callable=_handler,
-            args=('registerHandler', handler, for_, _BLANK))
+            discriminator=None, callable=_handler, args=("registerHandler", handler, for_, _BLANK)
+        )
     else:
         _context.action(
             discriminator=None,
             callable=_handler,
-            args=('registerSubscriptionAdapter', factory, for_, provides, _BLANK))
+            args=("registerSubscriptionAdapter", factory, for_, provides, _BLANK),
+        )
 
     if provides is not None:
-        _context.action(
-            discriminator=None,
-            callable=provide_interface,
-            args=('', provides))
+        _context.action(discriminator=None, callable=provide_interface, args=("", provides))
 
     # For each interface, state that the adapter provides that interface.
     for iface in for_:
         if iface is not None:
-            _context.action(
-                discriminator=None,
-                callable=provide_interface,
-                args=('', iface))
+            _context.action(discriminator=None, callable=provide_interface, args=("", iface))
 
 
-def utility(_context, provides=None, component=None, factory=None, name=''):
+def utility(_context, provides=None, component=None, factory=None, name=""):
     if factory and component:
         raise TypeError("Can't specify factory and component.")
 
@@ -165,28 +152,23 @@ def utility(_context, provides=None, component=None, factory=None, name=''):
         else:
             raise TypeError("Missing 'provides' attribute")
 
-    if name == '':
+    if name == "":
         if factory:
             name = getName(factory)
         else:
             name = getName(component)
 
     _context.action(
-        discriminator=('utility', provides, name),
+        discriminator=("utility", provides, name),
         callable=handler,
-        args=('registerUtility', component, provides, name),
-        kw=dict(factory=factory))
-    _context.action(
-        discriminator=None,
-        callable=provide_interface,
-        args=('', provides))
+        args=("registerUtility", component, provides, name),
+        kw=dict(factory=factory),
+    )
+    _context.action(discriminator=None, callable=provide_interface, args=("", provides))
 
 
-def interface(_context, interface, type=None, name=''):
-    _context.action(
-        discriminator=None,
-        callable=provide_interface,
-        args=(name, interface, type))
+def interface(_context, interface, type=None, name=""):
+    _context.action(discriminator=None, callable=provide_interface, args=(name, interface, type))
 
 
 def view(_context, factory, type, name, for_, provides=Interface):
@@ -202,47 +184,38 @@ def view(_context, factory, type, name, for_, provides=Interface):
     elif len(factories) < 1:
         raise ComponentConfigurationError("No view factory specified")
     elif len(factories) > 1 and len(for_) > 1:
-        raise ComponentConfigurationError(
-            "Can't use multiple factories and multiple for")
+        raise ComponentConfigurationError("Can't use multiple factories and multiple for")
     else:
+
         def factory(ob, request):
             for f in factories[:-1]:
                 ob = f(ob)
             return factories[-1](ob, request)
+
         factory.factory = factories[0]
 
     for_ = for_ + (type,)
 
     _context.action(
-        discriminator=('view', for_, name, provides),
+        discriminator=("view", for_, name, provides),
         callable=handler,
-        args=('registerAdapter', factory, for_, provides, name))
+        args=("registerAdapter", factory, for_, provides, name),
+    )
 
-    _context.action(
-        discriminator=None,
-        callable=provide_interface,
-        args=('', provides))
+    _context.action(discriminator=None, callable=provide_interface, args=("", provides))
 
     if for_ is not None:
         for iface in for_:
             if iface is not None:
-                _context.action(
-                    discriminator=None,
-                    callable=provide_interface,
-                    args=('', iface))
+                _context.action(discriminator=None, callable=provide_interface, args=("", iface))
 
 
 def resource(_context, factory, type, name, provides=Interface):
 
     _context.action(
-        discriminator=('resource', name, type, provides),
+        discriminator=("resource", name, type, provides),
         callable=handler,
-        args=('registerAdapter', factory, (type,), provides, name))
-    _context.action(
-        discriminator=None,
-        callable=provide_interface,
-        args=('', type))
-    _context.action(
-        discriminator=None,
-        callable=provide_interface,
-        args=('', provides))
+        args=("registerAdapter", factory, (type,), provides, name),
+    )
+    _context.action(discriminator=None, callable=provide_interface, args=("", type))
+    _context.action(discriminator=None, callable=provide_interface, args=("", provides))

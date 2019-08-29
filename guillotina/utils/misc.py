@@ -1,29 +1,32 @@
+from collections import MutableMapping
+from functools import partial
+from guillotina import glogging
+from guillotina import task_vars
+from guillotina._settings import app_settings
+from guillotina.component import get_utility
+from guillotina.db.interfaces import ITransaction
+from guillotina.exceptions import ContainerNotFound
+from guillotina.exceptions import DatabaseNotFound
+from guillotina.exceptions import RequestNotFound
+from guillotina.exceptions import TransactionNotFound
+from guillotina.interfaces import IAnnotations
+from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
+from guillotina.interfaces import IDatabase
+from guillotina.interfaces import IRegistry
+from guillotina.interfaces import IRequest
+from guillotina.profile import profilable
+from hashlib import sha256 as sha
+
 import asyncio
 import inspect
+import jsonschema.validators
+import os
 import random
 import string
 import time
 import types
 import typing
-from collections import MutableMapping
-from functools import partial
-from hashlib import sha256 as sha
-
-import jsonschema.validators
-from guillotina import glogging
-from guillotina import task_vars
-from guillotina._settings import app_settings
-from guillotina.component import get_utility
-from guillotina.exceptions import RequestNotFound
-from guillotina.exceptions import TransactionNotFound
-from guillotina.exceptions import ContainerNotFound
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IRegistry
-from guillotina.interfaces import IRequest
-from guillotina.db.interfaces import ITransaction
-from guillotina.profile import profilable
 
 
 try:
@@ -34,7 +37,7 @@ except NotImplementedError:
 
 
 RANDOM_SECRET = random.randint(0, 1000000)
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 
 def strings_differ(string1: str, string2: str) -> bool:
@@ -65,8 +68,7 @@ def strings_differ(string1: str, string2: str) -> bool:
     return invalid_bits != 0
 
 
-def get_random_string(length: int = 30,
-                      allowed_chars: str = string.ascii_letters + string.digits) -> str:
+def get_random_string(length: int = 30, allowed_chars: str = string.ascii_letters + string.digits) -> str:
     """
     Heavily inspired by Plone/Django
     Returns a securely generated random string.
@@ -79,8 +81,8 @@ def get_random_string(length: int = 30,
     if not using_sys_random:
         # do our best to get secure random without sysrandom
         seed_value = "%s%s%s" % (random.getstate(), time.time(), RANDOM_SECRET)
-        random.seed(sha(seed_value.encode('utf-8')).digest())
-    return ''.join([random.choice(allowed_chars) for i in range(length)])
+        random.seed(sha(seed_value.encode("utf-8")).digest())
+    return "".join([random.choice(allowed_chars) for i in range(length)])
 
 
 def merge_dicts(d1: dict, d2: dict) -> dict:
@@ -130,8 +132,7 @@ def loop_apply_coroutine(loop, func: types.FunctionType, *args, **kwargs) -> obj
     If the result is a coroutine, use the supplied loop to run it.
     """
     if asyncio.iscoroutinefunction(func):
-        future = asyncio.ensure_future(
-            func(*args, **kwargs), loop=loop)
+        future = asyncio.ensure_future(func(*args, **kwargs), loop=loop)
 
         loop.run_until_complete(future)
         return future.result()
@@ -153,6 +154,7 @@ def get_current_request() -> IRequest:
 
     raise RequestNotFound(RequestNotFound.__doc__)
 
+
 @profilable
 def get_current_transaction() -> ITransaction:
     """
@@ -171,7 +173,7 @@ def get_current_transaction() -> ITransaction:
 @profilable
 def get_current_container() -> IContainer:
     """
-    Return the current request by heuristically looking it up from stack
+    Return the current container by heuristically looking it up from stack
     """
     try:
         task_context = task_vars.container.get()
@@ -183,14 +185,29 @@ def get_current_container() -> IContainer:
     raise ContainerNotFound(ContainerNotFound.__doc__)
 
 
+@profilable
+def get_current_db() -> IDatabase:
+    """
+    Return the current db by heuristically looking it up from stack
+    """
+    try:
+        task_context = task_vars.db.get()
+        if task_context is not None:
+            return task_context
+    except (ValueError, AttributeError, RuntimeError):
+        pass
+
+    raise DatabaseNotFound("Could not find current task database")
+
+
 def lazy_apply(func, *call_args, **call_kwargs):
-    '''
+    """
     apply arguments in the order that they come in the function signature
     and do not apply if argument not provided
 
     call_args will be applied in order if func signature has args.
     otherwise, call_kwargs is the magic here...
-    '''
+    """
     sig = inspect.signature(func)
     args = []
     kwargs = {}
@@ -212,27 +229,27 @@ def lazy_apply(func, *call_args, **call_kwargs):
         else:
             if param.name in call_kwargs:
                 kwargs[param.name] = call_kwargs.pop(param.name)
-            elif (param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD and
-                    len(call_args) >= (idx + 1)):
+            elif param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD and len(call_args) >= (idx + 1):
                 args.append(call_args[idx])
     return func(*args, **kwargs)
 
 
 def to_str(value):
     if isinstance(value, bytes):
-        value = value.decode('utf-8')
+        value = value.decode("utf-8")
     return value
 
 
 def deprecated(message):
     def deprecated_decorator(func):
         def deprecated_func(*args, **kwargs):
-            if getattr(func, '__warned__', None) is None:
-                logger.warning(
-                    "{}: {}".format(func.__name__, message))
+            if getattr(func, "__warned__", None) is None:
+                logger.warning("{}: {}".format(func.__name__, message))
                 func.__warned__ = True
             return func(*args, **kwargs)
+
         return deprecated_func
+
     return deprecated_decorator
 
 
@@ -246,7 +263,7 @@ def list_or_dict_items(val):
 
 
 async def run_async(func, *args, **kwargs) -> object:
-    '''
+    """
     Run a non-async function in an executor
 
     >>> async def foobar(): return 'hi'
@@ -256,71 +273,75 @@ async def run_async(func, *args, **kwargs) -> object:
     :param func: function to run as coroutiune if one
     :param *args: args to call function with
     :param **kwargs: kwargs to call function with
-    '''
-    root = get_utility(IApplication, name='root')
+    """
+    root = get_utility(IApplication, name="root")
     loop = asyncio.get_event_loop()
     func = partial(func, *args, **kwargs)
     return await loop.run_in_executor(root.executor, func)
 
 
 def safe_unidecode(val: bytes) -> str:
-    '''
+    """
     Convert bytes to a string in a safe way
 
     >>> safe_unidecode(b'foobar')
     'foobar'
 
     :param val: bytes to convert
-    '''
+    """
     if isinstance(val, str):
         # already decoded
         return val
 
-    for codec in ('utf-8', 'windows-1252', 'latin-1'):
+    for codec in ("utf-8", "windows-1252", "latin-1"):
         try:
             return val.decode(codec)
         except UnicodeDecodeError:
             pass
-    return val.decode('utf-8', errors='replace')
+    return val.decode("utf-8", errors="replace")
 
 
 def get_url(req, path):
-    '''
+    """
     Return calculated url from a request object taking
     into account X-VirtualHost-Monster header
-    '''
-    if 'X-VirtualHost-Monster' in req.headers:
-        virtualhost = req.headers['X-VirtualHost-Monster']
-    else:
-        virtualhost = None
+    """
+    virtualhost_path = virtualhost = None
+    if "X-VirtualHost-Monster" in req.headers:
+        virtualhost = req.headers["X-VirtualHost-Monster"]
+    elif "X-VirtualHost-Path" in req.headers:
+        virtualhost_path = req.headers["X-VirtualHost-Path"]
 
     if virtualhost:
-        return '{}/{}'.format(virtualhost.rstrip('/'), path.strip('/'))
-    else:
-        url = req.url.with_path(path)
-        for hdr in ('X-Forwarded-Proto', 'X-Forwarded-Scheme',):
-            forwarded_proto = req.headers.get(hdr, None)
-            if forwarded_proto:
-                url = url.with_scheme(forwarded_proto)
-                break
-        return str(url)
+        return "{}/{}".format(virtualhost.rstrip("/"), path.strip("/"))
+
+    if virtualhost_path:
+        path = os.path.join(virtualhost_path.rstrip("/"), path.strip("/"))
+
+    url = req.url.with_path(path)
+    for hdr in ("X-Forwarded-Proto", "X-Forwarded-Scheme"):
+        forwarded_proto = req.headers.get(hdr, None)
+        if forwarded_proto:
+            url = url.with_scheme(forwarded_proto)
+            break
+    return str(url)
 
 
 _cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}
 
 
 def get_schema_validator(schema_name: str):
-    '''
+    """
     Get a json schema validator by the definition name
 
     :param schema_name: Name of the json schema type
-    '''
+    """
     if schema_name in _cached_jsonschema_validators:
         return _cached_jsonschema_validators[schema_name]
 
     schema = {
-        **app_settings['json_schema_definitions'][schema_name],
-        'definitions': app_settings['json_schema_definitions']
+        **app_settings["json_schema_definitions"][schema_name],
+        "definitions": app_settings["json_schema_definitions"],
     }
     jsonschema_validator = jsonschema.validators.validator_for(schema)
     jsonschema_validator.check_schema(schema)
@@ -330,13 +351,17 @@ def get_schema_validator(schema_name: str):
 
 
 def find_container(context=None) -> typing.Optional[IContainer]:
+    """
+    Find container based on contextvar or by looking up the
+    container from the provided context parameter
+    """
     container = task_vars.container.get()
     if container is None:
         while context is not None:
             if IContainer.providedBy(context):
                 container = context
                 break
-            context = getattr(context, '__parent__', None)
+            context = getattr(context, "__parent__", None)
     return container
 
 
@@ -350,6 +375,7 @@ async def get_registry(context=None) -> typing.Optional[IRegistry]:
             return None
         annotations_container = IAnnotations(container)
         from guillotina.registry import REGISTRY_DATA_KEY
+
         registry = await annotations_container.async_get(REGISTRY_DATA_KEY)
         task_vars.registry.set(registry)
     return registry
@@ -357,13 +383,17 @@ async def get_registry(context=None) -> typing.Optional[IRegistry]:
 
 def get_request_scheme(req) -> str:
     scheme = req.headers.get(
-        "X-Forwarded-Protocol",
-        req.headers.get(
-            "X-Scheme", req.headers.get("X-Forwarded-Proto", None)
-        ),
+        "X-Forwarded-Protocol", req.headers.get("X-Scheme", req.headers.get("X-Forwarded-Proto", None))
     )
 
     if scheme:
         return scheme
 
     return req.scheme
+
+
+async def notice_on_error(key: str, func_to_await):
+    try:
+        await func_to_await
+    except Exception:  # noqa
+        logger.exception(f"Error on initialize utility {key}", exc_info=True)

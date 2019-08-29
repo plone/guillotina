@@ -2,10 +2,8 @@
 from guillotina import configure
 
 
-app_settings = {
-
-}
+app_settings = {}
 
 
 def includeme():
-    configure.scan('measures.configuration')
+    configure.scan("measures.configuration")

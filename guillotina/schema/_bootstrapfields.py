@@ -30,11 +30,10 @@ from zope.interface import implementer
 from zope.interface import providedBy
 
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 
 class ValidatedProperty(object):
-
     def __init__(self, name, check=None):
         self._info = name, check
 
@@ -53,10 +52,9 @@ class ValidatedProperty(object):
 
 
 class DefaultProperty(ValidatedProperty):
-
     def __get__(self, inst, owner):
         name, check = self._info
-        default_factory = inst.__dict__.get('defaultFactory')
+        default_factory = inst.__dict__.get("defaultFactory")
         # If there is no default factory, simply return the default.
         if default_factory is None:
             return inst.__dict__[name]
@@ -97,7 +95,7 @@ class Field(Attribute):
     #    of Field (including Field subclass) instances.
     order = 0
 
-    default = DefaultProperty('default')
+    default = DefaultProperty("default")
 
     # These were declared as slots in zope.interface, we override them here to
     # get rid of the dedcriptors so they don't break .bind()
@@ -105,9 +103,19 @@ class Field(Attribute):
     interface = None
     _Element__tagged_values = None
 
-    def __init__(self, title='', description='', __name__='',
-                 required=True, readonly=False, constraint=None, default=None,
-                 defaultFactory=None, missing_value=__missing_value_marker, **kw):
+    def __init__(
+        self,
+        title="",
+        description="",
+        __name__="",
+        required=True,
+        readonly=False,
+        constraint=None,
+        default=None,
+        defaultFactory=None,
+        missing_value=__missing_value_marker,
+        **kw,
+    ):
         """Pass in field values as keyword parameters.
 
 
@@ -133,7 +141,7 @@ class Field(Attribute):
         >>> f.__doc__, f.title, f.description
         (u'sample\\n\\nblah blah\\nblah', u'sample', u'blah blah\\nblah')
         """
-        __doc__ = ''
+        __doc__ = ""
         if title:
             if description:
                 __doc__ = "%s\n\n%s" % (title, description)
@@ -191,8 +199,8 @@ class Field(Attribute):
             names.update(get_fields(interface))
 
         # order will be different always, don't compare it
-        if 'order' in names:
-            del names['order']
+        if "order" in names:
+            del names["order"]
         for name in names:
             if getattr(self, name) != getattr(other, name):
                 return False
@@ -216,20 +224,19 @@ class Field(Attribute):
 
     def set(self, object, value):
         if self.readonly:
-            raise TypeError("Can't set values on read-only fields "
-                            "(name=%s, class=%s.%s)"
-                            % (self.__name__,
-                               object.__class__.__module__,
-                               object.__class__.__name__))
+            raise TypeError(
+                "Can't set values on read-only fields "
+                "(name=%s, class=%s.%s)"
+                % (self.__name__, object.__class__.__module__, object.__class__.__name__)
+            )
         setattr(object, self.__name__, value)
 
 
 class Container(Field):
-
     def _validate(self, value):
         super(Container, self)._validate(value)
 
-        if not hasattr(value, '__contains__'):
+        if not hasattr(value, "__contains__"):
             try:
                 iter(value)
             except TypeError:
@@ -240,7 +247,6 @@ class Container(Field):
 #     is derived from Container, but cannot be used everywhere an instance
 #     of Container could be, because it's '_validate' is more restrictive.
 class Iterable(Container):
-
     def _validate(self, value):
         super(Iterable, self)._validate(value)
 
@@ -259,8 +265,8 @@ class Orderable(object):
     Orderable is a mixin used in combination with Field.
     """
 
-    min = ValidatedProperty('min')
-    max = ValidatedProperty('max')
+    min = ValidatedProperty("min")
+    max = ValidatedProperty("max")
 
     def __init__(self, min=None, max=None, default=None, **kw):
 
@@ -294,6 +300,7 @@ class MinMaxLen(object):
 
     MinMaxLen is a mixin used in combination with Field.
     """
+
     min_length = 0
     max_length = None
 
@@ -315,6 +322,7 @@ class MinMaxLen(object):
 @implementer(IFromUnicode)
 class Text(MinMaxLen, Field):
     """A field containing text used for human discourse."""
+
     _type = str
 
     def __init__(self, *args, **kw):
@@ -342,7 +350,7 @@ class TextLine(Text):
     """A text field with no newlines."""
 
     def constraint(self, value):
-        return '\n' not in value and '\r' not in value
+        return "\n" not in value and "\r" not in value
 
 
 class Password(TextLine):
@@ -406,7 +414,7 @@ class Bool(Field):
         >>> b.from_unicode('false') or b.from_unicode('False')
         False
         """
-        v = str == 'True' or str == 'true'
+        v = str == "True" or str == "true"
         self.validate(v)
         return v
 
@@ -414,6 +422,7 @@ class Bool(Field):
 @implementer(IFromUnicode)
 class Int(Orderable, Field):
     """A field representing an Integer."""
+
     _type = int
 
     def __init__(self, *args, **kw):

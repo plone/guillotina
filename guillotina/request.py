@@ -17,7 +17,7 @@ import uuid
 import urllib.parse
 
 
-_T = TypeVar('_T')
+_T = TypeVar("_T")
 
 
 # Vendored from aiohttp until we get rid of aiohttp on the traversal
@@ -204,21 +204,20 @@ class GuillotinaWebSocket:
 
 
 class AsyncStreamIterator(Generic[_T]):
-
     def __init__(self, read_func: Callable[[], Awaitable[_T]]) -> None:
         self.read_func = read_func
 
-    def __aiter__(self) -> 'AsyncStreamIterator[_T]':
+    def __aiter__(self) -> "AsyncStreamIterator[_T]":
         return self
 
     async def __anext__(self) -> _T:
         rv = await self.read_func()
-        if rv == b'':
+        if rv == b"":
             raise StopAsyncIteration  # NOQA
         return rv
 
 
-class AsgiStreamReader():
+class AsgiStreamReader:
     def __init__(self, receive):
         self.finished = False
         self._asgi_receive = receive
@@ -226,6 +225,7 @@ class AsgiStreamReader():
 
     async def readany(self):
         from guillotina.files import CHUNK_SIZE
+
         return await self.read(CHUNK_SIZE)
 
     async def readexactly(self, n: int) -> bytes:
@@ -266,9 +266,9 @@ class Request(object):
     object as it is essential our poor man's thread local model
     """
 
-#    tail = None
-#    resource = None
-#    security = None
+    #    tail = None
+    #    resource = None
+    #    security = None
 
     _uid = None
     _view_error = False
@@ -279,9 +279,20 @@ class Request(object):
     view_name = None
     found_view = None
 
-    def __init__(self, scheme, method, path, query_string, raw_headers,
-                 stream_reader, client_max_size: int=1024**2, loop=None,
-                 send=None, receive=None, scope=None):
+    def __init__(
+        self,
+        scheme,
+        method,
+        path,
+        query_string,
+        raw_headers,
+        stream_reader,
+        client_max_size: int = 1024 ** 2,
+        loop=None,
+        send=None,
+        receive=None,
+        scope=None,
+    ):
         self.send = send
         self._initialized = time.time()
         self.receive = receive
@@ -310,20 +321,18 @@ class Request(object):
         self.matchdict: Dict[str, str] = {}
 
     def get_ws(self):
-        return GuillotinaWebSocket(self.scope,
-                                   receive=self.receive,
-                                   send=self.send)
+        return GuillotinaWebSocket(self.scope, receive=self.receive, send=self.send)
 
     def record(self, event_name: str):
-        '''
+        """
         Record event on the request
 
         :param event_name: name of event
-        '''
+        """
         self._events[event_name] = time.time()
 
     def add_future(self, *args, **kwargs):
-        '''
+        """
         Register a future to be executed after the request has finished.
 
         :param name: name of future
@@ -331,16 +340,16 @@ class Request(object):
         :param scope: group the futures to execute different groupings together
         :param args: arguments to execute future with
         :param kwargs: kwargs to execute future with
-        '''
+        """
         execute.add_future(*args, **kwargs)
 
-    def get_future(self, name: str, scope: str=''):
-        '''
+    def get_future(self, name: str, scope: str = ""):
+        """
         Get a registered future
 
         :param name: scoped futures to execute. Leave default for normal behavior
         :param scope: scope name the future was registered for
-        '''
+        """
         return execute.get_future(name, scope)
 
     @property
@@ -352,12 +361,12 @@ class Request(object):
         return self._view_error
 
     @profilable
-    def execute_futures(self, scope: str=''):
-        '''
+    def execute_futures(self, scope: str = ""):
+        """
         Execute all the registered futures in a new task
 
         :param scope: scoped futures to execute. Leave default for normal behavior
-        '''
+        """
         return execute.execute_futures(scope)
 
     def clear_futures(self):
@@ -366,8 +375,8 @@ class Request(object):
     @property
     def uid(self):
         if self._uid is None:
-            if 'X-FORWARDED-REQUEST-UID' in self.headers:
-                self._uid = self.headers['X-FORWARDED-REQUEST-UID']
+            if "X-FORWARDED-REQUEST-UID" in self.headers:
+                self._uid = self.headers["X-FORWARDED-REQUEST-UID"]
             else:
                 self._uid = uuid.uuid4().hex
         return self._uid
@@ -376,9 +385,9 @@ class Request(object):
         task_vars.request.set(self)
 
     def __exit__(self, *args):
-        '''
+        """
         contextvars already tears down to previous value, do not set to None here!
-        '''
+        """
 
     async def __aenter__(self):
         return self.__enter__()
@@ -445,7 +454,7 @@ class Request(object):
         return self._raw_path
 
     @reify
-    def query(self) -> 'multidict.CIMultiDict[str]':
+    def query(self) -> "multidict.CIMultiDict[str]":
         """A multidict with all the variables in the query string."""
         query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
         return multidict.CIMultiDict(query)
@@ -459,11 +468,9 @@ class Request(object):
         return self._query_string
 
     @reify
-    def headers(self) -> 'multidict.CIMultiDict[str]':
+    def headers(self) -> "multidict.CIMultiDict[str]":
         """A case-insensitive multidict proxy with all headers."""
-        return multidict.CIMultiDict(
-            [(k.decode(), v.decode()) for k, v in self._raw_headers]
-        )
+        return multidict.CIMultiDict([(k.decode(), v.decode()) for k, v in self._raw_headers])
 
     @reify
     def raw_headers(self):
@@ -502,10 +509,8 @@ class Request(object):
                     body_size = len(body)
                     if body_size >= self._client_max_size:
                         from guillotina.response import HTTPRequestEntityTooLarge
-                        raise HTTPRequestEntityTooLarge(
-                            max_size=self._client_max_size,
-                            actual_size=body_size
-                        )
+
+                        raise HTTPRequestEntityTooLarge(max_size=self._client_max_size, actual_size=body_size)
                 if not chunk:
                     break
             self._read_bytes = bytes(body)
@@ -514,7 +519,7 @@ class Request(object):
     async def text(self) -> str:
         """Return BODY as text using encoding from .charset."""
         bytes_body = await self.read()
-        encoding = self.charset or 'utf-8'
+        encoding = self.charset or "utf-8"
         return bytes_body.decode(encoding)
 
     async def json(self, *, loads=json.loads) -> Any:  # type: ignore
@@ -523,10 +528,8 @@ class Request(object):
         return loads(body)
 
     def __repr__(self) -> str:
-        ascii_encodable_path = self.path.encode('ascii', 'backslashreplace') \
-            .decode('ascii')
-        return "<{} {} {} >".format(self.__class__.__name__,
-                                    self._method, ascii_encodable_path)
+        ascii_encodable_path = self.path.encode("ascii", "backslashreplace").decode("ascii")
+        return "<{} {} {} >".format(self.__class__.__name__, self._method, ascii_encodable_path)
 
     def __eq__(self, other: object) -> bool:
         return id(self) == id(other)

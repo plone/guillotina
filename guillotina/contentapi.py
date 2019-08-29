@@ -18,8 +18,7 @@ from zope.interface import alsoProvides
 
 
 class ContentAPI:
-
-    def __init__(self, db, user=RootUser('root')):
+    def __init__(self, db, user=RootUser("root")):
         self.db = db
         self.tm = db.get_transaction_manager()
         self.request = get_mocked_request()
@@ -51,12 +50,11 @@ class ContentAPI:
             task_vars.txn.set(self._active_txn)
         return self._active_txn
 
-    async def create(self, payload: dict, in_: IResource=None) -> IResource:
+    async def create(self, payload: dict, in_: IResource = None) -> IResource:
         await self.get_transaction()
         if in_ is None:
             in_ = self.db
-        view = get_multi_adapter(
-            (in_, self.request), app_settings['http_methods']['POST'], name='')
+        view = get_multi_adapter((in_, self.request), app_settings["http_methods"]["POST"], name="")
 
         async def json():
             return payload
@@ -64,19 +62,19 @@ class ContentAPI:
         self.request.json = json
         resp = await view()
         await self.commit()
-        path = resp.headers['Location']
-        if path.startswith('http://') or path.startswith('https://'):
+        path = resp.headers["Location"]
+        if path.startswith("http://") or path.startswith("https://"):
             # strip off container prefix
             container_url = get_object_url(in_, self.request)  # type: ignore
-            path = path[len(container_url or ''):]
-        return await navigate_to(in_, path.strip('/'))  # type: ignore
+            path = path[len(container_url or "") :]
+        return await navigate_to(in_, path.strip("/"))  # type: ignore
 
-    async def get(self, path: str, in_: IResource=None) -> typing.Optional[IResource]:
+    async def get(self, path: str, in_: IResource = None) -> typing.Optional[IResource]:
         await self.get_transaction()
         if in_ is None:
             in_ = self.db
         try:
-            return await navigate_to(in_, path.strip('/'))  # type: ignore
+            return await navigate_to(in_, path.strip("/"))  # type: ignore
         except KeyError:
             return None
 

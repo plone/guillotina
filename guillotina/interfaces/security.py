@@ -12,10 +12,10 @@ from zope.interface import Interface
 from .misc import IRequest
 
 
-_ = MessageFactory('guillotina')
+_ = MessageFactory("guillotina")
 
 
-Public = 'guillotina.Public'  # constant to check for always allowed permission
+Public = "guillotina.Public"  # constant to check for always allowed permission
 
 # These are the "setting" values returned by several methods defined
 # in these interfaces.  The implementation may move to another
@@ -34,7 +34,7 @@ class PermissionSetting:
         name. If the name already exists in the dict, return that
         instance rather than creating a new one.
         """
-        instances = cls.__dict__.get('_z_instances')
+        instances = cls.__dict__.get("_z_instances")
         if instances is None:
             cls._z_instances = instances = {}
         it = instances.get(name)
@@ -54,7 +54,7 @@ class PermissionSetting:
         return self.__name
 
     def __str__(self):
-        return 'PermissionSetting: %s' % self.__name
+        return "PermissionSetting: %s" % self.__name
 
     __repr__ = __str__
 
@@ -62,48 +62,36 @@ class PermissionSetting:
 # register PermissionSettings to be symbolic constants by identity,
 # even when pickled and unpickled.
 copyreg.constructor(PermissionSetting)
-copyreg.pickle(PermissionSetting,
-               PermissionSetting.get_name,
-               PermissionSetting)
+copyreg.pickle(PermissionSetting, PermissionSetting.get_name, PermissionSetting)
 
 
-Allow = PermissionSetting(
-    'Allow', 'Explicit allow setting for permissions')
+Allow = PermissionSetting("Allow", "Explicit allow setting for permissions")
 
-Deny = PermissionSetting(
-    'Deny', 'Explicit deny setting for permissions')
+Deny = PermissionSetting("Deny", "Explicit deny setting for permissions")
 
-AllowSingle = PermissionSetting(
-    'AllowSingle', 'Explicit allow and not inherit permission')
+AllowSingle = PermissionSetting("AllowSingle", "Explicit allow and not inherit permission")
 
-Unset = PermissionSetting(
-    'Unset', 'Unset constant that denotes no setting for permission')
+Unset = PermissionSetting("Unset", "Unset constant that denotes no setting for permission")
 
 
 class IRole(Interface):  # pylint: disable=E0239
     """A role object."""
 
     id = TextLine(
-        title='Id',
-        description='Id as which this role will be known and used.',
-        readonly=True,
-        required=True)
+        title="Id", description="Id as which this role will be known and used.", readonly=True, required=True
+    )
 
-    title = TextLine(
-        title='Title',
-        description='Provides a title for the role.',
-        required=True)
+    title = TextLine(title="Title", description="Provides a title for the role.", required=True)
 
     description = Text(
-        title='Description',
-        description='Provides a description for the role.',
-        required=False)
+        title="Description", description="Provides a description for the role.", required=False
+    )
 
 
 class IPrincipalRoleMap(Interface):  # pylint: disable=E0239
     """Mappings between principals and roles."""
 
-    _bycol = Attribute('settings stored by col')
+    _bycol = Attribute("settings stored by col")
 
     def get_principals_for_role(role_id):  # noqa: N805
         """Get the principals that have been granted a role.
@@ -325,20 +313,17 @@ class IPermission(Interface):  # pylint: disable=E0239
     """A permission object."""
 
     id = TextLine(
-        title=_('Id'),
-        description=_('Id as which this permission will be known and used.'),
+        title=_("Id"),
+        description=_("Id as which this permission will be known and used."),
         readonly=True,
-        required=True)
+        required=True,
+    )
 
-    title = TextLine(
-        title=_('Title'),
-        description=_('Provides a title for the permission.'),
-        required=True)
+    title = TextLine(title=_("Title"), description=_("Provides a title for the permission."), required=True)
 
     description = Text(
-        title=_('Description'),
-        description=_('Provides a description for the permission.'),
-        required=False)
+        title=_("Description"), description=_("Provides a description for the permission."), required=False
+    )
 
 
 class IPrincipal(Interface):  # pylint: disable=E0239
@@ -355,79 +340,80 @@ class IPrincipal(Interface):  # pylint: disable=E0239
     define a standard view name (e.g.  'inline_summary') for this
     purpose.
     """
-    groups = List(
-        value_type=TextLine()
-    )
+
+    groups = List(value_type=TextLine())
 
     id = TextLine(
-        title=_('Id'),
-        description=_('The unique identification of the principal.'),
+        title=_("Id"),
+        description=_("The unique identification of the principal."),
         required=True,
-        readonly=True)
+        readonly=True,
+    )
 
 
 SettingType = typing.Union[bool, None, str]
 
 
 class ISecurityPolicy(Interface):  # pylint: disable=E0239
-
     def __init__(IPrincipal):
         """
         """
 
     def invalidate_cache():
-        '''
+        """
         Invalidate current cache
-        '''
+        """
 
     def check_permission(permission: str, obj: IBaseObject) -> bool:
-        '''
+        """
         Check if user has permission on object
-        '''
+        """
 
     def cached_decision(parent: IBaseObject, principal: str, groups: typing.List[str], permission: str):
-        '''
-        '''
+        """
+        """
 
     def cached_principal_permission(
-            parent: IBaseObject, principal: str,
-            groups: typing.List[str], permission: str, level: str) -> SettingType:
-        '''
-        '''
+        parent: IBaseObject, principal: str, groups: typing.List[str], permission: str, level: str
+    ) -> SettingType:
+        """
+        """
 
     def global_principal_roles(principal: str, groups: typing.List[str]) -> typing.Dict[str, bool]:
-        '''
-        '''
+        """
+        """
 
-    def cached_principal_roles(parent: IBaseObject, principal: str,
-                               groups: typing.List[str], level: str) -> typing.Dict[str, SettingType]:
-        '''
-        '''
+    def cached_principal_roles(
+        parent: IBaseObject, principal: str, groups: typing.List[str], level: str
+    ) -> typing.Dict[str, SettingType]:
+        """
+        """
 
 
 class IPasswordHasher(Interface):
     def __call__(pw, salt):
-        '''
+        """
         Return hash of password
-        '''
+        """
 
 
 class IPasswordChecker(Interface):
     def __call__(hashed_value, password):
-        '''
+        """
         Return True if password matches hashed_value
-        '''
+        """
 
 
 class IAuthExtractor(Interface):
     def __call__(request: IRequest) -> typing.Optional[typing.Dict]:
-        '''
-        '''
+        """
+        """
+
 
 class IGroups(Interface):
     """A group Utility search."""
 
     def get_principal(ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
-        '''
+        """
         Get group principal object
-        '''
+        """

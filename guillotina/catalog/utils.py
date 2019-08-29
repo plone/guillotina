@@ -18,7 +18,7 @@ from guillotina.interfaces import ISearchParser
 from guillotina.utils import execute
 
 
-logger = logging.getLogger('guillotina')
+logger = logging.getLogger("guillotina")
 
 
 def get_index_fields(type_name):
@@ -38,14 +38,12 @@ def get_metadata_fields(type_name):
 
 
 def reindex_in_future(context, security=False):
-    '''
+    """
     Function to reindex a tree of content in the catalog.
-    '''
+    """
     search = query_utility(ICatalogUtility)
     if search is not None:
-        execute.in_pool(
-            search.reindex_all_content,
-            context, security).after_request()
+        execute.in_pool(search.reindex_all_content, context, security).after_request()
 
 
 _cached_indexes: typing.Dict[str, typing.Dict] = {}
@@ -95,9 +93,8 @@ def get_index_definition(name):
 def parse_query(context, query, util=None) -> typing.Optional[BasicParsedQueryInfo]:
     if util is None:
         util = get_utility(ICatalogUtility)
-    parser = query_multi_adapter(
-        (util, context), ISearchParser, name=app_settings['search_parser'])
+    parser = query_multi_adapter((util, context), ISearchParser, name=app_settings["search_parser"])
     if parser is None:
-        logger.warning(f'No parser found for {util}')
+        logger.warning(f"No parser found for {util}")
         return None
     return parser(query)

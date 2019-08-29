@@ -21,7 +21,7 @@ from guillotina.utils import get_authenticated_user_id
 from zope.interface import implementer
 
 
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 
 @implementer(ITransactionManager)
@@ -46,7 +46,7 @@ class TransactionManager:
     def db_id(self):
         if self._db is not None:
             return self._db.id
-        return 'root'
+        return "root"
 
     @property
     def lock(self):
@@ -60,22 +60,25 @@ class TransactionManager:
         return await txn.get(ROOT_ID)
 
     @profilable
-    async def begin(self, read_only: bool=False) -> ITransaction:
+    async def begin(self, read_only: bool = False) -> ITransaction:
         """Starts a new transaction.
         """
         # already has txn registered, as long as connection is closed, it
         # is safe
         txn: typing.Optional[ITransaction] = task_vars.txn.get()
-        if (txn is not None and txn.manager == self and
-                txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)):
+        if (
+            txn is not None
+            and txn.manager == self
+            and txn.storage == self.storage
+            and txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT)
+        ):
             # re-use txn if possible
-            txn.status = Status.ACTIVE
-            if (txn._db_conn is not None and
-                    getattr(txn._db_conn, '_in_use', None) is None):
+            txn.initialize(read_only)
+            if txn._db_conn is not None and getattr(txn._db_conn, "_in_use", None) is None:
                 try:
                     await self._close_txn(txn)
                 except Exception:
-                    logger.warn('Unable to close spurious connection', exc_info=True)
+                    logger.warn("Unable to close spurious connection", exc_info=True)
         else:
             txn = Transaction(self, read_only=read_only)
 
@@ -91,10 +94,10 @@ class TransactionManager:
 
         return txn
 
-    async def commit(self, *, txn: typing.Optional[ITransaction]=None) -> None:
+    async def commit(self, *, txn: typing.Optional[ITransaction] = None) -> None:
         return await shield(self._commit(txn=txn))
 
-    async def _commit(self, *, txn: typing.Optional[ITransaction]=None) -> None:
+    async def _commit(self, *, txn: typing.Optional[ITransaction] = None) -> None:
         """ Commit the last transaction
         """
         if txn is None:
@@ -121,7 +124,7 @@ class TransactionManager:
                 try:
                     await self._storage.close(txn._db_conn)
                 except asyncpg.exceptions.InterfaceError as ex:
-                    if 'received invalid connection' in str(ex):
+                    if "received invalid connection" in str(ex):
                         # ignore, new pool was created so we can not close this conn
                         pass
                     else:
@@ -137,19 +140,19 @@ class TransactionManager:
                 try:
                     await self._storage.terminate(txn._db_conn)
                 except asyncpg.exceptions.InterfaceError as ex:
-                    if 'released back to the pool' in str(ex):
+                    if "released back to the pool" in str(ex):
                         pass
                     else:
                         raise
             txn._db_conn = None
 
-    async def abort(self, *, txn: typing.Optional[ITransaction]=None) -> None:
+    async def abort(self, *, txn: typing.Optional[ITransaction] = None) -> None:
         try:
             return await shield(self._abort(txn=txn))
         except asyncio.CancelledError:
             pass
 
-    async def _abort(self, *, txn: typing.Optional[ITransaction]=None):
+    async def _abort(self, *, txn: typing.Optional[ITransaction] = None):
         """ Abort the last transaction
         """
         if txn is None:
@@ -171,9 +174,9 @@ class TransactionManager:
         return self
 
     def __exit__(self, *args):
-        '''
+        """
         contextvars already tears down to previous value, do not set to None here!
-        '''
+        """
 
     async def __aenter__(self) -> ITransactionManager:
         return self.__enter__()

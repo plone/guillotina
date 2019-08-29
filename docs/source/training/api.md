@@ -200,9 +200,9 @@ Each change can use the following settings:
 - Unset : you remove the setting
 
 
-## Exploring the API with Swagger
+## Exploring the API with OpenAPI
 
-In the previous step, we installed `guillotina_swagger`. With Swagger, we can
+In the previous step, we installed `guillotina.contrib.swagger`. With OpenAPI, we can
 inspect any context and explore the API.
 
 Visit `http://localhost:8080/@docs`

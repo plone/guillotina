@@ -9,45 +9,44 @@ from zope.interface import Interface
 class IMarkerBehavior1(Interface):
     pass
 
+
 class IMarkerBehavior2(Interface):
     pass
+
 
 class IMarkerBehavior3(Interface):
     pass
 
+
 class ITestBehavior1(Interface):
     foobar = schema.TextLine()
 
+
 class ITestBehavior2(Interface):
     foobar = schema.TextLine()
+
 
 class ITestBehavior3(Interface):
     foobar = schema.TextLine()
 
 
 @configure.behavior(
-    title="",
-    provides=ITestBehavior1,
-    marker=IMarkerBehavior1,
-    for_="guillotina.interfaces.IResource")
+    title="", provides=ITestBehavior1, marker=IMarkerBehavior1, for_="guillotina.interfaces.IResource"
+)
 class TestBehavior1(AnnotationBehavior):
     pass
 
 
 @configure.behavior(
-    title="",
-    provides=ITestBehavior2,
-    marker=IMarkerBehavior2,
-    for_="guillotina.interfaces.IResource")
+    title="", provides=ITestBehavior2, marker=IMarkerBehavior2, for_="guillotina.interfaces.IResource"
+)
 class TestBehavior2(AnnotationBehavior):
     pass
 
 
 @configure.behavior(
-    title="",
-    provides=ITestBehavior3,
-    marker=IMarkerBehavior3,
-    for_="guillotina.interfaces.IResource")
+    title="", provides=ITestBehavior3, marker=IMarkerBehavior3, for_="guillotina.interfaces.IResource"
+)
 class TestBehavior3(AnnotationBehavior):
     pass
 
@@ -84,7 +83,8 @@ class ITestContent6(ITestContent5):
         "measures.configuration.ITestBehavior1",
         "measures.configuration.ITestBehavior2",
         "measures.configuration.ITestBehavior3",
-    ])
+    ],
+)
 class TestContent1(Item):
     pass
 
@@ -97,6 +97,7 @@ class TestContent1(Item):
         "measures.configuration.ITestBehavior1",
         "measures.configuration.ITestBehavior2",
         "measures.configuration.ITestBehavior3",
-    ])
+    ],
+)
 class TestContent6(Item):
     pass

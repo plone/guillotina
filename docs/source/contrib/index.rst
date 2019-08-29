@@ -10,3 +10,5 @@ Contents:
    cache
    jsonbcatalog
    pubsub
+   swagger
+   mailer

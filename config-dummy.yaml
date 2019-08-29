@@ -1,4 +1,6 @@
 ---
+applications:
+- guillotina.contrib.swagger
 databases:
   d:
     storage: DUMMY

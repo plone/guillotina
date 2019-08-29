@@ -26,7 +26,6 @@ _marker = object()
 
 @interface.implementer(interfaces.IFieldUpdatedEvent)  # type: ignore
 class FieldUpdatedEvent(object):
-
     def __init__(self, inst, field, old_value, new_value):
         self.inst = inst
         self.field = field
@@ -58,7 +57,7 @@ class FieldProperty(object):
         value = inst.__dict__.get(self.__name, _marker)
         if value is _marker:
             field = self.__field.bind(inst)
-            value = getattr(field, 'default', _marker)
+            value = getattr(field, "default", _marker)
             if value is _marker:
                 raise AttributeError(self.__name)
 
@@ -68,14 +67,14 @@ class FieldProperty(object):
         value = inst.__dict__.get(self.__name, default)
         if value is default:
             field = self.__field.bind(inst)
-            value = getattr(field, 'default', default)
+            value = getattr(field, "default", default)
         return value
 
     def __set__(self, inst, value):
         field = self.__field.bind(inst)
         field.validate(value)
         if field.readonly and self.__name in inst.__dict__:
-            raise ValueError(self.__name, 'field is readonly')
+            raise ValueError(self.__name, "field is readonly")
         oldvalue = self.queryValue(inst, NO_VALUE)
         inst.__dict__[self.__name] = value
         event.sync_notify(FieldUpdatedEvent(inst, field, oldvalue, value))
@@ -84,13 +83,14 @@ class FieldProperty(object):
         return getattr(self.__field, name)
 
 
-def createFieldProperties(schema, omit=[]):
+def createFieldProperties(schema, omit=None):
     """Creates a FieldProperty fields in `schema` on the class it is called on.
 
     schema ... interface those fields should be added to class
     omit ... list of field names to be omitted in creation
 
     """
+    omit = omit or []
     frame = sys._getframe(1)
     for name in guillotina.schema.getFieldNamesInOrder(schema):
         if name in omit:
@@ -99,7 +99,6 @@ def createFieldProperties(schema, omit=[]):
 
 
 class FieldPropertyStoredThroughField(object):
-
     def __init__(self, field, name=None):
         if name is None:
             name = field.__name__
@@ -127,7 +126,7 @@ class FieldPropertyStoredThroughField(object):
         field = self.field.bind(inst)
         value = self.getValue(inst, field)
         if value is _marker:
-            value = getattr(field, 'default', _marker)
+            value = getattr(field, "default", _marker)
             if value is _marker:
                 raise AttributeError(self.__name)
 
@@ -143,7 +142,7 @@ class FieldPropertyStoredThroughField(object):
                 field.readonly = True
                 return
             else:
-                raise ValueError(self.__name, 'field is readonly')
+                raise ValueError(self.__name, "field is readonly")
         oldvalue = self.queryValue(inst, field, NO_VALUE)
         self.setValue(inst, field, value)
         event.sync_notify(FieldUpdatedEvent(inst, self.field, oldvalue, value))

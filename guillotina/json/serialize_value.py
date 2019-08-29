@@ -26,9 +26,7 @@ def json_compatible(value):
 
     result_value = query_adapter(value, IValueToJson, default=_MISSING)
     if result_value is _MISSING:
-        raise TypeError(
-            'No converter for making'
-            ' {0!r} ({1}) JSON compatible.'.format(value, type(value)))
+        raise TypeError("No converter for making" " {0!r} ({1}) JSON compatible.".format(value, type(value)))
     else:
         return result_value
 

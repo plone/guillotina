@@ -13,7 +13,7 @@ def test_generate_uid_with_parent():
     parent.__parent__ = utils.create_content()
     zoid = uid.generate_uid(ob)
     assert len(zoid) == (uid.UUID_LENGTH + len(uid.OID_DELIMITER) + uid.UID_SPLIT_LENGTH)
-    assert zoid.startswith(parent.__uuid__[:uid.UID_SPLIT_LENGTH] + uid.OID_DELIMITER)
+    assert zoid.startswith(parent.__uuid__[: uid.UID_SPLIT_LENGTH] + uid.OID_DELIMITER)
 
 
 def test_generate_uid_with_parents():
@@ -25,8 +25,15 @@ def test_generate_uid_with_parents():
                         parent=utils.create_content(
                             parent=utils.create_content(
                                 parent=utils.create_content(
-                                    parent=utils.create_content(
-                                        parent=utils.create_content())))))))))
+                                    parent=utils.create_content(parent=utils.create_content())
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
     ob = utils.create_content(parent=parent)
     zoid = uid.generate_uid(ob)
     assert len(zoid) == uid.MAX_UID_LENGTH

@@ -7,17 +7,24 @@ from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICloudFileField
 from guillotina.response import HTTPNotFound
 from guillotina.schema import Dict
+from guillotina._settings import app_settings
+from guillotina.utils import get_schema_validator
+from guillotina.response import HTTPPreconditionFailed
+from guillotina import glogging
+
+import jsonschema
+
+logger = glogging.getLogger("guillotina")
 
 
-class DictFieldProxy():
-
+class DictFieldProxy:
     def __init__(self, key, context, field_name):
         self.__key = key
         self.__context = context
         self.__field_name = field_name
 
     def __getattribute__(self, name):
-        if name.startswith('_DictFieldProxy'):  # local attribute
+        if name.startswith("_DictFieldProxy"):  # local attribute
             return super().__getattribute__(name)
 
         if name == self.__field_name:
@@ -26,7 +33,7 @@ class DictFieldProxy():
             return getattr(self.__context, name)
 
     def __setattr__(self, name, value):
-        if name.startswith('_DictFieldProxy'):
+        if name.startswith("_DictFieldProxy"):
             return super().__setattr__(name, value)
 
         if name == self.__field_name:
@@ -36,12 +43,105 @@ class DictFieldProxy():
 
 
 class Service(View):
+    __validator__ = __schema__ = None
+    _sentinal = object()
+
+    def _validate_parameters(self):
+        if "parameters" in self.__config__:
+            data = self.request.url.query
+            for parameter in self.__config__["parameters"]:
+                if parameter["in"] == "query":
+                    if "schema" in parameter and "name" in parameter:
+                        if parameter["schema"]["type"] == "integer":
+                            try:
+                                int(data[parameter["name"]])
+                            except ValueError:
+                                raise HTTPPreconditionFailed(
+                                    content={
+                                        "reason": "Schema validation error",
+                                        "message": "can not convert {} to Int".format(
+                                            data[parameter["name"]]
+                                        ),
+                                    }
+                                )
+                        elif parameter["schema"]["type"] == "float":
+                            try:
+                                float(data[parameter["name"]])
+                            except ValueError:
+                                raise HTTPPreconditionFailed(
+                                    content={
+                                        "reason": "Schema validation error",
+                                        "message": "can not convert {} to Float".format(
+                                            data[parameter["name"]]
+                                        ),
+                                    }
+                                )
+                        else:
+                            pass
+                        try:
+                            if parameter["required"] and parameter["name"] not in data:
+                                raise HTTPPreconditionFailed(
+                                    content={
+                                        "reason": "Schema validation error",
+                                        "message": "{} is required".format(parameter["name"]),
+                                    }
+                                )
+                        except KeyError:
+                            logger.warning("`required` is a mandatory field", exc_info=True)
+
+    @classmethod
+    def _get_validator(cls):
+        if cls.__validator__ is None and cls.__validator__ != cls._sentinal:
+            cls.__validator__ = cls._sentinal
+            if "requestBody" in cls.__config__:
+                requestBody = cls.__config__["requestBody"]
+                if "$ref" in requestBody["content"]["application/json"]["schema"]:
+                    try:
+                        ref = requestBody["content"]["application/json"]["schema"]["$ref"]
+                        schema_name = ref.split("/")[-1]
+                        cls.__schema__ = app_settings["json_schema_definitions"][schema_name]
+                        cls.__validator__ = get_schema_validator(schema_name)
+                    except KeyError:
+                        logger.warning("Invalid jsonschema", exc_info=True)
+                elif requestBody["content"]["application/json"]["schema"] is not None:
+                    try:
+                        cls.__schema__ = requestBody["content"]["application/json"]["schema"]
+                        jsonschema_validator = jsonschema.validators.validator_for(cls.__schema__)
+                        cls.__validator__ = jsonschema_validator(cls.__schema__)
+                    except jsonschema.exceptions.ValidationError:
+                        logger.warning("Could not validate schema", exc_info=True)
+                else:
+                    logger.warning("No schema found in service definition")
+            else:
+                pass  # can be used for query, path or header parameters
+        return cls.__schema__, cls.__validator__
+
+    async def validate(self):
+
+        self._validate_parameters()
+        schema, validator = self.__class__._get_validator()
+        if validator and validator != self._sentinal:
+            try:
+                data = await self.request.json()
+                validator.validate(data)
+            except jsonschema.exceptions.ValidationError as e:
+                raise HTTPPreconditionFailed(
+                    content={
+                        "reason": "json schema validation error",
+                        "message": e.message,
+                        "validator": e.validator,
+                        "validator_value": e.validator_value,
+                        "path": [i for i in e.path],
+                        "schema_path": [i for i in e.schema_path],
+                        "schema": schema,
+                    }
+                )
+
     async def get_data(self):
         return await self.request.json()
 
 
 class DownloadService(View):
-
     def __init__(self, context, request):
         super(DownloadService, self).__init__(context, request)
 
@@ -51,7 +151,7 @@ class TraversableFieldService(View):
 
     async def prepare(self):
         # we want have the field
-        name = self.request.matchdict['field_name']
+        name = self.request.matchdict["field_name"]
         fti = query_utility(IFactory, name=self.context.type_name)
         schema = fti.schema
         field = None
@@ -75,29 +175,24 @@ class TraversableFieldService(View):
 
         # Check that its a File Field
         if field is None:
-            raise HTTPNotFound(content={
-                'reason': 'No valid name'})
+            raise HTTPNotFound(content={"reason": "No valid name"})
 
         if self.behavior is not None:
             ctx = self.behavior
         else:
             ctx = self.context
 
-        if (self.behavior is not None and
-                IAsyncBehavior.implementedBy(self.behavior.__class__)):
+        if self.behavior is not None and IAsyncBehavior.implementedBy(self.behavior.__class__):
             # providedBy not working here?
             await self.behavior.load()
 
         if type(field) == Dict:
-            key = self.request.matchdict['filename']
-            self.field = CloudFileField(__name__=name).bind(
-                DictFieldProxy(key, ctx, name)
-            )
+            key = self.request.matchdict["filename"]
+            self.field = CloudFileField(__name__=name).bind(DictFieldProxy(key, ctx, name))
         elif ICloudFileField.providedBy(field):
             self.field = field.bind(ctx)
 
         if self.field is None:
-            raise HTTPNotFound(content={
-                'reason': 'No valid name'})
+            raise HTTPNotFound(content={"reason": "No valid name"})
 
         return self

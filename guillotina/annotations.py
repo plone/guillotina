@@ -10,7 +10,7 @@ from zope.interface import implementer
 import logging
 
 
-logger = logging.getLogger('guillotina')
+logger = logging.getLogger("guillotina")
 _marker = object()
 
 
@@ -21,12 +21,8 @@ class AnnotationData(BaseObject, UserDict):
     """
 
 
-@configure.adapter(
-    for_=IRegistry,
-    provides=IAnnotations)
-@configure.adapter(
-    for_=IResource,
-    provides=IAnnotations)
+@configure.adapter(for_=IRegistry, provides=IAnnotations)
+@configure.adapter(for_=IResource, provides=IAnnotations)
 class AnnotationsAdapter(object):
     """Store annotations on an object
     """
@@ -64,7 +60,7 @@ class AnnotationsAdapter(object):
 
     async def async_set(self, key, value):
         if not isinstance(value, BaseObject):
-            raise KeyError('Not a valid object as annotation')
+            raise KeyError("Not a valid object as annotation")
         annotations = self.obj.__gannotations__
         value.id = key  # make sure id is set...
         annotations[key] = value
@@ -74,9 +70,7 @@ class AnnotationsAdapter(object):
         # we register the value
         value.__txn__ = self.obj.__txn__
         value.__txn__.register(value)
-        logger.debug('registering annotation {}({}), of: {}'.format(
-            value.__uuid__, key, value.__of__
-        ))
+        logger.debug("registering annotation {}({}), of: {}".format(value.__uuid__, key, value.__of__))
 
     async def async_del(self, key):
         annotation = await self.async_get(key)

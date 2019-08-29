@@ -41,6 +41,7 @@ sdist
 cov_html
 .coveralls.yml
 .pytest_cache
+.mypy_cache
 
 #Translations
 *.mo

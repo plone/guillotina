@@ -24,31 +24,29 @@ ITERATIONS = 1000000
 
 async def run1():
     ob = test_utils.create_content()
-    print('Test single adapter lookup')
+    print("Test single adapter lookup")
     start = time.time()
     for _ in range(ITERATIONS):
         getAdapter(ob, ISecurityInfo)
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run2():
     ob = test_utils.create_content()
     req = test_utils.get_mocked_request()
     start = time.time()
-    print('Test multi adapter')
+    print("Test multi adapter")
     for _ in range(ITERATIONS):
         get_multi_adapter((ob, req), IResourceDeserializeFromJson)
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run3():
-    lookup_registry = {
-        ISecurityInfo: DefaultSecurityInfoAdapter
-    }
+    lookup_registry = {ISecurityInfo: DefaultSecurityInfoAdapter}
     ob = test_utils.create_content()
-    print('Test manual lookup')
+    print("Test manual lookup")
     type_ = type(ob)
     start = time.time()
     for _ in range(ITERATIONS):
@@ -57,7 +55,7 @@ async def run3():
             if interface in lookup_registry:
                 DefaultSecurityInfoAdapter(ob)
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run():

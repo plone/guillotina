@@ -26,39 +26,30 @@ ITERATIONS = 10000
 
 
 async def runit(type_name):
-    print(f'Test content creation with {type_name}')
+    print(f"Test content creation with {type_name}")
     request = get_current_request()
     txn = mocks.MockTransaction()
-    container = await create_content(type_name, id='container')
+    container = await create_content(type_name, id="container")
     container.__txn__ = txn
     start = time.time()
     for _ in range(ITERATIONS):
-        ob = await create_content(type_name, id='foobar')
+        ob = await create_content(type_name, id="foobar")
         ob.__txn__ = txn
-        await notify(BeforeObjectAddedEvent(ob, container, 'foobar'))
-        deserializer = get_multi_adapter((ob, request),
-                                         IResourceDeserializeFromJson)
+        await notify(BeforeObjectAddedEvent(ob, container, "foobar"))
+        deserializer = get_multi_adapter((ob, request), IResourceDeserializeFromJson)
         data = {
-            'title': 'Foobar',
-            'guillotina.behaviors.dublincore.IDublinCore': {
-                'tags': ['foo', 'bar']
-            },
-            'measures.configuration.ITestBehavior1': {
-                'foobar': '123'
-            },
-            'measures.configuration.ITestBehavior2': {
-                'foobar': '123'
-            },
-            'measures.configuration.ITestBehavior3': {
-                'foobar': '123'
-            }
+            "title": "Foobar",
+            "guillotina.behaviors.dublincore.IDublinCore": {"tags": ["foo", "bar"]},
+            "measures.configuration.ITestBehavior1": {"foobar": "123"},
+            "measures.configuration.ITestBehavior2": {"foobar": "123"},
+            "measures.configuration.ITestBehavior3": {"foobar": "123"},
         }
         await deserializer(data, validate_all=True)
-        await notify(ObjectAddedEvent(ob, container, 'foobar', payload=data))
+        await notify(ObjectAddedEvent(ob, container, "foobar", payload=data))
     end = time.time()
-    print(f'Done with {ITERATIONS} in {end - start} seconds')
+    print(f"Done with {ITERATIONS} in {end - start} seconds")
 
 
 async def run():
-    await runit('TestContent1')
-    await runit('TestContent6')
+    await runit("TestContent1")
+    await runit("TestContent6")

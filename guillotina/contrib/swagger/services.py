@@ -23,11 +23,7 @@ here = os.path.dirname(os.path.realpath(__file__))
 
 
 @configure.service(
-    method="GET",
-    context=Interface,
-    name="@swagger",
-    permission="guillotina.swagger.View",
-    ignore=True,
+    method="GET", context=Interface, name="@swagger", permission="guillotina.swagger.View", ignore=True
 )
 class SwaggerDefinitionService(Service):
     __allow_access__ = True
@@ -52,13 +48,16 @@ class SwaggerDefinitionService(Service):
         api_def[path or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", [""]) or tags,
             "parameters": self.get_data(service_def.get("parameters", {})),
+            "requestBody": self.get_data(service_def.get("requestBody", "")),
             "produces": self.get_data(service_def.get("produces", [])),
             "summary": self.get_data(service_def.get("summary", "")),
             "description": desc,
             "responses": self.get_data(service_def.get("responses", {})),
+            "security": "",
         }
 
-    def get_endpoints(self, iface_conf, base_path, api_def, tags=[]):
+    def get_endpoints(self, iface_conf, base_path, api_def, tags=None):
+        tags = tags or []
         for method in iface_conf.keys():
             if method == "endpoints":
                 for name in iface_conf["endpoints"]:
@@ -74,44 +73,33 @@ class SwaggerDefinitionService(Service):
 
                 service_def = iface_conf[method]
                 swagger_conf = service_def.get("swagger", {})
-                if (service_def.get("ignore") or
-                        service_def.get("swagger_ignore") or swagger_conf.get("ignore")):
+                if (
+                    service_def.get("ignore")
+                    or service_def.get("swagger_ignore")
+                    or swagger_conf.get("ignore")
+                ):
                     continue
 
-                if not self.policy.check_permission(
-                    service_def["permission"], self.context
-                ):
+                if not self.policy.check_permission(service_def["permission"], self.context):
                     continue
 
                 for sub_path in [""] + swagger_conf.get("extra_paths", []):
                     path = os.path.join(base_path, sub_path)
                     if "traversed_service_definitions" in service_def:
-                        trav_defs = service_def[
-                            "traversed_service_definitions"
-                        ]
+                        trav_defs = service_def["traversed_service_definitions"]
                         if isinstance(trav_defs, dict):
                             for sub_path, sub_service_def in trav_defs.items():
-                                sub_service_def["permission"] = service_def[
-                                    "permission"
-                                ]
+                                sub_service_def["permission"] = service_def["permission"]
                                 self.load_swagger_info(
-                                    api_def,
-                                    os.path.join(path, sub_path),
-                                    method,
-                                    tags,
-                                    sub_service_def,
+                                    api_def, os.path.join(path, sub_path), method, tags, sub_service_def
                                 )
                     else:
-                        self.load_swagger_info(
-                            api_def, path, method, tags, service_def
-                        )
+                        self.load_swagger_info(api_def, path, method, tags, service_def)
 
     async def __call__(self):
         user = get_authenticated_user()
         self.policy = get_security_policy(user)
-        definition = copy.deepcopy(
-            app_settings["swagger"]["base_configuration"]
-        )
+        definition = copy.deepcopy(app_settings["swagger"]["base_configuration"])
         vhm = self.request.headers.get("X-VirtualHost-Monster")
         if vhm:
             parsed_url = urlparse(vhm)
@@ -121,10 +109,8 @@ class SwaggerDefinitionService(Service):
         else:
             definition["host"] = self.request.host
             definition["schemes"] = [get_request_scheme(self.request)]
-        if 'version' not in definition['info']:
-            definition["info"]["version"] = pkg_resources.get_distribution(
-                "guillotina"
-            ).version
+        if "version" not in definition["info"]:
+            definition["info"]["version"] = pkg_resources.get_distribution("guillotina").version
 
         api_defs = app_settings["api_definition"]
 
@@ -136,11 +122,11 @@ class SwaggerDefinitionService(Service):
                 iface_conf = api_defs[dotted_iface]
                 self.get_endpoints(iface_conf, path, definition["paths"])
 
-        definition["definitions"] = app_settings["json_schema_definitions"]
+        definition["components"]["schemas"] = app_settings["json_schema_definitions"]
         return definition
 
 
-AUTH_HTML = '''
+AUTH_HTML = """
     <form id='api_selector'>
       <div id="auth_container">
         <div>
@@ -148,39 +134,33 @@ AUTH_HTML = '''
         </div>
       </div>
     </form>
-'''
+"""
 
 
 @configure.service(
-    method="GET",
-    context=Interface,
-    name="@docs",
-    permission="guillotina.swagger.View",
-    ignore=True,
+    method="GET", context=Interface, name="@docs", permission="guillotina.swagger.View", ignore=True
 )
 async def render_docs_index(context, request):
-    if app_settings['swagger'].get('index_html'):
-        index_file = app_settings['swagger']['index_html']
+    if app_settings["swagger"].get("index_html"):
+        index_file = app_settings["swagger"]["index_html"]
     else:
         index_file = os.path.join(here, "index.html")
     with open(index_file) as fi:
         html = fi.read()
 
     swagger_settings = app_settings["swagger"]
-    url = swagger_settings["base_url"] or request.headers.get(
-        "X-VirtualHost-Monster"
-    )
+    url = swagger_settings["base_url"] or request.headers.get("X-VirtualHost-Monster")
     if url is None:
         try:
             url = getMultiAdapter((context, request), IAbsoluteURL)()
         except ComponentLookupError:
             url = "{}://{}".format(get_request_scheme(request), request.host)
     swagger_settings["initial_swagger_url"] = url
-
-    if swagger_settings['authentication_allowed']:
+    swagger_settings["base_configuration"]["servers"][0]["url"] = url
+    if swagger_settings["authentication_allowed"]:
         auth = AUTH_HTML
     else:
-        auth = ''
+        auth = ""
     return html.format(
         app_settings=app_settings,
         request=request,
@@ -188,5 +168,5 @@ async def render_docs_index(context, request):
         base_url=url,
         static_url="{}/swagger_static/".format(url if url != "/" else ""),
         auth=auth,
-        title=swagger_settings['base_configuration']['info']['title']
+        title=swagger_settings["base_configuration"]["info"]["title"],
     )

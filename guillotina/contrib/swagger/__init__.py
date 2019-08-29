@@ -2,12 +2,8 @@ from guillotina import configure
 
 
 configure.permission("guillotina.swagger.View", "View swagger definition")
-configure.grant(
-    permission="guillotina.swagger.View", role="guillotina.Anonymous"
-)
-configure.grant(
-    permission="guillotina.swagger.View", role="guillotina.Authenticated"
-)
+configure.grant(permission="guillotina.swagger.View", role="guillotina.Anonymous")
+configure.grant(permission="guillotina.swagger.View", role="guillotina.Authenticated")
 
 
 app_settings = {
@@ -17,19 +13,17 @@ app_settings = {
         "base_url": None,
         "auth_storage_search_keys": ["auth"],
         "base_configuration": {
-            "swagger": "2.0",
-            "info": {
-                "version": "",
-                "title": "Guillotina",
-                "description": "The REST Resource API",
-            },
-            "host": "",
-            "basePath": "",
-            "schemes": [],
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
+            "openapi": "3.0.0",
+            "info": {"version": "1.0", "title": "Guillotina", "description": "The REST Resource API"},
+            "servers": [{"url": ""}],
             "paths": {},
-            "definitions": {},
+            "security": [{"basicAuth": []}, {"bearerAuth": []}],
+            "components": {
+                "securitySchemes": {
+                    "basicAuth": {"type": "http", "scheme": "basic"},
+                    "bearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"},
+                }
+            },
         },
     },
 }

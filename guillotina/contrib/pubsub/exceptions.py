@@ -1,3 +1,2 @@
-
 class NoPubSubDriver(Exception):
     pass

@@ -19,16 +19,25 @@ from zope.interface import implementer
 from guillotina.component import adapter
 from guillotina.component.testfiles import components
 
+
 class I1(Interface):
     pass
+
 
 class I2(Interface):
     pass
 
+
 class I3(Interface):
-    def f1(): pass  # type: ignore
-    def f2(): pass  # type: ignore
-    def f3(): pass  # type: ignore
+    def f1():
+        pass  # type: ignore
+
+    def f2():
+        pass  # type: ignore
+
+    def f3():
+        pass  # type: ignore
+
 
 class IS(Interface):
     pass
@@ -38,30 +47,38 @@ class Adapter(object):
     def __init__(self, *args):
         self.context = args
 
+
 @implementer(I1)
 class A1(Adapter):
     pass
 
+
 @implementer(I2)
 class A2(Adapter):
     pass
+
 
 @adapter(components.IContent, I1, I2)
 @implementer(I3)
 class A3(Adapter):
     pass
 
+
 class A4:
     pass
 
+
 a4 = A4()
+
 
 @implementer(I1, I2)
 class A5:
     pass
 
+
 a5 = A5()
+
 
 def Handler(content, *args):
     # uninteresting handler
-    content.args = getattr(content, 'args', ()) + (args, )
+    content.args = getattr(content, "args", ()) + (args,)

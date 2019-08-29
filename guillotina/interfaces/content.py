@@ -12,6 +12,7 @@ from zope.interface import Interface
 if TYPE_CHECKING:  # pragma: no cover
     from guillotina.db.interfaces import ITransactionManager
 else:
+
     class ITransactionManager(Interface):
         pass
 
@@ -59,7 +60,6 @@ class IAsyncContainer(Interface):
 
 
 class IRegistry(IMapping):
-
     def for_interface(interface, check=True, omit=(), prefix=None):  # noqa: N805
         """Get an IRecordsProxy for the given interface. If `check` is True,
         an error will be raised if one or more fields in the interface does
@@ -82,60 +82,60 @@ class ITraversable(Interface):
     """
 
     def get(name):  # noqa: N805
-        '''
-        '''
+        """
+        """
 
 
 class IApplication(ITraversable, IAsyncContainer):
-    '''
-    '''
+    """
+    """
 
     def __contains__(key) -> bool:
-        '''
+        """
         If contains the resource
-        '''
+        """
 
     def __getitem__(key):
-        '''
+        """
         Get db or resource
-        '''
+        """
 
     def __setitem__(key, value):
-        '''
+        """
         Set db or resource value
-        '''
+        """
 
     def __delitem__(key):
-        '''
+        """
         Delete resource
-        '''
+        """
 
 
 class IDatabase(ITraversable, IAsyncContainer):
-    __db_id__ = Attribute('')
+    __db_id__ = Attribute("")
 
     def get_transaction_manager() -> ITransactionManager:
-        '''
-        '''
+        """
+        """
 
     def open():  # type: ignore
-        '''
-        '''
+        """
+        """
 
 
 class IStaticFile(Interface):
-    '''
-    '''
+    """
+    """
 
 
 class IStaticDirectory(ITraversable):
-    '''
-    '''
+    """
+    """
 
 
 class IJavaScriptApplication(IStaticDirectory):
-    '''
-    '''
+    """
+    """
 
 
 class ILocation(Interface):
@@ -156,146 +156,152 @@ class ILocation(Interface):
 
     """
 
-    __parent__ = Attribute('The parent in the location hierarchy.')
+    __parent__ = Attribute("The parent in the location hierarchy.")
 
     __name__ = TextLine(
-        title='The name within the parent',
-        description="The object can be looked up from the parent's "
-                    'sublocations using this name.',
+        title="The name within the parent",
+        description="The object can be looked up from the parent's " "sublocations using this name.",
         required=False,
         default=None,
-        readonly=True)
+        readonly=True,
+    )
 
 
 class IResource(ILocation):
 
-    __acl__ = Attribute('')
-    __gannotations__ = Attribute('')
-    __uuid__ = Attribute('database object unique id')
+    __acl__ = Attribute("")
+    __gannotations__ = Attribute("")
+    __uuid__ = Attribute("database object unique id")
 
-    id = Attribute('')
-    creators = Attribute('')
-    contributors = Attribute('')
+    id = Attribute("")
+    creators = Attribute("")
+    contributors = Attribute("")
     type_name = guillotina.schema.TextLine(readonly=True)
 
     title = guillotina.schema.TextLine(
-        title='Title',
-        required=False,
-        description=u'Title of the Resource',
-        default=u''
+        title="Title", required=False, description="Title of the Resource", default=""
     )
 
-    uuid = guillotina.schema.TextLine(
-        title='UUID',
-        required=True,
-        readonly=True
-    )
+    uuid = guillotina.schema.TextLine(title="UUID", required=True, readonly=True)
 
-    modification_date = guillotina.schema.Datetime(
-        title='Modification date',
-        required=False
-    )
+    modification_date = guillotina.schema.Datetime(title="Modification date", required=False)
 
-    creation_date = guillotina.schema.Datetime(
-        title='Creation date',
-        required=False
-    )
+    creation_date = guillotina.schema.Datetime(title="Creation date", required=False)
 
     __behaviors__ = guillotina.schema.FrozenSet(
-        title='Enabled behaviors',
+        title="Enabled behaviors",
         required=False,
-        description='Dynamic behaviors for the content type',
+        description="Dynamic behaviors for the content type",
         default=frozenset({}),
-        readonly=True
+        readonly=True,
     )
 
     def register():
-        '''
+        """
         Register object
-        '''
+        """
 
 
 class IResourceFactory(IFactory):
 
     type_name = guillotina.schema.TextLine(
-        title='Portal type name',
-        description='The portal type this is an FTI for'
+        title="Portal type name", description="The portal type this is an FTI for"
     )
 
     schema = guillotina.schema.DottedName(
-        title='Schema interface',
-        description='Dotted name to an interface describing the type. '
-                    'This is not required if there is a model file or a '
-                    'model source string containing an unnamed schema.'
+        title="Schema interface",
+        description="Dotted name to an interface describing the type. "
+        "This is not required if there is a model file or a "
+        "model source string containing an unnamed schema.",
     )
 
     behaviors = guillotina.schema.List(
-        title='Behaviors',
-        description='A list of behaviors that are enabled for this type. '
-                    'See guillotina.behaviors for more details.',
-        value_type=guillotina.schema.DottedName(title='Behavior name')
+        title="Behaviors",
+        description="A list of behaviors that are enabled for this type. "
+        "See guillotina.behaviors for more details.",
+        value_type=guillotina.schema.DottedName(title="Behavior name"),
     )
 
     add_permission = guillotina.schema.DottedName(
-        title='Add permission',
-        description='A oermission name for the permission required to '
-                    'construct this content',
+        title="Add permission",
+        description="A oermission name for the permission required to " "construct this content",
     )
 
 
 class IFolder(IResource, IAsyncContainer, ITraversable):
-    '''
-    '''
+    """
+    """
 
 
 class IContainer(IResource, IAsyncContainer, ITraversable, IComponentSite):
-    '''
+    """
     Formally known as ISite.
     This is a base container to hold content.
     A database can hold multiple containers
-    '''
+    """
 
 
 class IItem(IResource):
-    '''
-    '''
+    """
+    """
 
 
 class IAnnotations(Interface):
-    '''
-    '''
+    """
+    """
 
-    async def async_get(name):
-        '''
+    def get(name, default=None):
+        """
+        get already loaded annotation
+        """
+
+    async def async_get(name, default=None):
+        """
         Get annotation
-        '''
+        """
 
     async def async_set(name, value):
-        '''
+        """
         Set annotation
-        '''
+        """
 
 
 class IAnnotationData(Interface):
-    '''
-    '''
+    """
+    """
 
 
 class IGroupFolder(IFolder):
-    '''
+    """
     Group content.
     Main purpose of this PR is to prevent reindexing on modify permissions
     for group content.
-    '''
+    """
 
 
 class IGetOwner(Interface):
-    '''
+    """
     Defines a utility for calculating the owner of a new resource
-    '''
+    """
 
 
 class IIDGenerator(Interface):
-    '''
+    """
     Generates an id on a POST for the new object
-    '''
+    """
+
+
+class IFieldValueRenderer(Interface):
+    """
+    Adapter to customize how to render results from `@fieldvalue` endpoint
+    """
+
+    def __init__(context, request, field):
+        """
+        adapts context/request and field because query params might affect how we render
+        """
+
+    async def __call__():
+        """
+        render value
+        """

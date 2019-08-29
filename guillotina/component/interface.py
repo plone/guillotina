@@ -3,7 +3,7 @@ from zope.interface import alsoProvides
 from zope.interface.interfaces import IInterface
 
 
-def provide_interface(id, interface, iface_type=None, info=''):
+def provide_interface(id, interface, iface_type=None, info=""):
     """ Mark 'interface' as a named utilty providing 'iface_type'.
     """
     if not id:

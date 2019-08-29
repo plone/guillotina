@@ -23,6 +23,7 @@ consist of field definitions.
 - guillotina.schema.Time
 - guillotina.fields.PatchField: allow updating value without patching entire value
 - guillotina.fields.BucketListField: optimized storage for very large lists of data
+- guillotina.fields.BucketDictField: optimized storage for very large dictionaries of data
 - guillotina.files.CloudFileField: file field for storing in db or cloud storage
 
 
@@ -56,12 +57,35 @@ Then, payload for patching to append to this list would look like:
 }
 ```
 
+
+Append if unique value only:
+
+```json
+{
+    "values": {
+        "op": "appendunique",
+        "value": "foobar"
+    }
+}
+```
+
 Extend:
 
 ```json
 {
     "values": {
         "op": "extend",
+        "value": ["foo", "bar"]
+    }
+}
+```
+
+Extend if unique values:
+
+```json
+{
+    "values": {
+        "op": "extendunique",
         "value": ["foo", "bar"]
     }
 }
@@ -280,6 +304,65 @@ Delete:
             "bucket_index": 0,
             "item_index": 0
         }
+    }
+}
+```
+
+
+## Bucket dict field
+
+```python
+from zope.interface import Interface
+from guillotina.fields import BucketDictField
+from guillotina import schema
+
+class IMySchema(Interface):
+    values = BucketDictField(
+        key_type=schema.Text(),
+        value_type=schema.Text(),
+        bucket_len=5000
+    )
+```
+
+
+Then, payload for patching would be...:
+
+```json
+{
+    "values": {
+        "op": "assign",
+        "value": {
+            "key": "foo",
+            "value": "bar"
+        }
+    }
+}
+```
+
+Update:
+
+```json
+{
+    "values": {
+        "op": "update",
+        "value": [{
+            "key": "foo",
+            "value": "barupdated"
+        }, {
+            "key": "other",
+            "value": "othervalue"
+        }]
+    }
+}
+```
+
+Delete:
+
+```json
+{
+    "values": {
+        "op": "del",
+        "value": "foo"
     }
 }
 ```

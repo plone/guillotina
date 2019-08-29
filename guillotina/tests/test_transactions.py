@@ -29,8 +29,8 @@ async def test_managed_transaction_with_adoption(container_requester):
     async with container_requester as requester:
         async with transaction(db=requester.db, abort_when_done=True) as txn:
             root = await txn.get(ROOT_ID)
-            container = await root.async_get('guillotina')
-            container.title = 'changed title'
+            container = await root.async_get("guillotina")
+            container.title = "changed title"
             container.register()
 
             assert container.__uuid__ in container.__txn__.modified
@@ -45,8 +45,8 @@ async def test_managed_transaction_with_adoption(container_requester):
 
         # finally, retrieve it again and make sure it's updated
         async with transaction(abort_when_done=True):
-            container = await root.async_get('guillotina')
-            assert container.title == 'changed title'
+            container = await root.async_get("guillotina")
+            assert container.title == "changed title"
 
 
 async def test_managed_transaction_works_with_parent_txn_adoption(container_requester):
@@ -54,21 +54,22 @@ async def test_managed_transaction_works_with_parent_txn_adoption(container_requ
         async with transaction(db=requester.db) as txn:
             # create some content
             root = await txn.get(ROOT_ID)
-            container = await root.async_get('guillotina')
+            container = await root.async_get("guillotina")
             await create_content_in_container(
-                container, 'Item', 'foobar', check_security=False, __uuid__='foobar')
+                container, "Item", "foobar", check_security=False, __uuid__="foobar"
+            )
 
         async with transaction(db=requester.db) as txn:
             root = await txn.get(ROOT_ID)
-            container = await root.async_get('guillotina')
+            container = await root.async_get("guillotina")
 
             # nest it with adoption
             async with transaction(adopt_parent_txn=True) as txn:
-                ob = await get_object_by_uid('foobar', txn)
+                ob = await get_object_by_uid("foobar", txn)
                 txn.delete(ob)
 
         # finally, retrieve it again and make sure it's updated
         async with transaction(db=requester.db) as txn:
             root = await txn.get(ROOT_ID)
-            container = await root.async_get('guillotina')
-            assert await container.async_get('foobar') is None
+            container = await root.async_get("guillotina")
+            assert await container.async_get("foobar") is None

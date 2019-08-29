@@ -7,11 +7,201 @@ CHANGELOG
 - Replaced aiohttp with ASGI (running with uvicorn by default)
   [dmanchon,masipcat]
 
-5.0.0a7 (unreleased)
---------------------
+
+5.0.0a17 (unreleased)
+---------------------
 
 - Nothing changed yet.
 
+
+5.0.0a16 (2019-08-26)
+---------------------
+
+- Throw exception when saving object to closed transaction
+  [vangheem]
+
+- Fix cache key for SQLStatements cache. This was causing vacuuming on multi-db environments
+  to not work since the vacuuming object was shared between dbs on guillotina_dynamictablestorage.
+  [vangheem]
+
+- Implement more optimized way to vacuum objects which dramatically improves handling
+  of deleting very large object trees
+  [vangheem]
+
+- Fix `LightweightConnection` pg class to close active cursors when connection done
+  [vangheem]
+
+- Swagger doc for search endpoint
+  [karannaoh]
+
+- Fix `modification_date` not indexed when an object is patched
+  [masipcat]
+
+- Move to black code formatter
+  [vangheem]
+
+- Fix field.validate() crashes when providing invalid schema (for field of type Object)
+  [masipcat]
+
+- Upgrade to Swagger 3/Open API 3
+  [karannaoh]
+
+- Implement json schema validation
+  [karannaoh]
+
+
+5.0.0a15 (2019-08-02)
+---------------------
+
+- Dict schema serialization needs properties to be valid JSON Schema
+  [bloodbare]
+
+- Fix potential bug when working with multiple databases/transaction managers
+  [vangheem]
+
+- New `guillotina.fields.BucketDictField`
+  [vangheem]
+
+- New `@fieldvalue/{field name or dotted behavior + field name}` endpoint
+  [vangheem]
+
+
+5.0.0a14 (2019-07-30)
+---------------------
+
+- Leaking txn on reindex on pg
+  [bloodbare]
+
+
+5.0.0a13 (2019-07-29)
+---------------------
+
+- Run default factory on attributes on behaviors
+  [bloodbare]
+
+- Allow to get full object serialization on GET operation
+  [bloodbare]
+
+- Only register object for writing if base object changed. Otherwise, changes to behavior data
+  was also causing writes to the object it was associated with
+  [vangheem]
+
+- Add `x-virtualhost-path` header support for url generation
+  [vangheem]
+
+
+5.0.0a12 (2019-07-26)
+---------------------
+
+- Make Tuple type work with patch field
+  [vangheem]
+
+- Make IDublinCore.tags a patch field
+  [vangheem]
+
+- Add `appendunique` and `extendunique` to patch field operations
+  [vangheem]
+
+- Fix exhausted retries conflict error response
+  [vangheem]
+
+- Make sure field name of patch field is set before using
+  [vangheem]
+
+- Improve request memory usage
+  [vangheem]
+
+- Fix: just skip indexing attributes from schemas that object does not
+  adapt to [lferran]
+
+
+5.0.0a11 (2019-07-22)
+---------------------
+
+- Allow to receive a fullobject serialization on search
+  [bloodbare]
+
+- Allow to reindex on PG catalog implementation
+  [bloodbare]
+
+- Read only txn can be reused without changing read only param
+  [bloodbare]
+
+- Merge CORS headers
+  [qiwn]
+
+- Fix redis pubsub potential cpu bound deadlock
+  [vangheem]
+
+- Make sure that channel is configured on cache pubsub
+  [bloodbare]
+
+- Handle cancelled error on cleanup
+  [vangheem]
+
+- Define TTL on cache set
+  [bloodbare]
+
+- Logging async util exception
+  [bloodbare]
+
+- Documentation improvements
+  [vangheem]
+
+- Cache JSONField schema validator object
+  [vangheem]
+
+- JSONField works with dict instead of requiring str(which is then converted to dict anyways)
+  [vangheem]
+
+
+5.0.0a10 (2019-06-27)
+---------------------
+
+- Adding store_json property on db configuration so we can disable json storage for each db.
+  [bloodbare]
+
+
+5.0.0a9 (2019-06-27)
+--------------------
+
+- Move guillotina_mailer to guillotina.contrib.mailer
+  [bloodbare]
+
+- Be able to customize the object reader function with the `object_reader` setting
+  [vangheem]
+
+- Fix indexing data potentially missing updated content when `fields` for accessor
+  is not specified
+  [vangheem]
+
+- Executioner:
+    - providing pagination support in navigation (1.2.0)
+    - supporting token authentication from login form (1.3.0)
+    - using @search endpoint to navigate in container items
+
+- A few more python antipattern fixes [lferran]
+
+5.0.0a8 (2019-06-23)
+--------------------
+
+- Aggregations in PG JSONb
+  [bloodbare]
+
+5.0.0a7 (2019-06-22)
+--------------------
+
+- Change `guillotina.files.utils.generate_key` to not accept a `request` parameter. It was
+  used to get the container id which is now a context var.
+  [vangheem]
+
+- Add `IExternalFileStorageManager` interface to be able to designate a file storage that
+  store a file into an external database. This enables you to automatically leverage the
+  `redis` data manager.
+
+- Add `cloud_datamanager` setting. Allows you to select between `db`(default) and
+  `redis`(if `guillotina.contrib.redis` is used) to not write to db to maintain state.
+  The `redis` option is only usable for gcloud and s3 adapters.
 
 5.0.0a6 (2019-06-22)
 --------------------

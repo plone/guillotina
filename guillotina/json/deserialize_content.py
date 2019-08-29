@@ -28,13 +28,11 @@ from guillotina.utils import get_security_policy
 from zope.interface import Interface
 
 
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 _missing = object()
 
 
-@configure.adapter(
-    for_=(IResource, Interface),
-    provides=IResourceDeserializeFromJson)
+@configure.adapter(for_=(IResource, Interface), provides=IResourceDeserializeFromJson)
 class DeserializeFromJson(object):
     def __init__(self, context, request):
         self.context = context
@@ -57,36 +55,31 @@ class DeserializeFromJson(object):
                     try:
                         txn = self.context.__txn__
                         await txn._cache.set(
-                            _EMPTY, container=self.context,
+                            _EMPTY,
+                            container=self.context,
                             id=behavior.__annotations_data_key__,
-                            variant='annotation')
+                            variant="annotation",
+                        )
                     except AttributeError:
                         pass
                 continue
             if IAsyncBehavior.implementedBy(behavior.__class__):
                 # providedBy not working here?
                 await behavior.load(create=True)
-            await self.set_schema(
-                behavior_schema, behavior, data, errors,
-                validate_all, True)
+            await self.set_schema(behavior_schema, behavior, data, errors, validate_all, True)
 
         factory = get_cached_factory(self.context.type_name)
         main_schema = factory.schema
-        await self.set_schema(
-            main_schema, self.context, data, errors, validate_all, False)
+        await self.set_schema(main_schema, self.context, data, errors, validate_all, False)
 
         if errors and not ignore_errors:
             raise DeserializationError(errors)
 
-        self.context.register()
-
         return self.context
 
-    async def set_schema(
-            self, schema, obj, data, errors,
-            validate_all=False, behavior=False):
+    async def set_schema(self, schema, obj, data, errors, validate_all=False, behavior=False):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
-
+        changed = False
         for name, field in get_fields(schema).items():
             if name in RESERVED_ATTRS:
                 continue
@@ -106,54 +99,52 @@ class DeserializeFromJson(object):
             if found:
 
                 if not self.check_permission(write_permissions.get(name)):
-                    raise Unauthorized('Write permission not allowed')
+                    raise Unauthorized("Write permission not allowed")
 
                 try:
                     field = field.bind(obj)
                     value = await self.get_value(field, obj, data_value)
                 except ValueError as e:
-                    errors.append({
-                        'message': 'Value error', 'field': name, 'error': e})
+                    errors.append({"message": "Value error", "field": name, "error": e})
                 except ValidationError as e:
-                    errors.append({
-                        'message': e.doc(), 'field': name, 'error': e})
+                    errors.append({"message": e.doc(), "field": name, "error": e})
                 except ValueDeserializationError as e:
-                    errors.append({
-                        'message': e.message, 'field': name, 'error': e})
+                    errors.append({"message": e.message, "field": name, "error": e})
                 except Invalid as e:
-                    errors.append({
-                        'message': e.args[0], 'field': name, 'error': e})
+                    errors.append({"message": e.args[0], "field": name, "error": e})
                 else:
                     # record object changes for potential future conflict resolution
                     try:
                         await apply_coroutine(field.set, obj, value)
+                        changed = True
                     except ValidationError as e:
-                        errors.append({
-                            'message': e.doc(), 'field': name, 'error': e})
+                        errors.append({"message": e.doc(), "field": name, "error": e})
                     except ValueDeserializationError as e:
-                        errors.append({
-                            'message': e.message, 'field': name, 'error': e})
+                        errors.append({"message": e.message, "field": name, "error": e})
                     except AttributeError:
-                        logger.warning(
-                            f'AttributeError setting data on field {name}', exc_info=True)
+                        logger.warning(f"AttributeError setting data on field {name}", exc_info=True)
                     except Exception:
                         if not isinstance(getattr(type(obj), name, None), property):
                             # we can not set data on properties
                             logger.warning(
-                                'Error setting data on field, falling back to setattr',
-                                exc_info=True)
+                                "Error setting data on field, falling back to setattr", exc_info=True
+                            )
                             setattr(obj, name, value)
+                            changed = True
                         else:
-                            logger.warning(
-                                'Error setting data on field', exc_info=True)
+                            logger.warning("Error setting data on field", exc_info=True)
             else:
                 if validate_all and field.required and getattr(obj, name, None) is None:
-                    errors.append({
-                        'message': 'Required parameter', 'field': name,
-                        'error': ValueError('Required parameter')})
+                    errors.append(
+                        {
+                            "message": "Required parameter",
+                            "field": name,
+                            "error": ValueError("Required parameter"),
+                        }
+                    )
 
         if validate_all:
-            invariant_errors = []
+            invariant_errors = []  # type: ignore
             try:
                 schema.validateInvariants(object, invariant_errors)
             except Invalid:
@@ -163,11 +154,10 @@ class DeserializeFromJson(object):
 
             if len(validation):
                 for error in validation:
-                    errors.append({
-                        'message': error[1].doc(),
-                        'field': error[0],
-                        'error': error
-                    })
+                    errors.append({"message": error[1].doc(), "field": error[0], "error": error})
+
+        if changed:
+            obj.register()
 
     async def get_value(self, field, obj, value):
         if value is None:
@@ -179,20 +169,18 @@ class DeserializeFromJson(object):
             field.validate(value)
             return value
         except ComponentLookupError:
-            raise ValueDeserializationError(
-                field, value, 'Deserializer not found for field')
+            raise ValueDeserializationError(field, value, "Deserializer not found for field")
 
     def check_permission(self, permission_name):
         if permission_name is None:
             return True
 
         if permission_name not in self.permission_cache:
-            permission = query_utility(IPermission,
-                                       name=permission_name)
+            permission = query_utility(IPermission, name=permission_name)
             if permission is None:
                 self.permission_cache[permission_name] = True
             else:
                 self.permission_cache[permission_name] = bool(
-                    get_security_policy().check_permission(
-                        permission.id, self.context))
+                    get_security_policy().check_permission(permission.id, self.context)
+                )
         return self.permission_cache[permission_name]

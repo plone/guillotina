@@ -21,7 +21,6 @@ _zone = tzutc()
 
 
 class QueueUtility(object):
-
     def __init__(self, settings=None, loop=None):
         self._queue = None
         self._loop = loop
@@ -44,9 +43,9 @@ class QueueUtility(object):
                 got_obj = True
                 txn = get_transaction()
                 tm = get_tm()
-                if txn is None or (txn.status in (
-                        Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and
-                        txn._db_conn is None):
+                if txn is None or (
+                    txn.status in (Status.ABORTED, Status.COMMITTED, Status.CONFLICT) and txn._db_conn is None
+                ):
                     txn = await tm.begin()
                 else:
                     # still finishing current transaction, this connection
@@ -61,18 +60,22 @@ class QueueUtility(object):
                         await view()
                         await tm.commit(txn=txn)
                     except Exception as e:
-                        logger.error(
-                            "Exception on writing execution",
-                            exc_info=e)
+                        logger.error("Exception on writing execution", exc_info=e)
                         await tm.abort(txn=txn)
-            except (RuntimeError, SystemExit, GeneratorExit, KeyboardInterrupt,
-                    asyncio.CancelledError, KeyboardInterrupt):
+            except (
+                RuntimeError,
+                SystemExit,
+                GeneratorExit,
+                KeyboardInterrupt,
+                asyncio.CancelledError,
+                KeyboardInterrupt,
+            ):
                 # dive, these errors mean we're exit(ing)
                 self._exceptions = True
                 return
             except Exception as e:  # noqa
                 self._exceptions = True
-                logger.error('Worker call failed', exc_info=e)
+                logger.error("Worker call failed", exc_info=e)
             finally:
                 if got_obj:
                     try:
@@ -99,7 +102,6 @@ class QueueUtility(object):
 
 
 class QueueObject(View):
-
     def __init__(self, context, request):
         # not sure if we need proxy object here...
         # super(QueueObject, self).__init__(context, TransactionProxy(request))
@@ -111,9 +113,9 @@ class QueueObject(View):
 
 
 class Job:
-
-    def __init__(self, func: typing.Callable[[], typing.Coroutine],
-                 request=None, args=None, kwargs=None) -> None:
+    def __init__(
+        self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None
+    ) -> None:
         self._func = func
         self._request = request
         self._args = args
@@ -133,12 +135,12 @@ class Job:
 
 
 class AsyncJobPool:
-
-    def __init__(self, settings={'max_size': 5}, loop=None):
+    def __init__(self, settings=None, loop=None):
+        settings = settings or {"max_size": 5}
         self._loop = None
         self._running = []
         self._pending = []
-        self._max_size = settings['max_size']
+        self._max_size = settings["max_size"]
         self._closing = False
 
     def get_loop(self):
@@ -160,10 +162,9 @@ class AsyncJobPool:
     async def finalize(self):
         await self.join()
 
-    def add_job(self, func: typing.Callable[[], typing.Coroutine],
-                request=None, args=None, kwargs=None):
+    def add_job(self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None):
         if self._closing:
-            raise ServerClosingException('Can not schedule job')
+            raise ServerClosingException("Can not schedule job")
         job = Job(func, request=request, args=args, kwargs=kwargs)
         self._pending.insert(0, job)
         self._schedule()
@@ -172,29 +173,27 @@ class AsyncJobPool:
     def _add_job_after_commit(self, status, func, request=None, args=None, kwargs=None):
         self.add_job(func, request=request, args=args, kwargs=kwargs)
 
-    def add_job_after_commit(self, func: typing.Callable[[], typing.Coroutine],
-                             request=None, args=None, kwargs=None):
+    def add_job_after_commit(
+        self, func: typing.Callable[[], typing.Coroutine], request=None, args=None, kwargs=None
+    ):
         txn = get_transaction()
         if txn is not None:
             txn.add_after_commit_hook(
                 self._add_job_after_commit,
                 args=[func],
-                kws={
-                    'request': request,
-                    'args': args,
-                    'kwargs': kwargs
-                })
+                kws={"request": request, "args": args, "kwargs": kwargs},
+            )
         else:
-            raise TransactionNotFound('Could not find transaction to run job with')
+            raise TransactionNotFound("Could not find transaction to run job with")
 
     def _done_callback(self, task):
         self._running.remove(task)
         self._schedule()  # see if we can schedule now
 
     def _schedule(self):
-        '''
+        """
         check if we can schedule a new job
-        '''
+        """
         if len(self._running) < self._max_size and len(self._pending) > 0:
             job = self._pending.pop()
             task = self.get_loop().create_task(job.run())

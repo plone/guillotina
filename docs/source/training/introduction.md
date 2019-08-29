@@ -12,7 +12,7 @@ Guillotina is and why you should use it.
 
 ## Using the training materials
 
-The training materials make use of Python 3.6, Docker and Postman so please
+The training materials make use of Python 3.7, Docker and Postman so please
 have up-to-date versions of all these ready.
 
 

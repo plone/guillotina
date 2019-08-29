@@ -8,38 +8,42 @@ from guillotina.utils import get_dotted_name
 
 
 @configure.service(
-    context=IApplication, method='GET', permission='guillotina.AccessContent',
+    context=IApplication,
+    method="GET",
+    permission="guillotina.AccessContent",
     summary="Get application data",
     description="Retrieves serialization of application",
     responses={
         "200": {
             "description": "Application data",
-            "schema": {
-                "$ref": "#/definitions/Application"
-            }
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Application"}}},
         }
-    })
+    },
+)
 async def get(context, request):
-    serializer = get_multi_adapter(
-        (context, request),
-        IResourceSerializeToJson)
+    serializer = get_multi_adapter((context, request), IResourceSerializeToJson)
     return await serializer()
 
 
 @configure.service(
-    context=IApplication, method='GET',
-    permission='guillotina.GetContainers', name='@apidefinition',
+    context=IApplication,
+    method="GET",
+    permission="guillotina.GetContainers",
+    name="@apidefinition",
     summary="Get API Definition",
-    description="Retrieves information on API configuration")
+    description="Retrieves information on API configuration",
+)
 async def get_api_definition(context, request):
-    return app_settings['api_definition']
+    return app_settings["api_definition"]
 
 
 @configure.service(
-    context=IApplication, method='GET',
-    name='@component-subscribers',
-    permission='guillotina.ReadConfiguration',
-    summary='Get all registered subscribers')
+    context=IApplication,
+    method="GET",
+    name="@component-subscribers",
+    permission="guillotina.ReadConfiguration",
+    summary="Get all registered subscribers",
+)
 async def get_all_subscribers(context, request):
     subscribers = {}
     sm = component.get_global_components()

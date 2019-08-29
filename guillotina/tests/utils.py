@@ -24,7 +24,8 @@ def get_db(app, db_id):
     return app.root[db_id]
 
 
-def get_mocked_request(*, db=None, method='POST', path='/', headers={}):
+def get_mocked_request(*, db=None, method="POST", path="/", headers=None):
+    headers = headers or {}
     request = make_mocked_request(method, path, headers=headers)
     request._futures = {}
     request._txn = None
@@ -39,7 +40,7 @@ def get_mocked_request(*, db=None, method='POST', path='/', headers={}):
     return request
 
 
-def login(*, user=RootUser('foobar')):
+def login(*, user=RootUser("foobar")):
     set_authenticated_user(user)
 
 
@@ -52,12 +53,10 @@ async def get_root(tm=None, db=None):
         return await txn.manager.get_root()
 
 
-async def get_container(*, requester=None, tm=None, container_id='guillotina'):
-    kw = {
-        'tm': tm
-    }
+async def get_container(*, requester=None, tm=None, container_id="guillotina"):
+    kw = {"tm": tm}
     if requester is not None:
-        kw['db'] = requester.db
+        kw["db"] = requester.db
     root = await get_root(**kw)
     async with transaction(**kw):
         container = await root.async_get(container_id)
@@ -78,6 +77,7 @@ class FakeRequest(object):
 def register(ob):
     if ob.__txn__ is None:
         from guillotina.tests.mocks import FakeConnection
+
         conn = FakeConnection()
         conn.register(ob)
 
@@ -92,24 +92,29 @@ class ContainerRequesterAsyncContextManager:
 
     async def __aenter__(self):
         self.requester = await self.get_requester()
-        resp, status = await self.requester('POST', '/db', data=json.dumps({
-            "@type": "Container",
-            # to be able to register for tests
-            "@addons": app_settings.get('__test_addons__') or [],
-            "title": "Guillotina Container",
-            "id": "guillotina",
-            "description": "Description Guillotina Container"
-        }))
+        resp, status = await self.requester(
+            "POST",
+            "/db",
+            data=json.dumps(
+                {
+                    "@type": "Container",
+                    # to be able to register for tests
+                    "@addons": app_settings.get("__test_addons__") or [],
+                    "title": "Guillotina Container",
+                    "id": "guillotina",
+                    "description": "Description Guillotina Container",
+                }
+            ),
+        )
         assert status == 200
         return self.requester
 
     async def __aexit__(self, exc_type, exc, tb):
-        _, status = await self.requester('DELETE', '/db/guillotina')
+        _, status = await self.requester("DELETE", "/db/guillotina")
         assert status in (200, 404)
 
 
 class wrap_request:
-
     def __init__(self, request, func=None):
         self.request = request
         self.original = task_vars.request.get()
@@ -118,38 +123,44 @@ class wrap_request:
     async def __aenter__(self):
         task_vars.request.set(self.request)
         if self.func:
-            if hasattr(self.func, '__aenter__'):
+            if hasattr(self.func, "__aenter__"):
                 return await self.func.__aenter__()
             else:
                 return await self.func()
 
     async def __aexit__(self, *args):
-        if self.func and hasattr(self.func, '__aexit__'):
+        if self.func and hasattr(self.func, "__aexit__"):
             return await self.func.__aexit__(*args)
 
 
-def create_content(factory=Item, type_name='Item', id=None, parent=None):
+def create_content(factory=Item, type_name="Item", id=None, parent=None):
     obj = factory()
     obj.__parent__ = parent
     obj.type_name = type_name
     obj.__uuid__ = uuid.uuid4().hex
     if id is None:
-        id = f'foobar{uuid.uuid4().hex}'
+        id = f"foobar{uuid.uuid4().hex}"
     obj.__name__ = obj.id = id
     apply_markers(obj)
     return obj
 
 
-def make_mocked_request(method, path, headers=None, *,
-                        version=HttpVersion(1, 1), closing=False,
-                        app=None,
-                        writer=sentinel,
-                        payload_writer=sentinel,
-                        protocol=sentinel,
-                        transport=sentinel,
-                        payload=sentinel,
-                        sslcontext=None,
-                        client_max_size=1024**2):
+def make_mocked_request(
+    method,
+    path,
+    headers=None,
+    *,
+    version=HttpVersion(1, 1),
+    closing=False,
+    app=None,
+    writer=sentinel,
+    payload_writer=sentinel,
+    protocol=sentinel,
+    transport=sentinel,
+    payload=sentinel,
+    sslcontext=None,
+    client_max_size=1024 ** 2,
+):
     """
     XXX copied from aiohttp but using guillotina request object
     Creates mocked web.Request testing purposes.
@@ -163,24 +174,15 @@ def make_mocked_request(method, path, headers=None, *,
 
     if headers is None:
         headers = {}
-    if 'Host' not in headers:
-        headers['Host'] = 'localhost'
+    if "Host" not in headers:
+        headers["Host"] = "localhost"
     headers = CIMultiDict(headers)
-    raw_hdrs = tuple(
-        (k.encode('utf-8'), v.encode('utf-8')) for k, v in headers.items())
+    raw_hdrs = tuple((k.encode("utf-8"), v.encode("utf-8")) for k, v in headers.items())
 
     if payload is sentinel:
         payload = mock.Mock()
 
-    req = Request(
-        "http",
-        method,
-        path,
-        b"",
-        raw_hdrs,
-        payload,
-        client_max_size=client_max_size
-    )
+    req = Request("http", method, path, b"", raw_hdrs, payload, client_max_size=client_max_size)
 
     match_info = UrlMappingMatchInfo({}, mock.Mock())
     match_info.add_app(app)

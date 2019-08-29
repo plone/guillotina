@@ -16,9 +16,9 @@ import unittest
 
 
 class ValidationErrorTests(unittest.TestCase):
-
     def _getTargetClass(self):
         from guillotina.schema.exceptions import ValidationError
+
         return ValidationError
 
     def _makeOne(self, *args, **kw):
@@ -27,22 +27,21 @@ class ValidationErrorTests(unittest.TestCase):
     def test_doc(self):
         class Derived(self._getTargetClass()):
             """DERIVED"""
+
         inst = Derived()
-        self.assertEqual(inst.doc(), 'DERIVED')
+        self.assertEqual(inst.doc(), "DERIVED")
 
     def test___eq___no_args(self):
         ve = self._makeOne()
         self.assertEqual(ve == object(), False)
 
     def test___eq___w_args(self):
-        left = self._makeOne('abc')
-        right = self._makeOne('def')
+        left = self._makeOne("abc")
+        right = self._makeOne("def")
         self.assertEqual(left == right, False)
         self.assertEqual(left == left, True)
         self.assertEqual(right == right, True)
 
 
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(ValidationErrorTests),
-    ))
+    return unittest.TestSuite((unittest.makeSuite(ValidationErrorTests),))

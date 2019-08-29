@@ -11,7 +11,6 @@ pytestmark = pytest.mark.asyncio
 
 
 class AsyncMockView(View):
-
     def __init__(self, context, request, func, *args, **kwargs):
         self.context = context
         self.request = request
@@ -35,20 +34,19 @@ async def test_add_sync_utility(guillotina):
     request = utils.get_mocked_request(db=guillotina.db)
     root = await utils.get_root(request)
 
-    await util.add(AsyncMockView(root, request, printHi, 'hola1'))
-    await util.add(AsyncMockView(root, request, printHi, 'hola2'))
-    await util.add(AsyncMockView(root, request, printHi, 'hola3'))
-    await util.add(AsyncMockView(root, request, printHi, 'hola4'))
+    await util.add(AsyncMockView(root, request, printHi, "hola1"))
+    await util.add(AsyncMockView(root, request, printHi, "hola2"))
+    await util.add(AsyncMockView(root, request, printHi, "hola3"))
+    await util.add(AsyncMockView(root, request, printHi, "hola4"))
     await util._queue.join()
-    assert 'hola1' in var
-    assert 'hola2' in var
-    assert 'hola3' in var
-    assert 'hola4' in var
+    assert "hola1" in var
+    assert "hola2" in var
+    assert "hola3" in var
+    assert "hola4" in var
     assert len(var) == 4
 
 
 class JobRunner:
-
     def __init__(self):
         self.done = False
         self.wait = True
@@ -61,7 +59,7 @@ class JobRunner:
 
 async def test_run_jobs(guillotina):
     pool = get_utility(IAsyncJobPool)
-    job = pool.add_job(JobRunner(), args=['foobar'])
+    job = pool.add_job(JobRunner(), args=["foobar"])
     assert pool.num_running == 1
     assert pool.num_pending == 0
     await asyncio.sleep(0.1)
@@ -75,8 +73,7 @@ async def test_run_jobs(guillotina):
 
 async def test_run_many_jobs(guillotina):
     pool = get_utility(IAsyncJobPool)
-    jobs = [pool.add_job(JobRunner(), args=['foobar'])
-            for _ in range(20)]
+    jobs = [pool.add_job(JobRunner(), args=["foobar"]) for _ in range(20)]
     assert pool.num_running == 5
     assert pool.num_pending == 15
 

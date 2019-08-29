@@ -8,7 +8,7 @@ UUID_LENGTH = 32
 # will show before their children in the key range
 # -- not sure there is a lot more value in parents being before children
 #    in key range sorting but...
-OID_DELIMITER = '|'
+OID_DELIMITER = "|"
 
 # max object depth this provides best benefit to is:
 #   (MAX_UID_LENGTH - UUID_LENGTH) / UID_SPLIT_LENGTH
@@ -23,7 +23,7 @@ def bw_oid_generator(ob):
 
 
 def generate_uid(ob):
-    '''
+    """
     We want OIDs that allow keys to organize data where it is logically
     in the hierarchy of data in the object tree.
 
@@ -37,7 +37,7 @@ def generate_uid(ob):
                 - ba2|286|aed97de832f54eeea7484676ceb4e854
                 - ba2|286|aee|cc6ecc8510684ceaa24bf509f5f936c7
                 - ba2|286|aee|ec6e76d668934136bee1442bc5b0c61d
-    '''
+    """
 
     parts = []
     current = ob
@@ -52,10 +52,7 @@ def generate_uid(ob):
         parts.append(ob.__of__[:UID_SPLIT_LENGTH])
     short_oid = uuid.uuid4().hex
     if len(parts) > 0:
-        oid = '{}{}{}'.format(
-            '|'.join(parts),
-            OID_DELIMITER,
-            short_oid)
+        oid = "{}{}{}".format("|".join(parts), OID_DELIMITER, short_oid)
     else:
         oid = short_oid
     return oid[-MAX_UID_LENGTH:]  # trim any possible extra...

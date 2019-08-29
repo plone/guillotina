@@ -40,7 +40,7 @@ class IContextAwareDefaultFactory(zope.interface.Interface):
 
 class _NO_VALUE(object):
     def __repr__(self):
-        return '<NO_VALUE>'
+        return "<NO_VALUE>"
 
 
 NO_VALUE = _NO_VALUE()

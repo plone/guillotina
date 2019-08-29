@@ -5,15 +5,14 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.strategies.base import BaseStrategy
 
 
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 
-@configure.adapter(
-    for_=ITransaction, provides=IDBTransactionStrategy, name="simple")
+@configure.adapter(for_=ITransaction, provides=IDBTransactionStrategy, name="simple")
 class SimpleStrategy(BaseStrategy):
-    '''
+    """
     Do not attempt to resolve conflicts but detect for them
-    '''
+    """
 
     async def tpc_begin(self):
         await self.retrieve_tid()
@@ -26,8 +25,8 @@ class SimpleStrategy(BaseStrategy):
         current_tid = await self._storage.get_current_tid(self._transaction)
         if current_tid > self._transaction._tid:
             logger.warn(
-                f'Could not resolve conflicts in TID: {self._transaction._tid}\n'
-                f'Conflicted TID: {current_tid}'
+                f"Could not resolve conflicts in TID: {self._transaction._tid}\n"
+                f"Conflicted TID: {current_tid}"
             )
             return False
 

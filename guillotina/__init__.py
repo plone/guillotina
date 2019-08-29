@@ -13,27 +13,29 @@ from guillotina.i18n import default_message_factory as _  # noqa
 from zope.interface import Interface  # noqa
 
 
-__version__ = pkg_resources.get_distribution('guillotina').version
+__version__ = pkg_resources.get_distribution("guillotina").version
 
 
 # create logging
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 
-if os.environ.get('GDEBUG', '').lower() in ('true', 't', '1'):  # pragma: no cover
+if os.environ.get("GDEBUG", "").lower() in ("true", "t", "1"):  # pragma: no cover
     # patches for extra debugging....
     import asyncpg
     import time
+
     original_execute = asyncpg.connection.Connection._do_execute
-    logger.error('RUNNING IN DEBUG MODE')
+    logger.error("RUNNING IN DEBUG MODE")
 
     def _record(query, duration):
         # log each query on the transaction object...
         try:
             from guillotina.transactions import get_transaction
+
             txn = get_transaction()
             if txn:
-                if not hasattr(txn, '_queries'):
+                if not hasattr(txn, "_queries"):
                     txn._queries = {}
                 if query not in txn._queries:
                     txn._queries[query] = [0, 0.0]
@@ -59,4 +61,5 @@ if os.environ.get('GDEBUG', '').lower() in ('true', 't', '1'):  # pragma: no cov
         end = time.time()
         _record(self._query, end - start)
         return result
+
     asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute = __bind_execute

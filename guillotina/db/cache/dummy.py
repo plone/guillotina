@@ -6,7 +6,6 @@ from guillotina.db.interfaces import ITransaction
 
 @configure.adapter(for_=ITransaction, provides=ITransactionCache, name="dummy")
 class DummyCache(BaseCache):
-
     async def get(self, **kwargs):
         return None
 

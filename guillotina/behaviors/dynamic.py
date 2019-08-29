@@ -18,11 +18,11 @@ def get_all_fields(content):
                 if field_name in _fields:
                     continue
                 _fields[field_name] = {
-                    'title': data.get('title'),
-                    'description': data.get('description'),
-                    'type': data.get('type'),
-                    'required': data.get('required', False),
-                    'meta': data.get('meta') or {},
+                    "title": data.get("title"),
+                    "description": data.get("description"),
+                    "type": data.get("type"),
+                    "required": data.get("required", False),
+                    "meta": data.get("meta") or {},
                 }
         content = content.__parent__
 
@@ -44,54 +44,38 @@ def find_field(content, name):
 class IFieldType(Interface):
     title = schema.Text(required=False)
     description = schema.Text(required=False)
-    type = schema.Choice(
-        values=['date', 'integer', 'text', 'float', 'keyword', 'boolean']
-    )
-    required = schema.Bool(
-        default=False,
-        required=False
-    )
+    type = schema.Choice(values=["date", "integer", "text", "float", "keyword", "boolean"])
+    required = schema.Bool(default=False, required=False)
     meta = schema.JSONField(
         title="Additional information on field",
         required=False,
-        schema=json.dumps({
-            'type': 'object',
-            'properties': {}
-        })
+        schema=json.dumps({"type": "object", "properties": {}}),
     )
 
 
 class IDynamicFields(Interface):
-    fields = fields.PatchField(schema.Dict(
-        key_type=schema.Text(),
-        value_type=schema.Object(
-            schema=IFieldType
-        )
-    ))
+    fields = fields.PatchField(
+        schema.Dict(key_type=schema.Text(), value_type=schema.Object(schema=IFieldType))
+    )
 
 
-@configure.behavior(
-    title="Dynamic fields",
-    provides=IDynamicFields,
-    for_="guillotina.interfaces.IResource")
+@configure.behavior(title="Dynamic fields", provides=IDynamicFields, for_="guillotina.interfaces.IResource")
 class DynamicFieldsBehavior(ContextBehavior):
-    '''
+    """
     context behavior so we don't have to do an async load here...
     the data here shouldn't be very large as well
-    '''
+    """
+
     auto_serialize = False
 
 
 class IDynamicFieldValues(Interface):
-    values = fields.DynamicField(schema.Dict(
-        key_type=schema.Text()
-    ))
+    values = fields.DynamicField(schema.Dict(key_type=schema.Text()))
 
 
 @configure.behavior(
-    title="Dynamic field values",
-    provides=IDynamicFieldValues,
-    for_="guillotina.interfaces.IResource")
+    title="Dynamic field values", provides=IDynamicFieldValues, for_="guillotina.interfaces.IResource"
+)
 class DynamicFieldValuesBehavior(AnnotationBehavior):
     auto_serialize = False
-    __annotations_data_key__ = 'dynamicfields'
+    __annotations_data_key__ = "dynamicfields"

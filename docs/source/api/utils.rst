@@ -5,15 +5,25 @@
 
   .. autofunction:: get_current_request
   .. autofunction:: get_content_path
+  .. autofunction:: get_full_content_path
   .. autofunction:: iter_parents
   .. autofunction:: navigate_to
   .. autofunction:: get_owners
   .. autofunction:: get_object_url
   .. autofunction:: get_object_by_uid
   .. autofunction:: get_behavior
+  .. autofunction:: get_database
+  .. autofunction:: get_current_db
+  .. autofunction:: get_current_container
+  .. autofunction:: find_container
+  .. autofunction:: get_current_transaction
+  .. autofunction:: get_url
+  .. autofunction:: get_schema_validator
+  .. autofunction:: get_registry
 
   .. autofunction:: get_authenticated_user
   .. autofunction:: get_authenticated_user_id
+  .. autofunction:: get_security_policy
 
   .. autofunction:: strings_differ
   .. autofunction:: get_random_string
@@ -30,6 +40,7 @@
   .. autofunction:: apply_coroutine
   .. autofunction:: lazy_apply
   .. autofunction:: safe_unidecode
+  .. autofunction:: run_async
 
   .. autoclass:: Navigator
     :members:

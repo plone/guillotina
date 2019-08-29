@@ -12,19 +12,19 @@ from zope.interface import classImplements
 
 
 def apply_concrete_behaviors():
-    '''
+    """
     Configured behaviors for an object should always be applied and can't
     be removed.
 
     Should be called once at startup instead of doing alsoProvides every
     time an object is created
-    '''
+    """
     for type_name, factory in get_utilities_for(IResourceFactory):
         for behavior in factory.behaviors:
-            behavior_registration = get_utility(
-                IBehavior, name=behavior.__identifier__)
+            behavior_registration = get_utility(IBehavior, name=behavior.__identifier__)
             if behavior_registration.marker is not None:
                 classImplements(factory._callable, behavior_registration.marker)
+
 
 @profilable
 def apply_markers(obj, event=None):

@@ -6,7 +6,7 @@ from guillotina.request import AsgiStreamReader
 from guillotina.request import Request
 
 
-logger = glogging.getLogger('guillotina')
+logger = glogging.getLogger("guillotina")
 
 
 class AsgiApp:
@@ -25,21 +25,19 @@ class AsgiApp:
         elif scope["type"] == "lifespan":
             while True:
                 message = await receive()
-                if message['type'] == 'lifespan.startup':
+                if message["type"] == "lifespan.startup":
                     await self.startup()
-                    await send({'type': 'lifespan.startup.complete'})
-                elif message['type'] == 'lifespan.shutdown':
+                    await send({"type": "lifespan.startup.complete"})
+                elif message["type"] == "lifespan.shutdown":
                     await self.shutdown()
-                    await send({'type': 'lifespan.shutdown.complete'})
+                    await send({"type": "lifespan.shutdown.complete"})
                     return
 
     async def startup(self):
         from guillotina.factory.app import startup_app
+
         self.app = await startup_app(
-            config_file=self.config_file,
-            settings=self.settings,
-            loop=self.loop,
-            server_app=self
+            config_file=self.config_file, settings=self.settings, loop=self.loop, server_app=self
         )
         return self.app
 
@@ -63,7 +61,7 @@ class AsgiApp:
             loop=self.loop,
             send=send,
             scope=scope,
-            receive=receive
+            receive=receive,
         )
 
         task_vars.request.set(request)
@@ -80,21 +78,21 @@ class AsgiApp:
             return await route.handler(request)
 
         except (ConflictError, TIDConflictError) as e:
-            if self.settings.get('conflict_retry_attempts', 3) > retries:
-                label = 'DB Conflict detected'
+            if self.settings.get("conflict_retry_attempts", 3) > retries:
+                label = "DB Conflict detected"
                 if isinstance(e, TIDConflictError):
-                    label = 'TID Conflict Error detected'
-                tid = getattr(getattr(request, '_txn', None), '_tid', 'not issued')
-                logger.debug(
-                    f'{label}, retrying request, tid: {tid}, retries: {retries + 1})',
-                    exc_info=True)
+                    label = "TID Conflict Error detected"
+                tid = getattr(getattr(request, "_txn", None), "_tid", "not issued")
+                logger.debug(f"{label}, retrying request, tid: {tid}, retries: {retries + 1})", exc_info=True)
                 request._retry_attempt = retries + 1
                 request.clear_futures()
                 return await self.request_handler(request, retries + 1)
             else:
                 logger.error(
-                    'Exhausted retry attempts for conflict error on tid: {}'.format(
-                        getattr(getattr(request, '_txn', None), '_tid', 'not issued')
-                    ))
+                    "Exhausted retry attempts for conflict error on tid: {}".format(
+                        getattr(getattr(request, "_txn", None), "_tid", "not issued")
+                    )
+                )
                 from guillotina.response import HTTPConflict
+
                 return HTTPConflict()

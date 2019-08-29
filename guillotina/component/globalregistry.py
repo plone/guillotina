@@ -25,26 +25,22 @@ import asyncio
 
 
 class GuillotinaAdapterLookup(AdapterLookup):
-
     @profilable
     async def asubscribers(self, objects, provided):
         subscriptions = self.subscriptions(map(providedBy, objects), provided)
         results = []
-        for subscription in sorted(subscriptions,
-                                   key=lambda sub: getattr(sub, 'priority', 100)):
+        for subscription in sorted(subscriptions, key=lambda sub: getattr(sub, "priority", 100)):
             if asyncio.iscoroutinefunction(subscription):
                 results.append(await subscription(*objects))
             else:
                 results.append(subscription(*objects))
         return results
 
-
     @profilable
     def subscribers(self, objects, provided):
         subscriptions = self.subscriptions(map(providedBy, objects), provided)
         result = []
-        for subscription in sorted(subscriptions,
-                                   key=lambda sub: getattr(sub, 'priority', 100)):
+        for subscription in sorted(subscriptions, key=lambda sub: getattr(sub, "priority", 100)):
             if not asyncio.iscoroutinefunction(subscription):
                 result.append(subscription(*objects))
         return result
@@ -54,7 +50,8 @@ class GuillotinaAdapterRegistry(AdapterRegistry):
     """
     Customized adapter registry for async
     """
-    _delegated = AdapterRegistry._delegated + ('asubscribers',)  # type: ignore
+
+    _delegated = AdapterRegistry._delegated + ("asubscribers",)  # type: ignore
     LookupClass = GuillotinaAdapterLookup
 
     def __init__(self, parent, name):
@@ -65,17 +62,16 @@ class GuillotinaAdapterRegistry(AdapterRegistry):
 
 @implementer(IComponentLookup)
 class GlobalComponents(Components):
-
     def _init_registries(self):
-        self.adapters = GuillotinaAdapterRegistry(self, 'adapters')
-        self.utilities = GuillotinaAdapterRegistry(self, 'utilities')
+        self.adapters = GuillotinaAdapterRegistry(self, "adapters")
+        self.utilities = GuillotinaAdapterRegistry(self, "utilities")
 
     def __reduce__(self):
         # Global site managers are pickled as global objects
         return self.__name__
 
 
-base = GlobalComponents('base')
+base = GlobalComponents("base")
 
 
 def get_global_components():
@@ -84,17 +80,20 @@ def get_global_components():
 
 def reset():
     global base
-    base = GlobalComponents('base')
+    base = GlobalComponents("base")
 
 
 def provide_utility(component, provides=None, name=_BLANK):
     base.registerUtility(component, provides, name, event=False)
 
+
 def provide_adapter(factory, adapts=None, provides=None, name=_BLANK):
     base.registerAdapter(factory, adapts, provides, name, event=False)
 
+
 def provide_subscription_adapter(factory, adapts=None, provides=None):
     base.registerSubscriptionAdapter(factory, adapts, provides, event=False)
+
 
 def provide_handler(factory, adapts=None):
     base.registerHandler(factory, adapts, event=False)

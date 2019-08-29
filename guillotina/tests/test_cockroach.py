@@ -1,4 +1,6 @@
+from guillotina.component import get_adapter
 from guillotina.content import Folder
+from guillotina.db.interfaces import IVacuumProvider
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.tests.utils import create_content
 
@@ -9,8 +11,8 @@ import pytest
 pytestmark = [
     pytest.mark.asyncio,
     pytest.mark.skipif(
-        os.environ.get('DATABASE') != 'cockroachdb',
-        reason="These tests are only for cockroach")
+        os.environ.get("DATABASE") != "cockroachdb", reason="These tests are only for cockroach"
+    ),
 ]
 
 
@@ -41,7 +43,9 @@ async def test_vacuum_cleans_orphaned_content(cockroach_storage):
         txn.delete(folder1)
 
         await tm.commit(txn=txn)
-        await storage.vacuum()
+
+        vacuumer = get_adapter(storage, IVacuumProvider)
+        await vacuumer()
 
         txn = await tm.begin()
         with pytest.raises(KeyError):
@@ -66,10 +70,10 @@ async def test_deleting_parent_deletes_children(cockroach_storage):
         tm = TransactionManager(storage)
         txn = await tm.begin()
 
-        folder = create_content(Folder, 'Folder')
+        folder = create_content(Folder, "Folder")
         txn.register(folder)
         ob = create_content()
-        await folder.async_set('foobar', ob)
+        await folder.async_set("foobar", ob)
 
         assert len(txn.modified) == 2
 

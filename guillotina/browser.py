@@ -17,7 +17,7 @@ def get_physical_path(context):
     while parent is not None and parent.__name__ is not None:
         parts.append(parent.__name__)
         parent = parent.__parent__
-    parts.append('')
+    parts.append("")
     return [x for x in reversed(parts)]
 
 
@@ -25,7 +25,7 @@ def get_physical_path(context):
 @implementer(IView, ILocation)
 class View(object):
 
-    __name__ = 'view'
+    __name__ = "view"
 
     # An attribute that marks that a view should not
     # be unauthorized by AccessContent on the object
@@ -43,17 +43,11 @@ class View(object):
         return self.context
 
     async def __call__(self):
-        return {
-            'context': str(self.context),
-            'path': '/'.join(get_physical_path(self.context))
-        }
+        return {"context": str(self.context), "path": "/".join(get_physical_path(self.context))}
 
 
-@configure.adapter(
-    for_=(IResource, IRequest),  # noqa: N801
-    provides=IAbsoluteURL)
+@configure.adapter(for_=(IResource, IRequest), provides=IAbsoluteURL)  # noqa: N801
 class Absolute_URL(object):
-
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -63,25 +57,22 @@ class Absolute_URL(object):
             # we want the url relative to container so remove the container
             path = [x for x in get_physical_path(self.context)]
             path.pop(1)
-            path = '/'.join(path)
+            path = "/".join(path)
         else:
-            path = '/'.join(get_physical_path(self.context))
+            path = "/".join(get_physical_path(self.context))
 
         if container_url:
             return path
         elif relative:
             db = task_vars.db.get()
-            return '/' + db.id + path
+            return "/" + db.id + path
         else:
             db = task_vars.db.get()
             return get_url(self.request, db.id + path)
 
 
-@configure.adapter(
-    for_=IResource,  # noqa: N801
-    provides=IAbsoluteURL)
+@configure.adapter(for_=IResource, provides=IAbsoluteURL)  # noqa: N801
 class Absolute_URL_ObtainRequest(Absolute_URL):
-
     def __init__(self, context):
         request = get_current_request()
         super().__init__(context, request)

@@ -8,9 +8,7 @@ class IRegistryData(Interface):
     foobar = schema.TextLine()
 
 
-@configure.addon(
-    name="docaddon",
-    title="Doc addon")
+@configure.addon(name="docaddon", title="Doc addon")
 class TestAddon(Addon):
     @classmethod
     def install(cls, container, request):

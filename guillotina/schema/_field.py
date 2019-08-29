@@ -88,21 +88,21 @@ import jsonschema
 import re
 
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 # pep 8 friendlyness
 Container
 
 # Fix up bootstrap field types
-Field.title = FieldProperty(IField['title'])  # type: ignore
-Field.description = FieldProperty(IField['description'])  # type: ignore
-Field.required = FieldProperty(IField['required'])  # type: ignore
-Field.readonly = FieldProperty(IField['readonly'])  # type: ignore
+Field.title = FieldProperty(IField["title"])  # type: ignore
+Field.description = FieldProperty(IField["description"])  # type: ignore
+Field.required = FieldProperty(IField["required"])  # type: ignore
+Field.readonly = FieldProperty(IField["readonly"])  # type: ignore
 # Default is already taken care of
 classImplements(Field, IField)
 
-MinMaxLen.min_length = FieldProperty(IMinMaxLen['min_length'])  # type: ignore
-MinMaxLen.max_length = FieldProperty(IMinMaxLen['max_length'])  # type: ignore
+MinMaxLen.min_length = FieldProperty(IMinMaxLen["min_length"])  # type: ignore
+MinMaxLen.max_length = FieldProperty(IMinMaxLen["max_length"])  # type: ignore
 
 classImplements(Text, IText)
 classImplements(TextLine, ITextLine)
@@ -153,7 +153,7 @@ class BytesLine(Bytes):
 
     def constraint(self, value):
         # TODO: we should probably use a more general definition of newlines
-        return b'\n' not in value
+        return b"\n" not in value
 
 
 NativeStringLine = TextLine
@@ -165,7 +165,7 @@ class ASCIILine(ASCII):
 
     def constraint(self, value):
         # TODO: we should probably use a more general definition of newlines
-        return '\n' not in value
+        return "\n" not in value
 
 
 @implementer(IFloat, IFromUnicode)
@@ -198,7 +198,7 @@ class Decimal(Orderable, Field):
         try:
             v = decimal.Decimal(uc)
         except decimal.InvalidOperation:
-            raise ValueError('invalid literal for Decimal(): %s' % uc)
+            raise ValueError("invalid literal for Decimal(): %s" % uc)
         self.validate(v)
         return v
 
@@ -244,24 +244,17 @@ class Choice(Field):
     def __init__(self, values=None, vocabulary=None, source=None, **kw):
         """Initialize object."""
         if vocabulary is not None:
-            if (not isinstance(vocabulary, str) and
-                    not IBaseVocabulary.providedBy(vocabulary)):
-                raise ValueError('vocabulary must be a string or implement '
-                                 'IBaseVocabulary')
+            if not isinstance(vocabulary, str) and not IBaseVocabulary.providedBy(vocabulary):
+                raise ValueError("vocabulary must be a string or implement " "IBaseVocabulary")
             if source is not None:
-                raise ValueError(
-                    "You cannot specify both source and vocabulary.")
+                raise ValueError("You cannot specify both source and vocabulary.")
         elif source is not None:
             vocabulary = source
 
-        if (values is None and vocabulary is None):
-            raise ValueError(
-                "You must specify either values or vocabulary."
-            )
+        if values is None and vocabulary is None:
+            raise ValueError("You must specify either values or vocabulary.")
         if values is not None and vocabulary is not None:
-            raise ValueError(
-                "You cannot specify both values and vocabulary."
-            )
+            raise ValueError("You cannot specify both values and vocabulary.")
 
         self.vocabulary = None
         self.vocabularyName = None
@@ -270,17 +263,15 @@ class Choice(Field):
         elif isinstance(vocabulary, str):
             self.vocabularyName = vocabulary
         else:
-            if (not ISource.providedBy(vocabulary) and
-                    not IContextSourceBinder.providedBy(vocabulary)):
-                raise ValueError('Invalid vocabulary')
+            if not ISource.providedBy(vocabulary) and not IContextSourceBinder.providedBy(vocabulary):
+                raise ValueError("Invalid vocabulary")
             self.vocabulary = vocabulary
         # Before a default value is checked, it is validated. However, a
         # named vocabulary is usually not complete when these fields are
         # initialized. Therefore signal the validation method to ignore
         # default value checks during initialization of a Choice tied to a
         # registered vocabulary.
-        self._init_field = (bool(self.vocabularyName) or
-                            IContextSourceBinder.providedBy(self.vocabulary))
+        self._init_field = bool(self.vocabularyName) or IContextSourceBinder.providedBy(self.vocabulary)
         super(Choice, self).__init__(**kw)
         self._init_field = False
 
@@ -297,7 +288,7 @@ class Choice(Field):
             clone.vocabulary = vr.get(object, self.vocabularyName)
 
         if not ISource.providedBy(clone.vocabulary):
-            raise ValueError('Invalid clone vocabulary')
+            raise ValueError("Invalid clone vocabulary")
 
         return clone
 
@@ -350,7 +341,8 @@ _isdotted = re.compile(
     r"([a-zA-Z][a-zA-Z0-9_]*)"
     r"([.][a-zA-Z][a-zA-Z0-9_]*)*"
     # use the whole line
-    r"$").match
+    r"$"
+).match
 
 
 @implementer(IDottedName)  # type: ignore
@@ -380,17 +372,14 @@ class DottedName(NativeStringLine):
             raise InvalidDottedName(value)
         dots = value.count(".")
         if dots < self.min_dots:
-            raise InvalidDottedName(
-                "too few dots; %d required" % self.min_dots, value
-            )
+            raise InvalidDottedName("too few dots; %d required" % self.min_dots, value)
         if self.max_dots is not None and dots > self.max_dots:
-            raise InvalidDottedName("too many dots; no more than %d allowed" %
-                                    self.max_dots, value)
+            raise InvalidDottedName("too many dots; no more than %d allowed" % self.max_dots, value)
 
     def from_unicode(self, value):
         v = value.strip()
         if not isinstance(v, self._type):
-            v = v.encode('ascii')
+            v = v.encode("ascii")
         self.validate(v)
         return v
 
@@ -416,7 +405,7 @@ class Id(NativeStringLine):
         """
         v = value.strip()
         if not isinstance(v, self._type):
-            v = v.encode('ascii')
+            v = v.encode("ascii")
         self.validate(v)
         return v
 
@@ -508,24 +497,26 @@ class AbstractCollection(MinMaxLen, Iterable):
 @implementer(ITuple)
 class Tuple(AbstractCollection):
     """A field representing a Tuple."""
+
     _type = tuple
 
 
 @implementer(IList)
 class List(AbstractCollection):
     """A field representing a List."""
+
     _type = list
 
 
 @implementer(ISet)
 class Set(AbstractCollection):
     """A field representing a set."""
+
     _type = set
 
     def __init__(self, **kw):
-        if 'unique' in kw:  # set members are always unique
-            raise TypeError(
-                "__init__() got an unexpected keyword argument 'unique'")
+        if "unique" in kw:  # set members are always unique
+            raise TypeError("__init__() got an unexpected keyword argument 'unique'")
         super(Set, self).__init__(unique=True, **kw)
 
 
@@ -534,9 +525,8 @@ class FrozenSet(AbstractCollection):
     _type = frozenset
 
     def __init__(self, **kw):
-        if 'unique' in kw:  # set members are always unique
-            raise TypeError(
-                "__init__() got an unexpected keyword argument 'unique'")
+        if "unique" in kw:  # set members are always unique
+            raise TypeError("__init__() got an unexpected keyword argument 'unique'")
         super(FrozenSet, self).__init__(unique=True, **kw)
 
 
@@ -603,10 +593,16 @@ class Object(Field):
         if isinstance(value, dict):
             # Dicts are validated differently
             valid_type = namedtuple(
-                'temp_validate_type',
-                set(self.schema.names(all=True)) & set(value.keys()))
+                "temp_validate_type", set(self.schema.names(all=True)) & set(value.keys())
+            )
+
             # check the value against schema
-            errors = _validate_fields(self.schema, valid_type(**value))
+            try:
+                t = valid_type(**value)
+            except TypeError:
+                raise SchemaNotProvided
+
+            errors = _validate_fields(self.schema, t)
         else:
             if not self.schema.providedBy(value):
                 raise SchemaNotProvided
@@ -618,6 +614,7 @@ class Object(Field):
 @implementer(IDict)
 class Dict(MinMaxLen, Iterable):
     """A field representing a Dict."""
+
     _type = dict
     key_type = None
     value_type = None
@@ -637,8 +634,7 @@ class Dict(MinMaxLen, Iterable):
         errors = []
         try:
             if self.value_type:
-                errors = _validate_sequence(self.value_type, value.values(),
-                                            errors)
+                errors = _validate_sequence(self.value_type, value.values(), errors)
             errors = _validate_sequence(self.key_type, value, errors)
 
             if errors:
@@ -659,30 +655,35 @@ class Dict(MinMaxLen, Iterable):
         return clone
 
 
-DEFAULT_JSON_SCHMEA = json.dumps({
-    'type': 'object',
-    'properties': {}
-})
+DEFAULT_JSON_SCHMEA = json.dumps({"type": "object", "properties": {}})
 
 
 @implementer(IJSONField)
 class JSONField(Field):
+    json_schema = validator = None
 
     def __init__(self, schema=DEFAULT_JSON_SCHMEA, **kw):
-        if not isinstance(schema, str):
-            raise WrongType
 
-        try:
-            self.json_schema = json.loads(schema)
-        except ValueError:
+        if isinstance(schema, str):
+            try:
+                self.json_schema = json.loads(schema)
+            except ValueError:
+                raise WrongType
+        elif not isinstance(schema, dict):
             raise WrongType
+        else:
+            self.json_schema = schema
+
+        jsonschema_validator = jsonschema.validators.validator_for(self.json_schema)
+        jsonschema_validator.check_schema(self.json_schema)
+        self.validator = jsonschema_validator(self.json_schema)
         super(JSONField, self).__init__(**kw)
 
     def _validate(self, value):
         super(JSONField, self)._validate(value)
 
         try:
-            jsonschema.validate(value, self.json_schema)
+            self.validator.validate(value)
         except jsonschema.ValidationError as e:
             raise WrongContainedType(e.message, self.__name__)
 
@@ -716,4 +717,5 @@ class UnionField(Field):
 
     def set(self, object, value):
         field = self.validate(value)
+        field.__name__ = self.__name__
         field.set(object, value)

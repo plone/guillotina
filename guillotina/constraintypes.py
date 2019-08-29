@@ -6,16 +6,13 @@ from guillotina.interfaces import IDatabase
 from zope.interface import Interface
 
 
-@configure.adapter(
-    for_=Interface,
-    provides=IConstrainTypes)
+@configure.adapter(for_=Interface, provides=IConstrainTypes)
 class FTIConstrainAllowedTypes:
-
     def __init__(self, context: Interface) -> None:
         self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:
-        if type_id in app_settings['container_types']:
+        if type_id in app_settings["container_types"]:
             return False
         allowed = self.get_allowed_types()
         if allowed is None:
@@ -24,26 +21,24 @@ class FTIConstrainAllowedTypes:
         return type_id in allowed
 
     def get_allowed_types(self) -> list:
-        tn = getattr(self.context, 'type_name', None)
+        tn = getattr(self.context, "type_name", None)
         if tn:
             factory = get_cached_factory(tn)
             return factory.allowed_types
         return []
 
 
-@configure.adapter(
-    for_=IDatabase,
-    provides=IConstrainTypes)
+@configure.adapter(for_=IDatabase, provides=IConstrainTypes)
 class DatabaseAllowedTypes:
-    '''
+    """
     Can only add containers to databases
-    '''
+    """
 
     def __init__(self, context: Interface) -> None:
         self.context = context
 
     def is_type_allowed(self, type_id: str) -> bool:
-        return type_id in app_settings['container_types']
+        return type_id in app_settings["container_types"]
 
     def get_allowed_types(self) -> list:
-        return app_settings['container_types']
+        return app_settings["container_types"]

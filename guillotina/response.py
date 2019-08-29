@@ -17,13 +17,12 @@ class Response(Exception):
     empty_body = False
     default_content: dict = {}  # noqa
 
-    def __init__(self, *, content: dict=None,
-                 headers: dict=None, status: int=None) -> None:
-        '''
+    def __init__(self, *, content: dict = None, headers: dict = None, status: int = None) -> None:
+        """
         :param content: content to serialize
         :param headers: headers to set on response
         :param status: customize the response status
-        '''
+        """
         if self.empty_body:
             self.content = None
         else:
@@ -34,7 +33,7 @@ class Response(Exception):
             self.headers = CIMultiDict(headers)  # type: ignore
         if status is not None:
             if self.status_code:
-                raise ValueError('Can not customize status code of this type')
+                raise ValueError("Can not customize status code of this type")
             else:
                 if status in (204, 205):
                     self.content = None
@@ -42,10 +41,15 @@ class Response(Exception):
 
 
 @implementer(IASGIResponse)
-class ASGIResponse():
-
-    def __init__(self, *, headers: dict=None, status: int=None,
-                 content_type: str = None, content_length: int = None) -> None:
+class ASGIResponse:
+    def __init__(
+        self,
+        *,
+        headers: dict = None,
+        status: int = None,
+        content_type: str = None,
+        content_length: int = None,
+    ) -> None:
         if status is None:
             raise ValueError("Status is none")
 
@@ -57,19 +61,19 @@ class ASGIResponse():
         self._state: Dict[str, Any] = {}
         self._prepared = False
         self._eof_sent = False
-        self._req: Optional['Request'] = None
+        self._req: Optional["Request"] = None
 
     @property
     def prepared(self) -> bool:
         return self._prepared is True
 
-    async def prepare(self, request: 'Request'):
+    async def prepare(self, request: "Request"):
         if self._eof_sent or self._prepared:
             return
         await request._prepare_hook(self)
         return await self._start(request)
 
-    async def _start(self, request: 'Request'):
+    async def _start(self, request: "Request"):
         self._req = request
         self._prepared = True
 
@@ -77,47 +81,42 @@ class ASGIResponse():
         if self.content_type:
             headers.setdefault(hdrs.CONTENT_TYPE, self.content_type)
         else:
-            headers.setdefault(hdrs.CONTENT_TYPE, 'application/octet-stream')
+            headers.setdefault(hdrs.CONTENT_TYPE, "application/octet-stream")
 
         if self.content_length:
             headers.setdefault(hdrs.CONTENT_LENGTH, str(self.content_length))
 
-        await request.send({
-            "type": "http.response.start",
-            "headers": self._headers_to_list(headers),
-            "status": self.status_code
-        })
+        await request.send(
+            {
+                "type": "http.response.start",
+                "headers": self._headers_to_list(headers),
+                "status": self.status_code,
+            }
+        )
 
     async def write(self, data: bytes) -> None:
-        assert isinstance(data, (bytes, bytearray, memoryview)), \
-            "data argument must be byte-ish (%r)" % type(data)
+        assert isinstance(data, (bytes, bytearray, memoryview)), "data argument must be byte-ish (%r)" % type(
+            data
+        )
 
         if self._eof_sent:
             raise RuntimeError("Cannot call write() after write_eof()")
         if self._prepared is False:
             raise RuntimeError("Cannot call write() before prepare()")
 
-        await self._req.send({
-            "type": "http.response.body",
-            "body": data,
-            "more_body": True
-        })
+        await self._req.send({"type": "http.response.body", "body": data, "more_body": True})
 
-    async def write_eof(self, data: bytes=b'') -> None:
-        assert isinstance(data, (bytes, bytearray, memoryview)), \
-            "data argument must be byte-ish (%r)" % type(data)
+    async def write_eof(self, data: bytes = b"") -> None:
+        assert isinstance(data, (bytes, bytearray, memoryview)), "data argument must be byte-ish (%r)" % type(
+            data
+        )
 
         if self._eof_sent:
             return
 
-        assert self._prepared is not None, \
-            "Response has not been started"
+        assert self._prepared is not None, "Response has not been started"
 
-        await self._req.send({
-            "type": "http.response.body",
-            "body": data,
-            "more_body": False
-        })
+        await self._req.send({"type": "http.response.body", "body": data, "more_body": False})
 
         self._eof_sent = True
         self._req = None
@@ -158,12 +157,11 @@ class ASGIResponse():
 
 
 class ASGISimpleResponse(ASGIResponse):
-
-    def __init__(self, *, body: bytes=b"", **kwargs) -> None:
+    def __init__(self, *, body: bytes = b"", **kwargs) -> None:
         self.body = body
         super().__init__(**kwargs)
 
-    async def prepare(self, request: 'Request'):
+    async def prepare(self, request: "Request"):
         await super().prepare(request)
         if self._eof_sent is False:
             await self.write(self.body)
@@ -171,24 +169,29 @@ class ASGISimpleResponse(ASGIResponse):
 
 
 class ErrorResponse(Response):
-    def __init__(self, type: str, message: str, *, reason=None,
-                 content: dict=None, headers: dict=None,
-                 status: int=500) -> None:
-        '''
+    def __init__(
+        self,
+        type: str,
+        message: str,
+        *,
+        reason=None,
+        content: dict = None,
+        headers: dict = None,
+        status: int = 500,
+    ) -> None:
+        """
         :param type: type of error
         :param message: error message
         :param content: provide additional content
         :param headers: headers to set on response
         :param status: customize the response status
-        '''
+        """
         if content is None:
             content = {}
-        content['error'] = {
-            'type': type,
-            'message': message
-        }
+        content["error"] = {"type": type, "message": message}
         if reason is not None:
             from guillotina.exc_resp import render_error_response
+
             content.update(render_error_response(type, reason))
         super().__init__(content=content, headers=headers, status=status)
 
@@ -241,49 +244,49 @@ class HTTPPartialContent(HTTPSuccessful):
 
 
 class _HTTPMove(HTTPRedirection):
-
-    def __init__(self, location: str, *,
-                 content: dict=None, headers: dict=None) -> None:
+    def __init__(self, location: str, *, content: dict = None, headers: dict = None) -> None:
         if not location:
             raise ValueError("HTTP redirects need a location to redirect to.")
         super().__init__(content=content, headers=headers)
-        self.headers['Location'] = str(location)
+        self.headers["Location"] = str(location)
         self.location = location
 
 
 class HTTPMultipleChoices(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
 
     status_code = 300
 
 
 class HTTPMovedPermanently(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
 
     status_code = 301
 
 
 class HTTPFound(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
+
     status_code = 302
 
 
 # This one is safe after a POST (the redirected location will be
 # retrieved with GET):
 class HTTPSeeOther(_HTTPMove):
-    '''
+    """
     :param location: where to redirect
     :param headers: additional headers to set
-    '''
+    """
+
     status_code = 303
 
 
@@ -336,25 +339,26 @@ class HTTPNotFound(HTTPClientError):
 
 
 class InvalidRoute(HTTPNotFound):
-    '''
+    """
     The defined route is invalid
-    '''
+    """
 
 
 class HTTPMethodNotAllowed(HTTPClientError):
     status_code = 405
 
-    def __init__(self, method: str, allowed_methods: list, *,
-                 content: dict=None, headers: dict=None) -> None:
-        '''
+    def __init__(
+        self, method: str, allowed_methods: list, *, content: dict = None, headers: dict = None
+    ) -> None:
+        """
         :param method: method not allowed
         :param allowed_methods: list of allowed methods
         :param content: content to serialize
         :param headers: headers to set on response
-        '''
-        allow = ','.join(sorted(allowed_methods))
+        """
+        allow = ",".join(sorted(allowed_methods))
         super().__init__(content=content, headers=headers)
-        self.headers['Allow'] = allow
+        self.headers["Allow"] = allow
         self.allowed_methods = allowed_methods
         self.method = method.upper()
 
@@ -445,7 +449,7 @@ class HTTPUnavailableForLegalReasons(HTTPClientError):
 
     def __init__(self, link, *, content=None, headers=None):
         super().__init__(content=content, headers=headers)
-        self.headers['Link'] = '<%s>; rel="blocked-by"' % link
+        self.headers["Link"] = '<%s>; rel="blocked-by"' % link
         self.link = link
 
 
