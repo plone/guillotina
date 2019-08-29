@@ -187,9 +187,12 @@ class BaseMatchInfo(AbstractMatchInfo):
                 resp.headers["XG-Timing-Total"] = "{0:.5f}".format((last - request._initialized) * 1000)
                 txn = task_vars.txn.get()
                 if txn is not None:
-                    resp.headers["XG-Total-Cache-hits"] = str(txn._cache._hits)
-                    resp.headers["XG-Total-Cache-misses"] = str(txn._cache._misses)
-                    resp.headers["XG-Total-Cache-stored"] = str(txn._cache._stored)
+                    resp.headers["XG-Cache-hits"] = str(txn._cache._hits)
+                    resp.headers["XG-Cache-misses"] = str(txn._cache._misses)
+                    resp.headers["XG-Cache-stored"] = str(txn._cache._stored)
+                    resp.headers["XG-Total-Cache-hits"] = str(txn._manager._cache_hits)
+                    resp.headers["XG-Total-Cache-misses"] = str(txn._manager._cache_misses)
+                    resp.headers["XG-Total-Cache-stored"] = str(txn._manager._cache_stored)
                     resp.headers["XG-Num-Queries"] = str(txn._query_count_end - txn._query_count_start)
                     for idx, query in enumerate(txn._queries.keys()):
                         counts = txn._queries[query]

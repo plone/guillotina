@@ -21,6 +21,7 @@ class BaseCache:
     @_hits.setter
     def _hits(self, value):
         self.__hits += 1
+        self._transaction._manager._cache_hits += 1
 
     @property
     def _misses(self):
@@ -29,6 +30,7 @@ class BaseCache:
     @_misses.setter
     def _misses(self, value):
         self.__misses += 1
+        self._transaction._manager._cache_misses += 1
 
     @property
     def _stored(self):
@@ -37,6 +39,7 @@ class BaseCache:
     @_stored.setter
     def _stored(self, value):
         self.__stored += 1
+        self._transaction._manager._cache_stored += 1
 
     def get_key(self, oid=None, container=None, id=None, variant=None):
         key = "{}-".format(getattr(self._transaction.manager, "db_id", "root"))

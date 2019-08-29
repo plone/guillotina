@@ -19,7 +19,7 @@ applications:
 
 ## In Storage Cache (No invalidations)
 
-This option is not recomended as they are not invalidating the memory objects.
+This option is not recommended as they are not invalidating the memory objects.
 
 Its needed to add `aioredis` as a dependency on your project
 
@@ -30,12 +30,12 @@ applications:
 - guillotina.contrib.redis
 - guillotina.contrib.cache
 cache:
-- driver: guillotina.contrib.redis
+  driver: guillotina.contrib.redis
 ```
 
-## In Storage Cache
+## Redis Storage Cache
 
-This option is the recomended one for more than one process running guillotina on the same DB.
+This option is the recommended one for more than one process running guillotina on the same DB.
 
 Its needed to add `aioredis` as a dependency on your project
 
@@ -47,7 +47,26 @@ applications:
 - guillotina.contrib.pubsub
 - guillotina.contrib.cache
 cache:
-- driver: guillotina.contrib.redis
-- updates_channel: guillotina
+  driver: guillotina.contrib.redis
+  updates_channel: guillotina
 ```
 
+
+### In-memory with redis invalidations
+
+Object invalidations are coordinated across Guillotina instances; however, pushing
+object data into and out of redis can be heavy on redis. Sometimes, an in-memory
+cache configuration but using redis only for pubsub invalidations provides the
+best performance.
+
+```yaml
+applications:
+- guillotina.contrib.redis
+- guillotina.contrib.pubsub
+- guillotina.contrib.cache
+cache:
+  driver:
+  updates_channel: guillotina
+  push: false
+-
+```

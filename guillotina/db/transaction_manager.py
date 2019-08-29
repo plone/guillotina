@@ -37,6 +37,9 @@ class TransactionManager:
         self._db = db
         self._hard_cache = {}
         self._lock = asyncio.Lock()
+        self._cache_hits = 0
+        self._cache_misses = 0
+        self._cache_stored = 0
 
     @property
     def storage(self):

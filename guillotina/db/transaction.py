@@ -13,7 +13,6 @@ from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import TransactionClosedException
-from guillotina.exceptions import TransactionMismatchException
 from guillotina.profile import profilable
 from guillotina.utils import lazy_apply
 from typing import AsyncIterator
@@ -74,10 +73,10 @@ class Transaction:
     _skip_commit = False
 
     def __init__(self, manager, loop=None, read_only=False):
-        self.initialize(read_only)
-
         # Transaction Manager
         self._manager = manager
+
+        self.initialize(read_only)
 
         logger.debug("new transaction")
 
@@ -90,12 +89,6 @@ class Transaction:
         # this provides a lock for each transaction
         # which would correspond with one connection
         self._lock = asyncio.Lock(loop=loop)
-
-        self._strategy = get_adapter(self, ITransactionStrategy, name=manager._storage._transaction_strategy)
-
-        self._cache = query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
-
-        self._query_count_start = self._query_count_end = 0
 
     def initialize(self, read_only):
         self._read_only = read_only
@@ -115,6 +108,12 @@ class Transaction:
 
         # List of (hook, args, kws) tuples added by addAfterCommitHook().
         self._after_commit = []
+
+        self._cache = query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
+        self._strategy = get_adapter(
+            self, ITransactionStrategy, name=self._manager._storage._transaction_strategy
+        )
+        self._query_count_start = self._query_count_end = 0
 
     def get_query_count(self):
         """

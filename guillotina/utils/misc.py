@@ -395,6 +395,8 @@ def get_request_scheme(req) -> str:
 async def notice_on_error(key: str, func_to_await):
     try:
         await func_to_await
+    except (asyncio.CancelledError, RuntimeError):
+        pass
     except Exception:  # noqa
         logger.exception(f"Error on initialize utility {key}", exc_info=True)
 
