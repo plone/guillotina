@@ -1,9 +1,7 @@
 import asyncio
 import json
 import uuid
-from unittest import mock
 
-from aiohttp.web import UrlMappingMatchInfo
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
@@ -161,17 +159,11 @@ def make_mocked_request(
         headers["Host"] = "localhost"
     raw_hdrs = list((k.encode("utf-8"), v.encode("utf-8")) for k, v in headers.items())
 
-    q = asyncio.Queue()
+    q: asyncio.Queue[Dict] = asyncio.Queue()
     chunks = [payload[i : i + 1024] for i in range(0, len(payload), 1024)]
     for i, chunk in enumerate(chunks):
         q.put_nowait({"body": chunk, "more_body": i < len(chunks) - 1})
 
-    req = Request(
+    return Request(
         "http", method, path, query_string, raw_hdrs, AsgiStreamReader(q.get), client_max_size=client_max_size
     )
-
-    match_info = UrlMappingMatchInfo({}, mock.Mock())
-    match_info.add_app(app)
-    req._match_info = match_info
-
-    return req
