@@ -4,7 +4,8 @@ CHANGELOG
 5.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Better redis pubsub error handling
+  [vangheem]
 
 
 5.0.1 (2019-08-30)
