@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.1 (unreleased)
+5.0.1 (2019-08-30)
 ------------------
 
 - Be not log verbose when pubsub utility task is cancelled
