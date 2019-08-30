@@ -59,6 +59,16 @@ Commands no longer automatically setup a fake request object. If you need one, y
 yourself in the command.
 
 
+Open API Changes
+----------------
+
+Guillotina 5 is now Open API 3 compliant. This document will not go over all the implications of this so
+please refer to the Open API docs for questions: https://swagger.io/docs/specification/about/
+
+The most important changes that you'll notice are no long putting validation into `parameters` for services
+and using the `#/components/schemas` prefix instead of `#/definitions`.
+
+
 Catalog interface changes
 -------------------------
 
