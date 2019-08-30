@@ -4,7 +4,8 @@ CHANGELOG
 5.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be not log verbose when pubsub utility task is cancelled
+  [vangheem]
 
 
 5.0.0 (2019-08-30)

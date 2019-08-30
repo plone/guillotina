@@ -53,8 +53,8 @@ class PubSubUtility:
                     for req, callback in self._subscribers[channel_name].items():
                         if data.get("ruid") != req:
                             await callback(data=data["data"], sender=data["ruid"])
-        except asyncio.CancelledError:
-            logger.error(f"Subscriber cancelled")
+        except (asyncio.CancelledError, RuntimeError):
+            pass
         except Exception:
             logger.error(f"Problem with pubsub", exc_info=True)
         finally:
