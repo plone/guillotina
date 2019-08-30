@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.2 (unreleased)
+5.0.2 (2019-08-30)
 ------------------
 
 - Fix json schema validation
