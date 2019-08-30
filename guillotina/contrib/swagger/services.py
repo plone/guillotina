@@ -14,7 +14,7 @@ from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_full_content_path
 from guillotina.utils import get_request_scheme
 from guillotina.utils import get_security_policy
-from guillotina.utils import resolve_dotted_name
+from guillotina.utils import resolve_dotted_name, get_object_url
 from zope.interface import Interface
 from zope.interface.interfaces import ComponentLookupError
 
@@ -101,14 +101,23 @@ class SwaggerDefinitionService(Service):
         self.policy = get_security_policy(user)
         definition = copy.deepcopy(app_settings["swagger"]["base_configuration"])
         vhm = self.request.headers.get("X-VirtualHost-Monster")
-        if vhm:
-            parsed_url = urlparse(vhm)
-            definition["host"] = parsed_url.netloc
-            definition["schemes"] = [parsed_url.scheme]
-            definition["basePath"] = parsed_url.path
+
+        if not app_settings["swagger"].get("base_url"):
+            if vhm:
+                parsed_url = urlparse(vhm)
+                host = parsed_url.netloc
+                scheme = parsed_url.scheme
+                base_path = parsed_url.path
+            else:
+                host = self.request.host
+                scheme = get_request_scheme(self.request)
+                base_path = ""
+            url = os.path.join(f"{scheme}://{host}", base_path)
         else:
-            definition["host"] = self.request.host
-            definition["schemes"] = [get_request_scheme(self.request)]
+            url = app_settings["swagger"]["base_url"]
+
+        definition["servers"][0]["url"] = url
+
         if "version" not in definition["info"]:
             definition["info"]["version"] = pkg_resources.get_distribution("guillotina").version
 
@@ -126,17 +135,6 @@ class SwaggerDefinitionService(Service):
         return definition
 
 
-AUTH_HTML = """
-    <form id='api_selector'>
-      <div id="auth_container">
-        <div>
-          <a class="authorize__btn" href="#">Authorize</a>
-        </div>
-      </div>
-    </form>
-"""
-
-
 @configure.service(
     method="GET", context=Interface, name="@docs", permission="guillotina.swagger.View", ignore=True
 )
@@ -148,25 +146,13 @@ async def render_docs_index(context, request):
     with open(index_file) as fi:
         html = fi.read()
 
-    swagger_settings = app_settings["swagger"]
-    url = swagger_settings["base_url"] or request.headers.get("X-VirtualHost-Monster")
-    if url is None:
-        try:
-            url = getMultiAdapter((context, request), IAbsoluteURL)()
-        except ComponentLookupError:
-            url = "{}://{}".format(get_request_scheme(request), request.host)
+    swagger_settings = copy.deepcopy(app_settings["swagger"])
+    url = request.headers.get("X-VirtualHost-Monster")
+    if not url:
+        url = str(request.url.with_path(""))
     swagger_settings["initial_swagger_url"] = url
-    swagger_settings["base_configuration"]["servers"][0]["url"] = url
-    if swagger_settings["authentication_allowed"]:
-        auth = AUTH_HTML
-    else:
-        auth = ""
     return html.format(
-        app_settings=app_settings,
-        request=request,
         swagger_settings=json.dumps(swagger_settings),
-        base_url=url,
         static_url="{}/swagger_static/".format(url if url != "/" else ""),
-        auth=auth,
         title=swagger_settings["base_configuration"]["info"]["title"],
     )
