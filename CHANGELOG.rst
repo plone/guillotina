@@ -4,7 +4,24 @@ CHANGELOG
 5.0.0a17 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Be able to configure cache to not push pickles with invalidation data
+  [vangheem]
+
+- Fix transaction handling to always get current active transaction, throw exception
+  when transaction is closed and be able to refresh objects.
+  [vangheem]
+
+- More normalization of execute module with task_vars/request objects
+  [vangheem]
+
+- Allow committing objects that were created with different transaction
+  [vangheem]
+
+- Fix async utils to work correctly with transactions and context vars
+  [vangheem]
+
+- Be able to have `None` default field values
+  [vangheem]
 
 
 5.0.0a16 (2019-08-26)

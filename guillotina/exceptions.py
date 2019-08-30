@@ -56,6 +56,13 @@ class TransactionClosedException(Exception):
         self.object = ob
 
 
+class TransactionMismatchException(Exception):
+    def __init__(self, msg, txn, ob):
+        super().__init__(msg)
+        self.txn = txn
+        self.object = ob
+
+
 class UnRetryableRequestError(Exception):
     pass
 

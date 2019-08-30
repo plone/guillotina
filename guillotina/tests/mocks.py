@@ -138,6 +138,9 @@ class MockTransactionManager:
             storage = MockStorage()
         self._storage = storage
         self._hard_cache = {}
+        self._cache_hits = 0
+        self._cache_misses = 0
+        self._cache_stored = 0
 
     async def _close_txn(self, *args, **kwargs):
         pass

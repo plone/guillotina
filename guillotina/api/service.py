@@ -37,7 +37,9 @@ class DictFieldProxy:
             return super().__setattr__(name, value)
 
         if name == self.__field_name:
-            getattr(self.__context, name)[self.__key] = value
+            val = getattr(self.__context, name)
+            setattr(self.__context, name, val)
+            val[self.__key] = value
         else:
             setattr(self.__context, name, value)
 

@@ -1,11 +1,6 @@
-import asyncio
-import os
-from unittest import mock
-
-import aiohttp
-import pytest
 from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
+from guillotina import task_vars
 from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
@@ -18,6 +13,7 @@ from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.tests import mocks
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
@@ -26,6 +22,12 @@ from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
 from guillotina.utils import merge_dicts
+from unittest import mock
+
+import aiohttp
+import asyncio
+import os
+import pytest
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -236,6 +238,19 @@ class GuillotinaDBRequester(object):
 async def close_async_tasks(app):
     for clean in app.on_cleanup:
         await clean(app)
+    # clear all task_vars
+    for var in (
+        "request",
+        "txn",
+        "tm",
+        "futures",
+        "authenticated_user",
+        "security_policies",
+        "container",
+        "registry",
+        "db",
+    ):
+        getattr(task_vars, var).set(None)
 
 
 @pytest.fixture(scope="function")
@@ -277,6 +292,7 @@ def dummy_request(dummy_guillotina, monkeypatch):
     db = root["db"]
 
     request = get_mocked_request(db=db)
+    task_vars.request.set(request)
     return request
 
 
@@ -299,6 +315,14 @@ class RootAsyncContextManager:
 @pytest.fixture(scope="function")
 async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
+
+
+@pytest.fixture(scope="function")
+def mock_txn():
+    txn = mocks.MockTransaction()
+    task_vars.txn.set(txn)
+    yield txn
+    task_vars.txn.set(None)
 
 
 async def _clear_dbs(root):

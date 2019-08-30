@@ -31,6 +31,10 @@ class BasicCache(BaseCache):
         self._keys_to_publish = []
         self._stored_objects = []
 
+    @property
+    def push_enabled(self):
+        return app_settings["cache"].get("push", True)
+
     @profilable
     async def get(self, **kwargs):
         if self._utility is None:
@@ -71,6 +75,8 @@ class BasicCache(BaseCache):
         await self._utility.delete_all(keys)
 
     async def store_object(self, obj, pickled):
+        if not self.push_enabled:
+            return
         if len(self._stored_objects) < self.max_publish_objects:
             self._stored_objects.append((obj, pickled))
             # also assume these objects are then stored
@@ -102,12 +108,14 @@ class BasicCache(BaseCache):
                 await self.delete_all(keys_to_invalidate)
 
             if len(self._keys_to_publish) > 0 and self._utility._subscriber is not None:
-                asyncio.ensure_future(self.synchronize())
+                keys = self._keys_to_publish
+                asyncio.ensure_future(self.synchronize(keys))
+            self._keys_to_publish = []
         except Exception:
             logger.warning("Error closing connection", exc_info=True)
 
     @profilable
-    async def synchronize(self):
+    async def synchronize(self, keys_to_publish):
         """
         publish cache changes on redis
         """
@@ -125,13 +133,13 @@ class BasicCache(BaseCache):
                 ob_key = self.get_key(container=obj.__parent__, id=obj.__name__)
                 await self.set(val, container=obj.__parent__, id=obj.__name__)
 
-            if ob_key in self._keys_to_publish:
-                self._keys_to_publish.remove(ob_key)
+            if ob_key in keys_to_publish:
+                keys_to_publish.remove(ob_key)
             push[ob_key] = val
 
         self._utility.ignore_tid(self._transaction._tid)
         await self._utility._subscriber.publish(
             app_settings["cache"]["updates_channel"],
             self._transaction._tid,
-            {"tid": self._transaction._tid, "keys": self._keys_to_publish, "push": push},
+            {"tid": self._transaction._tid, "keys": keys_to_publish, "push": push},
         )

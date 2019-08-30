@@ -1,10 +1,13 @@
 from collections import UserDict
 from guillotina import configure
+from guillotina.db.interfaces import ITransaction
 from guillotina.db.orm.base import BaseObject
+from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IResource
 from guillotina.interfaces import IRegistry
+from guillotina.interfaces import IResource
+from guillotina.transactions import get_transaction
 from zope.interface import implementer
 
 import logging
@@ -23,7 +26,7 @@ class AnnotationData(BaseObject, UserDict):
 
 @configure.adapter(for_=IRegistry, provides=IAnnotations)
 @configure.adapter(for_=IResource, provides=IAnnotations)
-class AnnotationsAdapter(object):
+class AnnotationsAdapter:
     """Store annotations on an object
     """
 
@@ -44,9 +47,10 @@ class AnnotationsAdapter(object):
         element = annotations.get(key, _marker)
         if element is _marker:
             # Get from DB
-            if self.obj.__txn__ is not None:
+            txn = self._get_transaction()
+            if txn is not None:
                 try:
-                    obj = await self.obj.__txn__.get_annotation(self.obj, key, reader=reader)
+                    obj = await txn.get_annotation(self.obj, key, reader=reader)
                 except KeyError:
                     obj = None
                 if obj is not None:
@@ -56,7 +60,8 @@ class AnnotationsAdapter(object):
         return default
 
     async def async_keys(self):
-        return await self.obj.__txn__.get_annotation_keys(self.obj.__uuid__)
+        txn = self._get_transaction()
+        return await txn.get_annotation_keys(self.obj.__uuid__)
 
     async def async_set(self, key, value):
         if not isinstance(value, BaseObject):
@@ -68,13 +73,23 @@ class AnnotationsAdapter(object):
         value.__name__ = key
         value.__new_marker__ = True
         # we register the value
-        value.__txn__ = self.obj.__txn__
-        value.__txn__.register(value)
+        txn = self._get_transaction()
+        value.__txn__ = txn
+        txn.register(value)
         logger.debug("registering annotation {}({}), of: {}".format(value.__uuid__, key, value.__of__))
+
+    def _get_transaction(self) -> ITransaction:
+        txn = get_transaction()
+        if txn is not None:
+            return txn
+        if self.obj.__txn__ is not None:
+            return self.obj.__txn__
+        raise TransactionNotFound()
 
     async def async_del(self, key):
         annotation = await self.async_get(key)
         if annotation is not None:
-            self.obj.__txn__.delete(annotation)
+            txn = self._get_transaction()
+            txn.delete(annotation)
             if key in self.obj.__gannotations__:
                 del self.obj.__gannotations__[key]

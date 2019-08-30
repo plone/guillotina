@@ -44,6 +44,10 @@ class RedisDriver:
         await self._pool.wait_closed()
         self.initialized = False
 
+    @property
+    def pool(self):
+        return self._pool
+
     async def info(self):
         return await self._pool.execute(b"COMMAND", b"INFO", "get")
 

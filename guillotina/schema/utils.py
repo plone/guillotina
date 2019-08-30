@@ -31,4 +31,6 @@ def get_default_from_schema(context, schema, fieldname, default=None):
             return deepcopy(field.defaultFactory())
     if field.default is not None:
         return deepcopy(field.default)
+    if field.default != default:
+        return field.default
     return default

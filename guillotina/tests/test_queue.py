@@ -70,7 +70,7 @@ async def test_run_jobs(guillotina):
 
 async def test_run_many_jobs(guillotina, dummy_request):
     pool = get_utility(IAsyncJobPool)
-    jobs = [pool.add_job(JobRunner(), args=["foobar"], request=dummy_request) for _ in range(20)]
+    jobs = [pool.add_job(JobRunner(), args=["foobar"]) for _ in range(20)]
     assert pool.num_running == 5
     assert pool.num_pending == 15
 

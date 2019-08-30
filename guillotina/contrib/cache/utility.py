@@ -35,7 +35,7 @@ class CacheUtility:
     async def initialize(self, app=None):
         self._memory_cache = memcache.get_memory_cache()
         settings = app_settings["cache"]
-        if settings["driver"] != "":
+        if settings["driver"]:
             klass = resolve_dotted_name(settings["driver"])
             if klass is not None:
                 self._obj_driver = await klass.get_driver()
@@ -153,7 +153,6 @@ class CacheUtility:
                 del self._memory_cache[key]
 
         for cache_key, ob in data.get("push", {}).items():
-            print(f"PUSH {cache_key}")
             self._memory_cache[cache_key] = ob
 
         # clean up possible memory leak
