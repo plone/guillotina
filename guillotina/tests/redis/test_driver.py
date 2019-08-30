@@ -7,6 +7,7 @@ import asyncio
 async def test_redis_ops(redis_container, guillotina_main, loop):
     driver = await resolve_dotted_name("guillotina.contrib.redis").get_driver()
     assert driver.initialized
+    assert driver.pool is not None
 
     await driver.set("test", "testdata", expire=10)
     result = await driver.get("test")
