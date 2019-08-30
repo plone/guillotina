@@ -93,3 +93,14 @@ The `ICatalogUtility.query` method is used for "raw" queries coming in. The defa
 use the configured parser and use the `ICatalogUtility.search` with the parsed query.
 
 Individual catalog implementations can decide then override this functionality.
+
+
+Gotchas
+-------
+
+- Context vars do not work in executors!
+- Default field values are now enforced. If you do not define default on fields, you will get AttributeError
+  if the data hasn't been set yet.
+- Beware of TransactionClosedException and TransactionNotFound exceptions. If you do not have a valid
+  transaction setup while you are interacting with objects to write to the database, you will get errors now.
+  This is to prevent you from making mistakes and expecting data to be written when it will not be.
