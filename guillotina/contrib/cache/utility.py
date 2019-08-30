@@ -65,7 +65,7 @@ class CacheUtility:
         try:
             if key in self._memory_cache:
                 logger.info("Retrieved {} from memory cache".format(key))
-                return self._memory_cache[key]
+                return serialize.loads(self._memory_cache[key])
             if self._obj_driver is not None:
                 val = await self._obj_driver.get(CACHE_PREFIX + key)
                 if val is not None:
@@ -91,11 +91,12 @@ class CacheUtility:
     async def set(self, key, value, ttl=None):
         try:
             size = self.get_size(value)
-            self._memory_cache.set(key, value, size)
+            stored_value = serialize.dumps(value)
+            self._memory_cache.set(key, stored_value, size)
             if ttl is None:
                 ttl = self._settings.get("ttl", 3600)
             if self._obj_driver is not None:
-                await self._obj_driver.set(CACHE_PREFIX + key, serialize.dumps(value), expire=ttl)
+                await self._obj_driver.set(CACHE_PREFIX + key, stored_value, expire=ttl)
             logger.info("set {} in cache".format(key))
         except Exception:
             logger.warning("Error setting cache value", exc_info=True)
