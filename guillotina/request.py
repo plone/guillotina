@@ -4,7 +4,7 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
-from typing import Any, Awaitable, Callable, Dict, Generic, Iterator, List, TypeVar, Optional
+from typing import Any, Callable, Dict, Iterator, List, TypeVar, Optional
 from yarl import URL
 from zope.interface import implementer
 
@@ -204,20 +204,6 @@ class GuillotinaWebSocket:
         await self.send({"type": "websocket.close", "code": code})
 
 
-class AsyncStreamIterator(Generic[_T]):
-    def __init__(self, read_func: Callable[[], Awaitable[_T]]) -> None:
-        self.read_func = read_func
-
-    def __aiter__(self) -> "AsyncStreamIterator[_T]":
-        return self
-
-    async def __anext__(self) -> _T:
-        rv = await self.read_func()
-        if rv == b"":
-            raise StopAsyncIteration  # NOQA
-        return rv
-
-
 class AsgiStreamReader:
     def __init__(self, receive):
         self.finished = False
@@ -255,9 +241,6 @@ class AsgiStreamReader:
         self.finished = not payload.get("more_body", False)
         return payload["body"]
 
-    def __aiter__(self) -> AsyncStreamIterator[bytes]:
-        return AsyncStreamIterator(self.readany)  # type: ignore
-
 
 def raw_headers_to_multidict(raw_headers: List[List]) -> multidict.CIMultiDict:
     return multidict.CIMultiDict([(k.decode(), v.decode()) for k, v in raw_headers])
@@ -293,17 +276,16 @@ class Request(object):
         raw_headers,
         stream_reader,
         client_max_size: int = 1024 ** 2,
-        loop=None,
         send=None,
         receive=None,
         scope=None,
     ):
+        # ASGI
         self.send = send
-        self._initialized = time.time()
         self.receive = receive
         self.scope = scope
+
         self._scheme = scheme
-        self._loop = loop
         self._method = method
         self._raw_path = path
         self._query_string = query_string
@@ -312,9 +294,6 @@ class Request(object):
         self._stream_reader = stream_reader
 
         self._client_max_size = client_max_size
-
-        self.charset = None
-        self.content_type = None
 
         self._read_bytes: Optional[bytes] = None
         self._state: Dict[str, Any] = {}
@@ -326,8 +305,7 @@ class Request(object):
         self.matchdict: Dict[str, str] = {}
 
     @classmethod
-    def factory(cls, scope, send, receive, loop=None):
-        loop = loop or asyncio.get_event_loop()
+    def factory(cls, scope, send, receive):
         return cls(
             scope["scheme"],
             scope["method"],
@@ -335,7 +313,6 @@ class Request(object):
             scope["query_string"],
             scope["headers"],
             AsgiStreamReader(receive),
-            loop=loop,
             send=send,
             scope=scope,
             receive=receive,
@@ -477,7 +454,7 @@ class Request(object):
     @reify
     def query(self) -> "multidict.CIMultiDict[str]":
         """A multidict with all the variables in the query string."""
-        query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"))
+        query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"), keep_blank_values=True)
         return multidict.CIMultiDict(query)
 
     @reify
@@ -502,6 +479,11 @@ class Request(object):
     def content(self):
         """Return raw payload stream."""
         return self._stream_reader
+
+    @reify
+    def content_type(self):
+        """Return raw payload stream."""
+        return self.headers.get("content-type")
 
     @property
     def can_read_body(self) -> bool:
@@ -538,10 +520,9 @@ class Request(object):
         return self._read_bytes
 
     async def text(self) -> str:
-        """Return BODY as text using encoding from .charset."""
+        """Return BODY as text"""
         bytes_body = await self.read()
-        encoding = self.charset or "utf-8"
-        return bytes_body.decode(encoding)
+        return bytes_body.decode("utf-8")
 
     async def json(self, *, loads=json.loads) -> Any:  # type: ignore
         """Return BODY as JSON."""
@@ -554,6 +535,3 @@ class Request(object):
 
     def __eq__(self, other: object) -> bool:
         return id(self) == id(other)
-
-    async def _prepare_hook(self, response):
-        return

@@ -1,6 +1,6 @@
 import pytest
 
-from aiohttp.web import Response
+from guillotina.response import Response
 from guillotina.tests.utils import get_mocked_request
 from guillotina.traversal import _apply_cors
 
@@ -20,6 +20,7 @@ class CorsTestRenderer:
         }
 
 
+@pytest.mark.asyncio
 @pytest.mark.app_settings({"cors_renderer": "guillotina.tests.test_traversal.CorsTestRenderer"})
 async def test_apply_cors(guillotina_main):
     request = get_mocked_request()

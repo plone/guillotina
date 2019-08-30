@@ -66,7 +66,7 @@ class ASGIResponse:
     async def prepare(self, request: "Request"):
         if self._eof_sent or self._prepared:
             return
-        await request._prepare_hook(self)
+
         return await self._start(request)
 
     async def _start(self, request: "Request"):
@@ -116,7 +116,7 @@ class ASGIResponse:
         self._eof_sent = True
         delattr(self, "_req")
 
-    def _headers_to_list(self, headers: Dict) -> List[Tuple]:
+    def _headers_to_list(self, headers: Dict) -> List[Tuple[bytes, bytes]]:
         return [(k.encode(), v.encode()) for k, v in headers.items()]
 
     def __repr__(self) -> str:

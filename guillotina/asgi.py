@@ -49,7 +49,7 @@ class AsgiApp:
         if scope["type"] == "websocket":
             scope["method"] = "GET"
 
-        request = Request.factory(scope, send, receive, self.loop)
+        request = Request.factory(scope, send, receive)
         task_vars.request.set(request)
         resp = await self.request_handler(request)
 

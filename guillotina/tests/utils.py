@@ -1,9 +1,8 @@
+import asyncio
 import json
 import uuid
 from unittest import mock
 
-from aiohttp.helpers import sentinel
-from aiohttp.http import HttpVersion
 from aiohttp.web import UrlMappingMatchInfo
 from guillotina import task_vars
 from guillotina._settings import app_settings
@@ -15,7 +14,8 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.request import Request
 from guillotina.transactions import transaction
-from multidict import CIMultiDict
+from guillotina.request import AsgiStreamReader
+from typing import Dict
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
@@ -146,43 +146,29 @@ def create_content(factory=Item, type_name="Item", id=None, parent=None):
 
 
 def make_mocked_request(
-    method,
-    path,
-    headers=None,
+    method: str,
+    path: str,
+    headers: Dict = None,
+    query_string: bytes = b"",
+    payload: bytes = b"",
     *,
-    version=HttpVersion(1, 1),
-    closing=False,
     app=None,
-    writer=sentinel,
-    payload_writer=sentinel,
-    protocol=sentinel,
-    transport=sentinel,
-    payload=sentinel,
-    sslcontext=None,
     client_max_size=1024 ** 2,
 ):
-    """
-    XXX copied from aiohttp but using guillotina request object
-    Creates mocked web.Request testing purposes.
-
-    Useful in unit tests, when spinning full web server is overkill or
-    specific conditions and errors are hard to trigger.
-
-    """
-    loop = mock.Mock()
-    loop.create_future.return_value = ()
-
     if headers is None:
         headers = {}
     if "Host" not in headers:
         headers["Host"] = "localhost"
-    headers = CIMultiDict(headers)
-    raw_hdrs = tuple((k.encode("utf-8"), v.encode("utf-8")) for k, v in headers.items())
+    raw_hdrs = list((k.encode("utf-8"), v.encode("utf-8")) for k, v in headers.items())
 
-    if payload is sentinel:
-        payload = mock.Mock()
+    q = asyncio.Queue()
+    chunks = [payload[i : i + 1024] for i in range(0, len(payload), 1024)]
+    for i, chunk in enumerate(chunks):
+        q.put_nowait({"body": chunk, "more_body": i < len(chunks) - 1})
 
-    req = Request("http", method, path, b"", raw_hdrs, payload, client_max_size=client_max_size)
+    req = Request(
+        "http", method, path, query_string, raw_hdrs, AsgiStreamReader(q.get), client_max_size=client_max_size
+    )
 
     match_info = UrlMappingMatchInfo({}, mock.Mock())
     match_info.add_app(app)

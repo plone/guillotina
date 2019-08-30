@@ -249,7 +249,6 @@ class GuillotinaDBRequester(object):
 async def dummy_guillotina(event_loop, request):
     globalregistry.reset()
     app = make_app(settings=get_dummy_settings(request.node), loop=event_loop)
-    # aioapp.config.execute_actions()
     async with TestClient(app):
         yield app
     logout()
@@ -338,7 +337,6 @@ SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
 async def app_client(event_loop, db, request):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(request.node), loop=event_loop)
-    # aioapp.config.execute_actions()
     async with TestClient(app, timeout=30) as client:
         await _clear_dbs(app.app.root)
         yield app, client

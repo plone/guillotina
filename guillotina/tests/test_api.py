@@ -674,7 +674,7 @@ async def test_items_fullobjects(container_requester):
         # add 20 items
         for _ in range(22):
             response, _ = await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item"}))
-        response, _ = await requester("GET", "/db/guillotina/?fullobjects=true")
+        response, _ = await requester("GET", "/db/guillotina/?fullobjects")
         assert len(response["items"]) == 22
         assert "guillotina.behaviors.dublincore.IDublinCore" in response["items"][0]
 
