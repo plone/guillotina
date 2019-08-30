@@ -4,7 +4,14 @@ CHANGELOG
 5.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix json schema validation
+  [vangheem]
+
+- Fix memory cache to be able to calc size properly
+  [vangheem]
+
+- Better redis pubsub error handling
+  [vangheem]
 
 
 5.0.1 (2019-08-30)

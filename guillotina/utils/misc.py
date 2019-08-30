@@ -341,7 +341,7 @@ def get_schema_validator(schema_name: str):
 
     schema = {
         **app_settings["json_schema_definitions"][schema_name],
-        "definitions": app_settings["json_schema_definitions"],
+        "components": {"schemas": app_settings["json_schema_definitions"]},
     }
     jsonschema_validator = jsonschema.validators.validator_for(schema)
     jsonschema_validator.check_schema(schema)

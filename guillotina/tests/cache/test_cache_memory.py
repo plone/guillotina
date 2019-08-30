@@ -1,12 +1,13 @@
 from guillotina.component import get_utility
+from guillotina.contrib.cache import serialize
+from guillotina.contrib.cache.strategy import BasicCache
+from guillotina.db.transaction import Transaction
+from guillotina.interfaces import ICacheUtility
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
-from guillotina.contrib.cache.strategy import BasicCache
-from guillotina.interfaces import ICacheUtility
-from guillotina.db.transaction import Transaction
-
 
 import pytest
+
 
 DEFAULT_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.cache"],
@@ -25,7 +26,7 @@ async def test_cache_set(guillotina_main, loop):
 
     await rcache.set("bar", oid="foo")
     # but also in memory
-    assert util._memory_cache.get("root-foo") == "bar"
+    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
     # and api matches..
     assert await rcache.get(oid="foo") == "bar"
 
@@ -40,7 +41,7 @@ async def test_cache_delete(guillotina_main, loop):
 
     await rcache.set("bar", oid="foo")
     # make sure it is in redis
-    assert util._memory_cache.get("root-foo") == "bar"
+    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
     assert await rcache.get(oid="foo") == "bar"
 
     # now delete
@@ -57,7 +58,7 @@ async def test_cache_clear(guillotina_main, loop):
     await rcache.clear()
 
     await rcache.set("bar", oid="foo")
-    assert util._memory_cache.get("root-foo") == "bar"
+    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
     assert await rcache.get(oid="foo") == "bar"
 
     await rcache.clear()
@@ -75,7 +76,7 @@ async def test_invalidate_object(guillotina_main, loop):
     await rcache.clear()
 
     await rcache.set("foobar", oid=content.__uuid__)
-    assert util._memory_cache.get("root-" + content.__uuid__) == "foobar"
+    assert serialize.loads(util._memory_cache.get("root-" + content.__uuid__)) == "foobar"
     assert await rcache.get(oid=content.__uuid__) == "foobar"
 
     await rcache.close(invalidate=True)

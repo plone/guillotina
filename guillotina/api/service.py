@@ -97,17 +97,21 @@ class Service(View):
             cls.__validator__ = cls._sentinal
             if "requestBody" in cls.__config__:
                 requestBody = cls.__config__["requestBody"]
-                if "$ref" in requestBody["content"]["application/json"]["schema"]:
+                try:
+                    schema = requestBody["content"]["application/json"]["schema"]
+                except KeyError:
+                    return cls.__schema__, cls.__validator__
+                if "$ref" in schema:
                     try:
-                        ref = requestBody["content"]["application/json"]["schema"]["$ref"]
+                        ref = schema["$ref"]
                         schema_name = ref.split("/")[-1]
                         cls.__schema__ = app_settings["json_schema_definitions"][schema_name]
                         cls.__validator__ = get_schema_validator(schema_name)
                     except KeyError:
                         logger.warning("Invalid jsonschema", exc_info=True)
-                elif requestBody["content"]["application/json"]["schema"] is not None:
+                elif schema is not None:
                     try:
-                        cls.__schema__ = requestBody["content"]["application/json"]["schema"]
+                        cls.__schema__ = schema
                         jsonschema_validator = jsonschema.validators.validator_for(cls.__schema__)
                         cls.__validator__ = jsonschema_validator(cls.__schema__)
                     except jsonschema.exceptions.ValidationError:

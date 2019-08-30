@@ -32,7 +32,7 @@ async def test_cache_set(redis_container, guillotina_main, loop):
     val = await driver.get(CACHE_PREFIX + "root-foo")
     assert serialize.loads(val) == "bar"
     # but also in memory
-    assert util._memory_cache.get("root-foo") == "bar"
+    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
     # and api matches..
     assert await rcache.get(oid="foo") == "bar"
     await util.finalize(None)
@@ -55,7 +55,7 @@ async def test_cache_delete(redis_container, guillotina_main, loop):
     driver = await resolve_dotted_name("guillotina.contrib.redis").get_driver()
 
     assert serialize.loads(await driver.get(CACHE_PREFIX + "root-foo")) == "bar"
-    assert util._memory_cache.get("root-foo") == "bar"
+    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
     assert await rcache.get(oid="foo") == "bar"
 
     # now delete
@@ -82,7 +82,7 @@ async def test_cache_clear(redis_container, guillotina_main, loop):
     driver = await resolve_dotted_name("guillotina.contrib.redis").get_driver()
 
     assert serialize.loads(await driver.get(CACHE_PREFIX + "root-foo")) == "bar"
-    assert util._memory_cache.get("root-foo") == "bar"
+    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
     assert await rcache.get(oid="foo") == "bar"
 
     await rcache.clear()
