@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-5.0.0a17 (unreleased)
----------------------
+5.0.0 (2019-08-30)
+------------------
 
 - Be able to configure cache to not push pickles with invalidation data
   [vangheem]
