@@ -8,15 +8,12 @@ import pkg_resources
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.component import getMultiAdapter
-from guillotina.interfaces import IAbsoluteURL
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_full_content_path
 from guillotina.utils import get_request_scheme
 from guillotina.utils import get_security_policy
-from guillotina.utils import resolve_dotted_name, get_object_url
+from guillotina.utils import resolve_dotted_name
 from zope.interface import Interface
-from zope.interface.interfaces import ComponentLookupError
 
 
 here = os.path.dirname(os.path.realpath(__file__))
