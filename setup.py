@@ -52,7 +52,6 @@ setup(
     package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"]},
     packages=find_packages(),
     install_requires=[
-        "aiohttp>=3.0.0,<4.0.0",
         "jsonschema",
         "python-dateutil",
         "pycryptodome",
@@ -79,10 +78,10 @@ setup(
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
             "pytest-rerunfailures",
-            'async-asgi-testclient~=1.0.2',
+            "async-asgi-testclient~=1.0.2",
         ],
         "docs": [
-            'aiohttp>=3.0.0,<4.0.0',
+            "aiohttp>=3.0.0,<4.0.0",
             "sphinx",
             "recommonmark",
             "sphinxcontrib-httpdomain",

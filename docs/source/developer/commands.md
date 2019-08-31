@@ -29,7 +29,6 @@ You can provide your own CLI commands for guillotina through a simple interface.
 - serve:
   - `--host`: host to bind to
   - `--port`: port to bind to
-  - `--reload`: auto reload on code changes. `requires aiohttp_autoreload`
 - shell
 - create
   - `--template`: name of template to use

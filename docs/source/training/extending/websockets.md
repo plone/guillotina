@@ -2,20 +2,19 @@
 
 Websocket support is built-in to Guillotina.
 
-It's as simple as using an `aiohttp` websocket in a service.
+It's as simple as using an `asgi` websocket in a service.
 
 Create a `ws.py` file and put the following code in:
 
 
 ```python
-from aiohttp import web
 from guillotina import configure
 from guillotina.component import get_utility
 from guillotina.interfaces import IContainer
 from guillotina.transactions import get_tm
 from guillotina_chat.utility import IMessageSender
 
-import aiohttp
+from guillotina import http
 import logging
 
 logger = logging.getLogger('guillotina_chat')
@@ -25,7 +24,9 @@ logger = logging.getLogger('guillotina_chat')
     context=IContainer, method='GET',
     permission='guillotina.AccessContent', name='@conversate')
 async def ws_conversate(context, request):
-    ws = web.WebSocketResponse()
+    ws = request.get_ws()
+    await ws.prepare(request)
+
     utility = get_utility(IMessageSender)
     utility.register_ws(ws, request)
 
@@ -34,10 +35,10 @@ async def ws_conversate(context, request):
     await ws.prepare(request)
 
     async for msg in ws:
-        if msg.tp == aiohttp.WSMsgType.text:
+        if msg.tp == http.WSMsgType.text:
             # ws does not receive any messages, just sends
             pass
-        elif msg.tp == aiohttp.WSMsgType.error:
+        elif msg.tp == http.WSMsgType.error:
             logger.debug('ws connection closed with exception {0:s}'
                          .format(ws.exception()))
 

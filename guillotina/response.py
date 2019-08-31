@@ -1,10 +1,10 @@
 from guillotina.request import Request
+from multidict import istr
 from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IResponse
 from multidict import CIMultiDict
 from zope.interface import implementer
 from typing import Any, Dict, List, Tuple, Optional
-from aiohttp import hdrs
 
 
 @implementer(IResponse)
@@ -75,12 +75,12 @@ class ASGIResponse:
 
         headers = self.headers
         if self.content_type:
-            headers.setdefault(hdrs.CONTENT_TYPE, self.content_type)
+            headers.setdefault(istr("Content-Type"), self.content_type)
         else:
-            headers.setdefault(hdrs.CONTENT_TYPE, "application/octet-stream")
+            headers.setdefault(istr("Content-Type"), "application/octet-stream")
 
         if self.content_length:
-            headers.setdefault(hdrs.CONTENT_LENGTH, str(self.content_length))
+            headers.setdefault(istr("Content-Length"), str(self.content_length))
 
         await request.send(
             {

@@ -1,6 +1,4 @@
 """Main routing traversal class."""
-from aiohttp.abc import AbstractMatchInfo
-from aiohttp.abc import AbstractRouter
 from contextlib import contextmanager
 from guillotina import __version__
 from guillotina import error_reasons
@@ -133,7 +131,7 @@ def generate_error_response(e, request, error, status=500):
     return response.HTTPInternalServerError(content=data)
 
 
-class BaseMatchInfo(AbstractMatchInfo):
+class BaseMatchInfo:
     def __init__(self):
         self._apps = ()
         self._frozen = False
@@ -258,7 +256,7 @@ def _clean_request(request, response):
 
 
 class MatchInfo(BaseMatchInfo):
-    """Function that returns from traversal request on aiohttp."""
+    """Function that returns from traversal request"""
 
     def __init__(self, resource, request, view):
         super().__init__()
@@ -268,7 +266,7 @@ class MatchInfo(BaseMatchInfo):
 
     @profilable
     async def handler(self, request):
-        """Main handler function for aiohttp."""
+        """Main handler function"""
         request._view_error = False
         await notify(BeforeRenderViewEvent(request, self.view))
         request.record("viewrender")
@@ -334,7 +332,7 @@ class MatchInfo(BaseMatchInfo):
 
 
 class BasicMatchInfo(BaseMatchInfo):
-    """Function that returns from traversal request on aiohttp."""
+    """Function that returns from traversal request"""
 
     def __init__(self, request, resp):
         super().__init__()
@@ -343,7 +341,7 @@ class BasicMatchInfo(BaseMatchInfo):
 
     @profilable
     async def handler(self, request):
-        """Main handler function for aiohttp."""
+        """Main handler function"""
         request.record("finish")
         self.debug(request, self.resp)
         _clean_request(request, self.resp)
@@ -358,13 +356,13 @@ class BasicMatchInfo(BaseMatchInfo):
         return {"request": self.request, "resp": self.resp}
 
 
-class TraversalRouter(AbstractRouter):
+class TraversalRouter:
     """Custom router for guillotina."""
 
     _root = None
 
     def __init__(self, root: IApplication = None) -> None:
-        """On traversing aiohttp sets the root object."""
+        """On traversing sets the root object."""
         self.set_root(root)
 
     def set_root(self, root: Optional[IApplication]):
@@ -526,7 +524,7 @@ class TraversalRouter(AbstractRouter):
         return MatchInfo(resource, request, view)
 
     async def traverse(self, request: IRequest) -> Tuple[IBaseObject, List[str]]:
-        """Wrapper that looks for the path based on aiohttp API."""
+        """Wrapper that looks for the path based"""
         path = tuple(p for p in request.path.split("/") if p)
         root = self._root
         return await traverse(request, root, path)

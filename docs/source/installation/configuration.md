@@ -161,22 +161,12 @@ load_utilities:
 
 ## Middleware
 
-`guillotina` is built on `aiohttp` which provides support for middleware.
+`guillotina` is built on `asgi` which provides support for middleware.
 You can provide an array of dotted names to use for your application.
 
 ```yaml
 middlewares:
   - guillotina_myaddon.Middleware
-```
-
-## aiohttp settings
-
-You can pass `aiohttp_settings` to configure the aiohttp server.
-
-
-```yaml
-aiohttp_settings:
-  client_max_size: 20971520
 ```
 
 ## JWT Settings
@@ -201,7 +191,6 @@ jwk:
 ## Miscellaneous settings
 
 - `port` (number): Port to bind to. _defaults to `8080`_
-- `access_log_format` (string): Customize access log format for aiohttp. _defaults to `None`_
 - `store_json` (boolean): Serialize object into json field in database. _defaults to `false`_
 - `host` (string): Where to host the server. _defaults to `"0.0.0.0"`_
 - `port` (number): Port to bind to. _defaults to `8080`_
@@ -209,7 +198,7 @@ jwk:
 - `cloud_storage` (string): Dotted path to cloud storage field type. _defaults to `"guillotina.interfaces.IDBFileField"`_
 - `loop_policy`: (string): Be able to customize the event loop policy used. For example, to use
   uvloop, set this value to `uvloop.EventLoopPolicy`.
-- `router`: be able to customize the main aiohttp Router class
+- `router`: be able to customize the main Router class
 - `oid_generator`: be able to customize the function used to generate oids on the system.
   defaults to `guillotina.db.oid.generate_oid`
 - `cors_renderer`: customize the cors renderer, defaults to `guillotina.cors.DefaultCorsRenderer`
