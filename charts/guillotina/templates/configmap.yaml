@@ -5,4 +5,4 @@ metadata:
   name: config
 data:
   config.yaml: |-
-{{toYaml .Values.configurations | indent 4}}
+{{toYaml .Values.app_settings | indent 4}}

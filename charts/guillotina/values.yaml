@@ -17,7 +17,7 @@ guillotinaPort: 8080
 
 arguments: []
 
-configurations:
+app_settings:
   debug: true
   applications:
     - guillotina.contrib.catalog.pg
