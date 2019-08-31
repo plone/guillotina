@@ -65,7 +65,7 @@ To log errors for guillotina for example:
       }
     },
     "loggers": {
-      "aiohttp.access": {
+      "guillotina": {
         "level": "INFO",
         "handlers": ["file"],
         "propagate": 0
@@ -79,9 +79,3 @@ To log errors for guillotina for example:
 ## Available Loggers
 
 - `guillotina`
-- `aiohttp.access`
-- `aiohttp.client`
-- `aiohttp.internal`
-- `aiohttp.server`
-- `aiohttp.web`
-- `aiohttp.websocket`

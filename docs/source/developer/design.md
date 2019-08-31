@@ -36,7 +36,7 @@ of functionality so it will never be as fast as say Pyramid.
 
 ## Asynchronous
 
-`guillotina` is asynchronous from the ground up, built on top of `aiohttp`
+`guillotina` is asynchronous from the ground up, built with `asgi`
 using Python 3.7's asyncio features.
 
 Practically speaking, being built completely on asyncio compatible technologies,
