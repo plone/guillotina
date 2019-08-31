@@ -14,7 +14,6 @@ from guillotina.interfaces import IContainer
 from guillotina.transactions import get_tm
 from guillotina_chat.utility import IMessageSender
 
-from guillotina import http
 import logging
 
 logger = logging.getLogger('guillotina_chat')
@@ -35,12 +34,8 @@ async def ws_conversate(context, request):
     await ws.prepare(request)
 
     async for msg in ws:
-        if msg.tp == http.WSMsgType.text:
-            # ws does not receive any messages, just sends
-            pass
-        elif msg.tp == http.WSMsgType.error:
-            logger.debug('ws connection closed with exception {0:s}'
-                         .format(ws.exception()))
+        # handle msg
+        pass
 
     logger.debug('websocket connection closed')
     utility.unregister_ws(ws)
