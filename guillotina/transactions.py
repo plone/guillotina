@@ -97,7 +97,7 @@ class transaction:  # noqa: N801
             tm = db.get_transaction_manager()
         self.tm = tm or get_tm()
         self.abort_when_done = abort_when_done
-        self.previous_txn = self.txn = None
+        self.previous_tm = self.previous_txn = self.txn = None
         self.adopt_parent_txn = adopt_parent_txn
         self.execute_futures = execute_futures
         self.adopted = []
@@ -107,17 +107,15 @@ class transaction:  # noqa: N801
         txn = get_transaction()
         if txn is not None:
             self.previous_txn = txn
+        tm = get_tm()
+        if tm is not None:
+            self.previous_tm = tm
 
         self.txn = await self.tm.begin(read_only=self.read_only)
         # these should be restored after
         task_vars.tm.set(self.tm)
         task_vars.txn.set(self.txn)
         return self.txn
-
-    def adopt_objects(self, obs, txn):
-        for oid, ob in obs.items():
-            self.adopted.append(ob)
-            ob.__txn__ = txn
 
     async def __aexit__(self, exc_type, exc, tb):
         if self.adopt_parent_txn and self.previous_txn is not None:
@@ -133,10 +131,6 @@ class transaction:  # noqa: N801
                 self.txn.deleted = {**self.previous_txn.deleted, **self.txn.deleted}
                 self.txn.added = {**self.previous_txn.added, **self.txn.added}
 
-                self.adopt_objects(self.previous_txn.modified, self.txn)
-                self.adopt_objects(self.previous_txn.deleted, self.txn)
-                self.adopt_objects(self.previous_txn.added, self.txn)
-
         if self.abort_when_done:
             await self.tm.abort(txn=self.txn)
         else:
@@ -151,13 +145,15 @@ class transaction:  # noqa: N801
                 self.previous_txn.deleted = {}
                 self.previous_txn.added = {}
 
-                for ob in self.adopted:
-                    ob.__txn__ = self.previous_txn
-
         if self.execute_futures:
             from guillotina.utils import execute
 
             execute.execute_futures()
+
+        if self.previous_txn is not None:
+            task_vars.txn.set(self.previous_txn)
+        if self.previous_tm is not None:
+            task_vars.tm.set(self.previous_tm)
 
 
 managed_transaction = transaction  # noqa

@@ -105,7 +105,7 @@ from guillotina_chat.utility import IMessageSender
 
 @configure.subscriber(for_=(IConversation, IObjectAddedEvent))
 async def container_added(conversation, event):
-    user_id = get_authenticated_user_id(get_current_request())
+    user_id = get_authenticated_user_id()
     if user_id not in conversation.users:
         conversation.users.append(user_id)
 

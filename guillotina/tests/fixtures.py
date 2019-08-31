@@ -1,10 +1,5 @@
-import asyncio
-import os
-from unittest import mock
-
-import pytest
-import json
 from async_asgi_testclient import TestClient
+from guillotina import task_vars
 from guillotina import testing
 from guillotina.component import get_utility
 from guillotina.component import globalregistry
@@ -16,6 +11,7 @@ from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.tests import mocks
 from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
@@ -24,6 +20,12 @@ from guillotina.tests.utils import wrap_request
 from guillotina.transactions import get_tm
 from guillotina.transactions import transaction
 from guillotina.utils import merge_dicts
+from unittest import mock
+
+import asyncio
+import json
+import os
+import pytest
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -245,6 +247,21 @@ class GuillotinaDBRequester(object):
         return wrap_request(request, transaction(db=self.db, adopt_parent_txn=True))
 
 
+def clear_task_vars():
+    for var in (
+        "request",
+        "txn",
+        "tm",
+        "futures",
+        "authenticated_user",
+        "security_policies",
+        "container",
+        "registry",
+        "db",
+    ):
+        getattr(task_vars, var).set(None)
+
+
 @pytest.fixture(scope="function")
 async def dummy_guillotina(event_loop, request):
     globalregistry.reset()
@@ -252,6 +269,7 @@ async def dummy_guillotina(event_loop, request):
     async with TestClient(app):
         yield app
     logout()
+    clear_task_vars()
 
 
 class DummyRequestAsyncContextManager(object):
@@ -279,6 +297,7 @@ def dummy_request(dummy_guillotina, monkeypatch):
     db = root["db"]
 
     request = get_mocked_request(db=db)
+    task_vars.request.set(request)
     return request
 
 
@@ -301,6 +320,14 @@ class RootAsyncContextManager:
 @pytest.fixture(scope="function")
 async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
+
+
+@pytest.fixture(scope="function")
+def mock_txn():
+    txn = mocks.MockTransaction()
+    task_vars.txn.set(txn)
+    yield txn
+    task_vars.txn.set(None)
 
 
 async def _clear_dbs(root):
@@ -340,6 +367,7 @@ async def app_client(event_loop, db, request):
     async with TestClient(app, timeout=30) as client:
         await _clear_dbs(app.app.root)
         yield app, client
+    clear_task_vars()
 
 
 @pytest.fixture(scope="function")

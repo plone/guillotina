@@ -41,27 +41,31 @@ class PubSubUtility:
         await asyncio.sleep(0.1)
 
     async def real_subscribe(self, channel_name):
-        try:
-            while channel_name in self._subscribers:
+        while channel_name in self._subscribers:
+            try:
                 channel = await self._driver.subscribe(channel_name)
                 async for msg in channel:
                     try:
-                        data = pickle.loads(msg)
-                    except (TypeError, pickle.UnpicklingError):
-                        logger.warning("Invalid message")
-                        continue
-                    for req, callback in self._subscribers[channel_name].items():
-                        if data.get("ruid") != req:
-                            await callback(data=data["data"], sender=data["ruid"])
-        except asyncio.CancelledError:
-            logger.error(f"Subscriber cancelled")
-        except Exception:
-            logger.error(f"Problem with pubsub", exc_info=True)
-        finally:
-            try:
-                await self._driver.unsubscribe(channel_name)
-            except Exception:
+                        try:
+                            data = pickle.loads(msg)
+                        except (TypeError, pickle.UnpicklingError):
+                            logger.warning("Invalid pubsub message", exc_info=True)
+                            continue
+                        for req, callback in self._subscribers[channel_name].items():
+                            if data.get("ruid") != req:
+                                await callback(data=data["data"], sender=data["ruid"])
+                    except Exception:
+                        logger.error("Unhandled error with pubsub message.", exc_info=True)
+            except (asyncio.CancelledError, RuntimeError):
                 pass
+            except Exception:
+                logger.error(f"Unhandled exception with pubsub. Sleeping before trying again", exc_info=True)
+                await asyncio.sleep(1)
+            finally:
+                try:
+                    await self._driver.unsubscribe(channel_name)
+                except Exception:
+                    pass
 
     async def subscribe(self, channel_name: str, rid: str, callback: Callable[[str], None]):
         if self._driver is None:

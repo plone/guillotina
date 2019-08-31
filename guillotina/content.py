@@ -276,11 +276,11 @@ class Folder(Resource):
     """
 
     def _get_transaction(self) -> ITransaction:
-        if self.__txn__ is not None:
-            return self.__txn__
         txn = get_transaction()
         if txn is not None:
             return txn
+        if self.__txn__ is not None:
+            return self.__txn__
         raise TransactionNotFound()
 
     async def async_contains(self, key: str) -> bool:
@@ -598,7 +598,10 @@ async def create_content_in_container(
             continue
         setattr(obj, key, value)
 
-    txn = getattr(parent, "__txn__", None) or get_transaction()
+    try:
+        txn = parent._get_transaction()
+    except AttributeError:
+        txn = getattr(parent, "__txn__", None) or get_transaction()  # type:ignore
     if txn is None or not txn.storage.supports_unique_constraints:
         # need to manually check unique constraints
         if await parent.async_contains(obj.id):

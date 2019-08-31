@@ -5,13 +5,50 @@ CHANGELOG
 ------------------
 
 - Replaced aiohttp with ASGI (running with uvicorn by default)
-  [dmanchon,masipcat]
+  [dmanchon,masipcat,vangheem]
 
 
-5.0.0a17 (unreleased)
----------------------
+5.0.2 (2019-08-30)
+------------------
 
-- Nothing changed yet.
+- Fix json schema validation
+  [vangheem]
+
+- Fix memory cache to be able to calc size properly
+  [vangheem]
+
+- Better redis pubsub error handling
+  [vangheem]
+
+
+5.0.1 (2019-08-30)
+------------------
+
+- Be not log verbose when pubsub utility task is cancelled
+  [vangheem]
+
+
+5.0.0 (2019-08-30)
+------------------
+
+- Be able to configure cache to not push pickles with invalidation data
+  [vangheem]
+
+- Fix transaction handling to always get current active transaction, throw exception
+  when transaction is closed and be able to refresh objects.
+  [vangheem]
+
+- More normalization of execute module with task_vars/request objects
+  [vangheem]
+
+- Allow committing objects that were created with different transaction
+  [vangheem]
+
+- Fix async utils to work correctly with transactions and context vars
+  [vangheem]
+
+- Be able to have `None` default field values
+  [vangheem]
 
 
 5.0.0a16 (2019-08-26)

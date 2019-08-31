@@ -77,6 +77,7 @@ async def create_container(
         await notify(
             ObjectAddedEvent(container, parent, container.__name__, payload={"id": container.id, **data})
         )
+    task_vars.container.set(container)
     return container
 
 

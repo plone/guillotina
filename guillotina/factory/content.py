@@ -200,6 +200,9 @@ class Database:
             self._tm = self.transaction_klass(self._storage, self)
         return self._tm
 
+    def transaction(self):
+        return self.get_transaction_manager().transaction()
+
     @property
     def __txn__(self) -> typing.Optional[ITransaction]:
         return get_transaction()

@@ -1,7 +1,3 @@
-import asyncio
-import json
-import uuid
-
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
@@ -13,9 +9,14 @@ from guillotina.interfaces import IRequest
 from guillotina.request import Request
 from guillotina.transactions import transaction
 from guillotina.request import AsgiStreamReader
+from guillotina.utils import get_database
 from typing import Dict
 from zope.interface import alsoProvides
 from zope.interface import implementer
+
+import asyncio
+import json
+import uuid
 
 
 def get_db(app, db_id):
@@ -25,11 +26,10 @@ def get_db(app, db_id):
 def get_mocked_request(*, db=None, method="POST", path="/", headers=None):
     headers = headers or {}
     request = make_mocked_request(method, path, headers=headers)
-    request._futures = {}
-    request._txn = None
     request.interaction = None
     alsoProvides(request, IRequest)
     alsoProvides(request, IDefaultLayer)
+    task_vars.request.set(request)
     if db is not None:
         db.request = request
         task_vars.db.set(db)
@@ -51,10 +51,16 @@ async def get_root(tm=None, db=None):
         return await txn.manager.get_root()
 
 
-async def get_container(*, requester=None, tm=None, container_id="guillotina"):
-    kw = {"tm": tm}
+async def get_container(*, requester=None, tm=None, db=None, container_id="guillotina"):
+    kw = {}
+    if tm is not None:
+        kw["tm"] = tm
     if requester is not None:
         kw["db"] = requester.db
+    if db is not None:
+        kw["db"] = db
+    if "db" not in kw and "tm" not in kw:
+        kw["db"] = await get_database("db")
     root = await get_root(**kw)
     async with transaction(**kw):
         container = await root.async_get(container_id)

@@ -46,7 +46,7 @@ async def test_invalidate_object(redis_container, guillotina_main):
 
     driver = await resolve_dotted_name("guillotina.contrib.redis").get_driver()
     assert serialize.loads(await driver.get(CACHE_PREFIX + "root-" + content.__uuid__)) == "foobar"
-    assert util._memory_cache.get("root-" + content.__uuid__) == "foobar"
+    assert serialize.loads(util._memory_cache.get("root-" + content.__uuid__)) == "foobar"
     assert await rcache.get(oid=content.__uuid__) == "foobar"
 
     await rcache.close(invalidate=True)
@@ -72,7 +72,7 @@ async def test_subscriber_invalidates(redis_container, guillotina_main):
     driver = await resolve_dotted_name("guillotina.contrib.redis").get_driver()
 
     assert serialize.loads(await driver.get(CACHE_PREFIX + "root-" + content.__uuid__)) == "foobar"
-    assert util._memory_cache.get("root-" + content.__uuid__) == "foobar"
+    assert serialize.loads(util._memory_cache.get("root-" + content.__uuid__)) == "foobar"
     assert await rcache.get(oid=content.__uuid__) == "foobar"
 
     assert "root-" + content.__uuid__ in util._memory_cache
@@ -106,7 +106,7 @@ async def test_subscriber_ignores_trsn_on_invalidate(redis_container, guillotina
 
     await rcache.set("foobar", oid=content.__uuid__)
     assert serialize.loads(await driver.get(CACHE_PREFIX + "root-" + content.__uuid__)) == "foobar"
-    assert util._memory_cache.get("root-" + content.__uuid__) == "foobar"
+    assert serialize.loads(util._memory_cache.get("root-" + content.__uuid__)) == "foobar"
     assert await rcache.get(oid=content.__uuid__) == "foobar"
 
     assert "root-" + content.__uuid__ in util._memory_cache

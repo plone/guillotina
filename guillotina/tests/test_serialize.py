@@ -12,10 +12,8 @@ from guillotina.json import deserialize_value
 from guillotina.json.deserialize_value import schema_compatible
 from guillotina.json.serialize_value import json_compatible
 from guillotina.schema.exceptions import WrongType
-from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
-from guillotina.transactions import get_tm
 from zope.interface import Interface
 
 import uuid
@@ -24,28 +22,28 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 
-async def test_serialize_resource(dummy_request):
+async def test_serialize_resource(dummy_request, mock_txn):
     content = create_content()
     serializer = get_multi_adapter((content, dummy_request), IResourceSerializeToJson)
     result = await serializer()
     assert "guillotina.behaviors.dublincore.IDublinCore" in result
 
 
-async def test_serialize_resource_omit_behavior(dummy_request):
+async def test_serialize_resource_omit_behavior(dummy_request, mock_txn):
     content = create_content()
     serializer = get_multi_adapter((content, dummy_request), IResourceSerializeToJson)
     result = await serializer(omit=["guillotina.behaviors.dublincore.IDublinCore"])
     assert "guillotina.behaviors.dublincore.IDublinCore" not in result
 
 
-async def test_serialize_resource_omit_field(dummy_request):
+async def test_serialize_resource_omit_field(dummy_request, mock_txn):
     content = create_content()
     serializer = get_multi_adapter((content, dummy_request), IResourceSerializeToJson)
     result = await serializer(omit=["guillotina.behaviors.dublincore.IDublinCore.creators"])
     assert "creators" not in result["guillotina.behaviors.dublincore.IDublinCore"]
 
 
-async def test_serialize_resource_include_field(dummy_request):
+async def test_serialize_resource_include_field(dummy_request, mock_txn):
     from guillotina.test_package import FileContent
 
     obj = create_content(FileContent, type_name="File")
@@ -57,7 +55,7 @@ async def test_serialize_resource_include_field(dummy_request):
     assert "file" not in result
 
 
-async def test_serialize_omit_main_interface_field(dummy_request):
+async def test_serialize_omit_main_interface_field(dummy_request, mock_txn):
     from guillotina.test_package import FileContent
 
     obj = create_content(FileContent, type_name="File")
@@ -69,45 +67,41 @@ async def test_serialize_omit_main_interface_field(dummy_request):
     assert "file" in result
 
 
-async def test_serialize_cloud_file(dummy_request, dummy_guillotina):
-    txn = mocks.MockTransaction()
-    with txn:
-        from guillotina.test_package import FileContent, IFileContent
-        from guillotina.interfaces import IFileManager
+async def test_serialize_cloud_file(dummy_request, mock_txn):
+    from guillotina.test_package import FileContent, IFileContent
+    from guillotina.interfaces import IFileManager
 
-        obj = create_content(FileContent)
-        obj.file = DBFile(filename="foobar.json", md5="foobar")
+    obj = create_content(FileContent)
+    obj.file = DBFile(filename="foobar.json", md5="foobar")
 
-        fm = get_multi_adapter((obj, dummy_request, IFileContent["file"].bind(obj)), IFileManager)
-        await fm.dm.load()
-        await fm.file_storage_manager.start(fm.dm)
+    fm = get_multi_adapter((obj, dummy_request, IFileContent["file"].bind(obj)), IFileManager)
+    await fm.dm.load()
+    await fm.file_storage_manager.start(fm.dm)
 
-        async def _data():
-            yield b'{"foo": "bar"}'
+    async def _data():
+        yield b'{"foo": "bar"}'
 
-        await fm.file_storage_manager.append(fm.dm, _data(), 0)
-        await fm.file_storage_manager.finish(fm.dm)
-        await fm.dm.finish()
-        value = json_compatible(obj.file)
-        assert value["filename"] == "foobar.json"
-        assert value["size"] == 14
-        assert value["md5"] == "foobar"
+    await fm.file_storage_manager.append(fm.dm, _data(), 0)
+    await fm.file_storage_manager.finish(fm.dm)
+    await fm.dm.finish()
+    value = json_compatible(obj.file)
+    assert value["filename"] == "foobar.json"
+    assert value["size"] == 14
+    assert value["md5"] == "foobar"
 
 
-async def test_deserialize_cloud_file(dummy_request):
+async def test_deserialize_cloud_file(dummy_request, mock_txn):
     from guillotina.test_package import IFileContent, FileContent
 
-    with get_tm() as tm, await tm.begin() as txn, dummy_request:
-        obj = create_content(FileContent)
-        obj.__txn__ = txn
-        obj.file = None
-        await get_adapter(
-            IFileContent["file"].bind(obj),
-            IJSONToValue,
-            args=["data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", obj],
-        )
-        assert isinstance(obj.file, DBFile)
-        assert obj.file.size == 42
+    obj = create_content(FileContent)
+    obj.file = None
+    await get_adapter(
+        IFileContent["file"].bind(obj),
+        IJSONToValue,
+        args=["data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", obj],
+    )
+    assert isinstance(obj.file, DBFile)
+    assert obj.file.size == 42
 
 
 class INestFieldSchema(Interface):
@@ -222,7 +216,7 @@ async def test_check_permission_deserialize_content(dummy_request):
     assert deserializer.check_permission("guillotina.ViewContent")  # with cache
 
 
-async def test_patch_list_field_normal_patch(dummy_request):
+async def test_patch_list_field_normal_patch(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -230,7 +224,7 @@ async def test_patch_list_field_normal_patch(dummy_request):
     assert len(content.patch_list) == 1
 
 
-async def test_patch_list_field(dummy_request):
+async def test_patch_list_field(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -272,7 +266,7 @@ async def test_patch_list_field(dummy_request):
     assert len(content.patch_list) == 3
 
 
-async def test_patch_tuple_field(dummy_request):
+async def test_patch_tuple_field(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -314,7 +308,7 @@ async def test_patch_tuple_field(dummy_request):
     assert len(content.patch_tuple) == 1
 
 
-async def test_patch_list_field_invalid_type(dummy_request):
+async def test_patch_list_field_invalid_type(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -326,7 +320,7 @@ async def test_patch_list_field_invalid_type(dummy_request):
     assert isinstance(errors[0]["error"], ValueDeserializationError)
 
 
-async def test_patch_dict_field_normal_patch(dummy_request):
+async def test_patch_dict_field_normal_patch(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -334,7 +328,7 @@ async def test_patch_dict_field_normal_patch(dummy_request):
     assert len(content.patch_dict) == 1
 
 
-async def test_patch_dict_field(dummy_request):
+async def test_patch_dict_field(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -358,7 +352,7 @@ async def test_patch_dict_field(dummy_request):
     assert "foo2" not in content.patch_dict
 
 
-async def test_patch_dict_field_invalid_type(dummy_request):
+async def test_patch_dict_field_invalid_type(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -372,7 +366,7 @@ async def test_patch_dict_field_invalid_type(dummy_request):
     assert isinstance(errors[0]["error"], WrongType)
 
 
-async def test_patch_int_field_normal_path(dummy_request):
+async def test_patch_int_field_normal_path(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -380,7 +374,7 @@ async def test_patch_int_field_normal_path(dummy_request):
     assert content.patch_int == 2
 
 
-async def test_patch_int_field(dummy_request):
+async def test_patch_int_field(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -435,10 +429,9 @@ async def test_patch_int_field_invalid_type(dummy_request):
         assert isinstance(errors[0]["error"], WrongType)
 
 
-async def test_bucket_list_field(dummy_request):
+async def test_bucket_list_field(dummy_request, mock_txn):
     login()
     content = create_content()
-    content.__txn__ = mocks.MockTransaction()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
         ITestSchema, content, {"bucket_list": {"op": "append", "value": {"key": "foo", "value": "bar"}}}, []
@@ -497,7 +490,7 @@ async def test_default_value_deserialize(dummy_request):
     )
 
 
-async def test_nested_patch_deserialize(dummy_request):
+async def test_nested_patch_deserialize(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -571,10 +564,9 @@ async def test_nested_patch_deserialize(dummy_request):
     assert content.nested_patch["foobar"][1]["nested_int"] == 1
 
 
-async def test_dates_bucket_list_field(dummy_request):
+async def test_dates_bucket_list_field(dummy_request, mock_txn):
     login()
     content = create_content()
-    content.__txn__ = mocks.MockTransaction()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
         ITestSchema,
@@ -597,7 +589,7 @@ async def test_dates_bucket_list_field(dummy_request):
     assert content.datetime_bucket_list.annotations_metadata[0]["len"] == 3
 
 
-async def test_patchfield_notdefined_field(dummy_request):
+async def test_patchfield_notdefined_field(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -660,7 +652,7 @@ async def test_patchfield_notdefined_field(dummy_request):
     assert "not_defined_field" not in content.patch_dict_of_obj["key1"]
 
 
-async def test_delete_by_value_field(dummy_request):
+async def test_delete_by_value_field(dummy_request, mock_txn):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
@@ -681,10 +673,9 @@ async def test_delete_by_value_field(dummy_request):
     assert errors[0]["field"] == "patch_list_int"
 
 
-async def test_bucket_dict_field(dummy_request):
+async def test_bucket_dict_field(dummy_request, mock_txn):
     login()
     content = create_content()
-    content.__txn__ = mocks.MockTransaction()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     await deserializer.set_schema(
         ITestSchema, content, {"bucket_dict": {"op": "assign", "value": {"key": "foo", "value": "bar"}}}, []

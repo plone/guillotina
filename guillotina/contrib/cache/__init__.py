@@ -10,6 +10,7 @@ app_settings = {
         "memory_cache_size": 209715200,
         "strategy": "basic",
         "ttl": 3600,
+        "push": True,  # push out object data to fill other guillotina caches with changes
     },
     "load_utilities": {
         "guillotina_cache": {

@@ -46,52 +46,59 @@ async def test_indexed_fields(dummy_guillotina):
     assert len(metadata) == 1
 
 
-async def test_get_index_data(dummy_guillotina):
+async def test_get_index_data(dummy_txn_root):
 
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
+    async with dummy_txn_root:
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
 
-    ob = await create_content("Item", id="foobar")
+        ob = await create_content("Item", id="foobar")
 
-    data = ICatalogDataAdapter(ob)
-    fields = await data()
+        data = ICatalogDataAdapter(ob)
+        fields = await data()
 
-    assert "type_name" in fields
-    assert "uuid" in fields
-    assert "path" in fields
-    assert "title" in fields
+        assert "type_name" in fields
+        assert "uuid" in fields
+        assert "path" in fields
+        assert "title" in fields
 
 
-async def test_get_index_data_with_accessors(dummy_request):
-    request = dummy_request  # noqa
+async def test_get_index_data_with_accessors(dummy_txn_root):
+    async with dummy_txn_root:
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
 
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
+        ob = await create_content("Example", id="foobar", categories=[{"label": "foo", "number": 1}])
 
-    ob = await create_content("Example", id="foobar", categories=[{"label": "foo", "number": 1}])
+        data = ICatalogDataAdapter(ob)
+        fields = await data()
+        for field_name in (
+            "categories_accessor",
+            "foobar_accessor",
+            "type_name",
+            "categories",
+            "uuid",
+            "path",
+            "title",
+            "tid",
+        ):
+            assert field_name in fields
 
-    data = ICatalogDataAdapter(ob)
-    fields = await data()
-    for field_name in (
-        "categories_accessor",
-        "foobar_accessor",
-        "type_name",
-        "categories",
-        "uuid",
-        "path",
-        "title",
-        "tid",
-    ):
-        assert field_name in fields
-
-    # now only with indexes specified
-    data = ICatalogDataAdapter(ob)
-    fields = await data(indexes=["categories"])
-    # but should also pull in `foobar_accessor` because it does not
-    # have a field specified for it.
-    for field_name in ("categories_accessor", "foobar_accessor", "type_name", "categories", "uuid", "tid"):
-        assert field_name in fields
-    assert "title" not in fields
+        # now only with indexes specified
+        data = ICatalogDataAdapter(ob)
+        fields = await data(indexes=["categories"])
+        # but should also pull in `foobar_accessor` because it does not
+        # have a field specified for it.
+        for field_name in (
+            "categories_accessor",
+            "foobar_accessor",
+            "type_name",
+            "categories",
+            "uuid",
+            "tid",
+        ):
+            assert field_name in fields
+        assert "title" not in fields
 
 
 async def test_registered_base_utility(dummy_guillotina):
@@ -107,18 +114,19 @@ async def test_get_security_data(dummy_guillotina):
     assert "access_roles" in data
 
 
-async def test_get_data_uses_indexes_param(dummy_guillotina):
-    util = query_utility(ICatalogUtility)
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
-    ob = await create_content("Item", id="foobar")
-    data = await util.get_data(ob, indexes=["title"])
-    assert len(data) == 8  # @uid, type_name, etc always returned
-    data = await util.get_data(ob, indexes=["title", "id"])
-    assert len(data) == 9
+async def test_get_data_uses_indexes_param(dummy_txn_root):
+    async with dummy_txn_root:
+        util = query_utility(ICatalogUtility)
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        ob = await create_content("Item", id="foobar")
+        data = await util.get_data(ob, indexes=["title"])
+        assert len(data) == 8  # @uid, type_name, etc always returned
+        data = await util.get_data(ob, indexes=["title", "id"])
+        assert len(data) == 9
 
-    data = await util.get_data(ob)
-    assert len(data) > 10
+        data = await util.get_data(ob)
+        assert len(data) > 10
 
 
 async def test_modified_event_gathers_all_index_data(dummy_guillotina):

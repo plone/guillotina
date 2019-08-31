@@ -341,7 +341,7 @@ def get_schema_validator(schema_name: str):
 
     schema = {
         **app_settings["json_schema_definitions"][schema_name],
-        "definitions": app_settings["json_schema_definitions"],
+        "components": {"schemas": app_settings["json_schema_definitions"]},
     }
     jsonschema_validator = jsonschema.validators.validator_for(schema)
     jsonschema_validator.check_schema(schema)
@@ -395,5 +395,18 @@ def get_request_scheme(req) -> str:
 async def notice_on_error(key: str, func_to_await):
     try:
         await func_to_await
+    except (asyncio.CancelledError, RuntimeError):
+        pass
     except Exception:  # noqa
         logger.exception(f"Error on initialize utility {key}", exc_info=True)
+
+
+def dump_task_vars(pick=None) -> dict:
+    if pick is None:
+        pick = ("request", "txn", "tm", "futures", "authenticated_user", "container", "registry", "db")
+    return {var: getattr(task_vars, var).get() for var in pick}
+
+
+def load_task_vars(tvars: dict):
+    for k, v in tvars.items():
+        getattr(task_vars, k).set(v)
