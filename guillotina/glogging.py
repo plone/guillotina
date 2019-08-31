@@ -26,7 +26,6 @@ def _wrapped(name):
             try:
                 url = request.url.human_repr()
             except AttributeError:
-                # older version of aiohttp
                 url = request.path
             try:
                 agent = request.headers['User-Agent']

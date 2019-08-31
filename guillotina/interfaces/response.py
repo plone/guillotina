@@ -1,5 +1,5 @@
-from zope.interface import Interface
 from zope.interface import Attribute
+from zope.interface import Interface
 
 
 class IResponse(Interface):
@@ -12,7 +12,13 @@ class IResponse(Interface):
         '''
 
 
-class IAioHTTPResponse(Interface):
+class IRawHTTPResponse(Interface):
     '''
-    Mark aiohttp responses with interface
+    Mark raw responses with interface
+    '''
+
+
+class IStreamHTTPResponse(IRawHTTPResponse):
+    '''
+    Mark stream response type
     '''

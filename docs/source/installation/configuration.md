@@ -161,22 +161,12 @@ load_utilities:
 
 ## Middleware
 
-`guillotina` is built on `aiohttp` which provides support for middleware.
+`guillotina` is built on `asgi` which provides support for middleware.
 You can provide an array of dotted names to use for your application.
 
 ```yaml
 middlewares:
   - guillotina_myaddon.Middleware
-```
-
-## aiohttp settings
-
-You can pass `aiohttp_settings` to configure the aiohttp server.
-
-
-```yaml
-aiohttp_settings:
-  client_max_size: 20971520
 ```
 
 ## JWT Settings

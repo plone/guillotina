@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, contextlib, gc
 import os
 from unittest import mock
 
@@ -478,3 +478,45 @@ def container_command(db):
 DELETE FROM objects;
 DELETe FROM blobs;
 COMMIT;''')
+
+
+@contextlib.contextmanager
+def loop_context(loop_factory=asyncio.new_event_loop, fast=False):
+    """A contextmanager that creates an event_loop, for test purposes.
+
+    Handles the creation and cleanup of a test loop.
+    """
+    loop = loop_factory()
+    yield loop
+    closed = loop.is_closed()
+    if not closed:
+        loop.call_soon(loop.stop)
+        loop.run_forever()
+        loop.close()
+
+    if not fast:
+        gc.collect()
+
+    asyncio.set_event_loop(None)
+
+
+@pytest.fixture
+def fast(request):
+    """--fast config option"""
+    return request.config.getoption('--g-fast')
+
+
+@pytest.fixture
+def loop_debug(request):
+    """--enable-loop-debug config option"""
+    return request.config.getoption('--g-enable-loop-debug')
+
+
+@pytest.fixture
+def loop(fast, loop_debug):
+    """Return an instance of the event loop."""
+    with loop_context(fast=fast) as _loop:
+        if loop_debug:
+            _loop.set_debug(True)  # pragma: no cover
+        asyncio.set_event_loop(_loop)
+        yield _loop

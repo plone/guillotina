@@ -1,9 +1,9 @@
 import time
 from urllib import parse
 
-import aiohttp
 import ujson
 from guillotina import configure
+from guillotina import http
 from guillotina import logger
 from guillotina import routes
 from guillotina import task_vars
@@ -12,14 +12,15 @@ from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
-from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPermission
+from guillotina.interfaces import IRawHTTPResponse
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
 from guillotina.utils import get_jwk_key
 from guillotina.utils import get_security_policy
+
 from jwcrypto import jwe
 from jwcrypto.common import json_encode
 
@@ -167,8 +168,8 @@ class WebsocketsView(Service):
             view = (await view.prepare()) or view
 
         view_result = await view()
-        if IAioHTTPResponse.providedBy(view_result):
-            raise Exception('Do not accept raw aiohttp exceptions in ws')
+        if IRawHTTPResponse.providedBy(view_result):
+            raise Exception('Do not accept raw exceptions in ws')
         else:
             from guillotina.traversal import apply_rendering
             resp = await apply_rendering(view, self.request, view_result)
@@ -190,7 +191,7 @@ class WebsocketsView(Service):
         await ws.prepare(self.request)
 
         async for msg in ws:
-            if msg.type == aiohttp.WSMsgType.text:
+            if msg.type == http.WSMsgType.text:
                 try:
                     message = ujson.loads(msg.data)
                 except ValueError:
@@ -209,7 +210,7 @@ class WebsocketsView(Service):
                         # only currently support GET requests which are *never*
                         # supposed to be commits
                         await tm.abort(txn=txn)
-            elif msg.type == aiohttp.WSMsgType.error:
+            elif msg.type == http.WSMsgType.error:
                 logger.debug('ws connection closed with exception {0:s}'
                              .format(ws.exception()))
 

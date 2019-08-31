@@ -1,15 +1,15 @@
-from aiohttp.web import Response as aioResponse
+import json
 from datetime import datetime
+from typing import Optional
+
+import ujson
 from guillotina import configure
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
 from guillotina.profile import profilable
-from typing import Dict
-from typing import Optional
-from zope.interface.interface import InterfaceClass
+from guillotina.response import RawResponse
 
-import json
-import ujson
+from zope.interface.interface import InterfaceClass
 
 
 class GuillotinaJSONEncoder(json.JSONEncoder):
@@ -48,25 +48,23 @@ class Renderer:
         return str(value).encode('utf-8')
 
     @profilable
-    async def __call__(self, value) -> aioResponse:
+    async def __call__(self, value) -> IResponse:
         '''
         Value can be:
         - Guillotina response object
         - serializable value
         '''
-        status = 200
-        headers: Dict[str, str] = {}
-        if IResponse.providedBy(value):
-            headers = value.headers
-            status = value.status_code or 200
-            value = value.content
+        if not IResponse.providedBy(value):
+            body = self.get_body(value)
+            resp = RawResponse(content=body)
+        else:
+            resp = value
 
-        headers.update({
+        resp.headers.update({
             'Content-Type': self.content_type
         })
 
-        return aioResponse(
-            body=self.get_body(value), status=status, headers=headers)
+        return resp
 
 
 @configure.renderer(name='application/json')

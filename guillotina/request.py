@@ -1,25 +1,30 @@
-from aiohttp.web_ws import WSMessage
-from aiohttp.web import WSMsgType
-from aiohttp.helpers import reify
-from aiohttp.streams import EmptyStreamReader
-from aiohttp.web_exceptions import HTTPRequestEntityTooLarge
+import enum
+import json
+import time
+import urllib.parse
+import uuid
+import warnings
 from collections import OrderedDict
+from typing import Any
+from typing import Dict
+from typing import Iterator
+from typing import Optional
+from typing import Tuple
+
+import multidict
 from guillotina import task_vars
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
-from typing import Any, Dict, Iterator, Tuple, Optional
 from yarl import URL
+
 from zope.interface import implementer
 
-import enum
-import json
-import time
-import multidict
-import uuid
-import urllib.parse
-import warnings
+from .http import EmptyStreamReader
+from .http import WSMessage
+from .http import WSMsgType
+from .utils import reify
 
 
 class State(enum.Enum):
@@ -130,7 +135,7 @@ class GuillotinaWebSocket:
 
 
 @implementer(IRequest, IDefaultLayer)
-class Request(object):
+class Request:
     """
     Guillotina specific request type.
     We store potentially a lot of state onto the request
@@ -395,6 +400,7 @@ class Request(object):
                 if self._client_max_size:
                     body_size = len(body)
                     if body_size >= self._client_max_size:
+                        from guillotina.response import HTTPRequestEntityTooLarge
                         raise HTTPRequestEntityTooLarge(
                             max_size=self._client_max_size,
                             actual_size=body_size

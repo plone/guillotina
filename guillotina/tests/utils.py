@@ -2,9 +2,6 @@ import json
 import uuid
 from unittest import mock
 
-from aiohttp.helpers import sentinel
-from aiohttp.http import HttpVersion
-from aiohttp.web import UrlMappingMatchInfo
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
@@ -142,24 +139,13 @@ def create_content(factory=Item, type_name='Item', id=None, parent=None):
     return obj
 
 
+sentinel = object()
+
+
 def make_mocked_request(method, path, headers=None, *,
-                        version=HttpVersion(1, 1), closing=False,
-                        app=None,
                         writer=sentinel,
-                        payload_writer=sentinel,
-                        protocol=sentinel,
-                        transport=sentinel,
                         payload=sentinel,
-                        sslcontext=None,
                         client_max_size=1024**2):
-    """
-    XXX copied from aiohttp but using guillotina request object
-    Creates mocked web.Request testing purposes.
-
-    Useful in unit tests, when spinning full web server is overkill or
-    specific conditions and errors are hard to trigger.
-
-    """
     loop = mock.Mock()
     loop.create_future.return_value = ()
 
@@ -183,9 +169,5 @@ def make_mocked_request(method, path, headers=None, *,
         payload,
         client_max_size=client_max_size
     )
-
-    match_info = UrlMappingMatchInfo({}, mock.Mock())
-    match_info.add_app(app)
-    req._match_info = match_info
 
     return req

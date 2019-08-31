@@ -1,9 +1,12 @@
 import fnmatch
 
-from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import glogging
 from guillotina._settings import app_settings
+from guillotina.interfaces import IRawHTTPResponse
 from guillotina.interfaces import IRequest
+from guillotina.response import HTTPUnauthorized
+
+from zope.interface import alsoProvides
 
 
 logger = glogging.getLogger('guillotina')
@@ -30,7 +33,9 @@ class DefaultCorsRenderer:
             else:
                 logger.error('Origin %s not allowed' % origin,
                              request=self.request)
-                raise HTTPUnauthorized()
+                resp = HTTPUnauthorized()
+                alsoProvides(resp, IRawHTTPResponse)
+                raise resp
         if self.request.headers.get(
                 'Access-Control-Request-Method', None) != 'OPTIONS':
             if settings['allow_credentials']:

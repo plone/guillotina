@@ -6,9 +6,6 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-import aiohttp
-from aiohttp.abc import AbstractMatchInfo
-from aiohttp.abc import AbstractRouter
 from guillotina import __version__
 from guillotina import error_reasons
 from guillotina import logger
@@ -38,7 +35,6 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IOPTIONS
-from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
@@ -46,6 +42,7 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IErrorResponseException
 from guillotina.interfaces import ILanguage
 from guillotina.interfaces import IPermission
+from guillotina.interfaces import IRawHTTPResponse
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ITraversable
@@ -60,6 +57,7 @@ from guillotina.transactions import commit
 from guillotina.utils import get_registry
 from guillotina.utils import get_security_policy
 from guillotina.utils import import_class
+
 from zope.interface import alsoProvides
 
 
@@ -136,7 +134,7 @@ def generate_error_response(e, request, error, status=500):
     })
 
 
-class BaseMatchInfo(AbstractMatchInfo):
+class BaseMatchInfo:
 
     def __init__(self):
         self._apps = ()
@@ -261,7 +259,7 @@ class MatchInfo(BaseMatchInfo):
             except (ConflictError, TIDConflictError):
                 # bubble this error up
                 raise
-            except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+            except response.Response as exc:
                 await abort()
                 view_result = exc
                 request._view_error = True
@@ -273,7 +271,7 @@ class MatchInfo(BaseMatchInfo):
         else:
             try:
                 view_result = await self.view()
-            except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+            except response.Response as exc:
                 view_result = exc
                 request._view_error = True
             except Exception as e:
@@ -283,7 +281,7 @@ class MatchInfo(BaseMatchInfo):
                 await abort()
         request.record('viewrendered')
 
-        if IAioHTTPResponse.providedBy(view_result):
+        if IRawHTTPResponse.providedBy(view_result):
             resp = view_result
         else:
             resp = await apply_rendering(self.view, self.request, view_result)
@@ -324,7 +322,7 @@ class BasicMatchInfo(BaseMatchInfo):
         """Main handler function for aiohttp."""
         request.record('finish')
         self.debug(request, self.resp)
-        if IAioHTTPResponse.providedBy(self.resp):
+        if IRawHTTPResponse.providedBy(self.resp):
             return self.resp
         else:
             resp = await apply_rendering(
@@ -339,7 +337,7 @@ class BasicMatchInfo(BaseMatchInfo):
         }
 
 
-class TraversalRouter(AbstractRouter):
+class TraversalRouter:
     """Custom router for guillotina."""
 
     _root = None
@@ -363,7 +361,7 @@ class TraversalRouter(AbstractRouter):
         result = None
         try:
             result = await self.real_resolve(request)
-        except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+        except response.Response as exc:
             await abort()
             return BasicMatchInfo(request, exc)
         except Exception:

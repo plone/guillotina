@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from Cython.Build import cythonize
 from setuptools import find_packages
 from setuptools import setup
 
@@ -50,7 +51,6 @@ setup(
     package_data={'': ['*.txt', '*.rst', 'guillotina/documentation/meta/*.json']},
     packages=find_packages(),
     install_requires=[
-        'aiohttp>=3.0.0,<4.0.0',
         'jsonschema',
         'python-dateutil',
         'pycryptodome',
@@ -87,6 +87,7 @@ setup(
             'sphinx-autodoc-typehints'
         ],
     },
+    ext_modules=cythonize("guillotina/utils/*.pyx"),
     entry_points={
         'console_scripts': [
             'guillotina = guillotina.commands:command_runner',

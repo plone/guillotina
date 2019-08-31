@@ -9,7 +9,7 @@ responses given depending on the exception type.
 ## Custom exception response
 
 ```python
-from aiohttp.web_exceptions import HTTPPreconditionFailed
+from guillotina.response import HTTPPreconditionFailed
 from guillotina import configure
 from guillotina.interfaces import IErrorResponseException
 

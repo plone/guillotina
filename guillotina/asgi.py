@@ -1,12 +1,15 @@
-from aiohttp.streams import EmptyStreamReader
+import asyncio
+from multidict import istr
+
 from guillotina import glogging
 from guillotina import task_vars
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
+from guillotina.interfaces import IStreamHTTPResponse
 from guillotina.request import Request
-from typing import Optional
+from guillotina.utils import execute
 
-import asyncio
+from .http import EmptyStreamReader
 
 
 logger = glogging.getLogger('guillotina')
@@ -56,54 +59,6 @@ class AsgiStreamReader(EmptyStreamReader):
         payload = await self._asgi_receive()
         self.finished = not payload.get("more_body", False)
         return payload["body"]
-
-
-class AsgiStreamWriter():
-    """Dummy implementation of StreamWriter"""
-
-    buffer_size = 0
-    output_size = 0
-    length: Optional[int] = 0
-
-    def __init__(self, send):
-        self.send = send
-        self._buffer = asyncio.Queue()
-        self.eof = False
-
-    async def write(self, chunk: bytes) -> None:
-        """Write chunk into stream."""
-        await self._buffer.put(chunk)
-
-    async def write_eof(self, chunk: bytes=b'') -> None:
-        """Write last chunk."""
-        await self.write(chunk)
-        self.eof = True
-        await self.drain()
-
-    async def drain(self) -> None:
-        """Flush the write buffer."""
-        while not self._buffer.empty():
-            body = await self._buffer.get()
-            await self.send({
-                "type": "http.response.body",
-                "body": body,
-                "more_body": True
-            })
-
-        if self.eof:
-            await self.send({
-                "type": "http.response.body",
-                "body": b"",
-                "more_body": False
-            })
-
-    def enable_compression(self, encoding: str='deflate') -> None:
-        """Enable HTTP body compression"""
-        raise NotImplemented()
-
-    def enable_chunking(self) -> None:
-        """Enable HTTP chunked mode"""
-        raise NotImplemented()
 
 
 class AsgiApp:
@@ -166,18 +121,19 @@ class AsgiApp:
 
         # WS handling after view execution missing here!!!
         if scope["type"] != "websocket":
-            from guillotina.response import StreamResponse
-
-            if not isinstance(resp, StreamResponse):
+            if not IStreamHTTPResponse.providedBy(resp):
+                headers = resp.headers.copy()
+                body = resp.body
+                if 'content-length' not in headers:
+                    headers[istr('Content-Length')] = str(len(body))
                 await send(
                     {
                         "type": "http.response.start",
-                        "status": resp.status,
-                        "headers": headers_to_list(resp.headers)
+                        "status": resp.status_code or 200,
+                        "headers": headers_to_list(headers)
                     }
                 )
-                body = resp.text or ""
-                await send({"type": "http.response.body", "body": body.encode()})
+                await send({"type": "http.response.body", "body": body})
 
     async def request_handler(self, request, retries=0):
         try:
@@ -194,7 +150,7 @@ class AsgiApp:
                     f'{label}, retrying request, tid: {tid}, retries: {retries + 1})',
                     exc_info=True)
                 request._retry_attempt = retries + 1
-                request.clear_futures()
+                execute.clear_futures()
                 return await self.request_handler(request, retries + 1)
             else:
                 logger.error(

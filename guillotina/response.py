@@ -1,14 +1,18 @@
-# this module closely mirrors aiohttp.web_exceptions
-from guillotina.asgi import AsgiStreamWriter
-from guillotina.request import Request
-from guillotina.interfaces import IAioHTTPResponse
-from guillotina.interfaces import IResponse
-from multidict import CIMultiDict
-from zope.interface import implementer
-from typing import Any, Dict, Optional
-from aiohttp import hdrs
-
+import asyncio
+import json
 import warnings
+from typing import Any
+from typing import Dict
+from typing import Optional
+
+from guillotina.interfaces import IRawHTTPResponse
+from guillotina.interfaces import IResponse
+from guillotina.interfaces import IStreamHTTPResponse
+from guillotina.request import Request
+from multidict import CIMultiDict
+from multidict import istr
+
+from zope.interface import implementer
 
 
 @implementer(IResponse)
@@ -41,9 +45,43 @@ class Response(Exception):
                     self.content = None
                 self.status_code = status
 
+    @property
+    def body(self):
+        return json.dumps(self.content).encode('utf-8')
 
-@implementer(IAioHTTPResponse)
-class StreamResponse():
+    def __repr__(self):
+        return f'<Response {self.status_code or 200}>'
+
+
+@implementer(IRawHTTPResponse)
+class RawResponse(Response):
+    '''
+    Does not take dict but bytes of data
+    '''
+    def __init__(self, *, content: Optional[bytes]=None,
+                 headers: dict=None, status: int=None) -> None:
+        '''
+        :param content: content to serialize
+        :param headers: headers to set on response
+        :param status: customize the response status
+        '''
+        if self.empty_body:
+            self.content = b''
+        else:
+            self.content = content or b''
+        if headers is None:
+            self.headers = CIMultiDict()  # type: ignore
+        else:
+            self.headers = CIMultiDict(headers)  # type: ignore
+        self.status_code = status
+
+    @property
+    def body(self):
+        return self.content
+
+
+@implementer(IStreamHTTPResponse)
+class StreamResponse:
 
     empty_body = False
     default_content: dict = {}  # noqa
@@ -105,12 +143,12 @@ class StreamResponse():
         headers = self.headers
 
         if self.content_type:
-            headers.setdefault(hdrs.CONTENT_TYPE, self.content_type)
+            headers.setdefault(istr('Content-Type'), self.content_type)
         else:
-            headers.setdefault(hdrs.CONTENT_TYPE, 'application/octet-stream')
+            headers.setdefault(istr('Content-Type'), 'application/octet-stream')
 
         if self.content_length:
-            headers.setdefault(hdrs.CONTENT_LENGTH, str(self.content_length))
+            headers.setdefault(istr('Content-Length'), str(self.content_length))
 
         from guillotina.asgi import headers_to_list
 
@@ -518,3 +556,51 @@ class HTTPNotExtended(HTTPServerError):
 
 class HTTPNetworkAuthenticationRequired(HTTPServerError):
     status_code = 511
+
+
+class AsgiStreamWriter:
+    """Dummy implementation of StreamWriter"""
+
+    buffer_size = 0
+    output_size = 0
+    length: Optional[int] = 0
+
+    def __init__(self, send):
+        self.send = send
+        self._buffer = asyncio.Queue()
+        self.eof = False
+
+    async def write(self, chunk: bytes) -> None:
+        """Write chunk into stream."""
+        await self._buffer.put(chunk)
+
+    async def write_eof(self, chunk: bytes=b'') -> None:
+        """Write last chunk."""
+        await self.write(chunk)
+        self.eof = True
+        await self.drain()
+
+    async def drain(self) -> None:
+        """Flush the write buffer."""
+        while not self._buffer.empty():
+            body = await self._buffer.get()
+            await self.send({
+                "type": "http.response.body",
+                "body": body,
+                "more_body": True
+            })
+
+        if self.eof:
+            await self.send({
+                "type": "http.response.body",
+                "body": b"",
+                "more_body": False
+            })
+
+    def enable_compression(self, encoding: str='deflate') -> None:
+        """Enable HTTP body compression"""
+        raise NotImplemented()
+
+    def enable_chunking(self) -> None:
+        """Enable HTTP chunked mode"""
+        raise NotImplemented()

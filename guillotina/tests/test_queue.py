@@ -5,6 +5,10 @@ from guillotina.component import get_utility
 from guillotina.tests import utils
 
 import asyncio
+import pytest
+
+
+pytestmark = pytest.mark.asyncio
 
 
 class AsyncMockView(View):

@@ -49,7 +49,7 @@ These response objects should have simple dict values for their content if provi
 
 ### Bypassing reponses rendering
 
-If you return any aiohttp based response objects, they will be ignored by the rendering
+If you return any `guillotina.response.StreamResponse` based response objects, they will be ignored by the rendering
 framework.
 
 This is useful when streaming data for example and it should not be transformed.

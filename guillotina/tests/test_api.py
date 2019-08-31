@@ -11,6 +11,10 @@ from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.tests import utils
 from guillotina.transactions import transaction
+import pytest
+
+
+pytestmark = pytest.mark.asyncio
 
 
 class ITestingRegistry(Interface):  # pylint: disable=E0239
