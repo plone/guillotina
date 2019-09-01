@@ -300,9 +300,6 @@ class MatchInfo(BaseMatchInfo):
                 view_result = exc
                 request._view_error = True
             except Exception as e:
-                import pdb
-
-                pdb.set_trace()
                 request._view_error = True
                 view_result = generate_error_response(e, request, "ViewError")
             finally:
