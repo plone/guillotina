@@ -1,14 +1,10 @@
-import json
-import pickle
-
-import pytest
 from guillotina import configure
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import get_utility
-from guillotina.content import Folder
-from guillotina.content import Item
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
+from guillotina.content import Folder
+from guillotina.content import Item
 from guillotina.content import load_cached_schema
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
@@ -19,8 +15,14 @@ from guillotina.schema import Dict
 from guillotina.schema import TextLine
 from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
+from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
+from guillotina.utils import get_database
 from guillotina.utils import get_object_by_oid
+
+import json
+import pickle
+import pytest
 
 
 class ICustomContentType(IItem):
@@ -45,81 +47,86 @@ async def test_not_allowed_to_create_content(dummy_guillotina):
 async def test_allowed_to_create_content(dummy_guillotina):
     utils.login()
 
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
-    utils.register(container)
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        utils.register(container)
 
-    await create_content_in_container(container, "Item", id_="foobar")
+        await create_content_in_container(container, "Item", id_="foobar")
 
 
 async def test_allowed_types(dummy_guillotina):
     utils.login()
 
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
-    utils.register(container)
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        utils.register(container)
 
-    import guillotina.tests
+        import guillotina.tests
 
-    configure.register_configuration(
-        Folder,
-        dict(
-            type_name="TestType",
-            allowed_types=["Item"],
-            module=guillotina.tests,  # for registration initialization
-        ),
-        "contenttype",
-    )
-    root = get_utility(IApplication, name="root")
+        configure.register_configuration(
+            Folder,
+            dict(
+                type_name="TestType",
+                allowed_types=["Item"],
+                module=guillotina.tests,  # for registration initialization
+            ),
+            "contenttype",
+        )
+        root = get_utility(IApplication, name="root")
 
-    configure.load_configuration(root.app.config, "guillotina.tests", "contenttype")
-    root.app.config.execute_actions()
-    load_cached_schema()
+        configure.load_configuration(root.app.config, "guillotina.tests", "contenttype")
+        root.app.config.execute_actions()
+        load_cached_schema()
 
-    obj = await create_content_in_container(container, "TestType", "foobar")
+        obj = await create_content_in_container(container, "TestType", "foobar")
 
-    constrains = IConstrainTypes(obj, None)
-    assert constrains.get_allowed_types() == ["Item"]
-    assert constrains.is_type_allowed("Item")
+        constrains = IConstrainTypes(obj, None)
+        assert constrains.get_allowed_types() == ["Item"]
+        assert constrains.is_type_allowed("Item")
 
-    with pytest.raises(NotAllowedContentType):
-        await create_content_in_container(obj, "TestType", "foobar")
-    await create_content_in_container(obj, "Item", "foobar")
+        with pytest.raises(NotAllowedContentType):
+            await create_content_in_container(obj, "TestType", "foobar")
+        await create_content_in_container(obj, "Item", "foobar")
 
 
 async def test_creator_used_from_content_creation(dummy_guillotina):
     utils.login()
 
-    container = await create_content("Container", id="guillotina", title="Guillotina")
-    container.__name__ = "guillotina"
-    utils.register(container)
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        utils.register(container)
 
-    import guillotina.tests
+        import guillotina.tests
 
-    configure.register_configuration(
-        Folder,
-        dict(type_name="TestType2", behaviors=[], module=guillotina.tests),  # for registration initialization
-        "contenttype",
-    )
-    root = get_utility(IApplication, name="root")
+        configure.register_configuration(
+            Folder,
+            dict(
+                type_name="TestType2", behaviors=[], module=guillotina.tests
+            ),  # for registration initialization
+            "contenttype",
+        )
+        root = get_utility(IApplication, name="root")
 
-    configure.load_configuration(root.app.config, "guillotina.tests", "contenttype")
-    root.app.config.execute_actions()
-    load_cached_schema()
+        configure.load_configuration(root.app.config, "guillotina.tests", "contenttype")
+        root.app.config.execute_actions()
+        load_cached_schema()
 
-    obj = await create_content_in_container(
-        container, "TestType2", "foobar", creators=("root",), contributors=("root",)
-    )
+        obj = await create_content_in_container(
+            container, "TestType2", "foobar", creators=("root",), contributors=("root",)
+        )
 
-    assert obj.creators == ("root",)
-    assert obj.contributors == ("root",)
+        assert obj.creators == ("root",)
+        assert obj.contributors == ("root",)
 
-    behavior = IDublinCore(obj)
-    assert behavior.creators == ("root",)
-    assert behavior.contributors == ("root",)
+        behavior = IDublinCore(obj)
+        assert behavior.creators == ("root",)
+        assert behavior.contributors == ("root",)
 
 
-def test_base_object():
+def test_base_object(dummy_guillotina, mock_txn):
     testing = {
         "__parent__": "_BaseObject__parent",
         "__of__": "_BaseObject__of",
@@ -127,7 +134,6 @@ def test_base_object():
         "__gannotations__": "_BaseObject__annotations",
         "__immutable_cache__": "_BaseObject__immutable_cache",
         "__new_marker__": "_BaseObject__new_marker",
-        "__txn__": "_BaseObject__txn",
         "__uuid__": "_BaseObject__uuid",
         "__serial__": "_BaseObject__serial",
     }
@@ -141,6 +147,16 @@ def test_base_object():
         assert getattr(new_item, name) != "foobar"
         assert name not in item.__dict__
         assert attr not in item.__dict__
+
+    item = Item()
+    setattr(item, "__txn__", mock_txn)
+    assert "__txn__" not in item.__dict__
+    assert "_BaseObject__txn" not in item.__dict__
+    pickled = pickle.dumps(item, protocol=pickle.HIGHEST_PROTOCOL)
+    new_item = pickle.loads(pickled)
+    assert getattr(new_item, "__txn__") != mock_txn
+    assert "__txn__" not in item.__dict__
+    assert "_BaseObject__txn" not in item.__dict__
 
 
 async def test_getattr_set_default(container_requester):

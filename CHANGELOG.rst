@@ -4,7 +4,8 @@ CHANGELOG
 5.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- `BaseObject.__txn__` should be weakref to prevent reference cycles
+  [vangheem]
 
 
 5.0.2 (2019-08-30)
