@@ -4,7 +4,8 @@ CHANGELOG
 5.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Change default service registration to work without inline defined klass methods
+  [vangheem]
 
 
 5.0.2 (2019-08-30)
