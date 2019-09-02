@@ -1,9 +1,3 @@
-import asyncio
-import logging
-import pickle
-import uuid
-from sys import getsizeof
-
 from guillotina import app_settings
 from guillotina.component import query_utility
 from guillotina.contrib.cache import CACHE_PREFIX
@@ -13,6 +7,13 @@ from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import IPubSubUtility
 from guillotina.profile import profilable
 from guillotina.utils import resolve_dotted_name
+from sys import getsizeof
+
+import asyncio
+import asyncpg
+import logging
+import pickle
+import uuid
 
 
 logger = logging.getLogger("guillotina.contrib.cache")
@@ -65,25 +66,27 @@ class CacheUtility:
         try:
             if key in self._memory_cache:
                 logger.info("Retrieved {} from memory cache".format(key))
-                return serialize.loads(self._memory_cache[key])
+                return self._memory_cache[key]
             if self._obj_driver is not None:
                 val = await self._obj_driver.get(CACHE_PREFIX + key)
                 if val is not None:
                     logger.info("Retrieved {} from redis cache".format(key))
                     val = serialize.loads(val)
-                    self._memory_cache[key] = val
+                    size = self.get_size(val)
+                    self._memory_cache.set(key, val, size)
+                    return val
         except Exception:
             logger.warning("Error getting cache value", exc_info=True)
 
     def get_size(self, value):
-        if isinstance(value, dict):
+        if isinstance(value, (dict, asyncpg.Record)):
             if "state" in value:
                 return len(value["state"])
         if isinstance(value, list) and len(value) > 0:
             # if its a list, guesss from first gey the length, and
             # estimate it from the total lenghts on the list..
             return getsizeof(value[0]) * len(value)
-        if type(value) in _basic_types:
+        if isinstance(value, _basic_types):
             return getsizeof(value)
         return _default_size
 
@@ -91,11 +94,11 @@ class CacheUtility:
     async def set(self, key, value, ttl=None):
         try:
             size = self.get_size(value)
-            stored_value = serialize.dumps(value)
-            self._memory_cache.set(key, stored_value, size)
+            self._memory_cache.set(key, value, size)
             if ttl is None:
                 ttl = self._settings.get("ttl", 3600)
             if self._obj_driver is not None:
+                stored_value = serialize.dumps(value)
                 await self._obj_driver.set(CACHE_PREFIX + key, stored_value, expire=ttl)
             logger.info("set {} in cache".format(key))
         except Exception:

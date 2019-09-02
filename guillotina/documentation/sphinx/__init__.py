@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
+import asyncio
+import json
+import logging
+from base64 import b64encode
+
+import docutils.statemachine
+import pkg_resources
 from aiohttp.test_utils import TestClient
 from aiohttp.test_utils import TestServer
-from base64 import b64encode
 from docutils import nodes
 from docutils.parsers.rst import Directive  # type: ignore
 from docutils.parsers.rst import directives  # type: ignore
@@ -14,12 +20,12 @@ from guillotina.tests.utils import get_mocked_request
 from guillotina.transactions import abort
 from guillotina.traversal import traverse
 from guillotina.utils import get_dotted_name
+
 from zope.interface import Interface
 
-import asyncio
-import docutils.statemachine
-import json
-import pkg_resources
+
+logger = logging.getLogger("guillotina.docs")
+
 
 _server = None
 
@@ -240,7 +246,14 @@ class APICall(Directive):
                 parameter["description"] += " (required)"
             elif parameter.get("default"):
                 parameter["description"] += " (default: {default})".format(**parameter)
-            rst_content += "\n    :query {type} {name}: {description}".format(**parameter)
+            try:
+                if "schema" in parameter:
+                    ptype = parameter["schema"]["type"]
+                else:
+                    ptype = parameter.get("type", "string")
+                rst_content += "\n    :query {ptype} {name}: {description}".format(ptype=ptype, **parameter)
+            except (KeyError, ValueError):
+                logger.warning(f"Could not format paremeter: {parameter}")
 
         responses = {
             code: info["description"] for code, info in service_definition.get("responses", {}).items()

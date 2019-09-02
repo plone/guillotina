@@ -4,9 +4,23 @@ CHANGELOG
 5.0.3 (unreleased)
 ------------------
 
-- `BaseObject.__txn__` should be weakref to prevent reference cycles
+- `BaseObject.__txn__` now weakref to prevent reference cycles
   [vangheem]
 
+- Change default service registration to work without inline defined klass methods
+  [vangheem]
+
+- Fix doc builds for new open api 3
+  [vangheem]
+
+- Fix getting cache value from redis
+  [vangheem]
+
+- Fix calculating in-memory cache size
+  [vangheem]
+
+- Update Makefile [svx]
+- Remove buildout bits [svx]
 
 5.0.2 (2019-08-30)
 ------------------

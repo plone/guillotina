@@ -23,7 +23,7 @@ def get_physical_path(context):
 
 @adapter(IResource, IRequest)
 @implementer(IView, ILocation)
-class View(object):
+class View:
 
     __name__ = "view"
 

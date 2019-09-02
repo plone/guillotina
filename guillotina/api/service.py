@@ -44,9 +44,11 @@ class DictFieldProxy:
             setattr(self.__context, name, value)
 
 
+_sentinal = object()
+
+
 class Service(View):
-    __validator__ = __schema__ = None
-    _sentinal = object()
+    __validator__ = __schema__ = __original__ = None
 
     def _validate_parameters(self):
         if "parameters" in self.__config__:
@@ -93,8 +95,8 @@ class Service(View):
 
     @classmethod
     def _get_validator(cls):
-        if cls.__validator__ is None and cls.__validator__ != cls._sentinal:
-            cls.__validator__ = cls._sentinal
+        if cls.__validator__ is None and cls.__validator__ != _sentinal:
+            cls.__validator__ = _sentinal
             if "requestBody" in cls.__config__:
                 requestBody = cls.__config__["requestBody"]
                 try:
@@ -122,11 +124,10 @@ class Service(View):
                 pass  # can be used for query, path or header parameters
         return cls.__schema__, cls.__validator__
 
-    async def validate(self):
-
+    async def _call_validate(self):
         self._validate_parameters()
         schema, validator = self.__class__._get_validator()
-        if validator and validator != self._sentinal:
+        if validator and validator != _sentinal:
             try:
                 data = await self.request.json()
                 validator.validate(data)
@@ -142,17 +143,24 @@ class Service(View):
                         "schema": schema,
                     }
                 )
+        return await self._call_original()
+
+    async def _call_original(self):
+        return await self.__original__()
+
+    async def _call_original_func(self):
+        return await self.__original__(self.context, self.request)
 
     async def get_data(self):
         return await self.request.json()
 
 
-class DownloadService(View):
+class DownloadService(Service):
     def __init__(self, context, request):
         super(DownloadService, self).__init__(context, request)
 
 
-class TraversableFieldService(View):
+class TraversableFieldService(Service):
     field = None
 
     async def prepare(self):

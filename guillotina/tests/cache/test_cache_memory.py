@@ -1,5 +1,4 @@
 from guillotina.component import get_utility
-from guillotina.contrib.cache import serialize
 from guillotina.contrib.cache.strategy import BasicCache
 from guillotina.db.transaction import Transaction
 from guillotina.interfaces import ICacheUtility
@@ -26,7 +25,7 @@ async def test_cache_set(guillotina_main, loop):
 
     await rcache.set("bar", oid="foo")
     # but also in memory
-    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
+    assert util._memory_cache.get("root-foo") == "bar"
     # and api matches..
     assert await rcache.get(oid="foo") == "bar"
 
@@ -41,7 +40,7 @@ async def test_cache_delete(guillotina_main, loop):
 
     await rcache.set("bar", oid="foo")
     # make sure it is in redis
-    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
+    assert util._memory_cache.get("root-foo") == "bar"
     assert await rcache.get(oid="foo") == "bar"
 
     # now delete
@@ -58,7 +57,7 @@ async def test_cache_clear(guillotina_main, loop):
     await rcache.clear()
 
     await rcache.set("bar", oid="foo")
-    assert serialize.loads(util._memory_cache.get("root-foo")) == "bar"
+    assert util._memory_cache.get("root-foo") == "bar"
     assert await rcache.get(oid="foo") == "bar"
 
     await rcache.clear()
@@ -76,7 +75,7 @@ async def test_invalidate_object(guillotina_main, loop):
     await rcache.clear()
 
     await rcache.set("foobar", oid=content.__uuid__)
-    assert serialize.loads(util._memory_cache.get("root-" + content.__uuid__)) == "foobar"
+    assert util._memory_cache.get("root-" + content.__uuid__) == "foobar"
     assert await rcache.get(oid=content.__uuid__) == "foobar"
 
     await rcache.close(invalidate=True)
