@@ -5,7 +5,7 @@ CHANGELOG
 ------------------
 
 - Update Makefile [svx]
-
+- Remove buildout bits [svx]
 
 5.0.2 (2019-08-30)
 ------------------
