@@ -3,6 +3,10 @@ CHANGELOG
 
 5.0.3 (unreleased)
 ------------------
+
+- Fix doc builds for new open api 3
+  [vangheem]
+
 - Fix getting cache value from redis
   [vangheem]
 
