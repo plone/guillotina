@@ -7,6 +7,14 @@ CHANGELOG
 - Fix doc builds for new open api 3
   [vangheem]
 
+- Fix getting cache value from redis
+  [vangheem]
+
+- Fix calculating in-memory cache size
+  [vangheem]
+
+- Update Makefile [svx]
+- Remove buildout bits [svx]
 
 5.0.2 (2019-08-30)
 ------------------
