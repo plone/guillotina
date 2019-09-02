@@ -3,6 +3,11 @@ CHANGELOG
 
 5.0.3 (unreleased)
 ------------------
+- Fix getting cache value from redis
+  [vangheem]
+
+- Fix calculating in-memory cache size
+  [vangheem]
 
 - Update Makefile [svx]
 - Remove buildout bits [svx]
