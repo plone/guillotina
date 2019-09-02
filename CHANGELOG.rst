@@ -4,7 +4,7 @@ CHANGELOG
 5.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update Makefile [svx]
 
 
 5.0.2 (2019-08-30)
