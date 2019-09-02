@@ -4,6 +4,9 @@ CHANGELOG
 5.0.3 (unreleased)
 ------------------
 
+- `BaseObject.__txn__` now weakref to prevent reference cycles
+  [vangheem]
+
 - Change default service registration to work without inline defined klass methods
   [vangheem]
 
