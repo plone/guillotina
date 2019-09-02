@@ -4,7 +4,11 @@ CHANGELOG
 5.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix getting cache value from redis
+  [vangheem]
+
+- Fix calculating in-memory cache size
+  [vangheem]
 
 
 5.0.2 (2019-08-30)
