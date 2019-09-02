@@ -4,6 +4,9 @@ CHANGELOG
 5.0.3 (unreleased)
 ------------------
 
+- Change default service registration to work without inline defined klass methods
+  [vangheem]
+
 - Fix doc builds for new open api 3
   [vangheem]
 
