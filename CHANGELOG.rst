@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.3 (unreleased)
+5.0.3 (2019-09-02)
 ------------------
 
 - `BaseObject.__txn__` now weakref to prevent reference cycles
