@@ -1,7 +1,5 @@
-import asyncio  # noqa
-import sys
-
 from guillotina import task_vars
+from guillotina import utils
 from guillotina._settings import app_settings
 from guillotina.commands import Command
 from guillotina.component import get_utility
@@ -9,7 +7,9 @@ from guillotina.interfaces import IApplication
 from guillotina.testing import TESTING_SETTINGS
 from guillotina.tests.utils import get_mocked_request
 from guillotina.tests.utils import login
-from guillotina import utils
+
+import asyncio  # noqa
+import sys
 
 
 class ShellHelpers:

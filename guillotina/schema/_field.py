@@ -58,7 +58,7 @@ from guillotina.schema.interfaces import IFrozenSet
 from guillotina.schema.interfaces import IId
 from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IInterfaceField
-from guillotina.schema.interfaces import IJSONField, IUnionField
+from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IMinMaxLen
 from guillotina.schema.interfaces import IObject
@@ -71,6 +71,7 @@ from guillotina.schema.interfaces import ITextLine
 from guillotina.schema.interfaces import ITime
 from guillotina.schema.interfaces import ITimedelta
 from guillotina.schema.interfaces import ITuple
+from guillotina.schema.interfaces import IUnionField
 from guillotina.schema.interfaces import IURI
 from guillotina.schema.utils import make_binary
 from guillotina.schema.vocabulary import getVocabularyRegistry

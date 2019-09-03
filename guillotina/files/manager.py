@@ -1,7 +1,4 @@
-import base64
-import posixpath
-import uuid
-
+from .const import CHUNK_SIZE
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
@@ -13,17 +10,19 @@ from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
+from guillotina.response import ASGIResponse
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
-from guillotina.response import ASGIResponse
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_object_url
 from guillotina.utils import resolve_dotted_name
 from zope.interface import alsoProvides
 
-from .const import CHUNK_SIZE
+import base64
+import posixpath
+import uuid
 
 
 @configure.adapter(for_=(IResource, IRequest, ICloudFileField), provides=IFileManager)

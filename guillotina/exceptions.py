@@ -1,9 +1,10 @@
-import ujson
 from guillotina._settings import app_settings
 from guillotina.interfaces import IUnauthorized
 from zope.interface import implementer
 from zope.interface.exceptions import Invalid  # noqa pylint: disable=W0611
 from zope.interface.interfaces import ComponentLookupError  # noqa pylint: disable=W0611
+
+import ujson
 
 
 class NoPermissionToAdd(Exception):

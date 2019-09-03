@@ -1,6 +1,3 @@
-import mimetypes
-
-from guillotina.response import ASGIResponse
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
@@ -12,7 +9,10 @@ from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
+from guillotina.response import ASGIResponse
 from guillotina.response import HTTPNotFound
+
+import mimetypes
 
 
 def _traversed_file_doc(summary, parameters=None, responses=None):

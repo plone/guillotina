@@ -1,10 +1,10 @@
+from guillotina.utils import get_jwk_key
+from jwcrypto import jwe
+
 import base64
 import json
 import logging
 import time
-
-from guillotina.utils import get_jwk_key
-from jwcrypto import jwe
 
 
 logger = logging.getLogger("guillotina")

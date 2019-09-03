@@ -1,5 +1,5 @@
-from guillotina.interfaces import IMailer
 from guillotina.component import get_utility
+from guillotina.interfaces import IMailer
 
 import pytest
 

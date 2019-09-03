@@ -1,6 +1,3 @@
-import logging
-import typing
-
 from guillotina import configure
 from guillotina.catalog.utils import parse_query
 from guillotina.component import query_adapter
@@ -28,6 +25,9 @@ from guillotina.utils import find_container
 from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 from zope.interface import implementer
+
+import logging
+import typing
 
 
 logger = logging.getLogger("guillotina")

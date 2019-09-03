@@ -1,5 +1,3 @@
-import json
-
 from guillotina import configure
 from guillotina import fields
 from guillotina import schema
@@ -7,6 +5,8 @@ from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.instance import ContextBehavior
 from guillotina.interfaces import IContentBehavior
 from zope.interface import Interface
+
+import json
 
 
 def get_all_fields(content):

@@ -1,9 +1,8 @@
-from typing import Optional
-
 from guillotina import task_vars
 from guillotina.component import get_adapter
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import ISecurityPolicy
+from typing import Optional
 
 
 def get_authenticated_user() -> Optional[IPrincipal]:

@@ -1,5 +1,4 @@
 from collections import namedtuple
-
 from guillotina import configure
 from guillotina import schema
 from guillotina.component import get_adapter
@@ -7,15 +6,15 @@ from guillotina.exceptions import ComponentLookupError
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.fields.interfaces import IDynamicField
 from guillotina.fields.interfaces import IDynamicFieldOperation
+from guillotina.fields.patch import field_converter
 from guillotina.fields.patch import PatchDictDel
 from guillotina.fields.patch import PatchDictSet
 from guillotina.fields.patch import PatchDictUpdate
 from guillotina.fields.patch import PatchField
-from guillotina.fields.patch import field_converter
 from guillotina.interfaces import IJSONToValue
 from guillotina.schema.interfaces import IDict
-from zope.interface import Interface
 from zope.interface import implementer
+from zope.interface import Interface
 
 
 @implementer(IDynamicField)

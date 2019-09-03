@@ -1,11 +1,11 @@
-import logging
-
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
+
+import logging
 
 
 logger = logging.getLogger("guillotina")

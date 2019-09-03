@@ -7,8 +7,9 @@ from guillotina.tests import utils
 from guillotina.transactions import transaction
 
 import json
-import random
 import pytest
+import random
+
 
 pytestmark = pytest.mark.asyncio
 

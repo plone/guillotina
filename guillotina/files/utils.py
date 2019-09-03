@@ -1,15 +1,14 @@
-import asyncio
-import base64
-import mimetypes
-import os
-import uuid
-
+from .const import MAX_REQUEST_CACHE_SIZE
 from guillotina import task_vars
 from guillotina.exceptions import UnRetryableRequestError
 from guillotina.utils import get_content_path
 from guillotina.utils import to_str
 
-from .const import MAX_REQUEST_CACHE_SIZE
+import asyncio
+import base64
+import mimetypes
+import os
+import uuid
 
 
 async def read_request_data(request, chunk_size):

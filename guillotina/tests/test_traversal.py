@@ -1,8 +1,8 @@
-import pytest
-
 from guillotina.response import Response
 from guillotina.tests.utils import get_mocked_request
 from guillotina.traversal import _apply_cors
+
+import pytest
 
 
 class CorsTestRenderer:

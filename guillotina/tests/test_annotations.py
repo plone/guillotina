@@ -1,12 +1,13 @@
-import os
-
-import pytest
 from guillotina.annotations import AnnotationData
 from guillotina.content import create_content_in_container
 from guillotina.interfaces import IAnnotations
 from guillotina.tests.utils import login
-from guillotina.utils import get_database
 from guillotina.transactions import transaction
+from guillotina.utils import get_database
+
+import os
+import pytest
+
 
 pytestmark = pytest.mark.asyncio
 

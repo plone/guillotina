@@ -1,8 +1,9 @@
-import typing
-from guillotina.utils import get_content_path
-from guillotina.utils import get_content_depth
-from guillotina.catalog.utils import iter_indexes
 from guillotina.catalog.types import BasicParsedQueryInfo
+from guillotina.catalog.utils import iter_indexes
+from guillotina.utils import get_content_depth
+from guillotina.utils import get_content_path
+
+import typing
 
 
 def to_list(value: typing.Union[str, list]) -> typing.List[str]:

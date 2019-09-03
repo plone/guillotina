@@ -13,10 +13,10 @@
 ##############################################################################
 # flake8: noqa
 
+import pickle as _pickle
 import sys
 import types
 
-import pickle as _pickle
 
 CLASS_TYPES = (type,)
 

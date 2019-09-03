@@ -1,16 +1,16 @@
 from guillotina import app_settings
 from guillotina.component import get_utility
-from guillotina.tests import mocks
-from guillotina.tests.utils import create_content
-from guillotina.contrib.cache.strategy import BasicCache
 from guillotina.contrib.cache import CACHE_PREFIX
 from guillotina.contrib.cache import serialize
+from guillotina.contrib.cache.strategy import BasicCache
 from guillotina.interfaces import ICacheUtility
+from guillotina.tests import mocks
+from guillotina.tests.utils import create_content
 from guillotina.utils import resolve_dotted_name
 
 import asyncio
-import pytest
 import pickle
+import pytest
 
 
 pytestmark = pytest.mark.asyncio

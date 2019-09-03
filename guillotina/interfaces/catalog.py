@@ -1,9 +1,8 @@
-import typing
-
+from .content import IContainer
 from guillotina.db.orm.interfaces import IBaseObject
 from zope.interface import Interface
 
-from .content import IContainer
+import typing
 
 
 class ICatalogUtility(Interface):

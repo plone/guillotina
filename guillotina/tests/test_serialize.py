@@ -16,8 +16,9 @@ from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
 
-import uuid
 import pytest
+import uuid
+
 
 pytestmark = pytest.mark.asyncio
 

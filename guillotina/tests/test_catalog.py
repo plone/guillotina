@@ -1,8 +1,4 @@
-import json
-import os
 from datetime import datetime
-
-import pytest
 from guillotina import task_vars
 from guillotina.catalog import index
 from guillotina.catalog.utils import get_index_fields
@@ -19,6 +15,10 @@ from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import ISecurityInfo
 from guillotina.tests import mocks
 from guillotina.tests import utils as test_utils
+
+import json
+import os
+import pytest
 
 
 pytestmark = pytest.mark.asyncio

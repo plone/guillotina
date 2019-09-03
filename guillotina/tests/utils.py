@@ -6,9 +6,9 @@ from guillotina.behaviors import apply_markers
 from guillotina.content import Item
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
+from guillotina.request import AsgiStreamReader
 from guillotina.request import Request
 from guillotina.transactions import transaction
-from guillotina.request import AsgiStreamReader
 from guillotina.utils import get_database
 from typing import Dict
 from zope.interface import alsoProvides

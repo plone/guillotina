@@ -1,5 +1,3 @@
-import json
-
 from guillotina import utils
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IPrincipalRoleManager
@@ -11,6 +9,7 @@ from guillotina.tests.utils import login
 from guillotina.utils import get_behavior
 from guillotina.utils.navigator import Navigator
 
+import json
 import pytest
 
 

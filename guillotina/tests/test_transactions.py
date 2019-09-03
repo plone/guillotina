@@ -1,5 +1,3 @@
-import pytest
-
 from guillotina import task_vars
 from guillotina.content import create_content_in_container
 from guillotina.db import ROOT_ID
@@ -9,6 +7,8 @@ from guillotina.exceptions import TransactionNotFound
 from guillotina.tests import mocks
 from guillotina.transactions import transaction
 from guillotina.utils import get_object_by_uid
+
+import pytest
 
 
 pytestmark = pytest.mark.asyncio

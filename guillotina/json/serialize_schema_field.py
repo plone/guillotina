@@ -1,6 +1,6 @@
 from guillotina import configure
-from guillotina.fields.interfaces import IPatchField
 from guillotina.component import get_multi_adapter
+from guillotina.fields.interfaces import IPatchField
 from guillotina.interfaces import ICloudFileField
 from guillotina.interfaces import IFileField
 from guillotina.interfaces import ISchemaFieldSerializeToJson

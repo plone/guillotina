@@ -1,5 +1,6 @@
 from guillotina.component import get_utility
 from guillotina.interfaces import IPubSubUtility
+
 import asyncio
 import pytest
 

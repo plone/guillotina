@@ -1,16 +1,16 @@
-import json
-import os
-from tempfile import mkstemp
-
-import pytest
+from contextlib import redirect_stdout
 from guillotina import testing
 from guillotina.commands import get_settings
+from guillotina.commands.crypto import CryptoCommand
 from guillotina.commands.migrate import MigrateCommand
 from guillotina.commands.run import RunCommand
 from guillotina.commands.vacuum import VacuumCommand
-from guillotina.commands.crypto import CryptoCommand
+from tempfile import mkstemp
+
 import io
-from contextlib import redirect_stdout
+import json
+import os
+import pytest
 
 
 DATABASE = os.environ.get("DATABASE", "DUMMY")

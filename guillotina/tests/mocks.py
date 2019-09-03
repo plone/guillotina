@@ -1,6 +1,3 @@
-import asyncio
-import uuid
-
 from guillotina import task_vars
 from guillotina.component import query_adapter
 from guillotina.db.cache.dummy import DummyCache
@@ -9,6 +6,9 @@ from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from zope.interface import implementer
+
+import asyncio
+import uuid
 
 
 class MockDBTransaction:

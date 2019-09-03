@@ -6,6 +6,7 @@ from guillotina.auth import validators
 import jwt
 import pytest
 
+
 pytestmark = pytest.mark.asyncio
 
 

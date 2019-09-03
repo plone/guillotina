@@ -12,8 +12,9 @@
 #
 ##############################################################################
 # flake8: noqa
-import unittest
 from zope.interface.interface import InterfaceClass
+
+import unittest
 
 
 def _makeSchema():

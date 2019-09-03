@@ -1,2 +1,2 @@
-from . import dummy  # noqa
 from . import base  # noqa
+from . import dummy  # noqa

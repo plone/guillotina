@@ -1,21 +1,24 @@
 # -*- coding: utf-8 -*-
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formatdate
+from guillotina import app_settings
+from guillotina import configure
+from guillotina.component import query_utility
+from guillotina.contrib.mailer import encoding
+from guillotina.contrib.mailer.exceptions import NoEndpointDefinedException
+from guillotina.interfaces import IMailEndpoint
+from guillotina.interfaces import IMailer
+from guillotina.utils import get_random_string
+from html2text import html2text
+from zope.interface import implementer
+
+import aiosmtplib
 import asyncio
 import logging
 import socket
 import time
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.utils import formatdate
 
-import aiosmtplib
-from guillotina import app_settings, configure
-from guillotina.component import query_utility
-from guillotina.utils import get_random_string
-from guillotina.contrib.mailer import encoding
-from guillotina.contrib.mailer.exceptions import NoEndpointDefinedException
-from guillotina.interfaces import IMailEndpoint, IMailer
-from html2text import html2text
-from zope.interface import implementer
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
-import uvicorn
 from guillotina.commands import Command
+
+import uvicorn
 
 
 class ServerCommand(Command):

@@ -1,12 +1,12 @@
-import json
-import logging
-import pytest
-
 from copy import deepcopy
 from guillotina import testing
 from guillotina import utils
 from guillotina.component import globalregistry
 from guillotina.factory import make_app
+
+import json
+import logging
+import pytest
 
 
 pytestmark = pytest.mark.asyncio

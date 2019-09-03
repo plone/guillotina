@@ -13,9 +13,9 @@
 ##############################################################################
 # flake8: noqa
 
-from zope.interface import Interface
-from zope.interface import implementer
 from zope.interface import directlyProvides
+from zope.interface import implementer
+from zope.interface import Interface
 
 
 class Request(object):

@@ -1,7 +1,7 @@
+from guillotina import task_vars
+
 import logging
 import uuid
-
-from guillotina import task_vars
 
 
 def _wrapped(name):

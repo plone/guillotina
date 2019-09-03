@@ -1,6 +1,7 @@
 from guillotina import configure
 from guillotina.fields import CloudFileField
-from guillotina.schema import Dict, TextLine
+from guillotina.schema import Dict
+from guillotina.schema import TextLine
 from zope.interface import Interface
 
 

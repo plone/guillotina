@@ -1,9 +1,9 @@
 from guillotina import configure
 from guillotina.const import TRASHED_ID
-from guillotina.db.storages.utils import register_sql
 from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.interfaces import IVacuumProvider
+from guillotina.db.storages.utils import register_sql
 
 
 register_sql(
