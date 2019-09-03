@@ -107,7 +107,6 @@ class GlobalRegistry:
     pass
 
 
-
 base = GuillotinaAdapterRegistry(GlobalRegistry, "adapters")
 GlobalRegistry.adapters = base  # type: ignore
 

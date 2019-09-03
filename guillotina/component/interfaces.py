@@ -12,6 +12,8 @@
 #
 ############################################################################
 # flake8: noqa
+
+# fmt: off
 from guillotina.component._compat import _BLANK
 from zope.interface import Attribute
 from zope.interface import implements
@@ -36,6 +38,9 @@ from zope.interface.interfaces import ObjectEvent
 from zope.interface.interfaces import Registered
 from zope.interface.interfaces import RegistrationEvent
 from zope.interface.interfaces import Unregistered
+
+
+# fmt: on
 
 
 class IComponentArchitecture(Interface):
