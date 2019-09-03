@@ -1,7 +1,4 @@
-import base64
-import posixpath
-import uuid
-
+from .const import CHUNK_SIZE
 from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
@@ -23,7 +20,9 @@ from guillotina.utils import get_object_url
 from guillotina.utils import resolve_dotted_name
 from zope.interface import alsoProvides
 
-from .const import CHUNK_SIZE
+import base64
+import posixpath
+import uuid
 
 
 @configure.adapter(for_=(IResource, IRequest, ICloudFileField), provides=IFileManager)

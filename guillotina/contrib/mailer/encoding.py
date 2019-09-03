@@ -1,6 +1,7 @@
 # pulled out of repoze.sendmail
-from email import utils
 from email import header
+from email import utils
+
 
 # From http://tools.ietf.org/html/rfc5322#section-3.6
 ADDR_HEADERS = (

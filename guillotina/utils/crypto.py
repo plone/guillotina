@@ -1,7 +1,8 @@
-import logging
-import string
 from guillotina._settings import app_settings
 from jwcrypto import jwk
+
+import logging
+import string
 
 
 logger = logging.getLogger("guillotina")

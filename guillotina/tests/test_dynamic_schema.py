@@ -1,5 +1,6 @@
 from guillotina import configure
-from guillotina.behaviors.dynamic import IDynamicFields, IDynamicFieldValues
+from guillotina.behaviors.dynamic import IDynamicFields
+from guillotina.behaviors.dynamic import IDynamicFieldValues
 from guillotina.behaviors.properties import FunctionProperty
 from guillotina.content import Item
 from guillotina.content import load_cached_schema

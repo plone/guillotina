@@ -1,12 +1,12 @@
-from typing import TYPE_CHECKING
-
-import guillotina.schema
 from guillotina.component.interfaces import IFactory
 from guillotina.component.interfaces import ISite as IComponentSite
 from guillotina.interfaces.common import IMapping
 from guillotina.schema import TextLine
+from typing import TYPE_CHECKING
 from zope.interface import Attribute
 from zope.interface import Interface
+
+import guillotina.schema
 
 
 if TYPE_CHECKING:  # pragma: no cover

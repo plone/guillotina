@@ -1,16 +1,16 @@
-import asyncio
-import logging
-
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import query_utility
 from guillotina.db.cache.base import BaseCache
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionCache
-from guillotina.exceptions import NoPubSubUtility
 from guillotina.exceptions import NoChannelConfigured
+from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import ICacheUtility
 from guillotina.profile import profilable
+
+import asyncio
+import logging
 
 
 logger = logging.getLogger("guillotina")

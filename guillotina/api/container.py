@@ -1,6 +1,3 @@
-import posixpath
-from typing import Optional
-
 from guillotina import addons
 from guillotina import app_settings
 from guillotina import configure
@@ -27,6 +24,9 @@ from guillotina.response import HTTPNotImplemented
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
+from typing import Optional
+
+import posixpath
 
 
 @configure.service(

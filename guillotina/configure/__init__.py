@@ -1,17 +1,4 @@
-import asyncio
-import inspect
-import logging
 from collections import OrderedDict
-from pprint import pformat
-from typing import Any
-from typing import Dict
-from typing import Optional
-from typing import Tuple
-
-from zope.interface import Interface
-from zope.interface import classImplements
-from zope.interface.interfaces import IInterface
-
 from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.configure import component
@@ -40,6 +27,18 @@ from guillotina.utils import get_caller_module
 from guillotina.utils import get_module_dotted_name
 from guillotina.utils import resolve_dotted_name
 from guillotina.utils import resolve_module_path
+from pprint import pformat
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Tuple
+from zope.interface import classImplements
+from zope.interface import Interface
+from zope.interface.interfaces import IInterface
+
+import asyncio
+import inspect
+import logging
 
 
 _registered_configurations: ConfigurationType = []

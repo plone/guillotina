@@ -1,7 +1,7 @@
-import logging
-
 from guillotina.commands import Command
 from jwcrypto import jwk
+
+import logging
 
 
 logger = logging.getLogger("guillotina")

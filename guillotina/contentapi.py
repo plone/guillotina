@@ -1,5 +1,3 @@
-import typing
-
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
@@ -15,6 +13,8 @@ from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
+
+import typing
 
 
 class ContentAPI:

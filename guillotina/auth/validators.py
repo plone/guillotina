@@ -1,12 +1,5 @@
-import asyncio
-import hashlib
-import logging
-import uuid
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-
-import argon2
-import jwt
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.auth import find_user
@@ -17,6 +10,13 @@ from guillotina.interfaces import IPasswordChecker
 from guillotina.interfaces import IPasswordHasher
 from guillotina.utils import strings_differ
 from lru import LRU
+
+import argon2
+import asyncio
+import hashlib
+import jwt
+import logging
+import uuid
 
 
 ph = argon2.PasswordHasher()

@@ -1,7 +1,4 @@
 from contextvars import ContextVar
-from typing import Dict
-from typing import Optional
-
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
 from guillotina.interfaces import IContainer
@@ -10,6 +7,8 @@ from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ISecurityPolicy
+from typing import Dict
+from typing import Optional
 
 
 request: ContextVar[Optional[IRequest]] = ContextVar("g_request", default=None)

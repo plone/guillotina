@@ -1,6 +1,4 @@
-import copyreg
-import typing
-
+from .misc import IRequest
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.i18n import MessageFactory
 from guillotina.schema import List
@@ -9,7 +7,8 @@ from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
 
-from .misc import IRequest
+import copyreg
+import typing
 
 
 _ = MessageFactory("guillotina")

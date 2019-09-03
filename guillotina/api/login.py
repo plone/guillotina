@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
 from datetime import datetime
 from datetime import timedelta
-
-import jwt
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
@@ -10,10 +8,12 @@ from guillotina.auth import authenticate_user
 from guillotina.event import notify
 from guillotina.events import UserLogin
 from guillotina.events import UserRefreshToken
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IContainer
 from guillotina.response import HTTPUnauthorized
 from guillotina.utils import get_authenticated_user
+
+import jwt
 
 
 @configure.service(

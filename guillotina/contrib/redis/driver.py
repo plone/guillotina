@@ -4,13 +4,15 @@ except ImportError:
     print("If you add guillotina.contrib.redis you need to add aioredis on your requirements")
     raise
 
-import asyncio
-import logging
 from guillotina import app_settings
 from guillotina.contrib.redis.exceptions import NoRedisConfigured
+from typing import Any
 from typing import List
 from typing import Optional
-from typing import Any
+
+import asyncio
+import logging
+
 
 logger = logging.getLogger("guillotina.contrib.redis")
 

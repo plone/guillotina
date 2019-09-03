@@ -1,7 +1,7 @@
+from guillotina.db.orm.interfaces import IBaseObject
+
 import pickle
 import typing
-
-from guillotina.db.orm.interfaces import IBaseObject
 
 
 def reader(result: dict) -> IBaseObject:

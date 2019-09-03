@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import asyncio
-import logging
-
 from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_multi_adapter
@@ -23,6 +20,9 @@ from guillotina.utils import apply_coroutine
 from guillotina.utils import get_object_url
 from guillotina.utils import get_security_policy
 from zope.interface import Interface
+
+import asyncio
+import logging
 
 
 logger = logging.getLogger("guillotina")

@@ -16,7 +16,6 @@ from guillotina.component._compat import _BLANK
 from zope.interface import Attribute
 from zope.interface import implements
 from zope.interface import Interface
-
 # BBB 2011-09-09, import interfaces from zope.interface
 from zope.interface.interfaces import _IBaseAdapterRegistration
 from zope.interface.interfaces import ComponentLookupError
