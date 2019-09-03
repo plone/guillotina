@@ -10,6 +10,8 @@ from typing import Optional
 from typing import TypeVar
 from zope.interface import implementer
 
+import weakref
+
 
 T = TypeVar("T")
 
@@ -92,9 +94,7 @@ class BaseObject:
     __immutable_cache__: bool = ObjectProperty[bool]("_BaseObject__immutable_cache", False)  # type: ignore
     __new_marker__: bool = ObjectProperty[bool]("_BaseObject__new_marker", False)  # type: ignore
     __gannotations__: Dict = DictDefaultProperty("_BaseObject__annotations")  # type: ignore
-    __txn__: Optional[ITransaction] = ObjectProperty[Optional[ITransaction]](  # type: ignore
-        "_BaseObject__txn", None
-    )
+
     __uuid__: str = ObjectProperty[str]("_BaseObject__uuid", None)  # type: ignore
     __serial__: int = ObjectProperty[int]("_BaseObject__serial", None)  # type: ignore
     __volatile__: Dict = DictDefaultProperty("_BaseObject__volatile")  # type: ignore
@@ -113,3 +113,17 @@ class BaseObject:
     @profilable
     def __getstate__(self):
         return self.__dict__
+
+    @property
+    def __txn__(self) -> Optional[ITransaction]:
+        ref = object.__getattribute__(self, "_BaseObject__txn")
+        if ref is not None:
+            return ref()
+        return None
+
+    @__txn__.setter
+    def __txn__(self, val: Optional[ITransaction]):
+        if val is None:
+            object.__setattr__(self, "_BaseObject__txn", None)
+        else:
+            object.__setattr__(self, "_BaseObject__txn", weakref.ref(val))

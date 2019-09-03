@@ -7,12 +7,8 @@ include *.nix
 include *.py
 include Dockerfile
 include LICENSE
-include buildout-pypy.cfg
-include buildout.cfg
-include zeo.cfg
 include docs/*
 include guillotina/documentation/meta/*
-include buildout-newt.cfg
 include guillotina/*
 include guillotina/documentation/meta/*
 exclude pip-selfcheck.json
@@ -23,7 +19,6 @@ recursive-include static *.ico
 include *.txt
 include .coveragerc
 include Makefile
-include buildout-docs.cfg
 include *.md
 include *.yaml
 include *.yml

@@ -434,21 +434,9 @@ class service(_base_decorator):  # noqa: N801
                 raise ServiceConfigurationError(
                     f"Service __call__ method must be async: {func.__call__}\n" f"{pformat(self.config)}"
                 )
-            # create new class with customizations
-            klass = type(func.__name__, (func,), dict(func.__dict__))
-            klass.__config__ = self.config
-            if self.config.get("validate", False):
-                original = klass.__call__
-
-                async def new_call(self):
-                    await self.validate()
-                    return await original(self)
-
-                klass.__call__ = new_call
-            klass.__module__ = func.__module__
-            klass.__allow_access__ = self.config.get("allow_access", getattr(func, "__allow_access__", False))
-            klass.__route__ = routes.Route(self.config.get("name", ""))
-            register_configuration(klass, self.config, "service")
+            klass = func
+            original = klass.__call__
+            call_original = klass._call_original
         else:
             if not _has_parameters(func):
                 raise ServiceConfigurationError(
@@ -459,24 +447,35 @@ class service(_base_decorator):  # noqa: N801
                 raise ServiceConfigurationError(
                     f"Service function must be async: {func}\n" f"{pformat(self.config)}"
                 )
-
-            # avoid circular imports
             from guillotina.api.service import Service
 
-            class _View(self.config.get("base", Service)):
-                __allow_access__ = self.config.get("allow_access", False)
-                __route__ = routes.Route(self.config.get("name", ""))
-                __auto_validate__ = self.config.get("validate", False)
-                __config__ = self.config
-                view_func = staticmethod(func)
+            klass = self.config.get("base", Service)
+            original = staticmethod(func)
+            call_original = klass._call_original_func
 
-                async def __call__(self):
-
-                    if self.__auto_validate__:
-                        await self.validate()
-                    return await func(self.context, self.request)
-
-            register_configuration(_View, self.config, "service")
+        call = call_original
+        if self.config.get("validate", False):
+            call = klass._call_validate
+        # create new class with customizations
+        klass = type(
+            func.__name__,
+            (klass,),
+            {
+                **dict(klass.__dict__),
+                **{
+                    "__module__": func.__module__,
+                    "__allow_access__": self.config.get(
+                        "allow_access", getattr(klass, "__allow_access__", False)
+                    ),
+                    "__route__": routes.Route(self.config.get("name", "")),
+                    "__config__": self.config,
+                    "__original__": original,
+                    "__call__": call,
+                    "_call_original": call_original,
+                },
+            },
+        )
+        register_configuration(klass, self.config, "service")
         return func
 
 

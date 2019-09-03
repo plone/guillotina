@@ -18,7 +18,7 @@ RUN mkdir /app
 COPY requirements.txt /requirements.txt
 COPY VERSION /VERSION
 
-# Install buildout
+# Install with pip
 RUN pip install -r /requirements.txt
 COPY . /app
 RUN pip install /app

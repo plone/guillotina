@@ -217,10 +217,10 @@ Supported params:
    :method: POST
    :basic_auth: root:root
    :body: {
-      "type_name": "Item",
-      "_from": 10,
-      "_size": 5,
-      "modification_date__gt": "2019-06-15T18:37:31.008359+00:00",
-      "_sort_asc": "modification_date",
-      "_metadata": "title,description"
-   }
+         "type_name": "Item",
+         "_from": 10,
+         "_size": 5,
+         "modification_date__gt": "2019-06-15T18:37:31.008359+00:00",
+         "_sort_asc": "modification_date",
+         "_metadata": "title,description"
+      }
