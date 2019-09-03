@@ -13,11 +13,10 @@
 ##############################################################################
 # flake8: noqa
 
-from zope.interface import Interface
-from zope.interface import implementer
-
 from guillotina.component import adapter
 from guillotina.component.testfiles import components
+from zope.interface import implementer
+from zope.interface import Interface
 
 
 class I1(Interface):

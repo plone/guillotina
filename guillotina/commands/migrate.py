@@ -1,11 +1,11 @@
-import logging
 from distutils.version import StrictVersion
-
 from guillotina.commands import Command
 from guillotina.component import get_utilities_for
 from guillotina.interfaces import IMigration
 from guillotina.transactions import transaction
 from guillotina.utils import iter_databases
+
+import logging
 
 
 logger = logging.getLogger("guillotina")

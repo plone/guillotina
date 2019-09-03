@@ -1,6 +1,7 @@
 from guillotina.utils import resolve_dotted_name
-import pytest
+
 import asyncio
+import pytest
 
 
 @pytest.mark.app_settings({"applications": ["guillotina", "guillotina.contrib.redis"]})

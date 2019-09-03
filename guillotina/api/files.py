@@ -1,5 +1,3 @@
-import mimetypes
-
 from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
@@ -13,6 +11,8 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.response import HTTPNotFound
+
+import mimetypes
 
 
 def _traversed_file_doc(summary, parameters=None, responses=None):

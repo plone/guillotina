@@ -1,5 +1,3 @@
-import json
-
 from guillotina.api.container import create_container
 from guillotina.auth.users import GuillotinaUser
 from guillotina.content import create_content_in_container
@@ -12,6 +10,8 @@ from guillotina.tests import utils
 from guillotina.tests.utils import get_db
 from guillotina.transactions import transaction
 from guillotina.utils import get_security_policy
+
+import json
 
 
 async def test_get_guillotina(container_requester):

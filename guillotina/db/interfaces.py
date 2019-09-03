@@ -1,10 +1,10 @@
-import typing
-
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
-from guillotina.db.orm.interfaces import IBaseObject
 from zope.interface import Attribute
 from zope.interface import Interface
+
+import typing
 
 
 class IPartition(Interface):

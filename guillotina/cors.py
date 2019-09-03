@@ -1,9 +1,9 @@
-import fnmatch
-
 from aiohttp.web_exceptions import HTTPUnauthorized
 from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina.interfaces import IRequest
+
+import fnmatch
 
 
 logger = glogging.getLogger("guillotina")

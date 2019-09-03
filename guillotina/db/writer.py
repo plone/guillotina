@@ -1,5 +1,3 @@
-import pickle
-
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.catalog.catalog import DefaultCatalogDataAdapter
@@ -10,6 +8,8 @@ from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IResource
 from guillotina.utils import find_container
 from guillotina.utils import get_dotted_name
+
+import pickle
 
 
 @configure.adapter(for_=IResource, provides=IJSONDBSerializer)

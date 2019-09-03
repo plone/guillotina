@@ -34,8 +34,6 @@ from .content import IResourceFactory  # noqa
 from .content import IStaticDirectory  # noqa
 from .content import IStaticFile  # noqa
 from .content import ITraversable  # noqa
-from .mail import IMailer  # noqa
-from .mail import IMailEndpoint  # noqa
 from .events import IAfterAsyncUtilityLoadedEvent  # noqa
 from .events import IApplicationCleanupEvent  # noqa
 from .events import IApplicationConfiguredEvent  # noqa
@@ -91,6 +89,8 @@ from .json import ISchemaFieldSerializeToJson  # noqa
 from .json import ISchemaSerializeToJson  # noqa
 from .json import IValueToJson  # noqa
 from .layer import IDefaultLayer  # noqa
+from .mail import IMailEndpoint  # noqa
+from .mail import IMailer  # noqa
 from .migration import IMigration  # noqa
 from .misc import IAbsoluteURL  # noqa
 from .misc import IAddOn  # noqa

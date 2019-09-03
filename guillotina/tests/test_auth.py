@@ -1,9 +1,9 @@
 from datetime import datetime
 from datetime import timedelta
-
-import jwt
 from guillotina._settings import app_settings
 from guillotina.auth import validators
+
+import jwt
 
 
 async def test_jwt_auth(container_requester):

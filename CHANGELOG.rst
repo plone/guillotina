@@ -4,7 +4,8 @@ CHANGELOG
 5.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Sorted imports in all files and added `isort` in .travis to keep the format
+  [masipcat]
 
 
 5.0.3 (2019-09-02)

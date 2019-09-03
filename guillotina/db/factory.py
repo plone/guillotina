@@ -1,8 +1,4 @@
-import string
 from copy import deepcopy
-from typing import List
-
-import asyncpg
 from guillotina import configure
 from guillotina.component import get_utility
 from guillotina.db.interfaces import IDatabaseManager
@@ -19,6 +15,10 @@ from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
 from guillotina.utils import apply_coroutine
 from guillotina.utils import resolve_dotted_name
+from typing import List
+
+import asyncpg
+import string
 
 
 def _get_connection_options(dbconfig):

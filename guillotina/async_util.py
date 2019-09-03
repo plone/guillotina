@@ -1,5 +1,6 @@
 from dateutil.tz import tzutc
-from guillotina import logger, task_vars
+from guillotina import logger
+from guillotina import task_vars
 from guillotina.db.transaction import Status
 from guillotina.exceptions import ServerClosingException
 from guillotina.exceptions import TransactionNotFound

@@ -1,5 +1,3 @@
-import typing
-
 from guillotina import configure
 from guillotina.auth.users import SystemUser
 from guillotina.component import get_utility
@@ -22,6 +20,8 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
 from lru import LRU
+
+import typing
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting

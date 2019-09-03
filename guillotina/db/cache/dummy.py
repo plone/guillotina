@@ -1,7 +1,7 @@
 from guillotina import configure
 from guillotina.db.cache.base import BaseCache
-from guillotina.db.interfaces import ITransactionCache
 from guillotina.db.interfaces import ITransaction
+from guillotina.db.interfaces import ITransactionCache
 
 
 @configure.adapter(for_=ITransaction, provides=ITransactionCache, name="dummy")

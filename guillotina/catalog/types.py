@@ -1,6 +1,6 @@
-import typing
-
 from mypy_extensions import TypedDict
+
+import typing
 
 
 class BasicParsedQueryInfo(TypedDict):

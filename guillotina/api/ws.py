@@ -1,8 +1,3 @@
-import time
-from urllib import parse
-
-import aiohttp
-import ujson
 from aiohttp import web
 from guillotina import configure
 from guillotina import logger
@@ -23,6 +18,11 @@ from guillotina.utils import get_jwk_key
 from guillotina.utils import get_security_policy
 from jwcrypto import jwe
 from jwcrypto.common import json_encode
+from urllib import parse
+
+import aiohttp
+import time
+import ujson
 
 
 @configure.service(

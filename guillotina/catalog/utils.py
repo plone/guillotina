@@ -1,14 +1,11 @@
-import logging
-import typing
-
 from guillotina import app_settings
 from guillotina.catalog.types import BasicParsedQueryInfo
 from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.component import query_utility
-from guillotina.content import IResourceFactory
 from guillotina.content import get_all_possible_schemas_for_type
+from guillotina.content import IResourceFactory
 from guillotina.directives import index_field
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
@@ -16,6 +13,9 @@ from guillotina.directives import metadata
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import ISearchParser
 from guillotina.utils import execute
+
+import logging
+import typing
 
 
 logger = logging.getLogger("guillotina")

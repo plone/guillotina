@@ -1,6 +1,3 @@
-import json
-import time
-
 from guillotina import configure
 from guillotina.contrib.redis import get_driver
 from guillotina.files.adapter import DBDataManager
@@ -8,6 +5,9 @@ from guillotina.interfaces import IExternalFileStorageManager
 from guillotina.interfaces import IUploadDataManager
 from guillotina.renderers import GuillotinaJSONEncoder
 from guillotina.transactions import get_transaction
+
+import json
+import time
 
 
 @configure.adapter(for_=IExternalFileStorageManager, provides=IUploadDataManager, name="redis")

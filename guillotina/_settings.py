@@ -1,9 +1,9 @@
-import copy
+from guillotina import interfaces
+from guillotina.db.uid import generate_uid
 from typing import Any
 from typing import Dict
 
-from guillotina import interfaces
-from guillotina.db.uid import generate_uid
+import copy
 
 
 app_settings: Dict[str, Any] = {

@@ -1,8 +1,5 @@
 from datetime import datetime
 from datetime import timedelta
-from typing import Optional
-
-import jwt
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth import groups  # noqa
@@ -12,6 +9,9 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IPrincipal
 from guillotina.profile import profilable
 from guillotina.utils import get_security_policy
+from typing import Optional
+
+import jwt
 
 
 @profilable

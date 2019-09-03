@@ -4,6 +4,7 @@ from guillotina.commands import Command
 import asyncio
 import sys
 
+
 try:
     from aiohttp.web_log import AccessLogger  # type: ignore
 except ImportError:

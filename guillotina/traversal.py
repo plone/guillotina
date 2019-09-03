@@ -1,14 +1,7 @@
 """Main routing traversal class."""
-import traceback
-import uuid
-from contextlib import contextmanager
-from typing import List
-from typing import Optional
-from typing import Tuple
-
-import aiohttp
 from aiohttp.abc import AbstractMatchInfo
 from aiohttp.abc import AbstractRouter
+from contextlib import contextmanager
 from guillotina import __version__
 from guillotina import error_reasons
 from guillotina import logger
@@ -37,7 +30,6 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
-from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAsyncContainer
@@ -45,6 +37,7 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IErrorResponseException
 from guillotina.interfaces import ILanguage
+from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
@@ -60,7 +53,14 @@ from guillotina.transactions import commit
 from guillotina.utils import get_registry
 from guillotina.utils import get_security_policy
 from guillotina.utils import import_class
+from typing import List
+from typing import Optional
+from typing import Tuple
 from zope.interface import alsoProvides
+
+import aiohttp
+import traceback
+import uuid
 
 
 async def traverse(request, parent, path):
