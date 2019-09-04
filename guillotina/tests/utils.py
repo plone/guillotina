@@ -21,7 +21,6 @@ from multidict import CIMultiDict
 from unittest import mock
 from yarl import URL
 from zope.interface import alsoProvides
-from zope.interface import implementer
 
 import json
 import uuid

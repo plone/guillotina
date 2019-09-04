@@ -1,4 +1,3 @@
-from guillotina.schema import BytesLine
 from zope.interface import Interface
 
 
