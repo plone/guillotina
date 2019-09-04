@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.4 (unreleased)
+5.0.4 (2019-09-04)
 ------------------
 
 - Upgrade mypy
