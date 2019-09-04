@@ -13,7 +13,7 @@ logger = logging.getLogger("guillotina")
 
 
 @implementer(IStorage)
-class DummyStorage(BaseStorage):
+class DummyStorage(BaseStorage):  # type: ignore
     """
     Dummy in-memory storage for testing
     """
@@ -220,14 +220,14 @@ class DummyStorage(BaseStorage):
 
 
 @implementer(IStorage)
-class DummyFileStorage(DummyStorage):  # pragma: no cover
-    def __init__(self, filename="g.db"):
+class DummyFileStorage(DummyStorage):  # type: ignore
+    def __init__(self, filename="g.db"):  # pragma: no cover
         super(DummyFileStorage, self).__init__()
         self.filename = filename
         self.blob_filename = self.filename + ".blobs"
         self.__load()
 
-    def __load(self):
+    def __load(self):  # pragma: no cover
         if not os.path.exists(self.filename):
             return
         with open(self.filename, "rb") as fi:
@@ -242,12 +242,12 @@ class DummyFileStorage(DummyStorage):  # pragma: no cover
                 except EOFError:
                     logger.warning(f"Could not load db file {self.blob_filename}")
 
-    def __save(self):
+    def __save(self):  # pragma: no cover
         with open(self.filename, "wb") as fi:
             fi.write(pickle.dumps(self._db))
         with open(self.blob_filename, "wb") as fi:
             fi.write(pickle.dumps(self._blobs))
 
-    async def commit(self, transaction):
+    async def commit(self, transaction):  # pragma: no cover
         await super().commit(transaction)
         self.__save()

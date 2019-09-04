@@ -10,7 +10,7 @@ import pytest
 
 
 @implementer(IResource)
-class ObjectTest(BaseObject):
+class ObjectTest(BaseObject):  # type: ignore
     pass
 
 

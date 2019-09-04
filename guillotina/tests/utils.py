@@ -21,7 +21,6 @@ from multidict import CIMultiDict
 from unittest import mock
 from yarl import URL
 from zope.interface import alsoProvides
-from zope.interface import implementer
 
 import json
 import uuid
@@ -74,16 +73,6 @@ async def get_container(*, requester=None, tm=None, db=None, container_id="guill
         container = await root.async_get(container_id)
         task_vars.container.set(container)
         return container
-
-
-@implementer(IRequest, IDefaultLayer)
-class FakeRequest(object):
-
-    _txn_dm = None
-
-    def __init__(self, conn=None):
-        self.headers = {}
-        self._txn_dm = conn
 
 
 def register(ob):

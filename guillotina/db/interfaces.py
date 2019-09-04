@@ -203,7 +203,7 @@ class IStorage(Interface):
         Get current tid
         """
 
-    async def get_conflicts(txn, full=False):
+    async def get_conflicts(txn):
         """
         get conflicted ob writes
         """

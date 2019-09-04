@@ -64,13 +64,13 @@ class IMapping(Interface):
     def clear():  # type: ignore
         "delete all items"
 
-    def update(d):  # noqa: N805
+    def update(*others):  # noqa: N805
         " Update D from E: for k in E.keys(): D[k] = E[k]"
 
     def setdefault(key, default=None):  # noqa: N805
         "D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"
 
-    def pop(k, *args):  # noqa: N805
+    def pop(key, default=None):  # noqa: N805
         """remove specified key and return the corresponding value
         *args may contain a single default value, or may not be supplied.
         If key is not found, default is returned if given, otherwise

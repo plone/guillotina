@@ -4,6 +4,9 @@ CHANGELOG
 5.0.4 (unreleased)
 ------------------
 
+- Upgrade mypy
+  [vangheem]
+
 - Fix not setting cache values for updated object when push is not enabled
   [vangheem]
 

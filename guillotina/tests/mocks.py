@@ -22,7 +22,7 @@ class MockDBTransaction:
 
 
 @implementer(ITransaction)
-class MockTransaction:
+class MockTransaction:  # type: ignore
     def __init__(self, manager=None):
         if manager is None:
             manager = MockTransactionManager()
@@ -45,8 +45,8 @@ class MockTransaction:
     async def refresh(self, ob):
         return ob
 
-    def register(self, ob):
-        self.modified[ob.__uuid__] = ob
+    def register(self, ob, new_oid=None):
+        self.modified[new_oid or ob.__uuid__] = ob
 
     def tpc_cleanup(self):
         pass
@@ -70,7 +70,7 @@ class MockTransaction:
 
 
 @implementer(IStorage)
-class MockStorage:
+class MockStorage:  # type: ignore
 
     _cache: dict = {}
     _read_only = False
@@ -116,7 +116,7 @@ class MockStorage:
             if oid in self._objects:
                 return self._objects[oid]
 
-    def store(self, ob):
+    def store(self, oid, old_serial, writer, ob, txn):
         writer = IWriter(ob)
         self._objects[ob.__uuid__] = {
             "state": writer.serialize(),
@@ -129,7 +129,7 @@ class MockStorage:
             self._objects[ob.__parent__.__uuid__]["children"][ob.id] = ob.__uuid__
 
 
-class MockTransactionManager:
+class MockTransactionManager:  # type: ignore
     _storage = None
     db_id = "root"
 

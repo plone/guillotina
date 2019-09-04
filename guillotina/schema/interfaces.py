@@ -673,7 +673,7 @@ class IFieldUpdatedEvent(IFieldEvent):
 class IJSONField(IField):
     """A text field that stores A JSON."""
 
-    schema = Attribute("schema", _("The JSON schema string serialization."))
+    json_schema = Attribute("json_schema", _("The JSON schema string serialization."))
 
 
 class IUnionField(IField):

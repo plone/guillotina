@@ -40,10 +40,10 @@ class IAbsoluteURL(Interface):
 
 
 class IAddOn(Interface):
-    def install(cls, container, request):  # noqa: N805
+    def install(container, request):  # noqa: N805
         """
         """
 
-    def uninstall(cls, container, request):  # noqa: N805
+    def uninstall(container, request):  # noqa: N805
         """
         """
