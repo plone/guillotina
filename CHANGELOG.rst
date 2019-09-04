@@ -4,8 +4,8 @@ CHANGELOG
 5.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Adding Helm Charts
+  [karannaoh]
 
 5.0.4 (2019-09-04)
 ------------------
@@ -96,6 +96,8 @@ CHANGELOG
 - Fix cache key for SQLStatements cache. This was causing vacuuming on multi-db environments
   to not work since the vacuuming object was shared between dbs on guillotina_dynamictablestorage.
   [vangheem]
+
+- Refractor and bug fix in validation of parameter
 
 - Implement more optimized way to vacuum objects which dramatically improves handling
   of deleting very large object trees
