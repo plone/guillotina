@@ -4,6 +4,12 @@ CHANGELOG
 5.0.4 (unreleased)
 ------------------
 
+- Fix not setting cache values for updated object when push is not enabled
+  [vangheem]
+
+- Fix conflict error handling with registry objects
+  [vangheem]
+
 - Sorted imports in all files and added `isort` in .travis to keep the format
   [masipcat]
 

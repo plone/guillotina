@@ -152,7 +152,7 @@ class GuillotinaAIOHTTPApplication(web.Application):
                     getattr(getattr(request, "_txn", None), "_tid", "not issued")
                 )
             )
-            return HTTPConflict()
+            return HTTPConflict(body=json.dumps({"summary": str(e)}), content_type="application/json")
 
     def _make_request(self, message, payload, protocol, writer, task, _cls=Request):
         return _cls(
