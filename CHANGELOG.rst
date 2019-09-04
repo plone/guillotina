@@ -1,8 +1,11 @@
 CHANGELOG
 =========
 
-5.0.5 (unreleased)
+5.0.6 (unreleased)
 ------------------
+
+- Fix `execute.clear_futures()`
+  [vangheem]
 
 - Adding Helm Charts
   [karannaoh]
