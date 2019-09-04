@@ -99,7 +99,7 @@ configure.permission("example.MyPermission", "example permission")
 
 
 @implementer(IExample)
-class Example(Resource):
+class Example(Resource):  # type: ignore
     pass
 
 
@@ -255,7 +255,7 @@ def dictfile_converter(value, field):
 
 
 @implementer(IInMemoryCloudFile)
-class MemoryFile(BaseCloudFile):
+class MemoryFile(BaseCloudFile):  # type: ignore
     """File stored in a GCloud, with a filename."""
 
     _chunks = 0

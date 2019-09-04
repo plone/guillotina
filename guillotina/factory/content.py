@@ -32,7 +32,7 @@ logger = logging.getLogger("guillotina")
 
 
 @implementer(IApplication)
-class ApplicationRoot(object):
+class ApplicationRoot:  # type: ignore
     executor = ThreadPoolExecutor(max_workers=100)
     root_user = None
     app = None  # set after app configuration is done
@@ -129,7 +129,7 @@ class ApplicationRoot(object):
     def __setitem__(self, key, value):
         self._items[key] = value
 
-    async def async_get(self, key, suppress_events=True):
+    async def async_get(self, key, default=None, suppress_events=True):
         if key in self._items:
             return self._items[key]
         # check configured storages, see if there is a database registered under this name...
@@ -138,6 +138,7 @@ class ApplicationRoot(object):
             factory = get_adapter(self, IDatabaseManager, name=manager, args=[config])
             if await factory.exists(key):
                 return await factory.get_database(key)
+        return default
 
 
 @implementer(IDatabase)
@@ -149,7 +150,7 @@ class Database:
         Database object is persistent through the application
         """
         self._storage = storage
-        self.id = self._database_name = key
+        self.id = self.__db_id__ = key
         self._tm = None
         self.transaction_klass = klass
 
@@ -171,12 +172,12 @@ class Database:
                 root = app_settings["object_reader"](root)
                 root.__txn__ = txn
                 if root.__db_id__ is None:
-                    root.__db_id__ = self._database_name
+                    root.__db_id__ = self.__db_id__
                     await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
         except KeyError:
             from guillotina.db.db import Root
 
-            root = Root(self._database_name)
+            root = Root(self.__db_id__)
             await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
         finally:
             await tm.commit(txn=txn)
@@ -213,10 +214,11 @@ class Database:
         except KeyError:
             pass
 
-    async def async_get(self, key, suppress_events=False):
+    async def async_get(self, key, default=None, suppress_events=False):
         root = await self.get_root()
         if root is not None:
             return await root.async_get(key)
+        return default
 
     async def async_keys(self):
         root = await self.get_root()

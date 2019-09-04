@@ -14,11 +14,6 @@ class IMailer(Interface):
     def send(recipient=None, subject=None, message=None, text=None, html=None, sender=None):
         pass
 
-    def send_immediately(
-        recipient=None, subject=None, message=None, text=None, html=None, sender=None, fail_silently=False
-    ):
-        pass
-
 
 class IMailEndpoint(Interface):
     def __init__():

@@ -81,10 +81,6 @@ class ITraversable(Interface):
     A content object that contains content that can be traversed to
     """
 
-    def get(name):  # noqa: N805
-        """
-        """
-
 
 class IApplication(ITraversable, IAsyncContainer):
     """

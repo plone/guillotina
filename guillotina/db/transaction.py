@@ -71,6 +71,7 @@ class cache:
 class Transaction:
     _status = "empty"
     _skip_commit = False
+    user = None
 
     def __init__(self, manager, loop=None, read_only=False):
         # Transaction Manager
@@ -95,6 +96,7 @@ class Transaction:
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE
+        self.user = None
 
         # List of objects added
         # needs to be ordered because content inserted after other might

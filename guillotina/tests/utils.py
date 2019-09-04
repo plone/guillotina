@@ -76,16 +76,6 @@ async def get_container(*, requester=None, tm=None, db=None, container_id="guill
         return container
 
 
-@implementer(IRequest, IDefaultLayer)
-class FakeRequest(object):
-
-    _txn_dm = None
-
-    def __init__(self, conn=None):
-        self.headers = {}
-        self._txn_dm = conn
-
-
 def register(ob):
     if ob.__txn__ is None:
         from guillotina.tests.mocks import FakeConnection

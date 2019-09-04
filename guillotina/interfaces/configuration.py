@@ -17,19 +17,7 @@ class IConfigurationContext(Interface):
     importing objects and opening files relative to the package.
     """
 
-    package = BytesLine(
-        title="The current package name",
-        description="""\
-          This is the name of the package containing the configuration
-          file being executed. If the configuration file was not
-          included by package, then this is None.
-          """,
-        required=False,
-    )
-
-    def action(
-        discriminator, callable, args=None, kw=None, order=0, includepath=None, info=None  # noqa: N805
-    ):
+    def action(discriminator, callable=None, args=(), kw=None, **extra):
         """Record a configuration action
 
         The job of most directives is to compute actions for later

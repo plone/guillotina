@@ -73,7 +73,7 @@ class Comp3(object):
 @adapter(IContent)
 @implementer(IApp)
 @named("app")
-class Comp4(object):
+class Comp4(object):  # type: ignore
     def __init__(self, context=None):
         self.context = context
 

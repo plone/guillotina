@@ -9,7 +9,8 @@ ANONYMOUS_USER_ID = "Anonymous User"
 
 @implementer(IPrincipal)
 class BaseUser:
-    pass
+    groups: list
+    id: str
 
 
 class SystemUser(BaseUser):

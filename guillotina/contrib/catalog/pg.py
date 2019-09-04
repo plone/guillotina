@@ -420,7 +420,7 @@ class PGSearchUtility(DefaultSearchUtility):
         # stored in db...
         return {}
 
-    async def initialize(self):
+    async def initialize(self, app):
         from guillotina import app_settings
 
         if not app_settings["store_json"]:

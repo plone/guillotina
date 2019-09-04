@@ -4,6 +4,9 @@ CHANGELOG
 5.0.4 (unreleased)
 ------------------
 
+- Upgrade mypy
+  [vangheem]
+
 - Sorted imports in all files and added `isort` in .travis to keep the format
   [masipcat]
 
