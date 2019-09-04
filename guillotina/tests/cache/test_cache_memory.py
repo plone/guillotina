@@ -112,7 +112,7 @@ async def test_cache_object_from_child(guillotina_main, loop):
     ob = create_content()
     parent = create_content()
     ob.__parent__ = parent
-    storage.store(parent)
+    storage.store(None, None, None, parent, txn)
     storage.store(None, None, None, ob, txn)
 
     loaded = await txn.get_child(parent, ob.id)
