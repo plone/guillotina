@@ -109,5 +109,5 @@ class BaseCache:
                 ]
         return keys
 
-    async def close(self, invalidate=True):
+    async def close(self, invalidate=True, publish=True):
         pass

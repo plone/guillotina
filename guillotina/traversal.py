@@ -104,6 +104,9 @@ async def traverse(request, parent, path):
 
     if IContainer.providedBy(context):
         task_vars.container.set(context)
+        # make sure to unset before we attempt to load in case
+        # there is an existing registry object set on task_vars
+        task_vars.registry.set(None)
         registry = await get_registry(context)
         layers = registry.get(ACTIVE_LAYERS_KEY, [])
         for layer in layers:

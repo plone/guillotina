@@ -330,7 +330,7 @@ class Transaction:
             # and invalidate again to make sure we aren't caching the ob
             self.status = Status.CONFLICT
             await self._manager._storage.abort(self)
-            await self._cache.close(invalidate=isinstance(ex, TIDConflictError))
+            await self._cache.close(invalidate=isinstance(ex, TIDConflictError), publish=False)
             self.tpc_cleanup()
             raise
         self.status = Status.COMMITTED
