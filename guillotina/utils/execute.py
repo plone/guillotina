@@ -212,7 +212,7 @@ def execute_futures(scope: str = "", futures=None, task=None) -> Optional[asynci
     return None
 
 
-def clear_futures(self):
+def clear_futures():
     futures = task_vars.futures.get() or {}
     futures.clear()
 

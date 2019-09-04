@@ -89,7 +89,7 @@ class Request(web_request.Request):
         return execute.execute_futures(scope)
 
     def clear_futures(self):
-        self._futures = {}
+        execute.clear_futures()
 
     @property
     def uid(self):

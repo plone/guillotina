@@ -4,7 +4,7 @@ CHANGELOG
 5.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `execute.clear_futures`
 
 
 5.0.4 (2019-09-04)
