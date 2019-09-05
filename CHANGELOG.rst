@@ -4,7 +4,7 @@ CHANGELOG
 5.0.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- pypi package desc fix
 
 
 5.0.7 (2019-09-05)
