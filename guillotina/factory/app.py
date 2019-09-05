@@ -135,6 +135,18 @@ def load_application(module, root, settings):
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
         task_vars.request.set(request)
+        for var in (
+            "txn",
+            "tm",
+            "futures",
+            "authenticated_user",
+            "security_policies",
+            "container",
+            "registry",
+            "db",
+        ):
+            # and make sure to reset various task vars...
+            getattr(task_vars, var).set(None)
         try:
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
