@@ -4,7 +4,8 @@ CHANGELOG
 5.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle errors vacuuming
+  [vangheem]
 
 
 5.0.8 (2019-09-05)

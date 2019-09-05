@@ -23,4 +23,7 @@ class VacuumCommand(Command):
 
     async def run(self, arguments, settings, app):
         async for db in iter_databases():
-            await self.vacuum(db)
+            try:
+                await self.vacuum(db)
+            except Exception:  # pragma: no cover
+                logger.error("Error vacuuming db", exc_info=True)
