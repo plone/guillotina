@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.9 (unreleased)
+5.0.9 (2019-09-05)
 ------------------
 
 - Handle errors vacuuming
