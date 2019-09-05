@@ -4,7 +4,11 @@ CHANGELOG
 5.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Explicitly reset task vars on every request
+  [vangheem]
+
+- Fix futures execute error when no futures are defined for type
+  [vangheem]
 
 
 5.0.6 (2019-09-04)
