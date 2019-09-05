@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.7 (unreleased)
+5.0.7 (2019-09-05)
 ------------------
 
 - Explicitly reset task vars on every request
