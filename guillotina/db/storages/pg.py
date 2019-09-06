@@ -616,6 +616,10 @@ class PostgresqlStorage(BaseStorage):
         await self._connection_manager.close()
 
     @property
+    def sql(self):
+        return self._sql
+
+    @property
     def read_conn(self):
         return self._connection_manager.read_conn
 

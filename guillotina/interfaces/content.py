@@ -1,5 +1,6 @@
 from guillotina.component.interfaces import IFactory
 from guillotina.component.interfaces import ISite as IComponentSite
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces.common import IMapping
 from guillotina.schema import TextLine
 from typing import TYPE_CHECKING
@@ -82,7 +83,7 @@ class ITraversable(Interface):
     """
 
 
-class IApplication(ITraversable, IAsyncContainer):
+class IApplication(IBaseObject, ITraversable, IAsyncContainer):
     """
     """
 
@@ -163,7 +164,7 @@ class ILocation(Interface):
     )
 
 
-class IResource(ILocation):
+class IResource(IBaseObject, ILocation):
 
     __acl__ = Attribute("")
     __gannotations__ = Attribute("")
