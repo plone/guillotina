@@ -48,10 +48,10 @@ setup(
     url="https://github.com/plone/guillotina",
     license="BSD",
     setup_requires=["pytest-runner"],
-    zip_safe=True,
+    zip_safe=False,
     include_package_data=True,
     ext_modules=[lru_module],
-    package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"]},
+    package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"], "guillotina": ["py.typed"]},
     packages=find_packages(),
     install_requires=[
         "aiohttp>=3.0.0,<4.0.0",

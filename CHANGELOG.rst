@@ -4,7 +4,8 @@ CHANGELOG
 5.0.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to use guillotina's types in 3rd party apps
+  [vangheem]
 
 
 5.0.9 (2019-09-05)
