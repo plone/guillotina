@@ -120,6 +120,11 @@ class ITransactionManager(Interface):
         abort txn
         """
 
+    async def begin(read_only: bool = False) -> ITransaction:
+        """
+        Begin new transaction
+        """
+
 
 class ITransactionCache(Interface):
     async def clear():  # type: ignore
@@ -287,6 +292,7 @@ class IStorage(Interface):
 class IPostgresStorage(IStorage):
     objects_table_name = Attribute("")
     sql = Attribute("")
+    pool = Attribute("")
 
 
 class ICockroachStorage(IStorage):

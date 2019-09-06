@@ -1,8 +1,9 @@
+from .content import IResource
 from zope.interface import Interface
 
 
 class IConstrainTypes(Interface):  # pylint: disable=E0239
-    def __init__(context, default=None):  # noqa: N805
+    def __init__(context: IResource, default=None):  # noqa: N805
         """
         """
 
