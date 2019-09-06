@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.10 (unreleased)
+5.0.10 (2019-09-06)
 -------------------
 
 - Be able to use guillotina's types in 3rd party apps
