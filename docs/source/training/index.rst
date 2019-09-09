@@ -2,9 +2,9 @@ Training
 ========
 
 Prerequisites:
- - Python >= 3.6
- - Docker
- - Postman
+ - `Python 3.7 <https://www.python.org/>`_
+ - `Docker <https://www.docker.com/>`_
+ - `Postman <https://www.getpostman.com/>`_
 
 
 Contents:
