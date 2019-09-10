@@ -4,7 +4,8 @@ CHANGELOG
 5.0.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Adjust Sphinx to build in in parallel
+  [svx]
 
 
 5.0.10 (2019-09-06)
