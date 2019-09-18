@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.11 (unreleased)
+5.0.11 (2019-09-18)
 -------------------
 
 - Fix patch field delete to handle when value is None
