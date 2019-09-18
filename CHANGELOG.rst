@@ -4,6 +4,9 @@ CHANGELOG
 5.0.11 (unreleased)
 -------------------
 
+- Fix patch field delete to handle when value is None
+  [vangheem]
+
 - Adjust Sphinx to build in in parallel
   [svx]
 
