@@ -4,7 +4,7 @@ CHANGELOG
 5.0.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Swagger url support for X-Forwarded-Proto and X-Forwarded-Schema
 
 
 5.0.11 (2019-09-18)
