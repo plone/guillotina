@@ -149,6 +149,8 @@ class Resource(guillotina.db.orm.base.BaseObject):
     creation_date = None
     modification_date = None
     title = None
+    creators = ()
+    contributors = ()
 
     @property
     def uuid(self):

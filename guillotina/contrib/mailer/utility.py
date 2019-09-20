@@ -188,6 +188,16 @@ class MailerUtility:
             _id = "%s-%s" % (str(time.time()), get_random_string(20))
         return "<%s@%s>" % (_id, domain)
 
+    async def initialize(self, app):
+        """
+        No implementation necessary
+        """
+
+    async def finalize(self):
+        """
+        No implementation necessary
+        """
+
 
 @implementer(IMailer)
 class PrintingMailerUtility(MailerUtility):

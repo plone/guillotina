@@ -71,6 +71,7 @@ class cache:
 class Transaction:
     _status = "empty"
     _skip_commit = False
+    user = None
 
     def __init__(self, manager, loop=None, read_only=False):
         # Transaction Manager
@@ -95,6 +96,7 @@ class Transaction:
         self._txn_time = None
         self._tid = None
         self.status = Status.ACTIVE
+        self.user = None
 
         # List of objects added
         # needs to be ordered because content inserted after other might
@@ -328,7 +330,7 @@ class Transaction:
             # and invalidate again to make sure we aren't caching the ob
             self.status = Status.CONFLICT
             await self._manager._storage.abort(self)
-            await self._cache.close(invalidate=isinstance(ex, TIDConflictError))
+            await self._cache.close(invalidate=isinstance(ex, TIDConflictError), publish=False)
             self.tpc_cleanup()
             raise
         self.status = Status.COMMITTED

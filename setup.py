@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+from setuptools import Extension
 from setuptools import find_packages
 from setuptools import setup
-from setuptools import Extension
 
 
 long_description = open("README.rst").read() + "\n"
@@ -15,7 +15,9 @@ for line in changelog.splitlines():
     long_description += "\n" + line
 
 
-long_description += """...
+long_description += """
+
+...
 
 You are seeing a truncated changelog.
 

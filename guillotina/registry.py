@@ -10,7 +10,7 @@ from zope.interface import implementer
 REGISTRY_DATA_KEY = "_registry"
 
 
-class RecordsProxy(object):
+class RecordsProxy:
     """A adapter that knows how to store data in registry.
 
     Each value will be stored as a primitive in the registry under a key
@@ -50,7 +50,7 @@ class RecordsProxy(object):
 
 
 @implementer(IRegistry, IBaseObject)
-class Registry(AnnotationData):
+class Registry(AnnotationData):  # type: ignore
 
     __name__ = "_registry"
     type_name = "Registry"

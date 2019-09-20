@@ -51,6 +51,18 @@ class AsgiApp:
 
         request = Request.factory(scope, send, receive)
         task_vars.request.set(request)
+        for var in (
+            "txn",
+            "tm",
+            "futures",
+            "authenticated_user",
+            "security_policies",
+            "container",
+            "registry",
+            "db",
+        ):
+            # and make sure to reset various task vars...
+            getattr(task_vars, var).set(None)
         resp = await self.request_handler(request)
 
         if not resp.prepared:

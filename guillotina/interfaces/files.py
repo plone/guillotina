@@ -154,9 +154,6 @@ class IFile(Interface):
 
     size = schema.Int(title="Size", default=0)
 
-    def get_size():  # type: ignore
-        """Return the byte-size of the data of the object."""
-
 
 # File Field
 

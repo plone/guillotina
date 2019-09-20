@@ -188,7 +188,7 @@ class IRolePermissionManager(IRolePermissionMap):
         """Bind the permission to the role.
         """
 
-    def grant_permission_to_role_no_inherit(role_id, principal_id):  # noqa: N805
+    def grant_permission_to_role_no_inherit(permission_id, role_id):  # noqa: N805
         """Assign the role to the principal without local inherit."""
 
     def deny_permission_to_role(permission_id, role_id):  # noqa: N805

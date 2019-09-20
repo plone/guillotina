@@ -12,7 +12,6 @@ from guillotina.transactions import transaction
 from guillotina.utils import get_database
 from typing import Dict
 from zope.interface import alsoProvides
-from zope.interface import implementer
 
 import asyncio
 import json
@@ -66,16 +65,6 @@ async def get_container(*, requester=None, tm=None, db=None, container_id="guill
         container = await root.async_get(container_id)
         task_vars.container.set(container)
         return container
-
-
-@implementer(IRequest, IDefaultLayer)
-class FakeRequest(object):
-
-    _txn_dm = None
-
-    def __init__(self, conn=None):
-        self.headers = {}
-        self._txn_dm = conn
 
 
 def register(ob):

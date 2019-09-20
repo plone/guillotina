@@ -272,6 +272,8 @@ class Request(object):
     exc = None
     view_name = None
     found_view = None
+    resource = None
+    tail = None
 
     def __init__(
         self,
@@ -374,7 +376,7 @@ class Request(object):
         return execute.execute_futures(scope)
 
     def clear_futures(self):
-        self._futures = {}
+        execute.clear_futures()
 
     @property
     def uid(self):

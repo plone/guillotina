@@ -8,7 +8,7 @@ from zope.interface import implementer
 
 
 @implementer(IAddOn)
-class Addon(object):
+class Addon:
     """ Prototype of an Addon plugin
     """
 

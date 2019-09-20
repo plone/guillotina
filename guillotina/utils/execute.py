@@ -197,8 +197,8 @@ def execute_futures(scope: str = "", futures=None, task=None) -> Optional[asynci
     """
     if futures is None:
         futures = task_vars.futures.get() or {}
-        if scope not in futures:
-            return None
+    if scope not in futures:
+        return None
     found = []
     for fut_data in futures[scope].values():
         fut = fut_data["fut"]
@@ -212,7 +212,7 @@ def execute_futures(scope: str = "", futures=None, task=None) -> Optional[asynci
     return None
 
 
-def clear_futures(self):
+def clear_futures():
     futures = task_vars.futures.get() or {}
     futures.clear()
 

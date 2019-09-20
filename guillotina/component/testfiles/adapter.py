@@ -59,7 +59,7 @@ class A2(Adapter):
 
 @adapter(components.IContent, I1, I2)
 @implementer(I3)
-class A3(Adapter):
+class A3(Adapter):  # type: ignore
     pass
 
 
@@ -71,8 +71,9 @@ a4 = A4()
 
 
 @implementer(I1, I2)
-class A5:
-    pass
+class A5:  # type: ignore
+    """
+    """
 
 
 a5 = A5()

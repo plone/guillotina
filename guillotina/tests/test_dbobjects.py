@@ -13,7 +13,7 @@ pytestmark = pytest.mark.asyncio
 
 
 @implementer(IResource)
-class ObjectTest(BaseObject):
+class ObjectTest(BaseObject):  # type: ignore
     pass
 
 
