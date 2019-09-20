@@ -151,7 +151,7 @@ class PatchListDel(PatchListAppend):
     def do_operation(self, existing, value):
         try:
             del existing[value]
-        except IndexError:
+        except (IndexError, TypeError):
             raise ValueDeserializationError(self.field, value, "Not valid index value")
         return existing
 
@@ -272,7 +272,7 @@ class PatchDictDel(PatchListAppend):
         existing = getattr(context, self.field.__name__, None)
         try:
             del existing[value]
-        except (IndexError, KeyError):
+        except (IndexError, KeyError, TypeError):
             raise ValueDeserializationError(self.field, value, "Not valid index value")
         return existing
 

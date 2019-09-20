@@ -305,6 +305,7 @@ def get_url(req, path):
     """
     Return calculated url from a request object taking
     into account X-VirtualHost-Monster header
+    and X-Forwarded header
     """
     virtualhost_path = virtualhost = None
     if "X-VirtualHost-Monster" in req.headers:

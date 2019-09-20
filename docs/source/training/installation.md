@@ -1,13 +1,9 @@
 # Installing Guillotina
 
-Guillotina is a simple Python package so it can be installed with any of the
-number of installation methods available to Python.
+To install Guillotina, we will use [pip](https://pip.pypa.io/en/stable/ "Link to pip's website")
+and [Docker](https://www.docker.com/ "Link to Docker's website").
 
-In the traing here, we will focus on using [pip](https://pip.pypa.io/en/stable/)
-and docker. You can use, for example, buildout as well.
-
-
-## with pip
+Please make sure that you have both installed.
 
 ```eval_rst
 .. note::
@@ -18,23 +14,16 @@ and docker. You can use, for example, buildout as well.
       source ./bin/activate
 ```
 
-
-It's as simple as...
-
-```
+``` shell
 pip install guillotina
 ```
 
+For the purpose of this training, you'll also need to install
+[Cookiecutter](https://cookiecutter.readthedocs.io/en/latest/ "Link to Cookiecutter's website").
 
-For the purpose of this training, you'll also need to install `cookiecutter`.
-
-```
+``` shell
 pip install cookiecutter
 ```
-
-
-Guillotina also provides [docker images](https://hub.docker.com/r/guillotina/guillotina/).
-
 
 **References**
 

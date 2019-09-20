@@ -8,9 +8,34 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.0.9 (unreleased)
+5.0.12 (unreleased)
+-------------------
 
-- Nothing changed yet.
+- Swagger url support for X-Forwarded-Proto and X-Forwarded-Schema
+
+
+5.0.11 (2019-09-18)
+-------------------
+
+- Fix patch field delete to handle when value is None
+  [vangheem]
+
+- Adjust Sphinx to build in in parallel
+  [svx]
+
+
+5.0.10 (2019-09-06)
+-------------------
+
+- Be able to use guillotina's types in 3rd party apps
+  [vangheem]
+
+
+5.0.9 (2019-09-05)
+------------------
+
+- Handle errors vacuuming
+  [vangheem]
 
 
 5.0.8 (2019-09-05)

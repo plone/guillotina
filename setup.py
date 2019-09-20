@@ -48,10 +48,10 @@ setup(
     url="https://github.com/plone/guillotina",
     license="BSD",
     setup_requires=["pytest-runner"],
-    zip_safe=True,
+    zip_safe=False,
     include_package_data=True,
     ext_modules=[lru_module],
-    package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"]},
+    package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"], "guillotina": ["py.typed"]},
     packages=find_packages(),
     install_requires=[
         "jsonschema",
@@ -71,7 +71,7 @@ setup(
     ],
     extras_require={
         "test": [
-            "pytest>=3.8.0",
+            "pytest>=3.8.0<=5.0.0",
             "docker",
             "backoff",
             "psycopg2-binary",

@@ -5,6 +5,12 @@ from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.interfaces import IVacuumProvider
 from guillotina.db.storages.utils import register_sql
 
+import asyncpg.exceptions
+import logging
+
+
+logger = logging.getLogger("guillotina")
+
 
 register_sql(
     "DELETE_TRASHED_OBJECTS",
@@ -94,12 +100,18 @@ class PGVacuum:
 
                 updated = 1
                 while updated > 0:
-                    result = await conn.fetch(
-                        sql.get(self._trash_batch_name, table_name), [r["zoid"] for r in batch], 500
-                    )
-                    updated = result[0]["count"]
-                    self._trashed += updated
-                    self.status()
+                    try:
+                        result = await conn.fetch(
+                            sql.get(self._trash_batch_name, table_name), [r["zoid"] for r in batch], 500
+                        )
+                        updated = result[0]["count"]
+                        self._trashed += updated
+                        self.status()
+                    except asyncpg.exceptions.UniqueViolationError:  # pragma: no cover
+                        logger.warning(
+                            "Unique constraint error vacuuming. This should not happen.", exc_info=True
+                        )
+                        updated = 0
 
                 await conn.execute(sql.get("DELETE_TRASHED_OBJECTS", table_name), [r["zoid"] for r in batch])
                 self._deleted += len(batch)
