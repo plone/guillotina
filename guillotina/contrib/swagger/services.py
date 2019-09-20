@@ -4,8 +4,8 @@ from guillotina.api.service import Service
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_full_content_path
 from guillotina.utils import get_request_scheme
-from guillotina.utils import get_url
 from guillotina.utils import get_security_policy
+from guillotina.utils import get_url
 from guillotina.utils import resolve_dotted_name
 from urllib.parse import urlparse
 from zope.interface import Interface
