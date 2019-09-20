@@ -4,6 +4,7 @@ from guillotina.api.service import Service
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_full_content_path
 from guillotina.utils import get_request_scheme
+from guillotina.utils import get_url
 from guillotina.utils import get_security_policy
 from guillotina.utils import resolve_dotted_name
 from urllib.parse import urlparse
@@ -143,9 +144,7 @@ async def render_docs_index(context, request):
         html = fi.read()
 
     swagger_settings = copy.deepcopy(app_settings["swagger"])
-    url = request.headers.get("X-VirtualHost-Monster")
-    if not url:
-        url = str(request.url.with_path(""))
+    url = get_url(request, "")
     swagger_settings["initial_swagger_url"] = url
     return html.format(
         swagger_settings=json.dumps(swagger_settings),
