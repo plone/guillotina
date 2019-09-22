@@ -5,7 +5,6 @@ from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
 from typing import Any
-from typing import Callable
 from typing import Dict
 from typing import Iterator
 from typing import List
@@ -444,10 +443,7 @@ class Request(object):
     @reify
     def url(self):
         return URL.build(
-            scheme=self.scheme,
-            host=self.host,
-            path=self._raw_path,
-            query_string=self.query_string
+            scheme=self.scheme, host=self.host, path=self._raw_path, query_string=self.query_string
         )
 
     @property
@@ -461,7 +457,7 @@ class Request(object):
     @reify
     def query(self) -> "multidict.CIMultiDict[str]":
         """A multidict with all the variables in the query string."""
-        query = urllib.parse.parse_qsl(self._query_string.decode("utf-8"), keep_blank_values=True)
+        query = urllib.parse.parse_qsl(self.query_string, keep_blank_values=True)
         return multidict.CIMultiDict(query)
 
     @reify
@@ -470,7 +466,7 @@ class Request(object):
 
         E.g., id=10
         """
-        return self._query_string.decode()
+        return self._query_string
 
     @reify
     def headers(self) -> "multidict.CIMultiDict[str]":
