@@ -5,6 +5,8 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.request import Request
 from guillotina.response import ASGISimpleResponse
 
+import asyncio
+
 
 logger = glogging.getLogger("guillotina")
 
@@ -17,6 +19,7 @@ class AsgiApp:
         self.loop = loop
         self.on_cleanup = []
         self.route = None
+        self.initialized = False
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http" or scope["type"] == "websocket":
@@ -34,41 +37,37 @@ class AsgiApp:
                     return
 
     async def startup(self):
-        from guillotina.factory.app import startup_app
+        try:
+            from guillotina.factory.app import startup_app
 
-        self.app = await startup_app(
-            config_file=self.config_file, settings=self.settings, loop=self.loop, server_app=self
-        )
-        return self.app
+            self.loop = self.loop or asyncio.get_event_loop()
+
+            self.app = await startup_app(
+                config_file=self.config_file, settings=self.settings, loop=self.loop, server_app=self
+            )
+            self.initialized = True
+            return self.app
+        except Exception as e:
+            logger.exception("Something crashed during app startup")
+            raise e
 
     async def shutdown(self):
         for clean in self.on_cleanup:
             await clean(self)
 
     async def handler(self, scope, receive, send):
+        if not self.initialized:
+            raise RuntimeError("The app is not initialized")
+
         if scope["type"] == "websocket":
             scope["method"] = "GET"
 
         request = Request.factory(scope, send, receive)
         task_vars.request.set(request)
-        for var in (
-            "txn",
-            "tm",
-            "futures",
-            "authenticated_user",
-            "security_policies",
-            "container",
-            "registry",
-            "db",
-        ):
-            # and make sure to reset various task vars...
-            getattr(task_vars, var).set(None)
         resp = await self.request_handler(request)
 
         if not resp.prepared:
             await resp.prepare(request)
-
-        return resp
 
     async def request_handler(self, request, retries=0):
         try:
@@ -84,6 +83,18 @@ class AsgiApp:
                 logger.debug(f"{label}, retrying request, tid: {tid}, retries: {retries + 1})", exc_info=True)
                 request._retry_attempt = retries + 1
                 request.clear_futures()
+                for var in (
+                    "txn",
+                    "tm",
+                    "futures",
+                    "authenticated_user",
+                    "security_policies",
+                    "container",
+                    "registry",
+                    "db",
+                ):
+                    # and make sure to reset various task vars...
+                    getattr(task_vars, var).set(None)
                 return await self.request_handler(request, retries + 1)
             else:
                 logger.error(

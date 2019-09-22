@@ -94,7 +94,7 @@ class ASGIResponse:
             }
         )
 
-    async def write(self, data: bytes) -> None:
+    async def write(self, data: bytes = b"", eof=False) -> None:
         assert isinstance(data, (bytes, bytearray, memoryview)), "data argument must be byte-ish (%r)" % type(
             data
         )
@@ -104,21 +104,8 @@ class ASGIResponse:
         if self._prepared is False:
             raise RuntimeError("Cannot call write() before prepare()")
 
-        await self._req.send({"type": "http.response.body", "body": data, "more_body": True})
-
-    async def write_eof(self, data: bytes = b"") -> None:
-        assert isinstance(data, (bytes, bytearray, memoryview)), "data argument must be byte-ish (%r)" % type(
-            data
-        )
-
-        if self._eof_sent:
-            return
-
-        assert self._prepared is not None, "Response has not been started"
-
-        await self._req.send({"type": "http.response.body", "body": data, "more_body": False})
-        self._eof_sent = True
-        delattr(self, "_req")
+        await self._req.send({"type": "http.response.body", "body": data, "more_body": not eof})
+        self._eof_sent = eof
 
     def _headers_to_list(self, headers: Dict) -> List[Tuple[bytes, bytes]]:
         return [(k.encode(), v.encode()) for k, v in headers.items()]
@@ -163,8 +150,7 @@ class ASGISimpleResponse(ASGIResponse):
     async def prepare(self, request: "Request"):
         await super().prepare(request)
         if self._eof_sent is False:
-            await self.write(self.body)
-            await self.write_eof()
+            await self.write(self.body, eof=True)
 
 
 class ErrorResponse(Response):

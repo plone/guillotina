@@ -29,6 +29,7 @@ You can provide your own CLI commands for guillotina through a simple interface.
 - serve:
   - `--host`: host to bind to
   - `--port`: port to bind to
+  - `--asgi-server`: choose which ASGI server to run (uvicorn by default)
 - shell
 - create
   - `--template`: name of template to use

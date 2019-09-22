@@ -73,7 +73,7 @@ class FileManager(object):
             if not await apply_coroutine(self.file_storage_manager.exists):
                 raise HTTPNotFound(content={"message": "File object does not exist"})
         download_resp = await self.prepare_download(disposition, filename, content_type, size, **kwargs)
-        await download_resp.write_eof()
+        await download_resp.write(eof=True)
         return download_resp
 
     async def download(self, disposition=None, filename=None, content_type=None, size=None, **kwargs):
@@ -89,7 +89,7 @@ class FileManager(object):
         if download_resp is None:
             # deferred
             download_resp = await self.prepare_download(disposition, filename, content_type, size, **kwargs)
-        await download_resp.write_eof()
+        await download_resp.write(eof=True)
         return download_resp
 
     async def tus_options(self, *args, **kwargs):

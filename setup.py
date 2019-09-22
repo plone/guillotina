@@ -34,7 +34,7 @@ setup(
     version=open("VERSION").read().strip(),
     description="asyncio REST API Resource database",  # noqa
     long_description=long_description,
-    keywords=["asyncio", "REST", "Framework", "transactional"],
+    keywords=["asyncio", "REST", "Framework", "transactional", "asgi"],
     author="Ramon Navarro Bosch & Nathan Van Gheem",
     author_email="ramon@plone.org",
     classifiers=[

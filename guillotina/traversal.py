@@ -379,9 +379,6 @@ class TraversalRouter:
         """
         Resolve a request
         """
-        # prevent: https://github.com/aio-libs/aiohttp/issues/3335
-        request.url
-
         request.record("start")
         result = None
         try:

@@ -10,7 +10,6 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
-from typing import TypeVar
 from yarl import URL
 from zope.interface import implementer
 
@@ -24,10 +23,7 @@ import urllib.parse
 import uuid
 
 
-_T = TypeVar("_T")
-
-
-# Vendored from aiohttp until we get rid of aiohttp on the traversal
+# Vendored from aiohttp
 class reify:
     """Use as a class method decorator.  It operates almost exactly like
     the Python `@property` decorator, but it puts the result of the
@@ -212,7 +208,7 @@ class GuillotinaWebSocket:
 
 class AsgiStreamReader:
     def __init__(self, receive):
-        self.finished = False
+        self._eof = False
         self._asgi_receive = receive
         self._buffer = bytearray()
 
@@ -230,7 +226,7 @@ class AsgiStreamReader:
     async def read(self, n: int = -1) -> bytearray:
         data = self._buffer
 
-        while (n == -1 or len(data) < n) and not self.finished:
+        while (n == -1 or len(data) < n) and not self._eof:
             chunk = await self.receive()
             data.extend(chunk)
 
@@ -244,8 +240,12 @@ class AsgiStreamReader:
 
     async def receive(self):
         payload = await self._asgi_receive()
-        self.finished = not payload.get("more_body", False)
+        self._eof = not payload.get("more_body", False)
         return payload["body"]
+
+    @property
+    def eof(self):
+        return self._eof
 
 
 def raw_headers_to_multidict(raw_headers: List[List]) -> multidict.CIMultiDict:
@@ -297,7 +297,6 @@ class Request(object):
         self._method = method
         self._raw_path = path
         self._query_string = query_string
-        self._rel_url = URL(path)
         self._raw_headers = raw_headers
         self._stream_reader = stream_reader
 
@@ -401,10 +400,6 @@ class Request(object):
     async def __aexit__(self, *args):
         return self.__exit__()
 
-    @reify
-    def rel_url(self):
-        return self._rel_url
-
     # MutableMapping API
 
     def __getitem__(self, key: str) -> Any:
@@ -422,11 +417,11 @@ class Request(object):
     def __iter__(self) -> Iterator[str]:
         return iter(self._state)
 
-    @reify
+    @property
     def scheme(self):
         return self._scheme
 
-    @reify
+    @property
     def method(self) -> str:
         """Read only property for getting HTTP method.
 
@@ -448,10 +443,14 @@ class Request(object):
 
     @reify
     def url(self):
-        url = URL.build(scheme=self.scheme, host=self.host)
-        return url.join(self._rel_url)
+        return URL.build(
+            scheme=self.scheme,
+            host=self.host,
+            path=self._raw_path,
+            query_string=self.query_string
+        )
 
-    @reify
+    @property
     def path(self) -> str:
         """The URL including *PATH INFO* without the host or scheme.
 
@@ -471,19 +470,19 @@ class Request(object):
 
         E.g., id=10
         """
-        return self._query_string
+        return self._query_string.decode()
 
     @reify
     def headers(self) -> "multidict.CIMultiDict[str]":
         """A case-insensitive multidict proxy with all headers."""
         return raw_headers_to_multidict(self._raw_headers)
 
-    @reify
+    @property
     def raw_headers(self):
         """A sequence of pairs for all headers."""
         return self._raw_headers
 
-    @reify
+    @property
     def content(self):
         """Return raw payload stream."""
         return self._stream_reader
@@ -496,15 +495,7 @@ class Request(object):
     @property
     def can_read_body(self) -> bool:
         """Return True if request's HTTP BODY can be read, False otherwise."""
-        return not self._stream_reader.at_eof()
-
-    async def release(self) -> None:
-        """Release request.
-
-        Eat unread part of HTTP BODY if present.
-        """
-        while not self._stream_reader.at_eof():
-            await self._stream_reader.readany()
+        return not self._stream_reader.eof
 
     async def read(self) -> bytes:
         """Read request body if present.
