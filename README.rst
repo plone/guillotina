@@ -42,17 +42,19 @@ Dependencies
 Quickstart
 ----------
 
-We use pip::
+We use pip
 
-  pip install guillotina
+.. code-block:: shell
+
+    pip install guillotina
 
 
-Run postgresql
+Run PostgreSQL
 --------------
 
-If you don't have a PostgreSQL server to play with, you can run one with docker.
+If you don't have a PostgreSQL server to play with, you can run one with Docker.
 
-Download and start the docker container by running
+Download and start the Docker container by running
 
 .. code-block:: shell
 
@@ -92,7 +94,7 @@ Read more `Guillotina-Heroku <https://github.com/guillotinaweb/guillotina-heroku
 Getting started with development
 --------------------------------
 
-Using pip(requires python > 3.7)
+Using pip (requires Python > 3.7)
 
 .. code-block:: shell
 
@@ -108,7 +110,7 @@ Using pip(requires python > 3.7)
 Run tests
 ---------
 
-We're using pytest
+We're using `pytest <https://docs.pytest.org/en/latest/>`_
 
 .. code-block:: shell
 
@@ -156,7 +158,7 @@ First, run PostgreSQL
         --name postgres \
         postgres:9.6
 
-Then, run guillotina
+Then, run Guillotina
 
 .. code-block:: shell
 
