@@ -42,6 +42,7 @@ async def test_url_of_object_with_scheme(container_requester):
         url = resp["@id"]
         assert url.startswith("https://")
         assert url.endswith("/db/guillotina/foobar")
+        assert url == "https://foobar.com/foo/bar/db/guillotina/foobar"
 
 
 def test_vh_path_url(dummy_guillotina):

@@ -4,13 +4,13 @@ from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
+from guillotina.utils.misc import build_url
 from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
-from yarl import URL
 from zope.interface import implementer
 
 import asyncio
@@ -438,9 +438,7 @@ class Request(object):
 
     @reify
     def url(self):
-        return URL.build(
-            scheme=self.scheme, host=self.host, path=self._raw_path, query_string=self.query_string
-        )
+        return build_url(scheme=self._scheme, host=self.host, path=self.path, query=self.query_string)
 
     @property
     def path(self) -> str:
