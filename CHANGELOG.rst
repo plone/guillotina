@@ -4,8 +4,11 @@ CHANGELOG
 5.0.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improve reST syntax of README
+  [svx]
 
+- Fix typo in CHANGELOG
+  [svx]
 
 5.0.12 (2019-09-24)
 -------------------
@@ -23,7 +26,7 @@ CHANGELOG
 - Fix patch field delete to handle when value is None
   [vangheem]
 
-- Adjust Sphinx to build in in parallel
+- Adjust Sphinx to build in parallel
   [svx]
 
 
