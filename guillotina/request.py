@@ -5,6 +5,7 @@ from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from guillotina.utils import execute
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import Iterator
 from typing import List
