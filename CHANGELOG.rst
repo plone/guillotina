@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.12 (unreleased)
+5.0.12 (2019-09-24)
 -------------------
 
 - Fix shut down for redis pubsub driver
