@@ -4,7 +4,11 @@ CHANGELOG
 5.0.12 (unreleased)
 -------------------
 
+- Fix shut down for redis pubsub driver
+  [vangheem]
+
 - Swagger url support for X-Forwarded-Proto and X-Forwarded-Schema
+  [bloodbare]
 
 
 5.0.11 (2019-09-18)

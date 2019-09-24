@@ -35,6 +35,7 @@ class PubSubUtility:
             self._initialized = True
 
     async def finalize(self, app):
+        self._subscribers.clear()
         for channel in self._tasks.values():
             if not channel.done():
                 channel.cancel()
@@ -58,7 +59,8 @@ class PubSubUtility:
                     except Exception:
                         logger.error("Unhandled error with pubsub message.", exc_info=True)
             except (asyncio.CancelledError, RuntimeError):
-                pass
+                # if we're cancelled, we don't want to attempt
+                return
             except Exception:
                 logger.error(f"Unhandled exception with pubsub. Sleeping before trying again", exc_info=True)
                 await asyncio.sleep(1)
