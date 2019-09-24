@@ -210,12 +210,12 @@ class AsgiStreamReader:
     def __init__(self, receive):
         self._eof = False
         self._asgi_receive = receive
-        self._buffer = bytearray()
+        self._buffer: bytearray = bytearray()
 
     async def readany(self):
-        from guillotina.files import CHUNK_SIZE
-
-        return await self.read(CHUNK_SIZE)
+        if not self._eof:
+            return await self.receive()
+        return b""
 
     async def readexactly(self, n: int) -> bytes:
         data = await self.read(n)
@@ -223,22 +223,20 @@ class AsgiStreamReader:
             raise asyncio.IncompleteReadError(data, n)
         return data
 
-    async def read(self, n: int = -1) -> bytearray:
+    async def read(self, n: int = -1) -> bytes:
         data = self._buffer
-
         while (n == -1 or len(data) < n) and not self._eof:
             chunk = await self.receive()
             data.extend(chunk)
 
         if n == -1:
             self._buffer = bytearray()
-            return data
+            return bytes(data)
         else:
-            data = memoryview(data)
-            self._buffer = bytearray(data[n:])
-            return data[:n]
+            self._buffer = data[n:]
+            return bytes(data[:n])
 
-    async def receive(self):
+    async def receive(self) -> bytes:
         payload = await self._asgi_receive()
         self._eof = not payload.get("more_body", False)
         return payload["body"]
@@ -282,7 +280,6 @@ class Request(object):
         path,
         query_string,
         raw_headers,
-        stream_reader,
         client_max_size: int = 1024 ** 2,
         send=None,
         receive=None,
@@ -298,9 +295,8 @@ class Request(object):
         self._raw_path = path
         self._query_string = query_string
         self._raw_headers = raw_headers
-        self._stream_reader = stream_reader
-
         self._client_max_size = client_max_size
+        self._stream_reader = AsgiStreamReader(receive)
 
         self._read_bytes: Optional[bytes] = None
         self._state: Dict[str, Any] = {}
@@ -319,7 +315,6 @@ class Request(object):
             scope["path"],
             scope["query_string"],
             scope["headers"],
-            AsgiStreamReader(receive),
             send=send,
             scope=scope,
             receive=receive,
@@ -467,7 +462,7 @@ class Request(object):
 
         E.g., id=10
         """
-        return self._query_string
+        return self._query_string.decode("utf-8")
 
     @reify
     def headers(self) -> "multidict.CIMultiDict[str]":
@@ -500,19 +495,26 @@ class Request(object):
         Returns bytes object with full request content.
         """
         if self._read_bytes is None:
-            body = bytearray()
-            while True:
-                chunk = await self._stream_reader.readany()
+            chunk = await self._stream_reader.readany()
+            if self._stream_reader.eof:
+                self._read_bytes = chunk
+            else:
+                body = bytearray()
                 body.extend(chunk)
-                if self._client_max_size:
-                    body_size = len(body)
-                    if body_size >= self._client_max_size:
-                        from guillotina.response import HTTPRequestEntityTooLarge
+                while True:
+                    chunk = await self._stream_reader.readany()
+                    body.extend(chunk)
+                    if self._client_max_size:
+                        body_size = len(body)
+                        if body_size >= self._client_max_size:
+                            from guillotina.response import HTTPRequestEntityTooLarge
 
-                        raise HTTPRequestEntityTooLarge(max_size=self._client_max_size, actual_size=body_size)
-                if not chunk:
-                    break
-            self._read_bytes = bytes(body)
+                            raise HTTPRequestEntityTooLarge(
+                                max_size=self._client_max_size, actual_size=body_size
+                            )
+                    if not chunk:
+                        break
+                self._read_bytes = bytes(body)
         return self._read_bytes
 
     async def text(self) -> str:

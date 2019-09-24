@@ -6,7 +6,6 @@ from guillotina.behaviors import apply_markers
 from guillotina.content import Item
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
-from guillotina.request import AsgiStreamReader
 from guillotina.request import Request
 from guillotina.transactions import transaction
 from guillotina.utils import get_database
@@ -160,5 +159,5 @@ def make_mocked_request(
         q.put_nowait({"body": chunk, "more_body": i < len(chunks) - 1})
 
     return Request(
-        "http", method, path, query_string, raw_hdrs, AsgiStreamReader(q.get), client_max_size=client_max_size
+        "http", method, path, query_string, raw_hdrs, client_max_size=client_max_size, receive=q.get
     )
