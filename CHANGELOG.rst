@@ -4,6 +4,9 @@ CHANGELOG
 5.0.13 (unreleased)
 -------------------
 
+- Case insensitive environ `G_` variable lookup
+  [svx]
+
 - Improve reST syntax of README
   [svx]
 
