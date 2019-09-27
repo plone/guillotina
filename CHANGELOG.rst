@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.13 (unreleased)
+5.0.13 (2019-09-27)
 -------------------
 
 - Case insensitive environ `G_` variable lookup
