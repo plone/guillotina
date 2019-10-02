@@ -4,7 +4,10 @@ CHANGELOG
 5.0.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Throw an `TransactionObjectRegistrationMismatchException` exception if you attempt to
+  register an object with a transaction that is a different than existing registration
+  for that object.
+  [vangheem]
 
 
 5.0.13 (2019-09-27)

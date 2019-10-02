@@ -246,3 +246,13 @@ class NoChannelConfigured(Exception):
     """
     No Channel Configured
     """
+
+
+class TransactionObjectRegistrationMismatchException(Exception):
+    def __init__(self, registered_object, object):
+        self.registered_object = registered_object
+        self.object = object
+        super().__init__(
+            f"Object already registered for this transaction with same uid "
+            f"but different object instance: {registered_object.uuid}"
+        )

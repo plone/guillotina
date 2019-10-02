@@ -134,13 +134,15 @@ class wrap_request:
             return await self.func.__aexit__(*args)
 
 
-def create_content(factory=Item, type_name="Item", id=None, parent=None):
+def create_content(factory=Item, type_name="Item", id=None, parent=None, uid=None):
     obj = factory()
     obj.__parent__ = parent
     obj.type_name = type_name
-    obj.__uuid__ = uuid.uuid4().hex
+    if uid is None:
+        uid = uuid.uuid4().hex
+    obj.__uuid__ = uid
     if id is None:
-        id = f"foobar{uuid.uuid4().hex}"
+        id = f"foobar{uid}"
     obj.__name__ = obj.id = id
     apply_markers(obj)
     return obj
