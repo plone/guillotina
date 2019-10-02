@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.14 (unreleased)
+5.0.14 (2019-10-02)
 -------------------
 
 - Throw an `TransactionObjectRegistrationMismatchException` exception if you attempt to
