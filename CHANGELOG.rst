@@ -8,11 +8,32 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.0.13 (unreleased)
+5.0.15 (unreleased)
 -------------------
 
 - Nothing changed yet.
 
+
+5.0.14 (2019-10-02)
+-------------------
+
+- Throw an `TransactionObjectRegistrationMismatchException` exception if you attempt to
+  register an object with a transaction that is a different than existing registration
+  for that object.
+  [vangheem]
+
+
+5.0.13 (2019-09-27)
+-------------------
+
+- Case insensitive environ `G_` variable lookup
+  [svx]
+
+- Improve reST syntax of README
+  [svx]
+
+- Fix typo in CHANGELOG
+  [svx]
 
 5.0.12 (2019-09-24)
 -------------------
@@ -30,7 +51,7 @@ CHANGELOG
 - Fix patch field delete to handle when value is None
   [vangheem]
 
-- Adjust Sphinx to build in in parallel
+- Adjust Sphinx to build in parallel
   [svx]
 
 

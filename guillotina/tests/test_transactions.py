@@ -4,8 +4,11 @@ from guillotina.db import ROOT_ID
 from guillotina.db.transaction import Transaction
 from guillotina.exceptions import TransactionClosedException
 from guillotina.exceptions import TransactionNotFound
+from guillotina.exceptions import TransactionObjectRegistrationMismatchException
 from guillotina.tests import mocks
+from guillotina.tests import utils
 from guillotina.transactions import transaction
+from guillotina.utils import get_database
 from guillotina.utils import get_object_by_uid
 
 import pytest
@@ -130,3 +133,10 @@ async def test_create_txn_with_db(container_requester):
         async with requester.db.transaction() as txn:
             root = await txn.get(ROOT_ID)
             assert root is not None
+
+
+async def test_register_duplicate_object_oid(guillotina_main):
+    async with transaction(db=await get_database("db")) as txn:
+        txn.register(utils.create_content(uid="foobar"))
+        with pytest.raises(TransactionObjectRegistrationMismatchException):
+            txn.register(utils.create_content(uid="foobar"))

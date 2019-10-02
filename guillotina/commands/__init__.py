@@ -87,10 +87,12 @@ def get_settings(configuration, overrides=None):
         context[parts[-1]] = value
 
     for env_name in os.environ.keys():
-        if not env_name.startswith("G_"):
+        orig_env_name = env_name
+        env_name = env_name.lower()
+        if not env_name.startswith("g_"):
             continue
-        name = env_name[2:].lower()
-        value = os.environ[env_name]
+        name = env_name[2:]
+        value = os.environ[orig_env_name]
         if value[0] in ("{", "["):
             value = json.loads(value)
         context = settings

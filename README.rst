@@ -35,44 +35,51 @@ This is the working project of the next generation Guillotina server based on as
 Dependencies
 ------------
 
-* python >= 3.7
-* postgresql >= 9.6
+* Python >= 3.7
+* PostgreSQL >= 9.6
 
 
 Quickstart
 ----------
 
-We use pip::
+We use pip
 
-  pip install guillotina
+.. code-block:: shell
+
+    pip install guillotina
 
 
-Run postgresql
+Run PostgreSQL
 --------------
 
-If you don't have a postgresql server to play with, you can run one easily
-with docker.
+If you don't have a PostgreSQL server to play with, you can run one with Docker.
 
-Download and start the docker container by running::
+Download and start the Docker container by running
 
-  make run-postgres
+.. code-block:: shell
+
+    make run-postgres
 
 
 
 Run the server
 --------------
 
-To run the server::
+To run the server
+
+.. code-block:: shell
 
     g
 
 
 Then...
 
+.. code-block:: shell
+
     curl http://localhost:8080
 
 
-Or, better yet, use postman to start playing with API.
+Or, better yet, use `Postman <https://www.getpostman.com/>`_ to start playing with API.
 
 You can also navigate in your Guillotina server with its built-in web admin interface by visiting http://localhost:8080/+admin/.
 
@@ -87,36 +94,46 @@ Read more `Guillotina-Heroku <https://github.com/guillotinaweb/guillotina-heroku
 Getting started with development
 --------------------------------
 
-Using pip(requires python > 3.7)::
+Using pip (requires Python > 3.7)
 
-  git clone git@github.com:plone/guillotina.git
-  cd guillotina
-  python3.7 -m venv .
-  ./bin/pip install -r requirements.txt
-  ./bin/pip install -r contrib-requirements.txt
-  ./bin/pip install -e .[test]
-  ./bin/pre-commit install
+.. code-block:: shell
+
+    git clone git@github.com:plone/guillotina.git
+    cd guillotina
+    python3.7 -m venv .
+    ./bin/pip install -r requirements.txt
+    ./bin/pip install -r contrib-requirements.txt
+    ./bin/pip install -e .[test]
+    ./bin/pre-commit install
 
 
 Run tests
 ---------
 
-We're using pytest::
+We're using `pytest <https://docs.pytest.org/en/latest/>`_
+
+.. code-block:: shell
 
     ./bin/pytest guillotina
 
-and for test coverage::
+and for test coverage
+
+.. code-block:: shell
 
     ./bin/pytest --cov=guillotina guillotina/
 
 With file watcher...
 
+.. code-block:: shell
+
     ./bin/ptw guillotina --runner=./bin/py.test
 
 
-To run tests with cockroach db::
+To run tests with cockroach db
 
-   USE_COCKROACH=true ./bin/pytest guillotina
+.. code-block:: shell
+
+    USE_COCKROACH=true ./bin/pytest guillotina
 
 Default
 -------
@@ -130,7 +147,9 @@ Docker
 You can also run Guillotina with Docker!
 
 
-First, run postgresql::
+First, run PostgreSQL
+
+.. code-block:: shell
 
     docker run --rm \
         -e POSTGRES_DB=guillotina \
@@ -139,7 +158,9 @@ First, run postgresql::
         --name postgres \
         postgres:9.6
 
-Then, run guillotina::
+Then, run Guillotina
+
+.. code-block:: shell
 
     docker run --rm -it \
         --link=postgres -p 127.0.0.1:8080:8080 \
