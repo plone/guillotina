@@ -31,7 +31,7 @@ class ShellHelpers:
         return self._active_txn
 
     async def use_container(self, container_id):
-        with self._active_tm:
+        with self._active_txn, self._active_tm:
             container = await self._active_db.async_get(container_id)
             if container is None:
                 raise Exception("Container not found")
@@ -91,7 +91,6 @@ Example
 -------
 
 txn = await use_db('db')
-setup()
 container = await use_container('container')
 setup()
 item = await container.async_get('item')
