@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.15 (unreleased)
+5.0.15 (2019-10-02)
 -------------------
 
 - Provide workaround for asyncio contextvars ipython bug in shell
