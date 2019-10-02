@@ -4,7 +4,8 @@ CHANGELOG
 5.0.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide workaround for asyncio contextvars ipython bug in shell
+  [vangheem]
 
 
 5.0.14 (2019-10-02)
