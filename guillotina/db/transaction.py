@@ -13,7 +13,9 @@ from guillotina.exceptions import ReadOnlyError
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import TransactionClosedException
+from guillotina.exceptions import TransactionObjectRegistrationMismatchException
 from guillotina.profile import profilable
+from guillotina.utils import get_current_request
 from guillotina.utils import lazy_apply
 from typing import AsyncIterator
 from typing import List
@@ -242,7 +244,10 @@ class Transaction:
         obj.__uuid__ = oid
         if new or obj.__new_marker__:
             self.added[oid] = obj
-        elif oid not in self.modified and oid not in self.added:
+        elif oid in self.modified:
+            if id(obj) != id(self.modified[oid]):
+                raise TransactionObjectRegistrationMismatchException(self.modified[oid], obj)
+        elif oid not in self.added:
             self.modified[oid] = obj
 
     def delete(self, obj: IBaseObject):
