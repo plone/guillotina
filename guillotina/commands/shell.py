@@ -24,23 +24,20 @@ class ShellHelpers:
 
     async def use_db(self, db_id):
         db = await utils.get_database(db_id)
-        task_vars.db.set(db)
         tm = self._active_tm = db.get_transaction_manager()
-        task_vars.db.set(db)
         self._active_db = db
         self._active_txn = await tm.begin()
-        task_vars.tm.set(tm)
-        task_vars.txn.set(self._active_txn)
+        self.setup_context()
         return self._active_txn
 
     async def use_container(self, container_id):
-        with self._active_txn:
+        with self._active_tm:
             container = await self._active_db.async_get(container_id)
             if container is None:
                 raise Exception("Container not found")
-            task_vars.container.set(container)
-            self._active_container = container
-            return container
+        self._active_container = container
+        self.setup_context()
+        return container
 
     async def commit(self):
         if self._active_tm is None:
@@ -48,6 +45,7 @@ class ShellHelpers:
         await self._active_tm.commit(txn=self._active_txn)
         self._request.execute_futures()
         self._active_txn = await self._active_tm.begin()
+        self.setup_context()
         return self._active_txn
 
     async def abort(self):
@@ -55,7 +53,17 @@ class ShellHelpers:
             raise Exception("No active transaction manager")
         await self._active_tm.abort(txn=self._active_txn)
         self._active_txn = await self._active_tm.begin()
+        self.setup_context()
         return self._active_txn
+
+    def setup_context(self):
+        if self._active_db:
+            task_vars.db.set(self._active_db)
+            task_vars.tm.set(self._active_db.get_transaction_manager())
+        if self._active_txn:
+            task_vars.txn.set(self._active_txn)
+        if self._active_container:
+            task_vars.container.set(self._active_container)
 
 
 class ShellCommand(Command):
@@ -77,12 +85,15 @@ Available local variables:
     - commit
     - abort
     - utils
+    - setup
 
 Example
 -------
 
 txn = await use_db('db')
+setup()
 container = await use_container('container')
+setup()
 item = await container.async_get('item')
 
 
@@ -122,6 +133,7 @@ Configured databases
         use_container = helpers.use_container  # noqa
         commit = helpers.commit  # noqa
         abort = helpers.abort  # noqa
+        setup = helpers.setup_context  # noqa
 
         try:
             from IPython.terminal.embed import InteractiveShellEmbed
