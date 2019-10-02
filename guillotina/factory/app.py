@@ -166,13 +166,17 @@ def optimize_settings(settings):
 def make_app(config_file=None, settings=None, loop=None):
     from guillotina.asgi import AsgiApp
 
-    # middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
-    router_klass = app_settings.get("router", TraversalRouter)
-    router = resolve_dotted_name(router_klass)()
-
     app = AsgiApp(config_file, settings, loop)
-    app.router = router
-    return app
+    router_klass = app_settings.get("router", TraversalRouter)
+    app.router = resolve_dotted_name(router_klass)()
+
+    # The guillotina application is the last middleware in the chain.
+    # We instantiate middlewares in reverse order. The last one is the first to be called
+    last_middleware = app
+    middlewares = [resolve_dotted_name(m) for m in app_settings.get('middlewares', [])]
+    for middleware in middlewares[::-1]:
+        last_middleware = middleware(last_middleware)
+    return last_middleware
 
 
 async def startup_app(config_file=None, settings=None, loop=None, server_app=None):

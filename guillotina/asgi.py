@@ -21,7 +21,19 @@ class AsgiApp:
         self.route = None
         self.initialized = False
 
-    async def __call__(self, scope, receive, send):
+    def __call__(self, scope, receive=None, send=None):
+        """
+        ASGI callable compatible with versions 2 and 3
+        """
+        if receive is None or send is None:
+            async def run_asgi2(receive, send):
+                return await self.real_asgi_app(scope, receive, send)
+
+            return run_asgi2
+        else:
+            return self.real_asgi_app(scope, receive, send)
+
+    async def real_asgi_app(self, scope, receive, send):
         if scope["type"] == "http" or scope["type"] == "websocket":
             return await self.handler(scope, receive, send)
 
