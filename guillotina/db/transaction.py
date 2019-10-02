@@ -15,7 +15,6 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import TransactionClosedException
 from guillotina.exceptions import TransactionObjectRegistrationMismatchException
 from guillotina.profile import profilable
-from guillotina.utils import get_current_request
 from guillotina.utils import lazy_apply
 from typing import AsyncIterator
 from typing import List
