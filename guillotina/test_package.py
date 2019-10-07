@@ -289,7 +289,13 @@ class InMemoryFileManager:
 
     async def iter_data(self, uri=None):
         if uri is None:
-            file = self.field.get(self.field.context or self.context)
+            try:
+                file = self.field.get(self.field.context or self.context)
+            except AttributeError:
+                if isinstance(self.field, MemoryFile):
+                    file = self.field
+                else:
+                    raise Exception("Field must be MemoryFile")
             uri = file.uri
         with open(_tmp_files[uri], "rb") as fi:
             chunk = fi.read(1024)

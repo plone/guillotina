@@ -5,7 +5,9 @@ from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IFileManager
 from guillotina.tests import utils
 from guillotina.transactions import transaction
+from guillotina.files import FileManager
 
+import base64
 import json
 import pytest
 import random
@@ -26,6 +28,33 @@ _pytest_params = [
         ],
     ),
 ]
+
+@pytest.mark.parametrize("manager_type", _pytest_params)
+async def test_db_file_storage(manager_type, redis_container, container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}))
+        assert status == 201
+        response, status = await requester(
+            "PATCH",
+            "/db/guillotina/foobar/@upload/file",
+            data=b"X" * 1024 * 1024 * 10,
+            headers={"x-upload-size": str(1024 * 1024 * 10)},
+        )
+        assert status == 200
+        request = utils.get_mocked_request(db=requester.db)
+        root = await utils.get_root(request)
+        container = await root.async_get("guillotina")
+        obj = await container.async_get("foobar")
+        behavior = IAttachment(obj)
+        await behavior.load()
+        file_manager = FileManager(obj, request, behavior.file)
+        size_response = 0
+        async for data in file_manager.file_storage_manager.iter_data():
+            size_response += len(data)
+        assert size_response == 1024 * 1024 * 10
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)

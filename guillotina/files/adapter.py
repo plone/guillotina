@@ -168,7 +168,13 @@ class DBFileStorageManagerAdapter:
         await dm.update(_blob=blob)
 
     async def iter_data(self):
-        file = self.field.get(self.field.context or self.context)
+        try:
+            file = self.field.get(self.field.context or self.context)
+        except AttributeError:
+            if isinstance(self.field, DBFile):
+                file = self.field
+            else:
+                raise Exception("Field must be DBFile")
         blob = file._blob
         bfile = blob.open()
         async for chunk in bfile.iter_async_read():
