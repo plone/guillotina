@@ -43,9 +43,10 @@ class Status:
 
 
 class cache:
-    def __init__(self, key_gen, check_state_size=False):
+    def __init__(self, key_gen, check_state_size=False, additional_keys=None):
         self.key_gen = key_gen
         self.check_state_size = check_state_size
+        self.additional_keys = additional_keys or []
 
     def __call__(self, func):
         this = self
@@ -61,6 +62,8 @@ class cache:
                 try:
                     if not this.check_state_size or len(result["state"]) < self._cache.max_cache_record_size:
                         await self._cache.set(result, **key_args)
+                        for key_gen in this.additional_keys:
+                            await self._cache.set(result, **key_gen(result))
                 except (TypeError, KeyError):
                     await self._cache.set(result, **key_args)
                 return result
@@ -276,7 +279,11 @@ class Transaction:
         ob.__serial__ = new.__serial__
         ob.__txn__ = self
 
-    @cache(lambda oid: {"oid": oid}, True)
+    @cache(
+        lambda oid: {"oid": oid},
+        True,
+        additional_keys=[lambda item: {"container": item["parent_id"], "id": item["id"]}],
+    )
     async def _get(self, oid):
         return await self._manager._storage.load(self, oid)
 
@@ -412,7 +419,11 @@ class Transaction:
             keys.append(record["id"])
         return keys
 
-    @cache(lambda container, key: {"container": container, "id": key}, True)
+    @cache(
+        lambda container, key: {"container": container, "id": key},
+        True,
+        additional_keys=[lambda item: {"oid": item["zoid"]}],
+    )
     async def _get_child(self, container, key):
         return await self._manager._storage.get_child(self, container.__uuid__, key)
 
@@ -485,7 +496,11 @@ class Transaction:
             yield item.__name__, item
 
     @profilable
-    @cache(lambda base_obj, id: {"container": base_obj, "id": id, "variant": "annotation"}, True)
+    @cache(
+        lambda base_obj, id: {"container": base_obj, "id": id, "variant": "annotation"},
+        True,
+        additional_keys=[lambda item: {"oid": item["zoid"]}],
+    )
     async def _get_annotation(self, base_obj, id):
         result = await self._manager._storage.get_annotation(self, base_obj.__uuid__, id)
         if result is None:

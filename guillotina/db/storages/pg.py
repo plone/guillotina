@@ -62,7 +62,7 @@ WHERE of = $1::varchar({MAX_UID_LENGTH})
 register_sql(
     "GET_CHILD",
     f"""
-SELECT zoid, tid, state_size, resource, type, state, id
+SELECT zoid, tid, state_size, resource, type, state, id, parent_id, of
 FROM {{table_name}}
 WHERE parent_id = $1::varchar({MAX_UID_LENGTH}) AND id = $2::text
 """,
@@ -71,7 +71,7 @@ WHERE parent_id = $1::varchar({MAX_UID_LENGTH}) AND id = $2::text
 register_sql(
     "GET_CHILDREN_BATCH",
     f"""
-SELECT zoid, tid, state_size, resource, type, state, id
+SELECT zoid, tid, state_size, resource, type, state, id, parent_id, of
 FROM {{table_name}}
 WHERE parent_id = $1::varchar({MAX_UID_LENGTH}) AND id = ANY($2)
 """,
@@ -100,7 +100,7 @@ WHERE zoid = $1::varchar({MAX_UID_LENGTH})
 register_sql(
     "GET_ANNOTATION",
     f"""
-SELECT zoid, tid, state_size, resource, type, state, id, parent_id
+SELECT zoid, tid, state_size, resource, type, state, id, parent_id, of
 FROM {{table_name}}
 WHERE
     of = $1::varchar({MAX_UID_LENGTH}) AND
