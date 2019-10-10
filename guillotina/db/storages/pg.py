@@ -789,7 +789,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         try:
             await shield(self.pool.release(con, timeout=1))
         except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError):
-            log.exception("", exc_info=True)
+            log.error("", exc_info=True)
 
     async def terminate(self, conn):
         log.warning(f"Terminate connection {conn}", exc_info=True)
