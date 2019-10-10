@@ -140,7 +140,7 @@ class TransactionManager:
                 logger.exception("MRK Something bad happened")
 
                 # failsafe terminate to make sure connection is cleaned
-                if txn._db_conn is not None:
+                if txn._db_conn is None:
                     raise
                 try:
                     await self._storage.terminate(txn._db_conn)

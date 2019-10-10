@@ -786,7 +786,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def open(self):
         qsize = self.pool._queue.qsize()
         log.info(f"MRK BeforeOpen: {qsize}")
-        conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
+        conn = await self.pool.acquire()
         log.info(f"MRK Open {conn}")
         return conn
 
