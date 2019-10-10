@@ -23,9 +23,7 @@ import time
 import ujson
 
 
-from guillotina import glogging
-
-log = glogging.getLogger("guillotina.storage")
+log = logging.getLogger("guillotina.storage")
 
 
 # we can not use FOR UPDATE or FOR SHARE unfortunately because
@@ -784,23 +782,17 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def open(self):
-        qsize = self.pool._queue.qsize()
-        log.info(f"MRK BeforeOpen: {qsize}")
         conn = await self.pool.acquire()
-        log.info(f"MRK Open {conn}")
         return conn
 
     async def close(self, con):
-        log.info(f"MRK Close {con}", exc_info=True)
         try:
             await shield(self.pool.release(con, timeout=1))
-        except (RuntimeError, asyncio.TimeoutError,):
-            log.info(f"MRK Close Exc {con}", exc_info=True)
         except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError):
-            log.info(f"MRK Close Cancelled {con}", exc_info=True)
+            log.exception("", exc_info=True)
 
     async def terminate(self, conn):
-        log.info(f"MRK Terminate {conn}", exc_info=True)
+        log.warning(f"Terminate connection {conn}", exc_info=True)
         conn.terminate()
 
     async def load(self, txn, oid):
