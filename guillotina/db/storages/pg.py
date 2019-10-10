@@ -783,20 +783,19 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     @restart_conn_on_exception
     async def open(self):
         conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
+        log.debug(f"MRK Open {conn}")
         return conn
 
     async def close(self, con):
         try:
             await shield(asyncio.wait_for(self.pool.release(con, timeout=1), 1))
-        except (
-            asyncio.CancelledError,
-            RuntimeError,
-            asyncio.TimeoutError,
-            asyncpg.exceptions.ConnectionDoesNotExistError,
-        ):
+        except (RuntimeError, asyncio.TimeoutError):
+            log.debug(f"MRK Close {con}", exc_info=True)
+        except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError):
             pass
 
     async def terminate(self, conn):
+        log.debug(f"MRK Terminate {conn}", exc_info=True)
         conn.terminate()
 
     async def load(self, txn, oid):

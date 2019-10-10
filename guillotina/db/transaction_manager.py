@@ -137,6 +137,8 @@ class TransactionManager:
                     if txn._db_conn is not None:
                         raise
             except Exception:
+                logger.exception("MRK Something bad happened")
+
                 # failsafe terminate to make sure connection is cleaned
                 if txn._db_conn is not None:
                     raise
