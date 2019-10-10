@@ -782,15 +782,18 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def open(self):
+        qsize = self.pool._queue.qsize()
+        log.debug(f"MRK BeforeOpen: {qsize}")
         conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
         log.debug(f"MRK Open {conn}")
         return conn
 
     async def close(self, con):
+        log.debug(f"MRK Close {con}", exc_info=True)
         try:
             await shield(asyncio.wait_for(self.pool.release(con, timeout=1), 1))
         except (RuntimeError, asyncio.TimeoutError):
-            log.debug(f"MRK Close {con}", exc_info=True)
+            log.debug(f"MRK Close Exc {con}", exc_info=True)
         except (asyncio.CancelledError, asyncpg.exceptions.ConnectionDoesNotExistError):
             pass
 
