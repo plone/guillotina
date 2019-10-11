@@ -782,16 +782,39 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def open(self):
-        conn = await self.pool.acquire()
+        start = time.time()
+
+        import asyncio
+        id_ = id(asyncio.current_task())
+        log.error(f"MRK {id_} BeforeOpen {self.pool._queue.qsize()}")
+        try:
+            conn = await self.pool.acquire()
+        finally:
+            end = time.time()
+            t = "{0:.6f}".format(end - start)
+            log.error(f"MRK {id_} Opened in {t}s", exc_info=True)
         return conn
 
     async def close(self, con):
+        start = time.time()
+
+        import asyncio
+        id_ = id(asyncio.current_task())
+        log.error(f"MRK {id_} BeforeClose {self.pool._queue.qsize()}")
+
+        exc = None
+
         try:
             await shield(self.pool.release(con, timeout=1))
-        except (asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
+        except (asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError) as e:
             log.warning("Exception on connection close", exc_info=True)
-        except asyncio.CancelledError:
-            pass
+            exc = e
+        except asyncio.CancelledError as e:
+            exc = e
+        finally:
+            end = time.time()
+            t = "{0:.6f}".format(end - start)
+            log.error(f"MRK {id_} Closed in {t}s ({self.pool._queue.qsize()}) (exc: {exc})")
 
     async def terminate(self, conn):
         log.warning(f"Terminate connection {conn}", exc_info=True)
