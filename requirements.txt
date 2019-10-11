@@ -1,7 +1,7 @@
 Cython==0.29.6
 aiohttp>=3.5.0,<4.0.0
 async-timeout==3.0.0
-asyncpg==0.17.0
+asyncpg==0.19.0
 cffi==1.12.2
 chardet==3.0.4
 jsonschema==2.6.0
