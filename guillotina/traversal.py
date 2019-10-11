@@ -286,6 +286,7 @@ class MatchInfo(BaseMatchInfo):
                 view_result = await self.view()
                 await commit(warn=False)
             except (ConflictError, TIDConflictError):
+                await abort()
                 # bubble this error up
                 raise
             except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
