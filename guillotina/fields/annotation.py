@@ -17,9 +17,13 @@ from zope.interface import implementer
 from zope.interface import Interface
 
 import bisect
+import logging
 import time
 import typing
 import uuid
+
+
+logger = logging.getLogger("guillotina")
 
 
 _default = object()
@@ -124,18 +128,22 @@ class BucketListField(schema.Field):
         super().__init__(*args, **kwargs)
 
     async def set(self, obj, value):
-        obj.register()
-        if IContentBehavior.providedBy(obj):
-            anno_context = obj.__dict__["context"]
-            self.__key_name__ = obj.__dict__["schema"].__identifier__ + "." + self.__name__
-        else:
-            anno_context = obj
-            self.__key_name__ = self.__name__
+        try:
+            obj.register()
+            if IContentBehavior.providedBy(obj):
+                anno_context = obj.__dict__["context"]
+                self.__key_name__ = obj.__dict__["schema"].__identifier__ + "." + self.__name__
+            else:
+                anno_context = obj
+                self.__key_name__ = self.__name__
 
-        operation_name = value["op"]
-        bound_field = self.bind(obj)
-        operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
-        await operation(obj, anno_context, value["value"])
+            operation_name = value["op"]
+            bound_field = self.bind(obj)
+            operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
+            await operation(obj, anno_context, value["value"])
+        except Exception:
+            logger.warning("Unhandled error setting value", exc_info=True)
+            raise ValueDeserializationError(self, value, "Unhandled error")
 
 
 @configure.adapter(for_=IBucketListField, provides=IPatchFieldOperation, name="append")
