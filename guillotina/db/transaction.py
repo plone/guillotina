@@ -16,7 +16,11 @@ from guillotina.exceptions import TransactionClosedException
 from guillotina.exceptions import TransactionObjectRegistrationMismatchException
 from guillotina.profile import profilable
 from guillotina.utils import lazy_apply
+from mypy_extensions import VarArg
+from typing import Any
 from typing import AsyncIterator
+from typing import Callable
+from typing import Dict
 from typing import List
 from typing import Optional
 from zope.interface import implementer
@@ -43,7 +47,12 @@ class Status:
 
 
 class cache:
-    def __init__(self, key_gen, check_state_size=False, additional_keys=None):
+    def __init__(
+        self,
+        key_gen: Callable[..., Dict[str, Any]],
+        check_state_size=False,
+        additional_keys: Optional[List[Callable[[Dict[str, Any]], Dict[str, str]]]] = None,
+    ):
         self.key_gen = key_gen
         self.check_state_size = check_state_size
         self.additional_keys = additional_keys or []
