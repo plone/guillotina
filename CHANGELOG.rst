@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.16 (unreleased)
+5.0.16 (2019-10-11)
 -------------------
 
 - Handle deserialization errors on bucket fields. Otherwise, dict values were getting incorrectly saved
