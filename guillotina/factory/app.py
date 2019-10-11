@@ -135,7 +135,18 @@ def load_application(module, root, settings):
 class GuillotinaAIOHTTPApplication(web.Application):
     async def _handle(self, request, retries=0):
         task_vars.request.set(request)
-        self.clear_task_vars()
+        for var in (
+            "txn",
+            "tm",
+            "futures",
+            "authenticated_user",
+            "security_policies",
+            "container",
+            "registry",
+            "db",
+        ):
+            # and make sure to reset various task vars...
+            getattr(task_vars, var).set(None)
         try:
             return await super()._handle(request)
         except (ConflictError, TIDConflictError) as e:
@@ -159,20 +170,6 @@ class GuillotinaAIOHTTPApplication(web.Application):
         return _cls(
             message, payload, protocol, writer, task, self._loop, client_max_size=self._client_max_size
         )
-
-    def clear_task_vars(self):
-        for var in (
-            "txn",
-            "tm",
-            "futures",
-            "authenticated_user",
-            "security_policies",
-            "container",
-            "registry",
-            "db",
-        ):
-            # and make sure to reset various task vars...
-            getattr(task_vars, var).set(None)
 
 
 def make_aiohttp_application():

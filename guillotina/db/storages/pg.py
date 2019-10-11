@@ -375,7 +375,7 @@ class PGVacuum:
         get existing trashed objects, push them on the queue...
         there might be contention, but that is okay
         """
-        async with self._manager.pool.acquire() as conn:
+        async with self._manager.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
             try:
                 sql = self._sql.get("GET_TRASHED_OBJECTS", table_name)
                 for record in await conn.fetch(sql):
@@ -498,7 +498,7 @@ class PGConnectionManager:
             )
 
             # shared read connection on all transactions
-            self._read_conn = await self._pool.acquire()
+            self._read_conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
 
             if self._autovacuum:
                 self._vacuum = self._vacuum_class(self, loop)
@@ -523,7 +523,7 @@ class PGConnectionManager:
         )
 
         # shared read connection on all transactions
-        self._read_conn = await self._pool.acquire()
+        self._read_conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
 
 
 @implementer(IPostgresStorage)
@@ -782,39 +782,18 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def open(self):
-        start = time.time()
-
-        import asyncio
-        id_ = id(asyncio.current_task())
-        log.warning(f"MRK {id_} BeforeOpen {self.pool._queue.qsize()}")
-        try:
-            conn = await self.pool.acquire()
-        finally:
-            end = time.time()
-            t = "{0:.6f}".format(end - start)
-            log.warning(f"MRK {id_} Opened in {t}s", exc_info=True)
+        conn = await self.pool.acquire()
         return conn
 
     async def close(self, con):
-        start = time.time()
-
-        import asyncio
-        id_ = id(asyncio.current_task())
-        log.warning(f"MRK {id_} BeforeClose {self.pool._queue.qsize()}")
-
-        exc = None
-
         try:
             await shield(self.pool.release(con, timeout=1))
-        except (asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError) as e:
+        except (
+            asyncio.CancelledError,
+            asyncio.TimeoutError,
+            asyncpg.exceptions.ConnectionDoesNotExistError,
+        ):
             log.warning("Exception on connection close", exc_info=True)
-            exc = e
-        except asyncio.CancelledError as e:
-            exc = e
-        finally:
-            end = time.time()
-            t = "{0:.6f}".format(end - start)
-            log.warning(f"MRK {id_} Closed in {t}s ({self.pool._queue.qsize()}) (exc: {exc})")
 
     async def terminate(self, conn):
         log.warning(f"Terminate connection {conn}", exc_info=True)
