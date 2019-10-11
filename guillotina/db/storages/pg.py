@@ -375,7 +375,7 @@ class PGVacuum:
         get existing trashed objects, push them on the queue...
         there might be contention, but that is okay
         """
-        async with self._manager.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
+        async with self._manager.pool.acquire(timeout=self._manager._conn_acquire_timeout) as conn:
             try:
                 sql = self._sql.get("GET_TRASHED_OBJECTS", table_name)
                 for record in await conn.fetch(sql):
@@ -394,7 +394,7 @@ class PGVacuum:
         """
         DELETED objects has parent id changed to the trashed ob for the oid...
         """
-        async with self._manager.pool.acquire() as conn:
+        async with self._manager.pool.acquire(timeout=self._manager._conn_acquire_timeout) as conn:
             sql = self._sql.get("DELETE_OBJECT", table_name)
             try:
                 await conn.execute(sql, oid)
