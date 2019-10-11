@@ -786,13 +786,13 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
         import asyncio
         id_ = id(asyncio.current_task())
-        log.error(f"MRK {id_} BeforeOpen {self.pool._queue.qsize()}")
+        log.warning(f"MRK {id_} BeforeOpen {self.pool._queue.qsize()}")
         try:
             conn = await self.pool.acquire()
         finally:
             end = time.time()
             t = "{0:.6f}".format(end - start)
-            log.error(f"MRK {id_} Opened in {t}s", exc_info=True)
+            log.warning(f"MRK {id_} Opened in {t}s", exc_info=True)
         return conn
 
     async def close(self, con):
@@ -800,7 +800,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
         import asyncio
         id_ = id(asyncio.current_task())
-        log.error(f"MRK {id_} BeforeClose {self.pool._queue.qsize()}")
+        log.warning(f"MRK {id_} BeforeClose {self.pool._queue.qsize()}")
 
         exc = None
 
@@ -814,7 +814,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         finally:
             end = time.time()
             t = "{0:.6f}".format(end - start)
-            log.error(f"MRK {id_} Closed in {t}s ({self.pool._queue.qsize()}) (exc: {exc})")
+            log.warning(f"MRK {id_} Closed in {t}s ({self.pool._queue.qsize()}) (exc: {exc})")
 
     async def terminate(self, conn):
         log.warning(f"Terminate connection {conn}", exc_info=True)
