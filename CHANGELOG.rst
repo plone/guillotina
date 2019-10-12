@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.17 (unreleased)
+5.0.17 (2019-10-11)
 -------------------
 
 - Transaction manager type hints
