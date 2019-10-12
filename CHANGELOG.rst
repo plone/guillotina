@@ -4,7 +4,8 @@ CHANGELOG
 5.0.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Transaction manager type hints
+  [vangheem]
 
 
 5.0.16 (2019-10-11)

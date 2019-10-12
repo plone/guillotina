@@ -125,6 +125,36 @@ class ITransactionManager(Interface):
         Begin new transaction
         """
 
+    async def get_root(txn: typing.Optional[ITransaction]) -> IBaseObject:
+        """
+        Begin new transaction
+        """
+
+    def transaction(**kwargs):
+        """
+        Return new transaction context manager
+        """
+
+    def __enter__() -> "ITransactionManager":
+        """
+        set task var
+        """
+
+    def __exit__(*args):
+        """
+        contextvars already tears down to previous value, do not set to None here!
+        """
+
+    async def __aenter__() -> "ITransactionManager":
+        """
+        unset task var
+        """
+
+    async def __aexit__(*args):
+        """
+        unset task var
+        """
+
 
 class ITransactionCache(Interface):
     async def clear():  # type: ignore
