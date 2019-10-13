@@ -1,4 +1,5 @@
 from asyncio import shield
+from async_timeout import timeout
 from guillotina._settings import app_settings
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
@@ -782,8 +783,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def open(self):
-        conn = await self.pool.acquire()
-        return conn
+        async with timeout(self._conn_acquire_timeout):
+            return await self.pool.acquire()
 
     async def close(self, con):
         try:

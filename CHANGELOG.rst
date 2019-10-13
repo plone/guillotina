@@ -4,7 +4,8 @@ CHANGELOG
 5.0.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix connection leaks in edge-cases
+  [masipcat]
 
 
 5.0.17 (2019-10-11)
