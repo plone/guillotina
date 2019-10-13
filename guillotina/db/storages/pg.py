@@ -1,3 +1,4 @@
+from async_timeout import timeout
 from asyncio import shield
 from guillotina._settings import app_settings
 from guillotina.const import TRASHED_ID
@@ -782,21 +783,17 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def open(self):
-        conn = await self.pool.acquire(timeout=self._conn_acquire_timeout)
-        return conn
+        async with timeout(self._conn_acquire_timeout):
+            return await self.pool.acquire()
 
     async def close(self, con):
         try:
-            await shield(asyncio.wait_for(self.pool.release(con, timeout=1), 1))
-        except (
-            asyncio.CancelledError,
-            RuntimeError,
-            asyncio.TimeoutError,
-            asyncpg.exceptions.ConnectionDoesNotExistError,
-        ):
-            pass
+            await shield(self.pool.release(con, timeout=1))
+        except (asyncio.CancelledError, asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
+            log.warning("Exception on connection close", exc_info=True)
 
     async def terminate(self, conn):
+        log.warning(f"Terminate connection {conn}", exc_info=True)
         conn.terminate()
 
     async def load(self, txn, oid):
