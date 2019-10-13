@@ -789,11 +789,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def close(self, con):
         try:
             await shield(self.pool.release(con, timeout=1))
-        except (
-            asyncio.CancelledError,
-            asyncio.TimeoutError,
-            asyncpg.exceptions.ConnectionDoesNotExistError,
-        ):
+        except (asyncio.CancelledError, asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
             log.warning("Exception on connection close", exc_info=True)
 
     async def terminate(self, conn):
