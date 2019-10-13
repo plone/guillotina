@@ -1,10 +1,24 @@
 CHANGELOG
 =========
 
-5.0.16 (unreleased)
+5.0.18 (unreleased)
 -------------------
 
 - Nothing changed yet.
+
+
+5.0.17 (2019-10-11)
+-------------------
+
+- Transaction manager type hints
+  [vangheem]
+
+
+5.0.16 (2019-10-11)
+-------------------
+
+- Handle deserialization errors on bucket fields. Otherwise, dict values were getting incorrectly saved
+  [vangheem]
 
 
 5.0.15 (2019-10-02)
