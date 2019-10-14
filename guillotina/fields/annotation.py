@@ -266,8 +266,9 @@ class BucketDictValue:
             del annotation["keys"][middle_idx:]
             del annotation["values"][middle_idx:]
             bucket["len"] = len(annotation["keys"])
+            annotation.register()
 
-            # get annotation for this key again
+            # get annotation for this key again as it might be the new annotation
             annotation = await self.get_annotation(context, key)
 
         if key in annotation["keys"]:
@@ -280,6 +281,7 @@ class BucketDictValue:
             annotation["values"].insert(insert_idx, value)
             _, bucket = self._find_bucket(key)
             bucket["len"] = len(annotation["keys"])
+
         annotation.register()
 
     async def get(self, context, key):

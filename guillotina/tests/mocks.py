@@ -1,3 +1,5 @@
+from collections import OrderedDict
+from guillotina import app_settings
 from guillotina import task_vars
 from guillotina.component import query_adapter
 from guillotina.db.cache.dummy import DummyCache
@@ -28,7 +30,8 @@ class MockTransaction:  # type: ignore
             manager = MockTransactionManager()
         self._manager = self.manager = manager
         self._tid = 1
-        self.modified = {}
+        self.modified = OrderedDict()
+        self.added = OrderedDict()
         self.request = None
         self._strategy = query_adapter(
             self, ITransactionStrategy, name=manager._storage._transaction_strategy
@@ -46,7 +49,14 @@ class MockTransaction:  # type: ignore
         return ob
 
     def register(self, ob, new_oid=None):
-        self.modified[new_oid or ob.__uuid__] = ob
+        oid = new_oid or ob.__uuid__
+        if oid is None:
+            oid = app_settings["uid_generator"](ob)
+        ob.__uuid__ = oid
+        if ob.__new_marker__:
+            self.added[oid] = ob
+        else:
+            self.modified[oid] = ob
 
     def tpc_cleanup(self):
         pass
