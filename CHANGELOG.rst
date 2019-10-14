@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.18 (unreleased)
+5.0.18 (2019-10-13)
 -------------------
 
 - Fix connection leaks in edge-cases
