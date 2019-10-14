@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.19 (unreleased)
+5.0.19 (2019-10-14)
 -------------------
 
 - Bucket dict field does not always split index properly
