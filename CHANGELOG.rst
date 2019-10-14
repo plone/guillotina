@@ -4,7 +4,8 @@ CHANGELOG
 5.0.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bucket dict field does not always split index properly
+  [vangheem]
 
 
 5.0.18 (2019-10-13)
