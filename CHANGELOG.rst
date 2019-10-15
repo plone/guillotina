@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.20 (unreleased)
+5.0.20 (2019-10-15)
 -------------------
 
 - Add event when database tables created for postgres
