@@ -16,7 +16,6 @@ from guillotina.exceptions import TransactionClosedException
 from guillotina.exceptions import TransactionObjectRegistrationMismatchException
 from guillotina.profile import profilable
 from guillotina.utils import lazy_apply
-from mypy_extensions import VarArg
 from typing import Any
 from typing import AsyncIterator
 from typing import Callable
