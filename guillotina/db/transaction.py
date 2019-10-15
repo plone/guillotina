@@ -51,7 +51,7 @@ class cache:
         self,
         key_gen: Callable[..., Dict[str, Any]],
         check_state_size=False,
-        additional_keys: Optional[List[Callable[[Dict[str, Any]], Dict[str, str]]]] = None,
+        additional_keys: Optional[List[Callable[[Dict[str, Any]], Dict[str, Any]]]] = None,
     ):
         self.key_gen = key_gen
         self.check_state_size = check_state_size
@@ -70,9 +70,9 @@ class cache:
             if result is not None:
                 try:
                     if not this.check_state_size or len(result["state"]) < self._cache.max_cache_record_size:
-                        await self._cache.set(result, **key_args)
-                        for key_gen in this.additional_keys:
-                            await self._cache.set(result, **key_gen(result))
+                        await self._cache.set(
+                            result, keyset=[key_args] + [key_gen(result) for key_gen in this.additional_keys]
+                        )
                 except (TypeError, KeyError):
                     await self._cache.set(result, **key_args)
                 return result
