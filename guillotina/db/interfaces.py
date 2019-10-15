@@ -3,6 +3,7 @@ from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
 from zope.interface import Attribute
 from zope.interface import Interface
+from zope.interface import interfaces
 
 import typing
 
@@ -392,3 +393,7 @@ class IVacuumProvider(Interface):
         """
         Run vacuuming
         """
+
+
+class IStorageCreatedEvent(interfaces.IObjectEvent):
+    object: IStorage = Attribute("storage that was created")
