@@ -4,7 +4,8 @@ CHANGELOG
 5.0.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add event when database tables created for postgres
+  [vangheem]
 
 
 5.0.19 (2019-10-14)
