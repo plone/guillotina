@@ -161,7 +161,7 @@ class CacheUtility:
                 del self._memory_cache[key]
 
         for cache_key, ob in data.get("push", {}).items():
-            self._memory_cache[cache_key] = ob
+            self._memory_cache.set(cache_key, ob, self.get_size(ob))
 
         # clean up possible memory leak
         while len(self._ignored_tids) > 100:
