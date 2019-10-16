@@ -160,8 +160,10 @@ class CacheUtility:
             if key in self._memory_cache:
                 del self._memory_cache[key]
 
-        for cache_key, ob in data.get("push", {}).items():
-            self._memory_cache.set(cache_key, ob, self.get_size(ob))
+        push = data.get("push", {})
+        if isinstance(push, dict):
+            for cache_key, ob in push.items():
+                self._memory_cache.set(cache_key, ob, self.get_size(ob))
 
         # clean up possible memory leak
         while len(self._ignored_tids) > 100:

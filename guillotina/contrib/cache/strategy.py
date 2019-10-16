@@ -125,7 +125,7 @@ class BasicCache(BaseCache):
             raise NoPubSubUtility()
         if app_settings.get("cache", {}).get("updates_channel", None) is None:
             raise NoChannelConfigured()
-        push = []
+        push = {}
         for obj, pickled in self._stored_objects:
             val = {
                 "state": pickled,
