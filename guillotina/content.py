@@ -208,10 +208,11 @@ class Resource(guillotina.db.orm.base.BaseObject):
         behavior_registration = get_utility(IBehavior, name=name)
         if behavior_registration is not None and behavior_registration.interface(self) is not None:
             # We can adapt so we can apply this dynamic behavior
-            self.__behaviors__ |= {name}
-            if behavior_registration.marker is not None:
-                alsoProvides(self, behavior_registration.marker)
-            self.register()  # make sure we resave this obj
+            if name not in self.__behaviors__:
+                self.__behaviors__ |= {name}
+                if behavior_registration.marker is not None:
+                    alsoProvides(self, behavior_registration.marker)
+                self.register()  # make sure we resave this obj
 
     def remove_behavior(self, iface: Interface) -> None:
         """We need to apply the marker interface.
