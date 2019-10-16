@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.21 (unreleased)
+5.0.21 (2019-10-16)
 -------------------
 
 - `add_behavior` should only write to database if behavior is new for object
