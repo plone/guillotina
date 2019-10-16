@@ -8,6 +8,9 @@ from guillotina.exceptions import NoChannelConfigured
 from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import ICacheUtility
 from guillotina.profile import profilable
+from typing import Any
+from typing import Dict
+from typing import List
 
 import asyncio
 import logging
@@ -48,11 +51,12 @@ class BasicCache(BaseCache):
         return obj
 
     @profilable
-    async def set(self, value, **kwargs):
+    async def set(self, value, keyset: List[Dict[str, Any]] = None, **kwargs):
         if self._utility is None:
             return
-        key = self.get_key(**kwargs)
-        await self._utility.set(key, value)
+        if keyset is None:
+            keyset = [kwargs]
+        await self._utility.set([self.get_key(**opts) for opts in keyset], value)
         self._stored += 1
 
     @profilable
@@ -121,19 +125,25 @@ class BasicCache(BaseCache):
             raise NoPubSubUtility()
         if app_settings.get("cache", {}).get("updates_channel", None) is None:
             raise NoChannelConfigured()
-        push = {}
+        push = []
         for obj, pickled in self._stored_objects:
-            val = {"state": pickled, "zoid": obj.__uuid__, "tid": obj.__serial__, "id": obj.__name__}
+            val = {
+                "state": pickled,
+                "zoid": obj.__uuid__,
+                "tid": obj.__serial__,
+                "id": obj.__name__,
+                "parent_id": obj.__parent__.__uuid__,
+            }
             if obj.__of__:
                 ob_key = self.get_key(oid=obj.__of__, id=obj.__name__, variant="annotation")
-                await self.set(val, oid=obj.__of__, id=obj.__name__, variant="annotation")
+                await self.set(
+                    val, [dict(oid=obj.__of__, id=obj.__name__, variant="annotation"), dict(oid=obj.__uuid__)]
+                )
             else:
                 ob_key = self.get_key(container=obj.__parent__, id=obj.__name__)
-                await self.set(val, container=obj.__parent__, id=obj.__name__)
+                await self.set(val, [dict(container=obj.__parent__, id=obj.__name__), dict(oid=obj.__uuid__)])
 
             if self.push_enabled:
-                if ob_key in keys_to_publish:
-                    keys_to_publish.remove(ob_key)
                 push[ob_key] = val
 
         self._utility.ignore_tid(self._transaction._tid)

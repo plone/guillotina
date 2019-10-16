@@ -1,4 +1,7 @@
 from guillotina import glogging
+from guillotina.db.orm.interfaces import IBaseObject
+
+import typing
 
 
 logger = glogging.getLogger("guillotina")
@@ -41,12 +44,21 @@ class BaseCache:
         self.__stored += 1
         self._transaction._manager._cache_stored += 1
 
-    def get_key(self, oid=None, container=None, id=None, variant=None):
+    def get_key(
+        self,
+        oid=None,
+        container: typing.Optional[typing.Union[str, IBaseObject]] = None,
+        id=None,
+        variant=None,
+    ):
         key = "{}-".format(getattr(self._transaction.manager, "db_id", "root"))
         if oid is not None:
             key += oid
         elif container is not None:
-            key += container.__uuid__
+            if isinstance(container, str):
+                key += container
+            else:
+                key += container.__uuid__
         if id is not None:
             key += "/" + id
         if variant is not None:

@@ -4,8 +4,9 @@ CHANGELOG
 5.0.21 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Improve cache hit performance by setting cache keys on objects loaded
+  directly by uid and by looking up children object
+  [vangheem]
 
 5.0.20 (2019-10-15)
 -------------------
