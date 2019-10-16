@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.22 (unreleased)
+5.0.22 (2019-10-16)
 -------------------
 
 - Fix push invalidation data type
