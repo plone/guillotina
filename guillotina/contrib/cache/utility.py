@@ -97,7 +97,6 @@ class CacheUtility:
         size = self.get_size(value)
         for key in keys:
             try:
-                size = self.get_size(value)
                 self._memory_cache.set(key, value, size)
                 if ttl is None:
                     ttl = self._settings.get("ttl", 3600)
