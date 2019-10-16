@@ -4,7 +4,8 @@ CHANGELOG
 5.0.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix push invalidation data type
+  [vangheem]
 
 
 5.0.21 (2019-10-16)
