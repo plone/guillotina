@@ -4,7 +4,10 @@ CHANGELOG
 5.0.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Cache improvements:
+    - Store changes in cache immediately after transaction has finished instead of in task
+    - Clear txn cache fill data after using it
+    - Properly cache annotation lookup misses
 
 
 5.0.22 (2019-10-16)

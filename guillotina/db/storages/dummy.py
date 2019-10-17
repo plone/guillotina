@@ -99,6 +99,7 @@ class DummyStorage(BaseStorage):  # type: ignore
             "ofs": existing.get("ofs", {}),
         }
         self.get_txn(txn)["added"][oid] = tobj
+        await txn._cache.store_object(obj, p)
         return txn._tid, len(p)
 
     async def delete(self, txn, oid):
