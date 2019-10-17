@@ -90,7 +90,7 @@ setup(
             "sphinx-guillotina-theme",
             "sphinx-autodoc-typehints",
         ],
-        "redis": ["aioredis>=1.2"],
+        "redis": ["aioredis>=1.3"],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
     },
     entry_points={
