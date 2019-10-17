@@ -1,12 +1,10 @@
 CHANGELOG
 =========
 
-5.1.0 (unreleased)
+5.0.23 (unreleased)
 -------------------
 
 - Fix compatiblity issues with Python 3.8
-  [masipcat]
-- Minimum aiohttp version is 3.6.0
   [masipcat]
 
 

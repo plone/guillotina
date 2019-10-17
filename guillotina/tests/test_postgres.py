@@ -509,7 +509,7 @@ async def test_exhausting_pool_size(db, dummy_guillotina):
         with pytest.raises(asyncio.TimeoutError):
             # should throw an error because we've run out of connections in pool
             txn2 = await tm.begin()
-            await txn2.get_connection()
+            await asyncio.wait_for(txn2.get_connection(), 0.5)
 
         await tm.abort(txn=txn)
 
