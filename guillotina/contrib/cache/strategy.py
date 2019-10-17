@@ -145,8 +145,11 @@ class BasicCache(BaseCache):
                     val, [dict(oid=obj.__of__, id=obj.__name__, variant="annotation"), dict(oid=obj.__uuid__)]
                 )
             else:
-                val["parent_id"] = obj.__parent__.__uuid__
-                await self.set(val, [dict(container=obj.__parent__, id=obj.__name__), dict(oid=obj.__uuid__)])
+                keyset = [dict(oid=obj.__uuid__)]
+                if obj.__parent__:
+                    val["parent_id"] = obj.__parent__.__uuid__
+                    keyset.append(dict(container=obj.__parent__, id=obj.__name__))
+                await self.set(val, keyset)
 
     @profilable
     async def synchronize(self, keys_to_publish):
@@ -164,7 +167,10 @@ class BasicCache(BaseCache):
                 if obj.__of__:
                     ob_key = self.get_key(oid=obj.__of__, id=obj.__name__, variant="annotation")
                 else:
-                    ob_key = self.get_key(container=obj.__parent__, id=obj.__name__)
+                    if obj.__parent__:
+                        ob_key = self.get_key(container=obj.__parent__, id=obj.__name__)
+                    else:
+                        ob_key = self.get_key(oid=obj.__uuid__)
                 push[ob_key] = val
 
         self._stored_objects.clear()
