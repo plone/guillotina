@@ -61,12 +61,11 @@ async def test_bucket_dict_value(db, guillotina_main):
         ob = await container.async_get("foobar")
         await bucket.clear(ob)
         assert len(bucket) == 0
-        assert await bucket.get(ob, "1") == None
+        assert await bucket.get(ob, "1") is None
 
     async with transaction(db=db):
         container = await db.async_get("container")
         ob = await container.async_get("foobar")
-        total = 100
         for index in range(50, 100):
             await bucket.assign(ob, str(index), index)
 
