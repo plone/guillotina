@@ -1,5 +1,8 @@
 from guillotina import glogging
 from guillotina.db.orm.interfaces import IBaseObject
+from typing import Any
+from typing import Dict
+from typing import List
 
 import typing
 
@@ -76,7 +79,9 @@ class BaseCache:
         """
         raise NotImplemented()
 
-    async def set(self, value, oid=None, container=None, id=None, variant=None):
+    async def set(
+        self, value, keyset: List[Dict[str, Any]] = None, oid=None, container=None, id=None, variant=None
+    ):
         """
         Use params to build cache key
         """

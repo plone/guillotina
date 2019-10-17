@@ -67,13 +67,20 @@ class cache:
             result = await func(self, *args, **kwargs)
 
             if result is not None:
-                try:
-                    if not this.check_state_size or len(result["state"]) < self._cache.max_cache_record_size:
-                        await self._cache.set(
-                            result, keyset=[key_args] + [key_gen(result) for key_gen in this.additional_keys]
-                        )
-                except (TypeError, KeyError):
-                    await self._cache.set(result, **key_args)
+                if result == _EMPTY:
+                    await self._cache.set(result, keyset=[key_args])
+                else:
+                    try:
+                        if (
+                            not this.check_state_size
+                            or len(result["state"]) < self._cache.max_cache_record_size
+                        ):
+                            await self._cache.set(
+                                result,
+                                keyset=[key_args] + [key_gen(result) for key_gen in this.additional_keys],
+                            )
+                    except (TypeError, KeyError):
+                        await self._cache.set(result, **key_args)
                 return result
 
         return _wrapper
@@ -510,7 +517,10 @@ class Transaction:
         additional_keys=[lambda item: {"oid": item["zoid"]}],
     )
     async def _get_annotation(self, base_obj, id):
-        result = await self._manager._storage.get_annotation(self, base_obj.__uuid__, id)
+        try:
+            result = await self._manager._storage.get_annotation(self, base_obj.__uuid__, id)
+        except KeyError:
+            return _EMPTY
         if result is None:
             return _EMPTY
         return result
