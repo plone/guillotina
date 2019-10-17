@@ -4,6 +4,9 @@ CHANGELOG
 5.0.24 (unreleased)
 -------------------
 
+- Add `BucketDictValue.clear()`
+  [qiwn]
+
 - Fix error closing cache with some objects
   [vangheem]
 
