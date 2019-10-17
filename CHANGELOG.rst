@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.24 (unreleased)
+5.0.24 (2019-10-17)
 -------------------
 
 - Add `BucketDictValue.clear()`
