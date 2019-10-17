@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.23 (unreleased)
+5.0.23 (2019-10-17)
 -------------------
 
 - Cache improvements:
