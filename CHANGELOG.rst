@@ -4,7 +4,8 @@ CHANGELOG
 5.0.24 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix error closing cache with some objects
+  [vangheem]
 
 
 5.0.23 (2019-10-17)
