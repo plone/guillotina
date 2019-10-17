@@ -11,7 +11,6 @@ from unittest.mock import Mock
 
 import asyncio
 import asyncpg
-import concurrent
 import os
 import pytest
 
@@ -507,10 +506,10 @@ async def test_exhausting_pool_size(db, dummy_guillotina):
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         await txn.get_connection()
 
-        with pytest.raises(concurrent.futures._base.TimeoutError):
+        with pytest.raises(asyncio.exceptions.TimeoutError):
             # should throw an error because we've run out of connections in pool
             txn2 = await tm.begin()
-            await asyncio.wait_for(txn2.get_connection(), 0.5)
+            await txn2.get_connection()
 
         await tm.abort(txn=txn)
 

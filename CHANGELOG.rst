@@ -1,10 +1,12 @@
 CHANGELOG
 =========
 
-5.0.23 (unreleased)
+5.1.0 (unreleased)
 -------------------
 
-- Add Python 3.8 in .travis.yml
+- Fix compatiblity issues with Python 3.8
+  [masipcat]
+- Minimum aiohttp versions is 3.6.0
   [masipcat]
 
 
