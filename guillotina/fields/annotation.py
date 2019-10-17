@@ -314,8 +314,9 @@ class BucketDictValue:
 
     async def clear(self, context):
         annotations_container = IAnnotations(context)
-        for key in await annotations_container.async_keys():
-            await annotations_container.async_del(key)
+        for bucket in self.buckets:
+            annotation_name = self.get_annotation_name(bucket["id"])
+            await annotations_container.async_del(annotation_name)
 
         self.buckets = self._get_empty_buckets()
 
