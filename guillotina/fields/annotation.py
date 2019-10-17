@@ -203,7 +203,12 @@ class BucketDictValue:
     """
 
     def __init__(self, annotation_prefix="bucketdict-", bucket_len=1000):
-        self.buckets = [
+        self.buckets = self._get_empty_buckets()
+        self.annotation_prefix = annotation_prefix
+        self.bucket_len = bucket_len
+
+    def _get_empty_buckets(self):
+        return [
             {
                 "id": uuid.uuid4().hex,  # random gen
                 "len": 0,
@@ -211,8 +216,6 @@ class BucketDictValue:
                 "start": None,  # first one has no bound here
             }
         ]
-        self.annotation_prefix = annotation_prefix
-        self.bucket_len = bucket_len
 
     def _find_bucket(self, key) -> typing.Tuple[int, dict]:
         found = (0, self.buckets[0])
@@ -308,6 +311,13 @@ class BucketDictValue:
         _, bucket = self._find_bucket(key)
         bucket["len"] = len(annotation["keys"])
         annotation.register()
+
+    async def clear(self, context):
+        annotations_container = IAnnotations(context)
+        for key in await annotations_container.async_keys():
+            await annotations_container.async_del(key)
+
+        self.buckets = self._get_empty_buckets()
 
     def __len__(self):
         total = 0
