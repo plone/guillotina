@@ -117,3 +117,19 @@ async def test_txn_push_updates_to_subscriber(redis_container, guillotina_main, 
     assert len(util._subscriber.data) == 1
     assert "db-00000000000000000000000000000000-keys" in util._subscriber.data[0]["keys"]
     assert "db-00000000000000000000000000000000/container" in util._subscriber.data[0]["push"]
+
+
+@pytest.mark.app_settings(DEFAULT_SETTINGS)
+async def test_txn_set_value_with_no_parent(redis_container, guillotina_main, loop):
+    util = get_utility(ICacheUtility)
+    await util.initialize()
+    app_settings["cache"]["updates_channel"] = "foobar"
+    util._subscriber = MockSubscriber()
+
+    async with transaction(db=await get_database("db")) as txn:
+        root = await txn.manager.get_root()
+        # root object will not have parent
+        root.foo = "bar"
+        root.register()
+
+    assert len(util._subscriber.data) == 1
