@@ -4,7 +4,8 @@ CHANGELOG
 5.0.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add Python 3.8 in .travis.yml
+  [masipcat]
 
 
 5.0.22 (2019-10-16)
