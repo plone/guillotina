@@ -989,7 +989,6 @@ async def test_field_values_dict_bucket_preconditions(container_requester):
         assert status == 412
 
         # delete annotation for bucket that should be there, we should get 410
-        request = utils.get_mocked_request(db=requester.db)
         root = await utils.get_root(db=requester.db)
         async with transaction(db=requester.db):
             container = await root.async_get("guillotina")

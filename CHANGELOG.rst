@@ -6,7 +6,7 @@ CHANGELOG
 
 - Fix compatiblity issues with Python 3.8
   [masipcat]
-- Minimum aiohttp versions is 3.6.0
+- Minimum aiohttp version is 3.6.0
   [masipcat]
 
 

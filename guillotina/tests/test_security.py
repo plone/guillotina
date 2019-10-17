@@ -139,7 +139,7 @@ async def test_sharing_prinrole(container_requester):
         )
         assert status == 200
 
-        request = utils.get_mocked_request(db=requester.db)
+        request = utils.get_mocked_request(db=requester.db)  # noqa
         root = await utils.get_root(db=requester.db)
         async with transaction(abort_when_done=True):
             container = await root.async_get("guillotina")
@@ -165,7 +165,7 @@ async def test_sharing_roleperm(container_requester):
         )
         assert status == 200
 
-        request = utils.get_mocked_request(db=requester.db)
+        request = utils.get_mocked_request(db=requester.db)  # noqa
         root = await utils.get_root(db=requester.db)
         async with transaction(abort_when_done=True):
             container = await root.async_get("guillotina")
