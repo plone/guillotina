@@ -3,6 +3,7 @@ from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
 from zope.interface import Attribute
 from zope.interface import Interface
+from zope.interface import interfaces
 
 import typing
 
@@ -123,6 +124,36 @@ class ITransactionManager(Interface):
     async def begin(read_only: bool = False) -> ITransaction:
         """
         Begin new transaction
+        """
+
+    async def get_root(txn: typing.Optional[ITransaction]) -> IBaseObject:
+        """
+        Begin new transaction
+        """
+
+    def transaction(**kwargs):
+        """
+        Return new transaction context manager
+        """
+
+    def __enter__() -> "ITransactionManager":
+        """
+        set task var
+        """
+
+    def __exit__(*args):
+        """
+        contextvars already tears down to previous value, do not set to None here!
+        """
+
+    async def __aenter__() -> "ITransactionManager":
+        """
+        unset task var
+        """
+
+    async def __aexit__(*args):
+        """
+        unset task var
         """
 
 
@@ -362,3 +393,7 @@ class IVacuumProvider(Interface):
         """
         Run vacuuming
         """
+
+
+class IStorageCreatedEvent(interfaces.IObjectEvent):
+    object: IStorage = Attribute("storage that was created")

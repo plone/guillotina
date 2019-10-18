@@ -28,8 +28,7 @@ async def test_get_guillotina(container_requester):
 async def test_database_root_has_none_parent(container_requester):
     async with container_requester as requester:
         # important for security checks to not inherit...
-        request = utils.get_mocked_request(db=requester.db)
-        root = await utils.get_root(request)
+        root = await utils.get_root(db=requester.db)
         assert root.__parent__ is None
 
 
@@ -68,7 +67,7 @@ async def test_set_local_guillotina(container_requester):
         )  # noqa
 
         request = utils.get_mocked_request(db=requester.db)
-        root = await utils.get_root(request)
+        root = await utils.get_root(db=requester.db)
 
         async with transaction(abort_when_done=True):
             container = await root.async_get("guillotina")
@@ -101,7 +100,7 @@ async def test_set_local_guillotina(container_requester):
             ),
         )
 
-        root = await utils.get_root(request)
+        root = await utils.get_root(db=requester.db)
 
         async with transaction(abort_when_done=True):
             # need to retreive objs again from db since they changed
@@ -124,7 +123,7 @@ async def test_set_local_guillotina(container_requester):
             ),
         )
         # need to retreive objs again from db since they changed
-        root = await utils.get_root(request)
+        root = await utils.get_root(db=requester.db)
 
         async with transaction(abort_when_done=True):
             container = await root.async_get("guillotina")
@@ -144,9 +143,8 @@ async def test_sharing_prinrole(container_requester):
         )
         assert status == 200
 
-        request = utils.get_mocked_request(db=requester.db)
-        root = await utils.get_root(request)
-
+        request = utils.get_mocked_request(db=requester.db)  # noqa
+        root = await utils.get_root(db=requester.db)
         async with transaction(abort_when_done=True):
             container = await root.async_get("guillotina")
             assert "user1" in container.__acl__["prinrole"]._bycol
@@ -171,9 +169,8 @@ async def test_sharing_roleperm(container_requester):
         )
         assert status == 200
 
-        request = utils.get_mocked_request(db=requester.db)
-        root = await utils.get_root(request)
-
+        request = utils.get_mocked_request(db=requester.db)  # noqa
+        root = await utils.get_root(db=requester.db)
         async with transaction(abort_when_done=True):
             container = await root.async_get("guillotina")
             assert "guillotina.Reader" in container.__acl__["roleperm"]._bycol

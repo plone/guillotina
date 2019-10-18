@@ -8,6 +8,9 @@ from guillotina.exceptions import NoChannelConfigured
 from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import ICacheUtility
 from guillotina.profile import profilable
+from typing import Any
+from typing import Dict
+from typing import List
 
 import asyncio
 import logging
@@ -48,11 +51,12 @@ class BasicCache(BaseCache):
         return obj
 
     @profilable
-    async def set(self, value, **kwargs):
+    async def set(self, value, keyset: List[Dict[str, Any]] = None, **kwargs):
         if self._utility is None:
             return
-        key = self.get_key(**kwargs)
-        await self._utility.set(key, value)
+        if keyset is None:
+            keyset = [kwargs]
+        await self._utility.set([self.get_key(**opts) for opts in keyset], value)
         self._stored += 1
 
     @profilable
@@ -91,6 +95,18 @@ class BasicCache(BaseCache):
 
     @profilable
     async def close(self, invalidate=True, publish=True):
+        """
+        - invalidate:
+            - invalidate object caches for the objects involved in the txn
+            - use False when you do not want changes in the transaction to invalidate the cache
+        - publish:
+            - synchronize changes to objects with caches
+            - use False when you do not want changes to synchronize
+
+        For example, on conflict error:
+            - invalidate=True -- we want objects involved in the txn to be invalidated so they are loaded from db
+            - publish=False -- objects involved in the txn should not be pushed to caches
+        """
         if self._utility is None:
             return
         try:
@@ -105,37 +121,59 @@ class BasicCache(BaseCache):
                 )
                 await self.delete_all(keys_to_invalidate)
 
-                if publish and len(self._keys_to_publish) > 0 and self._utility._subscriber is not None:
-                    keys = self._keys_to_publish
-                    asyncio.ensure_future(self.synchronize(keys))
+                if publish:
+                    await self.fill_cache()
+                    if len(self._keys_to_publish) > 0 and self._utility._subscriber is not None:
+                        keys = self._keys_to_publish
+                        asyncio.ensure_future(self.synchronize(keys))
+                    else:
+                        self._stored_objects.clear()
+            else:
+                self._stored_objects.clear()
+
             self._keys_to_publish = []
-        except Exception:
+        except Exception:  # pragma: no cover
+            self._stored_objects.clear()
+            self._keys_to_publish = []
             logger.warning("Error closing connection", exc_info=True)
+
+    async def fill_cache(self):
+        for obj, pickled in self._stored_objects:
+            val = {"state": pickled, "zoid": obj.__uuid__, "tid": obj.__serial__, "id": obj.__name__}
+            if obj.__of__:
+                await self.set(
+                    val, [dict(oid=obj.__of__, id=obj.__name__, variant="annotation"), dict(oid=obj.__uuid__)]
+                )
+            else:
+                keyset = [dict(oid=obj.__uuid__)]
+                if obj.__parent__:
+                    val["parent_id"] = obj.__parent__.__uuid__
+                    keyset.append(dict(container=obj.__parent__, id=obj.__name__))
+                await self.set(val, keyset)
 
     @profilable
     async def synchronize(self, keys_to_publish):
         """
         publish cache changes on redis
         """
-        if self._utility._subscriber is None:
+        if self._utility._subscriber is None:  # pragma: no cover
             raise NoPubSubUtility()
-        if app_settings.get("cache", {}).get("updates_channel", None) is None:
+        if app_settings.get("cache", {}).get("updates_channel", None) is None:  # pragma: no cover
             raise NoChannelConfigured()
         push = {}
-        for obj, pickled in self._stored_objects:
-            val = {"state": pickled, "zoid": obj.__uuid__, "tid": obj.__serial__, "id": obj.__name__}
-            if obj.__of__:
-                ob_key = self.get_key(oid=obj.__of__, id=obj.__name__, variant="annotation")
-                await self.set(val, oid=obj.__of__, id=obj.__name__, variant="annotation")
-            else:
-                ob_key = self.get_key(container=obj.__parent__, id=obj.__name__)
-                await self.set(val, container=obj.__parent__, id=obj.__name__)
-
-            if self.push_enabled:
-                if ob_key in keys_to_publish:
-                    keys_to_publish.remove(ob_key)
+        if self.push_enabled:
+            for obj, pickled in self._stored_objects:
+                val = {"state": pickled, "zoid": obj.__uuid__, "tid": obj.__serial__, "id": obj.__name__}
+                if obj.__of__:
+                    ob_key = self.get_key(oid=obj.__of__, id=obj.__name__, variant="annotation")
+                else:
+                    if obj.__parent__:
+                        ob_key = self.get_key(container=obj.__parent__, id=obj.__name__)
+                    else:
+                        ob_key = self.get_key(oid=obj.__uuid__)
                 push[ob_key] = val
 
+        self._stored_objects.clear()
         self._utility.ignore_tid(self._transaction._tid)
         await self._utility._subscriber.publish(
             app_settings["cache"]["updates_channel"],

@@ -44,7 +44,7 @@ def logout():
     set_authenticated_user(None)
 
 
-async def get_root(tm=None, db=None):
+async def get_root(*, tm=None, db=None):
     async with transaction(tm=tm, db=db) as txn:
         return await txn.manager.get_root()
 

@@ -33,7 +33,7 @@ async def test_add_sync_utility(guillotina):
         var.append(msg)
 
     request = utils.get_mocked_request(db=guillotina.db)
-    root = await utils.get_root(request)
+    root = await utils.get_root(db=guillotina.db)
 
     await util.add(AsyncMockView(root, request, printHi, "hola1"))
     await util.add(AsyncMockView(root, request, printHi, "hola2"))

@@ -91,3 +91,19 @@ async def test_cache_clear(redis_container, guillotina_main):
     await rcache.clear()
     assert await rcache.get(oid="foo") is None
     await util.finalize(None)
+
+
+@pytest.mark.app_settings(DEFAULT_SETTINGS)
+async def test_set_multiple_cache_keys_size(redis_container, guillotina_main):
+    util = get_utility(ICacheUtility)
+    await util.initialize()
+    assert util.initialized
+    assert util._obj_driver is not None
+    trns = mocks.MockTransaction(mocks.MockTransactionManager())
+    trns.added = trns.deleted = {}
+    rcache = BasicCache(trns)
+    await rcache.clear()
+
+    await rcache.set({"state": "foobar"}, keyset=[{"oid": "foo"}, {"container": "foobar", "id": "foobar"}])
+    assert util._memory_cache.get_memory() == 6
+    await util.finalize(None)

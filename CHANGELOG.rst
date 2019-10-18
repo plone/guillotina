@@ -8,10 +8,92 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.0.15 (unreleased)
+5.0.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix compatiblity issues with Python 3.8
+  [masipcat]
+
+
+5.0.24 (2019-10-17)
+-------------------
+
+- Add `BucketDictValue.clear()`
+  [qiwn]
+
+- Fix error closing cache with some objects
+  [vangheem]
+
+
+5.0.23 (2019-10-17)
+-------------------
+
+- Cache improvements:
+    - Store changes in cache immediately after transaction has finished instead of in task
+    - Clear txn cache fill data after using it
+    - Properly cache annotation lookup misses
+
+
+5.0.22 (2019-10-16)
+-------------------
+
+- Fix push invalidation data type
+  [vangheem]
+
+
+5.0.21 (2019-10-16)
+-------------------
+
+- `add_behavior` should only write to database if behavior is new for object
+  [vangheem]
+
+- Improve cache hit performance by setting cache keys on objects loaded
+  directly by uid and by looking up children object
+  [vangheem]
+
+5.0.20 (2019-10-15)
+-------------------
+
+- Add event when database tables created for postgres
+  [vangheem]
+
+
+5.0.19 (2019-10-14)
+-------------------
+
+- Bucket dict field does not always split index properly
+  [vangheem]
+
+
+5.0.18 (2019-10-13)
+-------------------
+
+- Fix connection leaks in edge-cases
+  [masipcat]
+
+- Pinned asyncpg to 0.19.0
+  [masipcat]
+
+
+5.0.17 (2019-10-11)
+-------------------
+
+- Transaction manager type hints
+  [vangheem]
+
+
+5.0.16 (2019-10-11)
+-------------------
+
+- Handle deserialization errors on bucket fields. Otherwise, dict values were getting incorrectly saved
+  [vangheem]
+
+
+5.0.15 (2019-10-02)
+-------------------
+
+- Provide workaround for asyncio contextvars ipython bug in shell
+  [vangheem]
 
 
 5.0.14 (2019-10-02)

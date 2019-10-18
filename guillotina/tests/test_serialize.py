@@ -738,3 +738,39 @@ async def test_bucket_dict_field(dummy_request, mock_txn):
     # check all values as well
     for idx, key in enumerate(all_keys):
         assert inserted[key] == all_values[idx]
+
+
+async def test_unhandled_exceptions_in_bucket_dict_field_do_not_write_to_object(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(
+        ITestSchema, content, {"bucket_dict": {"op": "assign", "value": None}}, errors
+    )
+    assert not hasattr(content, "bucket_dict")
+    assert len(errors) == 1
+
+
+async def test_bucket_dict_field_splitting(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    for idx in range(10):
+        key = str(idx)
+        await deserializer.set_schema(
+            ITestSchema,
+            content,
+            {"bucket_dict": {"op": "assign", "value": {"key": key, "value": str(idx)}}},
+            [],
+        )
+    assert len(mock_txn.added) == 1  # should all be in one bucket
+    mock_txn.added.clear()
+    # now test inserting one that will split the buckets and insert into new bucket.
+    await deserializer.set_schema(
+        ITestSchema,
+        content,
+        {"bucket_dict": {"op": "assign", "value": {"key": "ZZZZZ", "value": "foobar"}}},
+        [],
+    )
+    assert len(mock_txn.added) == 2  # should write to existing bucket and new one

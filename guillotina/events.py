@@ -40,7 +40,7 @@ import typing
 
 
 @implementer(IObjectEvent)
-class ObjectEvent(object):
+class ObjectEvent:
     def __init__(self, object, **kwargs):
         self.object = object
         self.data = kwargs

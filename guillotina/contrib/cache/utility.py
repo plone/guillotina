@@ -91,18 +91,22 @@ class CacheUtility:
         return _default_size
 
     # Set a object from cache
-    async def set(self, key, value, ttl=None):
-        try:
-            size = self.get_size(value)
-            self._memory_cache.set(key, value, size)
-            if ttl is None:
-                ttl = self._settings.get("ttl", 3600)
-            if self._obj_driver is not None:
-                stored_value = serialize.dumps(value)
-                await self._obj_driver.set(CACHE_PREFIX + key, stored_value, expire=ttl)
-            logger.info("set {} in cache".format(key))
-        except Exception:
-            logger.warning("Error setting cache value", exc_info=True)
+    async def set(self, keys, value, ttl=None):
+        if not isinstance(keys, list):
+            keys = [keys]
+        size = self.get_size(value)
+        for key in keys:
+            try:
+                self._memory_cache.set(key, value, size)
+                if ttl is None:
+                    ttl = self._settings.get("ttl", 3600)
+                if self._obj_driver is not None:
+                    stored_value = serialize.dumps(value)
+                    await self._obj_driver.set(CACHE_PREFIX + key, stored_value, expire=ttl)
+                logger.info("set {} in cache".format(key))
+            except Exception:
+                logger.warning("Error setting cache value", exc_info=True)
+            size = 0  # additional keys to set have 0 size in cache
 
     @profilable
     # Delete a set of objects from cache
@@ -156,8 +160,10 @@ class CacheUtility:
             if key in self._memory_cache:
                 del self._memory_cache[key]
 
-        for cache_key, ob in data.get("push", {}).items():
-            self._memory_cache[cache_key] = ob
+        push = data.get("push", {})
+        if isinstance(push, dict):
+            for cache_key, ob in push.items():
+                self._memory_cache.set(cache_key, ob, self.get_size(ob))
 
         # clean up possible memory leak
         while len(self._ignored_tids) > 100:

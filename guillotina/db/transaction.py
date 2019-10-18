@@ -16,7 +16,10 @@ from guillotina.exceptions import TransactionClosedException
 from guillotina.exceptions import TransactionObjectRegistrationMismatchException
 from guillotina.profile import profilable
 from guillotina.utils import lazy_apply
+from typing import Any
 from typing import AsyncIterator
+from typing import Callable
+from typing import Dict
 from typing import List
 from typing import Optional
 from zope.interface import implementer
@@ -43,9 +46,15 @@ class Status:
 
 
 class cache:
-    def __init__(self, key_gen, check_state_size=False):
+    def __init__(
+        self,
+        key_gen: Callable[..., Dict[str, Any]],
+        check_state_size=False,
+        additional_keys: Optional[List[Callable[[Dict[str, Any]], Dict[str, Any]]]] = None,
+    ):
         self.key_gen = key_gen
         self.check_state_size = check_state_size
+        self.additional_keys = additional_keys or []
 
     def __call__(self, func):
         this = self
@@ -58,11 +67,20 @@ class cache:
             result = await func(self, *args, **kwargs)
 
             if result is not None:
-                try:
-                    if not this.check_state_size or len(result["state"]) < self._cache.max_cache_record_size:
+                if result == _EMPTY:
+                    await self._cache.set(result, keyset=[key_args])
+                else:
+                    try:
+                        if (
+                            not this.check_state_size
+                            or len(result["state"]) < self._cache.max_cache_record_size
+                        ):
+                            await self._cache.set(
+                                result,
+                                keyset=[key_args] + [key_gen(result) for key_gen in this.additional_keys],
+                            )
+                    except (TypeError, KeyError):
                         await self._cache.set(result, **key_args)
-                except (TypeError, KeyError):
-                    await self._cache.set(result, **key_args)
                 return result
 
         return _wrapper
@@ -276,7 +294,11 @@ class Transaction:
         ob.__serial__ = new.__serial__
         ob.__txn__ = self
 
-    @cache(lambda oid: {"oid": oid}, True)
+    @cache(
+        lambda oid: {"oid": oid},
+        True,
+        additional_keys=[lambda item: {"container": item["parent_id"], "id": item["id"]}],
+    )
     async def _get(self, oid):
         return await self._manager._storage.load(self, oid)
 
@@ -412,7 +434,11 @@ class Transaction:
             keys.append(record["id"])
         return keys
 
-    @cache(lambda container, key: {"container": container, "id": key}, True)
+    @cache(
+        lambda container, key: {"container": container, "id": key},
+        True,
+        additional_keys=[lambda item: {"oid": item["zoid"]}],
+    )
     async def _get_child(self, container, key):
         return await self._manager._storage.get_child(self, container.__uuid__, key)
 
@@ -485,9 +511,16 @@ class Transaction:
             yield item.__name__, item
 
     @profilable
-    @cache(lambda base_obj, id: {"container": base_obj, "id": id, "variant": "annotation"}, True)
+    @cache(
+        lambda base_obj, id: {"container": base_obj, "id": id, "variant": "annotation"},
+        True,
+        additional_keys=[lambda item: {"oid": item["zoid"]}],
+    )
     async def _get_annotation(self, base_obj, id):
-        result = await self._manager._storage.get_annotation(self, base_obj.__uuid__, id)
+        try:
+            result = await self._manager._storage.get_annotation(self, base_obj.__uuid__, id)
+        except KeyError:
+            return _EMPTY
         if result is None:
             return _EMPTY
         return result

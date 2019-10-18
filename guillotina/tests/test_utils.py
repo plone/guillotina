@@ -39,8 +39,7 @@ async def test_get_content_path(container_requester):
             "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
-        request = get_mocked_request(db=requester.db)
-        root = await get_root(request)
+        root = await get_root(db=requester.db)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
         container = await root.async_get("guillotina")
@@ -57,8 +56,7 @@ async def test_get_content_depth(container_requester):
             "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
-        request = get_mocked_request(db=requester.db)
-        root = await get_root(request)
+        root = await get_root(db=requester.db)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
         container = await root.async_get("guillotina")
@@ -148,7 +146,7 @@ async def test_object_utils(container_requester):
         )
         assert status == 201
         request = get_mocked_request(db=requester.db)
-        root = await get_root(request)
+        root = await get_root(db=requester.db)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
         container = await root.async_get("guillotina")
@@ -181,8 +179,7 @@ async def test_navigator_preload(container_requester):
             "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
-        request = get_mocked_request(db=requester.db)
-        root = await get_root(request)
+        root = await get_root(db=requester.db)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
         container = await root.async_get("guillotina")
@@ -226,8 +223,7 @@ async def test_navigator_get(container_requester):
             data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"}),
         )
         assert status == 201
-        request = get_mocked_request(db=requester.db)
-        root = await get_root(request)
+        root = await get_root(db=requester.db)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
         container = await root.async_get("guillotina")
@@ -257,8 +253,7 @@ async def test_get_behavior(container_requester):
             "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
         )
         assert status == 201
-        request = get_mocked_request(db=requester.db)
-        root = await get_root(request)
+        root = await get_root(db=requester.db)
         tm = requester.db.get_transaction_manager()
         txn = await tm.begin()
         container = await root.async_get("guillotina")

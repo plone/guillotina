@@ -17,9 +17,13 @@ from zope.interface import implementer
 from zope.interface import Interface
 
 import bisect
+import logging
 import time
 import typing
 import uuid
+
+
+logger = logging.getLogger("guillotina")
 
 
 _default = object()
@@ -124,18 +128,22 @@ class BucketListField(schema.Field):
         super().__init__(*args, **kwargs)
 
     async def set(self, obj, value):
-        obj.register()
-        if IContentBehavior.providedBy(obj):
-            anno_context = obj.__dict__["context"]
-            self.__key_name__ = obj.__dict__["schema"].__identifier__ + "." + self.__name__
-        else:
-            anno_context = obj
-            self.__key_name__ = self.__name__
+        try:
+            obj.register()
+            if IContentBehavior.providedBy(obj):
+                anno_context = obj.__dict__["context"]
+                self.__key_name__ = obj.__dict__["schema"].__identifier__ + "." + self.__name__
+            else:
+                anno_context = obj
+                self.__key_name__ = self.__name__
 
-        operation_name = value["op"]
-        bound_field = self.bind(obj)
-        operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
-        await operation(obj, anno_context, value["value"])
+            operation_name = value["op"]
+            bound_field = self.bind(obj)
+            operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
+            await operation(obj, anno_context, value["value"])
+        except Exception:
+            logger.warning("Unhandled error setting value", exc_info=True)
+            raise ValueDeserializationError(self, value, "Unhandled error")
 
 
 @configure.adapter(for_=IBucketListField, provides=IPatchFieldOperation, name="append")
@@ -195,7 +203,12 @@ class BucketDictValue:
     """
 
     def __init__(self, annotation_prefix="bucketdict-", bucket_len=1000):
-        self.buckets = [
+        self.buckets = self._get_empty_buckets()
+        self.annotation_prefix = annotation_prefix
+        self.bucket_len = bucket_len
+
+    def _get_empty_buckets(self):
+        return [
             {
                 "id": uuid.uuid4().hex,  # random gen
                 "len": 0,
@@ -203,8 +216,6 @@ class BucketDictValue:
                 "start": None,  # first one has no bound here
             }
         ]
-        self.annotation_prefix = annotation_prefix
-        self.bucket_len = bucket_len
 
     def _find_bucket(self, key) -> typing.Tuple[int, dict]:
         found = (0, self.buckets[0])
@@ -258,8 +269,9 @@ class BucketDictValue:
             del annotation["keys"][middle_idx:]
             del annotation["values"][middle_idx:]
             bucket["len"] = len(annotation["keys"])
+            annotation.register()
 
-            # get annotation for this key again
+            # get annotation for this key again as it might be the new annotation
             annotation = await self.get_annotation(context, key)
 
         if key in annotation["keys"]:
@@ -272,6 +284,7 @@ class BucketDictValue:
             annotation["values"].insert(insert_idx, value)
             _, bucket = self._find_bucket(key)
             bucket["len"] = len(annotation["keys"])
+
         annotation.register()
 
     async def get(self, context, key):
@@ -298,6 +311,14 @@ class BucketDictValue:
         _, bucket = self._find_bucket(key)
         bucket["len"] = len(annotation["keys"])
         annotation.register()
+
+    async def clear(self, context):
+        annotations_container = IAnnotations(context)
+        for bucket in self.buckets:
+            annotation_name = self.get_annotation_name(bucket["id"])
+            await annotations_container.async_del(annotation_name)
+
+        self.buckets = self._get_empty_buckets()
 
     def __len__(self):
         total = 0
