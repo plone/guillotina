@@ -1,4 +1,4 @@
-Cython==0.29.6
+Cython==0.29.13
 async-timeout==3.0.0
 asyncpg==0.19.0
 cffi==1.12.2
