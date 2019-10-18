@@ -13,5 +13,8 @@ PyYaml==5.1
 six==1.11.0
 ujson==1.35
 zope.interface==4.4.3
+# Force build uvloop from source instead of using wheel
+# Replace with a uvicorn version that uses uvloop built for python 3.8
+git+https://github.com/dmontagu/uvloop@patch-1
 uvicorn==0.9.0
 argon2-cffi==18.3.0
