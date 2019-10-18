@@ -54,7 +54,8 @@ setup(
     package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"], "guillotina": ["py.typed"]},
     packages=find_packages(),
     install_requires=[
-        "aiohttp>=3.0.0,<3.6.0",
+        'aiohttp>=3.0.0,<3.6.0;python_version<"3.8"',
+        'aiohttp>=3.6.0,<4.0.0;python_version>="3.8"',
         "jsonschema",
         "python-dateutil",
         "pycryptodome",
@@ -90,7 +91,10 @@ setup(
             "sphinx-guillotina-theme",
             "sphinx-autodoc-typehints",
         ],
-        "redis": ["aioredis>=1.2"],
+        "redis": [
+            'aioredis>=1.2.0;python_version<"3.8"',
+            'aioredis>=1.3.0;python_version>="3.8"',
+        ],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
     },
     entry_points={

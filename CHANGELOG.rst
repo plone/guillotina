@@ -4,7 +4,8 @@ CHANGELOG
 5.0.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix compatiblity issues with Python 3.8
+  [masipcat]
 
 
 5.0.24 (2019-10-17)
