@@ -24,14 +24,13 @@ logger = logging.getLogger('guillotina_chat')
     permission='guillotina.AccessContent', name='@conversate')
 async def ws_conversate(context, request):
     ws = request.get_ws()
-    await ws.prepare(request)
+    await ws.prepare()
 
     utility = get_utility(IMessageSender)
     utility.register_ws(ws, request)
 
-    tm = get_tm(request)
-    await tm.abort(request)
-    await ws.prepare(request)
+    tm = get_tm()
+    await tm.abort()
 
     async for msg in ws:
         # handle msg

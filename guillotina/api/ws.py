@@ -165,7 +165,7 @@ class WebsocketsView(Service):
         tm = get_tm()
         await tm.abort()
         ws = self.request.get_ws()
-        await ws.prepare(self.request)
+        await ws.prepare()
 
         async for msg in ws:
             try:

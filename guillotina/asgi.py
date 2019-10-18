@@ -69,6 +69,8 @@ class AsgiApp:
             await clean(self)
 
     async def handler(self, scope, receive, send):
+        # Ensure the ASGI server has initialized the server before sending a request
+        # Some ASGI servers (i.e. daphne) doesn't implement the lifespan protocol.
         if not self.initialized:
             raise RuntimeError("The app is not initialized")
 
