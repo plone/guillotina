@@ -17,7 +17,7 @@ Then,
 
 ```
 cd guillotina_chat
-python setup.py develop
+pip install -e .
 ```
 
 

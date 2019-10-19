@@ -8,7 +8,7 @@ recent conversations and messages for a conversation.
 
 ## Creating the services
 
-We'll name our endpoints `@get-conversations` and `@get-messages` and put them
+We'll name our endpoints `@conversations` and `@messages` and put them
 in a file named `services.py`.
 
 ```python
@@ -19,7 +19,7 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina_chat.content import IConversation
 
 
-@configure.service(for_=IContainer, name='@get-conversations',
+@configure.service(for_=IContainer, name='@conversations',
                    permission='guillotina.Authenticated')
 async def get_conversations(context, request):
     results = []
@@ -35,7 +35,7 @@ async def get_conversations(context, request):
     return results
 
 
-@configure.service(for_=IConversation, name='@get-messages',
+@configure.service(for_=IConversation, name='@messages',
                    permission='guillotina.AccessContent')
 async def get_messages(context, request):
     results = []

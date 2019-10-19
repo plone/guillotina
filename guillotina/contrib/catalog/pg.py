@@ -33,6 +33,7 @@ from guillotina.utils import get_object_url
 from guillotina.utils import get_security_policy
 from zope.interface import implementer
 
+import asyncpg.exceptions
 import json
 import logging
 import typing
@@ -432,14 +433,23 @@ class PGSearchUtility(DefaultSearchUtility):
             tm = db.get_transaction_manager()
             if not IPostgresStorage.providedBy(tm.storage):
                 continue
-            async with tm.storage.pool.acquire() as conn:
-                for func in PG_FUNCTIONS:
-                    await conn.execute(func)
-                for index in [BasicJsonIndex("container_id")] + [v for v in get_pg_indexes().values()]:
-                    sqls = index.get_index_sql(tm.storage)
-                    for sql in sqls:
-                        logger.debug(f"Creating index:\n {sql}")
-                        await conn.execute(sql)
+            try:
+                async with tm.storage.pool.acquire() as conn:
+                    for func in PG_FUNCTIONS:
+                        await conn.execute(func)
+                    for index in [BasicJsonIndex("container_id")] + [v for v in get_pg_indexes().values()]:
+                        sqls = index.get_index_sql(tm.storage)
+                        for sql in sqls:
+                            logger.debug(f"Creating index:\n {sql}")
+                            await conn.execute(sql)
+            except asyncpg.exceptions.ConnectionDoesNotExistError:  # pragma: no cover
+                # closed before it could be setup
+                pass
+            except AttributeError as ex:  # pragma: no cover
+                if "'reset'" in str(ex):
+                    # ignore error removing from pool if already closed
+                    return
+                raise
 
     def get_default_where_clauses(self, container: IContainer) -> typing.List[str]:
         users = []
@@ -651,7 +661,8 @@ class PGSearchUtility(DefaultSearchUtility):
         data["transaction"] = await data["tm"].begin()
         container.__txn__ = data["transaction"]
         await self._process_object(container, data)
-        await self._process_folder(container, data)
+        if IFolder.providedBy(container):
+            await self._process_folder(container, data)
         await data["tm"].commit(txn=data["transaction"])
 
     async def _process_folder(self, obj, data):

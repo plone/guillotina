@@ -214,7 +214,7 @@ click the `Authorize` button
 ![alt text](../../_static/img/auth-swagger.png "Swagger Auth")
 
 
-The `Base API Endpoint` setting is what the current context is that you're exploring
+The top URL setting is what the current context is that you're exploring the API
 on. If you create content at `/db/container/foobar` and want to explore that
 content's API, you should change the URL. Different content types will have
 different services available.
