@@ -53,3 +53,34 @@ And make sure to add the scan.
 ```python
 configure.scan('guillotina_chat.services')
 ```
+
+These endpoints manually go through the content in the database and retrieve
+the results for you. This is to demonstration some interaction with objects
+and the database with services; however, you can do the same as what is
+going on here with the `@search` endpoint.
+
+For example:
+
+```
+POST @search {
+    "type_name": "Conversations"
+}
+```
+
+and...
+
+```
+POST @search {
+    "type_name": "Message"
+}
+```
+
+You can take this further to query by dates and the text of the message as well.
+
+```
+POST @search {
+    "type_name": "Message",
+    "text": "foobar",
+    "creation_date__gte": "2019-10-20T15:30:27.580369+00:00"
+}
+```
