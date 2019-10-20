@@ -56,7 +56,7 @@ class WSTokenAuthPolicy(BasePolicy):
                 return
             json_payload = json.loads(payload)
             if json_payload["exp"] <= int(time.time()):
-                logger.warn(f"Expired token {jwt_token}", exc_info=True)
+                logger.warning(f"Expired token {jwt_token}", exc_info=True)
                 return
             data = {"type": "wstoken", "token": json_payload["token"]}
             if "id" in json_payload:

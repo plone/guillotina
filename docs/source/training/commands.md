@@ -25,6 +25,7 @@ Then, to connect to the database and get your container object.
 ```python
 txn = await use_db('db')
 container = await use_container('container')
+setup()
 ```
 
 From here, you can access objects:

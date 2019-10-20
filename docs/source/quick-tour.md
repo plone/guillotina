@@ -221,7 +221,6 @@ Then use guillotina templates to create an application:
 
 ```
 $ ./bin/g create --template=application
-Could not find the configuration file config.json. Using default settings.
 full_name []: My App
 email []: guillotina@myapp.io
 package_name [guillotina_myproject]: myapp

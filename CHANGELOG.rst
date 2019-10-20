@@ -4,6 +4,9 @@ CHANGELOG
 5.0.25 (unreleased)
 -------------------
 
+- Documentation and training fixes
+  [vangheems]
+
 - Fix compatiblity issues with Python 3.8
   [masipcat]
 

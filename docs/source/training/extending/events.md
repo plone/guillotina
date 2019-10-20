@@ -13,13 +13,16 @@ A an `subscribers.py` file inside your application.
 
 ```python
 from guillotina import configure
-from guillotina.interfaces import IObjectAddedEvent, IPrincipalRoleManager
-from guillotina.utils import get_authenticated_user_id, get_current_request
+from guillotina.interfaces import (IObjectAddedEvent, IObjectModifiedEvent,
+                                   IPrincipalRoleManager)
+from guillotina.utils import get_authenticated_user_id
+
 from guillotina_chat.content import IConversation
 
 
 @configure.subscriber(for_=(IConversation, IObjectAddedEvent))
-async def container_added(conversation, event):
+@configure.subscriber(for_=(IConversation, IObjectModifiedEvent))
+async def container_changed(conversation, event):
     user_id = get_authenticated_user_id()
     if user_id not in conversation.users:
         conversation.users.append(user_id)
@@ -28,6 +31,7 @@ async def container_added(conversation, event):
     for user in conversation.users:
         manager.assign_role_to_principal(
             'guillotina_chat.ConversationParticipant', user)
+
 ```
 
 

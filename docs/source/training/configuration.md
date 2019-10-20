@@ -1,12 +1,12 @@
 # Configuration
 
 You may have wondered how running `g` command without any configuration and
-options knew to connect and configure the database. Well, it's only because
-we provide default settings in our application and documentation to make
-that step easy.
+options knew to connect and configure the database. This is because Guillotina
+will run without configuration. In it's place, it will run with a DUMMY_FILE
+database which will save the database file locally.
 
 In this section, we'll talk about working with the Guillotina configuration
-system.
+system and configure Guillotina to run with a postgresql database.
 
 
 ## Getting started
@@ -30,6 +30,26 @@ in the [configuration section](../../installation/configuration.html) of the doc
 .. note:: Guillotina also supports JSON configuration files
 ```
 
+## Running PostgreSQL
+
+Next, you'll need to run a [PostgreSQL](https://www.postgresql.org/ "Link to PostgreSQL's website")
+server for Guillotina to use.
+
+``` shell
+docker run \
+  -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres \
+  -p 127.0.0.1:5432:5432 \
+  postgres:9.6
+```
+
+
+```eval_rst
+.. note::
+   This particular docker run command produces a volatile database.
+
+   Stopping and starting it again will cause you to lose any data you pushed into it.
+```
+
 ## Configuration file
 
 To specify a configuration file other than the name `config.yaml`, you can use
@@ -40,17 +60,22 @@ the `-c` or `--config` command line option.
 g -c config-foobar.yaml
 ```
 
+```eval_rst
+.. note::
+   Make sure your configuration matches your PostgreSQL server settings
+```
+
 
 ## Installing applications
 
 Guillotina applications are python packages or modules that you install and then configure
 in your application settings.
 
-For an example, we'll go through installing swagger support.
+For an example, we'll go through activating swagger support.
 
 Since version 5, swagger is in packaged with Guillotina by default.
 
-Add this to your `config.yaml` file.
+Make sure `guillotina.contrib.swagger` is listed in your `config.yaml` file.
 
 ```yaml
 applications:

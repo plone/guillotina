@@ -8,41 +8,46 @@ Create a `ws.py` file and put the following code in:
 
 
 ```python
+import asyncio
+import logging
+
+import aiohttp
 from aiohttp import web
 from guillotina import configure
 from guillotina.component import get_utility
 from guillotina.interfaces import IContainer
 from guillotina.transactions import get_tm
-from guillotina_chat.utility import IMessageSender
 
-import aiohttp
-import logging
+from guillotina_chat.utility import IMessageSender
 
 logger = logging.getLogger('guillotina_chat')
 
 
 @configure.service(
-    context=IContainer, method='GET',
+    context=IContainer, method='GET', allow_access=True,
     permission='guillotina.AccessContent', name='@conversate')
 async def ws_conversate(context, request):
     ws = web.WebSocketResponse()
     utility = get_utility(IMessageSender)
     utility.register_ws(ws, request)
 
-    tm = get_tm(request)
-    await tm.abort(request)
+    tm = get_tm()
+    await tm.abort()
     await ws.prepare(request)
 
-    async for msg in ws:
-        if msg.tp == aiohttp.WSMsgType.text:
-            # ws does not receive any messages, just sends
-            pass
-        elif msg.tp == aiohttp.WSMsgType.error:
-            logger.debug('ws connection closed with exception {0:s}'
-                         .format(ws.exception()))
-
-    logger.debug('websocket connection closed')
-    utility.unregister_ws(ws)
+    try:
+        async for msg in ws:
+            if msg.tp == aiohttp.WSMsgType.text:
+                # ws does not receive any messages, just sends
+                pass
+            elif msg.tp == aiohttp.WSMsgType.error:
+                logger.debug(
+                    'ws connection closed with exception {0:s}'.format(ws.exception()))
+    except (RuntimeError, asyncio.CancelledError):
+        pass
+    finally:
+        logger.debug('websocket connection closed')
+        utility.unregister_ws(ws)
 
     return {}
 ```
@@ -59,6 +64,23 @@ the async utility sends out the messages.
 ## Using websockets
 
 In order to use websockets, you need to request a websocket token first.
+
+Websocket tokens are encrypted tokens with jwk. Guillotina does not provide
+a default jwk token for you so you need to generate it:
+
+```
+g key-gen
+```
+
+Then use this setting in your `config.yaml` file:
+
+```
+jwk:
+  k: hGplrewNAVxULSApZavdXuxdiR_2Ner73oc-2Z7TVVY
+  kty: oct
+```
+
+Now, use the `@wstoken` endpoint to request your websocket auth token.
 
 ```
 GET /db/container/@wstoken
