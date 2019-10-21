@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.25 (unreleased)
+5.0.25 (2019-10-21)
 -------------------
 
 - Documentation and training fixes
