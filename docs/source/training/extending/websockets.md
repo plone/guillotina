@@ -69,7 +69,7 @@ Websocket tokens are encrypted tokens with jwk. Guillotina does not provide
 a default jwk token for you so you need to generate it:
 
 ```
-g key-gen
+g gen-key
 ```
 
 Then use this setting in your `config.yaml` file:

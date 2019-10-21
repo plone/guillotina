@@ -77,7 +77,9 @@ class SwaggerDefinitionService(Service):
                 ):
                     continue
 
-                if not self.policy.check_permission(service_def["permission"], self.context):
+                if not self.policy.check_permission(
+                    service_def.get("permission", app_settings["default_permission"]), self.context
+                ):
                     continue
 
                 for sub_path in [""] + swagger_conf.get("extra_paths", []):

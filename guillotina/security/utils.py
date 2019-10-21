@@ -138,6 +138,8 @@ async def apply_sharing(context, data):
     lroles = role.local_roles()
     changed = False
     for perminhe in data.get("perminhe") or []:
+        if not isinstance(perminhe, dict):
+            raise PreconditionFailed(context, "Invalid Type, must be list {}".format(perminhe))
         setting = perminhe.get("setting")
         if setting not in PermissionMap["perminhe"]:
             raise PreconditionFailed(context, "Invalid Type {}".format(setting))
@@ -148,6 +150,8 @@ async def apply_sharing(context, data):
         func(perminhe["permission"])
 
     for prinrole in data.get("prinrole") or []:
+        if not isinstance(prinrole, dict):
+            raise PreconditionFailed(context, "Invalid Type, must be list {}".format(prinrole))
         setting = prinrole.get("setting")
         if setting not in PermissionMap["prinrole"]:
             raise PreconditionFailed(context, "Invalid Type {}".format(setting))
@@ -161,6 +165,8 @@ async def apply_sharing(context, data):
             raise PreconditionFailed(context, "No valid local role")
 
     for prinperm in data.get("prinperm") or []:
+        if not isinstance(prinperm, dict):
+            raise PreconditionFailed(context, "Invalid Type, must be list {}".format(prinperm))
         setting = prinperm["setting"]
         if setting not in PermissionMap["prinperm"]:
             raise PreconditionFailed(context, "Invalid Type")
@@ -171,6 +177,8 @@ async def apply_sharing(context, data):
         func(prinperm["permission"], prinperm["principal"])
 
     for roleperm in data.get("roleperm") or []:
+        if not isinstance(roleperm, dict):
+            raise PreconditionFailed(context, "Invalid Type, must be list {}".format(roleperm))
         setting = roleperm["setting"]
         if setting not in PermissionMap["roleperm"]:
             raise PreconditionFailed(context, "Invalid Type")
