@@ -19,7 +19,7 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina_chat.content import IConversation
 
 
-@configure.service(for_=IContainer, name='@conversations',
+@configure.service(context=IContainer, name='@conversations',
                    permission='guillotina.Authenticated')
 async def get_conversations(context, request):
     results = []
@@ -35,7 +35,7 @@ async def get_conversations(context, request):
     return results
 
 
-@configure.service(for_=IConversation, name='@messages',
+@configure.service(context=IConversation, name='@messages',
                    permission='guillotina.AccessContent')
 async def get_messages(context, request):
     results = []
@@ -63,7 +63,7 @@ For example:
 
 ```
 POST @search {
-    "type_name": "Conversations"
+    "type_name": "Conversation"
 }
 ```
 

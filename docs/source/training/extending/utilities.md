@@ -103,13 +103,14 @@ web services.So your `subscribers.py` file will now look like:
 ```
 from guillotina import configure
 from guillotina.component import get_utility
-from guillotina.interfaces import IObjectAddedEvent, IPrincipalRoleManager
+from guillotina.interfaces import IObjectAddedEvent, IObjectModifiedEvent, IPrincipalRoleManager
 from guillotina.utils import get_authenticated_user_id, get_current_request
 from guillotina_chat.content import IConversation, IMessage
 from guillotina_chat.utility import IMessageSender
 
 
 @configure.subscriber(for_=(IConversation, IObjectAddedEvent))
+@configure.subscriber(for_=(IConversation, IObjectModifiedEvent))
 async def container_added(conversation, event):
     user_id = get_authenticated_user_id()
     if user_id not in conversation.users:

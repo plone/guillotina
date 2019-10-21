@@ -4,14 +4,15 @@ CHANGELOG
 5.0.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Documentation and training fixes
+  [vangheem]
 
 
 5.0.25 (2019-10-21)
 -------------------
 
 - Documentation and training fixes
-  [vangheems]
+  [vangheem]
 
 - Fix compatiblity issues with Python 3.8
   [masipcat]

@@ -88,22 +88,19 @@ To demonstrate this you can schedule multiple coroutines that can run at the sam
 ```python
 import asyncio
 
-
 async def hello1():
+    print('before hi 1')
     await asyncio.sleep(0.5)
     print('hi 1')
-
 
 async def hello2():
     print('hi 2')
 
-
 async def run():
     future1 = asyncio.create_task(hello1())
     future2 = asyncio.create_task(hello2())
-    await future2
     await future1
-
+    await future2
 
 if __name__ == '__main__':
     asyncio.run(run())
