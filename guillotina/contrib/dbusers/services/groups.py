@@ -24,6 +24,7 @@ from zope.interface import alsoProvides
         "404": {"description": "Group not found"},
     },
     summary="List groups",
+    allow_access=True,
 )
 class GetGroups(Service):
     async def __call__(self):
@@ -66,6 +67,7 @@ class BaseGroup(Service):
         "404": {"description": "Group not found"},
     },
     summary="Get group data",
+    allow_access=True,
 )
 class GetGroup(BaseGroup):
     async def __call__(self):
@@ -84,6 +86,7 @@ class GetGroup(BaseGroup):
         "404": {"description": "Group not found"},
     },
     summary="Modify group data",
+    allow_access=True,
 )
 class PatchGroups(BaseGroup):
     async def __call__(self):
@@ -103,6 +106,7 @@ class PatchGroups(BaseGroup):
         "404": {"description": "Group not found"},
     },
     summary="Delete a group",
+    allow_access=True,
 )
 class DeleteGroup(BaseGroup):
     async def __call__(self):

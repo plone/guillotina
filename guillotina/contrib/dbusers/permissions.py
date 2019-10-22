@@ -9,3 +9,7 @@ configure.permission("guillotina.ManageUsers", "Manage Users on site", "Be able 
 configure.grant(permission="guillotina.AddUser", role="guillotina.Manager")
 configure.grant(permission="guillotina.AddGroup", role="guillotina.Manager")
 configure.grant(permission="guillotina.ManageUsers", role="guillotina.Manager")
+
+configure.grant(permission="guillotina.AddUser", role="guillotina.ContainerAdmin")
+configure.grant(permission="guillotina.AddGroup", role="guillotina.ContainerAdmin")
+configure.grant(permission="guillotina.ManageUsers", role="guillotina.ContainerAdmin")

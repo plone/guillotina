@@ -79,6 +79,7 @@ class GetUsers(BaseUser):
         "404": {"description": "User not found"},
     },
     summary="Modify user data",
+    allow_access=True,
 )
 class PatchUser(BaseUser):
     async def __call__(self):
@@ -95,6 +96,7 @@ class PatchUser(BaseUser):
     permission="guillotina.ManageUsers",
     responses={"200": {"description": "User successfully deleted"}, "404": {"description": "User not found"}},
     summary="Delete a user",
+    allow_access=True,
 )
 class DeleteUser(BaseUser):
     async def __call__(self):
@@ -115,6 +117,7 @@ class DeleteUser(BaseUser):
         }
     },
     summary="List existing users",
+    allow_access=True,
 )
 class ManageAvailableUsers(Service):
     async def __call__(self):
