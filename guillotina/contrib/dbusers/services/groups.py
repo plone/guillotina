@@ -3,8 +3,8 @@ from guillotina.api.content import DefaultDELETE
 from guillotina.api.content import DefaultPATCH
 from guillotina.api.service import Service
 from guillotina.component import get_multi_adapter
-from guillotina.interfaces import IPATCH
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IPATCH
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.response import HTTPNotFound
 from guillotina.utils import navigate_to
@@ -12,17 +12,16 @@ from zope.interface import alsoProvides
 
 
 @configure.service(
-    for_=IContainer, method="GET",
+    for_=IContainer,
+    method="GET",
     name="@groups",
-    permission='guillotina.ManageUsers',
+    permission="guillotina.ManageUsers",
     responses={
         "200": {
             "description": "Groups listing",
             # TODO: add response content schema here
         },
-        "404": {
-            "description": "Group not found"
-        },
+        "404": {"description": "Group not found"},
     },
     summary="List groups",
 )
@@ -32,9 +31,7 @@ class GetGroups(Service):
 
         result = []
         for group in groups:
-            serializer = get_multi_adapter(
-                (group, self.request), IResourceSerializeToJsonSummary
-            )
+            serializer = get_multi_adapter((group, self.request), IResourceSerializeToJsonSummary)
             result.append(await serializer())
 
         return result
@@ -57,40 +54,34 @@ class BaseGroup(Service):
 
 
 @configure.service(
-    for_=IContainer, methods="GET",
+    for_=IContainer,
+    methods="GET",
     name="@groups/{group}",
-    permission='guillotina.ManageUsers',
+    permission="guillotina.ManageUsers",
     responses={
         "200": {
             "description": "Group",
             # TODO: add response content schema here
         },
-        "404": {
-            "description": "Group not found"
-        },
+        "404": {"description": "Group not found"},
     },
     summary="Get group data",
 )
 class GetGroup(BaseGroup):
     async def __call__(self):
         group = await self.get_group()
-        serializer = get_multi_adapter(
-            (group, self.request), IResourceSerializeToJsonSummary
-        )
+        serializer = get_multi_adapter((group, self.request), IResourceSerializeToJsonSummary)
         return await serializer()
 
 
 @configure.service(
-    for_=IContainer, method="PATCH",
+    for_=IContainer,
+    method="PATCH",
     name="@groups/{group}",
-    permission='guillotina.ManageUsers',
+    permission="guillotina.ManageUsers",
     responses={
-        "204": {
-            "description": "Group succesfully modified",
-        },
-        "404": {
-            "description": "Group not found"
-        },
+        "204": {"description": "Group succesfully modified"},
+        "404": {"description": "Group not found"},
     },
     summary="Modify group data",
 )
@@ -103,16 +94,13 @@ class PatchGroups(BaseGroup):
 
 
 @configure.service(
-    for_=IContainer, method="DELETE",
+    for_=IContainer,
+    method="DELETE",
     name="@groups/{group}",
-    permission='guillotina.ManageUsers',
+    permission="guillotina.ManageUsers",
     responses={
-        "200": {
-            "description": "Group succesfully deleted",
-        },
-        "404": {
-            "description": "Group not found"
-        },
+        "200": {"description": "Group succesfully deleted"},
+        "404": {"description": "Group not found"},
     },
     summary="Delete a group",
 )

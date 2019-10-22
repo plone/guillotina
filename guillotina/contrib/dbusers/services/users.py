@@ -4,8 +4,8 @@ from guillotina.api.content import DefaultPATCH
 from guillotina.api.service import Service
 from guillotina.component import get_multi_adapter
 from guillotina.component import queryMultiAdapter
-from guillotina.interfaces import IPATCH
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IPATCH
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.response import HTTPNotFound
@@ -18,8 +18,8 @@ from zope.interface import alsoProvides
     context=IContainer,
     name="@user_info",
     method="GET",
-    permission="guillotina.Authenticated", # NOTE: this permission has the same id as a core role. Should we consider changing it?
-    summary="Get info about authenticated user"
+    permission="guillotina.Authenticated",  # noqa NOTE: this permission has the same id as a core role. Should we consider changing it?
+    summary="Get info about authenticated user",
 )
 class Info(Service):
     async def __call__(self):
@@ -29,9 +29,7 @@ class Info(Service):
             data = await serializer()
         else:
             data = {}
-        data.update(
-            {"id": user.id, "roles": user.roles, "groups": getattr(user, "groups", [])}
-        )
+        data.update({"id": user.id, "roles": user.roles, "groups": getattr(user, "groups", [])})
         return data
 
 
@@ -54,18 +52,14 @@ class BaseUser(Service):
             "description": "User data",
             # TODO: add response content schema here
         },
-        "404": {
-            "description": "User not found"
-        }
+        "404": {"description": "User not found"},
     },
-    summary="Get user data"
+    summary="Get user data",
 )
 class GetUsers(BaseUser):
     async def __call__(self):
         user = await self.get_user()
-        serializer = get_multi_adapter(
-            (user, self.request), IResourceSerializeToJsonSummary
-        )
+        serializer = get_multi_adapter((user, self.request), IResourceSerializeToJsonSummary)
         result = await serializer()
         return result
 
@@ -76,14 +70,10 @@ class GetUsers(BaseUser):
     method="PATCH",
     permission="guillotina.ManageUsers",
     responses={
-        "204": {
-            "description": "User successfully modified",
-        },
-        "404": {
-            "description": "User not found"
-        }
+        "204": {"description": "User successfully modified"},
+        "404": {"description": "User not found"},
     },
-    summary="Modify user data"
+    summary="Modify user data",
 )
 class PatchUser(BaseUser):
     async def __call__(self):
@@ -98,15 +88,8 @@ class PatchUser(BaseUser):
     name="@users/{user}",
     method="DELETE",
     permission="guillotina.ManageUsers",
-    responses={
-        "200": {
-            "description": "User successfully deleted",
-        },
-        "404": {
-            "description": "User not found"
-        }
-    },
-    summary="Delete a user"
+    responses={"200": {"description": "User successfully deleted"}, "404": {"description": "User not found"}},
+    summary="Delete a user",
 )
 class DeleteUser(BaseUser):
     async def __call__(self):
@@ -116,15 +99,17 @@ class DeleteUser(BaseUser):
 
 
 @configure.service(
-    context=IContainer, name="@users", method="GET",
+    context=IContainer,
+    name="@users",
+    method="GET",
     permission="guillotina.ManageUsers",
     responses={
         "200": {
             "description": "List of users",
             # TODO: add response content schema here
-        },
+        }
     },
-    summary="List existing users"
+    summary="List existing users",
 )
 class ManageAvailableUsers(Service):
     async def __call__(self):
@@ -133,9 +118,7 @@ class ManageAvailableUsers(Service):
             return []
         result = []
         for user in users:
-            serializer = get_multi_adapter(
-                (user, self.request), IResourceSerializeToJsonSummary
-            )
+            serializer = get_multi_adapter((user, self.request), IResourceSerializeToJsonSummary)
             result.append(await serializer())
 
         return result

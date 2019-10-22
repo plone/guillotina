@@ -16,12 +16,8 @@ class IGroup(IFolder):
 
     name = schema.TextLine(title=_("Group name"), required=False)
     description = schema.TextLine(title=_("Group Description"), required=False)
-    user_roles = schema.List(
-        title=_("Roles"), value_type=schema.TextLine(), required=False
-    )
-    users = schema.List(
-        title=_("Users"), value_type=schema.TextLine(), required=False, default=[]
-    )
+    user_roles = schema.List(title=_("Roles"), value_type=schema.TextLine(), required=False)
+    users = schema.List(title=_("Users"), value_type=schema.TextLine(), required=False, default=[])
 
 
 @configure.contenttype(
