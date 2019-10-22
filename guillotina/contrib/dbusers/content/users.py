@@ -4,6 +4,7 @@ from guillotina import schema
 from guillotina.content import Folder
 from guillotina.contrib.dbusers import _
 from guillotina.directives import read_permission
+from guillotina.directives import write_permission
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPrincipal
@@ -26,14 +27,18 @@ class IUser(IFolder, IPrincipal):
     read_permission(password="guillotina.Nobody")
     password = schema.TextLine(title=_("Password"), required=False)
 
+    write_permission(user_groups="guillotina.ManageUsers")
     user_groups = schema.List(title=_("Groups"), value_type=schema.TextLine(), required=False)
 
+    write_permission(user_roles="guillotina.ManageUsers")
     user_roles = schema.List(title=_("Roles"), value_type=schema.TextLine(), required=False)
 
+    write_permission(user_permissions="guillotina.ManageUsers")
     user_permissions = schema.List(
         title=_("Permissions"), value_type=schema.TextLine(), required=False, default=[]
     )
 
+    write_permission(disabled="guillotina.ManageUsers")
     disabled = schema.Bool(title=_("Disabled"), default=False)
 
     properties = schema.Dict(required=False, default={})

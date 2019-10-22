@@ -16,13 +16,16 @@ class DBUserIdentifier:
 
         user_id = token.get("id", "")
         if not user_id:
+            # No user id in the token
             return
 
         if user_id not in await users.async_keys():
+            # User id does not correspond to any existing user folder
             return
 
         user = await users.async_get(user_id)
         if user.disabled:
+            # User is disabled
             return
 
         return user

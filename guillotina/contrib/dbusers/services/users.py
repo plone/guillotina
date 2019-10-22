@@ -36,9 +36,13 @@ class Info(Service):
 class BaseUser(Service):
     async def get_user(self):
         user_id = self.request.matchdict["user"]
-        user = await navigate_to(self.context, "users/{}".format(user_id))
-        if not user:
-            raise HTTPNotFound(content={"reason": "User {user} not found"})
+        try:
+            user = await navigate_to(self.context, "users/{}".format(user_id))
+        except KeyError:
+            user = None
+
+        if user is None:
+            raise HTTPNotFound(content={"reason": f"User {user_id} not found"})
         return user
 
 
