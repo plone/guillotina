@@ -1,4 +1,3 @@
-import json
 from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
 from guillotina import task_vars
@@ -27,6 +26,7 @@ from unittest import mock
 
 import aiohttp
 import asyncio
+import json
 import os
 import pytest
 
@@ -469,9 +469,7 @@ def redis_container():
 class DBUsersRequester(ContainerRequesterAsyncContextManager):
     async def __aenter__(self):
         requester = await super().__aenter__()
-        await requester(
-            "POST", "/db/guillotina/@addons", data=json.dumps({"id": "dbusers"})
-        )
+        await requester("POST", "/db/guillotina/@addons", data=json.dumps({"id": "dbusers"}))
         return requester
 
 
