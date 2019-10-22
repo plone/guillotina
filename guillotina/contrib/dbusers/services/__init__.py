@@ -7,7 +7,7 @@ from guillotina.contrib.dbusers.content.users import IUserManager
 
 # override some views...
 configure.service(
-    context=IGroupManager, method='POST', permission='guillotina.AddGroup'
+    context=IGroupManager, method='POST', permission='guillotina.AddGroup',
 )(DefaultPOST)
 
 

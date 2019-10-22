@@ -18,7 +18,8 @@ from zope.interface import alsoProvides
     context=IContainer,
     name="@user_info",
     method="GET",
-    permission="guillotina.Authenticated",
+    permission="guillotina.Authenticated", # NOTE: this permission has the same id as a core role. Should we consider changing it?
+    summary="Get info about authenticated user"
 )
 class Info(Service):
     async def __call__(self):
@@ -39,7 +40,7 @@ class BaseUser(Service):
         user_id = self.request.matchdict["user"]
         user = await navigate_to(self.context, "users/{}".format(user_id))
         if not user:
-            raise HTTPNotFound()
+            raise HTTPNotFound(content={"reason": "User {user} not found"})
         return user
 
 
@@ -48,6 +49,16 @@ class BaseUser(Service):
     name="@users/{user}",
     method="GET",
     permission="guillotina.ManageUsers",
+    responses={
+        "200": {
+            "description": "User data",
+            # TODO: add response content schema here
+        },
+        "404": {
+            "description": "User not found"
+        }
+    },
+    summary="Get user data"
 )
 class GetUsers(BaseUser):
     async def __call__(self):
@@ -64,6 +75,15 @@ class GetUsers(BaseUser):
     name="@users/{user}",
     method="PATCH",
     permission="guillotina.ManageUsers",
+    responses={
+        "204": {
+            "description": "User successfully modified",
+        },
+        "404": {
+            "description": "User not found"
+        }
+    },
+    summary="Modify user data"
 )
 class PatchUser(BaseUser):
     async def __call__(self):
@@ -78,6 +98,15 @@ class PatchUser(BaseUser):
     name="@users/{user}",
     method="DELETE",
     permission="guillotina.ManageUsers",
+    responses={
+        "200": {
+            "description": "User successfully deleted",
+        },
+        "404": {
+            "description": "User not found"
+        }
+    },
+    summary="Delete a user"
 )
 class DeleteUser(BaseUser):
     async def __call__(self):
@@ -87,7 +116,15 @@ class DeleteUser(BaseUser):
 
 
 @configure.service(
-    context=IContainer, name="@users", method="GET", permission="guillotina.ManageUsers"
+    context=IContainer, name="@users", method="GET",
+    permission="guillotina.ManageUsers",
+    responses={
+        "200": {
+            "description": "List of users",
+            # TODO: add response content schema here
+        },
+    },
+    summary="List existing users"
 )
 class ManageAvailableUsers(Service):
     async def __call__(self):

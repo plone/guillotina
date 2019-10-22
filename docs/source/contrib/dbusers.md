@@ -1,7 +1,6 @@
-
 # Guillotina dbusers
 
-Store users/groups in the database for guillotina.
+Store users/groups as content in the database for guillotina.
 
 
 ## Installation
@@ -10,46 +9,40 @@ Store users/groups in the database for guillotina.
 - install into your container using the `@addons` endpoint using `dbusers` as id.
 
 Available content types:
+
 - User
 - Group
 
 ### Usage
 
-After installation, you will now have a `users` and `groups` folder inside
-your container::
+After installation, you will now have a `users` and `groups` folder
+inside your container. New users can be added just like creating
+content::
 
 ```json
 POST /db/container/users {
     "@type": "User",
-    "username": "foobar",
+    "id": "foobar",
+    "username": "@foobar",
+    "name": "FooBar",
     "email": "foo@bar.com",
     "password": "foobar"
 }
 ```
 
-
 You can now authenticate with the `foobar` user.
 
-
-### Login
-
-Besides using default authentication mechanisms, this package also provides
-a `@login` so you can work with jwt tokens::
-
+New groups are added likewise::
 ```json
-POST /db/container/@login {
-    "username": "foobar",
-    "password": "foobar"
+POST /db/container/groups {
+    "@type": "Group",
+    "id": "admins",
+    "name": "My Site Admins",
+    "description": "My site's admins group",
+    "user_roles": ["guillotina.Manager"],
+    "users": ["foobar", "otheradmin"],
 }
 ```
-
-
-And a `@refresh_token` endpoint:L
-
-```json
-POST /db/container/@refresh_token
-```
-
 
 ### Management
 

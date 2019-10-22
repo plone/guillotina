@@ -1,4 +1,3 @@
-
 from guillotina import configure
 from guillotina.api.content import DefaultDELETE
 from guillotina.api.content import DefaultPATCH
@@ -15,7 +14,17 @@ from zope.interface import alsoProvides
 @configure.service(
     for_=IContainer, method="GET",
     name="@groups",
-    permission='guillotina.ManageUsers'
+    permission='guillotina.ManageUsers',
+    responses={
+        "200": {
+            "description": "Groups listing",
+            # TODO: add response content schema here
+        },
+        "404": {
+            "description": "Group not found"
+        },
+    },
+    summary="List groups",
 )
 class GetGroups(Service):
     async def __call__(self):
@@ -43,14 +52,24 @@ class BaseGroup(Service):
         group_id = self.request.matchdict["group"]
         group = await navigate_to(self.context, "groups/{}".format(group_id))
         if not group:
-            raise HTTPNotFound()
+            raise HTTPNotFound(content={"reason": f"Group {group} not found"})
         return group
 
 
 @configure.service(
     for_=IContainer, methods="GET",
     name="@groups/{group}",
-    permission='guillotina.ManageUsers'
+    permission='guillotina.ManageUsers',
+    responses={
+        "200": {
+            "description": "Group",
+            # TODO: add response content schema here
+        },
+        "404": {
+            "description": "Group not found"
+        },
+    },
+    summary="Get group data",
 )
 class GetGroup(BaseGroup):
     async def __call__(self):
@@ -64,7 +83,16 @@ class GetGroup(BaseGroup):
 @configure.service(
     for_=IContainer, method="PATCH",
     name="@groups/{group}",
-    permission='guillotina.ManageUsers'
+    permission='guillotina.ManageUsers',
+    responses={
+        "204": {
+            "description": "Group succesfully modified",
+        },
+        "404": {
+            "description": "Group not found"
+        },
+    },
+    summary="Modify group data",
 )
 class PatchGroups(BaseGroup):
     async def __call__(self):
@@ -77,7 +105,16 @@ class PatchGroups(BaseGroup):
 @configure.service(
     for_=IContainer, method="DELETE",
     name="@groups/{group}",
-    permission='guillotina.ManageUsers'
+    permission='guillotina.ManageUsers',
+    responses={
+        "200": {
+            "description": "Group succesfully deleted",
+        },
+        "404": {
+            "description": "Group not found"
+        },
+    },
+    summary="Delete a group",
 )
 class DeleteGroup(BaseGroup):
     async def __call__(self):
