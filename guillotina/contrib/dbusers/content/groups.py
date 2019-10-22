@@ -27,8 +27,9 @@ class IGroup(IFolder):
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
 )
 class Group(Folder):
-    name = None
+    name = description = None
     user_roles: typing.List[str] = []
+    users: typing.List[str] = []
 
     @property
     def roles(self):
