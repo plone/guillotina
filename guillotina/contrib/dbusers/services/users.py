@@ -18,8 +18,8 @@ from zope.interface import alsoProvides
     context=IContainer,
     name="@user_info",
     method="GET",
-    permission="guillotina.Authenticated",  # noqa NOTE: this permission has the same id as a core role. Should we consider changing it?
     summary="Get info about authenticated user",
+    allow_access=True,
 )
 class Info(Service):
     async def __call__(self):
@@ -59,6 +59,7 @@ class BaseUser(Service):
         "404": {"description": "User not found"},
     },
     summary="Get user data",
+    allow_access=True,
 )
 class GetUsers(BaseUser):
     async def __call__(self):

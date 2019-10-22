@@ -51,7 +51,7 @@ async def test_login(dbusers_requester):
 
         # User should have access to its own folder
         _, status_code = await requester(
-            "GET", "/db/guillotina/@users/foobar", token=resp["token"], auth_type="Bearer"
+            "GET", "/db/guillotina/users/foobar", token=resp["token"], auth_type="Bearer"
         )
         assert status_code == 200
 
