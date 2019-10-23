@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.27 (unreleased)
+5.0.27 (2019-10-23)
 -------------------
 
 - Do not fallback to `setattr` with unhandled errors on fields
