@@ -19,7 +19,7 @@ class IGroup(IFolder):
 
     description = schema.TextLine(title=_("Group Description"), required=False)
 
-    index_field("user_roles", index_name="group_users", type="textkeyword")
+    index_field("user_roles", index_name="group_user_roles", type="textkeyword")
     user_roles = schema.List(title=_("Roles"), value_type=schema.TextLine(), required=False)
 
     index_field("users", index_name="group_users", type="textkeyword")

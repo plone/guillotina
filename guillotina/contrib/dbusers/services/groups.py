@@ -40,7 +40,7 @@ class ListGroups(ListGroupsOrUsersService):
             "id": obj.get("id"),
             "title": obj.get("group_name"),
             "users": obj.get("group_users") or [],
-            "roles": obj.get("group_roles") or [],
+            "roles": obj.get("group_user_roles") or [],
         }
 
 
