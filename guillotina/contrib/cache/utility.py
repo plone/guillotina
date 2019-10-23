@@ -65,12 +65,12 @@ class CacheUtility:
     async def get(self, key):
         try:
             if key in self._memory_cache:
-                logger.info("Retrieved {} from memory cache".format(key))
+                logger.debug("Retrieved {} from memory cache".format(key))
                 return self._memory_cache[key]
             if self._obj_driver is not None:
                 val = await self._obj_driver.get(CACHE_PREFIX + key)
                 if val is not None:
-                    logger.info("Retrieved {} from redis cache".format(key))
+                    logger.debug("Retrieved {} from redis cache".format(key))
                     val = serialize.loads(val)
                     size = self.get_size(val)
                     self._memory_cache.set(key, val, size)
@@ -103,7 +103,7 @@ class CacheUtility:
                 if self._obj_driver is not None:
                     stored_value = serialize.dumps(value)
                     await self._obj_driver.set(CACHE_PREFIX + key, stored_value, expire=ttl)
-                logger.info("set {} in cache".format(key))
+                logger.debug("set {} in cache".format(key))
             except Exception:
                 logger.warning("Error setting cache value", exc_info=True)
             size = 0  # additional keys to set have 0 size in cache
@@ -134,7 +134,7 @@ class CacheUtility:
             self._memory_cache.clear()
             if self._obj_driver is not None:
                 await self._obj_driver.flushall()
-            logger.info("Cleared cache")
+            logger.debug("Cleared cache")
         except Exception:
             logger.warning("Error clearing cache", exc_info=True)
 

@@ -4,7 +4,8 @@ CHANGELOG
 5.0.28 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Cache debug information should be debug level
+  [bloodbare]
 
 
 5.0.27 (2019-10-23)
