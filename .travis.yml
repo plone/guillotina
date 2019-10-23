@@ -21,24 +21,25 @@ matrix:
     - name: Python 3.7, Cockroachdb
       python: 3.7
       env: DATABASE=cockroachdb
-    - name: Python 3.8, Dummy DB
-      python: 3.8
-      env: DATABASE=DUMMY
-    - name: Python 3.8, PG 10
-      python: 3.8
-      env: DATABASE=postgres
-      addons:
-        postgresql: 10
-    - name: Python 3.8, PG 10 (db_schema=custom)
-      python: 3.8
-      env:
-       - DATABASE=postgres
-       - DB_SCHEMA=custom
-      addons:
-        postgresql: 10
-    - name: Python 3.8, Cockroachdb
-      python: 3.8
-      env: DATABASE=cockroachdb
+    # Comented until uvloop supoprts python 3.8
+    # - name: Python 3.8, Dummy DB
+    #   python: 3.8
+    #   env: DATABASE=DUMMY
+    # - name: Python 3.8, PG 10
+    #   python: 3.8
+    #   env: DATABASE=postgres
+    #   addons:
+    #     postgresql: 10
+    # - name: Python 3.8, PG 10 (db_schema=custom)
+    #   python: 3.8
+    #   env:
+    #    - DATABASE=postgres
+    #    - DB_SCHEMA=custom
+    #   addons:
+    #     postgresql: 10
+    # - name: Python 3.8, Cockroachdb
+    #   python: 3.8
+    #   env: DATABASE=cockroachdb
 
 services:
   - postgresql
