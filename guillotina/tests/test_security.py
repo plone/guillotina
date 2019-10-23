@@ -460,3 +460,12 @@ async def test_cached_access_roles(dummy_guillotina):
 
         roles = cached_roles(folder, "guillotina.AccessContent", "o")
         assert roles.get("guillotina.ContainerCreator") == 1
+
+
+async def test_bad_sharing_request_array(container_requester):
+    async with container_requester as requester:
+        for utype in ("perminhe", "prinrole", "prinperm", "roleperm"):
+            response, status = await requester(
+                "POST", "/db/guillotina/@sharing", data=json.dumps({utype: {"foo": "bar"}})
+            )
+            assert status == 412

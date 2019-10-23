@@ -1,7 +1,7 @@
 # Async Utilities
 
-An async utility is a utility that run persistently on the asyncio event loop.
-It is useful for long running tasks.
+An async utility is an object instantiation with an async function that is run
+persistently on the asyncio event loop. It is useful for long running tasks.
 
 For our training, we're going to use an async utility with a queue to send
 messages to logged in users.
@@ -32,9 +32,10 @@ class MessageSenderUtility:
         self._loop = loop
         self._settings = {}
         self._webservices = []
+        self._closed = False
 
     def register_ws(self, ws, request):
-        ws.user_id = get_authenticated_user_id(request)
+        ws.user_id = get_authenticated_user_id()
         self._webservices.append(ws)
 
     def unregister_ws(self, ws):
@@ -46,17 +47,22 @@ class MessageSenderUtility:
             IResourceSerializeToJsonSummary)()
         await self._queue.put((message, summary))
 
+    async def finalize(self):
+        self._closed = True
+
     async def initialize(self, app=None):
         self._queue = asyncio.Queue()
 
-        while True:
+        while not self._closed:
             try:
-                message, summary = await self._queue.get()
+                message, summary = await asyncio.wait_for(self._queue.get(), 0.2)
                 for user_id in message.__parent__.users:
                     for ws in self._webservices:
                         if ws.user_id == user_id:
                             await ws.send_str(json.dumps(
                                 summary, cls=GuillotinaJSONEncoder))
+            except (RuntimeError, asyncio.CancelledError, asyncio.TimeoutError):
+                pass
             except Exception:
                 logger.warning(
                     'Error sending message',
@@ -65,13 +71,13 @@ class MessageSenderUtility:
 ```
 
 
-Async utilities must implement a `initialize` method and performs the async
+Async utilities must implement an `initialize` method that performs the async
 task. In our case, it is creating a queue and waiting to process messages
 in the queue.
 
-In this case, we will send messages to registered websockets.
+We will use this to send messages to registered websockets.
 
-Make sure, like all other configured modules, to ensure this file is scanned
+Like all other configured modules, make sure this file is scanned
 by the packages `__init__.py` file.
 
 Additionally, async utilities need to also be configured in `__init__.py`:
@@ -97,13 +103,14 @@ web services.So your `subscribers.py` file will now look like:
 ```
 from guillotina import configure
 from guillotina.component import get_utility
-from guillotina.interfaces import IObjectAddedEvent, IPrincipalRoleManager
+from guillotina.interfaces import IObjectAddedEvent, IObjectModifiedEvent, IPrincipalRoleManager
 from guillotina.utils import get_authenticated_user_id, get_current_request
 from guillotina_chat.content import IConversation, IMessage
 from guillotina_chat.utility import IMessageSender
 
 
 @configure.subscriber(for_=(IConversation, IObjectAddedEvent))
+@configure.subscriber(for_=(IConversation, IObjectModifiedEvent))
 async def container_added(conversation, event):
     user_id = get_authenticated_user_id()
     if user_id not in conversation.users:

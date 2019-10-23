@@ -10,6 +10,7 @@ from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
+from guillotina.tests.utils import login
 
 import aiohttp
 import asyncio
@@ -212,6 +213,7 @@ class TestDataCommand(Command):
                     break
 
     async def run(self, arguments, settings, app):
+        login()
         self.arguments = arguments
         root = get_utility(IApplication, name="root")
         for _id, db in root:

@@ -25,6 +25,7 @@ Then, to connect to the database and get your container object.
 ```python
 txn = await use_db('db')
 container = await use_container('container')
+setup()
 ```
 
 From here, you can access objects:
@@ -47,7 +48,19 @@ In order for you to utilize this, the script must have an async function named
 `run` inside it.
 
 
+In this example, we are going through all the conversations and adding a user to them.
+
+
 ```python
+from guillotina.transactions import transaction
+
 async def run(container):
-    pass
+    conversations = await container.async_get('conversations')
+    async for conversation in conversations.async_values():
+        if 'foobar' in conversation.users:
+            continue
+        async with transaction():
+            print(f'Fixing {conversation}')
+            conversation.users.append('foobar')
+            conversation.register()  # register object with current transaction
 ```

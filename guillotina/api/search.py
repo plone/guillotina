@@ -98,7 +98,7 @@ async def _search(context, request, query):
     },
 )
 async def search_get(context, request):
-    q = request.query.copy()
+    q = dict(request.query)
     return await _search(context, request, q)
 
 

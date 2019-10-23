@@ -4,10 +4,11 @@ var JWT_KEY = 'gchat_token'
 var CURRENT_CONVERSATION = null;
 var SOCKET = null;
 
-var http = function(options){
+var http = function (options) {
   var url = options.url;
   var method = options.method || 'GET';
   var callback = options.callback || null;
+  var errorCallback = options.errorCallback || null;
   var data = options.data || null;
   var auth = options.auth || false;
 
@@ -15,46 +16,56 @@ var http = function(options){
 
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
-      if ([201, 200, 204].indexOf(xhr.status) !== -1 && callback) {
-        callback(xhr);
+      console.info("Response to " + url + " " + xhr.status)
+      if ([201, 200, 204].indexOf(xhr.status) !== -1) {
+        if (callback) {
+          callback(xhr);
+        }
+      } else {
+        if (errorCallback) {
+          errorCallback(xhr);
+        }
       }
     }
   };
   xhr.open(method, url, true);
-  if(auth){
+  if (auth) {
     xhr.setRequestHeader("Authorization", "Bearer " + localStorage.getItem(JWT_KEY));
   }
 
-  if(data){
+  if (data) {
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  }else{
-     data = '';
+  } else {
+    data = '';
   }
   xhr.send(data);
 };
 
 
-var showSection = function(name){
-  document.querySelectorAll('.container .section').forEach(function(el){
-    if(name !== el.id){
+var showSection = function (name) {
+  document.querySelectorAll('.container .section').forEach(function (el) {
+    if (name !== el.id) {
       el.style.display = 'none';
-    }else{
+    } else {
       el.style.display = 'block';
     }
   });
 }
 
 
-var login = function(username, password){
+var login = function (username, password) {
   http({
     url: BASE_URL + '/@login',
     method: 'POST',
-    callback: function(response){
+    callback: function (response) {
       var data = JSON.parse(response.responseText);
       localStorage.setItem(JWT_KEY, data['token']);
       showSection('conversations');
       getConversations();
       startSocket();
+    },
+    errorCallback: function (response) {
+      alert('User/password invalid');
     },
     data: JSON.stringify({
       username: username,
@@ -63,15 +74,15 @@ var login = function(username, password){
   });
 }
 
-var getConversations = function(){
+var getConversations = function () {
   http({
-    url: BASE_URL + '/@get-conversations',
+    url: BASE_URL + '/@conversations',
     auth: true,
-    callback: function(response){
+    callback: function (response) {
       var data = JSON.parse(response.responseText);
       var container = document.querySelector('#conversations ul');
       container.innerHTML = '';
-      data.forEach(function(conversation){
+      data.forEach(function (conversation) {
         var convObj = new Conversation(conversation);
         container.appendChild(convObj.render());
       });
@@ -79,20 +90,20 @@ var getConversations = function(){
   });
 }
 
-var Conversation = function(data){
+var Conversation = function (data) {
   var self = this;
   self.data = data;
   self.messages = [];
 
-  self.render = function(){
+  self.render = function () {
     var li = document.createElement('li');
     var a = document.createElement('a');
     a.href = '#';
     li.appendChild(a);
     var title;
-    if(self.data.title){
+    if (self.data.title) {
       title = self.data.title;
-    }else{
+    } else {
       title = 'Conversation with';
     }
     title += '(' + self.data.users.join(', ') + ')'
@@ -101,16 +112,16 @@ var Conversation = function(data){
     return li;
   };
 
-  self.addMessage = function(message){
+  self.addMessage = function (message) {
     self.messages.push(message);
     self.renderMessages();
   };
 
-  self.loadMessages = function(callbackFunc){
+  self.loadMessages = function (callbackFunc) {
     http({
-      url: self.data['@id'] + '/@get-messages',
+      url: self.data['@id'] + '/@messages',
       auth: true,
-      callback: function(response){
+      callback: function (response) {
         var data = JSON.parse(response.responseText);
         self.messages = data;
         self.renderMessages(callbackFunc)
@@ -118,23 +129,23 @@ var Conversation = function(data){
     });
   }
 
-  self.renderMessages = function(callbackFunc){
+  self.renderMessages = function (callbackFunc) {
     var container = document.querySelector('#conversation ul');
     container.innerHTML = '';
-    self.messages.forEach(function(message){
+    self.messages.forEach(function (message) {
       var messObj = new Message(message);
       container.appendChild(messObj.render());
     });
-    if(callbackFunc){
+    if (callbackFunc) {
       callbackFunc();
     }
   }
 
-  self.onClick = function(e){
-    if(e){
+  self.onClick = function (e) {
+    if (e) {
       e.preventDefault();
     }
-    self.loadMessages(function(){
+    self.loadMessages(function () {
       showSection('conversation');
 
       CURRENT_CONVERSATION = self;
@@ -147,7 +158,7 @@ var Conversation = function(data){
     });
   }
 
-  self.newMessage = function(e){
+  self.newMessage = function (e) {
     e.preventDefault();
     http({
       url: self.data['@id'],
@@ -157,7 +168,7 @@ var Conversation = function(data){
         '@type': 'Message',
         'text': document.getElementById('new-message').value
       }),
-      callback: function(){
+      callback: function () {
         document.getElementById('new-message').value = '';
       }
     });
@@ -166,11 +177,11 @@ var Conversation = function(data){
   return self;
 }
 
-var Message = function(data){
+var Message = function (data) {
   var self = this;
   self.data = data;
 
-  self.render = function(){
+  self.render = function () {
     var li = document.createElement('li');
     var date = new Date(self.data.creation_date);
     var message = (self.data.text || '') + ' &mdash; ' + self.data.author + '(' +
@@ -183,14 +194,14 @@ var Message = function(data){
 }
 
 
-var loginAction = function(e){
+var loginAction = function (e) {
   e.preventDefault();
   var username = document.getElementById('login-username').value;
   var password = document.getElementById('login-password').value;
   login(username, password);
 };
 
-var newConversation = function(e){
+var newConversation = function (e) {
   e.preventDefault();
   http({
     url: BASE_URL + '/conversations',
@@ -200,37 +211,37 @@ var newConversation = function(e){
       '@type': 'Conversation',
       'users': [document.getElementById('new-conversation').value]
     }),
-    callback: function(){
+    callback: function () {
       document.getElementById('new-conversation').value = '';
       getConversations();
     }
   })
 };
 
-var startSocket = function(){
-  if(SOCKET !== null){
+var startSocket = function () {
+  if (SOCKET !== null) {
     SOCKET.close();
   }
   http({
     url: BASE_URL + '/@wstoken',
     auth: true,
-    callback: function(response){
+    callback: function (response) {
       var data = JSON.parse(response.responseText);
       var url = BASE_URL + '/@conversate?ws_token=' + data['token'];
       SOCKET = new WebSocket(url.replace('http://', 'ws://'));
 
-      SOCKET.onopen = function(e){
+      SOCKET.onopen = function (e) {
       };
-      SOCKET.onmessage = function(msg){
+      SOCKET.onmessage = function (msg) {
         var data = JSON.parse(msg.data);
-        if(CURRENT_CONVERSATION.data.id == data.conversation_id){
+        if (CURRENT_CONVERSATION.data.id == data.conversation_id) {
           CURRENT_CONVERSATION.addMessage(data);
         }
       };
-      SOCKET.onclose = function(e){
+      SOCKET.onclose = function (e) {
       };
 
-      SOCKET.onerror = function(e){
+      SOCKET.onerror = function (e) {
       };
     }
   });
@@ -239,8 +250,8 @@ var startSocket = function(){
 document.querySelector('#login .button').addEventListener('click', loginAction);
 document.querySelector('#login form').addEventListener('submit', loginAction);
 
-document.querySelectorAll('.menu .item').forEach(function(el){
-  el.addEventListener('click', function(e){
+document.querySelectorAll('.menu .item').forEach(function (el) {
+  el.addEventListener('click', function (e) {
     e.preventDefault();
     showSection(e.target.attributes.section.value);
   });
@@ -250,7 +261,7 @@ document.getElementById('new-conversation-btn').addEventListener('click', newCon
 document.getElementById('new-conversation-form').addEventListener('submit', newConversation);
 
 
-if(localStorage.getItem(JWT_KEY)){
+if (localStorage.getItem(JWT_KEY)) {
   showSection('conversations');
   getConversations();
   startSocket();

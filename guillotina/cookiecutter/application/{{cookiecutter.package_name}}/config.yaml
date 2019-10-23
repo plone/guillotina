@@ -1,40 +1,40 @@
 ---
 applications:
-- {{cookiecutter.package_name}}
-- guillotina.contrib.catalog.pg
-- guillotina.contrib.swagger
+  - {{cookiecutter.package_name}}
+  - guillotina.contrib.catalog.pg
+  - guillotina.contrib.swagger
 databases:
   db:
     storage: postgresql
-    dsn: postgresql://guillotina@localhost:5432/guillotina
+    dsn: postgresql://postgres@localhost:5432/guillotina
     read_only: false
 host: localhost
 port: 8080
 root_user:
   password: root
 auth_extractors:
-- guillotina.auth.extractors.BearerAuthPolicy
-- guillotina.auth.extractors.BasicAuthPolicy
-- guillotina.auth.extractors.WSTokenAuthPolicy
+  - guillotina.auth.extractors.BearerAuthPolicy
+  - guillotina.auth.extractors.BasicAuthPolicy
+  - guillotina.auth.extractors.WSTokenAuthPolicy
 auth_token_validators:
-- guillotina.auth.validators.SaltedHashPasswordValidator
-- guillotina.auth.validators.JWTValidator
+  - guillotina.auth.validators.SaltedHashPasswordValidator
+  - guillotina.auth.validators.JWTValidator
 cors:
   allow_origin:
-  - http://localhost:8080
-  - "chrome-extension://*"
+    - http://localhost:8080
+    - "chrome-extension://*"
   allow_methods:
-  - GET
-  - POST
-  - DELETE
-  - HEAD
-  - PATCH
-  - PUT
-  - OPTIONS
+    - GET
+    - POST
+    - DELETE
+    - HEAD
+    - PATCH
+    - PUT
+    - OPTIONS
   allow_headers:
-  - "*"
+    - "*"
   expose_headers:
-  - "*"
+    - "*"
   allow_credentials: true
   max_age: 3660
 jwt:

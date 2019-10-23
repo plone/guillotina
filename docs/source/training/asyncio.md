@@ -6,7 +6,9 @@ code using coroutines inside an event loop.
 The event loop is designed for I/O over sockets and other resources,
 it is especially good for working with client/server network connections.
 
-Python >= 3.4(best features and performance in 3.6)
+Python >= 3.4(best features and performance in 3.6).
+
+This guide will assume you're on Python 3.7.
 
 ## Explanation
 
@@ -14,13 +16,13 @@ Python >= 3.4(best features and performance in 3.6)
 
 The event loop allows you to handle a larger number of network connections at once.
 
-No network blocks, so you can have long running connections with very little performance
+Non-blocking network IO, so you can have long running connections with very little performance
 impact (HTML5 sockets for example).
 
 
 ### How web servers are typically designed
 
-- (Pyramid, Flash, Plone, etc)
+- (Pyramid, Flask, Plone, etc)
 - Processes X Threads = Total number of concurrent connections that can be handled at once.
 - Client makes a request to web server, request is assigned thread, thread handle request and sends response
 - If no threads available, request is blocked, waiting for an open thread
@@ -59,7 +61,7 @@ WILL BLOCK all other connections while it is doing its network traffic
 
 Get active event loop or create new one
 
-Run coroutine inside event loop with `asyncio.run_until_complete`
+Run coroutine inside event loop with `asyncio.run`
 
 
 ```python
@@ -70,37 +72,38 @@ async def hello():
     print('hi')
 
 
-event_loop = asyncio.get_event_loop()
-event_loop.run_until_complete(hello())
+if __name__ == '__main__':
+    asyncio.run(hello())
 ```
 
 ## Basics(2)
 
-`asyncio.run_until_complete` automatically wraps your coroutine into a Future
+`asyncio.run` automatically wraps your coroutine into a Future
 object and waits for it to finish.
 
-`asyncio.ensure_future` will wrap a coroutine in a future and return it to you
+`asyncio.create_task` will wrap a coroutine in a future and return it to you.
 
-So you can schedule multiple coroutines that can run at the same time
+To demonstrate this you can schedule multiple coroutines that can run at the same time.
 
 ```python
 import asyncio
 
-
 async def hello1():
+    print('before hi 1')
     await asyncio.sleep(0.5)
     print('hi 1')
-
 
 async def hello2():
     print('hi 2')
 
+async def run():
+    future1 = asyncio.create_task(hello1())
+    future2 = asyncio.create_task(hello2())
+    await future1
+    await future2
 
-event_loop = asyncio.get_event_loop()
-future1 = asyncio.ensure_future(hello1(), loop=event_loop)
-future2 = asyncio.ensure_future(hello2(), loop=event_loop)
-event_loop.run_until_complete(future2)
-event_loop.run_until_complete(future1)
+if __name__ == '__main__':
+    asyncio.run(run())
 ```
 
 
@@ -124,13 +127,17 @@ async def hello_many():
         print('Hello {}'.format(number))
 
 
-event_loop = asyncio.get_event_loop()
-task = asyncio.Task(hello_many())
-print('task running now...')
-event_loop.run_until_complete(asyncio.sleep(10))
-print('we waited 10 seconds')
-task.cancel()
-print('task cancelled')
+async def run():
+    task = asyncio.create_task(hello_many())
+    print('task running now...')
+    await asyncio.sleep(10)
+    print('we waited 10 seconds')
+    task.cancel()
+    print('task cancelled')
+
+
+if __name__ == '__main__':
+    asyncio.run(run())
 ```
 
 
@@ -159,9 +166,13 @@ async def foobar():
     print_foobar2()  # won't work, never awaited
 
 
-event_loop = asyncio.get_event_loop()
-event_loop.run_until_complete(foobar())
-print_foobar1()  # won't work, never awaited
+async def run():
+    await foobar()
+    print_foobar1()  # won't work, never awaited
+
+if __name__ == '__main__':
+    asyncio.run(run())
+
 # await print_foobar1()  # error, not running in event loop
 ```
 
@@ -184,13 +195,18 @@ async def download_url(url):
         print(f'Downloaded {url}, size {len(text)}')
 
 
-event_loop = asyncio.get_event_loop()
-event_loop.run_until_complete(asyncio.gather(
-    download_url('https://www.google.com'),
-    download_url('https://www.facebook.com'),
-    download_url('https://www.twitter.com'),
-    download_url('https://www.stackoverflow.com')
-))
+async def run():
+    await asyncio.gather(
+        download_url('https://www.google.com'),
+        download_url('https://www.facebook.com'),
+        download_url('https://www.twitter.com'),
+        download_url('https://www.stackoverflow.com')
+    )
+
+
+if __name__ == '__main__':
+    asyncio.run(run())
+
 ```
 
 
@@ -208,13 +224,13 @@ async def yielding():
         yield idx
 
 
-async def foobar2():
+async def run():
     async for idx in yielding():
         print(f"Yay, I've been yield'd {idx}")
 
 
-event_loop = asyncio.get_event_loop()
-event_loop.run_until_complete(foobar2())
+if __name__ == '__main__':
+    asyncio.run(run())
 ```
 
 
@@ -252,21 +268,25 @@ async def foobar():
     print('foobar')
 
 
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+async def run():
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+    event_loop = asyncio.get_event_loop()
+    await asyncio.gather(
+        event_loop.run_in_executor(executor, download_url, 'https://www.google.com'),
+        event_loop.run_in_executor(executor, download_url, 'https://www.facebook.com'),
+        event_loop.run_in_executor(executor, download_url, 'https://www.twitter.com'),
+        event_loop.run_in_executor(executor, download_url, 'https://www.stackoverflow.com'),
+        foobar()
+    )
 
-event_loop = asyncio.get_event_loop()
-event_loop.run_until_complete(asyncio.gather(
-    event_loop.run_in_executor(executor, download_url, 'https://www.google.com'),
-    event_loop.run_in_executor(executor, download_url, 'https://www.facebook.com'),
-    event_loop.run_in_executor(executor, download_url, 'https://www.twitter.com'),
-    event_loop.run_in_executor(executor, download_url, 'https://www.stackoverflow.com'),
-    foobar()
-))
+if __name__ == '__main__':
+    asyncio.run(run())
+
 ```
 
 ## Subprocess
 
-Python also provides a very neat asyncio subprocess module.
+Python also provides a very neat AsyncIO subprocess module.
 
 ```python
 import asyncio
@@ -279,9 +299,13 @@ async def run_cmd(cmd):
     print(out.decode('utf8'))
 
 
-event_loop = asyncio.get_event_loop()
-event_loop.run_until_complete(asyncio.gather(
-    run_cmd(['sleep', '1']),
-    run_cmd(['echo', 'hello'])
-))
+async def run():
+    await asyncio.gather(
+        run_cmd(['sleep', '1']),
+        run_cmd(['echo', 'hello'])
+    )
+
+
+if __name__ == '__main__':
+    asyncio.run(run())
 ```

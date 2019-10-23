@@ -8,7 +8,7 @@ recent conversations and messages for a conversation.
 
 ## Creating the services
 
-We'll name our endpoints `@get-conversations` and `@get-messages` and put them
+We'll name our endpoints `@conversations` and `@messages` and put them
 in a file named `services.py`.
 
 ```python
@@ -19,7 +19,7 @@ from guillotina.utils import get_authenticated_user_id
 from guillotina_chat.content import IConversation
 
 
-@configure.service(for_=IContainer, name='@get-conversations',
+@configure.service(context=IContainer, name='@conversations',
                    permission='guillotina.Authenticated')
 async def get_conversations(context, request):
     results = []
@@ -35,7 +35,7 @@ async def get_conversations(context, request):
     return results
 
 
-@configure.service(for_=IConversation, name='@get-messages',
+@configure.service(context=IConversation, name='@messages',
                    permission='guillotina.AccessContent')
 async def get_messages(context, request):
     results = []
@@ -52,4 +52,35 @@ And make sure to add the scan.
 
 ```python
 configure.scan('guillotina_chat.services')
+```
+
+These endpoints manually go through the content in the database and retrieve
+the results for you. This is to demonstration some interaction with objects
+and the database with services; however, you can do the same as what is
+going on here with the `@search` endpoint.
+
+For example:
+
+```
+POST @search {
+    "type_name": "Conversation"
+}
+```
+
+and...
+
+```
+POST @search {
+    "type_name": "Message"
+}
+```
+
+You can take this further to query by dates and the text of the message as well.
+
+```
+POST @search {
+    "type_name": "Message",
+    "text": "foobar",
+    "creation_date__gte": "2019-10-20T15:30:27.580369+00:00"
+}
 ```

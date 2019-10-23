@@ -3,19 +3,6 @@
 Once you have [guillotina installed](./installation.html "Link to install docs"), you can run it
 with the `g` executable that it installs.
 
-Before we begin, you'll need to run a [PostgreSQL](https://www.postgresql.org/ "Link to PostgreSQL's website") server for Guillotina to use.
-
-``` shell
-docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres -p 127.0.0.1:5432:5432 postgres:9.6
-```
-
-```eval_rst
-.. note::
-   This particular docker run command produces a volatile database.
-
-   Stopping and starting it again will cause you to lose any data you pushed into it.
-```
-
 ## Command
 
 Run the default Guillotina command `g`.
@@ -28,7 +15,7 @@ Which should give you output like:
 
 ``` shell
 $ g
-Could not find the configuration file config.yaml. Using default settings.
+No configuration file found. Using default settings with DUMMY_FILE db.
 ======== Running on http://0.0.0.0:8080 ========
 (Press CTRL+C to quit)
 ```
@@ -67,5 +54,5 @@ Also, do a `GET` on `http://localhost:8080/db`.
 
   - [Quickstart](../../quickstart)
   - [Installation](../../installation/index)
-  - [Configuraion](../../installation/configuration)
+  - [Configuration](../../installation/configuration)
   - [Command Options](../../developer/commands)

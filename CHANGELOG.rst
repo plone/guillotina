@@ -8,8 +8,31 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.0.25 (unreleased)
+5.0.28 (unreleased)
 -------------------
+
+- Nothing changed yet.
+
+
+5.0.27 (2019-10-23)
+-------------------
+
+- Do not fallback to `setattr` with unhandled errors on fields
+  [vangheem]
+
+
+5.0.26 (2019-10-21)
+-------------------
+
+- Documentation and training fixes
+  [vangheem]
+
+
+5.0.25 (2019-10-21)
+-------------------
+
+- Documentation and training fixes
+  [vangheem]
 
 - Fix compatiblity issues with Python 3.8
   [masipcat]
