@@ -4,7 +4,8 @@ CHANGELOG
 5.0.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Do not fallback to `setattr` with unhandled errors on fields
+  [vangheem]
 
 
 5.0.26 (2019-10-21)
