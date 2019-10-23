@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.0.28 (unreleased)
+5.0.28 (2019-10-23)
 -------------------
 
 - Cache debug information should be debug level
