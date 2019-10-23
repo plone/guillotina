@@ -1,11 +1,11 @@
-from . import ListGroupsOrUsersService
-from .content.users import User
 from guillotina import configure
 from guillotina.api.content import DefaultDELETE
 from guillotina.api.content import DefaultPATCH
 from guillotina.api.service import Service
 from guillotina.component import get_multi_adapter
 from guillotina.component import queryMultiAdapter
+from guillotina.contrib.dbusers.content.users import User
+from guillotina.contrib.dbusers.services.utils import ListGroupsOrUsersService
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPATCH
 from guillotina.interfaces import IResourceSerializeToJson
@@ -24,8 +24,8 @@ from zope.interface import alsoProvides
     allow_access=True,
 )
 class Info(Service):
-    async def __call__(self) -> dict:
-        user: User = get_authenticated_user()
+    async def __call__(self):
+        user = get_authenticated_user()
         serializer = queryMultiAdapter((user, self.request), IResourceSerializeToJson)
         if serializer:
             data = await serializer()
