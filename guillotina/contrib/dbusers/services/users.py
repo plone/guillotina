@@ -1,3 +1,5 @@
+from . import ListGroupsOrUsersService
+from .content.users import User
 from guillotina import configure
 from guillotina.api.content import DefaultDELETE
 from guillotina.api.content import DefaultPATCH
@@ -119,21 +121,5 @@ class DeleteUser(BaseUser):
     summary="List existing users",
     allow_access=True,
 )
-class ManageAvailableUsers(Service):
-    async def __call__(self):
-        users = await self.get_users_form_folder()
-        if not users:
-            return []
-        result = []
-        for user in users:
-            serializer = get_multi_adapter((user, self.request), IResourceSerializeToJsonSummary)
-            result.append(await serializer())
-
-        return result
-
-    async def get_users_form_folder(self):
-        user_folder = await navigate_to(self.context, "users")
-        users = []
-        async for _, user in user_folder.async_items():
-            users.append(user)
-        return users
+class ListUsers(ListGroupsOrUsersService):
+    type_name = "User"

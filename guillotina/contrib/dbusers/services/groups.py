@@ -1,3 +1,4 @@
+from . import ListGroupsOrUsersService
 from guillotina import configure
 from guillotina.api.content import DefaultDELETE
 from guillotina.api.content import DefaultPATCH
@@ -28,38 +29,8 @@ import typing as t
     summary="List groups",
     allow_access=True,
 )
-class GetGroups(Service):
-    async def __call__(self):
-        groups = await self.get_all_groups()
-
-        result = []
-        for group in groups:
-            serializer = get_multi_adapter((group, self.request), IResourceSerializeToJsonSummary)
-            result.append(await serializer())
-
-        return result
-
-    async def get_all_groups(self) -> t.List[dict]:
-        try:
-            # Try first with catalog
-            return await self._get_groups_pgcatalog()
-        except NoCatalogException:
-            # Slower, but does the job
-            return await self._get_groups_iterating_db()
-
-    async def _get_groups_pgcatalog(self) -> t.List[dict]:
-        search = query_utility(ICatalogUtility)
-        if search is None:
-            raise NoCatalogException()
-        # TODO; search by type_name Group
-        return []
-
-    async def _get_groups_iterating_db(self) -> t.List[dict]:
-        group_folder = await navigate_to(self.context, "groups")
-        groups = []
-        async for _, group in group_folder.async_items():
-            groups.append(group)
-        return groups
+class ListGroups(ListGroupsOrUsersService):
+    type_name = "Group"
 
 
 class BaseGroup(Service):
