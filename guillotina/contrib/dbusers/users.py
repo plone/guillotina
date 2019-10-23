@@ -19,7 +19,7 @@ class DBUserIdentifier:
             # No user id in the token
             return
 
-        if user_id not in await users.async_keys():
+        if not await users.async_contains(user_id):
             # User id does not correspond to any existing user folder
             return
 

@@ -16,8 +16,10 @@ Available content types:
 ### Usage
 
 After installation, you will now have a `users` and `groups` folder
-inside your container. New users can be added just like creating
-content::
+inside your container.
+
+Guillotina users holding `guillotina.ContainerAdmin` or
+`guillotina.Manager` permissions can add new users like::
 
 ```json
 POST /db/container/users {
@@ -26,11 +28,12 @@ POST /db/container/users {
     "username": "@foobar",
     "name": "FooBar",
     "email": "foo@bar.com",
-    "password": "foobar"
+    "password": "foobar",
+    "user_roles": ["guillotina.Member"]
 }
 ```
 
-You can now authenticate with the `foobar` user.
+You can now login to the container with the `foobar` user.
 
 New groups are added likewise::
 ```json

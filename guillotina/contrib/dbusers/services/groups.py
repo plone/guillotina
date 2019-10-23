@@ -10,6 +10,8 @@ from guillotina.response import HTTPNotFound
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
 
+import typing as t
+
 
 @configure.service(
     for_=IContainer,
@@ -28,7 +30,7 @@ from zope.interface import alsoProvides
 )
 class GetGroups(Service):
     async def __call__(self):
-        groups = await self.get_groups_from_folder()
+        groups = await self.get_all_groups()
 
         result = []
         for group in groups:
@@ -37,7 +39,22 @@ class GetGroups(Service):
 
         return result
 
-    async def get_groups_from_folder(self):
+    async def get_all_groups(self) -> t.List[dict]:
+        try:
+            # Try first with catalog
+            return await self._get_groups_pgcatalog()
+        except NoCatalogException:
+            # Slower, but does the job
+            return await self._get_groups_iterating_db()
+
+    async def _get_groups_pgcatalog(self) -> t.List[dict]:
+        search = query_utility(ICatalogUtility)
+        if search is None:
+            raise NoCatalogException()
+        # TODO; search by type_name Group
+        return []
+
+    async def _get_groups_iterating_db(self) -> t.List[dict]:
         group_folder = await navigate_to(self.context, "groups")
         groups = []
         async for _, group in group_folder.async_items():
@@ -112,3 +129,7 @@ class DeleteGroup(BaseGroup):
     async def __call__(self):
         group = await self.get_group()
         return await DefaultDELETE(group, self.request)()
+
+
+class NoCatalogException(Exception):
+    pass

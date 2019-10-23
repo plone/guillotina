@@ -17,7 +17,7 @@ from guillotina.utils import navigate_to
 
 
 @configure.subscriber(for_=(IUser, IObjectAddedEvent))
-async def on_user_created(user: User, event: ObjectAddedEvent):
+async def on_user_created(user: User, event: ObjectAddedEvent) -> None:
     # Store only the hash of the password
     user.password = hash_password(user.password)
 
@@ -29,7 +29,8 @@ async def on_user_created(user: User, event: ObjectAddedEvent):
 
 
 @configure.subscriber(for_=(IGroup, IObjectModifiedEvent))
-async def on_update_groups(group: Group, event: ObjectModifiedEvent):
+async def on_update_groups(group: Group, event: ObjectModifiedEvent) -> None:
+    # Keep group.users and user.user_groups in sync
     container = get_current_container()
     users = group.users or []
     for user_id in users:
