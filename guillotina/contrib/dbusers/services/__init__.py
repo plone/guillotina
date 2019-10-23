@@ -2,9 +2,16 @@ from . import groups  # noqa
 from . import users  # noqa
 from guillotina import configure
 from guillotina.api.content import DefaultPOST
+from guillotina.api.service import Service
+from guillotina.component import get_multi_adapter
+from guillotina.component import query_utility
 from guillotina.content import Container
 from guillotina.contrib.dbusers.content.groups import IGroupManager
 from guillotina.contrib.dbusers.content.users import IUserManager
+from guillotina.interfaces import IAsyncContainer
+from guillotina.interfaces import IResourceSerializeToJsonSummary
+from guillotina.interfaces.catalog import ICatalogUtility
+from guillotina.utils import navigate_to
 
 import typing as t
 
@@ -27,7 +34,7 @@ class UserPOST(DefaultPOST):
 
 
 class ListGroupsOrUsersService(Service):
-    type_name = None
+    type_name: t.Optional[str] = None
 
     async def __call__(self) -> t.List[dict]:
         self.check_type_name()
@@ -47,14 +54,15 @@ class ListGroupsOrUsersService(Service):
         return obj
 
     async def _get_from_catalog(self) -> t.List[dict]:
-        search = query_utility(ICatalogUtility)
-        if search is None:
+        catalog = query_utility(ICatalogUtility)
+        if catalog is None:
             raise NoCatalogException()
 
+        container: Container = self.context
         result = await catalog.query(container, {"portal_type": self.type_name})
-        final = []
+        final: t.List = []
         for obj in result["member"]:
-            processed = await self.process_catalog_obj(obj)
+            processed: dict = await self.process_catalog_obj(obj)
             final.append(processed)
         return final
 
@@ -68,10 +76,14 @@ class ListGroupsOrUsersService(Service):
         elif self.type_name == "User":
             manager_folder = "users"
 
-        container: Container = self.context
+        container: IAsyncContainer = self.context
         folder = await navigate_to(container, manager_folder)
         items = []
         async for _, obj in folder.async_items():
-            processed = await self.process_obj(obj)
+            processed = await self.process_db_obj(obj)
             items.append(processed)
         return items
+
+
+class NoCatalogException(Exception):
+    pass

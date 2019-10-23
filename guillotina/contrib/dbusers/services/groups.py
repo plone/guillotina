@@ -1,4 +1,5 @@
 from . import ListGroupsOrUsersService
+from .content.groups import Group
 from guillotina import configure
 from guillotina.api.content import DefaultDELETE
 from guillotina.api.content import DefaultPATCH
@@ -30,13 +31,13 @@ import typing as t
     allow_access=True,
 )
 class ListGroups(ListGroupsOrUsersService):
-    type_name = "Group"
+    type_name: str = "Group"
 
 
 class BaseGroup(Service):
-    async def get_group(self):
-        group_id = self.request.matchdict["group"]
-        group = await navigate_to(self.context, "groups/{}".format(group_id))
+    async def get_group(self) -> Group:
+        group_id: str = self.request.matchdict["group"]
+        group: t.Optional[Group] = await navigate_to(self.context, "groups/{}".format(group_id))
         if not group:
             raise HTTPNotFound(content={"reason": f"Group {group} not found"})
         return group
@@ -59,7 +60,7 @@ class BaseGroup(Service):
 )
 class GetGroup(BaseGroup):
     async def __call__(self):
-        group = await self.get_group()
+        group: Group = await self.get_group()
         serializer = get_multi_adapter((group, self.request), IResourceSerializeToJsonSummary)
         return await serializer()
 
@@ -78,7 +79,7 @@ class GetGroup(BaseGroup):
 )
 class PatchGroups(BaseGroup):
     async def __call__(self):
-        group = await self.get_group()
+        group: Group = await self.get_group()
         alsoProvides(self.request, IPATCH)
         view = DefaultPATCH(group, self.request)
         return await view()
@@ -98,9 +99,5 @@ class PatchGroups(BaseGroup):
 )
 class DeleteGroup(BaseGroup):
     async def __call__(self):
-        group = await self.get_group()
+        group: Group = await self.get_group()
         return await DefaultDELETE(group, self.request)()
-
-
-class NoCatalogException(Exception):
-    pass

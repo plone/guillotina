@@ -24,8 +24,8 @@ from zope.interface import alsoProvides
     allow_access=True,
 )
 class Info(Service):
-    async def __call__(self):
-        user = get_authenticated_user(self.request)
+    async def __call__(self) -> dict:
+        user: User = get_authenticated_user()
         serializer = queryMultiAdapter((user, self.request), IResourceSerializeToJson)
         if serializer:
             data = await serializer()
@@ -36,8 +36,8 @@ class Info(Service):
 
 
 class BaseUser(Service):
-    async def get_user(self):
-        user_id = self.request.matchdict["user"]
+    async def get_user(self) -> User:
+        user_id: str = self.request.matchdict["user"]
         try:
             user = await navigate_to(self.context, "users/{}".format(user_id))
         except KeyError:
@@ -63,12 +63,11 @@ class BaseUser(Service):
     summary="Get user data",
     allow_access=True,
 )
-class GetUsers(BaseUser):
-    async def __call__(self):
-        user = await self.get_user()
+class GetUser(BaseUser):
+    async def __call__(self) -> dict:
+        user: User = await self.get_user()
         serializer = get_multi_adapter((user, self.request), IResourceSerializeToJsonSummary)
-        result = await serializer()
-        return result
+        return await serializer()
 
 
 @configure.service(
@@ -85,7 +84,7 @@ class GetUsers(BaseUser):
 )
 class PatchUser(BaseUser):
     async def __call__(self):
-        user = await self.get_user()
+        user: User = await self.get_user()
         alsoProvides(self.request, IPATCH)
         view = DefaultPATCH(user, self.request)
         return await view()
@@ -102,7 +101,7 @@ class PatchUser(BaseUser):
 )
 class DeleteUser(BaseUser):
     async def __call__(self):
-        user = await self.get_user()
+        user: User = await self.get_user()
         view = DefaultDELETE(user, self.request)
         return await view()
 
@@ -122,4 +121,4 @@ class DeleteUser(BaseUser):
     allow_access=True,
 )
 class ListUsers(ListGroupsOrUsersService):
-    type_name = "User"
+    type_name: str = "User"
