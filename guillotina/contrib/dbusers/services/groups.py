@@ -12,7 +12,7 @@ from guillotina.response import HTTPNotFound
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
 
-import typing as t
+import typing
 
 
 @configure.service(
@@ -32,12 +32,22 @@ import typing as t
 )
 class ListGroups(ListGroupsOrUsersService):
     type_name: str = "Group"
+    _desired_keys: typing.List[str] = ["groupname", "id", "title", "roles", "users", "@name"]
+
+    async def process_catalog_obj(self, obj) -> dict:
+        return {
+            "@name": obj.get("@name"),
+            "id": obj.get("id"),
+            "title": obj.get("group_name"),
+            "users": obj.get("group_users") or [],
+            "roles": obj.get("group_roles") or [],
+        }
 
 
 class BaseGroup(Service):
     async def get_group(self) -> Group:
         group_id: str = self.request.matchdict["group"]
-        group: t.Optional[Group] = await navigate_to(self.context, "groups/{}".format(group_id))
+        group: typing.Optional[Group] = await navigate_to(self.context, "groups/{}".format(group_id))
         if not group:
             raise HTTPNotFound(content={"reason": f"Group {group} not found"})
         return group

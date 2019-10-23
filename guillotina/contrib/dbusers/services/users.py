@@ -15,6 +15,8 @@ from guillotina.utils import get_authenticated_user
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
 
+import typing
+
 
 @configure.service(
     context=IContainer,
@@ -122,3 +124,13 @@ class DeleteUser(BaseUser):
 )
 class ListUsers(ListGroupsOrUsersService):
     type_name: str = "User"
+    _desired_keys: typing.List[str] = ["@name", "fullname", "email", "id", "roles"]
+
+    async def process_catalog_obj(self, obj) -> dict:
+        return {
+            "@name": obj.get("@name"),
+            "id": obj.get("id"),
+            "fullname": obj.get("user_name"),
+            "email": obj.get("user_email"),
+            "roles": obj.get("user_roles") or [],
+        }

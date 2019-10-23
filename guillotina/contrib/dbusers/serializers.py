@@ -67,7 +67,6 @@ class GroupSerializer(DefaultJSONSummarySerializer):
         return data
 
     def get_batch_users(self):
-        # TODO: provide batching?
         return {"items": self.context.users, "items_total": len(self.context.users)}
 
 

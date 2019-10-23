@@ -1,5 +1,7 @@
 from . import settings
+from guillotina.tests.test_catalog import NOT_POSTGRES
 
+import copy
 import json
 import pytest
 
@@ -54,3 +56,40 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         data = {"users": {"foobarx": True}}
         resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
         assert status == 412
+
+
+settings_with_catalog = copy.deepcopy(settings.DEFAULT_SETTINGS)
+settings_with_catalog["applications"].append("guillotina.contrib.catalog.pg")
+settings_with_catalog.update(
+    {
+        "load_utilities": {
+            "catalog": {
+                "provides": "guillotina.interfaces.ICatalogUtility",
+                "factory": "guillotina.contrib.catalog.pg.PGSearchUtility",
+            }
+        }
+    }
+)
+
+
+@pytest.mark.app_settings(settings_with_catalog)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_list_groups_works_with_catalog(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        # Check initially there is no users
+        resp, status_code = await requester("GET", "/db/guillotina/@groups")
+        assert status_code == 200
+        assert len(resp) == 0
+
+        # Add a user
+        resp, status_code = await requester("POST", "/db/guillotina/groups", data=json.dumps(_group))
+        assert status_code == 201
+
+        # Check it gets listed
+        resp, status_code = await requester("GET", "/db/guillotina/@groups")
+        assert status_code == 200
+        assert len(resp) == 1
+        assert resp[0]["@name"]
+        assert resp[0]["title"]
+        assert isinstance(resp[0]["roles"], list)
+        assert isinstance(resp[0]["users"], list)

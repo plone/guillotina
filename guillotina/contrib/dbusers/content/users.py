@@ -3,6 +3,7 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.content import Folder
 from guillotina.contrib.dbusers import _
+from guillotina.directives import index_field
 from guillotina.directives import read_permission
 from guillotina.directives import write_permission
 from guillotina.interfaces import Allow
@@ -20,8 +21,10 @@ class IUser(IFolder, IPrincipal):
 
     username = schema.TextLine(title=_("Username"), required=False)
 
+    index_field("email", index_name="user_email", type="keyword")
     email = schema.TextLine(title=_("Email"), required=False)
 
+    index_field("name", index_name="user_name", type="textkeyword")
     name = schema.TextLine(title=_("Name"), required=False)
 
     read_permission(password="guillotina.Nobody")
@@ -31,6 +34,7 @@ class IUser(IFolder, IPrincipal):
     user_groups = schema.List(title=_("Groups"), value_type=schema.TextLine(), required=False)
 
     write_permission(user_roles="guillotina.ManageUsers")
+    index_field("user_roles", type="textkeyword")
     user_roles = schema.List(title=_("Roles"), value_type=schema.TextLine(), required=False)
 
     write_permission(user_permissions="guillotina.ManageUsers")
