@@ -4,7 +4,8 @@ CHANGELOG
 5.0.29 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Missed debug information.
+  [bloodbare]
 
 
 5.0.28 (2019-10-23)
