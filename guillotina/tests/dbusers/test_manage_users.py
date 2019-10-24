@@ -53,6 +53,7 @@ async def test_get_users(dbusers_requester, user_data):
 
 settings_with_catalog = copy.deepcopy(settings.DEFAULT_SETTINGS)
 settings_with_catalog["applications"].append("guillotina.contrib.catalog.pg")
+settings_with_catalog.setdefault("load_utilities", {})  # type: ignore
 settings_with_catalog["load_utilities"]["catalog"] = {  # type: ignore
     "provides": "guillotina.interfaces.ICatalogUtility",
     "factory": "guillotina.contrib.catalog.pg.PGSearchUtility",
