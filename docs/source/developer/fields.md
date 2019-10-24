@@ -31,6 +31,9 @@ consist of field definitions.
 
 Guillotina provides a `PatchField` which allows you to patch values of
 `List`, `Dict` and `Int` fields without having the original value.
+This is done doing a PATCH request to the object absolute url with
+the following payloads:
+
 
 ### Patch field list
 
@@ -41,16 +44,17 @@ from guillotina.fields import PatchField
 from guillotina import schema
 
 class IMySchema(Interface):
-    values = PatchField(schema.List(
+    field = PatchField(schema.List(
         value_type=schema.Text()
     ))
 ```
 
 Then, payload for patching to append to this list would look like:
 
+
 ```json
 {
-    "values": {
+    "field": {
         "op": "append",
         "value": "foobar"
     }
@@ -62,7 +66,7 @@ Append if unique value only:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "appendunique",
         "value": "foobar"
     }
@@ -73,7 +77,7 @@ Extend:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "extend",
         "value": ["foo", "bar"]
     }
@@ -84,7 +88,7 @@ Extend if unique values:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "extendunique",
         "value": ["foo", "bar"]
     }
@@ -95,7 +99,7 @@ Delete:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "del",
         "value": 0
     }
@@ -106,7 +110,7 @@ Remove:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "remove",
         "value": "foobar"
     }
@@ -117,7 +121,7 @@ Update:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "update",
         "value": {
             "index": 0,
@@ -137,7 +141,7 @@ from guillotina.fields import PatchField
 from guillotina import schema
 
 class IMySchema(Interface):
-    values = PatchField(schema.Dict(
+    field = PatchField(schema.Dict(
         key_type=schema.Text(),
         value_type=schema.Text()
     ))
@@ -147,7 +151,7 @@ Then, payload for patching to add to this dict would look like:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "assign",
         "value": {
             "key": "foo",
@@ -161,7 +165,7 @@ Delete:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "del",
         "value": "foo"
     }
@@ -174,7 +178,7 @@ Update:
 {
     "values": {
         "op": "update",
-        "value": [{
+        "field": [{
             "key": "foo",
             "value": "bar"
         }, {
@@ -265,7 +269,7 @@ from guillotina.fields import BucketListField
 from guillotina import schema
 
 class IMySchema(Interface):
-    values = BucketListField(
+    field = BucketListField(
         value_type=schema.Text(),
         bucket_len=5000
     )
@@ -276,7 +280,7 @@ Then, payload for patching to append to this list would look like:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "append",
         "value": "foobar"
     }
@@ -287,7 +291,7 @@ Extend:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "extend",
         "value": ["foo", "bar"]
     }
@@ -298,7 +302,7 @@ Delete:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "del",
         "value": {
             "bucket_index": 0,
@@ -317,7 +321,7 @@ from guillotina.fields import BucketDictField
 from guillotina import schema
 
 class IMySchema(Interface):
-    values = BucketDictField(
+    field = BucketDictField(
         key_type=schema.Text(),
         value_type=schema.Text(),
         bucket_len=5000
@@ -329,7 +333,7 @@ Then, payload for patching would be...:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "assign",
         "value": {
             "key": "foo",
@@ -343,7 +347,7 @@ Update:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "update",
         "value": [{
             "key": "foo",
@@ -360,7 +364,7 @@ Delete:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "del",
         "value": "foo"
     }

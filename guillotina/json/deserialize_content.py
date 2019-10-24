@@ -125,15 +125,16 @@ class DeserializeFromJson(object):
                     except AttributeError:
                         logger.warning(f"AttributeError setting data on field {name}", exc_info=True)
                     except Exception:
-                        if not isinstance(getattr(type(obj), name, None), property):
-                            # we can not set data on properties
-                            logger.warning(
-                                "Error setting data on field, falling back to setattr", exc_info=True
-                            )
-                            setattr(obj, name, value)
-                            changed = True
-                        else:
-                            logger.warning("Error setting data on field", exc_info=True)
+                        logger.warning(
+                            f"Unhandled error setting data on field, {schema} {name}", exc_info=True
+                        )
+                        errors.append(
+                            {
+                                "message": "Unhandled exception",
+                                "field": name,
+                                "error": ValueDeserializationError(field, value, "Unhandled error"),
+                            }
+                        )
             else:
                 if validate_all and field.required and getattr(obj, name, None) is None:
                     errors.append(

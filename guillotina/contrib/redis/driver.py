@@ -80,7 +80,7 @@ class RedisDriver:
         for key in keys:
             try:
                 await self._pool.execute(b"DEL", key)
-                logger.info("Deleted cache keys {}".format(keys))
+                logger.debug("Deleted cache keys {}".format(keys))
             except Exception:
                 logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
 

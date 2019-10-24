@@ -1,11 +1,29 @@
 CHANGELOG
 =========
 
-5.0.27 (unreleased)
+5.0.29 (unreleased)
 -------------------
 
 - Move guillotina_dbusers to guillotina.contrib.dbusers
   [jordic, lferran]
+  
+- Missed debug information.
+  [bloodbare]
+
+
+5.0.28 (2019-10-23)
+-------------------
+
+- Cache debug information should be debug level
+  [bloodbare]
+
+
+5.0.27 (2019-10-23)
+-------------------
+
+- Do not fallback to `setattr` with unhandled errors on fields
+  [vangheem]
+
 
 5.0.26 (2019-10-21)
 -------------------
