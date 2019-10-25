@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-5.0.29 (unreleased)
--------------------
+5.1.0 (unreleased)
+------------------
 
 - Move guillotina_dbusers to guillotina.contrib.dbusers
   [jordic, lferran]
