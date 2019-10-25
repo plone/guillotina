@@ -20,7 +20,7 @@ from guillotina_chat.content import IConversation
 
 
 @configure.service(context=IContainer, name='@conversations',
-                   permission='guillotina.Authenticated')
+                   permission='guillotina.AccessContent')
 async def get_conversations(context, request):
     results = []
     conversations = await context.async_get('conversations')

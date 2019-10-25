@@ -8,10 +8,27 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.0.28 (unreleased)
--------------------
+5.1.1 (unreleased)
+------------------
 
 - Nothing changed yet.
+
+
+5.1.0 (2019-10-25)
+------------------
+
+- Move guillotina_dbusers to guillotina.contrib.dbusers
+  [jordic, lferran]
+
+- Missed debug information.
+  [bloodbare]
+
+
+5.0.28 (2019-10-23)
+-------------------
+
+- Cache debug information should be debug level
+  [bloodbare]
 
 
 5.0.27 (2019-10-23)

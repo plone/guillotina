@@ -56,16 +56,18 @@ class Login(Service):
 @configure.service(
     context=IContainer,
     method="POST",
-    permission="guillotina.AccessContent",
+    permission="guillotina.RefreshToken",
     name="@login-renew",
     summary="Refresh to a new token",
+    allow_access=True,
 )
 @configure.service(
     context=IApplication,
     method="POST",
-    permission="guillotina.AccessContent",
+    permission="guillotina.RefreshToken",
     name="@login-renew",
     summary="Refresh to a new token",
+    allow_access=True,
 )
 class Refresh(Service):
     token_timeout = 60 * 60 * 1

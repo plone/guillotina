@@ -28,6 +28,8 @@ configure.permission("guillotina.ManageAddons", "Manage addons on a container")
 configure.permission("guillotina.SeePermissions", "See permissions")
 configure.permission("guillotina.ChangePermissions", "Change permissions")
 
+configure.permission("guillotina.RefreshToken", "Refresh token")
+
 configure.permission("guillotina.SearchContent", "Search content")
 configure.permission("guillotina.RawSearchContent", "Raw search content")
 configure.permission("guillotina.ReindexContent", "Reindex Content")
@@ -66,6 +68,7 @@ configure.grant(permission="guillotina.AccessPreflight", role="guillotina.Anonym
 configure.grant(permission="guillotina.Public", role="guillotina.Anonymous")
 
 # Authenticated
+configure.grant(permission="guillotina.RefreshToken", role="guillotina.Authenticated")
 configure.grant(permission="guillotina.AccessPreflight", role="guillotina.Authenticated")
 configure.grant(permission="guillotina.Public", role="guillotina.Authenticated")
 
