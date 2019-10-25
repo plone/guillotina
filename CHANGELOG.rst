@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.0 (unreleased)
+5.1.0 (2019-10-25)
 ------------------
 
 - Move guillotina_dbusers to guillotina.contrib.dbusers
