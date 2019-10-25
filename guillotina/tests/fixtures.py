@@ -26,6 +26,7 @@ from unittest import mock
 
 import aiohttp
 import asyncio
+import json
 import os
 import pytest
 
@@ -463,3 +464,15 @@ def redis_container():
     yield host, port  # provide the fixture value
     pytest_docker_fixtures.redis_image.stop()
     annotations["redis"] = None
+
+
+class DBUsersRequester(ContainerRequesterAsyncContextManager):
+    async def __aenter__(self):
+        requester = await super().__aenter__()
+        await requester("POST", "/db/guillotina/@addons", data=json.dumps({"id": "dbusers"}))
+        return requester
+
+
+@pytest.fixture(scope="function")
+async def dbusers_requester(guillotina):
+    return DBUsersRequester(guillotina)

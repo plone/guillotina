@@ -4,6 +4,9 @@ CHANGELOG
 5.0.29 (unreleased)
 -------------------
 
+- Move guillotina_dbusers to guillotina.contrib.dbusers
+  [jordic, lferran]
+  
 - Missed debug information.
   [bloodbare]
 
