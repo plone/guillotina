@@ -1,4 +1,4 @@
-from db.interfaces import IStorage
+from guillotina.db.interfaces import IStorage
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
