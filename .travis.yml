@@ -14,8 +14,8 @@ matrix:
     - name: Python 3.7, PG 10 (db_schema=custom)
       python: 3.7
       env:
-       - DATABASE=postgres
-       - DB_SCHEMA=custom
+        - DATABASE=postgres
+        - DB_SCHEMA=custom
       addons:
         postgresql: 10
     - name: Python 3.7, Cockroachdb
@@ -32,8 +32,8 @@ matrix:
     - name: Python 3.8, PG 10 (db_schema=custom)
       python: 3.8
       env:
-       - DATABASE=postgres
-       - DB_SCHEMA=custom
+        - DATABASE=postgres
+        - DB_SCHEMA=custom
       addons:
         postgresql: 10
     - name: Python 3.8, Cockroachdb
@@ -60,7 +60,7 @@ script:
   - mypy guillotina/
   - isort -c -rc guillotina/
   - black --check --verbose guillotina
-  - pytest -s --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
+  - pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
 after_success:
   - codecov
 
@@ -73,5 +73,6 @@ deploy:
 # safelist
 branches:
   only:
-  - master
-  - 4.x
+    - master
+    - 4.x
+    - 5.x
