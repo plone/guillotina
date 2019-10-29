@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.1 (unreleased)
+5.1.1 (2019-10-29)
 ------------------
 
 - more mypy definitions on ITransactionManager
