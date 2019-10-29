@@ -1,4 +1,3 @@
-from guillotina.db.interfaces import IStorage
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
@@ -114,7 +113,7 @@ class ITransaction(Interface):
 
 class ITransactionManager(Interface):
     db_id: str
-    storage: IStorage
+    storage: "IStorage"
     lock: asyncio.Lock
 
     async def commit(*, txn: typing.Optional[ITransaction] = None):
