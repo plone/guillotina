@@ -1,3 +1,4 @@
+from db.interfaces import IStorage
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import IDatabase
@@ -5,6 +6,7 @@ from zope.interface import Attribute
 from zope.interface import Interface
 from zope.interface import interfaces
 
+import asyncio
 import typing
 
 
@@ -111,6 +113,10 @@ class ITransaction(Interface):
 
 
 class ITransactionManager(Interface):
+    db_id: str
+    storage: IStorage
+    lock: asyncio.Lock
+
     async def commit(*, txn: typing.Optional[ITransaction] = None):
         """
         Commit txn
