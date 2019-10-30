@@ -4,7 +4,8 @@ CHANGELOG
 5.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added deserializer for IUnionField
+  [masipcat]
 
 
 5.1.2 (2019-10-30)
@@ -25,7 +26,7 @@ CHANGELOG
 
 - Move guillotina_dbusers to guillotina.contrib.dbusers
   [jordic, lferran]
-  
+
 - Missed debug information.
   [bloodbare]
 

@@ -16,6 +16,7 @@ from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
 
+import pytest
 import uuid
 
 
@@ -142,6 +143,8 @@ class ITestSchema(Interface):
 
     datetime_bucket_list = fields.BucketListField(bucket_len=10, required=False, value_type=schema.Datetime())
 
+    union_field = schema.UnionField(schema.Datetime(), schema.Int(), required=False)
+
     nested_patch = fields.PatchField(
         schema.Dict(
             required=False,
@@ -197,6 +200,16 @@ async def test_deserialize_frozenset(dummy_guillotina):
 
 async def test_deserialize_dict(dummy_guillotina):
     assert schema_compatible({"foo": "bar"}, ITestSchema["dict_value"]) == {"foo": "bar"}
+
+
+async def test_deserialize_union(dummy_guillotina):
+    assert schema_compatible(123456789, ITestSchema["union_field"]) == 123456789
+    now = datetime.utcnow()
+    converted = schema_compatible(now.isoformat(), ITestSchema["union_field"])
+    assert converted.minute == now.minute
+
+    with pytest.raises(ValueDeserializationError):
+        schema_compatible("invalid-date", ITestSchema["union_field"])
 
 
 async def test_deserialize_datetime(dummy_guillotina):

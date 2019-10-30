@@ -17,6 +17,7 @@ from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
+from guillotina.schema.interfaces import IUnionField
 from zope.interface import Interface
 
 import datetime
@@ -142,3 +143,14 @@ def object_converter(field, value, context=None):
             else:
                 result[key] = None
     return result
+
+
+@configure.value_deserializer(IUnionField)
+def union_converter(field, value, context=None):
+    errors = []
+    for f in field.fields:
+        try:
+            return schema_compatible(value, f)
+        except Exception as e:
+            errors += [e]
+    raise ValueDeserializationError(field, value, errors)
