@@ -149,7 +149,10 @@ def object_converter(field, value, context=None):
 def union_converter(field, value, context=None):
     for f in field.fields:
         try:
-            return schema_compatible(value, f)
+            val = schema_compatible(value, f)
+            if f.__implemented__(IObject) and value and not val:
+                continue  # IObject doesn't match
+            return val
         except Exception:
             pass
     raise ValueDeserializationError(field, value, "Doesn't match any field")
