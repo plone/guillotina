@@ -147,10 +147,9 @@ def object_converter(field, value, context=None):
 
 @configure.value_deserializer(IUnionField)
 def union_converter(field, value, context=None):
-    errors = []
     for f in field.fields:
         try:
             return schema_compatible(value, f)
-        except Exception as e:
-            errors += [e]
-    raise ValueDeserializationError(field, value, errors)
+        except Exception:
+            pass
+    raise ValueDeserializationError(field, value, "Doesn't match any field")
