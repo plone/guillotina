@@ -4,7 +4,8 @@ CHANGELOG
 5.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Handle empty `G_` environment variable values
+  [vangheem]
 
 
 5.1.1 (2019-10-29)
