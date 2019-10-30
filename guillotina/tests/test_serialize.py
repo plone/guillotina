@@ -152,7 +152,9 @@ class ITestSchema(Interface):
     datetime_bucket_list = fields.BucketListField(bucket_len=10, required=False, value_type=schema.Datetime())
 
     union_field = schema.UnionField(schema.Datetime(), schema.Int(), required=False)
-    union_field_obj = schema.UnionField(schema.Object(IObjectA), schema.Object(schema=IObjectB), required=False)
+    union_field_obj = schema.UnionField(
+        schema.Object(IObjectA), schema.Object(schema=IObjectB), required=False
+    )
 
     nested_patch = fields.PatchField(
         schema.Dict(
