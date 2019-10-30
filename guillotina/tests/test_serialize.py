@@ -16,6 +16,7 @@ from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
 
+import pytest
 import uuid
 
 
@@ -101,6 +102,14 @@ async def test_deserialize_cloud_file(dummy_request, mock_txn):
     assert obj.file.size == 42
 
 
+class IObjectA(Interface):
+    foo = schema.Text(required=False)
+
+
+class IObjectB(Interface):
+    bar = schema.Text(required=False)
+
+
 class INestFieldSchema(Interface):
     foo = schema.Text(required=False)
     bar = schema.Int(required=False)
@@ -141,6 +150,11 @@ class ITestSchema(Interface):
     )
 
     datetime_bucket_list = fields.BucketListField(bucket_len=10, required=False, value_type=schema.Datetime())
+
+    union_field = schema.UnionField(schema.Datetime(), schema.Int(), required=False)
+    union_field_obj = schema.UnionField(
+        schema.Object(IObjectA), schema.Object(schema=IObjectB), required=False
+    )
 
     nested_patch = fields.PatchField(
         schema.Dict(
@@ -197,6 +211,24 @@ async def test_deserialize_frozenset(dummy_guillotina):
 
 async def test_deserialize_dict(dummy_guillotina):
     assert schema_compatible({"foo": "bar"}, ITestSchema["dict_value"]) == {"foo": "bar"}
+
+
+async def test_deserialize_union(dummy_guillotina):
+    assert schema_compatible(123456789, ITestSchema["union_field"]) == 123456789
+    now = datetime.utcnow()
+    converted = schema_compatible(now.isoformat(), ITestSchema["union_field"])
+    assert converted.minute == now.minute
+
+    with pytest.raises(ValueDeserializationError):
+        schema_compatible("invalid-date", ITestSchema["union_field"])
+
+
+async def test_deserialize_union_of_obj(dummy_guillotina):
+    assert schema_compatible({"foo": "oooo"}, ITestSchema["union_field_obj"]) == {"foo": "oooo"}
+    assert schema_compatible({"bar": "aaar"}, ITestSchema["union_field_obj"]) == {"bar": "aaar"}
+
+    with pytest.raises(ValueDeserializationError):
+        schema_compatible({"inexisting"}, ITestSchema["union_field_obj"])
 
 
 async def test_deserialize_datetime(dummy_guillotina):
