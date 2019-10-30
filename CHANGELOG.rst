@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.2 (unreleased)
+5.1.2 (2019-10-30)
 ------------------
 
 - Handle empty `G_` environment variable values
