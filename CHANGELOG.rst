@@ -6,6 +6,9 @@ CHANGELOG
 
 New:
 
+- More mypy support and better type checking
+  [vangheem]
+
 - Added deserializer for IUnionField
   [masipcat]
 
