@@ -102,6 +102,7 @@ class Field(Attribute):
     __name__ = None
     interface = None
     _Element__tagged_values = None
+    _validators = None
 
     def __init__(
         self,
@@ -169,6 +170,12 @@ class Field(Attribute):
         if missing_value is not self.__missing_value_marker:
             self.missing_value = missing_value
 
+    def validator(self, func):
+        if self._validators is None:
+            self._validators = []
+        self._validators.append(func)
+        return func
+
     def constraint(self, value):  # type: ignore
         return True
 
@@ -215,6 +222,8 @@ class Field(Attribute):
 
         if not self.constraint(value):
             raise ConstraintNotSatisfied(value, self.__name__)
+        for validator in self._validators or []:
+            validator(self, value)
 
     def get(self, object):
         return getattr(object, self.__name__)

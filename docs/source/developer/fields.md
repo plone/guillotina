@@ -370,3 +370,63 @@ Delete:
     }
 }
 ```
+
+
+# Field validation
+
+## constraints
+
+To provide additional field validation, you can provide a constraint for a field.
+
+This is a simple callable that takes an argument with the value that is being
+validated for the field.
+
+The most simple type of constraint is to use a lambda function:
+
+```python
+from zope.interface import Interface
+from guillotina import schema
+
+class IMySchema(Interface):
+    field = schema.Text(constraint=lambda val: val != 'foobar')
+```
+
+
+## field validators
+
+To provide more complex field validation, you can use the `validator` field decorator:
+
+```python
+from zope.interface import Interface
+from guillotina import schema
+
+class IMySchema(Interface):
+    field = schema.Text()
+
+    @field.validator
+    def validate_field(field, value):
+        # field is bound field so we can look at context now
+        return field.context.foobar is None
+
+```
+
+
+## invariants
+
+You can also validate the modified objects with invariants.
+
+
+```python
+from zope.interface import Interface, invariant, Invalid
+from guillotina import schema
+
+class IMySchema(Interface):
+    field = schema.Text()
+
+    @invariant
+    def validate_obj(obj):
+        # field is bound field so we can look at context here
+        if obj.foo is None and obj.bar is None:
+            raise Invalid(obj)
+
+```

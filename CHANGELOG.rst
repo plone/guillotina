@@ -4,8 +4,18 @@ CHANGELOG
 5.1.3 (unreleased)
 ------------------
 
+New:
+
 - Added deserializer for IUnionField
   [masipcat]
+
+- Provide new `@field.validator` to validate field values against bound fields
+  [vangheem]
+
+Fixes:
+
+- Fix @invariant validation. Any usage of it previously would cause exceptions.
+  [vangheem]
 
 
 5.1.2 (2019-10-30)

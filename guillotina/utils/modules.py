@@ -1,4 +1,5 @@
 from guillotina.gtypes import ResolvableType
+from typing import Any
 from zope.interface.interfaces import IInterface
 
 import importlib
@@ -19,7 +20,7 @@ def import_class(import_string: str) -> types.ModuleType:
     return getattr(importlib.import_module(t[0]), t[1], None)
 
 
-def resolve_dotted_name(name: str) -> ResolvableType:
+def resolve_dotted_name(name: str) -> Any:
     """
     import the provided dotted name
 

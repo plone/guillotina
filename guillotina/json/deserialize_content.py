@@ -145,18 +145,18 @@ class DeserializeFromJson(object):
                         }
                     )
 
-        if validate_all:
-            invariant_errors = []  # type: ignore
-            try:
-                schema.validateInvariants(object, invariant_errors)
-            except Invalid:
-                # Just collect errors
-                pass
-            validation = [(None, e) for e in invariant_errors]
-
-            if len(validation):
-                for error in validation:
-                    errors.append({"message": error[1].doc(), "field": error[0], "error": error})
+        invariant_errors = []  # type: ignore
+        try:
+            schema.validateInvariants(obj, invariant_errors)
+        except Invalid:
+            # Just collect errors
+            pass
+        for error in invariant_errors:
+            if len(getattr(error, "args", [])) > 0 and isinstance(error.args[0], str):
+                message = error.args[0]
+            else:
+                message = error.__doc__
+            errors.append({"message": message, "error": error})
 
         if changed:
             obj.register()
