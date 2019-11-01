@@ -9,6 +9,8 @@ from guillotina.interfaces import IPubSubUtility
 from guillotina.profile import profilable
 from guillotina.utils import resolve_dotted_name
 from sys import getsizeof
+from typing import List
+from typing import Optional
 
 import asyncio
 import asyncpg
@@ -23,12 +25,16 @@ _basic_types = (bytes, str, int, float)
 
 
 class CacheUtility:
+    _memory_cache: LRU
+    _ignored_tids: List[str]
+    _subscriber: Optional[IPubSubUtility]
+    _uid: str
+
     def __init__(self, settings=None, loop=None):
         self._loop = loop
         self._settings = {}
         self._ignored_tids = []
         self._subscriber = None
-        self._memory_cache: LRU = None
         self._obj_driver = None  # driver for obj cache
         self._uid = uuid.uuid4().hex
         self.initialized = False

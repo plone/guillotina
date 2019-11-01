@@ -1,12 +1,7 @@
 from typing import Any
+from typing import Dict
 
 
-class LRU:
+class LRU(Dict[str, Any]):
     def __init__(self, size: int):
-        ...
-
-    def set(self, key: str, value: Any) -> None:
-        ...
-
-    def get(self, key: str) -> Any:
         ...
