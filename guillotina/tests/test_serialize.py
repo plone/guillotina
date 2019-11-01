@@ -815,7 +815,7 @@ class ITestValidation(Interface):
 
     validated_text = schema.Text(required=False)
 
-    @zope.interface.invariant
+    @zope.interface.invariant  # type: ignore
     def text_should_not_be_foobar(ob):
         if getattr(ob, "foo", None) == "foo" and getattr(ob, "bar", None) == "bar":
             raise Invalid(ob)
