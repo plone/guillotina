@@ -17,7 +17,7 @@ import yaml
 
 
 try:
-    import line_profiler
+    import line_profiler  # type: ignore
 
     HAS_LINE_PROFILER = True
 except ImportError:
