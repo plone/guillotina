@@ -388,7 +388,7 @@ from zope.interface import Interface
 from guillotina import schema
 
 class IMySchema(Interface):
-    field = schame.Text(constraint=lambda val: val != 'foobar')
+    field = schema.Text(constraint=lambda val: val != 'foobar')
 ```
 
 
@@ -401,7 +401,7 @@ from zope.interface import Interface
 from guillotina import schema
 
 class IMySchema(Interface):
-    field = schame.Text()
+    field = schema.Text()
 
     @field.validator
     def validate_field(field, value):
@@ -421,7 +421,7 @@ from zope.interface import Interface, invariant, Invalid
 from guillotina import schema
 
 class IMySchema(Interface):
-    field = schame.Text()
+    field = schema.Text()
 
     @invariant
     def validate_obj(obj):
