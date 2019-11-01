@@ -15,6 +15,8 @@ from guillotina.schema.exceptions import WrongType
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
+from zope.interface import Invalid
+from zope.interface import invariant
 
 import pytest
 import uuid
@@ -802,3 +804,67 @@ async def test_bucket_dict_field_splitting(dummy_request, mock_txn):
         [],
     )
     assert len(mock_txn.added) == 2  # should write to existing bucket and new one
+
+
+class ITestValidation(Interface):
+
+    foo = schema.Text(required=False)
+    bar = schema.Text(required=False)
+
+    constrained = schema.Text(required=False, constraint=lambda val: val != "foobar")
+
+    validated_text = schema.Text(required=False)
+
+    @invariant
+    def text_should_not_be_foobar(ob):
+        if getattr(ob, "foo", None) == "foo" and getattr(ob, "bar", None) == "bar":
+            raise Invalid(ob)
+
+    @validated_text.validator
+    def validate_not_foo(field, value):
+        if getattr(field.context, "foo", None) == "foo" and value == "foo":
+            raise Invalid("Must not be foo")
+
+
+async def test_invariant_error(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(
+        ITestValidation, content, {"foo": "foo", "bar": "bar"}, errors, validate_all=True
+    )
+    assert len(errors) == 1
+
+    errors = []
+    await deserializer.set_schema(
+        ITestValidation, content, {"foo": "foo", "bar": "blah"}, errors, validate_all=True
+    )
+    assert len(errors) == 0
+
+
+async def test_constraint_error(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(ITestValidation, content, {"constrained": "foobar"}, errors)
+    assert len(errors) == 1
+
+    errors = []
+    await deserializer.set_schema(ITestValidation, content, {"constrained": "not foobar"}, errors)
+    assert len(errors) == 0
+
+
+async def test_validator_error(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(ITestValidation, content, {"validated_text": "foo", "foo": "foo"}, errors)
+    assert len(errors) == 1
+
+    errors = []
+    content = create_content()
+    await deserializer.set_schema(ITestValidation, content, {"validated_text": "foo"}, errors)
+    assert len(errors) == 0
