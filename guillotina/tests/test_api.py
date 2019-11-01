@@ -233,7 +233,7 @@ async def test_create_delete_contenttype(container_requester):
 async def test_404(container_requester):
     """Create and delete a content type."""
     async with container_requester as requester:
-        resp, status = await requester("GET", "/db/guillotina/sdflksdljfkdsk")
+        _, status = await requester("GET", "/db/guillotina/sdflksdljfkdsk")
         assert status == 404
         _, status = await requester("GET", "/db/sdflksdljfkdsk")
         assert status == 404

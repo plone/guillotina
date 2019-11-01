@@ -25,6 +25,7 @@ from guillotina.events import BeforeRenderViewEvent
 from guillotina.events import ObjectLoadedEvent
 from guillotina.events import TraversalRouteMissEvent
 from guillotina.events import TraversalViewMissEvent
+from guillotina.exceptions import ApplicationNotFound
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.i18n import default_message_factory as _
@@ -369,13 +370,13 @@ class BasicMatchInfo(BaseMatchInfo):
 class TraversalRouter(AbstractRouter):
     """Custom router for guillotina."""
 
-    _root: IApplication
+    _root: Optional[IApplication]
 
-    def __init__(self, root: IApplication) -> None:
+    def __init__(self, root: Optional[IApplication] = None) -> None:
         """On traversing aiohttp sets the root object."""
         self.set_root(root)
 
-    def set_root(self, root: IApplication):
+    def set_root(self, root: Optional[IApplication]):
         """Warpper to set the root object."""
         self._root = root
 
@@ -533,5 +534,7 @@ class TraversalRouter(AbstractRouter):
     async def traverse(self, request: IRequest) -> Tuple[IBaseObject, Tuple[str, ...]]:
         """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split("/") if p)
-        root = self._root
-        return await traverse(request, root, path)
+        if self._root is not None:
+            return await traverse(request, self._root, path)
+        else:  # pragma: no cover
+            raise ApplicationNotFound()
