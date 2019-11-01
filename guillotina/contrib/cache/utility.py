@@ -3,6 +3,7 @@ from guillotina.component import query_utility
 from guillotina.contrib.cache import CACHE_PREFIX
 from guillotina.contrib.cache import memcache
 from guillotina.contrib.cache import serialize
+from guillotina.contrib.cache.lru import LRU
 from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import IPubSubUtility
 from guillotina.profile import profilable
@@ -27,7 +28,7 @@ class CacheUtility:
         self._settings = {}
         self._ignored_tids = []
         self._subscriber = None
-        self._memory_cache = None
+        self._memory_cache: LRU = None
         self._obj_driver = None  # driver for obj cache
         self._uid = uuid.uuid4().hex
         self.initialized = False

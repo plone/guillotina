@@ -135,8 +135,8 @@ Configured databases
         setup = helpers.setup_context  # noqa
 
         try:
-            from IPython.terminal.embed import InteractiveShellEmbed
-            from traitlets.config.loader import Config
+            from IPython.terminal.embed import InteractiveShellEmbed  # type: ignore
+            from traitlets.config.loader import Config  # type: ignore
         except ImportError:
             sys.stderr.write(
                 "You must install ipython for the "

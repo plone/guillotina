@@ -1,6 +1,7 @@
 from guillotina import configure
 from guillotina.auth.users import SystemUser
 from guillotina.component import get_utility
+from guillotina.component import query_adapter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import Allow
 from guillotina.interfaces import AllowSingle
@@ -20,8 +21,10 @@ from guillotina.security.security_code import principal_permission_manager
 from guillotina.security.security_code import principal_role_manager
 from guillotina.security.security_code import role_permission_manager
 from lru import LRU
-
-import typing
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting
@@ -32,7 +35,7 @@ code_principals_for_permission = principal_permission_manager.get_principals_for
 SettingAsBoolean = {Allow: True, Deny: False, Unset: None, AllowSingle: "o", None: None}
 
 
-SettingType = typing.Union[bool, None, str]
+SettingType = Union[bool, None, str]
 
 
 def level_setting_as_boolean(level, value) -> SettingType:
@@ -286,11 +289,17 @@ class SecurityPolicy:
         return None
 
 
-def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dict[str, int]:
+def cached_roles(parent: Optional[IBaseObject], permission: str, level: str) -> Dict[str, int]:
     """
     Get the roles for a specific permission.
     Global + Local + Code
     """
+    if parent is None:
+        roles = dict(
+            [(role, 1) for (role, setting) in code_roles_for_permission(permission) if setting is Allow]
+        )
+        return roles
+
     try:
         cache = parent.__volatile__.setdefault("security_cache", {})
     except AttributeError:
@@ -304,14 +313,7 @@ def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dic
     except KeyError:
         pass
 
-    if parent is None:
-        roles = dict(
-            [(role, 1) for (role, setting) in code_roles_for_permission(permission) if setting is Allow]
-        )
-        cache_roles[permission + level] = roles
-        return roles
-
-    perminhe = IInheritPermissionMap(parent, None)
+    perminhe = query_adapter(parent, IInheritPermissionMap)
 
     if perminhe is None or perminhe.get_inheritance(permission) is Allow:
         roles = cached_roles(getattr(parent, "__parent__", None), permission, "p")
@@ -320,8 +322,8 @@ def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dic
         # Its dangerous as may lead to an object who nobody can see
         roles = dict()
 
-    roleper = IRolePermissionMap(parent, None)
-    if roleper:
+    roleper = query_adapter(parent, IRolePermissionMap)
+    if roleper is not None:
         roles = roles.copy()
         for role, setting in roleper.get_roles_for_permission(permission):
             if setting is Allow:
@@ -336,12 +338,18 @@ def cached_roles(parent: IBaseObject, permission: str, level: str) -> typing.Dic
 
 
 def cached_principals(
-    parent: IBaseObject, roles: typing.List[str], permission: str, level: str
-) -> typing.Dict[str, int]:
+    parent: Optional[IBaseObject], roles: List[str], permission: str, level: str
+) -> Dict[str, int]:
     """Get the roles for a specific permission.
 
     Global + Local + Code
     """
+    if parent is None:
+        principals = dict(
+            [(role, 1) for (role, setting) in code_principals_for_permission(permission) if setting is Allow]
+        )
+        return principals
+
     try:
         cache = parent.__volatile__.setdefault("security_cache", {})
     except AttributeError:
@@ -354,13 +362,6 @@ def cached_principals(
         return cache_principals[permission + level]
     except KeyError:
         pass
-
-    if parent is None:
-        principals = dict(
-            [(role, 1) for (role, setting) in code_principals_for_permission(permission) if setting is Allow]
-        )
-        cache_principals[permission + level] = principals
-        return principals
 
     principals = cached_principals(getattr(parent, "__parent__", None), roles, permission, "p")
     prinperm = IPrincipalPermissionMap(parent, None)

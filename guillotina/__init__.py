@@ -50,7 +50,7 @@ if os.environ.get("GDEBUG", "").lower() in ("true", "t", "1"):  # pragma: no cov
         _record(query, end - start)
         return result
 
-    asyncpg.connection.Connection._do_execute = _do_execute
+    asyncpg.connection.Connection._do_execute = _do_execute  # type: ignore
 
     original_bind_execute = asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute
 
@@ -61,4 +61,4 @@ if os.environ.get("GDEBUG", "").lower() in ("true", "t", "1"):  # pragma: no cov
         _record(self._query, end - start)
         return result
 
-    asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute = __bind_execute
+    asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute = __bind_execute  # type: ignore

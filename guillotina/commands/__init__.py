@@ -24,7 +24,7 @@ except ImportError:
     HAS_LINE_PROFILER = False
 
 try:
-    import aiomonitor
+    import aiomonitor  # type: ignore
 
     HAS_AIOMONITOR = True
 except ImportError:

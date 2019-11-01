@@ -58,7 +58,10 @@ from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
+from typing import Any
 from typing import AsyncIterator
+from typing import cast
+from typing import Dict
 from typing import FrozenSet
 from typing import Iterator
 from typing import List
@@ -143,7 +146,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
     """
 
     __behaviors__: FrozenSet[str] = frozenset({})
-    __acl__ = None
+    __acl__: Optional[Dict[str, Any]] = None
 
     type_name: Optional[str] = None
     creation_date = None
@@ -194,7 +197,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         for behavior in self.__behaviors__:
             yield BEHAVIOR_CACHE[behavior]
 
-    def add_behavior(self, iface: Interface) -> None:
+    def add_behavior(self, iface: Union[str, Interface]) -> None:
         """We need to apply the marker interface.
 
         value: Interface to add
@@ -214,7 +217,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
                     alsoProvides(self, behavior_registration.marker)
                 self.register()  # make sure we resave this obj
 
-    def remove_behavior(self, iface: Interface) -> None:
+    def remove_behavior(self, iface: Union[str, Interface]) -> None:
         """We need to apply the marker interface.
 
         value: Interface to add
@@ -600,10 +603,11 @@ async def create_content_in_container(
             continue
         setattr(obj, key, value)
 
-    try:
+    txn: Optional[ITransaction]
+    if hasattr(parent, "_get_transaction"):
         txn = parent._get_transaction()
-    except AttributeError:
-        txn = getattr(parent, "__txn__", None) or get_transaction()  # type:ignore
+    else:
+        txn = cast(Optional[ITransaction], getattr(parent, "__txn__", None) or get_transaction())
     if txn is None or not txn.storage.supports_unique_constraints:
         # need to manually check unique constraints
         if await parent.async_contains(obj.id):
