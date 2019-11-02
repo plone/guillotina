@@ -107,7 +107,7 @@ class RedisDriver:
     async def subscribe(self, channel_name: str):
         if self._pubsub_subscriptor is None:
             raise NoRedisConfigured()
-        channel, = await self._pubsub_subscriptor.subscribe(channel_name)
+        (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
         return self._listener(channel)
 
     async def _listener(self, channel: aioredis.Channel):
