@@ -15,5 +15,5 @@ PyYaml==5.1
 six==1.11.0
 ujson==1.35
 yarl==1.2.6
-zope.interface==4.4.3
+zope.interface==4.6.0
 argon2-cffi==18.3.0

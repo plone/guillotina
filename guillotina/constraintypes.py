@@ -4,6 +4,7 @@ from guillotina.content import get_cached_factory
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IResource
+from typing import Optional
 from zope.interface import Interface
 
 
@@ -21,7 +22,7 @@ class FTIConstrainAllowedTypes:
             return True
         return type_id in allowed
 
-    def get_allowed_types(self) -> list:
+    def get_allowed_types(self) -> Optional[list]:
         tn = getattr(self.context, "type_name", None)
         if tn:
             factory = get_cached_factory(tn)
@@ -41,5 +42,5 @@ class DatabaseAllowedTypes:
     def is_type_allowed(self, type_id: str) -> bool:
         return type_id in app_settings["container_types"]
 
-    def get_allowed_types(self) -> list:
+    def get_allowed_types(self) -> Optional[list]:
         return app_settings["container_types"]

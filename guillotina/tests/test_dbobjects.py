@@ -30,7 +30,7 @@ async def test_create_object(dummy_txn_root):
 
         assert ob1.__name__ == "ob1"
         assert ob1.__txn__ == root.__txn__
-        assert ob1.__uuid__ is not None
+        assert ob1.__uuid__ is not None  # type: ignore
         assert ob1.__of__ is None
         assert ob1.__parent__ is root
 

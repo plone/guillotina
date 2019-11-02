@@ -1,11 +1,14 @@
 from aiohttp import web_request
 from collections import OrderedDict
 from guillotina import task_vars
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
+from guillotina.interfaces.content import IApplication
 from guillotina.profile import profilable
 from guillotina.utils import execute
 from typing import Dict
+from typing import Optional
 from zope.interface import implementer
 
 import time
@@ -28,11 +31,11 @@ class Request(web_request.Request):
     _view_error = False
     _events: dict = {}
 
-    application = None
+    application: Optional[IApplication] = None
     exc = None
     view_name = None
     found_view = None
-    resource = None
+    resource: Optional[IBaseObject] = None
     tail = None
 
     def __init__(self, *args, **kwargs):

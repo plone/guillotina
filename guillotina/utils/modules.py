@@ -58,7 +58,7 @@ def get_caller_module(
 
 
 def resolve_module_path(path: str) -> str:
-    if isinstance(path, str) and path[0] == ".":
+    if len(path) > 0 and path[0] == ".":
         caller_mod = get_caller_module()
         caller_path = get_module_dotted_name(caller_mod)
         caller_path = ".".join(caller_path.split(".")[: -path.count("..")])

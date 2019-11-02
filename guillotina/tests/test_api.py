@@ -230,6 +230,17 @@ async def test_create_delete_contenttype(container_requester):
         assert status == 200
 
 
+async def test_404(container_requester):
+    """Create and delete a content type."""
+    async with container_requester as requester:
+        _, status = await requester("GET", "/db/guillotina/sdflksdljfkdsk")
+        assert status == 404
+        _, status = await requester("GET", "/db/sdflksdljfkdsk")
+        assert status == 404
+        _, status = await requester("GET", "/sdflksdljfkdsk")
+        assert status == 404
+
+
 async def test_register_registry(container_requester):
     async with container_requester as requester:
         # JSON schema validation

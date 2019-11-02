@@ -280,7 +280,7 @@ async def run_async(func, *args, **kwargs) -> object:
     return await loop.run_in_executor(root.executor, func)
 
 
-def safe_unidecode(val: bytes) -> str:
+def safe_unidecode(val: typing.Union[str, bytes]) -> str:
     """
     Convert bytes to a string in a safe way
 

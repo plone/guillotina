@@ -11,7 +11,7 @@ except ImportError:
     from aiohttp.helpers import AccessLogger  # type: ignore
 
 try:
-    import aiohttp_autoreload
+    import aiohttp_autoreload  # type: ignore
 
     HAS_AUTORELOAD = True
 except ImportError:
