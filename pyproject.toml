@@ -1,6 +1,7 @@
 [tool.black]
 line-length = 110
 target_version = ['py37']
+include = '''\.py$'''
 exclude = '''
 
 (
