@@ -71,16 +71,15 @@ class BaseObject:
         return "<%s %d>" % (self.__class__.__name__, id(self))
 
     __slots__ = (
-        "__parent",
-        "__of",
-        "__name",
-        "__annotations",
-        "__immutable_cache",
-        "__new_marker",
-        "__txn",
-        "__uuid",
-        "__serial",
-        "__volatile",
+        "__parent__",
+        "__of__",
+        "__name__",
+        "__gannotations__",
+        "__immutable_cache__",
+        "__new_marker__",
+        "__uuid__",
+        "__serial__",
+        "__volatile__",
     )
     __parent__: Optional[IBaseObject] = ObjectProperty[  # type: ignore
         Optional[IBaseObject]

@@ -20,6 +20,9 @@ Fixes:
 - Fix @invariant validation. Any usage of it previously would cause exceptions.
   [vangheem]
 
+- Discordance between the attributes defined in __slots__ and the actual attributes
+  [masipcat]
+
 
 5.1.2 (2019-10-30)
 ------------------
