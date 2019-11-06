@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.4 (unreleased)
+5.1.4 (2019-11-06)
 ------------------
 
 - Add `extra_headers` parameter into `FileManager.prepare_download()`
