@@ -4,7 +4,7 @@ CHANGELOG
 5.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix test util: add db in task vars too [lferran]
 
 
 5.1.4 (2019-11-06)
