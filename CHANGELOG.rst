@@ -5,6 +5,10 @@ CHANGELOG
 ------------------
 
 - Fix test util: add db in task vars too [lferran]
+  [lferran]
+
+- Added "pickle_protocol" to app_settings
+  [masipcat]
 
 
 5.1.4 (2019-11-06)
