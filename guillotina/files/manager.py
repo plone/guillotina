@@ -40,7 +40,9 @@ class FileManager(object):
             self.file_storage_manager, IUploadDataManager, name=app_settings.get("cloud_datamanager") or "db"
         )
 
-    async def prepare_download(self, disposition=None, filename=None, content_type=None, size=None, **kwargs):
+    async def prepare_download(
+        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+    ):
         if disposition is None:
             disposition = self.request.query.get("disposition", "attachment")
 
@@ -53,6 +55,7 @@ class FileManager(object):
             raise HTTPNotFound(content={"message": "File or custom filename required to download"})
         cors_renderer = app_settings["cors_renderer"](self.request)
         headers = await cors_renderer.get_headers()
+        headers.update(extra_headers or {})
         headers.update(
             {"Content-Disposition": '{}; filename="{}"'.format(disposition, filename or file.filename)}
         )
@@ -65,30 +68,38 @@ class FileManager(object):
         await download_resp.prepare(self.request)
         return download_resp
 
-    async def head(self, disposition=None, filename=None, content_type=None, size=None, **kwargs):
+    async def head(
+        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+    ):
         if hasattr(self.file_storage_manager, "exists"):
             # does not need to implement but can be a way to verify
             # file exists on cloud platform still
             if not await apply_coroutine(self.file_storage_manager.exists):
                 raise HTTPNotFound(content={"message": "File object does not exist"})
-        download_resp = await self.prepare_download(disposition, filename, content_type, size, **kwargs)
+        download_resp = await self.prepare_download(
+            disposition, filename, content_type, size, extra_headers, **kwargs
+        )
         await download_resp.write_eof()
         return download_resp
 
-    async def download(self, disposition=None, filename=None, content_type=None, size=None, **kwargs):
+    async def download(
+        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+    ):
         download_resp = None
         async for chunk in self.file_storage_manager.iter_data(**kwargs):
             if download_resp is None:
                 # defer to make sure we http exception handling
                 # before data starts streaming works properly
                 download_resp = await self.prepare_download(
-                    disposition, filename, content_type, size, **kwargs
+                    disposition, filename, content_type, size, extra_headers, **kwargs
                 )
             await download_resp.write(chunk)
             await download_resp.drain()
         if download_resp is None:
             # deferred
-            download_resp = await self.prepare_download(disposition, filename, content_type, size, **kwargs)
+            download_resp = await self.prepare_download(
+                disposition, filename, content_type, size, extra_headers, **kwargs
+            )
         await download_resp.write_eof()
         return download_resp
 

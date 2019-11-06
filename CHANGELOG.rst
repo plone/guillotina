@@ -4,7 +4,8 @@ CHANGELOG
 5.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add `extra_headers` parameter into `FileManager.prepare_download()`
+  [qiwn]
 
 
 5.1.3 (2019-11-04)
