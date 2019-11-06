@@ -4,7 +4,8 @@ CHANGELOG
 5.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added "pickle_protocol" to app_settings
+  [masipcat]
 
 
 5.1.4 (2019-11-06)
