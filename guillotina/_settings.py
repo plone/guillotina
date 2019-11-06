@@ -4,6 +4,7 @@ from typing import Any
 from typing import Dict
 
 import copy
+import pickle
 
 
 app_settings: Dict[str, Any] = {
@@ -32,7 +33,7 @@ app_settings: Dict[str, Any] = {
         },
     },
     "store_json": True,
-    "pickle_protocol": 4,
+    "pickle_protocol": pickle.HIGHEST_PROTOCOL,
     "root_user": {"password": ""},
     "auth_extractors": [
         "guillotina.auth.extractors.BearerAuthPolicy",

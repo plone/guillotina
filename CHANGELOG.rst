@@ -4,7 +4,7 @@ CHANGELOG
 5.1.4 (unreleased)
 ------------------
 
-- Set pickle protocol to v4 by default
+- Added "pickle_protocol" to app_settings
   [masipcat]
 
 
