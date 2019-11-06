@@ -4,6 +4,9 @@ CHANGELOG
 5.1.5 (unreleased)
 ------------------
 
+- Fix test util: add db in task vars too [lferran]
+  [lferran]
+
 - Added "pickle_protocol" to app_settings
   [masipcat]
 
