@@ -4,7 +4,8 @@ CHANGELOG
 5.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Set pickle protocol to v4 by default
+  [masipcat]
 
 
 5.1.3 (2019-11-04)

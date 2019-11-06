@@ -32,6 +32,7 @@ app_settings: Dict[str, Any] = {
         },
     },
     "store_json": True,
+    "pickle_protocol": 4,
     "root_user": {"password": ""},
     "auth_extractors": [
         "guillotina.auth.extractors.BearerAuthPolicy",

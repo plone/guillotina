@@ -57,7 +57,8 @@ class Writer(object):
         return getattr(self._obj, "__partition_id__", 0)
 
     def serialize(self):
-        return pickle.dumps(self._obj, protocol=pickle.HIGHEST_PROTOCOL)
+        protocol = app_settings.get("pickle_protocol", 4)
+        return pickle.dumps(self._obj, protocol=protocol)
 
     @property
     def parent_id(self):
