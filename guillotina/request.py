@@ -1,8 +1,10 @@
 from collections import OrderedDict
 from functools import update_wrapper
 from guillotina import task_vars
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IDefaultLayer
 from guillotina.interfaces import IRequest
+from guillotina.interfaces.content import IApplication
 from guillotina.profile import profilable
 from guillotina.utils import execute
 from guillotina.utils.misc import build_url
@@ -278,11 +280,11 @@ class Request(object):
     _view_error = False
     _events: dict = {}
 
-    application = None
+    application: Optional[IApplication] = None
     exc = None
     view_name = None
     found_view = None
-    resource = None
+    resource: Optional[IBaseObject] = None
     tail = None
 
     def __init__(

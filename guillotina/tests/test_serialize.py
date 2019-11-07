@@ -15,9 +15,11 @@ from guillotina.schema.exceptions import WrongType
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
+from zope.interface import Invalid
 
 import pytest
 import uuid
+import zope.interface
 
 
 pytestmark = pytest.mark.asyncio
@@ -105,6 +107,14 @@ async def test_deserialize_cloud_file(dummy_request, mock_txn):
     assert obj.file.size == 42
 
 
+class IObjectA(Interface):
+    foo = schema.Text(required=False)
+
+
+class IObjectB(Interface):
+    bar = schema.Text(required=False)
+
+
 class INestFieldSchema(Interface):
     foo = schema.Text(required=False)
     bar = schema.Int(required=False)
@@ -145,6 +155,11 @@ class ITestSchema(Interface):
     )
 
     datetime_bucket_list = fields.BucketListField(bucket_len=10, required=False, value_type=schema.Datetime())
+
+    union_field = schema.UnionField(schema.Datetime(), schema.Int(), required=False)
+    union_field_obj = schema.UnionField(
+        schema.Object(IObjectA), schema.Object(schema=IObjectB), required=False
+    )
 
     nested_patch = fields.PatchField(
         schema.Dict(
@@ -201,6 +216,24 @@ async def test_deserialize_frozenset(dummy_guillotina):
 
 async def test_deserialize_dict(dummy_guillotina):
     assert schema_compatible({"foo": "bar"}, ITestSchema["dict_value"]) == {"foo": "bar"}
+
+
+async def test_deserialize_union(dummy_guillotina):
+    assert schema_compatible(123456789, ITestSchema["union_field"]) == 123456789
+    now = datetime.utcnow()
+    converted = schema_compatible(now.isoformat(), ITestSchema["union_field"])
+    assert converted.minute == now.minute
+
+    with pytest.raises(ValueDeserializationError):
+        schema_compatible("invalid-date", ITestSchema["union_field"])
+
+
+async def test_deserialize_union_of_obj(dummy_guillotina):
+    assert schema_compatible({"foo": "oooo"}, ITestSchema["union_field_obj"]) == {"foo": "oooo"}
+    assert schema_compatible({"bar": "aaar"}, ITestSchema["union_field_obj"]) == {"bar": "aaar"}
+
+    with pytest.raises(ValueDeserializationError):
+        schema_compatible({"inexisting"}, ITestSchema["union_field_obj"])
 
 
 async def test_deserialize_datetime(dummy_guillotina):
@@ -774,3 +807,67 @@ async def test_bucket_dict_field_splitting(dummy_request, mock_txn):
         [],
     )
     assert len(mock_txn.added) == 2  # should write to existing bucket and new one
+
+
+class ITestValidation(Interface):
+
+    foo = schema.Text(required=False)
+    bar = schema.Text(required=False)
+
+    constrained = schema.Text(required=False, constraint=lambda val: val != "foobar")
+
+    validated_text = schema.Text(required=False)
+
+    @zope.interface.invariant  # type: ignore
+    def text_should_not_be_foobar(ob):
+        if getattr(ob, "foo", None) == "foo" and getattr(ob, "bar", None) == "bar":
+            raise Invalid(ob)
+
+    @validated_text.validator
+    def validate_not_foo(field, value):
+        if getattr(field.context, "foo", None) == "foo" and value == "foo":
+            raise Invalid("Must not be foo")
+
+
+async def test_invariant_error(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(
+        ITestValidation, content, {"foo": "foo", "bar": "bar"}, errors, validate_all=True
+    )
+    assert len(errors) == 1
+
+    errors = []
+    await deserializer.set_schema(
+        ITestValidation, content, {"foo": "foo", "bar": "blah"}, errors, validate_all=True
+    )
+    assert len(errors) == 0
+
+
+async def test_constraint_error(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(ITestValidation, content, {"constrained": "foobar"}, errors)
+    assert len(errors) == 1
+
+    errors = []
+    await deserializer.set_schema(ITestValidation, content, {"constrained": "not foobar"}, errors)
+    assert len(errors) == 0
+
+
+async def test_validator_error(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(ITestValidation, content, {"validated_text": "foo", "foo": "foo"}, errors)
+    assert len(errors) == 1
+
+    errors = []
+    content = create_content()
+    await deserializer.set_schema(ITestValidation, content, {"validated_text": "foo"}, errors)
+    assert len(errors) == 0

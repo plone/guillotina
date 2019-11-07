@@ -17,6 +17,7 @@ from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ITuple
+from guillotina.schema.interfaces import IUnionField
 from zope.interface import Interface
 
 import datetime
@@ -142,3 +143,16 @@ def object_converter(field, value, context=None):
             else:
                 result[key] = None
     return result
+
+
+@configure.value_deserializer(IUnionField)
+def union_converter(field, value, context=None):
+    for f in field.fields:
+        try:
+            val = schema_compatible(value, f)
+            if f.__implemented__(IObject) and value and not val:
+                continue  # IObject doesn't match
+            return val
+        except Exception:
+            pass
+    raise ValueDeserializationError(field, value, "Doesn't match any field")

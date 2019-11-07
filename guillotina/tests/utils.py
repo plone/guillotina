@@ -61,6 +61,7 @@ async def get_container(*, requester=None, tm=None, db=None, container_id="guill
         kw["db"] = await get_database("db")
     root = await get_root(**kw)
     async with transaction(**kw):
+        task_vars.db.set(kw["db"])
         container = await root.async_get(container_id)
         task_vars.container.set(container)
         return container

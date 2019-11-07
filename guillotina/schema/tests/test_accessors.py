@@ -280,7 +280,7 @@ class Test_accessors(unittest.TestCase):
         field = Text(title="Hmm", readonly=True)
 
         class IFoo(Interface):
-            getter, = self._callFUT(field)
+            (getter,) = self._callFUT(field)
 
         getter = IFoo["getter"]  # type: ignore
         self.assertEqual(getter.__name__, "getter")

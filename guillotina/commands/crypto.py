@@ -17,7 +17,5 @@ class CryptoCommand(Command):
         return parser
 
     async def run(self, arguments, settings, app):
-        if jwk is None:
-            print("NO jwk installed")
         key = jwk.JWK.generate(kty=arguments.key_type, size=arguments.key_size)
         print(key.export())

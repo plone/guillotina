@@ -14,6 +14,9 @@ from guillotina.tests.utils import get_mocked_request
 from guillotina.transactions import abort
 from guillotina.traversal import traverse
 from guillotina.utils import get_dotted_name
+from typing import Any
+from typing import Dict
+from typing import Optional
 from zope.interface import Interface
 
 import asyncio
@@ -26,7 +29,7 @@ import pkg_resources
 logger = logging.getLogger("guillotina.docs")
 
 
-_server = None
+_server: Optional[Dict[str, Any]] = None
 
 IGNORED_HEADERS = (
     "Accept-Encoding",

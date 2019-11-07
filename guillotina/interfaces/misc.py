@@ -1,16 +1,22 @@
-from zope.interface import Attribute
+from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.interfaces.content import IApplication
+from typing import Optional
+from typing import Tuple
+from typing import Type
+from yarl import URL
 from zope.interface import Interface
 
 
 class IRequest(Interface):
-    url = Attribute("")
-    path = Attribute("")
-    method = Attribute("")
-    resource = Attribute("traversed resource")
-    tail = Attribute("")
-    exc = Attribute("")
-    found_view = Attribute("")
-    view_name = Attribute("")
+    url: URL
+    path: str
+    method: str
+    resource: Optional[IBaseObject]
+    tail: Optional[Tuple[str, ...]]
+    exc: Optional[Exception]
+    found_view: Optional[Type]
+    view_name: Optional[str]
+    application: Optional[IApplication]
 
     def record(event_name) -> None:
         """

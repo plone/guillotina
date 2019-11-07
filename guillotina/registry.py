@@ -57,7 +57,7 @@ class Registry(AnnotationData):  # type: ignore
 
     def __repr__(self):
         path = "/".join([name or "n/a" for name in get_physical_path(self)])
-        return "<Registry at {path} by {mem} >".format(type=self.type_name, path=path, mem=id(self))
+        return "<Registry at {path} by {mem} >".format(path=path, mem=id(self))
 
     def get(self, name, default=None):
         try:

@@ -8,10 +8,60 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.1.1 (unreleased)
+5.1.6 (unreleased)
 ------------------
 
 - Nothing changed yet.
+
+
+5.1.5 (2019-11-06)
+------------------
+
+- Fix test util: add db in task vars too [lferran]
+  [lferran]
+
+- Added "pickle_protocol" to app_settings
+  [masipcat]
+
+
+5.1.4 (2019-11-06)
+------------------
+
+- Add `extra_headers` parameter into `FileManager.prepare_download()`
+  [qiwn]
+
+
+5.1.3 (2019-11-04)
+------------------
+
+New:
+
+- More mypy support and better type checking
+  [vangheem]
+
+- Added deserializer for IUnionField
+  [masipcat]
+
+- Provide new `@field.validator` to validate field values against bound fields
+  [vangheem]
+
+Fixes:
+
+- Fix @invariant validation. Any usage of it previously would cause exceptions.
+  [vangheem]
+
+
+5.1.2 (2019-10-30)
+------------------
+
+- Handle empty `G_` environment variable values
+  [vangheem]
+
+
+5.1.1 (2019-10-29)
+------------------
+
+- more mypy definitions on ITransactionManager
 
 
 5.1.0 (2019-10-25)

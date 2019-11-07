@@ -159,7 +159,6 @@ WHERE datistemplate = false;"""
             return True
         finally:
             await conn.close()
-        return False
 
     async def delete(self, name: str) -> bool:
         if name in self.app:
@@ -172,7 +171,6 @@ WHERE datistemplate = false;"""
             return True
         finally:
             await conn.close()
-        return False
 
     async def get_database(self, name: str) -> IDatabase:
         if name not in self.app:
@@ -217,7 +215,7 @@ class CockroachDatabaseManager(PostgresqlDatabaseManager):
             result = await conn.fetch("""SHOW DATABASES;""")
             output = []
             for item in result:
-                item = dict(item)
+                item = dict(item)  # type: ignore
                 db_name = item.get("Database", item.get("database_name"))
                 if db_name not in (
                     "defaultdb",

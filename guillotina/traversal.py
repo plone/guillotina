@@ -21,9 +21,9 @@ from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.event import notify
 from guillotina.events import BeforeRenderViewEvent
 from guillotina.events import ObjectLoadedEvent
-from guillotina.events import TraversalResourceMissEvent
 from guillotina.events import TraversalRouteMissEvent
 from guillotina.events import TraversalViewMissEvent
+from guillotina.exceptions import ApplicationNotFound
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.i18n import default_message_factory as _
@@ -51,7 +51,6 @@ from guillotina.transactions import commit
 from guillotina.utils import get_registry
 from guillotina.utils import get_security_policy
 from guillotina.utils import import_class
-from typing import List
 from typing import Optional
 from typing import Tuple
 from zope.interface import alsoProvides
@@ -60,12 +59,14 @@ import traceback
 import uuid
 
 
-async def traverse(request, parent, path):
+async def traverse(
+    request: IRequest, parent: IBaseObject, path: Tuple[str, ...]
+) -> Tuple[IBaseObject, Tuple[str, ...]]:
     """Do not use outside the main router function."""
     if IApplication.providedBy(parent):
         request.application = parent
 
-    if not path:
+    if len(path) == 0:
         return parent, path
 
     assert request is not None  # could be used for permissions, etc
@@ -366,10 +367,10 @@ class BasicMatchInfo(BaseMatchInfo):
 class TraversalRouter:
     """Custom router for guillotina."""
 
-    _root = None
+    _root: Optional[IApplication]
 
-    def __init__(self, root: IApplication = None) -> None:
-        """On traversing sets the root object."""
+    def __init__(self, root: Optional[IApplication] = None) -> None:
+        """On traversing aiohttp sets the root object."""
         self.set_root(root)
 
     def set_root(self, root: Optional[IApplication]):
@@ -427,13 +428,8 @@ class TraversalRouter:
 
         request.record("traversed")
 
-        await notify(ObjectLoadedEvent(resource))
         request.resource = resource
         request.tail = tail
-
-        if request.resource is None:
-            await notify(TraversalResourceMissEvent(request, tail))
-            raise HTTPNotFound(content={"reason": "Resource not found"})
 
         if tail and len(tail) > 0:
             # convert match lookups
@@ -491,7 +487,7 @@ class TraversalRouter:
         if not view and len(tail) > 0:
             # we should have a view in this case because we are matching routes
             await notify(TraversalViewMissEvent(request, tail))
-            return None
+            raise HTTPNotFound(content={"reason": "object and/or route not found"})
 
         request.found_view = view
         request.view_name = view_name
@@ -520,6 +516,8 @@ class TraversalRouter:
         except AttributeError:
             pass
 
+        await notify(ObjectLoadedEvent(resource))
+
         if hasattr(view, "prepare"):
             view = (await view.prepare()) or view
 
@@ -527,8 +525,10 @@ class TraversalRouter:
 
         return MatchInfo(resource, request, view)
 
-    async def traverse(self, request: IRequest) -> Tuple[IBaseObject, List[str]]:
-        """Wrapper that looks for the path based"""
+    async def traverse(self, request: IRequest) -> Tuple[IBaseObject, Tuple[str, ...]]:
+        """Wrapper that looks for the path based on aiohttp API."""
         path = tuple(p for p in request.path.split("/") if p)
-        root = self._root
-        return await traverse(request, root, path)
+        if self._root is not None:
+            return await traverse(request, self._root, path)
+        else:  # pragma: no cover
+            raise ApplicationNotFound()

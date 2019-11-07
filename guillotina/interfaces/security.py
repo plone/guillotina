@@ -7,7 +7,7 @@ from guillotina.schema import TextLine
 from zope.interface import Attribute
 from zope.interface import Interface
 
-import copyreg
+import copyreg  # type: ignore
 import typing
 
 

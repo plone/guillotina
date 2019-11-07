@@ -432,7 +432,7 @@ def command_arguments():
 
 @pytest.fixture(scope="function")
 def container_command(db):
-    import psycopg2
+    import psycopg2  # type: ignore
 
     settings = get_db_settings()
     host = settings["databases"]["db"]["dsn"]["host"]

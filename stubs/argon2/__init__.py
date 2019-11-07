@@ -1,0 +1,6 @@
+class PasswordHasher:
+    def hash(self, val: str) -> str:
+        ...
+
+    def verify(self, hashed: str, value: str) -> bool:
+        ...

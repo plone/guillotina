@@ -17,14 +17,14 @@ import yaml
 
 
 try:
-    import line_profiler
+    import line_profiler  # type: ignore
 
     HAS_LINE_PROFILER = True
 except ImportError:
     HAS_LINE_PROFILER = False
 
 try:
-    import aiomonitor
+    import aiomonitor  # type: ignore
 
     HAS_AIOMONITOR = True
 except ImportError:
@@ -93,7 +93,7 @@ def get_settings(configuration, overrides=None):
             continue
         name = env_name[2:]
         value = os.environ[orig_env_name]
-        if value[0] in ("{", "["):
+        if len(value) > 0 and value[0] in ("{", "["):
             value = json.loads(value)
         context = settings
         parts = name.split("__")

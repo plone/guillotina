@@ -104,6 +104,12 @@ class DatabaseNotFound(Exception):
     """
 
 
+class ApplicationNotFound(Exception):
+    """
+    Could not find application
+    """
+
+
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""

@@ -28,7 +28,7 @@ class BehaviorRegistration(object):
     def __repr__(self):
         if self.marker is not None:
             marker_info = self.marker.__identifier__
-        elif self.marker is not None and self.marker is not self.interface:
+        elif self.marker is not self.interface:
             marker_info = "(uses schema as marker)"
         else:
             marker_info = "(no marker is set)"

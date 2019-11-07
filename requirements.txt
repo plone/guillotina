@@ -12,6 +12,6 @@ python-dateutil==2.6.1
 PyYaml==5.1
 six==1.11.0
 ujson==1.35
-zope.interface==4.4.3
-uvicorn==0.9.1
+zope.interface==4.6.0
+uvicorn==0.10.3
 argon2-cffi==18.3.0
