@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.7 (unreleased)
+5.1.6 (2019-11-08)
 ------------------
 
 - reduce the load dbvacuum can cause
