@@ -5,6 +5,7 @@ from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.interfaces import IVacuumProvider
 from guillotina.db.storages.utils import register_sql
 
+import asyncio
 import asyncpg.exceptions
 import logging
 
@@ -74,6 +75,7 @@ SELECT count(*) FROM rows;
 class PGVacuum:
 
     _trash_batch_name = "TRASH_BATCH"
+    _pause = 0.1
 
     def __init__(self, storage):
         self._storage = storage
@@ -94,16 +96,18 @@ class PGVacuum:
         table_name = storage._objects_table_name
         async with storage.pool.acquire() as conn:
             while True:
-                batch = await conn.fetch(sql.get("GET_BATCH_OF_TRASHED_OBJECTS", table_name), 50)
+                batch = await conn.fetch(sql.get("GET_BATCH_OF_TRASHED_OBJECTS", table_name), 20)
                 if len(batch) == 0:
                     break
 
+                await asyncio.sleep(self._pause)
                 updated = 1
                 while updated > 0:
                     try:
                         result = await conn.fetch(
-                            sql.get(self._trash_batch_name, table_name), [r["zoid"] for r in batch], 500
+                            sql.get(self._trash_batch_name, table_name), [r["zoid"] for r in batch], 100
                         )
+                        await asyncio.sleep(self._pause)
                         updated = result[0]["count"]
                         self._trashed += updated
                         self.status()
@@ -113,6 +117,7 @@ class PGVacuum:
                         )
                         updated = 0
 
+                await asyncio.sleep(self._pause)
                 await conn.execute(sql.get("DELETE_TRASHED_OBJECTS", table_name), [r["zoid"] for r in batch])
                 self._deleted += len(batch)
                 self.status()

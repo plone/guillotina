@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+5.1.7 (unreleased)
+------------------
+
+- reduce the load dbvacuum can cause
+  [vangheem]
+
+
 5.1.6 (unreleased)
 ------------------
 
