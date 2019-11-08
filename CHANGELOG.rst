@@ -4,7 +4,8 @@ CHANGELOG
 5.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `required` param not specified in service `parameters` configuration
+  [vangheem]
 
 
 5.1.5 (2019-11-06)

@@ -84,7 +84,7 @@ class Service(View):
                         else:
                             pass
                         try:
-                            if parameter["required"] and parameter["name"] not in data:
+                            if parameter.get("required", False) and parameter["name"] not in data:
                                 raise HTTPPreconditionFailed(
                                     content={
                                         "reason": "Schema validation error",
