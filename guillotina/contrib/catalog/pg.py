@@ -599,9 +599,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
     async def search(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
         sql, arguments = self.build_query(container, query, ["id", "zoid", "json"])
-        txn = get_transaction()
-        if txn is None:
-            raise TransactionNotFound()
+        txn = get_current_transaction()
         conn = await txn.get_connection()
 
         results = []
@@ -609,7 +607,6 @@ class PGSearchUtility(DefaultSearchUtility):
         try:
             context_url = get_object_url(container)
             request = get_current_request()
-            txn = get_current_transaction()
         except RequestNotFound:
             context_url = get_content_path(container)
             request = None
@@ -704,7 +701,7 @@ class PGSearchUtility(DefaultSearchUtility):
         json_dict = await writer.get_json()
         json_value = ujson.dumps(json_dict)
 
-        statement_sql = txn._manager._storage._sql.get("JSONB_UPDATE", table_name)
+        statement_sql = txn.storage._sql.get("JSONB_UPDATE", table_name)
         conn = await txn.get_connection()
         async with txn.lock:
             await conn.fetch(statement_sql, oid, json_value)  # The OID of the object  # JSON catalog
