@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.7 (unreleased)
+5.1.7 (2019-11-11)
 ------------------
 
 - Make sure to use `txn.lock` when using pg connection
