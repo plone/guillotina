@@ -1,5 +1,4 @@
 from dateutil.parser import parse
-from db.interfaces import ITransaction
 from guillotina import configure
 from guillotina.api.content import DefaultGET
 from guillotina.auth.users import AnonymousUser
@@ -12,6 +11,7 @@ from guillotina.catalog.utils import iter_indexes
 from guillotina.component import get_utility
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
+from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import IWriter
 from guillotina.db.storages.utils import register_sql
 from guillotina.db.uid import MAX_UID_LENGTH
