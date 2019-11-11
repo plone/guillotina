@@ -24,6 +24,7 @@ class ITransaction(Interface):
     status = Attribute("")
     storage = Attribute("")
     manager = Attribute("")
+    lock = Attribute("")
     _cache = Attribute("")
 
     def initialize(read_only: bool):

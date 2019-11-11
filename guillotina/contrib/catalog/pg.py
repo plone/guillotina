@@ -1,4 +1,5 @@
 from dateutil.parser import parse
+from db.interfaces import ITransaction
 from guillotina import configure
 from guillotina.api.content import DefaultGET
 from guillotina.auth.users import AnonymousUser
@@ -582,14 +583,17 @@ class PGSearchUtility(DefaultSearchUtility):
 
         results = []
         logger.debug(f"Running search:\n{sql}\n{arguments}")
-        for record in await conn.fetch(sql, *arguments):
+        async with txn.lock:
+            records = await conn.fetch(sql, *arguments)
+        for record in records:
             results.append([json.loads(record[field]) for field in query["metadata"] or []])
 
         total = len(results)
         if total >= query["size"] or query["_from"] != 0:
             sql, arguments = self.build_count_query(container, query)
             logger.debug(f"Running search:\n{sql}\n{arguments}")
-            records = await conn.fetch(sql, *arguments)
+            async with txn.lock:
+                records = await conn.fetch(sql, *arguments)
             total = records[0]["count"]
         return {"member": results, "items_count": total}
 
@@ -611,7 +615,9 @@ class PGSearchUtility(DefaultSearchUtility):
             request = None
             txn = None
         logger.debug(f"Running search:\n{sql}\n{arguments}")
-        for record in await conn.fetch(sql, *arguments):
+        async with txn.lock:
+            records = await conn.fetch(sql, *arguments)
+        for record in records:
             data = json.loads(record["json"])
             if fullobjects and request is not None and txn is not None:
                 # Get Object
@@ -631,7 +637,8 @@ class PGSearchUtility(DefaultSearchUtility):
         if total >= query["size"] or query["_from"] != 0:
             sql, arguments = self.build_count_query(container, query)
             logger.debug(f"Running search:\n{sql}\n{arguments}")
-            records = await conn.fetch(sql, *arguments)
+            async with txn.lock:
+                records = await conn.fetch(sql, *arguments)
             total = records[0]["count"]
         return {"member": results, "items_count": total}
 
@@ -693,11 +700,11 @@ class PGSearchUtility(DefaultSearchUtility):
             await self._process_folder(obj, data)
         del obj
 
-    async def _index(self, oid, writer, txn, table_name):
+    async def _index(self, oid, writer, txn: ITransaction, table_name):
         json_dict = await writer.get_json()
         json_value = ujson.dumps(json_dict)
 
         statement_sql = txn._manager._storage._sql.get("JSONB_UPDATE", table_name)
         conn = await txn.get_connection()
-        async with txn._lock:
+        async with txn.lock:
             await conn.fetch(statement_sql, oid, json_value)  # The OID of the object  # JSON catalog

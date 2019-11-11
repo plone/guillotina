@@ -4,7 +4,8 @@ CHANGELOG
 5.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make sure to use `txn.lock` when using pg connection
+  [vangheem]
 
 
 5.1.6 (2019-11-08)

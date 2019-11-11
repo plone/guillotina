@@ -158,6 +158,10 @@ class Transaction:
         return self._db_conn
 
     @property
+    def lock(self):
+        return self._lock
+
+    @property
     def strategy(self):
         return self._strategy
 
