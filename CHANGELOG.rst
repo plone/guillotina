@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.9 (unreleased)
+5.1.9 (2019-11-12)
 ------------------
 
 - Add custom settings into test server
