@@ -258,7 +258,7 @@ def _clean_request(request, response):
             traceback.clear_frames(response.__traceback__)
         if response.exc is not None:
             traceback.clear_frames(response.exc.__traceback__)
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         pass
 
     for attr in ("resource", "found_view", "exc"):
