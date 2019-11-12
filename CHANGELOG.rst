@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.12 (unreleased)
+5.1.12 (2019-11-12)
 -------------------
 
 - Remove task call back to run execute_futures automatically. aiohttp reuses task object for
