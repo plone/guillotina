@@ -4,7 +4,8 @@ CHANGELOG
 5.1.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to customize number of thread pool workers
+  [vangheem]
 
 
 5.1.9 (2019-11-12)
