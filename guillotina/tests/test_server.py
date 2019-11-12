@@ -44,13 +44,13 @@ async def test_async_util_started_and_stopped(dummy_guillotina):
     assert util2.state == "finalize"
 
 
-async def test_requester_default_settings(container_requester):
+async def test_requester_with_default_settings(container_requester):
     async with container_requester as requester:
         assert requester.server.host == "127.0.0.1"
 
 
 @pytest.mark.app_settings({"test_server_settings": {"host": "0.0.0.0", "port": 8080}})
-async def test_requester_custom_settings(container_requester):
+async def test_requester_with_custom_settings(container_requester):
     async with container_requester as requester:
         assert requester.server.host == "0.0.0.0"
         assert requester.server.port == 8080
