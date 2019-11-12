@@ -4,7 +4,8 @@ CHANGELOG
 5.1.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Lazy create thread pool executor so we can properly use thread pool setting
+  [vangheem]
 
 
 5.1.10 (2019-11-12)

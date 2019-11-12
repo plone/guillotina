@@ -33,7 +33,6 @@ logger = logging.getLogger("guillotina")
 
 @implementer(IApplication)
 class ApplicationRoot:  # type: ignore
-    executor = ThreadPoolExecutor(max_workers=app_settings.get("thread_pool_workers", 32))
     root_user = None
     app = None  # set after app configuration is done
 
@@ -42,6 +41,13 @@ class ApplicationRoot:  # type: ignore
         self._config_file = config_file
         self._async_utilities = {}
         self._loop = loop
+        self._executor = None
+
+    @property
+    def executor(self):
+        if self._executor is None:
+            self._executor = ThreadPoolExecutor(max_workers=app_settings.get("thread_pool_workers", 32))
+        return self._executor
 
     def add_async_utility(
         self, key: str, config: typing.Dict, loop: typing.Optional[asyncio.AbstractEventLoop] = None
