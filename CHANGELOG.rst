@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.10 (unreleased)
+5.1.10 (2019-11-12)
 -------------------
 
 - Be able to customize number of thread pool workers
