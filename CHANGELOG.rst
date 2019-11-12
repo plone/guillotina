@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.11 (unreleased)
+5.1.11 (2019-11-12)
 -------------------
 
 - Lazy create thread pool executor so we can properly use thread pool setting
