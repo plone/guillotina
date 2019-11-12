@@ -4,7 +4,8 @@ CHANGELOG
 5.1.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add custom settings into test server
+  [qiwn]
 
 
 5.1.8 (2019-11-11)

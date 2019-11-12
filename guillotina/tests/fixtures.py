@@ -1,5 +1,6 @@
 from aiohttp.client_exceptions import ContentTypeError
 from aiohttp.test_utils import TestServer
+from guillotina import app_settings
 from guillotina import task_vars
 from guillotina import testing
 from guillotina.component import get_utility
@@ -376,7 +377,9 @@ def guillotina_main(loop, request):
 
 @pytest.fixture(scope="function")
 def guillotina(db, guillotina_main, loop):
-    server = TestServer(guillotina_main)
+    server_settings = app_settings.get("test_server_settings", {})
+    server = TestServer(guillotina_main, **server_settings)
+
     loop.run_until_complete(server.start_server(loop=loop))
     requester = GuillotinaDBRequester(server=server, loop=loop)
     yield requester
