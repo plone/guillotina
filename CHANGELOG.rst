@@ -4,7 +4,9 @@ CHANGELOG
 5.1.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Remove task call back to run execute_futures automatically. aiohttp reuses task object for
+  keepalive implementation and the `_callbacks` were never run
+  [vangheem]
 
 
 5.1.11 (2019-11-12)

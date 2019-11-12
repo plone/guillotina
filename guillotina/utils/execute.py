@@ -164,9 +164,6 @@ def add_future(
     if futures is None:
         futures = {}
         task_vars.futures.set(futures)
-        task = asyncio.current_task()
-        if task is not None and scope == "":
-            task.add_done_callback(partial(execute_futures, scope, futures))
     if scope not in futures:
         futures[scope] = {}
     futures[scope][name] = {"fut": fut, "args": args, "kwargs": kwargs}
