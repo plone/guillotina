@@ -33,7 +33,7 @@ logger = logging.getLogger("guillotina")
 
 @implementer(IApplication)
 class ApplicationRoot:  # type: ignore
-    executor = ThreadPoolExecutor(max_workers=100)
+    executor = ThreadPoolExecutor(max_workers=app_settings.get("thread_pool_workers", 32))
     root_user = None
     app = None  # set after app configuration is done
 
