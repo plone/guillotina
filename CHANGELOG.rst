@@ -4,7 +4,8 @@ CHANGELOG
 5.1.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Prevent JSONField name clash with field `validator` decorator
+  [vangheem]
 
 
 5.1.12 (2019-11-12)
