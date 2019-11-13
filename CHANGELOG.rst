@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.13 (unreleased)
+5.1.13 (2019-11-13)
 -------------------
 
 - Prevent JSONField name clash with field `validator` decorator
