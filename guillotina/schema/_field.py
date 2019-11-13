@@ -661,7 +661,7 @@ DEFAULT_JSON_SCHMEA = json.dumps({"type": "object", "properties": {}})
 
 @implementer(IJSONField)
 class JSONField(Field):
-    json_schema = validator = None
+    json_schema = schema_validator = None
 
     def __init__(self, schema=DEFAULT_JSON_SCHMEA, **kw):
 
@@ -677,14 +677,14 @@ class JSONField(Field):
 
         jsonschema_validator = jsonschema.validators.validator_for(self.json_schema)
         jsonschema_validator.check_schema(self.json_schema)
-        self.validator = jsonschema_validator(self.json_schema)
+        self.schema_validator = jsonschema_validator(self.json_schema)
         super(JSONField, self).__init__(**kw)
 
     def _validate(self, value):
         super(JSONField, self)._validate(value)
 
         try:
-            self.validator.validate(value)
+            self.schema_validator.validate(value)
         except jsonschema.ValidationError as e:
             raise WrongContainedType(e.message, self.__name__)
 
