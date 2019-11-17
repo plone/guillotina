@@ -209,6 +209,8 @@ Supported params:
 - `__lte`
 - `__lt`
 - `__in`
+- `__and`: nested AND queries
+- `__or`: nested OR queries
 
 
 .. http:gapi::
