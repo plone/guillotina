@@ -81,7 +81,7 @@ setup(
             "pytest-cov",
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
-            "pytest-rerunfailures",
+            "pytest-rerunfailures<=7.0",
         ],
         "docs": [
             "sphinx",
@@ -91,10 +91,7 @@ setup(
             "sphinx-guillotina-theme",
             "sphinx-autodoc-typehints",
         ],
-        "redis": [
-            'aioredis>=1.2.0;python_version<"3.8"',
-            'aioredis>=1.3.0;python_version>="3.8"',
-        ],
+        "redis": ['aioredis>=1.2.0;python_version<"3.8"', 'aioredis>=1.3.0;python_version>="3.8"'],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
     },
     entry_points={
