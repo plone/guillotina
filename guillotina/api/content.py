@@ -554,7 +554,7 @@ class DefaultOPTIONS(Service):
                     "properties": {
                         "destination": {
                             "type": "string",
-                            "description": "Absolute path to destination object from container",
+                            "description": "Absolute path to destination object from container or destination uid",
                             "required": False,
                         },
                         "new_id": {
@@ -599,7 +599,7 @@ async def move(context, request):
                     "properties": {
                         "destination": {
                             "type": "string",
-                            "description": "Absolute path to destination object from container",
+                            "description": "Absolute path to destination object from container or destination uid",
                             "required": False,
                         },
                         "new_id": {
