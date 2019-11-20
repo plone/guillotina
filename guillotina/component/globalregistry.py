@@ -95,7 +95,7 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             info["subscribers"].append(
                 {"duration": int(round(time.time() * 1000)) - start, "name": get_dotted_name(subscription)}
             )
-        info["end"] = int(round(time.time() * 1000)) - start
+        info["duration"] = int(round(time.time() * 1000)) - start
         profile_logger.info(info)
         return results
 
