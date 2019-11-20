@@ -74,7 +74,6 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
         except AttributeError:
             # older version of aiohttp
             url = ""
-        start = time.time() * 1000
         info = {
             "url": url,
             "account": getattr(task_vars.container.get(), "id", None),
@@ -86,6 +85,8 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             "context": context,
             "event": event.__identifier__,
         }
+
+        start = time.time() * 1000
         subscriptions = sorted(
             self.subscriptions(map(providedBy, objects), provided),
             key=lambda sub: getattr(sub, "priority", 100),
