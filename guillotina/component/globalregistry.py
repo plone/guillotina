@@ -67,6 +67,7 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
         except AttributeError:
             # older version of aiohttp
             url = ""
+        start = int(round(time.time() * 1000))
         info = {
             "url": url,
             "account": getattr(task_vars.container.get(), "id", None),
@@ -77,13 +78,12 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             "subscribers": [],
             "provided": repr(provided),
             "objects": repr(objects),
-            "start": int(round(time.time() * 1000)),
         }
         subscriptions = sorted(
             self.subscriptions(map(providedBy, objects), provided),
             key=lambda sub: getattr(sub, "priority", 100),
         )
-        info["lookup_time"] = int(round(time.time() * 1000)) - info["start"]
+        info["lookup_time"] = int(round(time.time() * 1000)) - start
         info["found"] = len(subscriptions)
         results = []
         for subscription in subscriptions:
@@ -95,7 +95,7 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             info["subscribers"].append(
                 {"duration": int(round(time.time() * 1000)) - start, "name": get_dotted_name(subscription)}
             )
-        info["end"] = int(round(time.time() * 1000)) - info["start"]
+        info["end"] = int(round(time.time() * 1000)) - start
         profile_logger.info(info)
         return results
 
