@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.15 (unreleased)
+5.1.15 (2019-11-20)
 -------------------
 
 - Fix correctly saving patch field
