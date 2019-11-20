@@ -4,7 +4,8 @@ CHANGELOG
 5.1.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix correctly saving patch field
+  [vangheem]
 
 
 5.1.14 (2019-11-20)

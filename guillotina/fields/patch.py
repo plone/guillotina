@@ -29,7 +29,9 @@ class PatchField(schema.Field):
     @property
     def bound_field(self):
         if self._bound_field is None:
-            return self.field.bind(self.field.context)
+            bound = self.field.bind(self.field.context)
+            bound.__name__ = self.__name__
+            return bound
         return self._bound_field
 
     async def set(self, obj, value):
@@ -41,6 +43,7 @@ class PatchField(schema.Field):
         bound = super().bind(object)
         bound.field = self.field
         bound._bound_field = self.field.bind(object)
+        bound._bound_field.__name__ = self.__name__
         return bound
 
     def validate(self, value):
