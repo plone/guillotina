@@ -59,10 +59,10 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
         from guillotina import task_vars
 
         if len(objects) > 1:
-            event = objects[1]
+            event = get_dotted_name(objects[1])
             context = getattr(objects[0], "__uuid__", None)
         else:
-            event = objects[0]
+            event = get_dotted_name(objects[0])
             context = None
 
         try:
@@ -83,7 +83,7 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             "method": getattr(request, "method", None),
             "subscribers": [],
             "context": context,
-            "event": event.__identifier__,
+            "event": event,
         }
 
         start = time.time() * 1000
