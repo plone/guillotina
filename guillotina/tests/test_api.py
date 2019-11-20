@@ -1014,3 +1014,19 @@ async def test_field_values_dict_bucket_preconditions(container_requester):
             "GET", "/db/guillotina/item1/@fieldvalue/{}.bucket_dict".format(ITestBehavior.__identifier__)
         )
         assert status == 410
+
+
+async def test_patch_field_validation(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": 1}}),
+        )
+        assert status == 412
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": [1]}}),
+        )
+        assert status == 412
