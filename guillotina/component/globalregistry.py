@@ -11,7 +11,6 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-# flake8: noqa
 from guillotina.component._compat import _BLANK
 from guillotina.component.interfaces import IComponentLookup
 from guillotina.profile import profilable
@@ -22,6 +21,12 @@ from zope.interface.adapter import AdapterRegistry
 from zope.interface.registry import Components
 
 import asyncio
+import logging
+import os
+import time
+
+
+profile_logger = logging.getLogger("guillotina.profile")
 
 
 class GuillotinaAdapterLookup(AdapterLookup):
@@ -46,13 +51,68 @@ class GuillotinaAdapterLookup(AdapterLookup):
         return result
 
 
+class DebugGuillotinaAdapterLookup(AdapterLookup):
+    @profilable
+    async def asubscribers(self, objects, provided):
+        from guillotina.utils import get_current_request, get_authenticated_user_id, get_dotted_name
+        from guillotina.exceptions import RequestNotFound
+        from guillotina import task_vars
+
+        try:
+            request = get_current_request()
+        except RequestNotFound:
+            request = None
+        info = {
+            "account": getattr(task_vars.container.get(), "id", None),
+            "user": get_authenticated_user_id(),
+            "db_id": getattr(task_vars.db.get(), "id", None),
+            "request_uid": getattr(request, "_uid", None),
+            "method": getattr(request, "method", None),
+            "start": time.time(),
+            "subscribers": [],
+            "provided": repr(provided),
+            "objects": repr(objects),
+        }
+        subscriptions = sorted(
+            self.subscriptions(map(providedBy, objects), provided),
+            key=lambda sub: getattr(sub, "priority", 100),
+        )
+        info["lookup_time"] = time.time() - info["start"]
+        info["found"] = len(subscriptions)
+        results = []
+        for subscription in subscriptions:
+            start = time.time()
+            if asyncio.iscoroutinefunction(subscription):
+                results.append(await subscription(*objects))
+            else:
+                results.append(subscription(*objects))
+            info["subscribers"].append(
+                {"duration": time.time() - start, "name": get_dotted_name(subscription)}
+            )
+        info["end"] = time.time() - info["start"]
+        profile_logger.info(f"Ran {provided}", extra=info)
+        return results
+
+    @profilable
+    def subscribers(self, objects, provided):
+        subscriptions = self.subscriptions(map(providedBy, objects), provided)
+        result = []
+        for subscription in sorted(subscriptions, key=lambda sub: getattr(sub, "priority", 100)):
+            if not asyncio.iscoroutinefunction(subscription):
+                result.append(subscription(*objects))
+        return result
+
+
 class GuillotinaAdapterRegistry(AdapterRegistry):
     """
     Customized adapter registry for async
     """
 
     _delegated = AdapterRegistry._delegated + ("asubscribers",)  # type: ignore
-    LookupClass = GuillotinaAdapterLookup
+    if os.environ.get("DEBUG_SUBSCRIBERS") in ("1", "true", "t") or True:
+        LookupClass = DebugGuillotinaAdapterLookup
+    else:
+        LookupClass = GuillotinaAdapterLookup
 
     def __init__(self, parent, name):
         self.__parent__ = parent
