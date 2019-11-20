@@ -74,28 +74,28 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             "db_id": getattr(task_vars.db.get(), "id", None),
             "request_uid": getattr(request, "_uid", None),
             "method": getattr(request, "method", None),
-            "start": time.time(),
             "subscribers": [],
             "provided": repr(provided),
             "objects": repr(objects),
+            "start": time.time() * 1000,
         }
         subscriptions = sorted(
             self.subscriptions(map(providedBy, objects), provided),
             key=lambda sub: getattr(sub, "priority", 100),
         )
-        info["lookup_time"] = time.time() - info["start"]
+        info["lookup_time"] = (time.time() * 1000) - info["start"]
         info["found"] = len(subscriptions)
         results = []
         for subscription in subscriptions:
-            start = time.time()
+            start = time.time() * 1000
             if asyncio.iscoroutinefunction(subscription):
                 results.append(await subscription(*objects))
             else:
                 results.append(subscription(*objects))
             info["subscribers"].append(
-                {"duration": time.time() - start, "name": get_dotted_name(subscription)}
+                {"duration": (time.time() * 1000) - start, "name": get_dotted_name(subscription)}
             )
-        info["end"] = time.time() - info["start"]
+        info["end"] = (time.time() * 1000) - info["start"]
         profile_logger.info(info)
         return results
 
