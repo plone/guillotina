@@ -58,6 +58,13 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
         from guillotina.exceptions import RequestNotFound
         from guillotina import task_vars
 
+        if len(objects) > 1:
+            event = objects[1]
+            context = getattr(objects[0], "__uuid__", None)
+        else:
+            event = objects[0]
+            context = None
+
         try:
             request = get_current_request()
         except RequestNotFound:
@@ -76,8 +83,8 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             "request_uid": getattr(request, "_uid", None),
             "method": getattr(request, "method", None),
             "subscribers": [],
-            "provided": repr(provided),
-            "objects": repr(objects),
+            "context": context,
+            "event": event.__identifier__,
         }
         subscriptions = sorted(
             self.subscriptions(map(providedBy, objects), provided),
