@@ -62,7 +62,13 @@ class DebugGuillotinaAdapterLookup(AdapterLookup):
             request = get_current_request()
         except RequestNotFound:
             request = None
+        try:
+            url = request.url.human_repr()
+        except AttributeError:
+            # older version of aiohttp
+            url = ""
         info = {
+            "url": url,
             "account": getattr(task_vars.container.get(), "id", None),
             "user": get_authenticated_user_id(),
             "db_id": getattr(task_vars.db.get(), "id", None),
@@ -90,7 +96,7 @@ class DebugGuillotinaAdapterLookup(AdapterLookup):
                 {"duration": time.time() - start, "name": get_dotted_name(subscription)}
             )
         info["end"] = time.time() - info["start"]
-        profile_logger.info(f"Ran {provided}", extra=info)
+        profile_logger.info(info)
         return results
 
     @profilable
