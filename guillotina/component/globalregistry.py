@@ -51,7 +51,7 @@ class GuillotinaAdapterLookup(AdapterLookup):
         return result
 
 
-class DebugGuillotinaAdapterLookup(AdapterLookup):
+class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
     @profilable
     async def asubscribers(self, objects, provided):
         from guillotina.utils import get_current_request, get_authenticated_user_id, get_dotted_name
@@ -98,15 +98,6 @@ class DebugGuillotinaAdapterLookup(AdapterLookup):
         info["end"] = time.time() - info["start"]
         profile_logger.info(info)
         return results
-
-    @profilable
-    def subscribers(self, objects, provided):
-        subscriptions = self.subscriptions(map(providedBy, objects), provided)
-        result = []
-        for subscription in sorted(subscriptions, key=lambda sub: getattr(sub, "priority", 100)):
-            if not asyncio.iscoroutinefunction(subscription):
-                result.append(subscription(*objects))
-        return result
 
 
 class GuillotinaAdapterRegistry(AdapterRegistry):
