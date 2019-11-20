@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-5.1.14 (unreleased)
------------------
+5.1.14 (2019-11-20)
+-------------------
 
 - Fix patch field validation
   [vangheem]
