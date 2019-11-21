@@ -172,10 +172,6 @@ register_sql("UPDATE", _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int""
 register_sql("NAIVE_UPDATE", _wrap_return_count(NAIVE_UPDATE))
 
 
-NEXT_TID = "SELECT nextval('{schema}.tid_sequence');"
-MAX_TID = "SELECT last_value FROM {schema}.tid_sequence;"
-
-
 register_sql(
     "NUM_CHILDREN", f"SELECT count(*) FROM {{table_name}} WHERE parent_id = $1::varchar({MAX_UID_LENGTH})"
 )
@@ -421,6 +417,9 @@ class PGConnectionManager:
     class to manage pool of connections
     """
 
+    _next_tid_sql = "SELECT nextval('{schema}.tid_sequence');"
+    _max_tid_sql = "SELECT last_value FROM {schema}.tid_sequence;"
+
     def __init__(
         self,
         dsn=None,
@@ -429,6 +428,7 @@ class PGConnectionManager:
         conn_acquire_timeout=20,
         vacuum_class=PGVacuum,
         autovacuum=True,
+        db_schema="public",
     ):
         self._dsn = dsn
         self._pool_size = pool_size
@@ -442,6 +442,8 @@ class PGConnectionManager:
         self._vacuum_task = None
         self._vacuum_class = vacuum_class
         self._autovacuum = autovacuum
+        self._stmt_next_tid = self._stmt_max_tid = None
+        self._db_schema = db_schema
 
     @property
     def vacuum(self):
@@ -454,6 +456,14 @@ class PGConnectionManager:
     @property
     def pool(self):
         return self._pool
+
+    @property
+    def stmt_next_tid(self):
+        return self._stmt_next_tid
+
+    @property
+    def stmt_max_tid(self):
+        return self._stmt_max_tid
 
     @property
     def lock(self):
@@ -483,6 +493,23 @@ class PGConnectionManager:
             self._pool.terminate()
             self._pool = self._read_conn = None
 
+    async def _initialize_tid_statements(self, retried=False):
+        try:
+            self._stmt_next_tid = await self._read_conn.prepare(
+                self._next_tid_sql.format(schema=self._db_schema)
+            )
+            self._stmt_max_tid = await self._read_conn.prepare(
+                self._max_tid_sql.format(schema=self._db_schema)
+            )
+        except asyncpg.exceptions.UndefinedTableError:
+            if retried:  # pragma: no cover
+                # always good to have prevention of infinity recursion
+                raise Exception("Error creating tid_sequence, this should never happen", exc_info=True)
+            await self._read_conn.execute(
+                "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
+            )
+            await self._initialize_tid_statements(True)
+
     async def initialize(self, loop=None, **kw):
         async with self._lock:
             if self._pool is not None:
@@ -502,6 +529,7 @@ class PGConnectionManager:
 
             # shared read connection on all transactions
             self._read_conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+            await self._initialize_tid_statements()
 
             if self._autovacuum:
                 self._vacuum = self._vacuum_class(self, loop)
@@ -527,6 +555,7 @@ class PGConnectionManager:
 
         # shared read connection on all transactions
         self._read_conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
+        await self._initialize_tid_statements()
 
 
 @implementer(IPostgresStorage)
@@ -537,6 +566,7 @@ class PostgresqlStorage(BaseStorage):
     _partition_class = None
     _large_record_size = 1 << 24
     _vacuum_class = PGVacuum
+    _connection_manager_class = PGConnectionManager
     _objects_table_name = "objects"
     _blobs_table_name = "blobs"
 
@@ -572,7 +602,6 @@ class PostgresqlStorage(BaseStorage):
         "CREATE INDEX IF NOT EXISTS {blob_table_name}_bid ON {blobs_table_name} (bid);",
         "CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);",
         "CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);",
-        "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;"
         "ALTER TABLE {objects_table_name} ADD CONSTRAINT {object_table_name}_parent_id_zoid_check CHECK (parent_id != zoid) NOT VALID;",  # noqa
     ]
 
@@ -639,10 +668,20 @@ class PostgresqlStorage(BaseStorage):
         return self._connection_manager.lock
 
     @property
+    def stmt_next_tid(self):
+        return self._connection_manager._stmt_next_tid
+
+    @property
+    def stmt_max_tid(self):
+        return self._connection_manager._stmt_max_tid
+
+    @property
     def objects_table_name(self):
         return self._objects_table_name
 
-    async def create(self):
+    async def create(self, conn=None):
+        if conn is None:
+            conn = self.read_conn
         # Check DB
         log.info("Creating initial database objects")
 
@@ -677,23 +716,20 @@ class PostgresqlStorage(BaseStorage):
                 schema=self._db_schema,
             )
             try:
-                await self.read_conn.execute(statement)
+                await conn.execute(statement)
             except asyncpg.exceptions.UniqueViolationError:
                 # this is okay on creation, means 2 getting created at same time
                 pass
 
-        await self.initialize_tid_statements()
-
     async def restart_connection(self, timeout=0.1):
         log.error("Connection potentially lost to pg, restarting")
         await self._connection_manager.restart()
-        await self.initialize_tid_statements()
         self._connection_initialized_on = time.time()
         raise ConflictError("Restarting connection to postgresql")
 
-    async def has_unique_constraint(self):
+    async def has_unique_constraint(self, conn):
         table_name = clear_table_name(self._objects_table_name)
-        result = await self.read_conn.fetch(
+        result = await conn.fetch(
             """
 SELECT * FROM pg_indexes
 WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
@@ -706,31 +742,31 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def initialize(self, loop=None, **kw):
         self._connection_options = kw
         if self._connection_manager is None:
-            self._connection_manager = PGConnectionManager(
+            self._connection_manager = self._connection_manager_class(
                 dsn=self._dsn,
                 pool_size=self._pool_size,
                 connection_options=self._connection_options,
                 conn_acquire_timeout=self._conn_acquire_timeout,
                 vacuum_class=self._vacuum_class,
                 autovacuum=self._autovacuum,
+                db_schema=self._db_schema,
             )
             await self._connection_manager.initialize(loop, **kw)
 
-        async with self.lock:
-            if await self.has_unique_constraint():
+        async with self.pool.acquire() as conn:
+            if await self.has_unique_constraint(conn):
                 self._supports_unique_constraints = True
 
             trash_sql = self._sql.get("CREATE_TRASH", self._objects_table_name)
             try:
-                await self.initialize_tid_statements()
-                await self.read_conn.execute(trash_sql)
+                await conn.execute(trash_sql)
             except asyncpg.exceptions.ReadOnlySQLTransactionError:
                 # Not necessary for read-only pg
                 pass
             except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
-                await self.create()
+                await self.create(conn)
                 # only available on new databases
-                await self.read_conn.execute(
+                await conn.execute(
                     self._unique_constraint.format(
                         objects_table_name=self._objects_table_name,
                         constraint_name=clear_table_name(self._objects_table_name),
@@ -738,15 +774,10 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     )
                 )
                 self._supports_unique_constraints = True
-                await self.initialize_tid_statements()
-                await self.read_conn.execute(trash_sql)
-                await notify(StorageCreatedEvent(self))
+                await conn.execute(trash_sql)
+                self._connection_initialized_on = time.time()
 
-            self._connection_initialized_on = time.time()
-
-    async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID.format(schema=self._db_schema))
-        self._stmt_max_tid = await self.read_conn.prepare(MAX_TID.format(schema=self._db_schema))
+        await notify(StorageCreatedEvent(self))
 
     async def remove(self):
         """Reset the tables"""
@@ -885,12 +916,12 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     @restart_conn_on_exception
     async def get_next_tid(self, txn):
         async with self.lock:
-            return await self._stmt_next_tid.fetchval()
+            return await self.stmt_next_tid.fetchval()
 
     @restart_conn_on_exception
     async def get_current_tid(self, txn):
         async with self.lock:
-            return await self._stmt_max_tid.fetchval()
+            return await self.stmt_max_tid.fetchval()
 
     async def get_one_row(self, txn, sql, *args, prepare=False):
         conn = await txn.get_connection()

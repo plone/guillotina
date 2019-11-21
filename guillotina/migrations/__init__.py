@@ -12,29 +12,30 @@ async def migrate_contraint(db):
         return  # only for pg
 
     table_name = clear_table_name(storage._objects_table_name)
-    result = await storage.read_conn.fetch(
-        """
-SELECT * FROM pg_indexes
-WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
-""".format(
-            table_name, table_name
+    async with storage.pool.acquire() as conn:
+        result = await conn.fetch(
+            """
+    SELECT * FROM pg_indexes
+    WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
+    """.format(
+                table_name, table_name
+            )
         )
-    )
-    if len(result) > 0:
-        # check if we need to drop and create new constraint
-        if TRASHED_ID not in result[0]["indexdef"]:
-            await storage.read_conn.execute(
-                """
-ALTER TABLE {}
-DROP CONSTRAINT {}_parent_id_id_key;
-""".format(
-                    storage._objects_table_name, table_name
+        if len(result) > 0:
+            # check if we need to drop and create new constraint
+            if TRASHED_ID not in result[0]["indexdef"]:
+                await conn.execute(
+                    """
+    ALTER TABLE {}
+    DROP CONSTRAINT {}_parent_id_id_key;
+    """.format(
+                        storage._objects_table_name, table_name
+                    )
                 )
-            )
-            await storage.read_conn.execute(
-                storage._unique_constraint.format(
-                    objects_table_name=storage._objects_table_name,
-                    constraint_name=table_name,
-                    TRASHED_ID=TRASHED_ID,
+                await conn.execute(
+                    storage._unique_constraint.format(
+                        objects_table_name=storage._objects_table_name,
+                        constraint_name=table_name,
+                        TRASHED_ID=TRASHED_ID,
+                    )
                 )
-            )

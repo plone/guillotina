@@ -125,7 +125,7 @@ async def test_restart_connection_pg(db, dummy_guillotina):
             )
 
         # Simulate underlying connection is closed
-        tm._storage._stmt_next_tid = Mock(**{"fetchval": fetchval_conn_closed})
+        tm._storage._connection_manager._stmt_next_tid = Mock(**{"fetchval": fetchval_conn_closed})
 
         with pytest.raises(ConflictError):
             await tm._storage.get_next_tid(Mock())
