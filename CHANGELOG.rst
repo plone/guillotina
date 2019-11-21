@@ -4,7 +4,8 @@ CHANGELOG
 5.1.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Allow uid as destination in `@duplicate` and `@move`
+  [qiwn]
 
 
 5.1.15 (2019-11-20)
