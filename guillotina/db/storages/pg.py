@@ -780,7 +780,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 await conn.execute(trash_sql)
                 self._connection_initialized_on = time.time()
 
-        await notify(StorageCreatedEvent(self))
+                await notify(StorageCreatedEvent(self))
 
     async def remove(self):
         """Reset the tables"""
