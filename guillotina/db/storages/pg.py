@@ -501,13 +501,16 @@ class PGConnectionManager:
             self._stmt_max_tid = await self._read_conn.prepare(
                 self._max_tid_sql.format(schema=self._db_schema)
             )
-        except asyncpg.exceptions.UndefinedTableError:
+        except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
             if retried:  # pragma: no cover
                 # always good to have prevention of infinity recursion
                 raise Exception("Error creating tid_sequence, this should never happen", exc_info=True)
-            await self._read_conn.execute(
-                "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
-            )
+            async with self.pool.acquire() as conn:
+                if self._db_schema != "public":
+                    await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._db_schema}")
+                await conn.execute(
+                    "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
+                )
             await self._initialize_tid_statements(True)
 
     async def initialize(self, loop=None, **kw):
@@ -753,6 +756,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             )
             await self._connection_manager.initialize(loop, **kw)
 
+        created = False
         async with self.pool.acquire() as conn:
             if await self.has_unique_constraint(conn):
                 self._supports_unique_constraints = True
@@ -764,6 +768,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 # Not necessary for read-only pg
                 pass
             except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
+                created = True
                 await self.create(conn)
                 # only available on new databases
                 await conn.execute(
@@ -777,7 +782,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 await conn.execute(trash_sql)
                 self._connection_initialized_on = time.time()
 
-        await notify(StorageCreatedEvent(self))
+        if created:
+            await notify(StorageCreatedEvent(self))
 
     async def remove(self):
         """Reset the tables"""
