@@ -778,7 +778,6 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     )
                 )
                 self._supports_unique_constraints = True
-                await self.initialize_tid_statements()
                 await conn.execute(trash_sql)
                 await notify(StorageCreatedEvent(self))
 
