@@ -4,6 +4,9 @@ CHANGELOG
 5.1.12.1 (unreleased)
 ---------------------
 
+- Allow uid as destination in `@duplicate` and `@move`
+  [qiwn]
+
 - fix deadlock issues
 
 
