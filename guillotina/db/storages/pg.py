@@ -767,7 +767,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 # Not necessary for read-only pg
                 pass
             except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
-                create = True
+                created = True
                 await self.create(conn)
                 # only available on new databases
                 await conn.execute(
