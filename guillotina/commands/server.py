@@ -25,14 +25,14 @@ class ServerCommand(Command):
         host = arguments.host or settings.get("host", "0.0.0.0")
 
         if arguments.asgi_server == "uvicorn":
-            import uvicorn
+            import uvicorn  # type: ignore
 
             uvicorn.run(app, host=host, port=port, reload=arguments.reload, access_log=False)
         elif arguments.asgi_server == "hypercorn":
             import asyncio
 
-            from hypercorn.asyncio import serve
-            from hypercorn.config import Config
+            from hypercorn.asyncio import serve  # type: ignore
+            from hypercorn.config import Config  # type: ignore
 
             config = Config()
             config.bind = [f"{host}:{port}"]
