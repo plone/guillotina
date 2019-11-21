@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.16 (unreleased)
+5.1.16 (2019-11-21)
 -------------------
 
 - Allow uid as destination in `@duplicate` and `@move`
