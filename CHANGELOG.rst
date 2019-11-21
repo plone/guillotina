@@ -4,7 +4,9 @@ CHANGELOG
 5.1.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to provide `DEBUG_SUBSCRIBERS` env variable to get details about
+  event timings being run.
+  [vangheem]
 
 
 5.1.18 (2019-11-25)

@@ -114,7 +114,7 @@ class GuillotinaAdapterRegistry(AdapterRegistry):
     """
 
     _delegated = AdapterRegistry._delegated + ("asubscribers",)  # type: ignore
-    if os.environ.get("DEBUG_SUBSCRIBERS") in ("1", "true", "t"):
+    if os.environ.get("GDEBUG_SUBSCRIBERS") in ("1", "true", "t"):
         LookupClass = DebugGuillotinaAdapterLookup
     else:
         LookupClass = GuillotinaAdapterLookup
