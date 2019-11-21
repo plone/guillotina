@@ -76,7 +76,7 @@ class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
             url = ""
         info = {
             "url": url,
-            "account": getattr(task_vars.container.get(), "id", None),
+            "container": getattr(task_vars.container.get(), "id", None),
             "user": get_authenticated_user_id(),
             "db_id": getattr(task_vars.db.get(), "id", None),
             "request_uid": getattr(request, "_uid", None),
@@ -114,7 +114,7 @@ class GuillotinaAdapterRegistry(AdapterRegistry):
     """
 
     _delegated = AdapterRegistry._delegated + ("asubscribers",)  # type: ignore
-    if os.environ.get("DEBUG_SUBSCRIBERS") in ("1", "true", "t") or True:
+    if os.environ.get("DEBUG_SUBSCRIBERS") in ("1", "true", "t"):
         LookupClass = DebugGuillotinaAdapterLookup
     else:
         LookupClass = GuillotinaAdapterLookup
