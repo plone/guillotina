@@ -506,7 +506,8 @@ class PGConnectionManager:
                 # always good to have prevention of infinity recursion
                 raise Exception("Error creating tid_sequence, this should never happen", exc_info=True)
             async with self.pool.acquire() as conn:
-                await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._db_schema}")
+                if self._db_schema != "public":
+                    await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._db_schema}")
                 await conn.execute(
                     "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
                 )
