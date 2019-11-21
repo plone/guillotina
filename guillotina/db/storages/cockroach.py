@@ -123,6 +123,8 @@ SAVEPOINT cockroach_restart;"""
 
 class CRConnectionManager(pg.PGConnectionManager):
     _next_tid_sql = "SELECT unique_rowid()"
+    # cr does not support this type of txn
+    _max_tid_sql = "SELECT 1;"
 
 
 @implementer(ICockroachStorage)
