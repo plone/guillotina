@@ -250,10 +250,15 @@ async def _apply_cors(request, resp):
 
 
 def _clean_request(request, response):
-    if isinstance(response, Exception):
-        traceback.clear_frames(response.__traceback__)
+    try:
+        if isinstance(response, Exception):
+            traceback.clear_frames(response.__traceback__)
+        if response.exc is not None:
+            traceback.clear_frames(response.exc.__traceback__)
+    except AttributeError:  # pragma: no cover
+        pass
 
-    for attr in ("resource", "found_view"):
+    for attr in ("resource", "found_view", "exc"):
         if getattr(request, attr, None) is not None:
             setattr(request, attr, None)
 

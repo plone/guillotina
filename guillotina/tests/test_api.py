@@ -495,9 +495,23 @@ async def test_move_content(container_requester):
         _, status = await requester(
             "POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "container2"})
         )
+        response, status = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "container3"})
+        )
+        container3_uid = response["@uid"]
         _, status = await requester(
             "POST", "/db/guillotina/container1", data=json.dumps({"@type": "Item", "id": "foobar"})
         )
+
+        _, status = await requester(
+            "POST", "/db/guillotina/container1/foobar/@move", data=json.dumps({"destination": "/wrong_path"})
+        )
+        assert status == 412
+        _, status = await requester(
+            "POST", "/db/guillotina/container1/foobar/@move", data=json.dumps({"destination": "wrong_uid"})
+        )
+        assert status == 412
+
         _, status = await requester(
             "POST", "/db/guillotina/container1/foobar/@move", data=json.dumps({"destination": "/container2"})
         )
@@ -507,16 +521,25 @@ async def test_move_content(container_requester):
         _, status = await requester("GET", "/db/guillotina/container1/foobar")
         assert status == 404
 
+        _, status = await requester(
+            "POST", "/db/guillotina/container2/foobar/@move", data=json.dumps({"destination": container3_uid})
+        )
+
+        _, status = await requester("GET", "/db/guillotina/container3/foobar")
+        assert status == 200
+        _, status = await requester("GET", "/db/guillotina/container2/foobar")
+        assert status == 404
+
         # move back with new id
         _, status = await requester(
             "POST",
-            "/db/guillotina/container2/foobar/@move",
+            "/db/guillotina/container3/foobar/@move",
             data=json.dumps({"destination": "/container1", "new_id": "foobar_new"}),
         )
 
         _, status = await requester("GET", "/db/guillotina/container1/foobar_new")
         assert status == 200
-        _, status = await requester("GET", "/db/guillotina/container2/foobar")
+        _, status = await requester("GET", "/db/guillotina/container3/foobar")
         assert status == 404
 
 
@@ -556,16 +579,40 @@ async def test_duplicate_content(container_requester):
         assert "foobar2" in response
         assert "foobar1" in response
 
-        await requester("POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "folder"}))
+        _, status = await requester(
+            "POST", "/db/guillotina/foobar1/@duplicate", data=json.dumps({"destination": "/wrong_path"})
+        )
+        assert status == 412
+        _, status = await requester(
+            "POST", "/db/guillotina/foobar1/@duplicate", data=json.dumps({"destination": "wrong_uid"})
+        )
+        assert status == 412
+
+        response, _ = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "folder"})
+        )
+        folder_uid = response["@uid"]
+
         await requester(
             "POST",
             "/db/guillotina/foobar1/@duplicate",
-            data=json.dumps({"new_id": "foobar", "destination": "/folder"}),
+            data=json.dumps({"new_id": "foobar1", "destination": "/folder"}),
         )
 
         response, _ = await requester("GET", "/db/guillotina/folder/@ids")
         assert len(response) == 1
-        assert "foobar" in response
+        assert "foobar1" in response
+
+        await requester(
+            "POST",
+            "/db/guillotina/foobar1/@duplicate",
+            data=json.dumps({"new_id": "foobar2", "destination": folder_uid}),
+        )
+
+        response, _ = await requester("GET", "/db/guillotina/folder/@ids")
+        assert len(response) == 2
+        assert "foobar1" in response
+        assert "foobar2" in response
 
 
 async def test_create_content_fields(container_requester):
@@ -1017,3 +1064,19 @@ async def test_field_values_dict_bucket_preconditions(container_requester):
             "GET", "/db/guillotina/item1/@fieldvalue/{}.bucket_dict".format(ITestBehavior.__identifier__)
         )
         assert status == 410
+
+
+async def test_patch_field_validation(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": 1}}),
+        )
+        assert status == 412
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": [1]}}),
+        )
+        assert status == 412

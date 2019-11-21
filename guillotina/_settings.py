@@ -90,5 +90,6 @@ app_settings: Dict[str, Any] = {
     "indexer": "guillotina.catalog.index.Indexer",
     "search_parser": "default",
     "object_reader": "guillotina.db.reader.reader",
+    "thread_pool_workers": 32,
 }
 default_settings = copy.deepcopy(app_settings)

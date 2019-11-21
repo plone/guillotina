@@ -11,6 +11,7 @@ from guillotina.catalog.utils import iter_indexes
 from guillotina.component import get_utility
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
+from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import IWriter
 from guillotina.db.storages.utils import register_sql
 from guillotina.db.uid import MAX_UID_LENGTH
@@ -582,22 +583,23 @@ class PGSearchUtility(DefaultSearchUtility):
 
         results = []
         logger.debug(f"Running search:\n{sql}\n{arguments}")
-        for record in await conn.fetch(sql, *arguments):
+        async with txn.lock:
+            records = await conn.fetch(sql, *arguments)
+        for record in records:
             results.append([json.loads(record[field]) for field in query["metadata"] or []])
 
         total = len(results)
         if total >= query["size"] or query["_from"] != 0:
             sql, arguments = self.build_count_query(container, query)
             logger.debug(f"Running search:\n{sql}\n{arguments}")
-            records = await conn.fetch(sql, *arguments)
+            async with txn.lock:
+                records = await conn.fetch(sql, *arguments)
             total = records[0]["count"]
         return {"member": results, "items_count": total}
 
     async def search(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
         sql, arguments = self.build_query(container, query, ["id", "zoid", "json"])
-        txn = get_transaction()
-        if txn is None:
-            raise TransactionNotFound()
+        txn = get_current_transaction()
         conn = await txn.get_connection()
 
         results = []
@@ -605,13 +607,14 @@ class PGSearchUtility(DefaultSearchUtility):
         try:
             context_url = get_object_url(container)
             request = get_current_request()
-            txn = get_current_transaction()
         except RequestNotFound:
             context_url = get_content_path(container)
             request = None
             txn = None
         logger.debug(f"Running search:\n{sql}\n{arguments}")
-        for record in await conn.fetch(sql, *arguments):
+        async with txn.lock:
+            records = await conn.fetch(sql, *arguments)
+        for record in records:
             data = json.loads(record["json"])
             if fullobjects and request is not None and txn is not None:
                 # Get Object
@@ -631,7 +634,8 @@ class PGSearchUtility(DefaultSearchUtility):
         if total >= query["size"] or query["_from"] != 0:
             sql, arguments = self.build_count_query(container, query)
             logger.debug(f"Running search:\n{sql}\n{arguments}")
-            records = await conn.fetch(sql, *arguments)
+            async with txn.lock:
+                records = await conn.fetch(sql, *arguments)
             total = records[0]["count"]
         return {"member": results, "items_count": total}
 
@@ -693,11 +697,11 @@ class PGSearchUtility(DefaultSearchUtility):
             await self._process_folder(obj, data)
         del obj
 
-    async def _index(self, oid, writer, txn, table_name):
+    async def _index(self, oid, writer, txn: ITransaction, table_name):
         json_dict = await writer.get_json()
         json_value = ujson.dumps(json_dict)
 
-        statement_sql = txn._manager._storage._sql.get("JSONB_UPDATE", table_name)
+        statement_sql = txn.storage._sql.get("JSONB_UPDATE", table_name)
         conn = await txn.get_connection()
-        async with txn._lock:
+        async with txn.lock:
             await conn.fetch(statement_sql, oid, json_value)  # The OID of the object  # JSON catalog

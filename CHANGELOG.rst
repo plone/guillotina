@@ -8,10 +8,94 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
+5.1.17 (unreleased)
+-------------------
+
+- Nothing changed yet.
+
+
+5.1.16 (2019-11-21)
+-------------------
+
+- Allow uid as destination in `@duplicate` and `@move`
+  [qiwn]
+
+
+5.1.15 (2019-11-20)
+-------------------
+
+- Fix correctly saving patch field
+  [vangheem]
+
+
+5.1.14 (2019-11-20)
+-------------------
+
+- Fix patch field validation
+  [vangheem]
+
+
+5.1.13 (2019-11-13)
+-------------------
+
+- Prevent JSONField name clash with field `validator` decorator
+  [vangheem]
+
+
+5.1.12 (2019-11-12)
+-------------------
+
+- Remove task call back to run execute_futures automatically. aiohttp reuses task object for
+  keepalive implementation and the `_callbacks` were never run
+  [vangheem]
+
+
+5.1.11 (2019-11-12)
+-------------------
+
+- Lazy create thread pool executor so we can properly use thread pool setting
+  [vangheem]
+
+
+5.1.10 (2019-11-12)
+-------------------
+
+- Be able to customize number of thread pool workers
+  [vangheem]
+
+
+5.1.9 (2019-11-12)
+------------------
+
+- Add custom settings into test server
+  [qiwn]
+
+
+5.1.8 (2019-11-11)
+------------------
+
+- bump
+
+
+5.1.7 (2019-11-11)
+------------------
+
+- Make sure to use `txn.lock` when using pg connection
+  [vangheem]
+
+
+5.1.6 (2019-11-08)
+------------------
+
+- reduce the load dbvacuum can cause
+  [vangheem]
+
+
 5.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix `required` param not specified in service `parameters` configuration
+  [vangheem]
 
 
 5.1.5 (2019-11-06)

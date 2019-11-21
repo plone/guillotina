@@ -22,14 +22,32 @@ class PatchField(schema.Field):
 
     def __init__(self, field, *args, **kwargs):
         self.field = field
+        self._bound_field = kwargs.pop("bound_field", None)
         super().__init__(*args, **kwargs)
         self.required = field.required
 
+    @property
+    def bound_field(self):
+        if self._bound_field is None:
+            bound = self.field.bind(self.field.context)
+            bound.__name__ = self.__name__
+            return bound
+        return self._bound_field
+
     async def set(self, obj, value):
         self.field.__name__ = self.__name__
-        bound_field = self.field.bind(obj)
-        await apply_coroutine(bound_field.set, obj, value)
+        await apply_coroutine(self.bound_field.set, obj, value)
         obj.register()
+
+    def bind(self, object):
+        bound = super().bind(object)
+        bound.field = self.field
+        bound._bound_field = self.field.bind(object)
+        bound._bound_field.__name__ = self.__name__
+        return bound
+
+    def validate(self, value):
+        return self.bound_field.validate(value)
 
 
 @configure.value_deserializer(IPatchField)

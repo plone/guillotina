@@ -3,12 +3,11 @@ from guillotina.interfaces.content import IApplication
 from typing import Optional
 from typing import Tuple
 from typing import Type
-from yarl import URL
 from zope.interface import Interface
 
 
 class IRequest(Interface):
-    url: URL
+    url: str
     path: str
     method: str
     resource: Optional[IBaseObject]
