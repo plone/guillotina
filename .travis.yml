@@ -55,6 +55,7 @@ install:
   - pip install -r requirements.txt
   - pip install -r contrib-requirements.txt
   - pip install -e .[test]
+  - pip install -e .[testdata]
 script:
   - flake8 guillotina --config=setup.cfg
   - mypy guillotina/
