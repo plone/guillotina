@@ -23,7 +23,7 @@ async def migrate_contraint(db):
         )
         if len(result) > 0:
             # check if we need to drop and create new constraint
-            if TRASHED_ID not in result[0]["indexdef"]:
+            if TRASHED_ID not in result[0]["indexdef"]:  # pragma: no cover
                 await conn.execute(
                     """
     ALTER TABLE {}
