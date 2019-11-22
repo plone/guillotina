@@ -56,6 +56,7 @@ from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.schema.utils import get_default_from_schema
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
+from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
 from typing import Any
@@ -652,11 +653,19 @@ async def duplicate(
 ) -> IResource:
     if destination is not None:
         if isinstance(destination, str):
-            container = task_vars.container.get()
-            if container:
-                destination_ob = await navigate_to(container, destination)
+            destination_ob = None
+            if destination.startswith("/"):
+                container = task_vars.container.get()
+                if container:
+                    try:
+                        destination_ob = await navigate_to(container, destination)
+                    except KeyError:
+                        pass
             else:
-                raise PreconditionFailed(context, "Could not find destination object")
+                try:
+                    destination_ob = await get_object_by_uid(destination)
+                except KeyError:
+                    pass
         else:
             destination_ob = destination
 
@@ -731,14 +740,19 @@ async def move(
         destination_ob = context.__parent__
     else:
         if isinstance(destination, str):
-            container = task_vars.container.get()
-            if container is not None:
-                try:
-                    destination_ob = await navigate_to(container, destination)
-                except KeyError:
-                    destination_ob = None
+            destination_ob = None
+            if destination.startswith("/"):
+                container = task_vars.container.get()
+                if container is not None:
+                    try:
+                        destination_ob = await navigate_to(container, destination)
+                    except KeyError:
+                        pass
             else:
-                raise PreconditionFailed(context, "Could not find destination object")
+                try:
+                    destination_ob = await get_object_by_uid(destination)
+                except KeyError:
+                    pass
         else:
             destination_ob = destination
 
