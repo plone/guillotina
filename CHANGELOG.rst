@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.17 (unreleased)
+5.1.17 (2019-11-22)
 -------------------
 
 - Fix potential deadlock issues when storage read conn handling
