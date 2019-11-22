@@ -779,7 +779,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     )
                     self._supports_unique_constraints = True
                     await conn.execute(trash_sql)
-                    await notify(StorageCreatedEvent(self, db_conn=conn, db_txn=True))
+                    await notify(StorageCreatedEvent(self, db_conn=conn))
 
         self._connection_initialized_on = time.time()
 
