@@ -264,7 +264,7 @@ def dummy_guillotina(loop, request):
     yield aioapp
     try:
         loop.run_until_complete(close_async_tasks(aioapp))
-    except asyncio.CancelledError:
+    except asyncio.CancelledError:  # pragma: no cover
         pass
     logout()
 
@@ -371,7 +371,7 @@ def guillotina_main(loop, request):
     logout()
     try:
         loop.run_until_complete(close_async_tasks(aioapp))
-    except asyncio.CancelledError:
+    except asyncio.CancelledError:  # pragma: no cover
         pass
 
 
@@ -412,11 +412,13 @@ class CockroachStorageAsyncContextManager(object):
         return self.storage
 
     async def __aexit__(self, exc_type, exc, tb):
-        conn = await self.storage.open()
-        await _bomb_shelter(conn.execute("DROP DATABASE IF EXISTS guillotina;"))
-        await _bomb_shelter(conn.execute("CREATE DATABASE guillotina;"))
-        await self.storage.pool.release(conn)
-        await self.storage.finalize()
+        async with self.storage.pool.acquire() as conn:
+            await _bomb_shelter(conn.execute("DROP DATABASE IF EXISTS guillotina;"))
+            await _bomb_shelter(conn.execute("CREATE DATABASE guillotina;"))
+            try:
+                await self.storage.finalize()
+            except asyncio.CancelledError:  # pragma: no cover
+                pass
 
 
 @pytest.fixture(scope="function")

@@ -4,7 +4,8 @@ CHANGELOG
 5.1.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix potential deadlock issues when storage read conn handling
+  [vangheem]
 
 
 5.1.16 (2019-11-21)

@@ -64,9 +64,6 @@ RETURNING tid, otid""",
 )
 
 
-NEXT_TID = """SELECT unique_rowid()"""
-
-
 class CockroachDBTransaction:
     """
     Custom transaction object to work with cockroachdb so we can...
@@ -124,6 +121,12 @@ SAVEPOINT cockroach_restart;"""
         self._status = "rolledback"
 
 
+class CRConnectionManager(pg.PGConnectionManager):
+    _next_tid_sql = "SELECT unique_rowid()"
+    # cr does not support this type of txn
+    _max_tid_sql = "SELECT 1;"
+
+
 @implementer(ICockroachStorage)
 class CockroachStorage(pg.PostgresqlStorage):
     """
@@ -143,6 +146,7 @@ class CockroachStorage(pg.PostgresqlStorage):
     """
 
     _db_transaction_factory = CockroachDBTransaction
+    _connection_manager_class = CRConnectionManager
     _vacuum = _vacuum_task = None
     _unique_constraint = """CREATE UNIQUE INDEX {constraint_name}_parent_id_id_key
                             ON {objects_table_name} (parent_id, id)"""
@@ -161,17 +165,12 @@ class CockroachStorage(pg.PostgresqlStorage):
         kwargs["transaction_strategy"] = transaction_strategy
         super().__init__(*args, **kwargs)
 
-    async def initialize_tid_statements(self):
-        self._stmt_next_tid = await self.read_conn.prepare(NEXT_TID)
-
-    async def get_current_tid(self, txn):
+    async def get_current_tid(self, txn):  # pragma: no cover
         raise Exception("cockroach does not support voting")
 
-    async def has_unique_constraint(self):
+    async def has_unique_constraint(self, conn):
         try:
-            for result in await self.read_conn.fetch(
-                """SHOW CONSTRAINTS FROM {};""".format(self._objects_table_name)
-            ):
+            for result in await conn.fetch("""SHOW CONSTRAINTS FROM {};""".format(self._objects_table_name)):
                 result = dict(result)
                 c_name = result.get("Name", result.get("constraint_name"))
                 if c_name == "{}_parent_id_id_key".format(self._objects_table_name):
