@@ -165,7 +165,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         kwargs["transaction_strategy"] = transaction_strategy
         super().__init__(*args, **kwargs)
 
-    async def get_current_tid(self, txn):
+    async def get_current_tid(self, txn):  # pragma: no cover
         raise Exception("cockroach does not support voting")
 
     async def has_unique_constraint(self, conn):

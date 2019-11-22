@@ -458,10 +458,6 @@ class PGConnectionManager:
         return self._pool
 
     @property
-    def lock(self):
-        return self._lock
-
-    @property
     def stmt_next_tid(self):
         return self._stmt_next_tid
 
@@ -469,25 +465,9 @@ class PGConnectionManager:
     def stmt_max_tid(self):
         return self._stmt_max_tid
 
-    async def _initialize_tid_statements(self, retried=False):
-        try:
-            self._stmt_next_tid = await self._read_conn.prepare(
-                self._next_tid_sql.format(schema=self._db_schema)
-            )
-            self._stmt_max_tid = await self._read_conn.prepare(
-                self._max_tid_sql.format(schema=self._db_schema)
-            )
-        except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
-            if retried:  # pragma: no cover
-                # always good to have prevention of infinity recursion
-                raise Exception("Error creating tid_sequence, this should never happen", exc_info=True)
-            async with self.pool.acquire() as conn:
-                if self._db_schema != "public":
-                    await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._db_schema}")
-                await conn.execute(
-                    "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
-                )
-            await self._initialize_tid_statements(True)
+    @property
+    def lock(self):
+        return self._lock
 
     async def close(self):
         async with self._lock:
@@ -512,6 +492,26 @@ class PGConnectionManager:
             # connections should not be staying open at this step
             self._pool.terminate()
             self._pool = self._read_conn = None
+
+    async def _initialize_tid_statements(self, retried=False):
+        try:
+            self._stmt_next_tid = await self._read_conn.prepare(
+                self._next_tid_sql.format(schema=self._db_schema)
+            )
+            self._stmt_max_tid = await self._read_conn.prepare(
+                self._max_tid_sql.format(schema=self._db_schema)
+            )
+        except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
+            if retried:  # pragma: no cover
+                # always good to have prevention of infinity recursion
+                raise Exception("Error creating tid_sequence, this should never happen", exc_info=True)
+            async with self.pool.acquire() as conn:
+                if self._db_schema != "public":
+                    await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._db_schema}")
+                await conn.execute(
+                    "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
+                )
+            await self._initialize_tid_statements(True)
 
     async def initialize(self, loop=None, **kw):
         async with self._lock:
@@ -671,16 +671,16 @@ class PostgresqlStorage(BaseStorage):
         return self._connection_manager.lock
 
     @property
-    def objects_table_name(self):
-        return self._objects_table_name
-
-    @property
     def stmt_next_tid(self):
         return self._connection_manager._stmt_next_tid
 
     @property
     def stmt_max_tid(self):
         return self._connection_manager._stmt_max_tid
+
+    @property
+    def objects_table_name(self):
+        return self._objects_table_name
 
     async def create(self, conn=None):
         if conn is None:
@@ -752,10 +752,10 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 conn_acquire_timeout=self._conn_acquire_timeout,
                 vacuum_class=self._vacuum_class,
                 autovacuum=self._autovacuum,
+                db_schema=self._db_schema,
             )
             await self._connection_manager.initialize(loop, **kw)
 
-        created = False
         async with self.pool.acquire() as conn:
             if await self.has_unique_constraint(conn):
                 self._supports_unique_constraints = True
@@ -767,24 +767,21 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 # Not necessary for read-only pg
                 pass
             except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
-                created = True
-                await self.create(conn)
-                # only available on new databases
-                await conn.execute(
-                    self._unique_constraint.format(
-                        objects_table_name=self._objects_table_name,
-                        constraint_name=clear_table_name(self._objects_table_name),
-                        TRASHED_ID=TRASHED_ID,
+                async with conn.transaction():
+                    await self.create(conn)
+                    # only available on new databases
+                    await conn.execute(
+                        self._unique_constraint.format(
+                            objects_table_name=self._objects_table_name,
+                            constraint_name=clear_table_name(self._objects_table_name),
+                            TRASHED_ID=TRASHED_ID,
+                        ).replace("CONCURRENTLY", "")
                     )
-                )
-                self._supports_unique_constraints = True
-                await conn.execute(trash_sql)
-                await notify(StorageCreatedEvent(self))
+                    self._supports_unique_constraints = True
+                    await conn.execute(trash_sql)
+                    await notify(StorageCreatedEvent(self, db_conn=conn))
 
-            self._connection_initialized_on = time.time()
-
-        if created:
-            await notify(StorageCreatedEvent(self))
+        self._connection_initialized_on = time.time()
 
     async def remove(self):
         """Reset the tables"""

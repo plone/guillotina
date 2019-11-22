@@ -15,7 +15,7 @@ class MigrateCommand(Command):
     description = "Run migrate on databases"
 
     async def migrate(self, db):
-        migrations = sorted(get_utilities_for(IMigration))
+        migrations = sorted(get_utilities_for(IMigration), key=lambda v: StrictVersion(v[0]))
         async with transaction(db=db) as txn:
             # make sure to get fresh copy
             txn._manager._hard_cache.clear()
