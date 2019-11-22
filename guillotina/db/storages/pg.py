@@ -756,7 +756,6 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             )
             await self._connection_manager.initialize(loop, **kw)
 
-        created = False
         async with self.pool.acquire() as conn:
             if await self.has_unique_constraint(conn):
                 self._supports_unique_constraints = True
@@ -768,22 +767,21 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 # Not necessary for read-only pg
                 pass
             except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
-                created = True
-                await self.create(conn)
-                # only available on new databases
-                await conn.execute(
-                    self._unique_constraint.format(
-                        objects_table_name=self._objects_table_name,
-                        constraint_name=clear_table_name(self._objects_table_name),
-                        TRASHED_ID=TRASHED_ID,
+                async with conn.transaction():
+                    await self.create(conn)
+                    # only available on new databases
+                    await conn.execute(
+                        self._unique_constraint.format(
+                            objects_table_name=self._objects_table_name,
+                            constraint_name=clear_table_name(self._objects_table_name),
+                            TRASHED_ID=TRASHED_ID,
+                        ).replace("CONCURRENTLY", "")
                     )
-                )
-                self._supports_unique_constraints = True
-                await conn.execute(trash_sql)
-                self._connection_initialized_on = time.time()
+                    self._supports_unique_constraints = True
+                    await conn.execute(trash_sql)
+                    await notify(StorageCreatedEvent(self, db_conn=conn))
 
-        if created:
-            await notify(StorageCreatedEvent(self))
+        self._connection_initialized_on = time.time()
 
     async def remove(self):
         """Reset the tables"""
