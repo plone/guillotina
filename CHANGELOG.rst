@@ -8,10 +8,17 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.1.17 (unreleased)
+5.1.18 (unreleased)
 -------------------
 
 - Nothing changed yet.
+
+
+5.1.17 (2019-11-22)
+-------------------
+
+- Fix potential deadlock issues when storage read conn handling
+  [vangheem]
 
 
 5.1.16 (2019-11-21)
