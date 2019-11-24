@@ -6,9 +6,17 @@ from guillotina.request import Request
 from guillotina.response import ASGISimpleResponse
 
 import asyncio
+import enum
 
 
 logger = glogging.getLogger("guillotina")
+
+
+class AppState(enum.IntEnum):
+
+    STARTING = 0
+    INITIALIZED = 1
+    SHUTDOWN = 2
 
 
 class AsgiApp:
@@ -19,7 +27,7 @@ class AsgiApp:
         self.loop = loop
         self.on_cleanup = []
         self.route = None
-        self.initialized = False
+        self.state = AppState.STARTING
 
     def __call__(self, scope, receive=None, send=None):
         """
@@ -50,6 +58,9 @@ class AsgiApp:
                     return
 
     async def startup(self):
+        if self.state == AppState.INITIALIZED:
+            return
+
         try:
             from guillotina.factory.app import startup_app
 
@@ -58,20 +69,23 @@ class AsgiApp:
             self.app = await startup_app(
                 config_file=self.config_file, settings=self.settings, loop=self.loop, server_app=self
             )
-            self.initialized = True
+            self.state = AppState.INITIALIZED
             return self.app
-        except Exception as e:
+        except Exception:
             logger.exception("Something crashed during app startup")
-            raise e
+            raise
 
     async def shutdown(self):
+        if self.state == AppState.SHUTDOWN:
+            return
         for clean in self.on_cleanup:
             await clean(self)
+        self.state = AppState.SHUTDOWN
 
     async def handler(self, scope, receive, send):
         # Ensure the ASGI server has initialized the server before sending a request
         # Some ASGI servers (i.e. daphne) doesn't implement the lifespan protocol.
-        if not self.initialized:
+        if not self.state == AppState.INITIALIZED:
             raise RuntimeError("The app is not initialized")
 
         if scope["type"] == "websocket":

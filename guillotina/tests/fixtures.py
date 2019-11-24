@@ -22,6 +22,7 @@ from guillotina.transactions import transaction
 from guillotina.utils import merge_dicts
 from unittest import mock
 
+import aiohttp
 import asyncio
 import json
 import os
@@ -171,7 +172,7 @@ def db():
             pytest_docker_fixtures.pg_image.stop()
 
 
-class GuillotinaDBRequester(object):
+class GuillotinaDBAsgiRequester(object):
     def __init__(self, client):
         self.client = client
         self.root = get_utility(IApplication, name="root")
@@ -245,6 +246,95 @@ class GuillotinaDBRequester(object):
             request = get_mocked_request(db=self.db)
         login()
         return wrap_request(request, transaction(db=self.db, adopt_parent_txn=True))
+
+    async def close(self):
+        pass
+
+
+class GuillotinaDBHttpRequester(object):
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.client = aiohttp.ClientSession()
+        self.root = get_utility(IApplication, name="root")
+        self.db = self.root["db"]
+
+    async def __call__(
+        self,
+        method,
+        path,
+        params=None,
+        data=None,
+        authenticated=True,
+        auth_type="Basic",
+        headers={},
+        token=testing.ADMIN_TOKEN,
+        accept="application/json",
+        allow_redirects=True,
+    ):
+
+        value, status, _ = await self.make_request(
+            method,
+            path,
+            params=params,
+            data=data,
+            authenticated=authenticated,
+            auth_type=auth_type,
+            headers=headers,
+            token=token,
+            accept=accept,
+            allow_redirects=allow_redirects,
+        )
+        return value, status
+
+    async def make_request(
+        self,
+        method,
+        path,
+        params=None,
+        data=None,
+        authenticated=True,
+        auth_type="Basic",
+        headers={},
+        token=testing.ADMIN_TOKEN,
+        accept="application/json",
+        allow_redirects=True,
+    ):
+        settings = {}
+        headers = headers.copy()
+        settings["headers"] = headers
+        if accept is not None:
+            settings["headers"]["ACCEPT"] = accept
+        if authenticated and token is not None:
+            settings["headers"]["AUTHORIZATION"] = "{} {}".format(auth_type, token)
+
+        settings["params"] = params
+        settings["data"] = data
+        settings["allow_redirects"] = allow_redirects
+
+        async with aiohttp.ClientSession() as session:
+            operation = getattr(session, method.lower(), None)
+            async with operation(self.make_url(path), **settings) as resp:
+                try:
+                    value = await resp.json()
+                except aiohttp.client_exceptions.ContentTypeError:
+                    value = await resp.read()
+
+                status = resp.status
+                return value, status, resp.headers
+
+    def transaction(self, request=None):
+        if request is None:
+            request = get_mocked_request(db=self.db)
+        login()
+        return wrap_request(request, transaction(db=self.db, adopt_parent_txn=True))
+
+    def make_url(self, path):
+        return f"http://{self.host}:{self.port}{path}"
+
+    async def close(self):
+        if not self.client.closed:
+            await self.client.close()
 
 
 def clear_task_vars():
@@ -361,6 +451,35 @@ SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
 
 
 @pytest.fixture(scope="function")
+async def app(event_loop, db, request):
+    globalregistry.reset()
+    settings = get_db_settings(request.node)
+    app = make_app(settings=settings, loop=event_loop)
+
+    server_settings = settings.get("test_server_settings", {})
+    host = server_settings.get("host", "127.0.0.1")
+    port = int(server_settings.get("port", 8000))
+
+    from uvicorn import Config, Server
+
+    config = Config(app, host=host, port=port, lifespan="on")
+    server = Server(config=config)
+    asyncio.create_task(server.serve())
+
+    while app.app is None:
+        # Wait for app initialization
+        await asyncio.sleep(0.05)
+
+    await _clear_dbs(app.app.root)
+
+    yield host, port
+
+    server.should_exit = True
+    await asyncio.sleep(1)  # There is no other way to wait for server shutdown
+    clear_task_vars()
+
+
+@pytest.fixture(scope="function")
 async def app_client(event_loop, db, request):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(request.node), loop=event_loop)
@@ -379,13 +498,24 @@ async def guillotina_main(app_client):
 @pytest.fixture(scope="function")
 def guillotina(app_client):
     _, client = app_client
-    requester = GuillotinaDBRequester(client)
+    requester = GuillotinaDBAsgiRequester(client)
     yield requester
+
+
+@pytest.fixture(scope="function")
+def guillotina_server(app):
+    host, port = app
+    return GuillotinaDBHttpRequester(host, port)
 
 
 @pytest.fixture(scope="function")
 def container_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina)
+
+
+@pytest.fixture(scope="function")
+def container_requester_server(guillotina_server):
+    return ContainerRequesterAsyncContextManager(guillotina_server)
 
 
 async def _bomb_shelter(future, timeout=2):
