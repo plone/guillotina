@@ -4,7 +4,8 @@ CHANGELOG
 5.1.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Make sure to reset registry task var when setting up new container
+  [vangheem]
 
 
 5.1.17 (2019-11-22)

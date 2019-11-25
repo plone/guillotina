@@ -63,6 +63,7 @@ class ShellHelpers:
         if self._active_txn:
             task_vars.txn.set(self._active_txn)
         if self._active_container:
+            task_vars.registry.set(None)
             task_vars.container.set(self._active_container)
 
 

@@ -37,6 +37,7 @@ class ContentAPI:
         await self.abort()
 
     async def use_container(self, container: IContainer):
+        task_vars.registry.set(None)
         task_vars.container.set(container)
         registry = await get_registry(container)
         if registry is not None:
