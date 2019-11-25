@@ -157,6 +157,7 @@ class TestDataCommand(Command):
                 await tm.abort(txn=txn)
             txn = await tm.begin()
 
+        task_vars.registry.set(None)
         task_vars.container.set(container)
 
         api = WikipediaAPI()

@@ -30,6 +30,7 @@ class Navigator:
         self.index = weakref.WeakValueDictionary()
         self.deleted = {}
 
+        task_vars.registry.set(None)
         task_vars.container.set(container)
         task_vars.txn.set(txn)
 
