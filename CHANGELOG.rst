@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.18 (unreleased)
+5.1.18 (2019-11-25)
 -------------------
 
 - Make sure to reset registry task var when setting up new container
