@@ -14,6 +14,7 @@
 from guillotina.component._compat import _BLANK
 from guillotina.component.interfaces import IComponentLookup
 from guillotina.profile import profilable
+from typing import Type
 from zope.interface import implementer
 from zope.interface import providedBy
 from zope.interface.adapter import AdapterLookup
@@ -113,8 +114,10 @@ class GuillotinaAdapterRegistry(AdapterRegistry):
     Customized adapter registry for async
     """
 
+    LookupClass: Type[GuillotinaAdapterLookup]
+
     _delegated = AdapterRegistry._delegated + ("asubscribers",)  # type: ignore
-    if os.environ.get("GDEBUG_SUBSCRIBERS") in ("1", "true", "t"):
+    if os.environ.get("GDEBUG_SUBSCRIBERS", "").lower() in ("1", "true", "t"):
         LookupClass = DebugGuillotinaAdapterLookup
     else:
         LookupClass = GuillotinaAdapterLookup
