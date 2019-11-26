@@ -198,12 +198,14 @@ class BaseMatchInfo(AbstractMatchInfo):
                     resp.headers["XG-Total-Cache-misses"] = str(txn._manager._cache_misses)
                     resp.headers["XG-Total-Cache-stored"] = str(txn._manager._cache_stored)
                     resp.headers["XG-Num-Queries"] = str(txn._query_count_end - txn._query_count_start)
-                    for idx, query in enumerate(txn._queries.keys()):
-                        counts = txn._queries[query]
-                        duration = "{0:.5f}".format(counts[1] * 1000)
-                        resp.headers[
-                            f"XG-Query-{idx}"
-                        ] = f"count: {counts[0]}, time: {duration}, query: {query}"  # noqa
+                    if hasattr(txn, "_queries"):  # pragma: no cover
+                        # only when GDEBUG active
+                        for idx, query in enumerate(txn._queries.keys()):
+                            counts = txn._queries[query]
+                            duration = "{0:.5f}".format(counts[1] * 1000)
+                            resp.headers[
+                                f"XG-Query-{idx}"
+                            ] = f"count: {counts[0]}, time: {duration}, query: {query}"  # noqa
             except (KeyError, AttributeError):
                 resp.headers["XG-Error"] = "Could not get stats"
 
