@@ -102,6 +102,7 @@ async def get_containers():
             for _, container in items.items():
                 with await tm.begin() as txn:
                     container.__txn__ = txn
+                    task_vars.registry.set(None)  # reset on new container
                     task_vars.container.set(container)
                     yield txn, tm, container
                     try:

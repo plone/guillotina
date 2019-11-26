@@ -1,5 +1,6 @@
 from guillotina.commands import Command
 from guillotina.utils import get_containers
+from guillotina.utils import iter_databases
 from guillotina.utils import lazy_apply
 
 import importlib.util
@@ -41,6 +42,10 @@ async def run(container):
             return
         sig = inspect.signature(module.run)
         if "container" in sig.parameters:
+            async for db in iter_databases():
+                # preload dynamic dbs
+                pass
+
             async for txn, tm, container in get_containers():
                 await module.run(container)
                 await tm.commit(txn=txn)

@@ -8,10 +8,17 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.1.18 (unreleased)
+5.1.19 (unreleased)
 -------------------
 
 - Nothing changed yet.
+
+
+5.1.18 (2019-11-25)
+-------------------
+
+- Make sure to reset registry task var when setting up new container
+  [vangheem]
 
 
 5.1.17 (2019-11-22)
