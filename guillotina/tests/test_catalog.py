@@ -69,6 +69,7 @@ async def test_get_index_data_with_accessors(dummy_txn_root):
 
         data = ICatalogDataAdapter(ob)
         fields = await data()
+
         for field_name in (
             "categories_accessor",
             "foobar_accessor",

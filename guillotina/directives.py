@@ -55,7 +55,7 @@ def merged_tagged_value_list(schema, name):
     tv = []
     for iface in reversed(schema.__iro__):
         tv.extend(iface.queryTaggedValue(name, []))
-    return tv
+    return list(set(tv))
 
 
 class MetadataDictDirective(Directive):

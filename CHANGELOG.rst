@@ -4,7 +4,8 @@ CHANGELOG
 5.1.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Update default zope.interface to 4.7.1
+  [bloodbare]
 
 
 5.1.18 (2019-11-25)
