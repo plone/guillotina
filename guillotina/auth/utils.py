@@ -8,7 +8,6 @@ from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IPrincipal
 from guillotina.profile import profilable
-from guillotina.utils import get_security_policy
 from typing import Optional
 
 import jwt
