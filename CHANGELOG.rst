@@ -7,6 +7,10 @@ CHANGELOG
 - Update default zope.interface to 4.7.1
   [bloodbare]
 
+- Be able to provide `DEBUG_SUBSCRIBERS` env variable to get details about
+  event timings being run.
+  [vangheem]
+
 
 5.1.18 (2019-11-25)
 -------------------
