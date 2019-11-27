@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.20 (unreleased)
+5.1.20 (2019-11-27)
 -------------------
 
 - Fix security bug: anonymous users were being granted
