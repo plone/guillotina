@@ -3,11 +3,13 @@ from datetime import timedelta
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth import groups  # noqa
+from guillotina.auth.users import AnonymousUser
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IPrincipal
 from guillotina.profile import profilable
+from guillotina.utils import get_security_policy
 from typing import Optional
 
 import jwt
@@ -30,6 +32,11 @@ async def authenticate_request(request) -> Optional[IPrincipal]:
 
 
 def set_authenticated_user(user):
+    if user is not None and not isinstance(user, AnonymousUser):
+        policy = get_security_policy(user)
+        policy.invalidate_cache()
+        if hasattr(user, "roles") and "guillotina.Authenticated" not in user.roles:
+            user.roles["guillotina.Authenticated"] = 1
     task_vars.authenticated_user.set(user)
 
 
