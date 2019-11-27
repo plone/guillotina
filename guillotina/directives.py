@@ -1,5 +1,6 @@
 from typing import Any
 from zope.interface.interface import TAGGED_DATA
+from zope.interface.interface import Element
 
 import sys
 
@@ -23,13 +24,14 @@ class DirectiveClass(type):
 
     def apply(self, IClass, *args, **kw):  # noqa: N803
         instance = self.__instance
-        existing = IClass.queryTaggedValue(instance.key)
+        existing = Element.queryTaggedValue(IClass, instance.key, default=None)
         tags = {}
         if existing:
             tags[instance.key] = existing
         value = instance.factory(*args, **kw)
         instance.store(tags, value)
-        IClass.setTaggedValue(instance.key, tags[instance.key])
+        Element.setTaggedValue(IClass, instance.key, tags[instance.key])
+        # IClass.setTaggedValue(instance.key, tags[instance.key])
         return self
 
 
@@ -54,7 +56,7 @@ def merged_tagged_value_list(schema, name):
     """
     tv = []
     for iface in reversed(schema.__iro__):
-        tv.extend(iface.queryTaggedValue(name, []))
+        tv.extend(Element.queryTaggedValue(iface, name, default=[]))
     return list(set(tv))
 
 
@@ -68,15 +70,15 @@ class MetadataDictDirective(Directive):
         tags.setdefault(self.key, {}).update(value)
 
 
-def merged_tagged_value_dict(iface, name):
+def merged_tagged_value_dict(schema, name):
     """Look up the tagged value 'name' in schema and all its bases, assuming
     that the value under 'name' is a dict. Return a dict that consists of
     all dict items, with those from more-specific interfaces overriding those
     from more-general ones.
     """
     tv = {}
-    for iface in reversed(iface.__iro__):
-        tv.update(iface.queryTaggedValue(name, {}))
+    for iface in reversed(schema.__iro__):
+        tv.update(Element.queryTaggedValue(iface, name, default={}))
     return tv
 
 
