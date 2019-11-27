@@ -4,6 +4,9 @@ CHANGELOG
 5.1.19 (unreleased)
 -------------------
 
+- Fix security bug: anonymous users were being granted
+  guillotina.Authenticated [lferran]
+
 - Update default zope.interface to 4.7.1
   [bloodbare]
 

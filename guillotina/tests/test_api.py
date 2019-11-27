@@ -645,7 +645,7 @@ async def test_raise_http_exception_works(container_requester):
         assert status == 422
 
 
-async def test_my_endpoint(container_requester):
+async def test_anonymous_user_does_not_get_authenticated_role(container_requester):
     async with container_requester as requester:
         # Make call as anonymous user
         _, status = await requester("GET", "/@myEndpoint", auth_type="Bearer", token="foo")
