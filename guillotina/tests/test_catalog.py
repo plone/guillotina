@@ -36,6 +36,7 @@ PG_CATALOG_SETTINGS = {
     },
 }
 
+
 class ICustomItem(IResource):
 
     pass
