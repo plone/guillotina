@@ -31,11 +31,6 @@ async def authenticate_request(request) -> Optional[IPrincipal]:
 
 
 def set_authenticated_user(user):
-    if user is not None:
-        policy = get_security_policy(user)
-        policy.invalidate_cache()
-        if hasattr(user, "roles") and "guillotina.Authenticated" not in user.roles:
-            user.roles["guillotina.Authenticated"] = 1
     task_vars.authenticated_user.set(user)
 
 

@@ -34,6 +34,7 @@ class GuillotinaUser(BaseUser):
         self.id = user_id
         self._groups = groups or []
         self._roles = roles or {}
+        self._roles["guillotina.Authenticated"] = Allow
         self._permissions = permissions or {}
         self._properties = properties or {}
 
@@ -59,3 +60,4 @@ class AnonymousUser(GuillotinaUser):
         super().__init__()
         self.id = ANONYMOUS_USER_ID
         self._roles["guillotina.Anonymous"] = Allow
+        self._roles.pop("guillotina.Authenticated", None)
