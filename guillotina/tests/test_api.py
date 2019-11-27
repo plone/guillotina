@@ -645,6 +645,13 @@ async def test_raise_http_exception_works(container_requester):
         assert status == 422
 
 
+async def test_my_endpoint(container_requester):
+    async with container_requester as requester:
+        # Make call as anonymous user
+        _, status = await requester("GET", "/@myEndpoint", auth_type="Bearer", token="foo")
+        assert status == 401
+
+
 async def test_addable_types(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina/@addable-types")

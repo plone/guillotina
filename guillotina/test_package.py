@@ -198,6 +198,18 @@ async def raise_http_exception(context, request):
     raise HTTPUnprocessableEntity()
 
 
+# Create a new permission and grant it to authenticated users only
+configure.permission("example.EndpointPermission", "example permission")
+configure.grant(permission="example.EndpointPermission", role="guillotina.Authenticated")
+
+
+@configure.service(
+    context=IApplication, method="GET", permission="example.EndpointPermission", name="@myEndpoint"
+)
+async def my_endpoint(context, request):
+    return {"foo": "bar"}
+
+
 class ITestAsyncUtility(IAsyncUtility):
     pass
 
