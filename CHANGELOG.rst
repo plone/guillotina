@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.19 (unreleased)
+5.1.19 (2019-11-27)
 -------------------
 
 - Update default zope.interface to 4.7.1
