@@ -1,4 +1,5 @@
 from datetime import datetime
+from guillotina import configure
 from guillotina import task_vars
 from guillotina.catalog import index
 from guillotina.catalog.utils import get_index_fields
@@ -8,10 +9,13 @@ from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import Container
 from guillotina.content import create_content
+from guillotina.content import Resource
+from guillotina.directives import index_field
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
+from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.tests import mocks
 from guillotina.tests import utils as test_utils
@@ -31,14 +35,6 @@ PG_CATALOG_SETTINGS = {
         }
     },
 }
-
-
-from zope.interface import Interface
-from guillotina import schema
-from guillotina.directives import index_field
-from guillotina.interfaces import IResource
-from guillotina import configure
-from guillotina.content import Resource
 
 class ICustomItem(IResource):
 

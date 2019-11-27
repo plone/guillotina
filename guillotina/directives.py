@@ -1,6 +1,6 @@
 from typing import Any
-from zope.interface.interface import TAGGED_DATA
 from zope.interface.interface import Element
+from zope.interface.interface import TAGGED_DATA
 
 import sys
 
