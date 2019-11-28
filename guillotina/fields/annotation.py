@@ -329,11 +329,11 @@ class BucketDictValue:
             total += bucket.get("len", 0)
         return total
 
-    async def _iter_annotations(self, context):
+    async def _iter_annotations(self, context) -> AsyncIterator[AnnotationData]:
         annotations_container = IAnnotations(context)
         for bucket in self.buckets:
             annotation_name: str = self.get_annotation_name(bucket["id"])
-            annotation = annotations_container.get(annotation_name, _default)
+            annotation: AnnotationData = annotations_container.get(annotation_name, _default)
             if annotation is _default:
                 annotation = await annotations_container.async_get(annotation_name, _default)
                 if annotation is _default:
