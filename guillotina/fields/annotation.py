@@ -330,7 +330,10 @@ class BucketDictValue:
         return total
 
     async def _iter_annotations(self, context) -> AsyncIterator[AnnotationData]:
-        annotations_container = IAnnotations(context)
+        try:
+            annotations_container = IAnnotations(context)
+        except TypeError:
+            return
         for bucket in self.buckets:
             annotation_name: str = self.get_annotation_name(bucket["id"])
             annotation: AnnotationData = annotations_container.get(annotation_name, _default)

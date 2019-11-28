@@ -66,14 +66,31 @@ async def test_bucket_dict_value(db, guillotina_main):
     async with transaction(db=db):
         container = await db.async_get("container")
         ob = await container.async_get("foobar")
-        _range = range(50, 100)
-        for index in _range:
+        for index in range(50, 100):
             await bucket.assign(ob, str(index), index)
 
         assert len(bucket) == 50
         assert await bucket.get(ob, "50") == 50
 
-        # Test iter keys, values and items
+    # Test iter keys, values and items
+    async with transaction(db=db):
+        # Test iterating on a None object
+        assert [k async for k in bucket.keys(None)] == []
+        assert [v async for v in bucket.values(None)] == []
+        assert [(k, v) async for k, v in bucket.items(None)] == []
+
+        # Test iterate on empty values
+        container = await db.async_get("container")
+        ob = await create_content_in_container(container, "Item", "foobar2")
+        assert [k async for k in bucket.keys(ob)] == []
+        assert [v async for v in bucket.values(ob)] == []
+        assert [(k, v) async for k, v in bucket.items(ob)] == []
+
+        # Add some data now
+        _range = range(50, 100)
+        for index in range(50, 100):
+            await bucket.assign(ob, str(index), index)
+
         assert [k async for k in bucket.keys(ob)] == [str(i) for i in _range]
         assert [v async for v in bucket.values(ob)] == [i for i in _range]
         assert [(k, v) async for k, v in bucket.items(ob)] == [(str(i), i) for i in _range]
