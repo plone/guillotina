@@ -329,29 +329,31 @@ class BucketDictValue:
             total += bucket.get("len", 0)
         return total
 
-    async def _iter_annotations_data(self, context):
+    async def _iter_annotations(self, context):
         annotations_container = IAnnotations(context)
         for bucket in self.buckets:
             annotation_name: str = self.get_annotation_name(bucket["id"])
             annotation = annotations_container.get(annotation_name, _default)
             if annotation is _default:
-                yield
-            yield annotation.data
+                annotation = await annotations_container.async_get(annotation_name, _default)
+                if annotation is _default:
+                    continue
+            yield annotation
 
     async def keys(self, context) -> AsyncIterator[str]:
-        async for annotation_data in self._iter_annotations_data(context):
-            for key in annotation_data["keys"]:
+        async for annotation in self._iter_annotations(context):
+            for key in annotation.data["keys"]:
                 yield key
 
     async def values(self, context) -> AsyncIterator[Any]:
-        async for annotation_data in self._iter_annotations_data(context):
-            for value in annotation_data["values"]:
+        async for annotation in self._iter_annotations(context):
+            for value in annotation.data["values"]:
                 yield value
 
     async def items(self, context) -> AsyncIterator[Tuple[str, Any]]:
-        async for annotation_data in self._iter_annotations_data(context):
-            for idx, key in enumerate(annotation_data["keys"]):
-                yield key, annotation_data["values"][idx]
+        async for annotation in self._iter_annotations(context):
+            for idx, key in enumerate(annotation.data["keys"]):
+                yield key, annotation.data["values"][idx]
 
 
 @implementer(IBucketDictField)
