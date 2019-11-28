@@ -13,6 +13,9 @@ from guillotina.interfaces import IFieldValueRenderer
 from guillotina.interfaces import IRequest
 from guillotina.response import HTTPGone
 from guillotina.response import HTTPPreconditionFailed
+from typing import Any
+from typing import AsyncIterator
+from typing import Tuple
 from zope.interface import implementer
 from zope.interface import Interface
 
@@ -325,6 +328,30 @@ class BucketDictValue:
         for bucket in self.buckets:
             total += bucket.get("len", 0)
         return total
+
+    async def _iter_annotations_data(self, context):
+        annotations_container = IAnnotations(context)
+        for bucket in self.buckets:
+            annotation_name: str = self.get_annotation_name(bucket["id"])
+            annotation = annotations_container.get(annotation_name, _default)
+            if annotation is _default:
+                yield
+            yield annotation.data
+
+    async def keys(self, context) -> AsyncIterator[str]:
+        async for annotation_data in self._iter_annotations_data(context):
+            for key in annotation_data["keys"]:
+                yield key
+
+    async def values(self, context) -> AsyncIterator[Any]:
+        async for annotation_data in self._iter_annotations_data(context):
+            for value in annotation_data["values"]:
+                yield value
+
+    async def items(self, context) -> AsyncIterator[Tuple[str, Any]]:
+        async for annotation_data in self._iter_annotations_data(context):
+            for idx, key in enumerate(annotation_data["keys"]):
+                yield key, annotation_data["values"][idx]
 
 
 @implementer(IBucketDictField)
