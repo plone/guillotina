@@ -66,8 +66,14 @@ async def test_bucket_dict_value(db, guillotina_main):
     async with transaction(db=db):
         container = await db.async_get("container")
         ob = await container.async_get("foobar")
-        for index in range(50, 100):
+        _range = range(50, 100)
+        for index in _range:
             await bucket.assign(ob, str(index), index)
 
         assert len(bucket) == 50
         assert await bucket.get(ob, "50") == 50
+
+        # Test iter keys, values and items
+        assert [k async for k in bucket.keys(ob)] == [str(i) for i in _range]
+        assert [v async for v in bucket.values(ob)] == [i for i in _range]
+        assert [(k, v) async for k, v in bucket.items(ob)] == [(str(i), i) for i in _range]
