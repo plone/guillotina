@@ -4,8 +4,8 @@ CHANGELOG
 5.1.21 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Allow to iterate keys, values and items of a BucketDictValue
+  [lferran]
 
 5.1.20 (2019-11-27)
 -------------------

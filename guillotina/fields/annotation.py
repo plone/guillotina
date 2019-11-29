@@ -13,6 +13,9 @@ from guillotina.interfaces import IFieldValueRenderer
 from guillotina.interfaces import IRequest
 from guillotina.response import HTTPGone
 from guillotina.response import HTTPPreconditionFailed
+from typing import Any
+from typing import AsyncIterator
+from typing import Tuple
 from zope.interface import implementer
 from zope.interface import Interface
 
@@ -100,7 +103,7 @@ class BucketListValue:
             metadata["len"] = metadata.get("len", 0) - 1
             annotation.register()
 
-    async def iter_buckets(self, context):
+    async def iter_buckets(self, context) -> AsyncIterator[AnnotationData]:
         for index in sorted(self.annotations_metadata.keys()):
             annotation_name = self.get_annotation_name(index)
             annotations_container = IAnnotations(context)
@@ -325,6 +328,35 @@ class BucketDictValue:
         for bucket in self.buckets:
             total += bucket.get("len", 0)
         return total
+
+    async def iter_buckets(self, context) -> AsyncIterator[AnnotationData]:
+        try:
+            annotations_container = IAnnotations(context)
+        except TypeError:
+            return
+        for bucket in self.buckets:
+            annotation_name: str = self.get_annotation_name(bucket["id"])
+            annotation: AnnotationData = annotations_container.get(annotation_name, _default)
+            if annotation is _default:
+                annotation = await annotations_container.async_get(annotation_name, _default)
+                if annotation is _default:
+                    continue
+            yield annotation
+
+    async def iter_keys(self, context) -> AsyncIterator[str]:
+        async for bucket in self.iter_buckets(context):
+            for key in bucket.data["keys"]:
+                yield key
+
+    async def iter_values(self, context) -> AsyncIterator[Any]:
+        async for bucket in self.iter_buckets(context):
+            for value in bucket.data["values"]:
+                yield value
+
+    async def iter_items(self, context) -> AsyncIterator[Tuple[str, Any]]:
+        async for bucket in self.iter_buckets(context):
+            for idx, key in enumerate(bucket.data["keys"]):
+                yield key, bucket.data["values"][idx]
 
 
 @implementer(IBucketDictField)
