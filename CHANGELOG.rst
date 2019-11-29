@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.21 (unreleased)
+5.1.21 (2019-11-29)
 -------------------
 
 - Allow to iterate keys, values and items of a BucketDictValue
