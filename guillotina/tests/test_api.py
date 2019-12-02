@@ -615,7 +615,7 @@ async def test_duplicate_content(container_requester):
 
 
 @pytest.mark.app_settings(DBUSERS_DEFAULT_SETTINGS)
-async def test_duplicate_content_allways_checks_permission_on_destination(dbusers_requester):
+async def test_duplicate_content_always_checks_permission_on_destination(dbusers_requester):
     async with dbusers_requester as requester:
         # Add Bob user
         _, status = await requester(
@@ -686,7 +686,7 @@ async def test_duplicate_content_allways_checks_permission_on_destination(dbuser
         )
 
         # Alice tries to duplicate the file into Bob's folder
-        _, status = await requester(
+        resp, status = await requester(
             "POST",
             "/db/guillotina/users/bob/foobar1/@duplicate",
             data=json.dumps(
@@ -700,6 +700,7 @@ async def test_duplicate_content_allways_checks_permission_on_destination(dbuser
             token=alice_token,
         )
         assert status == 412
+        assert "You do not have permission to add content to the destination object" in resp["message"]
 
 
 async def test_create_content_fields(container_requester):

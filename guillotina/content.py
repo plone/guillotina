@@ -647,8 +647,8 @@ async def get_all_behaviors(content, create=False, load=True) -> list:
 
 async def duplicate(
     context: IResource,
-    destination: Union[IResource, str] = None,
-    new_id: str = None,
+    destination: Optional[Union[IResource, str]] = None,
+    new_id: Optional[str] = None,
     check_permission: bool = True,
 ) -> IResource:
     if destination is not None:
