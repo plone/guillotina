@@ -2,6 +2,7 @@ from datetime import datetime
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
+from guillotina.auth.users import GuillotinaUser
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IAnnotations
@@ -9,10 +10,12 @@ from guillotina.interfaces import IFile
 from guillotina.interfaces import IResource
 from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
+from guillotina.tests.dbusers.settings import DEFAULT_SETTINGS as DBUSERS_DEFAULT_SETTINGS
 from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
 from zope.interface import Interface
 
+import base64
 import json
 import pytest
 
@@ -610,6 +613,89 @@ async def test_duplicate_content(container_requester):
         assert len(response) == 2
         assert "foobar1" in response
         assert "foobar2" in response
+
+
+@pytest.mark.app_settings(DBUSERS_DEFAULT_SETTINGS)
+async def test_duplicate_content_allways_checks_permission_on_destination(dbusers_requester):
+    async with dbusers_requester as requester:
+        # Add Bob user
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users",
+            data=json.dumps(
+                {
+                    "@type": "User",
+                    "name": "Bob",
+                    "id": "bob",
+                    "username": "bob",
+                    "email": "bob@foo.com",
+                    "password": "bob",
+                }
+            ),
+        )
+        assert status in (200, 201)
+
+        # Add Alice user
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users",
+            data=json.dumps(
+                {
+                    "@type": "User",
+                    "name": "Alice",
+                    "id": "alice",
+                    "username": "alice",
+                    "email": "alice@foo.com",
+                    "password": "alice",
+                }
+            ),
+        )
+        assert status in (200, 201)
+
+        bob_token = base64.b64encode(b"bob:bob").decode("ascii")
+        alice_token = base64.b64encode(b"alice:alice").decode("ascii")
+
+        # Bob creates a file
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "id": "foobar1"}),
+            auth_type="Basic",
+            token=bob_token,
+        )
+
+        # Shares it with alice as manager
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/foobar1/@sharing",
+            data=json.dumps(
+                {"prinrole": [{"principal": "alice", "role": "guillotina.Owner", "setting": "Allow"}]}
+            ),
+            auth_type="Basic",
+            token=bob_token,
+        )
+        assert status == 200
+
+        # Bob creates a folder
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Folder", "id": "bobfolder"}),
+            auth_type="Basic",
+            token=bob_token,
+        )
+
+        # Alice tries to duplicate the file into Bob's folder
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/foobar1",
+            data=json.dumps(
+                {"new_id": "foobar-from-alice", "destination": "/bobfolder", "check_permission": False}
+            ),
+            auth_type="Basic",
+            token=alice_token,
+        )
+        assert status == 412
 
 
 async def test_create_content_fields(container_requester):
