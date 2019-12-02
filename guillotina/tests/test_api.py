@@ -2,7 +2,6 @@ from datetime import datetime
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
-from guillotina.auth.users import GuillotinaUser
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.interfaces import IAnnotations
