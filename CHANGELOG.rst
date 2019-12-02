@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.22 (unreleased)
+5.1.22 (2019-12-02)
 -------------------
 
 - Fix security bug in @move and @duplicate [lferran]
