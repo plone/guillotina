@@ -615,7 +615,7 @@ async def test_duplicate_content(container_requester):
 
 
 @pytest.mark.app_settings(DBUSERS_DEFAULT_SETTINGS)
-async def test_duplicate_content_always_checks_permission_on_destination(dbusers_requester):
+async def test_duplicate_and_move_always_checks_permission_on_destination(dbusers_requester):
     async with dbusers_requester as requester:
         # Add Bob user
         _, status = await requester(
@@ -689,6 +689,23 @@ async def test_duplicate_content_always_checks_permission_on_destination(dbusers
         resp, status = await requester(
             "POST",
             "/db/guillotina/users/bob/foobar1/@duplicate",
+            data=json.dumps(
+                {
+                    "new_id": "foobar-from-alice",
+                    "destination": "/users/bob/bobfolder",
+                    "check_permission": False,
+                }
+            ),
+            auth_type="Basic",
+            token=alice_token,
+        )
+        assert status == 412
+        assert "You do not have permission to add content to the destination object" in resp["message"]
+
+        # Alice tries to move the file into Bob's folder
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/foobar1/@move",
             data=json.dumps(
                 {
                     "new_id": "foobar-from-alice",

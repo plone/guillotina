@@ -733,8 +733,8 @@ async def duplicate(
 
 async def move(
     context: IResource,
-    destination: Union[IResource, str] = None,
-    new_id: str = None,
+    destination: Optional[Union[IResource, str]] = None,
+    new_id: Optional[str] = None,
     check_permission: bool = True,
 ) -> None:
     if destination is None:
