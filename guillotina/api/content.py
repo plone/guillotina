@@ -621,7 +621,7 @@ async def duplicate(context, request):
         data = {}
 
     try:
-        new_obj = await content.duplicate(context, **data)
+        new_obj = await content.duplicate(context, **data, check_permission=True)
     except TypeError:
         raise ErrorResponse(
             "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412

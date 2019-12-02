@@ -655,19 +655,20 @@ async def test_duplicate_content_allways_checks_permission_on_destination(dbuser
         bob_token = base64.b64encode(b"bob:bob").decode("ascii")
         alice_token = base64.b64encode(b"alice:alice").decode("ascii")
 
-        # Bob creates a file
-        await requester(
+        # Bob creates a file in its folder
+        _, status = await requester(
             "POST",
-            "/db/guillotina/",
+            "/db/guillotina/users/bob/",
             data=json.dumps({"@type": "Item", "id": "foobar1"}),
             auth_type="Basic",
             token=bob_token,
         )
+        assert status in (200, 201)
 
         # Shares it with alice as manager
         _, status = await requester(
             "POST",
-            "/db/guillotina/foobar1/@sharing",
+            "/db/guillotina/users/bob/foobar1/@sharing",
             data=json.dumps(
                 {"prinrole": [{"principal": "alice", "role": "guillotina.Owner", "setting": "Allow"}]}
             ),
@@ -679,7 +680,7 @@ async def test_duplicate_content_allways_checks_permission_on_destination(dbuser
         # Bob creates a folder
         await requester(
             "POST",
-            "/db/guillotina/",
+            "/db/guillotina/users/bob/",
             data=json.dumps({"@type": "Folder", "id": "bobfolder"}),
             auth_type="Basic",
             token=bob_token,
@@ -688,9 +689,13 @@ async def test_duplicate_content_allways_checks_permission_on_destination(dbuser
         # Alice tries to duplicate the file into Bob's folder
         _, status = await requester(
             "POST",
-            "/db/guillotina/foobar1",
+            "/db/guillotina/users/bob/foobar1/@duplicate",
             data=json.dumps(
-                {"new_id": "foobar-from-alice", "destination": "/bobfolder", "check_permission": False}
+                {
+                    "new_id": "foobar-from-alice",
+                    "destination": "/users/bob/bobfolder",
+                    "check_permission": False,
+                }
             ),
             auth_type="Basic",
             token=alice_token,

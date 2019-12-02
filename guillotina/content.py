@@ -700,6 +700,7 @@ async def duplicate(
         id=new_id,
         creators=context.creators,
         contributors=context.contributors,
+        check_security=check_permission,
     )
 
     for key in context.__dict__.keys():
