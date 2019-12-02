@@ -623,7 +623,7 @@ async def duplicate(context, request):
         new_obj = await content.duplicate(
             context, destination=data.get("destination"), new_id=data.get("new_id"), check_permission=True
         )
-    except TypeError as err:
+    except TypeError:
         raise ErrorResponse(
             "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412
         )
