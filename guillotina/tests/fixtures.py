@@ -470,9 +470,8 @@ async def app(event_loop, db, request):
         # Wait for app initialization
         await asyncio.sleep(0.05)
 
-    exc = task.exception()
-    if exc:
-        raise exc
+    if task.done():
+        task.result()
 
     await _clear_dbs(app.app.root)
 
