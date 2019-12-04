@@ -464,11 +464,15 @@ async def app(event_loop, db, request):
 
     config = Config(app, host=host, port=port, lifespan="on")
     server = Server(config=config)
-    asyncio.create_task(server.serve())
+    task = asyncio.create_task(server.serve())
 
-    while app.app is None:
+    while app.app is None and not task.done():
         # Wait for app initialization
         await asyncio.sleep(0.05)
+
+    exc = task.exception()
+    if exc:
+        raise exc
 
     await _clear_dbs(app.app.root)
 

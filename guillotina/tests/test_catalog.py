@@ -59,7 +59,7 @@ class CustomItem(Resource):
     """
 
 
-def test_indexed_fields(dummy_guillotina):
+async def test_indexed_fields(dummy_guillotina):
     fields = get_index_fields("Item")
     assert "uuid" in fields
     assert "path" in fields
