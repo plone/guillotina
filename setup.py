@@ -34,7 +34,7 @@ setup(
     version=open("VERSION").read().strip(),
     description="asyncio REST API Resource database",  # noqa
     long_description=long_description,
-    keywords=["asyncio", "REST", "Framework", "transactional"],
+    keywords=["asyncio", "REST", "Framework", "transactional", "asgi"],
     author="Ramon Navarro Bosch & Nathan Van Gheem",
     author_email="ramon@plone.org",
     classifiers=[
@@ -54,8 +54,6 @@ setup(
     package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"], "guillotina": ["py.typed"]},
     packages=find_packages(),
     install_requires=[
-        'aiohttp>=3.0.0,<3.6.0;python_version<"3.8"',
-        'aiohttp>=3.6.0,<4.0.0;python_version>="3.8"',
         "jsonschema",
         "python-dateutil",
         "pycryptodome",
@@ -82,14 +80,20 @@ setup(
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=7.0",
+            "async-asgi-testclient~=1.2.0",
         ],
         "docs": [
+            "aiohttp>=3.0.0,<4.0.0",
             "sphinx",
             "recommonmark",
             "sphinxcontrib-httpdomain",
             "sphinxcontrib-httpexample",
             "sphinx-guillotina-theme",
             "sphinx-autodoc-typehints",
+        ],
+        "testdata": [
+            'aiohttp>=3.0.0,<3.6.0;python_version<"3.8"',
+            'aiohttp>=3.6.0,<4.0.0;python_version>="3.8"',
         ],
         "redis": ['aioredis>=1.2.0;python_version<"3.8"', 'aioredis>=1.3.0;python_version>="3.8"'],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],

@@ -4,13 +4,16 @@ from guillotina.interfaces import IMailer
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 @pytest.mark.app_settings(
     {
         "applications": ["guillotina", "guillotina.contrib.mailer"],
         "mailer": {"utility": "guillotina.contrib.mailer.utility.TestMailerUtility"},
     }
 )
-async def test_send_mail(guillotina_main, loop):
+async def test_send_mail(guillotina_main, event_loop):
 
     util = get_utility(IMailer)
     await util.send(

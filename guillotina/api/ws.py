@@ -1,4 +1,3 @@
-from aiohttp import web
 from guillotina import configure
 from guillotina import logger
 from guillotina import routes
@@ -8,10 +7,11 @@ from guillotina.api.service import Service
 from guillotina.auth.extractors import BasicAuthPolicy
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
-from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPermission
+from guillotina.request import WebSocketJsonDecodeError
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
 from guillotina.utils import get_jwk_key
@@ -20,7 +20,6 @@ from jwcrypto import jwe
 from jwcrypto.common import json_encode
 from urllib import parse
 
-import aiohttp
 import time
 import ujson
 
@@ -148,8 +147,8 @@ class WebsocketsView(Service):
             view = (await view.prepare()) or view
 
         view_result = await view()
-        if IAioHTTPResponse.providedBy(view_result):
-            raise Exception("Do not accept raw aiohttp exceptions in ws")
+        if IASGIResponse.providedBy(view_result):
+            raise Exception("Do not accept raw ASGI exceptions in ws")
         else:
             from guillotina.traversal import apply_rendering
 
@@ -165,31 +164,29 @@ class WebsocketsView(Service):
     async def __call__(self):
         tm = get_tm()
         await tm.abort()
-        ws = web.WebSocketResponse()
-        await ws.prepare(self.request)
+        ws = self.request.get_ws()
+        await ws.prepare()
 
         async for msg in ws:
-            if msg.type == aiohttp.WSMsgType.text:
+            try:
+                message = msg.json
+            except WebSocketJsonDecodeError:
+                # We only care about json messages
+                logger.warning("Invalid websocket payload, ignored: {}".format(msg))
+                continue
+
+            if message["op"].lower() == "close":
+                await ws.close()
+            elif message["op"].lower() == "get":
+                txn = await tm.begin()
                 try:
-                    message = ujson.loads(msg.data)
-                except ValueError:
-                    logger.warning("Invalid websocket payload, ignored: {}".format(msg.data))
-                    continue
-                if message["op"] == "close":
-                    await ws.close()
-                elif message["op"].lower() == "get":
-                    txn = await tm.begin()
-                    try:
-                        await self.handle_ws_request(ws, message)
-                    except Exception:
-                        logger.error("Exception on ws", exc_info=True)
-                    finally:
-                        # only currently support GET requests which are *never*
-                        # supposed to be commits
-                        await tm.abort(txn=txn)
-            elif msg.type == aiohttp.WSMsgType.error:
-                logger.debug("ws connection closed with exception {0:s}".format(ws.exception()))
+                    await self.handle_ws_request(ws, message)
+                except Exception:
+                    logger.error("Exception on ws", exc_info=True)
+                finally:
+                    # only currently support GET requests which are *never*
+                    # supposed to be commits
+                    await tm.abort(txn=txn)
 
         logger.debug("websocket connection closed")
-
         return {}

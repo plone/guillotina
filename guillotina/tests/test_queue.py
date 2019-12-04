@@ -5,6 +5,10 @@ from guillotina.component import get_utility
 from guillotina.tests import utils
 
 import asyncio
+import pytest
+
+
+pytestmark = pytest.mark.asyncio
 
 
 class AsyncMockView(View):
@@ -19,7 +23,8 @@ class AsyncMockView(View):
         await self.func(*self.args, **self.kwargs)
 
 
-async def test_add_sync_utility(guillotina, loop):
+async def test_add_sync_utility(guillotina):
+
     util = get_utility(IQueueUtility)
     var = []
 
@@ -67,7 +72,7 @@ async def test_run_jobs(guillotina):
     assert job.func.done
 
 
-async def test_run_many_jobs(guillotina, dummy_request):
+async def test_run_many_jobs(guillotina):
     pool = get_utility(IAsyncJobPool)
     jobs = [pool.add_job(JobRunner(), args=["foobar"]) for _ in range(20)]
     assert pool.num_running == 5

@@ -47,9 +47,9 @@ library.
 These response objects should have simple dict values for their content if provided.
 
 
-### Bypassing reponses rendering
+### Bypassing responses rendering
 
-If you return any aiohttp based response objects, they will be ignored by the rendering
+If you return a `guillotina.response.ASGISimpleResponse` response object, they will be ignored by the rendering
 framework.
 
 This is useful when streaming data for example and it should not be transformed.

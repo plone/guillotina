@@ -8,7 +8,8 @@ import pytest
 @pytest.mark.app_settings(
     {"applications": ["guillotina", "guillotina.contrib.redis", "guillotina.contrib.pubsub"]}
 )
-async def test_pubsub(redis_container, guillotina_main, loop):
+@pytest.mark.asyncio
+async def test_pubsub(redis_container, guillotina_main):
     util = get_utility(IPubSubUtility)
     await util.initialize()
     RESULT = []

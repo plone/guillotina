@@ -3,6 +3,10 @@ from guillotina.testing import TESTING_SETTINGS
 
 import json
 import jwt
+import pytest
+
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_login(container_requester):

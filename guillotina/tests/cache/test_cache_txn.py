@@ -17,7 +17,7 @@ DEFAULT_SETTINGS = {
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_txn_uses_cached_hits_on_annotations(redis_container, guillotina_main, loop):
+async def test_txn_uses_cached_hits_on_annotations(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
 
@@ -104,7 +104,7 @@ class MockSubscriber:
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_txn_push_updates_to_subscriber(redis_container, guillotina_main, loop):
+async def test_txn_push_updates_to_subscriber(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
     app_settings["cache"]["updates_channel"] = "foobar"
@@ -120,7 +120,7 @@ async def test_txn_push_updates_to_subscriber(redis_container, guillotina_main, 
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_txn_set_value_with_no_parent(redis_container, guillotina_main, loop):
+async def test_txn_set_value_with_no_parent(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
     app_settings["cache"]["updates_channel"] = "foobar"

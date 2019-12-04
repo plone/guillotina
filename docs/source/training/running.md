@@ -45,7 +45,6 @@ Also, do a `GET` on `http://localhost:8080/db`.
 
 ## Useful run options
 
-- `--reload`: auto reload on code changes. `requires aiohttp_autoreload`
 - `--profile`: profile Guillotina while it's running
 - `--profile-output`: where to save profiling output
 - `--monitor`: run with aiomonitor. `requires aiomonitor`

@@ -10,6 +10,9 @@ import os
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 pytest.mark.skipif(os.environ.get("DATABASE") == "cockroachdb", reason="Flaky cockroachdb test")
 
 

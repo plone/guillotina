@@ -25,24 +25,30 @@ from guillotina.json.serialize_content import SerializeFolderToJson
 from guillotina.json.serialize_content import SerializeToJson
 from guillotina.json.serialize_value import json_compatible
 
+import pytest
 
+
+@pytest.mark.asyncio
 async def test_DatabaseSpecialPermissions_IDatabase(dummy_txn_root):  # noqa: N802
     async with dummy_txn_root as root:
         adapter = get_adapter(root, interface=IPrincipalPermissionManager)
         assert isinstance(adapter, DatabaseSpecialPermissions)
 
 
+@pytest.mark.asyncio
 async def test_RootSpecialPermissions_IApplication(dummy_guillotina):  # noqa: N802
     root = get_utility(IApplication, name="root")
     adapter = get_adapter(root, interface=IPrincipalPermissionManager)
     assert isinstance(adapter, ApplicationSpecialPermissions)
 
 
+@pytest.mark.asyncio
 async def test_SerializeFolderToJson(dummy_request):  # noqa: N802
     adapter = get_multi_adapter((Container(), dummy_request), interface=IResourceSerializeToJson)
     assert isinstance(adapter, SerializeFolderToJson)
 
 
+@pytest.mark.asyncio
 async def test_SerializeToJson(dummy_request):  # noqa: N802
     obj = Item()
     adapter = get_multi_adapter((obj, dummy_request), interface=IResourceSerializeToJson)

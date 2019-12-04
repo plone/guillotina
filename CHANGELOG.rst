@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+6.0.0 (unreleased)
+------------------
+
+- Replaced aiohttp with ASGI (running with uvicorn by default)
+  [dmanchon,masipcat,vangheem]
+
+
 5.1.23 (unreleased)
 -------------------
 

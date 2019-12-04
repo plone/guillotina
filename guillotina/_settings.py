@@ -9,7 +9,6 @@ import pickle
 
 app_settings: Dict[str, Any] = {
     "debug": False,
-    "aiohttp_settings": {},
     "databases": [],
     "storages": {},
     "cache": {"strategy": "dummy"},

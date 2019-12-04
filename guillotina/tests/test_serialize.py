@@ -22,6 +22,9 @@ import uuid
 import zope.interface
 
 
+pytestmark = pytest.mark.asyncio
+
+
 async def test_serialize_resource(dummy_request, mock_txn):
     content = create_content()
     serializer = get_multi_adapter((content, dummy_request), IResourceSerializeToJson)
@@ -514,7 +517,7 @@ async def test_bucket_list_field(dummy_request, mock_txn):
     assert "bucketlist-bucket_list0" in content.__gannotations__
 
 
-def test_default_value_deserialize(dummy_request):
+async def test_default_value_deserialize(dummy_request):
     content = create_content()
     assert {"text": "foobar"} == deserialize_value.default_value_converter(
         ITestSchema, {"text": "foobar"}, content

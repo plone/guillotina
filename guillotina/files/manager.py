@@ -1,5 +1,4 @@
 from .const import CHUNK_SIZE
-from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
@@ -11,6 +10,7 @@ from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
+from guillotina.response import ASGIResponse
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
@@ -60,11 +60,12 @@ class FileManager(object):
             {"Content-Disposition": '{}; filename="{}"'.format(disposition, filename or file.filename)}
         )
 
-        download_resp = StreamResponse(headers=headers)
-        download_resp.content_type = content_type or file.guess_content_type()
-        if size or file.size:
-            download_resp.content_length = size or file.size
-
+        download_resp = ASGIResponse(
+            status=200,
+            headers=headers,
+            content_type=content_type or file.guess_content_type(),
+            content_length=size or file.size,
+        )
         await download_resp.prepare(self.request)
         return download_resp
 
@@ -79,7 +80,7 @@ class FileManager(object):
         download_resp = await self.prepare_download(
             disposition, filename, content_type, size, extra_headers, **kwargs
         )
-        await download_resp.write_eof()
+        await download_resp.write(eof=True)
         return download_resp
 
     async def download(
@@ -94,13 +95,12 @@ class FileManager(object):
                     disposition, filename, content_type, size, extra_headers, **kwargs
                 )
             await download_resp.write(chunk)
-            await download_resp.drain()
         if download_resp is None:
             # deferred
             download_resp = await self.prepare_download(
                 disposition, filename, content_type, size, extra_headers, **kwargs
             )
-        await download_resp.write_eof()
+        await download_resp.write(eof=True)
         return download_resp
 
     async def tus_options(self, *args, **kwargs):

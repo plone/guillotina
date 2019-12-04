@@ -22,11 +22,7 @@ def _wrapped(name):
             if eid is None:
                 eid = uuid.uuid4().hex
             extra = kwargs.get("extra", {})
-            try:
-                url = request.url.human_repr()
-            except AttributeError:
-                # older version of aiohttp
-                url = request.path
+            url = request.url
             try:
                 agent = request.headers["User-Agent"]
             except (AttributeError, KeyError):

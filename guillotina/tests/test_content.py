@@ -25,6 +25,9 @@ import pickle
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 class ICustomContentType(IItem):
 
     images = Dict(key_type=TextLine(), value_type=TextLine(), required=False, defaultFactory=dict)
@@ -126,7 +129,7 @@ async def test_creator_used_from_content_creation(dummy_guillotina):
         assert behavior.contributors == ("root",)
 
 
-def test_base_object(dummy_guillotina, mock_txn):
+async def test_base_object(mock_txn):
     testing = {
         "__parent__": "_BaseObject__parent",
         "__of__": "_BaseObject__of",

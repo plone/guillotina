@@ -173,17 +173,15 @@ class Command(object):
             self.__run(app, settings)
 
     def __run(self, app, settings):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(app.startup())
         if asyncio.iscoroutinefunction(self.run):
             # Blocking call which returns when finished
-            loop = asyncio.get_event_loop()
             loop.run_until_complete(self.run(self.arguments, settings, app))
-            try:
-                loop.run_until_complete(self.cleanup(app))
-                loop.close()
-            except (asyncio.CancelledError, RuntimeError):
-                logger.warning("Cancelled error on cleanup")
         else:
-            self.run(self.arguments, settings, app)
+            self.run(self.arguments, settings, app.app)
+        loop.run_until_complete(self.cleanup(app))
+        loop.close()
 
         if self.profiler is not None:
             if self.arguments.profile_output:
@@ -200,8 +198,7 @@ class Command(object):
 
     async def cleanup(self, app):
         try:
-            app.freeze()
-            await app.on_cleanup.send(app)
+            await app.shutdown()
         except Exception:
             logger.warning("Unhandled error cleanup tasks", exc_info=True)
         for task in asyncio.Task.all_tasks():
@@ -237,7 +234,7 @@ class Command(object):
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
         loop = self.get_loop()
-        return loop.run_until_complete(make_app(settings=settings, loop=loop))
+        return make_app(settings=settings, loop=loop)
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)

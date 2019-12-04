@@ -1,10 +1,13 @@
-from aiohttp.web_exceptions import HTTPUnauthorized
 from copy import deepcopy
 from guillotina import cors
 from guillotina._settings import app_settings
+from guillotina.response import HTTPUnauthorized
 from guillotina.tests.utils import get_mocked_request
 
 import pytest
+
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_get_root(container_requester):

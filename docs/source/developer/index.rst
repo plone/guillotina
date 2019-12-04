@@ -29,3 +29,4 @@ Contents:
    async_utils
    component-architecture
    debugging
+   advanced

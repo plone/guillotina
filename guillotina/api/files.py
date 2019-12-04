@@ -1,4 +1,3 @@
-from aiohttp.web import StreamResponse
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
@@ -10,6 +9,7 @@ from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
+from guillotina.response import ASGIResponse
 from guillotina.response import HTTPNotFound
 
 import mimetypes
@@ -54,11 +54,11 @@ class FileGET(DownloadService):
         filepath = str(fi.file_path.absolute())
         filename = fi.file_path.name
         with open(filepath, "rb") as f:
-            resp = StreamResponse()
+            resp = ASGIResponse(status=200)
             resp.content_type, _ = mimetypes.guess_type(filename)
 
             disposition = 'filename="{}"'.format(filename)
-            if "text" not in resp.content_type:
+            if "text" not in (resp.content_type or ""):
                 disposition = "attachment; " + disposition
 
             resp.headers["CONTENT-DISPOSITION"] = disposition
@@ -66,9 +66,7 @@ class FileGET(DownloadService):
             data = f.read()
             resp.content_length = len(data)
             await resp.prepare(self.request)
-
-            await resp.write(data)
-            await resp.write_eof()
+            await resp.write(data, eof=True)
             return resp
 
     async def __call__(self):

@@ -12,6 +12,10 @@ from guillotina.transactions import transaction
 from guillotina.utils import get_security_policy
 
 import json
+import pytest
+
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_get_guillotina(container_requester):

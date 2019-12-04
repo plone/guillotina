@@ -1,6 +1,6 @@
 # Router
 
-Guillotina uses `aiohttp` for it's webserver. In order to route requests against
+Guillotina uses `asgi` for it's webserver. In order to route requests against
 Guillotina's traversal url structure, Guillotina provides it's own router
 that does traversal: `guillotina.traversal.router`.
 

@@ -4,6 +4,11 @@ from guillotina.tests.utils import login
 from guillotina.transactions import transaction
 from guillotina.utils import get_database
 
+import pytest
+
+
+pytestmark = pytest.mark.asyncio
+
 
 async def test_create_blob(db, guillotina_main):
     db = await get_database("db")

@@ -6,6 +6,10 @@ from guillotina.factory import make_app
 
 import json
 import logging
+import pytest
+
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_get_the_root(guillotina):
@@ -48,36 +52,42 @@ async def test_content_paths_are_correct(container_requester):
         assert "/db/guillotina/hello" in response["@id"]
 
 
-def test_warn_about_jwt_secret(loop, caplog):
+async def test_warn_about_jwt_secret(event_loop, caplog):
     settings = deepcopy(testing.get_settings())
     settings.update({"debug": False, "jwt": {"algorithm": "HS256", "secret": "secret"}})
     with caplog.at_level(logging.WARNING, logger="guillotina"):
         globalregistry.reset()
-        loop.run_until_complete(make_app(settings=settings, loop=loop))
+        app = make_app(settings=settings, loop=event_loop)
+        await app.startup()
         assert len(caplog.records) == 1
         assert "strongly advised" in caplog.records[0].message
+        await app.shutdown()
 
 
-def test_warn_about_jwt_complexity(loop, caplog):
+async def test_warn_about_jwt_complexity(event_loop, caplog):
     settings = deepcopy(testing.get_settings())
     settings.update({"debug": False, "jwt": {"algorithm": "HS256", "secret": "DKK@7328*!&@@"}})
     with caplog.at_level(logging.WARNING, logger="guillotina"):
         globalregistry.reset()
-        loop.run_until_complete(make_app(settings=settings, loop=loop))
+        app = make_app(settings=settings, loop=event_loop)
+        await app.startup()
         assert len(caplog.records) == 1
         assert "insecure secret" in caplog.records[0].message
+        await app.shutdown()
 
 
-def test_not_warn_about_jwt_secret(loop, caplog):
+async def test_not_warn_about_jwt_secret(event_loop, caplog):
     settings = deepcopy(testing.get_settings())
     settings.update({"debug": True, "jwt": {"algorithm": "HS256", "secret": "secret"}})
     with caplog.at_level(logging.WARNING, logger="guillotina"):
         globalregistry.reset()
-        loop.run_until_complete(make_app(settings=settings, loop=loop))
+        app = make_app(settings=settings, loop=event_loop)
+        await app.startup()
         assert len(caplog.records) == 0
+        await app.shutdown()
 
 
-def test_warn_about_jwk_secret(loop, caplog):
+async def test_warn_about_jwk_secret(caplog):
     with caplog.at_level(logging.WARNING, logger="guillotina"):
         utils.get_jwk_key(settings={"debug": False})
         assert len(caplog.records) == 1

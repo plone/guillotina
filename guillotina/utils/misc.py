@@ -27,6 +27,7 @@ import string
 import time
 import types
 import typing
+import urllib.parse
 
 
 try:
@@ -301,6 +302,12 @@ def safe_unidecode(val: typing.Union[str, bytes]) -> str:
     return val.decode("utf-8", errors="replace")
 
 
+def build_url(*, scheme, host, path, query, fragment=""):
+    # scheme://netloc/path;parameters?query#fragment
+    params = ""
+    return urllib.parse.urlunparse((scheme, host, path, params, query, fragment))
+
+
 def get_url(req, path):
     """
     Return calculated url from a request object taking
@@ -319,13 +326,14 @@ def get_url(req, path):
     if virtualhost_path:
         path = os.path.join(virtualhost_path.rstrip("/"), path.strip("/"))
 
-    url = req.url.with_path(path)
+    scheme = req.scheme
     for hdr in ("X-Forwarded-Proto", "X-Forwarded-Scheme"):
         forwarded_proto = req.headers.get(hdr, None)
         if forwarded_proto:
-            url = url.with_scheme(forwarded_proto)
+            scheme = forwarded_proto
             break
-    return str(url)
+
+    return build_url(scheme=scheme, host=virtualhost or req.host, path=path, query=req.query_string)
 
 
 _cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}

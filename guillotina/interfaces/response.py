@@ -12,7 +12,7 @@ class IResponse(Interface):
         """
 
 
-class IAioHTTPResponse(Interface):
+class IASGIResponse(Interface):
     """
-    Mark aiohttp responses with interface
+    Mark ASGI server responses with interface
     """

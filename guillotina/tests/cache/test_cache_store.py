@@ -9,6 +9,8 @@ from guillotina.utils import resolve_dotted_name
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
 DEFAULT_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.redis", "guillotina.contrib.cache"],
     "cache": {"updates_channel": None, "driver": "guillotina.contrib.redis"},
@@ -16,7 +18,7 @@ DEFAULT_SETTINGS = {
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_set(redis_container, guillotina_main, loop):
+async def test_cache_set(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
     assert util.initialized
@@ -40,7 +42,7 @@ async def test_cache_set(redis_container, guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_delete(redis_container, guillotina_main, loop):
+async def test_cache_delete(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
     assert util.initialized
@@ -66,7 +68,7 @@ async def test_cache_delete(redis_container, guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_clear(redis_container, guillotina_main, loop):
+async def test_cache_clear(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
 
@@ -92,7 +94,7 @@ async def test_cache_clear(redis_container, guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_set_multiple_cache_keys_size(redis_container, guillotina_main, loop):
+async def test_set_multiple_cache_keys_size(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
     assert util.initialized

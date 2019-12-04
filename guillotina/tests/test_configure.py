@@ -19,6 +19,9 @@ from zope.interface import Interface
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 async def test_register_service(container_requester):
     cur_count = len(configure.get_configurations("guillotina.tests", "service"))
 
@@ -195,7 +198,7 @@ async def test_route_match_view(container_requester):
         }
 
 
-def test_loading_nested_configuration():
+async def test_loading_nested_configuration():
     root = ApplicationRoot(None, None)
     config = ConfigurationMachine()
     root.config = config
@@ -205,7 +208,7 @@ def test_loading_nested_configuration():
     assert "guillotina.test_package" in configured
 
 
-def test_loading_configuration_does_not_load_subpackage_definition():
+async def test_loading_configuration_does_not_load_subpackage_definition():
     import guillotina
     import guillotina.test_package  # make sure configuration is read
 

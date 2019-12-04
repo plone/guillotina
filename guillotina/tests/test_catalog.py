@@ -25,6 +25,9 @@ import os
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 NOT_POSTGRES = os.environ.get("DATABASE", "DUMMY") in ("cockroachdb", "DUMMY")
 PG_CATALOG_SETTINGS = {
     "applications": ["guillotina.contrib.catalog.pg"],
@@ -56,7 +59,7 @@ class CustomItem(Resource):
     """
 
 
-def test_indexed_fields(dummy_guillotina, loop):
+async def test_indexed_fields(dummy_guillotina):
     fields = get_index_fields("Item")
     assert "uuid" in fields
     assert "path" in fields

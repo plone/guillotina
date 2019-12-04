@@ -11,6 +11,9 @@ import pytest
 import random
 
 
+pytestmark = pytest.mark.asyncio
+
+
 _pytest_params = [
     pytest.param("db", marks=pytest.mark.app_settings({"cloud_datamanager": "db"})),
     pytest.param(
@@ -26,6 +29,19 @@ _pytest_params = [
         ],
     ),
 ]
+
+
+async def chunked_stream_gen(char=b"X", chunk_size=1024 * 1024 * 4, total_size=1024 * 1024 * 4):
+    assert total_size >= chunk_size
+    chunk = b""
+    remain = total_size
+    while True:
+        buf_size = min(chunk_size, remain)
+        remain = remain - buf_size
+        chunk = char * buf_size
+        if not buf_size:
+            break
+        yield chunk
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)
@@ -63,18 +79,20 @@ async def test_multi_upload(manager_type, redis_container, container_requester):
         )
         assert status == 201
 
+        data = chunked_stream_gen(b"X", chunk_size=1024 * 1024 * 4, total_size=1024 * 1024 * 10)
         response, status = await requester(
             "PATCH",
             "/db/guillotina/foobar/@upload/files/key1",
-            data=b"X" * 1024 * 1024 * 10,
+            data=data,
             headers={"x-upload-size": str(1024 * 1024 * 10)},
         )
         assert status == 200
 
+        data = chunked_stream_gen(b"Y", chunk_size=1024 * 1024 * 4, total_size=1024 * 1024 * 10)
         response, status = await requester(
             "PATCH",
             "/db/guillotina/foobar/@upload/files/key2",
-            data=b"Y" * 1024 * 1024 * 10,
+            data=data,
             headers={"x-upload-size": str(1024 * 1024 * 10)},
         )
         assert status == 200
@@ -107,10 +125,11 @@ async def test_large_upload_chunks(manager_type, redis_container, container_requ
         )
         assert status == 201
 
+        data = chunked_stream_gen(b"X", chunk_size=1024 * 1024 * 4, total_size=1024 * 1024 * 10)
         response, status = await requester(
             "PATCH",
             "/db/guillotina/foobar/@upload/file",
-            data=b"X" * 1024 * 1024 * 10,
+            data=data,
             headers={"x-upload-size": str(1024 * 1024 * 10)},
         )
         assert status == 200
@@ -269,6 +288,7 @@ async def test_tus_unknown_size(manager_type, redis_container, container_request
         for idx in range(10):
             # random sizes
             size = 1024 * random.choice([1024, 1243, 5555, 7777])
+
             response, status = await requester(
                 "PATCH",
                 "/db/guillotina/foobar/@tusupload/file",
@@ -311,10 +331,11 @@ async def test_copy_file_ob(manager_type, redis_container, container_requester):
             data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
         )
         assert status == 201
+        data = chunked_stream_gen(b"X", chunk_size=1024 * 1024 * 4, total_size=1024 * 1024 * 4)
         response, status = await requester(
             "PATCH",
             "/db/guillotina/foobar/@upload/file",
-            data=b"X" * 1024 * 1024 * 4,
+            data=data,
             headers={"x-upload-size": str(1024 * 1024 * 4)},
         )
         assert status == 200

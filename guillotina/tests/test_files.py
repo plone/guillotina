@@ -6,6 +6,7 @@ from guillotina.tests.utils import get_mocked_request
 import pytest
 
 
+@pytest.mark.asyncio
 async def test_read_request_data_handles_retries():
     request = get_mocked_request()
     request._retry_attempt = 1
@@ -14,6 +15,7 @@ async def test_read_request_data_handles_retries():
     assert await read_request_data(request, 5) == b"aaa"
 
 
+@pytest.mark.asyncio
 async def test_read_request_data_throws_exception_if_no_cache_data():
     request = get_mocked_request()
     request._retry_attempt = 1

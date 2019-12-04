@@ -65,6 +65,7 @@ from guillotina import content
 from guillotina import schema
 from guillotina.factory import make_app
 from zope import interface
+import uvicorn
 
 class IMyType(interface.Interface):
     foobar = schema.TextLine()
@@ -96,7 +97,7 @@ if __name__ == '__main__':
         },
         "port": 8080
     })
-    web.run_app(app, host='localhost', port=8080)
+    uvicorn.run(app, host='localhost', port=8080)
 
 ```
 

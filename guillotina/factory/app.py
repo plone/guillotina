@@ -1,9 +1,6 @@
-from aiohttp import web
-from aiohttp.web_exceptions import HTTPConflict
 from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
-from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina._settings import default_settings
 from guillotina.behaviors import apply_concrete_behaviors
@@ -21,13 +18,10 @@ from guillotina.events import ApplicationConfiguredEvent
 from guillotina.events import ApplicationInitializedEvent
 from guillotina.events import BeforeAsyncUtilityLoadedEvent
 from guillotina.events import DatabaseInitializedEvent
-from guillotina.exceptions import ConflictError
-from guillotina.exceptions import TIDConflictError
 from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
-from guillotina.request import Request
 from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
@@ -36,7 +30,6 @@ from guillotina.utils import resolve_path
 from guillotina.utils import secure_passphrase
 from jwcrypto import jwk
 
-import asyncio
 import json
 import logging
 import logging.config
@@ -132,55 +125,6 @@ def load_application(module, root, settings):
     app_configurator.load_application(module)
 
 
-class GuillotinaAIOHTTPApplication(web.Application):
-    async def _handle(self, request, retries=0):
-        task_vars.request.set(request)
-        for var in (
-            "txn",
-            "tm",
-            "futures",
-            "authenticated_user",
-            "security_policies",
-            "container",
-            "registry",
-            "db",
-        ):
-            # and make sure to reset various task vars...
-            getattr(task_vars, var).set(None)
-        try:
-            return await super()._handle(request)
-        except (ConflictError, TIDConflictError) as e:
-            if app_settings.get("conflict_retry_attempts", 3) > retries:
-                label = "DB Conflict detected"
-                if isinstance(e, TIDConflictError):
-                    label = "TID Conflict Error detected"
-                tid = getattr(getattr(request, "_txn", None), "_tid", "not issued")
-                logger.debug(f"{label}, retrying request, tid: {tid}, retries: {retries + 1})", exc_info=True)
-                request._retry_attempt = retries + 1
-                request.clear_futures()
-                return await self._handle(request, retries + 1)
-            logger.error(
-                "Exhausted retry attempts for conflict error on tid: {}".format(
-                    getattr(getattr(request, "_txn", None), "_tid", "not issued")
-                )
-            )
-            return HTTPConflict(body=json.dumps({"summary": str(e)}), content_type="application/json")
-
-    def _make_request(self, message, payload, protocol, writer, task, _cls=Request):
-        return _cls(
-            message, payload, protocol, writer, task, self._loop, client_max_size=self._client_max_size
-        )
-
-
-def make_aiohttp_application():
-    middlewares = [resolve_dotted_name(m) for m in app_settings.get("middlewares", [])]
-    router_klass = app_settings.get("router", TraversalRouter)
-    router = resolve_dotted_name(router_klass)()
-    return GuillotinaAIOHTTPApplication(
-        router=router, middlewares=middlewares, **app_settings.get("aiohttp_settings", {})
-    )
-
-
 _dotted_name_settings = (
     "auth_extractors",
     "auth_token_validators",
@@ -219,15 +163,33 @@ def optimize_settings(settings):
             settings[name] = resolve_dotted_name(new_val)
 
 
-async def make_app(config_file=None, settings=None, loop=None, server_app=None):
+def make_app(config_file=None, settings=None, loop=None):
+    from guillotina.asgi import AsgiApp
+
+    app = AsgiApp(config_file, settings, loop)
+    router_klass = app_settings.get("router", TraversalRouter)
+    app.router = resolve_dotted_name(router_klass)()
+
+    # The guillotina application is the last middleware in the chain.
+    # We instantiate middlewares in reverse order. The last one is the first to be called
+    last_middleware = app
+    middlewares = [resolve_dotted_name(m) for m in app_settings.get("middlewares", [])]
+    for middleware in middlewares[::-1]:
+        last_middleware = middleware(last_middleware)
+    return last_middleware
+
+
+async def startup_app(config_file=None, settings=None, loop=None, server_app=None):
     """
     Make application from configuration
 
     :param config_file: path to configuration file to load
     :param settings: dictionary of settings
     :param loop: if not using with default event loop
-    :param settings: provide your own aiohttp application
+    :param settings: provide your own asgi application
     """
+    assert loop is not None
+
     # reset app_settings
     startup_vars = {}
     for key in app_settings.keys():
@@ -238,12 +200,10 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
     app_settings.update(startup_vars)
     app_settings.update(deepcopy(default_settings))
 
-    if loop is None:
-        loop = asyncio.get_event_loop()
-
     if config_file is not None:
-        with open(config_file, "r") as config:
-            settings = json.load(config)
+        from guillotina.commands import get_settings
+
+        settings = get_settings(config_file)
     elif settings is None:
         raise Exception("Neither configuration or settings")
 
@@ -297,9 +257,7 @@ async def make_app(config_file=None, settings=None, loop=None, server_app=None):
         except Exception:
             app_logger.error("Could not setup logging configuration", exc_info=True)
 
-    # Make and initialize aiohttp app
-    if server_app is None:
-        server_app = make_aiohttp_application()
+    # Make and initialize asgi app
     root.app = server_app
     server_app.root = root
     server_app.config = config

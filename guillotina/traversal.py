@@ -1,6 +1,4 @@
 """Main routing traversal class."""
-from aiohttp.abc import AbstractMatchInfo
-from aiohttp.abc import AbstractRouter
 from contextlib import contextmanager
 from guillotina import __version__
 from guillotina import error_reasons
@@ -30,8 +28,8 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
-from guillotina.interfaces import IAioHTTPResponse
 from guillotina.interfaces import IApplication
+from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
@@ -57,7 +55,6 @@ from typing import Optional
 from typing import Tuple
 from zope.interface import alsoProvides
 
-import aiohttp
 import traceback
 import uuid
 
@@ -138,7 +135,7 @@ def generate_error_response(e, request, error, status=500):
     return response.HTTPInternalServerError(content=data)
 
 
-class BaseMatchInfo(AbstractMatchInfo):
+class BaseMatchInfo:
     def __init__(self):
         self._apps = ()
         self._frozen = False
@@ -244,7 +241,7 @@ async def _apply_cors(request, resp):
             else:
                 cors_headers[name] = value
 
-        resp._headers = cors_headers
+        resp.headers.update(cors_headers)
         retry_attempts = getattr(request, "_retry_attempt", 0)
         if retry_attempts > 0:
             resp.headers["X-Retry-Transaction-Count"] = str(retry_attempts)
@@ -273,7 +270,7 @@ def _clean_request(request, response):
 
 
 class MatchInfo(BaseMatchInfo):
-    """Function that returns from traversal request on aiohttp."""
+    """Function that returns from traversal request"""
 
     def __init__(self, resource, request, view):
         super().__init__()
@@ -283,7 +280,7 @@ class MatchInfo(BaseMatchInfo):
 
     @profilable
     async def handler(self, request):
-        """Main handler function for aiohttp."""
+        """Main handler function"""
         request._view_error = False
         await notify(BeforeRenderViewEvent(request, self.view))
         request.record("viewrender")
@@ -297,7 +294,7 @@ class MatchInfo(BaseMatchInfo):
                 await abort()
                 # bubble this error up
                 raise
-            except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+            except response.Response as exc:
                 await abort()
                 view_result = exc
                 request._view_error = True
@@ -308,7 +305,7 @@ class MatchInfo(BaseMatchInfo):
         else:
             try:
                 view_result = await self.view()
-            except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+            except response.Response as exc:
                 view_result = exc
                 request._view_error = True
             except Exception as e:
@@ -318,7 +315,7 @@ class MatchInfo(BaseMatchInfo):
                 await abort()
         request.record("viewrendered")
 
-        if IAioHTTPResponse.providedBy(view_result):
+        if IASGIResponse.providedBy(view_result):
             resp = view_result
         else:
             resp = await apply_rendering(self.view, self.request, view_result)
@@ -350,7 +347,7 @@ class MatchInfo(BaseMatchInfo):
 
 
 class BasicMatchInfo(BaseMatchInfo):
-    """Function that returns from traversal request on aiohttp."""
+    """Function that returns from traversal request"""
 
     def __init__(self, request, resp):
         super().__init__()
@@ -359,11 +356,11 @@ class BasicMatchInfo(BaseMatchInfo):
 
     @profilable
     async def handler(self, request):
-        """Main handler function for aiohttp."""
+        """Main handler function"""
         request.record("finish")
         self.debug(request, self.resp)
         _clean_request(request, self.resp)
-        if IAioHTTPResponse.providedBy(self.resp):
+        if IASGIResponse.providedBy(self.resp):
             return self.resp
         else:
             resp = await apply_rendering(View(None, request), request, self.resp)
@@ -374,7 +371,7 @@ class BasicMatchInfo(BaseMatchInfo):
         return {"request": self.request, "resp": self.resp}
 
 
-class TraversalRouter(AbstractRouter):
+class TraversalRouter:
     """Custom router for guillotina."""
 
     _root: Optional[IApplication]
@@ -391,14 +388,11 @@ class TraversalRouter(AbstractRouter):
         """
         Resolve a request
         """
-        # prevent: https://github.com/aio-libs/aiohttp/issues/3335
-        request.url
-
         request.record("start")
         result = None
         try:
             result = await self.real_resolve(request)
-        except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
+        except response.Response as exc:
             await abort()
             return BasicMatchInfo(request, exc)
         except Exception:

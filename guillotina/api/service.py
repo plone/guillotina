@@ -53,7 +53,7 @@ class Service(View):
 
     def _validate_parameters(self):
         if "parameters" in self.__config__:
-            data = self.request.url.query
+            data = self.request.query
             for parameter in self.__config__["parameters"]:
                 if parameter["in"] == "query":
                     if "schema" in parameter and "name" in parameter:

@@ -1,8 +1,13 @@
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
 
+import pytest
 
-def test_get_static_folder(dummy_guillotina):
+
+pytestmark = pytest.mark.asyncio
+
+
+async def test_get_static_folder(dummy_guillotina):
     root = get_utility(IApplication, name="root")
     assert "static" in root._items
 

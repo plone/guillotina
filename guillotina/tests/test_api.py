@@ -19,6 +19,9 @@ import json
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 class ITestingRegistry(Interface):  # pylint: disable=E0239
     enabled = schema.Bool(title="Example attribute")
 
@@ -413,7 +416,7 @@ async def test_uninstall_addons(container_requester):
 
         response, status = await requester("DELETE", "/db/guillotina/@addons", data=json.dumps({"id": id_}))
         assert status == 200
-        assert response is None
+        assert not response
 
 
 async def test_uninstall_addons_schema_validation(container_requester):
@@ -432,7 +435,7 @@ async def test_uninstall_addons_path(container_requester):
 
         response, status = await requester("DELETE", f"/db/guillotina/@addons/{id_}")
         assert status == 200
-        assert response is None
+        assert not response
 
 
 async def test_uninstall_invalid_addon(container_requester):

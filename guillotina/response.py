@@ -1,15 +1,14 @@
-# this module closely mirrors aiohttp.web_exceptions
-from aiohttp.web_response import StreamResponse
-from guillotina.interfaces import IAioHTTPResponse
+from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IResponse
+from guillotina.request import Request
 from multidict import CIMultiDict
+from multidict import istr
+from typing import Any
+from typing import Dict
+from typing import List
 from typing import Optional
-from zope.interface import classImplements
+from typing import Tuple
 from zope.interface import implementer
-
-
-# mark aiohttp response with interface
-classImplements(StreamResponse, IAioHTTPResponse)
 
 
 @implementer(IResponse)
@@ -40,6 +39,118 @@ class Response(Exception):
                 if status in (204, 205):
                     self.content = None
                 self.status_code = status
+
+
+@implementer(IASGIResponse)
+class ASGIResponse:
+    def __init__(
+        self,
+        *,
+        headers: dict = None,
+        status: int = None,
+        content_type: str = None,
+        content_length: int = None,
+    ) -> None:
+        if status is None:
+            raise ValueError("Status is none")
+
+        self.status_code = status
+        self.headers = headers or {}
+        self.content_type = content_type
+        self.content_length = content_length
+
+        self._state: Dict[str, Any] = {}
+        self._prepared = False
+        self._eof_sent = False
+
+    @property
+    def prepared(self) -> bool:
+        return self._prepared is True
+
+    async def prepare(self, request: "Request"):
+        if self._eof_sent or self._prepared:
+            return
+
+        return await self._start(request)
+
+    async def _start(self, request: "Request"):
+        self._req: "Request" = request
+        self._prepared = True
+
+        headers = self.headers
+        if self.content_type:
+            headers.setdefault(istr("Content-Type"), self.content_type)
+        else:
+            headers.setdefault(istr("Content-Type"), "application/octet-stream")
+
+        if self.content_length:
+            headers.setdefault(istr("Content-Length"), str(self.content_length))
+
+        await request.send(
+            {
+                "type": "http.response.start",
+                "headers": self._headers_to_list(headers),
+                "status": self.status_code,
+            }
+        )
+
+    async def write(self, data: bytes = b"", eof=False) -> None:
+        assert isinstance(data, (bytes, bytearray, memoryview)), "data argument must be byte-ish (%r)" % type(
+            data
+        )
+
+        if self._eof_sent:
+            raise RuntimeError("Cannot call write() after write_eof()")
+        if self._prepared is False:
+            raise RuntimeError("Cannot call write() before prepare()")
+
+        await self._req.send({"type": "http.response.body", "body": data, "more_body": not eof})
+        self._eof_sent = eof
+
+    def _headers_to_list(self, headers: Dict) -> List[Tuple[bytes, bytes]]:
+        return [(k.encode(), v.encode()) for k, v in headers.items()]
+
+    def __repr__(self) -> str:
+        if self._eof_sent:
+            info = "eof"
+        elif self.prepared:
+            assert self._req is not None
+            info = "{} {} ".format(self._req.method, self._req.path)
+        else:
+            info = "not prepared"
+        return "<{} {}>".format(self.__class__.__name__, info)
+
+    def __getitem__(self, key: str) -> Any:
+        return self._state[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self._state[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self._state[key]
+
+    def __len__(self) -> int:
+        return len(self._state)
+
+    def __iter__(self):
+        return iter(self._state)
+
+    def __hash__(self) -> int:
+        return hash(id(self))
+
+    def __eq__(self, other: object) -> bool:
+        return self is other
+
+
+class ASGISimpleResponse(ASGIResponse):
+    def __init__(self, *, body: bytes = b"", **kwargs) -> None:
+        self.body = body
+        super().__init__(**kwargs)
+
+    async def prepare(self, request: "Request"):
+        await super().prepare(request)
+        if self._eof_sent is False:
+            await self.write(self.body, eof=True)
 
 
 class ErrorResponse(Response):
@@ -267,6 +378,11 @@ class HTTPPreconditionFailed(HTTPClientError):
 
 class HTTPRequestEntityTooLarge(HTTPClientError):
     status_code = 413
+
+    def __init__(self, max_size, actual_size, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_size = max_size
+        self.actual_size = actual_size
 
 
 class HTTPRequestURITooLong(HTTPClientError):

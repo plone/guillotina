@@ -9,9 +9,12 @@ import os
 import pytest
 
 
-pytestmark = pytest.mark.skipif(
-    os.environ.get("DATABASE") != "cockroachdb", reason="These tests are only for cockroach"
-)
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.skipif(
+        os.environ.get("DATABASE") != "cockroachdb", reason="These tests are only for cockroach"
+    ),
+]
 
 
 async def test_creates_vacuum_task(cockroach_storage):

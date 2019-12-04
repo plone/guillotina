@@ -1,6 +1,4 @@
-Cython==0.29.6
-aiohttp>=3.0.0,<3.6.0;python_version<"3.8"
-aiohttp>=3.6.0,<4.0.0;python_version>="3.8"
+Cython==0.29.13
 async-timeout==3.0.0
 asyncpg==0.19.0
 cffi==1.12.2
@@ -14,6 +12,6 @@ python-dateutil==2.6.1
 PyYaml==5.1
 six==1.11.0
 ujson==1.35
-yarl==1.2.6
 zope.interface==4.7.1
+uvicorn==0.10.8
 argon2-cffi==18.3.0

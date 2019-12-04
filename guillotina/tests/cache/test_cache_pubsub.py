@@ -13,6 +13,9 @@ import pickle
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 DEFAULT_SETTINGS = {
     "applications": [
         "guillotina",
@@ -25,7 +28,7 @@ DEFAULT_SETTINGS = {
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_invalidate_object(redis_container, guillotina_main, loop):
+async def test_invalidate_object(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
     assert util.initialized
@@ -51,7 +54,7 @@ async def test_invalidate_object(redis_container, guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_subscriber_invalidates(redis_container, guillotina_main, loop):
+async def test_subscriber_invalidates(redis_container, guillotina_main):
     util = get_utility(ICacheUtility)
     await util.initialize()
     assert util.initialized
@@ -85,7 +88,7 @@ async def test_subscriber_invalidates(redis_container, guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_subscriber_ignores_trsn_on_invalidate(redis_container, guillotina_main, loop):
+async def test_subscriber_ignores_trsn_on_invalidate(redis_container, guillotina_main):
 
     util = get_utility(ICacheUtility)
     await util.initialize()

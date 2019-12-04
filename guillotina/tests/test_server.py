@@ -14,17 +14,19 @@ def test_make_app(dummy_guillotina):
     assert type(dummy_guillotina.router) == TraversalRouter
 
 
+@pytest.mark.asyncio
 async def test_trns_retries_with_app(container_requester):
     async with container_requester as requester:
-        with mock.patch("aiohttp.web.Application._handle") as handle_mock:  # noqa
+        with mock.patch("guillotina.traversal.MatchInfo.handler") as handle_mock:  # noqa
             f = asyncio.Future()
             f.set_result(None)
             handle_mock.return_value = f
             handle_mock.side_effect = ConflictError()
-            response, status = await requester("GET", "/db/guillotina/@types")
-            status == 409
+            _, status = await requester("GET", "/db/guillotina/@types")
+            assert status == 409
 
 
+@pytest.mark.asyncio
 async def test_async_util_started_and_stopped(dummy_guillotina):
     util = get_utility(ITestAsyncUtility)
     util.state == "init"
@@ -44,13 +46,16 @@ async def test_async_util_started_and_stopped(dummy_guillotina):
     assert util2.state == "finalize"
 
 
-async def test_requester_with_default_settings(container_requester):
-    async with container_requester as requester:
-        assert requester.server.host == "127.0.0.1"
+@pytest.mark.asyncio
+async def test_requester_with_default_settings(container_requester_server):
+    async with container_requester_server as requester:
+        assert requester.host == "127.0.0.1"
+        assert requester.port == 8000
 
 
-@pytest.mark.app_settings({"test_server_settings": {"host": "0.0.0.0", "port": 8080}})
-async def test_requester_with_custom_settings(container_requester):
-    async with container_requester as requester:
-        assert requester.server.host == "0.0.0.0"
-        assert requester.server.port == 8080
+@pytest.mark.app_settings({"test_server_settings": {"host": "0.0.0.0", "port": 1234}})
+@pytest.mark.asyncio
+async def test_requester_with_custom_settings(container_requester_server):
+    async with container_requester_server as requester:
+        assert requester.host == "0.0.0.0"
+        assert requester.port == 1234

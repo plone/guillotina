@@ -8,6 +8,9 @@ from guillotina.tests.utils import create_content
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 DEFAULT_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.cache"],
     "cache": {"updates_channel": None, "driver": None},
@@ -15,7 +18,7 @@ DEFAULT_SETTINGS = {
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_set(guillotina_main, loop):
+async def test_cache_set(guillotina_main):
     util = get_utility(ICacheUtility)
     assert util.initialized
     trns = mocks.MockTransaction(mocks.MockTransactionManager())
@@ -31,7 +34,7 @@ async def test_cache_set(guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_delete(guillotina_main, loop):
+async def test_cache_delete(guillotina_main):
     util = get_utility(ICacheUtility)
     trns = mocks.MockTransaction(mocks.MockTransactionManager())
     trns.added = trns.deleted = {}
@@ -49,7 +52,7 @@ async def test_cache_delete(guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_clear(guillotina_main, loop):
+async def test_cache_clear(guillotina_main):
     util = get_utility(ICacheUtility)
     trns = mocks.MockTransaction(mocks.MockTransactionManager())
     trns.added = trns.deleted = {}
@@ -65,7 +68,7 @@ async def test_cache_clear(guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_invalidate_object(guillotina_main, loop):
+async def test_invalidate_object(guillotina_main):
     util = get_utility(ICacheUtility)
     trns = mocks.MockTransaction(mocks.MockTransactionManager())
     trns.added = trns.deleted = {}
@@ -83,7 +86,7 @@ async def test_invalidate_object(guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_object(guillotina_main, loop):
+async def test_cache_object(guillotina_main):
     tm = mocks.MockTransactionManager()
     storage = tm._storage
     txn = Transaction(tm)
@@ -103,7 +106,7 @@ async def test_cache_object(guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_cache_object_from_child(guillotina_main, loop):
+async def test_cache_object_from_child(guillotina_main):
     tm = mocks.MockTransactionManager()
     storage = tm._storage
     txn = Transaction(tm)
@@ -125,7 +128,7 @@ async def test_cache_object_from_child(guillotina_main, loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_do_not_cache_large_object(guillotina_main, loop):
+async def test_do_not_cache_large_object(guillotina_main):
     tm = mocks.MockTransactionManager()
     storage = tm._storage
     txn = Transaction(tm)
