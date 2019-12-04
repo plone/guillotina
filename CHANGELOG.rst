@@ -8,10 +8,39 @@ CHANGELOG
   [dmanchon,masipcat,vangheem]
 
 
-5.1.19 (unreleased)
+5.1.23 (unreleased)
 -------------------
 
 - Nothing changed yet.
+
+
+5.1.22 (2019-12-02)
+-------------------
+
+- Fix security bug in @move and @duplicate [lferran]
+
+5.1.21 (2019-11-29)
+-------------------
+
+- Allow to iterate keys, values and items of a BucketDictValue
+  [lferran]
+
+5.1.20 (2019-11-27)
+-------------------
+
+- Fix security bug: anonymous users were being granted
+  guillotina.Authenticated [lferran]
+
+
+5.1.19 (2019-11-19)
+-------------------
+
+- Update default zope.interface to 4.7.1
+  [bloodbare]
+
+- Be able to provide `DEBUG_SUBSCRIBERS` env variable to get details about
+  event timings being run.
+  [vangheem]
 
 
 5.1.18 (2019-11-25)

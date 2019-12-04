@@ -21,6 +21,7 @@ import typing
 @configure.service(
     context=IContainer,
     name="@user_info",
+    permission="guillotina.AccessContent",
     method="GET",
     summary="Get info about authenticated user",
     allow_access=True,

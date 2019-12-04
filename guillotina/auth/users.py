@@ -59,3 +59,8 @@ class AnonymousUser(GuillotinaUser):
         super().__init__()
         self.id = ANONYMOUS_USER_ID
         self._roles["guillotina.Anonymous"] = Allow
+
+    @property
+    def roles(self):
+        # This prevents roles from being modified for anonymous user
+        return self._roles.copy()

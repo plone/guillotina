@@ -9,10 +9,12 @@ from guillotina.interfaces import IFile
 from guillotina.interfaces import IResource
 from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
+from guillotina.tests.dbusers.settings import DEFAULT_SETTINGS as DBUSERS_DEFAULT_SETTINGS
 from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
 from zope.interface import Interface
 
+import base64
 import json
 import pytest
 
@@ -615,6 +617,112 @@ async def test_duplicate_content(container_requester):
         assert "foobar2" in response
 
 
+@pytest.mark.app_settings(DBUSERS_DEFAULT_SETTINGS)
+async def test_duplicate_and_move_always_checks_permission_on_destination(dbusers_requester):
+    async with dbusers_requester as requester:
+        # Add Bob user
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users",
+            data=json.dumps(
+                {
+                    "@type": "User",
+                    "name": "Bob",
+                    "id": "bob",
+                    "username": "bob",
+                    "email": "bob@foo.com",
+                    "password": "bob",
+                }
+            ),
+        )
+        assert status in (200, 201)
+
+        # Add Alice user
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users",
+            data=json.dumps(
+                {
+                    "@type": "User",
+                    "name": "Alice",
+                    "id": "alice",
+                    "username": "alice",
+                    "email": "alice@foo.com",
+                    "password": "alice",
+                }
+            ),
+        )
+        assert status in (200, 201)
+
+        bob_token = base64.b64encode(b"bob:bob").decode("ascii")
+        alice_token = base64.b64encode(b"alice:alice").decode("ascii")
+
+        # Bob creates a file in its folder
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/",
+            data=json.dumps({"@type": "Item", "id": "foobar1"}),
+            auth_type="Basic",
+            token=bob_token,
+        )
+        assert status in (200, 201)
+
+        # Shares it with alice as manager
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/foobar1/@sharing",
+            data=json.dumps(
+                {"prinrole": [{"principal": "alice", "role": "guillotina.Owner", "setting": "Allow"}]}
+            ),
+            auth_type="Basic",
+            token=bob_token,
+        )
+        assert status == 200
+
+        # Bob creates a folder
+        await requester(
+            "POST",
+            "/db/guillotina/users/bob/",
+            data=json.dumps({"@type": "Folder", "id": "bobfolder"}),
+            auth_type="Basic",
+            token=bob_token,
+        )
+
+        # Alice tries to duplicate the file into Bob's folder
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/foobar1/@duplicate",
+            data=json.dumps(
+                {
+                    "new_id": "foobar-from-alice",
+                    "destination": "/users/bob/bobfolder",
+                    "check_permission": False,
+                }
+            ),
+            auth_type="Basic",
+            token=alice_token,
+        )
+        assert status == 412
+        assert "You do not have permission to add content to the destination object" in resp["message"]
+
+        # Alice tries to move the file into Bob's folder
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/foobar1/@move",
+            data=json.dumps(
+                {
+                    "new_id": "foobar-from-alice",
+                    "destination": "/users/bob/bobfolder",
+                    "check_permission": False,
+                }
+            ),
+            auth_type="Basic",
+            token=alice_token,
+        )
+        assert status == 412
+        assert "You do not have permission to add content to the destination object" in resp["message"]
+
+
 async def test_create_content_fields(container_requester):
     async with container_requester as requester:
         response, status = await requester(
@@ -646,6 +754,13 @@ async def test_raise_http_exception_works(container_requester):
         assert status == 422
         _, status = await requester("GET", "/@raise-http-exception")
         assert status == 422
+
+
+async def test_anonymous_user_does_not_get_authenticated_role(container_requester):
+    async with container_requester as requester:
+        # Make call as anonymous user
+        _, status = await requester("GET", "/@myEndpoint", auth_type="Bearer", token="foo")
+        assert status == 401
 
 
 async def test_addable_types(container_requester):

@@ -1,4 +1,5 @@
 from datetime import datetime
+from guillotina import configure
 from guillotina import task_vars
 from guillotina.catalog import index
 from guillotina.catalog.utils import get_index_fields
@@ -8,10 +9,13 @@ from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import Container
 from guillotina.content import create_content
+from guillotina.content import Resource
+from guillotina.directives import index_field
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import ICatalogDataAdapter
 from guillotina.interfaces import ICatalogUtility
+from guillotina.interfaces import IResource
 from guillotina.interfaces import ISecurityInfo
 from guillotina.tests import mocks
 from guillotina.tests import utils as test_utils
@@ -36,7 +40,26 @@ PG_CATALOG_SETTINGS = {
 }
 
 
-async def test_indexed_fields(dummy_guillotina):
+class ICustomItem(IResource):
+
+    pass
+
+
+@index_field.with_accessor(ICustomItem, "title", type="text", field="title")
+def get_title(ob):
+    return f"The title is: {ob.title}"
+
+
+@configure.contenttype(
+    type_name="CustomItem", schema=ICustomItem,
+)
+class CustomItem(Resource):
+    """
+    Basic item content type. Inherits from Resource
+    """
+
+
+def test_indexed_fields(dummy_guillotina):
     fields = get_index_fields("Item")
     assert "uuid" in fields
     assert "path" in fields
@@ -72,6 +95,7 @@ async def test_get_index_data_with_accessors(dummy_txn_root):
 
         data = ICatalogDataAdapter(ob)
         fields = await data()
+
         for field_name in (
             "categories_accessor",
             "foobar_accessor",
@@ -99,6 +123,24 @@ async def test_get_index_data_with_accessors(dummy_txn_root):
         ):
             assert field_name in fields
         assert "title" not in fields
+
+
+async def test_override_index_directive(dummy_txn_root):
+    container = await create_content("Container", id="guillotina", title="Guillotina")
+    container.__name__ = "guillotina"
+
+    ob = await create_content("CustomItem", id="foobar", title="Test")
+    data = ICatalogDataAdapter(ob)
+    fields = await data()
+    assert fields["title"] == "The title is: Test"  # Good, uses the custom accessor
+
+    ob = await create_content("Item", id="foobar", title="Test")
+    data = ICatalogDataAdapter(ob)
+    fields = await data(indexes=["title"])
+    assert fields["title"] == "Test"
+    # E       AssertionError: assert 'The title is: Test' == 'Test'
+    # E         - The title is: Test
+    # E         + Test
 
 
 async def test_registered_base_utility(dummy_guillotina):

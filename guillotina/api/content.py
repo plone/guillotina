@@ -576,7 +576,9 @@ async def move(context, request):
         data = {}
 
     try:
-        await content.move(context, **data)
+        await content.move(
+            context, destination=data.get("destination"), new_id=data.get("new_id"), check_permission=True
+        )
     except TypeError:
         raise ErrorResponse(
             "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412
@@ -619,9 +621,10 @@ async def duplicate(context, request):
         data = await request.json()
     except Exception:
         data = {}
-
     try:
-        new_obj = await content.duplicate(context, **data)
+        new_obj = await content.duplicate(
+            context, destination=data.get("destination"), new_id=data.get("new_id"), check_permission=True
+        )
     except TypeError:
         raise ErrorResponse(
             "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412

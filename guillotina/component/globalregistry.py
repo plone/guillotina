@@ -11,10 +11,10 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-# flake8: noqa
 from guillotina.component._compat import _BLANK
 from guillotina.component.interfaces import IComponentLookup
 from guillotina.profile import profilable
+from typing import Type
 from zope.interface import implementer
 from zope.interface import providedBy
 from zope.interface.adapter import AdapterLookup
@@ -22,6 +22,12 @@ from zope.interface.adapter import AdapterRegistry
 from zope.interface.registry import Components
 
 import asyncio
+import logging
+import os
+import time
+
+
+profile_logger = logging.getLogger("guillotina.profile")
 
 
 class GuillotinaAdapterLookup(AdapterLookup):
@@ -46,13 +52,75 @@ class GuillotinaAdapterLookup(AdapterLookup):
         return result
 
 
+class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
+    @profilable
+    async def asubscribers(self, objects, provided):
+        from guillotina.utils import get_current_request, get_authenticated_user_id, get_dotted_name
+        from guillotina.exceptions import RequestNotFound
+        from guillotina import task_vars
+
+        if len(objects) > 1:
+            event = get_dotted_name(objects[1])
+            context = getattr(objects[0], "__uuid__", None)
+        else:
+            event = get_dotted_name(objects[0])
+            context = None
+
+        try:
+            request = get_current_request()
+        except RequestNotFound:
+            request = None
+        try:
+            url = request.url.human_repr()
+        except AttributeError:
+            # older version of aiohttp
+            url = ""
+        info = {
+            "url": url,
+            "container": getattr(task_vars.container.get(), "id", None),
+            "user": get_authenticated_user_id(),
+            "db_id": getattr(task_vars.db.get(), "id", None),
+            "request_uid": getattr(request, "_uid", None),
+            "method": getattr(request, "method", None),
+            "subscribers": [],
+            "context": context,
+            "event": event,
+        }
+
+        start = time.time() * 1000
+        subscriptions = sorted(
+            self.subscriptions(map(providedBy, objects), provided),
+            key=lambda sub: getattr(sub, "priority", 100),
+        )
+        info["lookup_time"] = (time.time() * 1000) - start
+        info["found"] = len(subscriptions)
+        results = []
+        for subscription in subscriptions:
+            start = time.time() * 1000
+            if asyncio.iscoroutinefunction(subscription):
+                results.append(await subscription(*objects))
+            else:
+                results.append(subscription(*objects))
+            info["subscribers"].append(
+                {"duration": (time.time() * 1000) - start, "name": get_dotted_name(subscription)}
+            )
+        info["duration"] = (time.time() * 1000) - start
+        profile_logger.info(info)
+        return results
+
+
 class GuillotinaAdapterRegistry(AdapterRegistry):
     """
     Customized adapter registry for async
     """
 
+    LookupClass: Type[GuillotinaAdapterLookup]
+
     _delegated = AdapterRegistry._delegated + ("asubscribers",)  # type: ignore
-    LookupClass = GuillotinaAdapterLookup
+    if os.environ.get("GDEBUG_SUBSCRIBERS", "").lower() in ("1", "true", "t"):
+        LookupClass = DebugGuillotinaAdapterLookup
+    else:
+        LookupClass = GuillotinaAdapterLookup
 
     def __init__(self, parent, name):
         self.__parent__ = parent
