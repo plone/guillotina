@@ -17,7 +17,8 @@ import yaml
 
 
 try:
-    import uvloop
+    import uvloop  # type: ignore
+
     uvloop.install()
 except ImportError:
     pass
