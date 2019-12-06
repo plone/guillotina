@@ -17,6 +17,12 @@ import yaml
 
 
 try:
+    import uvloop
+    uvloop.install()
+except ImportError:
+    pass
+
+try:
     import line_profiler  # type: ignore
 
     HAS_LINE_PROFILER = True

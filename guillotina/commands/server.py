@@ -27,7 +27,11 @@ class ServerCommand(Command):
         if arguments.asgi_server == "uvicorn":
             import uvicorn  # type: ignore
 
-            uvicorn.run(app, host=host, port=port, reload=arguments.reload, access_log=False)
+            config = uvicorn.Config(app, host=host, port=port, reload=arguments.reload, access_log=False)
+            server = uvicorn.Server(config)
+            self.loop.run_until_complete(server.serve())
+
+            # uvicorn.run(app, host=host, port=port, reload=arguments.reload, access_log=False, loop=self.loop)
         elif arguments.asgi_server == "hypercorn":
             import asyncio
 
