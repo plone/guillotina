@@ -10,6 +10,9 @@ from guillotina.utils import get_database
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 DEFAULT_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.redis", "guillotina.contrib.cache"],
     "cache": {"updates_channel": None, "driver": "guillotina.contrib.redis"},
