@@ -499,10 +499,9 @@ async def guillotina_main(app_client):
 
 
 @pytest.fixture(scope="function")
-def guillotina(app_client):
+async def guillotina(app_client):
     _, client = app_client
-    requester = GuillotinaDBAsgiRequester(client)
-    yield requester
+    return GuillotinaDBAsgiRequester(client)
 
 
 @pytest.fixture(scope="function")

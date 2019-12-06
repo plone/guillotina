@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0 (unreleased)
 ------------------
 
+- Added async property `Request.body_exists`
+- Fixed fixture 'guillotina'
 - Replaced aiohttp with ASGI (running with uvicorn by default)
   [dmanchon,masipcat,vangheem]
 
