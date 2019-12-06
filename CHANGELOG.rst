@@ -4,14 +4,11 @@ CHANGELOG
 6.0.0 (unreleased)
 ------------------
 
+- Fix tests in 'test_cache_txn.py' and 'test_setup.py' being skipped
+  [masipcat]
+
 - Replaced aiohttp with ASGI (running with uvicorn by default)
   [dmanchon,masipcat,vangheem]
-
-
-5.1.23 (unreleased)
--------------------
-
-- Nothing changed yet.
 
 
 5.1.22 (2019-12-02)
@@ -19,11 +16,13 @@ CHANGELOG
 
 - Fix security bug in @move and @duplicate [lferran]
 
+
 5.1.21 (2019-11-29)
 -------------------
 
 - Allow to iterate keys, values and items of a BucketDictValue
   [lferran]
+
 
 5.1.20 (2019-11-27)
 -------------------

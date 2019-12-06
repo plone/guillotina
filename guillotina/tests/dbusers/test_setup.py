@@ -4,6 +4,9 @@ from guillotina.tests.utils import get_container
 import pytest
 
 
+pytestmark = pytest.mark.asyncio
+
+
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_users_and_groups_folders_are_created_on_install(dbusers_requester):
     async with dbusers_requester as requester:
