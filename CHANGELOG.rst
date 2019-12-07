@@ -4,6 +4,12 @@ CHANGELOG
 6.0.0 (unreleased)
 ------------------
 
+- Make sure that guillotina uses uvloop on starting if its installed
+  [bloodbare]
+
+- Make sure uvicorn uses the same loop as guillotina startup
+  [bloodbare]
+
 - Fix tests in 'test_cache_txn.py' and 'test_setup.py' being skipped
   [masipcat]
 
