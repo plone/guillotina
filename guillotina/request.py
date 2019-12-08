@@ -451,7 +451,7 @@ class Request(object):
         return self.headers.get("host")
 
     @reify
-    def url(self):
+    def url(self) -> str:
         return build_url(scheme=self._scheme, host=self.host, path=self.path, query=self.query_string)
 
     @property
@@ -538,6 +538,11 @@ class Request(object):
         """Return BODY as JSON."""
         body = await self.text()
         return loads(body)
+
+    @property
+    async def body_exists(self):
+        body = await self.read()
+        return len(body) > 0
 
     def __repr__(self) -> str:
         ascii_encodable_path = self.path.encode("ascii", "backslashreplace").decode("ascii")

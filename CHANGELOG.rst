@@ -4,6 +4,12 @@ CHANGELOG
 6.0.0 (unreleased)
 ------------------
 
+- Added async property `Request.body_exists`
+  [masipcat]
+
+- Fixed fixture 'guillotina'
+  [masipcat]
+
 - Make sure that guillotina uses uvloop on starting if its installed
   [bloodbare]
 

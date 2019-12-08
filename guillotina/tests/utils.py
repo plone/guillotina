@@ -159,7 +159,7 @@ def make_mocked_request(
     raw_hdrs = list((k.encode("utf-8"), v.encode("utf-8")) for k, v in headers.items())
 
     q: asyncio.Queue[Dict] = asyncio.Queue()
-    chunks = [payload[i : i + 1024] for i in range(0, len(payload), 1024)]
+    chunks = [payload[i : i + 1024] for i in range(0, len(payload), 1024)] or [b""]
     for i, chunk in enumerate(chunks):
         q.put_nowait({"body": chunk, "more_body": i < len(chunks) - 1})
 

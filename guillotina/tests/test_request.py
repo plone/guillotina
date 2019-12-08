@@ -64,6 +64,16 @@ async def test_get_content():
     assert body == b"X" * 2048
 
 
+async def test_body_exist():
+    req = make_mocked_request("GET", "/", payload=b"X" * 2048)
+    assert await req.body_exists is True
+
+
+async def test_not_body_exist():
+    req = make_mocked_request("GET", "/")
+    assert await req.body_exists is False
+
+
 async def test_get_forward_proto(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina", headers={"X-Forwarded-Proto": "https"})
