@@ -1195,3 +1195,21 @@ async def test_patch_field_validation(container_requester):
             data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": [1]}}),
         )
         assert status == 412
+
+
+async def test_move_with_already_existing_id(container_requester):
+    async with container_requester as requester:
+        await requester("POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "container1"}))
+        await requester("POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "container2"}))
+        await requester(
+            "POST", "/db/guillotina/container1", data=json.dumps({"@type": "Item", "id": "foobar"})
+        )
+        await requester(
+            "POST", "/db/guillotina/container2", data=json.dumps({"@type": "Item", "id": "foobar"})
+        )
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/container1/foobar/@move",
+            data=json.dumps({"destination": "/container2", "new_id": "foobar"}),
+        )
+        assert status == 409

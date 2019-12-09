@@ -24,6 +24,7 @@ from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ComponentLookupError
+from guillotina.exceptions import ConflictError
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAnnotations
@@ -583,6 +584,8 @@ async def move(context, request):
         raise ErrorResponse(
             "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412
         )
+    except ConflictError as e:
+        raise ErrorResponse("Conflict Error", str(e), reason=error_reasons.CONFLICT_ID, status=409)
 
     return {"@url": get_object_url(context, request)}
 

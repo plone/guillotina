@@ -1,9 +1,12 @@
 CHANGELOG
 =========
 
+
 6.0.0a2 (unreleased)
 --------------------
 
+- @move: destination id conflict should return 409 error, not 412
+  [inaki]
 - Explicit loop to execute on tests
   [bloodbare]
 - Fix IAbsoluteUrl() returns request query
