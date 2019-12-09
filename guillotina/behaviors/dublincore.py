@@ -104,6 +104,7 @@ class DublinCore(AnnotationBehavior):
     contributors = ContextProperty("contributors", ())
     creation_date = ContextProperty("creation_date", None)
     modification_date = ContextProperty("modification_date", None)
+    tags = ContextProperty("tags", None)
 
     def __init__(self, context):
         self.__dict__["context"] = context

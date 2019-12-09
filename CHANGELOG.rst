@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0 (unreleased)
 ------------------
 
+- Move tags to a context property to make it indexable on json
+  [bloodbare]
+
 - Added async property `Request.body_exists`
   [masipcat]
 
