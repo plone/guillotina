@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0 (unreleased)
+6.0.0a1 (unreleased)
 ------------------
 
 - Move tags to a context property to make it indexable on json
