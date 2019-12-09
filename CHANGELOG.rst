@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Added attribute cookies to class Request()
+  [masipcat]
 
 
 6.0.0a1 (2019-12-09)

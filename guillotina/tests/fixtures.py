@@ -187,6 +187,7 @@ class GuillotinaDBAsgiRequester(object):
         authenticated=True,
         auth_type="Basic",
         headers={},
+        cookies={},
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
@@ -200,6 +201,7 @@ class GuillotinaDBAsgiRequester(object):
             authenticated=authenticated,
             auth_type=auth_type,
             headers=headers,
+            cookies=cookies,
             token=token,
             accept=accept,
             allow_redirects=allow_redirects,
@@ -215,6 +217,7 @@ class GuillotinaDBAsgiRequester(object):
         authenticated=True,
         auth_type="Basic",
         headers={},
+        cookies={},
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
@@ -230,6 +233,7 @@ class GuillotinaDBAsgiRequester(object):
         settings["query_string"] = params
         settings["data"] = data
         settings["allow_redirects"] = allow_redirects
+        settings["cookies"] = cookies
 
         operation = getattr(self.client, method.lower(), None)
         resp = await operation(path, **settings)
