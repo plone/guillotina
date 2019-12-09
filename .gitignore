@@ -59,6 +59,7 @@ cov_html
 # files
 *.log
 *.swp
+.DS_Store
 
 # excludes
 !.coveragerc
