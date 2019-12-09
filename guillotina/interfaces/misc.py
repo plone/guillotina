@@ -53,6 +53,7 @@ class IAddOn(Interface):
         """
         """
 
+
 # Walking interface
 class IIteratorResources(Interface):
     pass

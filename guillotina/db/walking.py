@@ -1,7 +1,7 @@
-from guillotina.interfaces import IFolder
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IIteratorResources
 from guillotina.configure import adapter
+from guillotina.interfaces import IFolder
+from guillotina.interfaces import IIteratorResources
+from guillotina.interfaces import IResource
 
 
 @adapter(for_=(IFolder), provides=IIteratorResources)
@@ -47,4 +47,3 @@ class WalkingIterator(object):
                     yield obj
         if size is not None and len(object_list) > 0:
             yield object_list
-

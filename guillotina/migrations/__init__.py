@@ -50,6 +50,7 @@ async def migrate_contraint(db, conn=None):
         async with storage.pool.acquire() as conn:
             await _migrate_constraint(storage, conn)
 
+
 @configure.utility(name="6.0.0a1", provides=IMigration)
 async def migrate_tags(db, conn=None):
     async for key, container in db.async_items():
