@@ -553,7 +553,7 @@ async def test_not_allowed_move_to_same_parent(container_requester):
         _, status = await requester(
             "POST", "/db/guillotina/folder/@move", data=json.dumps({"destination": "/"})
         )
-        assert status == 412
+        assert status == 409
 
         _, status = await requester(
             "POST", "/db/guillotina/folder/@move", data=json.dumps({"new_id": "folder-2"})
