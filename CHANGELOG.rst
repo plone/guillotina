@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-6.0.0a1 (unreleased)
-------------------
+6.0.0a1 (2019-12-09)
+--------------------
 
 - Move tags to a context property to make it indexable on json
   [bloodbare]
