@@ -1,0 +1,10 @@
+4.x to 5.x
+==========
+
+The main change in Guillotina 6 is moving away from aiohttp to asgi.
+
+
+API Removals/changes
+--------------------
+
+- `IDublinCore.tags` changed to context property
