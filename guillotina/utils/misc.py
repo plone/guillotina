@@ -333,7 +333,7 @@ def get_url(req, path):
             scheme = forwarded_proto
             break
 
-    return build_url(scheme=scheme, host=virtualhost or req.host, path=path, query=req.query_string)
+    return build_url(scheme=scheme, host=virtualhost or req.host, path=path, query="")
 
 
 _cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}

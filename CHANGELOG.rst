@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
+- Fix IAbsoluteUrl() returns request query
+  [masipcat]
 - Added attribute cookies to class Request()
   [masipcat]
 - Added uvicorn as a guillotina requirement
