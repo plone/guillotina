@@ -550,7 +550,7 @@ async def test_not_allowed_move_to_same_parent(container_requester):
         _, status = await requester(
             "POST", "/db/guillotina/folder/@move", data=json.dumps({"destination": "/"})
         )
-        assert status == 412
+        assert status == 409
 
         _, status = await requester(
             "POST", "/db/guillotina/folder/@move", data=json.dumps({"new_id": "folder-2"})
@@ -561,7 +561,7 @@ async def test_not_allowed_move_to_same_parent(container_requester):
 async def test_not_allowed_move_to_self(container_requester):
     async with container_requester as requester:
         _, status = await requester("POST", "/db/guillotina/@move", data=json.dumps({"destination": "/"}))
-        assert status == 409
+        assert status == 412
 
 
 async def test_duplicate_content(container_requester):
