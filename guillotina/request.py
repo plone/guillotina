@@ -8,6 +8,7 @@ from guillotina.interfaces.content import IApplication
 from guillotina.profile import profilable
 from guillotina.utils import execute
 from guillotina.utils.misc import build_url
+from http.cookies import SimpleCookie
 from typing import Any
 from typing import Dict
 from typing import Iterator
@@ -476,15 +477,20 @@ class Request(object):
         """
         return self._query_string.decode("utf-8")
 
+    @property
+    def raw_headers(self):
+        """A sequence of pairs for all headers."""
+        return self._raw_headers
+
     @reify
     def headers(self) -> "multidict.CIMultiDict[str]":
         """A case-insensitive multidict proxy with all headers."""
         return raw_headers_to_multidict(self._raw_headers)
 
-    @property
-    def raw_headers(self):
-        """A sequence of pairs for all headers."""
-        return self._raw_headers
+    @reify
+    def cookies(self) -> dict:
+        cookie_jar = SimpleCookie(self.headers.get("cookie") or "")
+        return {name: value.value for name, value in cookie_jar.items()}
 
     @property
     def content(self):

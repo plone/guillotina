@@ -4,7 +4,10 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Added attribute cookies to class Request()
+  [masipcat]
+- Added uvicorn as a guillotina requirement
+  [masipcat]
 
 
 6.0.0a1 (2019-12-09)

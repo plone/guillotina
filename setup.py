@@ -54,6 +54,7 @@ setup(
     package_data={"": ["*.txt", "*.rst", "guillotina/documentation/meta/*.json"], "guillotina": ["py.typed"]},
     packages=find_packages(),
     install_requires=[
+        "uvicorn",
         "jsonschema",
         "python-dateutil",
         "pycryptodome",
