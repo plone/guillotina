@@ -6,7 +6,8 @@ CHANGELOG
 
 - Explicit loop to execute on tests
   [bloodbare]
-
+- Fix IAbsoluteUrl() returns request query
+  [masipcat]
 - Added attribute cookies to class Request()
   [masipcat]
 - Added uvicorn as a guillotina requirement
