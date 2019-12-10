@@ -1,11 +1,11 @@
+from guillotina import app_settings
 from guillotina import glogging
 from guillotina import task_vars
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.request import Request
-from guillotina.utils import resolve_dotted_name
 from guillotina.response import ASGISimpleResponse
-from guillotina import app_settings
+from guillotina.utils import resolve_dotted_name
 
 import asyncio
 import enum
