@@ -11,7 +11,7 @@ CHANGELOG
 - Added property 'app' to Request
   [masipcat]
 
-- Added property 'status' to Request and Response
+- Added property 'status' to Response
   [masipcat]
 
 - @move: destination id conflict should return 409 error, not 412
