@@ -5,6 +5,7 @@ CHANGELOG
 -------------------
 
 - Make pytest.mark.app_settings work in older pytest versions too [lferran]
+
 - @move: destination id conflict should return 409 error, not 412
   [inaki]
 
