@@ -5,10 +5,10 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
-- Added back support for Guillotina/aiohttp middlewares
+- Added 'server_settings' and 'request_settings'
   [masipcat]
 
-- Added property 'app' to Request
+- Added back support for Guillotina/aiohttp middlewares
   [masipcat]
 
 - Added property 'status' to Response

@@ -71,6 +71,7 @@ class AsgiApp:
             self.app = await startup_app(
                 config_file=self.config_file, settings=self.settings, loop=self.loop, server_app=self
             )
+            self.request_settings = app_settings.get("request_settings", {})
             self.middlewares = [resolve_dotted_name(m) for m in app_settings.get("middlewares", [])]
             self.state = AppState.INITIALIZED
             return self.app
@@ -94,8 +95,7 @@ class AsgiApp:
         if scope["type"] == "websocket":
             scope["method"] = "GET"
 
-        request = Request.factory(scope, send, receive)
-        request.app = self.app
+        request = Request.factory(scope, send, receive, **self.request_settings)
         task_vars.request.set(request)
         resp = await self.request_handler(request)
 
