@@ -24,7 +24,6 @@ from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ComponentLookupError
-from guillotina.exceptions import ConflictError
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAnnotations
@@ -47,6 +46,7 @@ from guillotina.interfaces import IRolePermissionMap
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
 from guillotina.response import ErrorResponse
+from guillotina.response import HTTPConflict
 from guillotina.response import HTTPMethodNotAllowed
 from guillotina.response import HTTPMovedPermanently
 from guillotina.response import HTTPNotFound
@@ -584,8 +584,13 @@ async def move(context, request):
         raise ErrorResponse(
             "RequiredParam", _("Invalid params"), reason=error_reasons.REQUIRED_PARAM_MISSING, status=412
         )
-    except ConflictError as e:
-        raise ErrorResponse("Conflict Error", str(e), reason=error_reasons.CONFLICT_ID, status=409)
+    except HTTPConflict:
+        raise ErrorResponse(
+            "Conflict Error",
+            "Id {data.get('new_id')} already exists in destination data.get('destination')",
+            reason=error_reasons.CONFLICT_ID,
+            status=409,
+        )
 
     return {"@url": get_object_url(context, request)}
 

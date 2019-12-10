@@ -25,7 +25,6 @@ from guillotina.events import BeforeObjectMovedEvent
 from guillotina.events import ObjectDuplicatedEvent
 from guillotina.events import ObjectLoadedEvent
 from guillotina.events import ObjectMovedEvent
-from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NoPermissionToAdd
@@ -54,6 +53,7 @@ from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
+from guillotina.response import HTTPConflict
 from guillotina.schema.utils import get_default_from_schema
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
@@ -783,7 +783,7 @@ async def move(
             )
 
     if await destination_ob.async_contains(new_id):
-        raise ConflictError(msg=f'Destination already has object with the id "{new_id}"')
+        raise HTTPConflict(content={"reason": f'Destination already has object with the id "{new_id}"'})
 
     original_parent = context.__parent__
 
