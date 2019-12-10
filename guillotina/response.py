@@ -40,6 +40,10 @@ class Response(Exception):
                     self.content = None
                 self.status_code = status
 
+    @property
+    def status(self):
+        return self.status_code
+
 
 @implementer(IASGIResponse)
 class ASGIResponse:
@@ -66,6 +70,10 @@ class ASGIResponse:
     @property
     def prepared(self) -> bool:
         return self._prepared is True
+
+    @property
+    def status(self):
+        return self.status_code
 
     async def prepare(self, request: "Request"):
         if self._eof_sent or self._prepared:

@@ -161,10 +161,17 @@ load_utilities:
 
 ## Middleware
 
-`guillotina` is built on `asgi` which provides support for middleware.
+`guillotina` support two types of middlewares:
+
+1. ASGI middlewares: run before the guillotina asgi application and can be used to
+  catch errors or to record timing metrics
+2. Guillotina (aiohttp-like) middlewares: run after the router and before executing the view
+
 You can provide an array of dotted names to use for your application.
 
 ```yaml
+asgi_middlewares:
+  - sentry_sdk.integrations.SentryAsgiMiddleware
 middlewares:
   - guillotina_myaddon.Middleware
 ```

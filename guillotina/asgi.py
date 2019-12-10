@@ -3,7 +3,9 @@ from guillotina import task_vars
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.request import Request
+from guillotina.utils import resolve_dotted_name
 from guillotina.response import ASGISimpleResponse
+from guillotina import app_settings
 
 import asyncio
 import enum
@@ -69,6 +71,7 @@ class AsgiApp:
             self.app = await startup_app(
                 config_file=self.config_file, settings=self.settings, loop=self.loop, server_app=self
             )
+            self.middlewares = [resolve_dotted_name(m) for m in app_settings.get("middlewares", [])]
             self.state = AppState.INITIALIZED
             return self.app
         except Exception:
@@ -92,6 +95,7 @@ class AsgiApp:
             scope["method"] = "GET"
 
         request = Request.factory(scope, send, receive)
+        request.app = self.app
         task_vars.request.set(request)
         resp = await self.request_handler(request)
 
@@ -101,7 +105,10 @@ class AsgiApp:
     async def request_handler(self, request, retries=0):
         try:
             route = await self.app.router.resolve(request)
-            return await route.handler(request)
+            handler = route.handler
+            for m in self.middlewares[::-1]:
+                handler = await m(self.app, handler)
+            return await handler(request)
 
         except (ConflictError, TIDConflictError) as e:
             if self.settings.get("conflict_retry_attempts", 3) > retries:

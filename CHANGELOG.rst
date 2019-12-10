@@ -4,6 +4,12 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
+- Added back support for Guillotina/aiohttp middlewares
+  [masipcat]
+- Added property 'app' to Request
+  [masipcat]
+- Added property 'status' to Request and Response
+  [masipcat]
 - Explicit loop to execute on tests
   [bloodbare]
 - Fix IAbsoluteUrl() returns request query

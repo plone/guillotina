@@ -173,8 +173,8 @@ def make_app(config_file=None, settings=None, loop=None):
     # The guillotina application is the last middleware in the chain.
     # We instantiate middlewares in reverse order. The last one is the first to be called
     last_middleware = app
-    middlewares = [resolve_dotted_name(m) for m in app_settings.get("middlewares", [])]
-    for middleware in middlewares[::-1]:
+    asgi_middlewares = [resolve_dotted_name(m) for m in app_settings.get("asgi_middlewares", [])]
+    for middleware in asgi_middlewares[::-1]:
         last_middleware = middleware(last_middleware)
     return last_middleware
 
