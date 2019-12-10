@@ -1,21 +1,31 @@
 CHANGELOG
 =========
 
+
 6.0.0a2 (unreleased)
 --------------------
 
 - Added back support for Guillotina/aiohttp middlewares
   [masipcat]
+
 - Added property 'app' to Request
   [masipcat]
+
 - Added property 'status' to Request and Response
   [masipcat]
+
+- @move: destination id conflict should return 409 error, not 412
+  [inaki]
+
 - Explicit loop to execute on tests
   [bloodbare]
+
 - Fix IAbsoluteUrl() returns request query
   [masipcat]
+
 - Added attribute cookies to class Request()
   [masipcat]
+
 - Added uvicorn as a guillotina requirement
   [masipcat]
 
