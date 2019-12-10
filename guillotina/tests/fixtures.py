@@ -90,7 +90,7 @@ def _update_from_pytest_markers(settings, pytest_node):
         marks.extend([mark for mark in pytest_node.iter_markers(name="app_settings")])
     except AttributeError:
         # Older pytest versions
-        mark = pytest_node.get_marks("app_settings")
+        mark = pytest_node.get_marker("app_settings")
         if mark is not None:
             marks.append(mark)
 
