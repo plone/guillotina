@@ -4,7 +4,8 @@ CHANGELOG
 5.1.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- @move: destination id conflict should return 409 error, not 412
+  [inaki]
 
 
 5.1.22 (2019-12-02)
