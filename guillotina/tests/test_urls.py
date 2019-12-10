@@ -5,6 +5,12 @@ import json
 import pytest
 
 
+def test_url(dummy_guillotina):
+    request = make_mocked_request("GET", "/a/b", query_string=b"include=title")
+
+    assert get_url(request, "/c/d") == "http://localhost/c/d"
+
+
 def test_vhm_url(dummy_guillotina):
     request = make_mocked_request("GET", "/", {"X-VirtualHost-Monster": "https://foobar.com/foo/bar"})
 
