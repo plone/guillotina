@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
+- Explicit loop to execute on tests
+  [bloodbare]
+
 - Added attribute cookies to class Request()
   [masipcat]
 - Added uvicorn as a guillotina requirement
