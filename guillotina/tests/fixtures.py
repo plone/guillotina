@@ -468,7 +468,7 @@ async def app(event_loop, db, request):
 
     config = Config(app, host=host, port=port, lifespan="on")
     server = Server(config=config)
-    task = asyncio.create_task(server.serve())
+    task = asyncio.ensure_future(server.serve(), loop=event_loop)
 
     while app.app is None and not task.done():
         # Wait for app initialization
