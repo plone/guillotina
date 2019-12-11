@@ -21,9 +21,9 @@ class ServerCommand(Command):
         return parser
 
     async def run(self, arguments, settings, app):
-        port = arguments.port or settings.get("address", settings.get("port"))
-        host = arguments.host or settings.get("host", "0.0.0.0")
-        loggers = settings.get("logging")
+        host = arguments.host or app.settings.get("host", "0.0.0.0")
+        port = arguments.port or app.settings.get("address", settings.get("port"))
+        loggers = app.settings.get("logging")
 
         if arguments.asgi_server == "uvicorn":
             from uvicorn import Config  # type: ignore
@@ -38,7 +38,7 @@ class ServerCommand(Command):
         elif arguments.asgi_server == "hypercorn":
             from hypercorn.asyncio import serve  # type: ignore
             from hypercorn.config import Config  # type: ignore
-            from hypercorn.logging import CONFIG_DEFAULTS
+            from hypercorn.logging import CONFIG_DEFAULTS  # type: ignore
 
             config = Config()
             config.bind = [f"{host}:{port}"]

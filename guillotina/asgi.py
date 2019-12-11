@@ -1,4 +1,3 @@
-from guillotina import app_settings
 from guillotina import glogging
 from guillotina import task_vars
 from guillotina.exceptions import ConflictError
