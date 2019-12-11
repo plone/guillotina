@@ -55,8 +55,10 @@ app_settings: Dict[str, Any] = {
         "allow_credentials": True,
         "max_age": 3660,
     },
-    "jwt": {"algorithm": "HS256"},
-    "jwt_token_expiration": 60 * 60 * 1,
+    "jwt": {
+        "algorithm": "HS256",
+        "token_expiration": 60 * 60 * 1,
+    },
     "commands": {
         "": "guillotina.commands.server.ServerCommand",
         "serve": "guillotina.commands.server.ServerCommand",

@@ -49,7 +49,7 @@ class Login(Service):
 
         jwt_token, data = authenticate_user(
             user.id,
-            timeout=app_settings["jwt_token_expiration"]
+            timeout=app_settings["jwt"]["token_expiration"]
         )
         await notify(UserLogin(user, jwt_token))
 
@@ -78,7 +78,7 @@ class Refresh(Service):
         user = get_authenticated_user()
         data = {
             "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(seconds=app_settings["jwt_token_expiration"]),
+            "exp": datetime.utcnow() + timedelta(seconds=app_settings["jwt"]["token_expiration"]),
             "id": user.id,
         }
         jwt_token = jwt.encode(
