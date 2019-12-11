@@ -4,7 +4,7 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
-- Added 'server_settings' and 'request_settings'
+- Added 'server_settings'
   [masipcat]
 
 - Added back support for Guillotina/aiohttp middlewares

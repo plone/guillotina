@@ -71,8 +71,8 @@ class AsgiApp:
             self.app = await startup_app(
                 config_file=self.config_file, settings=self.settings, loop=self.loop, server_app=self
             )
-            self.request_settings = app_settings.get("request_settings", {})
-            self.middlewares = [resolve_dotted_name(m) for m in app_settings.get("middlewares", [])]
+            self.server_settings = self.app.settings.get("server_settings", {})
+            self.middlewares = [resolve_dotted_name(m) for m in self.app.settings.get("middlewares", [])]
             self.state = AppState.INITIALIZED
             return self.app
         except Exception:
@@ -95,7 +95,8 @@ class AsgiApp:
         if scope["type"] == "websocket":
             scope["method"] = "GET"
 
-        request = Request.factory(scope, send, receive, **self.request_settings)
+        request_settings = {k: v for k, v in self.server_settings.items() if k in ("client_max_size",)}
+        request = Request.factory(scope, send, receive, **request_settings)
         task_vars.request.set(request)
         resp = await self.request_handler(request)
 
@@ -111,7 +112,7 @@ class AsgiApp:
             return await handler(request)
 
         except (ConflictError, TIDConflictError) as e:
-            if self.settings.get("conflict_retry_attempts", 3) > retries:
+            if self.app.settings.get("conflict_retry_attempts", 3) > retries:
                 label = "DB Conflict detected"
                 if isinstance(e, TIDConflictError):
                     label = "TID Conflict Error detected"

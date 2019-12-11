@@ -20,26 +20,32 @@ class ServerCommand(Command):
         parser.add_argument("--asgi-server", default="uvicorn", type=str)
         return parser
 
-    def run(self, arguments, settings, app):
+    async def run(self, arguments, settings, app):
         port = arguments.port or settings.get("address", settings.get("port"))
         host = arguments.host or settings.get("host", "0.0.0.0")
-        access_log = settings.get("server_settings", {}).get("access_log") or False
+        loggers = settings.get("logging")
 
         if arguments.asgi_server == "uvicorn":
-            import uvicorn  # type: ignore
+            from uvicorn import Config  # type: ignore
+            from uvicorn import Server  # type: ignore
+            from uvicorn.config import LOGGING_CONFIG  # type: ignore
 
-            config = uvicorn.Config(app, host=host, port=port, reload=arguments.reload, access_log=access_log)
-            server = uvicorn.Server(config)
-            self.loop.run_until_complete(server.serve())
+            config = Config(
+                app, host=host, port=port, reload=arguments.reload, log_config=loggers or LOGGING_CONFIG
+            )
+            server = Server(config)
+            await server.serve()
         elif arguments.asgi_server == "hypercorn":
-            import asyncio
-
             from hypercorn.asyncio import serve  # type: ignore
             from hypercorn.config import Config  # type: ignore
+            from hypercorn.logging import CONFIG_DEFAULTS
 
             config = Config()
             config.bind = [f"{host}:{port}"]
             config.use_reloader = arguments.reload
-            asyncio.run(serve(app, config))
+            config.logconfig_dict = loggers or CONFIG_DEFAULTS
+            config.accesslog = "-"
+            config.errorlog = "-"
+            await serve(app, config)
         else:
             raise Exception(f"Server {arguments.asgi_server} not supported")

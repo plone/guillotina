@@ -170,9 +170,9 @@ class Command(object):
 
         if self.arguments.profile:
             self.profiler = cProfile.Profile()
-            self.profiler.runcall(run_func, app, settings)
+            self.profiler.runcall(run_func, app, app_settings)
         else:
-            run_func(app, settings)
+            run_func(app, app_settings)
 
     def __run_with_monitor(self, app, settings):
         loop = self.get_loop()
