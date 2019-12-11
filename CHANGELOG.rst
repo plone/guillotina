@@ -1,7 +1,6 @@
 CHANGELOG
 =========
 
-
 6.0.0a2 (unreleased)
 --------------------
 
@@ -13,6 +12,8 @@ CHANGELOG
 
 - Added property 'status' to Response
   [masipcat]
+
+- Make pytest.mark.app_settings work in older pytest versions too [lferran]
 
 - @move: destination id conflict should return 409 error, not 412
   [inaki]

@@ -97,7 +97,16 @@ def _update_from_pytest_markers(settings, pytest_node):
         return settings
 
     # Update test app settings from pytest markers
-    for mark in pytest_node.iter_markers(name="app_settings"):
+    marks = []
+    try:
+        marks.extend([mark for mark in pytest_node.iter_markers(name="app_settings")])
+    except AttributeError:
+        # Older pytest versions
+        mark = pytest_node.get_marker("app_settings")
+        if mark is not None:
+            marks.append(mark)
+
+    for mark in marks:
         to_update = mark.args[0]
         settings = merge_dicts(settings, to_update)
 
