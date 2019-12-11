@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.23 (unreleased)
+5.1.23 (2019-12-11)
 -------------------
 
 - Make pytest.mark.app_settings work in older pytest versions too [lferran]
