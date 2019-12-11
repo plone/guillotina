@@ -47,7 +47,10 @@ class Login(Service):
         if user is None:
             raise HTTPUnauthorized(content={"text": "login failed"})
 
-        jwt_token, data = authenticate_user(user.id)
+        jwt_token, data = authenticate_user(
+            user.id,
+            timeout=app_settings["jwt_token_expiration"]
+        )
         await notify(UserLogin(user, jwt_token))
 
         return {"exp": data["exp"], "token": jwt_token}
@@ -70,13 +73,12 @@ class Login(Service):
     allow_access=True,
 )
 class Refresh(Service):
-    token_timeout = 60 * 60 * 1
 
     async def __call__(self):
         user = get_authenticated_user()
         data = {
             "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(seconds=self.token_timeout),
+            "exp": datetime.utcnow() + timedelta(seconds=app_settings["jwt_token_expiration"]),
             "id": user.id,
         }
         jwt_token = jwt.encode(
