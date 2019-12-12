@@ -16,6 +16,7 @@ CHANGELOG
   [masipcat]
 - Added uvicorn as a guillotina requirement
   [masipcat]
+- Added endpoint @available-roles on container
 
 
 6.0.0a1 (2019-12-09)
