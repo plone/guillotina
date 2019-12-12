@@ -50,9 +50,7 @@ def get_title(ob):
     return f"The title is: {ob.title}"
 
 
-@configure.contenttype(
-    type_name="CustomItem", schema=ICustomItem,
-)
+@configure.contenttype(type_name="CustomItem", schema=ICustomItem)
 class CustomItem(Resource):
     """
     Basic item content type. Inherits from Resource
