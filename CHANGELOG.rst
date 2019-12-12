@@ -16,7 +16,8 @@ CHANGELOG
   [masipcat]
 - Added uvicorn as a guillotina requirement
   [masipcat]
-
+- Add configurable expiration for jwt.tokens
+  [jordic]
 
 6.0.0a1 (2019-12-09)
 --------------------
