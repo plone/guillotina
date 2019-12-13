@@ -609,6 +609,12 @@ async def move(context, request):
                             "description": "Optional new id to assign object",
                             "required": False,
                         },
+                        "reset_acl": {
+                            "type": "bool",
+                            "description": "Remove users and roles from acl, except for the request user",
+                            "required": True,
+                            "default": False,
+                        },
                     }
                 }
             }
@@ -623,7 +629,11 @@ async def duplicate(context, request):
         data = {}
     try:
         new_obj = await content.duplicate(
-            context, destination=data.get("destination"), new_id=data.get("new_id"), check_permission=True
+            context,
+            destination=data.get("destination"),
+            new_id=data.get("new_id"),
+            check_permission=True,
+            reset_acl=data.get("reset_acl", False),
         )
     except TypeError:
         raise ErrorResponse(
