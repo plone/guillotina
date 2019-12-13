@@ -718,11 +718,15 @@ async def duplicate(
             continue
         new_obj.__dict__[key] = context.__dict__[key]
 
-    new_obj.__acl__ = context.__acl__
     if reset_acl:
-        prinrole = IPrincipalRoleManager(context)
-        prinrole.map._clear()
-        prinrole.map.add_cell("guillotina.Owner", user_id, "Allow")
+        new_obj.__acl__ = None
+        get_owner = get_utility(IGetOwner)
+        roleperm = IPrincipalRoleManager(new_obj)
+        owner = await get_owner(new_obj, user_id)
+        if owner is not None:
+            roleperm.assign_role_to_principal("guillotina.Owner", owner)
+    else:
+        new_obj.__acl__ = context.__acl__
 
     for behavior in context.__behaviors__:
         new_obj.add_behavior(behavior)
