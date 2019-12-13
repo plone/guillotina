@@ -514,7 +514,50 @@ async def test_bucket_list_field(dummy_request, mock_txn):
     assert "bucketlist-bucket_list0" in content.__gannotations__
 
 
-def test_default_value_deserialize(dummy_request):
+async def test_patch_multi(dummy_request):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+
+    await deserializer.set_schema(
+        ITestSchema,
+        content,
+        {
+            "patch_dict": {
+                "op": "multi",
+                "value": [
+                    {"op": "assign", "value": {"key": "foo", "value": "bar"}},
+                    {"op": "assign", "value": {"key": "foo2", "value": "bar2"}},
+                ],
+            }
+        },
+        [],
+    )
+    assert len(content.patch_dict) == 2
+    assert content.patch_dict["foo"] == "bar"
+    assert content.patch_dict["foo2"] == "bar2"
+
+    await deserializer.set_schema(
+        ITestSchema,
+        content,
+        {
+            "patch_dict": {
+                "op": "multi",
+                "value": [
+                    {"op": "del", "value": "foo2"},
+                    {"op": "assign", "value": {"key": "foo3", "value": "bar3"}},
+                ],
+            }
+        },
+        [],
+    )
+    assert len(content.patch_dict) == 2
+    assert "foo2" not in content.patch_dict
+    assert content.patch_dict["foo"] == "bar"
+    assert content.patch_dict["foo3"] == "bar3"
+
+
+async def test_default_value_deserialize(dummy_request):
     content = create_content()
     assert {"text": "foobar"} == deserialize_value.default_value_converter(
         ITestSchema, {"text": "foobar"}, content

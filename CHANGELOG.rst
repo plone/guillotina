@@ -4,7 +4,8 @@ CHANGELOG
 5.1.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- PatchField: added operation "multi"
+  [masipcat]
 
 
 5.1.24 (2019-12-16)

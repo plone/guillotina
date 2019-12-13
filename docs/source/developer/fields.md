@@ -131,6 +131,26 @@ Update:
 }
 ```
 
+Multiple operations:
+
+```json
+{
+    "field": {
+        "op": "multi",
+        "value": [
+            {
+                "op": "del",
+                "value": 0
+            },
+            {
+                "op": "append",
+                "value": "foobar"
+            }
+        ]
+    }
+}
+```
+
 
 ### Patch dict field
 
@@ -176,7 +196,7 @@ Update:
 
 ```json
 {
-    "values": {
+    "field": {
         "op": "update",
         "field": [{
             "key": "foo",
@@ -185,6 +205,29 @@ Update:
             "key": "foo2",
             "value": "bar2"
         }]
+    }
+}
+```
+
+Multiple operations:
+
+```json
+{
+    "field": {
+        "op": "multi",
+        "value": [
+            {
+                "op": "del",
+                "value": "foo"
+            },
+            {
+                "op": "assign",
+                "value": {
+                    "key": "foo3",
+                    "value": "bar3"
+                }
+            }
+        ]
     }
 }
 ```
