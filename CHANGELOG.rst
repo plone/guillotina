@@ -19,6 +19,8 @@ CHANGELOG
   [masipcat]
 - Added uvicorn as a guillotina requirement
   [masipcat]
+- Added endpoint @available-roles on container
+  [jordic]
 - Add configurable expiration for jwt.tokens
   [jordic]
 
