@@ -1,5 +1,6 @@
 from . import groups  # noqa
 from . import users  # noqa
+from . import roles  # noqa
 from guillotina import configure
 from guillotina.api.content import DefaultPOST
 from guillotina.contrib.dbusers.content.groups import IGroupManager

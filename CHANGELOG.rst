@@ -13,6 +13,11 @@ CHANGELOG
 - Added property 'status' to Response
   [masipcat]
 
+- PatchField: added operation "multi"
+  [masipcat]
+
+- @duplicate: added option to reset acl
+
 - Make pytest.mark.app_settings work in older pytest versions too [lferran]
 
 - @move: destination id conflict should return 409 error, not 412
@@ -29,6 +34,12 @@ CHANGELOG
 
 - Added uvicorn as a guillotina requirement
   [masipcat]
+
+- Added endpoint @available-roles on container
+  [jordic]
+
+- Add configurable expiration for jwt.tokens
+  [jordic]
 
 
 6.0.0a1 (2019-12-09)
