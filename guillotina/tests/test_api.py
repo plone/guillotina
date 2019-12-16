@@ -1210,3 +1210,104 @@ async def test_move_with_already_existing_id(container_requester):
             data=json.dumps({"destination": "/container2", "new_id": "foobar"}),
         )
         assert status == 409
+
+
+@pytest.mark.app_settings(DBUSERS_DEFAULT_SETTINGS)
+async def test_duplicate_with_reset_acl(dbusers_requester):
+    async with dbusers_requester as requester:
+        # Add Bob user
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users",
+            data=json.dumps(
+                {
+                    "@type": "User",
+                    "name": "Bob",
+                    "id": "bob",
+                    "username": "bob",
+                    "email": "bob@foo.com",
+                    "password": "bob",
+                }
+            ),
+        )
+        assert status == 201
+
+        # Add Alice user
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users",
+            data=json.dumps(
+                {
+                    "@type": "User",
+                    "name": "Alice",
+                    "id": "alice",
+                    "username": "alice",
+                    "email": "alice@foo.com",
+                    "password": "alice",
+                }
+            ),
+        )
+        assert status == 201
+
+        bob_token = base64.b64encode(b"bob:bob").decode("ascii")
+        alice_token = base64.b64encode(b"alice:alice").decode("ascii")
+
+        # Bob creates a file in its folder
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/",
+            data=json.dumps({"@type": "Item", "id": "foobar1"}),
+            auth_type="Basic",
+            token=bob_token,
+        )
+        assert status == 201
+
+        # Shares it with alice as manager
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/foobar1/@sharing",
+            data=json.dumps(
+                {"prinrole": [{"principal": "alice", "role": "guillotina.Owner", "setting": "Allow"}]}
+            ),
+            auth_type="Basic",
+            token=bob_token,
+        )
+        assert status == 200
+
+        # Aice creates a folder
+        await requester(
+            "POST",
+            "/db/guillotina/users/alice/",
+            data=json.dumps({"@type": "Folder", "id": "alicefolder"}),
+            auth_type="Basic",
+            token=alice_token,
+        )
+        assert status == 200
+
+        # Alice duplicates the file into her folder
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/users/bob/foobar1/@duplicate",
+            data=json.dumps(
+                {
+                    "new_id": "foobar-from-alice",
+                    "destination": "/users/alice",
+                    "check_permission": False,
+                    "reset_acl": True,
+                }
+            ),
+            auth_type="Basic",
+            token=alice_token,
+        )
+        assert status == 200
+
+        # check creators and contributors on duplicated file
+        resp, status = await requester("GET", "/db/guillotina/users/alice/foobar-from-alice")
+        assert status == 200
+        assert resp["guillotina.behaviors.dublincore.IDublinCore"]["creators"] == ["alice"]
+        assert resp["guillotina.behaviors.dublincore.IDublinCore"]["contributors"] == ["alice"]
+        # check owner role
+        resp, status = await requester("GET", "/db/guillotina/users/alice/foobar-from-alice/@sharing")
+        assert status == 200
+        assert len(resp["local"]["prinrole"].keys()) == 1
+        assert resp["local"]["prinrole"]["alice"] == {"guillotina.Owner": "Allow"}
