@@ -62,6 +62,7 @@ from guillotina.transactions import get_transaction
 from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
+from guillotina.utils.auth import get_authenticated_user_id
 from typing import Any
 from typing import AsyncIterator
 from typing import cast
@@ -660,6 +661,7 @@ async def duplicate(
     destination: Optional[Union[IResource, str]] = None,
     new_id: Optional[str] = None,
     check_permission: bool = True,
+    reset_acl: bool = False,
 ) -> IResource:
     if destination is not None:
         if isinstance(destination, str):
@@ -703,26 +705,40 @@ async def duplicate(
 
     from guillotina.content import create_content_in_container
 
+    creators = context.creators
+    contributors = context.contributors
+    user_id = get_authenticated_user_id()
+    if reset_acl:
+        creators = [user_id]
+        contributors = [user_id]
     new_obj = await create_content_in_container(
         destination_ob,
         context.type_name,
         new_id,
         id=new_id,
-        creators=context.creators,
-        contributors=context.contributors,
+        creators=creators,
+        contributors=contributors,
         check_security=check_permission,
     )
-
     for key in context.__dict__.keys():
         if key.startswith("__") or key.startswith("_BaseObject"):
             continue
-        if key in ("id",):
+        if key in ("id", "creators", "contributors"):
             continue
         new_obj.__dict__[key] = context.__dict__[key]
-    new_obj.__acl__ = context.__acl__
+
+    if reset_acl:
+        new_obj.__acl__ = None
+        get_owner = get_utility(IGetOwner)
+        roleperm = IPrincipalRoleManager(new_obj)
+        owner = await get_owner(new_obj, user_id)
+        if owner is not None:
+            roleperm.assign_role_to_principal("guillotina.Owner", owner)
+    else:
+        new_obj.__acl__ = context.__acl__
+
     for behavior in context.__behaviors__:
         new_obj.add_behavior(behavior)
-
     # need to copy annotation data as well...
     # load all annotations for context
     [b for b in await get_all_behaviors(context, load=True)]

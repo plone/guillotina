@@ -4,8 +4,10 @@ CHANGELOG
 5.1.24 (unreleased)
 -------------------
 
-- Provide way to restrict where objects can be created
-  (allowed_parent_types) [lferran]
+- Provide way to restrict where objects can be created (allowed_parent_types) [lferran]
+- Restrict dbusers users and groups to be added only in manager folders [lferran]
+  
+- @duplicate: added option to reset acl [inakip]
 
 5.1.23 (2019-12-11)
 -------------------
