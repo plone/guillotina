@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.24 (unreleased)
+5.1.24 (2019-12-16)
 -------------------
 
 - @duplicate: added option to reset acl [inakip]
