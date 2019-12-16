@@ -126,3 +126,13 @@ async def test_delete_user(dbusers_requester, user_data):
         # Check user is not there anymore
         _, status_code = await requester("GET", "/db/guillotina/@users/foobar")
         assert status_code == 404
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_users_cannot_be_added_outside_users_folder(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        # Add a outside users folder
+        resp, status_code = await requester("POST", "/db/guillotina", data=json.dumps(user_data))
+        assert status_code == 412
+        assert resp["reason"] == "notAllowed"
+        assert resp["details"] == "Type not allowed to be added here"

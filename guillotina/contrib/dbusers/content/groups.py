@@ -31,6 +31,7 @@ class IGroup(IFolder):
     schema=IGroup,
     add_permission="guillotina.AddGroup",
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+    allowed_parent_types=["GroupManager"],
 )
 class Group(Folder):
     name = description = None

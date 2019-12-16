@@ -4,8 +4,8 @@ CHANGELOG
 5.1.24 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Provide way to restrict where objects can be created
+  (allowed_parent_types) [lferran]
 
 5.1.23 (2019-12-11)
 -------------------

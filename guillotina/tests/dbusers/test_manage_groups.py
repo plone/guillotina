@@ -88,3 +88,13 @@ async def test_list_groups_works_with_catalog(dbusers_requester, user_data):
         assert resp[0]["title"]
         assert isinstance(resp[0]["roles"], list)
         assert isinstance(resp[0]["users"], list)
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_groups_cannot_be_added_outside_groups_folder(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        # Add a outside users folder
+        resp, status_code = await requester("POST", "/db/guillotina", data=json.dumps(_group))
+        assert status_code == 412
+        assert resp["reason"] == "notAllowed"
+        assert resp["details"] == "Type not allowed to be added here"

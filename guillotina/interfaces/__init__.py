@@ -121,6 +121,7 @@ from .security import IRolePermissionMap  # noqa
 from .security import ISecurityPolicy  # noqa
 from .security import Public  # noqa
 from .security import Unset  # noqa
+from .types import IConstrainParentTypes  # noqa
 from .types import IConstrainTypes  # noqa
 from .views import ICONNECT  # noqa
 from .views import IDELETE  # noqa
