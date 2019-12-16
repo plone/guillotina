@@ -4,7 +4,7 @@ from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NotAllowedContentType
-from guillotina.exceptions import NotAllowedParentContentType
+from guillotina.exceptions import NotGloballyAddable
 from guillotina.exceptions import PreconditionFailed
 from guillotina.exceptions import Unauthorized
 from guillotina.exceptions import UnRetryableRequestError
@@ -56,8 +56,9 @@ register_handler_factory(
     NotAllowedContentType, exception_handler_factory(error_reasons.NOT_ALLOWED, serialize_exc=True)
 )
 register_handler_factory(
-    NotAllowedParentContentType, exception_handler_factory(error_reasons.NOT_ALLOWED, serialize_exc=True)
+    NotGloballyAddable, exception_handler_factory(error_reasons.NOT_ALLOWED, serialize_exc=True)
 )
+
 register_handler_factory(
     ConflictIdOnContainer,
     exception_handler_factory(

@@ -29,7 +29,7 @@ from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import InvalidContentType
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
-from guillotina.exceptions import NotAllowedParentContentType
+from guillotina.exceptions import NotGloballyAddable
 from guillotina.exceptions import PreconditionFailed
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import DEFAULT_ADD_PERMISSION
@@ -37,7 +37,6 @@ from guillotina.interfaces import IAddons
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IConstrainParentTypes
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
@@ -104,7 +103,7 @@ class ResourceFactory(Factory):
         behaviors=None,
         add_permission=DEFAULT_ADD_PERMISSION,
         allowed_types=None,
-        allowed_parent_types=None,
+        globally_addable=True,
     ):
         super(ResourceFactory, self).__init__(
             klass, title, description, tuple(filter(bool, [schema] + list(behaviors) or list()))
@@ -114,7 +113,7 @@ class ResourceFactory(Factory):
         self.behaviors = behaviors or ()
         self.add_permission = add_permission
         self.allowed_types = allowed_types
-        self.allowed_parent_types = allowed_parent_types
+        self.globally_addable = globally_addable
 
     @profilable
     def __call__(self, id, parent=None, *args, **kw):
@@ -598,7 +597,13 @@ async def create_content_in_container(
 
     constrains = IConstrainTypes(parent, None)
     if constrains is not None:
-        if not constrains.is_type_allowed(type_):
+        if constrains.get_allowed_types() is None:
+            # allowed_types not configured for parent, so check if is
+            # globally addable
+            if not factory.globally_addable:
+                raise NotGloballyAddable(type_)
+
+        elif not constrains.is_type_allowed(type_):
             raise NotAllowedContentType(str(parent), type_)
 
     # We create the object with at least the ID
@@ -608,11 +613,6 @@ async def create_content_in_container(
             # the factory sets id
             continue
         setattr(obj, key, value)
-
-    parent_type_constrains = IConstrainParentTypes(obj, None)
-    if parent_type_constrains is not None:
-        if not parent_type_constrains.is_type_allowed(parent.type_name):
-            raise NotAllowedParentContentType(str(obj), parent.type_name)
 
     txn: Optional[ITransaction]
     if hasattr(parent, "_get_transaction"):

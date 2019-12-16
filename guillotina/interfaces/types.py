@@ -16,8 +16,3 @@ class IConstrainTypes(Interface):  # pylint: disable=E0239
         """
         get all allowed types
         """
-
-
-class IConstrainParentTypes(IConstrainTypes):  # pylint: disable=E0239
-    # Same as IConstrainTypes, but to constrain parent types
-    pass

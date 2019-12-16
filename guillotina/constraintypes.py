@@ -1,7 +1,6 @@
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.content import get_cached_factory
-from guillotina.interfaces import IConstrainParentTypes
 from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IResource
@@ -17,6 +16,7 @@ class FTIConstrainAllowedTypes:
     def is_type_allowed(self, type_id: str) -> bool:
         if type_id in app_settings["container_types"]:
             return False
+
         allowed = self.get_allowed_types()
         if allowed is None:
             # not define
@@ -28,28 +28,6 @@ class FTIConstrainAllowedTypes:
         if tn:
             factory = get_cached_factory(tn)
             return factory.allowed_types
-        return []
-
-
-@configure.adapter(for_=Interface, provides=IConstrainParentTypes)
-class FTIConstrainAllowedParentTypes:
-    def __init__(self, context: IResource) -> None:
-        self.context = context
-
-    def is_type_allowed(self, type_id: str) -> bool:
-        if type_id in app_settings["container_types"]:
-            return False
-        allowed = self.get_allowed_types()
-        if allowed is None:
-            # not define
-            return True
-        return type_id in allowed
-
-    def get_allowed_types(self) -> Optional[list]:
-        tn = getattr(self.context, "type_name", None)
-        if tn:
-            factory = get_cached_factory(tn)
-            return factory.allowed_parent_types
         return []
 
 

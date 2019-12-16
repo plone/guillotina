@@ -53,7 +53,7 @@ class IUser(IFolder, IPrincipal):
     schema=IUser,
     add_permission="guillotina.AddUser",
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
-    allowed_parent_types=["UserManager"],
+    globally_addable=False,
 )
 class User(Folder):
     username = email = name = password = None

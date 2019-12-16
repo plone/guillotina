@@ -40,16 +40,13 @@ class NotAllowedContentType(Exception):
         )
 
 
-class NotAllowedParentContentType(Exception):
-    def __init__(self, content, parent_content_type):
+class NotGloballyAddable(Exception):
+    def __init__(self, content_type):
         super().__init__()
-        self.content = content
-        self.parent_content_type = parent_content_type
+        self.content_type = content_type
 
     def __repr__(self):
-        return "Not allowed {content} on {parent_content_type}".format(
-            content=self.content, parent_content_type=self.parent_content_type
-        )
+        return "Not globally addable {content_type}".format(content_type=self.content_type)
 
 
 class ConflictIdOnContainer(Exception):
