@@ -5,6 +5,8 @@ CHANGELOG
 -------------------
 
 - Provide way to define a content type not globally addable [lferran]
+- Restrict dbusers users and groups to be added only in manager folders [lferran]
+- @duplicate: added option to reset acl [inakip]
 
 5.1.23 (2019-12-11)
 -------------------
