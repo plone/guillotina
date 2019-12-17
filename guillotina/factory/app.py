@@ -261,6 +261,7 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
     root.app = server_app
     server_app.root = root
     server_app.config = config
+    server_app.settings = app_settings
 
     for k, v in _moved.items():
         # for b/w compatibility, convert these

@@ -169,6 +169,15 @@ middlewares:
   - guillotina_myaddon.Middleware
 ```
 
+## Server settings
+
+You can pass `server_settings` to configure the asgi server.
+
+```yaml
+server_settings:
+  client_max_size: 20971520
+```
+
 ## JWT Settings
 
 If you want to enable JWT authentication, you'll need to configure the JWT

@@ -323,7 +323,7 @@ class Request(object):
         self.matchdict: Dict[str, str] = {}
 
     @classmethod
-    def factory(cls, scope, send, receive):
+    def factory(cls, scope, send, receive, **kwargs):
         return cls(
             scope["scheme"],
             scope["method"],
@@ -333,6 +333,7 @@ class Request(object):
             send=send,
             scope=scope,
             receive=receive,
+            **kwargs,
         )
 
     def get_ws(self):

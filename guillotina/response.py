@@ -40,6 +40,10 @@ class Response(Exception):
                     self.content = None
                 self.status_code = status
 
+    @property
+    def status(self):
+        return self.status_code
+
 
 @implementer(IASGIResponse)
 class ASGIResponse:
