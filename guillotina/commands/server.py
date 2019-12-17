@@ -27,11 +27,15 @@ class ServerCommand(Command):
 
         if arguments.asgi_server == "uvicorn":
             import uvicorn  # type: ignore
-                
+
             config = uvicorn.Config(
-                app, host=host, port=port,
-                reload=arguments.reload, access_log=False,
-                **settings["server_settings"]["uvicorn"])
+                app,
+                host=host,
+                port=port,
+                reload=arguments.reload,
+                access_log=False,
+                **settings["server_settings"]["uvicorn"],
+            )
             server = uvicorn.Server(config)
             self.loop.run_until_complete(server.serve())
 
