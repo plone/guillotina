@@ -37,7 +37,7 @@ class ServerCommand(Command):
                 port=port,
                 reload=arguments.reload,
                 log_config=loggers or LOGGING_CONFIG,
-                **settings["server_settings"]["uvicorn"],
+                **app.server_settings.get("uvicorn", {}),
             )
             server = Server(config)
             await server.serve()
