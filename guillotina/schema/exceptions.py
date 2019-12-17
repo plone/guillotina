@@ -78,6 +78,17 @@ class NotAnIterator(ValidationError):
 class WrongContainedType(ValidationError):
     __doc__ = _("""Wrong contained type""")
 
+    def doc(self):
+        errors = self.args[0]
+        doc = super().doc()
+        details = []
+        for err in errors:
+            details += [err.doc()]
+        import pdb
+
+        pdb.set_trace()
+        return doc + ". ".join(details)
+
 
 class NotUnique(ValidationError):
     __doc__ = _("""One or more entries of sequence are not unique.""")

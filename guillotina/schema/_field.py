@@ -591,6 +591,10 @@ class Object(Field):
     def _validate(self, value):
         super(Object, self)._validate(value)
 
+        import pdb
+
+        pdb.set_trace()
+
         if isinstance(value, dict):
             # Dicts are validated differently
             valid_type = namedtuple(
@@ -609,6 +613,9 @@ class Object(Field):
                 raise SchemaNotProvided
             errors = _validate_fields(self.schema, value)
         if errors:
+            import pdb
+
+            pdb.set_trace()
             raise WrongContainedType(errors, self.__name__)
 
 

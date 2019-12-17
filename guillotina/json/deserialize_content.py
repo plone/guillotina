@@ -108,6 +108,9 @@ class DeserializeFromJson(object):
                 except ValueError as e:
                     errors.append({"message": "Value error", "field": name, "error": e})
                 except ValidationError as e:
+                    import pdb
+
+                    pdb.set_trace()
                     errors.append({"message": e.doc(), "field": name, "error": e})
                 except ValueDeserializationError as e:
                     errors.append({"message": e.message, "field": name, "error": e})
