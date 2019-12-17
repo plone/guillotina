@@ -1181,20 +1181,30 @@ async def test_field_values_dict_bucket_preconditions(container_requester):
         assert status == 410
 
 
-async def test_patch_field_validation(container_requester):
+async def test_deserialization_errors(container_requester):
     async with container_requester as requester:
-        _, status = await requester(
+        resp, status = await requester(
             "POST",
             "/db/guillotina/",
             data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": 1}}),
         )
         assert status == 412
-        _, status = await requester(
+        assert resp["deserialization_errors"] == [
+            {
+                "field": "tags",
+                "message": 'Object is of wrong type. Expected "<class \'tuple\'>" but found "<class \'int\'>" (1) in field "tags".',
+            }
+        ]
+
+        resp, status = await requester(
             "POST",
             "/db/guillotina/",
             data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": [1]}}),
         )
         assert status == 412
+        assert resp["deserialization_errors"] == [
+            {"field": "tags", "message": 'Object is of wrong type. Expected "<class \'str\'>" but found "<class \'int\'>" (1).'}
+        ]
 
 
 async def test_move_with_already_existing_id(container_requester):

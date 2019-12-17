@@ -15,6 +15,13 @@ class ValidationError(zope.interface.Invalid):
     """Raised if the Validation process fails."""
 
     def doc(self):
+        if len(self.args) == 3:
+            value, type_, field_name = self.args
+            if field_name:
+                details = f'Expected "{type_}" but found "{type(value)}" ({value}) in field "{field_name}".'
+            else:
+                details = f'Expected "{type_}" but found "{type(value)}" ({value}).'
+            return f"{self.__class__.__doc__} {details}"
         return self.__class__.__doc__
 
     def __eq__(self, other):
