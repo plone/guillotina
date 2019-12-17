@@ -2,7 +2,7 @@ CHANGELOG
 =========
 
 
-6.0.0a2 (unreleased)
+6.0.0a2 (2019-12-17)
 --------------------
 
 - Adapt to HTTP1.1 protocol on uvicorn by default
