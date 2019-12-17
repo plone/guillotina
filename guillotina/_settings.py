@@ -91,5 +91,7 @@ app_settings: Dict[str, Any] = {
     "search_parser": "default",
     "object_reader": "guillotina.db.reader.reader",
     "thread_pool_workers": 32,
+    "keep_alive": 5,
+    "http_protocol": "h11"
 }
 default_settings = copy.deepcopy(app_settings)

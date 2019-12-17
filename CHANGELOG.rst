@@ -5,6 +5,8 @@ CHANGELOG
 6.0.0a2 (unreleased)
 --------------------
 
+- Adapt to HTTP1.1 protocol on uvicorn by default
+  [bloodbare]
 - PatchField: added operation "multi"
   [masipcat]
 - @duplicate: added option to reset acl
