@@ -31,12 +31,12 @@ class ServerCommand(Command):
             from uvicorn import Server  # type: ignore
             from uvicorn.config import LOGGING_CONFIG  # type: ignore
 
-            config = uvicorn.Config(
+            config = Config(
                 app,
                 host=host,
                 port=port,
                 reload=arguments.reload,
-                log_config=loggers or LOGGING_CONFIG
+                log_config=loggers or LOGGING_CONFIG,
                 **settings["server_settings"]["uvicorn"],
             )
             server = Server(config)
