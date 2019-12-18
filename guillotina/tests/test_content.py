@@ -75,6 +75,7 @@ async def test_add_behavior(dummy_guillotina):
         with pytest.raises(ComponentLookupError):
             item.add_behavior("foo")
 
+        # IDublinCore already exists
         item.add_behavior(IDublinCore.__identifier__)
         assert len(list(item.__behaviors_schemas__)) == 0
 
