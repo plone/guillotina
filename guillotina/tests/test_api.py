@@ -962,6 +962,7 @@ async def test_tags_patch_field(container_requester):
                     "@type": "Item",
                     "title": "Item1",
                     "id": "item1",
+                    "@behaviors": [IDublinCore.__identifier__],
                     IDublinCore.__identifier__: {"tags": ["one"]},
                 }
             ),

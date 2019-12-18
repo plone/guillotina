@@ -4,6 +4,9 @@ CHANGELOG
 5.1.25 (unreleased)
 -------------------
 
+- Fix adding duplicate behaviors
+  [qiwn]
+
 - PatchField: added operation "multi"
   [masipcat]
 
