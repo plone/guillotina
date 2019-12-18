@@ -22,7 +22,7 @@ async def test_trns_retries_with_app(container_requester):
             handle_mock.return_value = f
             handle_mock.side_effect = ConflictError()
             response, status = await requester("GET", "/db/guillotina/@types")
-            status == 409
+            assert status == 409
 
 
 async def test_async_util_started_and_stopped(dummy_guillotina):
