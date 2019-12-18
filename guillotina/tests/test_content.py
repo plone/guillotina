@@ -6,6 +6,7 @@ from guillotina.component.interfaces import ComponentLookupError
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.content import Folder
+from guillotina.content import get_all_behaviors
 from guillotina.content import Item
 from guillotina.content import load_cached_schema
 from guillotina.exceptions import NoPermissionToAdd
@@ -75,12 +76,16 @@ async def test_add_behavior(dummy_guillotina):
         with pytest.raises(ComponentLookupError):
             item.add_behavior("foo")
 
+        all_behaviors = await get_all_behaviors(item)
+        assert len(all_behaviors) == 1
+        assert all_behaviors[0][0] == IDublinCore
+
         # IDublinCore already exists
         item.add_behavior(IDublinCore.__identifier__)
-        assert len(list(item.__behaviors_schemas__)) == 0
+        assert len(await get_all_behaviors(item)) == 1
 
         item.add_behavior(IAttachment)
-        assert len(list(item.__behaviors_schemas__)) == 1
+        assert len(await get_all_behaviors(item)) == 2
 
 
 async def test_allowed_types(dummy_guillotina):
