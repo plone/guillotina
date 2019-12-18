@@ -442,6 +442,10 @@ class HTTPUnavailableForLegalReasons(HTTPClientError):
         self.link = link
 
 
+class HTTPClientClosedRequest(HTTPClientError):
+    status_code = 499  # nginx uses this and is loosely supported
+
+
 ############################################################
 # 5xx Server Error
 ############################################################

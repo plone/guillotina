@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a4 (unreleased)
 --------------------
 
+- Better CancelledError handling in resolving a request
+  [vangheem]
+
 - Fix duplicate behaviors interfaces in get_all_behavior_interfaces()
   [qiwn]
 
