@@ -1,17 +1,24 @@
 CHANGELOG
 =========
 
-6.0.0a2 (unreleased)
+6.0.0a3 (unreleased)
 --------------------
-
-- Added 'server_settings'
-  [masipcat]
 
 - Added back support for Guillotina/aiohttp middlewares
   [masipcat]
 
+- Improved server command and added 'server_settings'
+  [masipcat]
+
 - Added property 'status' to Response
   [masipcat]
+
+
+6.0.0a2 (2019-12-17)
+--------------------
+
+- Adapt to HTTP1.1 protocol on uvicorn by default
+  [bloodbare]
 
 - PatchField: added operation "multi"
   [masipcat]

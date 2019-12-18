@@ -17,6 +17,7 @@ class ServerCommand(Command):
         )
         parser.add_argument("--port", help="Override port to run this server on", default=None, type=int)
         parser.add_argument("--host", help="Override host to run this server on", default=None)
+
         parser.add_argument("--asgi-server", default="uvicorn", type=str)
         return parser
 
@@ -31,7 +32,12 @@ class ServerCommand(Command):
             from uvicorn.config import LOGGING_CONFIG  # type: ignore
 
             config = Config(
-                app, host=host, port=port, reload=arguments.reload, log_config=loggers or LOGGING_CONFIG
+                app,
+                host=host,
+                port=port,
+                reload=arguments.reload,
+                log_config=loggers or LOGGING_CONFIG,
+                **app.server_settings.get("uvicorn", {}),
             )
             server = Server(config)
             await server.serve()

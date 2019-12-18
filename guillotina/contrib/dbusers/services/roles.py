@@ -9,7 +9,7 @@ from guillotina.interfaces import IContainer
     name="@available-roles",
     permission="guillotina.ManageUsers",
     summary="Get available roles on guillotina container",
-    method="GET"
+    method="GET",
 )
 class AvailableRoles(Service):
     async def __call__(self):
