@@ -57,14 +57,35 @@ def field_converter(field, value, context):
         if not isinstance(value, dict):
             raise ValueDeserializationError(field, value, "Not an object")
         operation_name = value.get("op", "undefined")
-        bound_field = field.field.bind(context)
-        operation = query_adapter(bound_field, field.operation_type, name=operation_name)
-        if operation is None:
-            raise ValueDeserializationError(field, value, f'"{operation_name}" not a valid operation')
-        value = operation(context, value.get("value"))
+        if operation_name == "multi":
+            operation = query_adapter(field, field.operation_type, name=operation_name)
+            if operation is None:
+                raise ValueDeserializationError(field, value, f'"{operation_name}" not a valid operation')
+            value = operation(context, value.get("value"))
+        else:
+            bound_field = field.field.bind(context)
+            operation = query_adapter(bound_field, field.operation_type, name=operation_name)
+            if operation is None:
+                raise ValueDeserializationError(field, value, f'"{operation_name}" not a valid operation')
+            value = operation(context, value.get("value"))
     elif isinstance(value, (dict, list)):
         value = get_adapter(field.field, IJSONToValue, args=[value, context])
     return value
+
+
+@configure.adapter(for_=IPatchField, provides=IPatchFieldOperation, name="multi")
+class MultiPatch:
+    def __init__(self, field):
+        super().__init__()
+        self.field = field
+
+    def __call__(self, context, value):
+        bound_field = self.field.field.bind(context)
+        resulting_value = None
+        for op in value:
+            resulting_value = field_converter(self.field, op, context)
+            bound_field.set(context, resulting_value)
+        return resulting_value
 
 
 @configure.adapter(for_=IList, provides=IPatchFieldOperation, name="append")
