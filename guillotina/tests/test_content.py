@@ -1,6 +1,8 @@
 from guillotina import configure
+from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import get_utility
+from guillotina.component.interfaces import ComponentLookupError
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.content import Folder
@@ -56,6 +58,28 @@ async def test_allowed_to_create_content(dummy_guillotina):
         utils.register(container)
 
         await create_content_in_container(container, "Item", id_="foobar")
+
+
+async def test_add_behavior(dummy_guillotina):
+    utils.login()
+
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        utils.register(container)
+
+        item = await create_content_in_container(container, "Item", id_="foobar")
+        with pytest.raises(AttributeError):
+            item.add_behavior(123)
+
+        with pytest.raises(ComponentLookupError):
+            item.add_behavior("foo")
+
+        item.add_behavior(IDublinCore.__identifier__)
+        assert len(list(item.__behaviors_schemas__)) == 0
+
+        item.add_behavior(IAttachment)
+        assert len(list(item.__behaviors_schemas__)) == 1
 
 
 async def test_allowed_types(dummy_guillotina):
