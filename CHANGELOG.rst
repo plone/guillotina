@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a3 (unreleased)
+6.0.0a3 (2019-12-18)
 --------------------
 
 - Improved server command and added 'server_settings'
