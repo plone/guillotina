@@ -58,6 +58,7 @@ from typing import Tuple
 from zope.interface import alsoProvides
 
 import aiohttp
+import asyncio
 import traceback
 import uuid
 
@@ -401,6 +402,10 @@ class TraversalRouter(AbstractRouter):
         except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
             await abort()
             return BasicMatchInfo(request, exc)
+        except asyncio.CancelledError:
+            logger.warning("Unhandled cancel error", exc_info=True, request=request)
+            await abort()
+            return BasicMatchInfo(request, response.HTTPClientClosedRequest())
         except Exception:
             logger.error("Exception on resolve execution", exc_info=True, request=request)
             await abort()

@@ -4,6 +4,9 @@ CHANGELOG
 5.1.25 (unreleased)
 -------------------
 
+- Better CancelledError handling in resolving a request
+  [vangheem]
+
 - Fix adding duplicate behaviors
   [qiwn]
 
