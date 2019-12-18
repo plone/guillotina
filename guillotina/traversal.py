@@ -404,12 +404,10 @@ class TraversalRouter(AbstractRouter):
             await abort()
             return BasicMatchInfo(request, exc)
         except asyncio.CancelledError:
-            _clean_request(request, None)
             logger.warning("Unhandled cancel error", exc_info=True, request=request)
             await abort()
             return BasicMatchInfo(request, response.HTTPClientClosedRequest())
         except Exception:
-            _clean_request(request, None)
             logger.error("Exception on resolve execution", exc_info=True, request=request)
             await abort()
             return BasicMatchInfo(request, response.HTTPInternalServerError())
