@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.25 (unreleased)
+5.1.25 (2019-12-18)
 -------------------
 
 - Better CancelledError handling in resolving a request
