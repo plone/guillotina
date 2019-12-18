@@ -38,6 +38,7 @@ def test_value_serialization_error():
     assert error.value == "Bar"
 
 
+@pytest.mark.asyncio
 async def test_handle_cancelled_error(container_requester):
     async with container_requester as requester:
         with mock.patch("guillotina.traversal.TraversalRouter.real_resolve") as handle_mock:  # noqa
@@ -49,6 +50,7 @@ async def test_handle_cancelled_error(container_requester):
             assert status == 499
 
 
+@pytest.mark.asyncio
 async def test_unhandle_exception_in_view(container_requester):
     async with container_requester as requester:
         with mock.patch("guillotina.traversal.TraversalRouter.real_resolve") as handle_mock:  # noqa
