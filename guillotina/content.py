@@ -213,8 +213,9 @@ class Resource(guillotina.db.orm.base.BaseObject):
             raise AttributeError("Cant identify Interface")
         behavior_registration = get_utility(IBehavior, name=name)
         if behavior_registration is not None and behavior_registration.interface(self) is not None:
+            factory = get_cached_factory(self.type_name) or ()
             # We can adapt so we can apply this dynamic behavior
-            if name not in self.__behaviors__:
+            if behavior_registration.interface not in factory.behaviors and name not in self.__behaviors__:
                 self.__behaviors__ |= {name}
                 if behavior_registration.marker is not None:
                     alsoProvides(self, behavior_registration.marker)

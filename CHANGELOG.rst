@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a4 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix adding duplicate behaviors
+  [qiwn]
 
 
 6.0.0a3 (2019-12-18)
