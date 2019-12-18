@@ -71,10 +71,6 @@ class ASGIResponse:
     def prepared(self) -> bool:
         return self._prepared is True
 
-    @property
-    def status(self):
-        return self.status_code
-
     async def prepare(self, request: "Request"):
         if self._eof_sent or self._prepared:
             return
