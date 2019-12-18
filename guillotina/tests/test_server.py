@@ -14,7 +14,6 @@ def test_make_app(dummy_guillotina):
     assert type(dummy_guillotina.router) == TraversalRouter
 
 
-@pytest.mark.asyncio
 async def test_trns_retries_with_app(container_requester):
     async with container_requester as requester:
         with mock.patch("guillotina.traversal.MatchInfo.handler") as handle_mock:  # noqa
@@ -26,7 +25,6 @@ async def test_trns_retries_with_app(container_requester):
             assert status == 409
 
 
-@pytest.mark.asyncio
 async def test_async_util_started_and_stopped(dummy_guillotina):
     util = get_utility(ITestAsyncUtility)
     util.state == "init"
@@ -46,7 +44,6 @@ async def test_async_util_started_and_stopped(dummy_guillotina):
     assert util2.state == "finalize"
 
 
-@pytest.mark.asyncio
 async def test_requester_with_default_settings(container_requester_server):
     async with container_requester_server as requester:
         assert requester.host == "127.0.0.1"
@@ -54,7 +51,6 @@ async def test_requester_with_default_settings(container_requester_server):
 
 
 @pytest.mark.app_settings({"test_server_settings": {"host": "0.0.0.0", "port": 1234}})
-@pytest.mark.asyncio
 async def test_requester_with_custom_settings(container_requester_server):
     async with container_requester_server as requester:
         assert requester.host == "0.0.0.0"
