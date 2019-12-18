@@ -1,9 +1,6 @@
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 SWAGGER_SETTINGS = {"applications": ["guillotina.contrib.swagger"]}
 
 

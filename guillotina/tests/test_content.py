@@ -25,9 +25,6 @@ import pickle
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 class ICustomContentType(IItem):
 
     images = Dict(key_type=TextLine(), value_type=TextLine(), required=False, defaultFactory=dict)

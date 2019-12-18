@@ -7,9 +7,6 @@ import pytest
 import random
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_add_user(dbusers_requester):
     async with dbusers_requester as requester:

@@ -8,9 +8,6 @@ from guillotina.tests.utils import create_content
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 DEFAULT_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.cache"],
     "cache": {"updates_channel": None, "driver": None},

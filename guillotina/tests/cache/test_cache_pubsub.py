@@ -13,9 +13,6 @@ import pickle
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 DEFAULT_SETTINGS = {
     "applications": [
         "guillotina",

@@ -11,9 +11,6 @@ import pytest
 import random
 
 
-pytestmark = pytest.mark.asyncio
-
-
 _pytest_params = [
     pytest.param("db", marks=pytest.mark.app_settings({"cloud_datamanager": "db"})),
     pytest.param(

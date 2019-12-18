@@ -19,9 +19,6 @@ from zope.interface import Interface
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_register_service(container_requester):
     cur_count = len(configure.get_configurations("guillotina.tests", "service"))
 

@@ -6,9 +6,6 @@ import json
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 _group = {"name": "foo", "description": "foo description", "@type": "Group", "id": "foo"}
 
 

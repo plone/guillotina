@@ -7,9 +7,6 @@ from guillotina.tests.utils import get_mocked_request
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_get_root(container_requester):
     async with container_requester as requester:
         value, status, headers = await requester.make_request(

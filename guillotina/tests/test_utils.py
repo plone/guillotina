@@ -10,7 +10,6 @@ from guillotina.utils import get_behavior
 from guillotina.utils.navigator import Navigator
 
 import json
-import pytest
 
 
 def test_module_resolve_path():
@@ -32,7 +31,6 @@ def test_dotted_name():
     assert utils.get_dotted_name(IResource) == "guillotina.interfaces.content.IResource"
 
 
-@pytest.mark.asyncio
 async def test_get_content_path(container_requester):
     async with container_requester as requester:
         response, status = await requester(
@@ -49,7 +47,6 @@ async def test_get_content_path(container_requester):
         await tm.abort(txn=txn)
 
 
-@pytest.mark.asyncio
 async def test_get_content_depth(container_requester):
     async with container_requester as requester:
         response, status = await requester(
@@ -127,7 +124,6 @@ def test_merge_dicts():
     assert result["foo"]["bar"] == 3
 
 
-@pytest.mark.asyncio
 async def test_get_containers(container_requester):
     async with container_requester:
         containers = [c async for c in utils.get_containers()]
@@ -138,7 +134,6 @@ def test_safe_unidecode():
     assert "foobar" == utils.safe_unidecode(b"foobar")
 
 
-@pytest.mark.asyncio
 async def test_object_utils(container_requester):
     async with container_requester as requester:
         response, status = await requester(
@@ -164,7 +159,6 @@ async def test_object_utils(container_requester):
         await tm.abort(txn=txn)
 
 
-@pytest.mark.asyncio
 async def test_run_async():
     def _test():
         return "foobar"
@@ -172,7 +166,6 @@ async def test_run_async():
     assert await utils.run_async(_test) == "foobar"
 
 
-@pytest.mark.asyncio
 async def test_navigator_preload(container_requester):
     async with container_requester as requester:
         response, status = await requester(
@@ -196,7 +189,6 @@ async def test_navigator_preload(container_requester):
         await tm.abort(txn=txn)
 
 
-@pytest.mark.asyncio
 async def test_navigator_get(container_requester):
     async with container_requester as requester:
         response, status = await requester(
@@ -246,7 +238,6 @@ async def test_navigator_get(container_requester):
         await tm.abort(txn=txn)
 
 
-@pytest.mark.asyncio
 async def test_get_behavior(container_requester):
     async with container_requester as requester:
         response, status = await requester(

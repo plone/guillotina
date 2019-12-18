@@ -6,9 +6,6 @@ import json
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.fixture()
 async def user_data():
     return settings.user_data

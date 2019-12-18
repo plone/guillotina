@@ -48,21 +48,6 @@ def base_settings_configurator(settings):
 testing.configure_with(base_settings_configurator)
 
 
-@pytest.yield_fixture
-def event_loop():
-    """Create an instance of the default event loop for each test case."""
-    # https://github.com/pytest-dev/pytest-asyncio/issues/30#issuecomment-226947196
-    policy = asyncio.get_event_loop_policy()
-    res = policy.new_event_loop()
-    asyncio.set_event_loop(res)
-    res._close = res.close
-    res.close = lambda: None
-
-    yield res
-
-    res._close()
-
-
 def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
     settings = _update_from_pytest_markers(settings, pytest_node)

@@ -4,9 +4,6 @@ from guillotina.interfaces import IMailer
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.mark.app_settings(
     {
         "applications": ["guillotina", "guillotina.contrib.mailer"],

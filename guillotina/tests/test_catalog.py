@@ -25,9 +25,6 @@ import os
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 NOT_POSTGRES = os.environ.get("DATABASE", "DUMMY") in ("cockroachdb", "DUMMY")
 PG_CATALOG_SETTINGS = {
     "applications": ["guillotina.contrib.catalog.pg"],

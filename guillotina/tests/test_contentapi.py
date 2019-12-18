@@ -4,9 +4,6 @@ from guillotina.utils import get_content_path
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_contentapi_create(db, guillotina_main):
     async with ContentAPI(guillotina_main.root["db"]) as api:
         container = await api.create({"@type": "Container", "id": "foobar"})

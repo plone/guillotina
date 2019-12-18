@@ -19,9 +19,6 @@ import json
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 class ITestingRegistry(Interface):  # pylint: disable=E0239
     enabled = schema.Bool(title="Example attribute")
 

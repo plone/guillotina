@@ -11,9 +11,6 @@ import json
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 class IFoobarType(Interface):
     pass
 

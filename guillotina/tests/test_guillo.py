@@ -6,10 +6,6 @@ from guillotina.factory import make_app
 
 import json
 import logging
-import pytest
-
-
-pytestmark = pytest.mark.asyncio
 
 
 async def test_get_the_root(guillotina):

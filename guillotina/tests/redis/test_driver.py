@@ -4,9 +4,6 @@ import asyncio
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.mark.app_settings({"applications": ["guillotina", "guillotina.contrib.redis"]})
 async def test_redis_ops(redis_container, guillotina_main):
     driver = await resolve_dotted_name("guillotina.contrib.redis").get_driver()

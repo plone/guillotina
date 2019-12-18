@@ -14,9 +14,6 @@ from guillotina.utils import get_object_by_uid
 import pytest
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_no_tid_created_for_reads(dummy_request, event_loop):
     tm = mocks.MockTransactionManager()
     trns = Transaction(tm, loop=event_loop, read_only=True)

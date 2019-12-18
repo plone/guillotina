@@ -22,9 +22,6 @@ import uuid
 import zope.interface
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def test_serialize_resource(dummy_request, mock_txn):
     content = create_content()
     serializer = get_multi_adapter((content, dummy_request), IResourceSerializeToJson)
