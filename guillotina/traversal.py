@@ -400,7 +400,6 @@ class TraversalRouter(AbstractRouter):
         try:
             result = await self.real_resolve(request)
         except (response.Response, aiohttp.web_exceptions.HTTPException) as exc:
-            _clean_request(request, exc)
             await abort()
             return BasicMatchInfo(request, exc)
         except asyncio.CancelledError:
