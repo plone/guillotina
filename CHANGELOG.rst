@@ -1,28 +1,57 @@
 CHANGELOG
 =========
 
-
-6.0.0a2 (unreleased)
+6.0.0a4 (unreleased)
 --------------------
+
+- Fix adding duplicate behaviors
+  [qiwn]
+
+
+6.0.0a3 (2019-12-18)
+--------------------
+
+- Improved server command and added 'server_settings'
+  [masipcat]
+
+- Added property 'status' to Response
+  [masipcat]
+
+
+6.0.0a2 (2019-12-17)
+--------------------
+
+- Adapt to HTTP1.1 protocol on uvicorn by default
+  [bloodbare]
 
 - PatchField: added operation "multi"
   [masipcat]
+
 - @duplicate: added option to reset acl
+
 - Make pytest.mark.app_settings work in older pytest versions too [lferran]
+
 - @move: destination id conflict should return 409 error, not 412
   [inaki]
+
 - Explicit loop to execute on tests
   [bloodbare]
+
 - Fix IAbsoluteUrl() returns request query
   [masipcat]
+
 - Added attribute cookies to class Request()
   [masipcat]
+
 - Added uvicorn as a guillotina requirement
   [masipcat]
+
 - Added endpoint @available-roles on container
   [jordic]
+
 - Add configurable expiration for jwt.tokens
   [jordic]
+
 
 6.0.0a1 (2019-12-09)
 --------------------

@@ -92,7 +92,7 @@ def resolve_path(file_path: str) -> pathlib.Path:
     Resolve path to file inside python module
 
     >>> resolve_path('guillotina:__init__.py')
-    PosixPath('/Users/vangheem/onna/onna-canonical/libsrc/guillotina/guillotina/__init__.py')
+    PosixPath('/Users/user/guillotina/guillotina/__init__.py')
 
     :param file_path: `module:path` string
     """

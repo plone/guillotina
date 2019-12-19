@@ -17,30 +17,41 @@ class ServerCommand(Command):
         )
         parser.add_argument("--port", help="Override port to run this server on", default=None, type=int)
         parser.add_argument("--host", help="Override host to run this server on", default=None)
+
         parser.add_argument("--asgi-server", default="uvicorn", type=str)
         return parser
 
-    def run(self, arguments, settings, app):
-        port = arguments.port or settings.get("address", settings.get("port"))
-        host = arguments.host or settings.get("host", "0.0.0.0")
+    async def run(self, arguments, settings, app):
+        host = arguments.host or app.settings.get("host", "0.0.0.0")
+        port = arguments.port or app.settings.get("address", settings.get("port"))
+        loggers = app.settings.get("logging")
 
         if arguments.asgi_server == "uvicorn":
-            import uvicorn  # type: ignore
+            from uvicorn import Config  # type: ignore
+            from uvicorn import Server  # type: ignore
+            from uvicorn.config import LOGGING_CONFIG  # type: ignore
 
-            config = uvicorn.Config(app, host=host, port=port, reload=arguments.reload, access_log=False)
-            server = uvicorn.Server(config)
-            self.loop.run_until_complete(server.serve())
-
-            # uvicorn.run(app, host=host, port=port, reload=arguments.reload, access_log=False, loop=self.loop)
+            config = Config(
+                app,
+                host=host,
+                port=port,
+                reload=arguments.reload,
+                log_config=loggers or LOGGING_CONFIG,
+                **app.server_settings.get("uvicorn", {}),
+            )
+            server = Server(config)
+            await server.serve()
         elif arguments.asgi_server == "hypercorn":
-            import asyncio
-
             from hypercorn.asyncio import serve  # type: ignore
             from hypercorn.config import Config  # type: ignore
+            from hypercorn.logging import CONFIG_DEFAULTS  # type: ignore
 
             config = Config()
             config.bind = [f"{host}:{port}"]
             config.use_reloader = arguments.reload
-            asyncio.run(serve(app, config))
+            config.logconfig_dict = loggers or CONFIG_DEFAULTS
+            config.accesslog = "-"
+            config.errorlog = "-"
+            await serve(app, config)
         else:
             raise Exception(f"Server {arguments.asgi_server} not supported")
