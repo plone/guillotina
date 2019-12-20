@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.1.26 (unreleased)
+5.1.26 (2019-12-20)
 -------------------
 
 - Bubble cancelled errors in resolver
