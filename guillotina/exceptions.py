@@ -208,7 +208,7 @@ class DeserializationError(Exception):
     def json_data(self):
         return {"deserialization_errors": self.json_err_list(self.errors)}
 
-    def json_err_list(self, errors=None):
+    def json_err_list(self, errors):
         converted_errors = []
         for error in errors:
             # need to clean raw exceptions out of this list here...

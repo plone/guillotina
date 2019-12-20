@@ -1191,7 +1191,8 @@ class IObjectA(Interface):
 
 class ITestSchema(Interface):
 
-    object_a = schema.List(value_type=schema.Object(IObjectA))
+    object_a = schema.Object(IObjectA, required=False)
+    list_object_a = schema.List(value_type=schema.Object(IObjectA), required=False)
 
 
 @contenttype(type_name="TestSchema", schema=ITestSchema)
@@ -1226,19 +1227,35 @@ async def test_deserialization_errors(container_requester):
         ]
 
         resp, status = await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "TestSchema", "object_a": [{"foo": 1}]}),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "TestSchema", "object_a": {"foo": "hey"}}),
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
             {
-                "errors": [{"field": "foo", "message": "Expected <class 'str'> but found <class 'int'>."}],
+                "errors": [{"field": "bar", "message": "Required input is missing."}],
                 "field": "object_a",
                 "message": "Wrong contained type",
             }
         ]
 
         resp, status = await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "TestSchema", "object_a": [{"foo": "hey"}]}),
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "TestSchema", "list_object_a": [{"foo": 1}]}),
+        )
+        assert status == 412
+        assert resp["deserialization_errors"] == [
+            {
+                "errors": [{"field": "foo", "message": "Expected <class 'str'> but found <class 'int'>."}],
+                "field": "list_object_a",
+                "message": "Wrong contained type",
+            }
+        ]
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "TestSchema", "list_object_a": [{"foo": "hey"}]}),
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
@@ -1246,11 +1263,11 @@ async def test_deserialization_errors(container_requester):
                 "errors": [
                     {
                         "errors": [{"field": "bar", "message": "Required input is missing."}],
-                        "field": "object_a",
+                        "field": "list_object_a",  # this is actually 'list_object_a[0]'
                         "message": "Wrong contained type",
                     }
                 ],
-                "field": "object_a",
+                "field": "list_object_a",
                 "message": "Wrong contained type",
             }
         ]
