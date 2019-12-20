@@ -20,7 +20,6 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 
 import typing
-import warnings
 
 
 logger = glogging.getLogger("guillotina")
