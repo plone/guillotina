@@ -7,6 +7,12 @@ CHANGELOG
 - Improving ValidationErrors messages
   [masipcat]
 
+- Better CancelledError handling in resolving a request
+  [vangheem]
+
+- Fix duplicate behaviors interfaces in get_all_behavior_interfaces()
+  [qiwn]
+
 - Fix adding duplicate behaviors
   [qiwn]
 
