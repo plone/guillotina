@@ -4,7 +4,8 @@ CHANGELOG
 5.1.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bubble cancelled errors in resolver
+  [vangheem]
 
 
 5.1.25 (2019-12-18)
