@@ -108,10 +108,7 @@ class DeserializeFromJson(object):
                 except ValueError as e:
                     errors.append({"message": "Value error", "field": name, "error": e})
                 except ValidationError as e:
-                    import pdb
-
-                    pdb.set_trace()
-                    errors.append({"message": e.doc(), "field": name, "error": e})
+                    errors.append(e.json())
                 except ValueDeserializationError as e:
                     errors.append({"message": e.message, "field": name, "error": e})
                 except Invalid as e:
@@ -122,7 +119,7 @@ class DeserializeFromJson(object):
                         await apply_coroutine(field.set, obj, value)
                         changed = True
                     except ValidationError as e:
-                        errors.append({"message": e.doc(), "field": name, "error": e})
+                        errors.append(e.json())
                     except ValueDeserializationError as e:
                         errors.append({"message": e.message, "field": name, "error": e})
                     except AttributeError:

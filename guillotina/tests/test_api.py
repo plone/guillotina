@@ -4,6 +4,8 @@ from guillotina import schema
 from guillotina.addons import Addon
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.dublincore import IDublinCore
+from guillotina.configure import contenttype
+from guillotina.content import Item
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IResource
@@ -1182,6 +1184,21 @@ async def test_field_values_dict_bucket_preconditions(container_requester):
         assert status == 410
 
 
+class IObjectA(Interface):
+    foo = schema.Text(required=False)
+    bar = schema.Int(required=True)
+
+
+class ITestSchema(Interface):
+
+    object_a = schema.List(value_type=schema.Object(IObjectA))
+
+
+@contenttype(type_name="TestSchema", schema=ITestSchema)
+class TestSchema(Item):
+    pass
+
+
 async def test_deserialization_errors(container_requester):
     async with container_requester as requester:
         resp, status = await requester(
@@ -1191,10 +1208,7 @@ async def test_deserialization_errors(container_requester):
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
-            {
-                "field": "tags",
-                "message": 'Object is of wrong type. Expected "<class \'tuple\'>" but found "<class \'int\'>" (1) in field "tags".',
-            }
+            {"field": "tags", "message": "Expected <class 'tuple'> but found <class 'int'>."}
         ]
 
         resp, status = await requester(
@@ -1204,7 +1218,41 @@ async def test_deserialization_errors(container_requester):
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
-            {"field": "tags", "message": 'Object is of wrong type. Expected "<class \'str\'>" but found "<class \'int\'>" (1).'}
+            {
+                "errors": [{"field": "tags", "message": "Expected <class 'str'> but found <class 'int'>."}],
+                "field": "tags",
+                "message": "Wrong contained type",
+            }
+        ]
+
+        resp, status = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "TestSchema", "object_a": [{"foo": 1}]}),
+        )
+        assert status == 412
+        assert resp["deserialization_errors"] == [
+            {
+                "errors": [{"field": "foo", "message": "Expected <class 'str'> but found <class 'int'>."}],
+                "field": "object_a",
+                "message": "Wrong contained type",
+            }
+        ]
+
+        resp, status = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "TestSchema", "object_a": [{"foo": "hey"}]}),
+        )
+        assert status == 412
+        assert resp["deserialization_errors"] == [
+            {
+                "errors": [
+                    {
+                        "errors": [{"field": "bar", "message": "Required input is missing."}],
+                        "field": "object_a",
+                        "message": "Wrong contained type",
+                    }
+                ],
+                "field": "object_a",
+                "message": "Wrong contained type",
+            }
         ]
 
 

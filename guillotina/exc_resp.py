@@ -40,9 +40,6 @@ def deserialization_error_handler(exc, error="", eid=None) -> Response:
     data = render_error_response("DeserializationError", error_reasons.DESERIALIZATION_FAILED, eid)
     data["message"] = repr(exc)
     data.update(exc.json_data())
-    import pdb
-
-    pdb.set_trace()
     return HTTPPreconditionFailed(content=data)
 
 

@@ -14,15 +14,18 @@ class StopValidation(Exception):
 class ValidationError(zope.interface.Invalid):
     """Raised if the Validation process fails."""
 
+    field_name = ""
+    value = None
+    type = None
+    errors = None
+
     def doc(self):
-        if len(self.args) == 3:
-            value, type_, field_name = self.args
-            if field_name:
-                details = f'Expected "{type_}" but found "{type(value)}" ({value}) in field "{field_name}".'
-            else:
-                details = f'Expected "{type_}" but found "{type(value)}" ({value}).'
-            return f"{self.__class__.__doc__} {details}"
+        if self.value and self.type:
+            return f"Expected {self.type} but found {type(self.value)}."
         return self.__class__.__doc__
+
+    def json(self):
+        return {"message": self.doc(), "field": self.field_name, "error": self}
 
     def __eq__(self, other):
         if not hasattr(other, "args"):
@@ -38,9 +41,19 @@ class ValidationError(zope.interface.Invalid):
 class RequiredMissing(ValidationError):
     __doc__ = _("""Required input is missing.""")
 
+    def __init__(self, field_name):
+        super().__init__(field_name)
+        self.field_name = field_name
+
 
 class WrongType(ValidationError):
     __doc__ = _("""Object is of wrong type.""")
+
+    def __init__(self, value, type, field_name):
+        super().__init__(value, type, field_name)
+        self.value = value
+        self.type = type
+        self.field_name = field_name
 
 
 class TooBig(ValidationError):
@@ -62,9 +75,19 @@ class TooShort(ValidationError):
 class InvalidValue(ValidationError):
     __doc__ = _("""Invalid value""")
 
+    def __init__(self, value, field_name):
+        super().__init__(value, field_name)
+        self.value = value
+        self.field_name = field_name
+
 
 class ConstraintNotSatisfied(ValidationError):
     __doc__ = _("""Constraint not satisfied""")
+
+    def __init__(self, value, field_name):
+        super().__init__(value, field_name)
+        self.value = value
+        self.field_name = field_name
 
 
 class NotAContainer(ValidationError):
@@ -78,16 +101,10 @@ class NotAnIterator(ValidationError):
 class WrongContainedType(ValidationError):
     __doc__ = _("""Wrong contained type""")
 
-    def doc(self):
-        errors = self.args[0]
-        doc = super().doc()
-        details = []
-        for err in errors:
-            details += [err.doc()]
-        import pdb
-
-        pdb.set_trace()
-        return doc + ". ".join(details)
+    def __init__(self, errors, field_name):
+        super().__init__(errors, field_name)
+        self.errors = errors
+        self.field_name = field_name
 
 
 class NotUnique(ValidationError):
@@ -100,6 +117,11 @@ class SchemaNotFullyImplemented(ValidationError):
 
 class SchemaNotProvided(ValidationError):
     __doc__ = _("""Schema not provided""")
+
+    def __init__(self, value, field_name):
+        super().__init__(value, field_name)
+        self.value = value
+        self.field_name = field_name
 
 
 class InvalidURI(ValidationError):
@@ -116,3 +138,7 @@ class InvalidDottedName(ValidationError):
 
 class Unbound(Exception):
     __doc__ = _("""The field is not bound.""")
+
+
+class InvalidObjectSchema(Exception):
+    pass

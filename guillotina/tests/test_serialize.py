@@ -651,11 +651,7 @@ async def test_object_deserialize(dummy_request, mock_txn):
     await deserializer.set_schema(
         ITestSchema, content, {"object_a": {"foo": 1}}, errors,
     )
-    assert len(errors) == 0
-    assert len(content.test_object_deserialize) == 1
-    assert content.nested_patch["foobar"][0]["foo"] == "bar"
-    assert content.nested_patch["foobar"][0]["bar"] == 1
-    assert content.nested_patch["foobar"][0]["nested_int"] == 5
+    assert len(errors) == 1
 
 
 async def test_dates_bucket_list_field(dummy_request, mock_txn):
