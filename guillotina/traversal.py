@@ -55,6 +55,7 @@ from typing import Optional
 from typing import Tuple
 from zope.interface import alsoProvides
 
+import asyncio
 import traceback
 import uuid
 
@@ -395,6 +396,10 @@ class TraversalRouter:
         except response.Response as exc:
             await abort()
             return BasicMatchInfo(request, exc)
+        except asyncio.CancelledError:
+            logger.warning("Unhandled cancel error", exc_info=True, request=request)
+            await abort()
+            return BasicMatchInfo(request, response.HTTPClientClosedRequest())
         except Exception:
             logger.error("Exception on resolve execution", exc_info=True, request=request)
             await abort()
@@ -417,7 +422,7 @@ class TraversalRouter:
 
         try:
             resource, tail = await self.traverse(request)
-        except ConflictError:
+        except (ConflictError, asyncio.CancelledError):
             # can also happen from connection errors so we bubble this...
             raise
         except Exception as _exc:
