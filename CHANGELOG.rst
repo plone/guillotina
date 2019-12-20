@@ -4,6 +4,9 @@ CHANGELOG
 5.1.26 (unreleased)
 -------------------
 
+- Bubble cancelled errors in resolver
+  [vangheem]
+
 - Fix duplicate behaviors interfaces in get_all_behavior_interfaces()
   [qiwn]
 

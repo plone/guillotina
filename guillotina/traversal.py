@@ -428,7 +428,7 @@ class TraversalRouter(AbstractRouter):
 
         try:
             resource, tail = await self.traverse(request)
-        except ConflictError:
+        except (ConflictError, asyncio.CancelledError):
             # can also happen from connection errors so we bubble this...
             raise
         except Exception as _exc:
