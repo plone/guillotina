@@ -80,11 +80,12 @@ async def test_add_behavior(dummy_guillotina):
         assert len(all_behaviors) == 1
         assert all_behaviors[0][0] == IDublinCore
 
-        # IDublinCore already exists
+        # IDublinCore already exists and it is not added
         item.add_behavior(IDublinCore.__identifier__)
         assert len(item.__behaviors__) == 0
         assert len(await get_all_behaviors(item)) == 1
 
+        # Manually add IDublinCore and it is not retuned twice
         item.__behaviors__ |= {IDublinCore.__identifier__}
         assert len(await get_all_behaviors(item)) == 1
 
