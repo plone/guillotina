@@ -1,10 +1,13 @@
 CHANGELOG
 =========
 
-5.1.27 (unreleased)
--------------------
+5.2.0 (unreleased)
+------------------
 
-- Add `VALID_ID_CHARACTERS` to `guillotina.const` and make list
+- Added `IIDChecker` adapter
+  [vangheem]
+
+- Added `valid_id_characters` app setting
   [vangheem]
 
 

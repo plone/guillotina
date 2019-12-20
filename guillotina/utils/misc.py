@@ -240,19 +240,6 @@ def to_str(value):
     return value
 
 
-def deprecated(message):
-    def deprecated_decorator(func):
-        def deprecated_func(*args, **kwargs):
-            if getattr(func, "__warned__", None) is None:
-                logger.warning("{}: {}".format(func.__name__, message))
-                func.__warned__ = True
-            return func(*args, **kwargs)
-
-        return deprecated_func
-
-    return deprecated_decorator
-
-
 def list_or_dict_items(val):
     if isinstance(val, list):
         new_val = []

@@ -40,6 +40,7 @@ from guillotina.interfaces import IConstrainTypes
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
+from guillotina.interfaces import IIDChecker
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IJavaScriptApplication
 from guillotina.interfaces import ILayers
@@ -60,6 +61,7 @@ from guillotina.transactions import get_transaction
 from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
+from guillotina.utils import valid_id
 from guillotina.utils.auth import get_authenticated_user_id
 from typing import Any
 from typing import AsyncIterator
@@ -833,3 +835,12 @@ async def move(
     if txn is not None:
         cache_keys += txn._cache.get_cache_keys(context, "added")
         await txn._cache.delete_all(cache_keys)
+
+
+@configure.adapter(for_=IResource, provides=IIDChecker)
+class DefaultIDChecker:
+    def __init__(self, context):
+        self.context = context
+
+    async def __call__(self, id_: str, type_: str) -> bool:
+        return valid_id(id_)

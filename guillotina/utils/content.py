@@ -7,7 +7,6 @@ from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.const import TRASHED_ID
-from guillotina.const import VALID_ID_CHARACTERS
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.exceptions import DatabaseNotFound
@@ -21,6 +20,7 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 
 import typing
+import warnings
 
 
 logger = glogging.getLogger("guillotina")
@@ -68,12 +68,12 @@ def iter_parents(content: IResource) -> typing.Iterator[IResource]:
         content = getattr(content, "__parent__", None)
 
 
-def valid_id(_id):
+def valid_id(_id) -> bool:
     _id = _id.lower()
     # can't start with _
     if not _id or _id[0] in ("_", "@"):
         return False
-    return _id == "".join([l for l in _id if l in VALID_ID_CHARACTERS])
+    return _id == "".join([l for l in _id if l in app_settings["valid_id_characters"]])
 
 
 async def get_containers():
