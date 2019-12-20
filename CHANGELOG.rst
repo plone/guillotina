@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a4 (unreleased)
 --------------------
 
+- Fix duplicate behaviors interfaces in get_all_behavior_interfaces()
+  [qiwn]
+
 - Fix adding duplicate behaviors
   [qiwn]
 
