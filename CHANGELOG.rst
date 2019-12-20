@@ -4,7 +4,8 @@ CHANGELOG
 5.1.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add `VALID_ID_CHARACTERS` to `guillotina.const` and make list
+  [vangheem]
 
 
 5.1.26 (2019-12-20)
