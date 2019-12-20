@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.2.0 (unreleased)
+5.2.0 (2019-12-20)
 ------------------
 
 - Added `IIDChecker` adapter
