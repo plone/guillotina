@@ -5,6 +5,7 @@ from guillotina import security
 from guillotina._cache import FACTORY_CACHE
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
+from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.component import get_utility
 from guillotina.component import query_adapter
@@ -33,6 +34,7 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IFieldValueRenderer
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IGetOwner
+from guillotina.interfaces import IIDChecker
 from guillotina.interfaces import IIDGenerator
 from guillotina.interfaces import IPrincipalPermissionMap
 from guillotina.interfaces import IPrincipalRoleManager
@@ -61,7 +63,6 @@ from guillotina.utils import get_object_url
 from guillotina.utils import get_security_policy
 from guillotina.utils import iter_parents
 from guillotina.utils import resolve_dotted_name
-from guillotina.utils import valid_id
 
 
 def get_content_json_schema_responses(content):
@@ -163,13 +164,14 @@ class DefaultPOST(Service):
                 status=412,
             )
 
+        id_checker = get_adapter(self.context, IIDChecker)
         # Generate a temporary id if the id is not given
         new_id = None
         if not id_:
             generator = query_adapter(self.request, IIDGenerator)
             if generator is not None:
                 new_id = generator(data)
-                if isinstance(new_id, str) and not valid_id(new_id):
+                if isinstance(new_id, str) and not await id_checker(new_id, type_):
                     raise ErrorResponse(
                         "PreconditionFailed",
                         "Invalid id: {}".format(new_id),
@@ -177,7 +179,7 @@ class DefaultPOST(Service):
                         reason=error_reasons.INVALID_ID,
                     )
         else:
-            if not isinstance(id_, str) or not valid_id(id_):
+            if not isinstance(id_, str) or not await id_checker(new_id, type_):
                 raise ErrorResponse(
                     "PreconditionFailed",
                     "Invalid id: {}".format(id_),
