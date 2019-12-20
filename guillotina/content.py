@@ -632,7 +632,8 @@ def get_all_behavior_interfaces(content) -> list:
         behaviors.append(behavior_schema)
 
     for dynamic_behavior in content.__behaviors_schemas__:
-        behaviors.append(dynamic_behavior)
+        if dynamic_behavior not in behaviors:
+            behaviors.append(dynamic_behavior)
     return behaviors
 
 
