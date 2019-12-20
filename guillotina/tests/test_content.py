@@ -82,6 +82,10 @@ async def test_add_behavior(dummy_guillotina):
 
         # IDublinCore already exists
         item.add_behavior(IDublinCore.__identifier__)
+        assert len(item.__behaviors__) == 0
+        assert len(await get_all_behaviors(item)) == 1
+
+        item.__behaviors__ |= {IDublinCore.__identifier__}
         assert len(await get_all_behaviors(item)) == 1
 
         item.add_behavior(IAttachment)
