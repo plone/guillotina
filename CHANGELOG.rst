@@ -7,6 +7,9 @@ CHANGELOG
 - Bubble cancelled errors in resolver
   [vangheem]
 
+- Fix duplicate behaviors interfaces in get_all_behavior_interfaces()
+  [qiwn]
+
 
 5.1.25 (2019-12-18)
 -------------------
