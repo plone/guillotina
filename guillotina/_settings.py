@@ -5,6 +5,7 @@ from typing import Dict
 
 import copy
 import pickle
+import string
 
 
 app_settings: Dict[str, Any] = {
@@ -92,5 +93,6 @@ app_settings: Dict[str, Any] = {
     "search_parser": "default",
     "object_reader": "guillotina.db.reader.reader",
     "thread_pool_workers": 32,
+    "valid_id_characters": string.digits + string.ascii_lowercase + ".-_@$^()+ =",
 }
 default_settings = copy.deepcopy(app_settings)

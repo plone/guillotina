@@ -1,10 +1,14 @@
 CHANGELOG
 =========
 
-5.1.27 (unreleased)
--------------------
+5.2.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Added `IIDChecker` adapter
+  [vangheem]
+
+- Added `valid_id_characters` app setting
+  [vangheem]
 
 
 5.1.26 (2019-12-20)
