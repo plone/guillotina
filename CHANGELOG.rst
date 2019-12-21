@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a4 (unreleased)
 --------------------
 
+- Fix error with requeued async queue tasks
+  [vangheem]
+
 - Better CancelledError handling in resolving a request
   [vangheem]
 
