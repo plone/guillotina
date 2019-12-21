@@ -181,7 +181,10 @@ class Float(Orderable, Field):
     def from_unicode(self, uc):
         """ See IFromUnicode.
         """
-        v = float(uc)
+        try:
+            v = float(uc)
+        except ValueError:
+            raise InvalidValue(uc, field_name=self.__name__)
         self.validate(v)
         return v
 

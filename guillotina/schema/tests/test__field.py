@@ -327,10 +327,12 @@ class FloatTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, 20.02)
 
     def test_from_unicode_miss(self):
+        from guillotina.schema.exceptions import InvalidValue
+
         flt = self._makeOne()
-        self.assertRaises(ValueError, flt.from_unicode, "")
-        self.assertRaises(ValueError, flt.from_unicode, "abc")
-        self.assertRaises(ValueError, flt.from_unicode, "14.G")
+        self.assertRaises(InvalidValue, flt.from_unicode, "")
+        self.assertRaises(InvalidValue, flt.from_unicode, "abc")
+        self.assertRaises(InvalidValue, flt.from_unicode, "14.G")
 
     def test_from_unicode_hit(self):
         flt = self._makeOne()
@@ -414,10 +416,12 @@ class DecimalTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, decimal.Decimal("20.02"))
 
     def test_from_unicode_miss(self):
+        from guillotina.schema.exceptions import InvalidValue
+
         flt = self._makeOne()
-        self.assertRaises(ValueError, flt.from_unicode, "")
-        self.assertRaises(ValueError, flt.from_unicode, "abc")
-        self.assertRaises(ValueError, flt.from_unicode, "1.4G")
+        self.assertRaises(InvalidValue, flt.from_unicode, "")
+        self.assertRaises(InvalidValue, flt.from_unicode, "abc")
+        self.assertRaises(InvalidValue, flt.from_unicode, "1.4G")
 
     def test_from_unicode_hit(self):
         from decimal import Decimal
