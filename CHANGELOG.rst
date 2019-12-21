@@ -4,7 +4,8 @@ CHANGELOG
 5.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix error with requeued async queue tasks
+  [vangheem]
 
 
 5.2.0 (2019-12-20)
