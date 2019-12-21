@@ -15,6 +15,7 @@ from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
 from guillotina.schema._schema import get_fields
 from guillotina.schema.exceptions import ConstraintNotSatisfied
+from guillotina.schema.exceptions import InvalidValue
 from guillotina.schema.exceptions import NotAContainer
 from guillotina.schema.exceptions import NotAnIterator
 from guillotina.schema.exceptions import RequiredMissing
@@ -447,6 +448,9 @@ class Int(Orderable, Field):
         ...
         ValueError: invalid literal for int(): 125.6
         """
-        v = int(str)
-        self.validate(v)
+        try:
+            v = int(str)
+            self.validate(v)
+        except ValueError:
+            raise InvalidValue(str, self.__name__)
         return v

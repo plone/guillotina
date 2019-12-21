@@ -141,15 +141,18 @@ def date_converter(field, value, context=None):
 def object_converter(field, value, context=None):
     if not isinstance(value, dict):
         raise ValueDeserializationError(field, value, "Not an object")
-    result = {}
-    for key, val in value.items():
-        if key in field.schema:
-            f = field.schema[key]
-            if val is not None:
-                result[key] = get_adapter(f, IJSONToValue, args=[val, context])
-            else:
-                result[key] = None
-    return result
+    try:
+        result = {}
+        for key, val in value.items():
+            if key in field.schema:
+                f = field.schema[key]
+                if val is not None:
+                    result[key] = get_adapter(f, IJSONToValue, args=[val, context])
+                else:
+                    result[key] = None
+        return result
+    except ValidationError as error:
+        raise ValueDeserializationError(field, value, "Wrong contained type", errors=[error])
 
 
 @configure.value_deserializer(IUnionField)

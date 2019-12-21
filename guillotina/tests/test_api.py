@@ -6,6 +6,7 @@ from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.configure import contenttype
 from guillotina.content import Item
+from guillotina.fields.patch import PatchField
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IResource
@@ -1192,7 +1193,7 @@ class IObjectA(Interface):
 class ITestSchema(Interface):
 
     object_a = schema.Object(IObjectA, required=False)
-    list_object_a = schema.List(value_type=schema.Object(IObjectA), required=False)
+    list_object_a = PatchField(schema.List(value_type=schema.Object(IObjectA), required=False))
 
 
 @contenttype(type_name="TestSchema", schema=ITestSchema)
@@ -1267,6 +1268,38 @@ async def test_deserialization_errors(container_requester):
                         "message": "Wrong contained type",
                     }
                 ],
+                "field": "list_object_a",
+                "message": "Wrong contained type",
+            }
+        ]
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {"@type": "TestSchema", "list_object_a": {"op": "append", "value": {"bar": "arr", "foo": 1}}}
+            ),
+        )
+        assert status == 412
+        assert resp["deserialization_errors"] == [
+            {
+                "errors": [{"field": "bar", "message": "Invalid value"}],
+                "field": "list_object_a",
+                "message": "Wrong contained type",
+            }
+        ]
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {"@type": "TestSchema", "list_object_a": {"op": "append", "value": {"foo": "hey"}}}
+            ),
+        )
+        assert status == 412
+        assert resp["deserialization_errors"] == [
+            {
+                "errors": [{"field": "bar", "message": "Required input is missing."}],
                 "field": "list_object_a",
                 "message": "Wrong contained type",
             }

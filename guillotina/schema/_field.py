@@ -200,7 +200,7 @@ class Decimal(Orderable, Field):
         try:
             v = decimal.Decimal(uc)
         except decimal.InvalidOperation:
-            raise ValueError("invalid literal for Decimal(): %s" % uc)
+            raise InvalidValue(uc, field_name=self.__name__)
         self.validate(v)
         return v
 

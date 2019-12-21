@@ -58,29 +58,29 @@ class WrongType(ValidationError):
 class TooBig(ValidationError):
     __doc__ = _("""Value is too big""")
 
-    def __init__(self, value, constraint):
-        super().__init__(value=value, constraint=constraint)
+    def __init__(self, value, constraint, field_name=""):
+        super().__init__(value=value, constraint=constraint, field_name=field_name)
 
 
 class TooSmall(ValidationError):
     __doc__ = _("""Value is too small""")
 
-    def __init__(self, value, constraint):
-        super().__init__(value=value, constraint=constraint)
+    def __init__(self, value, constraint, field_name=""):
+        super().__init__(value=value, constraint=constraint, field_name=field_name)
 
 
 class TooLong(ValidationError):
     __doc__ = _("""Value is too long""")
 
-    def __init__(self, value, constraint):
-        super().__init__(value=value, constraint=constraint)
+    def __init__(self, value, constraint, field_name=""):
+        super().__init__(value=value, constraint=constraint, field_name=field_name)
 
 
 class TooShort(ValidationError):
     __doc__ = _("""Value is too short""")
 
-    def __init__(self, value, constraint):
-        super().__init__(value=value, constraint=constraint)
+    def __init__(self, value, constraint, field_name=""):
+        super().__init__(value=value, constraint=constraint, field_name=field_name)
 
 
 class InvalidValue(ValidationError):
