@@ -3,10 +3,10 @@ from dateutil.parser import parse
 from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_adapter
-from guillotina.schema.exceptions import ValidationError
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.interfaces import IJSONToValue
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
+from guillotina.schema.exceptions import ValidationError
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IDate
 from guillotina.schema.interfaces import IDatetime
