@@ -3,6 +3,7 @@ from guillotina.async_util import IQueueUtility
 from guillotina.browser import View
 from guillotina.component import get_utility
 from guillotina.tests import utils
+from guillotina.transactions import transaction
 
 import asyncio
 
@@ -40,6 +41,25 @@ async def test_add_sync_utility(guillotina, loop):
     assert "hola3" in var
     assert "hola4" in var
     assert len(var) == 4
+
+
+async def test_retry_on_txn_not_finished(guillotina, loop):
+    util = get_utility(IQueueUtility)
+    var = []
+
+    async def printHi(msg):
+        await asyncio.sleep(0.01)
+        var.append(msg)
+
+    request = utils.get_mocked_request(db=guillotina.db)
+    root = await utils.get_root(db=guillotina.db)
+    async with transaction(db=guillotina.db):
+        await util.add(AsyncMockView(root, request, printHi, "hola1"))
+        await asyncio.sleep(0.05)
+
+    await util._queue.join()
+    assert "hola1" in var
+    assert len(var) == 1
 
 
 class JobRunner:
