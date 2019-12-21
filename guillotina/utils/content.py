@@ -19,7 +19,6 @@ from guillotina.interfaces import IPrincipalRoleMap
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 
-import string
 import typing
 
 
