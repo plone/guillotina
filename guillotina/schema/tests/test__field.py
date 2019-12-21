@@ -1761,7 +1761,7 @@ class ObjectTests(unittest.TestCase):
             f(*args, **kw)
         except WrongContainedType as e:
             try:
-                return e.args[0]
+                return e.errors
             except:
                 return []
         self.fail("Expected WrongContainedType Error")
@@ -1911,7 +1911,7 @@ class ObjectTests(unittest.TestCase):
         errors = sorted(errors, key=lambda x: type(x).__name__)
         err = errors[0]
         self.assertTrue(isinstance(err, RequiredMissing))
-        self.assertEqual(err.args, ("foo",))
+        self.assertEqual(err.field_name, "foo")
         err = errors[1]
         self.assertTrue(isinstance(err, WrongType))
         self.assertEqual(err.args, (1, str, "bar"))
