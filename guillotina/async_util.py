@@ -53,8 +53,8 @@ class QueueUtility(object):
                     # still finishing current transaction, this connection
                     # will be cut off, so we need to wait until we no longer
                     # have an active transaction on the reqeust...
-                    await self.add((func, tvars))
-                    await asyncio.sleep(1)
+                    await self.queue.put((func, tvars))
+                    await asyncio.sleep(0.1)
                     continue
 
                 try:
@@ -63,20 +63,14 @@ class QueueUtility(object):
                 except Exception as e:
                     logger.error("Exception on writing execution", exc_info=e)
                     await tm.abort(txn=txn)
-            except (
-                RuntimeError,
-                SystemExit,
-                GeneratorExit,
-                KeyboardInterrupt,
-                asyncio.CancelledError,
-                KeyboardInterrupt,
-            ):
+            except (RuntimeError, SystemExit, GeneratorExit, KeyboardInterrupt, asyncio.CancelledError):
                 # dive, these errors mean we're exit(ing)
                 self._exceptions = True
                 return
             except Exception as e:  # noqa
                 self._exceptions = True
                 logger.error("Worker call failed", exc_info=e)
+                execute.clear_futures()
             finally:
                 if got_obj:
                     execute.execute_futures()
