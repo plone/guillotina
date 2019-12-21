@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.2.1 (unreleased)
+5.2.1 (2019-12-21)
 ------------------
 
 - Fix error with requeued async queue tasks
