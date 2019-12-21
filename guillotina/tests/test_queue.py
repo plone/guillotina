@@ -90,7 +90,7 @@ async def test_run_many_jobs(guillotina):
         assert job.func.done
 
 
-async def test_retry_on_txn_not_finished(guillotina, loop):
+async def test_retry_on_txn_not_finished(guillotina):
     util = get_utility(IQueueUtility)
     var = []
 
