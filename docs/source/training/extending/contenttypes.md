@@ -39,12 +39,17 @@ class IMessage(IItem):
     behaviors=[
         "guillotina.behaviors.dublincore.IDublinCore",
         "guillotina.behaviors.attachment.IAttachment"
-    ])
+    ],
+    globally_addable=False,
+)
 class Message(content.Item):
     pass
 ```
 
 The `index_field` exposes those fields to be searched by with the `@search` endpoint.
+
+Notice how `globally_addable` set to false makes messages only addable
+within `Conversations`.
 
 In order for Guillotina to detect your configuration, you'll need to add
 a scan call inside your `includeme` function in the `__init__.py` file.

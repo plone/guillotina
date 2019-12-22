@@ -16,8 +16,12 @@ class DBUsersAddon(Addon):
         registry = await get_registry()
         registry.for_interface(ILayers)["active_layers"] |= {USERS_LAYER}
         user = get_authenticated_user_id()
-        await create_content_in_container(site, "UserManager", "users", creators=(user,), title="Users")
-        await create_content_in_container(site, "GroupManager", "groups", creators=(user,), title="Groups")
+        await create_content_in_container(
+            site, "UserManager", "users", creators=(user,), title="Users", check_constraints=False
+        )
+        await create_content_in_container(
+            site, "GroupManager", "groups", creators=(user,), title="Groups", check_constraints=False
+        )
 
     @classmethod
     async def uninstall(self, site, request):

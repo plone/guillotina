@@ -50,6 +50,7 @@ class IUser(IFolder, IPrincipal):
     schema=IUser,
     add_permission="guillotina.AddUser",
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+    globally_addable=False,
 )
 class User(Folder):
     def __init__(self, *args, **kwargs):
@@ -89,6 +90,7 @@ class User(Folder):
     schema=IUserManager,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
     allowed_types=["User"],
+    globally_addable=False,
 )
 class UserManager(Folder):
     pass

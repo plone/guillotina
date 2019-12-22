@@ -103,8 +103,9 @@ class ResourceFactory(Factory):
         type_name="",
         schema=None,
         behaviors=None,
-        add_permission=DEFAULT_ADD_PERMISSION,
-        allowed_types=None,
+        add_permission: str = DEFAULT_ADD_PERMISSION,
+        allowed_types: Optional[List[str]] = None,
+        globally_addable: bool = True,
     ):
         super(ResourceFactory, self).__init__(
             klass, title, description, tuple(filter(bool, [schema] + list(behaviors) or list()))
@@ -113,7 +114,8 @@ class ResourceFactory(Factory):
         self.schema = schema or Interface
         self.behaviors = behaviors or ()
         self.add_permission = add_permission
-        self.allowed_types = allowed_types
+        self.allowed_types: Optional[List[str]] = allowed_types
+        self.globally_addable: bool = globally_addable
 
     @profilable
     def __call__(self, id, parent=None, *args, **kw):
@@ -569,7 +571,13 @@ async def create_content(type_, **kw) -> IResource:
 
 @profilable
 async def create_content_in_container(
-    parent: Folder, type_: str, id_: str, request: IRequest = None, check_security=True, **kw
+    parent: Folder,
+    type_: str,
+    id_: str,
+    request: IRequest = None,
+    check_security: bool = True,
+    check_constraints: bool = True,
+    **kw,
 ) -> Resource:
     """Utility to create a content.
 
@@ -596,10 +604,11 @@ async def create_content_in_container(
             if not policy.check_permission(permission.id, parent):
                 raise NoPermissionToAdd(str(parent), type_)
 
-    constrains = IConstrainTypes(parent, None)
-    if constrains is not None:
-        if not constrains.is_type_allowed(type_):
-            raise NotAllowedContentType(str(parent), type_)
+    if check_constraints:
+        constrains = IConstrainTypes(parent, None)
+        if constrains is not None:
+            if not constrains.is_type_allowed(type_):
+                raise NotAllowedContentType(str(parent), type_)
 
     # We create the object with at least the ID
     obj = factory(id=id_, parent=parent)
@@ -714,6 +723,7 @@ async def duplicate(
         creators=creators,
         contributors=contributors,
         check_security=check_permission,
+        check_constraints=True,
     )
     for key in context.__dict__.keys():
         if key.startswith("__") or key.startswith("_BaseObject"):

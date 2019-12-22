@@ -192,6 +192,7 @@ class TestDataCommand(Command):
                 creators=("root",),
                 contributors=("root",),
                 title=page_data["title"],
+                check_constraints=False,
             )
         behavior = IDublinCore(obj)
         await behavior.load(create=True)

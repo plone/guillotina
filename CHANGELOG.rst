@@ -4,6 +4,11 @@ CHANGELOG
 6.0.0a6 (unreleased)
 --------------------
 
+- Provide way to configure content types as not globally addable
+  [lferran]
+
+- Fix Users and Groups to be addable only on manager folders [lferran]
+
 - Fix optimized lookup to work with fields that do not have `_type`
   [vangheem]
 

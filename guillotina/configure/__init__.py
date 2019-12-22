@@ -174,7 +174,15 @@ def load_contenttype(_context, contenttype):
         behaviors=[resolve_dotted_name(b) for b in conf.get("behaviors", []) or ()],
         add_permission=conf.get("add_permission") or DEFAULT_ADD_PERMISSION,
         allowed_types=conf.get("allowed_types", None),
+        globally_addable=conf.get("globally_addable", True),
     )
+
+    # Populate app settings with globally addable types
+    if not factory.globally_addable:
+        app_settings.setdefault("global_disallowed_types", [])
+        if factory.type_name not in app_settings["global_disallowed_types"]:
+            app_settings["global_disallowed_types"].append(factory.type_name)
+
     component.utility(_context, provides=IResourceFactory, component=factory, name=conf["type_name"])
 
 
