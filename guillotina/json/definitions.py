@@ -67,7 +67,11 @@ configure.json_schema_definition(
     {
         "type": "object",
         "title": "Base resource data",
-        "properties": {"id": {"type": "string"}, "@type": {"type": "string"}, "title": {"type": "string"}},
+        "properties": {
+            "id": {"type": "string", "minLength": 1},
+            "@type": {"type": "string"},
+            "title": {"type": "string"},
+        },
         "required": ["id"],
     },
 )

@@ -1490,7 +1490,5 @@ async def test_containers_with_empty_id_cannot_be_created(container_requester):
         _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": 0}))
         assert status == 412
 
-        resp, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": ""}))
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": ""}))
         assert status == 412
-        assert resp["type"] == "RequiredParam"
-        assert resp["reason"] == "invalidId"
