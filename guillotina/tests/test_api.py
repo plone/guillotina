@@ -1477,3 +1477,20 @@ async def test_required_field_work_with_none(container_requester):
             data=json.dumps({ITestBehavior.__identifier__: {"test_required_field": None}}),
         )
         assert status == 412
+
+
+async def test_containers_with_empty_id_cannot_be_created(container_requester):
+    async with container_requester as requester:
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container"}))
+        assert status == 412
+
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": None}))
+        assert status == 412
+
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": 0}))
+        assert status == 412
+
+        resp, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": ""}))
+        assert status == 412
+        assert resp["type"] == "RequiredParam"
+        assert resp["reason"] == "invalidId"

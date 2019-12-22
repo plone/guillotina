@@ -114,8 +114,12 @@ class DefaultPOST(Service):
         if "@type" not in data or data["@type"] not in app_settings["container_types"]:
             raise HTTPNotFound(content={"message": "can not create this type %s" % data["@type"]})
 
-        if "id" not in data:
-            raise HTTPPreconditionFailed(content={"message": "We need an id"})
+        try:
+            assert data["id"]
+        except (KeyError, AssertionError):
+            raise ErrorResponse(
+                "RequiredParam", "Property 'id' is required", status=412, reason=error_reasons.INVALID_ID
+            )
 
         if not data.get("title"):
             data["title"] = data["id"]
