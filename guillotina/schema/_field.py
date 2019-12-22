@@ -29,7 +29,6 @@ from guillotina.schema._bootstrapfields import TextLine
 from guillotina.schema.exceptions import ConstraintNotSatisfied
 from guillotina.schema.exceptions import InvalidDottedName
 from guillotina.schema.exceptions import InvalidId
-from guillotina.schema.exceptions import InvalidObjectSchema
 from guillotina.schema.exceptions import InvalidURI
 from guillotina.schema.exceptions import InvalidValue
 from guillotina.schema.exceptions import NotUnique
@@ -590,7 +589,7 @@ class Object(Field):
 
     def __init__(self, schema, **kw):
         if not IInterface.providedBy(schema):
-            raise InvalidObjectSchema("Schema doesn't provide IInterface")
+            raise ValueError("Schema doesn't provide IInterface")
 
         self.schema = schema
         super(Object, self).__init__(**kw)
@@ -676,9 +675,9 @@ class JSONField(Field):
             try:
                 self.json_schema = json.loads(schema)
             except ValueError:
-                raise InvalidObjectSchema("Schema is not a valid json string")
+                raise ValueError("Schema is not a valid json string")
         elif not isinstance(schema, dict):
-            raise InvalidObjectSchema("Schema is not a dictionary")
+            raise ValueError("Schema is not a dictionary")
         else:
             self.json_schema = schema
 

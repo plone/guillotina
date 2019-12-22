@@ -450,7 +450,7 @@ class Int(Orderable, Field):
         """
         try:
             v = int(str)
-            self.validate(v)
         except ValueError:
             raise InvalidValue(str, self.__name__)
+        self.validate(v)
         return v

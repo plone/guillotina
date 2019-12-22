@@ -1824,9 +1824,7 @@ class ObjectTests(unittest.TestCase):
         verifyObject(IObject, self._makeOne())
 
     def test_ctor_w_bad_schema(self):
-        from guillotina.schema.exceptions import InvalidObjectSchema
-
-        self.assertRaises(InvalidObjectSchema, self._makeOne, object())
+        self.assertRaises(ValueError, self._makeOne, object())
 
     def test_validate_not_required(self):
         schema = self._makeSchema()

@@ -147,7 +147,3 @@ class InvalidDottedName(ValidationError):
 
 class Unbound(Exception):
     __doc__ = _("""The field is not bound.""")
-
-
-class InvalidObjectSchema(Exception):
-    pass
