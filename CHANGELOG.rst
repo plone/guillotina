@@ -4,6 +4,9 @@ CHANGELOG
 5.2.1 (unreleased)
 ------------------
 
+- Improving ValidationErrors messages
+  [masipcat]
+
 - Fix error with requeued async queue tasks
   [vangheem]
 

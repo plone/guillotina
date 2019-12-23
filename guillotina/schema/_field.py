@@ -145,7 +145,7 @@ class ASCII(NativeString):
         if not value:
             return
         if not max(map(ord, value)) < 128:
-            raise InvalidValue
+            raise InvalidValue(value, self.__name__)
 
 
 @implementer(IBytesLine)
@@ -180,7 +180,10 @@ class Float(Orderable, Field):
     def from_unicode(self, uc):
         """ See IFromUnicode.
         """
-        v = float(uc)
+        try:
+            v = float(uc)
+        except ValueError:
+            raise InvalidValue(uc, field_name=self.__name__)
         self.validate(v)
         return v
 
@@ -199,7 +202,7 @@ class Decimal(Orderable, Field):
         try:
             v = decimal.Decimal(uc)
         except decimal.InvalidOperation:
-            raise ValueError("invalid literal for Decimal(): %s" % uc)
+            raise InvalidValue(uc, field_name=self.__name__)
         self.validate(v)
         return v
 
@@ -474,6 +477,8 @@ class AbstractCollection(MinMaxLen, Iterable):
         # whine if value_type is not a field
         if value_type is not None and not IField.providedBy(value_type):
             raise ValueError("'value_type' must be field instance.")
+        if value_type:
+            value_type.__name__ = self.__name__
         self.value_type = value_type
         self.unique = unique
 
@@ -483,6 +488,7 @@ class AbstractCollection(MinMaxLen, Iterable):
         # binding value_type is necessary for choices with named vocabularies,
         # and possibly also for other fields.
         if clone.value_type is not None:
+            clone.value_type.__name__ = self.__name__
             clone.value_type = clone.value_type.bind(object)
         return clone
 
@@ -583,7 +589,7 @@ class Object(Field):
 
     def __init__(self, schema, **kw):
         if not IInterface.providedBy(schema):
-            raise WrongType
+            raise ValueError("Schema doesn't provide IInterface")
 
         self.schema = schema
         super(Object, self).__init__(**kw)
@@ -601,12 +607,12 @@ class Object(Field):
             try:
                 t = valid_type(**value)
             except TypeError:
-                raise SchemaNotProvided
+                raise SchemaNotProvided(value, self.__name__)
 
             errors = _validate_fields(self.schema, t)
         else:
             if not self.schema.providedBy(value):
-                raise SchemaNotProvided
+                raise SchemaNotProvided(value, self.__name__)
             errors = _validate_fields(self.schema, value)
         if errors:
             raise WrongContainedType(errors, self.__name__)
@@ -669,9 +675,9 @@ class JSONField(Field):
             try:
                 self.json_schema = json.loads(schema)
             except ValueError:
-                raise WrongType
+                raise ValueError("Schema is not a valid json string")
         elif not isinstance(schema, dict):
-            raise WrongType
+            raise ValueError("Schema is not a dictionary")
         else:
             self.json_schema = schema
 

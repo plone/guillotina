@@ -206,25 +206,31 @@ class DeserializationError(Exception):
         return "{} ({})".format(self.msg, ujson.dumps(self.json_data()))  # pylint: disable=I1101
 
     def json_data(self):
-        errors = []
-        for error in self.errors:
+        return {"deserialization_errors": self.json_err_list(self.errors)}
+
+    def json_err_list(self, errors):
+        converted_errors = []
+        for error in errors:
             # need to clean raw exceptions out of this list here...
             error = error.copy()
             if "error" in error:
-                error.pop("error")
-            errors.append(error)
-        return {"deserialization_errors": errors}
+                exc = error.pop("error")
+                if hasattr(exc, "errors") and exc.errors:
+                    error["errors"] = self.json_err_list([e.json() for e in exc.errors])
+            converted_errors.append(error)
+        return converted_errors
 
 
 class ValueDeserializationError(Exception):
     """An error happened during deserialization of content.
     """
 
-    def __init__(self, field, value, msg):
+    def __init__(self, field, value, msg, errors=None):
         super().__init__()
         self.msg = self.message = msg
         self.field = field
         self.value = value
+        self.errors = errors
 
 
 class QueryParsingError(Exception):
