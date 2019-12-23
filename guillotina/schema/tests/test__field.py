@@ -327,10 +327,12 @@ class FloatTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, 20.02)
 
     def test_from_unicode_miss(self):
+        from guillotina.schema.exceptions import InvalidValue
+
         flt = self._makeOne()
-        self.assertRaises(ValueError, flt.from_unicode, "")
-        self.assertRaises(ValueError, flt.from_unicode, "abc")
-        self.assertRaises(ValueError, flt.from_unicode, "14.G")
+        self.assertRaises(InvalidValue, flt.from_unicode, "")
+        self.assertRaises(InvalidValue, flt.from_unicode, "abc")
+        self.assertRaises(InvalidValue, flt.from_unicode, "14.G")
 
     def test_from_unicode_hit(self):
         flt = self._makeOne()
@@ -414,10 +416,12 @@ class DecimalTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, decimal.Decimal("20.02"))
 
     def test_from_unicode_miss(self):
+        from guillotina.schema.exceptions import InvalidValue
+
         flt = self._makeOne()
-        self.assertRaises(ValueError, flt.from_unicode, "")
-        self.assertRaises(ValueError, flt.from_unicode, "abc")
-        self.assertRaises(ValueError, flt.from_unicode, "1.4G")
+        self.assertRaises(InvalidValue, flt.from_unicode, "")
+        self.assertRaises(InvalidValue, flt.from_unicode, "abc")
+        self.assertRaises(InvalidValue, flt.from_unicode, "1.4G")
 
     def test_from_unicode_hit(self):
         from decimal import Decimal
@@ -1761,7 +1765,7 @@ class ObjectTests(unittest.TestCase):
             f(*args, **kw)
         except WrongContainedType as e:
             try:
-                return e.args[0]
+                return e.errors
             except:
                 return []
         self.fail("Expected WrongContainedType Error")
@@ -1820,9 +1824,7 @@ class ObjectTests(unittest.TestCase):
         verifyObject(IObject, self._makeOne())
 
     def test_ctor_w_bad_schema(self):
-        from guillotina.schema.exceptions import WrongType
-
-        self.assertRaises(WrongType, self._makeOne, object())
+        self.assertRaises(ValueError, self._makeOne, object())
 
     def test_validate_not_required(self):
         schema = self._makeSchema()
@@ -1911,10 +1913,10 @@ class ObjectTests(unittest.TestCase):
         errors = sorted(errors, key=lambda x: type(x).__name__)
         err = errors[0]
         self.assertTrue(isinstance(err, RequiredMissing))
-        self.assertEqual(err.args, ("foo",))
+        self.assertEqual(err.field_name, "foo")
         err = errors[1]
         self.assertTrue(isinstance(err, WrongType))
-        self.assertEqual(err.args, (1, str, "bar"))
+        self.assertEqual(err.args[:3], (1, str, "bar"))
 
     def test__validate_w_value_providing_schema(self):
         from zope.interface import implementer

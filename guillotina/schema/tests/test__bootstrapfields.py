@@ -797,10 +797,12 @@ class IntTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, 20)
 
     def test_from_unicode_miss(self):
+        from guillotina.schema.exceptions import InvalidValue
+
         txt = self._makeOne()
-        self.assertRaises(ValueError, txt.from_unicode, "")
-        self.assertRaises(ValueError, txt.from_unicode, "False")
-        self.assertRaises(ValueError, txt.from_unicode, "True")
+        self.assertRaises(InvalidValue, txt.from_unicode, "")
+        self.assertRaises(InvalidValue, txt.from_unicode, "False")
+        self.assertRaises(InvalidValue, txt.from_unicode, "True")
 
     def test_from_unicode_hit(self):
         txt = self._makeOne()

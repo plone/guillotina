@@ -6,6 +6,7 @@ from guillotina.component import get_adapter
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.interfaces import IJSONToValue
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
+from guillotina.schema.exceptions import ValidationError
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IDate
 from guillotina.schema.interfaces import IDatetime
@@ -78,7 +79,10 @@ def from_unicode_converter(field, value, context=None):
 def list_converter(field, value, context=None):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, "Not an array")
-    return [schema_compatible(item, field.value_type, context) for item in value]
+    try:
+        return [schema_compatible(item, field.value_type, context) for item in value]
+    except ValidationError as error:
+        raise ValueDeserializationError(field, value, "Wrong contained type", errors=[error])
 
 
 @configure.value_deserializer(ITuple)
@@ -110,10 +114,13 @@ def dict_converter(field, value, context=None):
     if not isinstance(value, dict):
         raise ValueDeserializationError(field, value, "Not an object")
 
-    keys, values = zip(*value.items())
-    keys = [schema_compatible(keys[idx], field.key_type, context) for idx in range(len(keys))]
-    values = [schema_compatible(values[idx], field.value_type, context) for idx in range(len(values))]
-    return dict(zip(keys, values))
+    try:
+        keys, values = zip(*value.items())
+        keys = [schema_compatible(keys[idx], field.key_type, context) for idx in range(len(keys))]
+        values = [schema_compatible(values[idx], field.value_type, context) for idx in range(len(values))]
+        return dict(zip(keys, values))
+    except ValidationError as error:
+        raise ValueDeserializationError(field, value, "Wrong contained type", errors=[error])
 
 
 @configure.value_deserializer(IDatetime)
@@ -134,15 +141,18 @@ def date_converter(field, value, context=None):
 def object_converter(field, value, context=None):
     if not isinstance(value, dict):
         raise ValueDeserializationError(field, value, "Not an object")
-    result = {}
-    for key, val in value.items():
-        if key in field.schema:
-            f = field.schema[key]
-            if val is not None:
-                result[key] = get_adapter(f, IJSONToValue, args=[val, context])
-            else:
-                result[key] = None
-    return result
+    try:
+        result = {}
+        for key, val in value.items():
+            if key in field.schema:
+                f = field.schema[key]
+                if val is not None:
+                    result[key] = get_adapter(f, IJSONToValue, args=[val, context])
+                else:
+                    result[key] = None
+        return result
+    except ValidationError as error:
+        raise ValueDeserializationError(field, value, "Wrong contained type", errors=[error])
 
 
 @configure.value_deserializer(IUnionField)

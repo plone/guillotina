@@ -156,6 +156,8 @@ class ITestSchema(Interface):
 
     datetime_bucket_list = fields.BucketListField(bucket_len=10, required=False, value_type=schema.Datetime())
 
+    object_a = schema.Object(IObjectA)
+
     union_field = schema.UnionField(schema.Datetime(), schema.Int(), required=False)
     union_field_obj = schema.UnionField(
         schema.Object(IObjectA), schema.Object(schema=IObjectB), required=False
@@ -639,6 +641,17 @@ async def test_nested_patch_deserialize(dummy_request, mock_txn):
     assert content.nested_patch["foobar"][1]["foo"] == "bar3"
     assert content.nested_patch["foobar"][1]["bar"] == 3
     assert content.nested_patch["foobar"][1]["nested_int"] == 1
+
+
+async def test_object_deserialize(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(
+        ITestSchema, content, {"object_a": {"foo": 1}}, errors,
+    )
+    assert len(errors) == 1
 
 
 async def test_dates_bucket_list_field(dummy_request, mock_txn):
