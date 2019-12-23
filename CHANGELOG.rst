@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a4 (unreleased)
+6.0.0a4 (2019-12-23)
 --------------------
 
 - Improving ValidationErrors messages
