@@ -1312,3 +1312,53 @@ async def test_duplicate_with_reset_acl(dbusers_requester):
         assert status == 200
         assert len(resp["local"]["prinrole"].keys()) == 1
         assert resp["local"]["prinrole"]["alice"] == {"guillotina.Owner": "Allow"}
+
+
+async def test_required_field_work_with_none(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {
+                    "@type": "Item",
+                    "@behaviors": [ITestBehavior.__identifier__],
+                    ITestBehavior.__identifier__: {},
+                }
+            ),
+        )
+        assert status == 412
+
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {
+                    "@type": "Item",
+                    "@behaviors": [ITestBehavior.__identifier__],
+                    ITestBehavior.__identifier__: {"test_required_field": None},
+                }
+            ),
+        )
+        assert status == 412
+
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {
+                    "@type": "Item",
+                    "id": "foobar",
+                    "@behaviors": [ITestBehavior.__identifier__],
+                    ITestBehavior.__identifier__: {"test_required_field": "Foobar"},
+                }
+            ),
+        )
+        assert status == 201
+
+        _, status = await requester(
+            "PATCH",
+            "/db/guillotina/foobar",
+            data=json.dumps({ITestBehavior.__identifier__: {"test_required_field": None}}),
+        )
+        assert status == 412

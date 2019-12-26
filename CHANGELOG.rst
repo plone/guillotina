@@ -4,7 +4,8 @@ CHANGELOG
 5.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix validating None values in required fields
+  [vangheem]
 
 
 5.2.1 (2019-12-21)
