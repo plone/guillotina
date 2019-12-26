@@ -163,9 +163,10 @@ class DeserializeFromJson(object):
 
     async def get_value(self, field, obj, value):
         try:
-            value = get_adapter(field, IJSONToValue, args=[value, obj])
-            if asyncio.iscoroutine(value):
-                value = await value
+            if value is not None:
+                value = get_adapter(field, IJSONToValue, args=[value, obj])
+                if asyncio.iscoroutine(value):
+                    value = await value
             field.validate(value)
             return value
         except ComponentLookupError:

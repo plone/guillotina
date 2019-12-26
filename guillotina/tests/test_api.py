@@ -1038,6 +1038,7 @@ async def test_field_values_with_custom_renderer(container_requester):
                             "op": "update",
                             "value": [{"key": str(idx), "value": str(idx)} for idx in range(50)],
                         },
+                        "test_required_field": "foobar",
                     },
                 }
             ),
@@ -1097,7 +1098,11 @@ async def test_field_values_unauthorized(container_requester):
                     "@type": "Item",
                     "id": "item1",
                     "@behaviors": [ITestBehavior.__identifier__],
-                    ITestBehavior.__identifier__: {"foobar": "blah", "no_read_field": "foobar"},
+                    ITestBehavior.__identifier__: {
+                        "foobar": "blah",
+                        "no_read_field": "foobar",
+                        "test_required_field": "foobar",
+                    },
                 }
             ),
         )
@@ -1136,6 +1141,7 @@ async def test_field_values_dict_bucket_preconditions(container_requester):
                             "op": "update",
                             "value": [{"key": str(idx), "value": str(idx)} for idx in range(20)],
                         },
+                        "test_required_field": "foobar",
                     },
                 }
             ),
