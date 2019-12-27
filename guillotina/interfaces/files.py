@@ -1,8 +1,6 @@
 from guillotina import schema
 from guillotina.schema.interfaces import IObject
 from typing import AsyncIterator
-from typing import List
-from typing import Tuple
 from zope.interface import Interface
 
 

@@ -3,7 +3,6 @@ from guillotina.exceptions import BlobChunkNotFound
 from guillotina.transactions import get_transaction
 from io import BytesIO
 from typing import AsyncIterator
-from typing import Optional
 from typing import Union
 
 
