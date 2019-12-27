@@ -326,6 +326,16 @@ class InMemoryFileManager:
                 os.remove(_tmp_files[uri])
             del _tmp_files[uri]
 
+    async def range_supported(self) -> bool:
+        return True
+
+    async def read_range(self, start: int, end: int) -> bytes:
+        file = self.field.get(self.field.context or self.context)
+        uri = file.uri
+        with open(_tmp_files[uri], "rb") as fi:
+            fi.seek(start)
+            return fi.read(end - start)
+
     async def append(self, dm, iterable, offset) -> int:
         count = 0
         file_id = dm.get("upload_file_id")

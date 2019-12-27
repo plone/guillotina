@@ -184,11 +184,13 @@ class GuillotinaDBRequester(object):
         data=None,
         authenticated=True,
         auth_type="Basic",
-        headers={},
+        headers=None,
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
     ):
+        if headers is None:
+            headers = {}
         value, status, headers = await self.make_request(
             method,
             path,
@@ -211,11 +213,13 @@ class GuillotinaDBRequester(object):
         data=None,
         authenticated=True,
         auth_type="Basic",
-        headers={},
+        headers=None,
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
     ):
+        if headers is None:
+            headers = {}
         settings = {}
         headers = headers.copy()
         settings["headers"] = headers

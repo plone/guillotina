@@ -546,6 +546,7 @@ async def test_file_head(manager_type, redis_container, container_requester):
         assert status == 200
         assert headers["Content-Length"] == str(1024 * 1024 * 4)
         assert headers["Content-Type"] == "application/octet-stream"
+        assert headers["Accept-Ranges"] == "bytes"
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)
@@ -562,3 +563,56 @@ async def test_file_head_not_found(manager_type, redis_container, container_requ
             "HEAD", "/db/guillotina/foobar/@download/file", accept="application/json"
         )
         assert status == 404
+
+
+@pytest.mark.parametrize("manager_type", _pytest_params)
+async def test_range_request_download(manager_type, redis_container, container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "@behaviors": [IAttachment.__identifier__], "id": "foobar"}),
+        )
+        assert status == 201
+
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/foobar/@tusupload/file",
+            headers={"UPLOAD-LENGTH": str(1024 * 1024 * 10), "TUS-RESUMABLE": "1.0.0"},
+        )
+        assert status == 201
+
+        for idx in range(10):
+            # 10, 1mb chunks
+            response, status = await requester(
+                "PATCH",
+                "/db/guillotina/foobar/@tusupload/file",
+                headers={
+                    "CONTENT-LENGTH": str(1024 * 1024 * 1),
+                    "TUS-RESUMABLE": "1.0.0",
+                    "upload-offset": str(1024 * 1024 * idx),
+                },
+                data=str(idx).encode("ascii") * 1024 * 1024 * 1,
+            )
+            assert status == 200
+
+        response, status, headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/foobar/@download/file",
+            accept="application/json",
+            headers={"Range": f"bytes={1024 * 1024}-{(2 * 1024 * 1024) - 1}"},
+        )
+
+        assert headers["Content-Range"] == f"{1024 * 1024}-{(2 * 1024 * 1024) - 1}/{10 * 1024 * 1024}"
+        assert len(response) == 1024 * 1024
+        assert response == b"1" * 1024 * 1024
+
+        response, status, headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/foobar/@download/file",
+            accept="application/json",
+            headers={"Range": f"bytes={(1024 * 1024 * 3) + 512}-{((5 * 1024 * 1024) + 512) - 1}"},
+        )
+
+        assert len(response) == 2 * 1024 * 1024
+        assert response == (b"3" * ((1024 * 1024) - 512)) + (b"4" * 1024 * 1024) + (b"5" * 512)

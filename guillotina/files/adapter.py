@@ -1,10 +1,13 @@
 from .dbfile import DBFile
+from .exceptions import RangeNotFound
+from .exceptions import RangeNotSupported
 from guillotina import configure
 from guillotina.blob import Blob
 from guillotina.event import notify
 from guillotina.events import FileBeforeUploadFinishedEvent
 from guillotina.events import FileUploadFinishedEvent
 from guillotina.events import FileUploadStartedEvent
+from guillotina.exceptions import BlobChunkNotFound
 from guillotina.files.utils import guess_content_type
 from guillotina.interfaces import IDBFileField
 from guillotina.interfaces import IFileCleanup
@@ -13,6 +16,7 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
 from guillotina.response import HTTPPreconditionFailed
+from typing import AsyncIterator
 
 import time
 
@@ -167,12 +171,55 @@ class DBFileStorageManagerAdapter:
         blob = Blob(self.context)
         await dm.update(_blob=blob)
 
-    async def iter_data(self):
+    async def iter_data(self) -> AsyncIterator[bytes]:
         file = self.field.get(self.field.context or self.context)
         blob = file._blob
         bfile = blob.open()
         async for chunk in bfile.iter_async_read():
             yield chunk
+
+    async def range_supported(self) -> bool:
+        file = self.field.get(self.field.context or self.context)
+        blob = file._blob
+        return blob.chunk_sizes is not None
+
+    async def read_range(self, start: int, end: int) -> bytes:
+        file = self.field.get(self.field.context or self.context)
+        blob = file._blob
+        if blob.chunk_sizes is None:
+            raise RangeNotSupported(field=self.field, blob=blob)
+        if start > end or start < 0:
+            raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
+
+        bfile = blob.open()
+        total = 0
+        start_bytes_idx = start
+        full_chunk = b""
+        # find first blob
+        search_total = 0
+        for chunk_idx, chunk_size in sorted(blob.chunk_sizes.items(), key=lambda vv: vv[0]):
+            if start_bytes_idx >= search_total and start_bytes_idx < (search_total + chunk_size):
+                start_bytes_idx = start - search_total
+                end_bytes_idx = start_bytes_idx + ((end - start) - total)
+
+                while total < (end - start):
+                    # now, just read from here until end
+                    try:
+                        chunk = (await bfile.async_read_chunk(chunk_idx))[start_bytes_idx:end_bytes_idx]
+                    except BlobChunkNotFound:
+                        raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
+                    if len(chunk) == 0:
+                        raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
+                    total += len(chunk)
+                    full_chunk += chunk
+                    chunk_idx += 1
+                    start_bytes_idx = 0
+                    end_bytes_idx = (end - start) - total
+
+                return full_chunk
+            else:
+                search_total += chunk_size
+        raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
 
     async def append(self, dm, iterable, offset) -> int:
         blob = dm.get("_blob")

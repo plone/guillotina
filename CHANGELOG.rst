@@ -1,11 +1,11 @@
 CHANGELOG
 =========
 
-5.2.3 (unreleased)
+5.3.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Add `Range` header support
+  [vangheem]
 
 5.2.2 (2019-12-27)
 ------------------
