@@ -15,6 +15,7 @@ from guillotina.directives import write_permission
 from guillotina.exceptions import NoIndexField
 from guillotina.fields import CloudFileField
 from guillotina.files import BaseCloudFile
+from guillotina.files.exceptions import RangeNotFound
 from guillotina.files.utils import generate_key
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
@@ -334,7 +335,9 @@ class InMemoryFileManager:
         uri = file.uri
         with open(_tmp_files[uri], "rb") as fi:
             fi.seek(start)
-            return fi.read(end - start)
+            chunk = fi.read(end - start)
+            if len(chunk) != (end - start):
+                raise RangeNotFound(field=self.field, start=start, end=end)
 
     async def append(self, dm, iterable, offset) -> int:
         count = 0

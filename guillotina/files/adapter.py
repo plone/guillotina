@@ -188,8 +188,6 @@ class DBFileStorageManagerAdapter:
         blob = file._blob
         if blob.chunk_sizes is None:
             raise RangeNotSupported(field=self.field, blob=blob)
-        if start > end or start < 0:
-            raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
 
         bfile = blob.open()
         total = 0
@@ -215,6 +213,9 @@ class DBFileStorageManagerAdapter:
                     chunk_idx += 1
                     start_bytes_idx = 0
                     end_bytes_idx = (end - start) - total
+
+                if len(full_chunk) != (end - start):
+                    raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
 
                 return full_chunk
             else:

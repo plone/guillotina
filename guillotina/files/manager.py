@@ -112,7 +112,7 @@ class FileManager(object):
 
         range_request = self.request.headers["Range"]
         try:
-            start, _, end = range_request.split("=")[-1].partition("-")
+            start, _, end = range_request.split("bytes=")[-1].partition("-")
             start = int(start)
             end = int(end) + 1  # python is inclusive, http is exclusive
         except (IndexError, ValueError):
@@ -120,6 +120,11 @@ class FileManager(object):
             raise HTTPRequestRangeNotSatisfiable(
                 content={"reason": "rangeNotParsable", "range": range_request}
             )
+        if start > end or start < 0:
+            raise HTTPRequestRangeNotSatisfiable(
+                content={"reason": "invalidRange", "range": range_request, "message": "Invalid range"}
+            )
+
         try:
             chunk = await self.file_storage_manager.read_range(start, end)
         except RangeException:
