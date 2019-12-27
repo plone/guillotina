@@ -118,6 +118,8 @@ class ITestBehavior(Interface):
     read_permission(no_read_field="example.MyPermission")
     no_read_field = schema.TextLine(required=False, default="")
 
+    test_required_field = schema.TextLine(required=True)
+
 
 @configure.behavior(
     title="", provides=ITestBehavior, marker=IMarkerBehavior, for_="guillotina.interfaces.IResource"
