@@ -338,6 +338,7 @@ class InMemoryFileManager:
             chunk = fi.read(end - start)
             if len(chunk) != (end - start):
                 raise RangeNotFound(field=self.field, start=start, end=end)
+            return chunk
 
     async def append(self, dm, iterable, offset) -> int:
         count = 0
