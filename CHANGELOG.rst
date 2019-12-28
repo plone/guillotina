@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.2.2 (unreleased)
+5.2.2 (2019-12-27)
 ------------------
 
 - Fix validating None values in required fields
