@@ -129,3 +129,12 @@ async def test_delete_user(dbusers_requester, user_data):
         # Check user is not there anymore
         _, status_code = await requester("GET", "/db/guillotina/@users/foobar")
         assert status_code == 404
+
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_get_available_roles(dbusers_requester):
+    async with dbusers_requester as requester:
+        resp, status_code = await requester("GET", "/db/guillotina/@available-roles")
+        assert "guillotina.Anonymous" in resp
+        assert "guillotina.Manager" in resp
