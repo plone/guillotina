@@ -833,7 +833,7 @@ async def test_upload_errors(manager_type, redis_container, container_requester)
             data=b"X" * 1024 * 1024 * 4,
             headers={
                 "content-length": str(1024 * 1024 * 4),
-                "UPLOAD-MD5": hashlib.md5(b"X" * 1024 * 1024 * 4).hexdigest(),
+                "X-UPLOAD-MD5HASH": hashlib.md5(b"X" * 1024 * 1024 * 4).hexdigest(),
                 "X-UPLOAD-EXTENSION": "bin",
                 "X-UPLOAD-FILENAME": "foo.bin",
             },

@@ -105,7 +105,7 @@ class FileManager(object):
     async def _range_supported(self) -> bool:
         try:
             return await self.file_storage_manager.range_supported()
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             pass
         return False
 
