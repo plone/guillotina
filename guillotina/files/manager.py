@@ -77,7 +77,7 @@ class FileManager(object):
 
         if await self._range_supported():
             headers["Accept-Ranges"] = "bytes"
-        else:
+        else:  # pragma: no cover
             headers["Accept-Ranges"] = "none"
 
         download_resp = StreamResponse(headers=headers, status=status)
@@ -106,8 +106,7 @@ class FileManager(object):
         try:
             return await self.file_storage_manager.range_supported()
         except AttributeError:  # pragma: no cover
-            pass
-        return False
+            return False
 
     async def download(self, **kwargs):
         if "Range" in self.request.headers and await self._range_supported():
