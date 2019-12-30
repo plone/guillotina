@@ -659,12 +659,6 @@ async def test_invalid_range_request_download(manager_type, redis_container, con
         assert status == 416
 
         _, status, _ = await requester.make_request(
-            "GET", "/db/guillotina/foobar/@download/file", headers={"Range": f"bytes=0-{(1024 * 1024 * 2)}"}
-        )
-        # should be 1 too large, throw error
-        assert status == 416
-
-        _, status, _ = await requester.make_request(
             "GET", "/db/guillotina/foobar/@download/file", headers={"Range": f"bytes=5-2"}
         )
         assert status == 416

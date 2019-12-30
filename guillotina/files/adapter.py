@@ -183,7 +183,7 @@ class DBFileStorageManagerAdapter:
         blob = file._blob
         return blob.chunk_sizes is not None
 
-    async def read_range(self, start: int, end: int) -> bytes:
+    async def read_range(self, start: int, end: int) -> AsyncIterator[bytes]:
         file = self.field.get(self.field.context or self.context)
         blob = file._blob
         if blob.chunk_sizes is None:
@@ -192,7 +192,6 @@ class DBFileStorageManagerAdapter:
         bfile = blob.open()
         total = 0
         start_bytes_idx = start
-        full_chunk = b""
         # find first blob
         search_total = 0
         for chunk_idx, chunk_size in sorted(blob.chunk_sizes.items(), key=lambda vv: vv[0]):
@@ -202,6 +201,8 @@ class DBFileStorageManagerAdapter:
 
                 while total < (end - start):
                     # now, just read from here until end
+                    if chunk_idx not in blob.chunk_sizes:
+                        raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
                     try:
                         chunk = (await bfile.async_read_chunk(chunk_idx))[start_bytes_idx:end_bytes_idx]
                     except BlobChunkNotFound:
@@ -209,18 +210,15 @@ class DBFileStorageManagerAdapter:
                     if len(chunk) == 0:
                         raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
                     total += len(chunk)
-                    full_chunk += chunk
+                    yield chunk
                     chunk_idx += 1
                     start_bytes_idx = 0
                     end_bytes_idx = (end - start) - total
 
-                if len(full_chunk) != (end - start):
+                if total != (end - start):
                     raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
-
-                return full_chunk
             else:
                 search_total += chunk_size
-        raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
 
     async def append(self, dm, iterable, offset) -> int:
         blob = dm.get("_blob")

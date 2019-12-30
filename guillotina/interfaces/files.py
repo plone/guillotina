@@ -58,7 +58,7 @@ class IFileStorageManager(Interface):
     async def range_supported() -> bool:
         ...
 
-    async def read_range(start: int, end: int) -> bytes:
+    async def read_range(start: int, end: int) -> AsyncIterator[bytes]:
         """
         Iterate through ranges of data
         """

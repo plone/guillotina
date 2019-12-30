@@ -2,6 +2,7 @@ from .const import CHUNK_SIZE
 from .exceptions import RangeException
 from aiohttp.web import StreamResponse
 from guillotina import configure
+from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
@@ -12,6 +13,7 @@ from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
+from guillotina.response import HTTPClientClosedRequest
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
@@ -22,9 +24,13 @@ from guillotina.utils import get_object_url
 from guillotina.utils import resolve_dotted_name
 from zope.interface import alsoProvides
 
+import asyncio
 import base64
 import posixpath
 import uuid
+
+
+logger = glogging.getLogger("guillotina")
 
 
 @configure.adapter(for_=(IResource, IRequest, ICloudFileField), provides=IFileManager)
@@ -43,7 +49,14 @@ class FileManager(object):
         )
 
     async def prepare_download(
-        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+        self,
+        disposition=None,
+        filename=None,
+        content_type=None,
+        size=None,
+        extra_headers=None,
+        status=200,
+        **kwargs,
     ):
         if disposition is None:
             disposition = self.request.query.get("disposition", "attachment")
@@ -67,7 +80,7 @@ class FileManager(object):
         else:
             headers["Accept-Ranges"] = "none"
 
-        download_resp = StreamResponse(headers=headers)
+        download_resp = StreamResponse(headers=headers, status=status)
         download_resp.content_type = content_type or file.guess_content_type()
         if size or file.size:
             download_resp.content_length = size or file.size
@@ -114,60 +127,94 @@ class FileManager(object):
         try:
             start, _, end = range_request.split("bytes=")[-1].partition("-")
             start = int(start)
+            if len(end) == 0:
+                # bytes=0- is valid
+                end = file.size - 1
             end = int(end) + 1  # python is inclusive, http is exclusive
         except (IndexError, ValueError):
             # range errors fallback to full download
             raise HTTPRequestRangeNotSatisfiable(
-                content={"reason": "rangeNotParsable", "range": range_request}
+                content={"reason": "rangeNotParsable", "range": range_request},
+                headers={"Content-Range": f"bytes */{file.size}"},
             )
         if start > end or start < 0:
             raise HTTPRequestRangeNotSatisfiable(
-                content={"reason": "invalidRange", "range": range_request, "message": "Invalid range"}
+                content={"reason": "invalidRange", "range": range_request, "message": "Invalid range"},
+                headers={"Content-Range": f"bytes */{file.size}"},
             )
-
-        try:
-            chunk = await self.file_storage_manager.read_range(start, end)
-        except RangeException:
+        if end > file.size:
             raise HTTPRequestRangeNotSatisfiable(
                 content={
-                    "reason": "rangeNotFound",
+                    "reason": "invalidRange",
                     "range": range_request,
-                    "message": "Could not read range correctly",
-                }
+                    "message": "Invalid range, too large end value",
+                },
+                headers={"Content-Range": f"bytes */{file.size}"},
             )
 
+        logger.debug(f"Range request: {range_request} {self.request}")
         if extra_headers is None:
             extra_headers = {}
-        extra_headers["Content-Range"] = f"{start}-{end - 1}/{file.size}"
+        extra_headers["Content-Range"] = f"bytes {start}-{end - 1}/{file.size}"
 
-        download_resp = await self.prepare_download(
-            disposition, filename, content_type, len(chunk), extra_headers, **kwargs
-        )
-        await download_resp.write(chunk)
-        await download_resp.drain()
-        await download_resp.write_eof()
-        return download_resp
+        try:
+            download_resp = await self.prepare_download(
+                disposition, filename, content_type, end - start, extra_headers, status=206, **kwargs
+            )
+
+            found = 0
+            try:
+                async for chunk in self.file_storage_manager.read_range(start, end):
+                    found += len(chunk)
+                    logger.info(f"Got chunk {range_request}: {len(chunk)}/{end - start}|{found}")
+                    await download_resp.write(chunk)
+                    await download_resp.drain()
+            except RangeException:
+                raise HTTPRequestRangeNotSatisfiable(
+                    content={
+                        "reason": "rangeNotFound",
+                        "range": range_request,
+                        "message": "Could not read range correctly",
+                    },
+                    headers={"Content-Range": f"bytes */{file.size}"},
+                )
+        except asyncio.CancelledError:
+            logger.info(f"Range cancelled: {range_request} {self.request}")
+            # when supporting range headers, the browser will
+            # cancel downloads. This is fine.
+            raise HTTPClientClosedRequest()
+        finally:
+            await download_resp.write_eof()
+            return download_resp
 
     async def _full_download(
         self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
     ):
         download_resp = None
-        async for chunk in self.file_storage_manager.iter_data(**kwargs):
+        try:
+            async for chunk in self.file_storage_manager.iter_data(**kwargs):
+                if download_resp is None:
+                    # defer to make sure we do http exception handling
+                    # before data starts streaming properly
+                    download_resp = await self.prepare_download(
+                        disposition, filename, content_type, size, extra_headers, **kwargs
+                    )
+                await download_resp.write(chunk)
+                await download_resp.drain()
+        except asyncio.CancelledError:
+            logger.info(f"Download cancelled: {self.request}")
+            # when supporting range headers, the browser will
+            # cancel downloads. This is fine.
             if download_resp is None:
-                # defer to make sure we do http exception handling
-                # before data starts streaming properly
+                raise HTTPClientClosedRequest()
+        finally:
+            if download_resp is None:
+                # deferred
                 download_resp = await self.prepare_download(
                     disposition, filename, content_type, size, extra_headers, **kwargs
                 )
-            await download_resp.write(chunk)
-            await download_resp.drain()
-        if download_resp is None:
-            # deferred
-            download_resp = await self.prepare_download(
-                disposition, filename, content_type, size, extra_headers, **kwargs
-            )
-        await download_resp.write_eof()
-        return download_resp
+            await download_resp.write_eof()
+            return download_resp
 
     async def tus_options(self, *args, **kwargs):
         resp = Response(

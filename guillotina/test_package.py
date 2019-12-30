@@ -32,6 +32,7 @@ from guillotina.response import HTTPUnprocessableEntity
 from guillotina.schema import Object
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from shutil import copyfile
+from typing import AsyncIterator
 from zope.interface import implementer
 from zope.interface import Interface
 
@@ -330,15 +331,18 @@ class InMemoryFileManager:
     async def range_supported(self) -> bool:
         return True
 
-    async def read_range(self, start: int, end: int) -> bytes:
+    async def read_range(self, start: int, end: int) -> AsyncIterator[bytes]:
         file = self.field.get(self.field.context or self.context)
         uri = file.uri
+        total = 0
         with open(_tmp_files[uri], "rb") as fi:
             fi.seek(start)
-            chunk = fi.read(end - start)
-            if len(chunk) != (end - start):
-                raise RangeNotFound(field=self.field, start=start, end=end)
-            return chunk
+            while total < (end - start):
+                chunk = fi.read(1024 * 1024)
+                total += len(chunk)
+                yield chunk
+        if len(chunk) != (end - start):
+            raise RangeNotFound(field=self.field, start=start, end=end)
 
     async def append(self, dm, iterable, offset) -> int:
         count = 0

@@ -76,6 +76,13 @@ async def test_write_large_blob_data(db, guillotina_main):
         await db.async_del("container")
 
 
+async def _gather_all(iterator):
+    data = b""
+    async for v in iterator:
+        data += v
+    return data
+
+
 async def test_read_data_ranges(db, guillotina_main, dummy_request):
     db = await get_database("db")
     login()
@@ -108,11 +115,14 @@ async def test_read_data_ranges(db, guillotina_main, dummy_request):
 
         assert await fm.file_storage_manager.range_supported()
 
-        assert await fm.file_storage_manager.read_range(0, 1024 * 1024) == b"X" * 1024 * 1024
-        assert await fm.file_storage_manager.read_range(1024 * 1024, (1024 * 1024) + 512) == b"Y" * 512
-        assert await fm.file_storage_manager.read_range(1024 * 1023, (1024 * 1024) + 1024) == (
+        assert await _gather_all(fm.file_storage_manager.read_range(0, 1024 * 1024)) == b"X" * 1024 * 1024
+        assert (
+            await _gather_all(fm.file_storage_manager.read_range(1024 * 1024, (1024 * 1024) + 512))
+            == b"Y" * 512
+        )
+        assert await _gather_all(fm.file_storage_manager.read_range(1024 * 1023, (1024 * 1024) + 1024)) == (
             b"X" * 1024
         ) + (b"Y" * 512) + (b"Z" * 512)
-        assert await fm.file_storage_manager.read_range(0, (1024 * 1024 * 11) + 512) == (
+        assert await _gather_all(fm.file_storage_manager.read_range(0, (1024 * 1024 * 11) + 512)) == (
             b"X" * (1024 * 1024 * 1)
         ) + (b"Y" * 512) + (b"Z" * (1024 * 1024 * 10))
