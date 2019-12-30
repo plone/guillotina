@@ -6,7 +6,9 @@ class RangeException(Exception):
 
 
 class RangeNotSupported(RangeException):
-    ...
+    """
+    Request request is not supported
+    """
 
 
 class RangeNotFound(RangeException):

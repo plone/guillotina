@@ -56,7 +56,9 @@ class IFileStorageManager(Interface):
         """
 
     async def range_supported() -> bool:
-        ...
+        """
+        If range is supported with manager
+        """
 
     async def read_range(start: int, end: int) -> AsyncIterator[bytes]:
         """

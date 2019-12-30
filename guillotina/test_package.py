@@ -322,7 +322,7 @@ class InMemoryFileManager:
         _tmp_files[upload_file_id] = tempfile.mkstemp()[1]
         await dm.update(_chunks=0, upload_file_id=upload_file_id)
 
-    async def delete_upload(self, uri):
+    async def delete_upload(self, uri):  # pragma: no cover
         if uri in _tmp_files:
             if os.path.exists(_tmp_files[uri]):
                 os.remove(_tmp_files[uri])

@@ -185,10 +185,10 @@ class DBFileStorageManagerAdapter:
 
     async def read_range(self, start: int, end: int) -> AsyncIterator[bytes]:
         file = self.field.get(self.field.context or self.context)
-        blob = file._blob
-        if blob.chunk_sizes is None:
-            raise RangeNotSupported(field=self.field, blob=blob)
+        if file is None or file._blob.chunk_sizes is None:
+            raise RangeNotSupported(field=self.field)
 
+        blob = file._blob
         bfile = blob.open()
         total = 0
         start_bytes_idx = start
@@ -201,13 +201,11 @@ class DBFileStorageManagerAdapter:
 
                 while total < (end - start):
                     # now, just read from here until end
-                    if chunk_idx not in blob.chunk_sizes:
-                        raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
                     try:
                         chunk = (await bfile.async_read_chunk(chunk_idx))[start_bytes_idx:end_bytes_idx]
                     except BlobChunkNotFound:
                         raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
-                    if len(chunk) == 0:
+                    if len(chunk) == 0:  # pragma: no cover
                         raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
                     total += len(chunk)
                     yield chunk
@@ -215,7 +213,7 @@ class DBFileStorageManagerAdapter:
                     start_bytes_idx = 0
                     end_bytes_idx = (end - start) - total
 
-                if total != (end - start):
+                if total != (end - start):  # pragma: no cover
                     raise RangeNotFound(field=self.field, blob=blob, start=start, end=end)
             else:
                 search_total += chunk_size

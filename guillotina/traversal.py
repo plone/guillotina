@@ -126,7 +126,7 @@ def generate_error_response(e, request, error, status=500):
     http_response = query_adapter(e, IErrorResponseException, kwargs={"error": error, "eid": eid})
     if http_response is not None:
         return http_response
-    if isinstance(e, asyncio.CancelledError):
+    if isinstance(e, asyncio.CancelledError):  # pragma: no cover
         message = _("Cancelled execution of view") + " " + eid
         logger.warning(message, exc_info=e, eid=eid, request=request)
     else:

@@ -686,7 +686,7 @@ async def test_invalid_range_request_download(manager_type, redis_container, con
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)
-async def _test_handle_cancel_error(manager_type, redis_container, container_requester):
+async def _test_handle_cancel_error(manager_type, redis_container, container_requester):  # pragma: no cover
     # it seems we can't test cancelled errors with pytest
     async with container_requester as requester:
         response, status = await requester(
