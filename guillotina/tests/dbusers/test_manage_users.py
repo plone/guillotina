@@ -109,6 +109,19 @@ async def test_patch_user_data(dbusers_requester, user_data):
         assert resp["email"] == "foobar2@foo.com"
         assert "guillotina.Manager" in resp["roles"]
 
+        # create a group
+        _group = {"name": "foo", "@type": "Group", "id": "foo"}
+        _, status = await requester("POST", "/db/guillotina/groups", data=json.dumps(_group))
+        # add the user to the group (throught users)
+        assert status == 201
+        data = {"user_groups": ["foo"]}
+        _, status = await requester("PATCH", "/db/guillotina/@users/foobar", data=json.dumps(data))
+        assert status == 204
+
+        # ensure group contains the user
+        resp, _ = await requester("GET", "/db/guillotina/@groups/foo")
+        assert "foobar" in resp["users"]["items"]
+
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_delete_user(dbusers_requester, user_data):

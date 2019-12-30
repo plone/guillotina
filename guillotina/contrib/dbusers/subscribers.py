@@ -44,3 +44,18 @@ async def on_update_groups(group: Group, event: ObjectModifiedEvent) -> None:
         if group.id not in user.user_groups:
             user.user_groups.append(group.id)
             user.register()
+
+
+@configure.subscriber(for_=(IUser, IObjectModifiedEvent))
+async def on_update_user(user: User, event: ObjectModifiedEvent) -> None:
+    # Keep group.users and user.user_groups in sync
+    container = get_current_container()
+    user_groups = user.user_groups or []
+    for group_id in user_groups:
+        try:
+            group = await navigate_to(container, f"groups/{group_id}")
+        except KeyError:
+            raise HTTPPreconditionFailed(content={"reason": f"inexistent group: {group_id}"})
+        if user.id not in group.users:
+            group.users.append(user.id)
+            group.register()

@@ -39,6 +39,8 @@ class UserDeserializer:
             self.context.email = data["email"]
         if "fullname" in data:
             self.context.name = data["fullname"]
+        if "user_groups" in data:
+            self.context.user_groups = data["user_groups"]
         self.context.register()
         return self.context
 

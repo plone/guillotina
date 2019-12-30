@@ -5,6 +5,8 @@ CHANGELOG
 --------------------
 
 - Nothing changed yet.
+- Denormalized group info when user is added to a group throught users endpoint (issue #806)
+  [jordic]
 
 
 6.0.0a4 (2019-12-23)
