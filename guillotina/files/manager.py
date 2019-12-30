@@ -63,10 +63,10 @@ class FileManager(object):
 
         try:
             file = self.field.get(self.field.context or self.context)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             file = None
 
-        if file is None and filename is None:
+        if file is None and filename is None:  # pragma: no cover
             raise HTTPNotFound(content={"message": "File or custom filename required to download"})
         cors_renderer = app_settings["cors_renderer"](self.request)
         headers = await cors_renderer.get_headers()
@@ -120,7 +120,7 @@ class FileManager(object):
     ):
         try:
             file = self.field.get(self.field.context or self.context)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             raise HTTPNotFound()
 
         range_request = self.request.headers["Range"]
@@ -178,7 +178,7 @@ class FileManager(object):
                     },
                     headers={"Content-Range": f"bytes */{file.size}"},
                 )
-        except asyncio.CancelledError:
+        except asyncio.CancelledError:  # pragma: no cover
             logger.info(f"Range cancelled: {range_request} {self.request}")
             # when supporting range headers, the browser will
             # cancel downloads. This is fine.
@@ -201,7 +201,7 @@ class FileManager(object):
                     )
                 await download_resp.write(chunk)
                 await download_resp.drain()
-        except asyncio.CancelledError:
+        except asyncio.CancelledError:  # pragma: no cover
             logger.info(f"Download cancelled: {self.request}")
             # when supporting range headers, the browser will
             # cancel downloads. This is fine.
@@ -274,7 +274,7 @@ class FileManager(object):
 
         read_bytes = await self.file_storage_manager.append(self.dm, self._iterate_request_data(), offset)
 
-        if to_upload and read_bytes != to_upload:
+        if to_upload and read_bytes != to_upload:  # pragma: no cover
             # check length matches if provided
             raise HTTPPreconditionFailed(content={"reason": "Upload size does not match what was provided"})
         await self.dm.update(offset=offset + read_bytes)
@@ -384,7 +384,7 @@ class FileManager(object):
         else:
             if "Content-Length" in self.request.headers:
                 size = int(self.request.headers["Content-Length"])
-            else:
+            else:  # pragma: no cover
                 raise AttributeError("x-upload-size or content-length header needed")
 
         if "X-UPLOAD-FILENAME" in self.request.headers:

@@ -163,7 +163,7 @@ class DBFileStorageManagerAdapter:
     def exists(self):
         try:
             file = self.field.get(self.field.context or self.context)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             file = None
         return file is not None and file.size > 0
 
