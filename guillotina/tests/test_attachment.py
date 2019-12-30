@@ -603,7 +603,7 @@ async def test_range_request_download(manager_type, redis_container, container_r
             headers={"Range": f"bytes={1024 * 1024}-{(2 * 1024 * 1024) - 1}"},
         )
 
-        assert headers["Content-Range"] == f"{1024 * 1024}-{(2 * 1024 * 1024) - 1}/{10 * 1024 * 1024}"
+        assert headers["Content-Range"] == f"bytes {1024 * 1024}-{(2 * 1024 * 1024) - 1}/{10 * 1024 * 1024}"
         assert len(response) == 1024 * 1024
         assert response == b"1" * 1024 * 1024
 
