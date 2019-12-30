@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Add localroles to @available-roles
+  [jordic]
 
 
 6.0.0a4 (2019-12-23)
