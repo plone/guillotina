@@ -58,9 +58,9 @@ class User(Folder):
     username = email = name = password = None
     disabled = False
     user_roles = None
-    user_groups: typing.List[str] = None
-    user_permissions: typing.List[str] = None
-    properties: typing.Dict[str, typing.Any] = None
+    user_groups: typing.Optional[typing.List[str]] = None
+    user_permissions: typing.Optional[typing.List[str]] = None
+    properties: typing.Optional[typing.Dict[str, typing.Any]] = None
 
     def __init__(self, *args, **kwargs):
         self.user_groups = []

@@ -80,7 +80,8 @@ async def on_update_user(user: User, event: BeforeObjectModifiedEvent) -> None:
 @configure.subscriber(for_=(IUser, IBeforeObjectRemovedEvent))
 async def on_remove_user(user: User, event: BeforeObjectRemovedEvent):
     container = get_current_container()
-    for group_id in user.user_groups:
+    user_groups = user.user_groups or []
+    for group_id in user_groups:
         group = await navigate_to(container, f"groups/{group_id}")
         group.users.remove(user.id)
         group.register()
@@ -89,7 +90,8 @@ async def on_remove_user(user: User, event: BeforeObjectRemovedEvent):
 @configure.subscriber(for_=(IGroup, IBeforeObjectRemovedEvent))
 async def on_remove_group(group: Group, event: BeforeObjectRemovedEvent):
     container = get_current_container()
-    for user_id in group.users:
+    users = group.users or []
+    for user_id in users:
         user = await navigate_to(container, f"users/{user_id}")
         user.user_groups.remove(group.id)
         user.register()

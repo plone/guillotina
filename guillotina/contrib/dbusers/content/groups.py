@@ -34,8 +34,8 @@ class IGroup(IFolder):
 )
 class Group(Folder):
     name = description = None
-    user_roles: typing.List[str] = None
-    users: typing.List[str] = None
+    user_roles: typing.Optional[typing.List[str]] = None
+    users: typing.Optional[typing.List[str]] = None
 
     def __init__(self, *args, **kwargs):
         super(Group).__init__(*args, **kwargs)
