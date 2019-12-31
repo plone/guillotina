@@ -50,8 +50,8 @@ async def on_update_groups(group: Group, event: ObjectModifiedEvent) -> None:
             user.register()
 
 
-@configure.subscriber(for_=(IUser, BeforeObjectModifiedEvent))
-async def on_update_user(user: User, event: ObjectModifiedEvent) -> None:
+@configure.subscriber(for_=(IUser, IBeforeObjectModifiedEvent))
+async def on_update_user(user: User, event: BeforeObjectModifiedEvent) -> None:
     # keep group.users updated with changes from users
     old_groups = user.user_groups or []
     new_groups = event.payload.get("user_groups", [])
@@ -77,7 +77,7 @@ async def on_update_user(user: User, event: ObjectModifiedEvent) -> None:
             group.register()
 
 
-@configure.subscriber(for_=(IUser, BeforeObjectRemovedEvent))
+@configure.subscriber(for_=(IUser, IBeforeObjectRemovedEvent))
 async def on_remove_user(user: User, event: BeforeObjectRemovedEvent):
     container = get_current_container()
     for group_id in user.user_groups:
@@ -86,8 +86,8 @@ async def on_remove_user(user: User, event: BeforeObjectRemovedEvent):
         group.register()
 
 
-@configure.subscriber(for_=(IGroup, BeforeObjectRemovedEvent))
-async def on_remove_user(group: Group, event: BeforeObjectRemovedEvent):
+@configure.subscriber(for_=(IGroup, IBeforeObjectRemovedEvent))
+async def on_remove_group(group: Group, event: BeforeObjectRemovedEvent):
     container = get_current_container()
     for user_id in group.users:
         user = await navigate_to(container, f"users/{user_id}")
