@@ -7,6 +7,9 @@ CHANGELOG
 - Fix validating None values in required fields
   [vangheem]
 
+- Add localroles to @available-roles
+  [jordic]
+
 
 6.0.0a4 (2019-12-23)
 --------------------
