@@ -4,8 +4,10 @@ CHANGELOG
 6.0.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
 - Denormalized group info when user is added to a group throught users endpoint (issue #806)
+  [jordic]
+
+- Add localroles to @available-roles
   [jordic]
 
 
