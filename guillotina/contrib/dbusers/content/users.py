@@ -67,7 +67,7 @@ class User(Folder):
         self.user_permissions = []
         self.user_roles = []
         self.properties = {}
-        super(User).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def roles(self):

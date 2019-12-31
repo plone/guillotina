@@ -38,7 +38,7 @@ class Group(Folder):
     users: typing.Optional[typing.List[str]] = None
 
     def __init__(self, *args, **kwargs):
-        super(Group).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.user_roles = []
         self.users = []
 
