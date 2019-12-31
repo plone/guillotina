@@ -57,10 +57,17 @@ class IUser(IFolder, IPrincipal):
 class User(Folder):
     username = email = name = password = None
     disabled = False
-    user_roles = ["guillotina.Member"]
-    user_groups: typing.List[str] = []
-    user_permissions: typing.List[str] = []
-    properties: typing.Dict[str, typing.Any] = {}
+    user_roles = None
+    user_groups: typing.List[str] = None
+    user_permissions: typing.List[str] = None
+    properties: typing.Dict[str, typing.Any] = None
+
+    def __init__(self, *args, **kwargs):
+        self.user_groups = []
+        self.user_permissions = []
+        self.user_roles = []
+        self.properties = {}
+        super(User).__init__(*args, **kwargs)
 
     @property
     def roles(self):

@@ -21,6 +21,7 @@ class UserJSONSummarySerializer(DefaultJSONSummarySerializer):
                 "location": None,
                 "portrait": None,
                 "roles": self.context.user_roles,
+                "user_groups": self.context.user_groups,
                 "homepage": None,
             }
         )
