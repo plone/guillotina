@@ -6,8 +6,6 @@ from guillotina.directives import index_field
 from guillotina.interfaces import IFolder
 from zope.interface import implementer
 
-import typing
-
 
 class IGroupManager(IFolder):
     pass
@@ -33,12 +31,9 @@ class IGroup(IFolder):
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
 )
 class Group(Folder):
-    name = description = None
-    user_roles: typing.Optional[typing.List[str]] = None
-    users: typing.Optional[typing.List[str]] = None
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.name = self.description = None
         self.user_roles = []
         self.users = []
 

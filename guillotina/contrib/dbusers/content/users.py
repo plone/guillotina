@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from guillotina import configure
 from guillotina import schema
 from guillotina.content import Folder
@@ -9,8 +8,6 @@ from guillotina.directives import write_permission
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPrincipal
-
-import typing
 
 
 class IUserManager(IFolder):
@@ -55,18 +52,13 @@ class IUser(IFolder, IPrincipal):
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
 )
 class User(Folder):
-    username = email = name = password = None
-    disabled = False
-    user_roles = None
-    user_groups: typing.Optional[typing.List[str]] = None
-    user_permissions: typing.Optional[typing.List[str]] = None
-    properties: typing.Optional[typing.Dict[str, typing.Any]] = None
-
     def __init__(self, *args, **kwargs):
         self.user_groups = []
         self.user_permissions = []
         self.user_roles = []
         self.properties = {}
+        self.username = self.email = self.name = self.password = None
+        self.disabled = False
         super().__init__(*args, **kwargs)
 
     @property
