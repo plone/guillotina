@@ -40,6 +40,17 @@ def schema_compatible(value, schema_or_field, context=None):
         raise ValueDeserializationError(schema_or_field, value, "Deserializer not found for field")
 
 
+def _optimized_lookup(value, field, context):
+    if field._type in (int, str, float, bool):
+        # for primitive types, all we really do is return the value back.
+        # this is costly for all the lookups
+        if not isinstance(value, field._type):
+            raise WrongType(value, field._type, field.__name__)
+        return value
+    else:
+        return schema_compatible(value, field, context)
+
+
 @profilable
 @configure.value_deserializer(Interface)
 def default_value_converter(schema, value, context=None):
@@ -53,7 +64,7 @@ def default_value_converter(schema, value, context=None):
     for key in value.keys():
         if not isinstance(key, str):
             raise ValueDeserializationError(schema, value, "Invalid key type provided")
-        result[key] = schema_compatible(value[key], schema[key], context)
+        result[key] = _optimized_lookup(value[key], schema[key], context)
     return result
 
 
@@ -89,7 +100,7 @@ def from_unicode_converter(field, value, context=None):
 def list_converter(field, value, context=None):
     if not isinstance(value, list):
         raise ValueDeserializationError(field, value, "Not an array")
-    return [schema_compatible(item, field.value_type, context) for item in value]
+    return [_optimized_lookup(item, field.value_type, context) for item in value]
 
 
 @profilable
@@ -127,7 +138,7 @@ def dict_converter(field, value, context=None):
     for key in value.keys():
         if not isinstance(key, field.key_type._type):
             raise ValueDeserializationError(field, value, "Invalid key type provided")
-        result[key] = schema_compatible(value[key], field.value_type, context)
+        result[key] = _optimized_lookup(value[key], field.value_type, context)
     return result
 
 
