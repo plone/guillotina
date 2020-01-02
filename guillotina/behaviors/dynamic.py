@@ -6,8 +6,6 @@ from guillotina.behaviors.instance import ContextBehavior
 from guillotina.interfaces import IContentBehavior
 from zope.interface import Interface
 
-import json
-
 
 def get_all_fields(content):
     _fields = {}
@@ -47,9 +45,7 @@ class IFieldType(Interface):
     type = schema.Choice(values=["date", "integer", "text", "float", "keyword", "boolean"])
     required = schema.Bool(default=False, required=False)
     meta = schema.JSONField(
-        title="Additional information on field",
-        required=False,
-        schema=json.dumps({"type": "object", "properties": {}}),
+        title="Additional information on field", required=False, schema={"type": "object", "properties": {}}
     )
 
 

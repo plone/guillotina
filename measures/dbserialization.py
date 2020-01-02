@@ -13,7 +13,7 @@ test_capnp = capnp.load("measures/capnp/test.capnp")
 ITERATIONS = 10000
 
 TEST_PAYLOAD = {
-    "tags": 10 * ["" for i in zip(string.ascii_letters, string.ascii_letters)],
+    "tags": 10 * ["".join(i) for i in zip(string.ascii_letters, string.ascii_letters)],
     # "creation_date": "2020-01-02T19:07:48.748922Z",
     # "effective_date": "2020-01-02T19:07:48.748922Z",
     # "expiration_date": "2020-01-02T19:07:48.748922Z",

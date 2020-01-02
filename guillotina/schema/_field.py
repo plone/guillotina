@@ -457,25 +457,26 @@ def _validate_sequence(value_type, value, errors=None):
 
 
 def _validate_uniqueness(value):
-    temp_values = []
-    for item in value:
-        if item in temp_values:
-            raise NotUnique(item)
-
-        temp_values.append(item)
+    # very slow to go item by item in iterable
+    compared_to = set(value)
+    if len(compared_to) != len(value):
+        raise NotUnique()
 
 
 class AbstractCollection(MinMaxLen, Iterable):
     value_type = None
     unique = False
+    naive = False
 
-    def __init__(self, value_type=None, unique=False, **kw):
+    def __init__(self, value_type=None, unique=False, naive=False, **kw):
         super(AbstractCollection, self).__init__(**kw)
         # whine if value_type is not a field
         if value_type is not None and not IField.providedBy(value_type):
             raise ValueError("'value_type' must be field instance.")
         self.value_type = value_type
         self.unique = unique
+        # naive designates if a field's sub type should be validated or not
+        self.naive = naive
 
     def bind(self, object):
         """See guillotina.schema._bootstrapinterfaces.IField."""
@@ -488,9 +489,10 @@ class AbstractCollection(MinMaxLen, Iterable):
 
     def _validate(self, value):
         super(AbstractCollection, self)._validate(value)
-        errors = _validate_sequence(self.value_type, value)
-        if errors:
-            raise WrongContainedType(errors, self.__name__)
+        if not self.naive:
+            errors = _validate_sequence(self.value_type, value)
+            if errors:
+                raise WrongContainedType(errors, self.__name__)
         if self.unique:
             _validate_uniqueness(value)
 
@@ -619,8 +621,9 @@ class Dict(MinMaxLen, Iterable):
     _type = dict
     key_type = None
     value_type = None
+    naive = False
 
-    def __init__(self, key_type=None, value_type=None, **kw):
+    def __init__(self, key_type=None, value_type=None, naive=False, **kw):
         super(Dict, self).__init__(**kw)
         # whine if key_type or value_type is not a field
         if key_type is not None and not IField.providedBy(key_type):
@@ -629,20 +632,18 @@ class Dict(MinMaxLen, Iterable):
             raise ValueError("'value_type' must be field instance.")
         self.key_type = key_type
         self.value_type = value_type
+        self.naive = naive
 
     def _validate(self, value):
         super(Dict, self)._validate(value)
         errors = []
-        try:
+        if not self.naive:
             if self.value_type:
                 errors = _validate_sequence(self.value_type, value.values(), errors)
             errors = _validate_sequence(self.key_type, value, errors)
 
-            if errors:
-                raise WrongContainedType(errors, self.__name__)
-
-        finally:
-            errors = None
+        if errors:
+            raise WrongContainedType(errors, self.__name__)
 
     def bind(self, object):
         """See guillotina.schema._bootstrapinterfaces.IField."""
