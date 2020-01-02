@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.0 (unreleased)
+5.3.0 (2020-01-02)
 ------------------
 
 - Add `Range` header support
