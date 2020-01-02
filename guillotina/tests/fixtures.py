@@ -280,7 +280,7 @@ class GuillotinaDBHttpRequester(object):
         data=None,
         authenticated=True,
         auth_type="Basic",
-        headers={},
+        headers=None,
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
@@ -308,11 +308,13 @@ class GuillotinaDBHttpRequester(object):
         data=None,
         authenticated=True,
         auth_type="Basic",
-        headers={},
+        headers=None,
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
     ):
+        if headers is None:
+            headers = {}
         settings = {}
         headers = headers.copy()
         settings["headers"] = headers

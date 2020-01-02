@@ -123,8 +123,12 @@ def generate_error_response(e, request, error, status=500):
     http_response = query_adapter(e, IErrorResponseException, kwargs={"error": error, "eid": eid})
     if http_response is not None:
         return http_response
-    message = _("Error on execution of view") + " " + eid
-    logger.error(message, exc_info=e, eid=eid, request=request)
+    if isinstance(e, asyncio.CancelledError):  # pragma: no cover
+        message = _("Cancelled execution of view") + " " + eid
+        logger.warning(message, exc_info=e, eid=eid, request=request)
+    else:
+        message = _("Error on execution of view") + " " + eid
+        logger.error(message, exc_info=e, eid=eid, request=request)
     data = {
         "message": message,
         "reason": error_reasons.UNKNOWN.name,
@@ -397,7 +401,7 @@ class TraversalRouter:
             await abort()
             return BasicMatchInfo(request, exc)
         except asyncio.CancelledError:
-            logger.warning("Unhandled cancel error", exc_info=True, request=request)
+            logger.info("Request cancelled", request=request)
             await abort()
             return BasicMatchInfo(request, response.HTTPClientClosedRequest())
         except Exception:
