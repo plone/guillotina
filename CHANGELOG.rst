@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.1 (unreleased)
+5.3.1 (2020-01-02)
 ------------------
 
 - Save old file attrs before content is cleaned
