@@ -169,7 +169,6 @@ class FileManager(object):
                     found += len(chunk)
                     logger.info(f"Got chunk {range_request}: {len(chunk)}/{end - start}|{found}")
                     await download_resp.write(chunk)
-                    await download_resp.drain()
             except RangeException:
                 raise HTTPRequestRangeNotSatisfiable(
                     content={
@@ -185,7 +184,7 @@ class FileManager(object):
             # cancel downloads. This is fine.
             raise HTTPClientClosedRequest()
         finally:
-            await download_resp.write_eof()
+            await download_resp.write(eof=True)
             return download_resp
 
     async def _full_download(
