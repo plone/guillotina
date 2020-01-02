@@ -106,22 +106,16 @@ def list_converter(field, value, context=None):
 @profilable
 @configure.value_deserializer(ITuple)
 def tuple_converter(field, value, context=None):
-    if not isinstance(value, list):
-        raise ValueDeserializationError(field, value, "Not an array")
     return tuple(list_converter(field, value, context))
 
 
 @configure.value_deserializer(ISet)
 def set_converter(field, value, context=None):
-    if not isinstance(value, list):
-        raise ValueDeserializationError(field, value, "Not an array")
     return set(list_converter(field, value, context))
 
 
 @configure.value_deserializer(IFrozenSet)
 def frozenset_converter(field, value, context=None):
-    if not isinstance(value, list):
-        raise ValueDeserializationError(field, value, "Not an array")
     return frozenset(list_converter(field, value, context))
 
 
@@ -165,7 +159,7 @@ def object_converter(field, value, context=None):
         if key in field.schema:
             f = field.schema[key]
             if val is not None:
-                result[key] = get_adapter(f, IJSONToValue, args=[val, context])
+                result[key] = _optimized_lookup(val, f, context)
             else:
                 result[key] = None
     return result

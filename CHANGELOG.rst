@@ -4,6 +4,9 @@ CHANGELOG
 5.3.3 (unreleased)
 ------------------
 
+- Optimize json deserialization
+  [vangheem]
+
 - Update Dockerfile
   [svx]
 
