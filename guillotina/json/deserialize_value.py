@@ -5,7 +5,9 @@ from guillotina.component import ComponentLookupError
 from guillotina.component import get_adapter
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.interfaces import IJSONToValue
+from guillotina.profile import profilable
 from guillotina.schema._bootstrapinterfaces import IFromUnicode
+from guillotina.schema.exceptions import WrongType
 from guillotina.schema.interfaces import IBool
 from guillotina.schema.interfaces import IDate
 from guillotina.schema.interfaces import IDatetime
@@ -23,6 +25,7 @@ from zope.interface import Interface
 import datetime
 
 
+@profilable
 def schema_compatible(value, schema_or_field, context=None):
     """The schema_compatible function converts any value to guillotina.schema
     compatible data when possible, raising a TypeError for unsupported values.
@@ -37,18 +40,21 @@ def schema_compatible(value, schema_or_field, context=None):
         raise ValueDeserializationError(schema_or_field, value, "Deserializer not found for field")
 
 
+@profilable
 @configure.value_deserializer(Interface)
 def default_value_converter(schema, value, context=None):
     if value == {}:
         return {}
 
-    if type(value) != dict:
+    if not isinstance(value, dict):
         return value
 
-    keys = [k for k in value.keys()]
-    values = [k for k in value.values()]
-    values = [schema_compatible(values[idx], schema[keys[idx]], context) for idx in range(len(keys))]
-    return dict(zip(keys, values))
+    result = {}
+    for key in value.keys():
+        if not isinstance(key, str):
+            raise ValueDeserializationError(schema, value, "Invalid key type provided")
+        result[key] = schema_compatible(value[key], schema[key], context)
+    return result
 
 
 @configure.value_deserializer(IJSONField)
@@ -59,6 +65,7 @@ def json_dict_converter(schemafield, value, context=None):
     return value
 
 
+@profilable
 @configure.value_deserializer(for_=IField)
 def default_converter(field, value, context=None):
     return value
@@ -69,11 +76,15 @@ def bool_converter(field, value, context=None):
     return bool(value)
 
 
+@profilable
 @configure.value_deserializer(IFromUnicode)
 def from_unicode_converter(field, value, context=None):
-    return field.from_unicode(value)
+    if value is not None and not isinstance(value, str):
+        raise WrongType(value, str, field.__name__)
+    return value
 
 
+@profilable
 @configure.value_deserializer(IList)
 def list_converter(field, value, context=None):
     if not isinstance(value, list):
@@ -81,6 +92,7 @@ def list_converter(field, value, context=None):
     return [schema_compatible(item, field.value_type, context) for item in value]
 
 
+@profilable
 @configure.value_deserializer(ITuple)
 def tuple_converter(field, value, context=None):
     if not isinstance(value, list):
@@ -102,6 +114,7 @@ def frozenset_converter(field, value, context=None):
     return frozenset(list_converter(field, value, context))
 
 
+@profilable
 @configure.value_deserializer(IDict)
 def dict_converter(field, value, context=None):
     if value == {}:
@@ -110,10 +123,12 @@ def dict_converter(field, value, context=None):
     if not isinstance(value, dict):
         raise ValueDeserializationError(field, value, "Not an object")
 
-    keys, values = zip(*value.items())
-    keys = [schema_compatible(keys[idx], field.key_type, context) for idx in range(len(keys))]
-    values = [schema_compatible(values[idx], field.value_type, context) for idx in range(len(values))]
-    return dict(zip(keys, values))
+    result = {}
+    for key in value.keys():
+        if not isinstance(key, field.key_type._type):
+            raise ValueDeserializationError(field, value, "Invalid key type provided")
+        result[key] = schema_compatible(value[key], field.value_type, context)
+    return result
 
 
 @configure.value_deserializer(IDatetime)

@@ -8,7 +8,7 @@ from guillotina.utils import get_current_request
 import time
 
 
-ITERATIONS = 10000
+ITERATIONS = 100
 
 # ----------------------------------------------------
 # Measure performance of serializing data
