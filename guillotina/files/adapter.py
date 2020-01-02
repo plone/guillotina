@@ -86,6 +86,16 @@ class DBDataManager:
         if file is None:
             file = self.file_storage_manager.file_class()
         else:
+            # save previous data on file.
+            # we do this instead of creating a new file object on every
+            # save just in case other implementations want to use the file
+            # object to store different data
+            file._old_uri = file.uri
+            file._old_size = file.size
+            file._old_filename = file.filename
+            file._old_md5 = file.md5
+            file._old_content_type = file.guess_content_type()
+
             if getattr(file, "_blob", None):
                 cleanup = IFileCleanup(self.context, None)
                 if cleanup is None or cleanup.should_clean(file=file):
@@ -95,16 +105,6 @@ class DBDataManager:
                     file._previous_blob = getattr(file, "_blob", None)
 
         await notify(FileBeforeUploadFinishedEvent(self.context, field=self.field, file=file, dm=self))
-
-        # save previous data on file.
-        # we do this instead of creating a new file object on every
-        # save just in case other implementations want to use the file
-        # object to store different data
-        file._old_uri = file.uri
-        file._old_size = file.size
-        file._old_filename = file.filename
-        file._old_md5 = file.md5
-        file._old_content_type = file.guess_content_type()
 
         if values is None:
             values = self._data
