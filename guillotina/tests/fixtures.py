@@ -246,10 +246,13 @@ class GuillotinaDBAsgiRequester(object):
 
         operation = getattr(self.client, method.lower(), None)
         resp = await operation(path, **settings)
-        try:
-            value = resp.json()
-        except json.decoder.JSONDecodeError:
+        if "Content-Range" in resp.headers:
             value = resp.content
+        else:
+            try:
+                value = resp.json()
+            except json.decoder.JSONDecodeError:
+                value = resp.content
 
         status = resp.status_code
         return value, status, resp.headers
