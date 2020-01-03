@@ -179,7 +179,7 @@ class DefaultPOST(Service):
                         reason=error_reasons.INVALID_ID,
                     )
         else:
-            if not isinstance(id_, str) or not await id_checker(new_id, type_):
+            if not isinstance(id_, str) or not await id_checker(id_, type_):
                 raise ErrorResponse(
                     "PreconditionFailed",
                     "Invalid id: {}".format(id_),
