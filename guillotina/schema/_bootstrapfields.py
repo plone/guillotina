@@ -103,7 +103,6 @@ class Field(Attribute):
     interface = None
     _Element__tagged_values = None
     _validators = None
-    _required = True
 
     def __init__(
         self,
@@ -155,6 +154,8 @@ class Field(Attribute):
         super(Field, self).__init__(__name__, __doc__)
         self.title = title
         self.description = description
+        if required is not None:
+            self.required = required
         self.readonly = readonly
         if constraint is not None:
             self.constraint = constraint
@@ -169,13 +170,6 @@ class Field(Attribute):
 
         if missing_value is not self.__missing_value_marker:
             self.missing_value = missing_value
-
-        if required is not None:
-            self._required = required
-
-    @property
-    def required(self):
-        return self._required
 
     def validator(self, func):
         if self._validators is None:

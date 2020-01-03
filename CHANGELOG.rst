@@ -4,8 +4,8 @@ CHANGELOG
 5.3.2 (unreleased)
 ------------------
 
-- Make `Field.required` a property with the configured value in `Field._required`.
-  To change default required behavior, you can monkey patch `Field._required = False`
+- Make `Field.required` an optional property. To change default required behavior,
+  you can monkey patch `IField['required'].default = False`
   [vangheem]
 
 
