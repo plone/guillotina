@@ -13,6 +13,9 @@ CHANGELOG
 - Add localroles to @available-roles
   [jordic]
 
+- Add `no-install-recommends` to Dockerfile (apt options)
+  [svx]
+
 6.0.0a4 (2019-12-23)
 --------------------
 
