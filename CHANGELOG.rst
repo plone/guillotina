@@ -4,7 +4,9 @@ CHANGELOG
 5.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make `Field.required` an optional property. To change default required behavior,
+  you can monkey patch `IField['required'].default = False`
+  [vangheem]
 
 
 5.3.1 (2020-01-02)
