@@ -75,7 +75,7 @@ class FileManager(object):
             {"Content-Disposition": '{}; filename="{}"'.format(disposition, filename or file.filename)}
         )
 
-        if await self._range_supported():
+        if kwargs.get("range_supported", True) and await self._range_supported():
             headers["Accept-Ranges"] = "bytes"
         else:  # pragma: no cover
             headers["Accept-Ranges"] = "none"
@@ -111,13 +111,24 @@ class FileManager(object):
             return False
 
     async def download(self, **kwargs):
-        if "Range" in self.request.headers and await self._range_supported():
+        if (
+            kwargs.get("range_supported", True)
+            and "Range" in self.request.headers
+            and await self._range_supported()
+        ):
             return await self._range_download(**kwargs)
         else:
             return await self._full_download(**kwargs)
 
     async def _range_download(
-        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+        self,
+        disposition=None,
+        filename=None,
+        content_type=None,
+        size=None,
+        extra_headers=None,
+        range_supported=True,
+        **kwargs,
     ):
         try:
             file = self.field.get(self.field.context or self.context)
@@ -160,7 +171,14 @@ class FileManager(object):
 
         try:
             download_resp = await self.prepare_download(
-                disposition, filename, content_type, end - start, extra_headers, status=206, **kwargs
+                disposition,
+                filename,
+                content_type,
+                end - start,
+                extra_headers,
+                status=206,
+                range_supported=range_supported,
+                **kwargs,
             )
 
             found = 0
@@ -188,7 +206,14 @@ class FileManager(object):
             return download_resp
 
     async def _full_download(
-        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+        self,
+        disposition=None,
+        filename=None,
+        content_type=None,
+        size=None,
+        extra_headers=None,
+        range_supported=True,
+        **kwargs,
     ):
         download_resp = None
         try:
@@ -197,7 +222,13 @@ class FileManager(object):
                     # defer to make sure we do http exception handling
                     # before data starts streaming properly
                     download_resp = await self.prepare_download(
-                        disposition, filename, content_type, size, extra_headers, **kwargs
+                        disposition,
+                        filename,
+                        content_type,
+                        size,
+                        extra_headers,
+                        range_supported=range_supported,
+                        **kwargs,
                     )
                 await download_resp.write(chunk)
         except asyncio.CancelledError:  # pragma: no cover
@@ -210,7 +241,13 @@ class FileManager(object):
             if download_resp is None:
                 # deferred
                 download_resp = await self.prepare_download(
-                    disposition, filename, content_type, size, extra_headers, **kwargs
+                    disposition,
+                    filename,
+                    content_type,
+                    size,
+                    extra_headers,
+                    range_supported=range_supported,
+                    **kwargs,
                 )
             await download_resp.write(eof=True)
             return download_resp
