@@ -109,7 +109,7 @@ class Field(Attribute):
         title="",
         description="",
         __name__="",
-        required=True,
+        required=None,
         readonly=False,
         constraint=None,
         default=None,
@@ -154,7 +154,8 @@ class Field(Attribute):
         super(Field, self).__init__(__name__, __doc__)
         self.title = title
         self.description = description
-        self.required = required
+        if required is not None:
+            self.required = required
         self.readonly = readonly
         if constraint is not None:
             self.constraint = constraint
