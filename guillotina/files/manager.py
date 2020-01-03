@@ -119,7 +119,14 @@ class FileManager(object):
             return await self._full_download(**kwargs)
 
     async def _range_download(
-        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+        self,
+        disposition=None,
+        filename=None,
+        content_type=None,
+        size=None,
+        extra_headers=None,
+        range_supported=True,
+        **kwargs,
     ):
         try:
             file = self.field.get(self.field.context or self.context)
@@ -191,7 +198,14 @@ class FileManager(object):
             return download_resp
 
     async def _full_download(
-        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+        self,
+        disposition=None,
+        filename=None,
+        content_type=None,
+        size=None,
+        extra_headers=None,
+        range_supported=True,
+        **kwargs,
     ):
         download_resp = None
         try:
