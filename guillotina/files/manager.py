@@ -169,7 +169,14 @@ class FileManager(object):
 
         try:
             download_resp = await self.prepare_download(
-                disposition, filename, content_type, end - start, extra_headers, status=206, **kwargs
+                disposition,
+                filename,
+                content_type,
+                end - start,
+                extra_headers,
+                status=206,
+                range_supported=range_supported,
+                **kwargs,
             )
 
             found = 0
@@ -214,7 +221,13 @@ class FileManager(object):
                     # defer to make sure we do http exception handling
                     # before data starts streaming properly
                     download_resp = await self.prepare_download(
-                        disposition, filename, content_type, size, extra_headers, **kwargs
+                        disposition,
+                        filename,
+                        content_type,
+                        size,
+                        extra_headers,
+                        range_supported=range_supported,
+                        **kwargs,
                     )
                 await download_resp.write(chunk)
                 await download_resp.drain()
@@ -228,7 +241,13 @@ class FileManager(object):
             if download_resp is None:
                 # deferred
                 download_resp = await self.prepare_download(
-                    disposition, filename, content_type, size, extra_headers, **kwargs
+                    disposition,
+                    filename,
+                    content_type,
+                    size,
+                    extra_headers,
+                    range_supported=range_supported,
+                    **kwargs,
                 )
             await download_resp.write_eof()
             return download_resp
