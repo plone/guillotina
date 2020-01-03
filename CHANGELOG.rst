@@ -4,7 +4,9 @@ CHANGELOG
 5.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make `Field.required` a property with the configured value in `Field._required`.
+  To change default required behavior, you can monkey patch `Field._required = False`
+  [vangheem]
 
 
 5.3.1 (2020-01-02)
