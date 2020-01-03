@@ -75,7 +75,7 @@ class FileManager(object):
             {"Content-Disposition": '{}; filename="{}"'.format(disposition, filename or file.filename)}
         )
 
-        if await self._range_supported():
+        if kwargs.get("range_supported", True) and await self._range_supported():
             headers["Accept-Ranges"] = "bytes"
         else:  # pragma: no cover
             headers["Accept-Ranges"] = "none"
@@ -109,7 +109,11 @@ class FileManager(object):
             return False
 
     async def download(self, **kwargs):
-        if "Range" in self.request.headers and await self._range_supported():
+        if (
+            kwargs.get("range_supported", True)
+            and "Range" in self.request.headers
+            and await self._range_supported()
+        ):
             return await self._range_download(**kwargs)
         else:
             return await self._full_download(**kwargs)

@@ -4,7 +4,8 @@ CHANGELOG
 5.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to disable supporting range headers in `IFileManager.download`
+  [vangheem]
 
 
 5.3.1 (2020-01-02)
