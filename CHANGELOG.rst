@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.2 (unreleased)
+5.3.2 (2020-01-03)
 ------------------
 
 - Be able to disable supporting range headers in `IFileManager.download`
