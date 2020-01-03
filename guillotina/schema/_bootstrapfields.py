@@ -110,7 +110,7 @@ class Field(Attribute):
         title="",
         description="",
         __name__="",
-        required=True,
+        required=False,
         readonly=False,
         constraint=None,
         default=None,

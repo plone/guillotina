@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a5 (unreleased)
 --------------------
 
+- Schema fields default value for `required` is now `False`
+  [vangheem]
+
 - Add `Range` header support
   [vangheem]
 

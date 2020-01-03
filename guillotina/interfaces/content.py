@@ -175,19 +175,16 @@ class IResource(IBaseObject, ILocation):
     contributors = Attribute("")
     type_name = guillotina.schema.TextLine(readonly=True)
 
-    title = guillotina.schema.TextLine(
-        title="Title", required=False, description="Title of the Resource", default=""
-    )
+    title = guillotina.schema.TextLine(title="Title", description="Title of the Resource", default="")
 
     uuid = guillotina.schema.TextLine(title="UUID", required=True, readonly=True)
 
-    modification_date = guillotina.schema.Datetime(title="Modification date", required=False)
+    modification_date = guillotina.schema.Datetime(title="Modification date")
 
-    creation_date = guillotina.schema.Datetime(title="Creation date", required=False)
+    creation_date = guillotina.schema.Datetime(title="Creation date")
 
     __behaviors__ = guillotina.schema.FrozenSet(
         title="Enabled behaviors",
-        required=False,
         description="Dynamic behaviors for the content type",
         default=frozenset({}),
         readonly=True,
