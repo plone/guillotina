@@ -4,6 +4,9 @@ CHANGELOG
 5.3.2 (unreleased)
 ------------------
 
+- Be able to disable supporting range headers in `IFileManager.download`
+  [vangheem]
+
 - Make `Field.required` an optional property. To change default required behavior,
   you can monkey patch `IField['required'].default = False`
   [vangheem]
