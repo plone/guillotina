@@ -1,6 +1,8 @@
 CHANGELOG
 =========
 
+.. towncrier release notes start
+
 6.0.0a5 (unreleased)
 --------------------
 
