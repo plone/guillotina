@@ -27,7 +27,7 @@ exclude = '''
 
 [tool.towncrier]
 package = "guillotina"
-filename = "CHANGES.rst"
+filename = "CHANGELOG.rst"
 directory = "news/"
 title_format = "{version} ({project_date})"
 underlines = ["-", ""]
