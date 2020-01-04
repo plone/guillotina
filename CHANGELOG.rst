@@ -4,8 +4,12 @@ CHANGELOG
 6.0.0a5 (unreleased)
 --------------------
 
+
 - Denormalized group info when user is added to a group throught users endpoint (issue #806)
   [jordic]
+
+- Add `Range` header support
+  [vangheem]
 
 - Fix validating None values in required fields
   [vangheem]
@@ -13,6 +17,8 @@ CHANGELOG
 - Add localroles to @available-roles
   [jordic]
 
+- Add `no-install-recommends` to Dockerfile (apt options)
+  [svx]
 
 6.0.0a4 (2019-12-23)
 --------------------

@@ -1,5 +1,7 @@
 from .const import CHUNK_SIZE
+from .exceptions import RangeException
 from guillotina import configure
+from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
@@ -11,18 +13,24 @@ from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
 from guillotina.response import ASGIResponse
+from guillotina.response import HTTPClientClosedRequest
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import HTTPRequestRangeNotSatisfiable
 from guillotina.response import Response
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_object_url
 from guillotina.utils import resolve_dotted_name
 from zope.interface import alsoProvides
 
+import asyncio
 import base64
 import posixpath
 import uuid
+
+
+logger = glogging.getLogger("guillotina")
 
 
 @configure.adapter(for_=(IResource, IRequest, ICloudFileField), provides=IFileManager)
@@ -41,17 +49,24 @@ class FileManager(object):
         )
 
     async def prepare_download(
-        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+        self,
+        disposition=None,
+        filename=None,
+        content_type=None,
+        size=None,
+        extra_headers=None,
+        status=200,
+        **kwargs,
     ):
         if disposition is None:
             disposition = self.request.query.get("disposition", "attachment")
 
         try:
             file = self.field.get(self.field.context or self.context)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             file = None
 
-        if file is None and filename is None:
+        if file is None and filename is None:  # pragma: no cover
             raise HTTPNotFound(content={"message": "File or custom filename required to download"})
         cors_renderer = app_settings["cors_renderer"](self.request)
         headers = await cors_renderer.get_headers()
@@ -60,12 +75,18 @@ class FileManager(object):
             {"Content-Disposition": '{}; filename="{}"'.format(disposition, filename or file.filename)}
         )
 
+        if await self._range_supported():
+            headers["Accept-Ranges"] = "bytes"
+        else:  # pragma: no cover
+            headers["Accept-Ranges"] = "none"
+
         download_resp = ASGIResponse(
             status=200,
             headers=headers,
             content_type=content_type or file.guess_content_type(),
             content_length=size or file.size,
         )
+
         await download_resp.prepare(self.request)
         return download_resp
 
@@ -83,25 +104,116 @@ class FileManager(object):
         await download_resp.write(eof=True)
         return download_resp
 
-    async def download(
+    async def _range_supported(self) -> bool:
+        try:
+            return await self.file_storage_manager.range_supported()
+        except AttributeError:  # pragma: no cover
+            return False
+
+    async def download(self, **kwargs):
+        if "Range" in self.request.headers and await self._range_supported():
+            return await self._range_download(**kwargs)
+        else:
+            return await self._full_download(**kwargs)
+
+    async def _range_download(
+        self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
+    ):
+        try:
+            file = self.field.get(self.field.context or self.context)
+        except AttributeError:  # pragma: no cover
+            raise HTTPNotFound()
+
+        range_request = self.request.headers["Range"]
+        try:
+            start, _, end = range_request.split("bytes=")[-1].partition("-")
+            start = int(start)
+            if len(end) == 0:
+                # bytes=0- is valid
+                end = file.size - 1
+            end = int(end) + 1  # python is inclusive, http is exclusive
+        except (IndexError, ValueError):
+            # range errors fallback to full download
+            raise HTTPRequestRangeNotSatisfiable(
+                content={"reason": "rangeNotParsable", "range": range_request},
+                headers={"Content-Range": f"bytes */{file.size}"},
+            )
+        if start > end or start < 0:
+            raise HTTPRequestRangeNotSatisfiable(
+                content={"reason": "invalidRange", "range": range_request, "message": "Invalid range"},
+                headers={"Content-Range": f"bytes */{file.size}"},
+            )
+        if end > file.size:
+            raise HTTPRequestRangeNotSatisfiable(
+                content={
+                    "reason": "invalidRange",
+                    "range": range_request,
+                    "message": "Invalid range, too large end value",
+                },
+                headers={"Content-Range": f"bytes */{file.size}"},
+            )
+
+        logger.debug(f"Range request: {range_request} {self.request}")
+        if extra_headers is None:
+            extra_headers = {}
+        extra_headers["Content-Range"] = f"bytes {start}-{end - 1}/{file.size}"
+
+        try:
+            download_resp = await self.prepare_download(
+                disposition, filename, content_type, end - start, extra_headers, status=206, **kwargs
+            )
+
+            found = 0
+            try:
+                async for chunk in self.file_storage_manager.read_range(start, end):
+                    found += len(chunk)
+                    logger.info(f"Got chunk {range_request}: {len(chunk)}/{end - start}|{found}")
+                    await download_resp.write(chunk)
+            except RangeException:
+                raise HTTPRequestRangeNotSatisfiable(
+                    content={
+                        "reason": "rangeNotFound",
+                        "range": range_request,
+                        "message": "Could not read range correctly",
+                    },
+                    headers={"Content-Range": f"bytes */{file.size}"},
+                )
+        except asyncio.CancelledError:  # pragma: no cover
+            logger.info(f"Range cancelled: {range_request} {self.request}")
+            # when supporting range headers, the browser will
+            # cancel downloads. This is fine.
+            raise HTTPClientClosedRequest()
+        finally:
+            await download_resp.write(eof=True)
+            return download_resp
+
+    async def _full_download(
         self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
     ):
         download_resp = None
-        async for chunk in self.file_storage_manager.iter_data(**kwargs):
+        try:
+            async for chunk in self.file_storage_manager.iter_data(**kwargs):
+                if download_resp is None:
+                    # defer to make sure we do http exception handling
+                    # before data starts streaming properly
+                    download_resp = await self.prepare_download(
+                        disposition, filename, content_type, size, extra_headers, **kwargs
+                    )
+                await download_resp.write(chunk)
+        except asyncio.CancelledError:  # pragma: no cover
+            logger.info(f"Download cancelled: {self.request}")
+            # when supporting range headers, the browser will
+            # cancel downloads. This is fine.
             if download_resp is None:
-                # defer to make sure we http exception handling
-                # before data starts streaming works properly
+                raise HTTPClientClosedRequest()
+        finally:
+            if download_resp is None:
+                # deferred
                 download_resp = await self.prepare_download(
                     disposition, filename, content_type, size, extra_headers, **kwargs
                 )
-            await download_resp.write(chunk)
-        if download_resp is None:
-            # deferred
-            download_resp = await self.prepare_download(
-                disposition, filename, content_type, size, extra_headers, **kwargs
-            )
-        await download_resp.write(eof=True)
-        return download_resp
+            await download_resp.write(eof=True)
+            return download_resp
 
     async def tus_options(self, *args, **kwargs):
         resp = Response(
@@ -161,7 +273,7 @@ class FileManager(object):
 
         read_bytes = await self.file_storage_manager.append(self.dm, self._iterate_request_data(), offset)
 
-        if to_upload and read_bytes != to_upload:
+        if to_upload and read_bytes != to_upload:  # pragma: no cover
             # check length matches if provided
             raise HTTPPreconditionFailed(content={"reason": "Upload size does not match what was provided"})
         await self.dm.update(offset=offset + read_bytes)
@@ -271,7 +383,7 @@ class FileManager(object):
         else:
             if "Content-Length" in self.request.headers:
                 size = int(self.request.headers["Content-Length"])
-            else:
+            else:  # pragma: no cover
                 raise AttributeError("x-upload-size or content-length header needed")
 
         if "X-UPLOAD-FILENAME" in self.request.headers:

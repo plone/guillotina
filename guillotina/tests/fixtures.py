@@ -246,10 +246,13 @@ class GuillotinaDBAsgiRequester(object):
 
         operation = getattr(self.client, method.lower(), None)
         resp = await operation(path, **settings)
-        try:
-            value = resp.json()
-        except json.decoder.JSONDecodeError:
+        if "Content-Range" in resp.headers:
             value = resp.content
+        else:
+            try:
+                value = resp.json()
+            except json.decoder.JSONDecodeError:
+                value = resp.content
 
         status = resp.status_code
         return value, status, resp.headers
@@ -280,7 +283,7 @@ class GuillotinaDBHttpRequester(object):
         data=None,
         authenticated=True,
         auth_type="Basic",
-        headers={},
+        headers=None,
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
@@ -308,11 +311,13 @@ class GuillotinaDBHttpRequester(object):
         data=None,
         authenticated=True,
         auth_type="Basic",
-        headers={},
+        headers=None,
         token=testing.ADMIN_TOKEN,
         accept="application/json",
         allow_redirects=True,
     ):
+        if headers is None:
+            headers = {}
         settings = {}
         headers = headers.copy()
         settings["headers"] = headers

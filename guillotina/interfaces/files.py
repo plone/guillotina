@@ -1,5 +1,6 @@
 from guillotina import schema
 from guillotina.schema.interfaces import IObject
+from typing import AsyncIterator
 from zope.interface import Interface
 
 
@@ -44,14 +45,24 @@ class IFileStorageManager(Interface):
     Manage storing file data
     """
 
-    async def start(dm):
+    async def start(dm: IUploadDataManager):
         """
         start upload
         """
 
-    async def iter_data():  # type: ignore
+    async def iter_data() -> AsyncIterator[bytes]:
         """
         iterate through data in file
+        """
+
+    async def range_supported() -> bool:
+        """
+        If range is supported with manager
+        """
+
+    async def read_range(start: int, end: int) -> AsyncIterator[bytes]:
+        """
+        Iterate through ranges of data
         """
 
     async def append(data):
@@ -64,7 +75,7 @@ class IFileStorageManager(Interface):
         finish upload
         """
 
-    async def copy(dm, other_storage_manager, other_dm):
+    async def copy(dm, other_storage_manager: IUploadDataManager, other_dm: IUploadDataManager):
         """
         copy file to another file
         """
