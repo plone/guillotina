@@ -51,7 +51,7 @@ class IFieldType(Interface):
 
 class IDynamicFields(Interface):
     fields = fields.PatchField(
-        schema.Dict(key_type=schema.Text(), value_type=schema.Object(schema=IFieldType))
+        schema.Dict(key_type=schema.Text(), value_type=schema.Object(schema=IFieldType), max_length=1000)
     )
 
 
@@ -66,7 +66,7 @@ class DynamicFieldsBehavior(ContextBehavior):
 
 
 class IDynamicFieldValues(Interface):
-    values = fields.DynamicField(schema.Dict(key_type=schema.Text()))
+    values = fields.DynamicField(schema.Dict(key_type=schema.Text(), max_length=1000))
 
 
 @configure.behavior(
