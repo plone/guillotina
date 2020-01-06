@@ -66,7 +66,7 @@ class IDublinCore(Interface):
         value_type=schema.TextLine(),
         required=False,
         naive=True,
-        max_length=10000,
+        max_length=1000,
     )
 
     tags = PatchField(
@@ -76,7 +76,7 @@ class IDublinCore(Interface):
             value_type=schema.TextLine(),
             required=False,
             naive=True,
-            max_length=20000,
+            max_length=10000,
         )
     )
 
