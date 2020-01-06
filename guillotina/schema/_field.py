@@ -242,6 +242,8 @@ class Choice(Field):
     values given by the field definition.
     """
 
+    _type = str
+
     def __init__(self, values=None, vocabulary=None, source=None, **kw):
         """Initialize object."""
         if vocabulary is not None:

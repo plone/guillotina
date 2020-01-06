@@ -90,11 +90,15 @@ def bool_converter(field, value, context=None):
 @profilable
 @configure.value_deserializer(IFromUnicode)
 def from_unicode_converter(field, value, context=None):
-    if value is not None and field._type is not None and not isinstance(value, field._type):
-        try:
-            value = field._type(value)  # convert other types over
-        except ValueError:
-            raise WrongType(value, field._type, field.__name__)
+    if value is not None:
+        if field._type is not None:
+            if not isinstance(value, field._type):
+                try:
+                    value = field._type(value)  # convert other types over
+                except ValueError:
+                    raise WrongType(value, field._type, field.__name__)
+        else:
+            value = field.from_unicode(value)
     return value
 
 
