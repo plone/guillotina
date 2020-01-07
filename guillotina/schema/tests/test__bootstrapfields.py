@@ -172,7 +172,7 @@ class FieldTests(unittest.TestCase):
         self.assertEqual(field.__doc__, "")
         self.assertEqual(field.title, "")
         self.assertEqual(field.description, "")
-        self.assertEqual(field.required, True)
+        self.assertEqual(field.required, False)
         self.assertEqual(field.readonly, False)
         self.assertEqual(field.constraint(object()), True)
         self.assertEqual(field.default, None)
@@ -398,7 +398,7 @@ class ContainerTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test__validate_not_collection_not_iterable(self):
@@ -560,7 +560,7 @@ class TextTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate("")
         field.validate("abc")
         field.validate("abc\ndef")
@@ -623,7 +623,7 @@ class TextLineTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate("")
         field.validate("abc")
         self.assertRaises(RequiredMissing, field.validate, None)
@@ -668,7 +668,7 @@ class PasswordTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate("")
         field.validate("abc")
         self.assertRaises(RequiredMissing, field.validate, None)
@@ -758,7 +758,7 @@ class IntTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(10)
         field.validate(0)
         field.validate(-1)

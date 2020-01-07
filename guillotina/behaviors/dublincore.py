@@ -27,44 +27,35 @@ class IDublinCore(Interface):
     index_field("contributors", type="keyword")
 
     title = schema.TextLine(
-        title="Title", description="The first unqualified Dublin Core 'Title' element value.", required=False
+        title="Title", description="The first unqualified Dublin Core 'Title' element value."
     )
 
     description = schema.Text(
-        title="Description",
-        description="The first unqualified Dublin Core 'Description' element value.",
-        required=False,
+        title="Description", description="The first unqualified Dublin Core 'Description' element value."
     )
 
     creation_date = schema.Datetime(
         title="Creation Date",
         description="The date and time that an object is created. " "\nThis is normally set automatically.",
-        required=False,
     )
 
     modification_date = schema.Datetime(
         title="Modification Date",
         description="The date and time that the object was last modified in a\n" "meaningful way.",
-        required=False,
     )
 
     effective_date = schema.Datetime(
-        title="Effective Date",
-        description="The date and time that an object should be published. ",
-        required=False,
+        title="Effective Date", description="The date and time that an object should be published. "
     )
 
     expiration_date = schema.Datetime(
-        title="Expiration Date",
-        description="The date and time that the object should become unpublished.",
-        required=False,
+        title="Expiration Date", description="The date and time that the object should become unpublished."
     )
 
     creators = schema.Tuple(
         title="Creators",
         description="The unqualified Dublin Core 'Creator' element values",
         value_type=schema.TextLine(),
-        required=False,
     )
 
     tags = PatchField(
@@ -72,21 +63,17 @@ class IDublinCore(Interface):
             title="Tags",
             description="The unqualified Dublin Core 'Tags' element values",
             value_type=schema.TextLine(),
-            required=False,
         )
     )
 
     publisher = schema.Text(
-        title="Publisher",
-        description="The first unqualified Dublin Core 'Publisher' element value.",
-        required=False,
+        title="Publisher", description="The first unqualified Dublin Core 'Publisher' element value."
     )
 
     contributors = schema.Tuple(
         title="Contributors",
         description="The unqualified Dublin Core 'Contributor' element values",
         value_type=schema.TextLine(),
-        required=False,
     )
 
 

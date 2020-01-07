@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a5 (unreleased)
 --------------------
 
+- Schema fields default value for `required` is now `False`
+  [vangheem]
 
 - Denormalized group info when user is added to a group throught users endpoint (issue #806)
   [jordic]
