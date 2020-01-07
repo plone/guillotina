@@ -214,6 +214,21 @@ async def my_endpoint(context, request):
     return {"foo": "bar"}
 
 
+@configure.service(
+    context=IApplication,
+    method="GET",
+    permission="guillotina.AccessContent",
+    name="@json-schema-validation",
+    validate=True,
+    parameters=[
+        {"name": "foo", "in": "query", "schema": {"type": "number"}, "required": True},
+        {"name": "bar", "in": "query", "schema": {"type": "string"}, "required": False},
+    ],
+)
+async def test_json_schema_query_validation(context, request):
+    return {}
+
+
 class ITestAsyncUtility(IAsyncUtility):
     pass
 
