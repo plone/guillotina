@@ -225,7 +225,7 @@ async def my_endpoint(context, request):
         {"name": "bar", "in": "query", "schema": {"type": "string"}, "required": False},
     ],
 )
-async def test_json_schema_query_validation(context, request):
+async def json_schema_query_validation(context, request):
     return {}
 
 
