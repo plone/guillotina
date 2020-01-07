@@ -24,4 +24,6 @@ class IAttachment(Interface):
     title="MultiAttachment behavior", marker=IMultiAttachmentMarker, for_="guillotina.interfaces.IResource"
 )
 class IMultiAttachment(Interface):
-    files = Dict(key_type=TextLine(), value_type=CloudFileField(), default={}, missing_value={})
+    files = Dict(
+        key_type=TextLine(), value_type=CloudFileField(), default={}, missing_value={}, max_length=1000
+    )
