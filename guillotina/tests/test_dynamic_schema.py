@@ -489,7 +489,7 @@ async def test_dynamic_fields_keyword_multi(container_requester):
         )
         assert status == 204
 
-        # test, int is not allowed still
+        # test, int converted to str
         resp, status = await requester(
             "PATCH",
             "/db/guillotina/foobar",
@@ -502,7 +502,13 @@ async def test_dynamic_fields_keyword_multi(container_requester):
                 }
             ),
         )
-        assert status == 412
+        assert status == 204
+        resp, status = await requester(
+            "GET",
+            f"/db/guillotina/foobar?include={IDynamicFieldValues.__identifier__},{IDynamicFields.__identifier__}",
+        )
+        assert resp[IDynamicFields.__identifier__]["fields"]["foobar"]["type"] == "keyword"
+        assert resp[IDynamicFieldValues.__identifier__]["values"] == {"foobar": "5"}
 
 
 async def test_del_dynamic_field_value(container_requester):

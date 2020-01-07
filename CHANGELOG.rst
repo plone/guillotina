@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Optimize json deserialization
+  [vangheem]
 
 
 6.0.0a5 (2020-01-07)
@@ -21,6 +22,7 @@ CHANGELOG
 
 - Add `Range` header support
   [vangheem]
+  
 
 - Be able to disable supporting range headers in `IFileManager.download`
   [vangheem]
