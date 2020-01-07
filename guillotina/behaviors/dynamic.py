@@ -6,8 +6,6 @@ from guillotina.behaviors.instance import ContextBehavior
 from guillotina.interfaces import IContentBehavior
 from zope.interface import Interface
 
-import json
-
 
 def get_all_fields(content):
     _fields = {}
@@ -47,13 +45,18 @@ class IFieldType(Interface):
     type = schema.Choice(values=["date", "integer", "text", "float", "keyword", "boolean"], required=True)
     required = schema.Bool(default=False)
     meta = schema.JSONField(
-        title="Additional information on field", schema=json.dumps({"type": "object", "properties": {}})
+        title="Additional information on field", required=False, schema={"type": "object", "properties": {}}
     )
 
 
 class IDynamicFields(Interface):
     fields = fields.PatchField(
-        schema.Dict(key_type=schema.Text(), value_type=schema.Object(schema=IFieldType), required=True)
+        schema.Dict(
+            key_type=schema.Text(),
+            value_type=schema.Object(schema=IFieldType),
+            required=True,
+            max_length=1000,
+        )
     )
 
 
@@ -68,7 +71,7 @@ class DynamicFieldsBehavior(ContextBehavior):
 
 
 class IDynamicFieldValues(Interface):
-    values = fields.DynamicField(schema.Dict(key_type=schema.Text()), required=True)
+    values = fields.DynamicField(schema.Dict(key_type=schema.Text(), required=True, max_length=1000))
 
 
 @configure.behavior(

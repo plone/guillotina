@@ -1287,9 +1287,9 @@ async def test_deserialization_errors(container_requester):
         assert status == 412
         assert resp["deserialization_errors"] == [
             {
-                "errors": [{"field": "bar", "message": "Invalid value"}],
-                "field": "list_object_a",
                 "message": "Wrong contained type",
+                "field": "list_object_a",
+                "errors": [{"message": "Expected <class 'int'> but found <class 'str'>.", "field": "bar"}],
             }
         ]
 

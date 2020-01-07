@@ -52,27 +52,27 @@ class TestBehavior3(AnnotationBehavior):
 
 
 class ITestContent1(IItem):
-    foobar1 = schema.TextLine()
+    foobar1 = schema.TextLine(required=False)
 
 
 class ITestContent2(ITestContent1):
-    foobar2 = schema.TextLine()
+    foobar2 = schema.TextLine(required=False)
 
 
 class ITestContent3(ITestContent2):
-    foobar3 = schema.TextLine()
+    foobar3 = schema.TextLine(required=False)
 
 
 class ITestContent4(ITestContent3):
-    foobar4 = schema.TextLine()
+    foobar4 = schema.TextLine(required=False)
 
 
 class ITestContent5(ITestContent4):
-    foobar5 = schema.TextLine()
+    foobar5 = schema.TextLine(required=False)
 
 
 class ITestContent6(ITestContent5):
-    foobar6 = schema.TextLine()
+    foobar6 = schema.TextLine(required=False)
 
 
 @configure.contenttype(

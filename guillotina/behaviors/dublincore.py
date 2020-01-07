@@ -56,6 +56,9 @@ class IDublinCore(Interface):
         title="Creators",
         description="The unqualified Dublin Core 'Creator' element values",
         value_type=schema.TextLine(),
+        required=False,
+        naive=True,
+        max_length=1000,
     )
 
     tags = PatchField(
@@ -63,6 +66,9 @@ class IDublinCore(Interface):
             title="Tags",
             description="The unqualified Dublin Core 'Tags' element values",
             value_type=schema.TextLine(),
+            required=False,
+            naive=True,
+            max_length=10000,
         )
     )
 
@@ -74,6 +80,9 @@ class IDublinCore(Interface):
         title="Contributors",
         description="The unqualified Dublin Core 'Contributor' element values",
         value_type=schema.TextLine(),
+        required=False,
+        naive=True,
+        max_length=10000,
     )
 
 

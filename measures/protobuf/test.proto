@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package measure;
+
+message DublinCore {
+  repeated string tags = 1;
+  google.protobuf.Timestamp creation_date = 2;
+  google.protobuf.Timestamp effective_date = 3;
+  google.protobuf.Timestamp expiration_date = 4;
+  repeated string creators = 5;
+}
