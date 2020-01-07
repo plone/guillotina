@@ -11,6 +11,9 @@ CHANGELOG
 - Add `Range` header support
   [vangheem]
 
+- Be able to disable supporting range headers in `IFileManager.download`
+  [vangheem]
+
 - Fix validating None values in required fields
   [vangheem]
 
