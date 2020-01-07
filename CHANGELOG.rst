@@ -4,7 +4,8 @@ CHANGELOG
 5.3.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix query param validation
+  [vangheem]
 
 
 5.3.3 (2020-01-07)
