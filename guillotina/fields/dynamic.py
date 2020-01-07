@@ -41,7 +41,9 @@ class IDynamicType(Interface):
     float = schema.Float(required=False)
     boolean = schema.Bool(required=False)
     keyword = schema.UnionField(
-        schema.List(required=False, value_type=schema.Text()), schema.Text(required=False), required=False
+        schema.List(required=False, value_type=schema.Text(), max_length=1000),
+        schema.Text(required=False),
+        required=False,
     )
 
 
