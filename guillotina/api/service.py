@@ -55,44 +55,48 @@ class Service(View):
         if "parameters" in self.__config__:
             data = self.request.query
             for parameter in self.__config__["parameters"]:
-                if parameter["in"] == "query":
-                    if "schema" in parameter and "name" in parameter:
-                        if parameter["schema"]["type"] == "integer":
-                            try:
-                                int(data[parameter["name"]])
-                            except ValueError:
-                                raise HTTPPreconditionFailed(
-                                    content={
-                                        "reason": "Schema validation error",
-                                        "message": "can not convert {} to Int".format(
-                                            data[parameter["name"]]
-                                        ),
-                                    }
-                                )
-                        elif parameter["schema"]["type"] == "float":
-                            try:
-                                float(data[parameter["name"]])
-                            except ValueError:
-                                raise HTTPPreconditionFailed(
-                                    content={
-                                        "reason": "Schema validation error",
-                                        "message": "can not convert {} to Float".format(
-                                            data[parameter["name"]]
-                                        ),
-                                    }
-                                )
-                        else:
-                            pass
+                if parameter["in"] != "query" or "schema" not in parameter or "name" not in parameter:
+                    continue
+                name = parameter["name"]
+                if parameter.get("required") and name not in data:
+                    raise HTTPPreconditionFailed(
+                        content={
+                            "reason": "Query schema validation error",
+                            "message": "{} is required".format(parameter["name"]),
+                            "path": [name],
+                            "in": "query",
+                            "parameter": name,
+                            "schema": parameter["schema"],
+                        }
+                    )
+                elif name not in data:
+                    continue
+
+                try:
+                    value = data[name]
+                    if parameter["schema"].get("type") == "number":
                         try:
-                            if parameter.get("required", False) and parameter["name"] not in data:
-                                raise HTTPPreconditionFailed(
-                                    content={
-                                        "reason": "Schema validation error",
-                                        "message": "{} is required".format(parameter["name"]),
-                                    }
-                                )
-                        except KeyError:
-                            logger.warning("`required` is a mandatory field", exc_info=True)
+                            value = int(value)
+                        except ValueError:
+                            try:
+                                value = float(value)
+                            except ValueError:
+                                pass
+                    jsonschema.validate(instance=value, schema=parameter["schema"])
+                except jsonschema.exceptions.ValidationError as e:
+                    raise HTTPPreconditionFailed(
+                        content={
+                            "reason": "json schema validation error",
+                            "message": e.message,
+                            "validator": e.validator,
+                            "validator_value": e.validator_value,
+                            "path": [i for i in e.path],
+                            "schema_path": [i for i in e.schema_path],
+                            "parameter": name,
+                            "in": "query",
+                            "schema": parameter["schema"],
+                        }
+                    )
 
     @classmethod
     def _get_validator(cls):
@@ -110,17 +114,15 @@ class Service(View):
                         schema_name = ref.split("/")[-1]
                         cls.__schema__ = app_settings["json_schema_definitions"][schema_name]
                         cls.__validator__ = get_schema_validator(schema_name)
-                    except KeyError:
+                    except KeyError:  # pragma: no cover
                         logger.warning("Invalid jsonschema", exc_info=True)
                 elif schema is not None:
                     try:
                         cls.__schema__ = schema
                         jsonschema_validator = jsonschema.validators.validator_for(cls.__schema__)
                         cls.__validator__ = jsonschema_validator(cls.__schema__)
-                    except jsonschema.exceptions.ValidationError:
+                    except jsonschema.exceptions.ValidationError:  # pragma: no cover
                         logger.warning("Could not validate schema", exc_info=True)
-                else:
-                    logger.warning("No schema found in service definition")
             else:
                 pass  # can be used for query, path or header parameters
         return cls.__schema__, cls.__validator__
@@ -141,6 +143,7 @@ class Service(View):
                         "validator_value": e.validator_value,
                         "path": [i for i in e.path],
                         "schema_path": [i for i in e.schema_path],
+                        "in": "body",
                         "schema": schema,
                     }
                 )

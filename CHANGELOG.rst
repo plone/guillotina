@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a6 (unreleased)
 --------------------
 
+- Fix query param validation
+  [vangheem]
+
 - Optimize json deserialization
   [vangheem]
 
