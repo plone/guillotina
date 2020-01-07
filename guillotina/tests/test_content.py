@@ -1,9 +1,12 @@
 from guillotina import configure
+from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.component import get_utility
+from guillotina.component.interfaces import ComponentLookupError
 from guillotina.content import create_content
 from guillotina.content import create_content_in_container
 from guillotina.content import Folder
+from guillotina.content import get_all_behaviors
 from guillotina.content import Item
 from guillotina.content import load_cached_schema
 from guillotina.exceptions import NoPermissionToAdd
@@ -56,6 +59,38 @@ async def test_allowed_to_create_content(dummy_guillotina):
         utils.register(container)
 
         await create_content_in_container(container, "Item", id_="foobar")
+
+
+async def test_add_behavior(dummy_guillotina):
+    utils.login()
+
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        utils.register(container)
+
+        item = await create_content_in_container(container, "Item", id_="foobar")
+        with pytest.raises(AttributeError):
+            item.add_behavior(123)
+
+        with pytest.raises(ComponentLookupError):
+            item.add_behavior("foo")
+
+        all_behaviors = await get_all_behaviors(item)
+        assert len(all_behaviors) == 1
+        assert all_behaviors[0][0] == IDublinCore
+
+        # IDublinCore already exists and check it is not added
+        item.add_behavior(IDublinCore.__identifier__)
+        assert len(item.__behaviors__) == 0
+        assert len(await get_all_behaviors(item)) == 1
+
+        # Manually add IDublinCore and check it is not returned twice
+        item.__behaviors__ |= {IDublinCore.__identifier__}
+        assert len(await get_all_behaviors(item)) == 1
+
+        item.add_behavior(IAttachment)
+        assert len(await get_all_behaviors(item)) == 2
 
 
 async def test_allowed_types(dummy_guillotina):

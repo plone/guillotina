@@ -1,7 +1,32 @@
 CHANGELOG
 =========
 
-6.0.0a3 (unreleased)
+6.0.0a5 (unreleased)
+--------------------
+
+- Nothing changed yet.
+
+
+6.0.0a4 (2019-12-23)
+--------------------
+
+- Improving ValidationErrors messages
+  [masipcat]
+
+- Fix error with requeued async queue tasks
+  [vangheem]
+
+- Better CancelledError handling in resolving a request
+  [vangheem]
+
+- Fix duplicate behaviors interfaces in get_all_behavior_interfaces()
+  [qiwn]
+
+- Fix adding duplicate behaviors
+  [qiwn]
+
+
+6.0.0a3 (2019-12-18)
 --------------------
 
 - Added back support for Guillotina/aiohttp middlewares
