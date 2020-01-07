@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.3 (unreleased)
+5.3.3 (2020-01-07)
 ------------------
 
 - Optimize json deserialization
