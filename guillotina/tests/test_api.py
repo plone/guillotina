@@ -1226,11 +1226,7 @@ async def test_deserialization_errors(container_requester):
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
-            {
-                "errors": [{"field": "tags", "message": "Expected <class 'str'> but found <class 'int'>."}],
-                "field": "tags",
-                "message": "Wrong contained type",
-            }
+            {"message": "Expected <class 'str'> but found <class 'int'>.", "field": "tags"}
         ]
 
         resp, status = await requester(
@@ -1286,11 +1282,7 @@ async def test_deserialization_errors(container_requester):
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
-            {
-                "errors": [{"field": "bar", "message": "Invalid value"}],
-                "field": "list_object_a",
-                "message": "Wrong contained type",
-            }
+            {"message": "Expected <class 'int'> but found <class 'str'>.", "field": "bar"}
         ]
 
         resp, status = await requester(
