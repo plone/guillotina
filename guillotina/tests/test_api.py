@@ -1477,3 +1477,22 @@ async def test_required_field_work_with_none(container_requester):
             data=json.dumps({ITestBehavior.__identifier__: {"test_required_field": None}}),
         )
         assert status == 412
+
+
+async def test_json_schema_query_params(container_requester):
+    async with container_requester as requester:
+        # JSON schema validation
+        resp, status = await requester("GET", "/@json-schema-validation")
+        assert status == 412
+        assert resp["parameter"] == "foo"
+
+        resp, status = await requester("GET", "/@json-schema-validation?foo=blah")
+        assert status == 412
+        assert resp["parameter"] == "foo"
+        assert resp["validator_value"] == "number"
+
+        resp, status = await requester("GET", "/@json-schema-validation?foo=5")
+        assert status == 200
+
+        resp, status = await requester("GET", "/@json-schema-validation?foo=5.5")
+        assert status == 200
