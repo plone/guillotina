@@ -52,3 +52,11 @@ class IAddOn(Interface):
     def uninstall(container, request):  # noqa: N805
         """
         """
+
+
+class IIDChecker(Interface):
+    def __init__(context):
+        ...
+
+    async def __call__(id_: str, type_: str) -> bool:
+        ...

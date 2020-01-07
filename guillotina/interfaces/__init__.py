@@ -94,6 +94,7 @@ from .mail import IMailer  # noqa
 from .migration import IMigration  # noqa
 from .misc import IAbsoluteURL  # noqa
 from .misc import IAddOn  # noqa
+from .misc import IIDChecker  # noqa
 from .misc import ILanguage  # noqa
 from .misc import IRenderer  # noqa
 from .misc import IRequest  # noqa

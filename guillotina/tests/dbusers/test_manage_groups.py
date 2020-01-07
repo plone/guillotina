@@ -14,7 +14,7 @@ _group = {"name": "foo", "description": "foo description", "@type": "Group", "id
 
 @pytest.fixture()
 async def user_data():
-    return settings.user_data
+    return settings.user_data.copy()
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)

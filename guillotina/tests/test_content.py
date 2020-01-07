@@ -228,7 +228,10 @@ async def test_context_property(container_requester):
                     "title": "Item1",
                     "id": "item1",
                     "@behaviors": [ITestBehavior.__identifier__],
-                    ITestBehavior.__identifier__: {"foobar_context": "foobar"},
+                    ITestBehavior.__identifier__: {
+                        "foobar_context": "foobar",
+                        "test_required_field": "foobar",
+                    },
                 }
             ),
         )

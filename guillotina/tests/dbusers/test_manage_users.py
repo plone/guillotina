@@ -11,7 +11,7 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture()
 async def user_data():
-    return settings.user_data
+    return settings.user_data.copy()
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
@@ -94,13 +94,18 @@ async def test_patch_user_data(dbusers_requester, user_data):
         assert status_code == 404
         assert resp["reason"] == "User unexisting not found"
 
+        _, status_code = await requester("GET", "/db/guillotina/@users/foobar")
+        assert status_code == 404
+
         # Create a user
-        _, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
+        resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
         assert status_code == 201
+
+        resp, status = await requester("GET", "/db/guillotina/@users/foobar")
 
         # Modify some data
         data = {"email": "foobar2@foo.com", "roles": {"guillotina.Manager": True}}
-        _, status_code = await requester("PATCH", "/db/guillotina/@users/foobar", data=json.dumps(data))
+        resp, status_code = await requester("PATCH", "/db/guillotina/@users/foobar", data=json.dumps(data))
         assert status_code == 204
 
         # Get it now and check it was updated
@@ -108,6 +113,53 @@ async def test_patch_user_data(dbusers_requester, user_data):
         assert status_code == 200
         assert resp["email"] == "foobar2@foo.com"
         assert "guillotina.Manager" in resp["roles"]
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_patch_groups_on_user_updates_groups(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        # Create a user
+        resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
+        assert status_code == 201
+        # create groups
+        group = {"name": "foo", "@type": "Group", "id": "foo"}
+        _, status = await requester("POST", "/db/guillotina/groups/", data=json.dumps(group))
+        assert status == 201
+        group2 = {"name": "foo2", "@type": "Group", "id": "foo2"}
+        _, status = await requester("POST", "/db/guillotina/groups/", data=json.dumps(group2))
+        assert status == 201
+
+        async def update_groups(lg):
+            return await requester(
+                "PATCH", "/db/guillotina/users/foobar", data=json.dumps({"user_groups": lg})
+            )
+
+        async def check_users_group(gr):
+            resp, _ = await requester("GET", f"/db/guillotina/@groups/{gr}")
+            return resp["users"]["items"]
+
+        await update_groups(["foo"])
+        assert "foobar" in await check_users_group("foo")
+        await update_groups(["foo", "foo2"])
+        assert "foobar" in await check_users_group("foo")
+        assert "foobar" in await check_users_group("foo2")
+        await update_groups(["foo2"])
+
+        assert "foobar" not in await check_users_group("foo")
+        assert "foobar" in await check_users_group("foo2")
+        await update_groups([])
+        assert len(await check_users_group("foo2")) == 0
+
+        # delete a group
+        await update_groups(["foo", "foo2"])
+        await requester("DELETE", "/db/guillotina/groups/foo")
+        # ensure user id updated
+        result, _ = await requester("GET", "/db/guillotina/users/foobar")
+        assert result["user_groups"] == ["foo2"]
+        # remove a user
+        await requester("DELETE", "/db/guillotina/users/foobar")
+        result, _ = await requester("GET", "/db/guillotina/groups/foo2")
+        assert len(result["users"]) == 0
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
@@ -129,3 +181,11 @@ async def test_delete_user(dbusers_requester, user_data):
         # Check user is not there anymore
         _, status_code = await requester("GET", "/db/guillotina/@users/foobar")
         assert status_code == 404
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_get_available_roles(dbusers_requester):
+    async with dbusers_requester as requester:
+        resp, status_code = await requester("GET", "/db/guillotina/@available-roles")
+        assert "guillotina.Anonymous" in resp
+        assert "guillotina.Manager" in resp

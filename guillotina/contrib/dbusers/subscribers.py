@@ -5,9 +5,13 @@ from guillotina.auth.validators import hash_password
 from guillotina.contrib.dbusers.content.groups import IGroup
 from guillotina.contrib.dbusers.content.users import IUser
 from guillotina.event import notify
+from guillotina.events import BeforeObjectModifiedEvent
+from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import NewUserAdded
 from guillotina.events import ObjectAddedEvent
 from guillotina.events import ObjectModifiedEvent
+from guillotina.interfaces import IBeforeObjectModifiedEvent
+from guillotina.interfaces import IBeforeObjectRemovedEvent
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IPrincipalRoleManager
@@ -44,3 +48,50 @@ async def on_update_groups(group: Group, event: ObjectModifiedEvent) -> None:
         if group.id not in user.user_groups:
             user.user_groups.append(group.id)
             user.register()
+
+
+@configure.subscriber(for_=(IUser, IBeforeObjectModifiedEvent))
+async def on_update_user(user: User, event: BeforeObjectModifiedEvent) -> None:
+    # keep group.users updated with changes from users
+    old_groups = user.user_groups or []
+    new_groups = event.payload.get("user_groups", [])
+    groups_added = set(new_groups) - set(old_groups)
+    groups_removed = set(old_groups) - set(new_groups)
+    container = get_current_container()
+    for group_id in groups_added:
+        try:
+            group = await navigate_to(container, f"groups/{group_id}")
+        except KeyError:
+            raise HTTPPreconditionFailed(content={"reason": f"inexistent group: {group_id}"})
+        if user.id not in group.users:
+            group.users.append(user.id)
+            group.register()
+
+    for group_id in groups_removed:
+        try:
+            group = await navigate_to(container, f"groups/{group_id}")
+        except KeyError:
+            raise HTTPPreconditionFailed(content={"reason": f"inexistent group: {group_id}"})
+        if user.id in group.users:
+            group.users.remove(user.id)
+            group.register()
+
+
+@configure.subscriber(for_=(IUser, IBeforeObjectRemovedEvent))
+async def on_remove_user(user: User, event: BeforeObjectRemovedEvent):
+    container = get_current_container()
+    user_groups = user.user_groups or []
+    for group_id in user_groups:
+        group = await navigate_to(container, f"groups/{group_id}")
+        group.users.remove(user.id)
+        group.register()
+
+
+@configure.subscriber(for_=(IGroup, IBeforeObjectRemovedEvent))
+async def on_remove_group(group: Group, event: BeforeObjectRemovedEvent):
+    container = get_current_container()
+    users = group.users or []
+    for user_id in users:
+        user = await navigate_to(container, f"users/{user_id}")
+        user.user_groups.remove(group.id)
+        user.register()

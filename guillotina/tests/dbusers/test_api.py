@@ -103,7 +103,7 @@ async def create_and_login_user(requester, user_id, password, roles):
     return await login_user(requester, user_id, password)
 
 
-async def _test_endpoint_access(requester, method, url, data=None, allowed_roles=None):
+async def _test_endpoint_access(requester, method, url, data=None, allowed_roles=None):  # pragma: no cover
     data = data or {}
     allowed_roles = allowed_roles or []
     all_roles = [
