@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a5 (unreleased)
+6.0.0a5 (2020-01-07)
 --------------------
 
 - Added `IIDChecker` adapter
