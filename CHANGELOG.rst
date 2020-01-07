@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a5 (unreleased)
 --------------------
 
+- Added `IIDChecker` adapter
+  [vangheem]
+
 - Schema fields default value for `required` is now `False`
   [vangheem]
 
@@ -32,6 +35,8 @@ CHANGELOG
   [masipcat]
 
 - Fix error with requeued async queue tasks
+
+- Added `valid_id_characters` app setting
   [vangheem]
 
 - Better CancelledError handling in resolving a request
