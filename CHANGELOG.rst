@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.4 (unreleased)
+5.3.4 (2020-01-07)
 ------------------
 
 - Fix query param validation
