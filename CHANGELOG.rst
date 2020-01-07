@@ -4,7 +4,8 @@ CHANGELOG
 5.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update Dockerfile
+  [svx]
 
 
 5.3.2 (2020-01-03)
