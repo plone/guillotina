@@ -78,7 +78,7 @@ class IField(Interface):
     required = Bool(
         title=_("Required"),
         description=(_("Tells whether a field requires its value to exist.")),
-        default=True,
+        default=False,
     )
 
     readonly = Bool(

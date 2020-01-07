@@ -7,7 +7,16 @@ CHANGELOG
 - Added `IIDChecker` adapter
   [vangheem]
 
+- Schema fields default value for `required` is now `False`
+  [vangheem]
+
+- Denormalized group info when user is added to a group throught users endpoint (issue #806)
+  [jordic]
+
 - Add `Range` header support
+  [vangheem]
+
+- Be able to disable supporting range headers in `IFileManager.download`
   [vangheem]
 
 - Fix validating None values in required fields

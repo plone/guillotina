@@ -42,20 +42,18 @@ def find_field(content, name):
 
 
 class IFieldType(Interface):
-    title = schema.Text(required=False)
-    description = schema.Text(required=False)
-    type = schema.Choice(values=["date", "integer", "text", "float", "keyword", "boolean"])
-    required = schema.Bool(default=False, required=False)
+    title = schema.Text()
+    description = schema.Text()
+    type = schema.Choice(values=["date", "integer", "text", "float", "keyword", "boolean"], required=True)
+    required = schema.Bool(default=False)
     meta = schema.JSONField(
-        title="Additional information on field",
-        required=False,
-        schema=json.dumps({"type": "object", "properties": {}}),
+        title="Additional information on field", schema=json.dumps({"type": "object", "properties": {}})
     )
 
 
 class IDynamicFields(Interface):
     fields = fields.PatchField(
-        schema.Dict(key_type=schema.Text(), value_type=schema.Object(schema=IFieldType))
+        schema.Dict(key_type=schema.Text(), value_type=schema.Object(schema=IFieldType), required=True)
     )
 
 
@@ -70,7 +68,7 @@ class DynamicFieldsBehavior(ContextBehavior):
 
 
 class IDynamicFieldValues(Interface):
-    values = fields.DynamicField(schema.Dict(key_type=schema.Text()))
+    values = fields.DynamicField(schema.Dict(key_type=schema.Text()), required=True)
 
 
 @configure.behavior(

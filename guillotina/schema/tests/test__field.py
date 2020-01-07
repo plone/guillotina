@@ -65,7 +65,7 @@ class BytesTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(b"")
         field.validate(b"abc")
         field.validate(b"abc\ndef")
@@ -178,7 +178,7 @@ class BytesLineTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(b"")
         field.validate(b"abc")
         field.validate(b"\xab\xde")
@@ -242,7 +242,7 @@ class ASCIILineTests(unittest.TestCase):
         from guillotina.schema.exceptions import InvalidValue
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate("")
         field.validate("abc")
         self.assertRaises(InvalidValue, field.validate, "\xab\xde")
@@ -289,7 +289,7 @@ class FloatTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(10.0)
         field.validate(0.93)
         field.validate(1000.0003)
@@ -375,7 +375,7 @@ class DecimalTests(unittest.TestCase):
         import decimal
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(decimal.Decimal("10.0"))
         field.validate(decimal.Decimal("0.93"))
         field.validate(decimal.Decimal("1000.0003"))
@@ -573,7 +573,7 @@ class DateTests(unittest.TestCase):
         from datetime import datetime
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(datetime.now().date())
         self.assertRaises(RequiredMissing, field.validate, None)
 
@@ -652,7 +652,7 @@ class TimedeltaTests(unittest.TestCase):
         from datetime import timedelta
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(timedelta(minutes=15))
         self.assertRaises(RequiredMissing, field.validate, None)
 
@@ -729,7 +729,7 @@ class TimeTests(unittest.TestCase):
         from datetime import time
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(time(12, 15, 37))
         self.assertRaises(RequiredMissing, field.validate, None)
 
@@ -1057,7 +1057,7 @@ class URITests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate("http://example.com/")
         self.assertRaises(RequiredMissing, field.validate, None)
 
@@ -1149,7 +1149,7 @@ class DottedNameTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate("name")
         field.validate("dotted.name")
         self.assertRaises(RequiredMissing, field.validate, None)
@@ -1237,7 +1237,7 @@ class IdTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate("http://example.com/")
         field.validate("dotted.name")
         self.assertRaises(RequiredMissing, field.validate, None)
@@ -1440,7 +1440,7 @@ class TupleTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(())
         field.validate((1, 2))
         field.validate((3,))
@@ -1520,7 +1520,7 @@ class ListTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate([])
         field.validate([1, 2])
         field.validate([3])
@@ -1606,7 +1606,7 @@ class SetTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(set())
         field.validate(set((1, 2)))
         field.validate(set((3,)))
@@ -1695,7 +1695,7 @@ class FrozenSetTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate(frozenset())
         field.validate(frozenset((1, 2)))
         field.validate(frozenset((3,)))
@@ -1878,7 +1878,7 @@ class ObjectTests(unittest.TestCase):
         from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Text
 
-        schema = self._makeSchema(foo=Text(), bar=Text())
+        schema = self._makeSchema(foo=Text(required=True), bar=Text(required=True))
 
         @implementer(schema)
         class Broken(object):
@@ -1899,7 +1899,7 @@ class ObjectTests(unittest.TestCase):
         from guillotina.schema.exceptions import WrongType
         from guillotina.schema._bootstrapfields import Text
 
-        schema = self._makeSchema(foo=Text(), bar=Text())
+        schema = self._makeSchema(foo=Text(required=True), bar=Text(required=True))
 
         @implementer(schema)
         class Broken(object):
@@ -2045,7 +2045,7 @@ class DictTests(unittest.TestCase):
     def test_validate_required(self):
         from guillotina.schema.exceptions import RequiredMissing
 
-        field = self._makeOne()
+        field = self._makeOne(required=True)
         field.validate({})
         field.validate({1: "b", 2: "d"})
         field.validate({3: "a"})
