@@ -7,7 +7,13 @@ CHANGELOG
 - Schema fields default value for `required` is now `False`
   [vangheem]
 
+- Denormalized group info when user is added to a group throught users endpoint (issue #806)
+  [jordic]
+
 - Add `Range` header support
+  [vangheem]
+
+- Be able to disable supporting range headers in `IFileManager.download`
   [vangheem]
 
 - Fix validating None values in required fields
@@ -15,6 +21,9 @@ CHANGELOG
 
 - Add localroles to @available-roles
   [jordic]
+
+- Add `no-install-recommends` to Dockerfile (apt options)
+  [svx]
 
 6.0.0a4 (2019-12-23)
 --------------------
