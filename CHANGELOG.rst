@@ -6,6 +6,9 @@ CHANGELOG
 
 - Prevent creating containers with empty id [lferran]
 
+- Fix query param validation
+  [vangheem]
+
 - Optimize json deserialization
   [vangheem]
 

@@ -1492,3 +1492,22 @@ async def test_containers_with_empty_id_cannot_be_created(container_requester):
 
         _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": ""}))
         assert status == 412
+
+
+async def test_json_schema_query_params(container_requester):
+    async with container_requester as requester:
+        # JSON schema validation
+        resp, status = await requester("GET", "/@json-schema-validation")
+        assert status == 412
+        assert resp["parameter"] == "foo"
+
+        resp, status = await requester("GET", "/@json-schema-validation?foo=blah")
+        assert status == 412
+        assert resp["parameter"] == "foo"
+        assert resp["validator_value"] == "number"
+
+        resp, status = await requester("GET", "/@json-schema-validation?foo=5")
+        assert status == 200
+
+        resp, status = await requester("GET", "/@json-schema-validation?foo=5.5")
+        assert status == 200
