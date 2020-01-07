@@ -46,7 +46,9 @@ def _optimized_lookup(value, field, context):
         # for primitive types, all we really do is return the value back.
         # this is costly for all the lookups
         if not isinstance(value, field._type):
-            raise WrongType(value, field._type, field.__name__)
+            raise ValueDeserializationError(
+                field, value, "Wrong contained type", errors=[WrongType(value, field._type, field.__name__)]
+            )
         return value
     else:
         try:
