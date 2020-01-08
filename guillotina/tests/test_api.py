@@ -1479,6 +1479,21 @@ async def test_required_field_work_with_none(container_requester):
         assert status == 412
 
 
+async def test_containers_with_empty_id_cannot_be_created(container_requester):
+    async with container_requester as requester:
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container"}))
+        assert status == 412
+
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": None}))
+        assert status == 412
+
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": 0}))
+        assert status == 412
+
+        _, status = await requester("POST", "/db/", data=json.dumps({"@type": "Container", "id": ""}))
+        assert status == 412
+
+
 async def test_json_schema_query_params(container_requester):
     async with container_requester as requester:
         # JSON schema validation

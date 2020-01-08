@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a6 (unreleased)
 --------------------
 
+- Prevent creating containers with empty id [lferran]
+
 - Fix query param validation
   [vangheem]
 
@@ -25,7 +27,7 @@ CHANGELOG
 
 - Add `Range` header support
   [vangheem]
-  
+
 
 - Be able to disable supporting range headers in `IFileManager.download`
   [vangheem]

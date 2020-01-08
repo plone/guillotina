@@ -21,7 +21,6 @@ from guillotina.response import ErrorResponse
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPNotImplemented
-from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user_id
 from typing import Optional
@@ -113,9 +112,6 @@ class DefaultPOST(Service):
         data = await self.request.json()
         if "@type" not in data or data["@type"] not in app_settings["container_types"]:
             raise HTTPNotFound(content={"message": "can not create this type %s" % data["@type"]})
-
-        if "id" not in data:
-            raise HTTPPreconditionFailed(content={"message": "We need an id"})
 
         if not data.get("title"):
             data["title"] = data["id"]
