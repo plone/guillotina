@@ -4,7 +4,9 @@ CHANGELOG
 5.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Be able to start database transaction before transaction has started it
+  without causing errors
+  [vangheem]
 
 
 5.3.5 (2020-01-09)
