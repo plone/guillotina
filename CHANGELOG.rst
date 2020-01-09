@@ -4,7 +4,8 @@ CHANGELOG
 5.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix optimized lookup to work with fields that do not have `_type`
+  [vangheem]
 
 
 5.3.4 (2020-01-07)
