@@ -4,7 +4,10 @@ CHANGELOG
 6.0.0a5 (unreleased)
 --------------------
 
-- Added back support for Guillotina/aiohttp middlewares
+- Implemented 'ErrorsMiddleware' that catches all undhandled errors
+  [masipcat]
+
+- Small changes to the middleware logic
   [masipcat]
 
 - Added `IIDChecker` adapter

@@ -1,7 +1,9 @@
 from guillotina import glogging
 from guillotina import task_vars
+from guillotina.exc_resp import HTTPConflict
+from guillotina.exceptions import ConflictError
+from guillotina.exceptions import TIDConflictError
 from guillotina.middlewares import ErrorsMiddleware
-from guillotina.middlewares import TraversalRouter
 from guillotina.request import Request
 from guillotina.utils import resolve_dotted_name
 
@@ -89,8 +91,8 @@ class AsgiApp:
             resolve_dotted_name(m) for m in settings.get("middlewares", [])
         ]
 
-        # The TraversalRouter is the last middleware in the chain.
-        last_middleware = TraversalRouter(self.router)
+        # Guillotina is the last middleware in the chain
+        last_middleware = Guillotina(self.app, self.router)
         for middleware in reversed(user_middlewares):
             last_middleware = middleware(last_middleware)
         return last_middleware
@@ -104,11 +106,63 @@ class AsgiApp:
         if scope["type"] == "websocket":
             scope["method"] = "GET"
 
-        request_settings = {k: v for k, v in self.server_settings.items() if k in ("client_max_size",)}
-        request = Request.factory(scope, send, receive, **request_settings)
-        task_vars.request.set(request)
-
         resp = await self.next_app(scope, receive, send)
 
         if not resp.prepared:
+            request = task_vars.request.get()
             await resp.prepare(request)
+
+        return
+
+
+class Guillotina:
+    def __init__(self, asgi_app, router):
+        self.asgi_app = asgi_app
+        self.router = router
+
+    async def __call__(self, scope, receive, send):
+        request_settings = {
+            k: v for k, v in self.asgi_app.server_settings.items() if k in ("client_max_size",)
+        }
+        request = Request.factory(scope, send, receive, **request_settings)
+        task_vars.request.set(request)
+
+        resp = await self.request_handler(request)
+
+        return resp
+
+    async def request_handler(self, request, retries=0):
+        try:
+            route = await self.router.resolve(request)
+            resp = await route.handler(request)
+            return resp
+
+        except (ConflictError, TIDConflictError) as e:
+            if self.asgi_app.settings.get("conflict_retry_attempts", 3) > retries:
+                label = "DB Conflict detected"
+                if isinstance(e, TIDConflictError):
+                    label = "TID Conflict Error detected"
+                tid = getattr(getattr(request, "_txn", None), "_tid", "not issued")
+                logger.debug(f"{label}, retrying request, tid: {tid}, retries: {retries + 1})", exc_info=True)
+                request._retry_attempt = retries + 1
+                request.clear_futures()
+                for var in (
+                    "txn",
+                    "tm",
+                    "futures",
+                    "authenticated_user",
+                    "security_policies",
+                    "container",
+                    "registry",
+                    "db",
+                ):
+                    # and make sure to reset various task vars...
+                    getattr(task_vars, var).set(None)
+                return await self.request_handler(request, retries + 1)
+            else:
+                logger.error(
+                    "Exhausted retry attempts for conflict error on tid: {}".format(
+                        getattr(getattr(request, "_txn", None), "_tid", "not issued")
+                    )
+                )
+                raise HTTPConflict()
