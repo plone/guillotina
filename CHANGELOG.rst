@@ -4,6 +4,10 @@ CHANGELOG
 6.0.0a6 (unreleased)
 --------------------
 
+- Be able to start database transaction before transaction has started it
+  without causing errors
+  [vangheem]
+
 - More detailed information in ValidationErrors
   [masipcat]
 
