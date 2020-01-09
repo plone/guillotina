@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.5 (unreleased)
+5.3.5 (2020-01-09)
 ------------------
 
 - Fix optimized lookup to work with fields that do not have `_type`
