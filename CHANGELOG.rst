@@ -4,6 +4,10 @@ CHANGELOG
 5.2.1 (unreleased)
 ------------------
 
+- Be able to start database transaction before transaction has started it
+  without causing errors
+  [vangheem]
+
 - Run _update_from_pytest_markers() after configuring db settings
   [masipcat]
 
