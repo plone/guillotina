@@ -161,25 +161,13 @@ load_utilities:
 
 ## Middleware
 
-`guillotina` support two types of middlewares:
-
-1. ASGI middlewares
-2. Guillotina (aiohttp-like) middlewares
+Guillotina has support for ASGI middlewares.
 
 You can provide an array of dotted names to use for your application.
 
 ```yaml
 middlewares:
   - sentry_sdk.integrations.asgi.SentryAsgiMiddleware
-  - guillotina_myaddon.Middleware
-```
-
-Optionally, you can choose when the `TraversalRouter` is executed:
-
-```yaml
-middlewares:
-  - sentry_sdk.integrations.asgi.SentryAsgiMiddleware
-  - guillotina.middlewares.TraversalRouter
   - guillotina_myaddon.Middleware
 ```
 

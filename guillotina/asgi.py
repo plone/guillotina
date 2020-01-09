@@ -1,7 +1,6 @@
 from guillotina import glogging
 from guillotina import task_vars
 from guillotina.middlewares import ErrorsMiddleware
-from guillotina.middlewares import ServiceExecutor
 from guillotina.middlewares import TraversalRouter
 from guillotina.request import Request
 from guillotina.utils import apply_coroutine
@@ -9,7 +8,6 @@ from guillotina.utils import resolve_dotted_name
 
 import asyncio
 import enum
-import inspect
 
 
 logger = glogging.getLogger("guillotina")
@@ -28,7 +26,6 @@ class AsgiApp:
         self.settings = settings
         self.loop = loop
         self.router = router
-        # ...
         self.app = None
         self.on_cleanup = []
         self.state = AppState.STARTING
@@ -93,29 +90,10 @@ class AsgiApp:
             resolve_dotted_name(m) for m in settings.get("middlewares", [])
         ]
 
-        if TraversalRouter not in user_middlewares:
-            # Add TraversalRouter at the end of the stack if it's not provided in the
-            # configuration
-            user_middlewares += [TraversalRouter]
-
-        # The ServiceExecutor is the last middleware in the chain.
-        last_middleware = ServiceExecutor()
-        # We instantiate middlewares in reverse order
+        # The TraversalRouter is the last middleware in the chain.
+        last_middleware = TraversalRouter(self.app.router)
         for middleware in reversed(user_middlewares):
-            args = inspect.getargspec(middleware).args
-            if args[-1] == "handler":
-                if "app" in args:
-                    middleware = aiohttpHandler2asgi(middleware)
-                else:
-                    middleware = aiohttp2asgi(middleware)
-
             last_middleware = middleware(last_middleware)
-
-        # The resuling stack would be:
-        #    ErrorsMiddleware ->
-        #      [user_middlewares] ->
-        #        TraversalRouter (if not in user_middlewares) ->
-        #          ServiceExecutor
         return last_middleware
 
     async def handler(self, scope, receive, send):
@@ -130,42 +108,8 @@ class AsgiApp:
         request_settings = {k: v for k, v in self.server_settings.items() if k in ("client_max_size",)}
         request = Request.factory(scope, send, receive, **request_settings)
         task_vars.request.set(request)
-        task_vars.app.set(self.app)
 
         resp = await self.next_app(scope, receive, send)
 
         if not resp.prepared:
             await resp.prepare(request)
-
-
-def aiohttpHandler2asgi(aiohttp_handler):
-    class AsgiMiddleware:
-        def __init__(self, app):
-            self.next_app = app
-
-        async def __call__(self, scope, receive, send):
-            request = task_vars.request.get()
-
-            async def handler(request):
-                return await self.next_app(scope, receive, send)
-
-            aiohttp_middleware = await apply_coroutine(aiohttp_handler, self.next_app, handler)
-            return await aiohttp_middleware(request)
-
-    return AsgiMiddleware
-
-
-def aiohttp2asgi(aiohttp_middleware):
-    class AsgiMiddleware:
-        def __init__(self, app):
-            self.next_app = app
-
-        async def __call__(self, scope, receive, send):
-            request = task_vars.request.get()
-
-            async def handler(request):
-                return await self.next_app(scope, receive, send)
-
-            return await aiohttp_middleware(request, handler)
-
-    return AsgiMiddleware

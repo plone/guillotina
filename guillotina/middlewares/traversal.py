@@ -8,26 +8,21 @@ from guillotina.exceptions import TIDConflictError
 
 class TraversalRouter:
     """
-    This middleware is responsible of doing traversal and resolving the service.
-    The execution of the matched service is done in ServiceExecutor middleware
+    This middleware is responsible of doing traversal and executing the service.
     """
 
-    def __init__(self, app):
-        self.next_app = app
+    def __init__(self, router):
+        self.router = router
 
     async def __call__(self, scope, receive, send):
         request = task_vars.request.get()
-        resp = await self.request_handler(scope, receive, send, request)
-        return resp
+        return await self.request_handler(request)
 
-    async def request_handler(self, scope, receive, send, request, retries=0):
-        app = task_vars.app.get()
-
+    async def request_handler(self, request, retries=0):
         try:
-            route = await app.router.resolve(request)
-            handler = route.handler
-            task_vars.service.set(handler)
-            return await self.next_app(scope, receive, send)
+            route = await self.router.resolve(request)
+            resp = await route.handler(request)
+            return resp
 
         except (ConflictError, TIDConflictError) as e:
             if app_settings.get("conflict_retry_attempts", 3) > retries:
@@ -47,11 +42,10 @@ class TraversalRouter:
                     "container",
                     "registry",
                     "db",
-                    "service",
                 ):
                     # and make sure to reset various task vars...
                     getattr(task_vars, var).set(None)
-                return await self.request_handler(scope, receive, send, request, retries + 1)
+                return await self.request_handler(request, retries + 1)
             else:
                 logger.error(
                     "Exhausted retry attempts for conflict error on tid: {}".format(

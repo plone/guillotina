@@ -12,9 +12,7 @@ from typing import Dict
 from typing import Optional
 
 
-app: ContextVar[Optional[Any]] = ContextVar("g_app", default=None)
 request: ContextVar[Optional[IRequest]] = ContextVar("g_request", default=None)
-service: ContextVar[Optional[Any]] = ContextVar("g_service", default=None)
 txn: ContextVar[Optional[ITransaction]] = ContextVar("g_txn", default=None)
 tm: ContextVar[Optional[ITransactionManager]] = ContextVar("g_tm", default=None)
 futures: ContextVar[Optional[Dict]] = ContextVar("g_futures", default=None)
