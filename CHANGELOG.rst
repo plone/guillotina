@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.6 (unreleased)
+5.3.6 (2020-01-09)
 ------------------
 
 - Be able to start database transaction before transaction has started it
