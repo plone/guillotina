@@ -7,7 +7,6 @@ from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import ISecurityPolicy
-from typing import Any
 from typing import Dict
 from typing import Optional
 

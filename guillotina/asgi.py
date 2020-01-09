@@ -3,7 +3,6 @@ from guillotina import task_vars
 from guillotina.middlewares import ErrorsMiddleware
 from guillotina.middlewares import TraversalRouter
 from guillotina.request import Request
-from guillotina.utils import apply_coroutine
 from guillotina.utils import resolve_dotted_name
 
 import asyncio
@@ -91,7 +90,7 @@ class AsgiApp:
         ]
 
         # The TraversalRouter is the last middleware in the chain.
-        last_middleware = TraversalRouter(self.app.router)
+        last_middleware = TraversalRouter(self.router)
         for middleware in reversed(user_middlewares):
             last_middleware = middleware(last_middleware)
         return last_middleware
