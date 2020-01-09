@@ -42,7 +42,7 @@ def schema_compatible(value, schema_or_field, context=None):
 
 
 def _optimized_lookup(value, field, context):
-    if field._type in (int, str, float, bool):
+    if getattr(field, "_type", None) in (int, str, float, bool):
         # for primitive types, all we really do is return the value back.
         # this is costly for all the lookups
         if not isinstance(value, field._type):

@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a6 (unreleased)
 --------------------
 
+- Fix optimized lookup to work with fields that do not have `_type`
+  [vangheem]
+
 - Prevent creating containers with empty id [lferran]
 
 - Fix query param validation
