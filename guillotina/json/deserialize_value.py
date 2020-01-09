@@ -41,7 +41,7 @@ def schema_compatible(value, schema_or_field, context=None):
 
 
 def _optimized_lookup(value, field, context):
-    if field._type in (int, str, float, bool):
+    if getattr(field, "_type", None) in (int, str, float, bool):
         # for primitive types, all we really do is return the value back.
         # this is costly for all the lookups
         if not isinstance(value, field._type):
@@ -106,6 +106,7 @@ def from_unicode_converter(field, value, context=None):
 @configure.value_deserializer(IList)
 def list_converter(field, value, context=None):
     if not isinstance(value, list):
+        breakpoint()
         raise ValueDeserializationError(field, value, "Not an array")
     return [_optimized_lookup(item, field.value_type, context) for item in value]
 
