@@ -451,11 +451,18 @@ def _validate_sequence(value_type, value, errors=None):
         errors = []
     if value_type is None:
         return errors
-    for item in value:
-        try:
-            value_type.validate(item)
-        except ValidationError as error:
-            errors.append(error)
+
+    original_field_name = value_type.__name__
+    try:
+        for i, item in enumerate(value):
+            try:
+                value_type.__name__ = f"{original_field_name}[{i}]"
+                value_type.validate(item)
+            except ValidationError as error:
+                errors.append(error)
+    finally:
+        value_type.__name__ = original_field_name
+
     return errors
 
 
@@ -496,7 +503,7 @@ class AbstractCollection(MinMaxLen, Iterable):
         super(AbstractCollection, self)._validate(value)
         errors = _validate_sequence(self.value_type, value)
         if errors:
-            raise WrongContainedType(errors, self.__name__)
+            raise WrongContainedType(errors, self.__name__, value=value)
         if self.unique:
             _validate_uniqueness(value)
 
@@ -615,7 +622,7 @@ class Object(Field):
                 raise SchemaNotProvided(value, self.__name__)
             errors = _validate_fields(self.schema, value)
         if errors:
-            raise WrongContainedType(errors, self.__name__)
+            raise WrongContainedType(errors, self.__name__, value=value)
 
 
 @implementer(IDict)
@@ -645,7 +652,7 @@ class Dict(MinMaxLen, Iterable):
             errors = _validate_sequence(self.key_type, value, errors)
 
             if errors:
-                raise WrongContainedType(errors, self.__name__)
+                raise WrongContainedType(errors, self.__name__, value=value)
 
         finally:
             errors = None
@@ -692,7 +699,7 @@ class JSONField(Field):
         try:
             self.schema_validator.validate(value)
         except jsonschema.ValidationError as e:
-            raise WrongContainedType(e.message, self.__name__)
+            raise WrongContainedType(e.message, self.__name__, value=value)
 
 
 @implementer(IUnionField)
@@ -720,7 +727,7 @@ class UnionField(Field):
             except ValidationError as error:
                 errors.append(error)
         else:
-            raise WrongContainedType(errors, self.__name__)
+            raise WrongContainedType(errors, self.__name__, value=value)
 
     def set(self, object, value):
         field = self.validate(value)

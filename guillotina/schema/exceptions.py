@@ -28,7 +28,18 @@ class ValidationError(zope.interface.Invalid):
         return self.__class__.__doc__
 
     def json(self):
-        return {"message": self.doc(), "field": self.field_name, "error": self}
+        d = {
+            "message": self.doc(),
+            "error": self,
+        }
+        if self.field_name:
+            d["field"] = self.field_name
+        if self.value:
+            if type(self.value) in (str, int, float):
+                d["value"] = self.value
+            else:
+                d["value"] = repr(self.value)
+        return d
 
     def __eq__(self, other):
         if not hasattr(other, "args"):
@@ -114,8 +125,8 @@ class NotAnIterator(ValidationError):
 class WrongContainedType(ValidationError):
     __doc__ = _("""Wrong contained type""")
 
-    def __init__(self, errors, field_name):
-        super().__init__(field_name=field_name, errors=errors)
+    def __init__(self, errors, field_name, value=None):
+        super().__init__(value=value, field_name=field_name, errors=errors)
 
 
 class NotUnique(ValidationError):

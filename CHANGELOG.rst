@@ -4,6 +4,9 @@ CHANGELOG
 5.2.1 (unreleased)
 ------------------
 
+- More detailed information in ValidationErrors
+  [masipcat]
+
 - Improving ValidationErrors messages
   [masipcat]
 
