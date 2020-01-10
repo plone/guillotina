@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a6 (unreleased)
 --------------------
 
+- More detailed information in ValidationErrors
+  [masipcat]
+
 - Fix optimized lookup to work with fields that do not have `_type`
   [vangheem]
 
@@ -31,7 +34,6 @@ CHANGELOG
 - Add `Range` header support
   [vangheem]
 
-
 - Be able to disable supporting range headers in `IFileManager.download`
   [vangheem]
 
@@ -43,6 +45,7 @@ CHANGELOG
 
 - Add `no-install-recommends` to Dockerfile (apt options)
   [svx]
+
 
 6.0.0a4 (2019-12-23)
 --------------------

@@ -1216,7 +1216,7 @@ async def test_deserialization_errors(container_requester):
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
-            {"field": "tags", "message": "Expected <class 'tuple'> but found <class 'int'>."}
+            {"field": "tags", "message": "Expected <class 'tuple'> but found <class 'int'>.", "value": 1}
         ]
 
         resp, status = await requester(
@@ -1227,7 +1227,13 @@ async def test_deserialization_errors(container_requester):
         assert status == 412
         assert resp["deserialization_errors"] == [
             {
-                "errors": [{"field": "tags", "message": "Expected <class 'str'> but found <class 'int'>."}],
+                "errors": [
+                    {
+                        "field": "tags",
+                        "message": "Expected <class 'str'> but found <class 'int'>.",
+                        "value": 1,
+                    }
+                ],
                 "field": "tags",
                 "message": "Wrong contained type",
             }
@@ -1242,6 +1248,7 @@ async def test_deserialization_errors(container_requester):
                 "errors": [{"field": "bar", "message": "Required input is missing."}],
                 "field": "object_a",
                 "message": "Wrong contained type",
+                "value": "{'foo': 'hey'}",
             }
         ]
 
@@ -1251,7 +1258,9 @@ async def test_deserialization_errors(container_requester):
         assert status == 412
         assert resp["deserialization_errors"] == [
             {
-                "errors": [{"field": "foo", "message": "Expected <class 'str'> but found <class 'int'>."}],
+                "errors": [
+                    {"field": "foo", "message": "Expected <class 'str'> but found <class 'int'>.", "value": 1}
+                ],
                 "field": "list_object_a",
                 "message": "Wrong contained type",
             }
@@ -1268,12 +1277,14 @@ async def test_deserialization_errors(container_requester):
                 "errors": [
                     {
                         "errors": [{"field": "bar", "message": "Required input is missing."}],
-                        "field": "list_object_a",  # this is actually 'list_object_a[0]'
+                        "field": "list_object_a[0]",
                         "message": "Wrong contained type",
+                        "value": "{'foo': 'hey'}",
                     }
                 ],
                 "field": "list_object_a",
                 "message": "Wrong contained type",
+                "value": "[{'foo': 'hey'}]",
             }
         ]
 
@@ -1289,7 +1300,13 @@ async def test_deserialization_errors(container_requester):
             {
                 "message": "Wrong contained type",
                 "field": "list_object_a",
-                "errors": [{"message": "Expected <class 'int'> but found <class 'str'>.", "field": "bar"}],
+                "errors": [
+                    {
+                        "message": "Expected <class 'int'> but found <class 'str'>.",
+                        "field": "bar",
+                        "value": "arr",
+                    }
+                ],
             }
         ]
 
@@ -1306,6 +1323,7 @@ async def test_deserialization_errors(container_requester):
                 "errors": [{"field": "bar", "message": "Required input is missing."}],
                 "field": "list_object_a",
                 "message": "Wrong contained type",
+                "value": "{'foo': 'hey'}",
             }
         ]
 
