@@ -1,6 +1,7 @@
 from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
+from guillotina import traversal
 from guillotina._settings import app_settings
 from guillotina._settings import default_settings
 from guillotina.behaviors import apply_concrete_behaviors
@@ -22,7 +23,6 @@ from guillotina.factory.content import ApplicationRoot
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IDatabaseConfigurationFactory
-from guillotina.traversal import TraversalRouter
 from guillotina.utils import lazy_apply
 from guillotina.utils import list_or_dict_items
 from guillotina.utils import resolve_dotted_name
@@ -166,17 +166,10 @@ def optimize_settings(settings):
 def make_app(config_file=None, settings=None, loop=None):
     from guillotina.asgi import AsgiApp
 
-    app = AsgiApp(config_file, settings, loop)
-    router_klass = app_settings.get("router", TraversalRouter)
-    app.router = resolve_dotted_name(router_klass)()
+    router_klass = app_settings.get("router", traversal.TraversalRouter)
+    app = AsgiApp(config_file, settings, loop, resolve_dotted_name(router_klass)())
 
-    # The guillotina application is the last middleware in the chain.
-    # We instantiate middlewares in reverse order. The last one is the first to be called
-    last_middleware = app
-    middlewares = [resolve_dotted_name(m) for m in app_settings.get("middlewares", [])]
-    for middleware in middlewares[::-1]:
-        last_middleware = middleware(last_middleware)
-    return last_middleware
+    return app
 
 
 async def startup_app(config_file=None, settings=None, loop=None, server_app=None):

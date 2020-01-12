@@ -22,6 +22,12 @@ CHANGELOG
 6.0.0a5 (2020-01-07)
 --------------------
 
+- Implemented 'ErrorsMiddleware' that catches all undhandled errors
+  [masipcat]
+
+- Small changes to the middleware logic
+  [masipcat]
+
 - Added `IIDChecker` adapter
   [vangheem]
 

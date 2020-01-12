@@ -161,13 +161,16 @@ load_utilities:
 
 ## Middleware
 
-`guillotina` is built on `asgi` which provides support for middleware.
+Guillotina has support for ASGI middlewares.
+
 You can provide an array of dotted names to use for your application.
 
 ```yaml
 middlewares:
+  - sentry_sdk.integrations.asgi.SentryAsgiMiddleware
   - guillotina_myaddon.Middleware
 ```
+
 
 ## Server settings
 

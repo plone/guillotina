@@ -1,7 +1,6 @@
 """Main routing traversal class."""
 from contextlib import contextmanager
 from guillotina import __version__
-from guillotina import error_reasons
 from guillotina import logger
 from guillotina import response
 from guillotina import routes
@@ -26,14 +25,12 @@ from guillotina.events import TraversalViewMissEvent
 from guillotina.exceptions import ApplicationNotFound
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
-from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IErrorResponseException
 from guillotina.interfaces import ILanguage
 from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IPermission
@@ -57,7 +54,6 @@ from zope.interface import alsoProvides
 
 import asyncio
 import traceback
-import uuid
 
 
 async def traverse(
@@ -115,29 +111,6 @@ async def traverse(
                 logger.error("Can not apply layer " + layer, request=request)
 
     return await traverse(request, context, path[1:])
-
-
-def generate_error_response(e, request, error, status=500):
-    # We may need to check the roles of the users to show the real error
-    eid = uuid.uuid4().hex
-    http_response = query_adapter(e, IErrorResponseException, kwargs={"error": error, "eid": eid})
-    if http_response is not None:
-        return http_response
-    if isinstance(e, asyncio.CancelledError):  # pragma: no cover
-        message = _("Cancelled execution of view") + " " + eid
-        logger.warning(message, exc_info=e, eid=eid, request=request)
-    else:
-        message = _("Error on execution of view") + " " + eid
-        logger.error(message, exc_info=e, eid=eid, request=request)
-    data = {
-        "message": message,
-        "reason": error_reasons.UNKNOWN.name,
-        "details": error_reasons.UNKNOWN.details,
-        "eid": eid,
-    }
-    if app_settings.get("debug"):
-        data["traceback"] = traceback.format_exc()
-    return response.HTTPInternalServerError(content=data)
 
 
 class BaseMatchInfo:
@@ -289,35 +262,26 @@ class MatchInfo(BaseMatchInfo):
         request._view_error = False
         await notify(BeforeRenderViewEvent(request, self.view))
         request.record("viewrender")
-        if app_settings["check_writable_request"](request):
-            try:
-                # We try to avoid collisions on the same instance of
-                # guillotina
-                view_result = await self.view()
+
+        try:
+            # We try to avoid collisions on the same instance of
+            # guillotina
+            view_result = await self.view()
+
+            if app_settings["check_writable_request"](request):
                 await commit(warn=False)
-            except (ConflictError, TIDConflictError):
-                await abort()
-                # bubble this error up
-                raise
-            except response.Response as exc:
-                await abort()
-                view_result = exc
-                request._view_error = True
-            except Exception as e:
-                await abort()
-                view_result = generate_error_response(e, request, "ServiceError")
-                request._view_error = True
-        else:
-            try:
-                view_result = await self.view()
-            except response.Response as exc:
-                view_result = exc
-                request._view_error = True
-            except Exception as e:
-                request._view_error = True
-                view_result = generate_error_response(e, request, "ViewError")
-            finally:
-                await abort()
+        except (ConflictError, TIDConflictError):
+            await abort()
+            # bubble this error up
+            raise
+        except response.Response as exc:
+            await abort()
+            view_result = exc
+            request._view_error = True
+        except Exception:
+            await abort()
+            raise
+
         request.record("viewrendered")
 
         if IASGIResponse.providedBy(view_result):
