@@ -1,5 +1,6 @@
 try:
     import aioredis
+    import aioredis.errors
 except ImportError:
     print("If you add guillotina.contrib.redis you need to add aioredis on your requirements")
     raise
@@ -117,7 +118,18 @@ class RedisDriver:
     async def subscribe(self, channel_name: str):
         if self._pubsub_subscriptor is None:
             raise NoRedisConfigured()
-        (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
+        try:
+            (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
+        except aioredis.errors.ConnectionClosedError:  # pragma: no cover
+            # closed in middle
+            try:
+                self._pool.close(self._conn)
+            except Exception:
+                pass
+            self._conn = await self._pool.acquire()
+            self._pubsub_subscriptor = aioredis.Redis(self._conn)
+            (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
+
         return self._listener(channel)
 
     async def _listener(self, channel: aioredis.Channel):
