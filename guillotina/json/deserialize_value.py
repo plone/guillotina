@@ -143,8 +143,9 @@ def dict_converter(field, value, context=None):
 
     result = {}
     for key in value.keys():
-        if not isinstance(key, field.key_type._type):
-            raise ValueDeserializationError(field, value, "Invalid key type provided")
+        if getattr(field, "key_type", None) and getattr(field.key_type, "_type", None):
+            if not isinstance(key, field.key_type._type):
+                raise ValueDeserializationError(field, value, "Invalid key type provided")
         result[key] = _optimized_lookup(value[key], field.value_type, context)
     return result
 
