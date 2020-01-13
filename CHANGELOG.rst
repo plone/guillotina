@@ -3,7 +3,6 @@ CHANGELOG
 
 6.0.0a6 (unreleased)
 --------------------
-
 - Fix bug on swagger with endpoints without explicit security declarations
   [jordic]
 
