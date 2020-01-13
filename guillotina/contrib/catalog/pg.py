@@ -135,7 +135,6 @@ class Parser(BaseParser):
             return self.process_compound_field(field, value, " AND ")
 
         result: typing.Any = value
-
         operator = "="
         if field.endswith("__not"):
             operator = "!="
@@ -202,7 +201,6 @@ class Parser(BaseParser):
 
     def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
         query_info = super().__call__(params)
-
         wheres = []
         arguments = []
         selects = []
@@ -601,7 +599,6 @@ class PGSearchUtility(DefaultSearchUtility):
         sql, arguments = self.build_query(container, query, ["id", "zoid", "json"])
         txn = get_current_transaction()
         conn = await txn.get_connection()
-
         results = []
         fullobjects = query["fullobjects"]
         try:
@@ -610,7 +607,7 @@ class PGSearchUtility(DefaultSearchUtility):
         except RequestNotFound:
             context_url = get_content_path(container)
             request = None
-            txn = None
+
         logger.debug(f"Running search:\n{sql}\n{arguments}")
         async with txn.lock:
             records = await conn.fetch(sql, *arguments)

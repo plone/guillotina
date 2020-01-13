@@ -37,10 +37,11 @@ class SwaggerDefinitionService(Service):
         desc = self.get_data(service_def.get("description", ""))
         swagger_conf = service_def.get("swagger", {})
         if swagger_conf.get("display_permission", True):
+            perms = service_def.get("permission", "")
             if desc:
-                desc += f" 〜 permission: {service_def['permission']}"
+                desc += f" 〜 permission: {perms}"
             else:
-                desc += f"permission: {service_def['permission']}"
+                desc += f"permission: {perms}"
 
         api_def[path or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", [""]) or tags,
