@@ -45,7 +45,10 @@ def _optimized_lookup(value, field, context):
         # for primitive types, all we really do is return the value back.
         # this is costly for all the lookups
         if not isinstance(value, field._type):
-            raise WrongType(value, field._type, field.__name__)
+            try:
+                value = field._type(value)  # convert other types over
+            except ValueError:
+                raise WrongType(value, field._type, field.__name__)
         return value
     else:
         return schema_compatible(value, field, context)
@@ -137,8 +140,9 @@ def dict_converter(field, value, context=None):
 
     result = {}
     for key in value.keys():
-        if not isinstance(key, field.key_type._type):
-            raise ValueDeserializationError(field, value, "Invalid key type provided")
+        if getattr(field, "key_type", None) and getattr(field.key_type, "_type", None):
+            if not isinstance(key, field.key_type._type):
+                raise ValueDeserializationError(field, value, "Invalid key type provided")
         result[key] = _optimized_lookup(value[key], field.value_type, context)
     return result
 
