@@ -140,6 +140,7 @@ class ITestSchema(Interface):
         schema.List(value_type=schema.Dict(key_type=schema.Text(), value_type=schema.Text()), required=False)
     )
     patch_list_int = fields.PatchField(schema.List(value_type=schema.Int(), required=False))
+    patch_list_float = fields.PatchField(schema.List(value_type=schema.Float(), required=False))
     patch_dict = fields.PatchField(
         schema.Dict(key_type=schema.Text(), value_type=schema.Text()), required=False
     )
@@ -198,6 +199,19 @@ async def test_deserialize_int(dummy_guillotina):
 
 async def test_deserialize_float(dummy_guillotina):
     assert int(schema_compatible(5.5534, ITestSchema["floating"])) == 5
+
+
+async def test_deserialize_float_convert_int(dummy_guillotina):
+    assert int(schema_compatible(5, ITestSchema["floating"])) == 5
+
+
+async def test_sub_field_float_convert_int(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(ITestSchema, content, {"patch_list_float": [1, 2]}, errors)
+    assert errors == []
 
 
 async def test_deserialize_list(dummy_guillotina):
@@ -648,9 +662,7 @@ async def test_object_deserialize(dummy_request, mock_txn):
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     errors = []
-    await deserializer.set_schema(
-        ITestSchema, content, {"object_a": {"foo": 1}}, errors,
-    )
+    await deserializer.set_schema(ITestSchema, content, {"object_a": {"foo": 1}}, errors)
     assert len(errors) == 1
 
 

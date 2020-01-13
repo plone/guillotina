@@ -7,6 +7,8 @@ CHANGELOG
 - Fix value_deserializer() when field.key_type._type is None
   [masipcat]
 
+- Fix automatic type conversion on nested fields. Fixes #832
+  [vangheem]
 
 6.0.0a6 (2020-01-13)
 --------------------
