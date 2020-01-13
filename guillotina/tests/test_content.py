@@ -129,6 +129,46 @@ async def test_allowed_types(dummy_guillotina):
         await create_content_in_container(obj, "Item", "foobar")
 
 
+async def test_globally_addable_types(dummy_guillotina):
+    utils.login()
+
+    async with transaction(db=await get_database("db")):
+        container = await create_content("Container", id="guillotina", title="Guillotina")
+        container.__name__ = "guillotina"
+        utils.register(container)
+
+        import guillotina.tests
+
+        # Define BarType which is not globally addable
+        configure.register_configuration(
+            Folder, dict(type_name="BarType", module=guillotina.tests, globally_addable=False), "contenttype"
+        )
+
+        # Define the only content where BarType is addable
+        configure.register_configuration(
+            Folder,
+            dict(type_name="FooType", allowed_types=["BarType"], module=guillotina.tests),
+            "contenttype",
+        )
+
+        root = get_utility(IApplication, name="root")
+
+        configure.load_configuration(root.app.config, "guillotina.tests", "contenttype")
+        root.app.config.execute_actions()
+        load_cached_schema()
+
+        # Check that BarType can be added in FooType
+        foo = await create_content_in_container(container, "FooType", "foo")
+        await create_content_in_container(foo, "BarType", "bar")
+
+        # Check that BarType cannot be globally added
+        with pytest.raises(NotAllowedContentType):
+            await create_content_in_container(container, "BarType", "bar")
+
+        # Check it can be bypassed
+        await create_content_in_container(container, "BarType", "bar", check_constraints=False)
+
+
 async def test_creator_used_from_content_creation(dummy_guillotina):
     utils.login()
 

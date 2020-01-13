@@ -36,6 +36,7 @@ async def test_user_auth(dbusers_requester):
             token=base64.b64encode(b"foobar:password").decode("ascii"),
             auth_type="Basic",
         )
+        assert status_code == 201
         container = await get_container(requester=requester)
         users = await container.async_get("users")
         foobar = await users.async_get("foobar")

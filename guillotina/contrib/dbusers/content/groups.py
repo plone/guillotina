@@ -29,6 +29,7 @@ class IGroup(IFolder):
     schema=IGroup,
     add_permission="guillotina.AddGroup",
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+    globally_addable=False,
 )
 class Group(Folder):
     def __init__(self, *args, **kwargs):
@@ -55,6 +56,7 @@ class Group(Folder):
     schema=IGroupManager,
     behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
     allowed_types=["Group"],
+    globally_addable=False,
 )
 class GroupManager(Folder):
     pass

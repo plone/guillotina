@@ -62,7 +62,7 @@ async def test_managed_transaction_works_with_parent_txn_adoption(container_requ
             root = await txn.get(ROOT_ID)
             container = await root.async_get("guillotina")
             await create_content_in_container(
-                container, "Item", "foobar", check_security=False, __uuid__="foobar"
+                container, "Item", "foobar", check_security=False, __uuid__="foobar", check_constraints=False
             )
 
         async with transaction(db=requester.db) as txn:

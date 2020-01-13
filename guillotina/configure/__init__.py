@@ -174,7 +174,9 @@ def load_contenttype(_context, contenttype):
         behaviors=[resolve_dotted_name(b) for b in conf.get("behaviors", []) or ()],
         add_permission=conf.get("add_permission") or DEFAULT_ADD_PERMISSION,
         allowed_types=conf.get("allowed_types", None),
+        globally_addable=conf.get("globally_addable", True),
     )
+
     component.utility(_context, provides=IResourceFactory, component=factory, name=conf["type_name"])
 
 
