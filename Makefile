@@ -30,6 +30,12 @@ run-cockroachdb: ## Run CockroachDB
 	@docker run -p 127.0.0.1:26257:26257 -p 127.0.0.1:9080:8080 \
 		--rm cockroachdb/cockroach:v2.0.0 start --insecure
 
+.PHONY: run-redis
+run-redis: ## Run Redis
+	@echo ""
+	@echo "$(YELLOW)==> Running Redis"
+	@docker run -p 127.0.0.1:32958:6379 --rm redis:5.0.7
+
 .PHONY: create-cockroachdb
 create-cockroachdb: ## Create CockroachDB
 	@echo ""

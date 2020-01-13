@@ -70,6 +70,7 @@ setup(
         "lru-dict",
         "mypy_extensions",
         "argon2-cffi",
+        "backoff",
     ],
     extras_require={
         "test": [
