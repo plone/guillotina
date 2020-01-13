@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a7 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix value_deserializer() when field.key_type._type is None
+  [masipcat]
 
 
 6.0.0a6 (2020-01-13)
