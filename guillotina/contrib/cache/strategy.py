@@ -175,7 +175,6 @@ class BasicCache(BaseCache):
 
         self._stored_objects.clear()
         self._utility.ignore_tid(self._transaction._tid)
-        breakpoint()
         await self._utility._subscriber.publish(
             app_settings["cache"]["updates_channel"],
             self._transaction._tid,
