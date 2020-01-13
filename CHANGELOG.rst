@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+6.0.0a7 (unreleased)
+--------------------
+
+- Nothing changed yet.
+
+
 6.0.0a6 (2020-01-13)
 --------------------
 - Fix bug on swagger with endpoints without explicit security declarations
