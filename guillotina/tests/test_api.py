@@ -1198,7 +1198,7 @@ async def test_patch_field_validation(container_requester):
             "/db/guillotina/",
             data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": [1]}}),
         )
-        assert status == 412
+        assert status == 201
 
 
 async def test_move_with_already_existing_id(container_requester):
