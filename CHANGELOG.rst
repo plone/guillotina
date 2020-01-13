@@ -3,6 +3,11 @@ CHANGELOG
 
 6.0.0a6 (unreleased)
 --------------------
+- Fix bug on swagger with endpoints without explicit security declarations
+  [jordic]
+
+- Fix bug on pgcatalog when using it without a request
+  [jordic]
 
 - Be able to start database transaction before transaction has started it
   without causing errors
