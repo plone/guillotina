@@ -1222,22 +1222,10 @@ async def test_deserialization_errors(container_requester):
         resp, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": [1]}}),
+            data=json.dumps({"@type": "Item", IDublinCore.__identifier__: {"tags": [{}]}}),
         )
         assert status == 412
-        assert resp["deserialization_errors"] == [
-            {
-                "errors": [
-                    {
-                        "field": "tags",
-                        "message": "Expected <class 'str'> but found <class 'int'>.",
-                        "value": 1,
-                    }
-                ],
-                "field": "tags",
-                "message": "Wrong contained type",
-            }
-        ]
+        assert resp["deserialization_errors"] == [{"field": "tags", "message": "Object is of wrong type."}]
 
         resp, status = await requester(
             "POST", "/db/guillotina/", data=json.dumps({"@type": "TestSchema", "object_a": {"foo": "hey"}})
@@ -1258,11 +1246,17 @@ async def test_deserialization_errors(container_requester):
         assert status == 412
         assert resp["deserialization_errors"] == [
             {
-                "errors": [
-                    {"field": "foo", "message": "Expected <class 'str'> but found <class 'int'>.", "value": 1}
-                ],
-                "field": "list_object_a",
                 "message": "Wrong contained type",
+                "field": "list_object_a",
+                "value": "[{'foo': '1'}]",
+                "errors": [
+                    {
+                        "message": "Wrong contained type",
+                        "field": "[0]",
+                        "value": "{'foo': '1'}",
+                        "errors": [{"message": "Required input is missing.", "field": "bar"}],
+                    }
+                ],
             }
         ]
 
@@ -1297,17 +1291,7 @@ async def test_deserialization_errors(container_requester):
         )
         assert status == 412
         assert resp["deserialization_errors"] == [
-            {
-                "message": "Wrong contained type",
-                "field": "list_object_a",
-                "errors": [
-                    {
-                        "message": "Expected <class 'int'> but found <class 'str'>.",
-                        "field": "bar",
-                        "value": "arr",
-                    }
-                ],
-            }
+            {"message": "Expected <class 'int'> but found <class 'str'>.", "field": "bar", "value": "arr"}
         ]
 
         resp, status = await requester(
