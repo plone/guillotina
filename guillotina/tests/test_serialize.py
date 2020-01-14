@@ -662,7 +662,7 @@ async def test_object_deserialize(dummy_request, mock_txn):
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
     errors = []
-    await deserializer.set_schema(ITestSchema, content, {"object_a": {"foo": 1}}, errors)
+    await deserializer.set_schema(ITestSchema, content, {"object_a": {"foo": {"foo": "bar"}}}, errors)
     assert len(errors) == 1
 
 
