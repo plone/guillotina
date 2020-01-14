@@ -46,13 +46,9 @@ def _optimized_lookup(value, field, context):
         # for primitive types, all we really do is return the value back.
         # this is costly for all the lookups
         if not isinstance(value, field._type):
-            if isinstance(value, (str, int, float)):
-                # only auto convert primitive types
-                try:
-                    value = field._type(value)  # convert other types over
-                except ValueError:
-                    raise WrongType(value, field._type, field.__name__)
-            else:
+            try:
+                value = field._type(value)  # convert other types over
+            except ValueError:
                 raise WrongType(value, field._type, field.__name__)
         return value
     else:
@@ -103,14 +99,16 @@ def bool_converter(field, value, context=None):
 def from_unicode_converter(field, value, context=None):
     if value is not None:
         if field._type is not None:
-            if not isinstance(value, field._type):
-                if isinstance(value, (str, int, float)):
-                    # only auto convert primitive types
-                    try:
-                        value = field._type(value)  # convert other types over
-                    except ValueError:
-                        raise WrongType(value, field._type, field.__name__)
-                else:
+            if not isinstance(value, field._type) and getattr(field, "_type", None) in (
+                int,
+                str,
+                float,
+                bool,
+            ):
+                # only auto convert primitive types
+                try:
+                    value = field._type(value)  # convert other types over
+                except ValueError:
                     raise WrongType(value, field._type, field.__name__)
         else:
             value = field.from_unicode(value)
