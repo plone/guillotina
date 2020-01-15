@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.9 (unreleased)
+5.3.9 (2020-01-15)
 ------------------
 
 - Add open api tests and fix ones that do not pass tests
