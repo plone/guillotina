@@ -25,6 +25,9 @@ from zope.interface import Interface
 import datetime
 
 
+_type_conversions = (int, str, float, bool)
+
+
 @profilable
 def schema_compatible(value, schema_or_field, context=None):
     """The schema_compatible function converts any value to guillotina.schema
@@ -41,13 +44,16 @@ def schema_compatible(value, schema_or_field, context=None):
 
 
 def _optimized_lookup(value, field, context):
-    if getattr(field, "_type", None) in (int, str, float, bool):
+    if getattr(field, "_type", None) in _type_conversions:
         # for primitive types, all we really do is return the value back.
         # this is costly for all the lookups
         if not isinstance(value, field._type):
-            try:
-                value = field._type(value)  # convert other types over
-            except ValueError:
+            if isinstance(value, _type_conversions):
+                try:
+                    value = field._type(value)  # convert other types over
+                except ValueError:
+                    raise WrongType(value, field._type, field.__name__)
+            else:
                 raise WrongType(value, field._type, field.__name__)
         return value
     else:
@@ -96,9 +102,12 @@ def from_unicode_converter(field, value, context=None):
     if value is not None:
         if field._type is not None:
             if not isinstance(value, field._type):
-                try:
-                    value = field._type(value)  # convert other types over
-                except ValueError:
+                if isinstance(value, _type_conversions):
+                    try:
+                        value = field._type(value)  # convert other types over
+                    except ValueError:
+                        raise WrongType(value, field._type, field.__name__)
+                else:
                     raise WrongType(value, field._type, field.__name__)
         else:
             value = field.from_unicode(value)

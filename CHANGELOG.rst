@@ -4,7 +4,8 @@ CHANGELOG
 5.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix automatic type conversion on nested fields
+  [vangheem]
 
 
 5.3.7 (2020-01-13)
