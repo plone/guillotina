@@ -1,7 +1,6 @@
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.routes import VariableRoutePart
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_full_content_path
 from guillotina.utils import get_request_scheme
