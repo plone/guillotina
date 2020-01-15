@@ -65,9 +65,9 @@ def event_loop():
 
 def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
-    settings = _update_from_pytest_markers(settings, pytest_node)
     settings["databases"]["db"]["storage"] = "DUMMY"
     settings["databases"]["db"]["dsn"] = {}
+    settings = _update_from_pytest_markers(settings, pytest_node)
     return settings
 
 
@@ -115,40 +115,37 @@ def _update_from_pytest_markers(settings, pytest_node):
 
 def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
-    settings = _update_from_pytest_markers(settings, pytest_node)
     if annotations["redis"] is not None:
         if "redis" not in settings:
             settings["redis"] = {}
         settings["redis"]["host"] = annotations["redis"][0]
         settings["redis"]["port"] = annotations["redis"][1]
 
-    if annotations["testdatabase"] == "DUMMY":
-        return settings
+    if annotations["testdatabase"] != "DUMMY":
+        settings["databases"]["db"]["storage"] = "postgresql"
+        settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
 
-    settings["databases"]["db"]["storage"] = "postgresql"
-    settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
+        settings["databases"]["db"]["dsn"] = {
+            "scheme": "postgres",
+            "dbname": "guillotina",
+            "user": "postgres",
+            "host": annotations.get("pg_host", "localhost"),
+            "port": annotations.get("pg_port", 5432),
+            "password": "",
+        }
 
-    settings["databases"]["db"]["dsn"] = {
-        "scheme": "postgres",
-        "dbname": "guillotina",
-        "user": "postgres",
-        "host": annotations.get("pg_host", "localhost"),
-        "port": annotations.get("pg_port", 5432),
-        "password": "",
-    }
+        options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
 
-    options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
+        if annotations["testdatabase"] == "cockroachdb":
+            configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
+            configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
+            configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
+        else:
+            configure_db(settings["databases"]["db"], **options)
+            configure_db(settings["databases"]["db-custom"], **options)
+            configure_db(settings["storages"]["db"], **options)
 
-    if annotations["testdatabase"] == "cockroachdb":
-        configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
-        configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
-        configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
-    else:
-        configure_db(settings["databases"]["db"], **options)
-        configure_db(settings["databases"]["db-custom"], **options)
-        configure_db(settings["storages"]["db"], **options)
-
-    return settings
+    return _update_from_pytest_markers(settings, pytest_node)
 
 
 @pytest.fixture(scope="session")

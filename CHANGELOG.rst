@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a7 (unreleased)
 --------------------
 
+- Run _update_from_pytest_markers() after configurung db settings
+  [masipcat]
+
 - Fix value_deserializer() when field.key_type._type is None
   [masipcat]
 
