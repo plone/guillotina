@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a7 (unreleased)
 --------------------
 
+- Fix bug in traversal introduced when added support for asgi middlewares
+  [masipcat]
+
 - Fix value_deserializer() when field.key_type._type is None
   [masipcat]
 
