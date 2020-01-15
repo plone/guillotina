@@ -267,9 +267,10 @@ class MatchInfo(BaseMatchInfo):
             # We try to avoid collisions on the same instance of
             # guillotina
             view_result = await self.view()
-
             if app_settings["check_writable_request"](request):
                 await commit(warn=False)
+            else:
+                await abort()
         except (ConflictError, TIDConflictError):
             await abort()
             # bubble this error up
