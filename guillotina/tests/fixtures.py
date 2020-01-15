@@ -138,7 +138,6 @@ def get_db_settings(pytest_node=None):
 
     options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
     settings = _update_from_pytest_markers(settings, pytest_node)
-    import pdb; pdb.set_trace()
 
     if annotations["testdatabase"] == "cockroachdb":
         configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
@@ -150,7 +149,6 @@ def get_db_settings(pytest_node=None):
         configure_db(settings["storages"]["db"], **options)
 
     return settings
-
 
 
 @pytest.fixture(scope="session")
