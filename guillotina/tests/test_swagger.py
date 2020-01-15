@@ -1,3 +1,6 @@
+from openapi_spec_validator import schema_v3_url
+from openapi_spec_validator import validate_v3_spec
+
 import pytest
 
 
@@ -27,3 +30,12 @@ async def test_get_swagger_index(container_requester):
     async with container_requester as requester:
         resp, status = await requester("GET", "/@docs")
         assert status == 200
+
+
+@pytest.mark.app_settings(SWAGGER_SETTINGS)
+async def test_validate_swagger_definition(container_requester):
+    async with container_requester as requester:
+        resp, status = await requester("GET", "/@swagger")
+        assert status == 200
+        print(schema_v3_url)
+        validate_v3_spec(resp)

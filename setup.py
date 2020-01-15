@@ -82,6 +82,7 @@ setup(
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=7.0",
+            "openapi-spec-validator",
         ],
         "docs": [
             "sphinx",

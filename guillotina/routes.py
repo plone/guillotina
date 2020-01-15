@@ -15,7 +15,7 @@ class RoutePart:
         return self.name == other
 
     def __repr__(self):
-        return "<RoutePart {}>".format(self.name)
+        return f"<{self.__class__.__name__} {self.name}>"
 
 
 class VariableRoutePart(RoutePart):
