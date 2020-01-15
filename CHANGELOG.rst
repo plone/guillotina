@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.8 (unreleased)
+5.3.8 (2020-01-15)
 ------------------
 
 - Fix automatic type conversion on nested fields
