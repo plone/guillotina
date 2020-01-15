@@ -130,7 +130,7 @@ def load_service(_context, service):
         factory.__route__ = routes.Route(name)
     else:
         factory.__route__.service_configuration = service_conf
-    service_conf["route"] = factory.__route__
+    service_conf["route"] = [str(rp) for rp in factory.__route__.route_parts]
 
     component.adapter(
         _context,

@@ -70,10 +70,11 @@ class SwaggerDefinitionService(Service):
             ]
         parameters = self.get_data(service_def.get("parameters", []))
 
-        for route_part in [r for r in service_def["route"].route_parts if isinstance(r, VariableRoutePart)]:
-            if route_part.name not in [p["name"] for p in parameters if p.get("in") == "path"]:
+        for route_part in [r for r in service_def["route"] if r[0] == "{"]:
+            route_part = route_part.strip("{}")
+            if route_part not in [p["name"] for p in parameters if p.get("in") == "path"]:
                 parameters.append(
-                    {"in": "path", "name": route_part.name, "schema": {"type": "string"}, "required": True}
+                    {"in": "path", "name": route_part, "schema": {"type": "string"}, "required": True}
                 )
         api_def[path or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", [""]) or tags,
