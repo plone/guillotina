@@ -69,36 +69,40 @@ def get_content_json_schema_responses(content):
     return {
         "200": {
             "description": "Resource data",
-            "schema": {
-                "allOf": [
-                    {"$ref": "#/components/schemas/ResourceFolder"},
-                    {"properties": convert_interfaces_to_schema(get_all_behavior_interfaces(content))},
-                ]
-            },
-        }
-    }
-
-
-def patch_content_json_schema_parameters(content):
-    return [
-        {
-            "required": True,
             "content": {
                 "application/json": {
                     "schema": {
                         "allOf": [
-                            {"$ref": "#/components/schemas/WritableResource"},
+                            {"$ref": "#/components/schemas/ResourceFolder"},
                             {
+                                "type": "object",
                                 "properties": convert_interfaces_to_schema(
                                     get_all_behavior_interfaces(content)
-                                )
+                                ),
                             },
                         ]
                     }
                 }
             },
         }
-    ]
+    }
+
+
+def patch_content_json_schema_parameters(content):
+    return {
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "allOf": [
+                        {"$ref": "#/components/schemas/WritableResource"},
+                        {"properties": convert_interfaces_to_schema(get_all_behavior_interfaces(content))},
+                    ],
+                }
+            }
+        },
+    }
 
 
 @configure.service(context=IResource, method="HEAD", permission="guillotina.ViewContent")
@@ -144,7 +148,10 @@ class DefaultGET(Service):
         "content": {"application/json": {"schema": {"$ref": "#/components/schemas/AddableResource"}}},
     },
     responses={
-        "200": {"description": "Resource data", "schema": {"$ref": "#/components/schemas/ResourceFolder"}}
+        "200": {
+            "description": "Resource data",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ResourceFolder"}}},
+        }
     },
 )
 class DefaultPOST(Service):
@@ -281,7 +288,7 @@ class DefaultPATCH(Service):
     method="PUT",
     permission="guillotina.ModifyContent",
     summary="Replace the content of this resource",
-    parameters=patch_content_json_schema_parameters,
+    requestBody=patch_content_json_schema_parameters,
     responses={
         "200": {
             "description": "Resource data",
@@ -329,7 +336,7 @@ class DefaultPUT(DefaultPATCH):
     responses={
         "200": {
             "description": "All the sharing defined on this resource",
-            "content": {"application/json": {"schema": {"ref": "#/components/schemas/ResourceACL"}}},
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ResourceACL"}}},
         }
     },
 )
@@ -557,14 +564,10 @@ class DefaultOPTIONS(Service):
                         "destination": {
                             "type": "string",
                             "description": "Absolute path to destination object from container or destination uid",
-                            "required": False,
                         },
-                        "new_id": {
-                            "type": "string",
-                            "description": "Optional new id to assign object",
-                            "required": False,
-                        },
-                    }
+                        "new_id": {"type": "string", "description": "Optional new id to assign object"},
+                    },
+                    "additionalProperties": False,
                 }
             }
         },
@@ -604,20 +607,15 @@ async def move(context, request):
                         "destination": {
                             "type": "string",
                             "description": "Absolute path to destination object from container or destination uid",
-                            "required": False,
                         },
-                        "new_id": {
-                            "type": "string",
-                            "description": "Optional new id to assign object",
-                            "required": False,
-                        },
+                        "new_id": {"type": "string", "description": "Optional new id to assign object"},
                         "reset_acl": {
                             "type": "bool",
                             "description": "Remove users and roles from acl, except for the request user",
-                            "required": True,
                             "default": False,
                         },
-                    }
+                    },
+                    "additionalProperties": False,
                 }
             }
         },
@@ -665,10 +663,10 @@ async def ids(context, request):
     permission="guillotina.Manage",
     summary="Paginated list of sub objects",
     parameters=[
-        {"name": "include", "in": "query", "required": True, "schema": {"type": "string"}},
-        {"name": "omit", "in": "query", "required": True, "schema": {"type": "string"}},
-        {"name": "page_size", "in": "query", "default": 20, "required": True, "schema": {"type": "number"}},
-        {"name": "page", "in": "query", "default": 1, "required": True, "schema": {"type": "number"}},
+        {"name": "include", "in": "query", "required": False, "schema": {"type": "string"}},
+        {"name": "omit", "in": "query", "required": False, "schema": {"type": "string"}},
+        {"name": "page_size", "in": "query", "required": False, "schema": {"type": "number"}},
+        {"name": "page", "in": "query", "required": False, "schema": {"type": "number"}},
     ],
     responses={"200": {"description": "Successfully returned response object"}},
 )

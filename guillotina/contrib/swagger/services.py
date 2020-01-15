@@ -120,7 +120,9 @@ class SwaggerDefinitionService(Service):
                         trav_defs = service_def["traversed_service_definitions"]
                         if isinstance(trav_defs, dict):
                             for sub_path, sub_service_def in trav_defs.items():
-                                sub_service_def["permission"] = service_def["permission"]
+                                for key in service_def.keys():
+                                    if key not in sub_service_def:
+                                        sub_service_def[key] = service_def[key]
                                 self.load_swagger_info(
                                     api_def, os.path.join(path, sub_path), method, tags, sub_service_def
                                 )

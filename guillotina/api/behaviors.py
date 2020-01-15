@@ -113,7 +113,7 @@ async def delete_behavior(context, behavior):
     responses={
         "200": {
             "description": "A listing of behaviors for content",
-            "content": {"application/json": {"schema": "#/components/schemas/BehaviorsResponse"}},
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BehaviorsResponse"}}},
         }
     },
 )
