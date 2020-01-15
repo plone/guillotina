@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a7 (unreleased)
 --------------------
 
+- Add open api tests and fix ones that do not pass tests
+  [vangheem]
+
 - Fix value_deserializer() when field.key_type._type is None
   [masipcat]
 

@@ -82,6 +82,7 @@ setup(
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=7.0",
             "async-asgi-testclient~=1.2.0",
+            "openapi-spec-validator",
         ],
         "docs": [
             "aiohttp>=3.0.0,<4.0.0",
