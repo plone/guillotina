@@ -121,31 +121,36 @@ def get_db_settings(pytest_node=None):
         settings["redis"]["host"] = annotations["redis"][0]
         settings["redis"]["port"] = annotations["redis"][1]
 
-    if annotations["testdatabase"] != "DUMMY":
-        settings["databases"]["db"]["storage"] = "postgresql"
-        settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
+    if annotations["testdatabase"] == "DUMMY":
+        return _update_from_pytest_markers(settings, pytest_node)
 
-        settings["databases"]["db"]["dsn"] = {
-            "scheme": "postgres",
-            "dbname": "guillotina",
-            "user": "postgres",
-            "host": annotations.get("pg_host", "localhost"),
-            "port": annotations.get("pg_port", 5432),
-            "password": "",
-        }
+    settings["databases"]["db"]["storage"] = "postgresql"
+    settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
 
-        options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
+    settings["databases"]["db"]["dsn"] = {
+        "scheme": "postgres",
+        "dbname": "guillotina",
+        "user": "postgres",
+        "host": annotations.get("pg_host", "localhost"),
+        "port": annotations.get("pg_port", 5432),
+        "password": "",
+    }
 
-        if annotations["testdatabase"] == "cockroachdb":
-            configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
-            configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
-            configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
-        else:
-            configure_db(settings["databases"]["db"], **options)
-            configure_db(settings["databases"]["db-custom"], **options)
-            configure_db(settings["storages"]["db"], **options)
+    options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
+    settings = _update_from_pytest_markers(settings, pytest_node)
+    import pdb; pdb.set_trace()
 
-    return _update_from_pytest_markers(settings, pytest_node)
+    if annotations["testdatabase"] == "cockroachdb":
+        configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
+        configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
+        configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
+    else:
+        configure_db(settings["databases"]["db"], **options)
+        configure_db(settings["databases"]["db-custom"], **options)
+        configure_db(settings["storages"]["db"], **options)
+
+    return settings
+
 
 
 @pytest.fixture(scope="session")
