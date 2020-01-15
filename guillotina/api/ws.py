@@ -34,7 +34,7 @@ import ujson
     responses={
         "200": {
             "description": "The new token",
-            "schema": {"properties": {"token": {"type": "string", "required": True}}},
+            "content": {"application/json": {"schema": {"properties": {"token": {"type": "string"}}}}},
         }
     },
 )
@@ -47,7 +47,7 @@ import ujson
     responses={
         "200": {
             "description": "The new token",
-            "schema": {"properties": {"token": {"type": "string", "required": True}}},
+            "content": {"application/json": {"schema": {"properties": {"token": {"type": "string"}}}}},
         }
     },
 )

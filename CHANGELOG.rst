@@ -4,7 +4,8 @@ CHANGELOG
 5.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add open api tests and fix ones that do not pass tests
+  [vangheem]
 
 
 5.3.8 (2020-01-15)
