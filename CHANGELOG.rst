@@ -4,6 +4,9 @@ CHANGELOG
 5.2.1 (unreleased)
 ------------------
 
+- Run _update_from_pytest_markers() after configuring db settings
+  [masipcat]
+
 - More detailed information in ValidationErrors
   [masipcat]
 
