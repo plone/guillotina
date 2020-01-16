@@ -7,6 +7,9 @@ CHANGELOG
 - Add open api tests and fix ones that do not pass tests
   [vangheem]
 
+- Fix bug in traversal introduced when added support for asgi middlewares
+  [masipcat]
+
 - Fix value_deserializer() when field.key_type._type is None
   [masipcat]
 
