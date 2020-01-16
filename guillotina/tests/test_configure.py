@@ -145,7 +145,10 @@ async def test_register_behavior(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina/@types")
         type_ = [s for s in response if s["title"] == "MyType2"][0]
-        assert "foobar" in type_["definitions"]["guillotina.tests.test_configure.IMyBehavior"]["properties"]
+        assert (
+            "foobar"
+            in type_["components"]["schemas"]["guillotina.tests.test_configure.IMyBehavior"]["properties"]
+        )
 
     # also get_all_possible_schemas_for_type should come with this new behavior
     behaviors_schemas = get_all_possible_schemas_for_type("MyType2")

@@ -60,7 +60,7 @@ def test_all(dummy_request):
         (schema.Text(), serialize_schema_field.DefaultTextSchemaFieldSerializer),
         (schema.TextLine(), serialize_schema_field.DefaultTextLineSchemaFieldSerializer),
         (schema.Float(), serialize_schema_field.DefaultFloatSchemaFieldSerializer),
-        (schema.Int(), serialize_schema_field.DefaultIntSchemaFieldSerializer),
+        (schema.Int(), serialize_schema_field.DefaultNumberSchemaFieldSerializer),
         (schema.Bool(), serialize_schema_field.DefaultBoolSchemaFieldSerializer),
         (schema.List(), serialize_schema_field.DefaultCollectionSchemaFieldSerializer),
         (schema.Choice(values=("one", "two")), serialize_schema_field.DefaultChoiceSchemaFieldSerializer),
