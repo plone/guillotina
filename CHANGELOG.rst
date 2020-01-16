@@ -10,6 +10,8 @@ CHANGELOG
 5.3.9 (2020-01-15)
 ------------------
 
+- Fix validating array params in query parameters [lferran]
+
 - Add open api tests and fix ones that do not pass tests
   [vangheem]
 
