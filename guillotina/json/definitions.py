@@ -110,7 +110,7 @@ configure.json_schema_definition(
                     "@type": {"type": "string"},
                     "parent": {
                         "type": "object",
-                        "schema": {"properties": {"@id": {"type": "string"}, "@type": {"type": "string"}}},
+                        "properties": {"@id": {"type": "string"}, "@type": {"type": "string"}},
                     },
                 },
                 "required": ["@id", "@type"],
@@ -129,7 +129,7 @@ configure.json_schema_definition(
             {"$ref": "#/components/schemas/Resource"},
             {
                 "properties": {
-                    "items": {"type": "object", "schema": {"$ref": "#/components/schemas/Resource"}},
+                    "items": {"type": "object", "$ref": "#/components/schemas/Resource"},
                     "length": {"type": "integer"},
                 }
             },
@@ -159,11 +159,8 @@ configure.json_schema_definition(
         "type": "object",
         "title": "All permissions for an object",
         "properties": {
-            "local": {"type": "object", "schema": {"$ref": "#/components/schemas/ACL"}},
-            "inherit": {
-                "type": "array",
-                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/ACL"}},
-            },
+            "local": {"type": "object", "$ref": "#/components/schemas/ACL"},
+            "inherit": {"type": "array", "items": {"type": "object", "$ref": "#/components/schemas/ACL"}},
         },
     },
 )
@@ -222,15 +219,15 @@ configure.json_schema_definition(
         "properties": {
             "prinperm": {
                 "type": "array",
-                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/PrincipalPermission"}},
+                "items": {"type": "object", "$ref": "#/components/schemas/PrincipalPermission"},
             },
             "prinrole": {
                 "type": "array",
-                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/PrincipalRole"}},
+                "items": {"type": "object", "$ref": "#/components/schemas/PrincipalRole"},
             },
             "roleperm": {
                 "type": "array",
-                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/RolePermission"}},
+                "items": {"type": "object", "$ref": "#/components/schemas/RolePermission"},
             },
         },
     },
@@ -238,13 +235,7 @@ configure.json_schema_definition(
 
 configure.json_schema_definition(
     "AllPermissions",
-    {
-        "type": "array",
-        "items": {
-            "type": "object",
-            "schema": {"type": "object", "schema": {"$ref": "#/components/schemas/Permissions"}},
-        },
-    },
+    {"type": "array", "items": {"type": "object", "$ref": "#/components/schemas/Permissions"}},
 )
 
 
@@ -261,7 +252,7 @@ configure.json_schema_definition(
         "properties": {
             "member": {
                 "type": "array",
-                "items": {"type": "object", "schema": {"$ref": "#/components/schemas/SearchResult"}},
+                "items": {"type": "object", "$ref": "#/components/schemas/SearchResult"},
             },
             "items_count": {"type": "integer"},
         },
@@ -280,7 +271,7 @@ configure.json_schema_definition(
     "SearchQuery",
     {
         "type": "object",
-        "tutle": "Search Query",
+        "title": "Search Query",
         "properties": {
             "term": {"type": "string"},
             "_from": {"type": "string"},
