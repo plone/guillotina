@@ -11,6 +11,7 @@ from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.schema import Dict
 from guillotina.utils import get_schema_validator
+from typing import Any
 from typing import Union
 
 import jsonschema
@@ -49,7 +50,7 @@ class DictFieldProxy:
 _sentinal = object()
 
 
-def _safe_int_or_float_cast(value: str) -> Union[int, float]:
+def _safe_int_or_float_cast(value: Any) -> Union[int, float]:
     try:
         value = int(value)
     except ValueError:
