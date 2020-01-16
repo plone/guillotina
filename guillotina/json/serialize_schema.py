@@ -38,7 +38,7 @@ class SerializeFactoryToJson(object):
             serializer = get_multi_adapter((field, factory.schema, self.request), ISchemaFieldSerializeToJson)
             result["properties"][name] = await serializer()
         if len(required) > 0:
-            result["required"] == required
+            result["required"] = required
 
         # Behavior serialization
         for schema in factory.behaviors or ():
