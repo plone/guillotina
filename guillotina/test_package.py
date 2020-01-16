@@ -252,6 +252,29 @@ async def matching_service(context, request):
     return request.matchdict
 
 
+@configure.service(
+    context=IApplication,
+    method="GET",
+    name="@queryParamsValidation",
+    parameters=[
+        {
+            "required": True,
+            "in": "query",
+            "name": "users",
+            "schema": {
+                "minItems": 2,
+                "maxItems": 5,
+                "type": "array",
+                "items": {"type": "string", "minLength": 1},
+            },
+        }
+    ],
+    validate=True,
+)
+async def test_query_params_service(context, request):
+    return {}
+
+
 @configure.adapter(for_=Interface, provides=IIDGenerator)
 class IDGenerator(object):
     """

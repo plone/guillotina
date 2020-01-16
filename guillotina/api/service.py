@@ -11,6 +11,7 @@ from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.schema import Dict
 from guillotina.utils import get_schema_validator
+from typing import Union
 
 import jsonschema
 
@@ -48,6 +49,17 @@ class DictFieldProxy:
 _sentinal = object()
 
 
+def _safe_int_or_float_cast(value: str) -> Union[int, float]:
+    try:
+        value = int(value)
+    except ValueError:
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+    return value
+
+
 class Service(View):
     __validator__ = __schema__ = __original__ = None
 
@@ -73,15 +85,14 @@ class Service(View):
                     continue
 
                 try:
-                    value = data[name]
-                    if parameter["schema"].get("type") == "number":
-                        try:
-                            value = int(value)
-                        except ValueError:
-                            try:
-                                value = float(value)
-                            except ValueError:
-                                pass
+                    if parameter["schema"].get("type") == "array":
+                        value = data.getall(name)
+                        if parameter["schema"]["items"].get("type") == "number":
+                            value = [_safe_int_or_float_cast(v) for v in value]
+                    else:
+                        value = data[name]
+                        if parameter["schema"].get("type") == "number":
+                            value = _safe_int_or_float_cast(value)
                     jsonschema.validate(instance=value, schema=parameter["schema"])
                 except jsonschema.exceptions.ValidationError as e:
                     raise HTTPPreconditionFailed(
