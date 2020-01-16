@@ -7,6 +7,11 @@ CHANGELOG
 - Run _update_from_pytest_markers() after configuring db settings
   [masipcat]
 
+- Fix validating array params in query parameters [lferran]
+
+- Add open api tests and fix ones that do not pass tests
+  [vangheem]
+
 - Fix bug in traversal introduced when added support for asgi middlewares
   [masipcat]
 

@@ -36,6 +36,10 @@ class SwaggerDefinitionService(Service):
             api_def[path or "/"] = {}
         desc = self.get_data(service_def.get("description", ""))
         swagger_conf = service_def.get("swagger", {})
+        try:
+            permission = service_def["permission"]
+        except KeyError:
+            permission = app_settings["default_permission"]
         if swagger_conf.get("display_permission", True):
             perms = service_def.get("permission", "")
             if desc:
@@ -43,15 +47,43 @@ class SwaggerDefinitionService(Service):
             else:
                 desc += f"permission: {perms}"
 
+        responses = self.get_data(service_def.get("responses", {}))
+        if "401" not in responses:
+            responses["401"] = {
+                "description": "Unauthorized",
+                "content": {"application/json": {"schema": {"type": "object"}}},
+            }
+        if "200" not in responses:
+            responses["200"] = {
+                "description": "OK",
+                "content": {"application/json": {"schema": {"type": "object"}}},
+            }
+        request_body = self.get_data(service_def.get("requestBody", None))
+        if request_body is None:
+            request_body = {"content": {"application/json": {"schema": {"type": "object"}}}}
+
+        security = self.get_data(service_def.get("security", None))
+        if security is None:
+            security = [
+                {"basicAuth": [f"permission:{permission}"]},
+                {"bearerAuth": [f"permission:{permission}"]},
+            ]
+        parameters = self.get_data(service_def.get("parameters", []))
+
+        for route_part in [r for r in service_def["route"] if r[0] == "{"]:
+            route_part = route_part.strip("{}")
+            if route_part not in [p["name"] for p in parameters if p.get("in") == "path"]:
+                parameters.append(
+                    {"in": "path", "name": route_part, "schema": {"type": "string"}, "required": True}
+                )
         api_def[path or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", [""]) or tags,
-            "parameters": self.get_data(service_def.get("parameters", {})),
-            "requestBody": self.get_data(service_def.get("requestBody", "")),
-            "produces": self.get_data(service_def.get("produces", [])),
+            "parameters": parameters,
+            "requestBody": request_body,
             "summary": self.get_data(service_def.get("summary", "")),
             "description": desc,
-            "responses": self.get_data(service_def.get("responses", {})),
-            "security": "",
+            "responses": responses,
+            "security": security,
         }
 
     def get_endpoints(self, iface_conf, base_path, api_def, tags=None):
@@ -89,7 +121,9 @@ class SwaggerDefinitionService(Service):
                         trav_defs = service_def["traversed_service_definitions"]
                         if isinstance(trav_defs, dict):
                             for sub_path, sub_service_def in trav_defs.items():
-                                sub_service_def["permission"] = service_def["permission"]
+                                for key in service_def.keys():
+                                    if key not in sub_service_def:
+                                        sub_service_def[key] = service_def[key]
                                 self.load_swagger_info(
                                     api_def, os.path.join(path, sub_path), method, tags, sub_service_def
                                 )

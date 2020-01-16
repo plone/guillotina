@@ -115,7 +115,6 @@ class UploadFile(TraversableFieldService):
     method="GET",
     permission="guillotina.ViewContent",
     name="@download/{field_name}",
-    parameters=[{"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}}],
     **_traversed_file_doc("Download the content of a file"),
 )
 @configure.service(
@@ -123,11 +122,10 @@ class UploadFile(TraversableFieldService):
     method="GET",
     permission="guillotina.ViewContent",
     name="@download/{field_name}/{filename}",
-    parameters=[
-        {"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}},
-        {"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}},
-    ],
-    **_traversed_file_doc("Download the content of a file"),
+    **_traversed_file_doc(
+        "Download the content of a file",
+        parameters=[{"in": "path", "name": "filename", "required": True, "schema": {"type": "string"}}],
+    ),
 )
 class DownloadFile(TraversableFieldService):
     async def handle(self, adapter, kwargs):
@@ -161,7 +159,7 @@ class DownloadFile(TraversableFieldService):
     name="@download/{field_name}/{filename}",
     parameters=[
         {"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}},
-        {"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}},
+        {"in": "path", "name": "filename", "required": True, "schema": {"type": "string"}},
     ],
 )
 class HeadFile(DownloadFile):
@@ -176,7 +174,6 @@ class HeadFile(DownloadFile):
     name="@tusupload/{field_name}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=TUS_PARAMETERS,
         responses={
             "204": {
                 "description": "Successfully patched data",
@@ -196,7 +193,8 @@ class HeadFile(DownloadFile):
     name="@tusupload/{field_name}/{filename}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=TUS_PARAMETERS,
+        parameters=[{"in": "path", "name": "filename", "required": True, "schema": {"type": "string"}}]
+        + TUS_PARAMETERS,
         responses={
             "204": {
                 "description": "Successfully patched data",
@@ -227,10 +225,7 @@ class TusCreateFile(UploadFile):
     name="@tusupload/{field_name}/{filename}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[
-            {"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}},
-            {"in": "path", "name": "filename", "required": True, "schema": {"type": "string"}},
-        ],
+        parameters=[{"in": "path", "name": "filename", "required": True, "schema": {"type": "string"}}],
         responses={
             "204": {
                 "description": "Successfully patched data",
@@ -250,7 +245,6 @@ class TusCreateFile(UploadFile):
     name="@tusupload/{field_name}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[{"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}}],
         responses={
             "200": {
                 "description": "Successfully patched data",
@@ -324,7 +318,6 @@ class TusPatchFile(UploadFile):
     name="@tusupload/{field_name}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[{"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}}],
         responses={
             "200": {
                 "description": "Successfully returned tus info",
@@ -345,10 +338,7 @@ class TusPatchFile(UploadFile):
     name="@tusupload/{field_name}/{filename}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[
-            {"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}},
-            {"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}},
-        ],
+        parameters=[{"in": "path", "name": "filename", "required": True, "schema": {"type": "string"}}],
         responses={
             "200": {
                 "description": "Successfully returned tus info",

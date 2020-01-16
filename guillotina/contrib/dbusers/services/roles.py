@@ -14,7 +14,7 @@ from guillotina.interfaces import IContainer
     responses={
         "200": {
             "description": "List of available roles",
-            "content": {"application/json": {"schema": {"type": {"array"}}}},
+            "content": {"application/json": {"schema": {"type": "array"}}},
         }
     },
 )
