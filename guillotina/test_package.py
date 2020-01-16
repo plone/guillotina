@@ -258,7 +258,7 @@ async def matching_service(context, request):
     name="@queryParamsValidation",
     parameters=[
         {
-            "required": True,
+            "required": False,
             "in": "query",
             "name": "users",
             "schema": {
@@ -267,7 +267,13 @@ async def matching_service(context, request):
                 "type": "array",
                 "items": {"type": "string", "minLength": 1},
             },
-        }
+        },
+        {
+            "required": False,
+            "in": "query",
+            "name": "numbers",
+            "schema": {"type": "array", "items": {"type": "number"}},
+        },
     ],
     validate=True,
 )

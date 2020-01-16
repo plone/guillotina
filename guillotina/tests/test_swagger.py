@@ -44,15 +44,13 @@ async def test_validate_swagger_definition(container_requester):
             validate_v3_spec(resp)
 
 
-async def test_validate_query_params(container_requester):
+async def test_validate_arrays_in_query_params(container_requester):
     async with container_requester as requester:
-        _, status = await requester("GET", "@queryParamsValidation?users=u1&users=u2&users=u3")
+        _, status = await requester("GET", "@queryParamsValidation?numbers=1.0&numbers=2")
         assert status == 200
 
-        resp, status = await requester("GET", "@queryParamsValidation")
-        assert status == 412
-        assert resp["reason"] == "Query schema validation error"
-        assert resp["message"] == "users is required"
+        _, status = await requester("GET", "@queryParamsValidation?users=u1&users=u2&users=u3")
+        assert status == 200
 
         resp, status = await requester("GET", "@queryParamsValidation?users=u1&users=")
         assert status == 412
