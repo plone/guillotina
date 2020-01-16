@@ -27,6 +27,7 @@ from guillotina.schema.interfaces import IText
 from guillotina.schema.interfaces import ITextLine
 from guillotina.schema.interfaces import ITime
 from guillotina.schema.interfaces import ITuple
+from typing import Dict
 from zope.interface import implementedBy
 from zope.interface import Interface
 
@@ -40,8 +41,8 @@ class DefaultSchemaFieldSerializer:
     # Elements we won't write
     filtered_attributes = ["order", "unique", "defaultFactory", "required", "missing_value"]
     forced_fields = frozenset(["default", "title"])
-    __name_translations = {"readonly": "readOnly", "vocabulary": "enum"}
-    name_translations = {}
+    __name_translations: Dict[str, str] = {"readonly": "readOnly", "vocabulary": "enum"}
+    name_translations: Dict[str, str] = {}
 
     def __init__(self, field, schema, request):
         self.field = field
@@ -240,7 +241,7 @@ class DefaultChoiceSchemaFieldSerializer(DefaultTextSchemaFieldSerializer):
 
 
 @configure.adapter(for_=(IObject, Interface, Interface), provides=ISchemaFieldSerializeToJson)
-class DefaultObjectSchemaFieldSerializer(DefaultObjectSchemaFieldSerializer):
+class DefaultObjectFieldSchemaFieldSerializer(DefaultObjectSchemaFieldSerializer):
     @property
     def field_type(self):
         return "object"
