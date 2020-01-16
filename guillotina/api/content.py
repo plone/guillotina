@@ -610,7 +610,7 @@ async def move(context, request):
                         },
                         "new_id": {"type": "string", "description": "Optional new id to assign object"},
                         "reset_acl": {
-                            "type": "bool",
+                            "type": "boolean",
                             "description": "Remove users and roles from acl, except for the request user",
                             "default": False,
                         },

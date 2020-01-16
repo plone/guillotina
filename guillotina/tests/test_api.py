@@ -88,7 +88,7 @@ async def test_get_contenttype(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina/@types/Item")
         assert status == 200
-        assert len(response["definitions"]) == 1
+        assert len(response["components"]["schemas"]) == 1
         assert response["title"] == "Item"
 
 
