@@ -252,6 +252,36 @@ async def matching_service(context, request):
     return request.matchdict
 
 
+@configure.service(
+    context=IApplication,
+    method="GET",
+    permission="guillotina.Public",
+    name="@queryParamsValidation",
+    parameters=[
+        {
+            "required": False,
+            "in": "query",
+            "name": "users",
+            "schema": {
+                "minItems": 2,
+                "maxItems": 5,
+                "type": "array",
+                "items": {"type": "string", "minLength": 1},
+            },
+        },
+        {
+            "required": False,
+            "in": "query",
+            "name": "numbers",
+            "schema": {"type": "array", "items": {"type": "number"}},
+        },
+    ],
+    validate=True,
+)
+async def dummy_query_params_service(context, request):
+    return {}
+
+
 @configure.adapter(for_=Interface, provides=IIDGenerator)
 class IDGenerator(object):
     """
