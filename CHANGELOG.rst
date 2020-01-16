@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.11 (unreleased)
+5.3.11 (2020-01-16)
 -------------------
 
 - Better error handling on redis connection issues
