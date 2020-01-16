@@ -7,3 +7,8 @@ class Channel:
 
     async def get(self) -> bytes:
         ...
+
+
+class Redis:
+    def __init__(self, conn):
+        ...

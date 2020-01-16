@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a7 (unreleased)
 --------------------
 
+- Better error handling on redis connection issues
+  [vangheem]
+
 - Fix validating array params in query parameters [lferran]
 
 - Add open api tests and fix ones that do not pass tests
