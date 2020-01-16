@@ -277,7 +277,7 @@ async def matching_service(context, request):
     ],
     validate=True,
 )
-async def test_query_params_service(context, request):
+async def dummy_query_params_service(context, request):
     return {}
 
 
