@@ -4,7 +4,8 @@ CHANGELOG
 5.3.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- JSON Schema and open api serialization fixes
+  [vangheem]
 
 
 5.3.9 (2020-01-15)

@@ -42,9 +42,9 @@ class SwaggerDefinitionService(Service):
             permission = app_settings["default_permission"]
         if swagger_conf.get("display_permission", True):
             if desc:
-                desc += f" 〜 permission: {service_def['permission']}"
+                desc += f" 〜 permission: {permission}"
             else:
-                desc += f"permission: {service_def['permission']}"
+                desc += f"permission: {permission}"
 
         responses = self.get_data(service_def.get("responses", {}))
         if "401" not in responses:
@@ -58,7 +58,7 @@ class SwaggerDefinitionService(Service):
                 "content": {"application/json": {"schema": {"type": "object"}}},
             }
         request_body = self.get_data(service_def.get("requestBody", None))
-        if request_body is None:
+        if request_body is None and method.lower() not in ("get", "delete"):
             request_body = {"content": {"application/json": {"schema": {"type": "object"}}}}
 
         security = self.get_data(service_def.get("security", None))
@@ -75,15 +75,17 @@ class SwaggerDefinitionService(Service):
                 parameters.append(
                     {"in": "path", "name": route_part, "schema": {"type": "string"}, "required": True}
                 )
-        api_def[path or "/"][method.lower()] = {
+        data = {
             "tags": swagger_conf.get("tags", [""]) or tags,
             "parameters": parameters,
-            "requestBody": request_body,
             "summary": self.get_data(service_def.get("summary", "")),
             "description": desc,
             "responses": responses,
             "security": security,
         }
+        if request_body is not None:
+            data["requestBody"] = request_body
+        api_def[path or "/"][method.lower()] = data
 
     def get_endpoints(self, iface_conf, base_path, api_def, tags=None):
         tags = tags or []

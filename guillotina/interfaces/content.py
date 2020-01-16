@@ -179,7 +179,7 @@ class IResource(IBaseObject, ILocation):
         title="Title", required=False, description="Title of the Resource", default=""
     )
 
-    uuid = guillotina.schema.TextLine(title="UUID", required=True, readonly=True)
+    uuid = guillotina.schema.TextLine(title="UUID", required=False, readonly=True)
 
     modification_date = guillotina.schema.Datetime(title="Modification date", required=False)
 

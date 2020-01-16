@@ -13,7 +13,7 @@ app_settings = {
         "base_url": None,
         "auth_storage_search_keys": ["auth"],
         "base_configuration": {
-            "openapi": "3.0.0",
+            "openapi": "3.0.2",
             "info": {"version": "1.0", "title": "Guillotina", "description": "The REST Resource API"},
             "servers": [{"url": ""}],
             "paths": {},
