@@ -41,6 +41,7 @@ async def test_validate_swagger_definition(container_requester):
             validate_v3_spec(resp)
 
 
+@pytest.mark.app_settings(SWAGGER_SETTINGS)
 async def test_validate_arrays_in_query_params(container_requester):
     async with container_requester as requester:
         _, status = await requester("GET", "@queryParamsValidation?numbers=1.0&numbers=2")

@@ -255,6 +255,7 @@ async def matching_service(context, request):
 @configure.service(
     context=IApplication,
     method="GET",
+    permission="guillotina.Public",
     name="@queryParamsValidation",
     parameters=[
         {
