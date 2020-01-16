@@ -45,6 +45,7 @@ class PubSubUtility:
         klass = resolve_dotted_name(self._settings["driver"])
         self._driver = await klass.get_driver()
         await self._driver.initialize(self._loop)
+        self._initialized = True
 
     async def finalize(self, app):
         self._subscribers.clear()
