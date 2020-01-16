@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.10 (unreleased)
+5.3.10 (2020-01-16)
 -------------------
 
 - JSON Schema and open api serialization fixes
