@@ -42,3 +42,26 @@ async def test_validate_swagger_definition(container_requester):
             resp, status = await requester("GET", os.path.join(path, "@swagger"))
             assert status == 200
             validate_v3_spec(resp)
+
+
+async def test_validate_arrays_in_query_params(container_requester):
+    async with container_requester as requester:
+        _, status = await requester("GET", "@queryParamsValidation?numbers=1.0&numbers=2")
+        assert status == 200
+
+        _, status = await requester("GET", "@queryParamsValidation?users=u1&users=u2&users=u3")
+        assert status == 200
+
+        resp, status = await requester("GET", "@queryParamsValidation?users=u1&users=")
+        assert status == 412
+        assert resp["validator"] == "minLength"
+
+        resp, status = await requester("GET", "@queryParamsValidation?users=u1")
+        assert status == 412
+        assert resp["validator"] == "minItems"
+
+        resp, status = await requester(
+            "GET", "@queryParamsValidation?users=u1&users=u2&users=u3&users=u4&users=u5&users=u6"
+        )
+        assert status == 412
+        assert resp["validator"] == "maxItems"
